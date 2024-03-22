@@ -17,8 +17,6 @@ import 'colors.dart';
 /// or the entire tab with [TabBarIndicatorSize.tab].
 class UnderlineTabIndicator extends Decoration {
   /// Create an underline style selected tab indicator.
-  ///
-  /// The [borderSide] and [insets] arguments must not be null.
   const UnderlineTabIndicator({
     this.borderRadius,
     this.borderSide = const BorderSide(width: 2.0, color: Colors.white),
@@ -28,7 +26,7 @@ class UnderlineTabIndicator extends Decoration {
   /// The radius of the indicator's corners.
   ///
   /// If this value is non-null, rounded rectangular tab indicator is
-  /// drawn, otherwise rectangular tab indictor is drawn.
+  /// drawn, otherwise rectangular tab indicator is drawn.
   final BorderRadius? borderRadius;
 
   /// The color and weight of the horizontal line drawn below the selected tab.

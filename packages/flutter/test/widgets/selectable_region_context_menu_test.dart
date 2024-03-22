@@ -5,6 +5,8 @@
 @TestOn('browser') // This file contains web-only library.
 library;
 
+import 'dart:js_interop';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -29,7 +31,7 @@ void main() {
     element = fn(0) as web.HTMLElement;
     // The element needs to be attached to the document body to receive mouse
     // events.
-    web.document.body!.append(element);
+    web.document.body!.append(element! as JSAny);
   };
   // This force register the dom element.
   PlatformSelectableRegionContextMenu(child: const Placeholder());
@@ -61,6 +63,7 @@ void main() {
 
   testWidgets('right click can trigger select word', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final UniqueKey spy = UniqueKey();
     await tester.pumpWidget(
         MaterialApp(
@@ -135,8 +138,13 @@ class RenderSelectionSpy extends RenderProxyBox
   Size _size = Size.zero;
 
   @override
+  List<Rect> get boundingBoxes => _boundingBoxes;
+  final List<Rect> _boundingBoxes = <Rect>[];
+
+  @override
   Size computeDryLayout(BoxConstraints constraints) {
     _size = Size(constraints.maxWidth, constraints.maxHeight);
+    _boundingBoxes.add(Rect.fromLTWH(0.0, 0.0, constraints.maxWidth, constraints.maxHeight));
     return _size;
   }
 

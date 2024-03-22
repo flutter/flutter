@@ -77,7 +77,7 @@ class XCResultGenerator {
 /// This is the result from an `xcrun xcresulttool get --path <resultPath> --format json` run.
 /// The result contains useful information such as build errors and warnings.
 class XCResult {
-  /// Parse the `resultJson` and stores useful informations in the returned `XCResult`.
+  /// Parse the `resultJson` and stores useful information in the returned `XCResult`.
   factory XCResult({required Map<String, Object?> resultJson, List<XCResultIssueDiscarder> issueDiscarders = const <XCResultIssueDiscarder>[]}) {
     final List<XCResultIssue> issues = <XCResultIssue>[];
 

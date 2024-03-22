@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'banner_theme.dart';
 import 'color_scheme.dart';
+import 'colors.dart';
 import 'divider.dart';
 import 'material.dart';
 import 'scaffold.dart';
@@ -17,6 +18,7 @@ import 'theme.dart';
 
 const Duration _materialBannerTransitionDuration = Duration(milliseconds: 250);
 const Curve _materialBannerHeightCurve = Curves.fastOutSlowIn;
+const double _kMaxContentTextScaleFactor = 1.5;
 
 /// Specify how a [MaterialBanner] was closed.
 ///
@@ -93,9 +95,8 @@ enum MaterialBannerClosedReason {
 class MaterialBanner extends StatefulWidget {
   /// Creates a [MaterialBanner].
   ///
-  /// The [actions], [content], and [forceActionsBelow] must be non-null.
-  /// The [actions].length must be greater than 0. The [elevation] must be null or
-  /// non-negative.
+  /// The length of the [actions] list must not be empty. The [elevation] must
+  /// be null or non-negative.
   const MaterialBanner({
     super.key,
     required this.content,
@@ -153,16 +154,18 @@ class MaterialBanner extends StatefulWidget {
   /// The color of the surface of this [MaterialBanner].
   ///
   /// If `null`, [MaterialBannerThemeData.backgroundColor] is used. If that is
-  /// also `null`, [ColorScheme.surface] of [ThemeData.colorScheme] is used.
+  /// also `null`, [ColorScheme.surfaceContainerLow] of [ThemeData.colorScheme] is used.
   final Color? backgroundColor;
 
   /// The color used as an overlay on [backgroundColor] to indicate elevation.
   ///
   /// If null, [MaterialBannerThemeData.surfaceTintColor] is used. If that
-  /// is also null, the default value is [ColorScheme.surfaceTint].
+  /// is also null, the default value is [Colors.transparent].
   ///
-  /// See [Material.surfaceTintColor] for more details on how this
-  /// overlay is applied.
+  /// This is not recommended for use. [Material 3 spec](https://m3.material.io/styles/color/the-color-system/color-roles)
+  /// introduced a set of tone-based surfaces and surface containers in its [ColorScheme],
+  /// which provide more flexibility. The intention is to eventually remove surface tint color from
+  /// the framework.
   final Color? surfaceTintColor;
 
   /// The color of the shadow below the [MaterialBanner].
@@ -319,7 +322,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
         ?? bannerTheme.leadingPadding
         ?? const EdgeInsetsDirectional.only(end: 16.0);
 
-    final Widget buttonBar = Container(
+    final Widget actionsBar = Container(
       alignment: AlignmentDirectional.centerEnd,
       constraints: const BoxConstraints(minHeight: 52.0),
       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -366,21 +369,31 @@ class _MaterialBannerState extends State<MaterialBanner> {
                       padding: leadingPadding,
                       child: widget.leading,
                     ),
-                  Expanded(
-                    child: DefaultTextStyle(
-                      style: textStyle!,
-                      child: widget.content,
+                  MediaQuery.withClampedTextScaling(
+                    // Set maximum text scale factor to _kMaxContentTextScaleFactor for the
+                    // content to keep the visual hierarchy the same even with larger font
+                    // sizes.
+                    maxScaleFactor: _kMaxContentTextScaleFactor,
+                    child: Expanded(
+                      child: DefaultTextStyle(
+                        style: textStyle!,
+                        child: widget.content,
+                      ),
                     ),
                   ),
                   if (isSingleRow)
-                    buttonBar,
+                    MediaQuery.withClampedTextScaling(
+                      // Set maximum text scale factor to _kMaxContentTextScaleFactor for the
+                      // actionsBar to keep the visual hierarchy the same even with larger font
+                      // sizes.
+                      maxScaleFactor: _kMaxContentTextScaleFactor,
+                      child: actionsBar,
+                    ),
                 ],
               ),
             ),
-            if (!isSingleRow)
-              buttonBar,
-            if (elevation == 0)
-              Divider(height: 0, color: dividerColor),
+            if (!isSingleRow) actionsBar,
+            if (elevation == 0) Divider(height: 0, color: dividerColor),
           ],
         ),
       ),
@@ -473,10 +486,10 @@ class _BannerDefaultsM3 extends MaterialBannerThemeData {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  Color? get backgroundColor => _colors.surface;
+  Color? get backgroundColor => _colors.surfaceContainerLow;
 
   @override
-  Color? get surfaceTintColor => _colors.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
   Color? get dividerColor => _colors.outlineVariant;

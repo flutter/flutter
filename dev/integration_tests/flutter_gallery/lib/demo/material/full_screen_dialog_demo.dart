@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 // This demo is based on
@@ -109,16 +110,15 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
   bool _hasName = false;
   late String _eventName;
 
-  Future<bool> _onWillPop() async {
-    _saveNeeded = _hasLocation || _hasName || _saveNeeded;
-    if (!_saveNeeded) {
-      return true;
+  Future<void> _handlePopInvoked(bool didPop) async {
+    if (didPop) {
+      return;
     }
 
     final ThemeData theme = Theme.of(context);
     final TextStyle dialogTextStyle = theme.textTheme.titleMedium!.copyWith(color: theme.textTheme.bodySmall!.color);
 
-    return showDialog<bool>(
+    final bool? shouldDiscard = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -130,19 +130,31 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
             TextButton(
               child: const Text('CANCEL'),
               onPressed: () {
-                Navigator.of(context).pop(false); // Pops the confirmation dialog but not the page.
+                // Pop the confirmation dialog and indicate that the page should
+                // not be popped.
+                Navigator.of(context).pop(false);
               },
             ),
             TextButton(
               child: const Text('DISCARD'),
               onPressed: () {
-                Navigator.of(context).pop(true); // Returning true to _onWillPop will pop again.
+                // Pop the confirmation dialog and indicate that the page should
+                // be popped, too.
+                Navigator.of(context).pop(true);
               },
             ),
           ],
         );
       },
-    ) as Future<bool>;
+    );
+
+    if (shouldDiscard ?? false) {
+      // Since this is the root route, quit the app where possible by invoking
+      // the SystemNavigator. If this wasn't the root route, then
+      // Navigator.maybePop could be used instead.
+      // See https://github.com/flutter/flutter/issues/11490
+      SystemNavigator.pop();
+    }
   }
 
   @override
@@ -162,7 +174,8 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
         ],
       ),
       body: Form(
-        onWillPop: _onWillPop,
+        canPop: !_saveNeeded && !_hasLocation && !_hasName,
+        onPopInvoked: _handlePopInvoked,
         child: Scrollbar(
           child: ListView(
             primary: true,

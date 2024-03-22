@@ -83,6 +83,11 @@ const CommonFinders find = CommonFinders._();
 /// See also [FlutterDriver.waitFor].
 typedef EvaluatorFunction = dynamic Function();
 
+// Examples can assume:
+// import 'package:flutter_driver/flutter_driver.dart';
+// import 'package:test/test.dart';
+// late FlutterDriver driver;
+
 /// Drives a Flutter Application running in another process.
 abstract class FlutterDriver {
   /// Default constructor.
@@ -173,15 +178,6 @@ abstract class FlutterDriver {
 
   /// Getter of webDriver.
   async_io.WebDriver get webDriver => throw UnimplementedError();
-
-  /// Enables accessibility feature.
-  @Deprecated(
-    'Call setSemantics(true) instead. '
-    'This feature was deprecated after v2.3.0-12.1.pre.'
-  )
-  Future<void> enableAccessibility() async {
-    await setSemantics(true);
-  }
 
   /// Sends [command] to the Flutter Driver extensions.
   /// This must be implemented by subclass.
@@ -478,7 +474,7 @@ abstract class FlutterDriver {
   ///
   /// ```dart
   /// test('enters text in a text field', () async {
-  ///   var textField = find.byValueKey('enter-text-field');
+  ///   final SerializableFinder textField = find.byValueKey('enter-text-field');
   ///   await driver.tap(textField);  // acquire focus
   ///   await driver.enterText('Hello!');  // enter text
   ///   await driver.waitFor(find.text('Hello!'));  // verify text appears on UI
@@ -520,7 +516,7 @@ abstract class FlutterDriver {
   ///
   /// ```dart
   /// test('submit text in a text field', () async {
-  ///   var textField = find.byValueKey('enter-text-field');
+  ///   final SerializableFinder textField = find.byValueKey('enter-text-field');
   ///   await driver.tap(textField);  // acquire focus
   ///   await driver.enterText('Hello!');  // enter text
   ///   await driver.waitFor(find.text('Hello!'));  // verify text appears on UI

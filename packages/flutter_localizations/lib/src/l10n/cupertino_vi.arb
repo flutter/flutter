@@ -22,5 +22,10 @@
   "tabSemanticsLabel": "Thẻ $tabIndex/$tabCount",
   "modalBarrierDismissLabel": "Bỏ qua",
   "searchTextFieldPlaceholderLabel": "Tìm kiếm",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "Không tìm thấy phương án thay thế",
+  "menuDismissLabel": "Đóng trình đơn",
+  "lookUpButtonLabel": "Tra cứu",
+  "searchWebButtonLabel": "Tìm kiếm trên web",
+  "shareButtonLabel": "Chia sẻ...",
+  "clearButtonLabel": "Clear"
 }

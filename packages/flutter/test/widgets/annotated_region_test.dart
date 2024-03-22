@@ -18,6 +18,7 @@ void main() {
     final AnnotatedRegionLayer<int> layer = layers.whereType<AnnotatedRegionLayer<int>>().first;
     expect(layer.value, 1);
   });
+
   testWidgets('provides a value to the layer tree in a particular region', (WidgetTester tester) async {
     await tester.pumpWidget(
       Transform.translate(

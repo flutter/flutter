@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('TextStyle', () {
-    test('getTextSyle is backward compatible', () {
+    test('getTextStyle is backward compatible', () {
       expect(
         const TextStyle(fontSize: 14).getTextStyle(textScaleFactor: 2.0).toString(),
         contains('fontSize: 28'),
@@ -216,7 +216,9 @@ void main() {
 
     testWidgets('EditableText', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
       final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Node');
+      addTearDown(focusNode.dispose);
       const TextStyle textStyle = TextStyle();
       const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
       await tester.pumpWidget(

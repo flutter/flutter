@@ -8,7 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -286,6 +285,7 @@ void main() {
     const Key radioKey1 = Key('radio1');
     const Key radioKey2 = Key('radio2');
     final FocusNode focusNode2 = FocusNode(debugLabel: 'radio2');
+    addTearDown(focusNode2.dispose);
     Widget buildApp({bool enabled = true}) {
       return CupertinoApp(
         home: Center(

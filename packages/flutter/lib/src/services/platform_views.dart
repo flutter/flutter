@@ -58,7 +58,7 @@ class PlatformViewsRegistry {
 
 /// Callback signature for when a platform view was created.
 ///
-/// `id` is the platform view's unique identifier.
+/// The `id` parameter is the platform view's unique identifier.
 typedef PlatformViewCreatedCallback = void Function(int id);
 
 /// Provides access to the platform views service.
@@ -92,28 +92,33 @@ class PlatformViewsService {
   /// {@template flutter.services.PlatformViewsService.initAndroidView}
   /// Creates a controller for a new Android view.
   ///
-  /// `id` is an unused unique identifier generated with [platformViewsRegistry].
+  /// The `id` argument is an unused unique identifier generated with
+  /// [platformViewsRegistry].
   ///
-  /// `viewType` is the identifier of the Android view type to be created, a
-  /// factory for this view type must have been registered on the platform side.
-  /// Platform view factories are typically registered by plugin code.
-  /// Plugins can register a platform view factory with
+  /// The `viewType` argument is the identifier of the Android view type to be
+  /// created, a factory for this view type must have been registered on the
+  /// platform side. Platform view factories are typically registered by plugin
+  /// code. Plugins can register a platform view factory with
   /// [PlatformViewRegistry#registerViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewRegistry.html#registerViewFactory-java.lang.String-io.flutter.plugin.platform.PlatformViewFactory-).
   ///
-  /// `creationParams` will be passed as the args argument of [PlatformViewFactory#create](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#create-android.content.Context-int-java.lang.Object-)
+  /// The `creationParams` argument will be passed as the args argument of
+  /// [PlatformViewFactory#create](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#create-android.content.Context-int-java.lang.Object-)
   ///
-  /// `creationParamsCodec` is the codec used to encode `creationParams` before sending it to the
-  /// platform side. It should match the codec passed to the constructor of [PlatformViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#PlatformViewFactory-io.flutter.plugin.common.MessageCodec-).
-  /// This is typically one of: [StandardMessageCodec], [JSONMessageCodec], [StringCodec], or [BinaryCodec].
+  /// The `creationParamsCodec` argument is the codec used to encode
+  /// `creationParams` before sending it to the platform side. It should match
+  /// the codec passed to the constructor of
+  /// [PlatformViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#PlatformViewFactory-io.flutter.plugin.common.MessageCodec-).
+  /// This is typically one of: [StandardMessageCodec], [JSONMessageCodec],
+  /// [StringCodec], or [BinaryCodec].
   ///
-  /// `onFocus` is a callback that will be invoked when the Android View asks to get the
-  /// input focus.
+  /// The `onFocus` argument is a callback that will be invoked when the Android
+  /// View asks to get the input focus.
   ///
-  /// The Android view will only be created after [AndroidViewController.setSize] is called for the
-  /// first time.
+  /// The Android view will only be created after
+  /// [AndroidViewController.setSize] is called for the first time.
   ///
-  /// The `id, `viewType, and `layoutDirection` parameters must not be null.
-  /// If `creationParams` is non null then `creationParamsCodec` must not be null.
+  /// If `creationParams` is non null then `creationParamsCodec` must not be
+  /// null.
   /// {@endtemplate}
   ///
   /// This attempts to use the newest and most efficient platform view
@@ -196,26 +201,21 @@ class PlatformViewsService {
     return controller;
   }
 
-  /// Whether the render surface of the Android `FlutterView` should be converted to a `FlutterImageView`.
-  @Deprecated(
-    'No longer necessary to improve performance. '
-    'This feature was deprecated after v2.11.0-0.1.pre.',
-  )
-  static Future<void> synchronizeToNativeViewHierarchy(bool yes) async {}
-
-  // TODO(amirh): reference the iOS plugin API for registering a UIView factory once it lands.
-  /// This is work in progress, not yet ready to be used, and requires a custom engine build. Creates a controller for a new iOS UIView.
+  /// Factory method to create a `UiKitView`.
   ///
-  /// `id` is an unused unique identifier generated with [platformViewsRegistry].
+  /// The `id` parameter is an unused unique identifier generated with
+  /// [platformViewsRegistry].
   ///
-  /// `viewType` is the identifier of the iOS view type to be created, a
-  /// factory for this view type must have been registered on the platform side.
-  /// Platform view factories are typically registered by plugin code.
+  /// The `viewType` parameter is the identifier of the iOS view type to be
+  /// created, a factory for this view type must have been registered on the
+  /// platform side. Platform view factories are typically registered by plugin
+  /// code.
   ///
-  /// `onFocus` is a callback that will be invoked when the UIKit view asks to
-  /// get the input focus.
-  /// The `id, `viewType, and `layoutDirection` parameters must not be null.
-  /// If `creationParams` is non null then `creationParamsCodec` must not be null.
+  /// The `onFocus` parameter is a callback that will be invoked when the UIKit
+  /// view asks to get the input focus. If `creationParams` is non null then
+  /// `creationParamsCodec` must not be null.
+  ///
+  /// See: https://docs.flutter.dev/platform-integration/ios/platform-views
   static Future<UiKitViewController> initUiKitView({
     required int id,
     required String viewType,
@@ -227,6 +227,7 @@ class PlatformViewsService {
     assert(creationParams == null || creationParamsCodec != null);
 
     // TODO(amirh): pass layoutDirection once the system channel supports it.
+    // https://github.com/flutter/flutter/issues/133682
     final Map<String, dynamic> args = <String, dynamic>{
       'id': id,
       'viewType': viewType,
@@ -245,6 +246,52 @@ class PlatformViewsService {
     }
     return UiKitViewController._(id, layoutDirection);
   }
+
+  // TODO(cbracken): Write and link website docs. https://github.com/flutter/website/issues/9424.
+  //
+  /// Factory method to create an `AppKitView`.
+  ///
+  /// The `id` parameter is an unused unique identifier generated with
+  /// [platformViewsRegistry].
+  ///
+  /// The `viewType` parameter is the identifier of the iOS view type to be
+  /// created, a factory for this view type must have been registered on the
+  /// platform side. Platform view factories are typically registered by plugin
+  /// code.
+  ///
+  /// The `onFocus` parameter is a callback that will be invoked when the UIKit
+  /// view asks to get the input focus. If `creationParams` is non null then
+  /// `creationParamsCodec` must not be null.
+  static Future<AppKitViewController> initAppKitView({
+    required int id,
+    required String viewType,
+    required TextDirection layoutDirection,
+    dynamic creationParams,
+    MessageCodec<dynamic>? creationParamsCodec,
+    VoidCallback? onFocus,
+  }) async {
+    assert(creationParams == null || creationParamsCodec != null);
+
+    // TODO(amirh): pass layoutDirection once the system channel supports it.
+    // https://github.com/flutter/flutter/issues/133682
+    final Map<String, dynamic> args = <String, dynamic>{
+      'id': id,
+      'viewType': viewType,
+    };
+    if (creationParams != null) {
+      final ByteData paramsByteData = creationParamsCodec!.encodeMessage(creationParams)!;
+      args['params'] = Uint8List.view(
+        paramsByteData.buffer,
+        0,
+        paramsByteData.lengthInBytes,
+      );
+    }
+    await SystemChannels.platform_views.invokeMethod<void>('create', args);
+    if (onFocus != null) {
+      _instance._focusCallbacks[id] = onFocus;
+    }
+    return AppKitViewController._(id, layoutDirection);
+  }
 }
 
 /// Properties of an Android pointer.
@@ -252,8 +299,6 @@ class PlatformViewsService {
 /// A Dart version of Android's [MotionEvent.PointerProperties](https://developer.android.com/reference/android/view/MotionEvent.PointerProperties).
 class AndroidPointerProperties {
   /// Creates an [AndroidPointerProperties] object.
-  ///
-  /// All parameters must not be null.
   const AndroidPointerProperties({
     required this.id,
     required this.toolType,
@@ -294,8 +339,6 @@ class AndroidPointerProperties {
 /// A Dart version of Android's [MotionEvent.PointerCoords](https://developer.android.com/reference/android/view/MotionEvent.PointerCoords).
 class AndroidPointerCoords {
   /// Creates an AndroidPointerCoords.
-  ///
-  /// All parameters must not be null.
   const AndroidPointerCoords({
     required this.orientation,
     required this.pressure,
@@ -376,8 +419,6 @@ class AndroidPointerCoords {
 ///  * [AndroidViewController.sendMotionEvent], which can be used to send an [AndroidMotionEvent] explicitly.
 class AndroidMotionEvent {
   /// Creates an AndroidMotionEvent.
-  ///
-  /// All parameters must not be null.
   AndroidMotionEvent({
     required this.downTime,
     required this.eventTime,
@@ -612,28 +653,33 @@ class _AndroidMotionEventConverter {
       yPrecision: 1.0,
       deviceId: 0,
       edgeFlags: 0,
-      source: 0,
+      source: _AndroidMotionEventConverter.sourceFor(event),
       flags: 0,
       motionEventId: event.embedderId,
     );
   }
 
+  static int sourceFor(PointerEvent event) {
+    return switch (event.kind) {
+      PointerDeviceKind.touch          => AndroidViewController.kInputDeviceSourceTouchScreen,
+      PointerDeviceKind.trackpad       => AndroidViewController.kInputDeviceSourceTouchPad,
+      PointerDeviceKind.mouse          => AndroidViewController.kInputDeviceSourceMouse,
+      PointerDeviceKind.stylus         => AndroidViewController.kInputDeviceSourceStylus,
+      PointerDeviceKind.invertedStylus => AndroidViewController.kInputDeviceSourceStylus,
+      PointerDeviceKind.unknown        => AndroidViewController.kInputDeviceSourceUnknown,
+    };
+  }
+
+
   AndroidPointerProperties propertiesFor(PointerEvent event, int pointerId) {
-    int toolType = AndroidPointerProperties.kToolTypeUnknown;
-    switch (event.kind) {
-      case PointerDeviceKind.touch:
-      case PointerDeviceKind.trackpad:
-        toolType = AndroidPointerProperties.kToolTypeFinger;
-      case PointerDeviceKind.mouse:
-        toolType = AndroidPointerProperties.kToolTypeMouse;
-      case PointerDeviceKind.stylus:
-        toolType = AndroidPointerProperties.kToolTypeStylus;
-      case PointerDeviceKind.invertedStylus:
-        toolType = AndroidPointerProperties.kToolTypeEraser;
-      case PointerDeviceKind.unknown:
-        toolType = AndroidPointerProperties.kToolTypeUnknown;
-    }
-    return AndroidPointerProperties(id: pointerId, toolType: toolType);
+    return AndroidPointerProperties(id: pointerId, toolType: switch (event.kind) {
+      PointerDeviceKind.touch          => AndroidPointerProperties.kToolTypeFinger,
+      PointerDeviceKind.trackpad       => AndroidPointerProperties.kToolTypeFinger,
+      PointerDeviceKind.mouse          => AndroidPointerProperties.kToolTypeMouse,
+      PointerDeviceKind.stylus         => AndroidPointerProperties.kToolTypeStylus,
+      PointerDeviceKind.invertedStylus => AndroidPointerProperties.kToolTypeEraser,
+      PointerDeviceKind.unknown        => AndroidPointerProperties.kToolTypeUnknown,
+    });
   }
 
   bool isSinglePointerAction(PointerEvent event) =>
@@ -698,6 +744,21 @@ abstract class AndroidViewController extends PlatformViewController {
   /// Android's [View.LAYOUT_DIRECTION_RTL](https://developer.android.com/reference/android/view/View.html#LAYOUT_DIRECTION_RTL) value.
   static const int kAndroidLayoutDirectionRtl = 1;
 
+  /// Android's [InputDevice.SOURCE_UNKNOWN](https://developer.android.com/reference/android/view/InputDevice#SOURCE_UNKNOWN)
+  static const int kInputDeviceSourceUnknown = 0;
+
+  /// Android's [InputDevice.SOURCE_TOUCHSCREEN](https://developer.android.com/reference/android/view/InputDevice#SOURCE_TOUCHSCREEN)
+  static const int kInputDeviceSourceTouchScreen = 4098;
+
+  /// Android's [InputDevice.SOURCE_MOUSE](https://developer.android.com/reference/android/view/InputDevice#SOURCE_MOUSE)
+  static const int kInputDeviceSourceMouse = 8194;
+
+  /// Android's [InputDevice.SOURCE_STYLUS](https://developer.android.com/reference/android/view/InputDevice#SOURCE_STYLUS)
+  static const int kInputDeviceSourceStylus = 16386;
+
+  /// Android's [InputDevice.SOURCE_TOUCHPAD](https://developer.android.com/reference/android/view/InputDevice#SOURCE_TOUCHPAD)
+  static const int kInputDeviceSourceTouchPad = 1048584;
+
   /// The unique identifier of the Android view controlled by this controller.
   @override
   final int viewId;
@@ -718,12 +779,10 @@ abstract class AndroidViewController extends PlatformViewController {
       <PlatformViewCreatedCallback>[];
 
   static int _getAndroidDirection(TextDirection direction) {
-    switch (direction) {
-      case TextDirection.ltr:
-        return kAndroidLayoutDirectionLtr;
-      case TextDirection.rtl:
-        return kAndroidLayoutDirectionRtl;
-    }
+    return switch (direction) {
+      TextDirection.ltr => kAndroidLayoutDirectionLtr,
+      TextDirection.rtl => kAndroidLayoutDirectionRtl,
+    };
   }
 
   /// Creates a masked Android MotionEvent action value for an indexed pointer.
@@ -770,8 +829,8 @@ abstract class AndroidViewController extends PlatformViewController {
 
   /// Sizes the Android View.
   ///
-  /// [size] is the view's new size in logical pixel, it must not be null and must
-  /// be bigger than zero.
+  /// [size] is the view's new size in logical pixel. It must be greater than
+  /// zero.
   ///
   /// The first time a size is set triggers the creation of the Android view.
   ///
@@ -1324,7 +1383,6 @@ abstract class DarwinPlatformViewController {
     TextDirection layoutDirection,
   ) : _layoutDirection = layoutDirection;
 
-
   /// The unique identifier of the iOS view controlled by this controller.
   ///
   /// This identifier is typically generated by
@@ -1391,6 +1449,14 @@ abstract class DarwinPlatformViewController {
 /// Typically created with [PlatformViewsService.initUiKitView].
 class UiKitViewController extends DarwinPlatformViewController {
   UiKitViewController._(
+    super.id,
+    super.layoutDirection,
+  );
+}
+
+/// Controller for a macOS platform view.
+class AppKitViewController extends DarwinPlatformViewController {
+  AppKitViewController._(
     super.id,
     super.layoutDirection,
   );

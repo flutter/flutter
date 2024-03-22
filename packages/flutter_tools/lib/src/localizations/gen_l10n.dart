@@ -48,7 +48,7 @@ Future<LocalizationsGenerator> generateLocalizations({
   precacheLanguageAndRegionTags();
 
   // Use \r\n if project's pubspec file contains \r\n.
-  final bool useCRLF = fileSystem.file('pubspec.yaml').readAsStringSync().contains('\r\n');
+  final bool useCRLF = projectDir.childFile('pubspec.yaml').readAsStringSync().contains('\r\n');
 
   LocalizationsGenerator generator;
   try {
@@ -73,6 +73,7 @@ Future<LocalizationsGenerator> generateLocalizations({
       logger: logger,
       suppressWarnings: options.suppressWarnings,
       useRelaxedSyntax: options.relaxSyntax,
+      useNamedParameters: options.useNamedParameters,
     )
       ..loadResources()
       ..writeOutputFiles(isFromYaml: true, useCRLF: useCRLF);
@@ -80,15 +81,11 @@ Future<LocalizationsGenerator> generateLocalizations({
     throwToolExit(e.message);
   }
 
-  final List<String> outputFileList = generator.outputFileList;
-  final File? untranslatedMessagesFile = generator.untranslatedMessagesFile;
-
   if (options.format) {
-    final List<String> formatFileList = outputFileList.toList();
-    if (untranslatedMessagesFile != null) {
-      // Don't format the messages file using `dart format`.
-      formatFileList.remove(untranslatedMessagesFile.absolute.path);
-    }
+    // Only format Dart files using `dart format`.
+    final List<String> formatFileList = generator.outputFileList
+        .where((String e) => e.endsWith('.dart'))
+        .toList(growable: false);
     if (formatFileList.isEmpty) {
       return generator;
     }
@@ -126,9 +123,9 @@ String _syntheticL10nPackagePath(FileSystem fileSystem) => fileSystem.path.join(
 // For example, if placeholders are used for plurals and no type was specified, then the type will
 // automatically set to 'num'. Similarly, if such placeholders are used for selects, then the type
 // will be set to 'String'. For such placeholders that are used for both, we should throw an error.
-List<String> generateMethodParameters(Message message) {
+List<String> generateMethodParameters(Message message, bool useNamedParameters) {
   return message.placeholders.values.map((Placeholder placeholder) {
-    return '${placeholder.type} ${placeholder.name}';
+    return '${useNamedParameters ? 'required ' : ''}${placeholder.type} ${placeholder.name}';
   }).toList();
 }
 
@@ -235,7 +232,7 @@ Map<String, String> pluralCases = <String, String>{
   'other': 'other',
 };
 
-String generateBaseClassMethod(Message message, LocaleInfo? templateArbLocale) {
+String generateBaseClassMethod(Message message, LocaleInfo? templateArbLocale, bool useNamedParameters) {
   final String comment = message
     .description
     ?.split('\n')
@@ -246,11 +243,11 @@ String generateBaseClassMethod(Message message, LocaleInfo? templateArbLocale) {
   /// **'${generateString(message.value)}'**''';
 
   if (message.placeholders.isNotEmpty) {
-    return baseClassMethodTemplate
+    return (useNamedParameters ? baseClassMethodWithNamedParameterTemplate : baseClassMethodTemplate)
       .replaceAll('@(comment)', comment)
       .replaceAll('@(templateLocaleTranslationComment)', templateLocaleTranslationComment)
       .replaceAll('@(name)', message.resourceId)
-      .replaceAll('@(parameters)', generateMethodParameters(message).join(', '));
+      .replaceAll('@(parameters)', generateMethodParameters(message, useNamedParameters).join(', '));
   }
   return baseClassGetterTemplate
     .replaceAll('@(comment)', comment)
@@ -496,6 +493,7 @@ class LocalizationsGenerator {
     required Logger logger,
     bool suppressWarnings = false,
     bool useRelaxedSyntax = false,
+    bool useNamedParameters = false,
   }) {
     final Directory? projectDirectory = projectDirFromPath(fileSystem, projectPathString);
     final Directory inputDirectory = inputDirectoryFromPath(fileSystem, inputPathString, projectDirectory);
@@ -520,6 +518,7 @@ class LocalizationsGenerator {
       logger: logger,
       suppressWarnings: suppressWarnings,
       useRelaxedSyntax: useRelaxedSyntax,
+      useNamedParameters: useNamedParameters,
     );
   }
 
@@ -545,6 +544,7 @@ class LocalizationsGenerator {
     this.useEscaping = false,
     this.suppressWarnings = false,
     this.useRelaxedSyntax = false,
+    this.useNamedParameters = false,
   });
 
   final FileSystem _fs;
@@ -688,6 +688,14 @@ class LocalizationsGenerator {
 
   /// Whether or not to suppress warnings or not.
   final bool suppressWarnings;
+
+  /// Whether to generate the Dart localization methods with named parameters.
+  ///
+  /// If this sets to true, the generated Dart localization methods will be:
+  /// ```
+  /// String helloWorld({required String name});
+  /// ```
+  final bool useNamedParameters;
 
   static bool _isNotReadable(FileStat fileStat) {
     final String rawStatString = fileStat.modeString();
@@ -1128,7 +1136,7 @@ class LocalizationsGenerator {
     return fileTemplate
       .replaceAll('@(header)', header.isEmpty ? '' : '$header\n')
       .replaceAll('@(class)', className)
-      .replaceAll('@(methods)', _allMessages.map((Message message) => generateBaseClassMethod(message, _templateArbLocale)).join('\n'))
+      .replaceAll('@(methods)', _allMessages.map((Message message) => generateBaseClassMethod(message, _templateArbLocale, useNamedParameters)).join('\n'))
       .replaceAll('@(importFile)', '$directory/$outputFileName')
       .replaceAll('@(supportedLocales)', supportedLocalesCode.join(',\n    '))
       .replaceAll('@(supportedLanguageCodes)', supportedLanguageCodes.join(', '))
@@ -1310,9 +1318,9 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
       }
       final String messageString = generateVariables(node, isRoot: true);
       final String tempVarLines = tempVariables.isEmpty ? '' : '${tempVariables.join('\n')}\n';
-      return methodTemplate
+      return (useNamedParameters ? methodWithNamedParameterTemplate : methodTemplate)
                 .replaceAll('@(name)', message.resourceId)
-                .replaceAll('@(parameters)', generateMethodParameters(message).join(', '))
+                .replaceAll('@(parameters)', generateMethodParameters(message, useNamedParameters).join(', '))
                 .replaceAll('@(dateFormatting)', generateDateFormattingLogic(message))
                 .replaceAll('@(numberFormatting)', generateNumberFormattingLogic(message))
                 .replaceAll('@(tempVars)', tempVarLines)

@@ -21,6 +21,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
 
+import '../impeller_test_helpers.dart';
 import 'widget_inspector_test_utils.dart';
 
 // Start of block of code where widget creation location line numbers and
@@ -284,7 +285,9 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
   static void runTests() {
     final TestWidgetInspectorService service = TestWidgetInspectorService();
     WidgetInspectorService.instance = service;
-
+    setUp(() {
+      WidgetInspectorService.instance.isSelectMode.value = true;
+    });
     tearDown(() async {
       service.resetAllState();
 
@@ -358,8 +361,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
         return Material(child: ElevatedButton(onPressed: onPressed, key: selectButtonKey, child: null));
       }
-      // State type is private, hence using dynamic.
-      dynamic getInspectorState() => inspectorKey.currentState;
+
       String paragraphText(RenderParagraph paragraph) {
         final TextSpan textSpan = paragraph.text as TextSpan;
         return textSpan.text!;
@@ -394,16 +396,22 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
       );
 
-      expect(getInspectorState().selection.current, isNull); // ignore: avoid_dynamic_calls
+      expect(WidgetInspectorService.instance.selection.current, isNull);
       await tester.tap(find.text('TOP'), warnIfMissed: false);
       await tester.pump();
       // Tap intercepted by the inspector
       expect(log, equals(<String>[]));
-      // ignore: avoid_dynamic_calls
-      final InspectorSelection selection = getInspectorState().selection as InspectorSelection;
-      expect(paragraphText(selection.current! as RenderParagraph), equals('TOP'));
+      expect(
+        paragraphText(
+          WidgetInspectorService.instance.selection.current! as RenderParagraph,
+        ),
+        equals('TOP'),
+      );
       final RenderObject topButton = find.byKey(topButtonKey).evaluate().first.renderObject!;
-      expect(selection.candidates, contains(topButton));
+      expect(
+        WidgetInspectorService.instance.selection.candidates,
+        contains(topButton),
+      );
 
       await tester.tap(find.text('TOP'));
       expect(log, equals(<String>['top']));
@@ -413,8 +421,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(log, equals(<String>['bottom']));
       log.clear();
       // Ensure the inspector selection has not changed to bottom.
-      // ignore: avoid_dynamic_calls
-      expect(paragraphText(getInspectorState().selection.current as RenderParagraph), equals('TOP'));
+      expect(
+        paragraphText(
+          WidgetInspectorService.instance.selection.current! as RenderParagraph,
+        ),
+        equals('TOP'),
+      );
 
       await tester.tap(find.byKey(selectButtonKey));
       await tester.pump();
@@ -424,8 +436,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       await tester.tap(find.text('BOTTOM'), warnIfMissed: false);
       expect(log, equals(<String>[]));
       log.clear();
-      // ignore: avoid_dynamic_calls
-      expect(paragraphText(getInspectorState().selection.current as RenderParagraph), equals('BOTTOM'));
+      expect(
+        paragraphText(
+          WidgetInspectorService.instance.selection.current! as RenderParagraph,
+        ),
+        equals('BOTTOM'),
+      );
     });
 
     testWidgets('WidgetInspector non-invertible transform regression test', (WidgetTester tester) async {
@@ -461,8 +477,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
         return Material(child: ElevatedButton(onPressed: onPressed, key: selectButtonKey, child: null));
       }
-      // State type is private, hence using dynamic.
-      dynamic getInspectorState() => inspectorKey.currentState;
 
       await tester.pumpWidget(
         Directionality(
@@ -498,7 +512,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       await tester.tap(find.byType(ListView), warnIfMissed: false);
       await tester.pump();
-      expect(getInspectorState().selection.current, isNotNull); // ignore: avoid_dynamic_calls
+      expect(WidgetInspectorService.instance.selection.current, isNotNull);
 
       // Now out of inspect mode due to the click.
       await tester.fling(find.byType(ListView), const Offset(0.0, -200.0), 200.0);
@@ -554,6 +568,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ],
         );
       }
+
+      late final OverlayEntry entry1;
+      addTearDown(() => entry1..remove()..dispose());
+      late final OverlayEntry entry2;
+      addTearDown(() => entry2..remove()..dispose());
+      late final OverlayEntry entry3;
+      addTearDown(() => entry3..remove()..dispose());
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -562,16 +584,16 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             selectButtonBuilder: null,
             child: Overlay(
               initialEntries: <OverlayEntry>[
-                OverlayEntry(
+                entry1 = OverlayEntry(
                   maintainState: true,
                   builder: (BuildContext _) => createSubtree(width: 94.0),
                 ),
-                OverlayEntry(
+                entry2 = OverlayEntry(
                   opaque: true,
                   maintainState: true,
                   builder: (BuildContext _) => createSubtree(width: 95.0),
                 ),
-                OverlayEntry(
+                entry3 = OverlayEntry(
                   maintainState: true,
                   builder: (BuildContext _) => createSubtree(width: 96.0, key: clickTarget),
                 ),
@@ -582,17 +604,21 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       );
 
       await tester.longPress(find.byKey(clickTarget), warnIfMissed: false);
-      // State type is private, hence using dynamic.
-      final dynamic inspectorState = inspectorKey.currentState;
       // The object with width 95.0 wins over the object with width 94.0 because
       // the subtree with width 94.0 is offstage.
-      // ignore: avoid_dynamic_calls
-      expect(inspectorState.selection.current.semanticBounds.width, equals(95.0));
+      expect(
+        WidgetInspectorService.instance.selection.current?.semanticBounds.width,
+        equals(95.0),
+      );
 
       // Exactly 2 out of the 3 text elements should be in the candidate list of
       // objects to select as only 2 are onstage.
-      // ignore: avoid_dynamic_calls
-      expect(inspectorState.selection.candidates.where((RenderObject object) => object is RenderParagraph).length, equals(2));
+      expect(
+        WidgetInspectorService.instance.selection.candidates
+            .whereType<RenderParagraph>()
+            .length,
+        equals(2),
+      );
     });
 
     testWidgets('WidgetInspector with Transform above', (WidgetTester tester) async {
@@ -661,9 +687,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         };
       }
 
-      // State type is private, hence using dynamic.
-      // The inspector state is static, so it's enough with reading one of them.
-      dynamic getInspectorState() => inspector1Key.currentState;
       String paragraphText(RenderParagraph paragraph) {
         final TextSpan textSpan = paragraph.text as TextSpan;
         return textSpan.text!;
@@ -699,18 +722,27 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
       );
 
-      // ignore: avoid_dynamic_calls
-      final InspectorSelection selection = getInspectorState().selection as InspectorSelection;
-      // The selection is static, so it may be initialized from previous tests.
-      selection.clear();
-
       await tester.tap(find.text('Child 1'), warnIfMissed: false);
       await tester.pump();
-      expect(paragraphText(selection.current! as RenderParagraph), equals('Child 1'));
+      expect(
+        paragraphText(
+          WidgetInspectorService.instance.selection.current! as RenderParagraph,
+        ),
+        equals('Child 1'),
+      );
+
+      // Re-enable select mode since it's state is shared between the
+      // WidgetInspectors
+      WidgetInspectorService.instance.isSelectMode.value = true;
 
       await tester.tap(find.text('Child 2'), warnIfMissed: false);
       await tester.pump();
-      expect(paragraphText(selection.current! as RenderParagraph), equals('Child 2'));
+      expect(
+        paragraphText(
+          WidgetInspectorService.instance.selection.current! as RenderParagraph,
+        ),
+        equals('Child 2'),
+      );
     });
 
     test('WidgetInspectorService null id', () {
@@ -2000,6 +2032,53 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     },
     skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
   );
+
+    group('InspectorSelection', () {
+      testWidgets('receives notifications when selection changes',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
+              children: <Widget>[
+                Text('a'),
+                Text('b'),
+              ],
+            ),
+          ),
+        );
+        final InspectorSelection selection = InspectorSelection();
+        addTearDown(selection.dispose);
+        int count = 0;
+        selection.addListener(() {
+          count++;
+        });
+        final RenderParagraph renderObjectA =
+            tester.renderObject<RenderParagraph>(find.text('a'));
+        final RenderParagraph renderObjectB =
+            tester.renderObject<RenderParagraph>(find.text('b'));
+        final Element elementA = find.text('a').evaluate().first;
+
+        selection.candidates = <RenderObject>[renderObjectA, renderObjectB];
+        await tester.pump();
+        expect(count, equals(1));
+
+        selection.index = 1;
+        await tester.pump();
+        expect(count, equals(2));
+
+        selection.clear();
+        await tester.pump();
+        expect(count, equals(3));
+
+        selection.current = renderObjectA;
+        await tester.pump();
+        expect(count, equals(4));
+
+        selection.currentElement = elementA;
+        expect(count, equals(5));
+      });
+    });
 
     test('ext.flutter.inspector.disposeGroup', () async {
       final Object a = Object();
@@ -3791,7 +3870,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       _CreationLocation location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(56));
+      expect(location.line, equals(57));
       expect(location.column, equals(9));
       expect(location.name, equals('ClockText'));
       expect(count, equals(1));
@@ -3801,7 +3880,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(94));
+      expect(location.line, equals(95));
       expect(location.column, equals(12));
       expect(location.name, equals('Text'));
       expect(count, equals(1));
@@ -3828,7 +3907,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(56));
+      expect(location.line, equals(57));
       expect(location.column, equals(9));
       expect(location.name, equals('ClockText'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
@@ -3838,7 +3917,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       location = knownLocations[id]!;
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(94));
+      expect(location.line, equals(95));
       expect(location.column, equals(12));
       expect(location.name, equals('Text'));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
@@ -4031,6 +4110,28 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
     testWidgets('ext.flutter.inspector.show', (WidgetTester tester) async {
       final Iterable<Map<Object, Object?>> extensionChangedEvents = service.getServiceExtensionStateChangedEvents('ext.flutter.inspector.show');
       Map<Object, Object?> extensionChangedEvent;
+      int debugShowChangeCounter = 0;
+
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(
+        WidgetsApp(
+          key: key,
+          builder: (BuildContext context, Widget? child) {
+            return const Placeholder();
+          },
+          color: const Color(0xFF123456),
+        ),
+      );
+
+      final ValueListenableBuilder<bool> valueListenableBuilderWidget = tester.widget(
+        find.byType(ValueListenableBuilder<bool>),
+      );
+      void debugShowWidgetInspectorOverrideCallback() {
+        debugShowChangeCounter++;
+      }
+
+      WidgetsBinding.instance.debugShowWidgetInspectorOverride = false;
+      valueListenableBuilderWidget.valueListenable.addListener(debugShowWidgetInspectorOverrideCallback);
 
       service.rebuildCount = 0;
       expect(extensionChangedEvents, isEmpty);
@@ -4045,7 +4146,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       extensionChangedEvent = extensionChangedEvents.last;
       expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
       expect(extensionChangedEvent['value'], isTrue);
-      expect(service.rebuildCount, equals(1));
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
+      expect(debugShowChangeCounter, equals(1));
       expect(
         await service.testBoolExtension(
           WidgetInspectorServiceExtensions.show.name,
@@ -4053,8 +4155,10 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         ),
         equals('true'),
       );
-      expect(WidgetsApp.debugShowWidgetInspectorOverride, isTrue);
+      expect(WidgetsBinding.instance.debugShowWidgetInspectorOverride, isTrue);
       expect(extensionChangedEvents.length, equals(1));
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
+      expect(debugShowChangeCounter, equals(1));
       expect(
         await service.testBoolExtension(
           WidgetInspectorServiceExtensions.show.name,
@@ -4066,7 +4170,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       extensionChangedEvent = extensionChangedEvents.last;
       expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
       expect(extensionChangedEvent['value'], isTrue);
-      expect(service.rebuildCount, equals(1));
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
+      expect(debugShowChangeCounter, equals(1));
       expect(
         await service.testBoolExtension(
           WidgetInspectorServiceExtensions.show.name,
@@ -4078,6 +4183,8 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       extensionChangedEvent = extensionChangedEvents.last;
       expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
       expect(extensionChangedEvent['value'], isFalse);
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
+      expect(debugShowChangeCounter, equals(2));
       expect(
         await service.testBoolExtension(
           WidgetInspectorServiceExtensions.show.name,
@@ -4086,7 +4193,99 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         equals('false'),
       );
       expect(extensionChangedEvents.length, equals(3));
-      expect(service.rebuildCount, equals(2));
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
+      expect(debugShowChangeCounter, equals(2));
+      expect(WidgetsBinding.instance.debugShowWidgetInspectorOverride, isFalse);
+    });
+
+    testWidgets('ext.flutter.inspector.show via WidgetsApp.debugShowWidgetInspectorOverride', (WidgetTester tester) async {
+      final Iterable<Map<Object, Object?>> extensionChangedEvents = service.getServiceExtensionStateChangedEvents('ext.flutter.inspector.show');
+      Map<Object, Object?> extensionChangedEvent;
+      int debugShowChangeCounter = 0;
+
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(
+        WidgetsApp(
+          key: key,
+          builder: (BuildContext context, Widget? child) {
+            return const Placeholder();
+          },
+          color: const Color(0xFF123456),
+        ),
+      );
+
+      final ValueListenableBuilder<bool> valueListenableBuilderWidget = tester.widget(
+        find.byType(ValueListenableBuilder<bool>),
+      );
+      void debugShowWidgetInspectorOverrideCallback() {
+        debugShowChangeCounter++;
+      }
+
+      WidgetsApp.debugShowWidgetInspectorOverride = false;
+      valueListenableBuilderWidget.valueListenable.addListener(debugShowWidgetInspectorOverrideCallback);
+
+      service.rebuildCount = 0;
+      expect(extensionChangedEvents, isEmpty);
+      expect(
+        await service.testBoolExtension(
+          WidgetInspectorServiceExtensions.show.name,
+          <String, String>{'enabled': 'true'},
+        ),
+        equals('true'),
+      );
+      expect(extensionChangedEvents.length, equals(1));
+      extensionChangedEvent = extensionChangedEvents.last;
+      expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
+      expect(extensionChangedEvent['value'], isTrue);
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
+      expect(debugShowChangeCounter, equals(1));
+      expect(
+        await service.testBoolExtension(
+          WidgetInspectorServiceExtensions.show.name,
+          <String, String>{},
+        ),
+        equals('true'),
+      );
+      expect(WidgetsApp.debugShowWidgetInspectorOverride, isTrue);
+      expect(extensionChangedEvents.length, equals(1));
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
+      expect(debugShowChangeCounter, equals(1));
+      expect(
+        await service.testBoolExtension(
+          WidgetInspectorServiceExtensions.show.name,
+          <String, String>{'enabled': 'true'},
+        ),
+        equals('true'),
+      );
+      expect(extensionChangedEvents.length, equals(2));
+      extensionChangedEvent = extensionChangedEvents.last;
+      expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
+      expect(extensionChangedEvent['value'], isTrue);
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
+      expect(debugShowChangeCounter, equals(1));
+      expect(
+        await service.testBoolExtension(
+          WidgetInspectorServiceExtensions.show.name,
+          <String, String>{'enabled': 'false'},
+        ),
+        equals('false'),
+      );
+      expect(extensionChangedEvents.length, equals(3));
+      extensionChangedEvent = extensionChangedEvents.last;
+      expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
+      expect(extensionChangedEvent['value'], isFalse);
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
+      expect(debugShowChangeCounter, equals(2));
+      expect(
+        await service.testBoolExtension(
+          WidgetInspectorServiceExtensions.show.name,
+          <String, String>{},
+        ),
+        equals('false'),
+      );
+      expect(extensionChangedEvents.length, equals(3));
+      expect(service.rebuildCount, equals(0)); // Should not be force rebuilt.
+      expect(debugShowChangeCounter, equals(2));
       expect(WidgetsApp.debugShowWidgetInspectorOverride, isFalse);
     });
 
@@ -4156,26 +4355,38 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
       final int expectedChildLayerCount = getChildLayerCount(layer);
       expect(expectedChildLayerCount, equals(2));
+
+      final ui.Image image1 = await layer.toImage(
+        renderObject.semanticBounds.inflate(50.0),
+      );
+      addTearDown(image1.dispose);
+
       await expectLater(
-        layer.toImage(renderObject.semanticBounds.inflate(50.0)),
+        image1,
         matchesGoldenFile('inspector.repaint_boundary_margin.png'),
       );
 
       // Regression test for how rendering with a pixel scale other than 1.0
       // was handled.
+      final ui.Image image2 = await layer.toImage(
+        renderObject.semanticBounds.inflate(50.0),
+        pixelRatio: 0.5,
+      );
+      addTearDown(image2.dispose);
+
       await expectLater(
-        layer.toImage(
-          renderObject.semanticBounds.inflate(50.0),
-          pixelRatio: 0.5,
-        ),
+        image2,
         matchesGoldenFile('inspector.repaint_boundary_margin_small.png'),
       );
 
+      final ui.Image image3 = await layer.toImage(
+        renderObject.semanticBounds.inflate(50.0),
+        pixelRatio: 2.0,
+      );
+      addTearDown(image3.dispose);
+
       await expectLater(
-        layer.toImage(
-          renderObject.semanticBounds.inflate(50.0),
-          pixelRatio: 2.0,
-        ),
+        image3,
         matchesGoldenFile('inspector.repaint_boundary_margin_large.png'),
       );
 
@@ -4185,12 +4396,15 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(layerParent, isNotNull);
       expect(firstChild, isNotNull);
 
+      final ui.Image? screenshot1 = await service.screenshot(
+        repaintBoundary,
+        width: 300.0,
+        height: 300.0,
+      );
+      addTearDown(() => screenshot1?.dispose());
+
       await expectLater(
-        service.screenshot(
-          repaintBoundary,
-          width: 300.0,
-          height: 300.0,
-        ),
+        screenshot1,
         matchesGoldenFile('inspector.repaint_boundary.png'),
       );
 
@@ -4201,13 +4415,16 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // of the layer.
       expect(getChildLayerCount(layer), equals(expectedChildLayerCount));
 
+      final ui.Image? screenshot2 = await service.screenshot(
+        repaintBoundary,
+        width: 500.0,
+        height: 500.0,
+        margin: 50.0,
+      );
+      addTearDown(() => screenshot2?.dispose());
+
       await expectLater(
-        service.screenshot(
-          repaintBoundary,
-          width: 500.0,
-          height: 500.0,
-          margin: 50.0,
-        ),
+        screenshot2,
         matchesGoldenFile('inspector.repaint_boundary_margin.png'),
       );
 
@@ -4221,13 +4438,16 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Make sure taking a screenshot didn't change the parent of the layer.
       expect(layer.parent, equals(layerParent));
 
+      final ui.Image? screenshot3 = await service.screenshot(
+        repaintBoundary,
+        width: 300.0,
+        height: 300.0,
+        debugPaint: true,
+      );
+      addTearDown(() => screenshot3?.dispose());
+
       await expectLater(
-        service.screenshot(
-          repaintBoundary,
-          width: 300.0,
-          height: 300.0,
-          debugPaint: true,
-        ),
+        screenshot3,
         matchesGoldenFile('inspector.repaint_boundary_debugPaint.png'),
       );
       // Verify that taking a screenshot with debug paint on did not change
@@ -4245,22 +4465,28 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(layer.attached, isTrue);
 
       // Full size image
+      final ui.Image? screenshot4 = await service.screenshot(
+        find.byKey(outerContainerKey).evaluate().single,
+        width: 100.0,
+        height: 100.0,
+      );
+      addTearDown(() => screenshot4?.dispose());
+
       await expectLater(
-        service.screenshot(
-          find.byKey(outerContainerKey).evaluate().single,
-          width: 100.0,
-          height: 100.0,
-        ),
+        screenshot4,
         matchesGoldenFile('inspector.container.png'),
       );
 
+      final ui.Image? screenshot5 = await service.screenshot(
+        find.byKey(outerContainerKey).evaluate().single,
+        width: 100.0,
+        height: 100.0,
+        debugPaint: true,
+      );
+      addTearDown(() => screenshot5?.dispose());
+
       await expectLater(
-        service.screenshot(
-          find.byKey(outerContainerKey).evaluate().single,
-          width: 100.0,
-          height: 100.0,
-          debugPaint: true,
-        ),
+        screenshot5,
         matchesGoldenFile('inspector.container_debugPaint.png'),
       );
 
@@ -4274,59 +4500,73 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           ..markNeedsPaint();
         expect(container.debugNeedsLayout, isTrue);
 
+        final ui.Image? screenshot6 = await service.screenshot(
+          find.byKey(outerContainerKey).evaluate().single,
+          width: 100.0,
+          height: 100.0,
+          debugPaint: true,
+        );
+        addTearDown(() => screenshot6?.dispose());
+
         await expectLater(
-          service.screenshot(
-            find.byKey(outerContainerKey).evaluate().single,
-            width: 100.0,
-            height: 100.0,
-            debugPaint: true,
-          ),
+          screenshot6,
           matchesGoldenFile('inspector.container_debugPaint.png'),
         );
         expect(container.debugNeedsLayout, isFalse);
       }
 
       // Small image
+      final ui.Image? screenshot7 = await service.screenshot(
+        find.byKey(outerContainerKey).evaluate().single,
+        width: 50.0,
+        height: 100.0,
+      );
+      addTearDown(() => screenshot7?.dispose());
+
       await expectLater(
-        service.screenshot(
-          find.byKey(outerContainerKey).evaluate().single,
-          width: 50.0,
-          height: 100.0,
-        ),
+        screenshot7,
         matchesGoldenFile('inspector.container_small.png'),
       );
 
+      final ui.Image? screenshot8 = await service.screenshot(
+        find.byKey(outerContainerKey).evaluate().single,
+        width: 400.0,
+        height: 400.0,
+        maxPixelRatio: 3.0,
+      );
+      addTearDown(() => screenshot8?.dispose());
+
       await expectLater(
-        service.screenshot(
-          find.byKey(outerContainerKey).evaluate().single,
-          width: 400.0,
-          height: 400.0,
-          maxPixelRatio: 3.0,
-        ),
+        screenshot8,
         matchesGoldenFile('inspector.container_large.png'),
       );
 
       // This screenshot will show the clip rect debug paint but no other
       // debug paint.
+      final ui.Image? screenshot9 = await service.screenshot(
+        find.byType(ClipRRect).evaluate().single,
+        width: 100.0,
+        height: 100.0,
+        debugPaint: true,
+      );
+      addTearDown(() => screenshot9?.dispose());
+
       await expectLater(
-        service.screenshot(
-          find.byType(ClipRRect).evaluate().single,
-          width: 100.0,
-          height: 100.0,
-          debugPaint: true,
-        ),
+        screenshot9,
         matchesGoldenFile('inspector.clipRect_debugPaint.png'),
       );
 
       final Element clipRect = find.byType(ClipRRect).evaluate().single;
 
-      final Future<ui.Image?> clipRectScreenshot = service.screenshot(
+      final ui.Image? clipRectScreenshot = await service.screenshot(
         clipRect,
         width: 100.0,
         height: 100.0,
         margin: 20.0,
         debugPaint: true,
       );
+      addTearDown(() => clipRectScreenshot?.dispose());
+
       // Add a margin so that the clip icon shows up in the screenshot.
       // This golden image is platform dependent due to the clip icon.
       await expectLater(
@@ -4354,46 +4594,56 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final ui.FrameInfo frame = await codec.getNextFrame();
         return frame.image;
       }))!;
+      addTearDown(screenshotImage.dispose);
 
       await expectLater(
         screenshotImage,
-        matchesReferenceImage((await clipRectScreenshot)!),
+        matchesReferenceImage(clipRectScreenshot!),
       );
 
       // Test with a very visible debug paint
+      final ui.Image? screenshot10 = await service.screenshot(
+        find.byKey(paddingKey).evaluate().single,
+        width: 300.0,
+        height: 300.0,
+        debugPaint: true,
+      );
+      addTearDown(() => screenshot10?.dispose());
+
       await expectLater(
-        service.screenshot(
-          find.byKey(paddingKey).evaluate().single,
-          width: 300.0,
-          height: 300.0,
-          debugPaint: true,
-        ),
+        screenshot10,
         matchesGoldenFile('inspector.padding_debugPaint.png'),
       );
 
       // The bounds for this box crop its rendered content.
+      final ui.Image? screenshot11 = await service.screenshot(
+        find.byKey(sizedBoxKey).evaluate().single,
+        width: 300.0,
+        height: 300.0,
+        debugPaint: true,
+      );
+      addTearDown(() => screenshot11?.dispose());
+
       await expectLater(
-        service.screenshot(
-          find.byKey(sizedBoxKey).evaluate().single,
-          width: 300.0,
-          height: 300.0,
-          debugPaint: true,
-        ),
+        screenshot11,
         matchesGoldenFile('inspector.sizedBox_debugPaint.png'),
       );
 
       // Verify that setting a margin includes the previously cropped content.
+      final ui.Image? screenshot12 = await service.screenshot(
+        find.byKey(sizedBoxKey).evaluate().single,
+        width: 300.0,
+        height: 300.0,
+        margin: 50.0,
+        debugPaint: true,
+      );
+      addTearDown(() => screenshot12?.dispose());
+
       await expectLater(
-        service.screenshot(
-          find.byKey(sizedBoxKey).evaluate().single,
-          width: 300.0,
-          height: 300.0,
-          margin: 50.0,
-          debugPaint: true,
-        ),
+        screenshot12,
         matchesGoldenFile('inspector.sizedBox_debugPaint_margin.png'),
       );
-    });
+    }, skip: impellerEnabled); // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/143616
 
     group('layout explorer', () {
       const String group = 'test-group';
@@ -4532,7 +4782,14 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(renderObject!['description'], contains('RenderView'));
 
         expect(result['parentRenderElement'], isNull);
-        expect(result['constraints'], isNull);
+
+        final Map<String, Object?>? constraints = result['constraints'] as Map<String, Object?>?;
+        expect(constraints, isNotNull);
+        expect(constraints!['type'], equals('BoxConstraints'));
+        expect(constraints['minWidth'], equals('800.0'));
+        expect(constraints['minHeight'], equals('600.0'));
+        expect(constraints['maxWidth'], equals('800.0'));
+        expect(constraints['maxHeight'], equals('600.0'));
         expect(result['isBox'], isNull);
 
         final Map<String, Object?>? size = result['size'] as Map<String, Object?>?;
@@ -4685,6 +4942,53 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         service.setSelection(leaf, group);
         final DiagnosticsNode diagnostic = leaf.toDiagnosticsNode();
         final String id = service.toId(diagnostic, group)!;
+
+        Object? error;
+        try {
+          await service.testExtension(
+            WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
+            <String, String>{'id': id, 'groupName': group, 'subtreeDepth': '1'},
+          );
+        } catch (e) {
+          error = e;
+        }
+        expect(error, isNull);
+      });
+
+      testWidgets(
+          'ext.flutter.inspector.getLayoutExplorerNode, on a ToolTip, does not throw StackOverflowError',
+          (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/devtools/issues/5946
+        const Widget widget = MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Row(
+                children: <Widget>[
+                  Flexible(
+                    child: ColoredBox(
+                      color: Colors.green,
+                      child: Tooltip(
+                        message: 'a',
+                        child: ElevatedButton(
+                          onPressed: null,
+                          child: Text('a'),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+        await tester.pumpWidget(widget);
+
+        final Element elevatedButton =
+            tester.element(find.byType(ElevatedButton).first);
+        service.setSelection(elevatedButton, group);
+
+        final String id = service.toId(elevatedButton, group)!;
 
         Object? error;
         try {
@@ -4853,26 +5157,39 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         matchesGoldenFile('inspector.composited_transform.only_offsets.png'),
       );
 
+      final ui.Image? screenshot1 = await WidgetInspectorService.instance.screenshot(
+        find.byKey(stackWithTransformFollower).evaluate().first,
+        width: 5000.0,
+        height: 500.0,
+      );
+      addTearDown(() => screenshot1?.dispose());
+
       await expectLater(
-        WidgetInspectorService.instance.screenshot(
-          find.byKey(stackWithTransformFollower).evaluate().first,
-          width: 5000.0,
-          height: 500.0,
-        ),
+        screenshot1,
         matchesGoldenFile('inspector.composited_transform.only_offsets_follower.png'),
       );
 
+      final ui.Image? screenshot2 = await WidgetInspectorService.instance.screenshot(
+        find.byType(Stack).evaluate().first,
+        width: 300.0,
+        height: 300.0,
+      );
+      addTearDown(() => screenshot2?.dispose());
+
       await expectLater(
-        WidgetInspectorService.instance.screenshot(find.byType(Stack).evaluate().first, width: 300.0, height: 300.0),
+        screenshot2,
         matchesGoldenFile('inspector.composited_transform.only_offsets_small.png'),
       );
 
+      final ui.Image? screenshot3 = await WidgetInspectorService.instance.screenshot(
+        find.byKey(transformTargetParent).evaluate().first,
+        width: 500.0,
+        height: 500.0,
+      );
+      addTearDown(() => screenshot3?.dispose());
+
       await expectLater(
-        WidgetInspectorService.instance.screenshot(
-          find.byKey(transformTargetParent).evaluate().first,
-          width: 500.0,
-          height: 500.0,
-        ),
+        screenshot3,
         matchesGoldenFile('inspector.composited_transform.only_offsets_target.png'),
       );
     });
@@ -4948,30 +5265,39 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         matchesGoldenFile('inspector.composited_transform.with_rotations.png'),
       );
 
+      final ui.Image? screenshot1 = await WidgetInspectorService.instance.screenshot(
+        find.byKey(mainStackKey).evaluate().first,
+        width: 500.0,
+        height: 500.0,
+      );
+      addTearDown(() => screenshot1?.dispose());
+
       await expectLater(
-        WidgetInspectorService.instance.screenshot(
-          find.byKey(mainStackKey).evaluate().first,
-          width: 500.0,
-          height: 500.0,
-        ),
+        screenshot1,
         matchesGoldenFile('inspector.composited_transform.with_rotations_small.png'),
       );
 
+      final ui.Image? screenshot2 = await WidgetInspectorService.instance.screenshot(
+        find.byKey(stackWithTransformTarget).evaluate().first,
+        width: 500.0,
+        height: 500.0,
+      );
+      addTearDown(() => screenshot2?.dispose());
+
       await expectLater(
-        WidgetInspectorService.instance.screenshot(
-          find.byKey(stackWithTransformTarget).evaluate().first,
-          width: 500.0,
-          height: 500.0,
-        ),
+        screenshot2,
         matchesGoldenFile('inspector.composited_transform.with_rotations_target.png'),
       );
 
+      final ui.Image? screenshot3 = await WidgetInspectorService.instance.screenshot(
+        find.byKey(stackWithTransformFollower).evaluate().first,
+        width: 500.0,
+        height: 500.0,
+      );
+      addTearDown(() => screenshot3?.dispose());
+
       await expectLater(
-        WidgetInspectorService.instance.screenshot(
-          find.byKey(stackWithTransformFollower).evaluate().first,
-          width: 500.0,
-          height: 500.0,
-        ),
+        screenshot3,
         matchesGoldenFile('inspector.composited_transform.with_rotations_follower.png'),
       );
 

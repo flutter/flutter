@@ -31,6 +31,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     final FocusNode focusNode = FocusNode(debugLabel: 'Editable Text Node');
+    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -72,6 +73,7 @@ void main() {
 
   testWidgets('Request focus shows keyboard', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -160,6 +162,7 @@ void main() {
 
   testWidgets('Focus triggers keep-alive', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -200,6 +203,7 @@ void main() {
 
   testWidgets('Focus keep-alive works with GlobalKey reparenting', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
     Widget makeTest(String? prefix) {
       return MaterialApp(
@@ -258,7 +262,10 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     final FocusScopeNode focusScopeNode0 = FocusScopeNode();
+    addTearDown(focusScopeNode0.dispose);
     final FocusScopeNode focusScopeNode1 = FocusScopeNode();
+    addTearDown(focusScopeNode1.dispose);
+
     final Key textField0 = UniqueKey();
     final Key textField1 = UniqueKey();
 
@@ -397,7 +404,10 @@ void main() {
 
   testWidgets('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop', (WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode();
+    addTearDown(focusNodeA.dispose);
     final FocusNode focusNodeB = FocusNode();
+    addTearDown(focusNodeB.dispose);
+
     final Key key = UniqueKey();
 
     await tester.pumpWidget(
@@ -454,6 +464,7 @@ void main() {
 
   testWidgets('A Focused text-field will not lose focus when clicking on its decoration', (WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode();
+    addTearDown(focusNodeA.dispose);
     final Key iconKey = UniqueKey();
 
     await tester.pumpWidget(
@@ -491,7 +502,10 @@ void main() {
 
   testWidgets('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop after tab navigation', (WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode(debugLabel: 'A');
+    addTearDown(focusNodeA.dispose);
     final FocusNode focusNodeB = FocusNode(debugLabel: 'B');
+    addTearDown(focusNodeB.dispose);
+
     final Key key = UniqueKey();
 
     await tester.pumpWidget(

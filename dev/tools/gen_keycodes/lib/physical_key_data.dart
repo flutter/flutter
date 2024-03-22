@@ -214,8 +214,6 @@ class PhysicalKeyData {
 /// written with the [toJson] method.
 class PhysicalKeyEntry {
   /// Creates a single key entry from available data.
-  ///
-  /// The [usbHidCode] and [chromiumName] parameters must not be null.
   PhysicalKeyEntry({
     required this.usbHidCode,
     required this.name,

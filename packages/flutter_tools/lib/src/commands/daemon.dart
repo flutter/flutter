@@ -73,7 +73,7 @@ class DaemonCommand extends FlutterCommand {
         throwToolExit('Invalid port for `--listen-on-tcp-port`: $error');
       }
 
-      await _DaemonServer(
+      await DaemonServer(
         port: port,
         logger: StdoutLogger(
           terminal: globals.terminal,
@@ -100,12 +100,14 @@ class DaemonCommand extends FlutterCommand {
   }
 }
 
-class _DaemonServer {
-  _DaemonServer({
+@visibleForTesting
+class DaemonServer {
+  DaemonServer({
     this.port,
     required this.logger,
     this.notifyingLogger,
-  });
+    @visibleForTesting Future<ServerSocket> Function(InternetAddress address, int port) bind = ServerSocket.bind,
+  }) : _bind = bind;
 
   final int? port;
 
@@ -115,8 +117,20 @@ class _DaemonServer {
   // Logger that sends the message to the other end of daemon connection.
   final NotifyingLogger? notifyingLogger;
 
+  final Future<ServerSocket> Function(InternetAddress address, int port) _bind;
+
   Future<void> run() async {
-    final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, port!);
+    ServerSocket? serverSocket;
+    try {
+      serverSocket = await _bind(InternetAddress.loopbackIPv4, port!);
+    } on SocketException {
+      logger.printTrace('Bind on $port failed with IPv4, retrying on IPv6');
+    }
+
+    // If binding on IPv4 failed, try binding on IPv6.
+    // Omit try catch here, let the failure fallthrough.
+    serverSocket ??= await _bind(InternetAddress.loopbackIPv6, port!);
+
     logger.printStatus('Daemon server listening on ${serverSocket.port}');
 
     final StreamSubscription<Socket> subscription = serverSocket.listen(
@@ -156,6 +170,7 @@ class Daemon {
     this.connection, {
     this.notifyingLogger,
     this.logToStdout = false,
+    FileTransfer fileTransfer = const FileTransfer(),
   }) {
     // Set up domains.
     registerDomain(daemonDomain = DaemonDomain(this));
@@ -163,7 +178,7 @@ class Daemon {
     registerDomain(deviceDomain = DeviceDomain(this));
     registerDomain(emulatorDomain = EmulatorDomain(this));
     registerDomain(devToolsDomain = DevToolsDomain(this));
-    registerDomain(proxyDomain = ProxyDomain(this));
+    registerDomain(proxyDomain = ProxyDomain(this, fileTransfer: fileTransfer));
 
     // Start listening.
     _commandSubscription = connection.incomingCommands.listen(
@@ -335,6 +350,7 @@ class DaemonDomain extends Domain {
     registerHandler('version', version);
     registerHandler('shutdown', shutdown);
     registerHandler('getSupportedPlatforms', getSupportedPlatforms);
+    registerHandler('setNotifyVerbose', setNotifyVerbose);
 
     sendEvent(
       'daemon.connected',
@@ -346,7 +362,7 @@ class DaemonDomain extends Domain {
 
     _subscription = daemon.notifyingLogger!.onMessage.listen((LogMessage message) {
       if (daemon.logToStdout) {
-        if (message.level == 'status') {
+        if (message.level == 'status' || message.level == 'trace') {
           // We use `print()` here instead of `stdout.writeln()` in order to
           // capture the print output for testing.
           // ignore: avoid_print
@@ -414,36 +430,167 @@ class DaemonDomain extends Domain {
   /// is correct.
   Future<Map<String, Object>> getSupportedPlatforms(Map<String, Object?> args) async {
     final String? projectRoot = _getStringArg(args, 'projectRoot', required: true);
-    final List<String> result = <String>[];
+    final List<String> platformTypes = <String>[];
+    final Map<String, Object> platformTypesMap = <String, Object>{};
     try {
       final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(projectRoot));
       final Set<SupportedPlatform> supportedPlatforms = flutterProject.getSupportedPlatforms().toSet();
-      if (featureFlags.isLinuxEnabled && supportedPlatforms.contains(SupportedPlatform.linux)) {
-        result.add('linux');
+
+      void handlePlatformType(
+        PlatformType platform,
+      ) {
+        final List<Map<String, Object>> reasons = <Map<String, Object>>[];
+        switch (platform) {
+          case PlatformType.linux:
+            if (!featureFlags.isLinuxEnabled) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Linux feature is not enabled',
+                'fixText': 'Run "flutter config --enable-linux-desktop"',
+                'fixCode': _ReasonCode.config.name,
+              });
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.linux)) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Linux platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=linux ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
+            }
+          case PlatformType.macos:
+            if (!featureFlags.isMacOSEnabled) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the macOS feature is not enabled',
+                'fixText': 'Run "flutter config --enable-macos-desktop"',
+                'fixCode': _ReasonCode.config.name,
+              });
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.macos)) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the macOS platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=macos ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
+            }
+          case PlatformType.windows:
+            if (!featureFlags.isWindowsEnabled) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Windows feature is not enabled',
+                'fixText': 'Run "flutter config --enable-windows-desktop"',
+                'fixCode': _ReasonCode.config.name,
+              });
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.windows)) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Windows platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=windows ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
+            }
+          case PlatformType.ios:
+            if (!featureFlags.isIOSEnabled) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the iOS feature is not enabled',
+                'fixText': 'Run "flutter config --enable-ios"',
+                'fixCode': _ReasonCode.config.name,
+              });
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.ios)) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the iOS platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=ios ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
+            }
+          case PlatformType.android:
+            if (!featureFlags.isAndroidEnabled) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Android feature is not enabled',
+                'fixText': 'Run "flutter config --enable-android"',
+                'fixCode': _ReasonCode.config.name,
+              });
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.android)) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Android platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=android ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
+            }
+          case PlatformType.web:
+            if (!featureFlags.isWebEnabled) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Web feature is not enabled',
+                'fixText': 'Run "flutter config --enable-web"',
+                'fixCode': _ReasonCode.config.name,
+              });
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.web)) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Web platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=web ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
+            }
+          case PlatformType.fuchsia:
+            if (!featureFlags.isFuchsiaEnabled) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Fuchsia feature is not enabled',
+                'fixText': 'Run "flutter config --enable-fuchsia"',
+                'fixCode': _ReasonCode.config.name,
+              });
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.fuchsia)) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Fuchsia platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=fuchsia ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
+            }
+          case PlatformType.custom:
+            if (!featureFlags.areCustomDevicesEnabled) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the custom devices feature is not enabled',
+                'fixText': 'Run "flutter config --enable-custom-devices"',
+                'fixCode': _ReasonCode.config.name,
+              });
+            }
+          case PlatformType.windowsPreview:
+            // TODO(fujino): detect if there any plugins with native code
+            if (!featureFlags.isPreviewDeviceEnabled) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Preview Device feature is not enabled',
+                'fixText': 'Run "flutter config --enable-flutter-preview',
+                'fixCode': _ReasonCode.config.name,
+              });
+            }
+            if (!supportedPlatforms.contains(SupportedPlatform.windows)) {
+              reasons.add(<String, Object>{
+                'reasonText': 'the Windows platform is not enabled for this project',
+                'fixText': 'Run "flutter create --platforms=windows ." in your application directory',
+                'fixCode': _ReasonCode.create.name,
+              });
+            }
+        }
+
+        if (reasons.isEmpty) {
+          platformTypes.add(platform.name);
+          platformTypesMap[platform.name] = const <String, Object>{
+            'isSupported': true,
+          };
+        } else {
+          platformTypesMap[platform.name] = <String, Object>{
+            'isSupported': false,
+            'reasons': reasons,
+          };
+        }
       }
-      if (featureFlags.isMacOSEnabled && supportedPlatforms.contains(SupportedPlatform.macos)) {
-        result.add('macos');
-      }
-      if (featureFlags.isWindowsEnabled && supportedPlatforms.contains(SupportedPlatform.windows)) {
-        result.add('windows');
-      }
-      if (featureFlags.isIOSEnabled && supportedPlatforms.contains(SupportedPlatform.ios)) {
-        result.add('ios');
-      }
-      if (featureFlags.isAndroidEnabled && supportedPlatforms.contains(SupportedPlatform.android)) {
-        result.add('android');
-      }
-      if (featureFlags.isWebEnabled && supportedPlatforms.contains(SupportedPlatform.web)) {
-        result.add('web');
-      }
-      if (featureFlags.isFuchsiaEnabled && supportedPlatforms.contains(SupportedPlatform.fuchsia)) {
-        result.add('fuchsia');
-      }
-      if (featureFlags.areCustomDevicesEnabled) {
-        result.add('custom');
-      }
+
+      PlatformType.values.forEach(handlePlatformType);
+
       return <String, Object>{
-        'platforms': result,
+        // TODO(fujino): delete this key https://github.com/flutter/flutter/issues/140473
+        'platforms': platformTypes,
+        'platformTypes': platformTypesMap,
       };
     } on Exception catch (err, stackTrace) {
       sendEvent('log', <String, Object?>{
@@ -452,15 +599,32 @@ class DaemonDomain extends Domain {
         'error': true,
       });
       // On any sort of failure, fall back to Android and iOS for backwards
-      // comparability.
-      return <String, Object>{
+      // compatibility.
+      return const <String, Object>{
         'platforms': <String>[
           'android',
           'ios',
         ],
+        'platformTypes': <String, Object>{
+          'android': <String, Object>{'isSupported': true},
+          'ios': <String, Object>{'isSupported': true},
+        },
       };
     }
   }
+
+  /// If notifyVerbose is set, the daemon will forward all verbose logs.
+  Future<void> setNotifyVerbose(Map<String, Object?> args) async {
+    daemon.notifyingLogger?.notifyVerbose = _getBoolArg(args, 'verbose') ?? true;
+  }
+}
+
+/// The reason a [PlatformType] is not currently supported.
+///
+/// The [name] of this value will be sent as a response to daemon client.
+enum _ReasonCode {
+  create,
+  config,
 }
 
 typedef RunOrAttach = Future<void> Function({
@@ -500,11 +664,11 @@ class AppDomain extends Domain {
     String? packagesFilePath,
     String? dillOutputPath,
     bool ipv6 = false,
-    bool multidexEnabled = false,
     String? isolateFilter,
     bool machine = true,
     String? userIdentifier,
     bool enableDevTools = true,
+    required HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
@@ -539,6 +703,7 @@ class AppDomain extends Domain {
         urlTunneller: options.webEnableExposeUrl! ? daemon.daemonDomain.exposeUrl : null,
         machine: machine,
         usage: globals.flutterUsage,
+        analytics: globals.analytics,
         systemClock: globals.systemClock,
         logger: globals.logger,
         fileSystem: globals.fs,
@@ -552,9 +717,10 @@ class AppDomain extends Domain {
         projectRootPath: projectRootPath,
         dillOutputPath: dillOutputPath,
         ipv6: ipv6,
-        multidexEnabled: multidexEnabled,
         hostIsIde: true,
         machine: machine,
+        analytics: globals.analytics,
+        nativeAssetsBuilder: nativeAssetsBuilder,
       );
     } else {
       runner = ColdRunner(
@@ -563,7 +729,6 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         applicationBinary: applicationBinary,
         ipv6: ipv6,
-        multidexEnabled: multidexEnabled,
         machine: machine,
       );
     }
@@ -843,6 +1008,7 @@ class DeviceDomain extends Domain {
     registerHandler('startDartDevelopmentService', startDartDevelopmentService);
     registerHandler('shutdownDartDevelopmentService', shutdownDartDevelopmentService);
     registerHandler('setExternalDevToolsUriForDartDevelopmentService', setExternalDevToolsUriForDartDevelopmentService);
+    registerHandler('getDiagnostics', getDiagnostics);
 
     // Use the device manager discovery so that client provided device types
     // are usable via the daemon protocol.
@@ -894,12 +1060,23 @@ class DeviceDomain extends Domain {
   }
 
   /// Return a list of the current devices, discarding existing cache of devices.
-  Future<List<Map<String, Object?>>> discoverDevices([ Map<String, Object?>? args ]) async {
-    return <Map<String, Object?>>[
+  Future<List<Map<String, Object?>>> discoverDevices(Map<String, Object?> args) async {
+    final int? timeoutInMilliseconds = _getIntArg(args, 'timeoutInMilliseconds');
+    final Duration? timeout = timeoutInMilliseconds != null ? Duration(milliseconds: timeoutInMilliseconds) : null;
+
+    // Calling `discoverDevices()` and `_deviceToMap()` in parallel for better performance.
+    final List<List<Device>> devicesListList = await Future.wait(<Future<List<Device>>>[
       for (final PollingDeviceDiscovery discoverer in _discoverers)
-        for (final Device device in await discoverer.discoverDevices())
-          await _deviceToMap(device),
+        discoverer.discoverDevices(timeout: timeout),
+    ]);
+
+    final List<Device> devices = <Device>[
+      for (final List<Device> devicesList in devicesListList)
+        ...devicesList,
     ];
+    return Future.wait(<Future<Map<String, Object?>>>[
+      for (final Device device in devices) _deviceToMap(device),
+    ]);
   }
 
   /// Enable device events.
@@ -1133,6 +1310,21 @@ class DeviceDomain extends Domain {
     }
     return null;
   }
+
+  /// Gets a list of diagnostic messages pertaining to issues with any connected
+  /// devices.
+  Future<List<String>> getDiagnostics(Map<String, Object?> args) async {
+    // Call `getDiagnostics()` in parallel to improve performance.
+    final List<List<String>> diagnosticsLists = await Future.wait(<Future<List<String>>>[
+      for (final PollingDeviceDiscovery discoverer in _discoverers)
+        discoverer.getDiagnostics(),
+    ]);
+
+    return <String>[
+      for (final List<String> diagnostics in diagnosticsLists)
+        ...diagnostics,
+    ];
+  }
 }
 
 class DevToolsDomain extends Domain {
@@ -1168,6 +1360,8 @@ Future<Map<String, Object?>> _deviceToMap(Device device) async {
     'ephemeral': device.ephemeral,
     'emulatorId': await device.emulatorId,
     'sdk': await device.sdkNameAndVersion,
+    'isConnected': device.isConnected,
+    'connectionInterface': getNameForDeviceConnectionInterface(device.connectionInterface),
     'capabilities': <String, Object>{
       'hotReload': device.supportsHotReload,
       'hotRestart': device.supportsHotRestart,
@@ -1210,7 +1404,7 @@ Object? _toJsonable(Object? obj) {
 }
 
 class NotifyingLogger extends DelegatingLogger {
-  NotifyingLogger({ required this.verbose, required Logger parent }) : super(parent) {
+  NotifyingLogger({ required this.verbose, required Logger parent, this.notifyVerbose = false }) : super(parent) {
     _messageController = StreamController<LogMessage>.broadcast(
       onListen: _onListen,
     );
@@ -1219,6 +1413,8 @@ class NotifyingLogger extends DelegatingLogger {
   final bool verbose;
   final List<LogMessage> messageBuffer = <LogMessage>[];
   late StreamController<LogMessage> _messageController;
+
+  bool notifyVerbose = false;
 
   void _onListen() {
     if (messageBuffer.isNotEmpty) {
@@ -1277,6 +1473,10 @@ class NotifyingLogger extends DelegatingLogger {
 
   @override
   void printTrace(String message) {
+    if (notifyVerbose) {
+      _sendMessage(LogMessage('trace', message));
+      return;
+    }
     if (!verbose) {
       return;
     }
@@ -1398,7 +1598,10 @@ class EmulatorDomain extends Domain {
 }
 
 class ProxyDomain extends Domain {
-  ProxyDomain(Daemon daemon) : super(daemon, 'proxy') {
+  ProxyDomain(Daemon daemon, {
+    required FileTransfer fileTransfer,
+  }) : _fileTransfer = fileTransfer,
+    super(daemon, 'proxy') {
     registerHandlerWithBinary('writeTempFile', writeTempFile);
     registerHandler('calculateFileHashes', calculateFileHashes);
     registerHandlerWithBinary('updateFile', updateFile);
@@ -1406,6 +1609,8 @@ class ProxyDomain extends Domain {
     registerHandler('disconnect', disconnect);
     registerHandlerWithBinary('write', write);
   }
+
+  final FileTransfer _fileTransfer;
 
   final Map<String, Socket> _forwardedConnections = <String, Socket>{};
   int _id = 0;
@@ -1421,12 +1626,26 @@ class ProxyDomain extends Domain {
   /// Calculate rolling hashes for a file in the local temporary directory.
   Future<Map<String, Object?>?> calculateFileHashes(Map<String, Object?> args) async {
     final String path = _getStringArg(args, 'path', required: true)!;
+    final bool cacheResult = _getBoolArg(args, 'cacheResult') ?? false;
     final File file = tempDirectory.childFile(path);
     if (!await file.exists()) {
       return null;
     }
-    final BlockHashes result = await FileTransfer().calculateBlockHashesOfFile(file);
-    return result.toJson();
+    final File hashFile = file.parent.childFile('${file.basename}.hashes');
+    if (hashFile.existsSync() && hashFile.statSync().modified.isAfter(file.statSync().modified)) {
+      // If the cached hash file is newer than the file, assume that the cached
+      // is up to date. Return the cached result directly.
+      final String cachedJson = await hashFile.readAsString();
+      return json.decode(cachedJson) as Map<String, Object?>;
+    }
+    final BlockHashes result = await _fileTransfer.calculateBlockHashesOfFile(file);
+    final Map<String, Object?> resultObject = result.toJson();
+
+    if (cacheResult) {
+      await hashFile.writeAsString(json.encode(resultObject));
+    }
+
+    return resultObject;
   }
 
   Future<bool?> updateFile(Map<String, Object?> args, Stream<List<int>>? binary) async {
@@ -1437,7 +1656,7 @@ class ProxyDomain extends Domain {
     }
     final List<Map<String, Object?>> deltaJson = (args['delta']! as List<Object?>).cast<Map<String, Object?>>();
     final List<FileDeltaBlock> delta = FileDeltaBlock.fromJsonList(deltaJson);
-    final bool result = await FileTransfer().rebuildFile(file, delta, binary!);
+    final bool result = await _fileTransfer.rebuildFile(file, delta, binary!);
     return result;
   }
 

@@ -22,5 +22,10 @@
   "tabSemanticsLabel": "ටැබ $tabCount න් $tabIndex",
   "modalBarrierDismissLabel": "ඉවත ලන්න",
   "searchTextFieldPlaceholderLabel": "සෙවීම",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "ප්‍රතිස්ථාපන හමු නොවිණි",
+  "menuDismissLabel": "මෙනුව අස් කරන්න",
+  "lookUpButtonLabel": "උඩ බලන්න",
+  "searchWebButtonLabel": "වෙබය සොයන්න",
+  "shareButtonLabel": "බෙදා ගන්න...",
+  "clearButtonLabel": "Clear"
 }

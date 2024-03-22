@@ -61,28 +61,20 @@ int getChildCount(WidgetTester tester) {
 }
 
 ui.RRect getSurroundingRect(WidgetTester tester, {int child = 0}) {
-  // Using dynamic so the test can access private classes.
-  // ignore: avoid_dynamic_calls
   return ((getRenderSegmentedControl(tester) as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
       .getChildrenAsList()[child].parentData! as dynamic).surroundingRect as ui.RRect;
 }
 
 Size getChildSize(WidgetTester tester, {int child = 0}) {
-  // Using dynamic so the test can access private classes.
-  // ignore: avoid_dynamic_calls
   return (getRenderSegmentedControl(tester) as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
       .getChildrenAsList()[child].size;
 }
 
 Color getBorderColor(WidgetTester tester) {
-  // Using dynamic so the test can access a private class.
-  // ignore: avoid_dynamic_calls
   return (getRenderSegmentedControl(tester) as dynamic).borderColor as Color;
 }
 
 int? getSelectedIndex(WidgetTester tester) {
-  // Using dynamic so the test can access a private class.
-  // ignore: avoid_dynamic_calls
   return (getRenderSegmentedControl(tester) as dynamic).selectedIndex as int?;
 }
 
@@ -410,11 +402,15 @@ void main() {
     expect(getBackgroundColor(tester, 1), CupertinoColors.activeGreen.color);
 
     final Offset center = tester.getCenter(find.text('Child 1'));
-    await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
     expect(getBackgroundColor(tester, 0), const Color(0x638CFC7B));
     expect(getBackgroundColor(tester, 1), CupertinoColors.activeGreen.color);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('Widgets are centered within segments', (WidgetTester tester) async {
@@ -604,11 +600,15 @@ void main() {
     expect(getBackgroundColor(tester, 1), isSameColorAs(CupertinoColors.white));
 
     final Offset center = tester.getCenter(find.text('Child 2'));
-    await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
     expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
     expect(getBackgroundColor(tester, 1), const Color(0x33007aff));
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('Long press does not change background color of currently-selected child', (WidgetTester tester) async {
@@ -618,11 +618,15 @@ void main() {
     expect(getBackgroundColor(tester, 1), isSameColorAs(CupertinoColors.white));
 
     final Offset center = tester.getCenter(find.text('Child 1'));
-    await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
     expect(getBackgroundColor(tester, 0), CupertinoColors.activeBlue);
     expect(getBackgroundColor(tester, 1), isSameColorAs(CupertinoColors.white));
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('Height of segmented control is determined by tallest widget', (WidgetTester tester) async {
@@ -1102,7 +1106,7 @@ void main() {
           );
         },
       ),
-      const Duration(milliseconds: 40),
+      duration: const Duration(milliseconds: 40),
     );
     expect(getBackgroundColor(tester, 0), const Color(0xff3d9aff));
     expect(getBackgroundColor(tester, 1), const Color(0x64007aff));
@@ -1123,7 +1127,7 @@ void main() {
           );
         },
       ),
-      const Duration(milliseconds: 40),
+      duration: const Duration(milliseconds: 40),
     );
     expect(getBackgroundColor(tester, 0), const Color(0xff7bbaff));
     expect(getBackgroundColor(tester, 1), const Color(0x95007aff));
@@ -1144,7 +1148,7 @@ void main() {
           );
         },
       ),
-      const Duration(milliseconds: 40),
+      duration: const Duration(milliseconds: 40),
     );
     expect(getBackgroundColor(tester, 0), const Color(0xffb9daff));
     expect(getBackgroundColor(tester, 1), const Color(0xc7007aff));
@@ -1165,7 +1169,7 @@ void main() {
           );
         },
       ),
-      const Duration(milliseconds: 40),
+      duration: const Duration(milliseconds: 40),
     );
     expect(getBackgroundColor(tester, 0), const Color(0xfff7faff));
     expect(getBackgroundColor(tester, 1), const Color(0xf8007aff));
@@ -1186,7 +1190,7 @@ void main() {
           );
         },
       ),
-      const Duration(milliseconds: 40),
+      duration: const Duration(milliseconds: 40),
     );
     expect(getBackgroundColor(tester, 0), isSameColorAs(CupertinoColors.white));
     expect(getBackgroundColor(tester, 1), CupertinoColors.activeBlue);
@@ -1220,18 +1224,23 @@ void main() {
 
     expect(getBackgroundColor(tester, 1), isSameColorAs(CupertinoColors.white));
 
-    await tester.startGesture(tester.getCenter(find.text('B')));
+    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.text('B')));
     await tester.pumpAndSettle(const Duration(milliseconds: 200));
 
     expect(getBackgroundColor(tester, 1), const Color(0x33007aff));
     expect(getBackgroundColor(tester, 2), isSameColorAs(CupertinoColors.white));
 
-    await tester.startGesture(tester.getCenter(find.text('C')));
+    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.text('C')));
     await tester.pumpAndSettle(const Duration(milliseconds: 200));
 
     // Press on C has no effect while B is held down.
     expect(getBackgroundColor(tester, 1), const Color(0x33007aff));
     expect(getBackgroundColor(tester, 2), isSameColorAs(CupertinoColors.white));
+
+    // Finish gesture to release resources.
+    await gesture1.up();
+    await gesture2.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('Transition is triggered while a transition is already occurring', (WidgetTester tester) async {
@@ -1572,13 +1581,17 @@ void main() {
     );
 
     final Offset center = tester.getCenter(find.text('B'));
-    await tester.startGesture(center);
+    final TestGesture gesture = await tester.startGesture(center);
     await tester.pumpAndSettle();
 
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('segmented_control_test.1.png'),
     );
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('Hovering over Cupertino segmented control updates cursor to clickable on Web', (WidgetTester tester) async {

@@ -12,6 +12,7 @@ import '../base/io.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart' as globals show fs;
+import 'error_formatter.dart';
 import 'flutter_adapter_args.dart';
 import 'flutter_base_adapter.dart';
 
@@ -219,17 +220,14 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
 
   /// Sends OutputEvents to the client for a Flutter.Error event.
   void _handleFlutterErrorEvent(vm.ExtensionData? data) {
-    final Map<String, dynamic>? errorData = data?.data;
+    final Map<String, Object?>? errorData = data?.data;
     if (errorData == null) {
       return;
     }
 
-    final String errorText = (errorData['renderedErrorText'] as String?)
-        ?? (errorData['description'] as String?)
-        // We should never not error text, but if we do at least send something
-        // so it's not just completely silent.
-        ?? 'Unknown error in Flutter.Error event';
-    sendOutput('stderr', '$errorText\n');
+    FlutterErrorFormatter()
+      ..formatError(errorData)
+      ..sendOutput(sendOutput);
   }
 
   /// Called by [launchRequest] to request that we actually start the app to be run/debugged.
@@ -422,6 +420,19 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     );
   }
 
+  /// Handles any app.progress event from Flutter.
+  void _handleAppProgress(Map<String, Object?> params) {
+    // If this is a new progress starting (and we're still launching), update
+    // the progress notification.
+    //
+    // We ignore finished status because we have a limited API - the next
+    // item will replace it (or the launch progress will be completed by
+    // _handleAppStarted).
+    if (params case {'message': final String message, 'finished': false}) {
+      launchProgress?.update(message: message);
+    }
+  }
+
   /// Handles the app.started event from Flutter.
   Future<void> _handleAppStarted() async {
     launchProgress?.end();
@@ -474,7 +485,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
   }
 
   /// Handles incoming JSON events from `flutter run --machine`.
-  void _handleJsonEvent(String event, Map<String, Object?>? params) {
+  void handleJsonEvent(String event, Map<String, Object?>? params) {
     params ??= <String, Object?>{};
     switch (event) {
       case 'daemon.connected':
@@ -483,6 +494,8 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
         _handleDebugPort(params);
       case 'app.start':
         _handleAppStart(params);
+      case 'app.progress':
+        _handleAppProgress(params);
       case 'app.started':
         _handleAppStarted();
     }
@@ -648,7 +661,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     final Object? params = payload['params'];
     final Object? id = payload['id'];
     if (event is String && params is Map<String, Object?>?) {
-      _handleJsonEvent(event, params);
+      handleJsonEvent(event, params);
     } else if (id != null && method is String && params is Map<String, Object?>?) {
       _handleJsonRequest(id, method, params);
     } else if (id is int && _flutterRequestCompleters.containsKey(id)) {

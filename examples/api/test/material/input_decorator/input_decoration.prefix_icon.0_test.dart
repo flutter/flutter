@@ -11,6 +11,6 @@ void main() {
     await tester.pumpWidget(
       const example.PrefixIconExampleApp(),
     );
-    expect(tester.getCenter(find.byIcon(Icons.person)).dy, 32.0);
+    expect(tester.getCenter(find.byIcon(Icons.person)).dy, 28.0);
   });
 }

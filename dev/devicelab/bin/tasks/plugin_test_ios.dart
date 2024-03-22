@@ -9,6 +9,8 @@ Future<void> main() async {
   await task(combine(<TaskFunction>[
     PluginTest('ios', <String>['-i', 'objc', '--platforms=ios']).call,
     PluginTest('ios', <String>['-i', 'swift', '--platforms=ios']).call,
+    // Test that app builds with Flutter as a transitive dependency.
+    PluginTest('ios', <String>['-i', 'objc', '--platforms=ios'], cocoapodsTransitiveFlutterDependency: true).call,
     // Test that Dart-only plugins are supported.
     PluginTest('ios', <String>['--platforms=ios'], dartOnlyPlugin: true).call,
     // Test that shared darwin directories are supported.

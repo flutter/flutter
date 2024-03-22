@@ -95,6 +95,62 @@ void main() {
         );
       });
 
+      testWithoutContext(
+          'selects uncontested implementation from direct dependency with additional native implementation',
+          () async {
+        final Set<String> directDependencies = <String>{
+          'url_launcher_linux',
+          'url_launcher_macos',
+        };
+        final List<PluginInterfaceResolution> resolutions =
+            resolvePlatformImplementation(
+          <Plugin>[
+            // Following plugin is native only and is not resolved as a dart plugin:
+            Plugin.fromYaml(
+              'url_launcher_linux',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{
+                    'package': 'com.example.url_launcher',
+                    'pluginClass': 'UrlLauncherPluginLinux',
+                  },
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              appDependencies: directDependencies,
+            ),
+            Plugin.fromYaml(
+              'url_launcher_macos',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'implements': 'url_launcher',
+                'platforms': <String, dynamic>{
+                  'macos': <String, dynamic>{
+                    'dartPluginClass': 'UrlLauncherPluginMacOS',
+                  },
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              appDependencies: directDependencies,
+            ),
+          ],
+        );
+
+        expect(resolutions.length, equals(1));
+        expect(
+            resolutions[0].toMap(),
+            equals(<String, String>{
+              'pluginName': 'url_launcher_macos',
+              'dartClass': 'UrlLauncherPluginMacOS',
+              'platform': 'macos',
+            }));
+      });
+
       testWithoutContext('selects uncontested implementation from transitive dependency', () async {
         final Set<String> directDependencies = <String>{
           'url_launcher_macos',
@@ -430,7 +486,7 @@ void main() {
         );
       });
 
-      testWithoutContext('selects user selected implementation despites default implementation', () async {
+      testWithoutContext('selects user selected implementation despite default implementation', () async {
         final Set<String> directDependencies = <String>{
           'user_selected_url_launcher_implementation',
           'url_launcher',
@@ -538,7 +594,7 @@ void main() {
 
         },
         throwsToolExit(
-          message: 'Please resolve the errors',
+          message: 'Please resolve the plugin implementation selection errors',
         ));
 
         expect(
@@ -627,7 +683,7 @@ void main() {
           ]);
         },
         throwsToolExit(
-          message: 'Please resolve the errors',
+          message: 'Please resolve the plugin implementation selection errors',
         ));
 
         expect(
@@ -684,7 +740,7 @@ void main() {
           ]);
         },
         throwsToolExit(
-          message: 'Please resolve the errors',
+          message: 'Please resolve the plugin implementation selection errors',
         ));
 
         expect(
@@ -776,7 +832,6 @@ void main() {
           packageConfig,
           'package:app/main.dart',
           mainFile,
-          throwOnPluginPubspecError: true,
         );
         expect(flutterProject.dartPluginRegistrant.readAsStringSync(),
           '//\n'
@@ -900,7 +955,6 @@ void main() {
             packageConfig,
             'package:app/main.dart',
             mainFile,
-            throwOnPluginPubspecError: true,
           ), throwsToolExit(message:
             'Invalid plugin specification url_launcher_macos.\n'
             'Invalid "macos" plugin specification.'
@@ -941,7 +995,6 @@ void main() {
             packageConfig,
             'package:app/main.dart',
             mainFile,
-            throwOnPluginPubspecError: true,
           ), throwsToolExit(message:
             'Invalid plugin specification url_launcher_macos.\n'
             'Cannot find the `flutter.plugin.platforms` key in the `pubspec.yaml` file. '
@@ -949,35 +1002,6 @@ void main() {
             'https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms'
           ),
         );
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      });
-
-      testUsingContext('Does not show error messages if throwOnPluginPubspecError is false', () async {
-        final Set<String> directDependencies = <String>{
-          'url_launcher_windows',
-        };
-        resolvePlatformImplementation(<Plugin>[
-          Plugin.fromYaml(
-            'url_launcher_windows',
-            '',
-            YamlMap.wrap(<String, dynamic>{
-              'platforms': <String, dynamic>{
-                'windows': <String, dynamic>{
-                  'dartPluginClass': 'UrlLauncherPluginWindows',
-                },
-              },
-            }),
-            null,
-            <String>[],
-            fileSystem: fs,
-            appDependencies: directDependencies,
-          ),
-        ],
-          throwOnPluginPubspecError: false,
-        );
-        expect(testLogger.errorText, '');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1000,7 +1024,6 @@ void main() {
           packageConfig,
           'package:app/main.dart',
           mainFile,
-          throwOnPluginPubspecError: true,
         );
         expect(flutterProject.dartPluginRegistrant.existsSync(), isFalse);
       }, overrides: <Type, Generator>{
@@ -1040,7 +1063,6 @@ void main() {
           packageConfig,
           'package:app/main.dart',
           mainFile,
-          throwOnPluginPubspecError: true,
         );
         expect(flutterProject.dartPluginRegistrant.existsSync(), isTrue);
 
@@ -1056,7 +1078,6 @@ void main() {
           packageConfig,
           'package:app/main.dart',
           mainFile,
-          throwOnPluginPubspecError: true,
         );
         expect(flutterProject.dartPluginRegistrant.existsSync(), isFalse);
       }, overrides: <Type, Generator>{

@@ -68,6 +68,40 @@ void main() {
       equals(<KeyboardLockMode>{}));
   }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
+  testWidgets('KeyEvent can tell which keys are pressed', (WidgetTester tester) async {
+    await tester.pumpWidget(const Focus(autofocus: true, child: SizedBox()));
+    await tester.pump();
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.numLock, platform: 'windows');
+
+    expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.numLock), isTrue);
+    expect(HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.numLock), isTrue);
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.numpad1, platform: 'windows');
+    expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.numpad1), isTrue);
+    expect(HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.numpad1), isTrue);
+
+    await simulateKeyRepeatEvent(LogicalKeyboardKey.numpad1, platform: 'windows');
+    expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.numpad1), isTrue);
+    expect(HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.numpad1), isTrue);
+
+    await simulateKeyUpEvent(LogicalKeyboardKey.numLock);
+    expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.numpad1), isTrue);
+    expect(HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.numpad1), isTrue);
+
+    await simulateKeyDownEvent(LogicalKeyboardKey.numLock, platform: 'windows');
+    expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.numLock), isTrue);
+    expect(HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.numLock), isTrue);
+
+    await simulateKeyUpEvent(LogicalKeyboardKey.numpad1, platform: 'windows');
+    expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.numpad1), isFalse);
+    expect(HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.numpad1), isFalse);
+
+    await simulateKeyUpEvent(LogicalKeyboardKey.numLock, platform: 'windows');
+    expect(HardwareKeyboard.instance.isPhysicalKeyPressed(PhysicalKeyboardKey.numLock), isFalse);
+    expect(HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.numLock), isFalse);
+  }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
+
   testWidgets('KeyboardManager synthesizes modifier keys in rawKeyData mode', (WidgetTester tester) async {
     final List<KeyEvent> events = <KeyEvent>[];
     HardwareKeyboard.instance.addHandler((KeyEvent event) {
@@ -98,6 +132,7 @@ void main() {
 
   testWidgets('Dispatch events to all handlers', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final List<int> logs = <int>[];
 
     await tester.pumpWidget(
@@ -203,6 +238,7 @@ void main() {
   // where a ShiftLeft key down is dispatched but the modifier bit is not set.
   testWidgets('Correctly convert down events that are synthesized released', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final List<KeyEvent> events = <KeyEvent>[];
 
     await tester.pumpWidget(
@@ -246,6 +282,7 @@ void main() {
 
   testWidgets('Instantly dispatch synthesized key events when the queue is empty', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final List<int> logs = <int>[];
 
     await tester.pumpWidget(
@@ -277,18 +314,21 @@ void main() {
   }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
   testWidgets('Postpone synthesized key events when the queue is not empty', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+    final FocusNode keyboardListenerFocusNode = FocusNode();
+    addTearDown(keyboardListenerFocusNode.dispose);
+    final FocusNode rawKeyboardListenerFocusNode = FocusNode();
+    addTearDown(rawKeyboardListenerFocusNode.dispose);
     final List<String> logs = <String>[];
 
     await tester.pumpWidget(
       RawKeyboardListener(
-        focusNode: FocusNode(),
+        focusNode: rawKeyboardListenerFocusNode,
         onKey: (RawKeyEvent event) {
           logs.add('${event.runtimeType}');
         },
         child: KeyboardListener(
           autofocus: true,
-          focusNode: focusNode,
+          focusNode: keyboardListenerFocusNode,
           child: Container(),
           onKeyEvent: (KeyEvent event) {
             logs.add('${event.runtimeType}');

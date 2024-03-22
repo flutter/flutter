@@ -264,14 +264,14 @@ void main() {
       ),
       const FakeVmServiceRequest(
         method: kListViewsMethod,
-        errorCode: RPCErrorCodes.kServiceDisappeared,
+        error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
       ),
       const FakeVmServiceRequest(
         method: 'streamCancel',
         args: <String, Object>{
           'streamId': 'Isolate',
         },
-        errorCode: RPCErrorCodes.kServiceDisappeared,
+        error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
       ),
     ], httpAddress: Uri.parse('http://localhost:1234'));
 
@@ -340,14 +340,14 @@ void main() {
       ),
       const FakeVmServiceRequest(
         method: kListViewsMethod,
-        errorCode: RPCErrorCodes.kServiceDisappeared,
+        error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
       ),
       const FakeVmServiceRequest(
         method: 'streamCancel',
         args: <String, Object>{
           'streamId': 'Isolate',
         },
-        errorCode: RPCErrorCodes.kServiceDisappeared,
+        error: FakeRPCError(code: RPCErrorCodes.kServiceDisappeared),
       ),
     ], httpAddress: Uri.parse('http://localhost:5678'));
 
@@ -467,9 +467,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   TargetPlatform targetPlatform = TargetPlatform.android_arm;
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   @override
   DartDevelopmentService get dds => FakeDartDevelopmentService();

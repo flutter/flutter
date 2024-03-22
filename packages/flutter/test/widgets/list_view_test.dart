@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 
 class TestSliverChildListDelegate extends SliverChildListDelegate {
@@ -660,6 +660,7 @@ void main() {
   testWidgets('Updates viewport dimensions when scroll direction changes', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/43380.
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     Widget buildListView({ required Axis scrollDirection }) {
       return Directionality(
@@ -728,6 +729,7 @@ void main() {
     // 4th, check that a non-default clip behavior can be sent to the painting context.
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.antiAlias));
+    context.dispose();
   });
 
   testWidgets('ListView.builder respects clipBehavior', (WidgetTester tester) async {
@@ -776,5 +778,222 @@ void main() {
     );
     final RenderViewport renderObject = tester.allRenderObjects.whereType<RenderViewport>().first;
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/pull/138912
+  testWidgets('itemExtentBuilder should respect item count', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    final List<double> numbers = <double>[
+      10, 20, 30, 40, 50,
+    ];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          controller: controller,
+          itemCount: numbers.length,
+          itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
+            return numbers[index];
+          },
+          itemBuilder: (BuildContext context, int index) {
+            return SizedBox(
+              height: numbers[index],
+              child: Text('Item $index'),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 4'), findsOneWidget);
+    expect(find.text('Item 5'), findsNothing);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/pull/131393
+  testWidgets('itemExtentBuilder test', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    final List<int> buildLog = <int>[];
+    late SliverLayoutDimensions sliverLayoutDimensions;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          controller: controller,
+          itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
+            sliverLayoutDimensions = dimensions;
+            return 100.0;
+          },
+          itemBuilder: (BuildContext context, int index) {
+            buildLog.insert(0, index);
+            return Text('Item $index');
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 5'), findsOneWidget);
+    expect(find.text('Item 6'), findsNothing);
+    expect(
+      sliverLayoutDimensions,
+      const SliverLayoutDimensions(
+        scrollOffset: 0.0,
+        precedingScrollExtent: 0.0,
+        viewportMainAxisExtent: 600.0,
+        crossAxisExtent: 800.0,
+      )
+    );
+    // viewport(600.0) + cache extent after(250.0)
+    expect(buildLog.length, 9);
+    expect(buildLog.min, 0);
+    expect(buildLog.max, 8);
+
+    buildLog.clear();
+
+    // Scrolling drastically.
+    controller.jumpTo(10000.0);
+    await tester.pump();
+
+    expect(find.text('Item 99'), findsNothing);
+    expect(find.text('Item 100'), findsOneWidget);
+    expect(find.text('Item 105'), findsOneWidget);
+    expect(find.text('Item 106'), findsNothing);
+    expect(
+        sliverLayoutDimensions,
+        const SliverLayoutDimensions(
+          scrollOffset: 10000.0,
+          precedingScrollExtent: 0.0,
+          viewportMainAxisExtent: 600.0,
+          crossAxisExtent: 800.0,
+        )
+    );
+    // Scrolling drastically only loading the visible and cached area items.
+    // cache extent before(250.0) + viewport(600.0) + cache extent after(250.0)
+    expect(buildLog.length, 12);
+    expect(buildLog.min, 97);
+    expect(buildLog.max, 108);
+
+    buildLog.clear();
+    controller.jumpTo(5000.0);
+    await tester.pump();
+
+    expect(find.text('Item 49'), findsNothing);
+    expect(find.text('Item 50'), findsOneWidget);
+    expect(find.text('Item 55'), findsOneWidget);
+    expect(find.text('Item 56'), findsNothing);
+    expect(
+        sliverLayoutDimensions,
+        const SliverLayoutDimensions(
+          scrollOffset: 5000.0,
+          precedingScrollExtent: 0.0,
+          viewportMainAxisExtent: 600.0,
+          crossAxisExtent: 800.0,
+        )
+    );
+    // cache extent before(250.0) + viewport(600.0) + cache extent after(250.0)
+    expect(buildLog.length, 12);
+    expect(buildLog.min, 47);
+    expect(buildLog.max, 58);
+
+    buildLog.clear();
+    controller.jumpTo(4700.0);
+    await tester.pump();
+
+    expect(find.text('Item 46'), findsNothing);
+    expect(find.text('Item 47'), findsOneWidget);
+    expect(find.text('Item 52'), findsOneWidget);
+    expect(find.text('Item 53'), findsNothing);
+    expect(
+        sliverLayoutDimensions,
+        const SliverLayoutDimensions(
+          scrollOffset: 4700.0,
+          precedingScrollExtent: 0.0,
+          viewportMainAxisExtent: 600.0,
+          crossAxisExtent: 800.0,
+        )
+    );
+    // Only newly entered cached area items need to be loaded.
+    expect(buildLog.length, 3);
+    expect(buildLog.min, 44);
+    expect(buildLog.max, 46);
+
+    buildLog.clear();
+    controller.jumpTo(5300.0);
+    await tester.pump();
+
+    expect(find.text('Item 52'), findsNothing);
+    expect(find.text('Item 53'), findsOneWidget);
+    expect(find.text('Item 58'), findsOneWidget);
+    expect(find.text('Item 59'), findsNothing);
+    expect(
+        sliverLayoutDimensions,
+        const SliverLayoutDimensions(
+          scrollOffset: 5300.0,
+          precedingScrollExtent: 0.0,
+          viewportMainAxisExtent: 600.0,
+          crossAxisExtent: 800.0,
+        )
+    );
+    // Only newly entered cached area items need to be loaded.
+    expect(buildLog.length, 6);
+    expect(buildLog.min, 56);
+    expect(buildLog.max, 61);
+  });
+
+  testWidgets('itemExtent, prototypeItem and itemExtentBuilder conflicts test', (WidgetTester tester) async {
+    Object? error;
+    try {
+      await tester.pumpWidget(
+        ListView.builder(
+          itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
+            return 100.0;
+          },
+          itemExtent: 100.0,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      );
+    } catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+
+    error = null;
+    try {
+      await tester.pumpWidget(
+        ListView.builder(
+          itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
+            return 100.0;
+          },
+          prototypeItem: Container(),
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      );
+    } catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+
+    error = null;
+    try {
+      await tester.pumpWidget(
+        ListView.builder(
+          itemExtent: 100.0,
+          prototypeItem: Container(),
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      );
+    } catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
   });
 }

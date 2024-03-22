@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'editable_text_utils.dart';
 
-final FocusNode focusNode = FocusNode(debugLabel: 'UndoHistory Node');
+final FocusNode _focusNode = FocusNode(debugLabel: 'UndoHistory Node');
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -32,7 +32,10 @@ void main() {
 
     testWidgets('allows undo and redo to be called programmatically from the UndoHistoryController', (WidgetTester tester) async {
       final ValueNotifier<int> value = ValueNotifier<int>(0);
+      addTearDown(value.dispose);
       final UndoHistoryController controller = UndoHistoryController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         MaterialApp(
           home: UndoHistory<int>(
@@ -41,7 +44,7 @@ void main() {
             onTriggered: (int newValue) {
               value.value = newValue;
             },
-            focusNode: focusNode,
+            focusNode: _focusNode,
             child: Container(),
           ),
         ),
@@ -57,7 +60,7 @@ void main() {
       controller.redo();
       expect(value.value, 0);
 
-      focusNode.requestFocus();
+      _focusNode.requestFocus();
       await tester.pump();
       expect(controller.value.canUndo, false);
       expect(controller.value.canRedo, false);
@@ -121,7 +124,10 @@ void main() {
 
     testWidgets('allows undo and redo to be called using the keyboard', (WidgetTester tester) async {
       final ValueNotifier<int> value = ValueNotifier<int>(0);
+      addTearDown(value.dispose);
       final UndoHistoryController controller = UndoHistoryController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         MaterialApp(
           home: UndoHistory<int>(
@@ -130,9 +136,9 @@ void main() {
             onTriggered: (int newValue) {
               value.value = newValue;
             },
-            focusNode: focusNode,
+            focusNode: _focusNode,
             child: Focus(
-              focusNode: focusNode,
+              focusNode: _focusNode,
               child: Container(),
             ),
           ),
@@ -149,7 +155,7 @@ void main() {
       await sendRedo(tester);
       expect(value.value, 0);
 
-      focusNode.requestFocus();
+      _focusNode.requestFocus();
       await tester.pump();
       expect(controller.value.canUndo, false);
       expect(controller.value.canRedo, false);
@@ -213,7 +219,10 @@ void main() {
 
     testWidgets('duplicate changes do not affect the undo history', (WidgetTester tester) async {
       final ValueNotifier<int> value = ValueNotifier<int>(0);
+      addTearDown(value.dispose);
       final UndoHistoryController controller = UndoHistoryController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         MaterialApp(
           home: UndoHistory<int>(
@@ -222,13 +231,13 @@ void main() {
             onTriggered: (int newValue) {
               value.value = newValue;
             },
-            focusNode: focusNode,
+            focusNode: _focusNode,
             child: Container(),
           ),
         ),
       );
 
-      focusNode.requestFocus();
+      _focusNode.requestFocus();
 
       // Wait for the throttling.
       await tester.pump(const Duration(milliseconds: 500));
@@ -263,9 +272,12 @@ void main() {
 
     testWidgets('ignores value changes pushed during onTriggered', (WidgetTester tester) async {
       final ValueNotifier<int> value = ValueNotifier<int>(0);
+      addTearDown(value.dispose);
       final UndoHistoryController controller = UndoHistoryController();
+      addTearDown(controller.dispose);
       int Function(int newValue) valueToUse = (int value) => value;
       final GlobalKey<UndoHistoryState<int>> key = GlobalKey<UndoHistoryState<int>>();
+
       await tester.pumpWidget(
         MaterialApp(
           home: UndoHistory<int>(
@@ -275,7 +287,7 @@ void main() {
             onTriggered: (int newValue) {
               value.value = valueToUse(newValue);
             },
-            focusNode: focusNode,
+            focusNode: _focusNode,
             child: Container(),
           ),
         ),
@@ -291,7 +303,7 @@ void main() {
       controller.redo();
       expect(value.value, 0);
 
-      focusNode.requestFocus();
+      _focusNode.requestFocus();
       await tester.pump();
       expect(controller.value.canUndo, false);
       expect(controller.value.canRedo, false);
@@ -316,9 +328,13 @@ void main() {
         return null;
       });
       final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
 
       final ValueNotifier<int> value = ValueNotifier<int>(0);
+      addTearDown(value.dispose);
       final UndoHistoryController controller = UndoHistoryController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         MaterialApp(
           home: UndoHistory<int>(
@@ -380,7 +396,10 @@ void main() {
 
     testWidgets('handlePlatformUndo should undo or redo appropriately on iOS', (WidgetTester tester) async {
       final ValueNotifier<int> value = ValueNotifier<int>(0);
+      addTearDown(value.dispose);
       final UndoHistoryController controller = UndoHistoryController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         MaterialApp(
           home: UndoHistory<int>(
@@ -389,9 +408,9 @@ void main() {
             onTriggered: (int newValue) {
               value.value = newValue;
             },
-            focusNode: focusNode,
+            focusNode: _focusNode,
             child: Focus(
-              focusNode: focusNode,
+              focusNode: _focusNode,
               child: Container(),
             ),
           ),
@@ -399,7 +418,7 @@ void main() {
       );
 
       await tester.pump(const Duration(milliseconds: 500));
-      focusNode.requestFocus();
+      _focusNode.requestFocus();
       await tester.pump();
 
       // Undo/redo have no effect if the value has never changed.
@@ -468,6 +487,7 @@ void main() {
     testWidgets('UndoHistoryController notifies onUndo listeners onUndo', (WidgetTester tester) async {
       int calls = 0;
       final UndoHistoryController controller = UndoHistoryController();
+      addTearDown(controller.dispose);
       controller.onUndo.addListener(() {
         calls++;
       });
@@ -485,6 +505,7 @@ void main() {
     testWidgets('UndoHistoryController notifies onRedo listeners onRedo', (WidgetTester tester) async {
       int calls = 0;
       final UndoHistoryController controller = UndoHistoryController();
+      addTearDown(controller.dispose);
       controller.onRedo.addListener(() {
         calls++;
       });
@@ -502,6 +523,7 @@ void main() {
     testWidgets('UndoHistoryController notifies listeners on value change', (WidgetTester tester) async {
       int calls = 0;
       final UndoHistoryController controller = UndoHistoryController(value: const UndoHistoryValue(canUndo: true));
+      addTearDown(controller.dispose);
       controller.addListener(() {
         calls++;
       });

@@ -25,9 +25,6 @@ void main() {
 
         final SerializableFinder demoList = find.byValueKey('GalleryDemoList');
 
-        // TODO(eseidel): These are very artificial scrolls, we should use better
-        // https://github.com/flutter/flutter/issues/3316
-        // Scroll down
         for (int i = 0; i < 5; i++) {
           await driver.scroll(demoList, 0.0, -300.0, const Duration(milliseconds: 300));
           await Future<void>.delayed(const Duration(milliseconds: 500));
@@ -38,7 +35,7 @@ void main() {
           await driver.scroll(demoList, 0.0, 300.0, const Duration(milliseconds: 300));
           await Future<void>.delayed(const Duration(milliseconds: 500));
         }
-      });
+      }, retainPriorEvents: true);
 
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
       await summary.writeTimelineToFile('home_scroll_perf', pretty: true);

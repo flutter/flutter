@@ -91,7 +91,9 @@ for how to set up your development environment, or ask in #hackers-test on Disco
 Developing for Flutter
 ----------------------
 
-If you would prefer to write code, you may wish to start with our list of [good first issues](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22).
+If you would prefer to write code, you may wish to start with our list of good first issues for [Flutter](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) or for [Flutter DevTools](https://github.com/flutter/devtools/labels/good%20first%20issue). See the respective sections below for further instructions.
+
+### Framework and Engine
 
 To develop for Flutter, you will eventually need to become familiar
 with our processes and conventions. This section lists the documents
@@ -132,6 +134,14 @@ and an article [Contributing to Flutter: Getting Started](https://medium.com/@ay
 on Medium that may be of interest. For a curated list of pages see the sidebar
 on the wiki's home page. They are more or less listed in order of importance.
 
+### DevTools
+
+Contributing code to Dart & Flutter DevTools may be a good place to start if you are
+looking to dip your toes into contributing with a relatively low-cost setup or if you
+are generally excited about improving the Dart & Flutter developer experience.
+
+Please see the DevTools [CONTRIBUTING.md](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md)
+guide to get started.
 
 Outreach
 --------

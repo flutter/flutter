@@ -22,5 +22,10 @@
   "tabSemanticsLabel": "Ithebhu $tabIndex kwangu-$tabCount",
   "modalBarrierDismissLabel": "Cashisa",
   "searchTextFieldPlaceholderLabel": "Sesha",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "Akukho Okuzofakwa Esikhundleni Okutholakele",
+  "menuDismissLabel": "Chitha imenyu",
+  "lookUpButtonLabel": "Bheka Phezulu",
+  "searchWebButtonLabel": "Sesha Iwebhu",
+  "shareButtonLabel": "Yabelana...",
+  "clearButtonLabel": "Clear"
 }

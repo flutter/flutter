@@ -9,8 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 const CupertinoDynamicColor _kScrollbarColor = CupertinoDynamicColor.withBrightness(
   color: Color(0x59000000),
   darkColor: Color(0x80FFFFFF),
@@ -99,6 +97,7 @@ void main() {
 
   testWidgets('Scrollbar thumb can be dragged with long press', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -171,6 +170,7 @@ void main() {
 
   testWidgets('Scrollbar thumb can be dragged with long press - reverse', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -255,6 +255,7 @@ void main() {
     final Size screenSize = tester.view.physicalSize / tester.view.devicePixelRatio;
 
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -368,6 +369,7 @@ void main() {
 
   testWidgets('When thumbVisibility is true, must pass a controller or find PrimaryScrollController that is attached to a scroll view', (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
       Widget viewWithScroll() {
         return Directionality(
           textDirection: TextDirection.ltr,
@@ -427,6 +429,7 @@ void main() {
 
   testWidgets('When thumbVisibility is true, must pass a controller or find PrimaryScrollController that is attached to a scroll view', (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
       Widget viewWithScroll() {
         return Directionality(
           textDirection: TextDirection.ltr,
@@ -461,6 +464,7 @@ void main() {
 
   testWidgets('On first render with thumbVisibility: true, the thumb shows with PrimaryScrollController', (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
       Widget viewWithScroll() {
         return Directionality(
           textDirection: TextDirection.ltr,
@@ -495,6 +499,7 @@ void main() {
 
   testWidgets('On first render with thumbVisibility: true, the thumb shows', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     Widget viewWithScroll() {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -528,6 +533,7 @@ void main() {
 
   testWidgets('On first render with thumbVisibility: true, the thumb shows with PrimaryScrollController', (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
       Widget viewWithScroll() {
         return Directionality(
           textDirection: TextDirection.ltr,
@@ -562,6 +568,7 @@ void main() {
 
   testWidgets('On first render with thumbVisibility: true, the thumb shows', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     Widget viewWithScroll() {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -595,6 +602,7 @@ void main() {
 
   testWidgets('On first render with thumbVisibility: false, the thumb is hidden', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     Widget viewWithScroll() {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -623,6 +631,7 @@ void main() {
 
   testWidgets('With thumbVisibility: true, fling a scroll. While it is still scrolling, set thumbVisibility: false. The thumb should not fade out until the scrolling stops.', (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
       bool thumbVisibility = true;
       Widget viewWithScroll() {
         return StatefulBuilder(
@@ -682,6 +691,7 @@ void main() {
     'With thumbVisibility: false, set thumbVisibility: true. The thumb should be always shown directly',
     (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
       bool thumbVisibility = false;
       Widget viewWithScroll() {
         return StatefulBuilder(
@@ -737,6 +747,7 @@ void main() {
     'The thumb should not fade even after the scrolling stops',
     (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
       bool thumbVisibility = false;
       Widget viewWithScroll() {
         return StatefulBuilder(
@@ -804,6 +815,7 @@ void main() {
     'This works even when you have never scrolled at all yet',
     (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
       bool thumbVisibility = true;
       Widget viewWithScroll() {
         return StatefulBuilder(
@@ -856,6 +868,7 @@ void main() {
 
   testWidgets('Scrollbar thumb can be dragged with long press - horizontal axis', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -930,6 +943,7 @@ void main() {
 
   testWidgets('Scrollbar thumb can be dragged with long press - horizontal axis, reverse', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1005,6 +1019,7 @@ void main() {
 
   testWidgets('Tapping the track area pages the Scroll View', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1064,6 +1079,7 @@ void main() {
 
   testWidgets('Throw if interactive with the bar when no position attached', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -1108,7 +1124,9 @@ void main() {
 
   testWidgets('Interactive scrollbars should have a valid scroll controller', (WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
+    addTearDown(primaryScrollController.dispose);
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -1150,6 +1168,7 @@ void main() {
   testWidgets('Simultaneous dragging and pointer scrolling does not cause a crash', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/70105
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       CupertinoApp(
         home: PrimaryScrollController(
@@ -1260,6 +1279,7 @@ void main() {
 
   testWidgets('CupertinoScrollbar scrollOrientation works correctly', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
       CupertinoApp(

@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
+
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 
@@ -101,20 +104,20 @@ void main() {
     expect(getNameForTargetPlatform(TargetPlatform.android), isNot(contains('ios')));
   });
 
-  testWithoutContext('defaultIOSArchsForEnvironment', () {
+  testUsingContext('defaultIOSArchsForEnvironment', () {
     expect(defaultIOSArchsForEnvironment(
       EnvironmentType.physical,
-      Artifacts.test(localEngine: 'ios_debug_unopt'),
+      Artifacts.testLocalEngine(localEngineHost: 'host_debug_unopt', localEngine: 'ios_debug_unopt'),
     ).single, DarwinArch.arm64);
 
     expect(defaultIOSArchsForEnvironment(
       EnvironmentType.simulator,
-      Artifacts.test(localEngine: 'ios_debug_sim_unopt'),
+      Artifacts.testLocalEngine(localEngineHost: 'host_debug_unopt', localEngine: 'ios_debug_sim_unopt'),
     ).single, DarwinArch.x86_64);
 
     expect(defaultIOSArchsForEnvironment(
       EnvironmentType.simulator,
-      Artifacts.test(localEngine: 'ios_debug_sim_unopt_arm64'),
+      Artifacts.testLocalEngine(localEngineHost: 'host_debug_unopt', localEngine: 'ios_debug_sim_unopt_arm64'),
     ).single, DarwinArch.arm64);
 
     expect(defaultIOSArchsForEnvironment(
@@ -124,21 +127,27 @@ void main() {
     expect(defaultIOSArchsForEnvironment(
       EnvironmentType.simulator, Artifacts.test(),
     ), <DarwinArch>[ DarwinArch.x86_64, DarwinArch.arm64 ]);
-  });
+  }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
 
-  testWithoutContext('defaultMacOSArchsForEnvironment', () {
+  testUsingContext('defaultMacOSArchsForEnvironment', () {
     expect(defaultMacOSArchsForEnvironment(
-      Artifacts.test(localEngine: 'host_debug_unopt'),
+      Artifacts.testLocalEngine(localEngineHost: 'host_debug_unopt', localEngine: 'host_debug_unopt'),
     ).single, DarwinArch.x86_64);
 
     expect(defaultMacOSArchsForEnvironment(
-      Artifacts.test(localEngine: 'host_debug_unopt_arm64'),
+      Artifacts.testLocalEngine(localEngineHost: 'host_debug_unopt', localEngine: 'host_debug_unopt_arm64'),
     ).single, DarwinArch.arm64);
 
     expect(defaultMacOSArchsForEnvironment(
       Artifacts.test(),
     ), <DarwinArch>[ DarwinArch.x86_64, DarwinArch.arm64 ]);
-  });
+  }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
 
   testWithoutContext('getIOSArchForName on Darwin arches', () {
     expect(getIOSArchForName('armv7'), DarwinArch.armv7);
@@ -166,6 +175,7 @@ void main() {
       dartDefines: <String>['foo=2', 'bar=2'],
       dartObfuscation: true,
       splitDebugInfoPath: 'foo/',
+      frontendServerStarterPath: 'foo/bar/frontend_server_starter.dart',
       extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
       extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
       bundleSkSLPath: 'foo/bar/baz.sksl.json',
@@ -181,6 +191,7 @@ void main() {
       'BuildMode': 'debug',
       'DartDefines': 'Zm9vPTI=,YmFyPTI=',
       'DartObfuscation': 'true',
+      'FrontendServerStarterPath': 'foo/bar/frontend_server_starter.dart',
       'ExtraFrontEndOptions': '--enable-experiment=non-nullable,bar',
       'ExtraGenSnapshotOptions': '--enable-experiment=non-nullable,fizz',
       'SplitDebugInfo': 'foo/',
@@ -196,19 +207,20 @@ void main() {
   });
 
   testWithoutContext('toEnvironmentConfig encoding of standard values', () {
-    const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
+    const BuildInfo buildInfo = BuildInfo(BuildMode.debug, 'strawberry',
       treeShakeIcons: true,
       trackWidgetCreation: true,
       dartDefines: <String>['foo=2', 'bar=2'],
       dartObfuscation: true,
       splitDebugInfoPath: 'foo/',
+      frontendServerStarterPath: 'foo/bar/frontend_server_starter.dart',
       extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
       extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
       bundleSkSLPath: 'foo/bar/baz.sksl.json',
       packagesPath: 'foo/.dart_tool/package_config.json',
       codeSizeDirectory: 'foo/code-size',
       // These values are ignored by toEnvironmentConfig
-      androidProjectArgs: <String>['foo=bar', 'fizz=bazz']
+      androidProjectArgs: <String>['foo=bar', 'fizz=bazz'],
     );
 
     expect(buildInfo.toEnvironmentConfig(), <String, String>{
@@ -217,11 +229,13 @@ void main() {
       'DART_DEFINES': 'Zm9vPTI=,YmFyPTI=',
       'DART_OBFUSCATION': 'true',
       'SPLIT_DEBUG_INFO': 'foo/',
+      'FRONTEND_SERVER_STARTER_PATH': 'foo/bar/frontend_server_starter.dart',
       'EXTRA_FRONT_END_OPTIONS': '--enable-experiment=non-nullable,bar',
       'EXTRA_GEN_SNAPSHOT_OPTIONS': '--enable-experiment=non-nullable,fizz',
       'BUNDLE_SKSL_PATH': 'foo/bar/baz.sksl.json',
       'PACKAGE_CONFIG': 'foo/.dart_tool/package_config.json',
       'CODE_SIZE_DIRECTORY': 'foo/code-size',
+      'FLAVOR': 'strawberry',
     });
   });
 
@@ -230,9 +244,9 @@ void main() {
       treeShakeIcons: true,
       trackWidgetCreation: true,
       dartDefines: <String>['foo=2', 'bar=2'],
-      dartDefineConfigJsonMap: <String, Object>{'baz': '2'},
       dartObfuscation: true,
       splitDebugInfoPath: 'foo/',
+      frontendServerStarterPath: 'foo/bar/frontend_server_starter.dart',
       extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
       extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
       bundleSkSLPath: 'foo/bar/baz.sksl.json',
@@ -244,6 +258,7 @@ void main() {
     expect(buildInfo.toGradleConfig(), <String>[
       '-Pdart-defines=Zm9vPTI=,YmFyPTI=',
       '-Pdart-obfuscation=true',
+      '-Pfrontend-server-starter-path=foo/bar/frontend_server_starter.dart',
       '-Pextra-front-end-options=--enable-experiment=non-nullable,bar',
       '-Pextra-gen-snapshot-options=--enable-experiment=non-nullable,fizz',
       '-Psplit-debug-info=foo/',
@@ -253,7 +268,6 @@ void main() {
       '-Pcode-size-directory=foo/code-size',
       '-Pfoo=bar',
       '-Pfizz=bazz',
-      '-Pbaz=2',
     ]);
   });
 
@@ -281,71 +295,5 @@ void main() {
     expect(decodeDartDefines(<String, String>{
       kDartDefines: 'MTIzMiw0NTY=,Mg==',
     }, kDartDefines), <String>['1232,456', '2']);
-  });
-
-  group('Check repeated buildInfo variables', () {
-    testUsingContext('toEnvironmentConfig repeated variable', () async {
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
-          treeShakeIcons: true,
-          trackWidgetCreation: true,
-          dartDefines: <String>['foo=2', 'bar=2'],
-          dartDefineConfigJsonMap: <String, Object>{'DART_DEFINES': 'Define a variable, but it occupies the variable name of the system'},
-          dartObfuscation: true,
-      );
-      buildInfo.toEnvironmentConfig();
-      expect(testLogger.warningText, contains('The key: [DART_DEFINES] already exists, you cannot use environment variables that have been used by the system'));
-    });
-
-    testUsingContext('toEnvironmentConfig repeated variable with DART_DEFINES not set', () async {
-      // Simulate operation flutterCommand.getBuildInfo  with `dart-define-from-file` set dartDefines
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
-          treeShakeIcons: true,
-          dartDefines: <String>['DART_DEFINES=Define a variable, but it occupies the variable name of the system'],
-          trackWidgetCreation: true,
-          dartDefineConfigJsonMap: <String, Object>{ 'DART_DEFINES' : 'Define a variable, but it occupies the variable name of the system'},
-          dartObfuscation: true,
-      );
-      buildInfo.toEnvironmentConfig();
-      expect(testLogger.warningText, contains('The key: [DART_DEFINES] already exists, you cannot use environment variables that have been used by the system'));
-
-    });
-
-    testUsingContext('toGradleConfig repeated variable', () async {
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
-          treeShakeIcons: true,
-          trackWidgetCreation: true,
-          dartDefines: <String>['foo=2', 'bar=2'],
-          dartDefineConfigJsonMap: <String, Object>{'dart-defines': 'Define a variable, but it occupies the variable name of the system'},
-          dartObfuscation: true,
-      );
-      buildInfo.toGradleConfig();
-      expect(testLogger.warningText, contains('The key: [dart-defines] already exists, you cannot use gradle variables that have been used by the system'));
-    });
-
-    testUsingContext('toGradleConfig repeated variable with not set', () async {
-      // Simulate operation flutterCommand.getBuildInfo  with `dart-define-from-file` set dartDefines
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
-          treeShakeIcons: true,
-          trackWidgetCreation: true,
-          dartDefines: <String>['dart-defines=Define a variable, but it occupies the variable name of the system'],
-          dartDefineConfigJsonMap: <String, Object>{'dart-defines': 'Define a variable, but it occupies the variable name of the system'},
-          dartObfuscation: true,
-      );
-      buildInfo.toGradleConfig();
-      expect(testLogger.warningText, contains('The key: [dart-defines] already exists, you cannot use gradle variables that have been used by the system'));
-    });
-
-    testUsingContext('toGradleConfig with androidProjectArgs override gradle project variant', () async {
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
-          treeShakeIcons: true,
-          trackWidgetCreation: true,
-          androidProjectArgs: <String>['applicationId=com.google'],
-          dartDefineConfigJsonMap: <String, Object>{'applicationId': 'override applicationId'},
-          dartObfuscation: true,
-      );
-      buildInfo.toGradleConfig();
-      expect(testLogger.warningText, contains('The key: [applicationId] already exists, you cannot use gradle variables that have been used by the system'));
-    });
-
   });
 }

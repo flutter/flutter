@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
-
 void main() {
   test('ActionIconThemeData copyWith, ==, hashCode basics', () {
     expect(const ActionIconThemeData(), const ActionIconThemeData().copyWith());
@@ -38,7 +36,7 @@ void main() {
     expect(copy.drawerButtonIconBuilder, originalButtonBuilder);
     expect(copy.endDrawerButtonIconBuilder, originalButtonBuilder);
 
-    // Check if the properties are overriden.
+    // Check if the properties are overridden.
     final ActionIconThemeData overridden = original.copyWith(
       backButtonIconBuilder: newButtonBuilder,
       closeButtonIconBuilder: newButtonBuilder,
@@ -59,7 +57,7 @@ void main() {
     expect(themeData.endDrawerButtonIconBuilder, null);
   });
 
-  testWidgetsWithLeakTracking('Default ActionIconThemeData debugFillProperties',
+  testWidgets('Default ActionIconThemeData debugFillProperties',
       (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ActionIconThemeData().debugFillProperties(builder);
@@ -72,7 +70,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('ActionIconThemeData implements debugFillProperties',
+  testWidgets('ActionIconThemeData implements debugFillProperties',
       (WidgetTester tester) async {
     Widget actionButtonIconBuilder(BuildContext context) {
       return const Icon(IconData(0));
@@ -100,7 +98,7 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('Action buttons use ThemeData action icon theme', (WidgetTester tester) async {
+  testWidgets('Action buttons use ThemeData action icon theme', (WidgetTester tester) async {
     const Color green = Color(0xff00ff00);
     const IconData icon = IconData(0);
 
@@ -161,7 +159,7 @@ void main() {
   // This test is essentially the same as 'Action buttons use ThemeData action icon theme'. In
   // this case the theme is introduced with the ActionIconTheme widget instead of
   // ThemeData.actionIconTheme.
-  testWidgetsWithLeakTracking('Action buttons use ActionIconTheme', (WidgetTester tester) async {
+  testWidgets('Action buttons use ActionIconTheme', (WidgetTester tester) async {
     const Color green = Color(0xff00ff00);
     const IconData icon = IconData(0);
 

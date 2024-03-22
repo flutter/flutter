@@ -33,27 +33,22 @@ class FocusExample extends StatefulWidget {
 class _FocusExampleState extends State<FocusExample> {
   Color _color = Colors.white;
 
-  KeyEventResult _handleKeyPress(FocusNode node, RawKeyEvent event) {
-    if (event is RawKeyDownEvent) {
+  KeyEventResult _handleKeyPress(FocusNode node, KeyEvent event) {
+    if (event is KeyDownEvent) {
       debugPrint('Focus node ${node.debugLabel} got key event: ${event.logicalKey}');
-      if (event.logicalKey == LogicalKeyboardKey.keyR) {
-        debugPrint('Changing color to red.');
-        setState(() {
-          _color = Colors.red;
-        });
-        return KeyEventResult.handled;
-      } else if (event.logicalKey == LogicalKeyboardKey.keyG) {
-        debugPrint('Changing color to green.');
-        setState(() {
-          _color = Colors.green;
-        });
-        return KeyEventResult.handled;
-      } else if (event.logicalKey == LogicalKeyboardKey.keyB) {
-        debugPrint('Changing color to blue.');
-        setState(() {
-          _color = Colors.blue;
-        });
-        return KeyEventResult.handled;
+      switch (event.logicalKey) {
+        case LogicalKeyboardKey.keyR:
+          debugPrint('Changing color to red.');
+          setState(() { _color = Colors.red; });
+          return KeyEventResult.handled;
+        case LogicalKeyboardKey.keyG:
+          debugPrint('Changing color to green.');
+          setState(() { _color = Colors.green; });
+          return KeyEventResult.handled;
+        case LogicalKeyboardKey.keyB:
+          debugPrint('Changing color to blue.');
+          setState(() { _color = Colors.blue; });
+          return KeyEventResult.handled;
       }
     }
     return KeyEventResult.ignored;
@@ -68,7 +63,7 @@ class _FocusExampleState extends State<FocusExample> {
       child: DefaultTextStyle(
         style: textTheme.headlineMedium!,
         child: Focus(
-          onKey: _handleKeyPress,
+          onKeyEvent: _handleKeyPress,
           debugLabel: 'Button',
           child: Builder(
             builder: (BuildContext context) {

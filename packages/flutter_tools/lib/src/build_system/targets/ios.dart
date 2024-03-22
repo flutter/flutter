@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../artifacts.dart';
 import '../../base/build.dart';
@@ -19,10 +20,10 @@ import '../../reporting/reporting.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
+import '../tools/shader_compiler.dart';
 import 'assets.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
-import 'shader_compiler.dart';
 
 /// Supports compiling a dart kernel file to an assembly file.
 ///
@@ -287,21 +288,18 @@ abstract class UnpackIOS extends Target {
     if (archs == null) {
       throw MissingDefineException(kIosArchs, name);
     }
-    _copyFramework(environment, sdkRoot);
+    await _copyFramework(environment, sdkRoot);
 
     final File frameworkBinary = environment.outputDir.childDirectory('Flutter.framework').childFile('Flutter');
     final String frameworkBinaryPath = frameworkBinary.path;
-    if (!frameworkBinary.existsSync()) {
+    if (!await frameworkBinary.exists()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
-    _thinFramework(environment, frameworkBinaryPath, archs);
-    if (buildMode == BuildMode.release) {
-      _bitcodeStripFramework(environment, frameworkBinaryPath);
-    }
+    await _thinFramework(environment, frameworkBinaryPath, archs);
     await _signFramework(environment, frameworkBinary, buildMode);
   }
 
-  void _copyFramework(Environment environment, String sdkRoot) {
+  Future<void> _copyFramework(Environment environment, String sdkRoot) async {
     final EnvironmentType? environmentType = environmentTypeFromSdkroot(sdkRoot, environment.fileSystem);
     final String basePath = environment.artifacts.getArtifactPath(
       Artifact.flutterFramework,
@@ -310,7 +308,7 @@ abstract class UnpackIOS extends Target {
       environmentType: environmentType,
     );
 
-    final ProcessResult result = environment.processManager.runSync(<String>[
+    final ProcessResult result = await environment.processManager.run(<String>[
       'rsync',
       '-av',
       '--delete',
@@ -328,16 +326,20 @@ abstract class UnpackIOS extends Target {
   }
 
   /// Destructively thin Flutter.framework to include only the specified architectures.
-  void _thinFramework(Environment environment, String frameworkBinaryPath, String archs) {
+  Future<void> _thinFramework(
+    Environment environment,
+    String frameworkBinaryPath,
+    String archs,
+  ) async {
     final List<String> archList = archs.split(' ').toList();
-    final ProcessResult infoResult = environment.processManager.runSync(<String>[
+    final ProcessResult infoResult = await environment.processManager.run(<String>[
       'lipo',
       '-info',
       frameworkBinaryPath,
     ]);
     final String lipoInfo = infoResult.stdout as String;
 
-    final ProcessResult verifyResult = environment.processManager.runSync(<String>[
+    final ProcessResult verifyResult = await environment.processManager.run(<String>[
       'lipo',
       frameworkBinaryPath,
       '-verify_arch',
@@ -355,7 +357,7 @@ abstract class UnpackIOS extends Target {
     }
 
     // Thin in-place.
-    final ProcessResult extractResult = environment.processManager.runSync(<String>[
+    final ProcessResult extractResult = await environment.processManager.run(<String>[
       'lipo',
       '-output',
       frameworkBinaryPath,
@@ -369,23 +371,6 @@ abstract class UnpackIOS extends Target {
 
     if (extractResult.exitCode != 0) {
       throw Exception('Failed to extract $archs for $frameworkBinaryPath.\n${extractResult.stderr}\nRunning lipo -info:\n$lipoInfo');
-    }
-  }
-
-  /// Destructively strip bitcode from the framework. This can be removed
-  /// when the framework is no longer built with bitcode.
-  void _bitcodeStripFramework(Environment environment, String frameworkBinaryPath) {
-    final ProcessResult stripResult = environment.processManager.runSync(<String>[
-      'xcrun',
-      'bitcode_strip',
-      frameworkBinaryPath,
-      '-r', // Delete the bitcode segment.
-      '-o',
-      frameworkBinaryPath,
-    ]);
-
-    if (stripResult.exitCode != 0) {
-      throw Exception('Failed to strip bitcode for $frameworkBinaryPath.\n${stripResult.stderr}');
     }
   }
 }
@@ -518,13 +503,11 @@ abstract class IosAssetBundle extends Target {
       environment,
       assetDirectory,
       targetPlatform: TargetPlatform.ios,
-      // Always specify an impeller shader target so that we support runtime toggling and
-      // the --enable-impeller debug flag.
-      shaderTarget: ShaderTarget.impelleriOS,
       additionalInputs: <File>[
         flutterProject.ios.infoPlist,
         flutterProject.ios.appFrameworkInfoPlist,
       ],
+      flavor: environment.defines[kFlavor],
     );
     environment.depFileService.writeToFile(
       assetDepfile,
@@ -633,6 +616,11 @@ class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
           label: buildSuccess ? 'success' : 'fail',
           flutterUsage: environment.usage,
         ).send();
+        environment.analytics.send(Event.appleUsageEvent(
+          workflow: 'assemble',
+          parameter: 'ios-archive',
+          result: buildSuccess ? 'success' : 'fail',
+        ));
       }
     }
   }
@@ -670,9 +658,9 @@ Future<void> _createStubAppFramework(File outputFile, Environment environment,
       '-dynamiclib',
       // Keep version in sync with AOTSnapshotter flag
       if (environmentType == EnvironmentType.physical)
-        '-miphoneos-version-min=11.0'
+        '-miphoneos-version-min=12.0'
       else
-        '-miphonesimulator-version-min=11.0',
+        '-miphonesimulator-version-min=12.0',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-fapplication-extension',

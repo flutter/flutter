@@ -26,6 +26,15 @@ enum ContextMenuButtonType {
   /// A button that deletes the current text selection.
   delete,
 
+  /// A button that looks up the current text selection.
+  lookUp,
+
+  /// A button that launches a web search for the current text selection.
+  searchWeb,
+
+  /// A button that displays the share screen for the current text selection.
+  share,
+
   /// A button for starting Live Text input.
   ///
   /// See also:

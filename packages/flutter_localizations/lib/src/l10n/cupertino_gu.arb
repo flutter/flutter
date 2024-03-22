@@ -22,5 +22,10 @@
   "tabSemanticsLabel": "$tabCountમાંથી $tabIndex ટૅબ",
   "modalBarrierDismissLabel": "છોડી દો",
   "searchTextFieldPlaceholderLabel": "શોધો",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "બદલવા માટે કોઈ શબ્દ મળ્યો નથી",
+  "menuDismissLabel": "મેનૂ છોડી દો",
+  "lookUpButtonLabel": "શોધો",
+  "searchWebButtonLabel": "વેબ પર શોધો",
+  "shareButtonLabel": "શેર કરો…",
+  "clearButtonLabel": "Clear"
 }

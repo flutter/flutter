@@ -7,7 +7,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../rendering/mock_canvas.dart';
 
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
@@ -150,6 +149,7 @@ void main() {
       find.byType(Switch),
       paints
         ..rrect(color: Colors.blue[500])
+        ..rrect()
         ..rrect(color: const Color(0x33000000))
         ..rrect(color: const Color(0x24000000))
         ..rrect(color: const Color(0x1f000000))
@@ -163,6 +163,7 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints
         ..rrect(color: Colors.green[500])
+        ..rrect()
         ..rrect(color: const Color(0x33000000))
         ..rrect(color: const Color(0x24000000))
         ..rrect(color: const Color(0x1f000000))
@@ -221,7 +222,7 @@ void main() {
     );
   });
 
-  testWidgets('SwitchListTile.adaptive delegates to', (WidgetTester tester) async {
+  testWidgets('SwitchListTile.adaptive only uses material switch', (WidgetTester tester) async {
     bool value = false;
 
     Widget buildFrame(TargetPlatform platform) {
@@ -246,23 +247,15 @@ void main() {
       );
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS,
+      TargetPlatform.macOS, TargetPlatform.android, TargetPlatform.fuchsia,
+      TargetPlatform.linux, TargetPlatform.windows ]) {
       value = false;
       await tester.pumpWidget(buildFrame(platform));
-      expect(find.byType(CupertinoSwitch), findsOneWidget);
-      expect(value, isFalse, reason: 'on ${platform.name}');
-
-      await tester.tap(find.byType(SwitchListTile));
-      expect(value, isTrue, reason: 'on ${platform.name}');
-    }
-
-    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
-      value = false;
-      await tester.pumpWidget(buildFrame(platform));
-      await tester.pumpAndSettle(); // Finish the theme change animation.
-
       expect(find.byType(CupertinoSwitch), findsNothing);
+      expect(find.byType(Switch), findsOneWidget);
       expect(value, isFalse, reason: 'on ${platform.name}');
+
       await tester.tap(find.byType(SwitchListTile));
       expect(value, isTrue, reason: 'on ${platform.name}');
     }
@@ -366,7 +359,19 @@ void main() {
     final ListTile listTile = tester.widget(find.byType(ListTile));
     // When controlAffinity is ListTileControlAffinity.leading, the position of
     // Switch is at leading edge and SwitchListTile.secondary at trailing edge.
-    expect(listTile.leading.runtimeType, Switch);
+
+    // Find the ExcludeFocus widget within the ListTile's leading
+    final ExcludeFocus excludeFocusWidget = tester.widget(
+      find.byWidgetPredicate((Widget widget) => listTile.leading == widget && widget is ExcludeFocus),
+    );
+
+    // Assert that the ExcludeFocus widget is not null
+    expect(excludeFocusWidget, isNotNull);
+
+    // Assert that the child of ExcludeFocus is Switch
+    expect(excludeFocusWidget.child.runtimeType, Switch);
+
+    // Assert that the trailing is Icon
     expect(listTile.trailing.runtimeType, Icon);
   });
 
@@ -386,8 +391,20 @@ void main() {
     // By default, value of controlAffinity is ListTileControlAffinity.platform,
     // where the position of SwitchListTile.secondary is at leading edge and Switch
     // at trailing edge. This also covers test for ListTileControlAffinity.trailing.
+
+    // Find the ExcludeFocus widget within the ListTile's trailing
+    final ExcludeFocus excludeFocusWidget = tester.widget(
+      find.byWidgetPredicate((Widget widget) => listTile.trailing == widget && widget is ExcludeFocus),
+    );
+
+    // Assert that the ExcludeFocus widget is not null
+    expect(excludeFocusWidget, isNotNull);
+
+    // Assert that the child of ExcludeFocus is Switch
+    expect(excludeFocusWidget.child.runtimeType, Switch);
+
+    // Assert that the leading is Icon
     expect(listTile.leading.runtimeType, Icon);
-    expect(listTile.trailing.runtimeType, Switch);
   });
 
   testWidgets('SwitchListTile respects shape', (WidgetTester tester) async {
@@ -560,6 +577,7 @@ void main() {
     await tester.pump();
     expect(gotFocus, isFalse);
     expect(node.hasFocus, isFalse);
+    node.dispose();
   });
 
   testWidgets('SwitchListTile.adaptive onFocusChange Callback', (WidgetTester tester) async {
@@ -589,6 +607,7 @@ void main() {
     await tester.pump();
     expect(gotFocus, isFalse);
     expect(node.hasFocus, isFalse);
+    node.dispose();
   });
 
   group('feedback', () {
@@ -712,14 +731,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(Switch))),
-      paints..rrect()..rrect()..rrect()..rrect()..rrect(color: inactiveDisabledThumbColor)
+      paints..rrect()..rrect()..rrect()..rrect()..rrect()..rrect(color: inactiveDisabledThumbColor)
     );
 
     await tester.pumpWidget(buildSwitchListTile(enabled: false, selected: true));
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(Switch))),
-      paints..rrect()..rrect()..rrect()..rrect()..rrect(color: activeDisabledThumbColor)
+      paints..rrect()..rrect()..rrect()..rrect()..rrect()..rrect(color: activeDisabledThumbColor)
     );
 
     await tester.pumpWidget(buildSwitchListTile(enabled: true, selected: false));
@@ -727,7 +746,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Switch))),
-      paints..rrect()..rrect()..rrect()..rrect()..rrect(color: inactiveEnabledThumbColor)
+      paints..rrect()..rrect()..rrect()..rrect()..rrect()..rrect(color: inactiveEnabledThumbColor)
     );
 
     await tester.pumpWidget(buildSwitchListTile(enabled: true, selected: true));
@@ -735,7 +754,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Switch))),
-      paints..rrect()..rrect()..rrect()..rrect()..rrect(color: activeEnabledThumbColor)
+      paints..rrect()..rrect()..rrect()..rrect()..rrect()..rrect(color: activeEnabledThumbColor)
     );
   });
 
@@ -851,7 +870,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Switch))),
-      paints..rrect()..rrect()..rrect()..rrect()..rrect(color: hoveredThumbColor),
+      paints..rrect()..rrect()..rrect()..rrect()..rrect()..rrect(color: hoveredThumbColor),
     );
 
     // On pressed state
@@ -859,7 +878,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(Switch))),
-      paints..rrect()..rrect()..rrect()..rrect()..rrect(color: pressedThumbColor),
+      paints..rrect()..rrect()..rrect()..rrect()..rrect()..rrect(color: pressedThumbColor),
     );
   });
 
@@ -1186,7 +1205,7 @@ void main() {
     for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
       await tester.pumpWidget(buildSwitchListTile(true, platform));
       await tester.pumpAndSettle();
-      expect(find.byType(CupertinoSwitch), findsOneWidget);
+      expect(find.byType(Switch), findsOneWidget);
       expect(
         Material.of(tester.element(find.byType(Switch))),
         paints..rrect(color: const Color(0xFF2196F3)),
@@ -1194,7 +1213,7 @@ void main() {
 
       await tester.pumpWidget(buildSwitchListTile(false, platform));
       await tester.pumpAndSettle();
-      expect(find.byType(CupertinoSwitch), findsOneWidget);
+      expect(find.byType(Switch), findsOneWidget);
       expect(
         Material.of(tester.element(find.byType(Switch))),
         paints..rrect(color: const Color(0xFF34C759)),
@@ -1222,7 +1241,7 @@ void main() {
     for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
       await tester.pumpWidget(buildSwitchListTile(true, platform));
       await tester.pumpAndSettle();
-      expect(find.byType(CupertinoSwitch), findsOneWidget);
+      expect(find.byType(Switch), findsOneWidget);
       expect(
         Material.of(tester.element(find.byType(Switch))),
         paints..rrect(color: const Color(0xFF6750A4)),
@@ -1230,7 +1249,7 @@ void main() {
 
       await tester.pumpWidget(buildSwitchListTile(false, platform));
       await tester.pumpAndSettle();
-      expect(find.byType(CupertinoSwitch), findsOneWidget);
+      expect(find.byType(Switch), findsOneWidget);
       expect(
         Material.of(tester.element(find.byType(Switch))),
         paints..rrect(color: const Color(0xFF34C759)),
@@ -1636,5 +1655,40 @@ void main() {
       Material.of(tester.element(find.byType(Switch))),
       paints..rrect()..rrect(color: hoveredTrackColor, style: PaintingStyle.stroke)
     );
+  });
+
+  testWidgets('SwitchListTile.control widget should not request focus on traversal', (WidgetTester tester) async {
+    final GlobalKey firstChildKey = GlobalKey();
+    final GlobalKey secondChildKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              SwitchListTile(
+                value: true,
+                onChanged: (bool? value) {},
+                title: Text('Hey', key: firstChildKey),
+              ),
+              SwitchListTile(
+                value: true,
+                onChanged: (bool? value) {},
+                title: Text('There', key: secondChildKey),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    Focus.of(firstChildKey.currentContext!).requestFocus();
+    await tester.pump();
+    expect(Focus.of(firstChildKey.currentContext!).hasPrimaryFocus, isTrue);
+    Focus.of(firstChildKey.currentContext!).nextFocus();
+    await tester.pump();
+    expect(Focus.of(firstChildKey.currentContext!).hasPrimaryFocus, isFalse);
+    expect(Focus.of(secondChildKey.currentContext!).hasPrimaryFocus, isTrue);
   });
 }

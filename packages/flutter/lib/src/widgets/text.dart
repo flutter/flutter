@@ -40,11 +40,6 @@ class DefaultTextStyle extends InheritedTheme {
   /// Consider using [DefaultTextStyle.merge] to inherit styling information
   /// from the current default text style for a given [BuildContext].
   ///
-  /// The [style] and [child] arguments are required and must not be null.
-  ///
-  /// The [softWrap] and [overflow] arguments must not be null (though they do
-  /// have default values).
-  ///
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
   const DefaultTextStyle({
@@ -235,8 +230,6 @@ class _NullWidget extends StatelessWidget {
 ///    [Text] widgets.
 class DefaultTextHeightBehavior extends InheritedTheme {
   /// Creates a default text height behavior for the given subtree.
-  ///
-  /// The [textHeightBehavior] and [child] arguments are required and must not be null.
   const DefaultTextHeightBehavior({
     super.key,
     required this.textHeightBehavior,
@@ -345,18 +338,50 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// This example shows how to display text using the [Text] widget with the
 /// [overflow] set to [TextOverflow.ellipsis].
 ///
-/// ![If the text is shorter than the available space, it is displayed in full without an ellipsis.](https://flutter.github.io/assets-for-api-docs/assets/widgets/text.png)
-///
 /// ![If the text overflows, the Text widget displays an ellipsis to trim the overflowing text](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_ellipsis.png)
 ///
 /// ```dart
-/// Text(
-///   'Hello, $_name! How are you?',
-///   textAlign: TextAlign.center,
-///   overflow: TextOverflow.ellipsis,
-///   style: const TextStyle(fontWeight: FontWeight.bold),
-/// )
+/// Container(
+///   width: 100,
+///   decoration: BoxDecoration(border: Border.all()),
+///   child: Text(overflow: TextOverflow.ellipsis, 'Hello $_name, how are you?'))
 /// ```
+/// {@end-tool}
+///
+/// {@tool snippet}
+///
+/// Setting [maxLines] to `1` is not equivalent to disabling soft wrapping with
+/// [softWrap]. This is apparent when using [TextOverflow.fade] as the following
+/// examples show.
+///
+/// ![If a second line overflows the Text widget displays a horizontal fade](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_fade_max_lines.png)
+///
+/// ```dart
+/// Text(
+///   overflow: TextOverflow.fade,
+///   maxLines: 1,
+///   'Hello $_name, how are you?')
+/// ```
+///
+/// Here soft wrapping is enabled and the [Text] widget tries to wrap the words
+/// "how are you?" to a second line. This is prevented by the [maxLines] value
+/// of `1`. The result is that a second line overflows and the fade appears in a
+/// horizontal direction at the bottom.
+///
+/// ![If a single line overflows the Text widget displays a horizontal fade](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_fade_soft_wrap.png)
+///
+/// ```dart
+/// Text(
+///   overflow: TextOverflow.fade,
+///   softWrap: false,
+///   'Hello $_name, how are you?')
+/// ```
+///
+/// Here soft wrapping is disabled with `softWrap: false` and the [Text] widget
+/// attempts to display its text in a single unbroken line. The result is that
+/// the single line overflows and the fade appears in a vertical direction at
+/// the right.
+///
 /// {@end-tool}
 ///
 /// Using the [Text.rich] constructor, the [Text] widget can
@@ -419,8 +444,6 @@ class Text extends StatelessWidget {
   /// If the [style] argument is null, the text will use the style from the
   /// closest enclosing [DefaultTextStyle].
   ///
-  /// The [data] parameter must not be null.
-  ///
   /// The [overflow] property's behavior is affected by the [softWrap] argument.
   /// If the [softWrap] is true or null, the glyph causing overflow, and those
   /// that follow, will not be rendered. Otherwise, it will be shown with the
@@ -459,8 +482,6 @@ class Text extends StatelessWidget {
   ///
   /// * [TextSpan]s define text and children [InlineSpan]s.
   /// * [WidgetSpan]s define embedded inline widgets.
-  ///
-  /// The [textSpan] parameter must not be null.
   ///
   /// See [RichText] which provides a lower-level way to draw text.
   const Text.rich(

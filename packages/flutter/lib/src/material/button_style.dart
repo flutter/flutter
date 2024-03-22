@@ -16,6 +16,12 @@ import 'theme_data.dart';
 // late BuildContext context;
 // typedef MyAppHome = Placeholder;
 
+/// The type for [ButtonStyle.backgroundBuilder] and [ButtonStyle.foregroundBuilder].
+///
+/// The [states] parameter is the button's current pressed/hovered/etc state. The [child] is
+/// typically a descendant of the returned widget.
+typedef ButtonLayerBuilder = Widget Function(BuildContext context, Set<MaterialState> states, Widget? child);
+
 /// The visual properties that most buttons have in common.
 ///
 /// Buttons and their themes have a ButtonStyle property which defines the visual
@@ -162,6 +168,8 @@ class ButtonStyle with Diagnosticable {
     this.enableFeedback,
     this.alignment,
     this.splashFactory,
+    this.backgroundBuilder,
+    this.foregroundBuilder,
   });
 
   /// The style for a button's [Text] widget descendants.
@@ -315,6 +323,42 @@ class ButtonStyle with Diagnosticable {
   /// ```
   final InteractiveInkFeatureFactory? splashFactory;
 
+  /// Creates a widget that becomes the child of the button's [Material]
+  /// and whose child is the rest of the button, including the button's
+  /// `child` parameter.
+  ///
+  /// The widget created by [backgroundBuilder] is constrained to be
+  /// the same size as the overall button and will appear behind the
+  /// button's child. The widget created by [foregroundBuilder] is
+  /// constrained to be the same size as the button's child, i.e. it's
+  /// inset by [ButtonStyle.padding] and aligned by the button's
+  /// [ButtonStyle.alignment].
+  ///
+  /// By default the returned widget is clipped to the Material's [ButtonStyle.shape].
+  ///
+  /// See also:
+  ///
+  ///  * [foregroundBuilder], to create a widget that's as big as the button's
+  ///    child and is layered behind the child.
+  ///  * [ButtonStyleButton.clipBehavior], for more information about
+  ///    configuring clipping.
+  final ButtonLayerBuilder? backgroundBuilder;
+
+  /// Creates a Widget that contains the button's child parameter which is used
+  /// instead of the button's child.
+  ///
+  /// The returned widget is clipped by the button's
+  /// [ButtonStyle.shape], inset by the button's [ButtonStyle.padding]
+  /// and aligned by the button's [ButtonStyle.alignment].
+  ///
+  /// See also:
+  ///
+  ///  * [backgroundBuilder], to create a widget that's as big as the button and
+  ///    is layered behind the button's child.
+  ///  * [ButtonStyleButton.clipBehavior], for more information about
+  ///    configuring clipping.
+  final ButtonLayerBuilder? foregroundBuilder;
+
   /// Returns a copy of this ButtonStyle with the given fields replaced with
   /// the new values.
   ButtonStyle copyWith({
@@ -340,6 +384,8 @@ class ButtonStyle with Diagnosticable {
     bool? enableFeedback,
     AlignmentGeometry? alignment,
     InteractiveInkFeatureFactory? splashFactory,
+    ButtonLayerBuilder? backgroundBuilder,
+    ButtonLayerBuilder? foregroundBuilder,
   }) {
     return ButtonStyle(
       textStyle: textStyle ?? this.textStyle,
@@ -364,6 +410,8 @@ class ButtonStyle with Diagnosticable {
       enableFeedback: enableFeedback ?? this.enableFeedback,
       alignment: alignment ?? this.alignment,
       splashFactory: splashFactory ?? this.splashFactory,
+      backgroundBuilder: backgroundBuilder ?? this.backgroundBuilder,
+      foregroundBuilder: foregroundBuilder ?? this.foregroundBuilder,
     );
   }
 
@@ -399,6 +447,8 @@ class ButtonStyle with Diagnosticable {
       enableFeedback: enableFeedback ?? style.enableFeedback,
       alignment: alignment ?? style.alignment,
       splashFactory: splashFactory ?? style.splashFactory,
+      backgroundBuilder: backgroundBuilder ?? style.backgroundBuilder,
+      foregroundBuilder: foregroundBuilder ?? style.foregroundBuilder,
     );
   }
 
@@ -427,6 +477,8 @@ class ButtonStyle with Diagnosticable {
       enableFeedback,
       alignment,
       splashFactory,
+      backgroundBuilder,
+      foregroundBuilder,
     ];
     return Object.hashAll(values);
   }
@@ -461,7 +513,9 @@ class ButtonStyle with Diagnosticable {
         && other.animationDuration == animationDuration
         && other.enableFeedback == enableFeedback
         && other.alignment == alignment
-        && other.splashFactory == splashFactory;
+        && other.splashFactory == splashFactory
+        && other.backgroundBuilder == backgroundBuilder
+        && other.foregroundBuilder == foregroundBuilder;
   }
 
   @override
@@ -488,6 +542,8 @@ class ButtonStyle with Diagnosticable {
     properties.add(DiagnosticsProperty<Duration>('animationDuration', animationDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('enableFeedback', enableFeedback, defaultValue: null));
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
+    properties.add(DiagnosticsProperty<ButtonLayerBuilder>('backgroundBuilder', backgroundBuilder, defaultValue: null));
+    properties.add(DiagnosticsProperty<ButtonLayerBuilder>('foregroundBuilder', foregroundBuilder, defaultValue: null));
   }
 
   /// Linearly interpolate between two [ButtonStyle]s.
@@ -518,6 +574,8 @@ class ButtonStyle with Diagnosticable {
       enableFeedback: t < 0.5 ? a?.enableFeedback : b?.enableFeedback,
       alignment: AlignmentGeometry.lerp(a?.alignment, b?.alignment, t),
       splashFactory: t < 0.5 ? a?.splashFactory : b?.splashFactory,
+      backgroundBuilder: t < 0.5 ? a?.backgroundBuilder : b?.backgroundBuilder,
+      foregroundBuilder: t < 0.5 ? a?.foregroundBuilder : b?.foregroundBuilder,
     );
   }
 

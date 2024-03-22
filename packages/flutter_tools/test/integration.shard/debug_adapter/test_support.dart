@@ -31,7 +31,7 @@ final bool useInProcessDap = Platform.environment['DAP_TEST_INTERNAL'] == 'true'
 /// Service traffic (wrapped in a custom 'dart.log' event).
 final bool verboseLogging = Platform.environment['DAP_TEST_VERBOSE'] == 'true';
 
-const String endOfErrorOutputMarker = '════════════════════════════════════════════════════════════════════════════════════════════════════';
+const String endOfErrorOutputMarker = '════════════════════════════════════════════════════════════════════════════════';
 
 /// Expects the lines in [actual] to match the relevant matcher in [expected],
 /// ignoring differences in line endings and trailing whitespace.

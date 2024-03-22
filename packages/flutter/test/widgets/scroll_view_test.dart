@@ -112,6 +112,11 @@ void main() {
 
   testWidgets('ListView dismiss keyboard onDrag test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView(
@@ -181,10 +186,13 @@ void main() {
   });
 
   testWidgets('PageView supports null items in itemBuilder', (WidgetTester tester) async {
+    final PageController controller = PageController(viewportFraction: 1 / 5);
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(textFieldBoilerplate(
       child: PageView.builder(
         itemCount: 5,
-        controller: PageController(viewportFraction: 1/5),
+        controller: controller,
         itemBuilder: (BuildContext context, int index) {
           if (index == 2) {
             return null;
@@ -221,6 +229,11 @@ void main() {
 
   testWidgets('ListView.builder dismiss keyboard onDrag test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.builder(
@@ -255,6 +268,11 @@ void main() {
 
   testWidgets('ListView.custom dismiss keyboard onDrag test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.custom(
@@ -291,6 +309,11 @@ void main() {
 
   testWidgets('ListView.separated dismiss keyboard onDrag test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.separated(
@@ -326,6 +349,11 @@ void main() {
 
   testWidgets('GridView dismiss keyboard onDrag test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView(
@@ -360,6 +388,11 @@ void main() {
 
   testWidgets('GridView.builder dismiss keyboard onDrag test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.builder(
@@ -395,6 +428,11 @@ void main() {
 
   testWidgets('GridView.count dismiss keyboard onDrag test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.count(
@@ -429,6 +467,11 @@ void main() {
 
   testWidgets('GridView.extent dismiss keyboard onDrag test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.extent(
@@ -463,6 +506,11 @@ void main() {
 
   testWidgets('GridView.custom dismiss keyboard onDrag test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.custom(
@@ -500,6 +548,11 @@ void main() {
 
   testWidgets('ListView dismiss keyboard manual test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView(
@@ -532,6 +585,11 @@ void main() {
 
   testWidgets('ListView.builder dismiss keyboard manual test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.builder(
@@ -565,6 +623,11 @@ void main() {
 
   testWidgets('ListView.custom dismiss keyboard manual test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.custom(
@@ -600,6 +663,11 @@ void main() {
 
   testWidgets('ListView.separated dismiss keyboard manual test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.separated(
@@ -634,6 +702,11 @@ void main() {
 
   testWidgets('GridView dismiss keyboard manual test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView(
@@ -667,6 +740,11 @@ void main() {
 
   testWidgets('GridView.builder dismiss keyboard manual test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.builder(
@@ -701,6 +779,11 @@ void main() {
 
   testWidgets('GridView.count dismiss keyboard manual test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.count(
@@ -734,6 +817,11 @@ void main() {
 
   testWidgets('GridView.extent dismiss keyboard manual test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.extent(
@@ -767,6 +855,11 @@ void main() {
 
   testWidgets('GridView.custom dismiss keyboard manual test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.custom(
@@ -881,6 +974,11 @@ void main() {
 
   testWidgets('CustomScrollView dismiss keyboard onDrag test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: CustomScrollView(
@@ -921,6 +1019,7 @@ void main() {
   testWidgets('Can jumpTo during drag', (WidgetTester tester) async {
     final List<Type> log = <Type>[];
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       Directionality(
@@ -977,14 +1076,16 @@ void main() {
   });
 
   test('PrimaryScrollController.automaticallyInheritOnPlatforms defaults to all mobile platforms', (){
-     final PrimaryScrollController primaryScrollController = PrimaryScrollController(
-        controller: ScrollController(),
-       child: const SizedBox(),
-     );
-     expect(
-       primaryScrollController.automaticallyInheritForPlatforms,
-       TargetPlatformVariant.mobile().values,
-     );
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    final PrimaryScrollController primaryScrollController = PrimaryScrollController(
+      controller: controller,
+      child: const SizedBox(),
+    );
+    expect(
+      primaryScrollController.automaticallyInheritForPlatforms,
+      TargetPlatformVariant.mobile().values,
+    );
   });
 
   testWidgets('Vertical CustomScrollViews are not primary by default', (WidgetTester tester) async {
@@ -994,6 +1095,7 @@ void main() {
 
   testWidgets('Vertical CustomScrollViews use PrimaryScrollController by default on mobile', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: const CustomScrollView(),
       controller: controller,
@@ -1003,6 +1105,7 @@ void main() {
 
   testWidgets("Vertical CustomScrollViews don't use PrimaryScrollController by default on desktop", (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
         child: const CustomScrollView(),
         controller: controller,
@@ -1017,6 +1120,7 @@ void main() {
 
   testWidgets('Vertical ListViews use PrimaryScrollController by default on mobile', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: ListView(),
       controller: controller,
@@ -1026,6 +1130,7 @@ void main() {
 
   testWidgets("Vertical ListViews don't use PrimaryScrollController by default on desktop", (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: ListView(),
       controller: controller,
@@ -1040,6 +1145,7 @@ void main() {
 
   testWidgets('Vertical GridViews use PrimaryScrollController by default on mobile', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: GridView.count(crossAxisCount: 1),
       controller: controller,
@@ -1049,6 +1155,7 @@ void main() {
 
   testWidgets("Vertical GridViews don't use PrimaryScrollController by default on desktop", (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: GridView.count(crossAxisCount: 1),
       controller: controller,
@@ -1057,78 +1164,97 @@ void main() {
   }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('Horizontal CustomScrollViews are non-primary by default', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final ScrollController controller1 = ScrollController();
+    addTearDown(controller1.dispose);
+    final ScrollController controller2 = ScrollController();
+    addTearDown(controller2.dispose);
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: CustomScrollView(
         scrollDirection: Axis.horizontal,
-        controller: ScrollController(),
+        controller: controller2,
       ),
-      controller: controller,
+      controller: controller1,
     ));
-    expect(controller.hasClients, isFalse);
+    expect(controller1.hasClients, isFalse);
   });
 
   testWidgets('Horizontal ListViews are non-primary by default', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final ScrollController controller1 = ScrollController();
+    addTearDown(controller1.dispose);
+    final ScrollController controller2 = ScrollController();
+    addTearDown(controller2.dispose);
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: ListView(
         scrollDirection: Axis.horizontal,
-        controller: ScrollController(),
+        controller: controller2,
       ),
-      controller: controller,
+      controller: controller1,
     ));
-    expect(controller.hasClients, isFalse);
+    expect(controller1.hasClients, isFalse);
   });
 
   testWidgets('Horizontal GridViews are non-primary by default', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final ScrollController controller1 = ScrollController();
+    addTearDown(controller1.dispose);
+    final ScrollController controller2 = ScrollController();
+    addTearDown(controller2.dispose);
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: GridView.count(
         scrollDirection: Axis.horizontal,
-        controller: ScrollController(),
+        controller: controller2,
         crossAxisCount: 1,
       ),
-      controller: controller,
+      controller: controller1,
     ));
-    expect(controller.hasClients, isFalse);
+    expect(controller1.hasClients, isFalse);
   });
 
   testWidgets('CustomScrollViews with controllers are non-primary by default', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final ScrollController controller1 = ScrollController();
+    addTearDown(controller1.dispose);
+    final ScrollController controller2 = ScrollController();
+    addTearDown(controller2.dispose);
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: CustomScrollView(
-        controller: ScrollController(),
+        controller: controller2,
       ),
-      controller: controller,
+      controller: controller1,
     ));
-    expect(controller.hasClients, isFalse);
+    expect(controller1.hasClients, isFalse);
   });
 
   testWidgets('ListViews with controllers are non-primary by default', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final ScrollController controller1 = ScrollController();
+    addTearDown(controller1.dispose);
+    final ScrollController controller2 = ScrollController();
+    addTearDown(controller2.dispose);
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: ListView(
-        controller: ScrollController(),
+        controller: controller2,
       ),
-      controller: controller,
+      controller: controller1,
     ));
-    expect(controller.hasClients, isFalse);
+    expect(controller1.hasClients, isFalse);
   });
 
   testWidgets('GridViews with controllers are non-primary by default', (WidgetTester tester) async {
-    final ScrollController controller = ScrollController();
+    final ScrollController controller1 = ScrollController();
+    addTearDown(controller1.dispose);
+    final ScrollController controller2 = ScrollController();
+    addTearDown(controller2.dispose);
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: GridView.count(
-        controller: ScrollController(),
+        controller: controller2,
         crossAxisCount: 1,
       ),
-      controller: controller,
+      controller: controller1,
     ));
-    expect(controller.hasClients, isFalse);
+    expect(controller1.hasClients, isFalse);
   });
 
   testWidgets('CustomScrollView sets PrimaryScrollController when primary', (WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
+    addTearDown(primaryScrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1144,6 +1270,7 @@ void main() {
 
   testWidgets('ListView sets PrimaryScrollController when primary', (WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
+    addTearDown(primaryScrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1159,6 +1286,7 @@ void main() {
 
   testWidgets('GridView sets PrimaryScrollController when primary', (WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
+    addTearDown(primaryScrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1175,6 +1303,7 @@ void main() {
   testWidgets('Nested scrollables have a null PrimaryScrollController', (WidgetTester tester) async {
     const Key innerKey = Key('inner');
     final ScrollController primaryScrollController = ScrollController();
+    addTearDown(primaryScrollController.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

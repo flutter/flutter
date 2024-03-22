@@ -10,8 +10,6 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 void main() {
   testWidgets('DecoratedSliver creates, paints, and disposes BoxPainter', (WidgetTester tester) async {
     final TestDecoration decoration = TestDecoration();
@@ -204,6 +202,7 @@ void main() {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
@@ -240,6 +239,7 @@ void main() {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
@@ -279,6 +279,7 @@ void main() {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
@@ -316,6 +317,7 @@ void main() {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
@@ -355,6 +357,7 @@ void main() {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
@@ -393,6 +396,7 @@ void main() {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
@@ -431,6 +435,7 @@ void main() {
     const Key key = Key('DecoratedSliver with border');
     const Color black = Color(0xFF000000);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Align(

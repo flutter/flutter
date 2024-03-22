@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -306,6 +307,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
     // ignore: invalid_use_of_protected_member
     context.stopRecordingIfNeeded();
     if (mode != SnapshotMode.forced && !offsetLayer.supportsRasterization()) {
+      offsetLayer.dispose();
       if (mode == SnapshotMode.normal) {
         throw FlutterError('SnapshotWidget used with a child that contains a PlatformView.');
       }
@@ -384,7 +386,14 @@ class _RenderSnapshotWidget extends RenderProxyBox {
 /// }
 /// ```
 /// {@end-tool}
-abstract class SnapshotPainter extends ChangeNotifier  {
+abstract class SnapshotPainter extends ChangeNotifier {
+  /// Creates an instance of [SnapshotPainter].
+  SnapshotPainter() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   /// Called whenever the [image] that represents a [SnapshotWidget]s child should be painted.
   ///
   /// The image is rasterized at the physical pixel resolution and should be scaled down by

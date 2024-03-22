@@ -9,7 +9,7 @@ Performance benchmarks use either flutter drive or the web benchmark harness.
 To run the cull opacity benchmark on a device:
 
 ```
-flutter drive --profile test_driver/cull_opacity_perf.dart
+flutter drive --profile -t test_driver/run_app.dart --driver test_driver/cull_opacity_perf_test.dart
 ```
 
 Results should be in the file `build/cull_opacity_perf.timeline_summary.json`.
@@ -21,7 +21,7 @@ More detailed logs should be in `build/cull_opacity_perf.timeline.json`.
 To run the cubic-bezier benchmark on a device:
 
 ```
-flutter drive --profile test_driver/cubic_bezier_perf.dart
+flutter drive --profile -t test_driver/run_app.dart --driver test_driver/cubic_bezier_perf_test.dart
 ```
 
 Results should be in the file `build/cubic_bezier_perf.timeline_summary.json`.
@@ -145,4 +145,4 @@ cd dev/devicelab
 File `test/frame_policy.dart` and its driving script `test_driver/frame_policy_test.dart`
 are used for testing [`fullyLive`](https://api.flutter.dev/flutter/flutter_test/LiveTestWidgetsFlutterBindingFramePolicy-class.html)
 and [`benchmarkLive`](https://api.flutter.dev/flutter/flutter_test/LiveTestWidgetsFlutterBindingFramePolicy-class.html)
-policies in terms of its effect on [`WidgetTester.handlePointerEventRecord`](https://master-api.flutter.dev/flutter/flutter_test/WidgetTester/handlePointerEventRecord.html).
+policies in terms of its effect on [`WidgetTester.handlePointerEventRecord`](https://api.flutter.dev/flutter/flutter_test/WidgetTester/handlePointerEventRecord.html).

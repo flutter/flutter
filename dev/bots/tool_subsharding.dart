@@ -16,20 +16,13 @@ class TestSpecs {
   int startTime;
   int? _endTime;
 
-  int get milliseconds {
-    return endTime - startTime;
-  }
+  int get milliseconds => endTime - startTime;
 
   set endTime(int value) {
     _endTime = value;
   }
 
-  int get endTime {
-    if (_endTime == null) {
-      return 0;
-    }
-    return _endTime!;
-  }
+  int get endTime => _endTime ?? 0;
 
   String toJson() {
     return json.encode(

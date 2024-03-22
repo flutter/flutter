@@ -54,8 +54,6 @@ class RestorationScope extends StatefulWidget {
   ///
   /// Providing null as the [restorationId] turns off state restoration for
   /// the [child] and its descendants.
-  ///
-  /// The [child] must not be null.
   const RestorationScope({
     super.key,
     required this.restorationId,
@@ -199,8 +197,6 @@ class UnmanagedRestorationScope extends InheritedWidget {
   ///
   /// When [bucket] is null state restoration is turned off for the [child] and
   /// its descendants.
-  ///
-  /// The [child] must not be null.
   const UnmanagedRestorationScope({
     super.key,
     this.bucket,
@@ -273,8 +269,6 @@ class RootRestorationScope extends StatefulWidget {
   ///
   /// Providing null as the [restorationId] turns off state restoration for
   /// the [child] and its descendants.
-  ///
-  /// The [child] must not be null.
   const RootRestorationScope({
     super.key,
     required this.restorationId,
@@ -454,6 +448,13 @@ class _RootRestorationScopeState extends State<RootRestorationScope> {
 ///  * [RestorationManager], which describes how state restoration works in
 ///    Flutter.
 abstract class RestorableProperty<T> extends ChangeNotifier {
+  /// Creates a [RestorableProperty].
+  RestorableProperty(){
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   /// Called by the [RestorationMixin] if no restoration data is available to
   /// restore the value of the property from to obtain the default value for the
   /// property.

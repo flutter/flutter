@@ -144,6 +144,14 @@ abstract final class SystemChannels {
       JSONMethodCodec(),
   );
 
+  /// A [MethodChannel] for handling text processing actions.
+  ///
+  /// This channel exposes the text processing feature for supported platforms.
+  /// Currently supported on Android only.
+  static const MethodChannel processText = OptionalMethodChannel(
+      'flutter/processtext',
+  );
+
   /// A JSON [MethodChannel] for handling text input.
   ///
   /// This channel exposes a system text input control for interacting with IMEs
@@ -502,6 +510,10 @@ abstract final class SystemChannels {
   ///    The keyboard state is sent as a `Map<int, int>?` where each entry
   ///    represents a pressed keyboard key. The entry key is the physical
   ///    key ID and the entry value is the logical key ID.
+  ///
+  ///    Both the framework and the engine maintain a state of the current
+  ///    pressed keys. There are edge cases, related to startup and restart,
+  ///    where the framework needs to resynchronize its keyboard state.
   ///
   /// See also:
   ///

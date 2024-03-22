@@ -6,10 +6,11 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for [MenuAnchor].
 
-// This is the type used by the menu below.
-enum SampleItem { itemOne, itemTwo, itemThree }
 
 void main() => runApp(const MenuAnchorApp());
+
+// This is the type used by the menu below.
+enum SampleItem { itemOne, itemTwo, itemThree }
 
 class MenuAnchorApp extends StatelessWidget {
   const MenuAnchorApp({super.key});
@@ -36,7 +37,10 @@ class _MenuAnchorExampleState extends State<MenuAnchorExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('MenuAnchorButton')),
+      appBar: AppBar(
+        title: const Text('MenuAnchorButton'),
+        backgroundColor: Theme.of(context).primaryColorLight,
+      ),
       body: Center(
         child: MenuAnchor(
           builder:

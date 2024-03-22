@@ -81,6 +81,7 @@ class ContextMenuController {
   ///  * [remove], which removes only the current instance.
   static void removeAny() {
     _menuOverlayEntry?.remove();
+    _menuOverlayEntry?.dispose();
     _menuOverlayEntry = null;
     if (_shownInstance != null) {
       _shownInstance!.onRemove?.call();

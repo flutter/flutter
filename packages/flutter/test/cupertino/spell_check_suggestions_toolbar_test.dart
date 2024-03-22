@@ -62,9 +62,13 @@ void main() {
   });
 
   testWidgets('buildButtonItems builds a disabled "No Replacements Found" button when no suggestions', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     await tester.pumpWidget(
       CupertinoApp(
-        home: _FakeEditableText(),
+        home: _FakeEditableText(focusNode, controller),
       ),
     );
     final _FakeEditableTextState editableTextState =
@@ -80,9 +84,11 @@ void main() {
 }
 
 class _FakeEditableText extends EditableText {
-  _FakeEditableText() : super(
-    controller: TextEditingController(),
-    focusNode: FocusNode(),
+  /// The parameters focusNode and controller are needed here so the can be
+  /// safely disposed after the test is completed.
+  _FakeEditableText(FocusNode focusNode, TextEditingController controller) : super(
+    controller: controller,
+    focusNode: focusNode,
     backgroundCursorColor: CupertinoColors.white,
     cursorColor: CupertinoColors.white,
     style: const TextStyle(),

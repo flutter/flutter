@@ -30,7 +30,7 @@ class _${blockName}DefaultsM3 extends BottomSheetThemeData {
   Color? get backgroundColor => ${componentColor("md.comp.sheet.bottom.docked.container")};
 
   @override
-  Color? get surfaceTintColor => ${componentColor("md.comp.sheet.bottom.docked.container.surface-tint-layer")};
+  Color? get surfaceTintColor => ${colorOrTransparent("md.comp.sheet.bottom.docked.container.surface-tint-layer")};
 
   @override
   Color? get shadowColor => Colors.transparent;

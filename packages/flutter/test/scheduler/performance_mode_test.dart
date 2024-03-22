@@ -7,6 +7,7 @@ import 'dart:ui';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   late SchedulerBinding binding;
@@ -52,5 +53,15 @@ void main() {
     expect(binding.debugGetRequestedPerformanceMode(), equals(DartPerformanceMode.latency));
     requestHandle2?.dispose();
     expect(binding.debugGetRequestedPerformanceMode(), isNull);
+  });
+
+  test('PerformanceModeRequestHandle dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => binding.requestPerformanceMode(DartPerformanceMode.latency)!.dispose(),
+        PerformanceModeRequestHandle,
+      ),
+      areCreateAndDispose,
+    );
   });
 }

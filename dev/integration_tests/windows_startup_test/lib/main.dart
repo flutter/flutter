@@ -31,6 +31,25 @@ void drawHelloWorld(ui.FlutterView view) {
   view.render(sceneBuilder.build());
 }
 
+Future<void> _waitUntilWindowVisible() async {
+  while (!await isWindowVisible()) {
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+  }
+}
+
+void _expectVisible(bool current, bool expect, Completer<String> completer, int frameCount) {
+  if (current != expect) {
+    try {
+      throw 'Window should be ${expect ? 'visible' : 'hidden'} on frame $frameCount';
+    } catch (e) {
+      if (!completer.isCompleted) {
+        completer.completeError(e);
+      }
+      rethrow;
+    }
+  }
+}
+
 void main() async {
   // TODO(goderbauer): Create a window if embedder doesn't provide an implicit view to draw into.
   assert(ui.PlatformDispatcher.instance.implicitView != null);
@@ -70,27 +89,39 @@ void main() async {
       throw 'Window should be hidden at startup';
     }
 
-    bool firstFrame = true;
-    ui.PlatformDispatcher.instance.onBeginFrame = (Duration duration) async {
-      if (await isWindowVisible()) {
-        if (firstFrame) {
-          throw 'Window should be hidden on first frame';
-        }
-
-        if (!visibilityCompleter.isCompleted) {
-          visibilityCompleter.complete('success');
-        }
+    int frameCount = 0;
+    ui.PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+      // Our goal is to verify that it's `drawHelloWorld` that makes the window
+      // appear, not anything else. This requires checking the visibility right
+      // before drawing, but since `isWindowVisible` has to be async, and
+      // `FlutterView.render` (in `drawHelloWorld`) forbids async before it,
+      // this can not be done during a single onBeginFrame. However, we can
+      // verify in separate frames to indirectly prove it, by ensuring that
+      // no other mechanism can affect isWindowVisible in the first frame at all.
+      frameCount += 1;
+      switch (frameCount) {
+        // The 1st frame: render nothing, just verify that the window is hidden.
+        case 1:
+          isWindowVisible().then((bool visible) {
+            _expectVisible(visible, false, visibilityCompleter, frameCount);
+            ui.PlatformDispatcher.instance.scheduleFrame();
+          });
+        // The 2nd frame: render, which makes the window appear.
+        case 2:
+          drawHelloWorld(view);
+          _waitUntilWindowVisible().then((_) {
+            if (!visibilityCompleter.isCompleted) {
+              visibilityCompleter.complete('success');
+            }
+          });
+        // Others, in case requested to render.
+        default:
+          drawHelloWorld(view);
       }
-
-      // Draw something to trigger the first frame callback that displays the
-      // window.
-      drawHelloWorld(view);
-      firstFrame = false;
     };
-
-    ui.PlatformDispatcher.instance.scheduleFrame();
   } catch (e) {
     visibilityCompleter.completeError(e);
     rethrow;
   }
+  ui.PlatformDispatcher.instance.scheduleFrame();
 }

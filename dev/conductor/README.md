@@ -90,13 +90,6 @@ Once a PR is opened, the user must validate CI builds. If there are regressions
 output of the failing test), then the user must fix these tests in their local
 checkout and push their changes again.
 
-### Codesign Engine Binaries
-
-The user must validate post-submit CI builds for their merged engine PR have
-passed. A link to the web dashboard is available via `conductor status`. Once
-the post-submit CI builds have all passed, the user must codesign engine
-binaries for the **merged** engine commit.
-
 ### Apply Framework Cherrypicks
 
 The tool will attempt to auto-apply all framework cherrypicks. However, any

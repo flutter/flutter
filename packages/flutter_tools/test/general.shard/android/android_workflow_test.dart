@@ -578,6 +578,42 @@ Review licenses that have not been accepted (y/N)?
       true,
     );
   });
+
+  testWithoutContext('Asks user to upgrade Android Studio when it is too far behind the Android SDK', () async {
+    const String sdkManagerPath = '/foo/bar/sdkmanager';
+    sdk.sdkManagerPath = sdkManagerPath;
+    final BufferLogger logger = BufferLogger.test();
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>[sdkManagerPath, '--licenses'],
+        exitCode: 1,
+        stderr: '''
+Error: LinkageError occurred while loading main class com.android.sdklib.tool.sdkmanager.SdkManagerCli
+        java.lang.UnsupportedClassVersionError: com/android/sdklib/tool/sdkmanager/SdkManagerCli has been compiled by a more recent version of the Java Runtime (class file version 61.0), this version of the Java Runtime only recognizes class file versions up to 55.0
+Android sdkmanager tool was found, but failed to run
+''',
+      ),
+    );
+
+    final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator(
+      java: FakeJava(),
+      androidSdk: sdk,
+      processManager: processManager,
+      platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+      stdio: stdio,
+      logger: logger,
+      userMessages: UserMessages(),
+    );
+
+    await expectLater(
+      licenseValidator.runLicenseManager(),
+      throwsToolExit(
+        message: RegExp('.*consider updating your installation of Android studio. Alternatively, you.*'),
+      ),
+    );
+    expect(processManager, hasNoRemainingExpectations);
+    expect(stdio.stderr.getAndClear(), contains('UnsupportedClassVersionError'));
+  });
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {

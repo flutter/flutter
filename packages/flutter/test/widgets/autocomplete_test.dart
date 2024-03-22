@@ -497,7 +497,9 @@ void main() {
       testWidgets('down', (WidgetTester tester) async {
         final GlobalKey autocompleteKey = GlobalKey();
         final TextEditingController controller = TextEditingController();
+        addTearDown(controller.dispose);
         final FocusNode focusNode = FocusNode();
+        addTearDown(focusNode.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -528,7 +530,9 @@ void main() {
       testWidgets('up', (WidgetTester tester) async {
         final GlobalKey autocompleteKey = GlobalKey();
         final TextEditingController controller = TextEditingController();
+        addTearDown(controller.dispose);
         final FocusNode focusNode = FocusNode();
+        addTearDown(focusNode.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -702,7 +706,9 @@ void main() {
     final GlobalKey autocompleteKey = GlobalKey();
     late Iterable<String> lastOptions;
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final TextEditingController textEditingController = TextEditingController();
+    addTearDown(textEditingController.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -824,7 +830,9 @@ void main() {
 
   testWidgets('initialValue cannot be defined if TextEditingController is defined', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final TextEditingController textEditingController = TextEditingController();
+    addTearDown(textEditingController.dispose);
 
     expect(
       () {

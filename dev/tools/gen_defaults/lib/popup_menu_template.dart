@@ -38,9 +38,13 @@ class _${blockName}DefaultsM3 extends PopupMenuThemeData {
   Color? get shadowColor => ${color("md.comp.menu.container.shadow-color")};
 
   @override
-  Color? get surfaceTintColor => ${color("md.comp.menu.container.surface-tint-layer.color")};
+  Color? get surfaceTintColor => ${colorOrTransparent("md.comp.menu.container.surface-tint-layer.color")};
 
   @override
   ShapeBorder? get shape => ${shape("md.comp.menu.container")};
+
+  // TODO(tahatesser): This is taken from https://m3.material.io/components/menus/specs
+  // Update this when the token is available.
+  static EdgeInsets menuHorizontalPadding  = const EdgeInsets.symmetric(horizontal: 12.0);
 }''';
 }

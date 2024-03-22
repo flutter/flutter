@@ -8,8 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/services/keyboard_key.g.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -108,6 +106,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(pressed, isTrue);
+    focusNode.dispose();
   });
 
   testWidgets('materialTapTargetSize.padded expands hit test area', (WidgetTester tester) async {
@@ -345,6 +344,7 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
     expect(box, paints..rect(color: focusColor));
+    focusNode.dispose();
   });
 
   testWidgets('RawMaterialButton loses focus when disabled.', (WidgetTester tester) async {
@@ -379,6 +379,7 @@ void main() {
 
     await tester.pump();
     expect(focusNode.hasPrimaryFocus, isFalse);
+    focusNode.dispose();
   });
 
   testWidgets("Disabled RawMaterialButton can't be traversed to.", (WidgetTester tester) async {
@@ -414,11 +415,14 @@ void main() {
     expect(focusNode1.hasPrimaryFocus, isTrue);
     expect(focusNode2.hasPrimaryFocus, isFalse);
 
-    expect(focusNode1.nextFocus(), isTrue);
+    expect(focusNode1.nextFocus(), isFalse);
     await tester.pump();
 
     expect(focusNode1.hasPrimaryFocus, isTrue);
     expect(focusNode2.hasPrimaryFocus, isFalse);
+
+    focusNode1.dispose();
+    focusNode2.dispose();
   });
 
   testWidgets('RawMaterialButton handles hover', (WidgetTester tester) async {

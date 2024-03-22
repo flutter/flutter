@@ -90,6 +90,12 @@ class _TestRouteInformationParser extends RouteInformationParser<String> {
 }
 
 class _TestRouterDelegate extends RouterDelegate<String> with ChangeNotifier {
+  _TestRouterDelegate() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   final List<String> newRoutePaths = <String>[];
   final List<String> restoredRoutePaths = <String>[];
 
@@ -128,6 +134,12 @@ class _TestRouterDelegate extends RouterDelegate<String> with ChangeNotifier {
 }
 
 class _TestRouteInformationProvider extends RouteInformationProvider with ChangeNotifier {
+  _TestRouteInformationProvider() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   @override
   RouteInformation get value => _value;
   RouteInformation _value = RouteInformation(uri: Uri.parse('/home'));
@@ -140,22 +152,37 @@ class _TestRouteInformationProvider extends RouteInformationProvider with Change
   }
 }
 
-class _TestWidget extends StatelessWidget {
+class _TestWidget extends StatefulWidget {
   const _TestWidget({this.withInformationProvider = false, this.routerKey});
 
   final bool withInformationProvider;
   final Key? routerKey;
 
   @override
+  State<_TestWidget> createState() => _TestWidgetState();
+}
+
+class _TestWidgetState extends State<_TestWidget> {
+  final _TestRouterDelegate _delegate = _TestRouterDelegate();
+  final _TestRouteInformationProvider _routeInformationProvider = _TestRouteInformationProvider();
+
+  @override
+  void dispose() {
+    _delegate.dispose();
+    _routeInformationProvider.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return RootRestorationScope(
       restorationId: 'root',
       child: Router<String>(
-        key: routerKey,
+        key: widget.routerKey,
         restorationScopeId: 'router',
-        routerDelegate: _TestRouterDelegate(),
+        routerDelegate: _delegate,
         routeInformationParser: _TestRouteInformationParser(),
-        routeInformationProvider: withInformationProvider ? _TestRouteInformationProvider() : null,
+        routeInformationProvider: widget.withInformationProvider ? _routeInformationProvider : null,
       ),
     );
   }

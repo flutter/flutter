@@ -8,11 +8,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/rendering.dart';
 
+import 'color_scheme.dart';
 import 'debug.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'theme.dart';
 
 const double _kToolbarHeight = 44.0;
 const double _kToolbarContentDistance = 8.0;
@@ -567,6 +569,40 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
     size = nextSize;
   }
 
+  // Horizontally expand the children when the menu overflows so they can react to
+  // pointer events into their whole area.
+  void _resizeChildrenWhenOverflow() {
+    if (!overflowOpen) {
+      return;
+    }
+
+    final RenderBox navButton = firstChild!;
+    int i = -1;
+
+    visitChildren((RenderObject renderObjectChild) {
+      final RenderBox child = renderObjectChild as RenderBox;
+      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
+
+      i++;
+
+      // Ignore the navigation button.
+      if (renderObjectChild == navButton) {
+        return;
+      }
+
+      // There is no need to update children that won't be painted.
+      if (!_shouldPaintChild(renderObjectChild, i)) {
+        childParentData.shouldPaint = false;
+        return;
+      }
+
+      child.layout(
+        BoxConstraints.tightFor(width: size.width),
+        parentUsesSize: true,
+      );
+    });
+  }
+
   @override
   void performLayout() {
     _lastIndexThatFits = -1;
@@ -577,6 +613,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
 
     _layoutChildren();
     _placeChildren();
+    _resizeChildrenWhenOverflow();
   }
 
   @override
@@ -650,13 +687,34 @@ class _TextSelectionToolbarContainer extends StatelessWidget {
 
   final Widget child;
 
+  // These colors were taken from a screenshot of a Pixel 6 emulator running
+  // Android API level 34.
+  static const Color _defaultColorLight = Color(0xffffffff);
+  static const Color _defaultColorDark = Color(0xff424242);
+
+  static Color _getColor(ColorScheme colorScheme) {
+    final bool isDefaultSurface = switch (colorScheme.brightness) {
+      Brightness.light => identical(ThemeData().colorScheme.surface, colorScheme.surface),
+      Brightness.dark => identical(ThemeData.dark().colorScheme.surface, colorScheme.surface),
+    };
+    if (!isDefaultSurface) {
+      return colorScheme.surface;
+    }
+    return switch (colorScheme.brightness) {
+      Brightness.light => _defaultColorLight,
+      Brightness.dark => _defaultColorDark,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     return Material(
       // This value was eyeballed to match the native text selection menu on
-      // a Pixel 2 running Android 10.
-      borderRadius: const BorderRadius.all(Radius.circular(7.0)),
+      // a Pixel 6 emulator running Android API level 34.
+      borderRadius: const BorderRadius.all(Radius.circular(_kToolbarHeight / 2)),
       clipBehavior: Clip.antiAlias,
+      color: _getColor(theme.colorScheme),
       elevation: 1.0,
       type: MaterialType.card,
       child: child,

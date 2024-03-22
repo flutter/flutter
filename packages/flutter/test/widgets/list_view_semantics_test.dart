@@ -17,6 +17,7 @@ void main() {
     testWidgets('forward vertical', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
 
       await tester.pumpWidget(
         Directionality(
@@ -47,6 +48,7 @@ void main() {
     testWidgets('reverse vertical', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
 
       await tester.pumpWidget(
         Directionality(
@@ -78,6 +80,7 @@ void main() {
     testWidgets('forward horizontal', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
 
       await tester.pumpWidget(
         Directionality(
@@ -109,6 +112,7 @@ void main() {
     testWidgets('reverse horizontal', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
 
       await tester.pumpWidget(
         Directionality(

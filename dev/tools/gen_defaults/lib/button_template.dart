@@ -136,6 +136,9 @@ ${tokenAvailable("$tokenGroup.outline.color") ? '''
     if (states.contains(MaterialState.disabled)) {
       return ${border("$tokenGroup.disabled.outline")};
     }
+    if (states.contains(MaterialState.focused)) {
+      return ${border('$tokenGroup.focus.outline')};
+    }
     return ${border("$tokenGroup.outline")};
   });''' : '''
   // No default side'''}

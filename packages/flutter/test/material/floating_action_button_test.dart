@@ -13,8 +13,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -368,6 +366,8 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     expect(getFABWidget(fabFinder).elevation, 6);
+
+    focusNode.dispose();
   });
 
   testWidgets('FlatActionButton mini size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
@@ -909,6 +909,8 @@ void main() {
       tester.renderObject(find.byType(FloatingActionButton)),
       paintsExactlyCountTimes(#clipPath, 0),
     );
+
+    focusNode.dispose();
   });
 
   testWidgets('Can find FloatingActionButton semantics', (WidgetTester tester) async {
@@ -1206,6 +1208,8 @@ void main() {
       await tester.pump(); // Start the splash and highlight animations.
       await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
       expect(getFABWidget(fabFinder).elevation, 12);
+
+      focusNode.dispose();
     });
 
     testWidgets('FloatingActionButton.isExtended', (WidgetTester tester) async {

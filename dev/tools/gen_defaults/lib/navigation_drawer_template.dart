@@ -26,7 +26,7 @@ class _${blockName}DefaultsM3 extends NavigationDrawerThemeData {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  Color? get backgroundColor => ${componentColor("md.comp.navigation-drawer.container")};
+  Color? get backgroundColor => ${componentColor("md.comp.navigation-drawer.modal.container")};
 
   @override
   Color? get surfaceTintColor => ${colorOrTransparent("md.comp.navigation-drawer.container.surface-tint-layer.color")};
@@ -42,7 +42,9 @@ class _${blockName}DefaultsM3 extends NavigationDrawerThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       return IconThemeData(
         size: ${getToken("md.comp.navigation-drawer.icon.size")},
-        color: states.contains(MaterialState.selected)
+        color: states.contains(MaterialState.disabled)
+          ? _colors.onSurfaceVariant.withOpacity(0.38)
+          : states.contains(MaterialState.selected)
             ? ${componentColor("md.comp.navigation-drawer.active.icon")}
             : ${componentColor("md.comp.navigation-drawer.inactive.icon")},
       );
@@ -54,7 +56,9 @@ class _${blockName}DefaultsM3 extends NavigationDrawerThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       final TextStyle style = ${textStyle("md.comp.navigation-drawer.label-text")}!;
       return style.apply(
-        color: states.contains(MaterialState.selected)
+        color: states.contains(MaterialState.disabled)
+          ? _colors.onSurfaceVariant.withOpacity(0.38)
+          : states.contains(MaterialState.selected)
             ? ${componentColor("md.comp.navigation-drawer.active.label-text")}
             : ${componentColor("md.comp.navigation-drawer.inactive.label-text")},
       );

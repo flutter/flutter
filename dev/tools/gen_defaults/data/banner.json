@@ -1,10 +1,9 @@
 {
-  "version": "v0_162",
+  "version": "v0_206",
 
-  "md.comp.banner.container.color": "surface",
+  "md.comp.banner.container.color": "surfaceContainerLow",
   "md.comp.banner.container.elevation": "md.sys.elevation.level1",
   "md.comp.banner.container.shape": "md.sys.shape.corner.none",
-  "md.comp.banner.container.surface-tint-layer.color": "surfaceTint",
   "md.comp.banner.desktop.with-single-line.container.height": 52.0,
   "md.comp.banner.desktop.with-three-lines.container.height": 90.0,
   "md.comp.banner.desktop.with-two-lines.with-image.container.height": 72.0,

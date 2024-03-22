@@ -91,15 +91,37 @@ void main() {
     expect(scrollable.position.pixels, equals(50.0));
   });
 
-  testWidgets('ClampingScrollPhysics handles out of bounds ScrollPosition', (WidgetTester tester) async {
+  testWidgets('ClampingScrollPhysics handles out of bounds ScrollPosition - initialScrollOffset', (WidgetTester tester) async {
     Future<void> testOutOfBounds(ScrollPhysics physics, double initialOffset, double expectedOffset) async {
       final ScrollController scrollController = ScrollController(initialScrollOffset: initialOffset);
+      addTearDown(scrollController.dispose);
       await tester.pumpWidget(buildFrame(physics, scrollController: scrollController));
       final ScrollableState scrollable = tester.state(find.byType(Scrollable));
 
-      expect(scrollable.position.pixels, equals(initialOffset));
-      await tester.pump(const Duration(seconds: 1)); // Allow overscroll to settle
+      // The initialScrollOffset will be corrected during the first frame.
       expect(scrollable.position.pixels, equals(expectedOffset));
+    }
+
+    await testOutOfBounds(const ClampingScrollPhysics(), -400.0, 0.0);
+    await testOutOfBounds(const ClampingScrollPhysics(), 800.0, 50.0);
+  });
+
+  testWidgets('ClampingScrollPhysics handles out of bounds ScrollPosition - jumpTo', (WidgetTester tester) async {
+    Future<void> testOutOfBounds(ScrollPhysics physics, double targetOffset, double endingOffset) async {
+      final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+      await tester.pumpWidget(buildFrame(physics, scrollController: scrollController));
+      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+
+      expect(scrollable.position.pixels, equals(0.0));
+
+      scrollController.jumpTo(targetOffset);
+      await tester.pump();
+
+      expect(scrollable.position.pixels, equals(targetOffset));
+
+      await tester.pump(const Duration(seconds: 1)); // Allow overscroll animation to settle
+      expect(scrollable.position.pixels, equals(endingOffset));
     }
 
     await testOutOfBounds(const ClampingScrollPhysics(), -400.0, 0.0);

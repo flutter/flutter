@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:file/src/interface/file_system.dart';
+import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:webdriver/sync_io.dart' as sync_io;
 
 import '../../src/common.dart';
@@ -258,6 +259,29 @@ void main() {
     WebRunnerFactory: () => FakeWebRunnerFactory(),
   });
 
+  testUsingContext('WebDriverService can start an app with a launch url provided', () async {
+    final WebDriverService service = setUpDriverService();
+    final FakeDevice device = FakeDevice();
+    const String testUrl = 'http://localhost:1234/test';
+    await service.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, webLaunchUrl: testUrl), true);
+    await service.stop();
+    expect(service.webUri, Uri.parse(testUrl));
+  }, overrides: <Type, Generator>{
+    WebRunnerFactory: () => FakeWebRunnerFactory(),
+  });
+
+  testUsingContext('WebDriverService will throw when an invalid launch url is provided', () async {
+    final WebDriverService service = setUpDriverService();
+    final FakeDevice device = FakeDevice();
+    const String invalidTestUrl = '::INVALID_URL::';
+    await expectLater(
+      service.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, webLaunchUrl: invalidTestUrl), true),
+      throwsA(isA<FormatException>()),
+    );
+  }, overrides: <Type, Generator>{
+    WebRunnerFactory: () => FakeWebRunnerFactory(),
+  });
+
   testUsingContext('WebDriverService forwards exception when run future fails before app starts', () async {
     final WebDriverService service = setUpDriverService();
     final Device device = FakeDevice();
@@ -280,7 +304,21 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
   final bool doResolveToError;
 
   @override
-  ResidentRunner createWebRunner(FlutterDevice device, {String? target, bool? stayResident, FlutterProject? flutterProject, bool? ipv6, DebuggingOptions? debuggingOptions, UrlTunneller? urlTunneller, Logger? logger, FileSystem? fileSystem, SystemClock? systemClock, Usage? usage, bool machine = false}) {
+  ResidentRunner createWebRunner(
+    FlutterDevice device, {
+    String? target,
+    bool? stayResident,
+    FlutterProject? flutterProject,
+    bool? ipv6,
+    DebuggingOptions? debuggingOptions,
+    UrlTunneller? urlTunneller,
+    Logger? logger,
+    FileSystem? fileSystem,
+    SystemClock? systemClock,
+    Usage? usage,
+    Analytics? analytics,
+    bool machine = false,
+  }) {
     expect(stayResident, isTrue);
     return FakeResidentRunner(
       doResolveToError: doResolveToError,
@@ -346,9 +384,6 @@ WebDriverService setUpDriverService() {
   );
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   @override
   final PlatformType platformType = PlatformType.web;

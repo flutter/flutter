@@ -83,23 +83,29 @@ Future<void> main() async {
     unit: 's',
     name: 'stock_animation_total_run_time',
   );
-  printer.addResult(
-    description: '  Opening first frame average time',
-    value: totalOpenFrameElapsedMicroseconds / totalOpenIterationCount,
-    unit: 'µs per frame ($totalOpenIterationCount frames)',
-    name: 'stock_animation_open_first_frame_average',
-  );
-  printer.addResult(
-    description: '  Closing first frame average time',
-    value: totalCloseFrameElapsedMicroseconds / totalCloseIterationCount,
-    unit: 'µs per frame ($totalCloseIterationCount frames)',
-    name: 'stock_animation_close_first_frame_average',
-  );
-  printer.addResult(
-    description: '  Subsequent frames average time',
-    value: totalSubsequentFramesElapsedMicroseconds / totalSubsequentFramesIterationCount,
-    unit: 'µs per frame ($totalSubsequentFramesIterationCount frames)',
-    name: 'stock_animation_subsequent_frame_average',
-  );
+  if (totalOpenIterationCount > 0) {
+    printer.addResult(
+      description: '  Opening first frame average time',
+      value: totalOpenFrameElapsedMicroseconds / totalOpenIterationCount,
+      unit: 'µs per frame ($totalOpenIterationCount frames)',
+      name: 'stock_animation_open_first_frame_average',
+    );
+  }
+  if (totalCloseIterationCount > 0) {
+    printer.addResult(
+      description: '  Closing first frame average time',
+      value: totalCloseFrameElapsedMicroseconds / totalCloseIterationCount,
+      unit: 'µs per frame ($totalCloseIterationCount frames)',
+      name: 'stock_animation_close_first_frame_average',
+    );
+  }
+  if (totalSubsequentFramesIterationCount > 0) {
+    printer.addResult(
+      description: '  Subsequent frames average time',
+      value: totalSubsequentFramesElapsedMicroseconds / totalSubsequentFramesIterationCount,
+      unit: 'µs per frame ($totalSubsequentFramesIterationCount frames)',
+      name: 'stock_animation_subsequent_frame_average',
+    );
+  }
   printer.printToStdout();
 }

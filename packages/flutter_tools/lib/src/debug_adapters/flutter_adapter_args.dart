@@ -24,6 +24,7 @@ class FlutterAttachRequestArguments
     super.cwd,
     super.env,
     super.additionalProjectPaths,
+    super.allowAnsiColorOutput,
     super.debugSdkLibraries,
     super.debugExternalPackageLibraries,
     super.evaluateGettersInDebugViews,
@@ -41,8 +42,7 @@ class FlutterAttachRequestArguments
         program = obj['program'] as String?,
         super.fromMap();
 
-  static FlutterAttachRequestArguments fromJson(Map<String, Object?> obj) =>
-      FlutterAttachRequestArguments.fromMap(obj);
+  factory FlutterAttachRequestArguments.fromJson(Map<String, Object?> obj) = FlutterAttachRequestArguments.fromMap;
 
   /// Arguments to be passed to the tool that will run [program] (for example, the VM or Flutter tool).
   final List<String>? toolArgs;
@@ -109,6 +109,7 @@ class FlutterLaunchRequestArguments
     super.cwd,
     super.env,
     super.additionalProjectPaths,
+    super.allowAnsiColorOutput,
     super.debugSdkLibraries,
     super.debugExternalPackageLibraries,
     super.evaluateGettersInDebugViews,
@@ -125,6 +126,8 @@ class FlutterLaunchRequestArguments
         customTool = obj['customTool'] as String?,
         customToolReplacesArgs = obj['customToolReplacesArgs'] as int?,
         super.fromMap();
+
+  factory FlutterLaunchRequestArguments.fromJson(Map<String, Object?> obj) = FlutterLaunchRequestArguments.fromMap;
 
   /// If noDebug is true the launch request should launch the program without enabling debugging.
   @override
@@ -168,7 +171,4 @@ class FlutterLaunchRequestArguments
         if (customToolReplacesArgs != null)
           'customToolReplacesArgs': customToolReplacesArgs,
       };
-
-  static FlutterLaunchRequestArguments fromJson(Map<String, Object?> obj) =>
-      FlutterLaunchRequestArguments.fromMap(obj);
 }

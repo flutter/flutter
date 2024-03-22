@@ -60,7 +60,7 @@ Future<void> main() async {
   do {
     await controller.drag(demoList, const Offset(0.0, -300.0));
     await Future<void>.delayed(const Duration(milliseconds: 20));
-  } while (!demoItem.precache());
+  } while (!demoItem.tryEvaluate());
 
   // Ensure that the center of the "Text fields" item is visible
   // because that's where we're going to tap

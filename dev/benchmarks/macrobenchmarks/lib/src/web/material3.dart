@@ -443,7 +443,7 @@ class Cards extends StatelessWidget {
           SizedBox(
             width: cardWidth,
             child: Card(
-              color: Theme.of(context).colorScheme.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               elevation: 0,
               child: Container(
                 padding: const EdgeInsets.fromLTRB(10, 5, 5, 10),
@@ -1279,7 +1279,7 @@ class _IconToggleButtonState extends State<IconToggleButton> {
 ButtonStyle enabledFilledButtonStyle(bool selected, ColorScheme colors) {
   return IconButton.styleFrom(
     foregroundColor: selected ? colors.onPrimary : colors.primary,
-    backgroundColor: selected ? colors.primary : colors.surfaceVariant,
+    backgroundColor: selected ? colors.primary : colors.surfaceContainerHighest,
     disabledForegroundColor: colors.onSurface.withOpacity(0.38),
     disabledBackgroundColor: colors.onSurface.withOpacity(0.12),
     hoverColor: selected
@@ -1306,7 +1306,7 @@ ButtonStyle enabledFilledTonalButtonStyle(bool selected, ColorScheme colors) {
     foregroundColor:
         selected ? colors.onSecondaryContainer : colors.onSurfaceVariant,
     backgroundColor:
-        selected ? colors.secondaryContainer : colors.surfaceVariant,
+        selected ? colors.secondaryContainer : colors.surfaceContainerHighest,
     hoverColor: selected
         ? colors.onSecondaryContainer.withOpacity(0.08)
         : colors.onSurfaceVariant.withOpacity(0.08),
@@ -1579,7 +1579,7 @@ class BottomSheetSection extends StatefulWidget {
 
 class _BottomSheetSectionState extends State<BottomSheetSection> {
   bool isNonModalBottomSheetOpen = false;
-  PersistentBottomSheetController<void>? _nonModalBottomSheetController;
+  PersistentBottomSheetController? _nonModalBottomSheetController;
 
   @override
   Widget build(BuildContext context) {
@@ -1663,7 +1663,7 @@ class _BottomSheetSectionState extends State<BottomSheetSection> {
                 });
               }
 
-              _nonModalBottomSheetController = showBottomSheet<void>(
+              _nonModalBottomSheetController = showBottomSheet(
                 elevation: 8.0,
                 context: context,
                 constraints: const BoxConstraints(maxWidth: 640),
@@ -2350,7 +2350,7 @@ class ComponentGroupDecoration extends StatelessWidget {
       child: Card(
         margin: EdgeInsets.zero,
         elevation: 0,
-        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 20.0),
           child: Center(

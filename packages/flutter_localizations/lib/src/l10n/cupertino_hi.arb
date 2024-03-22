@@ -22,5 +22,10 @@
   "tabSemanticsLabel": "$tabCount का टैब $tabIndex",
   "modalBarrierDismissLabel": "खारिज करें",
   "searchTextFieldPlaceholderLabel": "खोजें",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "सही वर्तनी वाला कोई शब्द नहीं मिला",
+  "menuDismissLabel": "मेन्यू खारिज करें",
+  "lookUpButtonLabel": "लुक अप बटन",
+  "searchWebButtonLabel": "वेब पर खोजें",
+  "shareButtonLabel": "शेयर करें…",
+  "clearButtonLabel": "Clear"
 }

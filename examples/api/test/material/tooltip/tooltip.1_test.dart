@@ -15,11 +15,9 @@ void main() {
       const example.TooltipExampleApp(),
     );
 
-    TestGesture? gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(() async {
-      if (gesture != null) {
-        return gesture.removePointer();
-      }
+      return gesture.removePointer();
     });
     await gesture.addPointer();
     await gesture.moveTo(const Offset(1.0, 1.0));
@@ -38,14 +36,9 @@ void main() {
     // Move the mouse away and wait for the tooltip to disappear.
     await gesture.moveTo(const Offset(1.0, 1.0));
     await tester.pump();
-    // Wait a second and the tooltip should still be visible.
-    await tester.pump(const Duration(seconds: 1));
-    expect(find.text(tooltipText), findsOneWidget);
     // Wait another second and the tooltip should be gone.
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
-    await gesture.removePointer();
-    gesture = null;
     expect(find.text(tooltipText), findsNothing);
   });
 }

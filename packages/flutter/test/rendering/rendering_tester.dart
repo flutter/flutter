@@ -88,10 +88,7 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
   /// idempotent; calling it a second time will just return the
   /// previously-created instance.
   static TestRenderingFlutterBinding ensureInitialized({ VoidCallback? onErrors }) {
-    if (_instance != null) {
-      return _instance!;
-    }
-    return TestRenderingFlutterBinding(onErrors: onErrors);
+    return _instance ?? TestRenderingFlutterBinding(onErrors: onErrors);
   }
 
   final List<FlutterErrorDetails> _errors = <FlutterErrorDetails>[];
@@ -381,7 +378,11 @@ class FakeTicker implements Ticker {
 }
 
 class TestClipPaintingContext extends PaintingContext {
-  TestClipPaintingContext() : super(ContainerLayer(), Rect.zero);
+  TestClipPaintingContext() : this._(ContainerLayer());
+
+  TestClipPaintingContext._(this._containerLayer) : super(_containerLayer, Rect.zero);
+
+  final ContainerLayer _containerLayer;
 
   @override
   ClipRectLayer? pushClipRect(
@@ -397,6 +398,11 @@ class TestClipPaintingContext extends PaintingContext {
   }
 
   Clip clipBehavior = Clip.none;
+
+  @mustCallSuper
+  void dispose() {
+    _containerLayer.dispose();
+  }
 }
 
 class TestPushLayerPaintingContext extends PaintingContext {

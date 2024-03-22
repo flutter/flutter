@@ -243,6 +243,8 @@ void main() {
 
   testWidgets('Sliver appbars - floating and pinned - second app bar stacks below', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -295,7 +297,9 @@ void main() {
   testWidgets('Does not crash when there is less than minExtent remainingPaintExtent', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/21887.
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     const double availableHeight = 50.0;
+
     await tester.pumpWidget(
       MaterialApp(
         home: Center(

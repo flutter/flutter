@@ -12,7 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import 'test_border.dart' show TestBorder;
 
 final List<String> log = <String>[];
@@ -854,6 +853,7 @@ void main() {
 
   testWidgets('CustomClipper reclips when notified', (WidgetTester tester) async {
     final ValueNotifier<Rect> clip = ValueNotifier<Rect>(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
+    addTearDown(clip.dispose);
 
     await tester.pumpWidget(
       ClipRect(

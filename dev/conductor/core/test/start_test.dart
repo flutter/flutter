@@ -159,7 +159,7 @@ void main() {
               EngineRepository.defaultUpstream,
               engine.path,
             ],
-            onRun: () {
+            onRun: (_) {
               // Create the DEPS file which the tool will update
               engine.createSync(recursive: true);
               depsFile
@@ -368,7 +368,7 @@ void main() {
               EngineRepository.defaultUpstream,
               engine.path,
             ],
-            onRun: () {
+            onRun: (_) {
               // Create the DEPS file which the tool will update
               engine.createSync(recursive: true);
               depsFile
@@ -554,7 +554,7 @@ void main() {
               EngineRepository.defaultUpstream,
               engine.path,
             ],
-            onRun: () {
+            onRun: (_) {
               // Create the DEPS file which the tool will update
               engine.createSync(recursive: true);
               depsFile
@@ -763,7 +763,7 @@ void main() {
               EngineRepository.defaultUpstream,
               engine.path,
             ],
-            onRun: () {
+            onRun: (_) {
               // Create the DEPS file which the tool will update
               engine.createSync(recursive: true);
               depsFile
@@ -972,7 +972,7 @@ void main() {
               EngineRepository.defaultUpstream,
               engine.path,
             ],
-            onRun: () {
+            onRun: (_) {
               // Create the DEPS file which the tool will update
               engine.createSync(recursive: true);
               depsFile

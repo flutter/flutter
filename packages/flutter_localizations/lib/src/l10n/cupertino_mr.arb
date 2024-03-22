@@ -22,5 +22,10 @@
   "tabSemanticsLabel": "$tabCount पैकी $tabIndex टॅब",
   "modalBarrierDismissLabel": "डिसमिस करा",
   "searchTextFieldPlaceholderLabel": "शोधा",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "कोणतेही बदल आढळले नाहीत",
+  "menuDismissLabel": "मेनू डिसमिस करा",
+  "lookUpButtonLabel": "शोध घ्या",
+  "searchWebButtonLabel": "वेबवर शोधा",
+  "shareButtonLabel": "शेअर करा...",
+  "clearButtonLabel": "Clear"
 }

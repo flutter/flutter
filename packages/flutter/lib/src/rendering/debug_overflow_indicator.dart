@@ -109,9 +109,10 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     );
   static final Paint _labelBackgroundPaint = Paint()..color = const Color(0xFFFFFFFF);
 
-  final List<TextPainter> _indicatorLabel = List<TextPainter>.filled(
+  final List<TextPainter> _indicatorLabel = List<TextPainter>.generate(
     _OverflowSide.values.length,
-    TextPainter(textDirection: TextDirection.ltr), // This label is in English.
+    (int i) => TextPainter(textDirection: TextDirection.ltr), // This label is in English.
+    growable: false,
   );
 
   @override

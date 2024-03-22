@@ -7,12 +7,9 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'dart:ui' as ui show ParagraphBuilder;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -472,9 +469,7 @@ void main() {
       ),
     );
 
-    final double textWidth = ui.ParagraphBuilder.shouldDisableRoundingHack
-      ? width
-      : (width / 1.5).floorToDouble() * 1.5;
+    final double textWidth = width;
     // The title is scaled and transformed to be 1.5 times bigger, when the
     // FlexibleSpaceBar is fully expanded, thus we expect the width to be
     // 1.5 times smaller than the full width. The height of the text is the same
@@ -543,9 +538,7 @@ void main() {
     // bottom edge.
     const double bottomMargin = titleFontSize * (expandedTitleScale - 1);
 
-    final double textWidth = ui.ParagraphBuilder.shouldDisableRoundingHack
-      ? collapsedWidth
-      : (collapsedWidth / 3).floorToDouble() * 3;
+    final double textWidth = collapsedWidth;
     // The title is scaled and transformed to be 3 times bigger, when the
     // FlexibleSpaceBar is fully expanded, thus we expect the width to be
     // 3 times smaller than the full width. The height of the text is the same
@@ -726,7 +719,6 @@ void main() {
 
     await tester.pumpWidget(buildFrame(TargetPlatform.macOS, false));
     expect(getTitleBottomLeft(), const Offset(72.0, 16.0));
-
   });
 
   testWidgets('FlexibleSpaceBar test titlePadding override', (WidgetTester tester) async {
@@ -827,6 +819,137 @@ void main() {
     expect(RenderRebuildTracker.count, greaterThan(1));
     expect(tester.layers.whereType<OpacityLayer>(), isEmpty);
   });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/132030.
+  testWidgets('FlexibleSpaceBarSettings.hasLeading provides a gap between leading and title', (WidgetTester tester) async {
+    final FlexibleSpaceBarSettings customSettings = FlexibleSpaceBar.createSettings(
+      currentExtent: 200.0,
+      hasLeading: true,
+      child: AppBar(
+        leading: const Icon(Icons.menu),
+        flexibleSpace: FlexibleSpaceBar(
+          title: Text('title ' * 10),
+          // Set centerTitle to false to create a gap between the leading widget
+          // and the long title.
+          centerTitle: false,
+        ),
+      ),
+    ) as FlexibleSpaceBarSettings;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: CustomScrollView(
+            slivers: <Widget>[
+              SliverPersistentHeader(
+                floating: true,
+                pinned: true,
+                delegate: TestDelegate(settings: customSettings),
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 1200.0,
+                  color: Colors.orange[400],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.byType(Text)).dx, closeTo(72.0, 0.01));
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/135698.
+  testWidgets('_FlexibleSpaceHeaderOpacity with near zero opacity avoids compositing', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: NestedScrollView(
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                SliverOverlapAbsorber(
+                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                  sliver: const SliverAppBar(
+                    pinned: true,
+                    expandedHeight: 200.0,
+                    collapsedHeight: 56.0,
+                    flexibleSpace: FlexibleSpaceBar(background: SizedBox()),
+                  ),
+                ),
+              ];
+            },
+            body: const SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  Placeholder(fallbackHeight: 300.0),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Drag the scroll view to the top to collapse the sliver app bar.
+    // Ensure collapsed height - current extent is near zero for the
+    // FlexibleSpaceBar to avoid compositing.
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -(200.0 - 56.08787892026129)));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  }, variant: TargetPlatformVariant.mobile());
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/138608.
+  testWidgets('FlexibleSpaceBar centers title with a leading widget', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverAppBar(
+                leading: Icon(Icons.menu),
+                flexibleSpace: FlexibleSpaceBar(
+                  centerTitle: true,
+                  title: Text('X'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Offset appBarCenter = tester.getCenter(find.byType(AppBar));
+    final Offset titleCenter = tester.getCenter(find.text('X'));
+    expect(appBarCenter.dx, titleCenter.dx);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/138296.
+  testWidgets('Material3 - Default title color', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme, // Provide the expected theme data.
+        home: const Material(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverAppBar(
+                flexibleSpace: FlexibleSpaceBar(
+                  title: Text('Title'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final DefaultTextStyle textStyle = DefaultTextStyle.of(tester.element(find.text('Title')));
+    expect(textStyle.style.color, theme.textTheme.titleLarge!.color);
+  });
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {
@@ -909,21 +1032,17 @@ class _SubCategoryScreenViewState extends State<SubCategoryScreenView>
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 12)),
-          SliverToBoxAdapter(
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-              ),
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 300,
-              itemBuilder: (BuildContext context, int index) {
-                return Card(
-                  color: Colors.amber,
-                  child: Center(child: Text('$index')),
-                );
-              },
+          SliverGrid.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
             ),
+            itemCount: 300,
+            itemBuilder: (BuildContext context, int index) {
+              return Card(
+                color: Colors.amber,
+                child: Center(child: Text('$index')),
+              );
+            },
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 12)),
         ],

@@ -89,6 +89,9 @@ class TestRoute extends Route<String?> with LocalHistoryRoute<String?> {
   @override
   void dispose() {
     log('dispose');
+    for (final OverlayEntry e in _entries) {
+      e.dispose();
+    }
     _entries.clear();
     routes.remove(this);
     super.dispose();
@@ -545,8 +548,11 @@ void main() {
 
   testWidgets('Can autofocus a TextField nested in a Focus in a route.', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
 
     final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(
       Material(
         child: MaterialApp(
@@ -2074,12 +2080,8 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
   final Color? barrierColor;
 
   @override
-  Curve get barrierCurve {
-    if (_barrierCurve == null) {
-      return super.barrierCurve;
-    }
-    return _barrierCurve!;
-  }
+  Curve get barrierCurve => _barrierCurve ?? super.barrierCurve;
+
   final Curve? _barrierCurve;
 
   @override

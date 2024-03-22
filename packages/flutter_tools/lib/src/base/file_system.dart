@@ -109,12 +109,19 @@ String getDisplayPath(String fullPath, FileSystem fileSystem) {
 ///
 /// Skips files if [shouldCopyFile] returns `false`.
 /// Does not recurse over directories if [shouldCopyDirectory] returns `false`.
+///
+/// If [followLinks] is false, then any symbolic links found are reported as
+/// [Link] objects, rather than as directories or files, and are not recursed into.
+///
+/// If [followLinks] is true, then working links are reported as directories or
+/// files, depending on what they point to.
 void copyDirectory(
   Directory srcDir,
   Directory destDir, {
   bool Function(File srcFile, File destFile)? shouldCopyFile,
   bool Function(Directory)? shouldCopyDirectory,
   void Function(File srcFile, File destFile)? onFileCopied,
+  bool followLinks = true,
 }) {
   if (!srcDir.existsSync()) {
     throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
@@ -124,7 +131,7 @@ void copyDirectory(
     destDir.createSync(recursive: true);
   }
 
-  for (final FileSystemEntity entity in srcDir.listSync()) {
+  for (final FileSystemEntity entity in srcDir.listSync(followLinks: followLinks)) {
     final String newPath = destDir.fileSystem.path.join(destDir.path, entity.basename);
     if (entity is Link) {
       final Link newLink = destDir.fileSystem.link(newPath);
@@ -145,6 +152,7 @@ void copyDirectory(
         destDir.fileSystem.directory(newPath),
         shouldCopyFile: shouldCopyFile,
         onFileCopied: onFileCopied,
+        followLinks: followLinks,
       );
     } else {
       throw Exception('${entity.path} is neither File nor Directory, was ${entity.runtimeType}');

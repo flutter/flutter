@@ -37,8 +37,7 @@ void main() {
     });
 
     group('status bar', () {
-      testWidgets(
-        "statusBarColor isn't set for unannotated view",
+      testWidgets("statusBarColor isn't set for unannotated view",
         (WidgetTester tester) async {
           await tester.pumpWidget(const SizedBox.expand());
           await tester.pumpAndSettle();
@@ -47,8 +46,7 @@ void main() {
         },
       );
 
-      testWidgets(
-        'statusBarColor is set for annotated view',
+      testWidgets('statusBarColor is set for annotated view',
         (WidgetTester tester) async {
           setupTestDevice(tester);
           await tester.pumpWidget(const AnnotatedRegion<SystemUiOverlayStyle>(
@@ -67,8 +65,7 @@ void main() {
         variant: TargetPlatformVariant.mobile(),
       );
 
-      testWidgets(
-        "statusBarColor isn't set when view covers less than half of the system status bar",
+      testWidgets("statusBarColor isn't set when view covers less than half of the system status bar",
         (WidgetTester tester) async {
           setupTestDevice(tester);
           const double lessThanHalfOfTheStatusBarHeight =
@@ -92,8 +89,7 @@ void main() {
         variant: TargetPlatformVariant.mobile(),
       );
 
-      testWidgets(
-        'statusBarColor is set when view covers more than half of tye system status bar',
+      testWidgets('statusBarColor is set when view covers more than half of tye system status bar',
         (WidgetTester tester) async {
           setupTestDevice(tester);
           const double moreThanHalfOfTheStatusBarHeight =
@@ -122,8 +118,7 @@ void main() {
     });
 
     group('navigation color (Android only)', () {
-      testWidgets(
-        "systemNavigationBarColor isn't set for non Android device",
+      testWidgets("systemNavigationBarColor isn't set for non Android device",
         (WidgetTester tester) async {
           setupTestDevice(tester);
           await tester.pumpWidget(const AnnotatedRegion<SystemUiOverlayStyle>(
@@ -142,8 +137,7 @@ void main() {
         variant: TargetPlatformVariant.only(TargetPlatform.iOS),
       );
 
-      testWidgets(
-        "systemNavigationBarColor isn't set for unannotated view",
+      testWidgets("systemNavigationBarColor isn't set for unannotated view",
         (WidgetTester tester) async {
           await tester.pumpWidget(const SizedBox.expand());
           await tester.pumpAndSettle();
@@ -153,8 +147,7 @@ void main() {
         variant: TargetPlatformVariant.only(TargetPlatform.android),
       );
 
-      testWidgets(
-        'systemNavigationBarColor is set for annotated view',
+      testWidgets('systemNavigationBarColor is set for annotated view',
         (WidgetTester tester) async {
           setupTestDevice(tester);
           await tester.pumpWidget(const AnnotatedRegion<SystemUiOverlayStyle>(
@@ -173,8 +166,7 @@ void main() {
         variant: TargetPlatformVariant.only(TargetPlatform.android),
       );
 
-      testWidgets(
-        "systemNavigationBarColor isn't set when view covers less than half of navigation bar",
+      testWidgets("systemNavigationBarColor isn't set when view covers less than half of navigation bar",
         (WidgetTester tester) async {
           setupTestDevice(tester);
           const double lessThanHalfOfTheNavigationBarHeight =
@@ -198,8 +190,7 @@ void main() {
         variant: TargetPlatformVariant.only(TargetPlatform.android),
       );
 
-      testWidgets(
-        'systemNavigationBarColor is set when view covers more than half of navigation bar',
+      testWidgets('systemNavigationBarColor is set when view covers more than half of navigation bar',
         (WidgetTester tester) async {
           setupTestDevice(tester);
           const double moreThanHalfOfTheNavigationBarHeight =

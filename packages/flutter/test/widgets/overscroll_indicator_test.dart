@@ -7,8 +7,6 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 final Matcher doesNotOverscroll = isNot(paints..circle());
 
 Future<void> slowDrag(WidgetTester tester, Offset start, Offset offset) async {
@@ -293,7 +291,8 @@ void main() {
     expect(painter, doesNotOverscroll);
   });
 
-  testWidgets('Nested overscrolls do not throw exceptions', (WidgetTester tester) async {
+  testWidgets('Nested overscrolls do not throw exceptions',
+  (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: PageView(

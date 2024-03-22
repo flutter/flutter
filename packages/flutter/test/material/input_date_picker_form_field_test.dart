@@ -50,6 +50,7 @@ void main() {
     ThemeData? theme,
     Iterable<LocalizationsDelegate<dynamic>>? localizationsDelegates,
     bool acceptEmptyDate = false,
+    FocusNode? focusNode,
   }) {
     return MaterialApp(
       theme: theme ?? ThemeData.from(colorScheme: const ColorScheme.light()),
@@ -71,6 +72,7 @@ void main() {
             fieldLabelText: fieldLabelText,
             autofocus: autofocus,
             acceptEmptyDate: acceptEmptyDate,
+            focusNode: focusNode,
           ),
         ),
       ),
@@ -277,6 +279,8 @@ void main() {
       expect(tester.getSemantics(find.byType(EditableText)), matchesSemantics(
         label: 'Enter Date',
         isTextField: true,
+        hasEnabledState: true,
+        isEnabled: true,
         isFocused: true,
         value: '01/15/2016',
         hasTapAction: true,
@@ -376,5 +380,21 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text(errorFormatText), findsOneWidget);
     });
+  });
+
+  testWidgets('FocusNode can request focus', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(inputDatePickerField(
+      focusNode: focusNode,
+    ));
+    expect((tester.widget(find.byType(TextField)) as TextField).focusNode, focusNode);
+    expect(focusNode.hasFocus, isFalse);
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isTrue);
+    focusNode.unfocus();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, isFalse);
   });
 }

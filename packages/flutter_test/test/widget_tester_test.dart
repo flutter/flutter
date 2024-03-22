@@ -16,10 +16,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matcher/expect.dart' as matcher;
 import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
 
-const List<Widget> fooBarTexts = <Text>[
-  Text('foo', textDirection: TextDirection.ltr),
-  Text('bar', textDirection: TextDirection.ltr),
-];
+import 'multi_view_testing.dart';
 
 void main() {
   group('expectLater', () {
@@ -75,70 +72,6 @@ void main() {
     });
   }, skip: true); // [intended] API testing
 
-  group('findsOneWidget', () {
-    testWidgets('finds exactly one widget', (WidgetTester tester) async {
-      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
-      expect(find.text('foo'), findsOneWidget);
-    });
-
-    testWidgets('fails with a descriptive message', (WidgetTester tester) async {
-      late TestFailure failure;
-      try {
-        expect(find.text('foo', skipOffstage: false), findsOneWidget);
-      } on TestFailure catch (e) {
-        failure = e;
-      }
-
-      expect(failure, isNotNull);
-      final String? message = failure.message;
-      expect(message, contains('Expected: exactly one matching node in the widget tree\n'));
-      expect(message, contains('Actual: _TextFinder:<zero widgets with text "foo">\n'));
-      expect(message, contains('Which: means none were found but one was expected\n'));
-    });
-  });
-
-  group('findsNothing', () {
-    testWidgets('finds no widgets', (WidgetTester tester) async {
-      expect(find.text('foo'), findsNothing);
-    });
-
-    testWidgets('fails with a descriptive message', (WidgetTester tester) async {
-      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
-
-      late TestFailure failure;
-      try {
-        expect(find.text('foo', skipOffstage: false), findsNothing);
-      } on TestFailure catch (e) {
-        failure = e;
-      }
-
-      expect(failure, isNotNull);
-      final String? message = failure.message;
-
-      expect(message, contains('Expected: no matching nodes in the widget tree\n'));
-      expect(message, contains('Actual: _TextFinder:<exactly one widget with text "foo": Text("foo", textDirection: ltr, dependencies: [MediaQuery])>\n'));
-      expect(message, contains('Which: means one was found but none were expected\n'));
-    });
-
-    testWidgets('fails with a descriptive message when skipping', (WidgetTester tester) async {
-      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
-
-      late TestFailure failure;
-      try {
-        expect(find.text('foo'), findsNothing);
-      } on TestFailure catch (e) {
-        failure = e;
-      }
-
-      expect(failure, isNotNull);
-      final String? message = failure.message;
-
-      expect(message, contains('Expected: no matching nodes in the widget tree\n'));
-      expect(message, contains('Actual: _TextFinder:<exactly one widget with text "foo" (ignoring offstage widgets): Text("foo", textDirection: ltr, dependencies: [MediaQuery])>\n'));
-      expect(message, contains('Which: means one was found but none were expected\n'));
-    });
-  });
-
   group('pumping', () {
     testWidgets('pumping', (WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
@@ -188,223 +121,19 @@ void main() {
 
       await tester.pumpFrames(target, const Duration(milliseconds: 55));
 
-      expect(logPaints, <int>[0, 17000, 34000, 50000]);
+      // `pumpframes` defaults to 16 milliseconds and 683 microseconds per pump,
+      // so we expect 4 pumps of 16683 microseconds each in the 55ms duration.
+      expect(logPaints, <int>[0, 16683, 33366, 50049]);
       logPaints.clear();
 
       await tester.pumpFrames(target, const Duration(milliseconds: 30), const Duration(milliseconds: 10));
 
-      expect(logPaints, <int>[60000, 70000, 80000]);
+      // Since `pumpFrames` was given a 10ms interval per pump, we expect the
+      // results to continue from 50049 with 10000 microseconds per pump over
+      // the 30ms duration.
+      expect(logPaints, <int>[60049, 70049, 80049]);
     });
   });
-
-  group('find.byElementPredicate', () {
-    testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
-      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
-
-      const String customDescription = 'custom description';
-      late TestFailure failure;
-      try {
-        expect(find.byElementPredicate((_) => false, description: customDescription), findsOneWidget);
-      } on TestFailure catch (e) {
-        failure = e;
-      }
-
-      expect(failure, isNotNull);
-      expect(failure.message, contains('Actual: _ElementPredicateFinder:<zero widgets with $customDescription'));
-    });
-  });
-
-  group('find.byWidgetPredicate', () {
-    testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
-      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
-
-      const String customDescription = 'custom description';
-      late TestFailure failure;
-      try {
-        expect(find.byWidgetPredicate((_) => false, description: customDescription), findsOneWidget);
-      } on TestFailure catch (e) {
-        failure = e;
-      }
-
-      expect(failure, isNotNull);
-      expect(failure.message, contains('Actual: _WidgetPredicateFinder:<zero widgets with $customDescription'));
-    });
-  });
-
-  group('find.descendant', () {
-    testWidgets('finds one descendant', (WidgetTester tester) async {
-      await tester.pumpWidget(const Row(
-        textDirection: TextDirection.ltr,
-        children: <Widget>[
-          Column(children: fooBarTexts),
-        ],
-      ));
-
-      expect(find.descendant(
-        of: find.widgetWithText(Row, 'foo'),
-        matching: find.text('bar'),
-      ), findsOneWidget);
-    });
-
-    testWidgets('finds two descendants with different ancestors', (WidgetTester tester) async {
-      await tester.pumpWidget(const Row(
-        textDirection: TextDirection.ltr,
-        children: <Widget>[
-          Column(children: fooBarTexts),
-          Column(children: fooBarTexts),
-        ],
-      ));
-
-      expect(find.descendant(
-        of: find.widgetWithText(Column, 'foo'),
-        matching: find.text('bar'),
-      ), findsNWidgets(2));
-    });
-
-    testWidgets('fails with a descriptive message', (WidgetTester tester) async {
-      await tester.pumpWidget(const Row(
-        textDirection: TextDirection.ltr,
-        children: <Widget>[
-          Column(children: <Text>[Text('foo', textDirection: TextDirection.ltr)]),
-          Text('bar', textDirection: TextDirection.ltr),
-        ],
-      ));
-
-      late TestFailure failure;
-      try {
-        expect(find.descendant(
-          of: find.widgetWithText(Column, 'foo'),
-          matching: find.text('bar'),
-        ), findsOneWidget);
-      } on TestFailure catch (e) {
-        failure = e;
-      }
-
-      expect(failure, isNotNull);
-      expect(
-        failure.message,
-        contains(
-          'Actual: _DescendantFinder:<zero widgets with text "bar" that has ancestor(s) with type "Column" which is an ancestor of text "foo"',
-        ),
-      );
-    });
-  });
-
-  group('find.ancestor', () {
-    testWidgets('finds one ancestor', (WidgetTester tester) async {
-      await tester.pumpWidget(const Row(
-        textDirection: TextDirection.ltr,
-        children: <Widget>[
-          Column(children: fooBarTexts),
-        ],
-      ));
-
-      expect(find.ancestor(
-        of: find.text('bar'),
-        matching: find.widgetWithText(Row, 'foo'),
-      ), findsOneWidget);
-    });
-
-    testWidgets('finds two matching ancestors, one descendant', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Row(
-            children: <Widget>[
-              Row(children: fooBarTexts),
-            ],
-          ),
-        ),
-      );
-
-      expect(find.ancestor(
-        of: find.text('bar'),
-        matching: find.byType(Row),
-      ), findsNWidgets(2));
-    });
-
-    testWidgets('fails with a descriptive message', (WidgetTester tester) async {
-      await tester.pumpWidget(const Row(
-        textDirection: TextDirection.ltr,
-        children: <Widget>[
-          Column(children: <Text>[Text('foo', textDirection: TextDirection.ltr)]),
-          Text('bar', textDirection: TextDirection.ltr),
-        ],
-      ));
-
-      late TestFailure failure;
-      try {
-        expect(find.ancestor(
-          of: find.text('bar'),
-          matching: find.widgetWithText(Column, 'foo'),
-        ), findsOneWidget);
-      } on TestFailure catch (e) {
-        failure = e;
-      }
-
-      expect(failure, isNotNull);
-      expect(
-        failure.message,
-        contains(
-          'Actual: _AncestorFinder:<zero widgets with type "Column" which is an ancestor of text "foo" which is an ancestor of text "bar"',
-        ),
-      );
-    });
-
-    testWidgets('Root not matched by default', (WidgetTester tester) async {
-      await tester.pumpWidget(const Row(
-        textDirection: TextDirection.ltr,
-        children: <Widget>[
-          Column(children: fooBarTexts),
-        ],
-      ));
-
-      expect(find.ancestor(
-        of: find.byType(Column),
-        matching: find.widgetWithText(Column, 'foo'),
-      ), findsNothing);
-    });
-
-    testWidgets('Match the root', (WidgetTester tester) async {
-      await tester.pumpWidget(const Row(
-        textDirection: TextDirection.ltr,
-        children: <Widget>[
-          Column(children: fooBarTexts),
-        ],
-      ));
-
-      expect(find.descendant(
-        of: find.byType(Column),
-        matching: find.widgetWithText(Column, 'foo'),
-        matchRoot: true,
-      ), findsOneWidget);
-    });
-
-    testWidgets('is fast in deep tree', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: _deepWidgetTree(
-            depth: 1000,
-            child: Row(
-              children: <Widget>[
-                _deepWidgetTree(
-                  depth: 1000,
-                  child: const Column(children: fooBarTexts),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-
-      expect(find.ancestor(
-        of: find.text('bar'),
-        matching: find.byType(Row),
-      ), findsOneWidget);
-    });
-  });
-
   group('pageBack', () {
     testWidgets('fails when there are no back buttons', (WidgetTester tester) async {
       await tester.pumpWidget(Container());
@@ -911,6 +640,56 @@ void main() {
         .checkMockMessageHandler(SystemChannels.accessibility.name, null), isTrue);
     });
   });
+
+  testWidgets('wrapWithView: false does not include View', (WidgetTester tester) async {
+    FlutterView? flutterView;
+    View? view;
+    int builderCount = 0;
+    await tester.pumpWidget(
+      wrapWithView: false,
+      Builder(
+        builder: (BuildContext context) {
+          builderCount++;
+          flutterView = View.maybeOf(context);
+          view = context.findAncestorWidgetOfExactType<View>();
+          return const ViewCollection(views: <Widget>[]);
+        },
+      ),
+    );
+
+    expect(builderCount, 1);
+    expect(view, isNull);
+    expect(flutterView, isNull);
+    expect(find.byType(View), findsNothing);
+  });
+
+  testWidgets('passing a view to pumpWidget with wrapWithView: true throws', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      View(
+        view: FakeView(tester.view),
+        child: const SizedBox.shrink(),
+      ),
+    );
+    expect(
+      tester.takeException(),
+      isFlutterError.having(
+        (FlutterError e) => e.message,
+        'message',
+        contains('consider setting the "wrapWithView" parameter of that method to false'),
+      ),
+    );
+  });
+
+  testWidgets('can pass a View to pumpWidget when wrapWithView: false', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapWithView: false,
+      View(
+        view: tester.view,
+        child: const SizedBox.shrink(),
+      ),
+    );
+    expect(find.byType(View), findsOne);
+  });
 }
 
 class FakeMatcher extends AsyncMatcher {
@@ -984,13 +763,4 @@ class _AlwaysRepaint extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     onPaint();
   }
-}
-
-/// Wraps [child] in [depth] layers of [SizedBox]
-Widget _deepWidgetTree({required int depth, required Widget child}) {
-  Widget tree = child;
-  for (int i = 0; i < depth; i += 1) {
-    tree = SizedBox(child: tree);
-  }
-  return tree;
 }

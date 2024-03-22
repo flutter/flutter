@@ -6,19 +6,24 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 
 void main() {
   group('Signals', () {
     late Signals signals;
     late FakeProcessSignal fakeSignal;
     late ProcessSignal signalUnderTest;
+    late FakeShutdownHooks shutdownHooks;
 
     setUp(() {
-      signals = Signals.test();
+      shutdownHooks = FakeShutdownHooks();
+      signals = Signals.test(shutdownHooks: shutdownHooks);
       fakeSignal = FakeProcessSignal();
       signalUnderTest = ProcessSignal(fakeSignal);
     });
@@ -168,9 +173,10 @@ void main() {
       expect(errList, isEmpty);
     });
 
-    testWithoutContext('all handlers for exiting signals are run before exit', () async {
+    testUsingContext('all handlers for exiting signals are run before exit', () async {
       final Signals signals = Signals.test(
         exitSignals: <ProcessSignal>[signalUnderTest],
+        shutdownHooks: shutdownHooks,
       );
       final Completer<void> completer = Completer<void>();
       bool first = false;
@@ -201,6 +207,27 @@ void main() {
 
       fakeSignal.controller.add(fakeSignal);
       await completer.future;
+      expect(shutdownHooks.ranShutdownHooks, isTrue);
+    });
+
+    testUsingContext('ShutdownHooks run before exiting', () async {
+      final Signals signals = Signals.test(
+        exitSignals: <ProcessSignal>[signalUnderTest],
+        shutdownHooks: shutdownHooks,
+      );
+      final Completer<void> completer = Completer<void>();
+
+      setExitFunctionForTests((int exitCode) {
+        expect(exitCode, 0);
+        restoreExitFunction();
+        completer.complete();
+      });
+
+      signals.addHandler(signalUnderTest, (ProcessSignal s) {});
+
+      fakeSignal.controller.add(fakeSignal);
+      await completer.future;
+      expect(shutdownHooks.ranShutdownHooks, isTrue);
     });
   });
 }
@@ -210,4 +237,13 @@ class FakeProcessSignal extends Fake implements io.ProcessSignal {
 
   @override
   Stream<io.ProcessSignal> watch() => controller.stream;
+}
+
+class FakeShutdownHooks extends Fake implements ShutdownHooks {
+  bool ranShutdownHooks = false;
+
+  @override
+  Future<void> runShutdownHooks(Logger logger) async {
+    ranShutdownHooks = true;
+  }
 }

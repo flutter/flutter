@@ -59,8 +59,6 @@ class CupertinoThumbPainter {
   final Color color;
 
   /// The list of [BoxShadow] to paint below the thumb.
-  ///
-  /// Must not be null.
   final List<BoxShadow> shadows;
 
   /// Half the default diameter of the thumb.

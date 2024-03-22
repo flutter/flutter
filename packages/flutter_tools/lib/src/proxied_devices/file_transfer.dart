@@ -15,13 +15,20 @@ import '../convert.dart';
 
 /// Adler-32 and MD5 hashes of blocks in files.
 class BlockHashes {
-  BlockHashes({
+  const BlockHashes({
     required this.blockSize,
     required this.totalSize,
     required this.adler32,
     required this.md5,
     required this.fileMd5,
   });
+
+  BlockHashes.fromJson(Map<String, Object?> obj)
+      : blockSize = obj['blockSize']! as int,
+        totalSize = obj['totalSize']! as int,
+        adler32 = Uint32List.view(base64.decode(obj['adler32']! as String).buffer),
+        md5 = (obj['md5']! as List<Object?>).cast<String>(),
+        fileMd5 = obj['fileMd5']! as String;
 
   /// The block size used to generate the hashes.
   final int blockSize;
@@ -45,16 +52,6 @@ class BlockHashes {
     'md5': md5,
     'fileMd5': fileMd5,
   };
-
-  static BlockHashes fromJson(Map<String, Object?> obj) {
-    return BlockHashes(
-      blockSize: obj['blockSize']! as int,
-      totalSize: obj['totalSize']! as int,
-      adler32: Uint32List.view(base64.decode(obj['adler32']! as String).buffer),
-      md5: (obj['md5']! as List<Object>).cast<String>(),
-      fileMd5: obj['fileMd5']! as String,
-    );
-  }
 }
 
 /// Converts a stream of bytes, into a stream of bytes of fixed chunk size.
@@ -104,7 +101,7 @@ const int _adler32Prime = 65521;
 
 /// Helper function to calculate Adler32 hash of a binary.
 @visibleForTesting
-int adler32Hash(List<int> binary) {
+int adler32Hash(Uint8List binary) {
   // The maximum integer that can be stored in the `int` data type.
   const int maxInt = 0x1fffffffffffff;
   // maxChunkSize is the maximum number of bytes we can sum without
@@ -119,8 +116,8 @@ int adler32Hash(List<int> binary) {
   final int length = binary.length;
   for (int i = 0; i < length; i += maxChunkSize) {
     final int end = i + maxChunkSize < length ? i + maxChunkSize : length;
-    for (final int c in binary.getRange(i, end)) {
-      a += c;
+    for (int j = i; j < end; j++) {
+      a += binary[j];
       b += a;
     }
     a %= _adler32Prime;
@@ -220,19 +217,22 @@ class RollingAdler32 {
 /// On the receiving end, it will build a copy of the source file from the
 /// given instructions.
 class FileTransfer {
+  const FileTransfer();
+
   /// Calculate hashes of blocks in the file.
   Future<BlockHashes> calculateBlockHashesOfFile(File file, { int? blockSize }) async {
     final int totalSize = await file.length();
     blockSize ??= max(sqrt(totalSize).ceil(), 2560);
 
-    final Stream<Uint8List> fileContentStream = file.openRead().map((List<int> chunk) => Uint8List.fromList(chunk));
+    final Stream<Uint8List> fileContentStream = file.openRead().map((List<int> chunk) => chunk is Uint8List ? chunk : Uint8List.fromList(chunk));
 
     final List<int> adler32Results = <int>[];
     final List<String> md5Results = <String>[];
-    await for (final Uint8List chunk in convertToChunks(fileContentStream, blockSize)) {
+
+    await convertToChunks(fileContentStream, blockSize).forEach((Uint8List chunk) {
       adler32Results.add(adler32Hash(chunk));
       md5Results.add(base64.encode(md5.convert(chunk).bytes));
-    }
+    });
 
     // Handle whole file md5 separately. Md5Hash requires the chunk size to be a multiple of 64.
     final String fileMd5 = await _md5OfFile(file);
@@ -276,8 +276,9 @@ class FileTransfer {
 
     final List<FileDeltaBlock> blocks = <FileDeltaBlock>[];
 
-    await for (final List<int> chunk in fileContentStream) {
-      for (final int c in chunk) {
+    await fileContentStream.forEach((List<int> chunk) {
+      for (int i = 0; i < chunk.length; i++) {
+        final int c = chunk[i];
         final int hash = adler32.push(c);
         size++;
 
@@ -326,7 +327,7 @@ class FileTransfer {
           break;
         }
       }
-    }
+    });
 
     // For the remaining content that is not matched, copy from the source.
     if (start < size) {
@@ -401,7 +402,7 @@ class FileTransfer {
 
   Future<String> _md5OfFile(File file) async {
     final Md5Hash fileMd5Hash = Md5Hash();
-    await file.openRead().forEach((List<int> chunk) => fileMd5Hash.addChunk(Uint8List.fromList(chunk)));
+    await file.openRead().forEach((List<int> chunk) => fileMd5Hash.addChunk(chunk is Uint8List ? chunk : Uint8List.fromList(chunk)));
     return base64.encode(fileMd5Hash.finalize().buffer.asUint8List());
   }
 }

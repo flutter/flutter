@@ -1227,6 +1227,23 @@ void main() {
     );
     layout(goodRoot, onErrors: () { assert(false); });
   });
+
+  group('BaselineOffset', () {
+    test('minOf', () {
+      expect(BaselineOffset.noBaseline.minOf(BaselineOffset.noBaseline), BaselineOffset.noBaseline);
+
+      expect(BaselineOffset.noBaseline.minOf(const BaselineOffset(1)), const BaselineOffset(1));
+      expect(const BaselineOffset(1).minOf(BaselineOffset.noBaseline), const BaselineOffset(1));
+
+      expect(const BaselineOffset(2).minOf(const BaselineOffset(1)), const BaselineOffset(1));
+      expect(const BaselineOffset(1).minOf(const BaselineOffset(2)), const BaselineOffset(1));
+    });
+
+    test('+', () {
+      expect(BaselineOffset.noBaseline + 2, BaselineOffset.noBaseline);
+      expect(const BaselineOffset(1) + 2, const BaselineOffset(3));
+    });
+  });
 }
 
 class _DummyHitTestTarget implements HitTestTarget {

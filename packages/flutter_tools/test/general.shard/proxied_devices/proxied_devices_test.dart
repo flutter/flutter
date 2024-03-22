@@ -6,12 +6,16 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/dds.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/daemon.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/proxied_devices/devices.dart';
+import 'package:flutter_tools/src/proxied_devices/file_transfer.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -328,6 +332,167 @@ void main() {
       expect(message.data['method'], 'device.stopApp');
       expect(message.data['params'], <String, Object?>{'deviceId': 'device-id', 'userIdentifier': 'user-id'});
     });
+
+    group('when launching an app with PrebuiltApplicationPackage', () {
+      late MemoryFileSystem fileSystem;
+      late FakePrebuiltApplicationPackage applicationPackage;
+      const List<int> fileContent = <int>[100, 120, 140];
+      setUp(() {
+        fileSystem = MemoryFileSystem.test()
+          ..directory('dir').createSync()
+          ..file('dir/foo').writeAsBytesSync(fileContent);
+        applicationPackage = FakePrebuiltApplicationPackage(fileSystem.file('dir/foo'));
+      });
+
+      testWithoutContext('transfers file to the daemon', () async {
+        bufferLogger = BufferLogger.test();
+        final ProxiedDevices proxiedDevices = ProxiedDevices(
+          clientDaemonConnection,
+          logger: bufferLogger,
+          deltaFileTransfer: false,
+        );
+        final ProxiedDevice device = proxiedDevices.deviceFromDaemonResult(fakeDevice);
+
+        final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
+
+        final Future<String> resultFuture = device.applicationPackageId(applicationPackage);
+
+        // Send proxy.writeTempFile.
+        final DaemonMessage writeTempFileMessage = await broadcastOutput.first;
+        expect(writeTempFileMessage.data['id'], isNotNull);
+        expect(writeTempFileMessage.data['method'], 'proxy.writeTempFile');
+        expect(writeTempFileMessage.data['params'], <String, Object?>{
+          'path': 'foo',
+        });
+        expect(await writeTempFileMessage.binary?.first, fileContent);
+
+        serverDaemonConnection.sendResponse(writeTempFileMessage.data['id']!);
+
+        // Send device.uploadApplicationPackage.
+        final DaemonMessage uploadApplicationPackageMessage = await broadcastOutput.first;
+        expect(uploadApplicationPackageMessage.data['id'], isNotNull);
+        expect(uploadApplicationPackageMessage.data['method'], 'device.uploadApplicationPackage');
+        expect(uploadApplicationPackageMessage.data['params'], <String, Object?>{
+          'targetPlatform': 'android-arm',
+          'applicationBinary': 'foo',
+        });
+
+        serverDaemonConnection.sendResponse(uploadApplicationPackageMessage.data['id']!, 'test_id');
+        expect(await resultFuture, 'test_id');
+      });
+
+      testWithoutContext('transfers file to the daemon with delta turned on, file not exist on remote', () async {
+        bufferLogger = BufferLogger.test();
+        final FakeFileTransfer fileTransfer = FakeFileTransfer();
+        final ProxiedDevices proxiedDevices = ProxiedDevices(
+          clientDaemonConnection,
+          logger: bufferLogger,
+          fileTransfer: fileTransfer,
+        );
+        final ProxiedDevice device = proxiedDevices.deviceFromDaemonResult(fakeDevice);
+
+        final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
+
+        final Future<String> resultFuture = device.applicationPackageId(applicationPackage);
+
+        // Send proxy.calculateFileHashes.
+        final DaemonMessage calculateFileHashesMessage = await broadcastOutput.first;
+        expect(calculateFileHashesMessage.data['id'], isNotNull);
+        expect(calculateFileHashesMessage.data['method'], 'proxy.calculateFileHashes');
+        expect(calculateFileHashesMessage.data['params'], <String, Object?>{
+          'path': 'foo',
+        });
+        serverDaemonConnection.sendResponse(calculateFileHashesMessage.data['id']!);
+
+        // Send proxy.writeTempFile.
+        final DaemonMessage writeTempFileMessage = await broadcastOutput.first;
+        expect(writeTempFileMessage.data['id'], isNotNull);
+        expect(writeTempFileMessage.data['method'], 'proxy.writeTempFile');
+        expect(writeTempFileMessage.data['params'], <String, Object?>{
+          'path': 'foo',
+        });
+        expect(await writeTempFileMessage.binary?.first, fileContent);
+
+        serverDaemonConnection.sendResponse(writeTempFileMessage.data['id']!);
+
+        // Send device.uploadApplicationPackage.
+        final DaemonMessage uploadApplicationPackageMessage = await broadcastOutput.first;
+        expect(uploadApplicationPackageMessage.data['id'], isNotNull);
+        expect(uploadApplicationPackageMessage.data['method'], 'device.uploadApplicationPackage');
+        expect(uploadApplicationPackageMessage.data['params'], <String, Object?>{
+          'targetPlatform': 'android-arm',
+          'applicationBinary': 'foo',
+        });
+
+        serverDaemonConnection.sendResponse(uploadApplicationPackageMessage.data['id']!, 'test_id');
+        expect(await resultFuture, 'test_id');
+      });
+
+      testWithoutContext('transfers file to the daemon with delta turned on, file exists on remote', () async {
+        bufferLogger = BufferLogger.test();
+        final FakeFileTransfer fileTransfer = FakeFileTransfer();
+        const BlockHashes blockHashes = BlockHashes(
+          blockSize: 10,
+          totalSize: 30,
+          adler32: <int>[1, 2, 3],
+          md5: <String>['a', 'b', 'c'],
+          fileMd5: 'abc',
+        );
+        const List<FileDeltaBlock> deltaBlocks = <FileDeltaBlock>[
+          FileDeltaBlock.fromSource(start: 10, size: 10),
+          FileDeltaBlock.fromDestination(start: 30, size: 40),
+        ];
+        fileTransfer.binary = Uint8List.fromList(<int>[11, 12, 13]);
+        fileTransfer.delta = deltaBlocks;
+
+        final ProxiedDevices proxiedDevices = ProxiedDevices(
+          clientDaemonConnection,
+          logger: bufferLogger,
+          fileTransfer: fileTransfer,
+        );
+        final ProxiedDevice device = proxiedDevices.deviceFromDaemonResult(fakeDevice);
+
+        final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
+
+        final Future<String> resultFuture = device.applicationPackageId(applicationPackage);
+
+        // Send proxy.calculateFileHashes.
+        final DaemonMessage calculateFileHashesMessage = await broadcastOutput.first;
+        expect(calculateFileHashesMessage.data['id'], isNotNull);
+        expect(calculateFileHashesMessage.data['method'], 'proxy.calculateFileHashes');
+        expect(calculateFileHashesMessage.data['params'], <String, Object?>{
+          'path': 'foo',
+        });
+        serverDaemonConnection.sendResponse(calculateFileHashesMessage.data['id']!, blockHashes.toJson());
+
+        // Send proxy.updateFile.
+        final DaemonMessage updateFileMessage = await broadcastOutput.first;
+        expect(updateFileMessage.data['id'], isNotNull);
+        expect(updateFileMessage.data['method'], 'proxy.updateFile');
+        expect(updateFileMessage.data['params'], <String, Object?>{
+          'path': 'foo',
+          'delta': <Map<String, Object>>[
+            <String, Object>{'size': 10},
+            <String, Object>{'start': 30, 'size': 40},
+          ],
+        });
+        expect(await updateFileMessage.binary?.first, <int>[11, 12, 13]);
+
+        serverDaemonConnection.sendResponse(updateFileMessage.data['id']!);
+
+        // Send device.uploadApplicationPackage.
+        final DaemonMessage uploadApplicationPackageMessage = await broadcastOutput.first;
+        expect(uploadApplicationPackageMessage.data['id'], isNotNull);
+        expect(uploadApplicationPackageMessage.data['method'], 'device.uploadApplicationPackage');
+        expect(uploadApplicationPackageMessage.data['params'], <String, Object?>{
+          'targetPlatform': 'android-arm',
+          'applicationBinary': 'foo',
+        });
+
+        serverDaemonConnection.sendResponse(uploadApplicationPackageMessage.data['id']!, 'test_id');
+        expect(await resultFuture, 'test_id');
+      });
+    });
   });
 
   group('ProxiedDevices', () {
@@ -374,11 +539,11 @@ void main() {
 
       proxiedDevices.startPolling();
 
-      final ItemListNotifier<Device>? deviceNotifier = proxiedDevices.deviceNotifier;
+      final ItemListNotifier<Device> deviceNotifier = proxiedDevices.deviceNotifier;
       expect(deviceNotifier, isNotNull);
 
       final List<Device> devicesAdded = <Device>[];
-      deviceNotifier!.onAdded.listen((Device device) {
+      deviceNotifier.onAdded.listen((Device device) {
         devicesAdded.add(device);
       });
 
@@ -397,21 +562,58 @@ void main() {
       expect(devicesAdded[0].id, fakeDevice['id']);
       expect(devicesAdded[1].id, fakeDevice2['id']);
     });
-    // Explicit timeout is needed because the default timeout is 2s, but `startPolling` waits for
-    // 4s before making its first poll.
-    // TODO(chingjun): Remove the timeout.
-  }, timeout: const Timeout(Duration(seconds: 6)));
+
+    testWithoutContext('handles getDiagnostics', () async {
+      bufferLogger = BufferLogger.test();
+      final ProxiedDevices proxiedDevices = ProxiedDevices(
+        clientDaemonConnection,
+        logger: bufferLogger,
+      );
+
+      final Future<List<String>> resultFuture = proxiedDevices.getDiagnostics();
+
+      final DaemonMessage message = await serverDaemonConnection.incomingCommands.first;
+      expect(message.data['id'], isNotNull);
+      expect(message.data['method'], 'device.getDiagnostics');
+
+      serverDaemonConnection.sendResponse(message.data['id']!, <String>['1', '2']);
+
+      final List<String> result = await resultFuture;
+      expect(result, <String>['1', '2']);
+    });
+
+    testWithoutContext('returns empty result when daemon does not understand getDiagnostics', () async {
+      bufferLogger = BufferLogger.test();
+      final ProxiedDevices proxiedDevices = ProxiedDevices(
+        clientDaemonConnection,
+        logger: bufferLogger,
+      );
+
+      final Future<List<String>> resultFuture = proxiedDevices.getDiagnostics();
+
+      final DaemonMessage message = await serverDaemonConnection.incomingCommands.first;
+      expect(message.data['id'], isNotNull);
+      expect(message.data['method'], 'device.getDiagnostics');
+
+      serverDaemonConnection.sendErrorResponse(message.data['id']!, 'command not understood: device.getDiagnostics', StackTrace.current);
+
+      final List<String> result = await resultFuture;
+      expect(result, isEmpty);
+    });
+  });
 
   group('ProxiedDartDevelopmentService', () {
     testWithoutContext('forwards start and shutdown to remote', () async {
       final FakeProxiedPortForwarder portForwarder = FakeProxiedPortForwarder();
       portForwarder.originalRemotePortReturnValue = 200;
       portForwarder.forwardReturnValue = 400;
+      final FakeProxiedPortForwarder devicePortForwarder = FakeProxiedPortForwarder();
       final ProxiedDartDevelopmentService dds = ProxiedDartDevelopmentService(
         clientDaemonConnection,
         'test_id',
         logger: bufferLogger,
         proxiedPortForwarder: portForwarder,
+        devicePortForwarder: devicePortForwarder,
       );
 
       final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
@@ -443,15 +645,81 @@ void main() {
 
       expect(dds.uri, Uri.parse('http://127.0.0.1:400/remote'));
 
+      expect(
+        bufferLogger.eventText.trim(),
+        '{"name":"device.proxied_dds_forwarded","args":{"deviceId":"test_id","remoteUri":"http://127.0.0.1:300/remote","localUri":"http://127.0.0.1:400/remote"}}',
+      );
+
       unawaited(dds.shutdown());
 
       final DaemonMessage shutdownMessage = await broadcastOutput.first;
       expect(shutdownMessage.data['id'], isNotNull);
       expect(shutdownMessage.data['method'], 'device.shutdownDartDevelopmentService');
+      expect(shutdownMessage.data['params'], <String, Object?>{
+        'deviceId': 'test_id',
+      });
+    });
+
+    testWithoutContext('forwards start and shutdown to remote if port was forwarded by the device port forwarder', () async {
+      final FakeProxiedPortForwarder portForwarder = FakeProxiedPortForwarder();
+      portForwarder.forwardReturnValue = 400;
+      final FakeProxiedPortForwarder devicePortForwarder = FakeProxiedPortForwarder();
+      devicePortForwarder.originalRemotePortReturnValue = 200;
+      final ProxiedDartDevelopmentService dds = ProxiedDartDevelopmentService(
+        clientDaemonConnection,
+        'test_id',
+        logger: bufferLogger,
+        proxiedPortForwarder: portForwarder,
+        devicePortForwarder: devicePortForwarder,
+      );
+
+      final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
+
+      final Future<void> startFuture = dds.startDartDevelopmentService(
+        Uri.parse('http://127.0.0.1:100/fake'),
+        disableServiceAuthCodes: true,
+        hostPort: 150,
+        ipv6: false,
+        logger: bufferLogger,
+      );
+
+      final DaemonMessage startMessage = await broadcastOutput.first;
+      expect(startMessage.data['id'], isNotNull);
+      expect(startMessage.data['method'], 'device.startDartDevelopmentService');
+      expect(startMessage.data['params'], <String, Object?>{
+        'deviceId': 'test_id',
+        'vmServiceUri': 'http://127.0.0.1:200/fake',
+        'disableServiceAuthCodes': true,
+      });
+
+      serverDaemonConnection.sendResponse(startMessage.data['id']!, 'http://127.0.0.1:300/remote');
+
+      await startFuture;
+      expect(portForwarder.receivedLocalForwardedPort, 100);
+      expect(portForwarder.forwardedDevicePort, 300);
+      expect(portForwarder.forwardedHostPort, 150);
+      expect(portForwarder.forwardedIpv6, false);
+
+      expect(dds.uri, Uri.parse('http://127.0.0.1:400/remote'));
+
+      expect(
+        bufferLogger.eventText.trim(),
+        '{"name":"device.proxied_dds_forwarded","args":{"deviceId":"test_id","remoteUri":"http://127.0.0.1:300/remote","localUri":"http://127.0.0.1:400/remote"}}',
+      );
+
+      unawaited(dds.shutdown());
+
+      final DaemonMessage shutdownMessage = await broadcastOutput.first;
+      expect(shutdownMessage.data['id'], isNotNull);
+      expect(shutdownMessage.data['method'], 'device.shutdownDartDevelopmentService');
+      expect(shutdownMessage.data['params'], <String, Object?>{
+        'deviceId': 'test_id',
+      });
     });
 
     testWithoutContext('starts a local dds if the VM service port is not a forwarded port', () async {
       final FakeProxiedPortForwarder portForwarder = FakeProxiedPortForwarder();
+      final FakeProxiedPortForwarder devicePortForwarder = FakeProxiedPortForwarder();
       final FakeDartDevelopmentService localDds = FakeDartDevelopmentService();
       localDds.uri = Uri.parse('http://127.0.0.1:450/local');
       final ProxiedDartDevelopmentService dds = ProxiedDartDevelopmentService(
@@ -459,6 +727,7 @@ void main() {
         'test_id',
         logger: bufferLogger,
         proxiedPortForwarder: portForwarder,
+        devicePortForwarder: devicePortForwarder,
         localDds: localDds,
       );
 
@@ -488,6 +757,7 @@ void main() {
     testWithoutContext('starts a local dds if the remote VM does not support starting DDS', () async {
       final FakeProxiedPortForwarder portForwarder = FakeProxiedPortForwarder();
       portForwarder.originalRemotePortReturnValue = 200;
+      final FakeProxiedPortForwarder devicePortForwarder = FakeProxiedPortForwarder();
       final FakeDartDevelopmentService localDds = FakeDartDevelopmentService();
       localDds.uri = Uri.parse('http://127.0.0.1:450/local');
       final ProxiedDartDevelopmentService dds = ProxiedDartDevelopmentService(
@@ -495,6 +765,7 @@ void main() {
         'test_id',
         logger: bufferLogger,
         proxiedPortForwarder: portForwarder,
+        devicePortForwarder: devicePortForwarder,
         localDds: localDds,
       );
 
@@ -711,4 +982,20 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 
   @override
   Future<void> shutdown() async => shutdownCalled = true;
+}
+
+class FakePrebuiltApplicationPackage extends Fake implements PrebuiltApplicationPackage {
+  FakePrebuiltApplicationPackage(this.applicationPackage);
+  @override
+  final FileSystemEntity applicationPackage;
+}
+
+class FakeFileTransfer extends Fake implements FileTransfer {
+  List<FileDeltaBlock>? delta;
+  Uint8List? binary;
+  @override
+  Future<List<FileDeltaBlock>> computeDelta(File file, BlockHashes hashes) async => delta!;
+
+  @override
+  Future<Uint8List> binaryForRebuilding(File file, List<FileDeltaBlock> delta) async => binary!;
 }

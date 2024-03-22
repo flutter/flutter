@@ -28,8 +28,7 @@ export 'package:flutter/physics.dart' show Tolerance;
 /// information about the Scrollable in order to be initialized.
 @immutable
 class ScrollableDetails {
-  /// Creates a set of details describing the [Scrollable]. The [direction]
-  /// cannot be null.
+  /// Creates a set of details describing the [Scrollable].
   const ScrollableDetails({
     required this.direction,
     this.controller,
@@ -185,21 +184,17 @@ class EdgeDraggingAutoScroller {
   bool _scrolling = false;
 
   double _offsetExtent(Offset offset, Axis scrollDirection) {
-    switch (scrollDirection) {
-      case Axis.horizontal:
-        return offset.dx;
-      case Axis.vertical:
-        return offset.dy;
-    }
+    return switch (scrollDirection) {
+      Axis.horizontal => offset.dx,
+      Axis.vertical   => offset.dy,
+    };
   }
 
   double _sizeExtent(Size size, Axis scrollDirection) {
-    switch (scrollDirection) {
-      case Axis.horizontal:
-        return size.width;
-      case Axis.vertical:
-        return size.height;
-    }
+    return switch (scrollDirection) {
+      Axis.horizontal => size.width,
+      Axis.vertical   => size.height,
+    };
   }
 
   AxisDirection get _axisDirection => scrollable.axisDirection;
@@ -338,8 +333,6 @@ enum ScrollIncrementType {
 /// for the scrollable.
 class ScrollIncrementDetails {
   /// A const constructor for a [ScrollIncrementDetails].
-  ///
-  /// All of the arguments must not be null, and are required.
   const ScrollIncrementDetails({
     required this.type,
     required this.metrics,
@@ -405,8 +398,8 @@ class ScrollAction extends ContextAction<ScrollIntent> {
   ///
   /// Must not be called when the position is null, or when any of the position
   /// metrics (pixels, viewportDimension, maxScrollExtent, minScrollExtent) are
-  /// null. The type and state arguments must not be null, and the widget must
-  /// have already been laid out so that the position fields are valid.
+  /// null. The widget must have already been laid out so that the position
+  /// fields are valid.
   static double _calculateScrollIncrement(ScrollableState state, { ScrollIncrementType type = ScrollIncrementType.line }) {
     assert(state.position.hasPixels);
     assert(state.resolvedPhysics == null || state.resolvedPhysics!.shouldAcceptUserOffset(state.position));
@@ -418,60 +411,20 @@ class ScrollAction extends ContextAction<ScrollIntent> {
         ),
       );
     }
-    switch (type) {
-      case ScrollIncrementType.line:
-        return 50.0;
-      case ScrollIncrementType.page:
-        return 0.8 * state.position.viewportDimension;
-    }
+    return switch (type) {
+      ScrollIncrementType.line => 50.0,
+      ScrollIncrementType.page => 0.8 * state.position.viewportDimension,
+    };
   }
 
   /// Find out how much of an increment to move by, taking the different
   /// directions into account.
   static double getDirectionalIncrement(ScrollableState state, ScrollIntent intent) {
-    final double increment = _calculateScrollIncrement(state, type: intent.type);
-    switch (intent.direction) {
-      case AxisDirection.down:
-        switch (state.axisDirection) {
-          case AxisDirection.up:
-            return -increment;
-          case AxisDirection.down:
-            return increment;
-          case AxisDirection.right:
-          case AxisDirection.left:
-            return 0.0;
-        }
-      case AxisDirection.up:
-        switch (state.axisDirection) {
-          case AxisDirection.up:
-            return increment;
-          case AxisDirection.down:
-            return -increment;
-          case AxisDirection.right:
-          case AxisDirection.left:
-            return 0.0;
-        }
-      case AxisDirection.left:
-        switch (state.axisDirection) {
-          case AxisDirection.right:
-            return -increment;
-          case AxisDirection.left:
-            return increment;
-          case AxisDirection.up:
-          case AxisDirection.down:
-            return 0.0;
-        }
-      case AxisDirection.right:
-        switch (state.axisDirection) {
-          case AxisDirection.right:
-            return increment;
-          case AxisDirection.left:
-            return -increment;
-          case AxisDirection.up:
-          case AxisDirection.down:
-            return 0.0;
-        }
+    if (axisDirectionToAxis(intent.direction) == axisDirectionToAxis(state.axisDirection)) {
+      final double increment = _calculateScrollIncrement(state, type: intent.type);
+      return intent.direction == state.axisDirection ? increment : -increment;
     }
+    return 0.0;
   }
 
   @override

@@ -4,6 +4,7 @@
 
 import 'package:intl/locale.dart';
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../convert.dart';
@@ -566,13 +567,18 @@ class Message {
   }
 }
 
-// Represents the contents of one ARB file.
+/// Represents the contents of one ARB file.
 class AppResourceBundle {
+  /// Assuming that the caller has verified that the file exists and is readable.
   factory AppResourceBundle(File file) {
-    // Assuming that the caller has verified that the file exists and is readable.
-    Map<String, Object?> resources;
+    final Map<String, Object?> resources;
     try {
-      resources = json.decode(file.readAsStringSync()) as Map<String, Object?>;
+      final String content = file.readAsStringSync().trim();
+      if (content.isEmpty) {
+        resources = <String, Object?>{};
+      } else {
+        resources = json.decode(content) as Map<String, Object?>;
+      }
     } on FormatException catch (e) {
       throw L10nException(
         'The arb file ${file.path} has the following formatting issue: \n'
@@ -641,7 +647,14 @@ class AppResourceBundle {
   final Map<String, Object?> resources;
   final Iterable<String> resourceIds;
 
-  String? translationFor(String resourceId) => resources[resourceId] as String?;
+  String? translationFor(String resourceId) {
+    final Object? result = resources[resourceId];
+    if (result is! String?) {
+      throwToolExit('Localized message for key "$resourceId" in "${file.path}" '
+        'is not a string.');
+    }
+    return result;
+  }
 
   @override
   String toString() {
@@ -657,20 +670,26 @@ class AppResourceBundleCollection {
     final RegExp filenameRE = RegExp(r'(\w+)\.arb$');
     final Map<LocaleInfo, AppResourceBundle> localeToBundle = <LocaleInfo, AppResourceBundle>{};
     final Map<String, List<LocaleInfo>> languageToLocales = <String, List<LocaleInfo>>{};
-    final List<File> files = directory.listSync().whereType<File>().toList()..sort(sortFilesByPath);
+    // We require the list of files to be sorted so that
+    // "languageToLocales[bundle.locale.languageCode]" is not null
+    // by the time we handle locales with country codes.
+    final List<File> files = directory
+      .listSync()
+      .whereType<File>()
+      .where((File e) => filenameRE.hasMatch(e.path))
+      .toList()
+      ..sort(sortFilesByPath);
     for (final File file in files) {
-      if (filenameRE.hasMatch(file.path)) {
-        final AppResourceBundle bundle = AppResourceBundle(file);
-        if (localeToBundle[bundle.locale] != null) {
-          throw L10nException(
-            "Multiple arb files with the same '${bundle.locale}' locale detected. \n"
-            'Ensure that there is exactly one arb file for each locale.'
-          );
-        }
-        localeToBundle[bundle.locale] = bundle;
-        languageToLocales[bundle.locale.languageCode] ??= <LocaleInfo>[];
-        languageToLocales[bundle.locale.languageCode]!.add(bundle.locale);
+      final AppResourceBundle bundle = AppResourceBundle(file);
+      if (localeToBundle[bundle.locale] != null) {
+        throw L10nException(
+          "Multiple arb files with the same '${bundle.locale}' locale detected. \n"
+          'Ensure that there is exactly one arb file for each locale.'
+        );
       }
+      localeToBundle[bundle.locale] = bundle;
+      languageToLocales[bundle.locale.languageCode] ??= <LocaleInfo>[];
+      languageToLocales[bundle.locale.languageCode]!.add(bundle.locale);
     }
 
     languageToLocales.forEach((String language, List<LocaleInfo> listOfCorrespondingLocales) {

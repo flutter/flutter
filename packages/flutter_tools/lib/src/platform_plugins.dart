@@ -84,19 +84,14 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
   })  : _fileSystem = fileSystem,
         ffiPlugin = ffiPlugin ?? false;
 
-  factory AndroidPlugin.fromYaml(String name, YamlMap yaml, String pluginPath, FileSystem fileSystem) {
-    assert(validate(yaml));
-    return AndroidPlugin(
-      name: name,
-      package: yaml['package'] as String?,
-      pluginClass: yaml[kPluginClass] as String?,
-      dartPluginClass: yaml[kDartPluginClass] as String?,
-      ffiPlugin: yaml[kFfiPlugin] as bool?,
-      defaultPackage: yaml[kDefaultPackage] as String?,
-      pluginPath: pluginPath,
-      fileSystem: fileSystem,
-    );
-  }
+  AndroidPlugin.fromYaml(this.name, YamlMap yaml, this.pluginPath, FileSystem fileSystem)
+      : assert(validate(yaml)),
+        package = yaml['package'] as String?,
+        pluginClass = yaml[kPluginClass] as String?,
+        dartPluginClass = yaml[kDartPluginClass] as String?,
+        ffiPlugin = yaml[kFfiPlugin] as bool? ?? false,
+        defaultPackage = yaml[kDefaultPackage] as String?,
+        _fileSystem = fileSystem;
 
   final FileSystem _fileSystem;
 
@@ -244,18 +239,14 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
   }) : ffiPlugin = ffiPlugin ?? false,
        sharedDarwinSource = sharedDarwinSource ?? false;
 
-  factory IOSPlugin.fromYaml(String name, YamlMap yaml) {
-    assert(validate(yaml)); // TODO(zanderso): https://github.com/flutter/flutter/issues/67241
-    return IOSPlugin(
-      name: name,
-      classPrefix: '',
-      pluginClass: yaml[kPluginClass] as String?,
-      dartPluginClass: yaml[kDartPluginClass] as String?,
-      ffiPlugin: yaml[kFfiPlugin] as bool?,
-      defaultPackage: yaml[kDefaultPackage] as String?,
-      sharedDarwinSource: yaml[kSharedDarwinSource] as bool?,
-    );
-  }
+  IOSPlugin.fromYaml(this.name, YamlMap yaml)
+      : assert(validate(yaml)), // TODO(zanderso): https://github.com/flutter/flutter/issues/67241
+        classPrefix = '',
+        pluginClass = yaml[kPluginClass] as String?,
+        dartPluginClass = yaml[kDartPluginClass] as String?,
+        ffiPlugin = yaml[kFfiPlugin] as bool? ?? false,
+        defaultPackage = yaml[kDefaultPackage] as String?,
+        sharedDarwinSource = yaml[kSharedDarwinSource] as bool? ?? false;
 
   static bool validate(YamlMap yaml) {
     return yaml[kPluginClass] is String ||
@@ -321,22 +312,14 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
   }) : ffiPlugin = ffiPlugin ?? false,
        sharedDarwinSource = sharedDarwinSource ?? false;
 
-  factory MacOSPlugin.fromYaml(String name, YamlMap yaml) {
-    assert(validate(yaml));
-    // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
-    String? pluginClass = yaml[kPluginClass] as String?;
-    if (pluginClass == 'none') {
-      pluginClass = null;
-    }
-    return MacOSPlugin(
-      name: name,
-      pluginClass: pluginClass,
-      dartPluginClass: yaml[kDartPluginClass] as String?,
-      ffiPlugin: yaml[kFfiPlugin] as bool?,
-      defaultPackage: yaml[kDefaultPackage] as String?,
-      sharedDarwinSource: yaml[kSharedDarwinSource] as bool?,
-    );
-  }
+  MacOSPlugin.fromYaml(this.name, YamlMap yaml)
+      : assert(validate(yaml)),
+        // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
+        pluginClass = yaml[kPluginClass] == 'none' ? null : yaml[kPluginClass] as String?,
+        dartPluginClass = yaml[kDartPluginClass] as String?,
+        ffiPlugin = yaml[kFfiPlugin] as bool? ?? false,
+        defaultPackage = yaml[kDefaultPackage] as String?,
+        sharedDarwinSource = yaml[kSharedDarwinSource] as bool? ?? false;
 
   static bool validate(YamlMap yaml) {
     return yaml[kPluginClass] is String ||
@@ -487,21 +470,13 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
   })  : ffiPlugin = ffiPlugin ?? false,
         assert(pluginClass != null || dartPluginClass != null || (ffiPlugin ?? false) || defaultPackage != null);
 
-  factory LinuxPlugin.fromYaml(String name, YamlMap yaml) {
-    assert(validate(yaml));
-    // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
-    String? pluginClass = yaml[kPluginClass] as String?;
-    if (pluginClass == 'none') {
-      pluginClass = null;
-    }
-    return LinuxPlugin(
-      name: name,
-      pluginClass: pluginClass,
-      dartPluginClass: yaml[kDartPluginClass] as String?,
-      ffiPlugin: yaml[kFfiPlugin] as bool?,
-      defaultPackage: yaml[kDefaultPackage] as String?,
-    );
-  }
+  LinuxPlugin.fromYaml(this.name, YamlMap yaml)
+      : assert(validate(yaml)),
+        // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
+        pluginClass = yaml[kPluginClass] == 'none' ? null : yaml[kPluginClass] as String?,
+        dartPluginClass = yaml[kDartPluginClass] as String?,
+        ffiPlugin = yaml[kFfiPlugin] as bool? ?? false,
+        defaultPackage = yaml[kDefaultPackage] as String?;
 
   static bool validate(YamlMap yaml) {
     return yaml[kPluginClass] is String ||

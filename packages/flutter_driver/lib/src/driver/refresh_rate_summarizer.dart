@@ -11,13 +11,9 @@ const String kUIThreadVsyncProcessEvent = 'VsyncProcessCallback';
 ///
 /// `RefreshRate` is the time between the start of a vsync pulse and the target time of that vsync.
 class RefreshRateSummary {
-
   /// Creates a [RefreshRateSummary] given the timeline events.
-  factory RefreshRateSummary({required List<TimelineEvent> vsyncEvents}) {
-    return RefreshRateSummary._(refreshRates: _computeRefreshRates(vsyncEvents));
-  }
-
-  RefreshRateSummary._({required List<double> refreshRates}) {
+  RefreshRateSummary({required List<TimelineEvent> vsyncEvents}) {
+    final List<double> refreshRates = _computeRefreshRates(vsyncEvents);
     _numberOfTotalFrames = refreshRates.length;
     for (final double refreshRate in refreshRates) {
       if ((refreshRate - 30).abs() < _kErrorMargin) {

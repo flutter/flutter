@@ -1,5 +1,5 @@
 {
-  "version": "v0_162",
+  "version": "v0_206",
 
   "md.comp.outlined-segmented-button.container.height": 40.0,
   "md.comp.outlined-segmented-button.disabled.icon.color": "onSurface",
@@ -8,6 +8,9 @@
   "md.comp.outlined-segmented-button.disabled.label-text.opacity": 0.38,
   "md.comp.outlined-segmented-button.disabled.outline.color": "onSurface",
   "md.comp.outlined-segmented-button.disabled.outline.opacity": 0.12,
+  "md.comp.outlined-segmented-button.focus.indicator.color": "secondary",
+  "md.comp.outlined-segmented-button.focus.indicator.outline.offset": "md.sys.state.focus-indicator.outer-offset",
+  "md.comp.outlined-segmented-button.focus.indicator.thickness": "md.sys.state.focus-indicator.thickness",
   "md.comp.outlined-segmented-button.focus.state-layer.opacity": "md.sys.state.focus.state-layer-opacity",
   "md.comp.outlined-segmented-button.hover.state-layer.opacity": "md.sys.state.hover.state-layer-opacity",
   "md.comp.outlined-segmented-button.label-text.text-style": "labelLarge",

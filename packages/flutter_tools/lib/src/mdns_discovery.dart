@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:multicast_dns/multicast_dns.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'base/common.dart';
 import 'base/context.dart';
@@ -26,10 +27,12 @@ class MDnsVmServiceDiscovery {
     MDnsClient? preliminaryMDnsClient,
     required Logger logger,
     required Usage flutterUsage,
+    required Analytics analytics,
   })  : _client = mdnsClient ?? MDnsClient(),
         _preliminaryClient = preliminaryMDnsClient,
         _logger = logger,
-        _flutterUsage = flutterUsage;
+        _flutterUsage = flutterUsage,
+        _analytics = analytics;
 
   final MDnsClient _client;
 
@@ -39,6 +42,7 @@ class MDnsVmServiceDiscovery {
 
   final Logger _logger;
   final Usage _flutterUsage;
+  final Analytics _analytics;
 
   @visibleForTesting
   static const String dartVmServiceName = '_dartVmService._tcp.local';
@@ -130,9 +134,9 @@ class MDnsVmServiceDiscovery {
   /// The [deviceVmservicePort] parameter must be set to specify which port
   /// to find.
   ///
-  /// [applicationId] and [deviceVmservicePort] are required for launch so that
-  /// if multiple flutter apps are running on different devices, it will
-  /// only match with the device running the desired app.
+  /// [applicationId] and either [deviceVmservicePort] or [deviceName] are
+  /// required for launch so that if multiple flutter apps are running on
+  /// different devices, it will only match with the device running the desired app.
   ///
   /// The [useDeviceIPAsHost] parameter flags whether to get the device IP
   /// and the [ipv6] parameter flags whether to get an iPv6 address
@@ -141,21 +145,27 @@ class MDnsVmServiceDiscovery {
   /// The [timeout] parameter determines how long to continue to wait for
   /// services to become active.
   ///
-  /// If a Dart VM Service matching the [applicationId] and [deviceVmservicePort]
-  /// cannot be found after the [timeout], it will call [throwToolExit].
+  /// If a Dart VM Service matching the [applicationId] and
+  /// [deviceVmservicePort]/[deviceName] cannot be found before the [timeout]
+  /// is reached, it will call [throwToolExit].
   @visibleForTesting
   Future<MDnsVmServiceDiscoveryResult?> queryForLaunch({
     required String applicationId,
-    required int deviceVmservicePort,
+    int? deviceVmservicePort,
+    String? deviceName,
     bool ipv6 = false,
     bool useDeviceIPAsHost = false,
     Duration timeout = const Duration(minutes: 10),
   }) async {
-    // Query for a specific application and device port.
+    // Either the device port or the device name must be provided.
+    assert(deviceVmservicePort != null || deviceName != null);
+
+    // Query for a specific application matching on either device port or device name.
     return firstMatchingVmService(
       _client,
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
+      deviceName: deviceName,
       ipv6: ipv6,
       useDeviceIPAsHost: useDeviceIPAsHost,
       timeout: timeout,
@@ -170,6 +180,7 @@ class MDnsVmServiceDiscovery {
     MDnsClient client, {
     String? applicationId,
     int? deviceVmservicePort,
+    String? deviceName,
     bool ipv6 = false,
     bool useDeviceIPAsHost = false,
     Duration timeout = const Duration(minutes: 10),
@@ -178,6 +189,7 @@ class MDnsVmServiceDiscovery {
       client,
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
+      deviceName: deviceName,
       ipv6: ipv6,
       useDeviceIPAsHost: useDeviceIPAsHost,
       timeout: timeout,
@@ -193,6 +205,7 @@ class MDnsVmServiceDiscovery {
     MDnsClient client, {
     String? applicationId,
     int? deviceVmservicePort,
+    String? deviceName,
     bool ipv6 = false,
     bool useDeviceIPAsHost = false,
     required Duration timeout,
@@ -260,6 +273,11 @@ class MDnsVmServiceDiscovery {
 
         // If deviceVmservicePort is set, only use records that match it
         if (deviceVmservicePort != null && srvRecord.port != deviceVmservicePort) {
+          continue;
+        }
+
+        // If deviceName is set, only use records that match it
+        if (deviceName != null && !deviceNameMatchesTargetName(deviceName, srvRecord.target)) {
           continue;
         }
 
@@ -332,6 +350,15 @@ class MDnsVmServiceDiscovery {
     }
   }
 
+  @visibleForTesting
+  bool deviceNameMatchesTargetName(String deviceName, String targetName) {
+    // Remove `.local` from the name along with any non-word, non-digit characters.
+    final RegExp cleanedNameRegex = RegExp(r'\.local|\W');
+    final String cleanedDeviceName = deviceName.trim().toLowerCase().replaceAll(cleanedNameRegex, '');
+    final String cleanedTargetName = targetName.toLowerCase().replaceAll(cleanedNameRegex, '');
+    return cleanedDeviceName == cleanedTargetName;
+  }
+
   String _getAuthCode(String txtRecord) {
     const String authCodePrefix = 'authCode=';
     final Iterable<String> matchingRecords =
@@ -354,7 +381,7 @@ class MDnsVmServiceDiscovery {
   /// When [useDeviceIPAsHost] is true, it will use the device's IP as the
   /// host and will not forward the port.
   ///
-  /// Differs from `getVMServiceUriForLaunch` because it can search for any available Dart VM Service.
+  /// Differs from [getVMServiceUriForLaunch] because it can search for any available Dart VM Service.
   /// Since [applicationId] and [deviceVmservicePort] are optional, it can either look for any service
   /// or a specific service matching [applicationId]/[deviceVmservicePort].
   /// It may find more than one service, which will throw an error listing the found services.
@@ -391,20 +418,22 @@ class MDnsVmServiceDiscovery {
   /// When [useDeviceIPAsHost] is true, it will use the device's IP as the
   /// host and will not forward the port.
   ///
-  /// Differs from `getVMServiceUriForAttach` because it only searches for a specific service.
-  /// This is enforced by [applicationId] and [deviceVmservicePort] being required.
+  /// Differs from [getVMServiceUriForAttach] because it only searches for a specific service.
+  /// This is enforced by [applicationId] being required and using either the
+  /// [deviceVmservicePort] or the [device]'s name to query.
   Future<Uri?> getVMServiceUriForLaunch(
     String applicationId,
     Device device, {
     bool usesIpv6 = false,
     int? hostVmservicePort,
-    required int deviceVmservicePort,
+    int? deviceVmservicePort,
     bool useDeviceIPAsHost = false,
     Duration timeout = const Duration(minutes: 10),
   }) async {
     final MDnsVmServiceDiscoveryResult? result = await queryForLaunch(
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
+      deviceName: deviceVmservicePort == null ? device.name : null,
       ipv6: usesIpv6,
       useDeviceIPAsHost: useDeviceIPAsHost,
       timeout: timeout,
@@ -479,6 +508,7 @@ class MDnsVmServiceDiscovery {
     switch (targetPlatform) {
       case TargetPlatform.ios:
         UsageEvent('ios-mdns', 'no-ipv4-link-local', flutterUsage: _flutterUsage).send();
+        _analytics.send(Event.appleUsageEvent(workflow: 'ios-mdns', parameter: 'no-ipv4-link-local'));
         _logger.printError(
           'The mDNS query for an attached iOS device failed. It may '
           'be necessary to disable the "Personal Hotspot" on the device, and '
@@ -499,6 +529,7 @@ class MDnsVmServiceDiscovery {
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
         _logger.printTrace('No interface with an ipv4 link local address was found.');
     }
   }

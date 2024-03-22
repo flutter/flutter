@@ -36,8 +36,6 @@ import 'sliver_multi_box_adaptor.dart';
 class RenderSliverList extends RenderSliverMultiBoxAdaptor {
   /// Creates a sliver that places multiple box children in a linear array along
   /// the main axis.
-  ///
-  /// The [childManager] argument must not be null.
   RenderSliverList({
     required super.childManager,
   });

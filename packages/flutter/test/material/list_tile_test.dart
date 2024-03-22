@@ -10,8 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -61,22 +59,22 @@ void main() {
 
     const double leftPadding = 10.0;
     const double rightPadding = 20.0;
-    Widget buildFrame({ bool dense = false, bool isTwoLine = false, bool isThreeLine = false, double textScaleFactor = 1.0, double? subtitleScaleFactor }) {
+    Widget buildFrame({ bool dense = false, bool isTwoLine = false, bool isThreeLine = false, TextScaler textScaler = TextScaler.noScaling, TextScaler? subtitleScaler }) {
       hasSubtitle = isTwoLine || isThreeLine;
-      subtitleScaleFactor ??= textScaleFactor;
+      subtitleScaler ??= textScaler;
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
         home: MediaQuery(
           data: MediaQueryData(
             padding: const EdgeInsets.only(left: leftPadding, right: rightPadding),
-            textScaleFactor: textScaleFactor,
+            textScaler: textScaler,
           ),
           child: Material(
             child: Center(
               child: ListTile(
                 leading: SizedBox(key: leadingKey, width: 24.0, height: 24.0),
                 title: const Text('title'),
-                subtitle: hasSubtitle ? Text('subtitle', textScaleFactor: subtitleScaleFactor) : null,
+                subtitle: hasSubtitle ? Text('subtitle', textScaler: subtitleScaler) : null,
                 trailing: SizedBox(key: trailingKey, width: 24.0, height: 24.0),
                 dense: dense,
                 isThreeLine: isThreeLine,
@@ -148,30 +146,32 @@ void main() {
     testHorizontalGeometry();
     testVerticalGeometry(88.0);
 
-    await tester.pumpWidget(buildFrame(textScaleFactor: 4.0));
+    await tester.pumpWidget(buildFrame(textScaler: const TextScaler.linear(4.0)));
     testChildren();
     testHorizontalGeometry();
     testVerticalGeometry(112.0);
 
-    await tester.pumpWidget(buildFrame(isTwoLine: true, textScaleFactor: 4.0));
+    await tester.pumpWidget(buildFrame(isTwoLine: true, textScaler: const TextScaler.linear(4.0)));
     testChildren();
     testHorizontalGeometry();
-    // TODO(tahatesser): https://github.com/flutter/flutter/issues/99933
-    //                A bug in the HTML renderer and/or Chrome 96+ causes a
-    //                discrepancy in the paragraph height.
-    const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
-    testVerticalGeometry(hasIssue99933 ? 193 : 192.0);
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      testVerticalGeometry(192.0);
+    }
 
     // Make sure that the height of a large subtitle is taken into account.
-    await tester.pumpWidget(buildFrame(isTwoLine: true, textScaleFactor: 0.5, subtitleScaleFactor: 4.0));
+    await tester.pumpWidget(buildFrame(isTwoLine: true, textScaler: const TextScaler.linear(0.5), subtitleScaler: const TextScaler.linear(4.0)));
     testChildren();
     testHorizontalGeometry();
-    testVerticalGeometry(hasIssue99933 ? 109 : 108.0);
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      testVerticalGeometry(108.0);
+    }
 
-    await tester.pumpWidget(buildFrame(isThreeLine: true, textScaleFactor: 4.0));
+    await tester.pumpWidget(buildFrame(isThreeLine: true, textScaler: const TextScaler.linear(4.0)));
     testChildren();
     testHorizontalGeometry();
-    testVerticalGeometry(hasIssue99933 ? 193 : 192.0);
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      testVerticalGeometry(192.0);
+    }
   });
 
   testWidgets('ListTile geometry (RTL)', (WidgetTester tester) async {
@@ -504,13 +504,13 @@ void main() {
         ),
       ),
     );
-    // TODO(tahatesser): https://github.com/flutter/flutter/issues/99933
-    //                A bug in the HTML renderer and/or Chrome 96+ causes a
-    //                discrepancy in the paragraph height.
-    const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
-    const double height = hasIssue99933 ? 301.0 : 300;
-    const double avatarTop = hasIssue99933 ? 130.5 : 130.0;
-    const double placeholderTop = hasIssue99933 ? 138.5 : 138.0;
+
+    if (kIsWeb && !isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      return;
+    }
+    const double height = 300;
+    const double avatarTop = 130.0;
+    const double placeholderTop = 138.0;
     //                                                                          LEFT                 TOP          WIDTH  HEIGHT
     expect(tester.getRect(find.byType(ListTile).at(0)),     const Rect.fromLTWH(                0.0,            0.0, 800.0, height));
     expect(tester.getRect(find.byType(CircleAvatar).at(0)), const Rect.fromLTWH(               16.0,      avatarTop,  40.0,  40.0));
@@ -904,6 +904,8 @@ void main() {
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
           ),
     );
+
+    focusNode.dispose();
   });
 
   testWidgets('ListTile can be hovered and has correct hover color', (WidgetTester tester) async {
@@ -1234,6 +1236,8 @@ void main() {
     await tester.pump();
     expect(gotFocus, isFalse);
     expect(node.hasFocus, isFalse);
+
+    node.dispose();
   });
 
   testWidgets('ListTile respects tileColor & selectedTileColor', (WidgetTester tester) async {
@@ -1376,7 +1380,7 @@ void main() {
       find.byType(Material),
       paints
         ..path(color: const Color(0xff000000))
-        ..path(color: const Color(0xffece6f3))
+        ..path(color: const Color(0xfff7f2fa))
         ..save()
         ..save(),
     );
@@ -1390,7 +1394,7 @@ void main() {
       find.byType(Material),
       paints
         ..path(color: const Color(0xff000000))
-        ..path(color: const Color(0xffece6f3))
+        ..path(color: const Color(0xfff7f2fa))
         ..save()
         ..save(),
     );
@@ -1798,6 +1802,36 @@ void main() {
     expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
     expect(right('title'), 708.0);
   });
+  testWidgets('ListTile minTileHeight', (WidgetTester tester) async {
+    Widget buildFrame(TextDirection textDirection, { double? minTileHeight, }) {
+      return MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: textDirection,
+          child: Material(
+            child: Container(
+              alignment: Alignment.topLeft,
+              child: ListTile(
+                minTileHeight: minTileHeight,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Default list tile with height = 56.0
+    await tester.pumpWidget(buildFrame(TextDirection.ltr));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 56.0));
+
+    // Set list tile height = 30.0
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, minTileHeight: 30));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 30.0));
+
+    // Set list tile height = 60.0
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, minTileHeight: 60));
+    expect(tester.getSize(find.byType(ListTile)), const Size(800.0, 60.0));
+  });
 
   testWidgets('colors are applied to leading and trailing text widgets', (WidgetTester tester) async {
     final Key leadingKey = UniqueKey();
@@ -2012,10 +2046,6 @@ void main() {
     expect(
       description,
       equalsIgnoringHashCodes(<String>[
-        'leading: Text',
-        'title: Text',
-        'subtitle: Text',
-        'trailing: Text',
         'isThreeLine: THREE_LINE',
         'dense: true',
         'visualDensity: VisualDensity#00000(h: 0.0, v: 0.0)',
@@ -2495,22 +2525,22 @@ void main() {
 
       const double leftPadding = 10.0;
       const double rightPadding = 20.0;
-      Widget buildFrame({ bool dense = false, bool isTwoLine = false, bool isThreeLine = false, double textScaleFactor = 1.0, double? subtitleScaleFactor }) {
+      Widget buildFrame({ bool dense = false, bool isTwoLine = false, bool isThreeLine = false, TextScaler textScaler = TextScaler.noScaling, TextScaler? subtitleScaler }) {
         hasSubtitle = isTwoLine || isThreeLine;
-        subtitleScaleFactor ??= textScaleFactor;
+        subtitleScaler ??= textScaler;
         return MaterialApp(
           theme: ThemeData(useMaterial3: false),
           home: MediaQuery(
             data: MediaQueryData(
               padding: const EdgeInsets.only(left: leftPadding, right: rightPadding),
-              textScaleFactor: textScaleFactor,
+              textScaler: textScaler,
             ),
             child: Material(
               child: Center(
                 child: ListTile(
                   leading: SizedBox(key: leadingKey, width: 24.0, height: 24.0),
                   title: const Text('title'),
-                  subtitle: hasSubtitle ? Text('subtitle', textScaleFactor: subtitleScaleFactor) : null,
+                  subtitle: hasSubtitle ? Text('subtitle', textScaler: subtitleScaler) : null,
                   trailing: SizedBox(key: trailingKey, width: 24.0, height: 24.0),
                   dense: dense,
                   isThreeLine: isThreeLine,
@@ -2597,38 +2627,38 @@ void main() {
       testHorizontalGeometry();
       testVerticalGeometry(76.0);
 
-      await tester.pumpWidget(buildFrame(textScaleFactor: 4.0));
+      await tester.pumpWidget(buildFrame(textScaler: const TextScaler.linear(4.0)));
       testChildren();
       testHorizontalGeometry();
       testVerticalGeometry(72.0);
 
-      await tester.pumpWidget(buildFrame(dense: true, textScaleFactor: 4.0));
+      await tester.pumpWidget(buildFrame(dense: true, textScaler: const TextScaler.linear(4.0)));
       testChildren();
       testHorizontalGeometry();
       testVerticalGeometry(72.0);
 
-      await tester.pumpWidget(buildFrame(isTwoLine: true, textScaleFactor: 4.0));
+      await tester.pumpWidget(buildFrame(isTwoLine: true, textScaler: const TextScaler.linear(4.0)));
       testChildren();
       testHorizontalGeometry();
       testVerticalGeometry(128.0);
 
       // Make sure that the height of a large subtitle is taken into account.
-      await tester.pumpWidget(buildFrame(isTwoLine: true, textScaleFactor: 0.5, subtitleScaleFactor: 4.0));
+      await tester.pumpWidget(buildFrame(isTwoLine: true, textScaler: const TextScaler.linear(0.5), subtitleScaler: const TextScaler.linear(4.0)));
       testChildren();
       testHorizontalGeometry();
       testVerticalGeometry(72.0);
 
-      await tester.pumpWidget(buildFrame(isTwoLine: true, dense: true, textScaleFactor: 4.0));
+      await tester.pumpWidget(buildFrame(isTwoLine: true, dense: true, textScaler: const TextScaler.linear(4.0)));
       testChildren();
       testHorizontalGeometry();
       testVerticalGeometry(128.0);
 
-      await tester.pumpWidget(buildFrame(isThreeLine: true, textScaleFactor: 4.0));
+      await tester.pumpWidget(buildFrame(isThreeLine: true, textScaler: const TextScaler.linear(4.0)));
       testChildren();
       testHorizontalGeometry();
       testVerticalGeometry(128.0);
 
-      await tester.pumpWidget(buildFrame(isThreeLine: true, dense: true, textScaleFactor: 4.0));
+      await tester.pumpWidget(buildFrame(isThreeLine: true, dense: true, textScaler: const TextScaler.linear(4.0)));
       testChildren();
       testHorizontalGeometry();
       testVerticalGeometry(128.0);

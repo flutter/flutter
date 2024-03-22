@@ -15,7 +15,10 @@ import '../microbenchmarks.dart';
 
 /// Creates a device lab task that runs benchmarks in
 /// `dev/benchmarks/microbenchmarks` reports results to the dashboard.
-TaskFunction createMicrobenchmarkTask({bool? enableImpeller}) {
+TaskFunction createMicrobenchmarkTask({
+  bool? enableImpeller,
+  Map<String, String> environment = const <String, String>{},
+}) {
   return () async {
     final Device device = await devices.workingDevice;
     await device.unlock();
@@ -41,9 +44,9 @@ TaskFunction createMicrobenchmarkTask({bool? enableImpeller}) {
           return startFlutter(
             'run',
             options: options,
+            environment: environment,
           );
         });
-
         return readJsonResults(flutterProcess);
       }
 
@@ -71,6 +74,7 @@ TaskFunction createMicrobenchmarkTask({bool? enableImpeller}) {
       ...await runMicrobench('lib/stocks/build_bench.dart'),
       ...await runMicrobench('lib/stocks/layout_bench.dart'),
       ...await runMicrobench('lib/ui/image_bench.dart'),
+      ...await runMicrobench('lib/layout/text_intrinsic_bench.dart'),
     };
 
     return TaskResult.success(allResults,

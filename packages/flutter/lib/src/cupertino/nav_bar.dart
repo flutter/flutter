@@ -140,13 +140,10 @@ Widget _wrapWithBackground({
   if (updateSystemUiOverlay) {
     final bool isDark = backgroundColor.computeLuminance() < 0.179;
     final Brightness newBrightness = brightness ?? (isDark ? Brightness.dark : Brightness.light);
-    final SystemUiOverlayStyle overlayStyle;
-    switch (newBrightness) {
-      case Brightness.dark:
-        overlayStyle = SystemUiOverlayStyle.light;
-      case Brightness.light:
-        overlayStyle = SystemUiOverlayStyle.dark;
-    }
+    final SystemUiOverlayStyle overlayStyle = switch (newBrightness) {
+      Brightness.dark  => SystemUiOverlayStyle.light,
+      Brightness.light => SystemUiOverlayStyle.dark,
+    };
     // [SystemUiOverlayStyle.light] and [SystemUiOverlayStyle.dark] set some system
     // navigation bar properties,
     // Before https://github.com/flutter/flutter/pull/104827 those properties
@@ -293,8 +290,6 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// 3. Show a back chevron with the previous route's `title` if the current
   ///    route is a [CupertinoPageRoute] and the previous route is also a
   ///    [CupertinoPageRoute].
-  ///
-  /// This value cannot be null.
   /// {@endtemplate}
   final bool automaticallyImplyLeading;
 
@@ -303,8 +298,6 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// If true and [middle] is null, automatically fill in a [Text] widget with
   /// the current route's `title` if the route is a [CupertinoPageRoute].
   /// If [middle] widget is not null, this parameter has no effect.
-  ///
-  /// This value cannot be null.
   final bool automaticallyImplyMiddle;
 
   /// {@template flutter.cupertino.CupertinoNavigationBar.previousPageTitle}
@@ -395,7 +388,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// When set to true, only one navigation bar can be present per route unless
   /// [heroTag] is also set.
   ///
-  /// This value defaults to true and cannot be null.
+  /// This value defaults to true.
   /// {@endtemplate}
   final bool transitionBetweenRoutes;
 
@@ -411,8 +404,8 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// navigation bars per route or to transition between multiple
   /// [Navigator]s.
   ///
-  /// Cannot be null. To disable Hero transitions for this navigation bar,
-  /// set [transitionBetweenRoutes] to false.
+  /// To disable Hero transitions for this navigation bar, set
+  /// [transitionBetweenRoutes] to false.
   /// {@endtemplate}
   final Object heroTag;
 
@@ -577,7 +570,8 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 class CupertinoSliverNavigationBar extends StatefulWidget {
   /// Creates a navigation bar for scrolling lists.
   ///
-  /// The [largeTitle] argument is required and must not be null.
+  /// If [automaticallyImplyTitle] is false, then the [largeTitle] argument is
+  /// required.
   const CupertinoSliverNavigationBar({
     super.key,
     this.largeTitle,
@@ -638,8 +632,6 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// If true and [largeTitle] is null, automatically fill in a [Text] widget
   /// with the current route's `title` if the route is a [CupertinoPageRoute].
   /// If [largeTitle] widget is not null, this parameter has no effect.
-  ///
-  /// This value cannot be null.
   final bool automaticallyImplyTitle;
 
   /// Controls whether [middle] widget should always be visible (even in
@@ -1402,8 +1394,6 @@ class _NavigationBarStaticComponents {
 class CupertinoNavigationBarBackButton extends StatelessWidget {
   /// Construct a [CupertinoNavigationBarBackButton] that can be used to pop
   /// the current route.
-  ///
-  /// The [color] parameter must not be null.
   const CupertinoNavigationBarBackButton({
     super.key,
     this.color,

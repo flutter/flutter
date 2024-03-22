@@ -7,7 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 import 'states.dart';
 
@@ -664,6 +663,7 @@ void main() {
     final TestClipPaintingContext context = TestClipPaintingContext();
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.none));
+    context.dispose();
   });
 
   testWidgets('GridView respects clipBehavior', (WidgetTester tester) async {
@@ -730,6 +730,7 @@ void main() {
     // 4th, check that a non-default clip behavior can be sent to the painting context.
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.antiAlias));
+    context.dispose();
   });
 
   testWidgets('GridView.builder respects clipBehavior', (WidgetTester tester) async {
@@ -857,6 +858,44 @@ void main() {
         maxCrossAxisExtent: maxCrossAxisExtent,
       ),
     ), throwsAssertionError);
+  });
 
+  testWidgets('SliverGrid sets correct extent for null returning builder delegate', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/130685
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: GridView.builder(
+        controller: controller,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+        ),
+        itemBuilder: (BuildContext context, int index) {
+          if (index == 12) {
+            return null;
+          }
+          return Container(
+            height: 100,
+            width: 100,
+            color: const Color(0xFFFF8A80),
+            alignment: Alignment.center,
+            child: Text('item ${index+1}'),
+          );
+        },
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(controller.position.maxScrollExtent, double.infinity);
+    expect(controller.position.pixels, 0.0);
+    await tester.fling(find.byType(GridView), const Offset(0.0, -1300.0), 100.0);
+    await tester.pumpAndSettle();
+    // The actual extent of the children is 472.0. This should be reflected when
+    // the builder returns null (meaning we have reached the end).
+    expect(controller.position.maxScrollExtent, 472.0);
+    expect(controller.position.pixels, 472.0);
   });
 }

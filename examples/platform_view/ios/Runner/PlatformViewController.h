@@ -8,8 +8,8 @@
 - (void)didUpdateCounter:(int)counter;
 @end
 
-
 @interface PlatformViewController : UIViewController
-@property (strong, nonatomic) id<PlatformViewControllerDelegate> delegate;
+@property(weak, nonatomic) IBOutlet UIButton* incrementButton;
+@property(strong, nonatomic) id<PlatformViewControllerDelegate> delegate;
 @property int counter;
 @end

@@ -11,6 +11,7 @@ void main() {
 
     expect(localizations.openAppDrawerTooltip, isNotNull);
     expect(localizations.backButtonTooltip, isNotNull);
+    expect(localizations.clearButtonTooltip, isNotNull);
     expect(localizations.closeButtonTooltip, isNotNull);
     expect(localizations.deleteButtonTooltip, isNotNull);
     expect(localizations.moreButtonTooltip, isNotNull);
@@ -29,6 +30,9 @@ void main() {
     expect(localizations.copyButtonLabel, isNotNull);
     expect(localizations.cutButtonLabel, isNotNull);
     expect(localizations.scanTextButtonLabel, isNotNull);
+    expect(localizations.lookUpButtonLabel, isNotNull);
+    expect(localizations.searchWebButtonLabel, isNotNull);
+    expect(localizations.shareButtonLabel, isNotNull);
     expect(localizations.okButtonLabel, isNotNull);
     expect(localizations.pasteButtonLabel, isNotNull);
     expect(localizations.selectAllButtonLabel, isNotNull);
@@ -38,6 +42,7 @@ void main() {
     expect(localizations.timePickerHourModeAnnouncement, isNotNull);
     expect(localizations.timePickerMinuteModeAnnouncement, isNotNull);
     expect(localizations.modalBarrierDismissLabel, isNotNull);
+    expect(localizations.menuDismissLabel, isNotNull);
     expect(localizations.drawerLabel, isNotNull);
     expect(localizations.menuBarMenuLabel, isNotNull);
     expect(localizations.popupMenuLabel, isNotNull);
@@ -132,6 +137,7 @@ void main() {
     expect(localizations.currentDateLabel, isNotNull);
     expect(localizations.scrimLabel, isNotNull);
     expect(localizations.bottomSheetLabel, isNotNull);
+    expect(localizations.selectedDateLabel, isNotNull);
 
     expect(localizations.scrimOnTapHint('FOO'), contains('FOO'));
 

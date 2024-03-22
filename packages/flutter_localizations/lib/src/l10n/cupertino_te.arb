@@ -22,5 +22,10 @@
   "tabSemanticsLabel": "$tabCountలో $tabIndexవ ట్యాబ్",
   "modalBarrierDismissLabel": "విస్మరించు",
   "searchTextFieldPlaceholderLabel": "సెర్చ్ చేయి",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "రీప్లేస్‌మెంట్‌లు ఏవీ కనుగొనబడలేదు",
+  "menuDismissLabel": "మెనూను తీసివేయండి",
+  "lookUpButtonLabel": "వెతకండి",
+  "searchWebButtonLabel": "వెబ్‌లో సెర్చ్ చేయండి",
+  "shareButtonLabel": "షేర్ చేయండి...",
+  "clearButtonLabel": "Clear"
 }

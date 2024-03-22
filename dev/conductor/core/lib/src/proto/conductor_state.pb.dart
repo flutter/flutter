@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-///
+//
 //  Generated code. Do not modify.
 //  source: conductor_state.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,unnecessary_const,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type,unnecessary_this,prefer_final_fields
+
+// ignore_for_file: annotate_overrides, camel_case_types
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:core' as $core;
 
@@ -19,33 +23,19 @@ import 'conductor_state.pbenum.dart';
 export 'conductor_state.pbenum.dart';
 
 class Remote extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Remote',
-      package: const $pb.PackageName(
-          const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'conductor_state'),
-      createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'url')
-    ..hasRequiredFields = false;
-
+  factory Remote() => create();
   Remote._() : super();
-  factory Remote({
-    $core.String? name,
-    $core.String? url,
-  }) {
-    final _result = create();
-    if (name != null) {
-      _result.name = name;
-    }
-    if (url != null) {
-      _result.url = url;
-    }
-    return _result;
-  }
   factory Remote.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(i, r);
   factory Remote.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Remote',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'conductor_state'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'name')
+    ..aOS(2, _omitFieldNames ? '' : 'url')
+    ..hasRequiredFields = false;
+
   @$core.Deprecated('Using this can add significant overhead to your binary. '
       'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
       'Will be removed in next major version')
@@ -53,9 +43,10 @@ class Remote extends $pb.GeneratedMessage {
   @$core.Deprecated('Using this can add significant overhead to your binary. '
       'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
       'Will be removed in next major version')
-  Remote copyWith(void Function(Remote) updates) =>
-      super.copyWith((message) => updates(message as Remote)) as Remote; // ignore: deprecated_member_use
+  Remote copyWith(void Function(Remote) updates) => super.copyWith((message) => updates(message as Remote)) as Remote;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Remote create() => Remote._();
   Remote createEmptyInstance() => create();
@@ -90,42 +81,21 @@ class Remote extends $pb.GeneratedMessage {
 }
 
 class Cherrypick extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Cherrypick',
-      package: const $pb.PackageName(
-          const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'conductor_state'),
-      createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trunkRevision',
-        protoName: 'trunkRevision')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'appliedRevision',
-        protoName: 'appliedRevision')
-    ..e<CherrypickState>(
-        3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'state', $pb.PbFieldType.OE,
-        defaultOrMaker: CherrypickState.PENDING, valueOf: CherrypickState.valueOf, enumValues: CherrypickState.values)
-    ..hasRequiredFields = false;
-
+  factory Cherrypick() => create();
   Cherrypick._() : super();
-  factory Cherrypick({
-    $core.String? trunkRevision,
-    $core.String? appliedRevision,
-    CherrypickState? state,
-  }) {
-    final _result = create();
-    if (trunkRevision != null) {
-      _result.trunkRevision = trunkRevision;
-    }
-    if (appliedRevision != null) {
-      _result.appliedRevision = appliedRevision;
-    }
-    if (state != null) {
-      _result.state = state;
-    }
-    return _result;
-  }
   factory Cherrypick.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(i, r);
   factory Cherrypick.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Cherrypick',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'conductor_state'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'trunkRevision', protoName: 'trunkRevision')
+    ..aOS(2, _omitFieldNames ? '' : 'appliedRevision', protoName: 'appliedRevision')
+    ..e<CherrypickState>(3, _omitFieldNames ? '' : 'state', $pb.PbFieldType.OE,
+        defaultOrMaker: CherrypickState.PENDING, valueOf: CherrypickState.valueOf, enumValues: CherrypickState.values)
+    ..hasRequiredFields = false;
+
   @$core.Deprecated('Using this can add significant overhead to your binary. '
       'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
       'Will be removed in next major version')
@@ -134,8 +104,10 @@ class Cherrypick extends $pb.GeneratedMessage {
       'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
       'Will be removed in next major version')
   Cherrypick copyWith(void Function(Cherrypick) updates) =>
-      super.copyWith((message) => updates(message as Cherrypick)) as Cherrypick; // ignore: deprecated_member_use
+      super.copyWith((message) => updates(message as Cherrypick)) as Cherrypick;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Cherrypick create() => Cherrypick._();
   Cherrypick createEmptyInstance() => create();
@@ -182,78 +154,26 @@ class Cherrypick extends $pb.GeneratedMessage {
 }
 
 class Repository extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Repository',
-      package: const $pb.PackageName(
-          const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'conductor_state'),
-      createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'candidateBranch',
-        protoName: 'candidateBranch')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'startingGitHead',
-        protoName: 'startingGitHead')
-    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'currentGitHead',
-        protoName: 'currentGitHead')
-    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'checkoutPath',
-        protoName: 'checkoutPath')
-    ..aOM<Remote>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'upstream',
-        subBuilder: Remote.create)
-    ..aOM<Remote>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'mirror',
-        subBuilder: Remote.create)
-    ..pc<Cherrypick>(
-        7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'cherrypicks', $pb.PbFieldType.PM,
-        subBuilder: Cherrypick.create)
-    ..aOS(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'dartRevision',
-        protoName: 'dartRevision')
-    ..aOS(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'workingBranch',
-        protoName: 'workingBranch')
-    ..hasRequiredFields = false;
-
+  factory Repository() => create();
   Repository._() : super();
-  factory Repository({
-    $core.String? candidateBranch,
-    $core.String? startingGitHead,
-    $core.String? currentGitHead,
-    $core.String? checkoutPath,
-    Remote? upstream,
-    Remote? mirror,
-    $core.Iterable<Cherrypick>? cherrypicks,
-    $core.String? dartRevision,
-    $core.String? workingBranch,
-  }) {
-    final _result = create();
-    if (candidateBranch != null) {
-      _result.candidateBranch = candidateBranch;
-    }
-    if (startingGitHead != null) {
-      _result.startingGitHead = startingGitHead;
-    }
-    if (currentGitHead != null) {
-      _result.currentGitHead = currentGitHead;
-    }
-    if (checkoutPath != null) {
-      _result.checkoutPath = checkoutPath;
-    }
-    if (upstream != null) {
-      _result.upstream = upstream;
-    }
-    if (mirror != null) {
-      _result.mirror = mirror;
-    }
-    if (cherrypicks != null) {
-      _result.cherrypicks.addAll(cherrypicks);
-    }
-    if (dartRevision != null) {
-      _result.dartRevision = dartRevision;
-    }
-    if (workingBranch != null) {
-      _result.workingBranch = workingBranch;
-    }
-    return _result;
-  }
   factory Repository.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(i, r);
   factory Repository.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'Repository',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'conductor_state'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'candidateBranch', protoName: 'candidateBranch')
+    ..aOS(2, _omitFieldNames ? '' : 'startingGitHead', protoName: 'startingGitHead')
+    ..aOS(3, _omitFieldNames ? '' : 'currentGitHead', protoName: 'currentGitHead')
+    ..aOS(4, _omitFieldNames ? '' : 'checkoutPath', protoName: 'checkoutPath')
+    ..aOM<Remote>(5, _omitFieldNames ? '' : 'upstream', subBuilder: Remote.create)
+    ..aOM<Remote>(6, _omitFieldNames ? '' : 'mirror', subBuilder: Remote.create)
+    ..pc<Cherrypick>(7, _omitFieldNames ? '' : 'cherrypicks', $pb.PbFieldType.PM, subBuilder: Cherrypick.create)
+    ..aOS(8, _omitFieldNames ? '' : 'dartRevision', protoName: 'dartRevision')
+    ..aOS(9, _omitFieldNames ? '' : 'workingBranch', protoName: 'workingBranch')
+    ..hasRequiredFields = false;
+
   @$core.Deprecated('Using this can add significant overhead to your binary. '
       'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
       'Will be removed in next major version')
@@ -262,8 +182,10 @@ class Repository extends $pb.GeneratedMessage {
       'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
       'Will be removed in next major version')
   Repository copyWith(void Function(Repository) updates) =>
-      super.copyWith((message) => updates(message as Repository)) as Repository; // ignore: deprecated_member_use
+      super.copyWith((message) => updates(message as Repository)) as Repository;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static Repository create() => Repository._();
   Repository createEmptyInstance() => create();
@@ -377,90 +299,35 @@ class Repository extends $pb.GeneratedMessage {
 }
 
 class ConductorState extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ConductorState',
-      package: const $pb.PackageName(
-          const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'conductor_state'),
-      createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'releaseChannel',
-        protoName: 'releaseChannel')
-    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'releaseVersion',
-        protoName: 'releaseVersion')
-    ..aOM<Repository>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'engine',
-        subBuilder: Repository.create)
-    ..aOM<Repository>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'framework',
-        subBuilder: Repository.create)
-    ..aInt64(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'createdDate',
-        protoName: 'createdDate')
-    ..aInt64(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastUpdatedDate',
-        protoName: 'lastUpdatedDate')
-    ..pPS(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'logs')
-    ..e<ReleasePhase>(
-        9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'currentPhase', $pb.PbFieldType.OE,
+  factory ConductorState() => create();
+  ConductorState._() : super();
+  factory ConductorState.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory ConductorState.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'ConductorState',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'conductor_state'), createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'releaseChannel', protoName: 'releaseChannel')
+    ..aOS(2, _omitFieldNames ? '' : 'releaseVersion', protoName: 'releaseVersion')
+    ..aOM<Repository>(4, _omitFieldNames ? '' : 'engine', subBuilder: Repository.create)
+    ..aOM<Repository>(5, _omitFieldNames ? '' : 'framework', subBuilder: Repository.create)
+    ..aInt64(6, _omitFieldNames ? '' : 'createdDate', protoName: 'createdDate')
+    ..aInt64(7, _omitFieldNames ? '' : 'lastUpdatedDate', protoName: 'lastUpdatedDate')
+    ..pPS(8, _omitFieldNames ? '' : 'logs')
+    ..e<ReleasePhase>(9, _omitFieldNames ? '' : 'currentPhase', $pb.PbFieldType.OE,
         protoName: 'currentPhase',
         defaultOrMaker: ReleasePhase.APPLY_ENGINE_CHERRYPICKS,
         valueOf: ReleasePhase.valueOf,
         enumValues: ReleasePhase.values)
-    ..aOS(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'conductorVersion',
-        protoName: 'conductorVersion')
-    ..e<ReleaseType>(
-        11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'releaseType', $pb.PbFieldType.OE,
+    ..aOS(10, _omitFieldNames ? '' : 'conductorVersion', protoName: 'conductorVersion')
+    ..e<ReleaseType>(11, _omitFieldNames ? '' : 'releaseType', $pb.PbFieldType.OE,
         protoName: 'releaseType',
         defaultOrMaker: ReleaseType.STABLE_INITIAL,
         valueOf: ReleaseType.valueOf,
         enumValues: ReleaseType.values)
     ..hasRequiredFields = false;
 
-  ConductorState._() : super();
-  factory ConductorState({
-    $core.String? releaseChannel,
-    $core.String? releaseVersion,
-    Repository? engine,
-    Repository? framework,
-    $fixnum.Int64? createdDate,
-    $fixnum.Int64? lastUpdatedDate,
-    $core.Iterable<$core.String>? logs,
-    ReleasePhase? currentPhase,
-    $core.String? conductorVersion,
-    ReleaseType? releaseType,
-  }) {
-    final _result = create();
-    if (releaseChannel != null) {
-      _result.releaseChannel = releaseChannel;
-    }
-    if (releaseVersion != null) {
-      _result.releaseVersion = releaseVersion;
-    }
-    if (engine != null) {
-      _result.engine = engine;
-    }
-    if (framework != null) {
-      _result.framework = framework;
-    }
-    if (createdDate != null) {
-      _result.createdDate = createdDate;
-    }
-    if (lastUpdatedDate != null) {
-      _result.lastUpdatedDate = lastUpdatedDate;
-    }
-    if (logs != null) {
-      _result.logs.addAll(logs);
-    }
-    if (currentPhase != null) {
-      _result.currentPhase = currentPhase;
-    }
-    if (conductorVersion != null) {
-      _result.conductorVersion = conductorVersion;
-    }
-    if (releaseType != null) {
-      _result.releaseType = releaseType;
-    }
-    return _result;
-  }
-  factory ConductorState.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(i, r);
-  factory ConductorState.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(i, r);
   @$core.Deprecated('Using this can add significant overhead to your binary. '
       'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
       'Will be removed in next major version')
@@ -469,9 +336,10 @@ class ConductorState extends $pb.GeneratedMessage {
       'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
       'Will be removed in next major version')
   ConductorState copyWith(void Function(ConductorState) updates) =>
-      super.copyWith((message) => updates(message as ConductorState))
-          as ConductorState; // ignore: deprecated_member_use
+      super.copyWith((message) => updates(message as ConductorState)) as ConductorState;
+
   $pb.BuilderInfo get info_ => _i;
+
   @$core.pragma('dart2js:noInline')
   static ConductorState create() => ConductorState._();
   ConductorState createEmptyInstance() => create();
@@ -595,3 +463,6 @@ class ConductorState extends $pb.GeneratedMessage {
   @$pb.TagNumber(11)
   void clearReleaseType() => clearField(11);
 }
+
+const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
+const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');

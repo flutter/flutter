@@ -91,7 +91,7 @@ class _BottomNavigationBarExampleState extends State<BottomNavigationBarExample>
   }
 
   void showModal(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
         content: const Text('Example Dialog'),

@@ -33,6 +33,7 @@ void main() {
     expect(themeData.textStyle, null);
     expect(themeData.hintStyle, null);
     expect(themeData.constraints, null);
+    expect(themeData.textCapitalization, null);
 
     const SearchBarTheme theme = SearchBarTheme(data: SearchBarThemeData(), child: SizedBox());
     expect(theme.data.elevation, null);
@@ -46,6 +47,7 @@ void main() {
     expect(theme.data.textStyle, null);
     expect(theme.data.hintStyle, null);
     expect(theme.data.constraints, null);
+    expect(theme.data.textCapitalization, null);
   });
 
   testWidgets('Default SearchBarThemeData debugFillProperties', (WidgetTester tester) async {
@@ -75,6 +77,7 @@ void main() {
       textStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 24.0)),
       hintStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 16.0)),
       constraints: BoxConstraints(minWidth: 350, maxWidth: 850),
+      textCapitalization: TextCapitalization.characters,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -82,17 +85,18 @@ void main() {
       .map((DiagnosticsNode node) => node.toString())
       .toList();
 
-    expect(description[0], 'elevation: MaterialStatePropertyAll(3.0)');
-    expect(description[1], 'backgroundColor: MaterialStatePropertyAll(Color(0xfffffff1))');
-    expect(description[2], 'shadowColor: MaterialStatePropertyAll(Color(0xfffffff2))');
-    expect(description[3], 'surfaceTintColor: MaterialStatePropertyAll(Color(0xfffffff3))');
-    expect(description[4], 'overlayColor: MaterialStatePropertyAll(Color(0xfffffff4))');
-    expect(description[5], 'side: MaterialStatePropertyAll(BorderSide(color: Color(0xfffffff5), width: 2.0))');
-    expect(description[6], 'shape: MaterialStatePropertyAll(StadiumBorder(BorderSide(width: 0.0, style: none)))');
-    expect(description[7], 'padding: MaterialStatePropertyAll(EdgeInsets.all(16.0))');
-    expect(description[8], 'textStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 24.0))');
-    expect(description[9], 'hintStyle: MaterialStatePropertyAll(TextStyle(inherit: true, size: 16.0))');
+    expect(description[0], 'elevation: WidgetStatePropertyAll(3.0)');
+    expect(description[1], 'backgroundColor: WidgetStatePropertyAll(Color(0xfffffff1))');
+    expect(description[2], 'shadowColor: WidgetStatePropertyAll(Color(0xfffffff2))');
+    expect(description[3], 'surfaceTintColor: WidgetStatePropertyAll(Color(0xfffffff3))');
+    expect(description[4], 'overlayColor: WidgetStatePropertyAll(Color(0xfffffff4))');
+    expect(description[5], 'side: WidgetStatePropertyAll(BorderSide(color: Color(0xfffffff5), width: 2.0))');
+    expect(description[6], 'shape: WidgetStatePropertyAll(StadiumBorder(BorderSide(width: 0.0, style: none)))');
+    expect(description[7], 'padding: WidgetStatePropertyAll(EdgeInsets.all(16.0))');
+    expect(description[8], 'textStyle: WidgetStatePropertyAll(TextStyle(inherit: true, size: 24.0))');
+    expect(description[9], 'hintStyle: WidgetStatePropertyAll(TextStyle(inherit: true, size: 16.0))');
     expect(description[10], 'constraints: BoxConstraints(350.0<=w<=850.0, 0.0<=h<=Infinity)');
+    expect(description[11], 'textCapitalization: TextCapitalization.characters');
   });
 
   group('[Theme, SearchBarTheme, SearchBar properties overrides]', () {
@@ -118,6 +122,7 @@ void main() {
     const MaterialStateProperty<TextStyle?> textStyle = MaterialStatePropertyAll<TextStyle>(textStyleValue);
     const MaterialStateProperty<TextStyle?> hintStyle = MaterialStatePropertyAll<TextStyle>(hintStyleValue);
     const BoxConstraints constraints = BoxConstraints(minWidth: 250.0, maxWidth: 300.0, minHeight: 80.0);
+    const TextCapitalization textCapitalization = TextCapitalization.words;
 
     const SearchBarThemeData searchBarTheme = SearchBarThemeData(
       elevation: elevation,
@@ -131,6 +136,7 @@ void main() {
       textStyle: textStyle,
       hintStyle: hintStyle,
       constraints: constraints,
+      textCapitalization: textCapitalization,
     );
 
     Widget buildFrame({
@@ -162,6 +168,7 @@ void main() {
             textStyle: textStyle,
             hintStyle: hintStyle,
             constraints: constraints,
+            textCapitalization: textCapitalization,
           );
         },
       );
@@ -221,6 +228,7 @@ void main() {
       final EditableText inputText = tester.widget(find.text('input'));
       expect(inputText.style.color, textStyleValue.color);
       expect(inputText.style.fontSize, textStyleValue.fontSize);
+      expect(inputText.textCapitalization, textCapitalization);
 
       final Rect barRect = tester.getRect(find.byType(SearchBar));
       final Rect leadingRect = tester.getRect(find.byIcon(Icons.search));

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -45,6 +47,94 @@ class PushRouteInformationObserver with WidgetsBindingObserver {
   }
 }
 
+// Implements to make sure all methods get coverage.
+class RentrantObserver implements WidgetsBindingObserver {
+  RentrantObserver() {
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  bool active = true;
+
+  int removeSelf() {
+    active = false;
+    int count = 0;
+    while (WidgetsBinding.instance.removeObserver(this)) {
+      count += 1;
+    }
+    return count;
+  }
+
+  @override
+  void didChangeAccessibilityFeatures() {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeLocales(List<Locale>? locales) {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeMetrics() {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeTextScaleFactor() {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didHaveMemoryPressure() {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  Future<bool> didPopRoute() {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+    return Future<bool>.value(true);
+  }
+
+  @override
+  Future<bool> didPushRoute(String route) {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+    return Future<bool>.value(true);
+  }
+
+  @override
+  Future<bool> didPushRouteInformation(RouteInformation routeInformation) {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+    return Future<bool>.value(true);
+  }
+
+  @override
+  Future<AppExitResponse> didRequestAppExit() {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+    return Future<AppExitResponse>.value(AppExitResponse.exit);
+  }
+}
+
 void main() {
   Future<void> setAppLifeCycleState(AppLifecycleState state) async {
     final ByteData? message =
@@ -52,6 +142,23 @@ void main() {
     await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .handlePlatformMessage('flutter/lifecycle', message, (_) { });
   }
+
+  testWidgets('Rentrant observer callbacks do not result in exceptions', (WidgetTester tester) async {
+    final RentrantObserver observer = RentrantObserver();
+    WidgetsBinding.instance.handleAccessibilityFeaturesChanged();
+    WidgetsBinding.instance.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    WidgetsBinding.instance.handleLocaleChanged();
+    WidgetsBinding.instance.handleMetricsChanged();
+    WidgetsBinding.instance.handlePlatformBrightnessChanged();
+    WidgetsBinding.instance.handleTextScaleFactorChanged();
+    WidgetsBinding.instance.handleMemoryPressure();
+    WidgetsBinding.instance.handlePopRoute();
+    WidgetsBinding.instance.handlePushRoute('/');
+    WidgetsBinding.instance.handleRequestAppExit();
+    await tester.idle();
+    expect(observer.removeSelf(), greaterThan(1));
+    expect(observer.removeSelf(), 0);
+  });
 
   testWidgets('didHaveMemoryPressure callback', (WidgetTester tester) async {
     final MemoryPressureObserver observer = MemoryPressureObserver();
@@ -117,7 +224,14 @@ void main() {
     ]);
 
     observer.accumulatedStates.clear();
-    await expectLater(() async => setAppLifeCycleState(AppLifecycleState.detached), throwsAssertionError);
+    await setAppLifeCycleState(AppLifecycleState.detached);
+    expect(observer.accumulatedStates, <AppLifecycleState>[
+      AppLifecycleState.inactive,
+      AppLifecycleState.hidden,
+      AppLifecycleState.paused,
+      AppLifecycleState.detached,
+    ]);
+    WidgetsBinding.instance.removeObserver(observer);
   });
 
   testWidgets('didPushRoute callback', (WidgetTester tester) async {
@@ -287,6 +401,21 @@ void main() {
     await setAppLifeCycleState(AppLifecycleState.resumed);
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
+  });
+
+  testWidgets('resetInternalState resets lifecycleState and framesEnabled to initial state', (WidgetTester tester) async {
+    // Initial state
+    expect(tester.binding.lifecycleState, isNull);
+    expect(tester.binding.framesEnabled, isTrue);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    expect(tester.binding.lifecycleState, AppLifecycleState.paused);
+    expect(tester.binding.framesEnabled, isFalse);
+
+    tester.binding.resetInternalState();
+
+    expect(tester.binding.lifecycleState, isNull);
+    expect(tester.binding.framesEnabled, isTrue);
   });
 
   testWidgets('scheduleFrameCallback error control test', (WidgetTester tester) async {

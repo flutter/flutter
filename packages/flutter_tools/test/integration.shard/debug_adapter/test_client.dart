@@ -155,6 +155,7 @@ class DapTestClient {
     String? cwd,
     bool? noDebug,
     List<String>? additionalProjectPaths,
+    bool? allowAnsiColorOutput,
     bool? debugSdkLibraries,
     bool? debugExternalPackageLibraries,
     bool? evaluateGettersInDebugViews,
@@ -169,6 +170,7 @@ class DapTestClient {
         args: args,
         toolArgs: toolArgs,
         additionalProjectPaths: additionalProjectPaths,
+        allowAnsiColorOutput: allowAnsiColorOutput,
         debugSdkLibraries: debugSdkLibraries,
         debugExternalPackageLibraries: debugExternalPackageLibraries,
         evaluateGettersInDebugViews: evaluateGettersInDebugViews,
@@ -335,7 +337,7 @@ extension DapTestClientExtension on DapTestClient {
   /// console, stdout and stderr.
   ///
   /// Only one of [start] or [launch] may be provided. Use [start] to customise
-  /// the whole start of the session (including initialise) or [launch] to only
+  /// the whole start of the session (including initialize) or [launch] to only
   /// customise the [launchRequest].
   Future<List<OutputEventBody>> collectAllOutput({
     String? program,

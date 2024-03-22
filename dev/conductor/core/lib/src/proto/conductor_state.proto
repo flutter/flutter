@@ -11,16 +11,16 @@ message Remote {
 enum ReleasePhase {
   // Release was started with `conductor start` and repositories cloned.
   APPLY_ENGINE_CHERRYPICKS = 0;
-  CODESIGN_ENGINE_BINARIES = 1;
+
+  // Verify engine CI is green before opening framework PR.
+  VERIFY_ENGINE_CI = 1;
+
   APPLY_FRAMEWORK_CHERRYPICKS = 2;
 
   // Git tag applied to framework RC branch HEAD and pushed upstream.
   PUBLISH_VERSION = 3;
 
-  // RC branch HEAD pushed to upstream release branch.
-  //
-  // For example, flutter-1.2-candidate.3 -> upstream/beta
-  PUBLISH_CHANNEL = 4;
+  reserved 4; // Formerly PUBLISH_CHANNEL, merged into PUBLISH_VERSION.
 
   // Package artifacts verified to exist on cloud storage.
   VERIFY_RELEASE = 5;

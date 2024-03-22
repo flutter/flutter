@@ -8,8 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 const Color green = Color(0xFF00FF00);
 const Color yellow = Color(0xFFFFFF00);
 
@@ -288,14 +286,11 @@ class _Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
 
   @override
   Widget? childForSlot(_DiagonalSlot? slot) {
-    switch (slot) {
-      case null:
-        return nullSlot;
-      case _DiagonalSlot.topLeft:
-        return topLeft;
-      case _DiagonalSlot.bottomRight:
-        return bottomRight;
-    }
+    return switch (slot) {
+      null => nullSlot,
+      _DiagonalSlot.topLeft     => topLeft,
+      _DiagonalSlot.bottomRight => bottomRight,
+    };
   }
 
   @override

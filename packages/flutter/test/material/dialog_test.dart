@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import '../widgets/semantics_tester.dart';
 
 MaterialApp _buildAppWithDialog(
@@ -31,8 +30,9 @@ MaterialApp _buildAppWithDialog(
                   context: context,
                   traversalEdgeBehavior: traversalEdgeBehavior,
                   builder: (BuildContext context) {
-                    return MediaQuery(
-                      data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+                    return MediaQuery.withClampedTextScaling(
+                      minScaleFactor: textScaleFactor,
+                      maxScaleFactor: textScaleFactor,
                       child: dialog,
                     );
                   },
@@ -57,7 +57,7 @@ RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text)
 // What was the AlertDialog's ButtonBar when many of these tests were written,
 // is now a Padding widget with an OverflowBar child. The Padding widget's size
 // and location match the original ButtonBar's size and location.
-Finder _findButtonBar() {
+Finder _findOverflowBar() {
   return find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Padding)).first;
 }
 
@@ -111,7 +111,7 @@ void main() {
     expect(materialWidget.color, customColor);
   });
 
-  testWidgets('Dialog Defaults', (WidgetTester tester) async {
+  testWidgets('Material2 - Dialog Defaults', (WidgetTester tester) async {
     const AlertDialog dialog = AlertDialog(
       title: Text('Title'),
       content: Text('Y'),
@@ -131,10 +131,14 @@ void main() {
       find.descendant(of: find.byType(Dialog), matching: find.byType(Material)),
     );
     expect(bottomLeft.dy, 360.0);
+  });
 
-    await tester.tapAt(const Offset(10.0, 10.0));
-    await tester.pumpAndSettle();
-
+  testWidgets('Material3 - Dialog Defaults', (WidgetTester tester) async {
+    const AlertDialog dialog = AlertDialog(
+      title: Text('Title'),
+      content: Text('Y'),
+      actions: <Widget>[ ],
+    );
     await tester.pumpWidget(_buildAppWithDialog(dialog, theme: material3Theme));
 
     await tester.tap(find.text('X'));
@@ -146,9 +150,8 @@ void main() {
     expect(material3Widget.elevation, 6.0);
   });
 
-  testWidgets('Dialog.fullscreen Defaults', (WidgetTester tester) async {
+  testWidgets('Material2 - Dialog.fullscreen Defaults', (WidgetTester tester) async {
     const String dialogTextM2 = 'Fullscreen Dialog - M2';
-    const String dialogTextM3 = 'Fullscreen Dialog - M3';
 
     await tester.pumpWidget(_buildAppWithDialog(
       theme: material2Theme,
@@ -162,7 +165,7 @@ void main() {
 
     expect(find.text(dialogTextM2), findsOneWidget);
 
-    Material materialWidget = _getMaterialFromDialog(tester);
+    final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.color, Colors.grey[800]);
 
     // Try to dismiss the fullscreen dialog with the escape key.
@@ -170,6 +173,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(dialogTextM2), findsNothing);
+  });
+
+  testWidgets('Material3 - Dialog.fullscreen Defaults', (WidgetTester tester) async {
+    const String dialogTextM3 = 'Fullscreen Dialog - M3';
 
     await tester.pumpWidget(_buildAppWithDialog(
       theme: material3Theme,
@@ -183,7 +190,7 @@ void main() {
 
     expect(find.text(dialogTextM3), findsOneWidget);
 
-    materialWidget = _getMaterialFromDialog(tester);
+    final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.color, material3Theme.colorScheme.surface);
 
     // Try to dismiss the fullscreen dialog with the escape key.
@@ -603,7 +610,7 @@ void main() {
         matching: find.byType(Material),
       ).first,
     );
-    final Size actionsSize = tester.getSize(_findButtonBar());
+    final Size actionsSize = tester.getSize(_findOverflowBar());
 
     expect(actionsSize.width, dialogSize.width);
   });
@@ -644,7 +651,7 @@ void main() {
     expect(actionsSize.width, dialogSize.width - (30.0 * 2));
   });
 
-  testWidgets('AlertDialog.buttonPadding defaults', (WidgetTester tester) async {
+  testWidgets('Material2 - AlertDialog.buttonPadding defaults', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
@@ -680,30 +687,48 @@ void main() {
     // First button
     expect(
       tester.getTopRight(find.byKey(key1)).dy,
-      tester.getTopRight(_findButtonBar()).dy + 8.0,
+      tester.getTopRight(_findOverflowBar()).dy + 8.0,
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key1)).dy,
-      tester.getBottomRight(_findButtonBar()).dy - 8.0,
+      tester.getBottomRight(_findOverflowBar()).dy - 8.0,
     ); // bottom
 
     // Second button
     expect(
       tester.getTopRight(find.byKey(key2)).dy,
-      tester.getTopRight(_findButtonBar()).dy + 8.0,
+      tester.getTopRight(_findOverflowBar()).dy + 8.0,
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key2)).dy,
-      tester.getBottomRight(_findButtonBar()).dy - 8.0,
+      tester.getBottomRight(_findOverflowBar()).dy - 8.0,
     ); // bottom
     expect(
       tester.getBottomRight(find.byKey(key2)).dx,
-      tester.getBottomRight(_findButtonBar()).dx - 8.0,
+      tester.getBottomRight(_findOverflowBar()).dx - 8.0,
     ); // right
+  });
 
-    // Dismiss it and test material 3 dialog
-    await tester.tapAt(const Offset(10.0, 10.0));
-    await tester.pumpAndSettle();
+  testWidgets('Material3 - AlertDialog.buttonPadding defaults', (WidgetTester tester) async {
+    final GlobalKey key1 = GlobalKey();
+    final GlobalKey key2 = GlobalKey();
+
+    final AlertDialog dialog = AlertDialog(
+      title: const Text('title'),
+      content: const Text('content'),
+      actions: <Widget>[
+        ElevatedButton(
+          key: key1,
+          onPressed: () {},
+          child: const Text('button 1'),
+        ),
+        ElevatedButton(
+          key: key2,
+          onPressed: () {},
+          child: const Text('button 2'),
+        ),
+      ],
+    );
 
     await tester.pumpWidget(_buildAppWithDialog(dialog, theme: material3Theme));
 
@@ -720,25 +745,25 @@ void main() {
     // First button
     expect(
       tester.getTopRight(find.byKey(key1)).dy,
-      tester.getTopRight(_findButtonBar()).dy,
+      tester.getTopRight(_findOverflowBar()).dy,
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key1)).dy,
-      tester.getBottomRight(_findButtonBar()).dy - 24.0,
+      tester.getBottomRight(_findOverflowBar()).dy - 24.0,
     ); // bottom
 
     // // Second button
     expect(
       tester.getTopRight(find.byKey(key2)).dy,
-      tester.getTopRight(_findButtonBar()).dy,
+      tester.getTopRight(_findOverflowBar()).dy,
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key2)).dy,
-      tester.getBottomRight(_findButtonBar()).dy - 24.0,
+      tester.getBottomRight(_findOverflowBar()).dy - 24.0,
     ); // bottom
     expect(
       tester.getBottomRight(find.byKey(key2)).dx,
-      tester.getBottomRight(_findButtonBar()).dx - 24.0,
+      tester.getBottomRight(_findOverflowBar()).dx - 24.0,
     ); // right
   });
 
@@ -784,25 +809,25 @@ void main() {
     // First button
     expect(
       tester.getTopRight(find.byKey(key1)).dy,
-      tester.getTopRight(_findButtonBar()).dy + ((10.0 + 20.0) / 2),
+      tester.getTopRight(_findOverflowBar()).dy + ((10.0 + 20.0) / 2),
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key1)).dy,
-      tester.getBottomRight(_findButtonBar()).dy - ((10.0 + 20.0) / 2),
+      tester.getBottomRight(_findOverflowBar()).dy - ((10.0 + 20.0) / 2),
     ); // bottom
 
     // Second button
     expect(
       tester.getTopRight(find.byKey(key2)).dy,
-      tester.getTopRight(_findButtonBar()).dy + ((10.0 + 20.0) / 2),
+      tester.getTopRight(_findOverflowBar()).dy + ((10.0 + 20.0) / 2),
     ); // top
     expect(
       tester.getBottomRight(find.byKey(key2)).dy,
-      tester.getBottomRight(_findButtonBar()).dy - ((10.0 + 20.0) / 2),
+      tester.getBottomRight(_findOverflowBar()).dy - ((10.0 + 20.0) / 2),
     ); // bottom
     expect(
       tester.getBottomRight(find.byKey(key2)).dx,
-      tester.getBottomRight(_findButtonBar()).dx - ((10.0 + 20.0) / 2),
+      tester.getBottomRight(_findOverflowBar()).dx - ((10.0 + 20.0) / 2),
     ); // right
   });
 
@@ -825,7 +850,7 @@ void main() {
     final Finder iconFinder = find.byKey(iconKey);
     final Finder titleFinder = find.byKey(titleKey);
     final Finder contentFinder = find.byKey(contentKey);
-    final Finder actionsFinder = _findButtonBar();
+    final Finder actionsFinder = _findOverflowBar();
     final Finder childrenFinder = find.byKey(childrenKey);
 
     Future<void> openDialog(WidgetTester tester, Widget dialog, double textScaleFactor, {bool isM3 = false}) async {
@@ -1631,12 +1656,12 @@ void main() {
     // The default testing screen (800, 600)
     const Rect screenRect = Rect.fromLTRB(0.0, 0.0, 800.0, 600.0);
 
-    // Test with no padding
+    // Test with no padding.
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(),
         child: Dialog(
-          insetPadding: null,
+          insetPadding: EdgeInsets.zero,
           child: Placeholder(),
         ),
       ),
@@ -1644,7 +1669,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byType(Placeholder)), screenRect);
 
-    // Test with an insetPadding
+    // Test with an insetPadding.
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(),
@@ -2659,6 +2684,9 @@ void main() {
     expect(await previousFocus(), true);
     expect(okNode.hasFocus, true);
     expect(cancelNode.hasFocus, false);
+
+    cancelNode.dispose();
+    okNode.dispose();
   });
 
   testWidgets('Adaptive AlertDialog shows correct widget on each platform', (WidgetTester tester) async {
@@ -2765,7 +2793,9 @@ void main() {
 
   testWidgets('Uses open focus traversal when overridden', (WidgetTester tester) async {
     final FocusNode okNode = FocusNode();
+    addTearDown(okNode.dispose);
     final FocusNode cancelNode = FocusNode();
+    addTearDown(cancelNode.dispose);
 
     Future<bool> nextFocus() async {
       final bool result = Actions.invoke(
@@ -2810,6 +2840,21 @@ void main() {
     expect(await nextFocus(), false);
     expect(okNode.hasFocus, false);
     expect(cancelNode.hasFocus, false);
+  });
+
+  testWidgets('Dialog.insetPadding is nullable', (WidgetTester tester) async {
+    const Dialog dialog = Dialog();
+    expect(dialog.insetPadding, isNull);
+  });
+
+  testWidgets('AlertDialog.insetPadding is nullable', (WidgetTester tester) async {
+    const AlertDialog alertDialog = AlertDialog();
+    expect(alertDialog.insetPadding, isNull);
+  });
+
+  testWidgets('SimpleDialog.insetPadding is nullable', (WidgetTester tester) async {
+    const SimpleDialog simpleDialog = SimpleDialog();
+    expect(simpleDialog.insetPadding, isNull);
   });
 }
 

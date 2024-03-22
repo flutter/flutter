@@ -250,6 +250,24 @@ void main() {
     expect(textSpan2.compareTo(textSpan2), RenderComparison.identical);
   });
 
+  test('GetSpanForPosition', () {
+    const TextSpan textSpan = TextSpan(
+      text: '',
+      children: <InlineSpan>[
+        TextSpan(text: '', children: <InlineSpan>[
+          TextSpan(text: 'a'),
+        ]),
+        TextSpan(text: 'b'),
+        TextSpan(text: 'c'),
+      ],
+    );
+
+    expect((textSpan.getSpanForPosition(const TextPosition(offset: 0)) as TextSpan?)?.text, 'a');
+    expect((textSpan.getSpanForPosition(const TextPosition(offset: 1)) as TextSpan?)?.text, 'b');
+    expect((textSpan.getSpanForPosition(const TextPosition(offset: 2)) as TextSpan?)?.text, 'c');
+    expect((textSpan.getSpanForPosition(const TextPosition(offset: 3)) as TextSpan?)?.text, isNull);
+  });
+
   test('GetSpanForPosition with WidgetSpan', () {
     const TextSpan textSpan = TextSpan(
       text: 'a',

@@ -41,9 +41,11 @@ class ProxiedDevices extends PollingDeviceDiscovery {
     bool deltaFileTransfer = true,
     bool enableDdsProxy = false,
     required Logger logger,
+    FileTransfer fileTransfer = const FileTransfer(),
   }) : _deltaFileTransfer = deltaFileTransfer,
        _enableDdsProxy = enableDdsProxy,
        _logger = logger,
+       _fileTransfer = fileTransfer,
        super('Proxied devices');
 
   /// [DaemonConnection] used to communicate with the daemon.
@@ -54,6 +56,8 @@ class ProxiedDevices extends PollingDeviceDiscovery {
   final bool _deltaFileTransfer;
 
   final bool _enableDdsProxy;
+
+  final FileTransfer _fileTransfer;
 
   @override
   bool get supportsPlatform => true;
@@ -98,6 +102,8 @@ class ProxiedDevices extends PollingDeviceDiscovery {
   @visibleForTesting
   ProxiedDevice deviceFromDaemonResult(Map<String, Object?> device) {
     final Map<String, Object?> capabilities = _cast<Map<String, Object?>>(device['capabilities']);
+    final String? connectionInterfaceName = _cast<String?>(device['connectionInterface']);
+    final DeviceConnectionInterface? connectionInterface = connectionInterfaceName != null ? getDeviceConnectionInterfaceForName(connectionInterfaceName) : null;
     return ProxiedDevice(
       connection, _cast<String>(device['id']),
       deltaFileTransfer: _deltaFileTransfer,
@@ -106,6 +112,8 @@ class ProxiedDevices extends PollingDeviceDiscovery {
       platformType: PlatformType.fromString(_cast<String>(device['platformType'])),
       targetPlatform: getTargetPlatformForName(_cast<String>(device['platform'])),
       ephemeral: _cast<bool>(device['ephemeral']),
+      isConnected: _cast<bool?>(device['isConnected']) ?? true,
+      connectionInterface: connectionInterface ?? DeviceConnectionInterface.attached,
       name: 'Proxied ${device['name']}',
       isLocalEmulator: _cast<bool>(device['emulator']),
       emulatorId: _cast<String?>(device['emulatorId']),
@@ -117,7 +125,23 @@ class ProxiedDevices extends PollingDeviceDiscovery {
       supportsFastStart: _cast<bool>(capabilities['fastStart']),
       supportsHardwareRendering: _cast<bool>(capabilities['hardwareRendering']),
       logger: _logger,
+      fileTransfer: _fileTransfer,
     );
+  }
+
+  @override
+  Future<List<String>> getDiagnostics() async {
+    try {
+      final List<String> diagnostics = _cast<List<dynamic>>(await connection.sendRequest('device.getDiagnostics')).cast<String>();
+      return diagnostics;
+    } on String catch (e) { // Daemon actually does throw string types.
+      if (e.contains('command not understood')) {
+        _logger.printTrace('The daemon is on an older version that does not support `device.getDiagnostics`.');
+        // Silently ignore.
+        return <String>[];
+      }
+      rethrow;
+    }
   }
 }
 
@@ -138,6 +162,8 @@ class ProxiedDevice extends Device {
     required PlatformType? platformType,
     required TargetPlatform targetPlatform,
     required bool ephemeral,
+    required this.isConnected,
+    required this.connectionInterface,
     required this.name,
     required bool isLocalEmulator,
     required String? emulatorId,
@@ -149,6 +175,7 @@ class ProxiedDevice extends Device {
     required this.supportsFastStart,
     required bool supportsHardwareRendering,
     required Logger logger,
+    FileTransfer fileTransfer = const FileTransfer(),
   }): _deltaFileTransfer = deltaFileTransfer,
       _enableDdsProxy = enableDdsProxy,
       _isLocalEmulator = isLocalEmulator,
@@ -157,6 +184,7 @@ class ProxiedDevice extends Device {
       _supportsHardwareRendering = supportsHardwareRendering,
       _targetPlatform = targetPlatform,
       _logger = logger,
+      _fileTransfer = fileTransfer,
       super(id,
         category: category,
         platformType: platformType,
@@ -170,6 +198,14 @@ class ProxiedDevice extends Device {
   final bool _deltaFileTransfer;
 
   final bool _enableDdsProxy;
+
+  final FileTransfer _fileTransfer;
+
+  @override
+  final bool isConnected;
+
+  @override
+  final DeviceConnectionInterface connectionInterface;
 
   @override
   final String name;
@@ -241,11 +277,11 @@ class ProxiedDevice extends Device {
   /// [proxiedPortForwarder] forwards a port from the remote host to local host.
   ProxiedPortForwarder get proxiedPortForwarder => _proxiedPortForwarder ??= ProxiedPortForwarder(connection, logger: _logger);
 
-  DevicePortForwarder? _portForwarder;
+  ProxiedPortForwarder? _portForwarder;
   /// [portForwarder] forwards a port from the remote device to remote host, and
   /// then forward the port from remote host to local host.
   @override
-  DevicePortForwarder get portForwarder => _portForwarder ??= ProxiedPortForwarder(connection, deviceId: id, logger: _logger);
+  ProxiedPortForwarder get portForwarder => _portForwarder ??= ProxiedPortForwarder(connection, deviceId: id, logger: _logger);
 
   ProxiedDartDevelopmentService? _proxiedDds;
   @override
@@ -254,7 +290,7 @@ class ProxiedDevice extends Device {
       return super.dds;
     }
     return _proxiedDds ??= ProxiedDartDevelopmentService(connection, id,
-        logger: _logger, proxiedPortForwarder: proxiedPortForwarder);
+        logger: _logger, proxiedPortForwarder: proxiedPortForwarder, devicePortForwarder: portForwarder);
   }
 
   @override
@@ -359,7 +395,7 @@ class ProxiedDevice extends Device {
 
     Map<String, Object?>? rollingHashResultJson;
     if (_deltaFileTransfer) {
-     rollingHashResultJson = _cast<Map<String, Object?>?>(await connection.sendRequest('proxy.calculateFileHashes', args));
+      rollingHashResultJson = _cast<Map<String, Object?>?>(await connection.sendRequest('proxy.calculateFileHashes', args));
     }
 
     if (rollingHashResultJson == null) {
@@ -371,18 +407,31 @@ class ProxiedDevice extends Device {
       await connection.sendRequest('proxy.writeTempFile', args, await binary.readAsBytes());
     } else {
       final BlockHashes rollingHashResult = BlockHashes.fromJson(rollingHashResultJson);
-      final List<FileDeltaBlock> delta = await FileTransfer().computeDelta(binary, rollingHashResult);
+      final List<FileDeltaBlock> delta = await _fileTransfer.computeDelta(binary, rollingHashResult);
 
       // Delta is empty if the file does not need to be updated
       if (delta.isNotEmpty) {
         final List<Map<String, Object>> deltaJson = delta.map((FileDeltaBlock block) => block.toJson()).toList();
-        final Uint8List buffer = await FileTransfer().binaryForRebuilding(binary, delta);
+        final Uint8List buffer = await _fileTransfer.binaryForRebuilding(binary, delta);
 
         await connection.sendRequest('proxy.updateFile', <String, Object>{
           'path': fileName,
           'delta': deltaJson,
         }, buffer);
       }
+    }
+
+    if (_deltaFileTransfer) {
+      // Ask the daemon to precache the hash content for subsequent runs.
+      // Wait for several seconds for the app to be launched, to not interfere
+      // with whatever the daemon is doing.
+      unawaited(() async {
+        await Future<void>.delayed(const Duration(seconds: 60));
+        await connection.sendRequest('proxy.calculateFileHashes', <String, Object>{
+          'path': fileName,
+          'cacheResult': true,
+        });
+      }());
     }
 
     final String id = _cast<String>(await connection.sendRequest('device.uploadApplicationPackage', <String, Object>{
@@ -666,9 +715,11 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
     this.deviceId, {
     required Logger logger,
     required ProxiedPortForwarder proxiedPortForwarder,
+    required ProxiedPortForwarder devicePortForwarder,
     @visibleForTesting DartDevelopmentService? localDds,
   })  : _logger = logger,
         _proxiedPortForwarder = proxiedPortForwarder,
+        _devicePortForwarder = devicePortForwarder,
         _localDds = localDds ?? DartDevelopmentService();
 
   final String deviceId;
@@ -678,7 +729,13 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
   /// [DaemonConnection] used to communicate with the daemon.
   final DaemonConnection connection;
 
+  /// [_proxiedPortForwarder] matches the [proxiedPortForwarder] of a ProxiedDevice.
+  /// It forwards a port on the remote host to the local host.
   final ProxiedPortForwarder _proxiedPortForwarder;
+
+  /// [_devicePortForwarder] matches the [portForwarder] of a ProxiedDevice.
+  /// It forwards a port on the remotely connected device, to the remote host, then to the local host.
+  final ProxiedPortForwarder _devicePortForwarder;
 
   Uri? _localUri;
 
@@ -703,7 +760,11 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
     bool cacheStartupProfile = false,
   }) async {
     // Locate the original VM service port on the remote daemon.
-    final int? remoteVMServicePort = _proxiedPortForwarder.originalRemotePort(vmServiceUri.port);
+    // A proxied device has two PortForwarder. Check both to determine which
+    // one forwarded the VM service port.
+    final int? remoteVMServicePort =
+        _proxiedPortForwarder.originalRemotePort(vmServiceUri.port) ??
+        _devicePortForwarder.originalRemotePort(vmServiceUri.port);
 
     if (remoteVMServicePort == null) {
       _logger.printTrace('VM service port is not a forwarded port. Start DDS locally.');
@@ -775,6 +836,11 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
 
     _localUri = remoteUri.replace(port: localPort);
     _logger.printTrace('Local port forwarded DDS on $_localUri.');
+    _logger.sendEvent('device.proxied_dds_forwarded', <String, String>{
+      'deviceId': deviceId,
+      'remoteUri': remoteUri.toString(),
+      'localUri': _localUri!.toString(),
+    });
   }
 
   @override
@@ -783,7 +849,9 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
       await _localDds.shutdown();
       _ddsStartedLocally = false;
     } else {
-      await connection.sendRequest('device.shutdownDartDevelopmentService');
+      await connection.sendRequest('device.shutdownDartDevelopmentService', <String, Object?>{
+        'deviceId': deviceId,
+      });
     }
   }
 

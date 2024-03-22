@@ -63,7 +63,7 @@ void main() {
 
   group('adler32Hash', () {
     test('works correctly', () {
-      final int hash = adler32Hash(utf8.encode('abcdefg'));
+      final int hash = adler32Hash(Uint8List.fromList(utf8.encode('abcdefg')));
       expect(hash, 0x0adb02bd);
     });
   });
@@ -72,19 +72,19 @@ void main() {
     test('works correctly without rolling', () {
       final RollingAdler32 adler32 = RollingAdler32(7);
       utf8.encode('abcdefg').forEach(adler32.push);
-      expect(adler32.hash, adler32Hash(utf8.encode('abcdefg')));
+      expect(adler32.hash, adler32Hash(Uint8List.fromList(utf8.encode('abcdefg'))));
     });
 
     test('works correctly after rolling once', () {
       final RollingAdler32 adler32 = RollingAdler32(7);
       utf8.encode('12abcdefg').forEach(adler32.push);
-      expect(adler32.hash, adler32Hash(utf8.encode('abcdefg')));
+      expect(adler32.hash, adler32Hash(Uint8List.fromList(utf8.encode('abcdefg'))));
     });
 
     test('works correctly after rolling multiple cycles', () {
       final RollingAdler32 adler32 = RollingAdler32(7);
       utf8.encode('1234567890123456789abcdefg').forEach(adler32.push);
-      expect(adler32.hash, adler32Hash(utf8.encode('abcdefg')));
+      expect(adler32.hash, adler32Hash(Uint8List.fromList(utf8.encode('abcdefg'))));
     });
 
     test('works correctly after reset', () {
@@ -92,7 +92,7 @@ void main() {
       utf8.encode('1234567890123456789abcdefg').forEach(adler32.push);
       adler32.reset();
       utf8.encode('abcdefg').forEach(adler32.push);
-      expect(adler32.hash, adler32Hash(utf8.encode('abcdefg')));
+      expect(adler32.hash, adler32Hash(Uint8List.fromList(utf8.encode('abcdefg'))));
     });
 
     test('currentBlock returns the correct entry when read less than one block', () {
@@ -133,7 +133,7 @@ void main() {
     test('calculateBlockHashesOfFile works normally', () async {
       final File file = fileSystem.file('test')..writeAsStringSync(content1);
 
-      final BlockHashes hashes = await FileTransfer().calculateBlockHashesOfFile(file, blockSize: 4);
+      final BlockHashes hashes = await const FileTransfer().calculateBlockHashesOfFile(file, blockSize: 4);
       expect(hashes.blockSize, 4);
       expect(hashes.totalSize, content1.length);
       expect(hashes.adler32, hasLength(5));
@@ -159,8 +159,8 @@ void main() {
       final File file1 = fileSystem.file('file1')..writeAsStringSync(content1);
       final File file2 = fileSystem.file('file1')..writeAsStringSync(content1);
 
-      final BlockHashes hashes = await FileTransfer().calculateBlockHashesOfFile(file1, blockSize: 4);
-      final List<FileDeltaBlock> delta = await FileTransfer().computeDelta(file2, hashes);
+      final BlockHashes hashes = await const FileTransfer().calculateBlockHashesOfFile(file1, blockSize: 4);
+      final List<FileDeltaBlock> delta = await const FileTransfer().computeDelta(file2, hashes);
 
       expect(delta, isEmpty);
     });
@@ -169,22 +169,44 @@ void main() {
       final File file1 = fileSystem.file('file1')..writeAsStringSync(content1);
       final File file2 = fileSystem.file('file2')..writeAsStringSync(content2);
 
-      final BlockHashes hashes = await FileTransfer().calculateBlockHashesOfFile(file1, blockSize: 4);
-      final List<FileDeltaBlock> delta = await FileTransfer().computeDelta(file2, hashes);
+      final BlockHashes hashes = await const FileTransfer().calculateBlockHashesOfFile(file1, blockSize: 4);
+      final List<FileDeltaBlock> delta = await const FileTransfer().computeDelta(file2, hashes);
 
       expect(delta, expectedDelta);
     });
 
     test('binaryForRebuilding returns the correct binary', () async {
       final File file = fileSystem.file('file')..writeAsStringSync(content2);
-      final List<int> binaryForRebuilding = await FileTransfer().binaryForRebuilding(file, expectedDelta);
+      final List<int> binaryForRebuilding = await const FileTransfer().binaryForRebuilding(file, expectedDelta);
       expect(binaryForRebuilding, utf8.encode(expectedBinaryForRebuilding));
     });
 
     test('rebuildFile can rebuild the correct file', () async {
       final File file = fileSystem.file('file')..writeAsStringSync(content1);
-      await FileTransfer().rebuildFile(file, expectedDelta, Stream<List<int>>.fromIterable(<List<int>>[utf8.encode(expectedBinaryForRebuilding)]));
+      await const FileTransfer().rebuildFile(file, expectedDelta, Stream<List<int>>.fromIterable(<List<int>>[utf8.encode(expectedBinaryForRebuilding)]));
       expect(file.readAsStringSync(), content2);
+    });
+  });
+
+  group('BlockHashes', () {
+    test('json conversion works normally', () {
+      const String json = '''
+{
+  "blockSize":4,
+  "totalSize":18,
+  "adler32":"7ACcAu0AoALuAKQC7wCoApQA+gA=",
+  "md5": [
+    "zB0S8R/fGt05GcI5v8AjIQ==",
+    "uZCZ4i/LUGFYAD+K1ZD0Wg==",
+    "6kbZGS8T1NJl/naWODQcNw==",
+    "kKh/aA2XAhR/r0HdZa3Bxg==",
+    "34eF7Bs/OhfoJ5+sAw0zyw=="
+  ],
+  "fileMd5":"VT/gkSEdctzUEUJCxclxuQ=="
+}
+''';
+      final Map<String, Object?> decodedJson = jsonDecode(json) as Map<String, Object?>;
+      expect(BlockHashes.fromJson(decodedJson).toJson(), decodedJson);
     });
   });
 }

@@ -141,7 +141,7 @@ class BuildableIOSApp extends IOSApp {
   // not a top-level output directory.
   // Specifying `build/ios/archive/Runner` will result in `build/ios/archive/Runner.xcarchive`.
   String get archiveBundlePath => globals.fs.path.join(getIosBuildDirectory(), 'archive',
-      _hostAppBundleName == null ? 'Runner' : globals.fs.path.withoutExtension(_hostAppBundleName!));
+      _hostAppBundleName == null ? 'Runner' : globals.fs.path.withoutExtension(_hostAppBundleName));
 
   // The output xcarchive bundle path `build/ios/archive/Runner.xcarchive`.
   String get archiveBundleOutputPath =>
@@ -150,7 +150,7 @@ class BuildableIOSApp extends IOSApp {
   String get builtInfoPlistPathAfterArchive => globals.fs.path.join(archiveBundleOutputPath,
       'Products',
       'Applications',
-      _hostAppBundleName == null ? 'Runner.app' : _hostAppBundleName!,
+      _hostAppBundleName ?? 'Runner.app',
       'Info.plist');
 
   String get projectAppIconDirName => _projectImageAssetDirName(_appIconAsset);
@@ -191,7 +191,7 @@ class BuildableIOSApp extends IOSApp {
 
   // Template asset's images are in flutter_template_images package.
   Future<String> _templateImageAssetDirNameForImages(String asset) async {
-    final Directory imageTemplate = await templateImageDirectory(null, globals.fs, globals.logger);
+    final Directory imageTemplate = await templatePathProvider.imageDirectory(null, globals.fs, globals.logger);
     return globals.fs.path.join(imageTemplate.path, _templateImageAssetDirNameSuffix(asset));
   }
 

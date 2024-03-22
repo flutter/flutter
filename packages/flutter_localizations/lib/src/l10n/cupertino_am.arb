@@ -22,5 +22,10 @@
   "tabSemanticsLabel": "ትር $tabIndex ከ$tabCount",
   "modalBarrierDismissLabel": "አሰናብት",
   "searchTextFieldPlaceholderLabel": "ፍለጋ",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "ምንም ተተኪዎች አልተገኙም",
+  "menuDismissLabel": "ምናሌን አሰናብት",
+  "lookUpButtonLabel": "ይመልከቱ",
+  "searchWebButtonLabel": "ድርን ፈልግ",
+  "shareButtonLabel": "አጋራ...",
+  "clearButtonLabel": "Clear"
 }

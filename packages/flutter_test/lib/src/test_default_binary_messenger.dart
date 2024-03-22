@@ -47,8 +47,6 @@ typedef AllMessagesHandler = Future<ByteData?>? Function(
 /// Listeners for these messages are configured using [setMessageHandler].
 class TestDefaultBinaryMessenger extends BinaryMessenger {
   /// Creates a [TestDefaultBinaryMessenger] instance.
-  ///
-  /// The [delegate] instance must not be null.
   TestDefaultBinaryMessenger(
     this.delegate, {
     Map<String, MessageHandler> outboundHandlers = const <String, MessageHandler>{},

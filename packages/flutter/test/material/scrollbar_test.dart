@@ -17,8 +17,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
 const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 const Color _kAndroidThumbIdleColor = Color(0xffbcbcbc);
@@ -204,6 +202,8 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     final AssertionError exception = tester.takeException() as AssertionError;
     expect(exception, isAssertionError);
+
+    controller.dispose();
   });
 
   testWidgets('On first render with thumbVisibility: true, the thumb shows', (WidgetTester tester) async {
@@ -230,6 +230,8 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
     expect(find.byType(Scrollbar), paints..rect());
+
+    controller.dispose();
   });
 
   testWidgets('On first render with thumbVisibility: true, the thumb shows with PrimaryScrollController', (WidgetTester tester) async {
@@ -262,6 +264,8 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
     expect(find.byType(Scrollbar), paints..rect());
+
+    controller.dispose();
   });
 
   testWidgets(
@@ -315,6 +319,8 @@ void main() {
       await tester.pumpWidget(viewWithScroll());
       final AssertionError exception = tester.takeException() as AssertionError;
       expect(exception, isAssertionError);
+
+      controller.dispose();
     },
   );
 
@@ -342,6 +348,8 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
     expect(find.byType(Scrollbar), paints..rect());
+
+    controller.dispose();
   });
 
   testWidgets('On first render with thumbVisibility: true, the thumb shows with PrimaryScrollController', (WidgetTester tester) async {
@@ -374,6 +382,8 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
     expect(find.byType(Scrollbar), paints..rect());
+
+    controller.dispose();
   });
 
   testWidgets('On first render with thumbVisibility: false, the thumb is hidden', (WidgetTester tester) async {
@@ -400,6 +410,8 @@ void main() {
     await tester.pumpWidget(viewWithScroll());
     await tester.pumpAndSettle();
     expect(find.byType(Scrollbar), isNot(paints..rect()));
+
+    controller.dispose();
   });
 
   testWidgets(
@@ -453,6 +465,8 @@ void main() {
       await tester.pumpAndSettle();
       // Scrollbar is not showing after scroll finishes
       expect(find.byType(Scrollbar), isNot(paints..rect()));
+
+      controller.dispose();
     },
   );
 
@@ -502,6 +516,8 @@ void main() {
       await tester.pumpAndSettle();
       // Scrollbar is not showing after scroll finishes
       expect(find.byType(Scrollbar), paints..rect());
+
+      controller.dispose();
     },
   );
 
@@ -562,6 +578,8 @@ void main() {
       await tester.pumpAndSettle();
       // Scrollbar thumb is showing after scroll finishes and timer ends.
       expect(find.byType(Scrollbar), paints..rect());
+
+      controller.dispose();
     },
   );
 
@@ -611,6 +629,8 @@ void main() {
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
       expect(materialScrollbar, isNot(paints..rect()));
+
+      controller.dispose();
     },
   );
 
@@ -674,6 +694,8 @@ void main() {
     ));
 
     await tester.pumpAndSettle();
+
+    controller.dispose();
   });
 
   testWidgets('Tapping the track area pages the Scroll View', (WidgetTester tester) async {
@@ -764,6 +786,8 @@ void main() {
           color: _kAndroidThumbIdleColor,
         ),
     );
+
+    scrollController.dispose();
   });
 
   testWidgets('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
@@ -937,6 +961,8 @@ void main() {
           color: _kAndroidThumbIdleColor,
         ),
     );
+
+    scrollController.dispose();
   });
 
   testWidgets('Scrollbar thumb color completes a hover animation', (WidgetTester tester) async {
@@ -994,7 +1020,12 @@ void main() {
           useMaterial3: false,
           scrollbarTheme: ScrollbarThemeData(
             thumbVisibility: MaterialStateProperty.all(true),
-            showTrackOnHover: true,
+            trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.hovered)) {
+                return true;
+              }
+              return false;
+            })
           ),
         ),
         home: const SingleChildScrollView(
@@ -1134,7 +1165,7 @@ void main() {
     }),
   );
 
-  testWidgets('ScrollbarThemeData.trackVisibility replaces showTrackOnHover', (WidgetTester tester) async {
+  testWidgets('ScrollbarThemeData.trackVisibility', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -1202,14 +1233,19 @@ void main() {
     }),
   );
 
-  testWidgets('Scrollbar showTrackOnHover', (WidgetTester tester) async {
+  testWidgets('Scrollbar trackVisibility on hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
           useMaterial3: false,
           scrollbarTheme: ScrollbarThemeData(
             thumbVisibility: MaterialStateProperty.all(true),
-            showTrackOnHover: true,
+            trackVisibility: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              if (states.contains(MaterialState.hovered)) {
+                return true;
+              }
+              return false;
+            }),
           ),
         ),
         home: const SingleChildScrollView(
@@ -1332,6 +1368,8 @@ void main() {
     expect(find.byType(CupertinoScrollbar), paints..rrect());
     final CupertinoScrollbar scrollbar = tester.widget<CupertinoScrollbar>(find.byType(CupertinoScrollbar));
     expect(scrollbar.controller, isNotNull);
+
+    controller.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets("Scrollbar doesn't show when scroll the inner scrollable widget", (WidgetTester tester) async {
@@ -1464,6 +1502,8 @@ void main() {
     await tester.pumpAndSettle();
     // The offset should not have changed.
     expect(scrollController.offset, scrollAmount);
+
+    scrollController.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.fuchsia }));
 
   testWidgets('Scrollbar dragging is disabled by default on Android', (WidgetTester tester) async {
@@ -1558,6 +1598,8 @@ void main() {
     // The offset should not have changed.
     expect(scrollController.offset, scrollAmount * 2);
     expect(tapCount, 2);
+
+    scrollController.dispose();
   });
 
   testWidgets('Simultaneous dragging and pointer scrolling does not cause a crash', (WidgetTester tester) async {
@@ -1730,6 +1772,8 @@ void main() {
           color: const Color(0xffbcbcbc),
         ),
     );
+
+    scrollController.dispose();
   });
 
   testWidgets('Scrollbar.thumbVisibility triggers assertion when multiple ScrollPositions are attached.', (WidgetTester tester) async {
@@ -1776,7 +1820,12 @@ void main() {
     FlutterError error = tester.takeException() as FlutterError;
     expect(
       error.message,
-      contains('The PrimaryScrollController is currently attached to more than one ScrollPosition.'),
+      '''
+The PrimaryScrollController is attached to more than one ScrollPosition.
+The Scrollbar requires a single ScrollPosition in order to be painted.
+When Scrollbar.thumbVisibility is true, the associated ScrollController must only have one ScrollPosition attached.
+If a ScrollController has not been provided, the PrimaryScrollController is used by default on mobile platforms for ScrollViews with an Axis.vertical scroll direction.
+More than one ScrollView may have tried to use the PrimaryScrollController of the current context. ScrollView.primary can override this behavior.''',
     );
 
     // Asserts when using the ScrollController provided by the user.
@@ -1795,8 +1844,14 @@ void main() {
     error = tester.takeException() as FlutterError;
     expect(
       error.message,
-      contains('The provided ScrollController is currently attached to more than one ScrollPosition.'),
+      '''
+The provided ScrollController is attached to more than one ScrollPosition.
+The Scrollbar requires a single ScrollPosition in order to be painted.
+When Scrollbar.thumbVisibility is true, the associated ScrollController must only have one ScrollPosition attached.
+The provided ScrollController cannot be shared by multiple ScrollView widgets.''',
     );
+
+    scrollController.dispose();
   });
 
   testWidgets('Scrollbar scrollOrientation works correctly', (WidgetTester tester) async {
@@ -1845,5 +1900,7 @@ void main() {
           color: _kAndroidThumbIdleColor,
         ),
     );
+
+    scrollController.dispose();
   });
 }

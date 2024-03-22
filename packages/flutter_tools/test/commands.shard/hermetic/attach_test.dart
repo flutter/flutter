@@ -19,11 +19,11 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
+import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
-import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -32,6 +32,7 @@ import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:multicast_dns/multicast_dns.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
@@ -50,10 +51,6 @@ class FakeProcessInfo extends Fake implements ProcessInfo {
 }
 
 void main() {
-  tearDown(() {
-    MacOSDesignedForIPadDevices.allowDiscovery = false;
-  });
-
   group('attach', () {
     late StreamLogger logger;
     late FileSystem testFileSystem;
@@ -72,12 +69,12 @@ void main() {
       testFileSystem = MemoryFileSystem.test();
       testFileSystem.directory('lib').createSync();
       testFileSystem.file(testFileSystem.path.join('lib', 'main.dart')).createSync();
-      artifacts = Artifacts.test();
+      artifacts = Artifacts.test(fileSystem: testFileSystem);
       stdio = FakeStdio();
       terminal = FakeTerminal();
       signals = Signals.test();
       processInfo = FakeProcessInfo();
-      testDeviceManager = TestDeviceManager(logger: BufferLogger.test());
+      testDeviceManager = TestDeviceManager(logger: logger);
     });
 
     group('with one device and no specified target file', () {
@@ -135,7 +132,6 @@ void main() {
 
         await createTestCommandRunner(AttachCommand(
           hotRunnerFactory: hotRunnerFactory,
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -161,7 +157,143 @@ void main() {
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         ),
+      });
+
+      testUsingContext('restores terminal to singleCharMode == false on command exit', () async {
+        final FakeIOSDevice device = FakeIOSDevice(
+          portForwarder: portForwarder,
+          majorSdkVersion: 12,
+          onGetLogReader: () {
+            fakeLogReader.addLine('Foo');
+            fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
+            return fakeLogReader;
+          },
+        );
+        testDeviceManager.devices = <Device>[device];
+        final Completer<void> completer = Completer<void>();
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
+          if (message == '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
+            // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
+            completer.complete();
+          }
+        });
+        final FakeHotRunner hotRunner = FakeHotRunner();
+        hotRunner.onAttach = (
+          Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          Completer<void>? appStartedCompleter,
+          bool allowExistingDdsInstance,
+          bool enableDevTools,
+        ) async {
+          appStartedCompleter?.complete();
+          return 0;
+        };
+        hotRunner.exited = false;
+        hotRunner.isWaitingForVmService = false;
+        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
+          ..hotRunner = hotRunner;
+
+        await createTestCommandRunner(AttachCommand(
+          hotRunnerFactory: hotRunnerFactory,
+          stdio: stdio,
+          logger: logger,
+          terminal: terminal,
+          signals: signals,
+          platform: platform,
+          processInfo: processInfo,
+          fileSystem: testFileSystem,
+        )).run(<String>['attach']);
+        await Future.wait<void>(<Future<void>>[
+          completer.future,
+          fakeLogReader.dispose(),
+          loggerSubscription.cancel(),
+        ]);
+
+        expect(terminal.singleCharMode, isFalse);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+          mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+          preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+          logger: logger,
+          flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
+        ),
+        Signals: () => FakeSignals(),
+      });
+
+      testUsingContext('local engine artifacts are passed to runner', () async {
+        const String localEngineSrc = '/path/to/local/engine/src';
+        const String localEngineDir = 'host_debug_unopt';
+        testFileSystem.directory('$localEngineSrc/out/$localEngineDir').createSync(recursive: true);
+        final FakeIOSDevice device = FakeIOSDevice(
+          portForwarder: portForwarder,
+          majorSdkVersion: 12,
+          onGetLogReader: () {
+            fakeLogReader.addLine('Foo');
+            fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:$devicePort');
+            return fakeLogReader;
+          },
+        );
+        testDeviceManager.devices = <Device>[device];
+        final Completer<void> completer = Completer<void>();
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
+          if (message == '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
+            // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
+            completer.complete();
+          }
+        });
+        final FakeHotRunner hotRunner = FakeHotRunner();
+        hotRunner.onAttach = (
+          Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          Completer<void>? appStartedCompleter,
+          bool allowExistingDdsInstance,
+          bool enableDevTools,
+        ) async => 0;
+        hotRunner.exited = false;
+        hotRunner.isWaitingForVmService = false;
+        bool passedArtifactTest = false;
+        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
+          ..hotRunner = hotRunner
+          .._artifactTester = (Artifacts artifacts) {
+            expect(artifacts, isA<CachedLocalEngineArtifacts>());
+            // expecting this to be true ensures this test ran
+            passedArtifactTest = true;
+          };
+
+        await createTestCommandRunner(AttachCommand(
+          hotRunnerFactory: hotRunnerFactory,
+          stdio: stdio,
+          logger: logger,
+          terminal: terminal,
+          signals: signals,
+          platform: platform,
+          processInfo: processInfo,
+          fileSystem: testFileSystem,
+        )).run(<String>['attach', '--local-engine-src-path=$localEngineSrc', '--local-engine=$localEngineDir', '--local-engine-host=$localEngineDir']);
+        await Future.wait<void>(<Future<void>>[
+          completer.future,
+          fakeLogReader.dispose(),
+          loggerSubscription.cancel(),
+        ]);
+        expect(passedArtifactTest, isTrue);
+      }, overrides: <Type, Generator>{
+        Artifacts: () => artifacts,
+        DeviceManager: () => testDeviceManager,
+        FileSystem: () => testFileSystem,
+        Logger: () => logger,
+        MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+          mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+          preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
+          logger: logger,
+          flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
+        ),
+        ProcessManager: () => FakeProcessManager.empty(),
       });
 
       testUsingContext('succeeds with iOS device with mDNS', () async {
@@ -189,7 +321,6 @@ void main() {
 
         await createTestCommandRunner(AttachCommand(
           hotRunnerFactory: hotRunnerFactory,
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -230,6 +361,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         ),
       });
 
@@ -254,7 +386,6 @@ void main() {
 
         await createTestCommandRunner(AttachCommand(
           hotRunnerFactory: hotRunnerFactory,
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -301,6 +432,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         ),
       });
 
@@ -325,7 +457,6 @@ void main() {
 
         await createTestCommandRunner(AttachCommand(
           hotRunnerFactory: hotRunnerFactory,
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -376,6 +507,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         ),
       });
 
@@ -400,7 +532,6 @@ void main() {
 
         await createTestCommandRunner(AttachCommand(
           hotRunnerFactory: hotRunnerFactory,
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -451,6 +582,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
+          analytics: const NoOpAnalytics(),
         ),
       });
 
@@ -469,7 +601,6 @@ void main() {
           }
         });
         final Future<void> task = createTestCommandRunner(AttachCommand(
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -502,7 +633,6 @@ void main() {
         };
         testDeviceManager.devices = <Device>[device];
         expect(() => createTestCommandRunner(AttachCommand(
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -546,7 +676,6 @@ void main() {
 
         final AttachCommand command = AttachCommand(
           hotRunnerFactory: hotRunnerFactory,
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -590,7 +719,6 @@ void main() {
         testDeviceManager.devices = <Device>[device];
 
         final AttachCommand command = AttachCommand(
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -644,7 +772,6 @@ void main() {
 
         await createTestCommandRunner(AttachCommand(
           hotRunnerFactory: hotRunnerFactory,
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -676,7 +803,6 @@ void main() {
         testDeviceManager.devices = <Device>[device];
 
         final AttachCommand command = AttachCommand(
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -725,7 +851,6 @@ void main() {
           }
         });
         final Future<void> task = createTestCommandRunner(AttachCommand(
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -760,7 +885,6 @@ void main() {
           }
         });
         final Future<void> task = createTestCommandRunner(AttachCommand(
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -796,7 +920,6 @@ void main() {
           }
         });
         final Future<void> task = createTestCommandRunner(AttachCommand(
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -841,7 +964,6 @@ void main() {
           }
         });
         final Future<void> task = createTestCommandRunner(AttachCommand(
-          artifacts: artifacts,
           stdio: stdio,
           logger: logger,
           terminal: terminal,
@@ -878,7 +1000,6 @@ void main() {
 
     testUsingContext('exits when no device connected', () async {
       final AttachCommand command = AttachCommand(
-        artifacts: artifacts,
         stdio: stdio,
         logger: logger,
         terminal: terminal,
@@ -902,7 +1023,6 @@ void main() {
       final FakeIOSDevice device = FakeIOSDevice();
       testDeviceManager.devices = <Device>[device];
       expect(createTestCommandRunner(AttachCommand(
-        artifacts: artifacts,
         stdio: stdio,
         logger: logger,
         terminal: terminal,
@@ -923,7 +1043,6 @@ void main() {
 
     testUsingContext('exits when multiple devices connected', () async {
       final AttachCommand command = AttachCommand(
-        artifacts: artifacts,
         stdio: stdio,
         logger: logger,
         terminal: terminal,
@@ -943,7 +1062,6 @@ void main() {
       expect(testLogger.statusText, containsIgnoringWhitespace('More than one device'));
       expect(testLogger.statusText, contains('xx1'));
       expect(testLogger.statusText, contains('yy2'));
-      expect(MacOSDesignedForIPadDevices.allowDiscovery, isTrue);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -973,7 +1091,6 @@ void main() {
 
       final AttachCommand command = AttachCommand(
         hotRunnerFactory: hotRunnerFactory,
-        artifacts: artifacts,
         stdio: stdio,
         logger: logger,
         terminal: terminal,
@@ -1014,7 +1131,6 @@ void main() {
 
       final AttachCommand command = AttachCommand(
         hotRunnerFactory: hotRunnerFactory,
-        artifacts: artifacts,
         stdio: stdio,
         logger: logger,
         terminal: terminal,
@@ -1053,6 +1169,15 @@ class FakeHotRunner extends Fake implements HotRunner {
   }) {
     return onAttach(connectionInfoCompleter, appStartedCompleter, allowExistingDdsInstance, enableDevTools);
   }
+
+  @override
+  bool supportsServiceProtocol = false;
+
+  @override
+  bool stayResident = true;
+
+  @override
+  void printHelp({required bool details}) {}
 }
 
 class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
@@ -1060,6 +1185,7 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
   String? dillOutputPath;
   String? projectRootPath;
   late List<FlutterDevice> devices;
+  void Function(Artifacts artifacts)? _artifactTester;
 
   @override
   HotRunner build(
@@ -1075,7 +1201,15 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
     bool stayResident = true,
     bool ipv6 = false,
     FlutterProject? flutterProject,
+    Analytics? analytics,
+    String? nativeAssetsYamlFile,
+    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) {
+    if (_artifactTester != null) {
+      for (final FlutterDevice device in devices) {
+        _artifactTester!((device.generator! as DefaultResidentCompiler).artifacts);
+      }
+    }
     this.devices = devices;
     this.dillOutputPath = dillOutputPath;
     this.projectRootPath = projectRootPath;
@@ -1261,9 +1395,6 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   Uri get uri => Uri.parse('http://localhost:8181');
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeAndroidDevice extends Fake implements AndroidDevice {
   FakeAndroidDevice({required this.id});
 
@@ -1326,9 +1457,6 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   }
 
   @override
-  OverrideArtifacts? get artifactOverrides => null;
-
-  @override
   final PlatformType platformType = PlatformType.android;
 
   @override
@@ -1338,9 +1466,6 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   bool get ephemeral => true;
 }
 
-// Unfortunately Device, despite not being immutable, has an `operator ==`.
-// Until we fix that, we have to also ignore related lints here.
-// ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({
     DevicePortForwarder? portForwarder,
@@ -1381,9 +1506,6 @@ class FakeIOSDevice extends Fake implements IOSDevice {
     }
     return onGetLogReader!();
   }
-
-  @override
-  OverrideArtifacts? get artifactOverrides => null;
 
   @override
   final String name = 'name';
@@ -1479,4 +1601,10 @@ class FakeTerminal extends Fake implements AnsiTerminal {
 
   @override
   bool usesTerminalUi = false;
+
+  @override
+  bool singleCharMode = false;
+
+  @override
+  Stream<String> get keystrokes => StreamController<String>().stream;
 }

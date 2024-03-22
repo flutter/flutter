@@ -41,6 +41,9 @@ class WebDriverService extends DriverService {
   late ResidentRunner _residentRunner;
   Uri? _webUri;
 
+  @visibleForTesting
+  Uri? get webUri => _webUri;
+
   /// The result of [ResidentRunner.run].
   ///
   /// This is expected to stay `null` throughout the test, as the application
@@ -74,16 +77,21 @@ class WebDriverService extends DriverService {
         DebuggingOptions.disabled(
           buildInfo,
           port: debuggingOptions.port,
+          hostname: debuggingOptions.hostname,
+          webRenderer: debuggingOptions.webRenderer,
         )
         : DebuggingOptions.enabled(
           buildInfo,
           port: debuggingOptions.port,
+          hostname: debuggingOptions.hostname,
           disablePortPublication: debuggingOptions.disablePortPublication,
+          webRenderer: debuggingOptions.webRenderer,
         ),
       stayResident: true,
       flutterProject: FlutterProject.current(),
       fileSystem: globals.fs,
       usage: globals.flutterUsage,
+      analytics: globals.analytics,
       logger: _logger,
       systemClock: globals.systemClock,
     );
@@ -116,10 +124,15 @@ class WebDriverService extends DriverService {
       throw ToolExit('Failed to start application');
     }
 
-    _webUri = _residentRunner.uri;
-
-    if (_webUri == null) {
+    if (_residentRunner.uri == null) {
       throw ToolExit('Unable to connect to the app. URL not available.');
+    }
+
+    if (debuggingOptions.webLaunchUrl != null) {
+      // It should throw an error if the provided url is invalid so no tryParse
+      _webUri = Uri.parse(debuggingOptions.webLaunchUrl!);
+    } else {
+      _webUri = _residentRunner.uri;
     }
   }
 

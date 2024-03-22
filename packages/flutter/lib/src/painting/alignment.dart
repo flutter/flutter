@@ -185,8 +185,6 @@ abstract class AlignmentGeometry {
 ///    whether the horizontal direction depends on the [TextDirection].
 class Alignment extends AlignmentGeometry {
   /// Creates an alignment.
-  ///
-  /// The [x] and [y] arguments must not be null.
   const Alignment(this.x, this.y);
 
   /// The distance fraction in the horizontal direction.
@@ -401,8 +399,6 @@ class Alignment extends AlignmentGeometry {
 ///    whose horizontal component does not depend on the text direction).
 class AlignmentDirectional extends AlignmentGeometry {
   /// Creates a directional alignment.
-  ///
-  /// The [start] and [y] arguments must not be null.
   const AlignmentDirectional(this.start, this.y);
 
   /// The distance fraction in the horizontal direction.
@@ -543,12 +539,10 @@ class AlignmentDirectional extends AlignmentGeometry {
   @override
   Alignment resolve(TextDirection? direction) {
     assert(direction != null, 'Cannot resolve $runtimeType without a TextDirection.');
-    switch (direction!) {
-      case TextDirection.rtl:
-        return Alignment(-start, y);
-      case TextDirection.ltr:
-        return Alignment(start, y);
-    }
+    return switch (direction!) {
+      TextDirection.rtl => Alignment(-start, y),
+      TextDirection.ltr => Alignment(start, y),
+    };
   }
 
   static String _stringify(double start, double y) {
@@ -647,12 +641,10 @@ class _MixedAlignment extends AlignmentGeometry {
   @override
   Alignment resolve(TextDirection? direction) {
     assert(direction != null, 'Cannot resolve $runtimeType without a TextDirection.');
-    switch (direction!) {
-      case TextDirection.rtl:
-        return Alignment(_x - _start, _y);
-      case TextDirection.ltr:
-        return Alignment(_x + _start, _y);
-    }
+    return switch (direction!) {
+      TextDirection.rtl => Alignment(_x - _start, _y),
+      TextDirection.ltr => Alignment(_x + _start, _y),
+    };
   }
 }
 

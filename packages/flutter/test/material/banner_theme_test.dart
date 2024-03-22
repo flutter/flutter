@@ -66,7 +66,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Passing no MaterialBannerThemeData returns defaults', (WidgetTester tester) async {
+  testWidgets('Material3 - Passing no MaterialBannerThemeData returns defaults', (WidgetTester tester) async {
     const String contentText = 'Content';
     final ThemeData theme = ThemeData(useMaterial3: true);
     late final ThemeData localizedTheme;
@@ -92,8 +92,8 @@ void main() {
     ));
 
     final Material material = _getMaterialFromText(tester, contentText);
-    expect(material.color, theme.colorScheme.surface);
-    expect(material.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(material.color, theme.colorScheme.surfaceContainerLow);
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.shadowColor, null);
     expect(material.elevation, 0.0);
 
@@ -115,7 +115,7 @@ void main() {
     expect(divider.color, theme.colorScheme.outlineVariant);
   });
 
-  testWidgets('Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger', (WidgetTester tester) async {
+  testWidgets('Material3 - Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger', (WidgetTester tester) async {
     const String contentText = 'Content';
     const Key tapTarget = Key('tap-target');
     final ThemeData theme = ThemeData(useMaterial3: true);
@@ -155,8 +155,8 @@ void main() {
     await tester.pumpAndSettle();
 
     final Material material = _getMaterialFromText(tester, contentText);
-    expect(material.color, theme.colorScheme.surface);
-    expect(material.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(material.color, theme.colorScheme.surfaceContainerLow);
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.shadowColor, null);
     expect(material.elevation, 0.0);
 
@@ -406,7 +406,7 @@ void main() {
     ));
 
     final Material material = _getMaterialFromText(tester, contentText);
-    expect(material.color, colorScheme.surface);
+    expect(material.color, colorScheme.surfaceContainerLow);
   });
 
   testWidgets('MaterialBanner uses color scheme when necessary when presented by ScaffoldMessenger', (WidgetTester tester) async {
@@ -445,7 +445,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Material material = _getMaterialFromText(tester, contentText);
-    expect(material.color, colorScheme.surface);
+    expect(material.color, colorScheme.surfaceContainerLow);
   });
 
   group('Material 2', () {
@@ -453,7 +453,7 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgets('Passing no MaterialBannerThemeData returns defaults', (WidgetTester tester) async {
+    testWidgets('Material2 - Passing no MaterialBannerThemeData returns defaults', (WidgetTester tester) async {
       const String contentText = 'Content';
 
       await tester.pumpWidget(MaterialApp(
@@ -499,7 +499,7 @@ void main() {
       expect(divider.color, null);
     });
 
-    testWidgets('Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger', (WidgetTester tester) async {
+    testWidgets('Material2 - Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger', (WidgetTester tester) async {
       const String contentText = 'Content';
       const Key tapTarget = Key('tap-target');
 

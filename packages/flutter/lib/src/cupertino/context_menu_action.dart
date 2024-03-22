@@ -57,7 +57,7 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
   );
   static const double _kButtonHeight = 43;
   static const TextStyle _kActionSheetActionStyle = TextStyle(
-    fontFamily: '.SF UI Text',
+    fontFamily: 'CupertinoSystemText',
     inherit: false,
     fontSize: 16.0,
     fontWeight: FontWeight.w400,
@@ -89,6 +89,7 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
   TextStyle get _textStyle {
     if (widget.isDefaultAction) {
       return _kActionSheetActionStyle.copyWith(
+        color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
         fontWeight: FontWeight.w600,
       );
     }

@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'multi_view_testing.dart';
 
 void main() {
   testWidgets('Widgets in view update as expected', (WidgetTester tester) async {
@@ -15,9 +15,9 @@ void main() {
       child: const TestWidget(),
     );
 
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: widget,
+    await tester.pumpWidget(
+      wrapWithView: false,
+      widget,
     );
 
     expect(find.text('Hello'), findsOneWidget);
@@ -29,9 +29,9 @@ void main() {
     expect(find.text('World'), findsOneWidget);
     expect(tester.renderObject<RenderParagraph>(find.byType(Text)).text.toPlainText(), 'World');
 
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: ViewCollection(
+    await tester.pumpWidget(
+      wrapWithView: false,
+      ViewCollection(
         views: <Widget>[widget],
       ),
     );
@@ -40,9 +40,9 @@ void main() {
     expect(tester.renderObject<RenderParagraph>(find.byType(Text)).text.toPlainText(), 'World');
 
     tester.state<TestWidgetState>(find.byType(TestWidget)).text = 'FooBar';
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: widget,
+    await tester.pumpWidget(
+      wrapWithView: false,
+      widget,
     );
     expect(find.text('World'), findsNothing);
     expect(find.text('FooBar'), findsOneWidget);
@@ -65,9 +65,9 @@ void main() {
       child: TestWidget(key: key2),
     );
 
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: ViewCollection(
+    await tester.pumpWidget(
+      wrapWithView: false,
+      ViewCollection(
         views: <Widget>[view1, view2],
       ),
     );
@@ -91,9 +91,9 @@ void main() {
     expect(renderParagraphTexts(), <String>['Guten', 'Abend']);
 
     tester.state<TestWidgetState>(find.byKey(key2)).text = 'Morgen';
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: ViewCollection(
+    await tester.pumpWidget(
+      wrapWithView: false,
+      ViewCollection(
         views: <Widget>[view1, ViewCollection(views: <Widget>[view2])],
       ),
     );
@@ -201,21 +201,4 @@ class TestWidgetState extends State<TestWidget> {
   Widget build(BuildContext context) {
     return Text(text, textDirection: TextDirection.ltr);
   }
-}
-
-Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, required  Widget widget}) {
-  tester.binding.attachRootWidget(widget);
-  tester.binding.scheduleFrame();
-  return tester.binding.pump();
-}
-
-class FakeView extends TestFlutterView{
-  FakeView(FlutterView view, { this.viewId = 100 }) : super(
-    view: view,
-    platformDispatcher: view.platformDispatcher as TestPlatformDispatcher,
-    display: view.display as TestDisplay,
-  );
-
-  @override
-  final int viewId;
 }

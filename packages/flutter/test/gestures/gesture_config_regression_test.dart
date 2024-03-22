@@ -7,11 +7,10 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
-
 class TestResult {
   bool dragStarted = false;
   bool dragUpdate = false;
+  bool dragEnd = false;
 }
 
 class NestedScrollableCase extends StatelessWidget {
@@ -78,7 +77,9 @@ class NestedDraggableCase extends StatelessWidget {
                     onDragUpdate: (DragUpdateDetails details){
                       testResult.dragUpdate = true;
                     },
-                    onDragEnd: (_) {},
+                    onDragEnd: (_) {
+                      testResult.dragEnd = true;
+                    },
                   ),
                 );
               },
@@ -91,7 +92,7 @@ class NestedDraggableCase extends StatelessWidget {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Scroll Views get the same ScrollConfiguration as GestureDetectors', (WidgetTester tester) async {
+  testWidgets('Scroll Views get the same ScrollConfiguration as GestureDetectors', (WidgetTester tester) async {
     tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
     addTearDown(tester.view.reset);
 
@@ -114,7 +115,7 @@ void main() {
    expect(result.dragUpdate, true);
   });
 
-  testWidgetsWithLeakTracking('Scroll Views get the same ScrollConfiguration as Draggables', (WidgetTester tester) async {
+  testWidgets('Scroll Views get the same ScrollConfiguration as Draggables', (WidgetTester tester) async {
     tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
     addTearDown(tester.view.reset);
 
@@ -135,5 +136,6 @@ void main() {
 
    expect(result.dragStarted, true);
    expect(result.dragUpdate, true);
+   expect(result.dragEnd, true);
   });
 }
