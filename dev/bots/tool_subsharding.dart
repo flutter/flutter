@@ -54,6 +54,7 @@ class TestFileReporterResults {
       /// is expected to be a json dictionary per line and the following line removes
       /// all the additional content at the beginning of the line until it finds the
       /// first opening curly bracket.
+      // TODO(godofredoc): remove when https://github.com/flutter/flutter/issues/145553 is fixed.
       final String sanitizedMetric = metric.replaceAll(RegExp(r'$.+{'), '{');
       final Map<String, Object?> entry = json.decode(sanitizedMetric) as Map<String, Object?>;
       if (entry.containsKey('suite')) {
