@@ -116,7 +116,6 @@ void main() {
 
     expect(caughtForegroundImageError, true);
     final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
-    // addTearDown(box.dispose);
     expect(box.size, equals(const Size(100.0, 100.0)));
     final RenderDecoratedBox child = box.child! as RenderDecoratedBox;
     final BoxDecoration decoration = child.decoration as BoxDecoration;
