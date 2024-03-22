@@ -120,6 +120,27 @@ TEST_F(WindowsTest, LaunchHeadlessEngine) {
   ASSERT_NE(engine, nullptr);
 }
 
+// Verify that the engine can return to headless mode.
+TEST_F(WindowsTest, EngineCanTransitionToHeadless) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  // Create and then destroy a view controller that does not own its engine.
+  // This causes the engine to transition back to headless mode.
+  {
+    FlutterDesktopViewControllerProperties properties = {};
+    ViewControllerPtr controller{
+        FlutterDesktopEngineCreateViewController(engine.get(), &properties)};
+
+    ASSERT_NE(controller, nullptr);
+  }
+
+  // The engine is back in headless mode now.
+  ASSERT_NE(engine, nullptr);
+}
+
 // Verify that accessibility features are initialized when a view is created.
 TEST_F(WindowsTest, LaunchRefreshesAccessibility) {
   auto& context = GetContext();

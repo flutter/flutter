@@ -108,6 +108,8 @@ ViewControllerPtr WindowsConfigBuilder::Run() const {
 
   int width = 600;
   int height = 400;
+
+  // Create a view controller that owns the engine.
   ViewControllerPtr controller{
       FlutterDesktopViewControllerCreate(width, height, engine.release())};
   if (!controller) {

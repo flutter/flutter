@@ -72,18 +72,27 @@ static FlutterDesktopTextureRegistrarRef HandleForTextureRegistrar(
   return reinterpret_cast<FlutterDesktopTextureRegistrarRef>(registrar);
 }
 
-FlutterDesktopViewControllerRef FlutterDesktopViewControllerCreate(
+// Creates a view controller that might own the engine.
+//
+// If `owns_engine` is true, then the returned `FlutterDesktopViewControllerRef`
+// owns `engine_ref` and will deallocate `engine_ref` upon its own destruction.
+static FlutterDesktopViewControllerRef CreateViewController(
+    FlutterDesktopEngineRef engine_ref,
     int width,
     int height,
-    FlutterDesktopEngineRef engine_ref) {
+    bool owns_engine) {
   flutter::FlutterWindowsEngine* engine_ptr = EngineFromHandle(engine_ref);
   std::unique_ptr<flutter::WindowBindingHandler> window_wrapper =
       std::make_unique<flutter::FlutterWindow>(
           width, height, engine_ptr->windows_proc_table());
 
-  auto engine = std::unique_ptr<flutter::FlutterWindowsEngine>(engine_ptr);
+  std::unique_ptr<flutter::FlutterWindowsEngine> engine;
+  if (owns_engine) {
+    engine = std::unique_ptr<flutter::FlutterWindowsEngine>(engine_ptr);
+  }
+
   std::unique_ptr<flutter::FlutterWindowsView> view =
-      engine->CreateView(std::move(window_wrapper));
+      engine_ptr->CreateView(std::move(window_wrapper));
   auto controller = std::make_unique<flutter::FlutterWindowsViewController>(
       std::move(engine), std::move(view));
 
@@ -103,6 +112,20 @@ FlutterDesktopViewControllerRef FlutterDesktopViewControllerCreate(
   controller->engine()->UpdateAccessibilityFeatures();
 
   return HandleForViewController(controller.release());
+}
+
+FlutterDesktopViewControllerRef FlutterDesktopViewControllerCreate(
+    int width,
+    int height,
+    FlutterDesktopEngineRef engine) {
+  return CreateViewController(engine, width, height, /*owns_engine=*/true);
+}
+
+FlutterDesktopViewControllerRef FlutterDesktopEngineCreateViewController(
+    FlutterDesktopEngineRef engine,
+    const FlutterDesktopViewControllerProperties* properties) {
+  return CreateViewController(engine, properties->width, properties->height,
+                              /*owns_engine=*/false);
 }
 
 void FlutterDesktopViewControllerDestroy(FlutterDesktopViewControllerRef ref) {
