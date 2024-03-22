@@ -1352,6 +1352,51 @@ InferExternalViewEmbedderFromArgs(const FlutterCompositor* compositor,
           false};
 }
 
+// Translates embedder metrics to engine metrics, or returns a string on error.
+static std::variant<flutter::ViewportMetrics, std::string>
+MakeViewportMetricsFromWindowMetrics(
+    const FlutterWindowMetricsEvent* flutter_metrics) {
+  if (flutter_metrics == nullptr) {
+    return "Invalid metrics handle.";
+  }
+
+  flutter::ViewportMetrics metrics;
+
+  metrics.physical_width = SAFE_ACCESS(flutter_metrics, width, 0.0);
+  metrics.physical_height = SAFE_ACCESS(flutter_metrics, height, 0.0);
+  metrics.device_pixel_ratio = SAFE_ACCESS(flutter_metrics, pixel_ratio, 1.0);
+  metrics.physical_view_inset_top =
+      SAFE_ACCESS(flutter_metrics, physical_view_inset_top, 0.0);
+  metrics.physical_view_inset_right =
+      SAFE_ACCESS(flutter_metrics, physical_view_inset_right, 0.0);
+  metrics.physical_view_inset_bottom =
+      SAFE_ACCESS(flutter_metrics, physical_view_inset_bottom, 0.0);
+  metrics.physical_view_inset_left =
+      SAFE_ACCESS(flutter_metrics, physical_view_inset_left, 0.0);
+  metrics.display_id = SAFE_ACCESS(flutter_metrics, display_id, 0);
+
+  if (metrics.device_pixel_ratio <= 0.0) {
+    return "Device pixel ratio was invalid. It must be greater than zero.";
+  }
+
+  if (metrics.physical_view_inset_top < 0 ||
+      metrics.physical_view_inset_right < 0 ||
+      metrics.physical_view_inset_bottom < 0 ||
+      metrics.physical_view_inset_left < 0) {
+    return "Physical view insets are invalid. They must be non-negative.";
+  }
+
+  if (metrics.physical_view_inset_top > metrics.physical_height ||
+      metrics.physical_view_inset_right > metrics.physical_width ||
+      metrics.physical_view_inset_bottom > metrics.physical_height ||
+      metrics.physical_view_inset_left > metrics.physical_width) {
+    return "Physical view insets are invalid. They cannot be greater than "
+           "physical height or width.";
+  }
+
+  return metrics;
+}
+
 struct _FlutterPlatformMessageResponseHandle {
   std::unique_ptr<flutter::PlatformMessage> message;
 };
@@ -2209,44 +2254,13 @@ FlutterEngineResult FlutterEngineSendWindowMetricsEvent(
   FlutterViewId view_id =
       SAFE_ACCESS(flutter_metrics, view_id, kFlutterImplicitViewId);
 
-  flutter::ViewportMetrics metrics;
-
-  metrics.physical_width = SAFE_ACCESS(flutter_metrics, width, 0.0);
-  metrics.physical_height = SAFE_ACCESS(flutter_metrics, height, 0.0);
-  metrics.device_pixel_ratio = SAFE_ACCESS(flutter_metrics, pixel_ratio, 1.0);
-  metrics.physical_view_inset_top =
-      SAFE_ACCESS(flutter_metrics, physical_view_inset_top, 0.0);
-  metrics.physical_view_inset_right =
-      SAFE_ACCESS(flutter_metrics, physical_view_inset_right, 0.0);
-  metrics.physical_view_inset_bottom =
-      SAFE_ACCESS(flutter_metrics, physical_view_inset_bottom, 0.0);
-  metrics.physical_view_inset_left =
-      SAFE_ACCESS(flutter_metrics, physical_view_inset_left, 0.0);
-  metrics.display_id = SAFE_ACCESS(flutter_metrics, display_id, 0);
-
-  if (metrics.device_pixel_ratio <= 0.0) {
-    return LOG_EMBEDDER_ERROR(
-        kInvalidArguments,
-        "Device pixel ratio was invalid. It must be greater than zero.");
+  std::variant<flutter::ViewportMetrics, std::string> metrics_or_error =
+      MakeViewportMetricsFromWindowMetrics(flutter_metrics);
+  if (const std::string* error = std::get_if<std::string>(&metrics_or_error)) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, error->c_str());
   }
 
-  if (metrics.physical_view_inset_top < 0 ||
-      metrics.physical_view_inset_right < 0 ||
-      metrics.physical_view_inset_bottom < 0 ||
-      metrics.physical_view_inset_left < 0) {
-    return LOG_EMBEDDER_ERROR(
-        kInvalidArguments,
-        "Physical view insets are invalid. They must be non-negative.");
-  }
-
-  if (metrics.physical_view_inset_top > metrics.physical_height ||
-      metrics.physical_view_inset_right > metrics.physical_width ||
-      metrics.physical_view_inset_bottom > metrics.physical_height ||
-      metrics.physical_view_inset_left > metrics.physical_width) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments,
-                              "Physical view insets are invalid. They cannot "
-                              "be greater than physical height or width.");
-  }
+  auto metrics = std::get<flutter::ViewportMetrics>(metrics_or_error);
 
   return reinterpret_cast<flutter::EmbedderEngine*>(engine)->SetViewportMetrics(
              view_id, metrics)
