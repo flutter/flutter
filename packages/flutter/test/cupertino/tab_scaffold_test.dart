@@ -627,7 +627,10 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/33455
-  testWidgets('Adding new tabs does not crash the app', (WidgetTester tester) async {
+  testWidgets('Adding new tabs does not crash the app',
+  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final List<int> tabsPainted = <int>[];
     final CupertinoTabController controller = CupertinoTabController();
     addTearDown(controller.dispose);
