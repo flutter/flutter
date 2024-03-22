@@ -112,5 +112,23 @@ TEST_P(RenderTargetCacheTest, CachedTextureGetsNewAttachmentConfig) {
   EXPECT_EQ(color2.clear_color, Color::Red());
 }
 
+TEST_P(RenderTargetCacheTest, CreateWithEmptySize) {
+  auto render_target_cache =
+      RenderTargetCache(GetContext()->GetResourceAllocator());
+
+  render_target_cache.Start();
+  RenderTarget empty_target =
+      render_target_cache.CreateOffscreen(*GetContext(), {100, 0}, 1);
+  RenderTarget empty_target_msaa =
+      render_target_cache.CreateOffscreenMSAA(*GetContext(), {0, 0}, 1);
+  render_target_cache.End();
+
+  {
+    ScopedValidationDisable disable_validation;
+    EXPECT_FALSE(empty_target.IsValid());
+    EXPECT_FALSE(empty_target_msaa.IsValid());
+  }
+}
+
 }  // namespace testing
 }  // namespace impeller
