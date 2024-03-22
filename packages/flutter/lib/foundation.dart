@@ -17,6 +17,7 @@ export 'package:meta/meta.dart' show
   optionalTypeArgs,
   protected,
   required,
+  visibleForOverriding,
   visibleForTesting;
 
 export 'src/foundation/annotations.dart';

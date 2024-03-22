@@ -10,6 +10,7 @@ import '../analyze.dart';
 import '../custom_rules/analyze.dart';
 import '../custom_rules/no_double_clamp.dart';
 import '../custom_rules/no_stop_watches.dart';
+import '../custom_rules/render_box_intrinsics.dart';
 import '../utils.dart';
 import 'common.dart';
 
@@ -264,6 +265,31 @@ void main() {
       '║ \n'
       '║ Stopwatches introduce flakes by falling out of sync with the FakeAsync used in testing.\n'
       '║ A Stopwatch that stays in sync with FakeAsync is available through the Gesture or Test bindings, through samplingClock.\n'
+      '╚═══════════════════════════════════════════════════════════════════════════════\n'
+    );
+  });
+
+  test('analyze.dart - RenderBox intrinsics', () async {
+    final String result = await capture(() => analyzeWithRules(
+      testRootPath,
+      <AnalyzeRule>[renderBoxIntrinsicCalculation],
+      includePaths: <String>['packages/flutter/lib'],
+    ), shouldHaveErrors: true);
+    final String lines = <String>[
+      '║ packages/flutter/lib/renderbox_intrinsics.dart:12: computeMaxIntrinsicWidth(). Consider calling getMaxIntrinsicWidth instead.',
+      '║ packages/flutter/lib/renderbox_intrinsics.dart:16: f = computeMaxIntrinsicWidth. Consider calling getMaxIntrinsicWidth instead.',
+      '║ packages/flutter/lib/renderbox_intrinsics.dart:23: computeDryBaseline(). Consider calling getDryBaseline instead.',
+      '║ packages/flutter/lib/renderbox_intrinsics.dart:24: computeDryLayout(). Consider calling getDryLayout instead.',
+      '║ packages/flutter/lib/renderbox_intrinsics.dart:31: computeDistanceToActualBaseline(). Consider calling getDistanceToBaseline, or getDistanceToActualBaseline instead.',
+      '║ packages/flutter/lib/renderbox_intrinsics.dart:36: computeMaxIntrinsicHeight(). Consider calling getMaxIntrinsicHeight instead.',
+    ]
+      .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
+      .join('\n');
+    expect(result,
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
+      '$lines\n'
+      '║ \n'
+      '║ Typically the get* methods should be used to obtain the intrinsics of a RenderBox.\n'
       '╚═══════════════════════════════════════════════════════════════════════════════\n'
     );
   });

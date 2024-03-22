@@ -1273,7 +1273,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    return computeMinIntrinsicHeight(width);
+    return getMinIntrinsicHeight(width);
   }
 
   @override

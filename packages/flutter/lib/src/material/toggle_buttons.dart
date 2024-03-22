@@ -1177,7 +1177,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
     // The baseline of this widget is the baseline of its child
-    final BaselineOffset childOffset = BaselineOffset(child?.computeDistanceToActualBaseline(baseline));
+    final BaselineOffset childOffset = BaselineOffset(child?.getDistanceToActualBaseline(baseline));
     return switch (direction) {
       Axis.horizontal => childOffset + borderSide.width,
       Axis.vertical => childOffset + leadingBorderSide.width,

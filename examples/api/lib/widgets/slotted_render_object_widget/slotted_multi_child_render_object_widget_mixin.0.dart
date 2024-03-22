@@ -242,8 +242,8 @@ class RenderDiagonal extends RenderBox
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     const BoxConstraints childConstraints = BoxConstraints();
-    final Size topLeftSize = _topLeft?.computeDryLayout(childConstraints) ?? Size.zero;
-    final Size bottomRightSize = _bottomRight?.computeDryLayout(childConstraints) ?? Size.zero;
+    final Size topLeftSize = _topLeft?.getDryLayout(childConstraints) ?? Size.zero;
+    final Size bottomRightSize = _bottomRight?.getDryLayout(childConstraints) ?? Size.zero;
     return constraints.constrain(Size(
       topLeftSize.width + bottomRightSize.width,
       topLeftSize.height + bottomRightSize.height,
