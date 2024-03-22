@@ -621,7 +621,7 @@ class DevFS {
       bundle.entries.forEach((String archivePath, AssetBundleEntry entry) {
         // If the content is backed by a real file, isModified will file stat and return true if
         // it was modified since the last time this was called.
-        if (!entry.isModified || bundleFirstUpload) {
+        if (!entry.content.isModified || bundleFirstUpload) {
           return;
         }
         // Modified shaders must be recompiled per-target platform.

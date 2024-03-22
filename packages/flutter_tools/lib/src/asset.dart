@@ -95,16 +95,6 @@ final class AssetBundleEntry {
   final AssetKind kind;
   final List<AssetTransformerEntry> transformers;
 
-  bool _hasModifiedBeenCalled = false;
-  bool get isModified {
-    if (!_hasModifiedBeenCalled) {
-      _hasModifiedBeenCalled = true;
-      content.isModified;
-      return true;
-    }
-    return content.isModified;
-  }
-
   final DateTime creationTime = DateTime.now();
 
   Future<List<int>> contentsAsBytes() => content.contentsAsBytes();
