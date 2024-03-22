@@ -187,11 +187,8 @@ String get shuffleSeed {
   return _shuffleSeed!;
 }
 
-final bool _isRandomizationOff = () {
-  // The values can be different, one is compile time, another is run time.
-  return const bool.fromEnvironment('TEST_RANDOMIZATION_OFF') ||
+final bool _isRandomizationOff = const bool.fromEnvironment('TEST_RANDOMIZATION_OFF') ||
       (bool.tryParse(Platform.environment['TEST_RANDOMIZATION_OFF'] ?? '') ?? false);
-} ();
 
 /// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter test. For example, you might want to call this
