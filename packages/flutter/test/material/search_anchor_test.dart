@@ -3074,12 +3074,9 @@ void main() {
                   onTap: () {
                     controller.openView();
                   },
-<<<<<<< HEAD
                   onTapOutside: (PointerDownEvent event) {
                     focusNode.unfocus();
                   },
-=======
->>>>>>> daec403ecafdf9ee9e0e42542192475bbac5dc67
                   onChanged: (_) {
                     controller.openView();
                   },
