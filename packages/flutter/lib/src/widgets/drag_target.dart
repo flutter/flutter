@@ -830,7 +830,7 @@ class _DragAvatar<T extends Object> extends Drag {
   final List<_DragTargetState<Object>> _enteredTargets = <_DragTargetState<Object>>[];
   Offset _position;
   Offset? _lastOffset;
-  Offset? _overlayOffset;
+  late Offset _overlayOffset;
   OverlayEntry? _entry;
 
   @override
@@ -946,8 +946,8 @@ class _DragAvatar<T extends Object> extends Drag {
 
   Widget _build(BuildContext context) {
     return Positioned(
-      left: _overlayOffset!.dx,
-      top: _overlayOffset!.dy,
+      left: _overlayOffset.dx,
+      top: _overlayOffset.dy,
       child: ExcludeSemantics(
         excluding: ignoringFeedbackSemantics,
         child: IgnorePointer(
