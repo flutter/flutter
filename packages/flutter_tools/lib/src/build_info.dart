@@ -730,7 +730,7 @@ TargetPlatform getTargetPlatformForName(String platform) {
     'web-javascript' => TargetPlatform.web_javascript,
     'flutter-tester' => TargetPlatform.tester,
     _ => throw Exception('Unsupported platform name "$platform"'),
-  }
+  };
 }
 
 AndroidArch getAndroidArchForName(String platform) {
