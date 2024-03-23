@@ -21,19 +21,15 @@ class Module {
 
     final bool usesNewModuleFormat = yaml.containsKey('platforms');
 
+    if (!usesOldModuleFormat && !usesNewModuleFormat) {
+      return <String>[];
+    }
+
     if (usesOldModuleFormat && usesNewModuleFormat) {
       const String errorMessage =
           'The flutter.module.platforms key cannot be used in combination with the old '
           'flutter.module.{androidX,androidPackage,iosBundleIdentifier} keys. '
           'See: https://flutter.dev/docs/development/add-to-app/developing-modules#module';
-      return <String>[errorMessage];
-    }
-
-    if (!usesOldModuleFormat && !usesNewModuleFormat) {
-      const String errorMessage =
-          'Cannot find the `flutter.module.platforms` key in the `pubspec.yaml` file. '
-          'An instruction to format the `pubspec.yaml` can be found here: '
-          'https://flutter.dev/docs/development/add-to-app/developing-modules#module-platforms';
       return <String>[errorMessage];
     }
 

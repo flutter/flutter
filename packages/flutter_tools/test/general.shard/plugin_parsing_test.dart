@@ -397,7 +397,7 @@ void main() {
         const <String>[],
         fileSystem: fileSystem,
       ),
-      throwsToolExit(message: 'Invalid "platforms" specification.'),
+      throwsToolExit(message: 'Invalid "platforms" specification in flutter.plugin'),
     );
   });
 
