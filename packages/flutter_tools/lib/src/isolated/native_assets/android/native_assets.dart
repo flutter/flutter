@@ -170,10 +170,10 @@ Target _getNativeTarget(AndroidArch androidArch) {
 /// Get the [AndroidArch] for [target].
 AndroidArch _getAndroidArch(Target target) {
   return switch (target) {
-    Target.androidArm => AndroidArch.armeabi_v7a,
+    Target.androidArm   => AndroidArch.armeabi_v7a,
     Target.androidArm64 => AndroidArch.arm64_v8a,
-    Target.androidIA32 => AndroidArch.x86,
-    Target.androidX64 => AndroidArch.x86_64,
+    Target.androidIA32  => AndroidArch.x86,
+    Target.androidX64   => AndroidArch.x86_64,
     Target.androidRiscv64 => throwToolExit('Android RISC-V not yet supported.'),
     _ => throwToolExit('Invalid target: $target.'),
   };
