@@ -33,12 +33,12 @@ HttpMethod _fromMethodString(String value) {
 
 String _toMethodString(HttpMethod method) {
   return switch (method) {
-    HttpMethod.get    => 'GET',
-    HttpMethod.put    => 'PUT',
+    HttpMethod.get => 'GET',
+    HttpMethod.put => 'PUT',
     HttpMethod.delete => 'DELETE',
-    HttpMethod.post   => 'POST',
-    HttpMethod.patch  => 'PATCH',
-    HttpMethod.head   => 'HEAD',
+    HttpMethod.post => 'POST',
+    HttpMethod.patch => 'PATCH',
+    HttpMethod.head => 'HEAD'
   };
 }
 

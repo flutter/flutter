@@ -262,17 +262,20 @@ class AndroidLicenseValidator extends DoctorValidator {
     final String sdkVersionText = _userMessages.androidStatusInfo(_androidSdk.latestVersion!.buildToolsVersionName);
 
     // Check for licenses.
-    final (bool success, ValidationMessage message) = switch (await licensesAccepted) {
-      LicensesAccepted.all     => (true,  ValidationMessage(_userMessages.androidLicensesAll)),
-      LicensesAccepted.some    => (false, ValidationMessage.hint(_userMessages.androidLicensesSome)),
-      LicensesAccepted.none    => (false, ValidationMessage.error(_userMessages.androidLicensesNone)),
-      LicensesAccepted.unknown => (false, ValidationMessage.error(_userMessages.androidLicensesUnknown(_platform))),
-    };
-    return ValidationResult(
-      success ? ValidationType.success : ValidationType.partial,
-      messages..add(message),
-      statusInfo: sdkVersionText,
-    );
+    switch (await licensesAccepted) {
+      case LicensesAccepted.all:
+        messages.add(ValidationMessage(_userMessages.androidLicensesAll));
+      case LicensesAccepted.some:
+        messages.add(ValidationMessage.hint(_userMessages.androidLicensesSome));
+        return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
+      case LicensesAccepted.none:
+        messages.add(ValidationMessage.error(_userMessages.androidLicensesNone));
+        return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
+      case LicensesAccepted.unknown:
+        messages.add(ValidationMessage.error(_userMessages.androidLicensesUnknown(_platform)));
+        return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
+    }
+    return ValidationResult(ValidationType.success, messages, statusInfo: sdkVersionText);
   }
 
   Future<bool> _checkJavaVersionNoOutput() async {
