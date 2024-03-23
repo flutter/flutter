@@ -32,10 +32,10 @@ class TargetModel {
   /// 'flutter_runner', 'vm', or 'dartdevc'.
   factory TargetModel(String rawValue) {
     return switch (rawValue) {
-      'flutter' => flutter,
+      'flutter'        => flutter,
       'flutter_runner' => flutterRunner,
-      'vm' => vm,
-      'dartdevc' => dartdevc,
+      'vm'             => vm,
+      'dartdevc'       => dartdevc,
       _ => throw Exception('Unexpected target model $rawValue'),
     };
   }
