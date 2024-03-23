@@ -193,6 +193,17 @@ class _PredictiveBackPageTransition extends StatelessWidget {
     required this.child,
   });
 
+  // These values were eyeballed to match the native predictive back animation
+  // on a Pixel 2 running Android API 34.
+  static const double _scaleFullyOpened = 1.0;
+  static const double _scaleStartTransition = 0.95;
+  static const double _opacityFullyOpened = 1.0;
+  static const double _opacityStartTransition = 0.95;
+  static const double _weightForStartState = 65.0;
+  static const double _weightForEndState = 35.0;
+  static const double _screenWidthDivisionFactor = 20.0;
+  static const double _xShiftAdjustment = 8.0;
+
   final Animation<double> animation;
   final Animation<double> secondaryAnimation;
   final ValueGetter<bool> getIsCurrent;
@@ -201,27 +212,36 @@ class _PredictiveBackPageTransition extends StatelessWidget {
   Widget _secondaryAnimatedBuilder(BuildContext context, Widget? child) {
     final Size size = MediaQuery.sizeOf(context);
     final double screenWidth = size.width;
-    final double xShift = (screenWidth / 20) - 8;
+    final double xShift =
+        (screenWidth / _screenWidthDivisionFactor) - _xShiftAdjustment;
 
     final bool isCurrent = getIsCurrent();
     final Tween<double> xShiftTween = isCurrent
         ? ConstantTween<double>(0)
         : Tween<double>(begin: xShift, end: 0);
     final Animatable<double> scaleTween = isCurrent
-        ? ConstantTween<double>(1)
+        ? ConstantTween<double>(_scaleFullyOpened)
         : TweenSequence<double>(<TweenSequenceItem<double>>[
             TweenSequenceItem<double>(
-                tween: Tween<double>(begin: 0.95, end: 1), weight: 65.0),
+                tween: Tween<double>(
+                    begin: _scaleStartTransition, end: _scaleFullyOpened),
+                weight: _weightForStartState),
             TweenSequenceItem<double>(
-                tween: Tween<double>(begin: 1, end: 1), weight: 35.0),
+                tween: Tween<double>(
+                    begin: _scaleFullyOpened, end: _scaleFullyOpened),
+                weight: _weightForEndState),
           ]);
     final Animatable<double> fadeTween = isCurrent
-        ? ConstantTween<double>(1)
+        ? ConstantTween<double>(_opacityFullyOpened)
         : TweenSequence<double>(<TweenSequenceItem<double>>[
             TweenSequenceItem<double>(
-                tween: Tween<double>(begin: 1.0, end: 0.8), weight: 65.0),
+                tween: Tween<double>(
+                    begin: _opacityFullyOpened, end: _opacityStartTransition),
+                weight: _weightForStartState),
             TweenSequenceItem<double>(
-                tween: Tween<double>(begin: 1, end: 1), weight: 35.0),
+                tween: Tween<double>(
+                    begin: _opacityFullyOpened, end: _opacityFullyOpened),
+                weight: _weightForEndState),
           ]);
 
     return Transform.translate(
@@ -239,36 +259,42 @@ class _PredictiveBackPageTransition extends StatelessWidget {
   Widget _primaryAnimatedBuilder(BuildContext context, Widget? child) {
     final Size size = MediaQuery.sizeOf(context);
     final double screenWidth = size.width;
-    final double xShift = (screenWidth / 20) - 8;
+    final double xShift =
+        (screenWidth / _screenWidthDivisionFactor) - _xShiftAdjustment;
 
-    final Animatable<double> xShiftTween = TweenSequence<double>(<TweenSequenceItem<double>>[
+    final Animatable<double> xShiftTween =
+        TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
         tween: Tween<double>(begin: 0.0, end: 0.0),
-        weight: 65.0,
+        weight: _weightForStartState,
       ),
       TweenSequenceItem<double>(
         tween: Tween<double>(begin: xShift, end: 0.0),
-        weight: 35.0,
+        weight: _weightForEndState,
       ),
     ]);
-    final Animatable<double> scaleTween = TweenSequence<double>(<TweenSequenceItem<double>>[
+    final Animatable<double> scaleTween =
+        TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
-        tween: Tween<double>(begin: 1.0, end: 1.0),
-        weight: 65.0,
+        tween: Tween<double>(begin: _scaleFullyOpened, end: _scaleFullyOpened),
+        weight: _weightForStartState,
       ),
       TweenSequenceItem<double>(
-        tween: Tween<double>(begin: 0.95, end: 1.0),
-        weight: 35.0,
+        tween:
+            Tween<double>(begin: _scaleStartTransition, end: _scaleFullyOpened),
+        weight: _weightForEndState,
       ),
     ]);
-    final Animatable<double> fadeTween = TweenSequence<double>(<TweenSequenceItem<double>>[
+    final Animatable<double> fadeTween =
+        TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
         tween: Tween<double>(begin: 0.0, end: 0.0),
-        weight: 65.0,
+        weight: _weightForStartState,
       ),
       TweenSequenceItem<double>(
-        tween: Tween<double>(begin: 0.95, end: 1.0),
-        weight: 35.0,
+        tween: Tween<double>(
+            begin: _opacityStartTransition, end: _opacityFullyOpened),
+        weight: _weightForEndState,
       ),
     ]);
 

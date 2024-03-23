@@ -480,7 +480,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> with PredictiveBackRou
   // Begin PredictiveBackRoute.
 
   @override
-  void handleStartBackGesture({double progress = 0}) {
+  void handleStartBackGesture({double progress = 0.0}) {
     _controller?.value = progress;
     navigator?.didStartUserGesture();
   }
@@ -579,7 +579,7 @@ mixin PredictiveBackRoute {
   bool get popGestureEnabled;
 
   /// Handles a predictive back gesture starting.
-  void handleStartBackGesture({double progress = 0});
+  void handleStartBackGesture({double progress = 0.0});
 
   /// Handles a predictive back gesture updating as the user drags across the
   /// screen.
