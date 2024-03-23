@@ -1170,7 +1170,7 @@ class SearchBar extends StatefulWidget {
 
   /// Called when the user taps this search bar.
   final GestureTapCallback? onTap;
-  
+
   /// Called when the user taps outside the search bar.
   final TapRegionCallback? onTapOutside;
 
