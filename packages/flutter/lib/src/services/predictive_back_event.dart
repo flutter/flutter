@@ -23,7 +23,7 @@ enum SwipeEdge {
 /// Holds information about the touch event, swipe direction and the animation
 /// progress that predictive back animations should seek to.
 @immutable
-class PredictiveBackEvent {
+final class PredictiveBackEvent {
   /// Creates a new [PredictiveBackEvent] instance.
   const PredictiveBackEvent._({
     required this.touchOffset,

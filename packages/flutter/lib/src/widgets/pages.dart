@@ -54,16 +54,8 @@ abstract class PageRoute<T> extends ModalRoute<T> {
 
   @override
   bool get popGestureEnabled {
-    if (!super.popGestureEnabled) {
-      return false;
-    }
-
     // Fullscreen dialogs aren't dismissible by back swipe.
-    if (fullscreenDialog) {
-      return false;
-    }
-
-    return true;
+    return !fullscreenDialog && super.popGestureEnabled;
   }
 }
 
