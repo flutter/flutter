@@ -1418,6 +1418,7 @@ class _TabBarState extends State<TabBar> {
       indicatorSize: indicatorSize,
       indicatorPadding: widget.indicatorPadding,
       tabKeys: _tabKeys,
+      // Passing old painter so that the constructor can copy some values from it.
       old: oldPainter,
       labelPaddings: _labelPaddings,
       dividerColor: widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor,
