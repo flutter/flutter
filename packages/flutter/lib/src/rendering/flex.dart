@@ -791,7 +791,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     double crossSize = 0.0;
     double allocatedSize = 0.0; // Sum of the sizes of the non-flexible children.
     RenderBox? child = firstChild;
-    RenderBox? lastFlexChild;
     final bool stretched = switch (crossAxisAlignment) {
       CrossAxisAlignment.start    => false,
       CrossAxisAlignment.center   => false,
@@ -804,7 +803,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       final int flex = _getFlex(child);
       if (flex > 0) {
         totalFlex += flex;
-        lastFlexChild = child;
       } else {
         final BoxConstraints innerConstraints = switch ((stretched, _direction)) {
           (true,  Axis.horizontal) => BoxConstraints.tightFor(height: constraints.maxHeight),
@@ -822,18 +820,13 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
     // Distribute free space to flexible children.
     final double freeSpace = math.max(0.0, (canFlex ? maxMainSize : 0.0) - allocatedSize);
-    double allocatedFlexSpace = 0.0;
     if (totalFlex > 0) {
       final double spacePerFlex = canFlex ? (freeSpace / totalFlex) : double.nan;
       child = firstChild;
       while (child != null) {
         final int flex = _getFlex(child);
         if (flex > 0) {
-          final double maxChildExtent = switch (canFlex) {
-            true when child == lastFlexChild => freeSpace - allocatedFlexSpace,
-            true => spacePerFlex * flex,
-            false => double.infinity,
-          };
+          final double maxChildExtent = canFlex ? spacePerFlex * flex : double.infinity;
           final double minChildExtent = switch (_getFit(child)) {
             FlexFit.tight => maxChildExtent,
             FlexFit.loose => 0.0,
@@ -848,7 +841,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           final double childMainSize = _getMainSize(childSize);
           assert(childMainSize <= maxChildExtent);
           allocatedSize += childMainSize;
-          allocatedFlexSpace += maxChildExtent;
           crossSize = math.max(crossSize, _getCrossSize(childSize));
         }
         final FlexParentData childParentData = child.parentData! as FlexParentData;
