@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/base/version.dart';
@@ -405,5 +406,15 @@ needs to be wrapped.
         ),
       );
     });
+  });
+
+  testWithoutContext('getSizeAsMB', () async {
+    // ignore: avoid_redundant_argument_values
+    expect(getSizeAsPlatformMB(10 * 1000 * 1000, platform: FakePlatform(operatingSystem: 'linux')), '10.0MB');
+    expect(getSizeAsPlatformMB(10 * 1000 * 1000, platform: FakePlatform(operatingSystem: 'macos')), '10.0MB');
+    expect(getSizeAsPlatformMB(10 * 1000 * 1000, platform: FakePlatform(operatingSystem: 'windows')), '9.5MB');
+    expect(getSizeAsPlatformMB(10 * 1000 * 1000, platform: FakePlatform(operatingSystem: 'android')), '10.0MB');
+    expect(getSizeAsPlatformMB(10 * 1000 * 1000, platform: FakePlatform(operatingSystem: 'ios')), '10.0MB');
+    expect(getSizeAsPlatformMB(10 * 1000 * 1000, platform: FakePlatform(operatingSystem: 'web')), '10.0MB');
   });
 }
