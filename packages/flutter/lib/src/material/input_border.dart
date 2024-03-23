@@ -243,6 +243,10 @@ class UnderlineInputBorder extends InputBorder {
     double gapPercentage = 0.0,
     TextDirection? textDirection,
   }) {
+    if (borderSide.style == BorderStyle.none) {
+      return;
+    }
+
     if (borderRadius.bottomLeft != Radius.zero || borderRadius.bottomRight != Radius.zero) {
       // This prevents the border from leaking the color due to anti-aliasing rounding errors.
       final BorderRadius updatedBorderRadius = BorderRadius.only(

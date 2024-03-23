@@ -9729,4 +9729,18 @@ void main() {
       expect(tester.renderObject<RenderBox>(find.text('COUNTER')).size, Size.zero);
     });
   });
+
+  testWidgets('UnderlineInputBorder with BorderStyle.none should not show anything', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/143746
+    const InputDecoration decoration = InputDecoration(
+      enabledBorder: UnderlineInputBorder(
+        borderSide: BorderSide(style: BorderStyle.none),
+        borderRadius: BorderRadius.all(Radius.circular(4)),
+      ),
+    );
+
+    await tester.pumpWidget(buildInputDecorator(decoration: decoration));
+    final RenderBox box = tester.renderObject(find.byType(InputDecorator));
+    expect(box, isNot(paints..drrect()));
+  });
 }

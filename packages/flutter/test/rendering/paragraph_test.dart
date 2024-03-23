@@ -121,7 +121,7 @@ void main() {
     );
     layout(paragraph);
 
-    final double height5 = paragraph.getFullHeightForCaret(const TextPosition(offset: 5))!;
+    final double height5 = paragraph.getFullHeightForCaret(const TextPosition(offset: 5));
     expect(height5, equals(10.0));
   });
 

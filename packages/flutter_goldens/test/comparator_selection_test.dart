@@ -60,18 +60,18 @@ void main() {
     expect(_testRecommendations(hasFlutterRoot: true, hasGold: true), _Comparator.local);
 
     // If we don't have gold but are on CI, we skip regardless.
-    expect(_testRecommendations(hasLuci: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(hasLuci: true, hasTryJob: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(hasCirrus: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(hasCirrus: true, hasTryJob: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(hasLuci: true, hasCirrus: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(hasLuci: true, hasCirrus: true, hasTryJob: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(hasFlutterRoot: true, hasLuci: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(hasFlutterRoot: true, hasLuci: true, hasTryJob: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(hasFlutterRoot: true, hasCirrus: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(hasFlutterRoot: true, hasCirrus: true, hasTryJob: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(hasFlutterRoot: true, hasLuci: true, hasCirrus: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(hasFlutterRoot: true, hasLuci: true, hasCirrus: true, hasTryJob: true), _Comparator.local); // TODO(ianh): this should be skip
+    expect(_testRecommendations(hasLuci: true), _Comparator.skip);
+    expect(_testRecommendations(hasLuci: true, hasTryJob: true), _Comparator.skip);
+    expect(_testRecommendations(hasCirrus: true), _Comparator.skip);
+    expect(_testRecommendations(hasCirrus: true, hasTryJob: true), _Comparator.skip);
+    expect(_testRecommendations(hasLuci: true, hasCirrus: true), _Comparator.skip);
+    expect(_testRecommendations(hasLuci: true, hasCirrus: true, hasTryJob: true), _Comparator.skip);
+    expect(_testRecommendations(hasFlutterRoot: true, hasLuci: true), _Comparator.skip);
+    expect(_testRecommendations(hasFlutterRoot: true, hasLuci: true, hasTryJob: true), _Comparator.skip);
+    expect(_testRecommendations(hasFlutterRoot: true, hasCirrus: true), _Comparator.skip);
+    expect(_testRecommendations(hasFlutterRoot: true, hasCirrus: true, hasTryJob: true), _Comparator.skip);
+    expect(_testRecommendations(hasFlutterRoot: true, hasLuci: true, hasCirrus: true), _Comparator.skip);
+    expect(_testRecommendations(hasFlutterRoot: true, hasLuci: true, hasCirrus: true, hasTryJob: true), _Comparator.skip);
 
     // On Luci, with Gold, post-submit. Flutter root and Cirrus variables should have no effect.
     expect(_testRecommendations(hasGold: true, hasLuci: true), _Comparator.post);
@@ -86,8 +86,8 @@ void main() {
     expect(_testRecommendations(hasGold: true, hasLuci: true, hasFlutterRoot: true, hasCirrus: true, hasTryJob: true), _Comparator.pre);
 
     // On Cirrus (with Gold and not on Luci), we skip regardless.
-    expect(_testRecommendations(hasCirrus: true, hasGold: true, hasFlutterRoot: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(hasCirrus: true, hasGold: true, hasFlutterRoot: true, hasTryJob: true), _Comparator.local); // TODO(ianh): this should be skip
+    expect(_testRecommendations(hasCirrus: true, hasGold: true, hasFlutterRoot: true), _Comparator.skip);
+    expect(_testRecommendations(hasCirrus: true, hasGold: true, hasFlutterRoot: true, hasTryJob: true), _Comparator.skip);
   });
 
   test('Comparator recommendations - release branch', () {
@@ -136,18 +136,18 @@ void main() {
     expect(_testRecommendations(os: 'linux', hasFlutterRoot: true, hasGold: true), _Comparator.local);
 
     // If we don't have gold but are on CI, we skip regardless.
-    expect(_testRecommendations(os: 'linux', hasLuci: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(os: 'linux', hasLuci: true, hasTryJob: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(os: 'linux', hasCirrus: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(os: 'linux', hasCirrus: true, hasTryJob: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(os: 'linux', hasLuci: true, hasCirrus: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(os: 'linux', hasLuci: true, hasCirrus: true, hasTryJob: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(os: 'linux', hasFlutterRoot: true, hasLuci: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(os: 'linux', hasFlutterRoot: true, hasLuci: true, hasTryJob: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(os: 'linux', hasFlutterRoot: true, hasCirrus: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(os: 'linux', hasFlutterRoot: true, hasCirrus: true, hasTryJob: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(os: 'linux', hasFlutterRoot: true, hasLuci: true, hasCirrus: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(os: 'linux', hasFlutterRoot: true, hasLuci: true, hasCirrus: true, hasTryJob: true), _Comparator.local); // TODO(ianh): this should be skip
+    expect(_testRecommendations(os: 'linux', hasLuci: true), _Comparator.skip);
+    expect(_testRecommendations(os: 'linux', hasLuci: true, hasTryJob: true), _Comparator.skip);
+    expect(_testRecommendations(os: 'linux', hasCirrus: true), _Comparator.skip);
+    expect(_testRecommendations(os: 'linux', hasCirrus: true, hasTryJob: true), _Comparator.skip);
+    expect(_testRecommendations(os: 'linux', hasLuci: true, hasCirrus: true), _Comparator.skip);
+    expect(_testRecommendations(os: 'linux', hasLuci: true, hasCirrus: true, hasTryJob: true), _Comparator.skip);
+    expect(_testRecommendations(os: 'linux', hasFlutterRoot: true, hasLuci: true), _Comparator.skip);
+    expect(_testRecommendations(os: 'linux', hasFlutterRoot: true, hasLuci: true, hasTryJob: true), _Comparator.skip);
+    expect(_testRecommendations(os: 'linux', hasFlutterRoot: true, hasCirrus: true), _Comparator.skip);
+    expect(_testRecommendations(os: 'linux', hasFlutterRoot: true, hasCirrus: true, hasTryJob: true), _Comparator.skip);
+    expect(_testRecommendations(os: 'linux', hasFlutterRoot: true, hasLuci: true, hasCirrus: true), _Comparator.skip);
+    expect(_testRecommendations(os: 'linux', hasFlutterRoot: true, hasLuci: true, hasCirrus: true, hasTryJob: true), _Comparator.skip);
 
     // On Luci, with Gold, post-submit. Flutter root and Cirrus variables should have no effect.
     expect(_testRecommendations(os: 'linux', hasGold: true, hasLuci: true), _Comparator.post);
@@ -162,8 +162,8 @@ void main() {
     expect(_testRecommendations(os: 'linux', hasGold: true, hasLuci: true, hasFlutterRoot: true, hasCirrus: true, hasTryJob: true), _Comparator.pre);
 
     // On Cirrus (with Gold and not on Luci), we skip regardless.
-    expect(_testRecommendations(os: 'linux', hasCirrus: true, hasGold: true, hasFlutterRoot: true), _Comparator.local); // TODO(ianh): this should be skip
-    expect(_testRecommendations(os: 'linux', hasCirrus: true, hasGold: true, hasFlutterRoot: true, hasTryJob: true), _Comparator.local); // TODO(ianh): this should be skip
+    expect(_testRecommendations(os: 'linux', hasCirrus: true, hasGold: true, hasFlutterRoot: true), _Comparator.skip);
+    expect(_testRecommendations(os: 'linux', hasCirrus: true, hasGold: true, hasFlutterRoot: true, hasTryJob: true), _Comparator.skip);
   });
 
   test('Branch names', () {
