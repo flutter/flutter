@@ -22,6 +22,7 @@ import '../globals.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
+import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
@@ -675,7 +676,15 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     xcodeBuildResult = result;
 
     if (!result.success) {
-      await diagnoseXcodeBuildFailure(result, globals.flutterUsage, globals.logger, globals.analytics);
+      await diagnoseXcodeBuildFailure(
+        result,
+        analytics: globals.analytics,
+        fileSystem: globals.fs,
+        flutterUsage: globals.flutterUsage,
+        logger: globals.logger,
+        platform: SupportedPlatform.ios,
+        project: app.project.parent,
+      );
       final String presentParticiple = xcodeBuildAction == XcodeBuildAction.build ? 'building' : 'archiving';
       throwToolExit('Encountered error while $presentParticiple for $logTarget.');
     }

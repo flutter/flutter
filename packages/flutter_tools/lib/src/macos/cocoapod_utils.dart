@@ -16,6 +16,12 @@ Future<void> processPodsIfNeeded(
   String buildDirectory,
   BuildMode buildMode) async {
   final FlutterProject project = xcodeProject.parent;
+
+  // When using Swift Package Manager, the Podfile may not exist so if there
+  // isn't a Podfile, skip processing pods.
+  if (project.usingSwiftPackageManager && !xcodeProject.podfile.existsSync()) {
+    return;
+  }
   // Ensure that the plugin list is up to date, since hasPlugins relies on it.
   await refreshPluginsList(project, macOSPlatform: project.macos.existsSync());
   if (!(hasPlugins(project) || (project.isModule && xcodeProject.podfile.existsSync()))) {
@@ -28,6 +34,8 @@ Future<void> processPodsIfNeeded(
     paths: <String>[
       xcodeProject.xcodeProjectInfoFile.path,
       xcodeProject.podfile.path,
+      if (xcodeProject.flutterPluginSwiftPackageManifest.existsSync())
+        xcodeProject.flutterPluginSwiftPackageManifest.path,
       globals.fs.path.join(
         Cache.flutterRoot!,
         'packages',

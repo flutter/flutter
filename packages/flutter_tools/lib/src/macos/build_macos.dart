@@ -22,6 +22,7 @@ import 'cocoapod_utils.dart';
 import 'migrations/flutter_application_migration.dart';
 import 'migrations/macos_deployment_target_migration.dart';
 import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
+import 'swift_package_manager.dart';
 
 /// When run in -quiet mode, Xcode should only print from the underlying tasks to stdout.
 /// Passing this regexp to trace moves the stdout output to stderr.
@@ -96,6 +97,16 @@ Future<void> buildMacOS({
     targetOverride: targetOverride,
     useMacOSConfig: true,
   );
+  if (flutterProject.usingSwiftPackageManager) {
+    SwiftPackageManager.linkFlutterFramework(
+      SupportedPlatform.macos,
+      flutterProject.macos,
+      buildInfo.mode,
+      artifacts: globals.artifacts!,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+    );
+  }
   await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode);
   // If the xcfilelists do not exist, create empty version.
   if (!flutterProject.macos.inputFileList.existsSync()) {

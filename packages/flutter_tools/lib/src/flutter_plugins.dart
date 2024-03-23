@@ -22,6 +22,8 @@ import 'dart/language_version.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
+import 'macos/darwin_dependency_management.dart';
+import 'macos/swift_package_manager.dart';
 import 'platform_plugins.dart';
 import 'plugins.dart';
 import 'project.dart';
@@ -190,6 +192,7 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   result['dependencyGraph'] = _createPluginLegacyDependencyGraph(plugins);
   result['date_created'] = globals.systemClock.now().toString();
   result['version'] = globals.flutterVersion.frameworkVersion;
+  result['swift_package_manager_enabled'] = project.usingSwiftPackageManager;
 
   // Only notify if the plugins list has changed. [date_created] will always be different,
   // [version] is not relevant for this check.
@@ -1180,6 +1183,7 @@ Future<void> injectPlugins(
   bool macOSPlatform = false,
   bool windowsPlatform = false,
   Iterable<String>? allowedPlugins,
+  DarwinDependencyManagement? darwinDependencyManagement,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
   // Sort the plugins by name to keep ordering stable in generated files.
@@ -1199,20 +1203,31 @@ Future<void> injectPlugins(
   if (windowsPlatform) {
     await writeWindowsPluginFiles(project, plugins, globals.templateRenderer, allowedPlugins: allowedPlugins);
   }
-  if (!project.isModule) {
-    final List<XcodeBasedProject> darwinProjects = <XcodeBasedProject>[
-      if (iosPlatform) project.ios,
-      if (macOSPlatform) project.macos,
-    ];
-    for (final XcodeBasedProject subproject in darwinProjects) {
-      if (plugins.isNotEmpty) {
-        await globals.cocoaPods?.setupPodfile(subproject);
-      }
-      /// The user may have a custom maintained Podfile that they're running `pod install`
-      /// on themselves.
-      else if (subproject.podfile.existsSync() && subproject.podfileLock.existsSync()) {
-        globals.cocoaPods?.addPodsDependencyToFlutterXcconfig(subproject);
-      }
+  if (iosPlatform || macOSPlatform) {
+    final DarwinDependencyManagement darwinDependencyManagerSetup = darwinDependencyManagement ?? DarwinDependencyManagement(
+      project: project,
+      plugins: plugins,
+      cocoapods: globals.cocoaPods!,
+      swiftPackageManager: SwiftPackageManager(
+        artifacts: globals.artifacts!,
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        templateRenderer: globals.templateRenderer,
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+        plistParser: globals.plistParser,
+      ),
+      fileSystem: globals.fs,
+      logger: globals.logger,
+    );
+    if (iosPlatform) {
+      await darwinDependencyManagerSetup.setup(
+        platform: SupportedPlatform.ios,
+      );
+    }
+    if (macOSPlatform) {
+      await darwinDependencyManagerSetup.setup(
+        platform: SupportedPlatform.macos,
+      );
     }
   }
 }

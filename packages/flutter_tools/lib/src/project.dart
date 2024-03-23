@@ -22,6 +22,7 @@ import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
+import 'macos/xcode.dart';
 import 'platform_plugins.dart';
 import 'project_validator_result.dart';
 import 'reporting/reporting.dart';
@@ -33,14 +34,20 @@ export 'xcode_project.dart';
 
 /// Enum for each officially supported platform.
 enum SupportedPlatform {
-  android,
-  ios,
-  linux,
-  macos,
-  web,
-  windows,
-  fuchsia,
-  root, // Special platform to represent the root project directory
+  android(name: 'android'),
+  ios(name: 'ios'),
+  linux(name: 'linux'),
+  macos(name: 'macos'),
+  web(name: 'web'),
+  windows(name: 'windows'),
+  fuchsia(name: 'fuchsia'),
+  root(name: 'root'); // Special platform to represent the root project directory
+
+  const SupportedPlatform({
+    required this.name,
+  });
+
+  final String name;
 }
 
 class FlutterProjectFactory {
@@ -262,6 +269,24 @@ class FlutterProject {
 
   /// True if this project has an example application.
   bool get hasExampleApp => _exampleDirectory(directory).existsSync();
+
+  /// True if this project doesn't have Swift Package Manager disabled in the
+  /// pubspec, has either an iOS or macOS platform implementation, Xcode is 15
+  /// or greater, and the Swift Package Manager feature is enabled.
+  bool get usingSwiftPackageManager {
+    if (!manifest.disabledSwiftPackageManager && (ios.existsSync() || macos.existsSync())) {
+      final Xcode? xcode = globals.xcode;
+      final Version? xcodeVersion = xcode?.currentVersion;
+      if (xcodeVersion == null || xcodeVersion.major < 15) {
+        globals.logger.printWarning(
+          'The current Xcode version is incompatible with Swift Package Manager. '
+          'Requires Xcode 15 or greater. Swift Package Manager will not be used.');
+        return false;
+      }
+      return featureFlags.isSwiftPackageManagerEnabled;
+    }
+    return false;
+  }
 
   /// Returns a list of platform names that are supported by the project.
   List<SupportedPlatform> getSupportedPlatforms({bool includeRoot = false}) {

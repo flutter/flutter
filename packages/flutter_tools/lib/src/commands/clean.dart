@@ -11,6 +11,7 @@ import '../base/logger.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
+import '../macos/swift_package_manager.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 
@@ -65,9 +66,11 @@ class CleanCommand extends FlutterCommand {
     deleteFile(flutterProject.ios.deprecatedCompiledDartFramework);
     deleteFile(flutterProject.ios.deprecatedProjectFlutterFramework);
     deleteFile(flutterProject.ios.flutterPodspec);
+    deleteFile(flutterProject.ios.flutterPluginSwiftPackageDirectory);
 
     deleteFile(flutterProject.linux.ephemeralDirectory);
     deleteFile(flutterProject.macos.ephemeralDirectory);
+    deleteFile(flutterProject.macos.flutterPluginSwiftPackageDirectory);
     deleteFile(flutterProject.windows.ephemeralDirectory);
     deleteFile(flutterProject.flutterPluginsDependenciesFile);
     deleteFile(flutterProject.flutterPluginsFile);

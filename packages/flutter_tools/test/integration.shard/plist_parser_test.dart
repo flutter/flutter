@@ -14,6 +14,8 @@ import '../src/common.dart';
 import '../src/fakes.dart';
 import 'test_utils.dart';
 
+// TODO: SPM - test
+
 const String base64PlistXml =
     'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPCFET0NUWVBFIHBsaXN0I'
     'FBVQkxJQyAiLS8vQXBwbGUvL0RURCBQTElTVCAxLjAvL0VOIiAiaHR0cDovL3d3dy5hcHBsZS'
@@ -212,5 +214,50 @@ void main() {
     expect(values['dateValue'], DateTime.utc(2021, 12, 1, 12, 34, 56));
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
+  }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
+
+  testWithoutContext('PlistParser.plistJsonContent can parse pbxproj file', () async {
+    final String xcodeProjectFile = fileSystem.path.join(
+      getFlutterRoot(),
+      'dev',
+      'integration_tests',
+      'flutter_gallery',
+      'ios',
+      'Runner.xcodeproj',
+      'project.pbxproj'
+    );
+
+    final BufferLogger logger = BufferLogger(
+      terminal: Terminal.test(),
+      outputPreferences: OutputPreferences(),
+    );
+
+    final PlistParser parser = PlistParser(
+      fileSystem: fileSystem,
+      processManager: processManager,
+      logger: logger,
+    );
+
+    final String? projectFileAsJson = parser.plistJsonContent(xcodeProjectFile);
+    expect(projectFileAsJson, isNotNull);
+    expect(projectFileAsJson, contains('"PRODUCT_NAME":"Flutter Gallery"'));
+    expect(logger.errorText, isEmpty);
+  }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
+
+  testWithoutContext('PlistParser.plistJsonContent returns null when errors', () async {
+    final BufferLogger logger = BufferLogger(
+      terminal: Terminal.test(),
+      outputPreferences: OutputPreferences(),
+    );
+
+    final PlistParser parser = PlistParser(
+      fileSystem: fileSystem,
+      processManager: processManager,
+      logger: logger,
+    );
+
+    final String? projectFileAsJson = parser.plistJsonContent('bad/path');
+    expect(projectFileAsJson, isNull);
+    expect(logger.errorText, isNotEmpty);
   }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 }

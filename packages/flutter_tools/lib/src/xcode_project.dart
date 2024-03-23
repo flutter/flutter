@@ -115,6 +115,18 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
       .childDirectory('Pods')
       .childDirectory('Target Support Files')
       .childDirectory('Pods-Runner');
+
+  /// The Flutter generated directory for the Swift Package handling plugin
+  /// dependencies.
+  Directory get flutterPluginSwiftPackageDirectory => hostAppRoot
+      .childDirectory('Flutter')
+      .childDirectory('Packages')
+      .childDirectory('FlutterGeneratedPluginSwiftPackage');
+
+  /// The Flutter generated Swift Package manifest (Package.swift) for plugin
+  /// dependencies.
+  File get flutterPluginSwiftPackageManifest => flutterPluginSwiftPackageDirectory
+      .childFile('Package.swift');
 }
 
 /// Represents the iOS sub-project of a Flutter project.

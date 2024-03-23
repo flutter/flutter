@@ -11,6 +11,7 @@ import '../../base/io.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../globals.dart' as globals show xcode;
+import '../../project.dart';
 import '../../reporting/reporting.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -38,9 +39,28 @@ abstract class UnpackMacOS extends Target {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/FlutterMacOS.framework/Versions/A/FlutterMacOS'),
-  ];
+  List<Source> get outputs {
+    // Swift Package Manager will also produce the FlutterMacOS framework if
+    // indicated in the package manifest. If both SPM and "Flutter Assemble"
+    // output the framework, the build will fail with an error about multiple
+    // commands producing the same output. Only output the framework if SPM
+    // isn't using it.
+    final FlutterProject flutterProject = FlutterProject.current();
+    if (flutterProject.usingSwiftPackageManager) {
+      final File swiftPackage = flutterProject.macos.flutterPluginSwiftPackageManifest;
+      if (swiftPackage.existsSync() &&
+          swiftPackage
+              .readAsStringSync()
+              .contains('FlutterMacOS.xcframework')) {
+        return <Source>[];
+      }
+    }
+    return <Source>[
+      const Source.pattern(
+        '{OUTPUT_DIR}/FlutterMacOS.framework/Versions/A/FlutterMacOS',
+      ),
+    ];
+  }
 
   @override
   List<Target> get dependencies => <Target>[];

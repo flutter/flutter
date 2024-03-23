@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/core_devices.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
@@ -237,6 +238,7 @@ void main() {
       );
 
       expect(fileSystem.directory('build/ios/iphoneos'), exists);
+      expect(flutterProject.ios.flutterPluginSwiftPackageDirectory.childLink('Flutter.xcframework').existsSync(), isFalse);
       expect(launchResult.started, true);
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
@@ -307,6 +309,67 @@ void main() {
       XcodeProjectInterpreter: () => fakeXcodeProjectInterpreter,
       Xcode: () => xcode,
     }, skip: true); // TODO(zanderso): clean up with https://github.com/flutter/flutter/issues/60675
+
+    testUsingContext('and links framework when Swift Package Manager is enabled', () async {
+      final IOSDevice iosDevice = setUpIOSDevice(
+        fileSystem: fileSystem,
+        processManager: processManager,
+        logger: logger,
+        artifacts: artifacts,
+      );
+      setUpIOSProject(fileSystem);
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
+      final BuildableIOSApp buildableIOSApp = BuildableIOSApp(flutterProject.ios, 'flutter', 'My Super Awesome App.app');
+      fileSystem.directory('build/ios/Release-iphoneos/My Super Awesome App.app').createSync(recursive: true);
+      flutterProject.ios.flutterPluginSwiftPackageDirectory.createSync(recursive: true);
+
+      processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
+      processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
+      processManager.addCommand(const FakeCommand(command: <String>[
+        'rsync',
+        '-8',
+        '-av',
+        '--delete',
+        'build/ios/Release-iphoneos/My Super Awesome App.app',
+        'build/ios/iphoneos',
+      ]));
+      processManager.addCommand(FakeCommand(
+        command: <String>[
+          iosDeployPath,
+          '--id',
+          '123',
+          '--bundle',
+          'build/ios/iphoneos/My Super Awesome App.app',
+          '--app_deltas',
+          'build/ios/app-delta',
+          '--no-wifi',
+          '--justlaunch',
+          '--args',
+          const <String>[
+            '--enable-dart-profiling',
+          ].join(' '),
+        ])
+      );
+
+      final LaunchResult launchResult = await iosDevice.startApp(
+        buildableIOSApp,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+        platformArgs: <String, Object>{},
+      );
+
+      expect(fileSystem.directory('build/ios/iphoneos'), exists);
+      expect(flutterProject.ios.flutterPluginSwiftPackageDirectory.childLink('Flutter.xcframework').existsSync(), isTrue);
+      expect(launchResult.started, true);
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      Platform: () => macPlatform,
+      FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+      XcodeProjectInterpreter: () => fakeXcodeProjectInterpreter,
+      Xcode: () => xcode,
+    });
   });
 
   group('IOSDevice.startApp for CoreDevice', () {

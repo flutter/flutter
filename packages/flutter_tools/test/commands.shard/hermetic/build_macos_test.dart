@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -20,6 +21,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
@@ -681,4 +683,58 @@ STDERR STUFF
     Usage: () => usage,
     Analytics: () => fakeAnalytics,
   });
+
+  testUsingContext('macOS build links framework when using Swift Package Manager', () async {
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    fileSystem.directory(fileSystem.path.join('macos', 'Runner.xcworkspace'))
+        .createSync(recursive: true);
+    fileSystem.directory('macos/Flutter/Packages/FlutterGeneratedPluginSwiftPackage')
+        .createSync(recursive: true);
+    createCoreMockProjectFiles();
+
+    await createTestCommandRunner(command).run(
+        const <String>['build', 'macos', '--no-pub']
+    );
+
+    expect(
+      fileSystem.link(
+        'macos/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/FlutterMacOS.xcframework'
+      ).existsSync(),
+      isTrue,
+    );
+  }, overrides: <Type, Generator>{
+    Platform: () => macosPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true, isSwiftPackageManagerEnabled: true),
+    Analytics: () => fakeAnalytics,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+  });
+}
+
+class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
+  FakeXcodeProjectInterpreter({
+    this.version,
+  });
+
+  @override
+  Version? version;
+
+  @override
+  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
+    return XcodeProjectInfo(
+      <String>['Runner'],
+      <String>['Debug', 'Release'],
+      <String>['Runner'],
+      BufferLogger.test(),
+    );
+  }
 }

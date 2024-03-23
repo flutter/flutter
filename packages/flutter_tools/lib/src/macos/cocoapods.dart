@@ -21,8 +21,8 @@ import '../cache.dart';
 import '../ios/xcodeproj.dart';
 import '../migrations/cocoapods_script_symlink.dart';
 import '../migrations/cocoapods_toolchain_directory_migration.dart';
+import '../project.dart';
 import '../reporting/reporting.dart';
-import '../xcode_project.dart';
 
 const String noCocoaPodsConsequence = '''
   CocoaPods is used to retrieve the iOS and macOS platform side's plugin code that responds to your plugin usage on the Dart side.
@@ -166,6 +166,10 @@ class CocoaPods {
     bool dependenciesChanged = true,
   }) async {
     if (!xcodeProject.podfile.existsSync()) {
+      // Swift Package Manager doesn't need Podfile, so don't error.
+      if (xcodeProject.parent.usingSwiftPackageManager) {
+        return false;
+      }
       throwToolExit('Podfile missing');
     }
     _warnIfPodfileOutOfDate(xcodeProject);
@@ -258,6 +262,18 @@ class CocoaPods {
       addPodsDependencyToFlutterXcconfig(xcodeProject);
       return;
     }
+    final File podfileTemplate = await getPodfileTemplate(
+      xcodeProject,
+      runnerProject,
+    );
+    podfileTemplate.copySync(podfile.path);
+    addPodsDependencyToFlutterXcconfig(xcodeProject);
+  }
+
+  Future<File> getPodfileTemplate(
+    XcodeBasedProject xcodeProject,
+    Directory runnerProject,
+  ) async {
     String podfileTemplateName;
     if (xcodeProject is MacOSProject) {
       podfileTemplateName = 'Podfile-macos';
@@ -268,7 +284,7 @@ class CocoaPods {
       )).containsKey('SWIFT_VERSION');
       podfileTemplateName = isSwift ? 'Podfile-ios-swift' : 'Podfile-ios-objc';
     }
-    final File podfileTemplate = _fileSystem.file(_fileSystem.path.join(
+    return _fileSystem.file(_fileSystem.path.join(
       Cache.flutterRoot!,
       'packages',
       'flutter_tools',
@@ -276,8 +292,6 @@ class CocoaPods {
       'cocoapods',
       podfileTemplateName,
     ));
-    podfileTemplate.copySync(podfile.path);
-    addPodsDependencyToFlutterXcconfig(xcodeProject);
   }
 
   /// Ensures all `Flutter/Xxx.xcconfig` files for the given Xcode-based
