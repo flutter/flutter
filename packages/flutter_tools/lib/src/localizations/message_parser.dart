@@ -355,14 +355,18 @@ class Parser {
         } else {
           // Handle keywords separately. Otherwise, lexer will assume parts of identifiers may be keywords.
           final String tokenStr = match.group(0)!;
-          matchedType = switch (tokenStr) {
-            'plural' => ST.plural,
-            'select' => ST.select,
-            'other'  => ST.other,
-            'date'   => ST.date,
-            'time'   => ST.time,
-            _        => matchedType,
-          };
+          switch (tokenStr) {
+            case 'plural':
+              matchedType = ST.plural;
+            case 'select':
+              matchedType = ST.select;
+            case 'other':
+              matchedType = ST.other;
+            case 'date':
+              matchedType = ST.date;
+            case 'time':
+              matchedType = ST.time;
+          }
           tokens.add(Node(matchedType!, startIndex, value: match.group(0)));
           startIndex = match.end;
           continue;
