@@ -20,12 +20,4 @@
         "master"
     ],
     "files.trimTrailingWhitespace": true,
-    "yaml.schemas": {
-        "https://json.schemastore.org/dart-build": [
-            "build.yaml",
-            "*.build.yaml",
-            "build.*.yaml"
-        ],
-        "https://json.schemastore.org/pubspec.json": "file:///e%3A/Programming/flutter/dev/benchmarks/multiple_flutters/module/pubspec.yaml"
-    },
 }
