@@ -95,8 +95,6 @@ final class AssetBundleEntry {
   final AssetKind kind;
   final List<AssetTransformerEntry> transformers;
 
-  final DateTime creationTime = DateTime.now();
-
   Future<List<int>> contentsAsBytes() => content.contentsAsBytes();
 
   bool hasEquivalentConfigurationWith(AssetBundleEntry other) {
