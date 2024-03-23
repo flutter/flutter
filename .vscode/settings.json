@@ -9,10 +9,23 @@
         "editor.formatOnType": false,
         "editor.formatOnPaste": false,
     },
+    // We use Flutter from the "bin" directory, this allows us not to write the PATH.
+    "dart.flutterSdkPath": "bin",
+    "dart.addSdkToTerminalPath": true,
+    "dart.checkForSdkUpdates": false,
 
+    "git.enableCommitSigning": true,
     "html.format.enable": false,
     "githubPullRequests.ignoredPullRequestBranches": [
         "master"
     ],
-    "files.trimTrailingWhitespace": true
+    "files.trimTrailingWhitespace": true,
+    "yaml.schemas": {
+        "https://json.schemastore.org/dart-build": [
+            "build.yaml",
+            "*.build.yaml",
+            "build.*.yaml"
+        ],
+        "https://json.schemastore.org/pubspec.json": "file:///e%3A/Programming/flutter/dev/benchmarks/multiple_flutters/module/pubspec.yaml"
+    },
 }

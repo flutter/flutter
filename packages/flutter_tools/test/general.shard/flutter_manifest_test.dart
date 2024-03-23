@@ -493,13 +493,14 @@ flutter:
     expect(flutterManifest.usesAndroidX, false);
   });
 
-  testWithoutContext('FlutterManifest allows a module declaration', () {
+  testWithoutContext('FlutterManifest allows a legacy module declaration', () {
     const String manifest = '''
 name: test
 flutter:
   module:
     androidPackage: com.example
     androidX: true
+    iosBundleIdentifier: Example
 ''';
 
     final FlutterManifest flutterManifest = FlutterManifest.createFromString(
@@ -510,6 +511,90 @@ flutter:
     expect(flutterManifest.isModule, true);
     expect(flutterManifest.androidPackage, 'com.example');
     expect(flutterManifest.usesAndroidX, true);
+    expect(flutterManifest.iosBundleIdentifier, 'Example');
+  });
+
+  testWithoutContext('FlutterManifest allows a multi-plat module declaration', () {
+    const String manifest = '''
+name: test
+flutter:
+  module:
+    platforms:
+      android:
+        androidX: true
+        package: com.example
+      ios:
+        bundleIdentifier: Example
+''';
+
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    )!;
+
+    expect(flutterManifest.isModule, true);
+    expect(flutterManifest.androidPackage, 'com.example');
+    expect(flutterManifest.usesAndroidX, true);
+    expect(flutterManifest.iosBundleIdentifier, 'Example');
+  });
+
+  testWithoutContext('FlutterManifest allows a multi-plat module declaration '
+    'with android only', () {
+    const String manifest = '''
+name: test
+flutter:
+  module:
+    platforms:
+      android:
+        androidX: true
+        package: com.example
+''';
+
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    )!;
+
+    expect(flutterManifest.isModule, true);
+    expect(flutterManifest.androidPackage, 'com.example');
+    expect(flutterManifest.usesAndroidX, true);
+  });
+
+  testWithoutContext('FlutterManifest allows a multi-plat module declaration '
+    'with ios only', () {
+    const String manifest = '''
+name: test
+flutter:
+  module:
+    platforms:
+      ios:
+        bundleIdentifier: Example
+''';
+
+    final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    )!;
+
+    expect(flutterManifest.isModule, true);
+    expect(flutterManifest.iosBundleIdentifier, 'Example');
+  });
+
+  testWithoutContext('FlutterManifest handles an invalid module declaration', () {
+    const String manifest = '''
+name: test
+flutter:
+    module:
+''';
+
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, null);
+    expect(logger.errorText,
+      contains('Expected "module" to be an object, but got null'));
   });
 
   testWithoutContext('FlutterManifest allows a legacy plugin declaration', () {
