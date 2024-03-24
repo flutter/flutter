@@ -5237,7 +5237,8 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
       env_variables: >-
         {
-          "LEAK_TRACKING": "true"
+          "LEAK_TRACKING": "true",
+          "TEST_RANDOMIZATION_OFF": "true"
         }
     runIf:
       - dev/**
@@ -5323,7 +5324,8 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
       env_variables: >-
         {
-          "LEAK_TRACKING": "true"
+          "LEAK_TRACKING": "true",
+          "TEST_RANDOMIZATION_OFF": "true"
         }
     runIf:
       - dev/**
