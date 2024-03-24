@@ -425,7 +425,7 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => r'$minute دقيقة​';
 
   @override
-  String get lookUpButtonLabel => 'النظر إلى أعلى';
+  String get lookUpButtonLabel => 'بحث عام';
 
   @override
   String get menuDismissLabel => 'إغلاق القائمة';
