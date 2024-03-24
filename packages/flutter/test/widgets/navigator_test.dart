@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer';
+import 'dart:io';
 import 'dart:ui' show FlutterView;
 
 import 'package:flutter/foundation.dart';
@@ -5242,11 +5244,75 @@ void main() {
       );
     });
   });
+
+  testWidgets(
+    'Navigation does not leak memory', (WidgetTester tester) async {
+      await tester.pumpWidget(const _MyAppWithMemoryTest());
+      Future<void> navigate(int count) async {
+        for (int i = 0; i < count; i++) {
+          await tester.tap(find.text('CLICK'));
+          await tester.pumpAndSettle();
+        }
+      }
+
+      // Warm up the engine.
+      await navigate(2);
+
+      // Repeat the navigation and measure the memory consumption.
+      const int count = 100;
+      final int initialRss = ProcessInfo.currentRss;
+      final int initialGcCount = reachabilityBarrier;
+      await navigate(count);
+      final int consumedKbPerOperation = (ProcessInfo.currentRss - initialRss) ~/ (1024 * count);
+      final int gcCount = reachabilityBarrier - initialGcCount;
+
+      expect(gcCount, greaterThan(0)); // Actual value is 0 on polina-c's mac.
+      expect(consumedKbPerOperation, lessThan(100)); // Actual value is 552 KB per operation on polina-c's mac.
+    },
+    skip: true, // https://github.com/flutter/flutter/issues/79605
+  );
 }
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>?);
 
 class NotAnnounced extends Route<void> { /* A place holder for not announced route*/ }
+
+class _MyAppWithMemoryTest extends StatelessWidget {
+  const _MyAppWithMemoryTest();
+
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      home: const _MemoryTest(),
+    );
+  }
+}
+
+class _MemoryTest extends StatelessWidget {
+  const _MemoryTest();
+
+  @override
+  Widget build(BuildContext context) {
+    Widget content = OutlinedButton(
+      child: const Text('CLICK'),
+      onPressed: () {
+        Navigator.of(context).pushReplacement(MaterialPageRoute<Widget>(
+          builder: (_) => const _MemoryTest(),
+        ));
+      },
+    );
+    for (int i = 10; i-- > 0;) {
+      content = Padding(padding: EdgeInsets.zero, child: content);
+    }
+    return content;
+  }
+}
 
 class RouteAnnouncementSpy extends Route<void> {
   RouteAnnouncementSpy({
