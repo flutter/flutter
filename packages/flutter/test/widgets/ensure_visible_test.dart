@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'two_dimensional_utils.dart';
 
@@ -1062,7 +1063,10 @@ void main() {
       return tester.element(findKey(vicinity));
     }
 
-    testWidgets('Axis.vertical', (WidgetTester tester) async {
+    testWidgets('Axis.vertical',
+    // TODO(polina-c): RenderTwoDimensionalViewport should dispose _delegate https://github.com/flutter/flutter/issues/145628 [leaks-to-clean]
+    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+    (WidgetTester tester) async {
       await tester.pumpWidget(simpleBuilderTest(useCacheExtent: true));
 
       Scrollable.ensureVisible(findContext(

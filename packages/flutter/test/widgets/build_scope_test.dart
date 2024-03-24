@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'test_widgets.dart';
 
@@ -164,7 +165,9 @@ void main() {
     await tester.pumpWidget(Container());
   });
 
-  testWidgets('Setting state during dispose is forbidden', (WidgetTester tester) async {
+  testWidgets('Setting state during dispose is forbidden',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     await tester.pumpWidget(const BadDisposeWidget());
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(Container());

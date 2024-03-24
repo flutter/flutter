@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'navigator_utils.dart';
 import 'observer_tester.dart';
@@ -1830,7 +1831,9 @@ void main() {
   });
 
   group('error control test', () {
-    testWidgets('onUnknownRoute null and onGenerateRoute returns null', (WidgetTester tester) async {
+    testWidgets('onGenerateRoute returns null',
+    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
       await tester.pumpWidget(Navigator(
         key: navigatorKey,
@@ -1856,7 +1859,9 @@ void main() {
       );
     });
 
-    testWidgets('onUnknownRoute null and onGenerateRoute returns null', (WidgetTester tester) async {
+    testWidgets('onUnknownRoute null and onGenerateRoute returns null',
+    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
       await tester.pumpWidget(Navigator(
         key: navigatorKey,
@@ -2895,7 +2900,9 @@ void main() {
       );
     });
 
-    testWidgets('throw if page list is empty', (WidgetTester tester) async {
+    testWidgets('throw if page list is empty',
+    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
       final List<TestPage> myPages = <TestPage>[];
       final FlutterExceptionHandler? originalOnError = FlutterError.onError;
       FlutterErrorDetails? firstError;
