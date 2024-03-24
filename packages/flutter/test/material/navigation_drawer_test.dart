@@ -321,6 +321,7 @@ void main() {
       matchesSemantics(
         label: 'AC\nTab 1 of 2',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
@@ -331,6 +332,7 @@ void main() {
       matchesSemantics(
         label: 'Alarm\nTab 2 of 2',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         hasTapAction: true,
       ),
@@ -343,6 +345,7 @@ void main() {
       matchesSemantics(
         label: 'AC\nTab 1 of 2',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         hasTapAction: true,
       ),
@@ -352,6 +355,7 @@ void main() {
       matchesSemantics(
         label: 'Alarm\nTab 2 of 2',
         textDirection: TextDirection.ltr,
+        isButton: true,
         isFocusable: true,
         isSelected: true,
         hasTapAction: true,
