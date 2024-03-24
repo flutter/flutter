@@ -58,6 +58,10 @@ if [[ $OS =~ MINGW.* || $OS =~ CYGWIN.* || $OS =~ MSYS.* ]]; then
   exec "${BIN_DIR}/flutter.bat" "$@"
 fi
 
+if [ $OS == Linux ] && grep -qi WSL2 /proc/version; then
+  exec /mnt/c/Windows/System32/cmd.exe /c flutter.bat "$@"
+fi
+
 # To define `shared::execute()` function
 source "$SHARED_NAME"
 
