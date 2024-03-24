@@ -94,7 +94,10 @@ Future<void> main() async {
     );
   });
 
-  testWidgets('TestBorder and Directionality - 2', (WidgetTester tester) async {
+  testWidgets('TestBorder and Directionality - 2',
+  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(
       Directionality(
