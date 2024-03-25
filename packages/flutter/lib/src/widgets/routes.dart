@@ -98,7 +98,7 @@ abstract class OverlayRoute<T> extends Route<T> {
 /// See also:
 ///
 ///  * [Route], which documents the meaning of the `T` generic type argument.
-abstract class TransitionRoute<T> extends OverlayRoute<T> with PredictiveBackRoute {
+abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveBackRoute {
   /// Creates a route that animates itself when it is pushed or popped.
   TransitionRoute({
     super.settings,
@@ -571,7 +571,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> with PredictiveBackRou
 ///
 ///  * [PredictiveBackPageTransitionsBuilder], which builds page transitions for
 ///    predictive back.
-mixin PredictiveBackRoute {
+abstract interface class PredictiveBackRoute {
   /// Whether this route is the top-most route on the navigator.
   bool get isCurrent;
 
