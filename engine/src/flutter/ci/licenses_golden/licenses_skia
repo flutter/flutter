@@ -1,4 +1,4 @@
-Signature: baf9ff7832c4ae706f95273498de2ba5
+Signature: 46dad30d690defa0a8a89dc066f3e326
 
 ====================================================================================================
 LIBRARY: etc1
@@ -1082,7 +1082,6 @@ LIBRARY: skia
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkMallocPixelRef.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkPixelRef.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkUnPreMultiply.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/include/effects/SkBlurDrawLooper.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/private/base/SkFloatBits.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/base/SkMathPriv.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkBitmap.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -1096,7 +1095,6 @@ TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/skia/include/core/SkMallocPixelRef.h
 FILE: ../../../flutter/third_party/skia/include/core/SkPixelRef.h
 FILE: ../../../flutter/third_party/skia/include/core/SkUnPreMultiply.h
-FILE: ../../../flutter/third_party/skia/include/effects/SkBlurDrawLooper.h
 FILE: ../../../flutter/third_party/skia/include/private/base/SkFloatBits.h
 FILE: ../../../flutter/third_party/skia/src/base/SkMathPriv.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkBitmap.cpp
