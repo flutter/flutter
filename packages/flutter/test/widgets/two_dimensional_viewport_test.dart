@@ -335,6 +335,7 @@ void main() {
             );
           }
         );
+        addTearDown(builderDelegate.dispose);
 
         await tester.pumpWidget(simpleBuilderTest(
           delegate: builderDelegate,
