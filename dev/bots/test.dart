@@ -187,6 +187,8 @@ String get shuffleSeed {
   return _shuffleSeed!;
 }
 
+final bool _isRandomizationOff = bool.tryParse(Platform.environment['TEST_RANDOMIZATION_OFF'] ?? '') ?? false;
+
 /// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter test. For example, you might want to call this
 /// script with the parameter --local-engine=host_debug_unopt to
@@ -1265,9 +1267,11 @@ Future<void> _runWebLongRunningTests() async {
     () => _runWebE2eTest('scroll_wheel_integration', buildMode: 'debug', renderer: 'html'),
 
     // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
-    () => _runWebE2eTest('text_editing_integration', buildMode: 'debug', renderer: 'canvaskit'),
-    () => _runWebE2eTest('text_editing_integration', buildMode: 'profile', renderer: 'html'),
-    () => _runWebE2eTest('text_editing_integration', buildMode: 'release', renderer: 'html'),
+    // These tests have been extremely flaky, so we are temporarily disabling them until we figure out how to make them more robust.
+    // See https://github.com/flutter/flutter/issues/143834
+    // () => _runWebE2eTest('text_editing_integration', buildMode: 'debug', renderer: 'canvaskit'),
+    // () => _runWebE2eTest('text_editing_integration', buildMode: 'profile', renderer: 'html'),
+    // () => _runWebE2eTest('text_editing_integration', buildMode: 'release', renderer: 'html'),
 
     // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
     () => _runWebE2eTest('url_strategy_integration', buildMode: 'debug', renderer: 'html'),
@@ -2469,7 +2473,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
 
   final List<String> args = <String>[
     'test',
-    if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
+    if (shuffleTests && !_isRandomizationOff) '--test-randomize-ordering-seed=$shuffleSeed',
     if (fatalWarnings) '--fatal-warnings',
     ...options,
     ...tags,
