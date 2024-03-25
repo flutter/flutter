@@ -442,6 +442,14 @@ abstract class MaterialLocalizations {
   /// [showTimePicker] when in [TimePickerEntryMode.input].
   String get timePickerInputHelpText;
 
+  /// Label used in the header of the duration picker dialog created with
+  /// [showDurationPicker] when in [DurationPickerEntryMode.dial].
+  String get durationPickerDialHelpText;
+
+  /// Label used in the header of the duration picker dialog created with
+  /// [showDurationPicker] when in [DurationPickerEntryMode.input].
+  String get durationPickerInputHelpText;
+
   /// Label used below the hour text field of the time picker dialog created
   /// with [showTimePicker] when in [TimePickerEntryMode.input].
   String get timePickerHourLabel;
@@ -1028,6 +1036,12 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get timePickerInputHelpText => 'Enter time';
+
+  @override
+  String get durationPickerDialHelpText => 'Select duration';
+
+  @override
+  String get durationPickerInputHelpText => 'Enter duration';
 
   @override
   String get timePickerHourLabel => 'Hour';

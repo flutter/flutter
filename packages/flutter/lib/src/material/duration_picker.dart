@@ -363,7 +363,7 @@ class _DurationControl extends StatelessWidget {
             child: Text(
               text,
               style: effectiveStyle,
-              // textScaler: TextScaler.noScaling,
+              textScaler: TextScaler.noScaling,
             ),
           ),
         ),
@@ -412,11 +412,25 @@ class _HourControl extends StatelessWidget {
       onDecrease: () {
         _DurationPickerModel.setSelectedTime(context, previousHour);
       },
-      child: _DurationControl(
-        isSelected: _DurationPickerModel.durationModeOf(context) == _DurationMode.hour,
-        text: formattedHour,
-        onTap: Feedback.wrapForTap(() => _DurationPickerModel.setDurationMode(context, _DurationMode.hour), context)!,
-        onDoubleTap: _DurationPickerModel.of(context, _DurationPickerAspect.onHourDoubleTapped).onHourDoubleTapped,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          _DurationControl(
+            isSelected: _DurationPickerModel.durationModeOf(context) == _DurationMode.hour,
+            text: formattedHour,
+            onTap: Feedback.wrapForTap(() => _DurationPickerModel.setDurationMode(context, _DurationMode.hour), context)!,
+            onDoubleTap: _DurationPickerModel.of(context, _DurationPickerAspect.onHourDoubleTapped).onHourDoubleTapped,
+          ),
+          // TODO: is this practicable to state the unit here?
+          ExcludeSemantics(
+            child: Text(
+              /*widget.hourLabelText ??*/ MaterialLocalizations.of(context).timePickerHourLabel,
+              style: Theme.of(context).textTheme.bodySmall,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -526,11 +540,25 @@ class _MinuteControl extends StatelessWidget {
       onDecrease: () {
         _DurationPickerModel.setSelectedTime(context, previousMinute);
       },
-      child: _DurationControl(
-        isSelected: _DurationPickerModel.durationModeOf(context) == _DurationMode.minute,
-        text: formattedMinute,
-        onTap: Feedback.wrapForTap(() => _DurationPickerModel.setDurationMode(context, _DurationMode.minute), context)!,
-        onDoubleTap: _DurationPickerModel.of(context, _DurationPickerAspect.onMinuteDoubleTapped).onMinuteDoubleTapped,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          _DurationControl(
+            isSelected: _DurationPickerModel.durationModeOf(context) == _DurationMode.minute,
+            text: formattedMinute,
+            onTap: Feedback.wrapForTap(() => _DurationPickerModel.setDurationMode(context, _DurationMode.minute), context)!,
+            onDoubleTap: _DurationPickerModel.of(context, _DurationPickerAspect.onMinuteDoubleTapped).onMinuteDoubleTapped,
+          ),
+          // TODO: is this practicable to state the unit here?
+          ExcludeSemantics(
+            child: Text(
+              /*widget.minuteLabelText ??*/ MaterialLocalizations.of(context).timePickerMinuteLabel,
+              style: Theme.of(context).textTheme.bodySmall,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -567,11 +595,25 @@ class _SecondControl extends StatelessWidget {
       onDecrease: () {
         _DurationPickerModel.setSelectedTime(context, previousSecond);
       },
-      child: _DurationControl(
-        isSelected: _DurationPickerModel.durationModeOf(context) == _DurationMode.second,
-        text: formattedSecond,
-        onTap: Feedback.wrapForTap(() => _DurationPickerModel.setDurationMode(context, _DurationMode.second), context)!,
-        onDoubleTap: _DurationPickerModel.of(context, _DurationPickerAspect.onSecondDoubleTapped).onSecondDoubleTapped,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          _DurationControl(
+            isSelected: _DurationPickerModel.durationModeOf(context) == _DurationMode.second,
+            text: formattedSecond,
+            onTap: Feedback.wrapForTap(() => _DurationPickerModel.setDurationMode(context, _DurationMode.second), context)!,
+            onDoubleTap: _DurationPickerModel.of(context, _DurationPickerAspect.onSecondDoubleTapped).onSecondDoubleTapped,
+          ),
+          // TODO: is this practicable to state the unit here?
+          ExcludeSemantics(
+            child: Text(
+              /*widget.secondLabelText ??*/ MaterialLocalizations.of(context).timePickerSecondLabel,
+              style: Theme.of(context).textTheme.bodySmall,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1551,7 +1593,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                                 durationMode: _DurationMode.hour,
                               ),
                             ),
-                            if (!hourHasError.value && !minuteHasError.value)
+                            if (!hourHasError.value && !minuteHasError.value && !secondHasError.value)
                               ExcludeSemantics(
                                 child: Text(
                                   widget.hourLabelText ?? MaterialLocalizations.of(context).timePickerHourLabel,
@@ -1584,7 +1626,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                               onChanged: _handleMinuteChanged,
                             ),
                           ),
-                          if (!hourHasError.value && !minuteHasError.value)
+                          if (!hourHasError.value && !minuteHasError.value && !secondHasError.value)
                             ExcludeSemantics(
                               child: Text(
                                 widget.minuteLabelText ?? MaterialLocalizations.of(context).timePickerMinuteLabel,
@@ -1616,7 +1658,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                                 durationMode: _DurationMode.second,
                               ),
                             ),
-                            if (!hourHasError.value && !secondHasError.value)
+                            if (!hourHasError.value && !minuteHasError.value && !secondHasError.value)
                               ExcludeSemantics(
                                 child: Text(
                                   widget.secondLabelText ?? MaterialLocalizations.of(context).timePickerSecondLabel,
@@ -2231,9 +2273,9 @@ class _TimePicker extends StatefulWidget {
   /// Optionally provide your own text for the help text at the top of the
   /// control.
   ///
-  /// If null, the widget uses [MaterialLocalizations.timePickerDialHelpText]
+  /// If null, the widget uses [MaterialLocalizations.durationPickerDialHelpText]
   /// when the [entryMode] is [DurationPickerEntryMode.dial], and
-  /// [MaterialLocalizations.timePickerInputHelpText] when the [entryMode] is
+  /// [MaterialLocalizations.durationPickerInputHelpText] when the [entryMode] is
   /// [DurationPickerEntryMode.input].
   final String? helpText;
 
@@ -2504,8 +2546,8 @@ class _DurationPickerState extends State<_TimePicker> with RestorationMixin {
       case DurationPickerEntryMode.dial:
       case DurationPickerEntryMode.dialOnly:
         helpText = widget.helpText ?? (theme.useMaterial3
-          ? localizations.timePickerDialHelpText
-          : localizations.timePickerDialHelpText.toUpperCase());
+          ? localizations.durationPickerDialHelpText
+          : localizations.durationPickerDialHelpText.toUpperCase());
 
         final EdgeInsetsGeometry dialPadding = switch (orientation) {
           Orientation.portrait  => const EdgeInsets.only(left: 12, right: 12, top: 36),
@@ -2578,8 +2620,8 @@ class _DurationPickerState extends State<_TimePicker> with RestorationMixin {
       case DurationPickerEntryMode.input:
       case DurationPickerEntryMode.inputOnly:
         final String helpText =  widget.helpText ?? (theme.useMaterial3
-          ? localizations.timePickerInputHelpText
-          : localizations.timePickerInputHelpText.toUpperCase());
+          ? localizations.durationPickerInputHelpText
+          : localizations.durationPickerInputHelpText.toUpperCase());
 
         picker = Column(
           mainAxisSize: MainAxisSize.min,
