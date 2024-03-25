@@ -1849,11 +1849,18 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
         _updateSelectables();
       }
 
-      if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.postFrameCallbacks) {
+      if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.postFrameCallbacks
+         || (!SchedulerBinding.instance.hasScheduledFrame && SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle)) {
         // A new task can be scheduled as a result of running the scheduled task
         // from another MultiSelectableSelectionContainerDelegate. This can
         // happen if nesting two SelectionContainers. The selectable can be
         // safely updated in the same frame in this case.
+        //
+        // A new task can also be scheduled when the scheduler is idle, and there
+        // is no new frame scheduled. This can happen when there are more than two
+        // nested SelectionContainers and the current frame has been fully drawn.
+        // The selectable can safely be updated in a microtask in this case since
+        // the build phase has completed and no frame is scheduled to be ran.
         scheduleMicrotask(runScheduledTask);
       } else {
         SchedulerBinding.instance.addPostFrameCallback(
