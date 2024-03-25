@@ -64,6 +64,7 @@ class Home extends StatelessWidget {
                   lastDate: DateTime(DateTime.now().year + 1));
             },
           ),
+          const DurationPickerDialog(initialDuration: Duration.zero),
         ],
       ),
     );
