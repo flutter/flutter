@@ -18,6 +18,6 @@ Future<void> addToAppLifeCycleRunner(String flutterRoot) async {
       workingDirectory: addToAppDir,
     );
   } else {
-    printProgress('${yellow}Skipped on this platform (only iOS has add-to-add lifecycle tests at this time).$reset');
+    throw Exception('Only iOS has add-to-add lifecycle tests at this time.');
   }
 }
