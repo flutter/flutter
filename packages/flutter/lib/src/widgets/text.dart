@@ -858,9 +858,8 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
 
   SelectionResult _handleSelectParagraph(SelectParagraphSelectionEvent event) {
     if (event.absorb) {
-      final SelectionEvent synthesizedEvent = SelectParagraphSelectionEvent(globalPosition: event.globalPosition, absorb: true);
       for (int index = 0; index < selectables.length; index += 1) {
-        dispatchSelectionEventToChild(selectables[index], synthesizedEvent);
+        dispatchSelectionEventToChild(selectables[index], event);
       }
       currentSelectionStartIndex = 0;
       currentSelectionEndIndex = selectables.length - 1;
