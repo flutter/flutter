@@ -2506,6 +2506,26 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///
   /// ** See code in examples/api/lib/material/scaffold/scaffold_state.show_bottom_sheet.0.dart **
   /// {@end-tool}
+  ///
+  /// The [sheetAnimationStyle] parameter is used to override the bottom sheet
+  /// animation duration and reverse animation duration.
+  ///
+  /// If [AnimationStyle.duration] is provided, it will be used to override
+  /// the bottom sheet animation duration in the underlying
+  /// [BottomSheet.createAnimationController].
+  ///
+  /// If [AnimationStyle.reverseDuration] is provided, it will be used to
+  /// override the bottom sheet reverse animation duration in the underlying
+  /// [BottomSheet.createAnimationController].
+  ///
+  /// To disable the bottom sheet animation, use [AnimationStyle.noAnimation].
+  ///
+  /// {@tool dartpad}
+  /// This sample showcases how to override the [showBottomSheet] animation
+  /// duration and reverse animation duration using [AnimationStyle].
+  ///
+  /// ** See code in examples/api/lib/material/scaffold/scaffold_state.show_bottom_sheet.1.dart **
+  /// {@end-tool}
   /// See also:
   ///
   ///  * [BottomSheet], which becomes the parent of the widget returned by the
@@ -2516,6 +2536,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
   ///  * The Material 2 spec at <https://m2.material.io/components/sheets-bottom>.
   ///  * The Material 3 spec at <https://m3.material.io/components/bottom-sheets/overview>.
+  ///  * [AnimationStyle], which is used to override the modal bottom sheet
+  ///    animation duration and reverse animation duration.
   PersistentBottomSheetController showBottomSheet(
     WidgetBuilder builder, {
     Color? backgroundColor,
@@ -2526,6 +2548,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     bool? enableDrag,
     bool? showDragHandle,
     AnimationController? transitionAnimationController,
+    AnimationStyle? sheetAnimationStyle,
   }) {
     assert(() {
       if (widget.bottomSheet != null) {
@@ -2540,7 +2563,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     assert(debugCheckHasMediaQuery(context));
 
     _closeCurrentBottomSheet();
-    final AnimationController controller = (transitionAnimationController ?? BottomSheet.createAnimationController(this))..forward();
+    final AnimationController controller = (transitionAnimationController
+      ?? BottomSheet.createAnimationController(this, sheetAnimationStyle: sheetAnimationStyle))
+         ..forward();
     setState(() {
       _currentBottomSheet = _buildBottomSheet(
         builder,
