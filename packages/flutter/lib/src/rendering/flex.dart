@@ -603,21 +603,25 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     };
     if (_direction == sizingDirection) {
       // INTRINSIC MAIN SIZE
-      Size layoutChildWithCrossSizeConstrained(RenderBox child, BoxConstraints constraints) {
-        switch (_direction) {
-          case Axis.horizontal:
-            final double crossExtent = constraints.maxHeight;
-            return Size(childSize(child, crossExtent), crossExtent);
-          case Axis.vertical:
-            final double crossExtent = constraints.maxWidth;
-            return Size(crossExtent, childSize(child, crossExtent));
+      // Intrinsic main size is the smallest size the flex container can take
+      // while maintaining the min/max-content contributions of its flex items.
+      double totalFlex = 0.0;
+      double inflexibleSpace = 0.0;
+      double maxFlexFractionSoFar = 0.0;
+      RenderBox? child = firstChild;
+      while (child != null) {
+        final int flex = _getFlex(child);
+        totalFlex += flex;
+        if (flex > 0) {
+          final double flexFraction = childSize(child, extent) / _getFlex(child);
+          maxFlexFractionSoFar = math.max(maxFlexFractionSoFar, flexFraction);
+        } else {
+          inflexibleSpace += childSize(child, extent);
         }
+        final FlexParentData childParentData = child.parentData! as FlexParentData;
+        child = childParentData.nextSibling;
       }
-      return _computeSizes(
-        constraints: extentConstraints,
-        layoutChild: layoutChildWithCrossSizeConstrained,
-        getBaseline: ChildLayoutHelper.getDryBaseline,
-      ).axisSize.mainAxisExtent;
+      return maxFlexFractionSoFar * totalFlex + inflexibleSpace;
     } else {
       // INTRINSIC CROSS SIZE
       Size layoutChildWithMainSizeConstrained(RenderBox child, BoxConstraints constraints) {
