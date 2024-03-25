@@ -194,6 +194,35 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(),
   });
 
+  testUsingContext('Linux build outputs path when successful', () async {
+    final BuildCommand command = BuildCommand(
+      artifacts: artifacts,
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      processUtils: processUtils,
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    processManager = FakeProcessManager.list(<FakeCommand>[
+      cmakeCommand('release'),
+      ninjaCommand('release'),
+    ]);
+
+    setUpMockProjectFilesForBuild();
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux', '--no-pub']
+    );
+    expect(testLogger.statusText, contains('✓ Built build/linux/x64/release/bundle'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    Platform: () => linuxPlatform,
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    OperatingSystemUtils: () => FakeOperatingSystemUtils(),
+  });
+
   testUsingContext('Linux build invokes CMake and ninja, and writes temporary files', () async {
     final BuildCommand command = BuildCommand(
       artifacts: artifacts,
