@@ -5,8 +5,111 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
 #include "flutter/shell/platform/linux/fl_method_codec_private.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_message_codec.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_message_codec.h"
 #include "flutter/shell/platform/linux/testing/fl_test.h"
 #include "gtest/gtest.h"
+
+G_DECLARE_FINAL_TYPE(FlTestMethodMessageCodec,
+                     fl_test_method_message_codec,
+                     FL,
+                     TEST_METHOD_MESSAGE_CODEC,
+                     FlStandardMessageCodec)
+
+struct _FlTestMethodMessageCodec {
+  FlStandardMessageCodec parent_instance;
+};
+
+G_DEFINE_TYPE(FlTestMethodMessageCodec,
+              fl_test_method_message_codec,
+              fl_standard_message_codec_get_type())
+
+static gboolean write_custom_value(FlStandardMessageCodec* codec,
+                                   GByteArray* buffer,
+                                   FlValue* value,
+                                   GError** error) {
+  const gchar* text =
+      static_cast<const gchar*>(fl_value_get_custom_value(value));
+  size_t length = strlen(text);
+
+  uint8_t type = 128;
+  g_byte_array_append(buffer, &type, sizeof(uint8_t));
+  fl_standard_message_codec_write_size(codec, buffer, length);
+  g_byte_array_append(buffer, reinterpret_cast<const uint8_t*>(text), length);
+  return TRUE;
+}
+
+static gboolean fl_test_method_message_codec_write_value(
+    FlStandardMessageCodec* codec,
+    GByteArray* buffer,
+    FlValue* value,
+    GError** error) {
+  if (fl_value_get_type(value) == FL_VALUE_TYPE_CUSTOM &&
+      fl_value_get_custom_type(value) == 128) {
+    return write_custom_value(codec, buffer, value, error);
+  } else {
+    return FL_STANDARD_MESSAGE_CODEC_CLASS(
+               fl_test_method_message_codec_parent_class)
+        ->write_value(codec, buffer, value, error);
+  }
+}
+
+static FlValue* read_custom_value(FlStandardMessageCodec* codec,
+                                  GBytes* buffer,
+                                  size_t* offset,
+                                  GError** error) {
+  uint32_t length;
+  if (!fl_standard_message_codec_read_size(codec, buffer, offset, &length,
+                                           error)) {
+    return nullptr;
+  }
+  if (*offset + length > g_bytes_get_size(buffer)) {
+    g_set_error(error, FL_MESSAGE_CODEC_ERROR,
+                FL_MESSAGE_CODEC_ERROR_OUT_OF_DATA, "Unexpected end of data");
+    return nullptr;
+  }
+  FlValue* value = fl_value_new_custom(
+      128,
+      g_strndup(static_cast<const gchar*>(g_bytes_get_data(buffer, nullptr)) +
+                    *offset,
+                length),
+      g_free);
+  *offset += length;
+
+  return value;
+}
+
+static FlValue* fl_test_method_message_codec_read_value_of_type(
+    FlStandardMessageCodec* codec,
+    GBytes* buffer,
+    size_t* offset,
+    int type,
+    GError** error) {
+  if (type == 128) {
+    return read_custom_value(codec, buffer, offset, error);
+  } else {
+    return FL_STANDARD_MESSAGE_CODEC_CLASS(
+               fl_test_method_message_codec_parent_class)
+        ->read_value_of_type(codec, buffer, offset, type, error);
+  }
+}
+
+static void fl_test_method_message_codec_class_init(
+    FlTestMethodMessageCodecClass* klass) {
+  FL_STANDARD_MESSAGE_CODEC_CLASS(klass)->write_value =
+      fl_test_method_message_codec_write_value;
+  FL_STANDARD_MESSAGE_CODEC_CLASS(klass)->read_value_of_type =
+      fl_test_method_message_codec_read_value_of_type;
+}
+
+static void fl_test_method_message_codec_init(FlTestMethodMessageCodec* self) {
+  // The following line suppresses a warning for unused function
+  FL_IS_TEST_METHOD_MESSAGE_CODEC(self);
+}
+
+static FlTestMethodMessageCodec* fl_test_method_message_codec_new() {
+  return FL_TEST_METHOD_MESSAGE_CODEC(
+      g_object_new(fl_test_method_message_codec_get_type(), nullptr));
+}
 
 // NOTE(robert-ancell) These test cases assumes a little-endian architecture.
 // These tests will need to be updated if tested on a big endian architecture.
@@ -374,4 +477,33 @@ TEST(FlStandardMethodCodecTest, DecodeResponseNotImplemented) {
 TEST(FlStandardMethodCodecTest, DecodeResponseUnknownEnvelope) {
   decode_error_response("02", FL_MESSAGE_CODEC_ERROR,
                         FL_MESSAGE_CODEC_ERROR_FAILED);
+}
+
+TEST(FlStandardMethodCodecTest, CustomMessageCodec) {
+  g_autoptr(FlTestMethodMessageCodec) message_codec =
+      fl_test_method_message_codec_new();
+  g_autoptr(FlStandardMethodCodec) codec =
+      fl_standard_method_codec_new_with_message_codec(
+          FL_STANDARD_MESSAGE_CODEC(message_codec));
+
+  g_autoptr(GError) error = nullptr;
+  g_autoptr(FlValue) value = fl_value_new_custom(128, "hello", nullptr);
+  g_autoptr(GBytes) message = fl_method_codec_encode_success_envelope(
+      FL_METHOD_CODEC(codec), value, &error);
+  EXPECT_NE(message, nullptr);
+  EXPECT_EQ(error, nullptr);
+  g_autofree gchar* hex_string = bytes_to_hex_string(message);
+  EXPECT_STREQ(hex_string, "00800568656c6c6f");
+
+  g_autoptr(FlMethodResponse) response =
+      fl_method_codec_decode_response(FL_METHOD_CODEC(codec), message, &error);
+  EXPECT_NE(response, nullptr);
+  EXPECT_EQ(error, nullptr);
+  EXPECT_TRUE(FL_IS_METHOD_SUCCESS_RESPONSE(response));
+  FlValue* result = fl_method_success_response_get_result(
+      FL_METHOD_SUCCESS_RESPONSE(response));
+  ASSERT_EQ(fl_value_get_type(result), FL_VALUE_TYPE_CUSTOM);
+  ASSERT_EQ(fl_value_get_custom_type(result), 128);
+  EXPECT_STREQ(static_cast<const gchar*>(fl_value_get_custom_value(result)),
+               "hello");
 }
