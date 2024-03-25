@@ -524,25 +524,11 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
     if (_direction == sizingDirection) {
       // INTRINSIC MAIN SIZE
-      // Intrinsic main size is the smallest size the flex container can take
-      // while maintaining the min/max-content contributions of its flex items.
-      double totalFlex = 0.0;
-      double inflexibleSpace = 0.0;
-      double maxFlexFractionSoFar = 0.0;
-      RenderBox? child = firstChild;
-      while (child != null) {
-        final int flex = _getFlex(child);
-        totalFlex += flex;
-        if (flex > 0) {
-          final double flexFraction = childSize(child, extent) / _getFlex(child);
-          maxFlexFractionSoFar = math.max(maxFlexFractionSoFar, flexFraction);
-        } else {
-          inflexibleSpace += childSize(child, extent);
-        }
-        final FlexParentData childParentData = child.parentData! as FlexParentData;
-        child = childParentData.nextSibling;
+      double mainSize = 0.0;
+      for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
+        mainSize += childSize(child, extent);
       }
-      return maxFlexFractionSoFar * totalFlex + inflexibleSpace;
+      return mainSize;
     } else {
       // INTRINSIC CROSS SIZE
       // Intrinsic cross size is the max of the intrinsic cross sizes of the
