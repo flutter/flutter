@@ -180,8 +180,7 @@ def main():
   )
   if not os.path.isfile(font_subset):
     raise Exception(
-        'Could not locate font-subset%s in host_debug or host_debug_unopt - build before running this script.'
-        % exe
+        'Could not locate font-subset%s in %s - build before running this script.' % (exe, variant)
     )
 
   print('Using font subset binary at %s (%s)' % (font_subset, font_subset_zip))
