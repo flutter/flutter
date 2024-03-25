@@ -428,6 +428,73 @@ flutter:
         ),
       );
     });
+
+    testWithoutContext("AssetBundleEntry::content::isModified is true when an asset's transformers change in between builds", () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+
+      fileSystem.file('my-asset.txt').createSync();
+
+      final BufferLogger logger = BufferLogger.test();
+      final FakePlatform platform = FakePlatform();
+      fileSystem.file('.packages').createSync();
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - path: my-asset.txt
+      transformers:
+        - package: my-transformer-one
+''');
+      final ManifestAssetBundle bundle = ManifestAssetBundle(
+        logger: logger,
+        fileSystem: fileSystem,
+        platform: platform,
+        flutterRoot: Cache.defaultFlutterRoot(
+          platform: platform,
+          fileSystem: fileSystem,
+          userMessages: UserMessages(),
+        ),
+      );
+
+      await bundle.build(
+        packagesPath: '.packages',
+        flutterProject: FlutterProject.fromDirectoryTest(
+          fileSystem.currentDirectory,
+        ),
+      );
+
+      expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
+
+      await bundle.build(
+        packagesPath: '.packages',
+        flutterProject: FlutterProject.fromDirectoryTest(
+          fileSystem.currentDirectory,
+        ),
+      );
+
+      expect(bundle.entries['my-asset.txt']!.content.isModified, isFalse);
+
+      fileSystem.file('pubspec.yaml').writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - path: my-asset.txt
+      transformers:
+        - package: my-transformer-one
+        - package: my-transformer-two
+''');
+
+      await bundle.build(
+        packagesPath: '.packages',
+        flutterProject: FlutterProject.fromDirectoryTest(
+          fileSystem.currentDirectory,
+        ),
+      );
+
+      expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
+    });
   });
 
   group('AssetBundle.build (web builds)', () {

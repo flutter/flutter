@@ -14,6 +14,7 @@ import 'base/deferred_component.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
+import 'base/utils.dart';
 import 'build_info.dart';
 import 'cache.dart';
 import 'convert.dart';
@@ -84,9 +85,8 @@ enum AssetKind {
 
 /// Contains all information about an asset needed by tool the to prepare and
 /// copy an asset file to the build output.
-@immutable
 final class AssetBundleEntry {
-  const AssetBundleEntry(this.content, {
+  AssetBundleEntry(this.content, {
     required this.kind,
     required this.transformers,
   });
@@ -96,6 +96,10 @@ final class AssetBundleEntry {
   final List<AssetTransformerEntry> transformers;
 
   Future<List<int>> contentsAsBytes() => content.contentsAsBytes();
+
+  bool hasEquivalentConfigurationWith(AssetBundleEntry other) {
+    return listEquals(transformers, other.transformers);
+  }
 }
 
 abstract class AssetBundle {
@@ -425,11 +429,11 @@ class ManifestAssetBundle implements AssetBundle {
         final File variantFile = variant.lookupAssetFile(_fileSystem);
         inputFiles.add(variantFile);
         assert(variantFile.existsSync());
-        entries[variant.entryUri.path] ??= AssetBundleEntry(
+        _setIfConfigurationChanged(entries, variant.entryUri.path, AssetBundleEntry(
           DevFSFileContent(variantFile),
           kind: variant.kind,
           transformers: variant.transformers,
-        );
+        ));
       }
     }
     // Save the contents of each deferred component image, image variant, and font
@@ -459,11 +463,11 @@ class ManifestAssetBundle implements AssetBundle {
         for (final _Asset variant in assetsMap[asset]!) {
           final File variantFile = variant.lookupAssetFile(_fileSystem);
           assert(variantFile.existsSync());
-          deferredComponentsEntries[componentName]![variant.entryUri.path] ??= AssetBundleEntry(
+          _setIfConfigurationChanged(deferredComponentsEntries[componentName]!, variant.entryUri.path, AssetBundleEntry(
             DevFSFileContent(variantFile),
             kind: AssetKind.regular,
             transformers: variant.transformers,
-          );
+          ));
         }
       }
     }
@@ -561,6 +565,13 @@ class ManifestAssetBundle implements AssetBundle {
     }
 
     return true;
+  }
+
+  void _setIfConfigurationChanged(Map<String, AssetBundleEntry> entryMap, String key, AssetBundleEntry entry,) {
+    final AssetBundleEntry? existingEntry = entryMap[key];
+    if (existingEntry == null || !entry.hasEquivalentConfigurationWith(existingEntry)) {
+      entryMap[key] = entry;
+    }
   }
 
   void _setLicenseIfChanged(
