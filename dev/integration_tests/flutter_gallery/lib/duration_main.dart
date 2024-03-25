@@ -5,6 +5,7 @@
 // Thanks for checking out Flutter!
 // Like what you see? Tweet us @FlutterDev
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(const TestDurationApp());
@@ -30,40 +31,55 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Row(
+      body: Column(
         children: [
-          IconButton(
-            icon: const Icon(Icons.access_time),
-            onPressed: () {
-              showTimePicker(context: context, initialTime: TimeOfDay.now());
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.timelapse),
-            onPressed: () {
-              showDurationPicker(
-                  context: context, initialDuration: Duration.zero);
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.date_range),
-            onPressed: () {
-              showDatePicker(
-                  context: context,
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime(DateTime.now().year + 1));
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.date_range),
-            onPressed: () {
-              showDateRangePicker(
-                  context: context,
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime(DateTime.now().year + 1));
-            },
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.access_time),
+                onPressed: () {
+                  showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.now(),
+                  );
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.timelapse),
+                onPressed: () {
+                  showDurationPicker(
+                    context: context,
+                    initialDuration: Duration.zero,
+                  );
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.date_range),
+                onPressed: () {
+                  showDatePicker(
+                      context: context,
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime(DateTime.now().year + 1));
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.date_range),
+                onPressed: () {
+                  showDateRangePicker(
+                      context: context,
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime(DateTime.now().year + 1));
+                },
+              ),
+            ],
           ),
           const DurationPickerDialog(initialDuration: Duration.zero),
+          CupertinoTimerPicker(
+            mode: CupertinoTimerPickerMode.hms,
+            onTimerDurationChanged: (Duration value) {
+              print(value);
+            },
+          ),
         ],
       ),
     );

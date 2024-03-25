@@ -145,6 +145,10 @@ abstract class MaterialLocalizations {
   /// [showTimePicker] is set to the minute picker mode.
   String get timePickerMinuteModeAnnouncement;
 
+  /// The text-to-speech announcement made when a time picker invoked using
+  /// [showTimePicker] is set to the second picker mode.
+  String get timePickerSecondModeAnnouncement;
+
   /// Label read out by accessibility tools (TalkBack or VoiceOver) for a modal
   /// barrier to indicate that a tap dismisses the barrier.
   ///
@@ -245,13 +249,17 @@ abstract class MaterialLocalizations {
   /// specific behavior.
   String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false });
 
-  /// Formats [Duration.hour] in the given time of day according to the value
+  /// Formats [Duration.hour] in the given duration according to the value
   /// of [DurationFormat].
   String formatDurationHour(Duration duration);
 
-  /// Formats [Duration.minute] in the given time of day according to the value
+  /// Formats [Duration.minute] in the given duration according to the value
   /// of [durationFormat].
   String formatDurationMinute(Duration duration);
+  
+  /// Formats [Duration.second] in the given duration according to the value
+  /// of [durationFormat].
+  String formatDurationSecond(Duration duration);
 
   /// Formats [duration] according to the value of [durationFormat].
   String formatDuration(Duration duration);
@@ -868,6 +876,12 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
+  String formatDurationSecond(Duration duration) {
+    final int second = duration.second;
+    return second < 10 ? '0$second' : second.toString();
+  }
+
+  @override
   String formatYear(DateTime date) => date.year.toString();
 
   @override
@@ -1258,6 +1272,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Select minutes';
+
+  @override
+  String get timePickerSecondModeAnnouncement => 'Select seconds';
 
   @override
   String get modalBarrierDismissLabel => 'Dismiss';
