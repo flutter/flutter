@@ -1529,7 +1529,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         if (_residentDevtoolsHandler!.printDtdUri) {
           final Uri? dtdUri = residentDevtoolsHandler!.dtdUri;
           if (dtdUri != null) {
-            globals.printStatus('The Dart Tooling Daemon is available at: $dtdUri');
+            globals.printStatus('The Dart Tooling Daemon is available at: $dtdUri\n');
           }
         }
         final Uri? uri = devToolsServerAddress!.uri?.replace(
