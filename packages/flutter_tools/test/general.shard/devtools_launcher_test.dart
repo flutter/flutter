@@ -106,7 +106,7 @@ Serving DevTools at http://127.0.0.1:9100.
     expect(address?.host, '127.0.0.1');
     expect(address?.port, 9100);
 
-    // Call `serve` again and verify that the already running server is returned.
+    // Call `serve` again and verify that the already-running server is returned.
     address = await launcher.serve();
     expect(address?.host, '127.0.0.1');
     expect(address?.port, 9100);
