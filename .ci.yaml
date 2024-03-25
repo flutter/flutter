@@ -2404,6 +2404,16 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: flavors_test
 
+  - name: Linux_pixel_7pro asset_transformers_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: asset_transformers_test
+
   # linux motog4 benchmark
   - name: Linux_android flutter_engine_group_performance
     recipe: devicelab/devicelab_drone
