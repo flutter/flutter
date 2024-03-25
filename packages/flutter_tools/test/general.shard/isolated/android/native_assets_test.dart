@@ -18,7 +18,7 @@ import 'package:flutter_tools/src/isolated/native_assets/android/native_assets.d
 import 'package:native_assets_cli/native_assets_cli_internal.dart'
     as native_assets_cli;
 import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    hide BuildMode, Target;
+    hide Target;
 import 'package:package_config/package_config_types.dart';
 
 import '../../../src/common.dart';
