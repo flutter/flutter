@@ -69,15 +69,16 @@ void main() {
 
     // Start a system pop gesture, which will switch to using
     // _PredictiveBackPageTransition for the page transition.
-    final ByteData? startMessage = const JSONMessageCodec().encodeMessage(<String, dynamic>{
-      'method': 'startBackGesture',
-      'args': <String, dynamic>{
-        'x': 5.0,
-        'y': 300.0,
-        'progress': 0.0,
-        'swipeEdge': 0, // left
-      },
-    });
+    final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
+      const MethodCall(
+        'startBackGesture',
+        <String, dynamic>{
+          'touchOffset': <double>[5.0, 300.0],
+          'progress': 0.0,
+          'swipeEdge': 0, // left
+        },
+      ),
+    );
     await binding.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/backgesture',
       startMessage,
@@ -91,15 +92,17 @@ void main() {
     expect(startPageBOffset.dx, 0.0);
 
     // Drag the system back gesture far enough to commit.
-    final ByteData? updateMessage = const JSONMessageCodec().encodeMessage(<String, dynamic>{
-      'method': 'updateBackGestureProgress',
-      'args': <String, dynamic>{
-        'x': 100.0,
-        'y': 300.0,
-        'progress': 0.35,
-        'swipeEdge': 0, // left
-      },
-    });
+    final ByteData updateMessage = const StandardMethodCodec().encodeMethodCall(
+      const MethodCall(
+        'updateBackGestureProgress',
+        <String, dynamic>{
+          'x': 100.0,
+          'y': 300.0,
+          'progress': 0.35,
+          'swipeEdge': 0, // left
+        },
+      ),
+    );
     await binding.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/backgesture',
       updateMessage,
@@ -114,9 +117,11 @@ void main() {
     expect(updatePageBOffset.dx, greaterThan(startPageBOffset.dx));
 
     // Commit the system back gesture.
-    final ByteData? commitMessage = const JSONMessageCodec().encodeMessage(<String, dynamic>{
-      'method': 'commitBackGesture',
-    });
+    final ByteData commitMessage = const StandardMethodCodec().encodeMethodCall(
+      const MethodCall(
+        'commitBackGesture',
+      ),
+    );
     await binding.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/backgesture',
       commitMessage,
@@ -176,15 +181,16 @@ void main() {
 
     // Start a system pop gesture, which will switch to using
     // _PredictiveBackPageTransition for the page transition.
-    final ByteData? startMessage = const JSONMessageCodec().encodeMessage(<String, dynamic>{
-      'method': 'startBackGesture',
-      'args': <String, dynamic>{
-        'x': 5.0,
-        'y': 300.0,
-        'progress': 0.0,
-        'swipeEdge': 0, // left
-      },
-    });
+    final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
+      const MethodCall(
+        'startBackGesture',
+        <String, dynamic>{
+          'touchOffset': <double>[5.0, 300.0],
+          'progress': 0.0,
+          'swipeEdge': 0, // left
+        },
+      ),
+    );
     await binding.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/backgesture',
       startMessage,
@@ -198,15 +204,16 @@ void main() {
     expect(startPageBOffset.dx, 0.0);
 
     // Drag the system back gesture.
-    final ByteData? updateMessage = const JSONMessageCodec().encodeMessage(<String, dynamic>{
-      'method': 'updateBackGestureProgress',
-      'args': <String, dynamic>{
-        'x': 100.0,
-        'y': 300.0,
-        'progress': 0.35,
-        'swipeEdge': 0, // left
-      },
-    });
+    final ByteData updateMessage = const StandardMethodCodec().encodeMethodCall(
+      const MethodCall(
+        'updateBackGestureProgress',
+        <String, dynamic>{
+          'touchOffset': <double>[100.0, 300.0],
+          'progress': 0.35,
+          'swipeEdge': 0, // left
+        },
+      ),
+    );
     await binding.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/backgesture',
       updateMessage,
@@ -221,9 +228,11 @@ void main() {
     expect(updatePageBOffset.dx, greaterThan(startPageBOffset.dx));
 
     // Cancel the system back gesture.
-    final ByteData? commitMessage = const JSONMessageCodec().encodeMessage(<String, dynamic>{
-      'method': 'cancelBackGesture',
-    });
+    final ByteData commitMessage = const StandardMethodCodec().encodeMethodCall(
+      const MethodCall(
+        'cancelBackGesture',
+      ),
+    );
     await binding.defaultBinaryMessenger.handlePlatformMessage(
       'flutter/backgesture',
       commitMessage,
