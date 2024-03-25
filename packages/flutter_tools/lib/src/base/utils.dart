@@ -7,9 +7,11 @@ import 'dart:math' as math;
 
 import 'package:file/file.dart';
 import 'package:intl/intl.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 
 import '../convert.dart';
+import 'platform.dart';
 
 /// A path jointer for URL paths.
 final path.Context urlContext = path.url;
@@ -88,18 +90,23 @@ String getElapsedAsMilliseconds(Duration duration) {
   return '${kMillisecondsFormat.format(duration.inMilliseconds)}ms';
 }
 
-/// Return a String - with units - for the size in MB of the given number of bytes.
-String getSizeAsMB(int bytesLength) {
-  return '${(bytesLength / (1024 * 1024)).toStringAsFixed(1)}MB';
+/// Return a platform-appropriate [String] representing the size of the given number of bytes.
+String getSizeAsPlatformMB(int bytesLength, {
+    @visibleForTesting Platform platform = const LocalPlatform()
+  }) {
+  // Because Windows displays 'MB' but actually reports MiB, we calculate MiB
+  // accordingly on Windows.
+  final int bytesInPlatformMB = platform.isWindows ? 1024 * 1024 : 1000 * 1000;
+  return '${(bytesLength / bytesInPlatformMB).toStringAsFixed(1)}MB';
 }
 
 /// A class to maintain a list of items, fire events when items are added or
 /// removed, and calculate a diff of changes when a new list of items is
 /// available.
 class ItemListNotifier<T> {
-  ItemListNotifier(): _items = <T>{};
+  ItemListNotifier(): _items = <T>{}, _isPopulated = false;
 
-  ItemListNotifier.from(List<T> items) : _items = Set<T>.of(items);
+  ItemListNotifier.from(List<T> items) : _items = Set<T>.of(items), _isPopulated = true;
 
   Set<T> _items;
 
@@ -111,6 +118,11 @@ class ItemListNotifier<T> {
 
   List<T> get items => _items.toList();
 
+  bool _isPopulated;
+
+  /// Returns whether the list has been populated.
+  bool get isPopulated => _isPopulated;
+
   void updateWithNewList(List<T> updatedList) {
     final Set<T> updatedSet = Set<T>.of(updatedList);
 
@@ -118,9 +130,10 @@ class ItemListNotifier<T> {
     final Set<T> removedItems = _items.difference(updatedSet);
 
     _items = updatedSet;
+    _isPopulated = true;
 
-    addedItems.forEach(_addedController.add);
     removedItems.forEach(_removedController.add);
+    addedItems.forEach(_addedController.add);
   }
 
   void removeItem(T item) {
