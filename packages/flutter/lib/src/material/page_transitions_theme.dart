@@ -547,7 +547,8 @@ abstract class PageTransitionsBuilder {
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 ///  * [PredictiveBackPageTransitionsBuilder], which defines a page
-///    transition that allows peeking behind the current route on Android.
+///    transition that allows peeking behind the current route on Android U and
+///    above.
 class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that slides the page up.
   const FadeUpwardsPageTransitionsBuilder();
