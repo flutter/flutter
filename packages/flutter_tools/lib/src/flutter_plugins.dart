@@ -1137,129 +1137,156 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
     MacOSPlugin.kConfigKey,
     WindowsPlugin.kConfigKey,
   ];
-  final Map<String, List<PluginInterfaceResolution>> possibleResolutions =
-      <String, List<PluginInterfaceResolution>>{};
-  final Map<String, String> defaultImplementations = <String, String>{};
-  // Generates a key for the maps above.
-  String getResolutionKey({required String platform, required String packageName}) {
-    return '$packageName:$platform';
-  }
+  final List<PluginInterfaceResolution> pluginResolutions = <PluginInterfaceResolution>[];
+  bool hasResolutionError = false;
 
   for (final String platformKey in platformKeys) {
+    // Key: the plugin name
+    final Map<String, List<Plugin>> pluginImplCandidates = <String, List<Plugin>>{};
+    final Map<String, String> defaultImplementations = <String, String>{};
+
     for (final Plugin plugin in plugins) {
-      final String? defaultImplementation = plugin.defaultPackagePlatforms[platformKey];
-      if (plugin.platforms[platformKey] == null && defaultImplementation == null) {
-        // The plugin doesn't implement this platform.
-        continue;
-      }
-      String? implementsPackage = plugin.implementsPackage;
-      if (implementsPackage == null || implementsPackage.isEmpty) {
-        final bool hasInlineDartImplementation =
-            plugin.pluginDartClassPlatforms[platformKey] != null;
-        if (defaultImplementation == null && !hasInlineDartImplementation) {
-          // Skip native inline PluginPlatform implementation
-          continue;
-        }
-        final String defaultImplementationKey = getResolutionKey(platform: platformKey, packageName: plugin.name);
-        if (defaultImplementation != null) {
-          defaultImplementations[defaultImplementationKey] = defaultImplementation;
-          continue;
-        } else {
-          // An app-facing package (i.e., one with no 'implements') with an
-          // inline implementation should be its own default implementation.
-          // Desktop platforms originally did not work that way, and enabling
-          // it unconditionally would break existing published plugins, so
-          // only treat it as such if either:
-          // - the platform is not desktop, or
-          // - the plugin requires at least Flutter 2.11 (when this opt-in logic
-          //   was added), so that existing plugins continue to work.
-          // See https://github.com/flutter/flutter/issues/87862 for details.
-          final bool isDesktop = platformKey == 'linux' || platformKey == 'macos' || platformKey == 'windows';
-          final semver.VersionConstraint? flutterConstraint = plugin.flutterConstraint;
-          final semver.Version? minFlutterVersion = flutterConstraint != null &&
-            flutterConstraint is semver.VersionRange ? flutterConstraint.min : null;
-          final bool hasMinVersionForImplementsRequirement = minFlutterVersion != null &&
-            minFlutterVersion.compareTo(semver.Version(2, 11, 0)) >= 0;
-          if (!isDesktop || hasMinVersionForImplementsRequirement) {
-            implementsPackage = plugin.name;
-            defaultImplementations[defaultImplementationKey] = plugin.name;
-          } else {
-            // If it doesn't meet any of the conditions, it isn't eligible for
-            // auto-registration.
-            continue;
-          }
-        }
-      }
-      // If there's no Dart implementation, there's nothing to register.
-      if (plugin.pluginDartClassPlatforms[platformKey] == null ||
-          plugin.pluginDartClassPlatforms[platformKey] == 'none') {
-        continue;
-      }
-
-      // If it hasn't been skipped, it's a candidate for auto-registration, so
-      // add it as a possible resolution.
-      final String resolutionKey = getResolutionKey(platform: platformKey, packageName: implementsPackage);
-      possibleResolutions.putIfAbsent(resolutionKey, () => <PluginInterfaceResolution>[]);
-      possibleResolutions[resolutionKey]!.add(PluginInterfaceResolution(
-        plugin: plugin,
-        platform: platformKey,
-      ));
-    }
-  }
-
-  // Now resolve all the possible resolutions to a single option for each
-  // plugin, or throw if that's not possible.
-  bool hasResolutionError = false;
-  final List<PluginInterfaceResolution> finalResolution = <PluginInterfaceResolution>[];
-  for (final MapEntry<String, List<PluginInterfaceResolution>> entry in possibleResolutions.entries) {
-    final List<PluginInterfaceResolution> candidates = entry.value;
-    // If there's only one candidate, use it.
-    if (candidates.length == 1) {
-      finalResolution.add(candidates.first);
-      continue;
-    }
-    // Next, try direct dependencies of the resolving application.
-    final Iterable<PluginInterfaceResolution> directDependencies = candidates.where((PluginInterfaceResolution r) {
-      return r.plugin.isDirectDependency;
-    });
-    if (directDependencies.isNotEmpty) {
-      if (directDependencies.length > 1) {
-        globals.printError(
-          'Plugin ${entry.key} has conflicting direct dependency implementations:\n'
-          '${directDependencies.map((PluginInterfaceResolution r) => '  ${r.plugin.name}\n').join()}'
-          'To fix this issue, remove all but one of these dependencies from pubspec.yaml.\n'
-        );
-        hasResolutionError = true;
-      } else {
-        finalResolution.add(directDependencies.first);
-      }
-      continue;
-    }
-    // Next, defer to the default implementation if there is one.
-    final String? defaultPackageName = defaultImplementations[entry.key];
-    if (defaultPackageName != null) {
-      final int defaultIndex = candidates
-          .indexWhere((PluginInterfaceResolution r) => r.plugin.name == defaultPackageName);
-      if (defaultIndex != -1) {
-        finalResolution.add(candidates[defaultIndex]);
-        continue;
-      }
-    }
-    // Otherwise, require an explicit choice.
-    if (candidates.length > 1) {
-      globals.printError(
-        'Plugin ${entry.key} has multiple possible implementations:\n'
-        '${candidates.map((PluginInterfaceResolution r) => '  ${r.plugin.name}\n').join()}'
-        'To fix this issue, add one of these dependencies to pubspec.yaml.\n'
+      final (String? resolutionPluginName, String? defaultImplementation) = _getPluginImplementationCandidate(
+        plugin,
+        platformKey,
       );
-      hasResolutionError = true;
-      continue;
+      if (defaultImplementation != null) {
+        defaultImplementations[plugin.name] = defaultImplementation;
+      }
+      if (resolutionPluginName != null) {
+        pluginImplCandidates.putIfAbsent(resolutionPluginName, () => <Plugin>[]);
+        pluginImplCandidates[resolutionPluginName]!.add(plugin);
+      }
     }
+
+    final Map<String, Plugin> pluginResolution = <String, Plugin>{};
+
+    // Now resolve all the possible resolutions to a single option for each
+    // plugin, or throw if that's not possible.
+    for (final MapEntry<String, List<Plugin>> implCandidatesEntry in pluginImplCandidates.entries) {
+      try {
+        final Plugin? resolution = _resolveImplementationOfPlugin(
+          platformKey,
+          implCandidatesEntry,
+          defaultPackageName:
+          defaultImplementations[implCandidatesEntry.key],
+        );
+        if (resolution != null) {
+          pluginResolution[implCandidatesEntry.key] = resolution;
+        }
+      } on ToolExit catch (e) {
+        if (e.message != null) {
+          globals.printError(e.message!);
+        }
+        hasResolutionError = true;
+      }
+    }
+
+    pluginResolutions.addAll(
+      pluginResolution.values.map((Plugin plugin) =>
+          PluginInterfaceResolution(plugin: plugin, platform: platformKey)),
+    );
   }
   if (hasResolutionError) {
     throwToolExit('Please resolve the plugin implementation selection errors');
   }
-  return finalResolution;
+  return pluginResolutions;
+}
+
+(String? resolutionPluginName, String? defaultImplementation) _getPluginImplementationCandidate(Plugin plugin, String platformKey) {
+  String? defaultImplementation = plugin.defaultPackagePlatforms[platformKey];
+  if (plugin.platforms[platformKey] == null && defaultImplementation == null) {
+    // The plugin doesn't implement this platform.
+    return (null, null);
+  }
+  String? implementsPackage = plugin.implementsPackage;
+  final bool hasInlineDartImplementation =
+      plugin.pluginDartClassPlatforms[platformKey] != null &&
+          plugin.pluginDartClassPlatforms[platformKey] != 'none';
+  if (implementsPackage == null || implementsPackage.isEmpty) {
+    if (defaultImplementation == null && !hasInlineDartImplementation) {
+      // Skip native inline PluginPlatform implementation
+      return (null, null);
+    }
+    if (defaultImplementation != null) {
+      return (null, defaultImplementation);
+    } else {
+      // An app-facing package (i.e., one with no 'implements') with an
+      // inline implementation should be its own default implementation.
+      // Desktop platforms originally did not work that way, and enabling
+      // it unconditionally would break existing published plugins, so
+      // only treat it as such if either:
+      // - the platform is not desktop, or
+      // - the plugin requires at least Flutter 2.11 (when this opt-in logic
+      //   was added), so that existing plugins continue to work.
+      // See https://github.com/flutter/flutter/issues/87862 for details.
+      final bool isDesktop = platformKey == 'linux' || platformKey == 'macos' || platformKey == 'windows';
+      final semver.VersionConstraint? flutterConstraint = plugin.flutterConstraint;
+      final semver.Version? minFlutterVersion = flutterConstraint != null &&
+          flutterConstraint is semver.VersionRange ? flutterConstraint.min : null;
+      final bool hasMinVersionForImplementsRequirement = minFlutterVersion != null &&
+          minFlutterVersion.compareTo(semver.Version(2, 11, 0)) >= 0;
+      if (!isDesktop || hasMinVersionForImplementsRequirement) {
+        // Given: implementsPackage == null, defaultImplementation == null, hasInlineDartImplementation == true
+        implementsPackage = plugin.name;
+        defaultImplementation = plugin.name;
+        return (implementsPackage, defaultImplementation);
+      } else {
+        // If it doesn't meet any of the conditions, it isn't eligible for
+        // auto-registration.
+        return (null, null);
+      }
+    }
+  }
+  // If there's no Dart implementation, there's nothing to register.
+  if (!hasInlineDartImplementation) {
+    return (null, null);
+  }
+
+  // If it hasn't been skipped, it's a candidate for auto-registration, so
+  // add it as a possible resolution.
+  return (implementsPackage, null);
+}
+
+Plugin? _resolveImplementationOfPlugin(
+  String platformKey,
+  MapEntry<String, List<Plugin>> implCandidatesEntry, {
+  String? defaultPackageName,
+}) {
+  final List<Plugin> candidates = implCandidatesEntry.value;
+  // If there's only one candidate, use it.
+  if (candidates.length == 1) {
+    return candidates.first;
+  }
+  // Next, try direct dependencies of the resolving application.
+  final Iterable<Plugin> directDependencies = candidates.where((Plugin plugin) {
+    return plugin.isDirectDependency;
+  });
+  if (directDependencies.isNotEmpty) {
+    if (directDependencies.length > 1) {
+      throwToolExit(
+          'Plugin ${implCandidatesEntry.key}:$platformKey has conflicting direct dependency implementations:\n'
+          '${directDependencies.map((Plugin plugin) => '  ${plugin.name}\n').join()}'
+          'To fix this issue, remove all but one of these dependencies from pubspec.yaml.\n');
+    } else {
+      return directDependencies.first;
+    }
+  }
+  // Next, defer to the default implementation if there is one.
+  if (defaultPackageName != null) {
+    final int defaultIndex = candidates
+        .indexWhere((Plugin plugin) => plugin.name == defaultPackageName);
+    if (defaultIndex != -1) {
+      return candidates[defaultIndex];
+    }
+  }
+  // Otherwise, require an explicit choice.
+  if (candidates.length > 1) {
+    throwToolExit('Plugin ${implCandidatesEntry.key}:$platformKey has multiple possible implementations:\n'
+        '${candidates.map((Plugin plugin) => '  ${plugin.name}\n').join()}'
+        'To fix this issue, add one of these dependencies to pubspec.yaml.\n');
+  }
+  return null;
 }
 
 /// Generates the Dart plugin registrant, which allows to bind a platform
