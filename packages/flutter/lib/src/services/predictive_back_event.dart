@@ -79,11 +79,9 @@ final class PredictiveBackEvent {
   /// The screen edge from which the swipe gesture starts.
   final SwipeEdge swipeEdge;
 
-  /// Determines if the event was triggered by a button press.
+  /// Indicates if the event was triggered by a system back button press.
   ///
-  /// It returns true when the back button is pressed, such as when the user
-  /// opts for 3-button navigation. In cases of gesture navigation, it returns
-  /// false.
+  /// Returns false for a predictive back gesture.
   bool get isButtonEvent =>
       touchOffset == null || (progress == 0.0 && touchOffset == Offset.zero);
 
