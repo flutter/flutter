@@ -3382,11 +3382,15 @@ void main() {
     await tester.pump();
 
     expect(tester.testTextInput.setClientArgs!['viewId'], 14);
+    expect(tester.testTextInput.log, contains(matchesMethodCall('TextInput.setClient')));
+    tester.testTextInput.log.clear();
 
     setState(() { viewId = 15; });
     await tester.pump();
 
     expect(tester.testTextInput.setClientArgs!['viewId'], 15);
+    expect(tester.testTextInput.log, contains(matchesMethodCall('TextInput.updateConfig')));
+    tester.testTextInput.log.clear();
   });
 
   testWidgets('Fires onChanged when text changes via TextSelectionOverlay', (WidgetTester tester) async {
