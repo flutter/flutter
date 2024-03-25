@@ -33,7 +33,7 @@ final class PredictiveBackEvent {
 
   /// Creates an [PredictiveBackEvent] from a Map, typically used when converting
   /// data received from a platform channel.
-  factory PredictiveBackEvent.fromMap(Map<Object?, Object?> map) {
+  factory PredictiveBackEvent.fromMap(Map<String?, Object?> map) {
     final List<Object?>? touchOffset = map['touchOffset'] as List<Object?>?;
     return PredictiveBackEvent._(
       touchOffset: touchOffset == null

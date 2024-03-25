@@ -481,6 +481,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
 
   @override
   void handleStartBackGesture({double progress = 0.0}) {
+    assert(isCurrent);
     _controller?.value = progress;
     navigator?.didStartUserGesture();
   }
@@ -496,7 +497,16 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   }
 
   @override
-  void handleDragEnd({required bool animateForward}) {
+  void handleCancelBackGesture() {
+    _handleDragEnd(animateForward: true);
+  }
+
+  @override
+  void handleCommitBackGesture() {
+    _handleDragEnd(animateForward: false);
+  }
+
+  void _handleDragEnd({required bool animateForward}) {
     if (isCurrent) {
       if (animateForward) {
         if (_controller != null) {
@@ -579,14 +589,23 @@ abstract interface class PredictiveBackRoute {
   bool get popGestureEnabled;
 
   /// Handles a predictive back gesture starting.
+  ///
+  /// The `progress` parameter indicates the progress of the gesture from 0.0 to
+  /// 1.0, as in [PredictiveBackEvent.progress].
   void handleStartBackGesture({double progress = 0.0});
 
   /// Handles a predictive back gesture updating as the user drags across the
   /// screen.
+  ///
+  /// The `progress` parameter indicates the progress of the gesture from 0.0 to
+  /// 1.0, as in [PredictiveBackEvent.progress].
   void handleUpdateBackGestureProgress({required double progress});
 
-  /// Handles a predictive back gesture ending.
-  void handleDragEnd({required bool animateForward});
+  /// Handles a predictive back gesture ending successfully.
+  void handleCommitBackGesture();
+
+  /// Handles a predictive back gesture ending in cancelation.
+  void handleCancelBackGesture();
 }
 
 /// An entry in the history of a [LocalHistoryRoute].

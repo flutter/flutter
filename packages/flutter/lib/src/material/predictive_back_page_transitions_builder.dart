@@ -146,7 +146,7 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
       return false;
     }
 
-    widget.route.handleDragEnd(animateForward: true);
+    widget.route.handleCancelBackGesture();
     _gestureInProgress = false;
     startBackEvent = currentBackEvent = null;
     return true;
@@ -158,7 +158,7 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
       return false;
     }
 
-    widget.route.handleDragEnd(animateForward: false);
+    widget.route.handleCommitBackGesture();
     _gestureInProgress = false;
     startBackEvent = currentBackEvent = null;
     return true;
