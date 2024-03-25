@@ -41,9 +41,8 @@ class Home extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.timelapse),
             onPressed: () {
-              final duration = Duration();
               showDurationPicker(
-                  context: context, initialTime: TimeOfDay.now());
+                  context: context, initialDuration: Duration.zero);
             },
           ),
           IconButton(

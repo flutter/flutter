@@ -338,7 +338,6 @@ class _HourControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final bool alwaysUse24HourFormat = MediaQuery.alwaysUse24HourFormatOf(context);
     final Duration selectedDuration = _DurationPickerModel.selectedDurationOf(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String formattedHour = localizations.formatDurationHour(selectedDuration);
@@ -904,10 +903,12 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     final Duration time;
 
     Duration getAmPmTime() {
-      return switch (widget.selectedDuration.period) {
-        DayPeriod.am => Duration(hours: hour, minute: widget.selectedDuration.minute),
-        DayPeriod.pm => Duration(hours: hour + Duration.hoursPerPeriod, minute: widget.selectedDuration.minute),
-      };
+      // TODO recheck, if needed.
+      return Duration(hours: hour, minutes: widget.selectedDuration.minute);
+      // return switch (widget.selectedDuration.period) {
+      //   DayPeriod.am => Duration(hours: hour, minutes: widget.selectedDuration.minute),
+      //   DayPeriod.pm => Duration(hours: hour + Duration.hoursPerPeriod, minutes: widget.selectedDuration.minute),
+      // };
     }
 
     switch (widget.hourMinuteMode) {
@@ -1235,23 +1236,13 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
       return null;
     }
 
-    int? newHour = int.tryParse(value);
+    final int? newHour = int.tryParse(value);
     if (newHour == null) {
       return null;
     }
 
-    if (MediaQuery.alwaysUse24HourFormatOf(context)) {
-      if (newHour >= 0 && newHour < 24) {
-        return newHour;
-      }
-    } else {
-      if (newHour > 0 && newHour < 13) {
-        if ((_selectedDuration.value.period == DayPeriod.pm && newHour != 12) ||
-            (_selectedDuration.value.period == DayPeriod.am && newHour == 12)) {
-          newHour = (newHour + Duration.hoursPerPeriod) % Duration.hoursPerDay;
-        }
-        return newHour;
-      }
+    if (newHour >= 0 && newHour < 24) {
+      return newHour;
     }
     return null;
   }
@@ -1275,7 +1266,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
   void _handleHourSavedSubmitted(String? value) {
     final int? newHour = _parseHour(value);
     if (newHour != null) {
-      _selectedDuration.value = Duration(hour: newHour, minute: _selectedDuration.value.minute);
+      _selectedDuration.value = Duration(hours: newHour, minutes: _selectedDuration.value.minute);
       _DurationPickerModel.setSelectedTime(context, _selectedDuration.value);
       FocusScope.of(context).requestFocus();
     }
@@ -1578,7 +1569,6 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
   }
 
   String get _formattedValue {
-    final bool alwaysUse24HourFormat = MediaQuery.alwaysUse24HourFormatOf(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     return !widget.isHour
         ? localizations.formatDurationMinute(widget.selectedDuration)
@@ -1590,7 +1580,6 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
     final ThemeData theme = Theme.of(context);
     final TimePickerThemeData timePickerTheme = TimePickerTheme.of(context);
     final _TimePickerDefaults defaultTheme = theme.useMaterial3 ? _TimePickerDefaultsM3(context) : _TimePickerDefaultsM2(context);
-    final bool alwaysUse24HourFormat = MediaQuery.alwaysUse24HourFormatOf(context);
 
     final InputDecorationTheme inputDecorationTheme = timePickerTheme.inputDecorationTheme ?? defaultTheme.inputDecorationTheme;
     InputDecoration inputDecoration = const InputDecoration().applyDefaults(inputDecorationTheme);
@@ -1638,7 +1627,7 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
       .copyWith(color: effectiveTextColor);
 
     return SizedBox.fromSize(
-      size: alwaysUse24HourFormat ? defaultTheme.hourMinuteInputSize24Hour : defaultTheme.hourMinuteInputSize,
+      size: defaultTheme.hourMinuteInputSize24Hour,
       child: MediaQuery.withNoTextScaling(
         child: UnmanagedRestorationScope(
           bucket: bucket,
@@ -1687,7 +1676,7 @@ class DurationPickerDialog extends StatefulWidget {
   /// Creates a Material Design time picker.
   const DurationPickerDialog({
     super.key,
-    required this.initialDuration,
+    this.initialDuration,
     this.cancelText,
     this.confirmText,
     this.helpText,
@@ -1701,7 +1690,7 @@ class DurationPickerDialog extends StatefulWidget {
   });
 
   /// The time initially selected when the dialog is shown.
-  final Duration initialDuration;
+  final Duration? initialDuration;
 
   /// Optionally provide your own text for the cancel button.
   ///
@@ -1764,7 +1753,7 @@ class DurationPickerDialog extends StatefulWidget {
 
 class _DurationPickerDialogState extends State<DurationPickerDialog> with RestorationMixin {
   late final RestorableEnum<DurationPickerEntryMode> _entryMode = RestorableEnum<DurationPickerEntryMode>(widget.initialEntryMode, values: DurationPickerEntryMode.values);
-  late final RestorableDuration _selectedDuration = RestorableDuration(widget.initialDuration);
+  late final RestorableDuration _selectedDuration = RestorableDuration(widget.initialDuration ?? Duration.zero);
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final RestorableEnum<AutovalidateMode> _autovalidateMode = RestorableEnum<AutovalidateMode>(AutovalidateMode.disabled, values: AutovalidateMode.values);
   late final RestorableEnumN<Orientation> _orientation = RestorableEnumN<Orientation>(widget.orientation, values: Orientation.values);
@@ -2024,7 +2013,7 @@ class _DurationPickerDialogState extends State<DurationPickerDialog> with Restor
                         key: _formKey,
                         autovalidateMode: _autovalidateMode.value,
                         child: _TimePicker(
-                          time: widget.initialDuration,
+                          time: widget.initialDuration ?? Duration.zero,
                           onTimeChanged: _handleTimeChanged,
                           helpText: widget.helpText,
                           cancelText: widget.cancelText,
@@ -2315,7 +2304,7 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
     final _HourDialType hourMode = switch (durationHour) {
       HourFormat.HH || HourFormat.H when theme.useMaterial3 => _HourDialType.twentyFourHourDoubleRing,
       HourFormat.HH || HourFormat.H => _HourDialType.twentyFourHour,
-      HourFormat.h => _HourDialType.twelveHour,
+      HourFormat.h => throw AssertionError('Duration cannot have an hour format `HourFormat.h`'),
     };
 
     final String helpText;
@@ -2528,7 +2517,7 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
 ///   [DisplayFeature]s can split the screen into sub-screens.
 Future<Duration?> showDurationPicker({
   required BuildContext context,
-  required Duration initialDuration,
+  Duration? initialDuration,
   TransitionBuilder? builder,
   bool barrierDismissible = true,
   Color? barrierColor,
