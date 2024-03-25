@@ -4,10 +4,7 @@
 
 import 'package:native_assets_builder/native_assets_builder.dart'
     hide NativeAssetsBuildRunner;
-import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    as native_assets_cli;
-import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    hide BuildMode;
+import 'package:native_assets_cli/native_assets_cli_internal.dart';
 
 import '../../../android/android_sdk.dart';
 import '../../../base/common.dart';
@@ -30,7 +27,7 @@ Future<Uri?> dryRunNativeAssetsAndroid({
     return null;
   }
 
-  final Uri buildUri_ = nativeAssetsBuildUri(projectUri, OS.android);
+  final Uri buildUri_ = nativeAssetsBuildUri(projectUri, OSImpl.android);
   final Iterable<KernelAsset> nativeAssetPaths =
       await dryRunNativeAssetsAndroidInternal(
     fileSystem,
@@ -50,20 +47,20 @@ Future<Iterable<KernelAsset>> dryRunNativeAssetsAndroidInternal(
   Uri projectUri,
   NativeAssetsBuildRunner buildRunner,
 ) async {
-  const OS targetOS = OS.android;
+  const OSImpl targetOS = OSImpl.android;
 
   globals.logger.printTrace('Dry running native assets for $targetOS.');
   final DryRunResult dryRunResult = await buildRunner.dryRun(
-    linkModePreference: LinkModePreference.dynamic,
+    linkModePreference: LinkModePreferenceImpl.dynamic,
     targetOS: targetOS,
     workingDirectory: projectUri,
     includeParentEnvironment: true,
   );
   ensureNativeAssetsBuildSucceed(dryRunResult);
-  final List<Asset> nativeAssets = dryRunResult.assets;
+  final List<AssetImpl> nativeAssets = dryRunResult.assets;
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
-  final Map<Asset, KernelAsset> assetTargetLocations =
+  final Map<AssetImpl, KernelAsset> assetTargetLocations =
       _assetTargetLocations(nativeAssets);
   return assetTargetLocations.values;
 }
@@ -80,7 +77,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
   required FileSystem fileSystem,
   required int targetAndroidNdkApi,
 }) async {
-  const OS targetOS = OS.android;
+  const OSImpl targetOS = OSImpl.android;
   final Uri buildUri_ = nativeAssetsBuildUri(projectUri, targetOS);
   if (!await nativeBuildRequired(buildRunner)) {
     final Uri nativeAssetsYaml = await writeNativeAssetsYaml(
@@ -92,21 +89,21 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
   }
 
   final List<Target> targets = androidArchs.map(_getNativeTarget).toList();
-  final native_assets_cli.BuildMode buildModeCli =
+  final BuildModeImpl buildModeCli =
       nativeAssetsBuildMode(buildMode);
 
   globals.logger
       .printTrace('Building native assets for $targets $buildModeCli.');
-  final List<Asset> nativeAssets = <Asset>[];
+  final List<AssetImpl> nativeAssets = <AssetImpl>[];
   final Set<Uri> dependencies = <Uri>{};
   for (final Target target in targets) {
     final BuildResult result = await buildRunner.build(
-      linkModePreference: LinkModePreference.dynamic,
+      linkModePreference: LinkModePreferenceImpl.dynamic,
       target: target,
       buildMode: buildModeCli,
       workingDirectory: projectUri,
       includeParentEnvironment: true,
-      cCompilerConfig: await buildRunner.ndkCCompilerConfig,
+      cCompilerConfig: await buildRunner.ndkCCompilerConfigImpl,
       targetAndroidNdkApi: targetAndroidNdkApi,
     );
     ensureNativeAssetsBuildSucceed(result);
@@ -115,7 +112,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
   }
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
-  final Map<Asset, KernelAsset> assetTargetLocations =
+  final Map<AssetImpl, KernelAsset> assetTargetLocations =
       _assetTargetLocations(nativeAssets);
   await _copyNativeAssetsAndroid(buildUri_, assetTargetLocations, fileSystem);
   final Uri nativeAssetsUri = await writeNativeAssetsYaml(
@@ -127,7 +124,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
 
 Future<void> _copyNativeAssetsAndroid(
   Uri buildUri,
-  Map<Asset, KernelAsset> assetTargetLocations,
+  Map<AssetImpl, KernelAsset> assetTargetLocations,
   FileSystem fileSystem,
 ) async {
   if (assetTargetLocations.isNotEmpty) {
@@ -141,9 +138,9 @@ Future<void> _copyNativeAssetsAndroid(
       final Uri archUri = buildUri.resolve('jniLibs/lib/$jniArchDir/');
       await fileSystem.directory(archUri).create(recursive: true);
     }
-    for (final MapEntry<Asset, KernelAsset> assetMapping
+    for (final MapEntry<AssetImpl, KernelAsset> assetMapping
         in assetTargetLocations.entries) {
-      final Uri source = (assetMapping.key.path as AssetAbsolutePath).uri;
+      final Uri source = assetMapping.key.file!;
       final Uri target = (assetMapping.value.path as KernelAssetAbsolutePath).uri;
       final AndroidArch androidArch =
           _getAndroidArch(assetMapping.value.target);
@@ -189,36 +186,37 @@ AndroidArch _getAndroidArch(Target target) {
   }
 }
 
-Map<Asset, KernelAsset> _assetTargetLocations(List<Asset> nativeAssets) {
-  return <Asset, KernelAsset>{
-    for (final Asset asset in nativeAssets)
+Map<AssetImpl, KernelAsset> _assetTargetLocations(
+    List<AssetImpl> nativeAssets) {
+  return <AssetImpl, KernelAsset>{
+    for (final AssetImpl asset in nativeAssets)
       asset: _targetLocationAndroid(asset),
   };
 }
 
 /// Converts the `path` of [asset] as output from a `build.dart` invocation to
 /// the path used inside the Flutter app bundle.
-KernelAsset _targetLocationAndroid(Asset asset) {
-  final AssetPath path = asset.path;
+KernelAsset _targetLocationAndroid(AssetImpl asset) {
+  final LinkModeImpl linkMode = (asset as NativeCodeAssetImpl).linkMode;
   final KernelAssetPath kernelAssetPath;
-  switch (path) {
-    case AssetSystemPath _:
-      kernelAssetPath = KernelAssetSystemPath(path.uri);
-    case AssetInExecutable _:
+  switch (linkMode) {
+    case DynamicLoadingSystemImpl _:
+      kernelAssetPath = KernelAssetSystemPath(linkMode.uri);
+    case LookupInExecutableImpl _:
       kernelAssetPath = KernelAssetInExecutable();
-    case AssetInProcess _:
+    case LookupInProcessImpl _:
       kernelAssetPath = KernelAssetInProcess();
-    case AssetAbsolutePath _:
-      final String fileName = path.uri.pathSegments.last;
+    case DynamicLoadingBundledImpl _:
+      final String fileName = asset.file!.pathSegments.last;
       kernelAssetPath = KernelAssetAbsolutePath(Uri(path: fileName));
     default:
       throw Exception(
-        'Unsupported asset path type ${path.runtimeType} in asset $asset',
+        'Unsupported asset link mode $linkMode in asset $asset',
       );
   }
   return KernelAsset(
     id: asset.id,
-    target: asset.target,
+    target: Target.fromArchitectureAndOS(asset.architecture!, asset.os),
     path: kernelAssetPath,
   );
 }
@@ -231,17 +229,19 @@ KernelAsset _targetLocationAndroid(Asset asset) {
 /// assets feature is disabled, or none of the packages have native assets, a
 /// missing NDK is okay.
 @override
-Future<CCompilerConfig> cCompilerConfigAndroid() async {
+Future<CCompilerConfigImpl> cCompilerConfigAndroid() async {
   final AndroidSdk? androidSdk = AndroidSdk.locateAndroidSdk();
   if (androidSdk == null) {
     throwToolExit('Android SDK could not be found.');
   }
-  final CCompilerConfig result = CCompilerConfig(
-    cc: _toOptionalFileUri(androidSdk.getNdkClangPath()),
-    ar: _toOptionalFileUri(androidSdk.getNdkArPath()),
-    ld: _toOptionalFileUri(androidSdk.getNdkLdPath()),
+  final CCompilerConfigImpl result = CCompilerConfigImpl(
+    compiler: _toOptionalFileUri(androidSdk.getNdkClangPath()),
+    archiver: _toOptionalFileUri(androidSdk.getNdkArPath()),
+    linker: _toOptionalFileUri(androidSdk.getNdkLdPath()),
   );
-  if (result.cc == null || result.ar == null || result.ld == null) {
+  if (result.compiler == null ||
+      result.archiver == null ||
+      result.linker == null) {
     throwToolExit('Android NDK Clang could not be found.');
   }
   return result;

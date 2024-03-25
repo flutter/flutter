@@ -18,9 +18,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/linux/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    hide BuildMode, Target;
-import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    as native_assets_cli;
+    hide Target;
 import 'package:package_config/package_config_types.dart';
 
 import '../../../src/common.dart';
@@ -165,18 +163,20 @@ void main() {
           Package('bar', projectUri),
         ],
         dryRunResult: FakeNativeAssetsBuilderResult(
-          assets: <Asset>[
-            Asset(
+          assets: <AssetImpl>[
+            NativeCodeAssetImpl(
               id: 'package:bar/bar.dart',
-              linkMode: LinkMode.dynamic,
-              target: native_assets_cli.Target.linuxX64,
-              path: AssetAbsolutePath(Uri.file('libbar.so')),
+              linkMode: DynamicLoadingBundledImpl(),
+              os: OSImpl.linux,
+              architecture: ArchitectureImpl.x64,
+              file: Uri.file('libbar.so'),
             ),
-            Asset(
+            NativeCodeAssetImpl(
               id: 'package:bar/bar.dart',
-              linkMode: LinkMode.dynamic,
-              target: native_assets_cli.Target.linuxArm64,
-              path: AssetAbsolutePath(Uri.file('libbar.so')),
+              linkMode: DynamicLoadingBundledImpl(),
+              os: OSImpl.linux,
+              architecture: ArchitectureImpl.arm64,
+              file: Uri.file('libbar.so'),
             ),
           ],
         ),
@@ -284,12 +284,13 @@ void main() {
             Package('bar', projectUri),
           ],
           buildResult: FakeNativeAssetsBuilderResult(
-            assets: <Asset>[
-              Asset(
+            assets: <AssetImpl>[
+              NativeCodeAssetImpl(
                 id: 'package:bar/bar.dart',
-                linkMode: LinkMode.dynamic,
-                target: native_assets_cli.Target.linuxX64,
-                path: AssetAbsolutePath(dylibAfterCompiling.uri),
+                linkMode: DynamicLoadingBundledImpl(),
+                os: OSImpl.linux,
+                architecture: ArchitectureImpl.x64,
+                file: dylibAfterCompiling.uri,
               ),
             ],
           ),
@@ -337,18 +338,20 @@ void main() {
             Package('bar', projectUri),
           ],
           dryRunResult: FakeNativeAssetsBuilderResult(
-            assets: <Asset>[
-              Asset(
+            assets: <AssetImpl>[
+              NativeCodeAssetImpl(
                 id: 'package:bar/bar.dart',
-                linkMode: LinkMode.static,
-                target: native_assets_cli.Target.macOSArm64,
-                path: AssetAbsolutePath(Uri.file('bar.a')),
+                linkMode: StaticLinkingImpl(),
+                os: OSImpl.macOS,
+                architecture: ArchitectureImpl.arm64,
+                file: Uri.file('bar.a'),
               ),
-              Asset(
+              NativeCodeAssetImpl(
                 id: 'package:bar/bar.dart',
-                linkMode: LinkMode.static,
-                target: native_assets_cli.Target.macOSX64,
-                path: AssetAbsolutePath(Uri.file('bar.a')),
+                linkMode: StaticLinkingImpl(),
+                os: OSImpl.macOS,
+                architecture: ArchitectureImpl.x64,
+                file: Uri.file('bar.a'),
               ),
             ],
           ),
@@ -460,12 +463,13 @@ void main() {
     );
     final NativeAssetsBuildRunner runner =
         NativeAssetsBuildRunnerImpl(projectUri, packageConfig, fileSystem, logger);
-    final CCompilerConfig result = await runner.cCompilerConfig;
-    expect(result.cc, Uri.file('/some/path/to/clang'));
+    final CCompilerConfigImpl result = await runner.cCompilerConfig;
+    expect(result.compiler, Uri.file('/some/path/to/clang'));
   });
 }
 
 class _BuildRunnerWithoutClang extends FakeNativeAssetsBuildRunner {
   @override
-  Future<CCompilerConfig> get cCompilerConfig async => throwToolExit('Failed to find clang++ on the PATH.');
+  Future<CCompilerConfigImpl> get cCompilerConfig async =>
+      throwToolExit('Failed to find clang++ on the PATH.');
 }

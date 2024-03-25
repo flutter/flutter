@@ -4,8 +4,7 @@
 
 import 'package:native_assets_builder/native_assets_builder.dart'
     hide NativeAssetsBuildRunner;
-import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    hide BuildMode;
+import 'package:native_assets_cli/native_assets_cli_internal.dart';
 
 import '../../../base/file_system.dart';
 import '../../../build_info.dart';
@@ -28,7 +27,7 @@ Future<Uri?> dryRunNativeAssetsWindows({
     projectUri: projectUri,
     flutterTester: flutterTester,
     fileSystem: fileSystem,
-    os: OS.windows,
+    os: OSImpl.windows,
   );
 }
 
@@ -43,7 +42,7 @@ Future<Iterable<KernelAsset>> dryRunNativeAssetsWindowsInternal(
     projectUri,
     flutterTester,
     buildRunner,
-    OS.windows,
+    OSImpl.windows,
   );
 }
 
@@ -68,7 +67,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)>
   );
 }
 
-Future<CCompilerConfig> cCompilerConfigWindows() async {
+Future<CCompilerConfigImpl> cCompilerConfigWindows() async {
   final VisualStudio visualStudio = VisualStudio(
     fileSystem: globals.fs,
     platform: globals.platform,
@@ -77,10 +76,10 @@ Future<CCompilerConfig> cCompilerConfigWindows() async {
     osUtils: globals.os,
   );
 
-  return CCompilerConfig(
-    cc: _toOptionalFileUri(visualStudio.clPath),
-    ld: _toOptionalFileUri(visualStudio.linkPath),
-    ar: _toOptionalFileUri(visualStudio.libPath),
+  return CCompilerConfigImpl(
+    compiler: _toOptionalFileUri(visualStudio.clPath),
+    linker: _toOptionalFileUri(visualStudio.linkPath),
+    archiver: _toOptionalFileUri(visualStudio.libPath),
     envScript: _toOptionalFileUri(visualStudio.vcvarsPath),
     envScriptArgs: <String>[],
   );
