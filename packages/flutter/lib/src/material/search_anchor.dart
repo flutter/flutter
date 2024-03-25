@@ -1118,6 +1118,7 @@ class SearchBar extends StatefulWidget {
     this.leading,
     this.trailing,
     this.onTap,
+    this.onTapOutside,
     this.onChanged,
     this.onSubmitted,
     this.constraints,
@@ -1169,6 +1170,9 @@ class SearchBar extends StatefulWidget {
 
   /// Called when the user taps this search bar.
   final GestureTapCallback? onTap;
+
+  /// Called when the user taps outside the search bar.
+  final TapRegionCallback? onTapOutside;
 
   /// Invoked upon user input.
   final ValueChanged<String>? onChanged;
@@ -1397,6 +1401,7 @@ class _SearchBarState extends State<SearchBar> {
                           autofocus: widget.autoFocus,
                           onTap: widget.onTap,
                           onTapAlwaysCalled: true,
+                          onTapOutside: widget.onTapOutside,
                           focusNode: _focusNode,
                           onChanged: widget.onChanged,
                           onSubmitted: widget.onSubmitted,
