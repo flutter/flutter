@@ -1317,7 +1317,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    return computeMinIntrinsicHeight(width);
+    return getMinIntrinsicHeight(width);
   }
 
   @override
@@ -1325,7 +1325,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final RenderBox? input = this.input;
     return input == null
       ? 0.0
-      : _boxParentData(input).offset.dy + (input.computeDistanceToActualBaseline(baseline) ?? 0.0);
+      : _boxParentData(input).offset.dy + (input.getDistanceToActualBaseline(baseline) ?? 0.0);
   }
 
   // Records where the label was painted.

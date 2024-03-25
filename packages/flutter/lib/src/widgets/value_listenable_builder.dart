@@ -40,63 +40,11 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 /// Using this pre-built child is entirely optional, but can improve
 /// performance significantly in some cases and is therefore a good practice.
 ///
-/// {@tool snippet}
-///
+/// {@tool dartpad}
 /// This sample shows how you could use a [ValueListenableBuilder] instead of
-/// setting state on the whole [Scaffold] in the default `flutter create` app.
+/// setting state on the whole [Scaffold] in a counter app.
 ///
-/// ```dart
-/// class MyHomePage extends StatefulWidget {
-///   const MyHomePage({super.key, required this.title});
-///   final String title;
-///
-///   @override
-///   State<MyHomePage> createState() => _MyHomePageState();
-/// }
-///
-/// class _MyHomePageState extends State<MyHomePage> {
-///   final ValueNotifier<int> _counter = ValueNotifier<int>(0);
-///   final Widget goodJob = const Text('Good job!');
-///   @override
-///   Widget build(BuildContext context) {
-///     return Scaffold(
-///       appBar: AppBar(
-///         title: Text(widget.title)
-///       ),
-///       body: Center(
-///         child: Column(
-///           mainAxisAlignment: MainAxisAlignment.center,
-///           children: <Widget>[
-///             const Text('You have pushed the button this many times:'),
-///             ValueListenableBuilder<int>(
-///               builder: (BuildContext context, int value, Widget? child) {
-///                 // This builder will only get called when the _counter
-///                 // is updated.
-///                 return Row(
-///                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-///                   children: <Widget>[
-///                     Text('$value'),
-///                     child!,
-///                   ],
-///                 );
-///               },
-///               valueListenable: _counter,
-///               // The child parameter is most helpful if the child is
-///               // expensive to build and does not depend on the value from
-///               // the notifier.
-///               child: goodJob,
-///             )
-///           ],
-///         ),
-///       ),
-///       floatingActionButton: FloatingActionButton(
-///         child: const Icon(Icons.plus_one),
-///         onPressed: () => _counter.value += 1,
-///       ),
-///     );
-///   }
-/// }
-/// ```
+/// ** See code in examples/api/lib/widgets/value_listenable_builder/value_listenable_builder.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -108,6 +56,8 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 ///    you have a direct reference to.
 ///  * [StreamBuilder], where a builder can depend on a [Stream] rather than
 ///    a [ValueListenable] for more advanced use cases.
+///  * [TweenAnimationBuilder], which can animate values in a widget based on a
+///    [Tween].
 class ValueListenableBuilder<T> extends StatefulWidget {
   /// Creates a [ValueListenableBuilder].
   ///

@@ -360,6 +360,8 @@ void main() {
       addTearDown(verticalController.dispose);
       final ScrollController horizontalController = ScrollController();
       addTearDown(horizontalController.dispose);
+      late final TwoDimensionalChildBuilderDelegate delegate;
+      addTearDown(() => delegate.dispose());
 
       await tester.pumpWidget(
         Directionality(
@@ -368,7 +370,7 @@ void main() {
             verticalDetails: ScrollableDetails.vertical(controller: verticalController),
             horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
             diagonalDragBehavior: DiagonalDragBehavior.free,
-            delegate: TwoDimensionalChildBuilderDelegate(
+            delegate: delegate = TwoDimensionalChildBuilderDelegate(
               maxXIndex: 100,
               maxYIndex: 100,
               builder: (BuildContext context, ChildVicinity vicinity) {
@@ -503,6 +505,8 @@ void main() {
       addTearDown(verticalController.dispose);
       final ScrollController horizontalController = ScrollController();
       addTearDown(horizontalController.dispose);
+      late final TwoDimensionalChildBuilderDelegate delegate;
+      addTearDown(() => delegate.dispose());
 
       await tester.pumpWidget(
         Directionality(
@@ -511,7 +515,7 @@ void main() {
             verticalDetails: ScrollableDetails.vertical(controller: verticalController),
             horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
             diagonalDragBehavior: DiagonalDragBehavior.free,
-            delegate: TwoDimensionalChildBuilderDelegate(
+            delegate: delegate = TwoDimensionalChildBuilderDelegate(
               maxXIndex: 100,
               maxYIndex: 100,
               builder: (BuildContext context, ChildVicinity vicinity) {
@@ -579,6 +583,310 @@ void main() {
       expect(verticalController.position.activity?.isScrolling, isFalse);
       expect(horizontalController.position.activity!.velocity, 0.0);
       expect(verticalController.position.activity!.velocity, 0.0);
+    });
+
+    group('Can drag horizontally when there is not enough vertical content', () {
+      testWidgets('DiagonalDragBehavior.free', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/144982
+        final ScrollController verticalController = ScrollController();
+        addTearDown(verticalController.dispose);
+        final ScrollController horizontalController = ScrollController();
+        addTearDown(horizontalController.dispose);
+        late final TwoDimensionalChildBuilderDelegate delegate;
+        addTearDown(() => delegate.dispose());
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: SimpleBuilderTableView(
+              verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+              horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
+              diagonalDragBehavior: DiagonalDragBehavior.free,
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                maxXIndex: 20,
+                maxYIndex: 1,
+                builder: _testChildBuilder,
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        expect(verticalController.position.maxScrollExtent, 0.0);
+        expect(horizontalController.position.maxScrollExtent, 3400.0);
+        // Fling vertically, nothing should happen.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(0.0, -200.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        // Fling horizontally, the horizontal position should change.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(-200.0, 0.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, greaterThan(840.0));
+      });
+
+      testWidgets('DiagonalDragBehavior.weightedEvent', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/144982
+        final ScrollController verticalController = ScrollController();
+        addTearDown(verticalController.dispose);
+        final ScrollController horizontalController = ScrollController();
+        addTearDown(horizontalController.dispose);
+        late final TwoDimensionalChildBuilderDelegate delegate;
+        addTearDown(() => delegate.dispose());
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: SimpleBuilderTableView(
+              verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+              horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
+              diagonalDragBehavior: DiagonalDragBehavior.weightedEvent,
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                maxXIndex: 20,
+                maxYIndex: 1,
+                builder: _testChildBuilder,
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        expect(verticalController.position.maxScrollExtent, 0.0);
+        expect(horizontalController.position.maxScrollExtent, 3400.0);
+        // Fling vertically, nothing should happen.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(0.0, -200.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        // Fling horizontally, the horizontal position should change.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(-200.0, 0.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, greaterThan(840.0));
+      });
+
+      testWidgets('DiagonalDragBehavior.weightedContinuous', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/144982
+        final ScrollController verticalController = ScrollController();
+        addTearDown(verticalController.dispose);
+        final ScrollController horizontalController = ScrollController();
+        addTearDown(horizontalController.dispose);
+        late final TwoDimensionalChildBuilderDelegate delegate;
+        addTearDown(() => delegate.dispose());
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: SimpleBuilderTableView(
+              verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+              horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
+              diagonalDragBehavior: DiagonalDragBehavior.weightedContinuous,
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                maxXIndex: 20,
+                maxYIndex: 1,
+                builder: _testChildBuilder,
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        expect(verticalController.position.maxScrollExtent, 0.0);
+        expect(horizontalController.position.maxScrollExtent, 3400.0);
+        // Fling vertically, nothing should happen.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(0.0, -200.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        // Fling horizontally, the horizontal position should change.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(-200.0, 0.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, greaterThan(840.0));
+      });
+    });
+
+    group('Can drag vertically when there is not enough horizontal content', () {
+      testWidgets('DiagonalDragBehavior.free', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/144982
+        final ScrollController verticalController = ScrollController();
+        addTearDown(verticalController.dispose);
+        final ScrollController horizontalController = ScrollController();
+        addTearDown(horizontalController.dispose);
+        late final TwoDimensionalChildBuilderDelegate delegate;
+        addTearDown(() => delegate.dispose());
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: SimpleBuilderTableView(
+              verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+              horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
+              diagonalDragBehavior: DiagonalDragBehavior.free,
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                maxXIndex: 1,
+                maxYIndex: 20,
+                builder: _testChildBuilder,
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        expect(verticalController.position.maxScrollExtent, 3600.0);
+        expect(horizontalController.position.maxScrollExtent, 0.0);
+        // Fling horizontally, nothing should happen.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(-200.0, 0.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        // Fling vertically, the vertical position should change.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(0.0, -200.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, greaterThan(840.0));
+        expect(horizontalController.position.pixels, 0.0);
+      });
+
+      testWidgets('DiagonalDragBehavior.weightedEvent', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/144982
+        final ScrollController verticalController = ScrollController();
+        addTearDown(verticalController.dispose);
+        final ScrollController horizontalController = ScrollController();
+        addTearDown(horizontalController.dispose);
+        late final TwoDimensionalChildBuilderDelegate delegate;
+        addTearDown(() => delegate.dispose());
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: SimpleBuilderTableView(
+              verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+              horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
+              diagonalDragBehavior: DiagonalDragBehavior.weightedEvent,
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                maxXIndex: 1,
+                maxYIndex: 20,
+                builder: _testChildBuilder,
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        expect(verticalController.position.maxScrollExtent, 3600.0);
+        expect(horizontalController.position.maxScrollExtent, 0.0);
+        // Fling horizontally, nothing should happen.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(-200.0, 0.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        // Fling vertically, the vertical position should change.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(0.0, -200.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, greaterThan(840.0));
+        expect(horizontalController.position.pixels, 0.0);
+      });
+
+      testWidgets('DiagonalDragBehavior.weightedContinuous', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/144982
+        final ScrollController verticalController = ScrollController();
+        addTearDown(verticalController.dispose);
+        final ScrollController horizontalController = ScrollController();
+        addTearDown(horizontalController.dispose);
+        late final TwoDimensionalChildBuilderDelegate delegate;
+        addTearDown(() => delegate.dispose());
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: SimpleBuilderTableView(
+              verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+              horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
+              diagonalDragBehavior: DiagonalDragBehavior.weightedContinuous,
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                maxXIndex: 1,
+                maxYIndex: 20,
+                builder: _testChildBuilder,
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        expect(verticalController.position.maxScrollExtent, 3600.0);
+        expect(horizontalController.position.maxScrollExtent, 0.0);
+        // Fling horizontally, nothing should happen.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(-200.0, 0.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, 0.0);
+        expect(horizontalController.position.pixels, 0.0);
+        // Fling vertically, the vertical position should change.
+        await tester.fling(
+          find.byType(TwoDimensionalScrollable),
+          const Offset(0.0, -200.0),
+          2000.0,
+        );
+        await tester.pumpAndSettle();
+        expect(verticalController.position.pixels, greaterThan(840.0));
+        expect(horizontalController.position.pixels, 0.0);
+      });
     });
   });
 }
