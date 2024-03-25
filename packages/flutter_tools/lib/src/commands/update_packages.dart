@@ -1229,21 +1229,14 @@ class PubspecHeader extends PubspecLine {
     final List<String> parts = strippedLine.split(':');
     final String sectionName = parts.first;
     final String value = parts.last.trim();
-    switch (sectionName) {
-      case 'dependencies':
-        return PubspecHeader(line, Section.dependencies);
-      case 'dev_dependencies':
-        return PubspecHeader(line, Section.devDependencies);
-      case 'dependency_overrides':
-        return PubspecHeader(line, Section.dependencyOverrides);
-      case 'builders':
-        return PubspecHeader(line, Section.builders);
-      case 'name':
-      case 'version':
-        return PubspecHeader(line, Section.header, name: sectionName, value: value);
-      default:
-        return PubspecHeader(line, Section.other);
-    }
+    return switch (sectionName) {
+      'dependencies'         => PubspecHeader(line, Section.dependencies),
+      'dev_dependencies'     => PubspecHeader(line, Section.devDependencies),
+      'dependency_overrides' => PubspecHeader(line, Section.dependencyOverrides),
+      'builders'             => PubspecHeader(line, Section.builders),
+      'name' || 'version'    => PubspecHeader(line, Section.header, name: sectionName, value: value),
+      _                      => PubspecHeader(line, Section.other),
+    };
   }
 
   /// Returns the input after removing trailing spaces and anything after the

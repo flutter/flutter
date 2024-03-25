@@ -31,17 +31,13 @@ class TargetModel {
   /// Throws an exception if passed a value other than 'flutter',
   /// 'flutter_runner', 'vm', or 'dartdevc'.
   factory TargetModel(String rawValue) {
-    switch (rawValue) {
-      case 'flutter':
-        return flutter;
-      case 'flutter_runner':
-        return flutterRunner;
-      case 'vm':
-        return vm;
-      case 'dartdevc':
-        return dartdevc;
-    }
-    throw Exception('Unexpected target model $rawValue');
+    return switch (rawValue) {
+      'flutter'        => flutter,
+      'flutter_runner' => flutterRunner,
+      'vm'             => vm,
+      'dartdevc'       => dartdevc,
+      _ => throw Exception('Unexpected target model $rawValue'),
+    };
   }
 
   const TargetModel._(this._value);
