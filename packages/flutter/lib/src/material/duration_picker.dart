@@ -93,7 +93,11 @@ enum DurationPickerMode {
   /// Mode that shows the timer duration in minute and second.
   ms,
   /// Mode that shows the timer duration in hour, minute, and second.
-  hms,
+  hms;
+  
+  bool get hasHours => this == DurationPickerMode.hm || this == DurationPickerMode.hms;
+  
+  bool get hasSeconds => this == DurationPickerMode.ms || this == DurationPickerMode.hms;
 }
 
 // Whether the dial-mode time picker is currently selecting the hour, the
@@ -104,10 +108,11 @@ enum _DurationMode { hour, minute, second }
 enum _DurationPickerAspect {
   useMaterial3,
   entryMode,
-  hourMinuteMode,
-  onHourMinuteModeChanged,
+  durationMode,
+  onDurationModeChanged,
   onHourDoubleTapped,
   onMinuteDoubleTapped,
+  onSecondDoubleTapped,
   hourDialType,
   selectedDuration,
   onSelectedDurationChanged,
@@ -119,10 +124,11 @@ enum _DurationPickerAspect {
 class _DurationPickerModel extends InheritedModel<_DurationPickerAspect> {
   const _DurationPickerModel({
     required this.entryMode,
-    required this.hourMinuteMode,
-    required this.onHourMinuteModeChanged,
+    required this.durationMode,
+    required this.onDurationModeChanged,
     required this.onHourDoubleTapped,
     required this.onMinuteDoubleTapped,
+    required this.onSecondDoubleTapped,
     required this.selectedDuration,
     required this.onSelectedDurationChanged,
     required this.useMaterial3,
@@ -134,10 +140,11 @@ class _DurationPickerModel extends InheritedModel<_DurationPickerAspect> {
   });
 
   final DurationPickerEntryMode entryMode;
-  final _DurationMode hourMinuteMode;
-  final ValueChanged<_DurationMode> onHourMinuteModeChanged;
+  final _DurationMode durationMode;
+  final ValueChanged<_DurationMode> onDurationModeChanged;
   final GestureTapCallback onHourDoubleTapped;
   final GestureTapCallback onMinuteDoubleTapped;
+  final GestureTapCallback onSecondDoubleTapped;
   final Duration selectedDuration;
   final ValueChanged<Duration> onSelectedDurationChanged;
   final bool useMaterial3;
@@ -148,7 +155,7 @@ class _DurationPickerModel extends InheritedModel<_DurationPickerAspect> {
 
   static _DurationPickerModel of(BuildContext context, [_DurationPickerAspect? aspect]) => InheritedModel.inheritFrom<_DurationPickerModel>(context, aspect: aspect)!;
   static DurationPickerEntryMode entryModeOf(BuildContext context) => of(context, _DurationPickerAspect.entryMode).entryMode;
-  static _DurationMode hourMinuteModeOf(BuildContext context) => of(context, _DurationPickerAspect.hourMinuteMode).hourMinuteMode;
+  static _DurationMode durationModeOf(BuildContext context) => of(context, _DurationPickerAspect.durationMode).durationMode;
   static Duration selectedDurationOf(BuildContext context) => of(context, _DurationPickerAspect.selectedDuration).selectedDuration;
   static bool useMaterial3Of(BuildContext context) => of(context, _DurationPickerAspect.useMaterial3).useMaterial3;
   static _HourDialType hourDialTypeOf(BuildContext context) => of(context, _DurationPickerAspect.hourDialType).hourDialType;
@@ -157,7 +164,7 @@ class _DurationPickerModel extends InheritedModel<_DurationPickerAspect> {
   static _TimePickerDefaults defaultThemeOf(BuildContext context) => of(context, _DurationPickerAspect.defaultTheme).defaultTheme;
 
   static void setSelectedTime(BuildContext context, Duration value) => of(context, _DurationPickerAspect.onSelectedDurationChanged).onSelectedDurationChanged(value);
-  static void setHourMinuteMode(BuildContext context, _DurationMode value) => of(context, _DurationPickerAspect.onHourMinuteModeChanged).onHourMinuteModeChanged(value);
+  static void setDurationMode(BuildContext context, _DurationMode value) => of(context, _DurationPickerAspect.onDurationModeChanged).onDurationModeChanged(value);
 
   @override
   bool updateShouldNotifyDependent(_DurationPickerModel oldWidget, Set<_DurationPickerAspect> dependencies) {
@@ -167,16 +174,19 @@ class _DurationPickerModel extends InheritedModel<_DurationPickerAspect> {
     if (entryMode != oldWidget.entryMode && dependencies.contains(_DurationPickerAspect.entryMode)) {
       return true;
     }
-    if (hourMinuteMode != oldWidget.hourMinuteMode && dependencies.contains(_DurationPickerAspect.hourMinuteMode)) {
+    if (durationMode != oldWidget.durationMode && dependencies.contains(_DurationPickerAspect.durationMode)) {
       return true;
     }
-    if (onHourMinuteModeChanged != oldWidget.onHourMinuteModeChanged && dependencies.contains(_DurationPickerAspect.onHourMinuteModeChanged)) {
+    if (onDurationModeChanged != oldWidget.onDurationModeChanged && dependencies.contains(_DurationPickerAspect.onDurationModeChanged)) {
       return true;
     }
-    if (onHourMinuteModeChanged != oldWidget.onHourDoubleTapped && dependencies.contains(_DurationPickerAspect.onHourDoubleTapped)) {
+    if (onDurationModeChanged != oldWidget.onHourDoubleTapped && dependencies.contains(_DurationPickerAspect.onHourDoubleTapped)) {
       return true;
     }
-    if (onHourMinuteModeChanged != oldWidget.onMinuteDoubleTapped && dependencies.contains(_DurationPickerAspect.onMinuteDoubleTapped)) {
+    if (onDurationModeChanged != oldWidget.onMinuteDoubleTapped && dependencies.contains(_DurationPickerAspect.onMinuteDoubleTapped)) {
+      return true;
+    }
+    if (onDurationModeChanged != oldWidget.onSecondDoubleTapped && dependencies.contains(_DurationPickerAspect.onSecondDoubleTapped)) {
       return true;
     }
     if (hourDialType != oldWidget.hourDialType && dependencies.contains(_DurationPickerAspect.hourDialType)) {
@@ -204,8 +214,8 @@ class _DurationPickerModel extends InheritedModel<_DurationPickerAspect> {
   bool updateShouldNotify(_DurationPickerModel oldWidget) {
     return useMaterial3 != oldWidget.useMaterial3
         || entryMode != oldWidget.entryMode
-        || hourMinuteMode != oldWidget.hourMinuteMode
-        || onHourMinuteModeChanged != oldWidget.onHourMinuteModeChanged
+        || durationMode != oldWidget.durationMode
+        || onDurationModeChanged != oldWidget.onDurationModeChanged
         || onHourDoubleTapped != oldWidget.onHourDoubleTapped
         || onMinuteDoubleTapped != oldWidget.onMinuteDoubleTapped
         || hourDialType != oldWidget.hourDialType
@@ -217,10 +227,11 @@ class _DurationPickerModel extends InheritedModel<_DurationPickerAspect> {
   }
 }
 
-class _TimePickerHeader extends StatelessWidget {
-  const _TimePickerHeader({ required this.helpText });
+class _DurationPickerHeader extends StatelessWidget {
+  const _DurationPickerHeader({ required this.durationPickerMode, required this.helpText });
 
   final String helpText;
+  final DurationPickerMode durationPickerMode;
 
   @override
   Widget build(BuildContext context) {
@@ -241,9 +252,15 @@ class _TimePickerHeader extends StatelessWidget {
               // Hour/minutes should not change positions in RTL locales.
               textDirection: TextDirection.ltr,
               children: <Widget>[
-                const Expanded(child: _HourControl()),
-                _TimeSelectorSeparator(durationFormat: durationFormat),
+                if (durationPickerMode.hasHours) ...<Widget>[
+                  const Expanded(child: _HourControl()),
+                  _TimeSelectorSeparator(durationFormat: durationFormat),
+                ],
                 const Expanded(child: _MinuteControl()),
+                if (durationPickerMode.hasSeconds) ...<Widget>[
+                  _TimeSelectorSeparator(durationFormat: durationFormat),
+                  const Expanded(child: _SecondControl()),
+                ],
               ],
             ),
           ],
@@ -266,9 +283,15 @@ class _TimePickerHeader extends StatelessWidget {
                     // Hour/minutes should not change positions in RTL locales.
                     textDirection: TextDirection.ltr,
                     children: <Widget>[
-                      const Expanded(child: _HourControl()),
-                      _TimeSelectorSeparator(durationFormat: durationFormat),
+                      if (durationPickerMode.hasHours) ...<Widget>[
+                        const Expanded(child: _HourControl()),
+                        _TimeSelectorSeparator(durationFormat: durationFormat),
+                      ],
                       const Expanded(child: _MinuteControl()),
+                      if (durationPickerMode.hasSeconds) ...<Widget>[
+                        _TimeSelectorSeparator(durationFormat: durationFormat),
+                        const Expanded(child: _SecondControl()),
+                      ],
                     ],
                   ),
                 ],
@@ -280,8 +303,8 @@ class _TimePickerHeader extends StatelessWidget {
   }
 }
 
-class _HourMinuteControl extends StatelessWidget {
-  const _HourMinuteControl({
+class _DurationControl extends StatelessWidget {
+  const _DurationControl({
     required this.text,
     required this.onTap,
     required this.onDoubleTap,
@@ -384,10 +407,10 @@ class _HourControl extends StatelessWidget {
       onDecrease: () {
         _DurationPickerModel.setSelectedTime(context, previousHour);
       },
-      child: _HourMinuteControl(
-        isSelected: _DurationPickerModel.hourMinuteModeOf(context) == _DurationMode.hour,
+      child: _DurationControl(
+        isSelected: _DurationPickerModel.durationModeOf(context) == _DurationMode.hour,
         text: formattedHour,
-        onTap: Feedback.wrapForTap(() => _DurationPickerModel.setHourMinuteMode(context, _DurationMode.hour), context)!,
+        onTap: Feedback.wrapForTap(() => _DurationPickerModel.setDurationMode(context, _DurationMode.hour), context)!,
         onDoubleTap: _DurationPickerModel.of(context, _DurationPickerAspect.onHourDoubleTapped).onHourDoubleTapped,
       ),
     );
@@ -492,11 +515,52 @@ class _MinuteControl extends StatelessWidget {
       onDecrease: () {
         _DurationPickerModel.setSelectedTime(context, previousMinute);
       },
-      child: _HourMinuteControl(
-        isSelected: _DurationPickerModel.hourMinuteModeOf(context) == _DurationMode.minute,
+      child: _DurationControl(
+        isSelected: _DurationPickerModel.durationModeOf(context) == _DurationMode.minute,
         text: formattedMinute,
-        onTap: Feedback.wrapForTap(() => _DurationPickerModel.setHourMinuteMode(context, _DurationMode.minute), context)!,
+        onTap: Feedback.wrapForTap(() => _DurationPickerModel.setDurationMode(context, _DurationMode.minute), context)!,
         onDoubleTap: _DurationPickerModel.of(context, _DurationPickerAspect.onMinuteDoubleTapped).onMinuteDoubleTapped,
+      ),
+    );
+  }
+}
+
+/// Displays the second fragment.
+///
+/// When tapped changes time picker dial mode to [_DurationMode.second].
+class _SecondControl extends StatelessWidget {
+  const _SecondControl();
+
+  @override
+  Widget build(BuildContext context) {
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final Duration selectedDuration = _DurationPickerModel.selectedDurationOf(context);
+    final String formattedSecond = localizations.formatDurationSecond(selectedDuration);
+    final Duration nextSecond = selectedDuration.replacing(
+      second: (selectedDuration.second + 1) % Duration.secondsPerMinute,
+    );
+    final String formattedNextSecond = localizations.formatDurationSecond(nextSecond);
+    final Duration previousSecond = selectedDuration.replacing(
+      second: (selectedDuration.second - 1) % Duration.secondsPerMinute,
+    );
+    final String formattedPreviousSecond = localizations.formatDurationSecond(previousSecond);
+
+    return Semantics(
+      excludeSemantics: true,
+      value: '${localizations.timePickerSecondModeAnnouncement} $formattedSecond',
+      increasedValue: formattedNextSecond,
+      onIncrease: () {
+        _DurationPickerModel.setSelectedTime(context, nextSecond);
+      },
+      decreasedValue: formattedPreviousSecond,
+      onDecrease: () {
+        _DurationPickerModel.setSelectedTime(context, previousSecond);
+      },
+      child: _DurationControl(
+        isSelected: _DurationPickerModel.durationModeOf(context) == _DurationMode.second,
+        text: formattedSecond,
+        onTap: Feedback.wrapForTap(() => _DurationPickerModel.setDurationMode(context, _DurationMode.second), context)!,
+        onDoubleTap: _DurationPickerModel.of(context, _DurationPickerAspect.onSecondDoubleTapped).onSecondDoubleTapped,
       ),
     );
   }
@@ -834,8 +898,8 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     }
   }
 
-  Duration _notifyOnChangedIfNeeded({ bool roundMinutes = false }) {
-    final Duration current = _getTimeForTheta(_theta.value, roundMinutes: roundMinutes, radius: _radius.value);
+  Duration _notifyOnChangedIfNeeded({ bool roundMinutes = false, bool roundSeconds = false }) {
+    final Duration current = _getTimeForTheta(_theta.value, roundMinutes: roundMinutes, roundSeconds: roundSeconds, radius: _radius.value);
     if (widget.onChanged == null) {
       return current;
     }
@@ -845,7 +909,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     return current;
   }
 
-  void _updateThetaForPan({ bool roundMinutes = false }) {
+  void _updateThetaForPan({ bool roundMinutes = false, bool roundSeconds = false }) {
     setState(() {
       final Offset offset = _position! - _center!;
       final double labelRadius = _dialSize!.shortestSide / 2 - _kTimePickerDialPadding;
@@ -853,7 +917,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       double angle = (math.atan2(offset.dx, offset.dy) - math.pi / 2) % _kTwoPi;
       final double radius = clampDouble((offset.distance - innerRadius) / _kTimePickerInnerDialOffset, 0, 1);
       if (roundMinutes) {
-        angle = _getThetaForTime(_getTimeForTheta(angle, roundMinutes: roundMinutes, radius: radius));
+        angle = _getThetaForTime(_getTimeForTheta(angle, roundMinutes: roundMinutes, roundSeconds: roundSeconds, radius: radius));
       }
       // The controller doesn't animate during the pan gesture.
       _thetaTween
@@ -903,8 +967,8 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _position = box.globalToLocal(details.globalPosition);
     _center = box.size.center(Offset.zero);
     _dialSize = box.size;
-    _updateThetaForPan(roundMinutes: true);
-    final Duration newTime = _notifyOnChangedIfNeeded(roundMinutes: true);
+    _updateThetaForPan(roundMinutes: true, roundSeconds: true);
+    final Duration newTime = _notifyOnChangedIfNeeded(roundMinutes: true, roundSeconds: true);
     if (widget.durationMode == _DurationMode.hour) {
       switch (widget.hourDialType) {
         case _HourDialType.twentyFourHour:
@@ -915,7 +979,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     } else {
       _announceToAccessibility(context, localizations.formatDecimal(newTime.minute));
     }
-    final Duration time = _getTimeForTheta(_theta.value, roundMinutes: true, radius: _radius.value);
+    final Duration time = _getTimeForTheta(_theta.value, roundMinutes: true, roundSeconds: true, radius: _radius.value);
     _animateTo(_getThetaForTime(time), _getRadiusForTime(time));
     _dragging = false;
     _position = null;
@@ -952,21 +1016,6 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       ..end = angle;
     _notifyOnChangedIfNeeded();
   }
-
-  static const List<Duration> _amHours = <Duration>[
-    Duration(hours: 12),
-    Duration(hours: 1),
-    Duration(hours: 2),
-    Duration(hours: 3),
-    Duration(hours: 4),
-    Duration(hours: 5),
-    Duration(hours: 6),
-    Duration(hours: 7),
-    Duration(hours: 8),
-    Duration(hours: 9),
-    Duration(hours: 10),
-    Duration(hours: 11),
-  ];
 
   // On M2, there's no inner ring of numbers.
   static const List<Duration> _twentyFourHoursM2 = <Duration>[
@@ -1224,18 +1273,23 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
 class _TimePickerInput extends StatefulWidget {
   const _TimePickerInput({
-    required this.initialSelectedTime,
+    required this.initialSelectedDuration,
     required this.errorInvalidText,
     required this.hourLabelText,
     required this.minuteLabelText,
+    required this.secondLabelText,
     required this.helpText,
     required this.autofocusHour,
     required this.autofocusMinute,
+    required this.autofocusSecond,
+    required this.durationPickerMode,
     this.restorationId,
   });
 
   /// The time initially selected when the dialog is shown.
-  final Duration initialSelectedTime;
+  final Duration initialSelectedDuration;
+
+  final DurationPickerMode durationPickerMode;
 
   /// Optionally provide your own validation error text.
   final String? errorInvalidText;
@@ -1246,11 +1300,16 @@ class _TimePickerInput extends StatefulWidget {
   /// Optionally provide your own minute label text.
   final String? minuteLabelText;
 
+  /// Optionally provide your own minute label text.
+  final String? secondLabelText;
+
   final String helpText;
 
   final bool? autofocusHour;
 
   final bool? autofocusMinute;
+
+  final bool? autofocusSecond;
 
   /// Restoration ID to save and restore the state of the time picker input
   /// widget.
@@ -1266,15 +1325,17 @@ class _TimePickerInput extends StatefulWidget {
 }
 
 class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixin {
-  late final RestorableDuration _selectedDuration = RestorableDuration(widget.initialSelectedTime);
+  late final RestorableDuration _selectedDuration = RestorableDuration(widget.initialSelectedDuration);
   final RestorableBool hourHasError = RestorableBool(false);
   final RestorableBool minuteHasError = RestorableBool(false);
+  final RestorableBool secondHasError = RestorableBool(false);
 
   @override
   void dispose() {
     _selectedDuration.dispose();
     hourHasError.dispose();
     minuteHasError.dispose();
+    secondHasError.dispose();
     super.dispose();
   }
 
@@ -1286,6 +1347,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
     registerForRestoration(_selectedDuration, 'selected_time');
     registerForRestoration(hourHasError, 'hour_has_error');
     registerForRestoration(minuteHasError, 'minute_has_error');
+    registerForRestoration(secondHasError, 'second_has_error');
   }
 
   int? _parseHour(String? value) {
@@ -1320,6 +1382,22 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
     return null;
   }
 
+  int? _parseSecond(String? value) {
+    if (value == null) {
+      return null;
+    }
+
+    final int? newSecond = int.tryParse(value);
+    if (newSecond == null) {
+      return null;
+    }
+
+    if (newSecond >= 0 && newSecond < 60) {
+      return newSecond;
+    }
+    return null;
+  }
+
   void _handleHourSavedSubmitted(String? value) {
     final int? newHour = _parseHour(value);
     if (newHour != null) {
@@ -1340,7 +1418,30 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
   void _handleMinuteSavedSubmitted(String? value) {
     final int? newMinute = _parseMinute(value);
     if (newMinute != null) {
-      _selectedDuration.value = Duration(hours: _selectedDuration.value.hour, minutes: int.parse(value!));
+      _selectedDuration.value = _selectedDuration.value.replacing(minute: int.parse(value!));
+      _DurationPickerModel.setSelectedTime(context, _selectedDuration.value);
+      if (widget.durationPickerMode.hasSeconds) {
+        FocusScope.of(context).requestFocus();
+      } else {
+        FocusScope.of(context).unfocus();
+      }
+    }
+  }
+
+  void _handleMinuteChanged(String value) {
+    if (widget.durationPickerMode.hasSeconds) {
+      final int? minute = _parseMinute(value);
+      if (minute != null && value.length == 2) {
+        // If a valid minute is typed, move focus to the second TextField.
+        FocusScope.of(context).nextFocus();
+      }
+    }
+  }
+
+  void _handleSecondSavedSubmitted(String? value) {
+    final int? newSecond = _parseSecond(value);
+    if (newSecond != null) {
+      _selectedDuration.value = _selectedDuration.value.replacing(second: int.parse(value!));
       _DurationPickerModel.setSelectedTime(context, _selectedDuration.value);
       FocusScope.of(context).unfocus();
     }
@@ -1368,6 +1469,17 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
     return newMinute == null ? '' : null;
   }
 
+  String? _validateSecond(String? value) {
+    final int? newSecond = _parseSecond(value);
+    setState(() {
+      minuteHasError.value = newSecond == null;
+    });
+    // This is used as the validator for the [TextFormField].
+    // Returning an empty string allows the field to go into an error state.
+    // Returning null means no error in the validation of the entered text.
+    return newSecond == null ? '' : null;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
@@ -1375,7 +1487,7 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
     final ThemeData theme = Theme.of(context);
     final TimePickerThemeData timePickerTheme = _DurationPickerModel.themeOf(context);
     final _TimePickerDefaults defaultTheme = _DurationPickerModel.defaultThemeOf(context);
-    final TextStyle hourMinuteStyle = timePickerTheme.hourMinuteTextStyle ?? defaultTheme.hourMinuteTextStyle;
+    final TextStyle durationStyle = timePickerTheme.hourMinuteTextStyle ?? defaultTheme.hourMinuteTextStyle;
 
     return Padding(
       padding: _DurationPickerModel.useMaterial3Of(context) ? EdgeInsets.zero : const EdgeInsets.symmetric(horizontal: 16),
@@ -1397,52 +1509,57 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                   // Hour/minutes should not change positions in RTL locales.
                   textDirection: TextDirection.ltr,
                   children: <Widget>[
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: _HourTextField(
-                              restorationId: 'hour_text_field',
-                              selectedDuration: _selectedDuration.value,
-                              style: hourMinuteStyle,
-                              autofocus: widget.autofocusHour,
-                              inputAction: TextInputAction.next,
-                              validator: _validateHour,
-                              onSavedSubmitted: _handleHourSavedSubmitted,
-                              onChanged: _handleHourChanged,
-                              hourLabelText: widget.hourLabelText,
-                            ),
-                          ),
-                          if (!hourHasError.value && !minuteHasError.value)
-                            ExcludeSemantics(
-                              child: Text(
-                                widget.hourLabelText ?? MaterialLocalizations.of(context).timePickerHourLabel,
-                                style: theme.textTheme.bodySmall,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                    if(widget.durationPickerMode.hasHours) ...<Widget>[
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: _DurationTextField(
+                                restorationId: 'hour_text_field',
+                                selectedDuration: _selectedDuration.value,
+                                style: durationStyle,
+                                autofocus: widget.autofocusHour,
+                                inputAction: TextInputAction.next,
+                                validator: _validateHour,
+                                onSavedSubmitted: _handleHourSavedSubmitted,
+                                onChanged: _handleHourChanged,
+                                semanticHintText: widget.hourLabelText ?? MaterialLocalizations.of(context).timePickerHourLabel,
+                                durationMode: _DurationMode.hour,
                               ),
                             ),
-                        ],
+                            if (!hourHasError.value && !minuteHasError.value)
+                              ExcludeSemantics(
+                                child: Text(
+                                  widget.hourLabelText ?? MaterialLocalizations.of(context).timePickerHourLabel,
+                                  style: theme.textTheme.bodySmall,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
-                    _TimeSelectorSeparator(durationFormat: durationFormat),
+                      _TimeSelectorSeparator(durationFormat: durationFormat),
+                    ],
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Padding(
                             padding: const EdgeInsets.only(bottom: 10),
-                            child: _MinuteTextField(
+                            child: _DurationTextField(
                               restorationId: 'minute_text_field',
                               selectedDuration: _selectedDuration.value,
-                              style: hourMinuteStyle,
+                              style: durationStyle,
                               autofocus: widget.autofocusMinute,
                               inputAction: TextInputAction.done,
                               validator: _validateMinute,
                               onSavedSubmitted: _handleMinuteSavedSubmitted,
-                              minuteLabelText: widget.minuteLabelText,
+                              semanticHintText: widget.minuteLabelText ?? MaterialLocalizations.of(context).timePickerMinuteLabel,
+                              durationMode: _DurationMode.minute,
+                              onChanged: _handleMinuteChanged,
                             ),
                           ),
                           if (!hourHasError.value && !minuteHasError.value)
@@ -1457,6 +1574,39 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
                         ],
                       ),
                     ),
+                    if(widget.durationPickerMode.hasSeconds) ...<Widget>[
+                      _TimeSelectorSeparator(durationFormat: durationFormat),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: _DurationTextField(
+                                restorationId: 'second_text_field',
+                                selectedDuration: _selectedDuration.value,
+                                style: durationStyle,
+                                autofocus: widget.autofocusSecond,
+                                inputAction: TextInputAction.done,
+                                validator: _validateSecond,
+                                onSavedSubmitted: _handleSecondSavedSubmitted,
+                                semanticHintText: widget.secondLabelText ?? MaterialLocalizations.of(context).timePickerSecondLabel,
+                                durationMode: _DurationMode.second,
+                              ),
+                            ),
+                            if (!hourHasError.value && !secondHasError.value)
+                              ExcludeSemantics(
+                                child: Text(
+                                  widget.secondLabelText ?? MaterialLocalizations.of(context).timePickerSecondLabel,
+                                  style: theme.textTheme.bodySmall,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -1475,87 +1625,10 @@ class _TimePickerInputState extends State<_TimePickerInput> with RestorationMixi
   }
 }
 
-class _HourTextField extends StatelessWidget {
-  const _HourTextField({
+class _DurationTextField extends StatefulWidget {
+  const _DurationTextField({
     required this.selectedDuration,
-    required this.style,
-    required this.autofocus,
-    required this.inputAction,
-    required this.validator,
-    required this.onSavedSubmitted,
-    required this.onChanged,
-    required this.hourLabelText,
-    this.restorationId,
-  });
-
-  final Duration selectedDuration;
-  final TextStyle style;
-  final bool? autofocus;
-  final TextInputAction inputAction;
-  final FormFieldValidator<String> validator;
-  final ValueChanged<String?> onSavedSubmitted;
-  final ValueChanged<String> onChanged;
-  final String? hourLabelText;
-  final String? restorationId;
-
-  @override
-  Widget build(BuildContext context) {
-    return _HourMinuteTextField(
-      restorationId: restorationId,
-      selectedDuration: selectedDuration,
-      isHour: true,
-      autofocus: autofocus,
-      inputAction: inputAction,
-      style: style,
-      semanticHintText: hourLabelText ?? MaterialLocalizations.of(context).timePickerHourLabel,
-      validator: validator,
-      onSavedSubmitted: onSavedSubmitted,
-      onChanged: onChanged,
-    );
-  }
-}
-
-class _MinuteTextField extends StatelessWidget {
-  const _MinuteTextField({
-    required this.selectedDuration,
-    required this.style,
-    required this.autofocus,
-    required this.inputAction,
-    required this.validator,
-    required this.onSavedSubmitted,
-    required this.minuteLabelText,
-    this.restorationId,
-  });
-
-  final Duration selectedDuration;
-  final TextStyle style;
-  final bool? autofocus;
-  final TextInputAction inputAction;
-  final FormFieldValidator<String> validator;
-  final ValueChanged<String?> onSavedSubmitted;
-  final String? minuteLabelText;
-  final String? restorationId;
-
-  @override
-  Widget build(BuildContext context) {
-    return _HourMinuteTextField(
-      restorationId: restorationId,
-      selectedDuration: selectedDuration,
-      isHour: false,
-      autofocus: autofocus,
-      inputAction: inputAction,
-      style: style,
-      semanticHintText: minuteLabelText ?? MaterialLocalizations.of(context).timePickerMinuteLabel,
-      validator: validator,
-      onSavedSubmitted: onSavedSubmitted,
-    );
-  }
-}
-
-class _HourMinuteTextField extends StatefulWidget {
-  const _HourMinuteTextField({
-    required this.selectedDuration,
-    required this.isHour,
+    required this.durationMode,
     required this.autofocus,
     required this.inputAction,
     required this.style,
@@ -1567,7 +1640,7 @@ class _HourMinuteTextField extends StatefulWidget {
   });
 
   final Duration selectedDuration;
-  final bool isHour;
+  final _DurationMode durationMode;
   final bool? autofocus;
   final TextInputAction inputAction;
   final TextStyle style;
@@ -1578,10 +1651,10 @@ class _HourMinuteTextField extends StatefulWidget {
   final String? restorationId;
 
   @override
-  _HourMinuteTextFieldState createState() => _HourMinuteTextFieldState();
+  _DurationTextFieldState createState() => _DurationTextFieldState();
 }
 
-class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with RestorationMixin {
+class _DurationTextFieldState extends State<_DurationTextField> with RestorationMixin {
   final RestorableTextEditingController controller = RestorableTextEditingController();
   final RestorableBool controllerHasBeenSet = RestorableBool(false);
   late FocusNode focusNode;
@@ -1627,9 +1700,11 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
 
   String get _formattedValue {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    return !widget.isHour
-        ? localizations.formatDurationMinute(widget.selectedDuration)
-        : localizations.formatDurationHour(widget.selectedDuration);
+    return switch (widget.durationMode) {
+      _DurationMode.second => localizations.formatDurationSecond(widget.selectedDuration),
+      _DurationMode.minute => localizations.formatDurationMinute(widget.selectedDuration),
+      _DurationMode.hour => localizations.formatDurationHour(widget.selectedDuration),
+    };
   }
 
   @override
@@ -1740,6 +1815,7 @@ class DurationPickerDialog extends StatefulWidget {
     this.errorInvalidText,
     this.hourLabelText,
     this.minuteLabelText,
+    this.secondLabelText,
     this.restorationId,
     this.initialEntryMode = DurationPickerEntryMode.dial,
     this.durationPickerMode = DurationPickerMode.hms,
@@ -1771,6 +1847,9 @@ class DurationPickerDialog extends StatefulWidget {
 
   /// Optionally provide your own minute label text.
   final String? minuteLabelText;
+
+  /// Optionally provide your own second label text.
+  final String? secondLabelText;
 
   /// Restoration ID to save and restore the state of the [DurationPickerDialog].
   ///
@@ -2082,8 +2161,10 @@ class _DurationPickerDialogState extends State<DurationPickerDialog> with Restor
                           errorInvalidText: widget.errorInvalidText,
                           hourLabelText: widget.hourLabelText,
                           minuteLabelText: widget.minuteLabelText,
+                          secondLabelText: widget.secondLabelText,
                           restorationId: 'time_picker',
                           entryMode: _entryMode.value,
+                          durationPickerMode: widget.durationPickerMode,
                           orientation: widget.orientation,
                           onEntryModeChanged: _handleEntryModeChanged,
                         ),
@@ -2117,8 +2198,10 @@ class _TimePicker extends StatefulWidget {
     this.errorInvalidText,
     this.hourLabelText,
     this.minuteLabelText,
+    this.secondLabelText,
     this.restorationId,
     this.entryMode = DurationPickerEntryMode.dial,
+    required this.durationPickerMode,
     this.orientation,
     this.onEntryModeChanged,
   });
@@ -2151,6 +2234,9 @@ class _TimePicker extends StatefulWidget {
   /// Optionally provide your own minute label text.
   final String? minuteLabelText;
 
+  /// Optionally provide your own second label text.
+  final String? secondLabelText;
+
   /// Restoration ID to save and restore the state of the [DurationPickerDialog].
   ///
   /// If it is non-null, the time picker will persist and restore the
@@ -2167,6 +2253,9 @@ class _TimePicker extends StatefulWidget {
 
   /// The initial entry mode for the picker. Whether it's text input or a dial.
   final DurationPickerEntryMode entryMode;
+
+  /// The duration picker mode. Whether it's hours, minutes, or seconds input.
+  final DurationPickerMode durationPickerMode;
 
   /// The currently selected time of day.
   final Duration time;
@@ -2190,18 +2279,19 @@ class _TimePicker extends StatefulWidget {
   final DurationEntryModeChangeCallback? onEntryModeChanged;
 
   @override
-  State<_TimePicker> createState() => _TimePickerState();
+  State<_TimePicker> createState() => _DurationPickerState();
 }
 
-class _TimePickerState extends State<_TimePicker> with RestorationMixin {
+class _DurationPickerState extends State<_TimePicker> with RestorationMixin {
   Timer? _vibrateTimer;
   late MaterialLocalizations localizations;
-  final RestorableEnum<_DurationMode> _hourMinuteMode =
+  final RestorableEnum<_DurationMode> _durationMode =
       RestorableEnum<_DurationMode>(_DurationMode.hour, values: _DurationMode.values);
   final RestorableEnumN<_DurationMode> _lastModeAnnounced =
       RestorableEnumN<_DurationMode>(null, values: _DurationMode.values);
   final RestorableBoolN _autofocusHour = RestorableBoolN(null);
   final RestorableBoolN _autofocusMinute = RestorableBoolN(null);
+  final RestorableBoolN _autofocusSecond = RestorableBoolN(null);
   final RestorableBool _announcedInitialTime = RestorableBool(false);
   late final RestorableEnumN<Orientation> _orientation =
       RestorableEnumN<Orientation>(widget.orientation, values: Orientation.values);
@@ -2214,10 +2304,11 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
     _vibrateTimer = null;
     _orientation.dispose();
     _selectedDuration.dispose();
-    _hourMinuteMode.dispose();
+    _durationMode.dispose();
     _lastModeAnnounced.dispose();
     _autofocusHour.dispose();
     _autofocusMinute.dispose();
+    _autofocusSecond.dispose();
     _announcedInitialTime.dispose();
     super.dispose();
   }
@@ -2250,10 +2341,11 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-    registerForRestoration(_hourMinuteMode, 'hour_minute_mode');
+    registerForRestoration(_durationMode, 'hour_minute_mode');
     registerForRestoration(_lastModeAnnounced, 'last_mode_announced');
     registerForRestoration(_autofocusHour, 'autofocus_hour');
     registerForRestoration(_autofocusMinute, 'autofocus_minute');
+    registerForRestoration(_autofocusSecond, 'autofocus_second');
     registerForRestoration(_announcedInitialTime, 'announced_initial_time');
     registerForRestoration(_selectedDuration, 'selected_time');
     registerForRestoration(_orientation, 'orientation');
@@ -2279,7 +2371,7 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
   void _handleHourMinuteModeChanged(_DurationMode mode) {
     _vibrate();
     setState(() {
-      _hourMinuteMode.value = mode;
+      _durationMode.value = mode;
       _announceModeOnce();
     });
   }
@@ -2293,6 +2385,7 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
         case DurationPickerEntryMode.input:
           _autofocusHour.value = false;
           _autofocusMinute.value = false;
+          _autofocusSecond.value = false;
           newMode = DurationPickerEntryMode.dial;
         case DurationPickerEntryMode.dialOnly:
         case DurationPickerEntryMode.inputOnly:
@@ -2303,12 +2396,12 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
   }
 
   void _announceModeOnce() {
-    if (_lastModeAnnounced.value == _hourMinuteMode.value) {
+    if (_lastModeAnnounced.value == _durationMode.value) {
       // Already announced it.
       return;
     }
 
-    switch (_hourMinuteMode.value) {
+    switch (_durationMode.value) {
       case _DurationMode.hour:
         _announceToAccessibility(context, localizations.timePickerHourModeAnnouncement);
       case _DurationMode.minute:
@@ -2316,7 +2409,7 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
       case _DurationMode.second:
         _announceToAccessibility(context, localizations.timePickerSecondModeAnnouncement);
     }
-    _lastModeAnnounced.value = _hourMinuteMode.value;
+    _lastModeAnnounced.value = _durationMode.value;
   }
 
   void _announceInitialTimeOnce() {
@@ -2350,9 +2443,14 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
     _handleEntryModeToggle();
   }
 
+  void _handleSecondDoubleTapped() {
+    _autofocusSecond.value = true;
+    _handleEntryModeToggle();
+  }
+
   void _handleHourSelected() {
     setState(() {
-      _hourMinuteMode.value = _DurationMode.minute;
+      _durationMode.value = _DurationMode.minute;
     });
   }
 
@@ -2391,7 +2489,7 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
               child: AspectRatio(
                 aspectRatio: 1,
                 child: _Dial(
-                  durationMode: _hourMinuteMode.value,
+                  durationMode: _durationMode.value,
                   hourDialType: hourMode,
                   selectedDuration: _selectedDuration.value,
                   onChanged: _handleTimeChanged,
@@ -2410,7 +2508,7 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
               children: <Widget>[
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: theme.useMaterial3 ? 0 : 16),
-                  child: _TimePickerHeader(helpText: helpText),
+                  child: _DurationPickerHeader(helpText: helpText, durationPickerMode: widget.durationPickerMode),
                 ),
                 Expanded(
                   child: Column(
@@ -2437,7 +2535,7 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
-                        _TimePickerHeader(helpText: helpText),
+                        _DurationPickerHeader(helpText: helpText, durationPickerMode: widget.durationPickerMode),
                         Expanded(child: dial),
                       ],
                     ),
@@ -2456,13 +2554,16 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             _TimePickerInput(
-              initialSelectedTime: _selectedDuration.value,
+              initialSelectedDuration: _selectedDuration.value,
+              durationPickerMode: widget.durationPickerMode,
               errorInvalidText: widget.errorInvalidText,
               hourLabelText: widget.hourLabelText,
               minuteLabelText: widget.minuteLabelText,
+              secondLabelText: widget.secondLabelText,
               helpText: helpText,
               autofocusHour: _autofocusHour.value,
               autofocusMinute: _autofocusMinute.value,
+              autofocusSecond: _autofocusSecond.value,
               restorationId: 'time_picker_input',
             ),
           ],
@@ -2471,11 +2572,12 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
     return _DurationPickerModel(
       entryMode: widget.entryMode,
       selectedDuration: _selectedDuration.value,
-      hourMinuteMode: _hourMinuteMode.value,
+      durationMode: _durationMode.value,
       orientation: orientation,
-      onHourMinuteModeChanged: _handleHourMinuteModeChanged,
+      onDurationModeChanged: _handleHourMinuteModeChanged,
       onHourDoubleTapped: _handleHourDoubleTapped,
       onMinuteDoubleTapped: _handleMinuteDoubleTapped,
+      onSecondDoubleTapped: _handleSecondDoubleTapped,
       hourDialType: hourMode,
       onSelectedDurationChanged: _handleTimeChanged,
       useMaterial3: theme.useMaterial3,
@@ -2594,6 +2696,7 @@ Future<Duration?> showDurationPicker({
   String? errorInvalidText,
   String? hourLabelText,
   String? minuteLabelText,
+  String? secondLabelText,
   RouteSettings? routeSettings,
   DurationEntryModeChangeCallback? onEntryModeChanged,
   Offset? anchorPoint,
@@ -2610,8 +2713,10 @@ Future<Duration?> showDurationPicker({
     errorInvalidText: errorInvalidText,
     hourLabelText: hourLabelText,
     minuteLabelText: minuteLabelText,
+    secondLabelText: secondLabelText,
     orientation: orientation,
     onEntryModeChanged: onEntryModeChanged,
+    durationPickerMode: durationPickerMode,
   );
   return showDialog<Duration>(
     context: context,

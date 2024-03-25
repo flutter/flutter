@@ -31,56 +31,62 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.access_time),
-                onPressed: () {
-                  showTimePicker(
-                    context: context,
-                    initialTime: TimeOfDay.now(),
-                  );
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.timelapse),
-                onPressed: () {
-                  showDurationPicker(
-                    context: context,
-                    initialDuration: Duration.zero,
-                  );
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.date_range),
-                onPressed: () {
-                  showDatePicker(
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.access_time),
+                  onPressed: () {
+                    showTimePicker(
                       context: context,
-                      firstDate: DateTime.now(),
-                      lastDate: DateTime(DateTime.now().year + 1));
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.date_range),
-                onPressed: () {
-                  showDateRangePicker(
+                      initialTime: TimeOfDay.now(),
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.timelapse),
+                  onPressed: () {
+                    showDurationPicker(
                       context: context,
-                      firstDate: DateTime.now(),
-                      lastDate: DateTime(DateTime.now().year + 1));
-                },
-              ),
-            ],
-          ),
-          const DurationPickerDialog(initialDuration: Duration.zero),
-          CupertinoTimerPicker(
-            mode: CupertinoTimerPickerMode.hms,
-            onTimerDurationChanged: (Duration value) {
-              print(value);
-            },
-          ),
-        ],
+                      initialDuration: Duration.zero,
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.date_range),
+                  onPressed: () {
+                    showDatePicker(
+                        context: context,
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime(DateTime.now().year + 1));
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.date_range),
+                  onPressed: () {
+                    showDateRangePicker(
+                        context: context,
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime(DateTime.now().year + 1));
+                  },
+                ),
+              ],
+            ),
+            const DurationPickerDialog(
+              durationPickerMode: DurationPickerMode.hms,
+            ),
+            const DurationPickerDialog(
+                durationPickerMode: DurationPickerMode.ms),
+            CupertinoTimerPicker(
+              mode: CupertinoTimerPickerMode.hms,
+              onTimerDurationChanged: (Duration value) {
+                print(value);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -450,6 +450,10 @@ abstract class MaterialLocalizations {
   /// with [showTimePicker] when in [TimePickerEntryMode.input].
   String get timePickerMinuteLabel;
 
+  /// Label used below the second text field of the time picker dialog created
+  /// with [showTimePicker] when in [TimePickerEntryMode.input].
+  String get timePickerSecondLabel;
+
   /// Error message for the time picker dialog created with [showTimePicker]
   /// when in [TimePickerEntryMode.input].
   String get invalidTimeLabel;
@@ -1030,6 +1034,10 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get timePickerMinuteLabel => 'Minute';
+
+  @override
+  String get timePickerSecondLabel => 'Second';
+
 
   @override
   String get invalidTimeLabel => 'Enter a valid time';
