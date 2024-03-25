@@ -25,10 +25,10 @@ import 'page_transitions_theme.dart';
 ///    that's similar to the one provided by Android O.
 ///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android P.
-///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
-///    transition that matches native iOS page transitions.
 ///  * [ZoomPageTransitionsBuilder], which defines the default page transition
 ///    that's similar to the one provided in Android Q.
+///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
+///    transition that matches native iOS page transitions.
 class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Creates an instance of a [PageTransitionsBuilder] that matches Android U's
   /// predictive back transition.
@@ -43,7 +43,7 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
     Widget child,
   ) {
     return _PredictiveBackGestureDetector(
-      predictiveBackRoute: route,
+      route: route,
       builder: (BuildContext context) {
         // Only do a predictive back transition when the user is performing a
         // pop gesture. Otherwise, for things like button presses or other
@@ -71,12 +71,12 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
 
 class _PredictiveBackGestureDetector extends StatefulWidget {
   const _PredictiveBackGestureDetector({
-    required this.predictiveBackRoute,
+    required this.route,
     required this.builder,
   });
 
   final WidgetBuilder builder;
-  final PredictiveBackRoute predictiveBackRoute;
+  final PredictiveBackRoute route;
 
   @override
   State<_PredictiveBackGestureDetector> createState() =>
@@ -90,8 +90,8 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
 
   /// True when the predictive back gesture is enabled.
   bool get _isEnabled {
-    return widget.predictiveBackRoute.isCurrent
-        && widget.predictiveBackRoute.popGestureEnabled;
+    return widget.route.isCurrent
+        && widget.route.popGestureEnabled;
   }
 
   /// The back event when the gesture first started.
@@ -115,7 +115,7 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
     }
   }
 
-  // Begin WidgetsBinding.
+  // Begin WidgetsBindingObserver.
 
   @override
   bool handleStartBackGesture(PredictiveBackEvent backEvent) {
@@ -124,7 +124,7 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
       return false;
     }
 
-    widget.predictiveBackRoute.handleStartBackGesture(progress: 1 - backEvent.progress);
+    widget.route.handleStartBackGesture(progress: 1 - backEvent.progress);
     startBackEvent = currentBackEvent = backEvent;
     return true;
   }
@@ -135,7 +135,7 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
       return false;
     }
 
-    widget.predictiveBackRoute.handleUpdateBackGestureProgress(progress: 1 - backEvent.progress);
+    widget.route.handleUpdateBackGestureProgress(progress: 1 - backEvent.progress);
     currentBackEvent = backEvent;
     return true;
   }
@@ -146,7 +146,7 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
       return false;
     }
 
-    widget.predictiveBackRoute.handleDragEnd(animateForward: true);
+    widget.route.handleDragEnd(animateForward: true);
     _gestureInProgress = false;
     startBackEvent = currentBackEvent = null;
     return true;
@@ -158,13 +158,13 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
       return false;
     }
 
-    widget.predictiveBackRoute.handleDragEnd(animateForward: false);
+    widget.route.handleDragEnd(animateForward: false);
     _gestureInProgress = false;
     startBackEvent = currentBackEvent = null;
     return true;
   }
 
-  // End WidgetsBinding.
+  // End WidgetsBindingObserver.
 
   @override
   void initState() {
