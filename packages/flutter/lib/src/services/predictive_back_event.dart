@@ -83,6 +83,12 @@ final class PredictiveBackEvent {
   ///
   /// Returns false for a predictive back gesture.
   bool get isButtonEvent =>
+      // The Android documentation for BackEvent
+      // (https://developer.android.com/reference/android/window/BackEvent#getTouchX())
+      // says that getTouchX and getTouchY should return NaN when the system
+      // back button is pressed, but in practice it seems to return 0.0, hence
+      // the check for Offset.zero here. This was tested directly in the engine
+      // on Android emulator running API 34.
       touchOffset == null || (progress == 0.0 && touchOffset == Offset.zero);
 
   @override
