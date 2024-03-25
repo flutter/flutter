@@ -414,11 +414,6 @@ public class FlutterRenderer implements TextureRegistry {
     // Flip when debugging to see verbose logs.
     private static final boolean VERBOSE_LOGS = false;
 
-    // If we cleanup the ImageReaders on memory pressure it breaks VirtualDisplay
-    // backed platform views. Disable for now as this is only necessary to work
-    // around a Samsung-specific Android 14 bug.
-    private static final boolean CLEANUP_ON_MEMORY_PRESSURE = false;
-
     private final long id;
 
     private boolean released;
@@ -654,9 +649,6 @@ public class FlutterRenderer implements TextureRegistry {
 
     @Override
     public void onTrimMemory(int level) {
-      if (!CLEANUP_ON_MEMORY_PRESSURE) {
-        return;
-      }
       cleanup();
       createNewReader = true;
     }

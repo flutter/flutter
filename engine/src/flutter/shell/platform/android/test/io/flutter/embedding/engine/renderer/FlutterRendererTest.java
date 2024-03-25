@@ -648,12 +648,11 @@ public class FlutterRendererTest {
     assertEquals(1, texture.numImages());
 
     // Invoke the onTrimMemory callback.
-    // This should do nothing.
     texture.onTrimMemory(0);
     shadowOf(Looper.getMainLooper()).idle();
 
-    assertEquals(1, texture.numImageReaders());
-    assertEquals(1, texture.numImages());
+    assertEquals(0, texture.numImageReaders());
+    assertEquals(0, texture.numImages());
   }
 
   // A 0x0 ImageReader is a runtime error.
