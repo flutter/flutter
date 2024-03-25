@@ -499,7 +499,7 @@ Could not build the precompiled application for the device.''',
       final MemoryFileSystem fs = MemoryFileSystem.test();
       final FakeFlutterProject project = FakeFlutterProject(
         fileSystem: fs,
-        usingSwiftPackageManager: true,
+        usesSwiftPackageManager: true,
       );
       project.ios.podfile.createSync(recursive: true);
       await diagnoseXcodeBuildFailure(
@@ -544,7 +544,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       final MemoryFileSystem fs = MemoryFileSystem.test();
       final FakeFlutterProject project = FakeFlutterProject(
         fileSystem: fs,
-        usingSwiftPackageManager: true,
+        usesSwiftPackageManager: true,
       );
       project.ios.podfile.createSync(recursive: true);
       await diagnoseXcodeBuildFailure(
@@ -586,7 +586,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       final MemoryFileSystem fs = MemoryFileSystem.test();
       final FakeFlutterProject project = FakeFlutterProject(
         fileSystem: fs,
-        usingSwiftPackageManager: true,
+        usesSwiftPackageManager: true,
       );
       project.ios.podfile.createSync(recursive: true);
       await diagnoseXcodeBuildFailure(
@@ -627,7 +627,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       final MemoryFileSystem fs = MemoryFileSystem.test();
       final FakeFlutterProject project = FakeFlutterProject(
         fileSystem: fs,
-        usingSwiftPackageManager: true,
+        usesSwiftPackageManager: true,
       );
       project.ios.podfile.createSync(recursive: true);
       await diagnoseXcodeBuildFailure(
@@ -833,7 +833,7 @@ class FakeIosProject extends Fake implements IosProject {
 class FakeFlutterProject extends Fake implements FlutterProject {
   FakeFlutterProject({
     required this.fileSystem,
-    this.usingSwiftPackageManager = false,
+    this.usesSwiftPackageManager = false,
     this.isModule = false,
   });
 
@@ -855,7 +855,7 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   late final IosProject ios = FakeIosProject(fileSystem: fileSystem);
 
   @override
-  final bool usingSwiftPackageManager;
+  final bool usesSwiftPackageManager;
 
   @override
   final bool isModule;

@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import '../base/common.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../convert.dart';
 import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';
 import '../project.dart';

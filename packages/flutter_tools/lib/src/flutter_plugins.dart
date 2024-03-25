@@ -192,7 +192,7 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   result['dependencyGraph'] = _createPluginLegacyDependencyGraph(plugins);
   result['date_created'] = globals.systemClock.now().toString();
   result['version'] = globals.flutterVersion.frameworkVersion;
-  result['swift_package_manager_enabled'] = project.usingSwiftPackageManager;
+  result['swift_package_manager_enabled'] = project.usesSwiftPackageManager;
 
   // Only notify if the plugins list has changed. [date_created] will always be different,
   // [version] is not relevant for this check.

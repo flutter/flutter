@@ -273,14 +273,11 @@ class FlutterProject {
   /// True if this project doesn't have Swift Package Manager disabled in the
   /// pubspec, has either an iOS or macOS platform implementation, Xcode is 15
   /// or greater, and the Swift Package Manager feature is enabled.
-  bool get usingSwiftPackageManager {
+  bool get usesSwiftPackageManager {
     if (!manifest.disabledSwiftPackageManager && (ios.existsSync() || macos.existsSync())) {
       final Xcode? xcode = globals.xcode;
       final Version? xcodeVersion = xcode?.currentVersion;
       if (xcodeVersion == null || xcodeVersion.major < 15) {
-        globals.logger.printWarning(
-          'The current Xcode version is incompatible with Swift Package Manager. '
-          'Requires Xcode 15 or greater. Swift Package Manager will not be used.');
         return false;
       }
       return featureFlags.isSwiftPackageManagerEnabled;

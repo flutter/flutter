@@ -58,7 +58,7 @@ class DarwinDependencyManagement {
     final XcodeBasedProject xcodeProject = platform == SupportedPlatform.ios
         ? _project.ios
         : _project.macos;
-    if (_project.usingSwiftPackageManager) {
+    if (_project.usesSwiftPackageManager) {
       await _swiftPackageManager.generatePluginsSwiftPackage(
         _plugins,
         platform,
@@ -85,7 +85,7 @@ class DarwinDependencyManagement {
       );
 
       final bool useCocoapods;
-      if (_project.usingSwiftPackageManager) {
+      if (_project.usesSwiftPackageManager) {
         useCocoapods = _usingCocoaPodsPlugin(
           pluginCount: pluginCount,
           swiftPackageCount: swiftPackageCount,
@@ -114,7 +114,7 @@ class DarwinDependencyManagement {
     required int swiftPackageCount,
     required int cocoapodCount,
   }) {
-    if (_project.usingSwiftPackageManager) {
+    if (_project.usesSwiftPackageManager) {
       if (pluginCount == swiftPackageCount) {
         return false;
       }
@@ -177,7 +177,7 @@ class DarwinDependencyManagement {
 
       // If not using Swift Package Manager and plugin does not have podspec
       // but does have a Package.swift, warn it will not be used.
-      if (!_project.usingSwiftPackageManager &&
+      if (!_project.usesSwiftPackageManager &&
           !cocoaPodsCompatible &&
           swiftPackageManagerCompatible) {
         _logger.printWarning(
@@ -187,7 +187,7 @@ class DarwinDependencyManagement {
       }
     }
 
-    if (_project.usingSwiftPackageManager &&
+    if (_project.usesSwiftPackageManager &&
         pluginCount == swiftPackageCount &&
         swiftPackageCount != 0) {
       final bool podfileExists = xcodeProject.podfile.existsSync();

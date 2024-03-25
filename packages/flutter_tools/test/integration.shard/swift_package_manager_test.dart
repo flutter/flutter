@@ -101,7 +101,7 @@ void main() {
             workingDirectoryPath,
             iosLanguage: iosLanguage,
             platform: platformName,
-            usingSwiftPackageManager: true,
+            usesSwiftPackageManager: true,
           );
           _addDependency(appDirectoryPath: app, plugin: integrationTestPlugin);
           await _buildApp(
@@ -297,9 +297,9 @@ Future<String> _createApp(
   String workingDirectory, {
   required String platform,
   required String iosLanguage,
-  bool usingSwiftPackageManager = false,
+  bool usesSwiftPackageManager = false,
 }) async {
-  final String appTemplateType = usingSwiftPackageManager ? 'spm' : 'default';
+  final String appTemplateType = usesSwiftPackageManager ? 'spm' : 'default';
 
   final String appName = '${platform}_${iosLanguage}_${appTemplateType}_app';
   final ProcessResult result = await processManager.run(
@@ -364,6 +364,7 @@ Future<void> _buildApp(
       }
     }
     remainingExpectedLines.remove(trimmedLine);
+    remainingExpectedLines.removeWhere((String expectedLine) => trimmedLine.contains(expectedLine));
     if (unexpectedLines != null && unexpectedLines.contains(trimmedLine)) {
       unexpectedLinesFound.add(trimmedLine);
     }
@@ -414,9 +415,9 @@ Future<_Plugin> _createPlugin(
   String workingDirectory, {
   required String platform,
   required String iosLanguage,
-  bool usingSwiftPackageManager = false,
+  bool usesSwiftPackageManager = false,
 }) async {
-  final String dependencyManager = usingSwiftPackageManager ? 'spm' : 'cocoapods';
+  final String dependencyManager = usesSwiftPackageManager ? 'spm' : 'cocoapods';
 
   // Create plugin
   final String pluginName = '${platform}_${iosLanguage}_${dependencyManager}_plugin';
@@ -525,9 +526,9 @@ List<String> _expectedLines({
         '${swiftPackagePlugin.pluginName}: ${swiftPackagePlugin.pluginPath}/$platform/${swiftPackagePlugin.pluginName} @ local',
         "➜ Explicit dependency on target '${swiftPackagePlugin.pluginName}' in project '${swiftPackagePlugin.pluginName}'",
         if (platform == 'macos')
-          'ProcessXCFramework $appPlatformDirectoryPath/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/FlutterMacOS.xcframework /private$appDirectoryPath/build/macos/Build/Products/Debug/FlutterMacOS.framework macos',
+          'ProcessXCFramework $appPlatformDirectoryPath/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/FlutterMacOS.xcframework',
         if (platform == 'ios')
-          'ProcessXCFramework $appPlatformDirectoryPath/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/Flutter.xcframework /private$appDirectoryPath/build/ios/Debug-iphoneos/Flutter.framework ios',
+          'ProcessXCFramework $appPlatformDirectoryPath/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/Flutter.xcframework',
       ]);
     } else {
       expectedLines.addAll(<String>[
@@ -580,9 +581,9 @@ List<String> _unexpectedLines({
         '${swiftPackagePlugin.pluginName}: ${swiftPackagePlugin.pluginPath}/$platform/${swiftPackagePlugin.pluginName} @ local',
         "➜ Explicit dependency on target '${swiftPackagePlugin.pluginName}' in project '${swiftPackagePlugin.pluginName}'",
         if (platform == 'macos')
-          'ProcessXCFramework $appPlatformDirectoryPath/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/FlutterMacOS.xcframework /private$appDirectoryPath/build/macos/Build/Products/Debug/FlutterMacOS.framework macos',
+          'ProcessXCFramework $appPlatformDirectoryPath/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/FlutterMacOS.xcframework',
         if (platform == 'ios')
-          'ProcessXCFramework $appPlatformDirectoryPath/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/Flutter.xcframework /private$appDirectoryPath/build/ios/Debug-iphoneos/Flutter.framework ios',
+          'ProcessXCFramework $appPlatformDirectoryPath/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/Flutter.xcframework',
       ]);
     }
   }

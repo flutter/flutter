@@ -252,7 +252,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     targetOverride: targetOverride,
     buildInfo: buildInfo,
   );
-  if (project.usingSwiftPackageManager) {
+  if (project.usesSwiftPackageManager) {
     SwiftPackageManager.linkFlutterFramework(
       SupportedPlatform.ios,
       project.ios,
@@ -879,7 +879,7 @@ Future<bool> _handleIssues(
     logger.printError(missingPlatformInstructions(missingPlatform), emphasis: true);
   } else if (duplicateModules.isNotEmpty) {
     final bool usesCocoapods = xcodeProject.podfile.existsSync();
-    final bool usesSwiftPackageManager = project.usingSwiftPackageManager;
+    final bool usesSwiftPackageManager = project.usesSwiftPackageManager;
     if (usesCocoapods && usesSwiftPackageManager) {
       logger.printError(
         'Your project uses both CocoaPods and Swift Package Manager, which can '
@@ -893,7 +893,7 @@ Future<bool> _handleIssues(
     }
   } else if (missingModules.isNotEmpty) {
     final bool usesCocoapods = xcodeProject.podfile.existsSync();
-    final bool usesSwiftPackageManager = project.usingSwiftPackageManager;
+    final bool usesSwiftPackageManager = project.usesSwiftPackageManager;
     if (usesCocoapods && !usesSwiftPackageManager) {
       final List<String> swiftPackageOnlyPlugins = <String>[];
       for (final String module in missingModules) {

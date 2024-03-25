@@ -19,7 +19,7 @@ Future<void> processPodsIfNeeded(
 
   // When using Swift Package Manager, the Podfile may not exist so if there
   // isn't a Podfile, skip processing pods.
-  if (project.usingSwiftPackageManager && !xcodeProject.podfile.existsSync()) {
+  if (project.usesSwiftPackageManager && !xcodeProject.podfile.existsSync()) {
     return;
   }
   // Ensure that the plugin list is up to date, since hasPlugins relies on it.

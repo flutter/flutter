@@ -11,7 +11,6 @@ import '../base/logger.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
-import '../macos/swift_package_manager.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 

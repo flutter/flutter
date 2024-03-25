@@ -63,7 +63,7 @@ void main() {
 
               final DarwinDependencyManagement dependencyManagement = DarwinDependencyManagement(
                 project: FakeFlutterProject(
-                  usingSwiftPackageManager: true,
+                  usesSwiftPackageManager: true,
                   fileSystem: fs,
                 ),
                 plugins: plugins,
@@ -100,7 +100,7 @@ void main() {
 
               final DarwinDependencyManagement dependencyManagement = DarwinDependencyManagement(
                 project: FakeFlutterProject(
-                  usingSwiftPackageManager: true,
+                  usesSwiftPackageManager: true,
                   fileSystem: fs,
                 ),
                 plugins: plugins,
@@ -139,7 +139,7 @@ void main() {
                 podFile: projectPodfile,
               );
               final FakeFlutterProject project = FakeFlutterProject(
-                usingSwiftPackageManager: true,
+                usesSwiftPackageManager: true,
                 fileSystem: fs,
               );
               final XcodeBasedProject xcodeProject = platform == SupportedPlatform.ios ? project.ios : project.macos;
@@ -190,7 +190,7 @@ void main() {
                 podFile: projectPodfile,
               );
               final FakeFlutterProject project = FakeFlutterProject(
-                usingSwiftPackageManager: true,
+                usesSwiftPackageManager: true,
                 fileSystem: fs,
               );
               final XcodeBasedProject xcodeProject = platform == SupportedPlatform.ios ? project.ios : project.macos;
@@ -250,7 +250,7 @@ void main() {
 
               final DarwinDependencyManagement dependencyManagement = DarwinDependencyManagement(
                 project: FakeFlutterProject(
-                  usingSwiftPackageManager: true,
+                  usesSwiftPackageManager: true,
                   fileSystem: fs,
                 ),
                 plugins: plugins,
@@ -287,7 +287,7 @@ void main() {
               );
               final FakeCocoaPods cocoaPods = FakeCocoaPods();
               final FakeFlutterProject project = FakeFlutterProject(
-                usingSwiftPackageManager: true,
+                usesSwiftPackageManager: true,
                 fileSystem: fs,
               );
               final XcodeBasedProject xcodeProject = platform == SupportedPlatform.ios ? project.ios : project.macos;
@@ -494,7 +494,7 @@ class FakeMacOSProject extends Fake implements MacOSProject {
 class FakeFlutterProject extends Fake implements FlutterProject {
   FakeFlutterProject({
     required this.fileSystem,
-    this.usingSwiftPackageManager = false,
+    this.usesSwiftPackageManager = false,
     this.isModule = false,
   });
 
@@ -508,7 +508,7 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   late final MacOSProject macos = FakeMacOSProject(fileSystem: fileSystem);
 
   @override
-  final bool usingSwiftPackageManager;
+  final bool usesSwiftPackageManager;
 
   @override
   final bool isModule;

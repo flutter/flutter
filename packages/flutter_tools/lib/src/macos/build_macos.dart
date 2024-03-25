@@ -97,7 +97,7 @@ Future<void> buildMacOS({
     targetOverride: targetOverride,
     useMacOSConfig: true,
   );
-  if (flutterProject.usingSwiftPackageManager) {
+  if (flutterProject.usesSwiftPackageManager) {
     SwiftPackageManager.linkFlutterFramework(
       SupportedPlatform.macos,
       flutterProject.macos,

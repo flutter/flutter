@@ -689,7 +689,7 @@ dependencies:
         final DateTime dateCreated = DateTime(1970);
         systemClock.currentTime = dateCreated;
 
-        flutterProject.usingSwiftPackageManager = true;
+        flutterProject.usesSwiftPackageManager = true;
 
         await refreshPluginsList(flutterProject);
 
@@ -2000,7 +2000,7 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   bool isModule = false;
 
   @override
-  bool usingSwiftPackageManager = false;
+  bool usesSwiftPackageManager = false;
 
   @override
   late FlutterManifest manifest;

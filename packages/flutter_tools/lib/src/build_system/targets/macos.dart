@@ -46,7 +46,7 @@ abstract class UnpackMacOS extends Target {
     // commands producing the same output. Only output the framework if SPM
     // isn't using it.
     final FlutterProject flutterProject = FlutterProject.current();
-    if (flutterProject.usingSwiftPackageManager) {
+    if (flutterProject.usesSwiftPackageManager) {
       final File swiftPackage = flutterProject.macos.flutterPluginSwiftPackageManifest;
       if (swiftPackage.existsSync() &&
           swiftPackage

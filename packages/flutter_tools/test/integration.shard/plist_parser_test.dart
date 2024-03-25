@@ -14,8 +14,6 @@ import '../src/common.dart';
 import '../src/fakes.dart';
 import 'test_utils.dart';
 
-// TODO: SPM - test
-
 const String base64PlistXml =
     'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPCFET0NUWVBFIHBsaXN0I'
     'FBVQkxJQyAiLS8vQXBwbGUvL0RURCBQTElTVCAxLjAvL0VOIiAiaHR0cDovL3d3dy5hcHBsZS'
