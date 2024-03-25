@@ -801,7 +801,8 @@ class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
   _AutofillScopeTextInputConfiguration({
     required this.allConfigurations,
     required TextInputConfiguration currentClientConfiguration,
-  }) : super(inputType: currentClientConfiguration.inputType,
+  }) : super(viewId: currentClientConfiguration.viewId,
+         inputType: currentClientConfiguration.inputType,
          obscureText: currentClientConfiguration.obscureText,
          autocorrect: currentClientConfiguration.autocorrect,
          smartDashesType: currentClientConfiguration.smartDashesType,
