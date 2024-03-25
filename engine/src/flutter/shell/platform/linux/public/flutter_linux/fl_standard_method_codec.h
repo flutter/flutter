@@ -12,6 +12,7 @@
 #include <gmodule.h>
 
 #include "fl_method_codec.h"
+#include "fl_standard_message_codec.h"
 
 G_BEGIN_DECLS
 
@@ -41,6 +42,17 @@ G_DECLARE_FINAL_TYPE(FlStandardMethodCodec,
  * Returns: a new #FlStandardMethodCodec.
  */
 FlStandardMethodCodec* fl_standard_method_codec_new();
+
+/**
+ * fl_standard_method_codec_new:
+ * @message_codec: A #FlMessageCodec.
+ *
+ * Creates an #FlStandardMethodCodec with a custom message codec.
+ *
+ * Returns: a new #FlStandardMethodCodec.
+ */
+FlStandardMethodCodec* fl_standard_method_codec_new_with_message_codec(
+    FlStandardMessageCodec* message_codec);
 
 G_END_DECLS
 
