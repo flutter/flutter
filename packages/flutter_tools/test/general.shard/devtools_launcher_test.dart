@@ -74,7 +74,7 @@ Serving DevTools at http://127.0.0.1:9100.
     )..printDtdUri = true;
 
     expect(launcher.dtdUri, isNull);
-    expect(launcher.printDtdUri, false);
+    expect(launcher.printDtdUri, true);
     final DevToolsServerAddress? address = await launcher.serve();
     expect(address?.host, '127.0.0.1');
     expect(address?.port, 9100);
