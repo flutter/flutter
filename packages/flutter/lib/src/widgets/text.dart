@@ -870,7 +870,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     // First pass, if the position is on a placeholder then dispatch the selection
     // event to the [Selectable] at the location and terminate.
     for (int index = 0; index < selectables.length; index += 1) {
-      final bool selectableIsPlaceholder = paragraph.selectables != null && !paragraph.selectables!.contains(selectables[index]);
+      final bool selectableIsPlaceholder = !paragraph.selectableBelongsToParagraph(selectables[index]);
       if (selectableIsPlaceholder && selectables[index].boundingBoxes.isNotEmpty) {
         for (final Rect rect in selectables[index].boundingBoxes) {
           final Rect globalRect = MatrixUtils.transformRect(selectables[index].getTransformTo(null), rect);
@@ -886,7 +886,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     bool foundStart = false;
     int? lastNextIndex;
     for (int index = 0; index < selectables.length; index += 1) {
-      if (paragraph.selectables != null && !paragraph.selectables!.contains(selectables[index])) {
+      if (!paragraph.selectableBelongsToParagraph(selectables[index])) {
         if (foundStart) {
           final SelectionEvent synthesizedEvent = SelectParagraphSelectionEvent(globalPosition: event.globalPosition, absorb: true);
           final SelectionResult result = dispatchSelectionEventToChild(selectables[index], synthesizedEvent);
