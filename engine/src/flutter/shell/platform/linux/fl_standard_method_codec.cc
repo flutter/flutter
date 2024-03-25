@@ -18,17 +18,52 @@ static constexpr guint8 kEnvelopeTypeError = 1;
 struct _FlStandardMethodCodec {
   FlMethodCodec parent_instance;
 
-  FlStandardMessageCodec* codec;
+  FlStandardMessageCodec* message_codec;
 };
+
+enum { kPropMessageCodec = 1, kPropLast };
 
 G_DEFINE_TYPE(FlStandardMethodCodec,
               fl_standard_method_codec,
               fl_method_codec_get_type())
 
+static void fl_standard_method_codec_set_property(GObject* object,
+                                                  guint prop_id,
+                                                  const GValue* value,
+                                                  GParamSpec* pspec) {
+  FlStandardMethodCodec* self = FL_STANDARD_METHOD_CODEC(object);
+
+  switch (prop_id) {
+    case kPropMessageCodec:
+      g_set_object(&self->message_codec,
+                   FL_STANDARD_MESSAGE_CODEC(g_value_get_object(value)));
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+      break;
+  }
+}
+
+static void fl_standard_method_codec_get_property(GObject* object,
+                                                  guint prop_id,
+                                                  GValue* value,
+                                                  GParamSpec* pspec) {
+  FlStandardMethodCodec* self = FL_STANDARD_METHOD_CODEC(object);
+
+  switch (prop_id) {
+    case kPropMessageCodec:
+      g_value_set_object(value, self->message_codec);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+      break;
+  }
+}
+
 static void fl_standard_method_codec_dispose(GObject* object) {
   FlStandardMethodCodec* self = FL_STANDARD_METHOD_CODEC(object);
 
-  g_clear_object(&self->codec);
+  g_clear_object(&self->message_codec);
 
   G_OBJECT_CLASS(fl_standard_method_codec_parent_class)->dispose(object);
 }
@@ -42,11 +77,11 @@ static GBytes* fl_standard_method_codec_encode_method_call(FlMethodCodec* codec,
 
   g_autoptr(GByteArray) buffer = g_byte_array_new();
   g_autoptr(FlValue) name_value = fl_value_new_string(name);
-  if (!fl_standard_message_codec_write_value(self->codec, buffer, name_value,
-                                             error)) {
+  if (!fl_standard_message_codec_write_value(self->message_codec, buffer,
+                                             name_value, error)) {
     return nullptr;
   }
-  if (!fl_standard_message_codec_write_value(self->codec, buffer, args,
+  if (!fl_standard_message_codec_write_value(self->message_codec, buffer, args,
                                              error)) {
     return nullptr;
   }
@@ -66,7 +101,7 @@ static gboolean fl_standard_method_codec_decode_method_call(
 
   size_t offset = 0;
   g_autoptr(FlValue) name_value = fl_standard_message_codec_read_value(
-      self->codec, message, &offset, error);
+      self->message_codec, message, &offset, error);
   if (name_value == nullptr) {
     return FALSE;
   }
@@ -77,7 +112,7 @@ static gboolean fl_standard_method_codec_decode_method_call(
   }
 
   g_autoptr(FlValue) args_value = fl_standard_message_codec_read_value(
-      self->codec, message, &offset, error);
+      self->message_codec, message, &offset, error);
   if (args_value == nullptr) {
     return FALSE;
   }
@@ -104,8 +139,8 @@ static GBytes* fl_standard_method_codec_encode_success_envelope(
   g_autoptr(GByteArray) buffer = g_byte_array_new();
   guint8 type = kEnvelopeTypeSuccess;
   g_byte_array_append(buffer, &type, 1);
-  if (!fl_standard_message_codec_write_value(self->codec, buffer, result,
-                                             error)) {
+  if (!fl_standard_message_codec_write_value(self->message_codec, buffer,
+                                             result, error)) {
     return nullptr;
   }
 
@@ -126,18 +161,18 @@ static GBytes* fl_standard_method_codec_encode_error_envelope(
   guint8 type = kEnvelopeTypeError;
   g_byte_array_append(buffer, &type, 1);
   g_autoptr(FlValue) code_value = fl_value_new_string(code);
-  if (!fl_standard_message_codec_write_value(self->codec, buffer, code_value,
-                                             error)) {
+  if (!fl_standard_message_codec_write_value(self->message_codec, buffer,
+                                             code_value, error)) {
     return nullptr;
   }
   g_autoptr(FlValue) message_value =
       message != nullptr ? fl_value_new_string(message) : nullptr;
-  if (!fl_standard_message_codec_write_value(self->codec, buffer, message_value,
-                                             error)) {
+  if (!fl_standard_message_codec_write_value(self->message_codec, buffer,
+                                             message_value, error)) {
     return nullptr;
   }
-  if (!fl_standard_message_codec_write_value(self->codec, buffer, details,
-                                             error)) {
+  if (!fl_standard_message_codec_write_value(self->message_codec, buffer,
+                                             details, error)) {
     return nullptr;
   }
 
@@ -167,7 +202,7 @@ static FlMethodResponse* fl_standard_method_codec_decode_response(
   g_autoptr(FlMethodResponse) response = nullptr;
   if (type == kEnvelopeTypeError) {
     g_autoptr(FlValue) code = fl_standard_message_codec_read_value(
-        self->codec, message, &offset, error);
+        self->message_codec, message, &offset, error);
     if (code == nullptr) {
       return nullptr;
     }
@@ -178,7 +213,7 @@ static FlMethodResponse* fl_standard_method_codec_decode_response(
     }
 
     g_autoptr(FlValue) error_message = fl_standard_message_codec_read_value(
-        self->codec, message, &offset, error);
+        self->message_codec, message, &offset, error);
     if (error_message == nullptr) {
       return nullptr;
     }
@@ -190,7 +225,7 @@ static FlMethodResponse* fl_standard_method_codec_decode_response(
     }
 
     g_autoptr(FlValue) details = fl_standard_message_codec_read_value(
-        self->codec, message, &offset, error);
+        self->message_codec, message, &offset, error);
     if (details == nullptr) {
       return nullptr;
     }
@@ -203,7 +238,7 @@ static FlMethodResponse* fl_standard_method_codec_decode_response(
         fl_value_get_type(details) != FL_VALUE_TYPE_NULL ? details : nullptr));
   } else if (type == kEnvelopeTypeSuccess) {
     g_autoptr(FlValue) result = fl_standard_message_codec_read_value(
-        self->codec, message, &offset, error);
+        self->message_codec, message, &offset, error);
 
     if (result == nullptr) {
       return nullptr;
@@ -227,7 +262,10 @@ static FlMethodResponse* fl_standard_method_codec_decode_response(
 
 static void fl_standard_method_codec_class_init(
     FlStandardMethodCodecClass* klass) {
+  G_OBJECT_CLASS(klass)->set_property = fl_standard_method_codec_set_property;
+  G_OBJECT_CLASS(klass)->get_property = fl_standard_method_codec_get_property;
   G_OBJECT_CLASS(klass)->dispose = fl_standard_method_codec_dispose;
+
   FL_METHOD_CODEC_CLASS(klass)->encode_method_call =
       fl_standard_method_codec_encode_method_call;
   FL_METHOD_CODEC_CLASS(klass)->decode_method_call =
@@ -238,13 +276,28 @@ static void fl_standard_method_codec_class_init(
       fl_standard_method_codec_encode_error_envelope;
   FL_METHOD_CODEC_CLASS(klass)->decode_response =
       fl_standard_method_codec_decode_response;
+
+  g_object_class_install_property(
+      G_OBJECT_CLASS(klass), kPropMessageCodec,
+      g_param_spec_object(
+          "message-codec", "message-codec", "Message codec to use",
+          fl_message_codec_get_type(),
+          static_cast<GParamFlags>(G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY |
+                                   G_PARAM_STATIC_STRINGS)));
 }
 
-static void fl_standard_method_codec_init(FlStandardMethodCodec* self) {
-  self->codec = fl_standard_message_codec_new();
-}
+static void fl_standard_method_codec_init(FlStandardMethodCodec* self) {}
 
 G_MODULE_EXPORT FlStandardMethodCodec* fl_standard_method_codec_new() {
+  g_autoptr(FlStandardMessageCodec) message_codec =
+      fl_standard_message_codec_new();
+  return fl_standard_method_codec_new_with_message_codec(message_codec);
+}
+
+G_MODULE_EXPORT FlStandardMethodCodec*
+fl_standard_method_codec_new_with_message_codec(
+    FlStandardMessageCodec* message_codec) {
   return FL_STANDARD_METHOD_CODEC(
-      g_object_new(fl_standard_method_codec_get_type(), nullptr));
+      g_object_new(fl_standard_method_codec_get_type(), "message-codec",
+                   message_codec, nullptr));
 }
