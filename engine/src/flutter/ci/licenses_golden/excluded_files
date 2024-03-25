@@ -2278,7 +2278,6 @@
 ../../../flutter/third_party/skia/gn/find_headers.py
 ../../../flutter/third_party/skia/gn/find_msvc.py
 ../../../flutter/third_party/skia/gn/find_xcode_sysroot.py
-../../../flutter/third_party/skia/gn/gen_plist_ios.py
 ../../../flutter/third_party/skia/gn/gn_meta_sln.py
 ../../../flutter/third_party/skia/gn/gn_to_bp.py
 ../../../flutter/third_party/skia/gn/gn_to_bp_utils.py
