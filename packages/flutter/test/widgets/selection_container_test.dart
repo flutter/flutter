@@ -89,7 +89,7 @@ void main() {
               child: const Text('dummy'),
             );
           },
-        )
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -131,17 +131,17 @@ void main() {
     await pumpContainer(
       tester,
       SelectionContainer(
-          registrar: registrar,
-          delegate: delegate,
-          child: Builder(
-            builder: (BuildContext context) {
-              return SelectionContainer(
-                registrar: SelectionContainer.maybeOf(context),
-                delegate: childDelegate,
-                child: const Text('dummy'),// The [Text] widget has an internal [SelectionContainer].
-              );
-            },
-          )
+        registrar: registrar,
+        delegate: delegate,
+        child: Builder(
+          builder: (BuildContext context) {
+            return SelectionContainer(
+              registrar: SelectionContainer.maybeOf(context),
+              delegate: childDelegate,
+              child: const Text('dummy'),// The [Text] widget has an internal [SelectionContainer].
+            );
+          },
+        ),
       ),
     );
     await tester.pump();
@@ -161,25 +161,25 @@ void main() {
     await pumpContainer(
       tester,
       SelectionContainer(
-          registrar: registrar,
-          delegate: delegate,
-          child: Builder(
-            builder: (BuildContext context) {
-              return SelectionContainer(
-                registrar: SelectionContainer.maybeOf(context),
-                delegate: childDelegate,
-                child: Builder(
-                  builder: (BuildContext context) {
-                    return RichText(
-                      selectionColor: Colors.blue,
-                      selectionRegistrar: SelectionContainer.maybeOf(context),
-                      text: TextSpan(text: 'dummy'),
-                    );
-                  },
-                ),
-              );
-            },
-          )
+        registrar: registrar,
+        delegate: delegate,
+        child: Builder(
+          builder: (BuildContext context) {
+            return SelectionContainer(
+              registrar: SelectionContainer.maybeOf(context),
+              delegate: childDelegate,
+              child: Builder(
+                builder: (BuildContext context) {
+                  return RichText(
+                    selectionColor: Colors.blue,
+                    selectionRegistrar: SelectionContainer.maybeOf(context),
+                    text: const TextSpan(text: 'dummy'),
+                  );
+                },
+              ),
+            );
+          },
+        ),
       ),
     );
     await tester.pump();
