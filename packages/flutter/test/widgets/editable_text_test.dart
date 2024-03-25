@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/clipboard_utils.dart';
 import 'editable_text_utils.dart';
@@ -9748,7 +9749,9 @@ void main() {
       expect(errorString, contains('Unbalanced call to endBatchEdit'));
     });
 
-     testWidgets('catch unfinished batch edits on disposal', (WidgetTester tester) async {
+     testWidgets('catch unfinished batch edits on disposal',
+     experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+     (WidgetTester tester) async {
       await tester.pumpWidget(buildWidget());
 
       // Connect.
@@ -15346,6 +15349,7 @@ void main() {
       final EditableText editableText = tester.widget(find.byType(EditableText));
       final BuildContext context = tester.firstElement(find.byType(EditableText));
       final ValueNotifier<MagnifierInfo> magnifierInfo = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
+      addTearDown(magnifierInfo.dispose);
       expect(
         editableText.magnifierConfiguration.magnifierBuilder(
           context,

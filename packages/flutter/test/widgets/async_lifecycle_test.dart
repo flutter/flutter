@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class InvalidOnInitLifecycleWidget extends StatefulWidget {
   const InvalidOnInitLifecycleWidget({super.key});
@@ -46,13 +47,17 @@ class InvalidDidUpdateWidgetLifecycleWidgetState extends State<InvalidDidUpdateW
 }
 
 void main() {
-  testWidgets('async onInit throws FlutterError', (WidgetTester tester) async {
+  testWidgets('async onInit throws FlutterError',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     await tester.pumpWidget(const InvalidOnInitLifecycleWidget());
 
     expect(tester.takeException(), isFlutterError);
   });
 
-  testWidgets('async didUpdateWidget throws FlutterError', (WidgetTester tester) async {
+  testWidgets('async didUpdateWidget throws FlutterError',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(color: Colors.green));
     await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(color: Colors.red));
 

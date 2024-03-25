@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgets('TickerMode', (WidgetTester tester) async {
@@ -66,7 +67,9 @@ void main() {
   });
 
   group('TickerProviderStateMixin assertion control test', () {
-    testWidgets('SingleTickerProviderStateMixin create multiple tickers', (WidgetTester tester) async {
+    testWidgets('SingleTickerProviderStateMixin create multiple tickers',
+    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
       const Widget widget = _SingleTickerCreateMultipleTicker();
       await tester.pumpWidget(widget);
       final dynamic exception = tester.takeException();
