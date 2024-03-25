@@ -109,6 +109,7 @@ enum _DurationPickerAspect {
   useMaterial3,
   entryMode,
   durationMode,
+  durationPickerMode,
   onDurationModeChanged,
   onHourDoubleTapped,
   onMinuteDoubleTapped,
@@ -125,6 +126,7 @@ class _DurationPickerModel extends InheritedModel<_DurationPickerAspect> {
   const _DurationPickerModel({
     required this.entryMode,
     required this.durationMode,
+    required this.durationPickerMode,
     required this.onDurationModeChanged,
     required this.onHourDoubleTapped,
     required this.onMinuteDoubleTapped,
@@ -141,6 +143,7 @@ class _DurationPickerModel extends InheritedModel<_DurationPickerAspect> {
 
   final DurationPickerEntryMode entryMode;
   final _DurationMode durationMode;
+  final DurationPickerMode durationPickerMode;
   final ValueChanged<_DurationMode> onDurationModeChanged;
   final GestureTapCallback onHourDoubleTapped;
   final GestureTapCallback onMinuteDoubleTapped;
@@ -155,6 +158,7 @@ class _DurationPickerModel extends InheritedModel<_DurationPickerAspect> {
 
   static _DurationPickerModel of(BuildContext context, [_DurationPickerAspect? aspect]) => InheritedModel.inheritFrom<_DurationPickerModel>(context, aspect: aspect)!;
   static DurationPickerEntryMode entryModeOf(BuildContext context) => of(context, _DurationPickerAspect.entryMode).entryMode;
+  static DurationPickerMode durationPickerModeOf(BuildContext context) => of(context, _DurationPickerAspect.durationPickerMode).durationPickerMode;
   static _DurationMode durationModeOf(BuildContext context) => of(context, _DurationPickerAspect.durationMode).durationMode;
   static Duration selectedDurationOf(BuildContext context) => of(context, _DurationPickerAspect.selectedDuration).selectedDuration;
   static bool useMaterial3Of(BuildContext context) => of(context, _DurationPickerAspect.useMaterial3).useMaterial3;
@@ -227,6 +231,7 @@ class _DurationPickerModel extends InheritedModel<_DurationPickerAspect> {
   }
 }
 
+/// TODO: only used for dial, should also be renamed in TimePickerHeader to _TimePickerDialHeader
 class _DurationPickerHeader extends StatelessWidget {
   const _DurationPickerHeader({ required this.durationPickerMode, required this.helpText });
 
@@ -303,6 +308,7 @@ class _DurationPickerHeader extends StatelessWidget {
   }
 }
 
+/// TODO used in Dial mode only. Also change in TimeOfDay_picker!
 class _DurationControl extends StatelessWidget {
   const _DurationControl({
     required this.text,
@@ -330,19 +336,18 @@ class _DurationControl extends StatelessWidget {
       _DurationPickerModel.themeOf(context).hourMinuteTextColor ?? _DurationPickerModel.defaultThemeOf(context).hourMinuteTextColor,
       states,
     );
-    final TextStyle effectiveStyle = MaterialStateProperty.resolveAs<TextStyle>(
+    TextStyle effectiveStyle = MaterialStateProperty.resolveAs<TextStyle>(
       timePickerTheme.hourMinuteTextStyle ?? defaultTheme.hourMinuteTextStyle,
       states,
     ).copyWith(color: effectiveTextColor);
 
-    final double height;
-    switch (_DurationPickerModel.entryModeOf(context)) {
-      case DurationPickerEntryMode.dial:
-      case DurationPickerEntryMode.dialOnly:
-        height = defaultTheme.hourMinuteSize.height;
-      case DurationPickerEntryMode.input:
-      case DurationPickerEntryMode.inputOnly:
-        height = defaultTheme.hourMinuteInputSize.height;
+    // TODO: only used in dial mode, therefore can remove the other stuff.
+    double height = defaultTheme.hourMinuteSize.height;
+
+    // TODO: check if it's valid to scale
+    if (_DurationPickerModel.durationPickerModeOf(context) == DurationPickerMode.hms) {
+      height = defaultTheme.hourMinuteInputSize.height;
+      effectiveStyle = effectiveStyle.copyWith(fontSize: 45); // Display medium
     }
 
     return SizedBox(
@@ -358,7 +363,7 @@ class _DurationControl extends StatelessWidget {
             child: Text(
               text,
               style: effectiveStyle,
-              textScaler: TextScaler.noScaling,
+              // textScaler: TextScaler.noScaling,
             ),
           ),
         ),
@@ -451,7 +456,7 @@ class _TimeSelectorSeparator extends StatelessWidget {
         ?? defaultTheme.hourMinuteTextColor,
       states,
     );
-    final TextStyle effectiveStyle = MaterialStateProperty.resolveAs<TextStyle>(
+    TextStyle effectiveStyle = MaterialStateProperty.resolveAs<TextStyle>(
       timePickerTheme.timeSelectorSeparatorTextStyle?.resolve(states)
         ?? timePickerTheme.hourMinuteTextStyle
         ?? defaultTheme.timeSelectorSeparatorTextStyle?.resolve(states)
@@ -459,7 +464,7 @@ class _TimeSelectorSeparator extends StatelessWidget {
       states,
     ).copyWith(color: effectiveTextColor);
 
-    final double height;
+    double height;
     switch (_DurationPickerModel.entryModeOf(context)) {
       case DurationPickerEntryMode.dial:
       case DurationPickerEntryMode.dialOnly:
@@ -467,6 +472,12 @@ class _TimeSelectorSeparator extends StatelessWidget {
       case DurationPickerEntryMode.input:
       case DurationPickerEntryMode.inputOnly:
         height = defaultTheme.hourMinuteInputSize.height;
+    }
+
+    // TODO: check if it's valid to scale, also it isn't scaled in input dialog.
+    if (_DurationPickerModel.durationPickerModeOf(context) == DurationPickerMode.hms) {
+      height = defaultTheme.hourMinuteInputSize.height;
+      effectiveStyle = effectiveStyle.copyWith(fontSize: 45); // Display medium
     }
 
     return ExcludeSemantics(
@@ -731,6 +742,7 @@ class _Dial extends StatefulWidget {
     required this.hourDialType,
     required this.onChanged,
     required this.onHourSelected,
+    required this.onMinuteSelected,
   });
 
   final Duration selectedDuration;
@@ -738,6 +750,7 @@ class _Dial extends StatefulWidget {
   final _HourDialType hourDialType;
   final ValueChanged<Duration>? onChanged;
   final VoidCallback? onHourSelected;
+  final VoidCallback? onMinuteSelected;
 
   @override
   _DialState createState() => _DialState();
@@ -957,8 +970,12 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _center = null;
     _dialSize = null;
     _animateTo(_getThetaForTime(widget.selectedDuration), _getRadiusForTime(widget.selectedDuration));
-    if (widget.durationMode == _DurationMode.hour) {
-      widget.onHourSelected?.call();
+    switch(widget.durationMode) {
+      case _DurationMode.hour:
+        widget.onHourSelected?.call();
+      case _DurationMode.minute:
+        widget.onMinuteSelected?.call();
+      case _DurationMode.second:
     }
   }
 
@@ -969,16 +986,21 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _dialSize = box.size;
     _updateThetaForPan(roundMinutes: true, roundSeconds: true);
     final Duration newTime = _notifyOnChangedIfNeeded(roundMinutes: true, roundSeconds: true);
-    if (widget.durationMode == _DurationMode.hour) {
-      switch (widget.hourDialType) {
-        case _HourDialType.twentyFourHour:
-        case _HourDialType.twentyFourHourDoubleRing:
-          _announceToAccessibility(context, localizations.formatDecimal(newTime.hour));
-      }
-      widget.onHourSelected?.call();
-    } else {
-      _announceToAccessibility(context, localizations.formatDecimal(newTime.minute));
+    switch(widget.durationMode) {
+      case _DurationMode.hour:
+        switch (widget.hourDialType) {
+          case _HourDialType.twentyFourHour:
+          case _HourDialType.twentyFourHourDoubleRing:
+            _announceToAccessibility(context, localizations.formatDecimal(newTime.hour));
+        }
+        widget.onHourSelected?.call();
+      case _DurationMode.minute:
+        _announceToAccessibility(context, localizations.formatDecimal(newTime.minute));
+        widget.onMinuteSelected?.call();
+      case _DurationMode.second:
+        _announceToAccessibility(context, localizations.formatDecimal(newTime.second));
     }
+    
     final Duration time = _getTimeForTheta(_theta.value, roundMinutes: true, roundSeconds: true, radius: _radius.value);
     _animateTo(_getThetaForTime(time), _getRadiusForTime(time));
     _dragging = false;
@@ -2454,6 +2476,14 @@ class _DurationPickerState extends State<_TimePicker> with RestorationMixin {
     });
   }
 
+  void _handleMinuteSelected() {
+    if (widget.durationPickerMode.hasSeconds) {
+      setState(() {
+        _durationMode.value = _DurationMode.second;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
@@ -2494,6 +2524,7 @@ class _DurationPickerState extends State<_TimePicker> with RestorationMixin {
                   selectedDuration: _selectedDuration.value,
                   onChanged: _handleTimeChanged,
                   onHourSelected: _handleHourSelected,
+                  onMinuteSelected: _handleMinuteSelected,
                 ),
               ),
             ),
@@ -2571,6 +2602,7 @@ class _DurationPickerState extends State<_TimePicker> with RestorationMixin {
     }
     return _DurationPickerModel(
       entryMode: widget.entryMode,
+      durationPickerMode: widget.durationPickerMode,
       selectedDuration: _selectedDuration.value,
       durationMode: _durationMode.value,
       orientation: orientation,

@@ -74,11 +74,45 @@ class Home extends StatelessWidget {
                 ),
               ],
             ),
-            const DurationPickerDialog(
-              durationPickerMode: DurationPickerMode.hms,
+            Row(
+              children: [
+                const DurationPickerDialog(
+                  durationPickerMode: DurationPickerMode.hm,
+                  initialDuration: Duration(hours: 1, minutes: 30, seconds: 45),
+                ),
+                const DurationPickerDialog(
+                  durationPickerMode: DurationPickerMode.hm,
+                  initialEntryMode: DurationPickerEntryMode.input,
+                  initialDuration: Duration(hours: 1, minutes: 30, seconds: 45),
+                ),
+              ],
             ),
-            const DurationPickerDialog(
-                durationPickerMode: DurationPickerMode.ms),
+            Row(
+              children: [
+                const DurationPickerDialog(
+                  durationPickerMode: DurationPickerMode.hms,
+                  initialDuration: Duration(hours: 1, minutes: 30, seconds: 45),
+                ),
+                const DurationPickerDialog(
+                  durationPickerMode: DurationPickerMode.hms,
+                  initialEntryMode: DurationPickerEntryMode.input,
+                  initialDuration: Duration(hours: 1, minutes: 30, seconds: 45),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                const DurationPickerDialog(
+                  durationPickerMode: DurationPickerMode.ms,
+                  initialDuration: Duration(hours: 1, minutes: 30, seconds: 45),
+                ),
+                const DurationPickerDialog(
+                  durationPickerMode: DurationPickerMode.ms,
+                  initialEntryMode: DurationPickerEntryMode.input,
+                  initialDuration: Duration(hours: 1, minutes: 30, seconds: 45),
+                ),
+              ],
+            ),
             CupertinoTimerPicker(
               mode: CupertinoTimerPickerMode.hms,
               onTimerDurationChanged: (Duration value) {
