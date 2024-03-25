@@ -596,11 +596,18 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     required double extent, // the extent in the direction that isn't the sizing direction
     required _ChildSizingFunction childSize, // a method to find the size in the sizing direction
   }) {
-    // Translate the extent into BoxConstraints.
-    final BoxConstraints extentConstraints = switch (sizingDirection) {
-      Axis.horizontal => BoxConstraints(maxHeight: extent),
-      Axis.vertical   => BoxConstraints(maxWidth: extent),
-    };
+    // TODO(LongCatIsLooong): use _computeSizes for intrinsics calculation and
+    // add support for baseline alignment.
+    if (_isBaselineAligned) {
+      // Intrinsics cannot be calculated without a full layout for
+      // baseline alignment. Throw an assertion and return 0.0 as documented
+      // on [RenderBox.computeMinIntrinsicWidth].
+      assert(
+        RenderObject.debugCheckingIntrinsics,
+        'Intrinsics are not available for CrossAxisAlignment.baseline.',
+      );
+      return 0.0;
+    }
     if (_direction == sizingDirection) {
       // INTRINSIC MAIN SIZE
       // Intrinsic main size is the smallest size the flex container can take
@@ -624,26 +631,53 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       return maxFlexFractionSoFar * totalFlex + inflexibleSpace;
     } else {
       // INTRINSIC CROSS SIZE
-      Size layoutChildWithMainSizeConstrained(RenderBox child, BoxConstraints constraints) {
-        final bool isFlexChild = _getFlex(child) > 0;
-        switch (_direction) {
-          case Axis.horizontal:
-            final double mainExtent = isFlexChild
-              ? math.min(child.getMaxIntrinsicWidth(constraints.maxHeight), constraints.maxWidth)
-              : child.getMaxIntrinsicWidth(constraints.maxHeight);
-            return Size(mainExtent, childSize(child, mainExtent));
-          case Axis.vertical:
-            final double mainExtent = isFlexChild
-              ? math.min(child.getMaxIntrinsicHeight(constraints.maxWidth), constraints.maxHeight)
-              : child.getMaxIntrinsicHeight(constraints.maxWidth);
-            return Size(childSize(child, mainExtent), mainExtent);
+      // Intrinsic cross size is the max of the intrinsic cross sizes of the
+      // children, after the flexible children are fit into the available space,
+      // with the children sized using their max intrinsic dimensions.
+
+      // Get inflexible space using the max intrinsic dimensions of fixed children in the main direction.
+      final double availableMainSpace = extent;
+      int totalFlex = 0;
+      double inflexibleSpace = 0.0;
+      double maxCrossSize = 0.0;
+      RenderBox? child = firstChild;
+      while (child != null) {
+        final int flex = _getFlex(child);
+        totalFlex += flex;
+        late final double mainSize;
+        late final double crossSize;
+        if (flex == 0) {
+          switch (_direction) {
+            case Axis.horizontal:
+              mainSize = child.getMaxIntrinsicWidth(double.infinity);
+              crossSize = childSize(child, mainSize);
+            case Axis.vertical:
+              mainSize = child.getMaxIntrinsicHeight(double.infinity);
+              crossSize = childSize(child, mainSize);
+          }
+          inflexibleSpace += mainSize;
+          maxCrossSize = math.max(maxCrossSize, crossSize);
         }
+        final FlexParentData childParentData = child.parentData! as FlexParentData;
+        child = childParentData.nextSibling;
       }
-      return _computeSizes(
-        constraints: extentConstraints,
-        layoutChild: layoutChildWithMainSizeConstrained,
-        getBaseline: ChildLayoutHelper.getDryBaseline,
-      ).axisSize.crossAxisExtent;
+
+      // Determine the spacePerFlex by allocating the remaining available space.
+      // When you're overconstrained spacePerFlex can be negative.
+      final double spacePerFlex = math.max(0.0, (availableMainSpace - inflexibleSpace) / totalFlex);
+
+      // Size remaining (flexible) items, find the maximum cross size.
+      child = firstChild;
+      while (child != null) {
+        final int flex = _getFlex(child);
+        if (flex > 0) {
+          maxCrossSize = math.max(maxCrossSize, childSize(child, spacePerFlex * flex));
+        }
+        final FlexParentData childParentData = child.parentData! as FlexParentData;
+        child = childParentData.nextSibling;
+      }
+
+      return maxCrossSize;
     }
   }
 

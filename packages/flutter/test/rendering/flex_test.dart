@@ -711,32 +711,6 @@ void main() {
       expect(flex.getMaxIntrinsicWidth(500.0), 200.0 + 500.0);
     });
 
-    test('main axis intrinsics with RenderAspectRatio 2', () {
-      const BoxConstraints square = BoxConstraints.tightFor(width: 100.0, height: 100.0);
-      final RenderConstrainedBox box1 = RenderConstrainedBox(additionalConstraints: square);
-      final RenderAspectRatio box2 = RenderAspectRatio(aspectRatio: 1.0, child: RenderConstrainedBox(additionalConstraints: square));
-      final RenderAspectRatio box3 = RenderAspectRatio(aspectRatio: 1.0, child: RenderConstrainedBox(additionalConstraints: square));
-      final RenderFlex flex = RenderFlex(
-        textDirection: TextDirection.ltr,
-      );
-      flex.addAll(<RenderBox>[box1, box2, box3]);
-      final FlexParentData box2ParentData = box2.parentData! as FlexParentData;
-      box2ParentData.flex = 1;
-      box2ParentData.fit = FlexFit.tight;
-      final FlexParentData box3ParentData = box3.parentData! as FlexParentData;
-      box3ParentData.flex = 2;
-      box3ParentData.fit = FlexFit.tight;
-
-      expect(flex.getMinIntrinsicWidth(double.infinity), 300.0);
-      expect(flex.getMaxIntrinsicWidth(double.infinity), 300.0);
-
-      expect(flex.getMinIntrinsicWidth(300.0), 100.0 + 300.0 * 2);
-      expect(flex.getMaxIntrinsicWidth(300.0), 100.0 + 300.0 * 2);
-
-      expect(flex.getMinIntrinsicWidth(500.0), 100.0 + 500.0 * 2);
-      expect(flex.getMaxIntrinsicWidth(500.0), 100.0 + 500.0 * 2);
-    });
-
     test('cross axis intrinsics, with ascending flex flow layout', () {
       const BoxConstraints square = BoxConstraints.tightFor(width: 5.0, height: 5.0);
       // 3 'A's separated by zero-width spaces. Max instrinsic width = 30, min intrinsic width = 10
@@ -807,79 +781,6 @@ void main() {
       // width distribution = 5, 20, 10
       expect(flex.getMinIntrinsicHeight(35.0), 30.0);
       expect(flex.getMaxIntrinsicHeight(35.0), 30.0);
-    });
-
-    test('baseline aligned non-flex flow layout intrinsics', () {
-      // box1 has its baseline placed at the top of the box.
-      final RenderFlowBaselineTestBox box1 = RenderFlowBaselineTestBox()
-        ..baselinePlacer = ((double height) => 0.0)
-        ..gridCount = 10;
-
-      // box2 has its baseline placed at the bottom of the box.
-      final RenderFlowBaselineTestBox box2 = RenderFlowBaselineTestBox()
-        ..baselinePlacer = ((double height) => height)
-        ..gridCount = 10;
-
-      final RenderFlex flex = RenderFlex(
-        textDirection: TextDirection.ltr,
-        textBaseline: TextBaseline.alphabetic,
-        crossAxisAlignment: CrossAxisAlignment.baseline,
-        children: <RenderBox>[box1, box2],
-      );
-
-      expect(flex.getMinIntrinsicHeight(double.infinity), 10.0 + 10.0);
-      expect(flex.getMaxIntrinsicHeight(double.infinity), 10.0 + 10.0);
-      expect(flex.getMinIntrinsicWidth(double.infinity), 20.0);
-      expect(flex.getMaxIntrinsicWidth(double.infinity), 200.0);
-
-      expect(flex.getMinIntrinsicHeight(20), 20.0);
-      expect(flex.getMaxIntrinsicHeight(20), 20.0);
-      expect(flex.getMinIntrinsicWidth(100), 20.0);
-      expect(flex.getMaxIntrinsicWidth(100), 200.0);
-
-      expect(flex.getMinIntrinsicHeight(5), 20.0);
-      expect(flex.getMaxIntrinsicHeight(5), 20.0);
-      expect(flex.getMinIntrinsicWidth(5), 20.0);
-      expect(flex.getMaxIntrinsicWidth(5), 200.0);
-    });
-
-    test('baseline aligned flex flow layout intrinsics', () {
-      // box1 has its baseline placed at the top of the box.
-      final RenderFlowBaselineTestBox box1 = RenderFlowBaselineTestBox()
-        ..baselinePlacer = ((double height) => 0.0)
-        ..gridCount = 10;
-
-      // box2 has its baseline placed at the bottom of the box.
-      final RenderFlowBaselineTestBox box2 = RenderFlowBaselineTestBox()
-        ..baselinePlacer = ((double height) => height)
-        ..gridCount = 10;
-
-      final RenderFlex flex = RenderFlex(
-        textDirection: TextDirection.ltr,
-        textBaseline: TextBaseline.alphabetic,
-        crossAxisAlignment: CrossAxisAlignment.baseline,
-        children: <RenderBox>[box1, box2],
-      );
-      final FlexParentData box1ParentData = box1.parentData! as FlexParentData;
-      box1ParentData.flex = 2;
-      box1ParentData.fit = FlexFit.tight; // In intrinsics FlexFit.tight should have no effect.
-      final FlexParentData box2ParentData = box2.parentData! as FlexParentData;
-      box2ParentData.flex = 1;
-
-      expect(flex.getMinIntrinsicHeight(double.infinity), 10.0 + 10.0);
-      expect(flex.getMaxIntrinsicHeight(double.infinity), 10.0 + 10.0);
-      expect(flex.getMinIntrinsicWidth(double.infinity), 20.0);
-      expect(flex.getMaxIntrinsicWidth(double.infinity), 200.0);
-
-      expect(flex.getMinIntrinsicHeight(20), 200.0);
-      expect(flex.getMaxIntrinsicHeight(20), 200.0);
-      expect(flex.getMinIntrinsicWidth(100), 20.0);
-      expect(flex.getMaxIntrinsicWidth(100), 200.0);
-
-      expect(flex.getMinIntrinsicHeight(5), 200.0);
-      expect(flex.getMaxIntrinsicHeight(5), 200.0);
-      expect(flex.getMinIntrinsicWidth(5), 20.0);
-      expect(flex.getMaxIntrinsicWidth(5), 200.0);
     });
 
     test('baseline aligned flex flow computeDryLayout', () {
