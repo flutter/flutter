@@ -1193,6 +1193,36 @@ class WidgetsApp extends StatefulWidget {
   /// Used by the `showPerformanceOverlay` VM service extension.
   static bool showPerformanceOverlayOverride = false;
 
+  /// If true, forces the widget inspector to be visible.
+  ///
+  /// Deprecated.
+  /// Use WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.value
+  /// instead.
+  ///
+  /// Overrides the `debugShowWidgetInspector` value set in [WidgetsApp].
+  ///
+  /// Used by the `debugShowWidgetInspector` debugging extension.
+  ///
+  /// The inspector allows the selection of a location on your device or emulator
+  /// and view what widgets and render objects associated with it. An outline of
+  /// the selected widget and some summary information is shown on device and
+  /// more detailed information is shown in the IDE or DevTools.
+  @Deprecated(
+    'Use WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.value instead. '
+    'This feature was deprecated after v3.20.0-14.0.pre.',
+  )
+  static bool get debugShowWidgetInspectorOverride {
+    return WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.value;
+  }
+
+  @Deprecated(
+    'Use WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.value instead. '
+    'This feature was deprecated after v3.20.0-14.0.pre.',
+  )
+  static set debugShowWidgetInspectorOverride(bool value) {
+    WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.value = value;
+  }
+
   /// If false, prevents the debug banner from being visible.
   ///
   /// Used by the `debugAllowBanner` VM service extension.

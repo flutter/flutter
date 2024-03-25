@@ -275,13 +275,13 @@ void main() {
               'open',
               <String>[
                 '-a',
-                '/non_existant_path',
+                '/non_existent_path',
                 '-g',
                 '-j',
                 '-F',
                 xcworkspace.path,
               ],
-              'The application /non_existant_path cannot be opened for an unexpected reason',
+              'The application /non_existent_path cannot be opened for an unexpected reason',
             ),
           ),
         ]);
@@ -304,7 +304,7 @@ void main() {
 
         expect(
           logger.errorText,
-          contains('The application /non_existant_path cannot be opened for an unexpected reason'),
+          contains('The application /non_existent_path cannot be opened for an unexpected reason'),
         );
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(status, false);
@@ -807,7 +807,7 @@ void main() {
         expect(status, isTrue);
       });
 
-      testWithoutContext('prints error message when deleting temporary directory that is nonexistant', () async {
+      testWithoutContext('prints error message when deleting temporary directory that is nonexistent', () async {
         final Xcode xcode = setupXcode(
           fakeProcessManager: fakeProcessManager,
           fileSystem: fileSystem,
@@ -914,7 +914,7 @@ void main() {
         expect(exitStatus, isTrue);
       });
 
-      testWithoutContext('does not crash when deleting temporary directory that is nonexistant when force exiting', () async {
+      testWithoutContext('does not crash when deleting temporary directory that is nonexistent when force exiting', () async {
         final Xcode xcode = setupXcode(
           fakeProcessManager: FakeProcessManager.any(),
           fileSystem: fileSystem,

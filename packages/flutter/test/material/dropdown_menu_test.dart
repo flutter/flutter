@@ -8,8 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_testing/leak_tracker_testing.dart';
 
 void main() {
+  // TODO(polina-c): _DropdownMenuState should not be used after disposal, https://github.com/flutter/flutter/issues/145622 [leaks-to-clean]
+  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
+
   const String longText = 'one two three four five six seven eight nine ten eleven twelve';
   final List<DropdownMenuEntry<TestMenu>> menuChildren = <DropdownMenuEntry<TestMenu>>[];
 
@@ -1119,17 +1123,10 @@ void main() {
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pump();
 
-    late final bool isMobile;
-    switch (themeData.platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-      case TargetPlatform.fuchsia:
-        isMobile = true;
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        isMobile = false;
-    }
+    final bool isMobile = switch (themeData.platform) {
+      TargetPlatform.android || TargetPlatform.iOS || TargetPlatform.fuchsia => true,
+      TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => false,
+    };
     int expectedCount = isMobile ? 0 : 1;
 
     // Test onSelected on key press
@@ -1807,8 +1804,7 @@ void main() {
     checkExpectedHighlight(searchResult: 'Read', otherItems: <String>['All', 'Unread']);
   });
 
-   testWidgets('onSelected gets called when a selection is made in a nested menu',
-      (WidgetTester tester) async {
+   testWidgets('onSelected gets called when a selection is made in a nested menu', (WidgetTester tester) async {
     int selectionCount = 0;
 
     final ThemeData themeData = ThemeData();

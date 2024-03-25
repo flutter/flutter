@@ -2213,16 +2213,16 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   @protected
   void debugAssertDoesMeetConstraints();
 
-  /// When true, debugAssertDoesMeetConstraints() is currently
-  /// executing asserts for verifying the consistent behavior of
+  /// When true, a debug method ([debugAssertDoesMeetConstraints], for instance)
+  /// is currently executing asserts for verifying the consistent behavior of
   /// intrinsic dimensions methods.
   ///
-  /// This should only be set by debugAssertDoesMeetConstraints()
-  /// implementations. It is used by tests to selectively ignore
-  /// custom layout callbacks. It should not be set outside of
-  /// debugAssertDoesMeetConstraints(), and should not be checked in
-  /// release mode (where it will always be false).
+  /// This is typically set by framework debug methods. It is read by tests to
+  /// selectively ignore custom layout callbacks. It should not be set outside of
+  /// intrinsic-checking debug methods, and should not be checked in release mode
+  /// (where it will always be false).
   static bool debugCheckingIntrinsics = false;
+
   bool _debugSubtreeRelayoutRootAlreadyMarkedNeedsLayout() {
     if (_relayoutBoundary == null) {
       // We don't know where our relayout boundary is yet.
