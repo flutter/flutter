@@ -41,17 +41,40 @@ class RestorableDuration extends RestorableValue<Duration> {
   Object? toPrimitives() => <int>[value.minute, value.hour];
 }
 
-/// Extract the remainders of the duration units.
-extension DurationUnitRemainder on Duration {
+/// Frequently used operations for Duration.
+extension DurationExtension on Duration {
+  static const int hoursPerPeriod = 12;
+
+  /// Extract the millisecond remainder.
   int get millisecond => inMilliseconds % 1000;
 
+  /// Extract the second remainder.
   int get second => inSeconds % 60;
-
+  
+  /// Extract the minute remainder.
   int get minute => inMinutes % 60;
 
+  /// Extract the hour remainder.
   int get hour => inHours % 24;
 
+  /// Extract the day remainder.
   int get day => inDays;
+
+  Duration replacing({
+    int? day,
+    int? hour,
+    int? minute,
+    int? second,
+    int? millisecond,
+  }) {
+    return Duration(
+      days: day ?? this.day,
+      hours: hour ?? this.hour,
+      minutes: minute ?? this.minute,
+      seconds: second ?? this.second,
+      milliseconds: millisecond ?? this.millisecond,
+    );
+  }
 }
 
 /// Determines how the time picker invoked using [showDurationPicker] formats and
@@ -89,7 +112,7 @@ enum DurationFormat {
 }
 
 /// The [HourFormat] used for the given [DurationFormat].
-HourFormat hourFormat({required DurationFormat of}) {
+HourFormat hourDurationFormat({required DurationFormat of}) {
   switch (of) {
     case DurationFormat.H_colon_mm:
       return HourFormat.H;
