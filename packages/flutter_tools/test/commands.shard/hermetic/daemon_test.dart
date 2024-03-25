@@ -824,7 +824,7 @@ void main() {
       expect(result['host'], '127.0.0.1');
       expect(result['port'], 1234);
     }, overrides: <Type, Generator>{
-      DevtoolsLauncher: () => FakeDevtoolsLauncher(DevToolsServerAddress('127.0.0.1', 1234)),
+      DevtoolsLauncher: () => FakeDevtoolsLauncher(serverAddress: DevToolsServerAddress('127.0.0.1', 1234)),
     });
 
     testUsingContext('devtools.serve command should return null fields if null returned', () async {
@@ -840,7 +840,7 @@ void main() {
       expect(result['host'], null);
       expect(result['port'], null);
     }, overrides: <Type, Generator>{
-      DevtoolsLauncher: () => FakeDevtoolsLauncher(null),
+      DevtoolsLauncher: () => FakeDevtoolsLauncher(),
     });
 
     testUsingContext('proxy.connect tries to connect to an ipv4 address and proxies the connection correctly', () async {
@@ -1284,18 +1284,6 @@ class FakeDeviceLogReader implements DeviceLogReader {
   @override
   String get name => 'device';
 
-}
-
-class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
-  FakeDevtoolsLauncher(this._serverAddress);
-
-  final DevToolsServerAddress? _serverAddress;
-
-  @override
-  Future<DevToolsServerAddress?> serve() async => _serverAddress;
-
-  @override
-  Future<void> close() async {}
 }
 
 class FakeApplicationPackageFactory implements ApplicationPackageFactory {

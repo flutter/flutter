@@ -24,6 +24,19 @@ abstract class ResidentDevtoolsHandler {
   /// The current devtools server, or null if one is not running.
   DevToolsServerAddress? get activeDevToolsServer;
 
+  /// The Dart Tooling Daemon (DTD) URI for the DTD instance being hosted by
+  /// DevTools server.
+  ///
+  /// This will be null if the DevTools server is not served through Flutter
+  /// tools (e.g. if it is served from an IDE).
+  Uri? get dtdUri;
+
+  /// Whether to print the Dart Tooling Daemon URI.
+  ///
+  /// This will always return false when there is not a DTD instance being
+  /// served from the DevTools server.
+  bool get printDtdUri;
+
   /// Whether it's ok to announce the [activeDevToolsServer].
   ///
   /// This should only return true once all the devices have been notified
@@ -62,6 +75,12 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     assert(!_readyToAnnounce || _devToolsLauncher?.activeDevToolsServer != null);
     return _devToolsLauncher?.activeDevToolsServer;
   }
+
+  @override
+  Uri? get dtdUri => _devToolsLauncher?.dtdUri;
+
+  @override
+  bool get printDtdUri => _devToolsLauncher?.printDtdUri ?? false;
 
   @override
   bool get readyToAnnounce => _readyToAnnounce;
@@ -337,6 +356,12 @@ class NoOpDevtoolsHandler implements ResidentDevtoolsHandler {
     wasShutdown = true;
     return;
   }
+
+  @override
+  Uri? get dtdUri => null;
+
+  @override
+  bool get printDtdUri => false;
 }
 
 /// Convert a [URI] with query parameters into a display format instead
