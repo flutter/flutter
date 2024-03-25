@@ -801,7 +801,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     while (child != null) {
       final FlexParentData childParentData = child.parentData! as FlexParentData;
       final int flex = _getFlex(child);
-      if (flex > 0) {
+      if (flex > 0 && canFlex) {
         totalFlex += flex;
       } else {
         final BoxConstraints innerConstraints = switch ((stretched, _direction)) {
@@ -819,9 +819,11 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
 
     // Distribute free space to flexible children.
-    final double freeSpace = math.max(0.0, (canFlex ? maxMainSize : 0.0) - allocatedSize);
+    final double freeSpace = canFlex ? math.max(0.0, maxMainSize - allocatedSize) : 0.0;
     if (totalFlex > 0) {
-      final double spacePerFlex = canFlex ? (freeSpace / totalFlex) : double.nan;
+      assert(canFlex);
+      final double spacePerFlex = freeSpace / totalFlex;
+      assert(spacePerFlex.isFinite);
       child = firstChild;
       while (child != null) {
         final int flex = _getFlex(child);
