@@ -20,7 +20,7 @@
 ///  * [flutter.dev/widgets](https://flutter.dev/widgets/)
 ///    for a catalog of commonly-used Flutter widgets.
 
-library cupertino;
+library;
 
 export 'src/cupertino/activity_indicator.dart';
 export 'src/cupertino/adaptive_text_selection_toolbar.dart';

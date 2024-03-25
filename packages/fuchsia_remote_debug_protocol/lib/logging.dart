@@ -7,6 +7,6 @@
 /// Useful for determining connection issues and the like. This is included as a
 /// separate library so that it can be imported under a separate namespace in
 /// the event that you are using a logging package with similar class names.
-library logging;
+library;
 
 export 'src/common/logging.dart';

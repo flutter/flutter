@@ -11,7 +11,7 @@
 ///
 /// The [SemanticsNode] hierarchy represents the semantic structure of the UI
 /// and is used by the platform-specific accessibility services.
-library semantics;
+library;
 
 export 'dart:ui' show LocaleStringAttribute, SpellOutStringAttribute;
 
