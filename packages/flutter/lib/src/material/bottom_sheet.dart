@@ -237,10 +237,13 @@ class BottomSheet extends StatefulWidget {
   /// This API available as a convenience for a Material compliant bottom sheet
   /// animation. If alternative animation durations are required, a different
   /// animation controller could be provided.
-  static AnimationController createAnimationController(TickerProvider vsync) {
+  static AnimationController createAnimationController(
+    TickerProvider vsync,
+    { AnimationStyle? sheetAnimationStyle }
+  ) {
     return AnimationController(
-      duration: _bottomSheetEnterDuration,
-      reverseDuration: _bottomSheetExitDuration,
+      duration: sheetAnimationStyle?.duration ?? _bottomSheetEnterDuration,
+      reverseDuration: sheetAnimationStyle?.reverseDuration ?? _bottomSheetExitDuration,
       debugLabel: 'BottomSheet',
       vsync: vsync,
     );
@@ -846,6 +849,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.transitionAnimationController,
     this.anchorPoint,
     this.useSafeArea = false,
+    this.sheetAnimationStyle,
   });
 
   /// A builder for the contents of the sheet.
@@ -992,6 +996,20 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// The default is false.
   final bool useSafeArea;
 
+  /// Used to override the modal bottom sheet animation duration and reverse
+  /// animation duration.
+  ///
+  /// If [AnimationStyle.duration] is provided, it will be used to override
+  /// the modal bottom sheet animation duration in the underlying
+  /// [BottomSheet.createAnimationController].
+  ///
+  /// If [AnimationStyle.reverseDuration] is provided, it will be used to
+  /// override the modal bottom sheet reverse animation duration in the
+  /// underlying [BottomSheet.createAnimationController].
+  ///
+  /// To disable the modal bottom sheet animation, use [AnimationStyle.noAnimation].
+  final AnimationStyle? sheetAnimationStyle;
+
   /// {@template flutter.material.ModalBottomSheetRoute.barrierOnTapHint}
   /// The semantic hint text that informs users what will happen if they
   /// tap on the widget. Announced in the format of 'Double tap to ...'.
@@ -1051,7 +1069,10 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
       _animationController = transitionAnimationController;
       willDisposeAnimationController = false;
     } else {
-      _animationController = BottomSheet.createAnimationController(navigator!);
+      _animationController = BottomSheet.createAnimationController(
+        navigator!,
+        sheetAnimationStyle: sheetAnimationStyle,
+      );
     }
     return _animationController!;
   }
@@ -1159,6 +1180,26 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// ** See code in examples/api/lib/material/bottom_sheet/show_modal_bottom_sheet.1.dart **
 /// {@end-tool}
 ///
+/// The [sheetAnimationStyle] parameter is used to override the modal bottom sheet
+/// animation duration and reverse animation duration.
+///
+/// If [AnimationStyle.duration] is provided, it will be used to override
+/// the modal bottom sheet animation duration in the underlying
+/// [BottomSheet.createAnimationController].
+///
+/// If [AnimationStyle.reverseDuration] is provided, it will be used to
+/// override the modal bottom sheet reverse animation duration in the
+/// underlying [BottomSheet.createAnimationController].
+///
+/// To disable the bottom sheet animation, use [AnimationStyle.noAnimation].
+///
+/// {@tool dartpad}
+/// This sample showcases how to override the [showModalBottomSheet] animation
+/// duration and reverse animation duration using [AnimationStyle].
+///
+/// ** See code in examples/api/lib/material/bottom_sheet/show_modal_bottom_sheet.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [BottomSheet], which becomes the parent of the widget returned by the
@@ -1171,6 +1212,8 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 ///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * The Material 2 spec at <https://m2.material.io/components/sheets-bottom>.
 ///  * The Material 3 spec at <https://m3.material.io/components/bottom-sheets/overview>.
+///  * [AnimationStyle], which is used to override the modal bottom sheet
+///    animation duration and reverse animation duration.
 Future<T?> showModalBottomSheet<T>({
   required BuildContext context,
   required WidgetBuilder builder,
@@ -1191,6 +1234,7 @@ Future<T?> showModalBottomSheet<T>({
   RouteSettings? routeSettings,
   AnimationController? transitionAnimationController,
   Offset? anchorPoint,
+  AnimationStyle? sheetAnimationStyle,
 }) {
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
@@ -1217,6 +1261,7 @@ Future<T?> showModalBottomSheet<T>({
     transitionAnimationController: transitionAnimationController,
     anchorPoint: anchorPoint,
     useSafeArea: useSafeArea,
+    sheetAnimationStyle: sheetAnimationStyle,
   ));
 }
 
@@ -1234,6 +1279,26 @@ Future<T?> showModalBottomSheet<T>({
 ///
 /// The [enableDrag] parameter specifies whether the bottom sheet can be
 /// dragged up and down and dismissed by swiping downwards.
+///
+/// The [sheetAnimationStyle] parameter is used to override the bottom sheet
+/// animation duration and reverse animation duration.
+///
+/// If [AnimationStyle.duration] is provided, it will be used to override
+/// the bottom sheet animation duration in the underlying
+/// [BottomSheet.createAnimationController].
+///
+/// If [AnimationStyle.reverseDuration] is provided, it will be used to
+/// override the bottom sheet reverse animation duration in the underlying
+/// [BottomSheet.createAnimationController].
+///
+/// To disable the bottom sheet animation, use [AnimationStyle.noAnimation].
+///
+/// {@tool dartpad}
+/// This sample showcases how to override the [showBottomSheet] animation
+/// duration and reverse animation duration using [AnimationStyle].
+///
+/// ** See code in examples/api/lib/material/bottom_sheet/show_bottom_sheet.0.dart **
+/// {@end-tool}
 ///
 /// To rebuild the bottom sheet (e.g. if it is stateful), call
 /// [PersistentBottomSheetController.setState] on the controller returned by
@@ -1265,6 +1330,8 @@ Future<T?> showModalBottomSheet<T>({
 ///  * [Scaffold.of], for information about how to obtain the [BuildContext].
 ///  * The Material 2 spec at <https://m2.material.io/components/sheets-bottom>.
 ///  * The Material 3 spec at <https://m3.material.io/components/bottom-sheets/overview>.
+///  * [AnimationStyle], which is used to override the bottom sheet animation
+///    duration and reverse animation duration.
 PersistentBottomSheetController showBottomSheet({
   required BuildContext context,
   required WidgetBuilder builder,
@@ -1276,6 +1343,7 @@ PersistentBottomSheetController showBottomSheet({
   bool? enableDrag,
   bool? showDragHandle,
   AnimationController? transitionAnimationController,
+  AnimationStyle? sheetAnimationStyle,
 }) {
   assert(debugCheckHasScaffold(context));
 
@@ -1289,6 +1357,7 @@ PersistentBottomSheetController showBottomSheet({
     enableDrag: enableDrag,
     showDragHandle: showDragHandle,
     transitionAnimationController: transitionAnimationController,
+    sheetAnimationStyle: sheetAnimationStyle,
   );
 }
 
