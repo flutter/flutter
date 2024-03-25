@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'dart:ui' show
+  FlutterView,
   FontWeight,
   Offset,
   Rect,
@@ -13,6 +14,7 @@ import 'dart:ui' show
   TextDirection;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart' show View;
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'autofill.dart';
@@ -485,6 +487,8 @@ class TextInputConfiguration {
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled);
 
   /// The ID of the view that the text input belongs to.
+  ///
+  /// See: [View] and [FlutterView].
   final int? viewId;
 
   /// The type of information for which to optimize the text input control.
