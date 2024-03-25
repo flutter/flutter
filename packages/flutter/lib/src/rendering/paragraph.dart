@@ -453,8 +453,14 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     return result;
   }
 
-  /// The [Selectable]s created by this [RenderParagraph] instance.
-  List<Selectable>? get selectables => _lastSelectableFragments;
+  /// Determines whether the given [Selectable] was created by this
+  /// [RenderParagraph].
+  bool selectableBelongsToParagraph(Selectable selectable) {
+    if (_lastSelectableFragments == null) {
+      return false;
+    }
+    return _lastSelectableFragments!.contains(selectable);
+  }
 
   void _disposeSelectableFragments() {
     if (_lastSelectableFragments == null) {
