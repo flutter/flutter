@@ -386,7 +386,7 @@ void main() {
                 '"flutter config --enable-swift-package-manager".'
               ));
               expect(testLogger.statusText, isEmpty);
-              expect(cocoaPods.podfileSetup, isFalse);
+              expect(cocoaPods.podfileSetup, isTrue);
             });
 
             testWithoutContext('when project is a module', () async {
@@ -452,6 +452,14 @@ class FakeIosProject extends Fake implements IosProject {
 
   @override
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
+
+  @override
+  bool get flutterPluginSwiftPackageInProjectSettings {
+    return xcodeProjectInfoFile.existsSync() &&
+        xcodeProjectInfoFile
+            .readAsStringSync()
+            .contains('FlutterGeneratedPluginSwiftPackage');
+  }
 }
 
 class FakeMacOSProject extends Fake implements MacOSProject {
@@ -473,6 +481,14 @@ class FakeMacOSProject extends Fake implements MacOSProject {
 
   @override
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
+
+  @override
+  bool get flutterPluginSwiftPackageInProjectSettings {
+    return xcodeProjectInfoFile.existsSync() &&
+        xcodeProjectInfoFile
+            .readAsStringSync()
+            .contains('FlutterGeneratedPluginSwiftPackage');
+  }
 }
 
 class FakeFlutterProject extends Fake implements FlutterProject {

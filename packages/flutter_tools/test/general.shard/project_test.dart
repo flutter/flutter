@@ -1150,6 +1150,31 @@ plugins {
           expect(await project.ios.productBundleIdentifier(null), 'io.flutter.someProject');
         });
       });
+
+      group('flutterSwiftPackageInProjectSettings', () {
+        testWithMocks('is false if pbxproj missing', () async {
+          final FlutterProject project = await someProject();
+          expect(project.ios.xcodeProjectInfoFile.existsSync(), isFalse);
+          expect(project.ios.flutterPluginSwiftPackageInProjectSettings, isFalse);
+        });
+
+        testWithMocks('is false if pbxproj does not contain FlutterGeneratedPluginSwiftPackage in build process', () async {
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProjectInfoFile.createSync(recursive: true);
+          expect(project.ios.xcodeProjectInfoFile.existsSync(), isTrue);
+          expect(project.ios.flutterPluginSwiftPackageInProjectSettings, isFalse);
+        });
+
+        testWithMocks('is true if pbxproj does contain FlutterGeneratedPluginSwiftPackage in build process', () async {
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProjectInfoFile.createSync(recursive: true);
+          project.ios.xcodeProjectInfoFile.writeAsStringSync('''
+'		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };';
+''');
+          expect(project.ios.xcodeProjectInfoFile.existsSync(), isTrue);
+          expect(project.ios.flutterPluginSwiftPackageInProjectSettings, isTrue);
+        });
+      });
     });
 
     group('application bundle name', () {

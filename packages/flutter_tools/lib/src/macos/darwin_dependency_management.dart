@@ -64,7 +64,7 @@ class DarwinDependencyManagement {
         platform,
         xcodeProject,
       );
-    } else if (SwiftPackageManager.flutterSwiftPackageInProjectSettings(xcodeProject)) {
+    } else if (xcodeProject.flutterPluginSwiftPackageInProjectSettings) {
       // If Swift Package Manager is not enabled but the project is already
       // integrated for Swift Package Manager, pass no plugins to the generator.
       // This will still generate the required Package.swift, but it will have
@@ -76,20 +76,28 @@ class DarwinDependencyManagement {
       );
     }
 
-    final (int pluginCount, int swiftPackageCount, int cocoapodCount) = await _evaluatePlugins(
-      platform: platform,
-      xcodeProject: xcodeProject,
-    );
-
-    final bool useCocoapods = _usingCocoaPodsPlugin(
-      pluginCount: pluginCount,
-      swiftPackageCount: swiftPackageCount,
-      cocoapodCount: cocoapodCount,
-    );
-
     // Skip updating Podfile if project is a module, since it will use a
     // different module-specific Podfile.
     if (!_project.isModule) {
+      final (int pluginCount, int swiftPackageCount, int cocoapodCount) = await _evaluatePluginsAndPrintWarnings(
+        platform: platform,
+        xcodeProject: xcodeProject,
+      );
+
+      final bool useCocoapods;
+      if (_project.usingSwiftPackageManager) {
+        useCocoapods = _usingCocoaPodsPlugin(
+          pluginCount: pluginCount,
+          swiftPackageCount: swiftPackageCount,
+          cocoapodCount: cocoapodCount,
+        );
+      } else {
+        // When Swift Package Manager is not enabled, setup Podfile if plugins
+        // is not empty, regardless of if plugins are CocoaPod compatible. This
+        // is done because `processPodsIfNeeded` uses `hasPlugins` to determine
+        // whether to run.
+        useCocoapods = _plugins.isNotEmpty;
+      }
       if (useCocoapods) {
         await _cocoapods.setupPodfile(xcodeProject);
       }
@@ -126,7 +134,7 @@ class DarwinDependencyManagement {
   ///
   /// Prints message prompting the user to deintegrate CocoaPods if using all
   /// Swift Package plugins.
-  Future<(int, int, int)> _evaluatePlugins({
+  Future<(int, int, int)> _evaluatePluginsAndPrintWarnings({
     required SupportedPlatform platform,
     required XcodeBasedProject xcodeProject,
   }) async {

@@ -18,8 +18,6 @@ import 'swift_packages.dart';
 /// Swift Package Manager is a dependency management solution for iOS and macOS
 /// applications.
 ///
-/// It is included with Swift.
-///
 /// See also:
 ///   * https://www.swift.org/documentation/package-manager/ - documentation on
 ///     Swift Package Manager.
@@ -84,7 +82,7 @@ class SwiftPackageManager {
     // it's not needed. If the project has already been migrated, regenerate
     // the Package.swift even if there are no dependencies in case there
     // were dependencies previously.
-    if (packageDependencies.isEmpty && !flutterSwiftPackageInProjectSettings(project)) {
+    if (packageDependencies.isEmpty && !project.flutterPluginSwiftPackageInProjectSettings) {
       return;
     }
 
@@ -135,10 +133,9 @@ class SwiftPackageManager {
     );
     pluginsPackage.createSwiftPackage();
 
-    // You need to setup the framework symlink so xcodebuild commands like
-    // -showBuildSettings will still work. The BuildMode is not known yet, so
-    // set to release for now. The correct framework will be symlinked when the
-    // project is built.
+    // Setup the framework symlink so xcodebuild commands like -showBuildSettings
+    // will still work. The BuildMode is not known yet, so set to release for
+    // now. The correct framework will be symlinked when the project is built.
     linkFlutterFramework(
       platform,
       project,
@@ -180,15 +177,6 @@ class SwiftPackageManager {
       ));
     }
     return (packageDependencies, targetDependencies);
-  }
-
-  /// Checks if FlutterGeneratedPluginSwiftPackage has been added to the
-  /// project's build settings by checking the contents of the pbxproj.
-  static bool flutterSwiftPackageInProjectSettings(XcodeBasedProject project) {
-    return project.xcodeProjectInfoFile.existsSync() &&
-        project.xcodeProjectInfoFile
-            .readAsStringSync()
-            .contains(_defaultFlutterPluginsSwiftPackageName);
   }
 
   /// Adds Swift Package Manager integration to the Xcode project's project.pbxproj.

@@ -125,8 +125,17 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
 
   /// The Flutter generated Swift Package manifest (Package.swift) for plugin
   /// dependencies.
-  File get flutterPluginSwiftPackageManifest => flutterPluginSwiftPackageDirectory
-      .childFile('Package.swift');
+  File get flutterPluginSwiftPackageManifest =>
+      flutterPluginSwiftPackageDirectory.childFile('Package.swift');
+
+  /// Checks if FlutterGeneratedPluginSwiftPackage has been added to the
+  /// project's build settings by checking the contents of the pbxproj.
+  bool get flutterPluginSwiftPackageInProjectSettings {
+    return xcodeProjectInfoFile.existsSync() &&
+        xcodeProjectInfoFile
+            .readAsStringSync()
+            .contains('FlutterGeneratedPluginSwiftPackage');
+  }
 }
 
 /// Represents the iOS sub-project of a Flutter project.

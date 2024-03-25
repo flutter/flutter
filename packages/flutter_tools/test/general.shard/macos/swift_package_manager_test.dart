@@ -306,31 +306,6 @@ let package = Package(
           });
         });
 
-        group('flutterSwiftPackageInProjectSettings', () {
-          testWithoutContext('is false if pbxproj missing', () {
-            final MemoryFileSystem fs = MemoryFileSystem();
-            final FakeIosProject project = FakeIosProject(fileSystem: fs);
-            expect(SwiftPackageManager.flutterSwiftPackageInProjectSettings(project), isFalse);
-          });
-
-          testWithoutContext('is false if pbxproj does not contain FlutterGeneratedPluginSwiftPackage in build process', () {
-            final MemoryFileSystem fs = MemoryFileSystem();
-            final FakeIosProject project = FakeIosProject(fileSystem: fs);
-            project.xcodeProjectInfoFile.createSync(recursive: true);
-            expect(SwiftPackageManager.flutterSwiftPackageInProjectSettings(project), isFalse);
-          });
-
-          testWithoutContext('is true if pbxproj does contain FlutterGeneratedPluginSwiftPackage in build process', () {
-            final MemoryFileSystem fs = MemoryFileSystem();
-            final FakeIosProject project = FakeIosProject(fileSystem: fs);
-            project.xcodeProjectInfoFile.createSync(recursive: true);
-            project.xcodeProjectInfoFile.writeAsStringSync('''
-'		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };';
-''');
-            expect(SwiftPackageManager.flutterSwiftPackageInProjectSettings(project), isTrue);
-          });
-        });
-
         group('linkFlutterFramework', () {
           testWithoutContext('throw if invalid platform', () {
             final MemoryFileSystem fs = MemoryFileSystem();
@@ -457,6 +432,14 @@ class FakeIosProject extends Fake implements IosProject {
 
   @override
   File flutterPluginSwiftPackageManifest;
+
+  @override
+  bool get flutterPluginSwiftPackageInProjectSettings {
+    return xcodeProjectInfoFile.existsSync() &&
+        xcodeProjectInfoFile
+            .readAsStringSync()
+            .contains('FlutterGeneratedPluginSwiftPackage');
+  }
 }
 
 class FakePlugin extends Fake implements Plugin {
