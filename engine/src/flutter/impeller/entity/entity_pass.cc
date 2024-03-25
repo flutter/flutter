@@ -869,7 +869,9 @@ bool EntityPass::RenderElement(Entity& element_entity,
 
       if constexpr (ContentContext::kEnableStencilThenCover) {
         // Skip all clip restores when stencil-then-cover is enabled.
-        clip_replay_->RecordEntity(element_entity, clip_coverage.type);
+        if (clip_coverage_stack.back().coverage.has_value()) {
+          clip_replay_->RecordEntity(element_entity, clip_coverage.type);
+        }
         return true;
       }
 
@@ -1269,7 +1271,9 @@ void EntityPassClipRecorder::RecordEntity(const Entity& entity,
       rendered_clip_entities_.push_back(entity.Clone());
       break;
     case Contents::ClipCoverage::Type::kRestore:
-      rendered_clip_entities_.pop_back();
+      if (!rendered_clip_entities_.empty()) {
+        rendered_clip_entities_.pop_back();
+      }
       break;
   }
 }

@@ -152,6 +152,7 @@
 ../../../flutter/impeller/entity/contents/tiled_texture_contents_unittests.cc
 ../../../flutter/impeller/entity/contents/vertices_contents_unittests.cc
 ../../../flutter/impeller/entity/entity_pass_target_unittests.cc
+../../../flutter/impeller/entity/entity_pass_unittests.cc
 ../../../flutter/impeller/entity/entity_unittests.cc
 ../../../flutter/impeller/entity/geometry/geometry_unittests.cc
 ../../../flutter/impeller/entity/render_target_cache_unittests.cc

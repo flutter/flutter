@@ -272,6 +272,7 @@ impeller_component("entity_unittests") {
     "contents/tiled_texture_contents_unittests.cc",
     "contents/vertices_contents_unittests.cc",
     "entity_pass_target_unittests.cc",
+    "entity_pass_unittests.cc",
     "entity_playground.cc",
     "entity_playground.h",
     "entity_unittests.cc",
