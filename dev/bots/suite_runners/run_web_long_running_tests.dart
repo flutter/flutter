@@ -163,19 +163,19 @@ Future<void> webLongRunningTestsRunner(String flutterRoot) async {
     ),
     () => _runWebDebugTest('lib/sound_mode.dart'),
     () => _runWebReleaseTest('lib/sound_mode.dart'),
-    () => _runFlutterWebTest(
+    () => runFlutterWebTest(
       'html',
       path.join(flutterRoot, 'packages', 'integration_test'),
       <String>['test/web_extension_test.dart'],
       false,
     ),
-    () => _runFlutterWebTest(
+    () => runFlutterWebTest(
       'canvaskit',
       path.join(flutterRoot, 'packages', 'integration_test'),
       <String>['test/web_extension_test.dart'],
       false,
     ),
-    () => _runFlutterWebTest(
+    () => runFlutterWebTest(
       'skwasm',
       path.join(flutterRoot, 'packages', 'integration_test'),
       <String>['test/web_extension_test.dart'],
@@ -514,31 +514,6 @@ Future<void> _runWebReleaseTest(String target, {
       '${red}Web release mode test failed.$reset',
     ]);
   }
-}
-
-Future<void> _runFlutterWebTest(
-  String webRenderer,
-  String workingDirectory,
-  List<String> tests,
-  bool useWasm,
-) async {
-  await runCommand(
-    flutter,
-    <String>[
-      'test',
-      '-v',
-      '--platform=chrome',
-      if (useWasm) '--wasm',
-      '--web-renderer=$webRenderer',
-      '--dart-define=DART_HHH_BOT=$_runningInDartHHHBot',
-      ...flutterTestArgs,
-      ...tests,
-    ],
-    workingDirectory: workingDirectory,
-    environment: <String, String>{
-      'FLUTTER_WEB': 'true',
-    },
-  );
 }
 
 // The `chromedriver` process created by this test.
