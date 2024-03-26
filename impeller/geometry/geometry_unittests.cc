@@ -352,6 +352,18 @@ TEST(GeometryTest, MatrixGetMaxBasisLengthXY) {
     auto m = Matrix::MakeScale({-3, 4, 7});
     ASSERT_EQ(m.GetMaxBasisLengthXY(), 4);
   }
+
+  {
+    // clang-format off
+    auto m = Matrix::MakeColumn(
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        4.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f
+    );
+    // clang-format on
+    ASSERT_EQ(m.GetMaxBasisLengthXY(), 1.0f);
+  }
 }
 
 TEST(GeometryTest, MatrixMakeOrthographic) {
