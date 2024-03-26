@@ -2195,7 +2195,8 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       }
     } else {
       // When the drag position is somewhere on the root text and not a placeholder,
-      // traverse the selectable fragments relative to the root paragraph.
+      // traverse the selectable fragments relative to the [RenderParagraph] that 
+      // contains the drag position.
       if (paragraphContainsPosition) {
         return _updateSelectionStartEdgeByMultiSelectableTextBoundary(
           getTextBoundary,
@@ -2206,44 +2207,44 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         );
       }
       if (existingSelectionEnd != null) {
-        final RenderParagraph rootParagraph = _getEncompassingParagraph()!;
-        final Matrix4 rootTransform = rootParagraph.getTransformTo(null);
-        rootTransform.invert();
-        final Offset rootParagraphLocalPosition = MatrixUtils.transformPoint(rootTransform, globalPosition);
-        final bool positionWithinRootParagraph = rootParagraph.paintBounds.contains(rootParagraphLocalPosition);
-        final TextPosition positionRelativeToRootParagraph = rootParagraph.getPositionForOffset(rootParagraphLocalPosition);
-        final String rootText = rootParagraph.text.toPlainText(includeSemanticsLabels: false);
-        final bool positionOnPlaceholder = rootParagraph.getWordBoundary(positionRelativeToRootParagraph).textInside(rootText) == _placeholderCharacter;
-        if (!positionOnPlaceholder && positionWithinRootParagraph) {
+        final RenderParagraph targetParagraph = _getParentParagraphContainingPosition(globalPosition);
+        final Matrix4 targetTransform = targetParagraph.getTransformTo(null);
+        targetTransform.invert();
+        final Offset targetParagraphLocalPosition = MatrixUtils.transformPoint(targetTransform, globalPosition);
+        final bool positionWithinTargetParagraph = targetParagraph.paintBounds.contains(targetParagraphLocalPosition);
+        final TextPosition positionRelativeToTargetParagraph = targetParagraph.getPositionForOffset(targetParagraphLocalPosition);
+        final String targetText = targetParagraph.text.toPlainText(includeSemanticsLabels: false);
+        final bool positionOnPlaceholder = targetParagraph.getWordBoundary(positionRelativeToTargetParagraph).textInside(targetText) == _placeholderCharacter;
+        if (!positionOnPlaceholder && positionWithinTargetParagraph) {
           final bool backwardSelection = existingSelectionStart == null && existingSelectionEnd.offset == range.start
               || existingSelectionStart == existingSelectionEnd && existingSelectionEnd.offset == range.start
               || existingSelectionStart != null && existingSelectionStart.offset > existingSelectionEnd.offset;
-          final _TextBoundaryRecord boundaryAtPositionRelativeToRootParagraph = getTextBoundary(positionRelativeToRootParagraph, rootText);
-          final TextPosition rootParagraphPlaceholderTextPosition = _getPositionInParagraph(rootParagraph);
-          final TextRange rootParagraphPlaceholderRange = TextRange(start: rootParagraphPlaceholderTextPosition.offset, end: rootParagraphPlaceholderTextPosition.offset + _placeholderLength);
-          if (boundaryAtPositionRelativeToRootParagraph.boundaryStart.offset < rootParagraphPlaceholderRange.start && boundaryAtPositionRelativeToRootParagraph.boundaryEnd.offset < rootParagraphPlaceholderRange.start) {
+          final _TextBoundaryRecord boundaryAtPositionRelativeToTargetParagraph = getTextBoundary(positionRelativeToTargetParagraph, targetText);
+          final TextPosition targetParagraphPlaceholderTextPosition = _getPositionInParagraph(targetParagraph);
+          final TextRange targetParagraphPlaceholderRange = TextRange(start: targetParagraphPlaceholderTextPosition.offset, end: targetParagraphPlaceholderTextPosition.offset + _placeholderLength);
+          if (boundaryAtPositionRelativeToTargetParagraph.boundaryStart.offset < targetParagraphPlaceholderRange.start && boundaryAtPositionRelativeToTargetParagraph.boundaryEnd.offset < targetParagraphPlaceholderRange.start) {
             _setSelectionPosition(TextPosition(offset: range.start), isEnd: isEnd);
             return SelectionResult.previous;
           }
-          if (boundaryAtPositionRelativeToRootParagraph.boundaryStart.offset > rootParagraphPlaceholderRange.end && boundaryAtPositionRelativeToRootParagraph.boundaryEnd.offset > rootParagraphPlaceholderRange.end) {
+          if (boundaryAtPositionRelativeToTargetParagraph.boundaryStart.offset > targetParagraphPlaceholderRange.end && boundaryAtPositionRelativeToTargetParagraph.boundaryEnd.offset > targetParagraphPlaceholderRange.end) {
             _setSelectionPosition(TextPosition(offset: range.end), isEnd: isEnd);
             return SelectionResult.next;
           }
           if (backwardSelection) {
-            if (boundaryAtPositionRelativeToRootParagraph.boundaryEnd.offset <= rootParagraphPlaceholderRange.end) {
+            if (boundaryAtPositionRelativeToTargetParagraph.boundaryEnd.offset <= targetParagraphPlaceholderRange.end) {
               _setSelectionPosition(TextPosition(offset: range.end), isEnd: isEnd);
               return SelectionResult.end;
             }
-            if (boundaryAtPositionRelativeToRootParagraph.boundaryEnd.offset > rootParagraphPlaceholderRange.end) {
+            if (boundaryAtPositionRelativeToTargetParagraph.boundaryEnd.offset > targetParagraphPlaceholderRange.end) {
               _setSelectionPosition(TextPosition(offset: range.end), isEnd: isEnd);
               return SelectionResult.next;
             }
           } else {
-            if (boundaryAtPositionRelativeToRootParagraph.boundaryStart.offset >= rootParagraphPlaceholderRange.start) {
+            if (boundaryAtPositionRelativeToTargetParagraph.boundaryStart.offset >= targetParagraphPlaceholderRange.start) {
               _setSelectionPosition(TextPosition(offset: range.start), isEnd: isEnd);
               return SelectionResult.end;
             }
-            if (boundaryAtPositionRelativeToRootParagraph.boundaryStart.offset < rootParagraphPlaceholderRange.start) {
+            if (boundaryAtPositionRelativeToTargetParagraph.boundaryStart.offset < targetParagraphPlaceholderRange.start) {
               _setSelectionPosition(TextPosition(offset: range.start), isEnd: isEnd);
               return SelectionResult.previous;
             }
@@ -2377,7 +2378,8 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       }
     } else {
       // When the drag position is somewhere on the root text and not a placeholder,
-      // traverse the selectable fragments relative to the root paragraph.
+      // traverse the selectable fragments relative to the [RenderParagraph] that 
+      // contains the drag position.
       if (paragraphContainsPosition) {
         return _updateSelectionEndEdgeByMultiSelectableTextBoundary(
           getTextBoundary,
@@ -2388,44 +2390,44 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         );
       }
       if (existingSelectionStart != null) {
-        final RenderParagraph rootParagraph = _getEncompassingParagraph()!;
-        final Matrix4 rootTransform = rootParagraph.getTransformTo(null);
-        rootTransform.invert();
-        final Offset rootParagraphLocalPosition = MatrixUtils.transformPoint(rootTransform, globalPosition);
-        final bool positionWithinRootParagraph = rootParagraph.paintBounds.contains(rootParagraphLocalPosition);
-        final TextPosition positionRelativeToRootParagraph = rootParagraph.getPositionForOffset(rootParagraphLocalPosition);
-        final String rootText = rootParagraph.text.toPlainText(includeSemanticsLabels: false);
-        final bool positionOnPlaceholder = rootParagraph.getWordBoundary(positionRelativeToRootParagraph).textInside(rootText) == _placeholderCharacter;
-        if (!positionOnPlaceholder && positionWithinRootParagraph) {
+        final RenderParagraph targetParagraph = _getParentParagraphContainingPosition(globalPosition);
+        final Matrix4 targetTransform = targetParagraph.getTransformTo(null);
+        targetTransform.invert();
+        final Offset targetParagraphLocalPosition = MatrixUtils.transformPoint(targetTransform, globalPosition);
+        final bool positionWithinTargetParagraph = targetParagraph.paintBounds.contains(targetParagraphLocalPosition);
+        final TextPosition positionRelativeToTargetParagraph = targetParagraph.getPositionForOffset(targetParagraphLocalPosition);
+        final String targetText = targetParagraph.text.toPlainText(includeSemanticsLabels: false);
+        final bool positionOnPlaceholder = targetParagraph.getWordBoundary(positionRelativeToTargetParagraph).textInside(targetText) == _placeholderCharacter;
+        if (!positionOnPlaceholder && positionWithinTargetParagraph) {
           final bool backwardSelection = existingSelectionEnd == null && existingSelectionStart.offset == range.end
               || existingSelectionStart == existingSelectionEnd && existingSelectionStart.offset == range.end
               || existingSelectionEnd != null && existingSelectionStart.offset > existingSelectionEnd.offset;
-          final _TextBoundaryRecord boundaryAtPositionRelativeToRootParagraph = getTextBoundary(positionRelativeToRootParagraph, rootText);
-          final TextPosition rootParagraphPlaceholderTextPosition = _getPositionInParagraph(rootParagraph);
-          final TextRange rootParagraphPlaceholderRange = TextRange(start: rootParagraphPlaceholderTextPosition.offset, end: rootParagraphPlaceholderTextPosition.offset + _placeholderLength);
-          if (boundaryAtPositionRelativeToRootParagraph.boundaryStart.offset < rootParagraphPlaceholderRange.start && boundaryAtPositionRelativeToRootParagraph.boundaryEnd.offset < rootParagraphPlaceholderRange.start) {
+          final _TextBoundaryRecord boundaryAtPositionRelativeToTargetParagraph = getTextBoundary(positionRelativeToTargetParagraph, targetText);
+          final TextPosition targetParagraphPlaceholderTextPosition = _getPositionInParagraph(targetParagraph);
+          final TextRange targetParagraphPlaceholderRange = TextRange(start: targetParagraphPlaceholderTextPosition.offset, end: targetParagraphPlaceholderTextPosition.offset + _placeholderLength);
+          if (boundaryAtPositionRelativeToTargetParagraph.boundaryStart.offset < targetParagraphPlaceholderRange.start && boundaryAtPositionRelativeToTargetParagraph.boundaryEnd.offset < targetParagraphPlaceholderRange.start) {
             _setSelectionPosition(TextPosition(offset: range.start), isEnd: isEnd);
             return SelectionResult.previous;
           }
-          if (boundaryAtPositionRelativeToRootParagraph.boundaryStart.offset > rootParagraphPlaceholderRange.end && boundaryAtPositionRelativeToRootParagraph.boundaryEnd.offset > rootParagraphPlaceholderRange.end) {
+          if (boundaryAtPositionRelativeToTargetParagraph.boundaryStart.offset > targetParagraphPlaceholderRange.end && boundaryAtPositionRelativeToTargetParagraph.boundaryEnd.offset > targetParagraphPlaceholderRange.end) {
             _setSelectionPosition(TextPosition(offset: range.end), isEnd: isEnd);
             return SelectionResult.next;
           }
           if (backwardSelection) {
-            if (boundaryAtPositionRelativeToRootParagraph.boundaryStart.offset >= rootParagraphPlaceholderRange.start) {
+            if (boundaryAtPositionRelativeToTargetParagraph.boundaryStart.offset >= targetParagraphPlaceholderRange.start) {
               _setSelectionPosition(TextPosition(offset: range.start), isEnd: isEnd);
               return SelectionResult.end;
             }
-            if (boundaryAtPositionRelativeToRootParagraph.boundaryStart.offset < rootParagraphPlaceholderRange.start) {
+            if (boundaryAtPositionRelativeToTargetParagraph.boundaryStart.offset < targetParagraphPlaceholderRange.start) {
               _setSelectionPosition(TextPosition(offset: range.start), isEnd: isEnd);
               return SelectionResult.previous;
             }
           } else {
-            if (boundaryAtPositionRelativeToRootParagraph.boundaryEnd.offset <= rootParagraphPlaceholderRange.end) {
+            if (boundaryAtPositionRelativeToTargetParagraph.boundaryEnd.offset <= targetParagraphPlaceholderRange.end) {
               _setSelectionPosition(TextPosition(offset: range.end), isEnd: isEnd);
               return SelectionResult.end;
             }
-            if (boundaryAtPositionRelativeToRootParagraph.boundaryEnd.offset > rootParagraphPlaceholderRange.end) {
+            if (boundaryAtPositionRelativeToTargetParagraph.boundaryEnd.offset > targetParagraphPlaceholderRange.end) {
               _setSelectionPosition(TextPosition(offset: range.end), isEnd: isEnd);
               return SelectionResult.next;
             }
@@ -2609,16 +2611,29 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     return originParagraph ?? paragraph;
   }
 
-  RenderParagraph? _getEncompassingParagraph() {
-    RenderObject? current = paragraph;
+  RenderParagraph _getParentParagraphContainingPosition(Offset globalPosition) {
+    // This method will return the closest parent [RenderParagraph] whose rect
+    // contains the given `globalPosition`. If no parent [RenderParagraph]
+    // contains the given `globalPosition` then this method will return the
+    // furthest ancestor [RenderParagraph]. If there is no parent [RenderParagraph]
+    // then this method will return the [RenderParagraph] that created this
+    // [_SelectableFragment].
+    RenderObject? current = paragraph.parent;
     RenderParagraph? lastParagraph;
     while (current != null) {
       if (current is RenderParagraph) {
         lastParagraph = current;
+        final Matrix4 currentTransform = current.getTransformTo(null);
+        currentTransform.invert();
+        final Offset currentParagraphLocalPosition = MatrixUtils.transformPoint(currentTransform, globalPosition);
+        final bool positionWithinCurrentParagraph = current.paintBounds.contains(currentParagraphLocalPosition);
+        if (positionWithinCurrentParagraph) {
+          return current;
+        }
       }
       current = current.parent;
     }
-    return lastParagraph;
+    return lastParagraph ?? paragraph;
   }
 
   bool _boundingBoxesContains(Offset position) {
