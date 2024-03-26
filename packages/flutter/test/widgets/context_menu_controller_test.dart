@@ -110,6 +110,7 @@ void main() {
     expect(find.byKey(key1), findsNothing);
 
     final ContextMenuController controller = ContextMenuController();
+    addTearDown(controller.remove);
 
     // Instantiating the controller does not shown it.
     await tester.pump();
