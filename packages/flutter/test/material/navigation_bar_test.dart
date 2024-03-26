@@ -1524,6 +1524,32 @@ void main() {
       icon = tester.widget<Icon>(find.byType(Icon).last);
       expect(icon.color, initialColor);
     });
+
+    testWidgetsWithLeakTracking('NavigationDestinationInfo is reachable and usable in navigation destinations', (WidgetTester tester) async {
+
+      Widget buildNavigationBar() {
+        return const MaterialApp(
+          home: Scaffold(
+            bottomNavigationBar: _StatefulNavigationBar()
+          ),
+        );
+      }
+
+      final Widget navBar = buildNavigationBar();
+      await tester.pumpWidget(navBar);
+
+      // as the selected index is the 0, only the first text should be visible
+      expect(find.text('label 1/2'), findsOneWidget);
+      expect(find.text('label 2/2'), findsNothing);
+
+      // tap the unselected destination
+      await tester.tap(find.byIcon(Icons.ac_unit));
+      // Trigger a rebuild.
+      await tester.pumpAndSettle();
+      // ensure the text shown is the not previously selected
+      expect(find.text('label 1/2'), findsNothing);
+      expect(find.text('label 2/2'), findsOneWidget);
+    });
   });
 }
 
@@ -1565,7 +1591,7 @@ class IconWithRandomColor extends StatelessWidget {
   }
 }
 
-
 bool _sizeAlmostEqual(Size a, Size b, {double maxDiff=0.05}) {
   return (a.width - b.width).abs() <= maxDiff && (a.height - b.height).abs() <= maxDiff;
+
 }
