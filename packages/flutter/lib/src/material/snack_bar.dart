@@ -92,6 +92,7 @@ class SnackBarAction extends StatefulWidget {
     this.disabledBackgroundColor,
     required this.label,
     required this.onPressed,
+    this.labelStyle,
   }) : assert(backgroundColor is! MaterialStateColor || disabledBackgroundColor == null,
         'disabledBackgroundColor must not be provided when background color is '
         'a MaterialStateColor');
@@ -131,6 +132,14 @@ class SnackBarAction extends StatefulWidget {
   /// This callback will be called at most once each time this action is
   /// displayed in a [SnackBar].
   final VoidCallback onPressed;
+
+  /// The button label's textStyle.
+  ///
+  /// If not provided, defaults to [SnackBarThemeData.actionLabelStyle].
+  ///
+  /// [TextStyle.color] would be overridden by either [textColor] or
+  /// [disabledTextColor].
+  final TextStyle? labelStyle;
 
   @override
   State<SnackBarAction> createState() => _SnackBarActionState();
@@ -209,7 +218,10 @@ class _SnackBarActionState extends State<SnackBarAction> {
         backgroundColor: resolveBackgroundColor(),
       ),
       onPressed: _haveTriggeredAction ? null : _handlePressed,
-      child: Text(widget.label),
+      child: Text(
+        widget.label,
+        style: widget.labelStyle ?? snackBarTheme.actionLabelStyle,
+      ),
     );
   }
 }

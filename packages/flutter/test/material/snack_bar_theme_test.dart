@@ -597,6 +597,43 @@ void main() {
       'was set by the inherited SnackBarThemeData.',
     );
   });
+
+  testWidgets('SnackBarAction honors actionLabelStyle', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        snackBarTheme: const SnackBarThemeData(
+          actionLabelStyle: TextStyle(
+            backgroundColor: Colors.orange,
+          ),
+        ),
+      ),
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: const Text('I am a snack bar.'),
+                  duration: const Duration(seconds: 2),
+                  action: SnackBarAction(
+                    label: 'ACTION',
+                    onPressed: () {},
+                  ),
+                ));
+              },
+              child: const Text('X'),
+            );
+          },
+        ),
+      ),
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<Text>(find.text('ACTION')).style?.backgroundColor,
+      Colors.orange,
+    );
+  });
 }
 
 SnackBarThemeData _snackBarTheme({bool? showCloseIcon}) {

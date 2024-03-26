@@ -72,6 +72,7 @@ class SnackBarThemeData with Diagnosticable {
     this.actionBackgroundColor,
     this.disabledActionBackgroundColor,
     this.dismissDirection,
+    this.actionLabelStyle,
   })  : assert(elevation == null || elevation >= 0.0),
         assert(width == null || identical(behavior, SnackBarBehavior.floating),
           'Width can only be set if behaviour is SnackBarBehavior.floating'),
@@ -164,6 +165,9 @@ class SnackBarThemeData with Diagnosticable {
   /// If null, [SnackBar] will default to [DismissDirection.down].
   final DismissDirection? dismissDirection;
 
+  /// Overrides the default value for [SnackBarAction.labelStyle].
+  final TextStyle? actionLabelStyle;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   SnackBarThemeData copyWith({
@@ -182,6 +186,7 @@ class SnackBarThemeData with Diagnosticable {
     Color? actionBackgroundColor,
     Color? disabledActionBackgroundColor,
     DismissDirection? dismissDirection,
+    TextStyle? actionLabelStyle,
   }) {
     return SnackBarThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -199,6 +204,7 @@ class SnackBarThemeData with Diagnosticable {
       actionBackgroundColor: actionBackgroundColor ?? this.actionBackgroundColor,
       disabledActionBackgroundColor: disabledActionBackgroundColor ?? this.disabledActionBackgroundColor,
       dismissDirection: dismissDirection ?? this.dismissDirection,
+      actionLabelStyle: actionLabelStyle ?? this.actionLabelStyle,
     );
   }
 
@@ -224,6 +230,7 @@ class SnackBarThemeData with Diagnosticable {
       actionBackgroundColor: Color.lerp(a?.actionBackgroundColor, b?.actionBackgroundColor, t),
       disabledActionBackgroundColor: Color.lerp(a?.disabledActionBackgroundColor, b?.disabledActionBackgroundColor, t),
       dismissDirection: t < 0.5 ? a?.dismissDirection : b?.dismissDirection,
+      actionLabelStyle: TextStyle.lerp(a?.actionLabelStyle, b?.actionLabelStyle, t),
     );
   }
 
@@ -244,6 +251,7 @@ class SnackBarThemeData with Diagnosticable {
         actionBackgroundColor,
         disabledActionBackgroundColor,
         dismissDirection,
+        actionLabelStyle,
       );
 
   @override
@@ -269,7 +277,8 @@ class SnackBarThemeData with Diagnosticable {
         && other.actionOverflowThreshold == actionOverflowThreshold
         && other.actionBackgroundColor == actionBackgroundColor
         && other.disabledActionBackgroundColor == disabledActionBackgroundColor
-        && other.dismissDirection == dismissDirection;
+        && other.dismissDirection == dismissDirection
+        && other.actionLabelStyle == actionLabelStyle;
   }
 
   @override
@@ -290,5 +299,6 @@ class SnackBarThemeData with Diagnosticable {
     properties.add(ColorProperty('actionBackgroundColor', actionBackgroundColor, defaultValue: null));
     properties.add(ColorProperty('disabledActionBackgroundColor', disabledActionBackgroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<DismissDirection>('dismissDirection', dismissDirection, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('actionLabelStyle', actionLabelStyle, defaultValue: null));
   }
 }
