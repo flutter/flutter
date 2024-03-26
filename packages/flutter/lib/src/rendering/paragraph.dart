@@ -2207,7 +2207,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         );
       }
       if (existingSelectionEnd != null) {
-        final RenderParagraph targetParagraph = _getParentParagraphContainingPosition(globalPosition);
+        final RenderParagraph targetParagraph = _getParagraphContainingPosition(globalPosition);
         final Matrix4 targetTransform = targetParagraph.getTransformTo(null);
         targetTransform.invert();
         final Offset targetParagraphLocalPosition = MatrixUtils.transformPoint(targetTransform, globalPosition);
@@ -2390,7 +2390,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         );
       }
       if (existingSelectionStart != null) {
-        final RenderParagraph targetParagraph = _getParentParagraphContainingPosition(globalPosition);
+        final RenderParagraph targetParagraph = _getParagraphContainingPosition(globalPosition);
         final Matrix4 targetTransform = targetParagraph.getTransformTo(null);
         targetTransform.invert();
         final Offset targetParagraphLocalPosition = MatrixUtils.transformPoint(targetTransform, globalPosition);
@@ -2611,7 +2611,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     return originParagraph ?? paragraph;
   }
 
-  RenderParagraph _getParentParagraphContainingPosition(Offset globalPosition) {
+  RenderParagraph _getParagraphContainingPosition(Offset globalPosition) {
     // This method will return the closest parent [RenderParagraph] whose rect
     // contains the given `globalPosition`. If no parent [RenderParagraph]
     // contains the given `globalPosition` then this method will return the
