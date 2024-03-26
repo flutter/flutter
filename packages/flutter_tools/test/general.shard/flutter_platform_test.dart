@@ -7,6 +7,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/flutter_platform.dart';
 import 'package:test_core/backend.dart';
 
@@ -120,6 +121,135 @@ void main() {
       expect(flutterPlatform.testAssetDirectory, '/build/test');
       expect(flutterPlatform.icudtlPath, equals('ghi'));
       expect(flutterPlatform.uriConverter?.call('hello'), 'hello/test');
+    });
+
+    group('createListenerDart', () {
+      late FlutterPlatform flutterPlatform;
+
+      final Map<Type, Generator> overrides = <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+      };
+
+      setUp(
+        () {
+          fileSystem.directory('build').createSync();
+
+          final FlutterProject project = FlutterProject.fromDirectoryTest(
+            fileSystem.currentDirectory,
+          );
+
+          flutterPlatform = FlutterPlatform(
+            shellPath: '/',
+            debuggingOptions: DebuggingOptions.enabled(
+              const BuildInfo(
+                BuildMode.debug,
+                null,
+                treeShakeIcons: false,
+              ),
+            ),
+            enableVmService: false,
+            flutterProject: project,
+            host: InternetAddress.loopbackIPv6,
+            updateGoldens: true,
+          );
+        },
+      );
+
+      testUsingContext(
+          'creates listener.dart in the correct directory within the build directory of the FlutterProject',
+          () async {
+        final String listenerFilePath = flutterPlatform.createListenerDart(
+          <Finalizer>[],
+          0,
+          'test.dart',
+        );
+
+        const String expectedListenerFilePath =
+            '/build/068070b05f23393259df743349b63e04/listener.dart';
+
+        expect(listenerFilePath, expectedListenerFilePath);
+        expect(fileSystem.file(expectedListenerFilePath).existsSync(), isTrue);
+      }, overrides: overrides);
+
+      testUsingContext(
+          'creates a new listener.dart file at the same path each time if called '
+          'more than once with the same test file path', () async {
+        final String listenerFilePath1 = flutterPlatform.createListenerDart(
+          <Finalizer>[],
+          0,
+          'test.dart',
+        );
+
+        final File listenerFile1 = fileSystem.file(listenerFilePath1);
+
+        expect(listenerFile1.existsSync(), isTrue);
+
+        final FileStat file1Stat = listenerFile1.statSync();
+
+        final String listenerFilePath2 = flutterPlatform.createListenerDart(
+          <Finalizer>[],
+          0,
+          'test.dart',
+        );
+
+        final File listenerFile2 = fileSystem.file(listenerFilePath2);
+
+        expect(listenerFile2.existsSync(), isTrue);
+
+        final FileStat file2Stat = listenerFile2.statSync();
+
+        expect(listenerFilePath1, listenerFilePath2);
+        expect(file2Stat.modified.isAfter(file1Stat.modified), isTrue);
+      }, overrides: overrides);
+
+      testUsingContext(
+          'creates different listener.dart files at different paths if called '
+          'multiple times with different test file paths', () async {
+        final String listenerFilePath1 = flutterPlatform.createListenerDart(
+          <Finalizer>[],
+          0,
+          'test1.dart',
+        );
+
+        final File listenerFile1 = fileSystem.file(listenerFilePath1);
+
+        expect(listenerFile1.existsSync(), isTrue);
+
+        final String listenerFilePath2 = flutterPlatform.createListenerDart(
+          <Finalizer>[],
+          0,
+          'test2.dart',
+        );
+
+        final File listenerFile2 = fileSystem.file(listenerFilePath2);
+
+        expect(listenerFile2.existsSync(), isTrue);
+
+        expect(listenerFile1, isNot(listenerFile2));
+
+        expect(listenerFilePath1, isNot(listenerFilePath2));
+          }, overrides: overrides);
+
+      testUsingContext(
+          'adds a cleanup function to the finalizers list', () async {
+        final List<Finalizer> finalizers = <Finalizer>[];
+
+        final String listenerFilepath = flutterPlatform.createListenerDart(
+          finalizers,
+          0,
+          'test.dart',
+        );
+        expect(finalizers, hasLength(1));
+
+        final File listenerFile = fileSystem.file(listenerFilepath);
+        expect(listenerFile.existsSync(), isTrue);
+
+        final Finalizer finalizer = finalizers.last;
+        await finalizer();
+
+        expect(listenerFile.existsSync(), isFalse);
+        }, overrides: overrides);
     });
   });
 }

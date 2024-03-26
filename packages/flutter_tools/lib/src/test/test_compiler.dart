@@ -194,7 +194,13 @@ class TestCompiler {
         if (shouldCopyDillFile) {
           final String path = request.mainUri.toFilePath(windows: globals.platform.isWindows);
           final File outputFile = globals.fs.file(outputPath);
+
+          if (globals.fs.file('$path.dill').existsSync()) {
+            globals.fs.file('$path.dill').deleteSync();
+          }
+
           final File kernelReadyToRun = await outputFile.copy('$path.dill');
+
           final File testCache = globals.fs.file(testFilePath);
           if (firstCompile || !testCache.existsSync() || (testCache.lengthSync() < outputFile.lengthSync())) {
             // The idea is to keep the cache file up-to-date and include as

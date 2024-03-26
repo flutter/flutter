@@ -6,6 +6,8 @@
 
 import 'dart:async';
 
+import 'package:convert/convert.dart';
+import 'package:crypto/crypto.dart';
 import 'package:dds/dds.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -493,7 +495,7 @@ class FlutterPlatform extends PlatformPlugin {
       } else if (precompiledDillFiles != null) {
         mainDart = precompiledDillFiles![testPath];
       } else {
-        mainDart = _createListenerDart(finalizers, ourTestCount, testPath);
+        mainDart = createListenerDart(finalizers, ourTestCount, testPath);
 
         // Integration test device takes care of the compilation.
         if (integrationTestDevice == null) {
@@ -605,20 +607,25 @@ class FlutterPlatform extends PlatformPlugin {
     return outOfBandError;
   }
 
-  String _createListenerDart(
+  @visibleForTesting
+  String createListenerDart(
     List<Finalizer> finalizers,
     int ourTestCount,
     String testPath,
   ) {
-    // Prepare a temporary directory to store the Dart file that will talk to us.
-    final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_test_listener.');
+    final Digest digest = md5.convert(utf8.encode(testPath));
+    final String testPathHash = hex.encode(digest.bytes);
+
+    // Prepare a directory to store the Dart file that will talk to us.
+    final Directory flutterTestListenerDirectory = flutterProject!.buildDirectory.childDirectory(testPathHash);
+    flutterTestListenerDirectory.createSync();
     finalizers.add(() async {
-      globals.printTrace('test $ourTestCount: deleting temporary directory');
-      tempDir.deleteSync(recursive: true);
+      globals.printTrace('test $ourTestCount: deleting directory');
+      flutterTestListenerDirectory.deleteSync(recursive: true);
     });
 
     // Prepare the Dart file that will talk to us and start the test.
-    final File listenerFile = globals.fs.file('${tempDir.path}/listener.dart');
+    final File listenerFile = globals.fs.file('${flutterTestListenerDirectory.path}/listener.dart');
     listenerFile.createSync();
     listenerFile.writeAsStringSync(_generateTestMain(
       testUrl: globals.fs.path.toUri(globals.fs.path.absolute(testPath)),
