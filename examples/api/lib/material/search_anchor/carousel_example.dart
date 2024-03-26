@@ -7,13 +7,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-/// Flutter code sample for [SearchBar].
-
-// 假设最大width = 200, 中等width = 120，最小width = 50
-double maxItemWidth = 200.0;
-double midItemWidth = 120.0;
-double minItemWidth = 50.0;
-
 void main() => runApp(const CarouselExample());
 
 class CarouselExample extends StatefulWidget {
@@ -45,34 +38,11 @@ class _CarouselExampleState extends State<CarouselExample> {
   bool? isScrolling;
   ScrollDirection? scrollDirection;
   late double screenWidth;
-  late PageController pageController;
 
   @override
   void initState() {
     super.initState();
     itemKeys = List<GlobalKey>.generate(6, (int index) => GlobalKey());
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      pageController.addListener(() {
-        setState(() {});
-      });
-    });
-  }
-
-  @override
-  void didChangeDependencies() {
-    screenWidth = MediaQuery.of(context).size.width;
-    // Min # of items: 3
-    final double minItems = max(3, screenWidth / maxItemWidth);
-    pageController = PageController(
-      viewportFraction: 1 / (screenWidth / maxItemWidth),
-    );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      pageController.addListener(() {
-        setState(() {});
-      });
-    });
-
-    super.didChangeDependencies();
   }
 
   Rect? getRect(int index) {
@@ -125,8 +95,8 @@ class _CarouselExampleState extends State<CarouselExample> {
           slivers: <Widget>[
             SliverCarousel(
               // maxChildExtent: 200,
-              clipExtent: 200/3, // Clip extent must <= min child extent
-              childExtentList: const <int>[3,3,3,2,1],
+              clipExtent: 100, // Clip extent must <= min child extent
+              childExtentList: const <int>[1,3],
               delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) {
                   return Padding(
