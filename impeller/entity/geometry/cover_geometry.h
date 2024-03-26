@@ -20,6 +20,8 @@ class CoverGeometry final : public Geometry {
   // |Geometry|
   bool CoversArea(const Matrix& transform, const Rect& rect) const override;
 
+  bool CanApplyMaskFilter() const override;
+
  private:
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,
