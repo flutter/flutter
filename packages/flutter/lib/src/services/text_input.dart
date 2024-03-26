@@ -14,7 +14,6 @@ import 'dart:ui' show
   TextDirection;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart' show View;
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'autofill.dart';
@@ -466,7 +465,7 @@ class TextInputConfiguration {
   /// All arguments have default values, except [actionLabel]. Only
   /// [actionLabel] may be null.
   const TextInputConfiguration({
-    required this.viewId,
+    this.viewId,
     this.inputType = TextInputType.text,
     this.readOnly = false,
     this.obscureText = false,
@@ -488,7 +487,10 @@ class TextInputConfiguration {
 
   /// The ID of the view that the text input belongs to.
   ///
-  /// See: [View] and [FlutterView].
+  /// See also:
+  ///
+  /// * [FlutterView], which is the view that the ID points to.
+  /// * [View], which is a widget that wraps a [FlutterView].
   final int? viewId;
 
   /// The type of information for which to optimize the text input control.
