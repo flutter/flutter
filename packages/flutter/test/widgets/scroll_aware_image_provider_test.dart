@@ -183,7 +183,9 @@ void main() {
 
     final DisposableBuildContext context = DisposableBuildContext(keys.last.currentState!);
     addTearDown(context.dispose);
-    final TestImageProvider testImageProvider = TestImageProvider(testImage.clone());
+    final ui.Image image = testImage.clone();
+    addTearDown(image.dispose);
+    final TestImageProvider testImageProvider = TestImageProvider(image);
     final ScrollAwareImageProvider<TestImageProvider> imageProvider = ScrollAwareImageProvider<TestImageProvider>(
       context: context,
       imageProvider: testImageProvider,
