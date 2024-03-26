@@ -598,6 +598,12 @@ Future<void> _runBuildTests() async {
             path.join('dev', 'integration_tests', 'web_compile_tests'),
             path.join('lib', 'dart_io_import.dart'),
           ),
+      // Should be able to compile with a call to:
+      // BackgroundIsolateBinaryMessenger.ensureInitialized.
+      () => _flutterBuildDart2js(
+            path.join('dev', 'integration_tests', 'web_compile_tests'),
+            path.join('lib', 'background_isolate_binary_messenger.dart'),
+          ),
     ],
     runForbiddenFromReleaseTests,
   ]..shuffle(math.Random(0));
