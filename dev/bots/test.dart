@@ -67,6 +67,7 @@ import 'browser.dart';
 import 'run_command.dart';
 import 'service_worker_test.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
+import 'suite_runners/run_web_long_running_tests.dart';
 import 'tool_subsharding.dart';
 import 'utils.dart';
 
@@ -248,7 +249,7 @@ Future<void> main(List<String> args) async {
       // All the unit/widget tests run using `flutter test --platform=chrome --wasm --web-renderer=skwasm`
       'web_skwasm_tests': _runWebSkwasmUnitTests,
       // All web integration tests
-      'web_long_running_tests': _runWebLongRunningTests,
+      'web_long_running_tests': () => webLongRunningTestsRunner(flutterRoot),
       'flutter_plugins': _runFlutterPackagesTests,
       'skp_generator': _runSkpGeneratorTests,
       'realm_checker': _runRealmCheckerTest,
