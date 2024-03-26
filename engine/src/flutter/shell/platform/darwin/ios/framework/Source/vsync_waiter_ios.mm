@@ -41,20 +41,6 @@ VsyncWaiterIOS::~VsyncWaiterIOS() {
 
 void VsyncWaiterIOS::AwaitVSync() {
   double new_max_refresh_rate = [DisplayLinkManager displayRefreshRate];
-  if (fml::TaskRunnerChecker::RunsOnTheSameThread(
-          task_runners_.GetRasterTaskRunner()->GetTaskQueueId(),
-          task_runners_.GetPlatformTaskRunner()->GetTaskQueueId())) {
-    BOOL isRunningOnMac = NO;
-    if (@available(iOS 14.0, *)) {
-      isRunningOnMac = [NSProcessInfo processInfo].iOSAppOnMac;
-    }
-    if (!isRunningOnMac) {
-      // Pressure tested on iPhone 13 pro, the oldest iPhone that supports refresh rate greater than
-      // 60fps. A flutter app can handle fast scrolling on 80 fps with 6 PlatformViews in the scene
-      // at the same time.
-      new_max_refresh_rate = 80;
-    }
-  }
   if (fabs(new_max_refresh_rate - max_refresh_rate_) > kRefreshRateDiffToIgnore) {
     max_refresh_rate_ = new_max_refresh_rate;
     [client_.get() setMaxRefreshRate:max_refresh_rate_];
