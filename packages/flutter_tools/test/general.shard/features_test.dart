@@ -81,12 +81,6 @@ void main() {
       expect(featureFlags.isWebEnabled, true);
     });
 
-    testWithoutContext('Flutter web wasm only enable on master', () {
-      expect(flutterWebWasm.getSettingForChannel('master').enabledByDefault, isTrue);
-      expect(flutterWebWasm.getSettingForChannel('beta').enabledByDefault, isTrue);
-      expect(flutterWebWasm.getSettingForChannel('stable').enabledByDefault, isFalse);
-    });
-
     testWithoutContext('Flutter web help string', () {
       expect(flutterWebFeature.generateHelpMessage(),
       'Enable or disable Flutter for web.');
