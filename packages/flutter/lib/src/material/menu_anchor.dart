@@ -2427,130 +2427,35 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       return;
     }
     final bool buttonIsFocused = anchor.widget.childFocusNode?.hasPrimaryFocus ?? false;
-    Axis orientation;
-    if (buttonIsFocused && anchor._parent != null) {
-      orientation = anchor._parent!._orientation;
-    } else {
-      orientation = anchor._orientation;
-    }
+    final Axis? parentOrientation = anchor._parent?._orientation;
+    final Axis orientation = (buttonIsFocused ? parentOrientation : null) ?? anchor._orientation;
+    final bool differentParent = orientation != parentOrientation;
     final bool firstItemIsFocused = anchor._firstItemFocusNode?.hasPrimaryFocus ?? false;
+    final bool rtl = switch (Directionality.of(context)) {
+      TextDirection.rtl => true,
+      TextDirection.ltr => false,
+    };
+
     assert(_debugMenuInfo('In _MenuDirectionalFocusAction, current node is ${anchor.widget.childFocusNode?.debugLabel}, '
         'button is${buttonIsFocused ? '' : ' not'} focused. Assuming ${orientation.name} orientation.'));
 
-    switch (intent.direction) {
-      case TraversalDirection.up:
-        switch (orientation) {
-          case Axis.horizontal:
-            if (_moveToParent(anchor)) {
-              return;
-            }
-          case Axis.vertical:
-            if (firstItemIsFocused) {
-              if (_moveToParent(anchor)) {
-                return;
-              }
-            }
-            if (_moveToPrevious(anchor)) {
-              return;
-            }
-        }
-      case TraversalDirection.down:
-        switch (orientation) {
-          case Axis.horizontal:
-            if (_moveToSubmenu(anchor)) {
-              return;
-            }
-          case Axis.vertical:
-            if (_moveToNext(anchor)) {
-              return;
-            }
-        }
-      case TraversalDirection.left:
-        switch (orientation) {
-          case Axis.horizontal:
-            switch (Directionality.of(context)) {
-              case TextDirection.rtl:
-                if (_moveToNext(anchor)) {
-                  return;
-                }
-              case TextDirection.ltr:
-                if (_moveToPrevious(anchor)) {
-                  return;
-                }
-            }
-          case Axis.vertical:
-            switch (Directionality.of(context)) {
-              case TextDirection.rtl:
-                if (buttonIsFocused) {
-                  if (_moveToSubmenu(anchor)) {
-                    return;
-                  }
-                } else {
-                  if (_moveToNextFocusableTopLevel(anchor)) {
-                    return;
-                  }
-                }
-              case TextDirection.ltr:
-                switch (anchor._parent?._orientation) {
-                  case Axis.horizontal:
-                  case null:
-                    if (_moveToPreviousFocusableTopLevel(anchor)) {
-                      return;
-                    }
-                  case Axis.vertical:
-                    if (buttonIsFocused) {
-                      if (_moveToPreviousFocusableTopLevel(anchor)) {
-                        return;
-                      }
-                    } else {
-                      if (_moveToParent(anchor)) {
-                        return;
-                      }
-                    }
-                }
-            }
-        }
-      case TraversalDirection.right:
-        switch (orientation) {
-          case Axis.horizontal:
-            switch (Directionality.of(context)) {
-              case TextDirection.rtl:
-                if (_moveToPrevious(anchor)) {
-                  return;
-                }
-              case TextDirection.ltr:
-                if (_moveToNext(anchor)) {
-                  return;
-                }
-            }
-          case Axis.vertical:
-            switch (Directionality.of(context)) {
-              case TextDirection.rtl:
-                switch (anchor._parent?._orientation) {
-                  case Axis.horizontal:
-                  case null:
-                    if (_moveToPreviousFocusableTopLevel(anchor)) {
-                      return;
-                    }
-                  case Axis.vertical:
-                    if (_moveToParent(anchor)) {
-                      return;
-                    }
-                }
-              case TextDirection.ltr:
-                if (buttonIsFocused) {
-                  if (_moveToSubmenu(anchor)) {
-                    return;
-                  }
-                } else {
-                  if (_moveToNextFocusableTopLevel(anchor)) {
-                    return;
-                  }
-                }
-            }
-        }
+    final bool Function(_MenuAnchorState) traversal = switch ((intent.direction, orientation)) {
+      (TraversalDirection.up, Axis.horizontal) => _moveToParent,
+      (TraversalDirection.up, Axis.vertical) => firstItemIsFocused ? _moveToParent: _moveToPrevious,
+      (TraversalDirection.down, Axis.horizontal) => _moveToSubmenu,
+      (TraversalDirection.down, Axis.vertical) => _moveToNext,
+      (TraversalDirection.left, Axis.horizontal) => rtl ? _moveToNext : _moveToPrevious,
+      (TraversalDirection.right, Axis.horizontal) => rtl ? _moveToPrevious : _moveToNext,
+      (TraversalDirection.left, Axis.vertical) when rtl => buttonIsFocused ? _moveToSubmenu : _moveToNextFocusableTopLevel,
+      (TraversalDirection.left, Axis.vertical) when differentParent => _moveToPreviousFocusableTopLevel,
+      (TraversalDirection.left, Axis.vertical) => buttonIsFocused ? _moveToPreviousFocusableTopLevel : _moveToParent,
+      (TraversalDirection.right, Axis.vertical) when !rtl => buttonIsFocused ? _moveToSubmenu : _moveToNextFocusableTopLevel,
+      (TraversalDirection.right, Axis.vertical) when differentParent => _moveToPreviousFocusableTopLevel,
+      (TraversalDirection.right, Axis.vertical) => buttonIsFocused ? _moveToPreviousFocusableTopLevel : _moveToParent,
+    };
+    if (!traversal(anchor)) {
+      super.invoke(intent);
     }
-    super.invoke(intent);
   }
 
   bool _moveToNext(_MenuAnchorState currentMenu) {
@@ -3357,6 +3262,12 @@ class _MenuPanel extends StatefulWidget {
 
 class _MenuPanelState extends State<_MenuPanel> {
   ScrollController scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

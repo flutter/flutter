@@ -523,10 +523,9 @@ targets:
       # "--device", "model=Nexus6P,version=25"
       virtual_devices: >-
         [
-          "--device", "model=Nexus5,version=21",
-          "--device", "model=Nexus5,version=22",
-          "--device", "model=Nexus5,version=23",
-          "--device", "model=Nexus5,version=24",
+          "--device", "model=Nexus5.gce_x86,version=21",
+          "--device", "model=Nexus5.gce_x86,version=22",
+          "--device", "model=Nexus5.gce_x86,version=23",
           "--device", "model=Nexus6P,version=25",
           "--device", "model=Nexus6P,version=26",
           "--device", "model=Nexus6P,version=27",
@@ -555,9 +554,9 @@ targets:
       # "--device", "model=Nexus6P,version=25"
       virtual_devices: >-
         [
-          "--device", "model=Nexus5,version=21",
-          "--device", "model=Nexus5,version=22",
-          "--device", "model=Nexus5,version=23",
+          "--device", "model=Nexus5.gce_x86,version=21",
+          "--device", "model=Nexus5.gce_x86,version=22",
+          "--device", "model=Nexus5.gce_x86,version=23",
           "--device", "model=Nexus6P,version=25",
           "--device", "model=Nexus6P,version=26",
           "--device", "model=Nexus6P,version=27",
@@ -586,9 +585,9 @@ targets:
       # "--device", "model=Nexus6P,version=25"
       virtual_devices: >-
         [
-          "--device", "model=Nexus5,version=21",
-          "--device", "model=Nexus5,version=22",
-          "--device", "model=Nexus5,version=23",
+          "--device", "model=Nexus5.gce_x86,version=21",
+          "--device", "model=Nexus5.gce_x86,version=22",
+          "--device", "model=Nexus5.gce_x86,version=23",
           "--device", "model=Nexus6P,version=25",
           "--device", "model=Nexus6P,version=26",
           "--device", "model=Nexus6P,version=27",
@@ -806,6 +805,7 @@ targets:
       task_name: gradle_plugin_fat_apk_test
     runIf:
       - dev/**
+      - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
 
@@ -824,6 +824,7 @@ targets:
       task_name: gradle_plugin_light_apk_test
     runIf:
       - dev/**
+      - packages/flutter_tools/**
       - bin/**
       - .ci.yaml
 
@@ -1724,6 +1725,190 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Linux web_skwasm_tests_0
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
+      shard: web_skwasm_tests
+      subshard: "0"
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
+    runIf:
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Linux web_skwasm_tests_1
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
+      shard: web_skwasm_tests
+      subshard: "1"
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
+    runIf:
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Linux web_skwasm_tests_2
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
+      shard: web_skwasm_tests
+      subshard: "2"
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
+    runIf:
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Linux web_skwasm_tests_3
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
+      shard: web_skwasm_tests
+      subshard: "3"
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
+    runIf:
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Linux web_skwasm_tests_4
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
+      shard: web_skwasm_tests
+      subshard: "4"
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
+    runIf:
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Linux web_skwasm_tests_5
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
+      shard: web_skwasm_tests
+      subshard: "5"
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
+    runIf:
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Linux web_skwasm_tests_6
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
+      shard: web_skwasm_tests
+      subshard: "6"
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
+    runIf:
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
+
+  - name: Linux web_skwasm_tests_7_last
+    bringup: true
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "chrome_and_driver", "version": "version:119.0.6045.9"},
+          {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
+        ]
+      shard: web_skwasm_tests
+      subshard: "7_last"
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
+    runIf:
+      - dev/**
+      - packages/**
+      - bin/**
+      - .ci.yaml
+
   - name: Linux web_tool_tests
     recipe: flutter/flutter_drone
     timeout: 60
@@ -2393,6 +2578,7 @@ targets:
   # linux motog4 benchmark
   - name: Linux_android hot_mode_dev_cycle_linux__benchmark
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -4626,6 +4812,16 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: platform_views_scroll_perf_ios__timeline_summary
 
+  - name: Mac_ios platform_views_scroll_perf_ad_banners__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: platform_views_scroll_perf_ad_banners__timeline_summary
+
   - name: Mac_ios platform_views_scroll_perf_non_intersecting_impeller_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4679,7 +4875,8 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: hot_mode_dev_cycle_ios__benchmark
+      # TODO(vashworth): Use "hot_mode_dev_cycle_ios__benchmark" once https://github.com/flutter/flutter/issues/142305 is fixed.
+      task_name: hot_mode_dev_cycle_ios__benchmark_no_dds
 
   - name: Mac_x64 hot_mode_dev_cycle_ios_simulator
     recipe: devicelab/devicelab_drone
@@ -5040,7 +5237,8 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
       env_variables: >-
         {
-          "LEAK_TRACKING": "true"
+          "LEAK_TRACKING": "true",
+          "TEST_RANDOMIZATION_OFF": "true"
         }
     runIf:
       - dev/**
@@ -5126,7 +5324,8 @@ targets:
         ["framework", "hostonly", "shard", "windows"]
       env_variables: >-
         {
-          "LEAK_TRACKING": "true"
+          "LEAK_TRACKING": "true",
+          "TEST_RANDOMIZATION_OFF": "true"
         }
     runIf:
       - dev/**
