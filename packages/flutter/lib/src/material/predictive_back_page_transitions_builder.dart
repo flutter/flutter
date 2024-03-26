@@ -85,7 +85,6 @@ class _PredictiveBackGestureDetector extends StatefulWidget {
 
 class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDetector>
     with WidgetsBindingObserver {
-  PredictiveBackEvent? _startBackEvent;
   bool _gestureInProgress = false;
 
   /// True when the predictive back gesture is enabled.
@@ -96,6 +95,7 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
 
   /// The back event when the gesture first started.
   PredictiveBackEvent? get startBackEvent => _startBackEvent;
+  PredictiveBackEvent? _startBackEvent;
   set startBackEvent(PredictiveBackEvent? startBackEvent) {
     if (_startBackEvent != startBackEvent && mounted) {
       setState(() {
@@ -105,8 +105,8 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
   }
 
   /// The most recent back event during the gesture.
-  PredictiveBackEvent? _currentBackEvent;
   PredictiveBackEvent? get currentBackEvent => _currentBackEvent;
+  PredictiveBackEvent? _currentBackEvent;
   set currentBackEvent(PredictiveBackEvent? currentBackEvent) {
     if (_currentBackEvent != currentBackEvent && mounted) {
       setState(() {
@@ -223,25 +223,37 @@ class _PredictiveBackPageTransition extends StatelessWidget {
         ? ConstantTween<double>(_scaleFullyOpened)
         : TweenSequence<double>(<TweenSequenceItem<double>>[
             TweenSequenceItem<double>(
-                tween: Tween<double>(
-                    begin: _scaleStartTransition, end: _scaleFullyOpened),
-                weight: _weightForStartState),
+              tween: Tween<double>(
+                begin: _scaleStartTransition,
+                end: _scaleFullyOpened,
+              ),
+              weight: _weightForStartState,
+            ),
             TweenSequenceItem<double>(
-                tween: Tween<double>(
-                    begin: _scaleFullyOpened, end: _scaleFullyOpened),
-                weight: _weightForEndState),
+              tween: Tween<double>(
+                begin: _scaleFullyOpened,
+                end: _scaleFullyOpened,
+              ),
+              weight: _weightForEndState,
+            ),
           ]);
     final Animatable<double> fadeTween = isCurrent
         ? ConstantTween<double>(_opacityFullyOpened)
         : TweenSequence<double>(<TweenSequenceItem<double>>[
             TweenSequenceItem<double>(
-                tween: Tween<double>(
-                    begin: _opacityFullyOpened, end: _opacityStartTransition),
-                weight: _weightForStartState),
+              tween: Tween<double>(
+                begin: _opacityFullyOpened,
+                end: _opacityStartTransition,
+              ),
+              weight: _weightForStartState,
+            ),
             TweenSequenceItem<double>(
-                tween: Tween<double>(
-                    begin: _opacityFullyOpened, end: _opacityFullyOpened),
-                weight: _weightForEndState),
+              tween: Tween<double>(
+                begin: _opacityFullyOpened,
+                end: _opacityFullyOpened,
+              ),
+              weight: _weightForEndState,
+            ),
           ]);
 
     return Transform.translate(
@@ -276,12 +288,17 @@ class _PredictiveBackPageTransition extends StatelessWidget {
     final Animatable<double> scaleTween =
         TweenSequence<double>(<TweenSequenceItem<double>>[
       TweenSequenceItem<double>(
-        tween: Tween<double>(begin: _scaleFullyOpened, end: _scaleFullyOpened),
+        tween: Tween<double>(
+          begin: _scaleFullyOpened,
+          end: _scaleFullyOpened,
+        ),
         weight: _weightForStartState,
       ),
       TweenSequenceItem<double>(
-        tween:
-            Tween<double>(begin: _scaleStartTransition, end: _scaleFullyOpened),
+        tween: Tween<double>(
+          begin: _scaleStartTransition,
+          end: _scaleFullyOpened,
+        ),
         weight: _weightForEndState,
       ),
     ]);
@@ -293,7 +310,9 @@ class _PredictiveBackPageTransition extends StatelessWidget {
       ),
       TweenSequenceItem<double>(
         tween: Tween<double>(
-            begin: _opacityStartTransition, end: _opacityFullyOpened),
+          begin: _opacityStartTransition,
+          end: _opacityFullyOpened,
+        ),
         weight: _weightForEndState,
       ),
     ]);
