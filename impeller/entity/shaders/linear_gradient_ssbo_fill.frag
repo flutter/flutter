@@ -61,5 +61,5 @@ void main() {
   }
 
   frag_color = IPPremultiply(frag_color) * frag_info.alpha;
-  frag_color = IPOrderedDither8x8(frag_color, v_position);
+  frag_color = IPOrderedDither8x8(frag_color, gl_FragCoord.xy);
 }

@@ -1126,7 +1126,7 @@
             "shortest_path_cycles": [
               0.5,
               0.109375,
-              0.328125,
+              0.296875,
               0.5,
               0.0,
               0.25,
@@ -1136,9 +1136,9 @@
               "load_store"
             ],
             "total_cycles": [
-              1.4500000476837158,
+              1.4249999523162842,
               0.862500011920929,
-              1.4500000476837158,
+              1.4249999523162842,
               0.875,
               4.0,
               0.25,
@@ -1147,8 +1147,8 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 46,
-          "work_registers_used": 20
+          "uniform_registers_used": 44,
+          "work_registers_used": 17
         }
       }
     }
@@ -8336,7 +8336,7 @@
             "shortest_path_cycles": [
               0.5625,
               0.203125,
-              0.296875,
+              0.265625,
               0.5625,
               0.0,
               0.25,
@@ -8346,9 +8346,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.78125,
+              0.75,
               0.421875,
-              0.78125,
+              0.75,
               0.625,
               4.0,
               0.25,
@@ -8358,7 +8358,7 @@
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
           "uniform_registers_used": 24,
-          "work_registers_used": 20
+          "work_registers_used": 17
         }
       }
     }
@@ -9205,7 +9205,7 @@
             "shortest_path_cycles": [
               0.5625,
               0.21875,
-              0.3125,
+              0.28125,
               0.5625,
               0.0,
               0.25,
@@ -9215,9 +9215,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.75,
+              0.71875,
               0.421875,
-              0.75,
+              0.71875,
               0.625,
               4.0,
               0.25,
@@ -9227,7 +9227,7 @@
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
           "uniform_registers_used": 22,
-          "work_registers_used": 20
+          "work_registers_used": 17
         }
       }
     }
@@ -10013,7 +10013,7 @@
             "shortest_path_cycles": [
               0.8125,
               0.421875,
-              0.359375,
+              0.328125,
               0.8125,
               0.0,
               0.25,
@@ -10025,7 +10025,7 @@
             "total_cycles": [
               0.875,
               0.6875,
-              0.800000011920929,
+              0.762499988079071,
               0.875,
               4.0,
               0.25,
@@ -10034,8 +10034,8 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 28,
-          "work_registers_used": 23
+          "uniform_registers_used": 26,
+          "work_registers_used": 20
         }
       }
     }
