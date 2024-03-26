@@ -2231,7 +2231,7 @@
 ../../../flutter/third_party/skia/.git
 ../../../flutter/third_party/skia/.gitignore
 ../../../flutter/third_party/skia/.gn
-../../../flutter/third_party/skia/.vpython
+../../../flutter/third_party/skia/.vpython3
 ../../../flutter/third_party/skia/AUTHORS
 ../../../flutter/third_party/skia/BUILD.bazel
 ../../../flutter/third_party/skia/CONTRIBUTING
