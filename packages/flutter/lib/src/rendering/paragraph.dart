@@ -2207,15 +2207,15 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         );
       }
       if (existingSelectionEnd != null) {
-        final RenderParagraph targetParagraph = _getParagraphContainingPosition(globalPosition);
-        final Matrix4 targetTransform = targetParagraph.getTransformTo(null);
-        targetTransform.invert();
-        final Offset targetParagraphLocalPosition = MatrixUtils.transformPoint(targetTransform, globalPosition);
-        final bool positionWithinTargetParagraph = targetParagraph.paintBounds.contains(targetParagraphLocalPosition);
-        final TextPosition positionRelativeToTargetParagraph = targetParagraph.getPositionForOffset(targetParagraphLocalPosition);
+        final ({RenderParagraph paragraph, Offset localPosition})? targetDetails = _getParagraphContainingPosition(globalPosition);
+        if (targetDetails == null) {
+          return null;
+        }
+        final RenderParagraph targetParagraph = targetDetails.paragraph;
+        final TextPosition positionRelativeToTargetParagraph = targetParagraph.getPositionForOffset(targetDetails.localPosition);
         final String targetText = targetParagraph.text.toPlainText(includeSemanticsLabels: false);
         final bool positionOnPlaceholder = targetParagraph.getWordBoundary(positionRelativeToTargetParagraph).textInside(targetText) == _placeholderCharacter;
-        if (!positionOnPlaceholder && positionWithinTargetParagraph) {
+        if (!positionOnPlaceholder) {
           final bool backwardSelection = existingSelectionStart == null && existingSelectionEnd.offset == range.start
               || existingSelectionStart == existingSelectionEnd && existingSelectionEnd.offset == range.start
               || existingSelectionStart != null && existingSelectionStart.offset > existingSelectionEnd.offset;
@@ -2390,15 +2390,15 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
         );
       }
       if (existingSelectionStart != null) {
-        final RenderParagraph targetParagraph = _getParagraphContainingPosition(globalPosition);
-        final Matrix4 targetTransform = targetParagraph.getTransformTo(null);
-        targetTransform.invert();
-        final Offset targetParagraphLocalPosition = MatrixUtils.transformPoint(targetTransform, globalPosition);
-        final bool positionWithinTargetParagraph = targetParagraph.paintBounds.contains(targetParagraphLocalPosition);
-        final TextPosition positionRelativeToTargetParagraph = targetParagraph.getPositionForOffset(targetParagraphLocalPosition);
+        final ({RenderParagraph paragraph, Offset localPosition})? targetDetails = _getParagraphContainingPosition(globalPosition);
+        if (targetDetails == null) {
+          return null;
+        }
+        final RenderParagraph targetParagraph = targetDetails.paragraph;
+        final TextPosition positionRelativeToTargetParagraph = targetParagraph.getPositionForOffset(targetDetails.localPosition);
         final String targetText = targetParagraph.text.toPlainText(includeSemanticsLabels: false);
         final bool positionOnPlaceholder = targetParagraph.getWordBoundary(positionRelativeToTargetParagraph).textInside(targetText) == _placeholderCharacter;
-        if (!positionOnPlaceholder && positionWithinTargetParagraph) {
+        if (!positionOnPlaceholder) {
           final bool backwardSelection = existingSelectionEnd == null && existingSelectionStart.offset == range.end
               || existingSelectionStart == existingSelectionEnd && existingSelectionStart.offset == range.end
               || existingSelectionEnd != null && existingSelectionStart.offset > existingSelectionEnd.offset;
@@ -2611,29 +2611,25 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     return originParagraph ?? paragraph;
   }
 
-  RenderParagraph _getParagraphContainingPosition(Offset globalPosition) {
-    // This method will return the closest parent [RenderParagraph] whose rect
-    // contains the given `globalPosition`. If no parent [RenderParagraph]
-    // contains the given `globalPosition` then this method will return the
-    // furthest ancestor [RenderParagraph]. If there is no parent [RenderParagraph]
-    // then this method will return the [RenderParagraph] that created this
-    // [_SelectableFragment].
-    RenderObject? current = paragraph.parent;
-    RenderParagraph? lastParagraph;
+  ({RenderParagraph paragraph, Offset localPosition})? _getParagraphContainingPosition(Offset globalPosition) {
+    // This method will return the closest [RenderParagraph] whose rect
+    // contains the given `globalPosition` and the given `globalPosition`
+    // relative to that [RenderParagraph]. If no ancestor [RenderParagraph]
+    // contains the given `globalPosition` then this method will return null.
+    RenderObject? current = paragraph;
     while (current != null) {
       if (current is RenderParagraph) {
-        lastParagraph = current;
         final Matrix4 currentTransform = current.getTransformTo(null);
         currentTransform.invert();
         final Offset currentParagraphLocalPosition = MatrixUtils.transformPoint(currentTransform, globalPosition);
         final bool positionWithinCurrentParagraph = current.paintBounds.contains(currentParagraphLocalPosition);
         if (positionWithinCurrentParagraph) {
-          return current;
+          return (paragraph: current, localPosition: currentParagraphLocalPosition);
         }
       }
       current = current.parent;
     }
-    return lastParagraph ?? paragraph;
+    return null;
   }
 
   bool _boundingBoxesContains(Offset position) {
