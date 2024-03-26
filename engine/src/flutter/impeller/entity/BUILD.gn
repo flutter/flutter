@@ -188,6 +188,8 @@ impeller_component("entity") {
     "entity.h",
     "entity_pass.cc",
     "entity_pass.h",
+    "entity_pass_clip_stack.cc",
+    "entity_pass_clip_stack.h",
     "entity_pass_delegate.cc",
     "entity_pass_delegate.h",
     "entity_pass_target.cc",
