@@ -44,8 +44,10 @@ static std::shared_ptr<Contents> CreateContentsForGeometryWithFilters(
     }
   }
 
+  bool can_apply_mask_filter = geometry->CanApplyMaskFilter();
   contents->SetGeometry(std::move(geometry));
-  if (paint.mask_blur_descriptor.has_value()) {
+
+  if (can_apply_mask_filter && paint.mask_blur_descriptor.has_value()) {
     // If there's a mask blur and we need to apply the color filter on the GPU,
     // we need to be careful to only apply the color filter to the source
     // colors. CreateMaskBlur is able to handle this case.

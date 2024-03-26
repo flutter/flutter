@@ -58,4 +58,8 @@ bool CoverGeometry::CoversArea(const Matrix& transform,
   return true;
 }
 
+bool CoverGeometry::CanApplyMaskFilter() const {
+  return false;
+}
+
 }  // namespace impeller
