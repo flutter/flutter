@@ -148,6 +148,8 @@ class Geometry {
 
   virtual bool IsAxisAlignedRect() const;
 
+  virtual bool CanApplyMaskFilter() const;
+
  protected:
   static GeometryResult ComputePositionGeometry(
       const ContentContext& renderer,

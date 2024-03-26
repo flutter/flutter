@@ -240,4 +240,8 @@ bool Geometry::IsAxisAlignedRect() const {
   return false;
 }
 
+bool Geometry::CanApplyMaskFilter() const {
+  return true;
+}
+
 }  // namespace impeller

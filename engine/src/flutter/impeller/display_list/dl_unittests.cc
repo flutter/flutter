@@ -1834,5 +1834,28 @@ TEST_P(DisplayListTest, SceneColorSource) {
 }
 #endif
 
+TEST_P(DisplayListTest, DrawPaintIgnoresMaskFilter) {
+  flutter::DisplayListBuilder builder;
+  builder.DrawPaint(flutter::DlPaint().setColor(flutter::DlColor::kWhite()));
+
+  auto filter = flutter::DlBlurMaskFilter(flutter::DlBlurStyle::kNormal, 10.0f);
+  builder.DrawCircle({300, 300}, 200,
+                     flutter::DlPaint().setMaskFilter(&filter));
+
+  std::vector<flutter::DlColor> colors = {flutter::DlColor::kGreen(),
+                                          flutter::DlColor::kGreen()};
+  const float stops[2] = {0.0, 1.0};
+  auto linear = flutter::DlColorSource::MakeLinear(
+      {100.0, 100.0}, {300.0, 300.0}, 2, colors.data(), stops,
+      flutter::DlTileMode::kRepeat);
+  flutter::DlPaint blend_paint =
+      flutter::DlPaint()           //
+          .setColorSource(linear)  //
+          .setBlendMode(flutter::DlBlendMode::kScreen);
+  builder.DrawPaint(blend_paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller
