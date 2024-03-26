@@ -2195,7 +2195,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       }
     } else {
       // When the drag position is somewhere on the root text and not a placeholder,
-      // traverse the selectable fragments relative to the [RenderParagraph] that 
+      // traverse the selectable fragments relative to the [RenderParagraph] that
       // contains the drag position.
       if (paragraphContainsPosition) {
         return _updateSelectionStartEdgeByMultiSelectableTextBoundary(
@@ -2379,7 +2379,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
       }
     } else {
       // When the drag position is somewhere on the root text and not a placeholder,
-      // traverse the selectable fragments relative to the [RenderParagraph] that 
+      // traverse the selectable fragments relative to the [RenderParagraph] that
       // contains the drag position.
       if (paragraphContainsPosition) {
         return _updateSelectionEndEdgeByMultiSelectableTextBoundary(
