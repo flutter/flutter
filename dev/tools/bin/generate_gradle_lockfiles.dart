@@ -123,7 +123,7 @@ void main(List<String> arguments) {
     final File gradleWrapper = androidDirectory.childFile('gradlew');
     // Generate Gradle wrapper if it doesn't exist.
     if (!gradleWrapper.existsSync()) {
-      Process.runSync(
+      exec(
         'flutter',
         <String>['build', 'apk', '--config-only'],
         workingDirectory: appDirectory,
