@@ -66,6 +66,7 @@ import 'package:process/process.dart';
 import 'browser.dart';
 import 'run_command.dart';
 import 'service_worker_test.dart';
+import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
 import 'tool_subsharding.dart';
 import 'utils.dart';
 
@@ -230,7 +231,7 @@ Future<void> main(List<String> args) async {
       printProgress('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
     }
     await selectShard(<String, ShardRunner>{
-      'add_to_app_life_cycle_tests': _runAddToAppLifeCycleTests,
+      'add_to_app_life_cycle_tests': () => addToAppLifeCycleRunner(flutterRoot),
       'build_tests': _runBuildTests,
       'framework_coverage': _runFrameworkCoverage,
       'framework_tests': _runFrameworkTests,
@@ -788,19 +789,6 @@ Future<void> _flutterBuildDart2js(String relativePathToApplication, String targe
       'FLUTTER_WEB': 'true',
     },
   );
-}
-
-Future<void> _runAddToAppLifeCycleTests() async {
-  if (Platform.isMacOS) {
-    printProgress('${green}Running add-to-app life cycle iOS integration tests$reset...');
-    final String addToAppDir = path.join(flutterRoot, 'dev', 'integration_tests', 'ios_add2app_life_cycle');
-    await runCommand('./build_and_test.sh',
-      <String>[],
-      workingDirectory: addToAppDir,
-    );
-  } else {
-    printProgress('${yellow}Skipped on this platform (only iOS has add-to-add lifecycle tests at this time).$reset');
-  }
 }
 
 Future<void> _runFrameworkTests() async {
