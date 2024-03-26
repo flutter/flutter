@@ -66,6 +66,7 @@ import 'package:process/process.dart';
 import 'browser.dart';
 import 'run_command.dart';
 import 'service_worker_test.dart';
+import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
 import 'tool_subsharding.dart';
 import 'utils.dart';
 
@@ -187,6 +188,8 @@ String get shuffleSeed {
   return _shuffleSeed!;
 }
 
+final bool _isRandomizationOff = bool.tryParse(Platform.environment['TEST_RANDOMIZATION_OFF'] ?? '') ?? false;
+
 /// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter test. For example, you might want to call this
 /// script with the parameter --local-engine=host_debug_unopt to
@@ -228,7 +231,7 @@ Future<void> main(List<String> args) async {
       printProgress('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
     }
     await selectShard(<String, ShardRunner>{
-      'add_to_app_life_cycle_tests': _runAddToAppLifeCycleTests,
+      'add_to_app_life_cycle_tests': () => addToAppLifeCycleRunner(flutterRoot),
       'build_tests': _runBuildTests,
       'framework_coverage': _runFrameworkCoverage,
       'framework_tests': _runFrameworkTests,
@@ -242,6 +245,8 @@ Future<void> main(List<String> args) async {
       'web_tests': _runWebHtmlUnitTests,
       // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=canvaskit`
       'web_canvaskit_tests': _runWebCanvasKitUnitTests,
+      // All the unit/widget tests run using `flutter test --platform=chrome --wasm --web-renderer=skwasm`
+      'web_skwasm_tests': _runWebSkwasmUnitTests,
       // All web integration tests
       'web_long_running_tests': _runWebLongRunningTests,
       'flutter_plugins': _runFlutterPackagesTests,
@@ -786,19 +791,6 @@ Future<void> _flutterBuildDart2js(String relativePathToApplication, String targe
   );
 }
 
-Future<void> _runAddToAppLifeCycleTests() async {
-  if (Platform.isMacOS) {
-    printProgress('${green}Running add-to-app life cycle iOS integration tests$reset...');
-    final String addToAppDir = path.join(flutterRoot, 'dev', 'integration_tests', 'ios_add2app_life_cycle');
-    await runCommand('./build_and_test.sh',
-      <String>[],
-      workingDirectory: addToAppDir,
-    );
-  } else {
-    printProgress('${yellow}Skipped on this platform (only iOS has add-to-add lifecycle tests at this time).$reset');
-  }
-}
-
 Future<void> _runFrameworkTests() async {
   final List<String> trackWidgetCreationAlternatives = <String>['--track-widget-creation', '--no-track-widget-creation'];
 
@@ -1117,14 +1109,18 @@ Future<void> _runFrameworkCoverage() async {
 }
 
 Future<void> _runWebHtmlUnitTests() {
-  return _runWebUnitTests('html');
+  return _runWebUnitTests('html', false);
 }
 
 Future<void> _runWebCanvasKitUnitTests() {
-  return _runWebUnitTests('canvaskit');
+  return _runWebUnitTests('canvaskit', false);
 }
 
-Future<void> _runWebUnitTests(String webRenderer) async {
+Future<void> _runWebSkwasmUnitTests() {
+  return _runWebUnitTests('skwasm', true);
+}
+
+Future<void> _runWebUnitTests(String webRenderer, bool useWasm) async {
   final Map<String, ShardRunner> subshards = <String, ShardRunner>{};
 
   final Directory flutterPackageDirectory = Directory(path.join(flutterRoot, 'packages', 'flutter'));
@@ -1160,6 +1156,7 @@ Future<void> _runWebUnitTests(String webRenderer) async {
         index * testsPerShard,
         (index + 1) * testsPerShard,
       ),
+      useWasm,
     );
   }
 
@@ -1175,16 +1172,19 @@ Future<void> _runWebUnitTests(String webRenderer) async {
         (webShardCount - 1) * testsPerShard,
         allTests.length,
       ),
+      useWasm,
     );
     await _runFlutterWebTest(
       webRenderer,
       path.join(flutterRoot, 'packages', 'flutter_web_plugins'),
       <String>['test'],
+      useWasm,
     );
     await _runFlutterWebTest(
       webRenderer,
       path.join(flutterRoot, 'packages', 'flutter_driver'),
       <String>[path.join('test', 'src', 'web_tests', 'web_extension_test.dart')],
+      useWasm,
     );
   };
 
@@ -1255,9 +1255,11 @@ Future<void> _runWebLongRunningTests() async {
     () => _runWebE2eTest('scroll_wheel_integration', buildMode: 'debug', renderer: 'html'),
 
     // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
-    () => _runWebE2eTest('text_editing_integration', buildMode: 'debug', renderer: 'canvaskit'),
-    () => _runWebE2eTest('text_editing_integration', buildMode: 'profile', renderer: 'html'),
-    () => _runWebE2eTest('text_editing_integration', buildMode: 'release', renderer: 'html'),
+    // These tests have been extremely flaky, so we are temporarily disabling them until we figure out how to make them more robust.
+    // See https://github.com/flutter/flutter/issues/143834
+    // () => _runWebE2eTest('text_editing_integration', buildMode: 'debug', renderer: 'canvaskit'),
+    // () => _runWebE2eTest('text_editing_integration', buildMode: 'profile', renderer: 'html'),
+    // () => _runWebE2eTest('text_editing_integration', buildMode: 'release', renderer: 'html'),
 
     // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
     () => _runWebE2eTest('url_strategy_integration', buildMode: 'debug', renderer: 'html'),
@@ -1333,11 +1335,19 @@ Future<void> _runWebLongRunningTests() async {
       'html',
       path.join(flutterRoot, 'packages', 'integration_test'),
       <String>['test/web_extension_test.dart'],
+      false,
     ),
     () => _runFlutterWebTest(
       'canvaskit',
       path.join(flutterRoot, 'packages', 'integration_test'),
       <String>['test/web_extension_test.dart'],
+      false,
+    ),
+    () => _runFlutterWebTest(
+      'skwasm',
+      path.join(flutterRoot, 'packages', 'integration_test'),
+      <String>['test/web_extension_test.dart'],
+      true,
     ),
   ];
 
@@ -2302,13 +2312,19 @@ Future<void> _runWebDebugTest(String target, {
   }
 }
 
-Future<void> _runFlutterWebTest(String webRenderer, String workingDirectory, List<String> tests) async {
+Future<void> _runFlutterWebTest(
+  String webRenderer,
+  String workingDirectory,
+  List<String> tests,
+  bool useWasm,
+) async {
   await runCommand(
     flutter,
     <String>[
       'test',
       '-v',
       '--platform=chrome',
+      if (useWasm) '--wasm',
       '--web-renderer=$webRenderer',
       '--dart-define=DART_HHH_BOT=$_runningInDartHHHBot',
       ...flutterTestArgs,
@@ -2445,7 +2461,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
 
   final List<String> args = <String>[
     'test',
-    if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
+    if (shuffleTests && !_isRandomizationOff) '--test-randomize-ordering-seed=$shuffleSeed',
     if (fatalWarnings) '--fatal-warnings',
     ...options,
     ...tags,

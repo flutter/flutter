@@ -1550,7 +1550,10 @@ void main() {
     });
   });
 
-  testWidgets('Overlay.wrap', (WidgetTester tester) async {
+  testWidgets('Overlay.wrap',
+  // TODO(ksokolovskyi): dispose OverlayEntry, https://github.com/flutter/flutter/issues/145687 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1582,7 +1585,10 @@ void main() {
     expect(tester.state(find.byType(Overlay)), same(overlayState));
   });
 
-  testWidgets('Overlay.wrap is sized by child in an unconstrained environment', (WidgetTester tester) async {
+  testWidgets('Overlay.wrap is sized by child in an unconstrained environment',
+  // TODO(ksokolovskyi): dispose OverlayEntry, https://github.com/flutter/flutter/issues/145687 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
