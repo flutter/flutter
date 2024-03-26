@@ -1,7 +1,9 @@
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
+[rootProject, project(':app')].each { project ->
+    project.repositories {
+        repositories {
+            google()
+            mavenCentral()
+        }
     }
 }
 
