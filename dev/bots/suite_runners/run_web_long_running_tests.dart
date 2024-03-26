@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' show File, HttpClient, HttpClientRequest, HttpClientResponse, Platform, Process, RawSocket, SocketDirection, SocketException;
+import 'dart:io' show File, HttpClient, HttpClientRequest, HttpClientResponse, Process, RawSocket, SocketDirection, SocketException;
 import 'dart:math' as math;
 import 'package:path/path.dart' as path;
 
