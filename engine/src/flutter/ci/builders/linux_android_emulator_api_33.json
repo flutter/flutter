@@ -63,7 +63,7 @@
                     "language": "dart",
                     "name": "Scenario App Integration Tests",
                     "test_timeout_secs": 900,
-                    "max_attempts": 2,
+                    "max_attempts": 1,
                     "test_dependencies": [
                         {
                             "dependency": "android_virtual_device",
