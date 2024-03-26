@@ -709,6 +709,9 @@ Future<void> _verifyNoMissingLicenseForExtension(
     if (contents.isEmpty) {
       continue; // let's not go down the /bin/true rabbit hole
     }
+    if (path.basename(file.path) == 'Package.swift') {
+      continue;
+    }
     if (!contents.startsWith(RegExp(header + licensePattern))) {
       errors.add(file.path);
     }
