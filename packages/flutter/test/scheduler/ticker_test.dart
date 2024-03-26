@@ -102,8 +102,7 @@ void main() {
   testWidgets(
     'Ticker control test',
     // Functions are inlined too aggressively by the TFA for this test to work.
-    // See https://github.com/dart-lang/sdk/issues/55279
-    skip: kIsWasm,
+    skip: kIsWasm, // https://github.com/dart-lang/sdk/issues/55279
     (WidgetTester tester) async {
     late Ticker ticker;
     addTearDown(() => ticker.dispose());
