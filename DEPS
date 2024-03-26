@@ -84,7 +84,6 @@ vars = {
   'dart_webdev_rev': '51b5484348b4a8ede351e8dff0428b083495ba78',
   'dart_webkit_inspection_protocol_rev': '153fea4fe5ac45bebf0c2e76bb3d76b0f1fcdaae',
   'dart_yaml_edit_rev': '54884db790720ac0f7ca491cb9e6d7a0395ad4cb',
-  'dart_zlib_rev': '14dd4c4455602c9b71a1a89b5cafd1f4030d2e3f',
 
   'ocmock_rev': 'c4ec0e3a7a9f56cfdbd0aa01f4f97bb4b75c5ef8', # v3.7.1
 
@@ -666,7 +665,7 @@ deps = {
    Var('skia_git') + '/external/github.com/google/wuffs-mirror-release-c.git' + '@' + '600cd96cf47788ee3a74b40a6028b035c9fd6a61',
 
   'src/third_party/zlib':
-   Var('chromium_git') + '/chromium/src/third_party/zlib.git' + '@' + Var('dart_zlib_rev'),
+   Var('chromium_git') + '/chromium/src/third_party/zlib.git' + '@' + '14dd4c4455602c9b71a1a89b5cafd1f4030d2e3f',
 
   'src/flutter/third_party/inja':
    Var('flutter_git') + '/third_party/inja' + '@' + '88bd6112575a80d004e551c98cf956f88ff4d445',
