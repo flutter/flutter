@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../rendering/sliver_utils.dart';
 
@@ -325,7 +326,9 @@ void main() {
     expect(renderGroup.geometry!.scrollExtent, equals(300 * 20));
   });
 
-  testWidgets('Assertion error when SliverExpanded is used outside of SliverCrossAxisGroup', (WidgetTester tester) async {
+  testWidgets('Assertion error when SliverExpanded is used outside of SliverCrossAxisGroup',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);

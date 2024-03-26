@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const Color green = Color(0xFF00FF00);
 const Color yellow = Color(0xFFFFFF00);
@@ -186,7 +187,9 @@ void main() {
     expect(widget2Element, same(tester.element(find.byWidget(widget2))));
   });
 
-  testWidgets('duplicated key error message', (WidgetTester tester) async {
+  testWidgets('duplicated key error message',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     const Widget widget1 = SizedBox(key: ValueKey<String>('widget 1'), height: 10, width: 10);
     const Widget widget2 = SizedBox(key: ValueKey<String>('widget 1'), height: 100, width: 100);
     const Widget widget3 = SizedBox(key: ValueKey<String>('widget 1'), height: 50, width: 50);

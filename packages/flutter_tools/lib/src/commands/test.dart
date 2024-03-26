@@ -12,7 +12,6 @@ import '../build_info.dart';
 import '../bundle_builder.dart';
 import '../devfs.dart';
 import '../device.dart';
-import '../features.dart';
 import '../globals.dart' as globals;
 import '../native_assets.dart';
 import '../project.dart';
@@ -240,7 +239,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         FlutterOptions.kWebWasmFlag,
         help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
         negatable: false,
-        hide: !featureFlags.isFlutterWebWasmEnabled,
       );
 
     addDdsOptions(verboseHelp: verboseHelp);

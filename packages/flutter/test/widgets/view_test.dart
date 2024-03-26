@@ -7,6 +7,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'multi_view_testing.dart';
 
@@ -344,7 +345,10 @@ void main() {
     });
   });
 
-  testWidgets('correctly switches between view configurations', (WidgetTester tester) async {
+  testWidgets('correctly switches between view configurations',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapWithView: false,
       View(

@@ -4,10 +4,7 @@
 
 import 'package:native_assets_builder/native_assets_builder.dart'
     hide NativeAssetsBuildRunner;
-import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    hide BuildMode;
-import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    as native_assets_cli;
+import 'package:native_assets_cli/native_assets_cli_internal.dart';
 
 import '../../../base/file_system.dart';
 import '../../../build_info.dart';
@@ -30,7 +27,7 @@ Future<Uri?> dryRunNativeAssetsIOS({
     return null;
   }
 
-  final Uri buildUri = nativeAssetsBuildUri(projectUri, OS.iOS);
+  final Uri buildUri = nativeAssetsBuildUri(projectUri, OSImpl.iOS);
   final Iterable<KernelAsset> assetTargetLocations = await dryRunNativeAssetsIOSInternal(
     fileSystem,
     projectUri,
@@ -49,16 +46,16 @@ Future<Iterable<KernelAsset>> dryRunNativeAssetsIOSInternal(
   Uri projectUri,
   NativeAssetsBuildRunner buildRunner,
 ) async {
-  const OS targetOS = OS.iOS;
+  const OSImpl targetOS = OSImpl.iOS;
   globals.logger.printTrace('Dry running native assets for $targetOS.');
   final DryRunResult dryRunResult = await buildRunner.dryRun(
-    linkModePreference: LinkModePreference.dynamic,
+    linkModePreference: LinkModePreferenceImpl.dynamic,
     targetOS: targetOS,
     workingDirectory: projectUri,
     includeParentEnvironment: true,
   );
   ensureNativeAssetsBuildSucceed(dryRunResult);
-  final List<Asset> nativeAssets = dryRunResult.assets;
+  final List<AssetImpl> nativeAssets = dryRunResult.assets;
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
   return _assetTargetLocations(nativeAssets).values;
@@ -81,20 +78,20 @@ Future<List<Uri>> buildNativeAssetsIOS({
   }
 
   final List<Target> targets = darwinArchs.map(_getNativeTarget).toList();
-  final native_assets_cli.BuildMode buildModeCli = nativeAssetsBuildMode(buildMode);
+  final BuildModeImpl buildModeCli = nativeAssetsBuildMode(buildMode);
 
-  const OS targetOS = OS.iOS;
+  const OSImpl targetOS = OSImpl.iOS;
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS);
-  final IOSSdk iosSdk = _getIOSSdk(environmentType);
+  final IOSSdkImpl iosSdk = _getIOSSdkImpl(environmentType);
 
   globals.logger.printTrace('Building native assets for $targets $buildModeCli.');
-  final List<Asset> nativeAssets = <Asset>[];
+  final List<AssetImpl> nativeAssets = <AssetImpl>[];
   final Set<Uri> dependencies = <Uri>{};
   for (final Target target in targets) {
     final BuildResult result = await buildRunner.build(
-      linkModePreference: LinkModePreference.dynamic,
+      linkModePreference: LinkModePreferenceImpl.dynamic,
       target: target,
-      targetIOSSdk: iosSdk,
+      targetIOSSdkImpl: iosSdk,
       buildMode: buildModeCli,
       workingDirectory: projectUri,
       includeParentEnvironment: true,
@@ -106,7 +103,8 @@ Future<List<Uri>> buildNativeAssetsIOS({
   }
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
-  final Map<KernelAssetPath, List<Asset>> fatAssetTargetLocations = _fatAssetTargetLocations(nativeAssets);
+  final Map<KernelAssetPath, List<AssetImpl>> fatAssetTargetLocations =
+      _fatAssetTargetLocations(nativeAssets);
   await _copyNativeAssetsIOS(
     buildUri,
     fatAssetTargetLocations,
@@ -115,7 +113,8 @@ Future<List<Uri>> buildNativeAssetsIOS({
     fileSystem,
   );
 
-  final Map<Asset, KernelAsset> assetTargetLocations = _assetTargetLocations(nativeAssets);
+  final Map<AssetImpl, KernelAsset> assetTargetLocations =
+      _assetTargetLocations(nativeAssets);
   await writeNativeAssetsYaml(
     KernelAssets(assetTargetLocations.values),
     yamlParentDirectory,
@@ -124,12 +123,12 @@ Future<List<Uri>> buildNativeAssetsIOS({
   return dependencies.toList();
 }
 
-IOSSdk _getIOSSdk(EnvironmentType environmentType) {
+IOSSdkImpl _getIOSSdkImpl(EnvironmentType environmentType) {
   switch (environmentType) {
     case EnvironmentType.physical:
-      return IOSSdk.iPhoneOs;
+      return IOSSdkImpl.iPhoneOS;
     case EnvironmentType.simulator:
-      return IOSSdk.iPhoneSimulator;
+      return IOSSdkImpl.iPhoneSimulator;
   }
 }
 
@@ -145,11 +144,13 @@ Target _getNativeTarget(DarwinArch darwinArch) {
   }
 }
 
-Map<KernelAssetPath, List<Asset>> _fatAssetTargetLocations(List<Asset> nativeAssets) {
+Map<KernelAssetPath, List<AssetImpl>> _fatAssetTargetLocations(
+    List<AssetImpl> nativeAssets) {
   final Set<String> alreadyTakenNames = <String>{};
-  final Map<KernelAssetPath, List<Asset>> result = <KernelAssetPath, List<Asset>>{};
+  final Map<KernelAssetPath, List<AssetImpl>> result =
+      <KernelAssetPath, List<AssetImpl>>{};
   final Map<String, KernelAssetPath> idToPath = <String, KernelAssetPath>{};
-  for (final Asset asset in nativeAssets) {
+  for (final AssetImpl asset in nativeAssets) {
     // Use same target path for all assets with the same id.
     final KernelAssetPath path = idToPath[asset.id] ??
         _targetLocationIOS(
@@ -157,44 +158,45 @@ Map<KernelAssetPath, List<Asset>> _fatAssetTargetLocations(List<Asset> nativeAss
           alreadyTakenNames,
         ).path;
     idToPath[asset.id] = path;
-    result[path] ??= <Asset>[];
+    result[path] ??= <AssetImpl>[];
     result[path]!.add(asset);
   }
   return result;
 }
 
-Map<Asset, KernelAsset> _assetTargetLocations(List<Asset> nativeAssets) {
+Map<AssetImpl, KernelAsset> _assetTargetLocations(
+    List<AssetImpl> nativeAssets) {
   final Set<String> alreadyTakenNames = <String>{};
-  return <Asset, KernelAsset>{
-    for (final Asset asset in nativeAssets)
+  return <AssetImpl, KernelAsset>{
+    for (final AssetImpl asset in nativeAssets)
       asset: _targetLocationIOS(asset, alreadyTakenNames),
   };
 }
 
-KernelAsset _targetLocationIOS(Asset asset, Set<String> alreadyTakenNames) {
-  final AssetPath path = asset.path;
+KernelAsset _targetLocationIOS(AssetImpl asset, Set<String> alreadyTakenNames) {
+  final LinkModeImpl linkMode = (asset as NativeCodeAssetImpl).linkMode;
 final KernelAssetPath kernelAssetPath;
-  switch (path) {
-    case AssetSystemPath _:
-      kernelAssetPath = KernelAssetSystemPath(path.uri);
-    case AssetInExecutable _:
+  switch (linkMode) {
+    case DynamicLoadingSystemImpl _:
+      kernelAssetPath = KernelAssetSystemPath(linkMode.uri);
+    case LookupInExecutableImpl _:
       kernelAssetPath = KernelAssetInExecutable();
-    case AssetInProcess _:
+    case LookupInProcessImpl _:
       kernelAssetPath = KernelAssetInProcess();
-    case AssetAbsolutePath _:
-      final String fileName = path.uri.pathSegments.last;
+    case DynamicLoadingBundledImpl _:
+      final String fileName = asset.file!.pathSegments.last;
       kernelAssetPath = KernelAssetAbsolutePath(frameworkUri(
         fileName,
         alreadyTakenNames,
       ));
     default:
       throw Exception(
-        'Unsupported asset path type ${path.runtimeType} in asset $asset',
+        'Unsupported asset link mode $linkMode in asset $asset',
       );
   }
   return KernelAsset(
     id: asset.id,
-    target: asset.target,
+    target: Target.fromArchitectureAndOS(asset.architecture!, asset.os),
     path: kernelAssetPath,
   );
 }
@@ -211,7 +213,7 @@ final KernelAssetPath kernelAssetPath;
 /// in xcode_backend.dart.
 Future<void> _copyNativeAssetsIOS(
   Uri buildUri,
-  Map<KernelAssetPath, List<Asset>> assetTargetLocations,
+  Map<KernelAssetPath, List<AssetImpl>> assetTargetLocations,
   String? codesignIdentity,
   BuildMode buildMode,
   FileSystem fileSystem,
@@ -219,12 +221,11 @@ Future<void> _copyNativeAssetsIOS(
   if (assetTargetLocations.isNotEmpty) {
     globals.logger
         .printTrace('Copying native assets to ${buildUri.toFilePath()}.');
-    for (final MapEntry<KernelAssetPath, List<Asset>> assetMapping
+    for (final MapEntry<KernelAssetPath, List<AssetImpl>> assetMapping
         in assetTargetLocations.entries) {
       final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
       final List<Uri> sources = <Uri>[
-        for (final Asset source in assetMapping.value)
-          (source.path as AssetAbsolutePath).uri
+        for (final AssetImpl source in assetMapping.value) source.file!
       ];
       final Uri targetUri = buildUri.resolveUri(target);
       final File dylibFile = fileSystem.file(targetUri);

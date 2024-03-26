@@ -791,7 +791,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             width: _stepIconWidth ?? _kStepSize,
             child: Center(
               child: SizedBox(
-                width: widget.connectorThickness ?? 1.0,
+                width: !_isLast(index) ? (widget.connectorThickness ?? 1.0) : 0.0,
                 child: Container(
                   color: _connectorColor(widget.steps[index].isActive),
                 ),

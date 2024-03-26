@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-
 void main() {
   Finder findMenuPanels() {
     return find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MenuPanel');

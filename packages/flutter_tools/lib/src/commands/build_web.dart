@@ -97,22 +97,18 @@ class BuildWebCommand extends BuildSubCommand {
     );
 
     //
-    // Experimental options
+    // WebAssembly compilation options
     //
-    if (featureFlags.isFlutterWebWasmEnabled) {
-      argParser.addSeparator('Experimental options');
-    }
+    argParser.addSeparator('WebAssembly compilation options');
     argParser.addFlag(
       FlutterOptions.kWebWasmFlag,
       help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
       negatable: false,
-      hide: !featureFlags.isFlutterWebWasmEnabled,
     );
     argParser.addFlag(
       'strip-wasm',
       help: 'Whether to strip the resulting wasm file of static symbol names.',
       defaultsTo: true,
-      hide: !featureFlags.isFlutterWebWasmEnabled,
     );
   }
 
@@ -148,16 +144,13 @@ class BuildWebCommand extends BuildSubCommand {
 
     final List<WebCompilerConfig> compilerConfigs;
     if (boolArg('wasm')) {
-      if (!featureFlags.isFlutterWebWasmEnabled) {
-        throwToolExit('Compiling to WebAssembly (wasm) is only available on the beta and master channels.');
-      }
       if (stringArg(FlutterOptions.kWebRendererFlag) != argParser.defaultFor(FlutterOptions.kWebRendererFlag)) {
         throwToolExit('"--${FlutterOptions.kWebRendererFlag}" cannot be combined with "--${FlutterOptions.kWebWasmFlag}"');
       }
       globals.logger.printBox(
-        title: 'Experimental feature',
+        title: 'New feature',
         '''
-  WebAssembly compilation is experimental.
+  WebAssembly compilation is new. Understand the details before deploying to production.
   $kWasmMoreInfo''',
       );
 

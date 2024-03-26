@@ -973,8 +973,7 @@ void main() {
   });
 
   testWidgets(
-    "TabBarTheme's labelColor & unselectedLabelColor override labelStyle & unselectedLabelStyle colors",
-    (WidgetTester tester) async {
+    "TabBarTheme's labelColor & unselectedLabelColor override labelStyle & unselectedLabelStyle colors", (WidgetTester tester) async {
       const Color labelColor = Color(0xfff00000);
       const Color unselectedLabelColor = Color(0x95ff0000);
       const TextStyle labelStyle = TextStyle(

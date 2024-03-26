@@ -576,7 +576,7 @@ void main() {
 
     expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
     expect(logger.statusText, contains('Building App Store IPA'));
-    expect(logger.statusText, contains('Built IPA to /build/ios/ipa'));
+    expect(logger.statusText, contains(RegExp(r'Built IPA to build/ios/ipa \(\d+\.\d+MB\)')));
     expect(logger.statusText, contains('To upload to the App Store'));
     expect(logger.statusText, contains('Apple Transporter macOS app'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -628,7 +628,7 @@ void main() {
 
     expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
     expect(logger.statusText, contains('Building ad-hoc IPA'));
-    expect(logger.statusText, contains('Built IPA to /build/ios/ipa'));
+    expect(logger.statusText, contains(RegExp(r'Built IPA to build/ios/ipa \(\d+\.\d+MB\)')));
     // Don'ltruct how to upload to the App Store.
     expect(logger.statusText, isNot(contains('To upload')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -680,7 +680,7 @@ void main() {
 
     expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
     expect(logger.statusText, contains('Building enterprise IPA'));
-    expect(logger.statusText, contains('Built IPA to /build/ios/ipa'));
+    expect(logger.statusText, contains(RegExp(r'Built IPA to build/ios/ipa \(\d+\.\d+MB\)')));
     // Don'ltruct how to upload to the App Store.
     expect(logger.statusText, isNot(contains('To upload')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -889,7 +889,7 @@ void main() {
 
   testUsingContext('ipa build invokes xcode build export archive when passed plist', () async {
     final String outputPath =
-        fileSystem.path.absolute(fileSystem.path.join('build', 'ios', 'ipa'));
+        fileSystem.path.relative(fileSystem.path.join('build', 'ios', 'ipa'));
     final File exportOptions = fileSystem.file('ExportOptions.plist')
       ..createSync();
     final BuildCommand command = BuildCommand(
@@ -918,7 +918,7 @@ void main() {
       ],
     );
 
-    expect(logger.statusText, contains('Built IPA to $outputPath.'));
+    expect(logger.statusText, contains(RegExp('Built IPA to $outputPath ' r'\(\d+\.\d+MB\)')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,

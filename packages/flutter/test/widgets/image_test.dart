@@ -2066,7 +2066,10 @@ void main() {
     );
   });
 
-  testWidgets('Animated GIFs do not require layout for subsequent frames', (WidgetTester tester) async {
+  testWidgets('Animated GIFs do not require layout for subsequent frames',
+  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     final ui.Codec codec = (await tester.runAsync(() {
       return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
     }))!;

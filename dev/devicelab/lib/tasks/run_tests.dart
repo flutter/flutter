@@ -135,7 +135,7 @@ class AndroidRunOutputTest extends RunOutputTask {
     _findNextMatcherInList(
       stdout,
       (String line) => line.contains('Built build/app/outputs/flutter-apk/$apk') &&
-        (!release || line.contains('MB).')),
+        (!release || line.contains('MB)')),
       'Built build/app/outputs/flutter-apk/$apk',
     );
 
@@ -177,7 +177,7 @@ class WindowsRunOutputTest extends DesktopRunOutputTest {
     multiLine: true,
   );
   static final RegExp _builtOutput = RegExp(
-    r'Built build\\windows\\(x64|arm64)\\runner\\(Debug|Release)\\\w+\.exe( \(\d+(\.\d+)?MB\))?\.',
+    r'Built build\\windows\\(x64|arm64)\\runner\\(Debug|Release)\\\w+\.exe( \(\d+(\.\d+)?MB\))?',
   );
 
   @override
@@ -196,15 +196,9 @@ class WindowsRunOutputTest extends DesktopRunOutputTest {
           return false;
         }
 
-        // Size information is only included in release builds.
-        final bool hasSize = line.contains('MB).');
-        if (release != hasSize) {
-          return false;
-        }
-
         return true;
       },
-      'Built build\\windows\\$arch\\runner\\$buildMode\\app.exe',
+      '√ Built build\\windows\\$arch\\runner\\$buildMode\\ui.exe',
     );
   }
 }

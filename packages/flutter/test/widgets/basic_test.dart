@@ -22,6 +22,7 @@ void main() {
   group('RawImage', () {
     testWidgets('properties', (WidgetTester tester) async {
       final ui.Image image1 = (await tester.runAsync<ui.Image>(() => createTestImage()))!;
+      addTearDown(image1.dispose);
 
       await tester.pumpWidget(
         Directionality(
@@ -50,6 +51,7 @@ void main() {
       expect(renderObject.isAntiAlias, false);
 
       final ui.Image image2 = (await tester.runAsync<ui.Image>(() => createTestImage(width: 2, height: 2)))!;
+      addTearDown(image2.dispose);
       const String debugImageLabel = 'debugImageLabel';
       const double width = 1;
       const double height = 1;
