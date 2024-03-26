@@ -1,4 +1,4 @@
-Signature: 46dad30d690defa0a8a89dc066f3e326
+Signature: 0b1754c6b32ab5936994917106e16679
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9530,6 +9530,8 @@ ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/mtl/GrMtlBackendSemapho
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/mtl/GrMtlDirectContext.mm + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/RasterPathUtils.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/RasterPathUtils.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/task/DrawTask.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/task/DrawTask.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sksl/analysis/SkSLCheckSymbolTableCorrectness.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sksl/ir/SkSLSymbol.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sksl/transform/SkSLFindAndDeclareBuiltinStructs.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -9557,6 +9559,8 @@ FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/mtl/GrMtlBackendSemaphore
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/mtl/GrMtlDirectContext.mm
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/RasterPathUtils.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/RasterPathUtils.h
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/task/DrawTask.cpp
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/task/DrawTask.h
 FILE: ../../../flutter/third_party/skia/src/sksl/analysis/SkSLCheckSymbolTableCorrectness.cpp
 FILE: ../../../flutter/third_party/skia/src/sksl/ir/SkSLSymbol.cpp
 FILE: ../../../flutter/third_party/skia/src/sksl/transform/SkSLFindAndDeclareBuiltinStructs.cpp
