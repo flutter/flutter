@@ -842,10 +842,15 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     SystemNavigator.pop();
   }
 
+  // The observer that is currently handling an active predictive back gesture.
+  WidgetsBindingObserver? _backGestureObserver;
+
   Future<bool> _handleStartBackGesture(Map<String?, Object?> arguments) {
+    _backGestureObserver = null;
     final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (observer.handleStartBackGesture(backEvent)) {
+        _backGestureObserver = observer;
         return Future<bool>.value(true);
       }
     }
@@ -853,20 +858,24 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 
   Future<bool> _handleUpdateBackGestureProgress(Map<String?, Object?> arguments) {
+    if (_backGestureObserver == null) {
+      return Future<bool>.value(false);
+    }
+
     final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if (observer.handleUpdateBackGestureProgress(backEvent)) {
-        return Future<bool>.value(true);
-      }
+    if (_backGestureObserver!.handleUpdateBackGestureProgress(backEvent)) {
+      return Future<bool>.value(true);
     }
     return Future<bool>.value(false);
   }
 
   Future<bool> _handleCommitBackGesture() async {
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if (observer.handleCommitBackGesture()) {
-        return true;
-      }
+    if (_backGestureObserver == null) {
+      return Future<bool>.value(false);
+    }
+
+    if (_backGestureObserver!.handleCommitBackGesture()) {
+      return true;
     }
     // If no observer handled the back gesture, handle it as if it were a normal
     // system pop event.
@@ -875,10 +884,12 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 
   Future<void> _handleCancelBackGesture() {
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      if (observer.handleCancelBackGesture()) {
-        return Future<bool>.value(true);
-      }
+    if (_backGestureObserver == null) {
+      return Future<bool>.value(false);
+    }
+
+    if (_backGestureObserver!.handleCancelBackGesture()) {
+      return Future<bool>.value(true);
     }
     return Future<bool>.value(false);
   }
