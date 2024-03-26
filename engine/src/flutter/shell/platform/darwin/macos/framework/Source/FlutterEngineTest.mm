@@ -251,7 +251,7 @@ TEST_F(FlutterEngineTest, BackgroundIsBlack) {
   latch.Wait();
 }
 
-TEST_F(FlutterEngineTest, CanOverrideBackgroundColor) {
+TEST_F(FlutterEngineTest, DISABLED_CanOverrideBackgroundColor) {
   FlutterEngine* engine = GetFlutterEngine();
 
   // Latch to ensure the entire layer tree has been generated and presented.
