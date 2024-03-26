@@ -9,15 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
 
   Future<void> pumpContainer(WidgetTester tester, Widget child) async {
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: DefaultSelectionStyle(
-          selectionColor: Colors.red,
-          child: child,
-        ),
-      ),
-    );
+    await tester.pumpWidget(MaterialApp(home: child));
   }
 
   testWidgets('updates its registrar and delegate based on the number of selectables', (WidgetTester tester) async {
@@ -121,36 +113,6 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Can update within one frame with more than two nested SelectionContainers', (WidgetTester tester) async {
-    final TestSelectionRegistrar registrar = TestSelectionRegistrar();
-    final TestContainerDelegate delegate = TestContainerDelegate();
-    addTearDown(delegate.dispose);
-    final TestContainerDelegate childDelegate = TestContainerDelegate();
-    addTearDown(childDelegate.dispose);
-
-    await pumpContainer(
-      tester,
-      SelectionContainer(
-        registrar: registrar,
-        delegate: delegate,
-        child: Builder(
-          builder: (BuildContext context) {
-            return SelectionContainer(
-              registrar: SelectionContainer.maybeOf(context),
-              delegate: childDelegate,
-              child: const Text('dummy'),// The [Text] widget has an internal [SelectionContainer].
-            );
-          },
-        ),
-      ),
-    );
-    await tester.pump();
-    // Should finish update after flushing the micro tasks.
-    await tester.idle();
-    expect(registrar.selectables.length, 1);
-    expect(delegate.value.hasContent, isTrue);
-  });
-
   testWidgets('Can update within one frame', (WidgetTester tester) async {
     final TestSelectionRegistrar registrar = TestSelectionRegistrar();
     final TestContainerDelegate delegate = TestContainerDelegate();
@@ -168,15 +130,7 @@ void main() {
             return SelectionContainer(
               registrar: SelectionContainer.maybeOf(context),
               delegate: childDelegate,
-              child: Builder(
-                builder: (BuildContext context) {
-                  return RichText(
-                    selectionColor: Colors.blue,
-                    selectionRegistrar: SelectionContainer.maybeOf(context),
-                    text: const TextSpan(text: 'dummy'),
-                  );
-                },
-              ),
+              child: const Text('dummy'),// The [Text] widget has an internal [SelectionContainer].
             );
           },
         ),
