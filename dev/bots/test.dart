@@ -600,7 +600,7 @@ Future<void> _runBuildTests() async {
     runForbiddenFromReleaseTests,
   ]..shuffle(math.Random(0));
 
-  await _runShardRunnerIndexOfTotalSubshard(tests);
+  await runShardRunnerIndexOfTotalSubshard(tests);
 }
 
 Future<void> _runExampleProjectBuildTests(Directory exampleDirectory, [File? mainFile]) async {
@@ -2035,7 +2035,7 @@ List<T> _selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSub
   return tests.sublist(start, end);
 }
 
-Future<void> _runShardRunnerIndexOfTotalSubshard(List<ShardRunner> tests) async {
+Future<void> runShardRunnerIndexOfTotalSubshard(List<ShardRunner> tests) async {
   final List<ShardRunner> sublist = _selectIndexOfTotalSubshard<ShardRunner>(tests);
   for (final ShardRunner test in sublist) {
     await test();

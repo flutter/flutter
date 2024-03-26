@@ -16,10 +16,6 @@ import '../utils.dart';
 
 const List<String> _kAllBuildModes = <String>['debug', 'profile', 'release'];
 
-final String _luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
-final bool _runningInDartHHHBot =
-    _luciBotId.startsWith('luci-dart-') || _luciBotId.startsWith('dart-tests-');
-
 /// Coarse-grained integration tests running on the Web.
 Future<void> webLongRunningTestsRunner(String flutterRoot) async {
 
@@ -570,4 +566,3 @@ Future<void> _ensureChromeDriverIsRunning() async {
     throw Exception('WebDriver not available.');
   }
 }
-
