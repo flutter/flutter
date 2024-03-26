@@ -1922,7 +1922,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) => computeMaxIntrinsicHeight(width);
+  double computeMinIntrinsicHeight(double width) => getMaxIntrinsicHeight(width);
 
   @override
   double computeMaxIntrinsicHeight(double width) {
