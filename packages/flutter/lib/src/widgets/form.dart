@@ -610,19 +610,19 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
+    final FormState? formState = Form.maybeOf(context);
     if (widget.enabled) {
-      switch (widget.autovalidateMode) {
-        case AutovalidateMode.always:
+      final AutovalidateMode? formMode = formState?.widget.autovalidateMode;
+      final AutovalidateMode fieldMode = widget.autovalidateMode;
+      if (formMode == AutovalidateMode.always || fieldMode == AutovalidateMode.always) {
+        _validate();
+      } else if (formMode == AutovalidateMode.onUserInteraction || fieldMode == AutovalidateMode.onUserInteraction) {
+        if (_hasInteractedByUser.value) {
           _validate();
-        case AutovalidateMode.onUserInteraction:
-          if (_hasInteractedByUser.value) {
-            _validate();
-          }
-        case AutovalidateMode.disabled:
-          break;
+        }
       }
     }
-    Form.maybeOf(context)?._register(this);
+    formState?._register(this);
     return widget.builder(this);
   }
 }

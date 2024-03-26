@@ -843,9 +843,6 @@ void main() {
       );
     }
 
-    // Makes sure the Form widget won't auto-validate the form fields
-    // after rebuilds if there is not user interaction.
-    await tester.pumpWidget(builder());
     await tester.pumpWidget(builder());
 
     // We expect no validation error text being shown.
@@ -883,9 +880,6 @@ void main() {
       );
     }
 
-    // The issue only happens on the second build so we
-    // need to rebuild the tree twice.
-    await tester.pumpWidget(builder());
     await tester.pumpWidget(builder());
 
     // We expect validation error text being shown.
