@@ -708,7 +708,12 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   ///  * [addObserver], for the method that adds observers in the first place.
   ///  * [WidgetsBindingObserver], which has an example of using this method.
-  bool removeObserver(WidgetsBindingObserver observer) => _observers.remove(observer);
+  bool removeObserver(WidgetsBindingObserver observer) {
+    if (observer == _backGestureObserver) {
+      _backGestureObserver = null;
+    }
+    return _observers.remove(observer);
+  }
 
   @override
   Future<AppExitResponse> handleRequestAppExit() async {
