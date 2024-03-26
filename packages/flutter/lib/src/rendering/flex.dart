@@ -719,9 +719,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    // `defaultComputeDistanceToFirstActualBaseline` does not work even for
-    // Columns, because the children reorder with VerticalDirection.up.
-    return defaultComputeDistanceToHighestActualBaseline(baseline);
+    if (_direction == Axis.horizontal) {
+      return defaultComputeDistanceToHighestActualBaseline(baseline);
+    }
+    return defaultComputeDistanceToFirstActualBaseline(baseline);
   }
 
   static int _getFlex(RenderBox child) {
