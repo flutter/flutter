@@ -355,8 +355,9 @@ class SkiaGoldClient {
 
     final String/*!*/ resultStdout = result.stdout.toString();
     if (result.exitCode != 0) {
-      print('*****');
       print(resultStdout);
+      // Throw for good measure so we know when our error message is ready
+      throw SkiaException('Quick-search');
     }
     if (result.exitCode != 0 &&
       !(resultStdout.contains('Untriaged') || resultStdout.contains('negative image'))) {
