@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.View;
+import android.window.BackEvent;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
 import androidx.test.core.app.ApplicationProvider;
@@ -39,6 +40,7 @@ import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
+import io.flutter.embedding.engine.systemchannels.BackGestureChannel;
 import io.flutter.embedding.engine.systemchannels.LifecycleChannel;
 import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
@@ -669,6 +671,73 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // Verify that the navigation channel tried to send a message to Flutter.
     verify(mockFlutterEngine.getNavigationChannel(), times(1)).popRoute();
+  }
+
+  @Test
+  public void itForwardsStartBackGestureToFlutter() {
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    // The FlutterEngine is set up in onAttach().
+    delegate.onAttach(ctx);
+
+    // Emulate the host and inform our delegate of the start back gesture with a mocked BackEvent
+    BackEvent backEvent = mock(BackEvent.class);
+    delegate.startBackGesture(backEvent);
+
+    // Verify that the back gesture tried to send a message to Flutter.
+    verify(mockFlutterEngine.getBackGestureChannel(), times(1)).startBackGesture(backEvent);
+  }
+
+  @Test
+  public void itForwardsUpdateBackGestureProgressToFlutter() {
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    // The FlutterEngine is set up in onAttach().
+    delegate.onAttach(ctx);
+
+    // Emulate the host and inform our delegate of the back gesture progress with a mocked BackEvent
+    BackEvent backEvent = mock(BackEvent.class);
+    delegate.updateBackGestureProgress(backEvent);
+
+    // Verify that the back gesture tried to send a message to Flutter.
+    verify(mockFlutterEngine.getBackGestureChannel(), times(1))
+        .updateBackGestureProgress(backEvent);
+  }
+
+  @Test
+  public void itForwardsCommitBackGestureToFlutter() {
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    // The FlutterEngine is set up in onAttach().
+    delegate.onAttach(ctx);
+
+    // Emulate the host and inform our delegate when the back gesture is committed
+    delegate.commitBackGesture();
+
+    // Verify that the back gesture tried to send a message to Flutter.
+    verify(mockFlutterEngine.getBackGestureChannel(), times(1)).commitBackGesture();
+  }
+
+  @Test
+  public void itForwardsCancelBackGestureToFlutter() {
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    // The FlutterEngine is set up in onAttach().
+    delegate.onAttach(ctx);
+
+    // Emulate the host and inform our delegate of the back gesture cancellation
+    delegate.cancelBackGesture();
+
+    // Verify that the back gesture tried to send a message to Flutter.
+    verify(mockFlutterEngine.getBackGestureChannel(), times(1)).cancelBackGesture();
   }
 
   @Test
@@ -1396,6 +1465,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     when(engine.getLocalizationPlugin()).thenReturn(mock(LocalizationPlugin.class));
     when(engine.getMouseCursorChannel()).thenReturn(mock(MouseCursorChannel.class));
     when(engine.getNavigationChannel()).thenReturn(mock(NavigationChannel.class));
+    when(engine.getBackGestureChannel()).thenReturn(mock(BackGestureChannel.class));
     when(engine.getPlatformViewsController()).thenReturn(mock(PlatformViewsController.class));
 
     FlutterRenderer renderer = mock(FlutterRenderer.class);

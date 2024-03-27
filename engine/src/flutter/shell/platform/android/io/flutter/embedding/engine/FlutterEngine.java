@@ -25,6 +25,7 @@ import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.RenderSurface;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
+import io.flutter.embedding.engine.systemchannels.BackGestureChannel;
 import io.flutter.embedding.engine.systemchannels.DeferredComponentChannel;
 import io.flutter.embedding.engine.systemchannels.LifecycleChannel;
 import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
@@ -95,6 +96,7 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   @NonNull private final LocalizationChannel localizationChannel;
   @NonNull private final MouseCursorChannel mouseCursorChannel;
   @NonNull private final NavigationChannel navigationChannel;
+  @NonNull private final BackGestureChannel backGestureChannel;
   @NonNull private final RestorationChannel restorationChannel;
   @NonNull private final PlatformChannel platformChannel;
   @NonNull private final ProcessTextChannel processTextChannel;
@@ -331,6 +333,7 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     localizationChannel = new LocalizationChannel(dartExecutor);
     mouseCursorChannel = new MouseCursorChannel(dartExecutor);
     navigationChannel = new NavigationChannel(dartExecutor);
+    backGestureChannel = new BackGestureChannel(dartExecutor);
     platformChannel = new PlatformChannel(dartExecutor);
     processTextChannel = new ProcessTextChannel(dartExecutor, context.getPackageManager());
     restorationChannel = new RestorationChannel(dartExecutor, waitForRestorationData);
@@ -539,6 +542,12 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
   @NonNull
   public NavigationChannel getNavigationChannel() {
     return navigationChannel;
+  }
+
+  /** System channel that sends back gesture commands from Android to Flutter. */
+  @NonNull
+  public BackGestureChannel getBackGestureChannel() {
+    return backGestureChannel;
   }
 
   /**
