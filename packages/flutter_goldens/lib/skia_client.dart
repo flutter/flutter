@@ -354,6 +354,10 @@ class SkiaGoldClient {
     final io.ProcessResult result = await process.run(imgtestCommand);
 
     final String/*!*/ resultStdout = result.stdout.toString();
+    if (result.exitCode != 0) {
+      print('*****');
+      print(resultStdout);
+    }
     if (result.exitCode != 0 &&
       !(resultStdout.contains('Untriaged') || resultStdout.contains('negative image'))) {
       String? resultContents;
