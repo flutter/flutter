@@ -13,7 +13,7 @@ import 'package:process/process.dart';
 
 import 'src/errors.dart';
 
-export 'src/errors.dart' show SkiaGoldProcessError;
+export 'src/errors.dart' show SkiaGoldNegativeImageError, SkiaGoldProcessError;
 
 const String _kGoldctlKey = 'GOLDCTL';
 const String _kPresubmitEnvName = 'GOLD_TRYJOB';
@@ -406,30 +406,46 @@ interface class SkiaGoldClient {
         _stderr.writeln('stderr:\n${result.stderr}');
       }
     } else {
-      // Neither of these conditions are considered failures during tryjobs.
-      final bool isUntriaged = resultStdout.contains('Untriaged');
-      final bool isNegative = resultStdout.contains('negative image');
-      if (!isUntriaged && !isNegative) {
-        final StringBuffer buf = StringBuffer()
-          ..writeln('Unexpected Gold tryjobAdd failure.')
-          ..writeln('Tryjob execution for golden file test $testName failed for')
-          ..writeln('a reason unrelated to pixel comparison.');
-        throw SkiaGoldProcessError(
-          command: tryjobCommand,
-          stdout: resultStdout,
-          stderr: result.stderr.toString(),
-          message: buf.toString(),
-        );
-      }
+      // Untriaged images are not considered failures during tryjobs.
       // ... but we want to know about them anyway.
       // See https://github.com/flutter/flutter/issues/145219.
       // TODO(matanlurey): Update the documentation to reflect the new behavior.
+      final bool isUntriaged = resultStdout.contains('Untriaged');
       if (isUntriaged) {
         _stderr
           ..writeln('NOTE: Untriaged image detected in tryjob.')
           ..writeln('Triage should be required by the "Flutter Gold" check')
           ..writeln('stdout:\n$resultStdout');
+        return;
       }
+
+      // Negative images are considered failures during tryjobs.
+      //
+      // We don't actually use negative images as part of our workflow, but
+      // if they *are* used (i.e. someone accidentally marks a digest a
+      // negative image), we want to fail the tryjob - otherwise we just end up
+      // with a negative image in the tree (a post-submit failure).
+      final bool isNegative = resultStdout.contains('negative image');
+      if (isNegative) {
+        throw SkiaGoldNegativeImageError(
+          testName: testName,
+          command: tryjobCommand,
+          stdout: resultStdout,
+          stderr: result.stderr.toString(),
+        );
+      }
+
+      // If the tryjob failed for some other reason, throw an error.
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Unexpected Gold tryjobAdd failure.')
+        ..writeln('Tryjob execution for golden file test $testName failed for')
+        ..writeln('a reason unrelated to pixel comparison.');
+      throw SkiaGoldProcessError(
+        command: tryjobCommand,
+        stdout: resultStdout,
+        stderr: result.stderr.toString(),
+        message: buf.toString(),
+      );
     }
   }
 
