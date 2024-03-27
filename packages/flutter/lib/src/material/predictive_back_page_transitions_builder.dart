@@ -177,9 +177,9 @@ class _PredictiveBackPageTransition extends StatelessWidget {
   // These values were eyeballed to match the native predictive back animation
   // on a Pixel 2 running Android API 34.
   static const double _scaleFullyOpened = 1.0;
-  static const double _scaleStartTransition = 0.95;
+  static const double _scaleStartTransition = 0.8;
   static const double _opacityFullyOpened = 1.0;
-  static const double _opacityStartTransition = 0.8;//0.95;
+  static const double _opacityStart = 0.8;
   static const double _weightForStartState = 80.0;
   static const double _weightForEndState = 100.0 - _weightForStartState;
   static const double _screenWidthDivisionFactor = 20.0;
@@ -205,25 +205,26 @@ class _PredictiveBackPageTransition extends StatelessWidget {
         : Tween<double>(begin: _getXShift(context), end: 0.0);
     final Animatable<double> scaleTween = isCurrent
         ? ConstantTween<double>(_scaleFullyOpened)
-        : Tween<double>(begin: 0.95, end: 1.0);
-    final Animatable<double> fadeTween = isCurrent
-        ? ConstantTween<double>(_opacityFullyOpened)
-        : TweenSequence<double>(<TweenSequenceItem<double>>[
-            TweenSequenceItem<double>(
-              tween: Tween<double>(
-                begin: _opacityFullyOpened,
-                end: _opacityStartTransition,
-              ),
-              weight: _weightForEndState,
-            ),
-            TweenSequenceItem<double>(
-              tween: Tween<double>(
-                begin: _opacityFullyOpened,
-                end: _opacityFullyOpened,
-              ),
-              weight: _weightForStartState,
-            ),
-          ]);
+        : Tween<double>(
+          begin: _scaleStartTransition,
+          end: _scaleFullyOpened,
+        );
+    final Animatable<double> fadeTween = TweenSequence<double>(<TweenSequenceItem<double>>[
+      TweenSequenceItem<double>(
+        tween: Tween<double>(
+          begin: _opacityFullyOpened,
+          end: _opacityStart,
+        ),
+        weight: _weightForEndState,
+      ),
+      TweenSequenceItem<double>(
+        tween: Tween<double>(
+          begin: _opacityFullyOpened,
+          end: _opacityStart,
+        ),
+        weight: _weightForStartState,
+      ),
+    ]);
 
     return Transform.translate(
       offset: Offset(
