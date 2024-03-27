@@ -3144,6 +3144,7 @@
 ../../../fuchsia/sdk/linux/pkg/vulkan/meta.json
 ../../../fuchsia/sdk/linux/pkg/vulkan_layers/meta.json
 ../../../fuchsia/sdk/linux/pkg/zx/meta.json
+../../../fuchsia/sdk/linux/python/rtc_conformance_test/meta.json
 ../../../fuchsia/sdk/linux/tools
 ../../../fuchsia/sdk/linux/version_history.json
 ../../../out
