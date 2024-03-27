@@ -2813,6 +2813,51 @@ TEST_P(EntityTest, FailOnValidationError) {
       "");
 }
 
+TEST_P(EntityTest, CanComputeGeometryForEmptyPathsWithoutCrashing) {
+  PathBuilder builder = {};
+  builder.AddRect(Rect::MakeLTRB(0, 0, 0, 0));
+  Path path = builder.TakePath();
+
+  EXPECT_TRUE(path.GetBoundingBox()->IsEmpty());
+
+  auto geom = Geometry::MakeFillPath(path);
+
+  Entity entity;
+  RenderTarget target =
+      GetContentContext()->GetRenderTargetCache()->CreateOffscreen(
+          *GetContext(), {1, 1}, 1u);
+  testing::MockRenderPass render_pass(GetContext(), target);
+  auto position_result =
+      geom->GetPositionBuffer(*GetContentContext(), entity, render_pass);
+
+  auto uv_result =
+      geom->GetPositionUVBuffer(Rect::MakeLTRB(0, 0, 100, 100), Matrix(),
+                                *GetContentContext(), entity, render_pass);
+
+  EXPECT_EQ(position_result.vertex_buffer.vertex_count, 0u);
+  EXPECT_EQ(uv_result.vertex_buffer.vertex_count, 0u);
+
+  EXPECT_EQ(geom->GetResultMode(), GeometryResult::Mode::kNormal);
+}
+
+TEST_P(EntityTest, CanRenderEmptyPathsWithoutCrashing) {
+  PathBuilder builder = {};
+  builder.AddRect(Rect::MakeLTRB(0, 0, 0, 0));
+  Path path = builder.TakePath();
+
+  EXPECT_TRUE(path.GetBoundingBox()->IsEmpty());
+
+  auto contents = std::make_shared<SolidColorContents>();
+  contents->SetGeometry(Geometry::MakeFillPath(path));
+  contents->SetColor(Color::Red());
+
+  Entity entity;
+  entity.SetTransform(Matrix::MakeScale(GetContentScale()));
+  entity.SetContents(contents);
+
+  ASSERT_TRUE(OpenPlaygroundHere(std::move(entity)));
+}
+
 }  // namespace testing
 }  // namespace impeller
 

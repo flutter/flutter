@@ -137,6 +137,9 @@ class ColorSourceContents : public Contents {
 
       GeometryResult stencil_geometry_result =
           GetGeometry()->GetPositionBuffer(renderer, entity, pass);
+      if (stencil_geometry_result.vertex_buffer.vertex_count == 0u) {
+        return true;
+      }
       pass.SetVertexBuffer(std::move(stencil_geometry_result.vertex_buffer));
       options.primitive_type = stencil_geometry_result.type;
 
@@ -182,6 +185,9 @@ class ColorSourceContents : public Contents {
             ? geometry.GetPositionUVBuffer(texture_coverage, effect_transform,
                                            renderer, entity, pass)
             : geometry.GetPositionBuffer(renderer, entity, pass);
+    if (geometry_result.vertex_buffer.vertex_count == 0u) {
+      return true;
+    }
     pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
     options.primitive_type = geometry_result.type;
 
