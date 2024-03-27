@@ -541,7 +541,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
 
     if (_controller?.isAnimating ?? false) {
       // Keep the userGestureInProgress in true state since AndroidBackGesturePageTransitionsBuilder
-      // depends on userGestureInProgress
+      // depends on userGestureInProgress.
       late AnimationStatusListener animationStatusCallback;
       animationStatusCallback = (AnimationStatus status) {
         navigator?.didStopUserGesture();
