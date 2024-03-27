@@ -39,4 +39,14 @@ Future<void> testMain() async {
 
     expect(() => builder.build(), returnsNormally);
   });
+
+  test('build and layout a paragraph with an empty addText', () {
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle());
+    builder.addText('');
+    final Paragraph paragraph = builder.build();
+    expect(
+      () => paragraph.layout(const ParagraphConstraints(width: double.infinity)),
+      returnsNormally,
+    );
+  });
 }
