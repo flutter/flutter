@@ -162,6 +162,7 @@ void test(
   dynamic tags,
   Map<String, dynamic>? onPlatform,
   int? retry,
+  bool solo = false,
 }) {
   _maybeConfigureTearDownForTestFile();
   _declarer.test(
@@ -173,6 +174,7 @@ void test(
     onPlatform: onPlatform,
     tags: tags,
     retry: retry,
+    solo: solo,
   );
 }
 

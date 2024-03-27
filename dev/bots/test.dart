@@ -174,7 +174,7 @@ const Map<String, List<String>> kWebTestFileKnownFailures = <String, List<String
     'test/examples/sector_layout_test.dart',
 
     // These tests are broken and need to be fixed.
-    // TODO(yjbanov): https://github.com/flutter/flutter/issues/71604
+    // TODO(jacksongardner): https://github.com/flutter/flutter/issues/71604
     'test/material/text_field_test.dart',
     'test/widgets/performance_overlay_test.dart',
     'test/widgets/html_element_view_test.dart',
