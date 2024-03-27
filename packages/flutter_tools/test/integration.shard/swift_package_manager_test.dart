@@ -335,10 +335,10 @@ Future<void> _buildApp(
   String flutterBin,
   String workingDirectory, {
   required List<String> options,
-  List<String>? expectedLines,
+  List<Pattern>? expectedLines,
   List<String>? unexpectedLines,
 }) async {
-  final List<String> remainingExpectedLines = expectedLines ?? <String>[];
+  final List<Pattern> remainingExpectedLines = expectedLines ?? <Pattern>[];
   final List<String> unexpectedLinesFound = <String>[];
 
   final ProcessResult result = await processManager.run(
@@ -364,43 +364,9 @@ Future<void> _buildApp(
       }
     }
     remainingExpectedLines.remove(trimmedLine);
-    remainingExpectedLines.removeWhere((String expectedLine) => trimmedLine.contains(expectedLine));
+    remainingExpectedLines.removeWhere((Pattern expectedLine) => trimmedLine.contains(expectedLine));
     if (unexpectedLines != null && unexpectedLines.contains(trimmedLine)) {
       unexpectedLinesFound.add(trimmedLine);
-    }
-  }
-  if (result.exitCode != 0 && result.stdout.toString().contains("'Flutter/Flutter.h' file not found")) {
-    final Directory buildDir = fileSystem
-        .directory(workingDirectory)
-        .childDirectory('build')
-        .childDirectory('ios')
-        .childDirectory('Debug-iphoneos');
-    if (buildDir.existsSync()) {
-      print('${buildDir.path}: ');
-      for (final FileSystemEntity file in buildDir.listSync()) {
-        print(file.basename);
-      }
-    }
-
-    final Directory buildFlutterDir = buildDir.childDirectory('Flutter');
-    if (buildFlutterDir.existsSync()) {
-      print('${buildFlutterDir.path}: ');
-      for (final FileSystemEntity file in buildFlutterDir.listSync()) {
-        print(file.basename);
-      }
-    }
-
-    final Directory buildFlutterFrameworkDir = buildDir.childDirectory('Flutter.framework');
-    if (buildFlutterFrameworkDir.existsSync()) {
-      print('${buildFlutterFrameworkDir.path}: ');
-      for (final FileSystemEntity file in buildFlutterFrameworkDir.listSync()) {
-        print(file.basename);
-      }
-      final Directory headersFir = buildFlutterFrameworkDir.childDirectory('Headers');
-      print('${headersFir.path}: ');
-      for (final FileSystemEntity file in headersFir.listSync()) {
-        print(file.basename);
-      }
     }
   }
   expect(
@@ -533,7 +499,7 @@ _Plugin _integrationTestPlugin(String platform) {
   );
 }
 
-List<String> _expectedLines({
+List<Pattern> _expectedLines({
   required String platform,
   required String appDirectoryPath,
   _Plugin? cococapodsPlugin,
@@ -546,7 +512,7 @@ List<String> _expectedLines({
     platform,
   );
 
-  final List<String> expectedLines = <String>[];
+  final List<Pattern> expectedLines = <Pattern>[];
   if (swiftPackageMangerEnabled) {
     expectedLines.addAll(<String>[
       'FlutterGeneratedPluginSwiftPackage: $appPlatformDirectoryPath/Flutter/Packages/FlutterGeneratedPluginSwiftPackage',
@@ -556,13 +522,13 @@ List<String> _expectedLines({
   if (swiftPackagePlugin != null) {
     // If using a Swift Package plugin, but Swift Package Manager is not enabled, it falls back to being used as a CocoaPods plugin.
     if (swiftPackageMangerEnabled) {
-      expectedLines.addAll(<String>[
+      expectedLines.addAll(<Pattern>[
         '${swiftPackagePlugin.pluginName}: ${swiftPackagePlugin.pluginPath}/$platform/${swiftPackagePlugin.pluginName} @ local',
         "➜ Explicit dependency on target '${swiftPackagePlugin.pluginName}' in project '${swiftPackagePlugin.pluginName}'",
         if (platform == 'macos')
-          'ProcessXCFramework $appPlatformDirectoryPath/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/FlutterMacOS.xcframework',
+          RegExp('ProcessXCFramework [/private]*$appPlatformDirectoryPath/Flutter/Packages/FlutterFramework/FlutterMacOS.xcframework'),
         if (platform == 'ios')
-          'ProcessXCFramework $appPlatformDirectoryPath/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/Flutter.xcframework',
+          RegExp('ProcessXCFramework [/private]*$appPlatformDirectoryPath/Flutter/Packages/FlutterFramework/Flutter.xcframework'),
       ]);
     } else {
       expectedLines.addAll(<String>[
@@ -615,9 +581,9 @@ List<String> _unexpectedLines({
         '${swiftPackagePlugin.pluginName}: ${swiftPackagePlugin.pluginPath}/$platform/${swiftPackagePlugin.pluginName} @ local',
         "➜ Explicit dependency on target '${swiftPackagePlugin.pluginName}' in project '${swiftPackagePlugin.pluginName}'",
         if (platform == 'macos')
-          'ProcessXCFramework $appPlatformDirectoryPath/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/FlutterMacOS.xcframework',
+          'ProcessXCFramework $appPlatformDirectoryPath/Flutter/Packages/FlutterFramework/FlutterMacOS.xcframework',
         if (platform == 'ios')
-          'ProcessXCFramework $appPlatformDirectoryPath/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/Flutter.xcframework',
+          'ProcessXCFramework $appPlatformDirectoryPath/Flutter/Packages/FlutterFramework/Flutter.xcframework',
       ]);
     }
   }

@@ -87,7 +87,6 @@ class SwiftPackageManager {
     }
 
     SwiftPackageTarget? frameworkTarget;
-    SwiftPackageTargetDependency? frameworkTargetDependency;
     if (packageDependencies.isNotEmpty) {
       final String flutterFramework = platform == SupportedPlatform.ios
         ? 'Flutter'
@@ -96,19 +95,58 @@ class SwiftPackageManager {
         name: flutterFramework,
         relativePath: '$flutterFramework.xcframework',
       );
-      frameworkTargetDependency = SwiftPackageTargetDependency.target(
-        name: flutterFramework,
+      final SwiftPackage frameworkPackage = SwiftPackage(
+        manifest: project.flutterFrameworkSwiftPackageManifest,
+        name: 'FlutterFramework',
+        platforms: <SwiftPackageSupportedPlatform>[
+          if (platform == SupportedPlatform.ios)
+            _iosSwiftPackageSupportedPlatform,
+          if (platform == SupportedPlatform.macos)
+            _macosSwiftPackageSupportedPlatform,
+        ],
+        products: <SwiftPackageProduct>[
+          SwiftPackageProduct(
+            name: 'FlutterFramework',
+            targets: <String>[flutterFramework],
+          ),
+        ],
+        dependencies: <SwiftPackagePackageDependency>[],
+        targets: <SwiftPackageTarget>[frameworkTarget],
+        templateRenderer: _templateRenderer,
+      );
+      frameworkPackage.createSwiftPackage();
+      packageDependencies.insert(
+        0,
+        SwiftPackagePackageDependency(
+          name: 'FlutterFramework',
+          path: project.flutterFrameworkSwiftPackageDirectory.path,
+        ),
+      );
+      targetDependencies.insert(
+        0,
+        SwiftPackageTargetDependency.product(
+          name: 'FlutterFramework',
+          packageName: 'FlutterFramework',
+        ),
+      );
+
+      // Setup the framework symlink so xcodebuild commands like -showBuildSettings
+      // will still work. The BuildMode is not known yet, so set to release for
+      // now. The correct framework will be symlinked when the project is built.
+      linkFlutterFramework(
+        platform,
+        project,
+        BuildMode.release,
+        artifacts: _artifacts,
+        fileSystem: _fileSystem,
+        logger: _logger,
       );
     }
 
     final List<SwiftPackageTarget> packageTargets = <SwiftPackageTarget>[
-      if (frameworkTarget != null) frameworkTarget,
       SwiftPackageTarget.defaultTarget(
         name: _defaultFlutterPluginsSwiftPackageName,
-        dependencies: <SwiftPackageTargetDependency>[
-          if (frameworkTargetDependency != null) frameworkTargetDependency,
-          ...targetDependencies,
-        ],
+        dependencies: targetDependencies,
       ),
     ];
 
@@ -133,17 +171,6 @@ class SwiftPackageManager {
     );
     pluginsPackage.createSwiftPackage();
 
-    // Setup the framework symlink so xcodebuild commands like -showBuildSettings
-    // will still work. The BuildMode is not known yet, so set to release for
-    // now. The correct framework will be symlinked when the project is built.
-    linkFlutterFramework(
-      platform,
-      project,
-      BuildMode.release,
-      artifacts: _artifacts,
-      fileSystem: _fileSystem,
-      logger: _logger,
-    );
     await migrateProject(project, platform);
   }
 
@@ -219,11 +246,11 @@ class SwiftPackageManager {
     final String xcframeworkName = platform == SupportedPlatform.macos
         ? 'FlutterMacOS.xcframework'
         : 'Flutter.xcframework';
-    if (!project.flutterPluginSwiftPackageDirectory.existsSync()) {
+    if (!project.flutterFrameworkSwiftPackageDirectory.existsSync()) {
       // This can happen when Swift Package Manager is enabled, but the project
       // hasn't been migrated yet since it doesn't have any Swift Package
       // Manager plugin dependencies.
-      logger.printTrace('FlutterGeneratedPluginSwiftPackage does not exist, skipping adding link to $xcframeworkName.');
+      logger.printTrace('FlutterFramework Swift Package does not exist, skipping adding link to $xcframeworkName.');
       return;
     }
 
@@ -241,7 +268,8 @@ class SwiftPackageManager {
         mode: buildMode,
       );
     }
-    final Link frameworkSymlink = project.flutterPluginSwiftPackageDirectory.childLink(xcframeworkName);
+    final Link frameworkSymlink = project.flutterFrameworkSwiftPackageDirectory
+        .childLink(xcframeworkName);
     if (!frameworkSymlink.existsSync()) {
       frameworkSymlink.createSync(engineFlutterFrameworkArtifactPath);
     } else if (frameworkSymlink.targetSync() != engineFlutterFrameworkArtifactPath) {
