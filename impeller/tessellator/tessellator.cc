@@ -179,6 +179,7 @@ Path::Polyline Tessellator::CreateTempPolyline(const Path& path,
 std::vector<Point> Tessellator::TessellateConvex(const Path& path,
                                                  Scalar tolerance) {
   FML_DCHECK(point_buffer_);
+
   std::vector<Point> output;
   point_buffer_->clear();
   auto polyline =
