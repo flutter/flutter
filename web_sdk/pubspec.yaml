@@ -18,6 +18,8 @@ dev_dependencies:
 dependency_overrides: # Must include all transitive dependencies from the "any" packages above.
   _fe_analyzer_shared:
     path: ../../third_party/dart/pkg/_fe_analyzer_shared
+  _macros:
+    path: ../../third_party/dart/pkg/_macros
   analyzer:
     path: ../../third_party/dart/pkg/analyzer
   async:
@@ -34,6 +36,8 @@ dependency_overrides: # Must include all transitive dependencies from the "any" 
     path: ../../third_party/dart/third_party/pkg/file/packages/file
   glob:
     path: ../../third_party/dart/third_party/pkg/glob
+  macros:
+    path: ../../third_party/dart/pkg/macros
   meta:
     path: ../../third_party/dart/pkg/meta
   package_config:
