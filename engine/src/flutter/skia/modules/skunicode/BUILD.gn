@@ -40,6 +40,7 @@ if (skia_use_icu || skia_use_client_icu || skia_use_libgrapheme) {
 
     if (skia_use_icu) {
       sources += skia_unicode_icu_sources
+      sources += skia_unicode_bidi_full_sources
       defines += [ "SK_UNICODE_ICU_IMPLEMENTATION" ]
 
       # only available for Android at the moment
@@ -52,20 +53,18 @@ if (skia_use_icu || skia_use_client_icu || skia_use_libgrapheme) {
       }
       configs += [ "$_skia_root/third_party/icu/config:no_cxx" ]
     }
+    if (skia_use_client_icu || skia_use_libgrapheme) {
+      sources += skia_unicode_bidi_subset_sources
+      deps += [ skia_icu_bidi_third_party_dir ]
+    }
     if (skia_use_client_icu) {
       sources += skia_unicode_client_icu_sources
       defines += [ "SK_UNICODE_CLIENT_IMPLEMENTATION" ]
-      if (!skia_use_icu) {
-        deps += [ skia_icu_bidi_third_party_dir ]
-      }
     }
     if (skia_use_libgrapheme) {
       sources += skia_unicode_libgrapheme_sources
       defines += [ "SK_UNICODE_LIBGRAPHEME_IMPLEMENTATION" ]
       deps += [ skia_libgrapheme_third_party_dir ]
-      if (!skia_use_icu) {
-        deps += [ skia_icu_bidi_third_party_dir ]
-      }
     }
   }
 } else {
