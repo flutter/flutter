@@ -45,6 +45,7 @@
   V(Hue)                                \
   V(Saturation)                         \
   V(Color)                              \
+  V(PlusAdvanced)                       \
   V(Luminosity)
 
 namespace impeller {
@@ -91,6 +92,7 @@ enum class BlendMode : uint8_t {
   kHue,
   kSaturation,
   kColor,
+  kPlusAdvanced,
   kLuminosity,
 
   kLast = kLuminosity,
