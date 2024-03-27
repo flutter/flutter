@@ -14256,7 +14256,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'برش';
 
   @override
-  String get dateHelpText => 'روز/ماه/سال';
+  String get dateHelpText => 'رر/م‌م/س‌س‌س‌س';
 
   @override
   String get dateInputLabel => 'تاریخ را وارد کنید';
@@ -16232,9 +16232,6 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
 
   @override
   String get keyboardKeyInsert => 'Insér.';
-
-  @override
-  String get keyboardKeyEscape => 'Échapp.';
 
   @override
   String get keyboardKeyEject => 'Éject.';
@@ -32227,7 +32224,7 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'$applicationName ਬਾਰੇ';
 
   @override
-  String get alertDialogLabel => 'ਸੁਚੇਤਨਾ';
+  String get alertDialogLabel => 'ਅਲਰਟ';
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
@@ -34295,13 +34292,13 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
   String get dateOutOfRangeLabel => 'Fora do intervalo.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Data de conclusão: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Data de fim: $fullDate';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Data de início: $fullDate';
 
   @override
-  String get dateRangeEndLabel => 'Data de conclusão';
+  String get dateRangeEndLabel => 'Data de fim';
 
   @override
   String get inputDateModeButtonLabel => 'Mude para a introdução';
