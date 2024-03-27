@@ -25,7 +25,6 @@
 #include "impeller/entity/inline_pass_context.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/rect.h"
-#include "impeller/geometry/size.h"
 #include "impeller/renderer/command_buffer.h"
 
 #ifdef IMPELLER_DEBUG
@@ -753,25 +752,6 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
   FML_UNREACHABLE();
 }
 
-static void SetClipScissor(std::optional<Rect> clip_coverage,
-                           RenderPass& pass,
-                           Point global_pass_position) {
-  if constexpr (!ContentContext::kEnableStencilThenCover) {
-    return;
-  }
-  // Set the scissor to the clip coverage area. We do this prior to rendering
-  // the clip itself and all its contents.
-  IRect scissor;
-  if (clip_coverage.has_value()) {
-    clip_coverage = clip_coverage->Shift(-global_pass_position);
-    scissor = IRect::RoundOut(clip_coverage.value());
-    // The scissor rect must not exceed the size of the render target.
-    scissor = scissor.Intersection(IRect::MakeSize(pass.GetRenderTargetSize()))
-                  .value_or(IRect());
-  }
-  pass.SetScissor(scissor);
-}
-
 bool EntityPass::RenderElement(Entity& element_entity,
                                size_t clip_depth_floor,
                                InlinePassContext& pass_context,
@@ -791,10 +771,8 @@ bool EntityPass::RenderElement(Entity& element_entity,
     // Restore any clips that were recorded before the backdrop filter was
     // applied.
     auto& replay_entities = clip_coverage_stack.GetReplayEntities();
-    for (const auto& replay : replay_entities) {
-      SetClipScissor(clip_coverage_stack.CurrentClipCoverage(), *result.pass,
-                     global_pass_position);
-      if (!replay.entity.Render(renderer, *result.pass)) {
+    for (const auto& entity : replay_entities) {
+      if (!entity.Render(renderer, *result.pass)) {
         VALIDATION_LOG << "Failed to render entity for clip restore.";
       }
     }
@@ -848,18 +826,11 @@ bool EntityPass::RenderElement(Entity& element_entity,
   element_entity.GetContents()->SetCoverageHint(
       Rect::Intersection(element_coverage_hint, current_clip_coverage));
 
-  EntityPassClipStack::ClipStateResult clip_state_result =
-      clip_coverage_stack.ApplyClipState(clip_coverage, element_entity,
-                                         clip_depth_floor,
-                                         global_pass_position);
-
-  if (clip_state_result.clip_did_change) {
-    // We only need to update the pass scissor if the clip state has changed.
-    SetClipScissor(clip_coverage_stack.CurrentClipCoverage(), *result.pass,
-                   global_pass_position);
-  }
-
-  if (!clip_state_result.should_render) {
+  if (!clip_coverage_stack.AppendClipCoverage(clip_coverage, element_entity,
+                                              clip_depth_floor,
+                                              global_pass_position)) {
+    // If the entity's coverage change did not change the clip coverage, we
+    // don't need to render it.
     return true;
   }
 
