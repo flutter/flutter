@@ -85,8 +85,6 @@ class _PredictiveBackGestureDetector extends StatefulWidget {
 
 class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDetector>
     with WidgetsBindingObserver {
-  bool _gestureInProgress = false;
-
   /// True when the predictive back gesture is enabled.
   bool get _isEnabled {
     return widget.route.isCurrent
@@ -119,8 +117,8 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
 
   @override
   bool handleStartBackGesture(PredictiveBackEvent backEvent) {
-    _gestureInProgress = !backEvent.isButtonEvent && _isEnabled;
-    if (!_gestureInProgress) {
+    final bool gestureInProgress = !backEvent.isButtonEvent && _isEnabled;
+    if (!gestureInProgress) {
       return false;
     }
 
@@ -130,38 +128,21 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
   }
 
   @override
-  bool handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) {
-    if (!_gestureInProgress) {
-      return false;
-    }
-
+  void handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) {
     widget.route.handleUpdateBackGestureProgress(progress: 1 - backEvent.progress);
     currentBackEvent = backEvent;
-    return true;
   }
 
   @override
-  bool handleCancelBackGesture() {
-    if (!_gestureInProgress) {
-      return false;
-    }
-
+  void handleCancelBackGesture() {
     widget.route.handleCancelBackGesture();
-    _gestureInProgress = false;
     startBackEvent = currentBackEvent = null;
-    return true;
   }
 
   @override
-  bool handleCommitBackGesture() {
-    if (!_gestureInProgress) {
-      return false;
-    }
-
+  void handleCommitBackGesture() {
     widget.route.handleCommitBackGesture();
-    _gestureInProgress = false;
     startBackEvent = currentBackEvent = null;
-    return true;
   }
 
   // End WidgetsBindingObserver.

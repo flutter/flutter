@@ -509,20 +509,20 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   void _handleDragEnd({required bool animateForward}) {
     if (isCurrent) {
       if (animateForward) {
-        if (_controller != null) {
-          // The closer the panel is to dismissing, the shorter the animation is.
-          // We want to cap the animation time, but we want to use a linear curve
-          // to determine it.
-          final int droppedPageForwardAnimationTime = min(
-            ui.lerpDouble(800, 0, _controller!.value)!.floor(),
-            300,
-          );
-          _controller!.animateTo(
-            1.0,
-            duration: Duration(milliseconds: droppedPageForwardAnimationTime),
-            curve: Curves.fastLinearToSlowEaseIn,
-          );
-        }
+        // The closer the panel is to dismissing, the shorter the animation is.
+        // We want to cap the animation time, but we want to use a linear curve
+        // to determine it.
+        // These values were eyeballed to match the native predictive back
+        // animation on a Pixel 2 running Android API 34.
+        final int droppedPageForwardAnimationTime = min(
+          ui.lerpDouble(800, 0, _controller!.value)!.floor(),
+          300,
+        );
+        _controller?.animateTo(
+          1.0,
+          duration: Duration(milliseconds: droppedPageForwardAnimationTime),
+          curve: Curves.fastLinearToSlowEaseIn,
+        );
       } else {
         // This route is destined to pop at this point. Reuse navigator's pop.
         navigator?.pop();
@@ -542,7 +542,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
     if (_controller?.isAnimating ?? false) {
       // Keep the userGestureInProgress in true state since AndroidBackGesturePageTransitionsBuilder
       // depends on userGestureInProgress.
-      late AnimationStatusListener animationStatusCallback;
+      late final AnimationStatusListener animationStatusCallback;
       animationStatusCallback = (AnimationStatus status) {
         navigator?.didStopUserGesture();
         _controller!.removeStatusListener(animationStatusCallback);
