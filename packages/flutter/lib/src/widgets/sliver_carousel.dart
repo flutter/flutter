@@ -44,22 +44,10 @@ class SliverCarousel extends SliverMultiBoxAdaptorWidget {
 class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
   RenderSliverCarousel({
     required super.childManager,
-    // required double maxChildExtent,
     required double clipExtent,
     required List<int> childExtentList,
   }) : _clipExtent = clipExtent,
-      //  _maxChildExtent = maxChildExtent,
        _childExtentList = childExtentList;
-
-  // double get maxChildExtent => _maxChildExtent;
-  // double _maxChildExtent;
-  // set maxChildExtent(double value) {
-  //   if (_maxChildExtent == value) {
-  //     return;
-  //   }
-  //   _maxChildExtent = value;
-  //   markNeedsLayout();
-  // }
 
   double get clipExtent => _clipExtent;
   double _clipExtent;
@@ -81,35 +69,28 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
     markNeedsLayout();
   }
 
-  BoxConstraints _getChildConstraints(int index) {
+  double _getChildExtent(int index) {
     double extent;
     if (_firstVisibleItemIndex == index) {
       extent = math.max(_firstVisibleItemExtent, clipExtent);
     } else if (index > _firstVisibleItemIndex
       // Children in this if statement are visible items except the first one.
       && index - _firstVisibleItemIndex + 1 <= childExtentList.length
-      // && index <= indexOf(lastChild!)
     ) {
       assert(index - _firstVisibleItemIndex < childExtentList.length);
-      extent = eachSliceExtent * childExtentList.elementAt(index - _firstVisibleItemIndex); // initial extent
+      extent = extentPerWeightUnit * childExtentList.elementAt(index - _firstVisibleItemIndex); // initial extent
       final int currWeight = childExtentList.elementAt(index - _firstVisibleItemIndex);
       double progress = _gapBetweenCurrentAndPrev / firstChildExtent;
       if (lastChild != null && index == indexOf(lastChild!)) {
         if (index - _firstVisibleItemIndex + 1 < childExtentList.length) {
           progress = 1;
         }
-        double finalIncrease = 1 - currWeight / childExtentList.max;
+        final double finalIncrease = 1 - currWeight / childExtentList.max;
         extent = extent + finalIncrease * progress * maxChildExtent;
-        // print('index $index  -> extent $extent');
       } else {
-        // print('progress: $progress');
         assert(index - _firstVisibleItemIndex - 1 < childExtentList.length, '$index');
         final int prevWeight = childExtentList.elementAt(index - _firstVisibleItemIndex - 1);
         final double finalIncrease = (prevWeight - currWeight) / childExtentList.max;
-
-        // print('index: $index, finalIncrease: $finalIncrease, first item extent: $_firstVisibleItemExtent');
-        // extent = math.min(extent + ((1 - numerator / denominator) * childExtentList.max) * progress, maxChildExtent);
-        // print('Add delta: ${((1 - numerator / denominator) * childExtentList.max) * progress}');
 
         extent = extent + finalIncrease * progress * maxChildExtent;
       }
@@ -118,17 +99,18 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
     {
       double visibleItemsTotalExtent = _firstVisibleItemExtent;
       for (int i = _firstVisibleItemIndex + 1; i < index; i++) {
-        // print('subtotal extent before $i: $visibleItemsTotalExtent');
-        visibleItemsTotalExtent += _getChildConstraints(i).maxWidth;
+        visibleItemsTotalExtent += _getChildExtent(i);
       }
       extent = math.max(constraints.remainingPaintExtent - visibleItemsTotalExtent, clipExtent);
-      // print('child index: $index extent: $extent');
     }
     else {
       extent = math.max(minChildExtent, clipExtent);
-      // print('index: $index extent $extent');
-
     }
+    return extent;
+  }
+
+  BoxConstraints _getChildConstraints(int index) {
+    final double extent = _getChildExtent(index);
     return constraints.asBoxConstraints(
       minExtent: extent,
       maxExtent: extent,
@@ -136,17 +118,16 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
     );
   }
 
-  double get eachSliceExtent => constraints.remainingPaintExtent / (childExtentList.reduce((int total, int extent) => total + extent));
+  double get extentPerWeightUnit => constraints.remainingPaintExtent / (childExtentList.reduce((int total, int extent) => total + extent));
 
-  double get firstChildExtent => childExtentList.first * eachSliceExtent;
-  double get maxChildExtent => childExtentList.max * eachSliceExtent;
+  double get firstChildExtent => childExtentList.first * extentPerWeightUnit;
+  double get maxChildExtent => childExtentList.max * extentPerWeightUnit;
   double get mediumChildExtent {
-    List<int> sortedList = List.from(childExtentList);
+    final List<int> sortedList = List<int>.from(childExtentList);
     sortedList.sort();
-    print(sortedList);
-    return sortedList.elementAt(1) * eachSliceExtent;
+    return sortedList.elementAt(1) * extentPerWeightUnit;
   }
-  double get minChildExtent => childExtentList.min * eachSliceExtent;
+  double get minChildExtent => childExtentList.min * extentPerWeightUnit;
 
   int get _firstVisibleItemIndex => (constraints.scrollOffset / firstChildExtent).floor();
   double get _gapBetweenCurrentAndPrev => constraints.scrollOffset % firstChildExtent;
@@ -171,40 +152,18 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
     int index,
   ) {
     assert(itemExtentBuilder == null);
-      // print('first visible index: $_firstVisibleItemIndex');
-  // print('getMinChildIndexForScrollOffset: ${getMinChildIndexForScrollOffset(constraints.scrollOffset + constraints.cacheOrigin, 0)}');
-  // print('remaining paint extent: ${constraints.remainingPaintExtent}');
-  // print('viewportMainAxisExtent: ${constraints.viewportMainAxisExtent}');
-  // print('scrolloffset: ${constraints.scrollOffset}');
-  // print('getMaxChildIndexForScrollOffset: ${getMaxChildIndexForScrollOffset(constraints.scrollOffset + constraints.remainingPaintExtent, 0)}');
-  // print('last visible index $_lastVisibleItenIndex');
     if (_firstVisibleItemIndex == index && firstChildExtent - _gapBetweenCurrentAndPrev > clipExtent) { // pinned
       return constraints.scrollOffset;
     } else if (_firstVisibleItemIndex == index) { // do not pin
       return firstChildExtent * index + (firstChildExtent - clipExtent);
-    } else if (index > _firstVisibleItemIndex
-      && index - _firstVisibleItemIndex + 1 <= childExtentList.length)
-    {
+    } else if (index > _firstVisibleItemIndex) {
+      print('--------------- $index ----------------');
       double visibleItemsTotalExtent = _firstVisibleItemExtent;
       for (int i = _firstVisibleItemIndex + 1; i < index; i++) {
-        visibleItemsTotalExtent += _getChildConstraints(i).maxWidth;
+        visibleItemsTotalExtent += _getChildExtent(i);
       }
-      // print('first visible: $_firstVisibleItemIndex, ${_getChildConstraints(_firstVisibleItemIndex).maxWidth}');
-      return constraints.scrollOffset + visibleItemsTotalExtent;
-            // print('child index: $index');
-
-    } else if (index > _firstVisibleItemIndex
-      && index - _firstVisibleItemIndex + 1 > childExtentList.length)
-    {
-      double visibleItemsTotalExtent = _firstVisibleItemExtent;
-      for (int i = _firstVisibleItemIndex + 1; i < index; i++) {
-        visibleItemsTotalExtent += _getChildConstraints(i).maxWidth;
-      }
-      // print('first visible: $_firstVisibleItemIndex, ${_getChildConstraints(_firstVisibleItemIndex).maxWidth}');
-      // print('child index: $index visibleItemsTsotalExtent: $visibleItemsTotalExtent');
       return constraints.scrollOffset + visibleItemsTotalExtent;
     }
-    // print('in layout method - index: $index');
     return firstChildExtent * index;
   }
 
@@ -227,7 +186,7 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
     double itemExtent,
   ) {
     assert(itemExtentBuilder == null);
-    final double childExtent = maxChildExtent;
+    final double childExtent = firstChildExtent;
     if (childExtent > 0.0) {
       final double actual = scrollOffset / childExtent;
       final int round = actual.round();
@@ -257,28 +216,15 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
   ) {
     final int? childCount = childManager.estimatedChildCount;
     if (childCount != null) {
-      // print(childCount);
       double visibleItemsTotalExtent = _firstVisibleItemExtent;
       for (int i = _firstVisibleItemIndex + 1; i < childCount; i++) {
-        // print('subtotal extent before $i: $visibleItemsTotalExtent');
-        visibleItemsTotalExtent += _getChildConstraints(i).maxWidth;
+        visibleItemsTotalExtent += _getChildExtent(i);
         if (visibleItemsTotalExtent >= constraints.remainingPaintExtent) {
-          // print('visible total extent: $visibleItemsTotalExtent, last visible index: $i');
           return i;
         }
       }
     }
-    itemExtent = maxChildExtent;
-    if (itemExtent > 0.0) {
-      final double actual = scrollOffset / itemExtent - 1;
-      final int round = actual.round();
-      if ((actual * itemExtent - round * itemExtent).abs() < precisionErrorTolerance) {
-        return math.max(0, round);
-      }
-      return math.max(0, actual.ceil());
-    }
-    // print('=================');
-    return 0;
+    return childCount ?? 0;
   }
 
 
@@ -287,7 +233,6 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
     final SliverConstraints constraints = this.constraints;
     childManager.didStartLayout();
     childManager.setDidUnderflow(false);
-    // print('------------------------------ remainingPaintExtent: ${constraints.remainingPaintExtent} ------------------------------');
 
     final double scrollOffset = constraints.scrollOffset + constraints.cacheOrigin;
     assert(scrollOffset >= 0.0);
@@ -375,13 +320,9 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
     final int lastIndex = indexOf(lastChild!);
     final double leadingScrollOffset = indexToLayoutOffset(deprecatedExtraItemExtent, firstIndex);
     final double trailingScrollOffset = indexToLayoutOffset(deprecatedExtraItemExtent, lastIndex + 1);
-// print('${childScrollOffset(firstChild!)!} - $scrollOffset = ${childScrollOffset(firstChild!)! - scrollOffset}');
-    // assert(firstIndex == 0 || childScrollOffset(firstChild!)! - scrollOffset <= precisionErrorTolerance
-    //   , '${childScrollOffset(firstChild!)!} - $scrollOffset = ${childScrollOffset(firstChild!)! - scrollOffset}'
-    // );
+
     assert(debugAssertChildListIsNonEmptyAndContiguous());
     assert(indexOf(firstChild!) == firstIndex);
-    // print('$targetLastIndex  -------------- $lastIndex');
     assert(targetLastIndex == null || lastIndex <= targetLastIndex);
 
     estimatedMaxScrollOffset = math.min(
@@ -410,14 +351,7 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
     final double targetEndScrollOffsetForPaint = constraints.scrollOffset + constraints.remainingPaintExtent;
     final int? targetLastIndexForPaint = targetEndScrollOffsetForPaint.isFinite ?
         getMaxChildIndexForScrollOffset(targetEndScrollOffsetForPaint, deprecatedExtraItemExtent) : null;
-// print('\n------------------------------ '
-// // '\nfirst visible index: $_firstVisibleItemIndex, '
-// // '\nfirst visible extent: $_firstVisibleItemExtent,'
-// ' \nmaxChildExtent: $maxChildExtent\n '
-// 'mediumChildExtent: $mediumChildExtent\n'
-// 'minChildExtent: $minChildExtent \n'
-// // 'last visible item: ${getMaxChildIndexForScrollOffset(targetEndScrollOffsetForPaint, deprecatedExtraItemExtent)}
-// '------------------------------');
+
     geometry = SliverGeometry(
       scrollExtent: estimatedMaxScrollOffset,
       paintExtent: paintExtent,
