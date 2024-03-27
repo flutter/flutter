@@ -51,3 +51,26 @@ final class SkiaGoldProcessError extends Error {
     ].join('\n');
   }
 }
+
+/// Error thrown when the Skia Gold process exits due to a negative image.
+final class SkiaGoldNegativeImageError extends SkiaGoldProcessError {
+  /// Creates a new [SkiaGoldNegativeImageError] from the provided origin.
+  ///
+  /// See [SkiaGoldProcessError.new] for more information.
+  SkiaGoldNegativeImageError({
+    required this.testName,
+    required super.command,
+    required super.stdout,
+    required super.stderr,
+  });
+
+  /// Name of the test that produced the negative image.
+  final String testName;
+
+  @override
+  String get message => 'Negative image detected for test: "$testName".\n\n'
+      'The flutter/engine workflow should never produce negative images; it is '
+      'possible that someone accidentally (or without knowing our policy) '
+      'marked a test as negative.\n\n'
+      'See https://github.com/flutter/flutter/issues/145043 for details.';
+}

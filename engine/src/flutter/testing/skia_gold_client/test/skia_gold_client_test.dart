@@ -336,6 +336,41 @@ void main() {
     }
   });
 
+  test('addImg [pre-submit] fails due to a negative image', () async {
+    final _TestFixture fixture = _TestFixture();
+    try {
+      final SkiaGoldClient client = createClient(
+        fixture,
+        environment: presubmitEnv,
+        onRun: (List<String> command) {
+          if (command case ['git', ...]) {
+            return io.ProcessResult(0, 0, mockCommitHash, '');
+          }
+          if (command case ['python tools/goldctl.py', 'imgtest', 'init', ...]) {
+            return io.ProcessResult(0, 0, '', '');
+          }
+          return io.ProcessResult(0, 1, 'negative image', 'stderr');
+        },
+      );
+
+      try {
+        await client.addImg(
+          'test-name.foo',
+          io.File(p.join(fixture.workDirectory.path, 'temp', 'golden.png')),
+          screenshotSize: 1000,
+        );
+        fail('addImg should fail due to a negative image');
+      } on SkiaGoldNegativeImageError catch (error) {
+        expect(error.testName, 'test-name.foo');
+        expect(error.stdout, 'negative image');
+        expect(error.stderr, 'stderr');
+        expect(error.command.join(' '), contains('imgtest add'));
+      }
+    } finally {
+      fixture.dispose();
+    }
+  });
+
   test('addImg [pre-submit] fails due to an unexpected error', () async {
     final _TestFixture fixture = _TestFixture();
     try {
@@ -349,7 +384,7 @@ void main() {
           if (command case ['python tools/goldctl.py', 'imgtest', 'init', ...]) {
             return io.ProcessResult(0, 0, '', '');
           }
-          return io.ProcessResult(1, 0, 'stdout-text', 'stderr-text');
+          return io.ProcessResult(0, 1, 'stdout-text', 'stderr-text');
         },
       );
 
@@ -359,11 +394,12 @@ void main() {
           io.File(p.join(fixture.workDirectory.path, 'temp', 'golden.png')),
           screenshotSize: 1000,
         );
+        fail('addImg should fail due to an unexpected error');
       } on SkiaGoldProcessError catch (error) {
-        expect(error.message, contains('Skia Gold image test failed.'));
+        expect(error.message, contains('Unexpected Gold tryjobAdd failure.'));
         expect(error.stdout, 'stdout-text');
         expect(error.stderr, 'stderr-text');
-        expect(error.command, contains('imgtest add'));
+        expect(error.command.join(' '), contains('imgtest add'));
       }
     } finally {
       fixture.dispose();
@@ -478,7 +514,7 @@ void main() {
           if (command case ['python tools/goldctl.py', 'imgtest', 'init', ...]) {
             return io.ProcessResult(0, 0, '', '');
           }
-          return io.ProcessResult(1, 0, 'stdout-text', 'stderr-text');
+          return io.ProcessResult(0, 1, 'stdout-text', 'stderr-text');
         },
       );
 
@@ -488,11 +524,12 @@ void main() {
           io.File(p.join(fixture.workDirectory.path, 'temp', 'golden.png')),
           screenshotSize: 1000,
         );
+        fail('addImg should fail due to an unapproved image');
       } on SkiaGoldProcessError catch (error) {
-        expect(error.message, contains('Skia Gold image test failed.'));
+        expect(error.message, contains('Skia Gold received an unapproved image'));
         expect(error.stdout, 'stdout-text');
         expect(error.stderr, 'stderr-text');
-        expect(error.command, contains('imgtest add'));
+        expect(error.command.join(' '), contains('imgtest add'));
       }
     } finally {
       fixture.dispose();
