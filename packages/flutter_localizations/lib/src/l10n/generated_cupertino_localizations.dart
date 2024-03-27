@@ -10316,7 +10316,7 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   });
 
   @override
-  String get alertDialogLabel => 'ਸੁਚੇਤਨਾ';
+  String get alertDialogLabel => 'ਅਲਰਟ';
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
