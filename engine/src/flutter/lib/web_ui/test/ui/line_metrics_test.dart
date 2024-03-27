@@ -176,5 +176,5 @@ Future<void> testMain() async {
 
     // In Roboto, the width should be 11 here. In the test font, it would be square (16 points)
     expect(metrics!.width, 11);
-  }, solo: true);
+  });
 }
