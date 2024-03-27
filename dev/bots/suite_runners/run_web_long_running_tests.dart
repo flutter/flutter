@@ -7,7 +7,6 @@ import 'dart:io' show File, HttpClient, HttpClientRequest, HttpClientResponse, P
 import 'dart:math' as math;
 import 'package:path/path.dart' as path;
 
-
 import '../browser.dart';
 import '../run_command.dart';
 import '../service_worker_test.dart';
