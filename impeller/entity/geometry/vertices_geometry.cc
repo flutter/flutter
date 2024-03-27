@@ -138,7 +138,7 @@ GeometryResult VerticesGeometry::GetPositionBuffer(
               .index_type =
                   index_count > 0 ? IndexType::k16bit : IndexType::kNone,
           },
-      .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
+      .transform = entity.GetShaderTransform(pass),
   };
 }
 
@@ -182,7 +182,7 @@ GeometryResult VerticesGeometry::GetPositionColorBuffer(
               .index_type =
                   index_count > 0 ? IndexType::k16bit : IndexType::kNone,
           },
-      .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
+      .transform = entity.GetShaderTransform(pass),
   };
 }
 
@@ -239,7 +239,7 @@ GeometryResult VerticesGeometry::GetPositionUVBuffer(
               .index_type =
                   index_count > 0 ? IndexType::k16bit : IndexType::kNone,
           },
-      .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
+      .transform = entity.GetShaderTransform(pass),
   };
 }
 

@@ -139,7 +139,6 @@ bool VerticesUVContents::Render(const ContentContext& renderer,
   pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
 
   VS::FrameInfo frame_info;
-  frame_info.depth = entity.GetShaderClipDepth();
   frame_info.mvp = geometry_result.transform;
   frame_info.texture_sampler_y_coord_scale =
       snapshot->texture->GetYCoordScale();
@@ -189,7 +188,6 @@ bool VerticesColorContents::Render(const ContentContext& renderer,
   pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
 
   VS::FrameInfo frame_info;
-  frame_info.depth = entity.GetShaderClipDepth();
   frame_info.mvp = geometry_result.transform;
   VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
 

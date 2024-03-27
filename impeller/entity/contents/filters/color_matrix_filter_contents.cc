@@ -75,10 +75,10 @@ std::optional<Entity> ColorMatrixFilterContents::RenderFilter(
     pass.SetVertexBuffer(vtx_builder.CreateVertexBuffer(host_buffer));
 
     VS::FrameInfo frame_info;
-    frame_info.depth = entity.GetShaderClipDepth();
-    frame_info.mvp = pass.GetOrthographicTransform() * entity.GetTransform() *
-                     input_snapshot->transform *
-                     Matrix::MakeScale(Vector2(size));
+    frame_info.mvp = Entity::GetShaderTransform(
+        entity.GetShaderClipDepth(), pass,
+        entity.GetTransform() * input_snapshot->transform *
+            Matrix::MakeScale(Vector2(size)));
     frame_info.texture_sampler_y_coord_scale =
         input_snapshot->texture->GetYCoordScale();
 

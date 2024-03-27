@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <cmath>
 #include <optional>
 
 #include "fml/logging.h"
@@ -13,6 +14,14 @@
 #include "impeller/renderer/vertex_buffer_builder.h"
 
 namespace impeller {
+
+static Scalar GetShaderClipDepth(const Entity& entity) {
+  // Draw the clip at the max of the clip entity's depth slice, so that other
+  // draw calls with this same depth value will be culled even if they have a
+  // perspective transform.
+  return std::nextafterf(
+      Entity::GetShaderClipDepth(entity.GetNewClipDepth() + 1), 0.0f);
+}
 
 /*******************************************************************************
  ******* ClipContents
@@ -81,7 +90,7 @@ bool ClipContents::RenderDepthClip(const ContentContext& renderer,
   using VS = ClipPipeline::VertexShader;
 
   VS::FrameInfo info;
-  info.depth = entity.GetShaderClipDepth();
+  info.depth = GetShaderClipDepth(entity);
 
   auto geometry_result = geometry.GetPositionBuffer(renderer, entity, pass);
   auto options = OptionsFromPass(pass);
@@ -167,7 +176,7 @@ bool ClipContents::RenderStencilClip(const ContentContext& renderer,
   using VS = ClipPipeline::VertexShader;
 
   VS::FrameInfo info;
-  info.depth = entity.GetShaderClipDepth();
+  info.depth = GetShaderClipDepth(entity);
 
   auto options = OptionsFromPass(pass);
   options.blend_mode = BlendMode::kDestination;
@@ -301,11 +310,11 @@ bool ClipRestoreContents::Render(const ContentContext& renderer,
       vtx_builder.CreateVertexBuffer(renderer.GetTransientsBuffer()));
 
   VS::FrameInfo info;
-  info.depth = entity.GetShaderClipDepth();
+  info.depth = GetShaderClipDepth(entity);
   info.mvp = pass.GetOrthographicTransform();
   VS::BindFrameInfo(pass, renderer.GetTransientsBuffer().EmplaceUniform(info));
 
   return pass.Draw().ok();
 }
 
-};  // namespace impeller
+}  // namespace impeller

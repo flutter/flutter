@@ -95,8 +95,8 @@ bool TextContents::Render(const ContentContext& renderer,
 
   // Common vertex uniforms for all glyphs.
   VS::FrameInfo frame_info;
-  frame_info.depth = entity.GetShaderClipDepth();
-  frame_info.mvp = pass.GetOrthographicTransform();
+  frame_info.mvp =
+      Entity::GetShaderTransform(entity.GetShaderClipDepth(), pass, Matrix());
   frame_info.atlas_size =
       Vector2{static_cast<Scalar>(atlas->GetTexture()->GetSize().width),
               static_cast<Scalar>(atlas->GetTexture()->GetSize().height)};

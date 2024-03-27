@@ -29,6 +29,7 @@
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
+#include "impeller/geometry/rect.h"
 #include "impeller/playground/widgets.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/snapshot.h"
@@ -3374,6 +3375,56 @@ TEST_P(AiksTest, CorrectClipDepthAssignedToEntities) {
   for (size_t i = 0; i < expected.size(); i++) {
     EXPECT_EQ(expected[i], actual[i]) << "Index: " << i;
   }
+}
+
+TEST_P(AiksTest, CanDrawPerspectiveTransformWithClips) {
+  // Avoiding `GetSecondsElapsed()` to reduce risk of golden flakiness.
+  int time = 0;
+  auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
+    Canvas canvas;
+
+    canvas.Save();
+    {
+      canvas.Translate({300, 300});
+
+      // 1. Draw/restore a clip before drawing the image, which will get drawn
+      //    to the depth buffer behind the image.
+      canvas.Save();
+      {
+        canvas.DrawPaint({.color = Color::Green()});
+        canvas.ClipRect(Rect::MakeLTRB(-180, -180, 180, 180),
+                        Entity::ClipOperation::kDifference);
+        canvas.DrawPaint({.color = Color::Black()});
+      }
+      canvas.Restore();  // Restore rectangle difference clip.
+
+      canvas.Save();
+      {
+        // 2. Draw an oval clip that applies to the image, which will get drawn
+        //    in front of the image on the depth buffer.
+        canvas.ClipOval(Rect::MakeLTRB(-200, -200, 200, 200));
+
+        // 3. Draw the rotating image with a perspective transform.
+        canvas.Transform(
+            Matrix(1.0, 0.0, 0.0, 0.0,    //
+                   0.0, 1.0, 0.0, 0.0,    //
+                   0.0, 0.0, 1.0, 0.003,  //
+                   0.0, 0.0, 0.0, 1.0) *  //
+            Matrix::MakeRotationY({Radians{-1.0f + (time++ / 60.0f)}}));
+        auto image =
+            std::make_shared<Image>(CreateTextureForFixture("airplane.jpg"));
+        canvas.DrawImage(image, -Point(image->GetSize()) / 2, {});
+      }
+      canvas.Restore();  // Restore oval intersect clip.
+
+      // 4. Draw a semi-translucent blue circle atop all previous draws.
+      canvas.DrawCircle({}, 230, {.color = Color::Blue().WithAlpha(0.4)});
+    }
+    canvas.Restore();  // Restore translation.
+
+    return canvas.EndRecordingAsPicture();
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 }  // namespace testing

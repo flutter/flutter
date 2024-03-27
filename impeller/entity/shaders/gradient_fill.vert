@@ -7,7 +7,6 @@
 
 uniform FrameInfo {
   mat4 mvp;
-  float depth;
   mat4 matrix;
 }
 frame_info;
@@ -18,7 +17,5 @@ out vec2 v_position;
 
 void main() {
   gl_Position = frame_info.mvp * vec4(position, 0.0, 1.0);
-  gl_Position /= gl_Position.w;
-  gl_Position.z = frame_info.depth;
   v_position = IPVec2TransformPosition(frame_info.matrix, position);
 }

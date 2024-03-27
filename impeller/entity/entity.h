@@ -23,6 +23,8 @@ class Entity {
   static constexpr BlendMode kLastPipelineBlendMode = BlendMode::kModulate;
   static constexpr BlendMode kLastAdvancedBlendMode = BlendMode::kLuminosity;
 
+  static constexpr Scalar kDepthEpsilon = 1.0f / 262144.0;
+
   enum class RenderingMode {
     /// In direct mode, the Entity's transform is used as the current
     /// local-to-screen transform matrix.
@@ -75,6 +77,15 @@ class Entity {
   /// @brief  Get the global transform matrix for this Entity.
   const Matrix& GetTransform() const;
 
+  /// @brief  Get the vertex shader transform used for drawing this Entity.
+  Matrix GetShaderTransform(const RenderPass& pass) const;
+
+  /// @brief  Static utility that computes the vertex shader transform used for
+  ///         drawing an Entity with a given the clip depth and RenderPass size.
+  static Matrix GetShaderTransform(Scalar clip_depth,
+                                   const RenderPass& pass,
+                                   const Matrix& transform);
+
   /// @brief  Set the global transform matrix for this Entity.
   void SetTransform(const Matrix& transform);
 
@@ -100,6 +111,8 @@ class Entity {
   uint32_t GetNewClipDepth() const;
 
   float GetShaderClipDepth() const;
+
+  static float GetShaderClipDepth(uint32_t clip_depth);
 
   void SetBlendMode(BlendMode blend_mode);
 

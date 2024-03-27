@@ -29,7 +29,7 @@ GeometryResult CoverGeometry::GetPositionBuffer(const ContentContext& renderer,
               .vertex_count = 4,
               .index_type = IndexType::k16bit,
           },
-      .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
+      .transform = entity.GetShaderTransform(pass),
   };
 }
 
