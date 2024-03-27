@@ -201,6 +201,9 @@ class _DropdownMenu<T> extends StatefulWidget {
     required this.route,
     required this.buttonRect,
     required this.constraints,
+    this.itemExtent,
+    this.itemExtentBuilder,
+    this.prototypeItem,
     this.dropdownColor,
     required this.enableFeedback,
     this.borderRadius,
@@ -211,6 +214,9 @@ class _DropdownMenu<T> extends StatefulWidget {
   final EdgeInsets? padding;
   final Rect buttonRect;
   final BoxConstraints constraints;
+  final double? itemExtent;
+  final ItemExtentBuilder? itemExtentBuilder;
+  final Widget? prototypeItem;
   final Color? dropdownColor;
   final bool enableFeedback;
   final BorderRadius? borderRadius;
@@ -314,6 +320,9 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
                       primary: true,
                       padding: kMaterialListPadding,
                       shrinkWrap: true,
+                      itemExtent: widget.itemExtent,
+                      itemExtentBuilder: widget.itemExtentBuilder,
+                      prototypeItem: widget.prototypeItem,
                       children: children,
                     ),
                   ),
@@ -426,6 +435,9 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     required this.style,
     this.barrierLabel,
     this.itemHeight,
+    this.itemExtent,
+    this.itemExtentBuilder,
+    this.prototypeItem,
     this.dropdownColor,
     this.menuMaxHeight,
     required this.enableFeedback,
@@ -440,6 +452,9 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final CapturedThemes capturedThemes;
   final TextStyle style;
   final double? itemHeight;
+  final double? itemExtent;
+  final ItemExtentBuilder? itemExtentBuilder;
+  final Widget? prototypeItem;
   final Color? dropdownColor;
   final double? menuMaxHeight;
   final bool enableFeedback;
@@ -473,6 +488,9 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
           elevation: elevation,
           capturedThemes: capturedThemes,
           style: style,
+          itemExtent: itemExtent,
+          itemExtentBuilder: itemExtentBuilder,
+          prototypeItem: prototypeItem,
           dropdownColor: dropdownColor,
           enableFeedback: enableFeedback,
           borderRadius: borderRadius,
@@ -582,6 +600,9 @@ class _DropdownRoutePage<T> extends StatefulWidget {
     this.elevation = 8,
     required this.capturedThemes,
     this.style,
+    this.itemExtent,
+    this.itemExtentBuilder,
+    this.prototypeItem,
     required this.dropdownColor,
     required this.enableFeedback,
     this.borderRadius,
@@ -596,6 +617,9 @@ class _DropdownRoutePage<T> extends StatefulWidget {
   final int elevation;
   final CapturedThemes capturedThemes;
   final TextStyle? style;
+  final double? itemExtent;
+  final ItemExtentBuilder? itemExtentBuilder;
+  final Widget? prototypeItem;
   final Color? dropdownColor;
   final bool enableFeedback;
   final BorderRadius? borderRadius;
@@ -632,6 +656,9 @@ class _DropdownRoutePageState<T> extends State<_DropdownRoutePage<T>> {
       padding: widget.padding.resolve(textDirection),
       buttonRect: widget.buttonRect,
       constraints: widget.constraints,
+      itemExtent: widget.itemExtent,
+      itemExtentBuilder: widget.itemExtentBuilder,
+      prototypeItem: widget.prototypeItem,
       dropdownColor: widget.dropdownColor,
       enableFeedback: widget.enableFeedback,
       borderRadius: widget.borderRadius,
@@ -928,6 +955,9 @@ class DropdownButton<T> extends StatefulWidget {
     this.isDense = false,
     this.isExpanded = false,
     this.itemHeight = kMinInteractiveDimension,
+    this.itemExtent,
+    this.itemExtentBuilder,
+    this.prototypeItem,
     this.focusColor,
     this.focusNode,
     this.autofocus = false,
@@ -972,6 +1002,9 @@ class DropdownButton<T> extends StatefulWidget {
     this.isDense = false,
     this.isExpanded = false,
     this.itemHeight = kMinInteractiveDimension,
+    this.itemExtent,
+    this.itemExtentBuilder,
+    this.prototypeItem,
     this.focusColor,
     this.focusNode,
     this.autofocus = false,
@@ -1151,6 +1184,15 @@ class DropdownButton<T> extends StatefulWidget {
   /// offset is computed as if all of the menu item heights were
   /// [kMinInteractiveDimension].
   final double? itemHeight;
+
+  /// {@macro flutter.widgets.list_view.itemExtent}
+  final double? itemExtent;
+
+  /// {@macro flutter.widgets.list_view.itemExtentBuilder}
+  final ItemExtentBuilder? itemExtentBuilder;
+
+  /// {@macro flutter.widgets.list_view.prototypeItem}
+  final Widget? prototypeItem;
 
   /// The color for the button's [Material] when it has the input focus.
   final Color? focusColor;
@@ -1343,6 +1385,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       style: _textStyle!,
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       itemHeight: widget.itemHeight,
+      itemExtent: widget.itemExtent,
+      itemExtentBuilder: widget.itemExtentBuilder,
+      prototypeItem: widget.prototypeItem,
       dropdownColor: widget.dropdownColor,
       menuMaxHeight: widget.menuMaxHeight,
       enableFeedback: widget.enableFeedback ?? true,
@@ -1589,6 +1634,9 @@ class DropdownButtonFormField<T> extends FormField<T> {
     Color? focusColor,
     FocusNode? focusNode,
     bool autofocus = false,
+    double? itemExtent,
+    ItemExtentBuilder? itemExtentBuilder,
+    Widget? prototypeItem,
     Color? dropdownColor,
     InputDecoration? decoration,
     super.onSaved,
@@ -1685,6 +1733,9 @@ class DropdownButtonFormField<T> extends FormField<T> {
                    isDense: isDense,
                    isExpanded: isExpanded,
                    itemHeight: itemHeight,
+                   itemExtent: itemExtent,
+                   itemExtentBuilder: itemExtentBuilder,
+                   prototypeItem: prototypeItem,
                    focusColor: focusColor,
                    focusNode: focusNode,
                    autofocus: autofocus,
