@@ -43,7 +43,8 @@ class ContextMTL final : public Context,
   static std::shared_ptr<ContextMTL> Create(
       const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
       std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
-      const std::string& label);
+      const std::string& label,
+      std::optional<PixelFormat> pixel_format_override = std::nullopt);
 
   static std::shared_ptr<ContextMTL> Create(
       id<MTLDevice> device,
@@ -133,11 +134,11 @@ class ContextMTL final : public Context,
   std::shared_ptr<CommandQueue> command_queue_ip_;
   bool is_valid_ = false;
 
-  ContextMTL(
-      id<MTLDevice> device,
-      id<MTLCommandQueue> command_queue,
-      NSArray<id<MTLLibrary>>* shader_libraries,
-      std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch);
+  ContextMTL(id<MTLDevice> device,
+             id<MTLCommandQueue> command_queue,
+             NSArray<id<MTLLibrary>>* shader_libraries,
+             std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
+             std::optional<PixelFormat> pixel_format_override = std::nullopt);
 
   std::shared_ptr<CommandBuffer> CreateCommandBufferInQueue(
       id<MTLCommandQueue> queue) const;

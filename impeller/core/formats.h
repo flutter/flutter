@@ -138,6 +138,14 @@ constexpr bool IsStencilWritable(PixelFormat format) {
   }
 }
 
+/// Returns `true` if the pixel format has an implicit `clamp(x, 0, 1)` in the
+/// pixel format. This is important for example when performing the `Plus` blend
+/// where we don't want alpha values over 1.0.
+constexpr bool IsAlphaClampedToOne(PixelFormat pixel_format) {
+  return !(pixel_format == PixelFormat::kR32G32B32A32Float ||
+           pixel_format == PixelFormat::kR16G16B16A16Float);
+}
+
 constexpr const char* PixelFormatToString(PixelFormat format) {
   switch (format) {
     case PixelFormat::kUnknown:
