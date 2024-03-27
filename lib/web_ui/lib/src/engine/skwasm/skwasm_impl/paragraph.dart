@@ -940,26 +940,28 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder> im
     // just create both up front here.
     final Pointer<Uint32> outSize = scope.allocUint32Array(1);
     final Pointer<Uint8> utf8Data = paragraphBuilderGetUtf8Text(handle, outSize);
-    if (utf8Data == nullptr) {
-      return;
-    }
 
-    // TODO(jacksongardner): We could make a subclass of `List<int>` here to
-    // avoid this copy.
-    final List<int> codeUnitList = List<int>.generate(
-      outSize.value,
-      (int index) => utf8Data[index]
-    );
-    final String text = utf8.decode(codeUnitList);
-    final JSString jsText = _utf8Decoder.decode(
-      // In an ideal world we would just use a subview of wasm memory rather
-      // than a slice, but the TextDecoder API doesn't work on shared buffer
-      // sources yet.
-      // See https://bugs.chromium.org/p/chromium/issues/detail?id=1012656
-      createUint8ArrayFromBuffer(skwasmInstance.wasmMemory.buffer).slice(
-        utf8Data.address.toJS,
-        (utf8Data.address + outSize.value).toJS
-      ));
+    final String text;
+    final JSString jsText;
+    if (utf8Data == nullptr) {
+      text = '';
+      jsText = ''.toJS;
+    } else {
+      final List<int> codeUnitList = List<int>.generate(
+        outSize.value,
+        (int index) => utf8Data[index]
+      );
+      text = utf8.decode(codeUnitList);
+      jsText = _utf8Decoder.decode(
+        // In an ideal world we would just use a subview of wasm memory rather
+        // than a slice, but the TextDecoder API doesn't work on shared buffer
+        // sources yet.
+        // See https://bugs.chromium.org/p/chromium/issues/detail?id=1012656
+        createUint8ArrayFromBuffer(skwasmInstance.wasmMemory.buffer).slice(
+          utf8Data.address.toJS,
+          (utf8Data.address + outSize.value).toJS
+        ));
+    }
 
     _addGraphemeBreakData(text, jsText);
     _addWordBreakData(text, jsText);
