@@ -184,7 +184,7 @@ class SwiftPackageManagerIntegrationMigration {
           'An error occured when adding Swift Package Manager integration:\n'
           '  $e\n'
           'Swift Package Manager is currently an experimental feature, please file a bug at\n'
-          '  https://github.com/flutter/flutter/issues/new?assignees=&labels=&projects=&template=1_activation.yml\n\n'
+          '  https://github.com/flutter/flutter/issues/new?template=1_activation.yml\n\n'
           'To avoid this failure, disable Flutter Swift Package Manager integration for the project\n'
           'by adding the following in the project\'s pubspec.yaml under the "flutter" section:\n'
           '  "disable-swift-package-manager: true"\n'
