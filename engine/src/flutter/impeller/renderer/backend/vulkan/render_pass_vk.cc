@@ -113,7 +113,6 @@ SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
         depth->load_action,                                   //
         depth->store_action                                   //
     );
-    TextureVK::Cast(*depth->texture).SetLayout(barrier);
   } else if (auto stencil = render_target_.GetStencilAttachment();
              stencil.has_value()) {
     builder.SetStencilAttachment(
@@ -122,7 +121,6 @@ SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
         stencil->load_action,                                   //
         stencil->store_action                                   //
     );
-    TextureVK::Cast(*stencil->texture).SetLayout(barrier);
   }
 
   if (recycled_renderpass != nullptr) {
