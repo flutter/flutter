@@ -607,14 +607,11 @@ class RouteSettings {
 
 /// Describes the configuration of a [Route].
 ///
-/// The type argument `T` is the corresponding [Route]'s return type, as
-/// used by [Route.currentResult], [Route.popped], and [Route.didPop].
-///
 /// See also:
 ///
 ///  * [Navigator.pages], which accepts a list of [Page]s and updates its routes
 ///    history.
-abstract class Page<T> extends RouteSettings {
+abstract class Page extends RouteSettings {
   /// Creates a page and initializes [key] for subclasses.
   const Page({
     this.key,
@@ -643,7 +640,7 @@ abstract class Page<T> extends RouteSettings {
   ///
   /// Two pages are consider updatable if they have same the [runtimeType] and
   /// [key].
-  bool canUpdate(Page<dynamic> other) {
+  bool canUpdate(Page other) {
     return other.runtimeType == runtimeType &&
            other.key == key;
   }
@@ -652,7 +649,7 @@ abstract class Page<T> extends RouteSettings {
   ///
   /// The created [Route] must have its [Route.settings] property set to this [Page].
   @factory
-  Route<T> createRoute(BuildContext context);
+  Route<Object?> createRoute(BuildContext context);
 
   @override
   String toString() => '${objectRuntimeType(this, 'Page')}("$name", $key, $arguments)';
@@ -1453,7 +1450,7 @@ class Navigator extends StatefulWidget {
   /// If the [pages] is not empty, the [onPopPage] must not be null.
   const Navigator({
     super.key,
-    this.pages = const <Page<dynamic>>[],
+    this.pages = const <Page>[],
     this.onPopPage,
     this.initialRoute,
     this.onGenerateInitialRoutes = Navigator.defaultGenerateInitialRoutes,
@@ -1496,7 +1493,7 @@ class Navigator extends StatefulWidget {
   /// If [initialRoute] is non-null when the widget is first created, then
   /// [onGenerateInitialRoutes] is used to generate routes that are above those
   /// corresponding to [pages] in the initial history.
-  final List<Page<dynamic>> pages;
+  final List<Page> pages;
 
   /// Called when [pop] is invoked but the current [Route] corresponds to a
   /// [Page] found in the [pages] list.
@@ -2950,7 +2947,7 @@ class _RouteEntry extends RouteTransitionRecord {
     // User-provided restoration ids of Pages are prefixed with 'p+'. Generated
     // ids for pageless routes are prefixed with 'r+' to avoid clashes.
     if (pageBased) {
-      final Page<Object?> page = route.settings as Page<Object?>;
+      final Page page = route.settings as Page;
       return page.restorationId != null ? 'p+${page.restorationId}' : null;
     }
     if (restorationInformation != null) {
@@ -2959,14 +2956,14 @@ class _RouteEntry extends RouteTransitionRecord {
     return null;
   }
 
-  bool canUpdateFrom(Page<dynamic> page) {
+  bool canUpdateFrom(Page page) {
     if (!willBePresent) {
       return false;
     }
     if (!pageBased) {
       return false;
     }
-    final Page<dynamic> routePage = route.settings as Page<dynamic>;
+    final Page routePage = route.settings as Page;
     return page.canUpdate(routePage);
   }
 
@@ -3510,7 +3507,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   late List<NavigatorObserver> _effectiveObservers;
 
-  bool get _usingPagesAPI => widget.pages != const <Page<dynamic>>[];
+  bool get _usingPagesAPI => widget.pages != const <Page>[];
 
   void _handleHistoryChanged() {
     final bool navigatorCanPop = canPop();
@@ -3617,7 +3614,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
     // Populate the new history from restoration data.
     _history.addAll(_serializableHistory.restoreEntriesForPage(null, this));
-    for (final Page<dynamic> page in widget.pages) {
+    for (final Page page in widget.pages) {
       final _RouteEntry entry = _RouteEntry(
         page.createRoute(context),
         pageBased: true,
@@ -3845,7 +3842,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   void _debugCheckDuplicatedPageKeys() {
     assert(() {
       final Set<Key> keyReservation = <Key>{};
-      for (final Page<dynamic> page in widget.pages) {
+      for (final Page page in widget.pages) {
         final LocalKey? key = page.key;
         if (key != null) {
           assert(!keyReservation.contains(key));
@@ -3987,7 +3984,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       if (newPagesBottom > newPagesTop) {
         break;
       }
-      final Page<dynamic> newPage = widget.pages[newPagesBottom];
+      final Page newPage = widget.pages[newPagesBottom];
       if (!oldEntry.canUpdateFrom(newPage)) {
         break;
       }
@@ -4009,7 +4006,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         oldEntriesTop -= 1;
         continue;
       }
-      final Page<dynamic> newPage = widget.pages[newPagesTop];
+      final Page newPage = widget.pages[newPagesTop];
       if (!oldEntry.canUpdateFrom(newPage)) {
         break;
       }
@@ -4048,7 +4045,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         continue;
       }
 
-      final Page<dynamic> page = oldEntry.route.settings as Page<dynamic>;
+      final Page page = oldEntry.route.settings as Page;
       if (page.key == null) {
         continue;
       }
@@ -4063,7 +4060,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
     // Updates the middle of the list.
     while (newPagesBottom <= newPagesTop) {
-      final Page<dynamic> nextPage = widget.pages[newPagesBottom];
+      final Page nextPage = widget.pages[newPagesBottom];
       newPagesBottom += 1;
       if (
         nextPage.key == null ||
@@ -4114,7 +4111,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         continue;
       }
 
-      final Page<dynamic> potentialPageToRemove = potentialEntryToRemove.route.settings as Page<dynamic>;
+      final Page potentialPageToRemove = potentialEntryToRemove.route.settings as Page;
       // Marks for transition delegate to remove if this old page does not have
       // a key, was not taken during updating the middle of new page, or is
       // already transitioning out.
@@ -4162,7 +4159,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         continue;
       }
       previousOldPageRouteEntry = oldEntry;
-      final Page<dynamic> newPage = widget.pages[newPagesBottom];
+      final Page newPage = widget.pages[newPagesBottom];
       assert(oldEntry.canUpdateFrom(newPage));
       oldEntry.route._updateSettings(newPage);
       newHistory.add(oldEntry);

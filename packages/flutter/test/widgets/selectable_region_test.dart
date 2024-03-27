@@ -118,8 +118,8 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Navigator(
-            pages: <Page<void>> [
-              MaterialPage<void>(
+            pages: <Page> [
+              MaterialPage(
                 child: Column(
                   children: <Widget>[
                     const Text('How are you?'),
@@ -132,7 +132,7 @@ void main() {
                   ],
                 ),
               ),
-              const MaterialPage<void>(
+              const MaterialPage(
                 child: Scaffold(body: Text('Foreground Page')),
               ),
             ],

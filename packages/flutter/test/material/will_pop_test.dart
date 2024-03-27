@@ -74,7 +74,7 @@ class _TestPageRoute<T> extends MaterialPageRoute<T> {
   bool get hasCallback => super.hasScopedWillPopCallback;
 }
 
-class _TestPage extends Page<dynamic> {
+class _TestPage extends Page {
   _TestPage({
     required this.builder,
     required LocalKey key,
@@ -401,7 +401,7 @@ void main() {
     late StateSetter contentsSetState;
     bool moveToAnotherNavigator = false;
 
-    final List<Page<dynamic>> pages = <Page<dynamic>>[
+    final List<Page> pages = <Page>[
       _TestPage(
         key: UniqueKey(),
         builder: (BuildContext context) {
@@ -413,7 +413,7 @@ void main() {
       ),
     ];
 
-    Widget buildNavigator(Key? key, List<Page<dynamic>> pages) {
+    Widget buildNavigator(Key? key, List<Page> pages) {
       return Navigator(
         key: key,
         pages: pages,

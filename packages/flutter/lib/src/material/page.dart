@@ -134,15 +134,10 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
 /// fullscreen modal dialog. On iOS, those routes animate from the bottom to the
 /// top rather than horizontally.
 ///
-/// The type `T` specifies the return type of the route which can be supplied as
-/// the route is popped from the stack via [Navigator.transitionDelegate] by
-/// providing the optional `result` argument to the
-/// [RouteTransitionRecord.markForPop] in the [TransitionDelegate.resolve].
-///
 /// See also:
 ///
 ///  * [MaterialPageRoute], which is the [PageRoute] version of this class
-class MaterialPage<T> extends Page<T> {
+class MaterialPage extends Page {
   /// Creates a material page.
   const MaterialPage({
     required this.child,
@@ -168,8 +163,8 @@ class MaterialPage<T> extends Page<T> {
   final bool allowSnapshotting;
 
   @override
-  Route<T> createRoute(BuildContext context) {
-    return _PageBasedMaterialPageRoute<T>(page: this, allowSnapshotting: allowSnapshotting);
+  Route<Object?> createRoute(BuildContext context) {
+    return _PageBasedMaterialPageRoute<Object?>(page: this, allowSnapshotting: allowSnapshotting);
   }
 }
 
@@ -179,13 +174,13 @@ class MaterialPage<T> extends Page<T> {
 // the content is up to date after page updates.
 class _PageBasedMaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T> {
   _PageBasedMaterialPageRoute({
-    required MaterialPage<T> page,
+    required MaterialPage page,
     super.allowSnapshotting,
   }) : super(settings: page) {
     assert(opaque);
   }
 
-  MaterialPage<T> get _page => settings as MaterialPage<T>;
+  MaterialPage get _page => settings as MaterialPage;
 
   @override
   Widget buildContent(BuildContext context) {

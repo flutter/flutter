@@ -1992,8 +1992,8 @@ void main() {
   testWidgets('CupertinoPage works', (WidgetTester tester) async {
     final LocalKey pageKey = UniqueKey();
     final TransitionDetector detector = TransitionDetector();
-    List<Page<void>> myPages = <Page<void>>[
-      CupertinoPage<void>(
+    List<Page> myPages = <Page>[
+      CupertinoPage(
         key: pageKey,
         title: 'title one',
         child: CupertinoPageScaffold(
@@ -2018,8 +2018,8 @@ void main() {
     expect(find.widgetWithText(CupertinoNavigationBar, 'title one'), findsOneWidget);
     expect(find.text('first'), findsOneWidget);
 
-    myPages = <Page<void>>[
-      CupertinoPage<void>(
+    myPages = <Page>[
+      CupertinoPage(
         key: pageKey,
         title: 'title two',
         child: CupertinoPageScaffold(
@@ -2054,9 +2054,9 @@ void main() {
     final LocalKey pageKeyOne = UniqueKey();
     final LocalKey pageKeyTwo = UniqueKey();
     final TransitionDetector detector = TransitionDetector();
-    List<Page<void>> myPages = <Page<void>>[
-      CupertinoPage<void>(key: pageKeyOne, maintainState: false, child: const Text('first')),
-      CupertinoPage<void>(key: pageKeyTwo, child: const Text('second')),
+    List<Page> myPages = <Page>[
+      CupertinoPage(key: pageKeyOne, maintainState: false, child: const Text('first')),
+      CupertinoPage(key: pageKeyTwo, child: const Text('second')),
     ];
     await tester.pumpWidget(
       buildNavigator(
@@ -2075,9 +2075,9 @@ void main() {
     expect(find.text('first', skipOffstage: false), findsNothing);
     expect(find.text('second'), findsOneWidget);
 
-    myPages = <Page<void>>[
-      CupertinoPage<void>(key: pageKeyOne, child: const Text('first')),
-      CupertinoPage<void>(key: pageKeyTwo, child: const Text('second')),
+    myPages = <Page>[
+      CupertinoPage(key: pageKeyOne, child: const Text('first')),
+      CupertinoPage(key: pageKeyTwo, child: const Text('second')),
     ];
 
     await tester.pumpWidget(
@@ -2518,7 +2518,7 @@ class TransitionDetector extends DefaultTransitionDelegate<void> {
 }
 
 Widget buildNavigator({
-  required List<Page<dynamic>> pages,
+  required List<Page> pages,
   required FlutterView view,
   PopPageCallback? onPopPage,
   GlobalKey<NavigatorState>? key,
@@ -2570,13 +2570,13 @@ class _TestPageUpdateState extends State<_TestPageUpdate> {
       home: Navigator(
         key: navKey,
         pages: updatePages
-            ? <Page<dynamic>>[
-                const CupertinoPage<dynamic>(name: '/home', child: Text('home')),
-                const CupertinoPage<dynamic>(name: '/home/new', child: Text('New page')),
+            ? <Page>[
+                const CupertinoPage(name: '/home', child: Text('home')),
+                const CupertinoPage(name: '/home/new', child: Text('New page')),
               ]
-            : <Page<dynamic>>[
-                const CupertinoPage<dynamic>(name: '/home', child: Text('home')),
-                CupertinoPage<dynamic>(name: '/home/old', child: buildMainPage()),
+            : <Page>[
+                const CupertinoPage(name: '/home', child: Text('home')),
+                CupertinoPage(name: '/home/old', child: buildMainPage()),
               ],
         onPopPage: (_, __) {
           return false;

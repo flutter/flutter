@@ -1055,21 +1055,21 @@ void main() {
   });
 
   testWidgets('AppBar does not update the leading if a route is popped case 1', (WidgetTester tester) async {
-    final Page<void> page1 = MaterialPage<void>(
+    final Page page1 = MaterialPage(
       key: const ValueKey<String>('1'),
       child: Scaffold(
         key: const ValueKey<String>('1'),
         appBar: AppBar(),
       ),
     );
-    final Page<void> page2 = MaterialPage<void>(
+    final Page page2 = MaterialPage(
         key: const ValueKey<String>('2'),
         child: Scaffold(
           key: const ValueKey<String>('2'),
           appBar: AppBar(),
         ),
     );
-    List<Page<void>> pages = <Page<void>>[ page1 ];
+    List<Page> pages = <Page>[ page1 ];
     await tester.pumpWidget(
       MaterialApp(
         home: Navigator(
@@ -1080,7 +1080,7 @@ void main() {
     );
     expect(find.byType(BackButton), findsNothing);
     // Update pages
-    pages = <Page<void>>[ page2 ];
+    pages = <Page>[ page2 ];
     await tester.pumpWidget(
       MaterialApp(
         home: Navigator(
@@ -1093,21 +1093,21 @@ void main() {
   });
 
   testWidgets('AppBar does not update the leading if a route is popped case 2', (WidgetTester tester) async {
-    final Page<void> page1 = MaterialPage<void>(
+    final Page page1 = MaterialPage(
       key: const ValueKey<String>('1'),
       child: Scaffold(
         key: const ValueKey<String>('1'),
         appBar: AppBar(),
       ),
     );
-    final Page<void> page2 = MaterialPage<void>(
+    final Page page2 = MaterialPage(
       key: const ValueKey<String>('2'),
       child: Scaffold(
         key: const ValueKey<String>('2'),
         appBar: AppBar(),
       ),
     );
-    List<Page<void>> pages = <Page<void>>[ page1, page2 ];
+    List<Page> pages = <Page>[ page1, page2 ];
     await tester.pumpWidget(
       MaterialApp(
         home: Navigator(
@@ -1125,7 +1125,7 @@ void main() {
       findsOneWidget,
     );
     // Update pages
-    pages = <Page<void>>[ page1 ];
+    pages = <Page>[ page1 ];
     await tester.pumpWidget(
       MaterialApp(
         home: Navigator(
@@ -2567,7 +2567,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/80256
   testWidgets('The second page should have a back button even it has a end drawer', (WidgetTester tester) async {
-    final Page<void> page1 = MaterialPage<void>(
+    final Page page1 = MaterialPage(
         key: const ValueKey<String>('1'),
         child: Scaffold(
           key: const ValueKey<String>('1'),
@@ -2575,7 +2575,7 @@ void main() {
           endDrawer: const Drawer(),
         )
     );
-    final Page<void> page2 = MaterialPage<void>(
+    final Page page2 = MaterialPage(
         key: const ValueKey<String>('2'),
         child: Scaffold(
           key: const ValueKey<String>('2'),
@@ -2583,7 +2583,7 @@ void main() {
           endDrawer: const Drawer(),
         )
     );
-    final List<Page<void>> pages = <Page<void>>[ page1, page2 ];
+    final List<Page> pages = <Page>[ page1, page2 ];
     await tester.pumpWidget(
       MaterialApp(
         home: Navigator(

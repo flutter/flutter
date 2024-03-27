@@ -117,7 +117,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Navigator(
-        pages: const <Page<void>>[
+        pages: const <Page>[
           TestPage(name: '/'),
         ],
         onPopPage: (Route<void> route, void result) => false,
@@ -129,7 +129,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Navigator(
-        pages: const <Page<void>>[
+        pages: const <Page>[
           TestPage(name: '/'),
           TestPage(name: '/abc'),
         ],
@@ -383,7 +383,7 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
   Widget build(BuildContext context) => builder(context, routeInformation);
 }
 
-class TestPage extends Page<void> {
+class TestPage extends Page {
   const TestPage({super.key, super.name});
 
   @override

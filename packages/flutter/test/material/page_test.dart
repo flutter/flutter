@@ -1073,8 +1073,8 @@ void main() {
   testWidgets('MaterialPage works', (WidgetTester tester) async {
     final LocalKey pageKey = UniqueKey();
     final TransitionDetector detector = TransitionDetector();
-    List<Page<void>> myPages = <Page<void>>[
-      MaterialPage<void>(key: pageKey, child: const Text('first')),
+    List<Page> myPages = <Page>[
+      MaterialPage(key: pageKey, child: const Text('first')),
     ];
     await tester.pumpWidget(
       buildNavigator(
@@ -1091,8 +1091,8 @@ void main() {
     expect(detector.hasTransition, isFalse);
     expect(find.text('first'), findsOneWidget);
 
-    myPages = <Page<void>>[
-      MaterialPage<void>(key: pageKey, child: const Text('second')),
+    myPages = <Page>[
+      MaterialPage(key: pageKey, child: const Text('second')),
     ];
 
     await tester.pumpWidget(
@@ -1117,9 +1117,9 @@ void main() {
     final LocalKey pageKeyOne = UniqueKey();
     final LocalKey pageKeyTwo = UniqueKey();
     final TransitionDetector detector = TransitionDetector();
-    List<Page<void>> myPages = <Page<void>>[
-      MaterialPage<void>(key: pageKeyOne, maintainState: false, child: const Text('first')),
-      MaterialPage<void>(key: pageKeyTwo, child: const Text('second')),
+    List<Page> myPages = <Page>[
+      MaterialPage(key: pageKeyOne, maintainState: false, child: const Text('first')),
+      MaterialPage(key: pageKeyTwo, child: const Text('second')),
     ];
     await tester.pumpWidget(
       buildNavigator(
@@ -1138,9 +1138,9 @@ void main() {
     expect(find.text('first', skipOffstage: false), findsNothing);
     expect(find.text('second'), findsOneWidget);
 
-    myPages = <Page<void>>[
-      MaterialPage<void>(key: pageKeyOne, child: const Text('first')),
-      MaterialPage<void>(key: pageKeyTwo, child: const Text('second')),
+    myPages = <Page>[
+      MaterialPage(key: pageKeyOne, child: const Text('first')),
+      MaterialPage(key: pageKeyTwo, child: const Text('second')),
     ];
 
     await tester.pumpWidget(
@@ -1182,8 +1182,8 @@ void main() {
         child: TestDependencies(
           child: Navigator(
             onPopPage: (Route<dynamic> route, dynamic result) { return false; },
-            pages: const <Page<Object?>>[
-              MaterialPage<void>(
+            pages: const <Page>[
+              MaterialPage(
                 restorationId: 'p1',
                 child: TestRestorableWidget(restorationId: 'p1'),
               ),
@@ -1291,7 +1291,7 @@ class TransitionDetector extends DefaultTransitionDelegate<void> {
 }
 
 Widget buildNavigator({
-  required List<Page<dynamic>> pages,
+  required List<Page> pages,
   required PopPageCallback onPopPage,
   required ui.FlutterView view,
   GlobalKey<NavigatorState>? key,
@@ -1335,9 +1335,9 @@ class _KeepsStateTestWidgetState extends State<KeepsStateTestWidget> {
     return MaterialApp(
       home: Navigator(
         key: widget.navigatorKey,
-        pages: <Page<void>>[
-          const MaterialPage<void>(child: Text('home')),
-          if (_subpage != null) MaterialPage<void>(child: Text(_subpage!)),
+        pages: <Page>[
+          const MaterialPage(child: Text('home')),
+          if (_subpage != null) MaterialPage(child: Text(_subpage!)),
         ],
         onPopPage: (Route<dynamic> route, dynamic result) {
           if (!route.didPop(result)) {
