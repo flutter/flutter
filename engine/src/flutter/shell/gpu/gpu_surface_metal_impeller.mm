@@ -150,6 +150,12 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
         auto surface = impeller::SurfaceMTL::MakeFromMetalLayerDrawable(renderer->GetContext(),
                                                                         drawable, clip_rect);
 
+        // The surface may be null if we failed to allocate the onscreen render target
+        // due to running out of memory.
+        if (!surface) {
+          return false;
+        }
+
         if (clip_rect && clip_rect->IsEmpty()) {
           return surface->Present();
         }
