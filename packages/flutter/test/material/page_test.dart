@@ -535,7 +535,7 @@ void main() {
     expect(tester.getTopLeft(find.text('Page 2')), const Offset(100.0, 0.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-  testWidgets('back gesture while OS changes for CupertinoPageTransitionsBuilder', (WidgetTester tester) async {
+  testWidgets('back gesture while OS changes', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: TextButton(
@@ -545,18 +545,9 @@ void main() {
       ),
       '/b': (BuildContext context) => const Text('HELLO'),
     };
-    final PageTransitionsTheme allCupertinoTransitions = PageTransitionsTheme(
-      builders: <TargetPlatform, PageTransitionsBuilder>{
-        for (final TargetPlatform platform in TargetPlatform.values)
-          platform: const CupertinoPageTransitionsBuilder(),
-      },
-    );
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          platform: TargetPlatform.iOS,
-          pageTransitionsTheme: allCupertinoTransitions,
-        ),
+        theme: ThemeData(platform: TargetPlatform.iOS),
         routes: routes,
       ),
     );
@@ -579,10 +570,7 @@ void main() {
     expect(Theme.of(tester.element(find.text('HELLO'))).platform, TargetPlatform.iOS);
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          platform: TargetPlatform.android,
-          pageTransitionsTheme: allCupertinoTransitions,
-        ),
+        theme: ThemeData(platform: TargetPlatform.android),
         routes: routes,
       ),
     );
@@ -615,10 +603,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          platform: TargetPlatform.macOS,
-          pageTransitionsTheme: allCupertinoTransitions,
-        ),
+        theme: ThemeData(platform: TargetPlatform.macOS),
         routes: routes,
       ),
     );
