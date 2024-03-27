@@ -875,11 +875,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 
   Future<bool> _handleCommitBackGesture() async {
-    if (_backGestureObserver == null) {
-      return Future<bool>.value(false);
-    }
-
-    if (_backGestureObserver!.handleCommitBackGesture()) {
+    if (_backGestureObserver?.handleCommitBackGesture() ?? false) {
       return true;
     }
     // If the predictive back was not handled, then the route should be popped
