@@ -22,8 +22,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.window.BackEvent;
+import android.window.OnBackAnimationCallback;
+import android.window.OnBackInvokedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.test.core.app.ApplicationProvider;
@@ -120,6 +124,71 @@ public class FlutterActivityTest {
     activity.release();
 
     verify(activity, times(1)).unregisterOnBackInvokedCallback();
+  }
+
+  @Test
+  @Config(sdk = API_LEVELS.API_32)
+  public void onBackInvokedCallbackIsNullForSdk32OrLower() {
+    Intent intent = FlutterActivity.createDefaultIntent(ctx);
+    ActivityController<FlutterActivity> activityController =
+        Robolectric.buildActivity(FlutterActivity.class, intent);
+    FlutterActivity flutterActivity = activityController.get();
+
+    assertNull(
+        "onBackInvokedCallback should be null for SDK 32 or lower",
+        flutterActivity.getOnBackInvokedCallback());
+  }
+
+  @Test
+  @Config(sdk = API_LEVELS.API_33)
+  @TargetApi(API_LEVELS.API_33)
+  public void onBackInvokedCallbackCallsOnBackPressedForSdk33() {
+    Intent intent = FlutterActivityWithMockBackInvokedHandling.createDefaultIntent(ctx);
+    ActivityController<FlutterActivityWithMockBackInvokedHandling> activityController =
+        Robolectric.buildActivity(FlutterActivityWithMockBackInvokedHandling.class, intent);
+    FlutterActivityWithMockBackInvokedHandling activity = activityController.get();
+
+    OnBackInvokedCallback callback = activity.getOnBackInvokedCallback();
+    assertNotNull("onBackInvokedCallback should not be null for SDK 33", callback);
+
+    callback.onBackInvoked();
+    assertEquals("Expected onBackPressed to be called 1 times", 1, activity.onBackPressedCounter);
+  }
+
+  @Test
+  @Config(sdk = API_LEVELS.API_34)
+  @TargetApi(API_LEVELS.API_34)
+  public void itHandlesOnBackAnimationCallbackAsExpectedForSdk34OrHigher() {
+    Intent intent = FlutterActivityWithMockBackInvokedHandling.createDefaultIntent(ctx);
+    ActivityController<FlutterActivityWithMockBackInvokedHandling> activityController =
+        Robolectric.buildActivity(FlutterActivityWithMockBackInvokedHandling.class, intent);
+    FlutterActivityWithMockBackInvokedHandling activity = activityController.get();
+
+    assertTrue(
+        "onBackInvokedCallback should be an instance of OnBackAnimationCallback for SDK 34 or higher",
+        activity.getOnBackInvokedCallback() instanceof OnBackAnimationCallback);
+
+    OnBackAnimationCallback callback =
+        (OnBackAnimationCallback) activity.getOnBackInvokedCallback();
+
+    BackEvent mockBackEvent = mock(BackEvent.class);
+    callback.onBackStarted(mockBackEvent);
+    assertEquals(
+        "Expected startBackGesture to be called 1 times", 1, activity.startBackGestureCounter);
+
+    callback.onBackProgressed(mockBackEvent);
+    assertEquals(
+        "Expected updateBackGestureProgress to be called 1 times",
+        1,
+        activity.updateBackGestureProgressCounter);
+
+    callback.onBackInvoked();
+    assertEquals(
+        "Expected commitBackGesture to be called 1 times", 1, activity.commitBackGestureCounter);
+
+    callback.onBackCancelled();
+    assertEquals(
+        "Expected cancelBackGesture to be called 1 times", 1, activity.cancelBackGestureCounter);
   }
 
   @Test
@@ -568,12 +637,46 @@ public class FlutterActivityTest {
     }
   }
 
-  private class FlutterActivityWithMockBackInvokedHandling extends FlutterActivity {
-    @Override
-    public void registerOnBackInvokedCallback() {}
+  private static class FlutterActivityWithMockBackInvokedHandling extends FlutterActivity {
+
+    int onBackPressedCounter = 0;
+    int startBackGestureCounter = 0;
+    int updateBackGestureProgressCounter = 0;
+    int commitBackGestureCounter = 0;
+    int cancelBackGestureCounter = 0;
 
     @Override
-    public void unregisterOnBackInvokedCallback() {}
+    public void onBackPressed() {
+      onBackPressedCounter++;
+    }
+
+    @TargetApi(API_LEVELS.API_34)
+    @RequiresApi(API_LEVELS.API_34)
+    @Override
+    public void startBackGesture(@NonNull BackEvent backEvent) {
+      startBackGestureCounter++;
+    }
+
+    @TargetApi(API_LEVELS.API_34)
+    @RequiresApi(API_LEVELS.API_34)
+    @Override
+    public void updateBackGestureProgress(@NonNull BackEvent backEvent) {
+      updateBackGestureProgressCounter++;
+    }
+
+    @TargetApi(API_LEVELS.API_34)
+    @RequiresApi(API_LEVELS.API_34)
+    @Override
+    public void commitBackGesture() {
+      commitBackGestureCounter++;
+    }
+
+    @TargetApi(API_LEVELS.API_34)
+    @RequiresApi(API_LEVELS.API_34)
+    @Override
+    public void cancelBackGesture() {
+      cancelBackGestureCounter++;
+    }
   }
 
   private static final class FakeFlutterPlugin
