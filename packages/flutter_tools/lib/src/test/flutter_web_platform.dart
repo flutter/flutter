@@ -433,7 +433,10 @@ class FlutterWebPlatform extends PlatformPlugin {
       );
 
       final Directory assetDirectory = _fileSystem.directory(assetPath);
-      final shelf.Handler handler = createDirectoryHandler(assetDirectory);
+      final shelf.Handler handler = createDirectoryHandler(
+        assetDirectory,
+        crossOriginIsolated: webRenderer == WebRendererMode.skwasm,
+      );
       final shelf.Request modifiedRequest = shelf.Request(
         request.method,
         modifiedUri,
