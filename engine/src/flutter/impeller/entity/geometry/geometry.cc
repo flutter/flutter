@@ -50,7 +50,7 @@ GeometryResult Geometry::ComputePositionGeometry(
               .vertex_count = count,
               .index_type = IndexType::kNone,
           },
-      .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
+      .transform = entity.GetShaderTransform(pass),
   };
 }
 
@@ -85,7 +85,7 @@ GeometryResult Geometry::ComputePositionUVGeometry(
               .vertex_count = count,
               .index_type = IndexType::kNone,
           },
-      .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
+      .transform = entity.GetShaderTransform(pass),
   };
 }
 
@@ -156,7 +156,7 @@ GeometryResult ComputeUVGeometryForRect(Rect source_rect,
               .vertex_count = 4,
               .index_type = IndexType::kNone,
           },
-      .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
+      .transform = entity.GetShaderTransform(pass),
   };
 }
 

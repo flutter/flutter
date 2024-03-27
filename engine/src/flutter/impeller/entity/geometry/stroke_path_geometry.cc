@@ -614,7 +614,7 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
               .vertex_count = position_writer.GetData().size(),
               .index_type = IndexType::kNone,
           },
-      .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
+      .transform = entity.GetShaderTransform(pass),
       .mode = GeometryResult::Mode::kPreventOverdraw,
   };
 }
@@ -660,7 +660,7 @@ GeometryResult StrokePathGeometry::GetPositionUVBuffer(
               .vertex_count = writer.GetData().size(),
               .index_type = IndexType::kNone,
           },
-      .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
+      .transform = entity.GetShaderTransform(pass),
       .mode = GeometryResult::Mode::kPreventOverdraw,
   };
 }

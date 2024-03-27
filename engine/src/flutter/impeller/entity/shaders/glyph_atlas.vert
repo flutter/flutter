@@ -7,7 +7,6 @@
 
 uniform FrameInfo {
   mat4 mvp;
-  float depth;
   mat4 entity_transform;
   vec2 atlas_size;
   vec2 offset;
@@ -81,8 +80,6 @@ void main() {
   }
 
   gl_Position = frame_info.mvp * position;
-  gl_Position /= gl_Position.w;
-  gl_Position.z = frame_info.depth;
   v_uv = uv_origin + unit_position * uv_size;
   v_text_color = frame_info.text_color;
 }

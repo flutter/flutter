@@ -22,7 +22,6 @@
 namespace impeller {
 
 class ContentContext;
-class EntityPassClipRecorder;
 
 /// Specifies how much to trust the bounds rectangle provided for a list
 /// of contents. Used by both |EntityPass| and |Canvas::SaveLayer|.
@@ -213,9 +212,6 @@ class EntityPass {
 
   std::optional<Rect> GetElementsCoverage(
       std::optional<Rect> coverage_limit) const;
-
-  /// Exposed for testing purposes only.
-  const EntityPassClipRecorder& GetEntityPassClipRecorder() const;
 
  private:
   struct EntityResult {

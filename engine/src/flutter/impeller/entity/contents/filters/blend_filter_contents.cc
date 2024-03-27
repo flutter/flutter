@@ -373,7 +373,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
     auto blend_uniform = host_buffer.EmplaceUniform(blend_info);
     FS::BindBlendInfo(pass, blend_uniform);
 
-    frame_info.mvp = pass.GetOrthographicTransform() * entity.GetTransform();
+    frame_info.mvp = entity.GetShaderTransform(pass);
 
     auto uniform_view = host_buffer.EmplaceUniform(frame_info);
     VS::BindFrameInfo(pass, uniform_view);
