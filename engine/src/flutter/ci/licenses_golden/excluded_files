@@ -3402,12 +3402,15 @@
 ../../../third_party/dart/sdk/lib/vmservice_libraries.json
 ../../../third_party/dart/sdk/lib/vmservice_libraries.yaml
 ../../../third_party/dart/sdk/version
+../../../third_party/dart/sdk_packages.yaml
 ../../../third_party/dart/tests
 ../../../third_party/dart/third_party/.gitignore
 ../../../third_party/dart/third_party/OWNERS
 ../../../third_party/dart/third_party/binary_size
 ../../../third_party/dart/third_party/binaryen
 ../../../third_party/dart/third_party/clang.tar.gz.sha1
+../../../third_party/dart/third_party/cpu_features/OWNERS
+../../../third_party/dart/third_party/cpu_features/README.chromium
 ../../../third_party/dart/third_party/d3
 ../../../third_party/dart/third_party/d8
 ../../../third_party/dart/third_party/devtools
