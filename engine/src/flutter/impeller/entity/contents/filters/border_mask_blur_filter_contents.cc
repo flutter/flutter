@@ -105,8 +105,7 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
     options.primitive_type = PrimitiveType::kTriangleStrip;
 
     VS::FrameInfo frame_info;
-    frame_info.depth = entity.GetShaderClipDepth();
-    frame_info.mvp = pass.GetOrthographicTransform() * entity.GetTransform();
+    frame_info.mvp = entity.GetShaderTransform(pass);
     frame_info.texture_sampler_y_coord_scale =
         input_snapshot->texture->GetYCoordScale();
 

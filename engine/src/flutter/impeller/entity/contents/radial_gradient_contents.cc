@@ -120,9 +120,6 @@ bool RadialGradientContents::RenderTexture(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   frame_info.matrix = GetInverseEffectTransform();
 
-  VS::BindFrameInfo(pass,
-                    renderer.GetTransientsBuffer().EmplaceUniform(frame_info));
-
   PipelineBuilderCallback pipeline_callback =
       [&renderer](ContentContextOptions options) {
         return renderer.GetRadialGradientFillPipeline(options);

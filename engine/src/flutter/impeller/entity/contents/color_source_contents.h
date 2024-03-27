@@ -187,7 +187,6 @@ class ColorSourceContents : public Contents {
 
     // Take the pre-populated vertex shader uniform struct and set managed
     // values.
-    frame_info.depth = entity.GetShaderClipDepth();
     frame_info.mvp = geometry_result.transform;
 
     // If overdraw prevention is enabled (like when drawing stroke paths), we

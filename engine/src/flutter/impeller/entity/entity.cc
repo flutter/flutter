@@ -50,6 +50,18 @@ const Matrix& Entity::GetTransform() const {
   return transform_;
 }
 
+Matrix Entity::GetShaderTransform(const RenderPass& pass) const {
+  return Entity::GetShaderTransform(GetShaderClipDepth(), pass, transform_);
+}
+
+Matrix Entity::GetShaderTransform(Scalar shader_clip_depth,
+                                  const RenderPass& pass,
+                                  const Matrix& transform) {
+  return Matrix::MakeTranslation({0, 0, shader_clip_depth}) *
+         Matrix::MakeScale({1, 1, Entity::kDepthEpsilon}) *
+         pass.GetOrthographicTransform() * transform;
+}
+
 void Entity::SetTransform(const Matrix& transform) {
   transform_ = transform;
 }
@@ -102,10 +114,13 @@ uint32_t Entity::GetNewClipDepth() const {
   return new_clip_depth_;
 }
 
-static const Scalar kDepthEpsilon = 1.0f / std::pow(2, 18);
+Scalar Entity::GetShaderClipDepth() const {
+  return Entity::GetShaderClipDepth(new_clip_depth_);
+}
 
-float Entity::GetShaderClipDepth() const {
-  return std::clamp(new_clip_depth_ * kDepthEpsilon, 0.0f, 1.0f);
+Scalar Entity::GetShaderClipDepth(uint32_t clip_depth) {
+  Scalar result = std::clamp(clip_depth * kDepthEpsilon, 0.0f, 1.0f);
+  return std::min(result, 1.0f - kDepthEpsilon);
 }
 
 void Entity::IncrementStencilDepth(uint32_t increment) {

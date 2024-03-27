@@ -6,7 +6,6 @@
 
 uniform FrameInfo {
   mat4 mvp;
-  float depth;
   f16vec4 color;
 }
 frame_info;
@@ -18,6 +17,4 @@ IMPELLER_MAYBE_FLAT out f16vec4 v_color;
 void main() {
   v_color = frame_info.color;
   gl_Position = frame_info.mvp * vec4(position, 0.0, 1.0);
-  gl_Position /= gl_Position.w;
-  gl_Position.z = frame_info.depth;
 }

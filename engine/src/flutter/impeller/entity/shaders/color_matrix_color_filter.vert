@@ -7,7 +7,6 @@
 
 uniform FrameInfo {
   mat4 mvp;
-  float depth;
   float texture_sampler_y_coord_scale;
 }
 frame_info;
@@ -18,8 +17,6 @@ out vec2 v_texture_coords;
 
 void main() {
   gl_Position = frame_info.mvp * vec4(position, 0.0, 1.0);
-  gl_Position /= gl_Position.w;
-  gl_Position.z = frame_info.depth;
   v_texture_coords =
       IPRemapCoords(position, frame_info.texture_sampler_y_coord_scale);
 }

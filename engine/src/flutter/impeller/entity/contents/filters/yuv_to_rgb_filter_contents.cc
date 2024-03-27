@@ -94,10 +94,10 @@ std::optional<Entity> YUVToRGBFilterContents::RenderFilter(
     pass.SetVertexBuffer(vtx_builder.CreateVertexBuffer(host_buffer));
 
     VS::FrameInfo frame_info;
-    frame_info.depth = entity.GetShaderClipDepth();
-    frame_info.mvp = pass.GetOrthographicTransform() * entity.GetTransform() *
-                     y_input_snapshot->transform *
-                     Matrix::MakeScale(Vector2(size));
+    frame_info.mvp = Entity::GetShaderTransform(
+        entity.GetShaderClipDepth(), pass,
+        entity.GetTransform() * y_input_snapshot->transform *
+            Matrix::MakeScale(Vector2(size)));
     frame_info.texture_sampler_y_coord_scale =
         y_input_snapshot->texture->GetYCoordScale();
 
