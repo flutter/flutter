@@ -100,18 +100,17 @@ Float32List _computeIdentityTransform() {
   return result;
 }
 
-SkColorFilter createSkColorFilterFromColorAndBlendMode(ui.Color color, ui.BlendMode blendMode) {
-  /// Return the identity matrix when the color opacity is 0. Replicates
-  /// effect of applying no filter
-  if (color.opacity == 0) {
-    return canvasKit.ColorFilter.MakeMatrix(_identityTransform);
-  }
+SkColorFilter createSkColorFilterFromColorAndBlendMode(
+    ui.Color color, ui.BlendMode blendMode) {
   final SkColorFilter? filter = canvasKit.ColorFilter.MakeBlend(
     toSharedSkColor1(color),
     toSkBlendMode(blendMode),
   );
   if (filter == null) {
-    throw ArgumentError('Invalid parameters for blend mode ColorFilter');
+    // If CanvasKit returns null, then the ColorFilter with this combination of
+    // color and blend mode is a no-op. So just return a dummy color filter that
+    // does nothing.
+    return canvasKit.ColorFilter.MakeMatrix(_identityTransform);
   }
   return filter;
 }

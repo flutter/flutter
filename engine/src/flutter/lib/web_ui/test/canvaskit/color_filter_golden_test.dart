@@ -156,7 +156,44 @@ void testMain() {
 
       builder.addPicture(ui.Offset.zero, redCircle2);
 
-      await matchSceneGolden('canvaskit_transparent_colorfilter.png', builder.build(), region: region);
+      await matchSceneGolden(
+          'canvaskit_transparent_colorfilter.png', builder.build(),
+          region: region);
+    });
+
+    test('ColorFilter with dst blend mode', () async {
+      final LayerSceneBuilder builder = LayerSceneBuilder();
+      builder.pushOffset(0, 0);
+      final CkPictureRecorder recorder = CkPictureRecorder();
+      final CkCanvas canvas = recorder.beginRecording(region);
+
+      canvas.drawCircle(
+        const ui.Offset(75, 125),
+        50,
+        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+      );
+      final CkPicture redCircle1 = recorder.endRecording();
+      builder.addPicture(ui.Offset.zero, redCircle1);
+
+      // Push dst color filter
+      builder.pushColorFilter(
+          const ui.ColorFilter.mode(ui.Color(0xffff0000), ui.BlendMode.dst));
+
+      // Draw another red circle and apply it to the scene.
+      // This one should also be red with the color filter doing nothing
+      final CkPictureRecorder recorder2 = CkPictureRecorder();
+      final CkCanvas canvas2 = recorder2.beginRecording(region);
+      canvas2.drawCircle(
+        const ui.Offset(425, 125),
+        50,
+        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+      );
+      final CkPicture redCircle2 = recorder2.endRecording();
+
+      builder.addPicture(ui.Offset.zero, redCircle2);
+
+      await matchSceneGolden('canvaskit_dst_colorfilter.png', builder.build(),
+          region: region);
     });
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
   }, skip: isSafari || isFirefox);
