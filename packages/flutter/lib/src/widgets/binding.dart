@@ -882,8 +882,11 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     if (_backGestureObserver!.handleCommitBackGesture()) {
       return true;
     }
-    // If no observer handled the back gesture, handle it as if it were a normal
-    // system pop event.
+    // If the predictive back was not handled, then the route should be popped
+    // like a normal, non-predictive back. For example, this will happen if a
+    // back gesture occurs but no predictive back route transition exists to
+    // handle it. The back gesture should still cause normal pop even if it
+    // doesn't cause a predictive transition.
     await handlePopRoute();
     return true;
   }
