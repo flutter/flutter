@@ -40,6 +40,8 @@ dev_dependencies:
 dependency_overrides:
   _fe_analyzer_shared:
     path: ../../../third_party/dart/pkg/_fe_analyzer_shared
+  _macros:
+    path: ../../../third_party/dart/pkg/_macros
   analyzer:
     path: ../../../third_party/dart/pkg/analyzer
   async:
@@ -64,6 +66,8 @@ dependency_overrides:
     path: ../../testing/litetest
   meta:
     path: ../../../third_party/dart/pkg/meta
+  macros:
+    path: ../../../third_party/dart/pkg/macros
   package_config:
     path: ../../../third_party/dart/third_party/pkg/package_config
   path:
