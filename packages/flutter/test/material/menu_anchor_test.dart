@@ -3336,7 +3336,7 @@ void main() {
           home: Center(
             child: MenuItemButton(
               semanticsLabel: 'TestWidget',
-              shortcut: SingleActivator(LogicalKeyboardKey.comma),
+              shortcut: const SingleActivator(LogicalKeyboardKey.comma),
               style: MenuItemButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
               onPressed: () {},
               child: const Text('ABC'),
