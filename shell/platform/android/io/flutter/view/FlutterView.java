@@ -38,6 +38,7 @@ import android.view.autofill.AutofillValue;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.window.BackEvent;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.UiThread;
@@ -49,6 +50,7 @@ import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.SurfaceTextureWrapper;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
+import io.flutter.embedding.engine.systemchannels.BackGestureChannel;
 import io.flutter.embedding.engine.systemchannels.LifecycleChannel;
 import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
@@ -124,6 +126,7 @@ public class FlutterView extends SurfaceView
   private final DartExecutor dartExecutor;
   private final FlutterRenderer flutterRenderer;
   private final NavigationChannel navigationChannel;
+  private final BackGestureChannel backGestureChannel;
   private final LifecycleChannel lifecycleChannel;
   private final LocalizationChannel localizationChannel;
   private final PlatformChannel platformChannel;
@@ -214,6 +217,7 @@ public class FlutterView extends SurfaceView
 
     // Create all platform channels
     navigationChannel = new NavigationChannel(dartExecutor);
+    backGestureChannel = new BackGestureChannel(dartExecutor);
     lifecycleChannel = new LifecycleChannel(dartExecutor);
     localizationChannel = new LocalizationChannel(dartExecutor);
     platformChannel = new PlatformChannel(dartExecutor);
@@ -367,6 +371,30 @@ public class FlutterView extends SurfaceView
 
   public void popRoute() {
     navigationChannel.popRoute();
+  }
+
+  @TargetApi(API_LEVELS.API_34)
+  @RequiresApi(API_LEVELS.API_34)
+  public void startBackGesture(@NonNull BackEvent backEvent) {
+    backGestureChannel.startBackGesture(backEvent);
+  }
+
+  @TargetApi(API_LEVELS.API_34)
+  @RequiresApi(API_LEVELS.API_34)
+  public void updateBackGestureProgress(@NonNull BackEvent backEvent) {
+    backGestureChannel.updateBackGestureProgress(backEvent);
+  }
+
+  @TargetApi(API_LEVELS.API_34)
+  @RequiresApi(API_LEVELS.API_34)
+  public void commitBackGesture() {
+    backGestureChannel.commitBackGesture();
+  }
+
+  @TargetApi(API_LEVELS.API_34)
+  @RequiresApi(API_LEVELS.API_34)
+  public void cancelBackGesture() {
+    backGestureChannel.cancelBackGesture();
   }
 
   private void sendUserPlatformSettingsToDart() {
