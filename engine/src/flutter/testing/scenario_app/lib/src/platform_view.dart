@@ -367,10 +367,10 @@ class PlatformViewMaxOverlaysScenario extends Scenario
 }
 
 /// A platform view with adjacent surrounding layers should not create overlays.
-class PlatformViewSurroundingLayersScenario extends Scenario
+class PlatformViewSurroundingLayersFractionalCoordinateScenario extends Scenario
     with _BasePlatformViewScenarioMixin {
   /// Creates the PlatformView scenario.
-  PlatformViewSurroundingLayersScenario(
+  PlatformViewSurroundingLayersFractionalCoordinateScenario(
     super.view, {
     required this.id,
   });
@@ -423,6 +423,55 @@ class PlatformViewSurroundingLayersScenario extends Scenario
     // Rect at the bottom of platform view
     canvas.drawRect(
       rect.shift(const Offset(0, 100)),
+      Paint()..color = const Color(0x22FF0000),
+    );
+
+    final Picture picture = recorder.endRecording();
+    builder.addPicture(Offset.zero, picture);
+
+    // Pop the (0.5, 0.5) offset.
+    builder.pop();
+
+    final Scene scene = builder.build();
+    view.render(scene);
+    scene.dispose();
+  }
+}
+
+/// A platform view partially intersect with a layer, both with fractional coordinates.
+class PlatformViewPartialIntersectionFractionalCoordinateScenario extends Scenario
+    with _BasePlatformViewScenarioMixin {
+  /// Creates the PlatformView scenario.
+  PlatformViewPartialIntersectionFractionalCoordinateScenario(
+    super.view, {
+    required this.id,
+  });
+
+  /// The platform view identifier.
+  final int id;
+
+  @override
+  void onBeginFrame(Duration duration) {
+    final SceneBuilder builder = SceneBuilder();
+
+    // Simulate partial pixel offsets as we would see while scrolling.
+    // All objects in the scene below are then on sub-pixel boundaries.
+    builder.pushOffset(0.5, 0.5);
+
+    // a platform view from (0, 0) to (100, 100)
+    addPlatformView(
+      id,
+      width: 100,
+      height: 100,
+      dispatcher: view.platformDispatcher,
+      sceneBuilder: builder,
+    );
+
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+
+    canvas.drawRect(
+      const Rect.fromLTWH(50, 50, 100, 100),
       Paint()..color = const Color(0x22FF0000),
     );
 
