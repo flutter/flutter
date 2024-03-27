@@ -275,7 +275,7 @@ class RenderConstrainedBox extends RenderProxyBox {
 
   @override
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
-    return child?.computeDryBaseline(_additionalConstraints.enforce(constraints), baseline);
+    return child?.getDryBaseline(_additionalConstraints.enforce(constraints), baseline);
   }
 
   @override

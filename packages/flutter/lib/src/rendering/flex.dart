@@ -212,8 +212,7 @@ enum MainAxisAlignment {
   /// after the first and last child.
   spaceEvenly;
 
-  // Returns (leadingSpace, betweenSpace).
-  (double, double) _distributeSpace(double freeSpace, int itemCount, bool flipped) {
+  (double leadingSpace, double betweenSpace) _distributeSpace(double freeSpace, int itemCount, bool flipped) {
     assert(itemCount >= 0);
     return switch (this) {
       MainAxisAlignment.start => flipped ? (freeSpace, 0.0) : (0.0, 0.0),
