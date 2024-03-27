@@ -1396,7 +1396,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(offset, ancestor: overlay),
-        button.localToGlobal(button.size.bottomRight(Offset.zero) + offset, ancestor: overlay),
+        button.localToGlobal(offset + Offset(0, button.size.height), ancestor: overlay),
       ),
       Offset.zero & overlay.size,
     );
