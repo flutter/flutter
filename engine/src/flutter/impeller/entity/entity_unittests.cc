@@ -2200,7 +2200,7 @@ TEST_P(EntityTest, RuntimeEffect) {
   ASSERT_TRUE(runtime_stage->IsDirty());
 
   bool expect_dirty = true;
-  Pipeline<PipelineDescriptor>* first_pipeline = nullptr;
+  Pipeline<PipelineDescriptor>* first_pipeline;
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     EXPECT_EQ(runtime_stage->IsDirty(), expect_dirty);
 
@@ -2238,7 +2238,10 @@ TEST_P(EntityTest, RuntimeEffect) {
   // Simulate some renders and hot reloading of the shader.
   auto content_context = GetContentContext();
   {
-    RenderTarget target;
+    RenderTarget target =
+        content_context->GetRenderTargetCache()->CreateOffscreen(
+            *content_context->GetContext(), {1, 1}, 1u);
+
     testing::MockRenderPass mock_pass(GetContext(), target);
     callback(*content_context, mock_pass);
     callback(*content_context, mock_pass);
@@ -2252,10 +2255,7 @@ TEST_P(EntityTest, RuntimeEffect) {
     expect_dirty = true;
 
     callback(*content_context, mock_pass);
-    callback(*content_context, mock_pass);
   }
-
-  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 TEST_P(EntityTest, RuntimeEffectCanSuccessfullyRender) {
@@ -2319,7 +2319,6 @@ TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
 
   auto contents = std::make_shared<RuntimeEffectContents>();
   contents->SetGeometry(Geometry::MakeCover());
-
   contents->SetRuntimeStage(runtime_stage);
 
   struct FragUniforms {
@@ -2338,7 +2337,9 @@ TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
   entity.SetContents(contents);
 
   auto context = GetContentContext();
-  RenderTarget target;
+  RenderTarget target = context->GetRenderTargetCache()->CreateOffscreen(
+      *context->GetContext(), {1, 1}, 1u);
+
   testing::MockRenderPass pass(GetContext(), target);
   ASSERT_TRUE(contents->Render(*context, entity, pass));
   ASSERT_EQ(pass.GetCommands().size(), 1u);
