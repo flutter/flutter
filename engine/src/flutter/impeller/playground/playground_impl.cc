@@ -20,29 +20,6 @@
 #include "impeller/playground/backend/vulkan/playground_impl_vk.h"
 #endif  // IMPELLER_ENABLE_VULKAN
 
-namespace {
-
-std::string GetTestName() {
-  std::string suite_name =
-      ::testing::UnitTest::GetInstance()->current_test_suite()->name();
-  std::string test_name =
-      ::testing::UnitTest::GetInstance()->current_test_info()->name();
-  std::stringstream ss;
-  ss << "impeller_" << suite_name << "_" << test_name;
-  std::string result = ss.str();
-  // Make sure there are no slashes in the test name.
-  std::replace(result.begin(), result.end(), '/', '_');
-  return result;
-}
-
-bool ShouldTestHaveVulkanValidations() {
-  std::string test_name = GetTestName();
-  return std::find(impeller::kVulkanDenyValidationTests.begin(),
-                   impeller::kVulkanDenyValidationTests.end(),
-                   test_name) == impeller::kVulkanDenyValidationTests.end();
-}
-}  // namespace
-
 namespace impeller {
 
 std::unique_ptr<PlaygroundImpl> PlaygroundImpl::Create(
@@ -64,7 +41,7 @@ std::unique_ptr<PlaygroundImpl> PlaygroundImpl::Create(
                             "isn't available or was disabled on this platform: "
                          << PlaygroundBackendToString(backend);
       }
-      switches.enable_vulkan_validation = ShouldTestHaveVulkanValidations();
+      switches.enable_vulkan_validation = true;
       return std::make_unique<PlaygroundImplVK>(switches);
 #endif  // IMPELLER_ENABLE_VULKAN
     default:
