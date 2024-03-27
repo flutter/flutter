@@ -62,8 +62,8 @@ RenderPassBuilderVK& RenderPassBuilderVK::SetDepthStencilAttachment(
   desc.storeOp = ToVKAttachmentStoreOp(store_action);
   desc.stencilLoadOp = desc.loadOp;    // Not separable in Impeller.
   desc.stencilStoreOp = desc.storeOp;  // Not separable in Impeller.
-  desc.initialLayout = vk::ImageLayout::eGeneral;
-  desc.finalLayout = vk::ImageLayout::eGeneral;
+  desc.initialLayout = vk::ImageLayout::eUndefined;
+  desc.finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
   depth_stencil_ = desc;
   return *this;
 }
@@ -80,8 +80,8 @@ RenderPassBuilderVK& RenderPassBuilderVK::SetStencilAttachment(
   desc.storeOp = vk::AttachmentStoreOp::eDontCare;
   desc.stencilLoadOp = ToVKAttachmentLoadOp(load_action);
   desc.stencilStoreOp = ToVKAttachmentStoreOp(store_action);
-  desc.initialLayout = vk::ImageLayout::eGeneral;
-  desc.finalLayout = vk::ImageLayout::eGeneral;
+  desc.initialLayout = vk::ImageLayout::eUndefined;
+  desc.finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
   depth_stencil_ = desc;
   return *this;
 }
@@ -182,6 +182,21 @@ void InsertBarrierForInputAttachmentRead(const vk::CommandBuffer& buffer,
                          {},                           //
                          barrier                       //
   );
+}
+
+const std::map<size_t, vk::AttachmentDescription>&
+RenderPassBuilderVK::GetColorAttachments() const {
+  return colors_;
+}
+
+const std::map<size_t, vk::AttachmentDescription>&
+RenderPassBuilderVK::GetResolves() const {
+  return resolves_;
+}
+
+const std::optional<vk::AttachmentDescription>&
+RenderPassBuilderVK::GetDepthStencil() const {
+  return depth_stencil_;
 }
 
 }  // namespace impeller
