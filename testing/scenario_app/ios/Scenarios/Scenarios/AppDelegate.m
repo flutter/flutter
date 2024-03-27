@@ -52,7 +52,10 @@
         @"platform_view_one_overlay_two_intersecting_overlays",
     @"--platform-view-multiple-without-overlays" : @"platform_view_multiple_without_overlays",
     @"--platform-view-max-overlays" : @"platform_view_max_overlays",
-    @"--platform-view-surrounding-layers" : @"platform_view_surrounding_layers",
+    @"--platform-view-surrounding-layers-fractional-coordinate" :
+        @"platform_view_surrounding_layers_fractional_coordinate",
+    @"--platform-view-partial-intersection-fractional-coordinate" :
+        @"platform_view_partial_intersection_fractional_coordinate",
     @"--platform-view-multiple" : @"platform_view_multiple",
     @"--platform-view-multiple-background-foreground" :
         @"platform_view_multiple_background_foreground",
