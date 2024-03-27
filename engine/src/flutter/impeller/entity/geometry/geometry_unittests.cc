@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <memory>
 #include "flutter/testing/testing.h"
+#include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/geometry/path_builder.h"
+#include "impeller/renderer/testing/mocks.h"
 
 inline ::testing::AssertionResult SolidVerticesNear(
     std::vector<impeller::SolidFillVertexShader::PerVertexData> a,
