@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../assertion_helper.dart';
+
 void main() {
   testWidgets('MaterialBanner properties are respected', (WidgetTester tester) async {
     const String contentText = 'Content';
@@ -1116,15 +1118,9 @@ void main() {
           actions: <Widget>[],
         ));
       },
-      throwsA(
-        isA<AssertionError>().having(
-          (AssertionError error) => error.toString(),
-          'description',
-          contains(
-            'ScaffoldMessenger.showMaterialBanner was called, but there are currently '
-            'no descendant Scaffolds to present to.'
-          )
-        ),
+      throwsAssertionWith(
+        'ScaffoldMessenger.showMaterialBanner was called, but there are '
+        'currently no descendant Scaffolds to present to.'
       ),
     );
   });

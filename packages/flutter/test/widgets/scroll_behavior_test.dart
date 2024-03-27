@@ -7,6 +7,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../assertion_helper.dart';
+
 late GestureVelocityTrackerBuilder lastCreatedBuilder;
 class TestScrollBehavior extends ScrollBehavior {
   const TestScrollBehavior(this.flag);
@@ -66,10 +68,7 @@ void main() {
           () {
             defaultBehavior.buildScrollbar(capturedContext, child, details);
           },
-          throwsA(
-            isA<AssertionError>().having((AssertionError error) => error.toString(),
-              'description', contains('details.controller != null')),
-          ),
+          throwsAssertionWith('details.controller != null')
         );
     }
   }, variant: TargetPlatformVariant.all());

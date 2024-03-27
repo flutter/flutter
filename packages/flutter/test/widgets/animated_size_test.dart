@@ -6,6 +6,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../assertion_helper.dart';
+
 class TestPaintingContext implements PaintingContext {
   final List<Invocation> invocations = <Invocation>[];
 
@@ -513,16 +515,12 @@ void main() {
       expect(box.debugController, isNotNull);
       expect(
         () => box.debugController!.dispose(),
-        throwsA(isA<AssertionError>().having(
-          (AssertionError error) => error.message,
-          'message',
-          equalsIgnoringHashCodes(
-            'AnimationController.dispose() called more than once.\n'
-            'A given AnimationController cannot be disposed more than once.\n'
-            'The following AnimationController object was disposed multiple times:\n'
-            '  AnimationController#00000(⏮ 0.000; paused; DISPOSED)',
-          ),
-        )),
+        throwsAssertionWith(
+          'AnimationController.dispose() called more than once.\n'
+          'A given AnimationController cannot be disposed more than once.\n'
+          'The following AnimationController object was disposed multiple times:\n'
+          '  AnimationController#00000(⏮ 0.000; paused; DISPOSED)',
+        ),
       );
     });
   });

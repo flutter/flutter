@@ -9,6 +9,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../assertion_helper.dart';
+
 void main() {
   testWidgets('Heroes work', (WidgetTester tester) async {
     await tester.pumpWidget(CupertinoApp(
@@ -538,10 +540,7 @@ void main() {
           () {
             defaultBehavior.buildScrollbar(capturedContext, child, details);
           },
-          throwsA(
-            isA<AssertionError>().having((AssertionError error) => error.toString(),
-                'description', contains('details.controller != null')),
-          ),
+          throwsAssertionWith('details.controller != null')
         );
     }
   }, variant: TargetPlatformVariant.all());

@@ -20,6 +20,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import '../assertion_helper.dart';
 import '../impeller_test_helpers.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
@@ -1407,11 +1408,7 @@ void main() {
           ),
         );
       },
-      throwsA(isA<AssertionError>().having(
-        (AssertionError error) => error.toString(),
-        '.toString()',
-        contains("minLines can't be greater than maxLines"),
-      )),
+      throwsAssertionWith("minLines can't be greater than maxLines"),
     );
   });
 

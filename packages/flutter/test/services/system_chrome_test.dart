@@ -6,6 +6,8 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../assertion_helper.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -143,10 +145,7 @@ void main() {
       () async {
         await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual);
       },
-      throwsA(
-        isA<AssertionError>().having((AssertionError error) => error.toString(),
-            'description', contains('mode == SystemUiMode.manual && overlays != null')),
-      ),
+      throwsAssertionWith('mode == SystemUiMode.manual && overlays != null'),
     );
   });
 

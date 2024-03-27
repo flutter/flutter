@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../assertion_helper.dart';
+
 class TestIcon extends StatefulWidget {
   const TestIcon({super.key});
 
@@ -389,10 +391,10 @@ void main() {
           ),
         );
       },
-      throwsA(isA<AssertionError>().having((AssertionError error) => error.toString(), '.toString()', contains(
+      throwsAssertionWith(
         'CrossAxisAlignment.baseline is not supported since the expanded'
         ' children are aligned in a column, not a row. Try to use another constant.',
-      ))),
+      ),
     );
   });
 

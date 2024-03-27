@@ -5,6 +5,8 @@
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../assertion_helper.dart';
+
 void main() {
   group('Linear TextScaler', () {
     test('equality', () {
@@ -30,7 +32,7 @@ void main() {
       // Asserts when min > max.
       expect(
         () => TextScaler.noScaling.clamp(minScaleFactor: 5.0, maxScaleFactor: 4.0),
-        throwsA(isA<AssertionError>().having((AssertionError error) => error.toString(), 'message', contains('maxScaleFactor >= minScaleFactor'))),
+        throwsAssertionWith('maxScaleFactor >= minScaleFactor'),
       );
     });
   });
