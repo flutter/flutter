@@ -1174,6 +1174,87 @@ void main() {
     expect((findRenderEditable(tester).text! as TextSpan).text, '•••');
   });
 
+  testWidgets('Test TextSpan build with various maxLength scenarios showing last entered character', (WidgetTester tester) async {
+  TextEditingController controller;
+  final FocusNode focusNode = FocusNode();
+  const TextStyle textStyle = TextStyle();
+  const Color cursorColor = Colors.black;
+
+  // First scenario: No maxLength defined.
+  const String initialText = 'hello';
+  controller = TextEditingController(text: initialText);
+  await tester.pumpWidget(MaterialApp(
+    home: EditableText(
+      backgroundCursorColor: Colors.grey,
+      controller: controller,
+      obscureText: true,
+      focusNode: focusNode,
+      style: textStyle,
+      cursorColor: cursorColor,
+    ),
+  ));
+
+  // Insertar 'H' en la segunda posición
+  controller.selection = const TextSelection.collapsed(offset: 1);
+  await tester.pump();
+  await tester.enterText(find.byType(EditableText), 'hHello');
+  await tester.pump();
+
+  // Check that 'H' is briefly displayed in its correct position.
+  expect((findRenderEditable(tester).text! as TextSpan).text, '•H••••');
+
+  // Second scenario: maxLength is defined but the text does not reach maxLength.
+  controller = TextEditingController(text: initialText);
+  await tester.pumpWidget(MaterialApp(
+    home: EditableText(
+      backgroundCursorColor: Colors.grey,
+      controller: controller,
+      obscureText: true,
+      focusNode: focusNode,
+      style: textStyle,
+      cursorColor: cursorColor,
+      maxLength: 10,
+    ),
+  ));
+
+  // Insert 'H' at the third position.
+  controller.selection = const TextSelection.collapsed(offset: 2);
+  await tester.pump();
+  await tester.enterText(find.byType(EditableText), 'heHllo');
+  await tester.pump();
+
+  // Check that 'H' is briefly displayed in its correct position.
+  expect((findRenderEditable(tester).text! as TextSpan).text, '••H•••');
+
+  // Third scenario: maxLength is defined and the text reaches maxLength.
+  const String longText = 'abcdefghij'; // 10 characters
+  controller = TextEditingController(text: longText);
+  await tester.pumpWidget(MaterialApp(
+    home: EditableText(
+      backgroundCursorColor: Colors.grey,
+      controller: controller,
+      obscureText: true,
+      focusNode: focusNode,
+      style: textStyle,
+      cursorColor: cursorColor,
+      maxLength: 10,
+    ),
+  ));
+
+  // Try to insert 'K' at the sixth position, which should not be displayed because we reached maxLength.
+  controller.selection = const TextSelection.collapsed(offset: 5);
+  await tester.pump();
+  await tester.enterText(find.byType(EditableText), 'abcdeKfghij');
+  await tester.pump();
+
+  // Check that 'K' is not displayed, since the text reached the maxLength.
+  expect((findRenderEditable(tester).text! as TextSpan).text, '•••••••••••');
+});
+
+
+
+
+
   testWidgets('getLocalRectForCaret with empty text', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     addTearDown(() { EditableText.debugDeterministicCursor = false; });
