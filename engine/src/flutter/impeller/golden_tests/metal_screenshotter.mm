@@ -13,10 +13,11 @@
 namespace impeller {
 namespace testing {
 
-MetalScreenshotter::MetalScreenshotter() {
+MetalScreenshotter::MetalScreenshotter(bool enable_wide_gamut) {
   FML_CHECK(::glfwInit() == GLFW_TRUE);
-  playground_ =
-      PlaygroundImpl::Create(PlaygroundBackend::kMetal, PlaygroundSwitches{});
+  PlaygroundSwitches switches;
+  switches.enable_wide_gamut = enable_wide_gamut;
+  playground_ = PlaygroundImpl::Create(PlaygroundBackend::kMetal, switches);
 }
 
 std::unique_ptr<Screenshot> MetalScreenshotter::MakeScreenshot(
@@ -32,10 +33,6 @@ std::unique_ptr<Screenshot> MetalScreenshotter::MakeScreenshot(
   std::shared_ptr<Texture> texture = image->GetTexture();
   id<MTLTexture> metal_texture =
       std::static_pointer_cast<TextureMTL>(texture)->GetMTLTexture();
-
-  if (metal_texture.pixelFormat != MTLPixelFormatBGRA8Unorm) {
-    return {};
-  }
 
   CGColorSpaceRef color_space = CGColorSpaceCreateDeviceRGB();
   CIImage* ciImage = [[CIImage alloc]
