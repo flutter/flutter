@@ -695,6 +695,8 @@ bool FlutterPlatformViewsController::SubmitFrame(GrDirectContext* gr_context,
   auto did_submit = true;
   auto num_platform_views = composition_order_.size();
 
+  // TODO(hellohuanlin) this double for-loop is expensive with wasted computations.
+  // See: https://github.com/flutter/flutter/issues/145802
   for (size_t i = 0; i < num_platform_views; i++) {
     int64_t platform_view_id = composition_order_[i];
     EmbedderViewSlice* slice = slices_[platform_view_id].get();
@@ -705,8 +707,28 @@ bool FlutterPlatformViewsController::SubmitFrame(GrDirectContext* gr_context,
     for (size_t j = i + 1; j > 0; j--) {
       int64_t current_platform_view_id = composition_order_[j - 1];
       SkRect platform_view_rect = GetPlatformViewRect(current_platform_view_id);
-      std::vector<SkIRect> intersection_rects =
-          slice->roundedInRegion(platform_view_rect).getRects();
+      std::vector<SkIRect> intersection_rects = slice->region(platform_view_rect).getRects();
+      const SkIRect rounded_in_platform_view_rect = platform_view_rect.roundIn();
+      // Ignore intersections of single width/height on the edge of the platform view.
+      // This is to address the following performance issue when interleaving adjacent
+      // platform views and layers:
+      // Since we `roundOut` both platform view rects and the layer rects, as long as
+      // the coordinate is fractional, there will be an intersection of a single pixel width
+      // (or height) after rounding out, even if they do not intersect before rounding out.
+      // We have to round out both platform view rect and the layer rect.
+      // Rounding in platform view rect will result in missing pixel on the intersection edge.
+      // Rounding in layer rect will result in missing pixel on the edge of the layer on top
+      // of the platform view.
+      for (auto it = intersection_rects.begin(); it != intersection_rects.end(); /*no-op*/) {
+        // If intersection_rect does not intersect with the *rounded in* platform
+        // view rect, then the intersection must be a single pixel width (or height) on edge.
+        if (!SkIRect::Intersects(*it, rounded_in_platform_view_rect)) {
+          it = intersection_rects.erase(it);
+        } else {
+          ++it;
+        }
+      }
+
       auto allocation_size = intersection_rects.size();
 
       // For testing purposes, the overlay id is used to find the overlay view.
