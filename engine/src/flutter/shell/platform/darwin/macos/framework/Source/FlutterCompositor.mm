@@ -27,8 +27,7 @@ FlutterCompositor::FlutterCompositor(id<FlutterViewProvider> view_provider,
                                      FlutterPlatformViewController* platform_view_controller)
     : view_provider_(view_provider),
       time_converter_(time_converter),
-      platform_view_controller_(platform_view_controller),
-      mutator_views_([NSMapTable strongToStrongObjectsMapTable]) {
+      platform_view_controller_(platform_view_controller) {
   FML_CHECK(view_provider != nullptr) << "view_provider cannot be nullptr";
 }
 
@@ -55,6 +54,10 @@ bool FlutterCompositor::CreateBackingStore(const FlutterBackingStoreConfig* conf
 bool FlutterCompositor::Present(FlutterViewId view_id,
                                 const FlutterLayer** layers,
                                 size_t layers_count) {
+  // TODO(dkwingsmt): The macOS embedder only supports rendering to the implicit
+  // view for now. As it supports adding more views, this assertion should be
+  // lifted. https://github.com/flutter/flutter/issues/142845
+  FML_DCHECK(view_id == kFlutterImplicitViewId);
   FlutterView* view = [view_provider_ viewForId:view_id];
   if (!view) {
     return false;
@@ -98,15 +101,22 @@ bool FlutterCompositor::Present(FlutterViewId view_id,
   [view.surfaceManager presentSurfaces:surfaces
                                 atTime:presentation_time
                                 notify:^{
-                                  PresentPlatformViews(view, *platform_views_layers);
+                                  // Gets a presenter or create a new one for the view.
+                                  ViewPresenter& presenter = presenters_[view_id];
+                                  presenter.PresentPlatformViews(view, *platform_views_layers,
+                                                                 platform_view_controller_);
                                 }];
 
   return true;
 }
 
-void FlutterCompositor::PresentPlatformViews(
+FlutterCompositor::ViewPresenter::ViewPresenter()
+    : mutator_views_([NSMapTable strongToStrongObjectsMapTable]) {}
+
+void FlutterCompositor::ViewPresenter::PresentPlatformViews(
     FlutterView* default_base_view,
-    const std::vector<PlatformViewLayerWithIndex>& platform_views) {
+    const std::vector<PlatformViewLayerWithIndex>& platform_views,
+    const FlutterPlatformViewController* platform_view_controller) {
   FML_DCHECK([[NSThread currentThread] isMainThread])
       << "Must be on the main thread to present platform views";
 
@@ -114,8 +124,9 @@ void FlutterCompositor::PresentPlatformViews(
   NSMutableArray<FlutterMutatorView*>* present_mutators = [NSMutableArray array];
 
   for (const auto& platform_view : platform_views) {
-    [present_mutators addObject:PresentPlatformView(default_base_view, platform_view.first,
-                                                    platform_view.second)];
+    FlutterMutatorView* container = PresentPlatformView(
+        default_base_view, platform_view.first, platform_view.second, platform_view_controller);
+    [present_mutators addObject:container];
   }
 
   NSMutableArray<FlutterMutatorView*>* obsolete_mutators =
@@ -127,17 +138,19 @@ void FlutterCompositor::PresentPlatformViews(
     [mutator removeFromSuperview];
   }
 
-  [platform_view_controller_ disposePlatformViews];
+  [platform_view_controller disposePlatformViews];
 }
 
-FlutterMutatorView* FlutterCompositor::PresentPlatformView(FlutterView* default_base_view,
-                                                           const PlatformViewLayer& layer,
-                                                           size_t index) {
+FlutterMutatorView* FlutterCompositor::ViewPresenter::PresentPlatformView(
+    FlutterView* default_base_view,
+    const PlatformViewLayer& layer,
+    size_t index,
+    const FlutterPlatformViewController* platform_view_controller) {
   FML_DCHECK([[NSThread currentThread] isMainThread])
       << "Must be on the main thread to present platform views";
 
   int64_t platform_view_id = layer.identifier();
-  NSView* platform_view = [platform_view_controller_ platformViewWithID:platform_view_id];
+  NSView* platform_view = [platform_view_controller platformViewWithID:platform_view_id];
 
   FML_DCHECK(platform_view) << "Platform view not found for id: " << platform_view_id;
 
