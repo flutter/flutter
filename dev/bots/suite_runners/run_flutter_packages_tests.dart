@@ -12,7 +12,6 @@ import '../run_command.dart';
 import '../test.dart';
 import '../utils.dart';
 
-
 /// Executes the test suite for the flutter/packages repo.
 Future<void> flutterPackagesRunner(String flutterRoot) async {
 
@@ -21,7 +20,7 @@ Future<void> flutterPackagesRunner(String flutterRoot) async {
     final Directory checkout = Directory.systemTemp.createTempSync('flutter_packages.');
     await runCommand(
       'git',
-      <String>[
+      const <String>[
         '-c',
         'core.longPaths=true',
         'clone',
@@ -49,7 +48,7 @@ Future<void> flutterPackagesRunner(String flutterRoot) async {
     final String toolDir = path.join(checkout.path, 'script', 'tool');
     await runCommand(
       'dart',
-      <String>[
+      const <String>[
         'pub',
         'get',
       ],
