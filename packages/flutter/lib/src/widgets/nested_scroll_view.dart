@@ -1429,7 +1429,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
           metrics,
           simulation,
           context.vsync,
-          false,
+          activity?.shouldIgnorePointer ?? true,
         );
       case _NestedBallisticScrollActivityMode.inner:
         return _NestedInnerBallisticScrollActivity(
@@ -1437,14 +1437,10 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
           this,
           simulation,
           context.vsync,
-          false,
+          activity?.shouldIgnorePointer ?? true,
         );
       case _NestedBallisticScrollActivityMode.independent:
-        return BallisticScrollActivity(
-          this, simulation,
-          context.vsync,
-          false,
-        );
+        return BallisticScrollActivity(this, simulation, context.vsync, activity?.shouldIgnorePointer ?? true);
     }
   }
 
