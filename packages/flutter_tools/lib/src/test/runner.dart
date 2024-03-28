@@ -222,6 +222,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
             testTimeRecorder: testTimeRecorder,
             webRenderer: debuggingOptions.webRenderer,
             useWasm: useWasm,
+            assetPath: testAssetDirectory,
           );
         },
       );

@@ -90,6 +90,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     required this.webRenderer,
     required this.useWasm,
     TestTimeRecorder? testTimeRecorder,
+    this.assetPath,
   }) : _fileSystem = fileSystem,
       _buildDirectory = buildDirectory,
       _testDartJs = testDartJs,
@@ -112,7 +113,8 @@ class FlutterWebPlatform extends PlatformPlugin {
           fileSystem.directory(fileSystem.path.join(fileSystem.currentDirectory.path, 'test')),
           crossOriginIsolated: webRenderer == WebRendererMode.skwasm,
         ))
-        .add(_packageFilesHandler);
+        .add(_packageFilesHandler)
+        .add(_createAssetHandler);
     _server.mount(cascade.handler);
     _testGoldenComparator = TestGoldenComparator(
       shellPath,
@@ -140,6 +142,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   final String _root;
   final WebRendererMode webRenderer;
   final bool useWasm;
+  final String? assetPath;
 
   /// Allows only one test suite (typically one test file) to be loaded and run
   /// at any given point in time. Loading more than one file at a time is known
@@ -172,6 +175,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     TestTimeRecorder? testTimeRecorder,
     Uri? testPackageUri,
     Future<shelf.Server> Function() serverFactory = defaultServerFactory,
+    String? assetPath,
   }) async {
     final shelf.Server server = await serverFactory();
     if (testPackageUri == null) {
@@ -192,7 +196,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       'dart.js',
     ));
     final File testHostDartJs = fileSystem.file(fileSystem.path.join(
-    testPackageUri.toFilePath(),
+      testPackageUri.toFilePath(),
       'src',
       'runner',
       'browser',
@@ -220,6 +224,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       webRenderer: webRenderer,
       useWasm: useWasm,
       testTimeRecorder: testTimeRecorder,
+      assetPath: assetPath,
     );
   }
 
@@ -415,6 +420,33 @@ class FlutterWebPlatform extends PlatformPlugin {
         );
         return handler(modifiedRequest);
       }
+    }
+    return shelf.Response.notFound('Not Found');
+  }
+
+  FutureOr<shelf.Response> _createAssetHandler(shelf.Request request) async {
+    if (request.requestedUri.path.contains('assets') && assetPath != null) {
+      final int assetSegmentIndex = request.requestedUri.pathSegments.indexOf('assets');
+      final Uri modifiedUri = Uri(
+        scheme: 'file',
+        pathSegments: request.requestedUri.pathSegments.skip(assetSegmentIndex + 1),
+      );
+
+      final Directory assetDirectory = _fileSystem.directory(assetPath);
+      final shelf.Handler handler = createDirectoryHandler(
+        assetDirectory,
+        crossOriginIsolated: webRenderer == WebRendererMode.skwasm,
+      );
+      final shelf.Request modifiedRequest = shelf.Request(
+        request.method,
+        modifiedUri,
+        protocolVersion: request.protocolVersion,
+        headers: request.headers,
+        handlerPath: request.handlerPath,
+        encoding: request.encoding,
+        context: request.context,
+      );
+      return handler(modifiedRequest);
     }
     return shelf.Response.notFound('Not Found');
   }
