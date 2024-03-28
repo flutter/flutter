@@ -2458,14 +2458,14 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('MenuItemButton layout is updated by overflowDirection', (WidgetTester tester) async {
-      Widget buildMenuButton({ required Axis overflowDirection, bool constrainedLayout = false }) {
+    testWidgets('MenuItemButton layout is updated by overflowAxis', (WidgetTester tester) async {
+      Widget buildMenuButton({ required Axis overflowAxis, bool constrainedLayout = false }) {
         return MaterialApp(
           home: Scaffold(
             body: SizedBox(
               width: constrainedLayout ? 200 : null,
               child: MenuItemButton(
-                overflowDirection: overflowDirection,
+                overflowAxis: overflowAxis,
                 onPressed: () {},
                 child: const Text('This is a very long text that will wrap to the multiple lines.'),
               ),
@@ -2474,20 +2474,20 @@ void main() {
         );
       }
 
-      // Test a long MenuItemButton in an unconstrained layout with vertical overflow direction.
-      await tester.pumpWidget(buildMenuButton(overflowDirection: Axis.vertical));
+      // Test a long MenuItemButton in an unconstrained layout with vertical overflow axis.
+      await tester.pumpWidget(buildMenuButton(overflowAxis: Axis.vertical));
       expect(tester.getSize(find.byType(MenuItemButton)), const Size(800.0, 48.0));
 
-      // Test a long MenuItemButton in an unconstrained layout with horizontal overflow direction.
-      await tester.pumpWidget(buildMenuButton(overflowDirection: Axis.horizontal));
+      // Test a long MenuItemButton in an unconstrained layout with horizontal overflow axis.
+      await tester.pumpWidget(buildMenuButton(overflowAxis: Axis.horizontal));
       expect(tester.getSize(find.byType(MenuItemButton)), const Size(800.0, 48.0));
 
-      // Test a long MenuItemButton in a constrained layout with vertical overflow direction.
-      await tester.pumpWidget(buildMenuButton(overflowDirection: Axis.vertical, constrainedLayout: true));
+      // Test a long MenuItemButton in a constrained layout with vertical overflow axis.
+      await tester.pumpWidget(buildMenuButton(overflowAxis: Axis.vertical, constrainedLayout: true));
       expect(tester.getSize(find.byType(MenuItemButton)), const Size(200.0, 120.0));
 
-      // Test a long MenuItemButton in a constrained layout with horizontal overflow direction.
-      await tester.pumpWidget(buildMenuButton(overflowDirection: Axis.horizontal, constrainedLayout: true));
+      // Test a long MenuItemButton in a constrained layout with horizontal overflow axis.
+      await tester.pumpWidget(buildMenuButton(overflowAxis: Axis.horizontal, constrainedLayout: true));
       expect(tester.getSize(find.byType(MenuItemButton)), const Size(200.0, 48.0));
       // This should throw an error.
       final AssertionError exception = tester.takeException() as AssertionError;
@@ -3680,7 +3680,7 @@ void main() {
     );
 
     // Horizontal _MenuPanel wraps children with IntrinsicWidth to ensure MenuItemButton
-    // with vertical overflow direction are as wide as the widest child.
+    // with vertical overflow axis is as wide as the widest child.
     final Finder intrinsicWidthFinder = find.ancestor(
       of: find.byType(MenuItemButton),
       matching: find.byType(IntrinsicWidth),
