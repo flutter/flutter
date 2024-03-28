@@ -625,6 +625,12 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   late _NestedScrollController _outerController;
   late _NestedScrollController _innerController;
 
+  @override
+  bool? get preferredHandOffIgnorePointer => true;
+
+  @override
+  bool get outOfRange => false;
+
   _NestedScrollPosition? get _outerPosition {
     if (!_outerController.hasClients) {
       return null;
@@ -1234,6 +1240,9 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   TickerProvider get vsync => context.vsync;
 
   ScrollController? _parent;
+
+  @override
+  bool? get preferredHandOffIgnorePointer => true;
 
   void setParent(ScrollController? value) {
     _parent?.detach(this);

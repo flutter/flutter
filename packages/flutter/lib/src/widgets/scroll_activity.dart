@@ -47,6 +47,10 @@ abstract class ScrollActivityDelegate {
   /// Terminate the current activity and start a ballistic activity with the
   /// given velocity.
   void goBallistic(double velocity);
+
+  bool? get preferredHandOffIgnorePointer;
+
+  bool get outOfRange;
 }
 
 /// Base class for scrolling activities like dragging and flinging.
@@ -596,6 +600,9 @@ class BallisticScrollActivity extends ScrollActivity {
   /// and returns true if the overflow was zero.
   @protected
   bool applyMoveTo(double value) {
+    if (delegate.outOfRange) {
+      shouldIgnorePointer = false;
+    }
     return delegate.setPixels(value).abs() < precisionErrorTolerance;
   }
 
@@ -613,7 +620,7 @@ class BallisticScrollActivity extends ScrollActivity {
   }
 
   @override
-  final bool shouldIgnorePointer;
+  bool shouldIgnorePointer;
 
   @override
   bool get isScrolling => true;
