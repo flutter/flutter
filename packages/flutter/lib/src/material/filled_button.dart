@@ -724,6 +724,29 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
   // No default fixedSize
 
   @override
+  MaterialStateProperty<double>? get iconSize =>
+    const MaterialStatePropertyAll<double>(18.0);
+
+  @override
+  MaterialStateProperty<Color>? get iconColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return _colors.onSurface.withOpacity(0.38);
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onPrimary;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.onPrimary;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _colors.onPrimary;
+      }
+      return _colors.onPrimary;
+    });
+  }
+
+  @override
   MaterialStateProperty<Size>? get maximumSize =>
     const MaterialStatePropertyAll<Size>(Size.infinite);
 
@@ -844,6 +867,29 @@ class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
     const MaterialStatePropertyAll<Size>(Size(64.0, 40.0));
 
   // No default fixedSize
+
+  @override
+  MaterialStateProperty<double>? get iconSize =>
+    const MaterialStatePropertyAll<double>(18.0);
+
+  @override
+  MaterialStateProperty<Color>? get iconColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return _colors.onSurface.withOpacity(0.38);
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onSecondaryContainer;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return _colors.onSecondaryContainer;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _colors.onSecondaryContainer;
+      }
+      return _colors.onSecondaryContainer;
+    });
+  }
 
   @override
   MaterialStateProperty<Size>? get maximumSize =>
