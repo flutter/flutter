@@ -37,6 +37,7 @@ static vk::UniqueSampler CreateSampler(
   sampler_info.addressModeW = address_mode_w;
   sampler_info.borderColor = vk::BorderColor::eFloatTransparentBlack;
   sampler_info.mipmapMode = mip_map;
+  sampler_info.maxLod = VK_LOD_CLAMP_NONE;
 
   if (yuv_conversion && yuv_conversion->IsValid()) {
     sampler_chain.get<vk::SamplerYcbcrConversionInfo>().conversion =

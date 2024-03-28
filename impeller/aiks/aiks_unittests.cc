@@ -3528,6 +3528,57 @@ TEST_P(AiksTest, CanRenderClippedBackdropFilter) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, MipmapGenerationWorksCorrectly) {
+  TextureDescriptor texture_descriptor;
+  texture_descriptor.size = ISize{1024, 1024};
+  texture_descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
+  texture_descriptor.storage_mode = StorageMode::kHostVisible;
+  texture_descriptor.mip_count = texture_descriptor.size.MipCount();
+
+  std::vector<uint8_t> bytes(4194304);
+  bool alternate = false;
+  for (auto i = 0u; i < 4194304; i += 4) {
+    if (alternate) {
+      bytes[i] = 255;
+      bytes[i + 1] = 0;
+      bytes[i + 2] = 0;
+      bytes[i + 3] = 255;
+    } else {
+      bytes[i] = 0;
+      bytes[i + 1] = 255;
+      bytes[i + 2] = 0;
+      bytes[i + 3] = 255;
+    }
+    alternate = !alternate;
+  }
+
+  ASSERT_EQ(texture_descriptor.GetByteSizeOfBaseMipLevel(), bytes.size());
+  auto mapping = std::make_shared<fml::NonOwnedMapping>(
+      bytes.data(),                                   // data
+      texture_descriptor.GetByteSizeOfBaseMipLevel()  // size
+  );
+  auto texture =
+      GetContext()->GetResourceAllocator()->CreateTexture(texture_descriptor);
+
+  ASSERT_TRUE(!!texture);
+  ASSERT_TRUE(texture->SetContents(mapping));
+
+  auto command_buffer = GetContext()->CreateCommandBuffer();
+  auto blit_pass = command_buffer->CreateBlitPass();
+
+  blit_pass->GenerateMipmap(texture);
+  EXPECT_TRUE(blit_pass->EncodeCommands(GetContext()->GetResourceAllocator()));
+  EXPECT_TRUE(GetContext()->GetCommandQueue()->Submit({command_buffer}).ok());
+
+  auto image = std::make_shared<Image>(texture);
+
+  Canvas canvas;
+  canvas.DrawImageRect(image, Rect::MakeSize(texture->GetSize()),
+                       Rect::MakeLTRB(0, 0, 100, 100), {});
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller
 
