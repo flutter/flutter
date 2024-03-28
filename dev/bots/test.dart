@@ -50,9 +50,9 @@
 import 'dart:convert';
 import 'dart:core' as system show print;
 import 'dart:core' hide print;
+import 'dart:io' as io;
 import 'dart:io' as system show exit;
 import 'dart:io' hide exit;
-import 'dart:io' as io;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -65,6 +65,7 @@ import 'package:process/process.dart';
 
 import 'run_command.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
+import 'suite_runners/run_skp_generator_tests.dart';
 import 'suite_runners/run_web_long_running_tests.dart';
 import 'tool_subsharding.dart';
 import 'utils.dart';
@@ -248,7 +249,7 @@ Future<void> main(List<String> args) async {
       // All web integration tests
       'web_long_running_tests': () => webLongRunningTestsRunner(flutterRoot),
       'flutter_plugins': _runFlutterPackagesTests,
-      'skp_generator': _runSkpGeneratorTests,
+      'skp_generator': skpGeneratorTestsRunner,
       'realm_checker': _runRealmCheckerTest,
       'customer_testing': _runCustomerTesting,
       'analyze': _runAnalyze,
@@ -1733,32 +1734,6 @@ Future<bool> hasExpectedEntitlements(
     }
   }
   return passes;
-}
-
-/// Runs the skp_generator from the flutter/tests repo.
-///
-/// See also the customer_tests shard.
-///
-/// Generated SKPs are ditched, this just verifies that it can run without failure.
-Future<void> _runSkpGeneratorTests() async {
-  printProgress('${green}Running skp_generator from flutter/tests$reset');
-  final Directory checkout = Directory.systemTemp.createTempSync('flutter_skp_generator.');
-  await runCommand(
-    'git',
-    <String>[
-      '-c',
-      'core.longPaths=true',
-      'clone',
-      'https://github.com/flutter/tests.git',
-      '.',
-    ],
-    workingDirectory: checkout.path,
-  );
-  await runCommand(
-    './build.sh',
-    <String>[ ],
-    workingDirectory: path.join(checkout.path, 'skp_generator'),
-  );
 }
 
 Future<void> _runRealmCheckerTest() async {
