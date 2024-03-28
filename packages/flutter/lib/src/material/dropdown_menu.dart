@@ -689,7 +689,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     if (widget.width != null) {
       effectiveMenuStyle = effectiveMenuStyle.copyWith(minimumSize: MaterialStatePropertyAll<Size?>(Size(widget.width!, 0.0)));
     } else if (anchorWidth != null){
-      effectiveMenuStyle = effectiveMenuStyle.copyWith(minimumSize: MaterialStatePropertyAll<Size?>(Size(anchorWidth, 0.0)));
+      final VisualDensity visualDensity = effectiveMenuStyle.visualDensity ?? Theme.of(context).visualDensity;
+      final double dx = (visualDensity.horizontal) * 4;
+      effectiveMenuStyle = effectiveMenuStyle.copyWith(minimumSize: MaterialStatePropertyAll<Size?>(Size(anchorWidth - dx, 0.0)));
     }
 
     if (widget.menuHeight != null) {
@@ -1062,10 +1064,10 @@ class _DropdownMenuDefaultsM3 extends DropdownMenuThemeData {
 
   @override
   MenuStyle get menuStyle {
-    return const MenuStyle(
-      minimumSize: MaterialStatePropertyAll<Size>(Size(_kMinimumWidth, 0.0)),
-      maximumSize: MaterialStatePropertyAll<Size>(Size.infinite),
-      visualDensity: VisualDensity.standard,
+    return MenuStyle(
+      minimumSize: const MaterialStatePropertyAll<Size>(Size(_kMinimumWidth, 0.0)),
+      maximumSize: const MaterialStatePropertyAll<Size>(Size.infinite),
+      visualDensity: _theme.visualDensity,
     );
   }
 

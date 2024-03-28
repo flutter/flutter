@@ -54,6 +54,10 @@ const double _kLabelItemDefaultSpacing = 12;
 // shortcut label in a _MenuItemLabel.
 const double _kLabelItemMinSpacing = 4;
 
+const double _kOpacityAnimationFraction = 100 / 500;
+
+const double _kOpacityAnimationReverseFraction = 50 / 500;
+
 // Navigation shortcuts that we need to make sure are active when menus are
 // open.
 const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivator, Intent>{
@@ -286,7 +290,7 @@ class MenuAnchor extends StatefulWidget {
   }
 }
 
-class _MenuAnchorState extends State<MenuAnchor> {
+class _MenuAnchorState extends State<MenuAnchor> with TickerProviderStateMixin {
   // This is the global key that is used later to determine the bounding rect
   // for the anchor's region that the CustomSingleChildLayout's delegate
   // uses to determine where to place the menu on the screen and to avoid the
@@ -305,6 +309,9 @@ class _MenuAnchorState extends State<MenuAnchor> {
   bool get _isRoot => _parent == null;
   bool get _isTopLevel => _parent?._isRoot ?? false;
   MenuController get _menuController => widget.controller ?? _internalMenuController!;
+  late AnimationController _animateController;
+  CurvedAnimation? _menuSize;
+  CurvedAnimation? _menuOpacity;
 
   @override
   void initState() {
@@ -314,6 +321,10 @@ class _MenuAnchorState extends State<MenuAnchor> {
       _internalMenuController = MenuController();
     }
     _menuController._attach(this);
+    _animateController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
   }
 
   @override
@@ -327,6 +338,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
     _menuController._detach(this);
     _internalMenuController = null;
     _menuScopeNode.dispose();
+    _animateController.dispose();
     super.dispose();
   }
 
@@ -348,6 +360,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       _root._close();
     }
     _viewSize = newSize;
+    updateAnimation();
   }
 
   @override
@@ -365,6 +378,33 @@ class _MenuAnchorState extends State<MenuAnchor> {
       }
     }
     assert(_menuController._anchor == this);
+    if (oldWidget.style?.sizeAnimationStyle != widget.style?.sizeAnimationStyle) {
+      updateAnimation();
+    }
+  }
+
+  void updateAnimation() {
+    final AnimationStyle defaultAnimationStyle = _MenuDefaultsM3(context).sizeAnimationStyle;
+    final AnimationStyle effectiveAnimationStyle = widget.style?.sizeAnimationStyle
+      ?? MenuTheme.of(context).style?.sizeAnimationStyle
+      ?? defaultAnimationStyle;
+
+    _animateController.duration = effectiveAnimationStyle.duration;
+    _animateController.reverseDuration = effectiveAnimationStyle.reverseDuration;
+
+    _menuSize = CurvedAnimation(
+      parent: _animateController,
+      curve: effectiveAnimationStyle.curve ?? Curves.linear,
+      reverseCurve: effectiveAnimationStyle.reverseCurve,
+    );
+
+    if (effectiveAnimationStyle == defaultAnimationStyle) {
+      _menuOpacity = CurvedAnimation(
+        parent: _animateController,
+        curve: const Interval(0, _kOpacityAnimationFraction),
+        reverseCurve: const Interval(1 - _kOpacityAnimationReverseFraction, 1.0),
+      );
+    }
   }
 
   @override
@@ -374,6 +414,8 @@ class _MenuAnchorState extends State<MenuAnchor> {
       overlayChildBuilder: (BuildContext context) {
        return _Submenu(
           anchor: this,
+          menuSize: _menuSize,
+          menuOpacity: _menuOpacity,
           menuStyle: widget.style,
           alignmentOffset: widget.alignmentOffset ?? Offset.zero,
           menuPosition: _menuPosition,
@@ -413,7 +455,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
         NextFocusIntent: _MenuNextFocusAction(),
         DismissIntent: DismissMenuAction(controller: _menuController),
       },
-      child:  Builder(
+      child: Builder(
         key: _anchorKey,
         builder: (BuildContext context) {
           return widget.builder?.call(context, _menuController, widget.child)
@@ -568,7 +610,7 @@ _MenuAnchorState? get _previousFocusableSibling {
   ///
   /// Call this when the menu should be closed. Has no effect if the menu is
   /// already closed.
-  void _close({bool inDispose = false}) {
+  Future<void> _close({bool inDispose = false}) async {
     assert(_debugMenuInfo('Closing $this'));
     if (!_isOpen) {
       return;
@@ -577,6 +619,7 @@ _MenuAnchorState? get _previousFocusableSibling {
       FocusManager.instance.removeEarlyKeyEventHandler(_checkForEscape);
     }
     _closeChildren(inDispose: inDispose);
+
     // Don't hide if we're in the middle of a build.
     if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
       _overlayController.hide();
@@ -589,6 +632,7 @@ _MenuAnchorState? get _previousFocusableSibling {
       // Notify that _childIsOpen changed state, but only if not
       // currently disposing.
       _parent?._childChangedOpenState();
+      await _animateController.reverse();
       widget.onClose?.call();
       if (mounted && SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
         setState(() {
@@ -652,8 +696,9 @@ class MenuController {
   /// If the menu's anchor point (either a [MenuBar] or a [MenuAnchor]) is
   /// scrolled by an ancestor, or the view changes size, then any open menu will
   /// automatically close.
-  void close() {
+  Future<void> close() async {
     assert(_anchor != null);
+    await _anchor?._animateController.reverse();
     _anchor!._close();
   }
 
@@ -671,6 +716,7 @@ class MenuController {
   void open({Offset? position}) {
     assert(_anchor != null);
     _anchor!._open(position: position);
+    _anchor!._animateController.forward();
   }
 
   // ignore: use_setters_to_change_properties
@@ -3227,6 +3273,8 @@ class _MenuLayout extends SingleChildLayoutDelegate {
 class _MenuPanel extends StatefulWidget {
   const _MenuPanel({
     required this.menuStyle,
+    this.menuSize,
+    this.menuOpacity,
     this.clipBehavior = Clip.none,
     required this.orientation,
     this.crossAxisUnconstrained = true,
@@ -3235,6 +3283,10 @@ class _MenuPanel extends StatefulWidget {
 
   /// The menu style that has all the attributes for this menu panel.
   final MenuStyle? menuStyle;
+
+  final Animation<double>? menuSize;
+
+  final Animation<double>? menuOpacity;
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
@@ -3337,7 +3389,44 @@ class _MenuPanelState extends State<_MenuPanel> {
       }
     }
 
-    Widget menuPanel = _intrinsicCrossSize(
+    Widget menuPanel = Padding(
+      padding: resolvedPadding,
+      child: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(
+          scrollbars: false,
+          overscroll: false,
+          physics: const ClampingScrollPhysics(),
+        ),
+        child: PrimaryScrollController(
+          controller: scrollController,
+          child: Scrollbar(
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              scrollDirection: widget.orientation,
+              child: Flex(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                textDirection: Directionality.of(context),
+                direction: widget.orientation,
+                mainAxisSize: MainAxisSize.min,
+                children: widget.children,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    if (widget.menuSize != null) {
+      menuPanel = SizeTransition(
+        sizeFactor: widget.menuSize!,
+        axisAlignment: -1,
+        fixedCrossAxisSizeFactor: 1,
+        child: menuPanel,
+      ) ;
+    }
+
+    menuPanel = _intrinsicCrossSize(
       child: Material(
         elevation: elevation,
         shape: shape,
@@ -3346,35 +3435,16 @@ class _MenuPanelState extends State<_MenuPanel> {
         surfaceTintColor: surfaceTintColor,
         type: backgroundColor == null ? MaterialType.transparency : MaterialType.canvas,
         clipBehavior: widget.clipBehavior,
-        child: Padding(
-          padding: resolvedPadding,
-          child: ScrollConfiguration(
-            behavior: ScrollConfiguration.of(context).copyWith(
-              scrollbars: false,
-              overscroll: false,
-              physics: const ClampingScrollPhysics(),
-            ),
-            child: PrimaryScrollController(
-              controller: scrollController,
-              child: Scrollbar(
-                thumbVisibility: true,
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  scrollDirection: widget.orientation,
-                  child: Flex(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    textDirection: Directionality.of(context),
-                    direction: widget.orientation,
-                    mainAxisSize: MainAxisSize.min,
-                    children: widget.children,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
+        child: menuPanel,
       ),
     );
+
+    if (widget.menuOpacity != null) {
+      menuPanel = FadeTransition(
+        opacity: widget.menuOpacity!,
+        child: menuPanel,
+      );
+    }
 
     if (widget.crossAxisUnconstrained) {
       menuPanel = UnconstrainedBox(
@@ -3402,6 +3472,8 @@ class _MenuPanelState extends State<_MenuPanel> {
 // A widget that defines the menu drawn in the overlay.
 class _Submenu extends StatelessWidget {
   const _Submenu({
+    required this.menuSize,
+    required this.menuOpacity,
     required this.anchor,
     required this.menuStyle,
     required this.menuPosition,
@@ -3412,6 +3484,8 @@ class _Submenu extends StatelessWidget {
   });
 
   final _MenuAnchorState anchor;
+  final Animation<double>? menuSize;
+  final Animation<double>? menuOpacity;
   final MenuStyle? menuStyle;
   final Offset? menuPosition;
   final Offset alignmentOffset;
@@ -3485,7 +3559,8 @@ class _Submenu extends StatelessWidget {
           child: TapRegion(
             groupId: anchor._root,
             consumeOutsideTaps: anchor._root._isOpen && anchor.widget.consumeOutsideTap,
-            onTapOutside: (PointerDownEvent event) {
+            onTapOutside: (PointerDownEvent event) async {
+              await anchor._animateController.reverse();
               anchor._close();
             },
             child: MouseRegion(
@@ -3502,6 +3577,8 @@ class _Submenu extends StatelessWidget {
                   child: Shortcuts(
                     shortcuts: _kMenuTraversalShortcuts,
                     child: _MenuPanel(
+                      menuSize: menuSize,
+                      menuOpacity: menuOpacity,
                       menuStyle: menuStyle,
                       clipBehavior: clipBehavior,
                       orientation: anchor._orientation,
@@ -3845,6 +3922,20 @@ class _MenuDefaultsM3 extends MenuStyle {
 
   @override
   VisualDensity get visualDensity => Theme.of(context).visualDensity;
+
+  @override
+  AnimationStyle get sizeAnimationStyle {
+    return switch (Theme.of(context).platform) {
+      TargetPlatform.iOS || TargetPlatform.android || TargetPlatform.fuchsia
+        => AnimationStyle(
+          curve: Curves.easeInOutCubicEmphasized,
+          reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
+          duration: const Duration(milliseconds: 500),
+        ),
+      TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows
+        => AnimationStyle.noAnimation,
+    };
+  }
 }
 
 // END GENERATED TOKEN PROPERTIES - Menu

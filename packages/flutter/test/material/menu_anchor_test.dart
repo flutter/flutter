@@ -102,7 +102,7 @@ void main() {
                 controller: controller,
                 alignmentOffset: alignmentOffset,
                 consumeOutsideTap: consumesOutsideTap,
-                style: MenuStyle(alignment: alignment),
+                style: MenuStyle(alignment: alignment, sizeAnimationStyle: AnimationStyle.noAnimation),
                 onOpen: () {
                   onOpen?.call(TestMenu.anchorButton);
                 },
@@ -349,6 +349,219 @@ void main() {
       find.descendant(of: find.byIcon(Icons.add), matching: find.byType(RichText)),
     );
     expect(iconRichText.text.style?.color, themeData.colorScheme.onSurfaceVariant);
+  });
+
+  testWidgets('Menu animation defaults', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: MenuAnchor(
+            builder: (BuildContext context, MenuController controller, Widget? child) {
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
+                  }
+                },
+              );
+            },
+            menuChildren: <Widget>[
+              SubmenuButton(
+                menuChildren: <Widget>[
+                  MenuItemButton(
+                    child: const Text('Item 0.0'),
+                    onPressed: () {},
+                  ),
+                  MenuItemButton(
+                    child: const Text('Item 0.1'),
+                    onPressed: () {},
+                  ),
+                  MenuItemButton(
+                    child: const Text('Item 0.2'),
+                    onPressed: () {},
+                  ),
+                  MenuItemButton(
+                    child: const Text('Item 0.3'),
+                    onPressed: () {},
+                  )
+                ],
+                child: const Text('Item 0'),
+              ),
+              MenuItemButton(
+                child: const Text('Item 1'),
+                onPressed: () {},
+              ),
+              MenuItemButton(
+                child: const Text('Item 2'),
+                onPressed: () {},
+              ),
+            ],
+          )
+        ),
+      ),
+    );
+
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
+    await tester.pump();
+
+    final Rect menuPanel = tester.getRect(findMenuPanels());
+    expect(menuPanel.height, 0);
+
+    // Menu height(160) = button height(48) * 3 + top vertical padding(8) + bottom vertical padding
+    await tester.pump(const Duration(milliseconds: 50));
+    // After 50 ms, the animated height should be less than half of the menu height
+    // based on Curves.easeInOutCubicEmphasized.
+    expect(tester.getRect(findMenuPanels().last).height, lessThan(80));
+
+    await tester.pump(const Duration(milliseconds: 300));
+    // After 350 ms, the animated height should be less than menu height based on
+    // Curves.easeInOutCubicEmphasized.
+    expect(tester.getRect(findMenuPanels().last).height, lessThan(160));
+
+    await tester.pump(const Duration(milliseconds: 150));
+    // Default duration is 500ms. After 500 ms, the animated height should be equal
+    // to the menu height based on Curves.easeInOutCubicEmphasized.
+    expect(tester.getRect(findMenuPanels().last).height, 160);
+
+    await tester.tap(find.widgetWithText(SubmenuButton, 'Item 0'));
+    await tester.pump();
+    final Rect submenuPanel = tester.getRect(findMenuPanels().last);
+    expect(submenuPanel.height, 0);
+
+    // Menu height is 208 (48 * 4 + 8 * 2).
+    await tester.pump(const Duration(milliseconds: 50));
+    // After 50 ms, the animated height should be less than half of the menu height
+    // based on Curves.easeInOutCubicEmphasized.
+    expect(tester.getRect(findMenuPanels().last).height, lessThan(104));
+
+    await tester.pump(const Duration(milliseconds: 300));
+    // After 350 ms, the animated height should be less than menu height based on
+    // Curves.easeInOutCubicEmphasized.
+    expect(tester.getRect(findMenuPanels().last).height, lessThan(208));
+
+    await tester.pump(const Duration(milliseconds: 150));
+    // Default duration is 500ms. After 500 ms, the animated height should be equal
+    // to the menu height based on Curves.easeInOutCubicEmphasized.
+    expect(tester.getRect(findMenuPanels().last).height, 208);
+  });
+
+  testWidgets('Custom menuStyle.sizeAnimationStyle', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+            child: MenuAnchor(
+              style: MenuStyle(
+                sizeAnimationStyle: AnimationStyle(
+                  duration: const Duration(milliseconds: 1000),
+                  curve: Curves.linear,
+                  reverseCurve: Curves.linear,
+                )
+              ),
+              builder: (BuildContext context, MenuController controller, Widget? child) {
+                return IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                );
+              },
+              menuChildren: <Widget>[
+                SubmenuButton(
+                  menuStyle: MenuStyle(
+                    sizeAnimationStyle: AnimationStyle(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.linear,
+                      reverseCurve: Curves.linear,
+                    )
+                  ),
+                  menuChildren: <Widget>[
+                    MenuItemButton(
+                      child: const Text('Item 0.0'),
+                      onPressed: () {},
+                    ),
+                    MenuItemButton(
+                      child: const Text('Item 0.1'),
+                      onPressed: () {},
+                    ),
+                    MenuItemButton(
+                      child: const Text('Item 0.2'),
+                      onPressed: () {},
+                    )
+                  ],
+                  child: const Text('Item 0'),
+                ),
+                MenuItemButton(
+                  child: const Text('Item 1'),
+                  onPressed: () {},
+                ),
+                MenuItemButton(
+                  child: const Text('Item 2'),
+                  onPressed: () {},
+                ),
+              ],
+            )
+        ),
+      ),
+    );
+
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
+    await tester.pump();
+
+    final Rect menuPanel = tester.getRect(findMenuPanels());
+    expect(menuPanel.height, 0);
+
+    // Menu height(160) = button height(48) * 3 + top vertical padding(8) + bottom vertical padding
+    await tester.pump(const Duration(milliseconds: 100));
+    // After 100 ms, the animated height should be 1/10 of the menu height because
+    // curve is Curves.linear.
+    expect(tester.getRect(findMenuPanels().last).height, 16);
+
+    await tester.pump(const Duration(milliseconds: 500));
+    // After 600 ms, the animated height should be half of menu height because of
+    // Curves.linear.
+    expect(tester.getRect(findMenuPanels().last).height, 96);
+
+    await tester.pump(const Duration(milliseconds: 400));
+    // Default duration is 500ms. After 500 ms, the animated height should be equal
+    // to the menu height based on Curves.linear.
+    expect(tester.getRect(findMenuPanels().last).height, 160);
+
+    // Open submenu
+    await tester.tap(find.widgetWithText(SubmenuButton, 'Item 0'));
+    await tester.pump();
+    final Rect submenuPanel = tester.getRect(findMenuPanels().last);
+    expect(submenuPanel.height, 0);
+
+    // Menu height is 160 (48 * 3 + 8 * 2).
+    await tester.pump(const Duration(milliseconds: 50));
+    // After 50 ms, the animated height should be less than half of the menu height
+    // based on Curves.linear.
+    expect(tester.getRect(findMenuPanels().last).height, 40);
+
+    await tester.pump(const Duration(milliseconds: 50));
+    // After 100 ms, the animated height should be less than menu height based on
+    // Curves.linear.
+    expect(tester.getRect(findMenuPanels().last).height, 80);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    // Default duration is 200. After 200 ms, the animated height should be equal
+    // to the menu height based on Curves.linear.
+    expect(tester.getRect(findMenuPanels().last).height, 160);
+
+    // close menu
+    await tester.tap(find.widgetWithText(SubmenuButton, 'Item 0'));
+    await tester.pump();
+    expect(tester.getRect(findMenuPanels().last).height, 160);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(tester.getRect(findMenuPanels().last).height, 80);
   });
 
   testWidgets('Menu defaults - disabled', (WidgetTester tester) async {
@@ -1639,6 +1852,9 @@ void main() {
                 height: 1000,
                 alignment: Alignment.topLeft,
                 child: MenuAnchor(
+                  style: MenuStyle(
+                    sizeAnimationStyle: AnimationStyle.noAnimation,
+                  ),
                   controller: controller,
                   alignmentOffset: const Offset(0, 10),
                   builder: (BuildContext context, MenuController controller, Widget? child) {
@@ -2372,6 +2588,9 @@ void main() {
           child: Center(
             child: MenuAnchor(
               controller: controller,
+              style: MenuStyle(
+                sizeAnimationStyle: AnimationStyle.noAnimation,
+              ),
               menuChildren: <Widget>[
                 MenuItemButton(
                   onPressed: () {},
@@ -2406,6 +2625,9 @@ void main() {
         home: Material(
           child: Center(
             child: MenuAnchor(
+              style: MenuStyle(
+                sizeAnimationStyle: AnimationStyle.noAnimation,
+              ),
               controller: controller,
               menuChildren: <Widget>[
                 MenuItemButton(
@@ -2609,6 +2831,9 @@ void main() {
           home: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return MenuAnchor(
+                style: MenuStyle(
+                  sizeAnimationStyle: AnimationStyle.noAnimation,
+                ),
                 menuChildren: <Widget>[
                   MenuItemButton(
                     focusNode: buttonFocusNode,
@@ -2697,6 +2922,7 @@ void main() {
     });
 
     testWidgets('constrained menus show up in the right place with offset in LTR', (WidgetTester tester) async {
+      final MenuStyle menuStyle = MenuStyle(sizeAnimationStyle: AnimationStyle.noAnimation);
       await changeSurfaceSize(tester, const Size(800, 600));
       await tester.pumpWidget(
         MaterialApp(
@@ -2708,27 +2934,32 @@ void main() {
                 child: Align(
                   alignment: Alignment.topLeft,
                   child: MenuAnchor(
-                    menuChildren: const <Widget>[
+                    style: menuStyle,
+                    menuChildren: <Widget>[
                       SubmenuButton(
-                        alignmentOffset: Offset(10, 0),
+                        menuStyle: menuStyle,
+                        alignmentOffset: const Offset(10, 0),
                         menuChildren: <Widget>[
                           SubmenuButton(
+                            menuStyle: menuStyle,
                             menuChildren: <Widget>[
                               SubmenuButton(
-                                alignmentOffset: Offset(10, 0),
+                                menuStyle: menuStyle,
+                                alignmentOffset: const Offset(10, 0),
                                 menuChildren: <Widget>[
                                   SubmenuButton(
-                                    menuChildren: <Widget>[],
-                                    child: Text('SubMenuButton4'),
+                                    menuStyle: menuStyle,
+                                    menuChildren: const <Widget>[],
+                                    child: const Text('SubMenuButton4'),
                                   ),
                                 ],
-                                child: Text('SubMenuButton3'),
+                                child: const Text('SubMenuButton3'),
                               ),
                             ],
-                            child: Text('SubMenuButton2'),
+                            child: const Text('SubMenuButton2'),
                           ),
                         ],
-                        child: Text('SubMenuButton1'),
+                        child: const Text('SubMenuButton1'),
                       ),
                     ],
                     builder: (BuildContext context, MenuController controller, Widget? child) {
@@ -2774,6 +3005,7 @@ void main() {
     });
 
     testWidgets('constrained menus show up in the right place with offset in RTL', (WidgetTester tester) async {
+      final MenuStyle menuStyle = MenuStyle(sizeAnimationStyle: AnimationStyle.noAnimation);
       await changeSurfaceSize(tester, const Size(800, 600));
       await tester.pumpWidget(
         MaterialApp(
@@ -2785,27 +3017,32 @@ void main() {
                 child: Align(
                   alignment: Alignment.topRight,
                   child: MenuAnchor(
-                    menuChildren: const <Widget>[
+                    style: menuStyle,
+                    menuChildren: <Widget>[
                       SubmenuButton(
-                        alignmentOffset: Offset(10, 0),
+                        menuStyle: menuStyle,
+                        alignmentOffset: const Offset(10, 0),
                         menuChildren: <Widget>[
                           SubmenuButton(
+                            menuStyle: menuStyle,
                             menuChildren: <Widget>[
                               SubmenuButton(
-                                alignmentOffset: Offset(10, 0),
+                                menuStyle: menuStyle,
+                                alignmentOffset: const Offset(10, 0),
                                 menuChildren: <Widget>[
                                   SubmenuButton(
-                                    menuChildren: <Widget>[],
-                                    child: Text('SubMenuButton4'),
+                                    menuStyle: menuStyle,
+                                    menuChildren: const <Widget>[],
+                                    child: const Text('SubMenuButton4'),
                                   ),
                                 ],
-                                child: Text('SubMenuButton3'),
+                                child: const Text('SubMenuButton3'),
                               ),
                             ],
-                            child: Text('SubMenuButton2'),
+                            child: const Text('SubMenuButton2'),
                           ),
                         ],
-                        child: Text('SubMenuButton1'),
+                        child: const Text('SubMenuButton1'),
                       ),
                     ],
                     builder: (BuildContext context, MenuController controller, Widget? child) {
@@ -2862,6 +3099,9 @@ void main() {
                 child: Align(
                   alignment: Alignment.bottomLeft,
                   child: MenuAnchor(
+                    style: MenuStyle(
+                      sizeAnimationStyle: AnimationStyle.noAnimation,
+                    ),
                     menuChildren: const <Widget>[
                       MenuItemButton(
                         child: Text('Button1'),
@@ -2914,6 +3154,7 @@ void main() {
                 child: Align(
                   alignment: Alignment.bottomLeft,
                   child: MenuAnchor(
+                    style: MenuStyle(sizeAnimationStyle: AnimationStyle.noAnimation),
                     alignmentOffset: const Offset(0, 50),
                     menuChildren: const <Widget>[
                       MenuItemButton(
@@ -3171,6 +3412,7 @@ void main() {
               return MenuBar(
                 children: <Widget>[
                   SubmenuButton(
+                    menuStyle: MenuStyle(sizeAnimationStyle: AnimationStyle.noAnimation),
                     menuChildren: <Widget>[
                       CheckboxMenuButton(
                         value: checkBoxValue,
@@ -3225,6 +3467,7 @@ void main() {
               return MenuBar(
                 children: <Widget>[
                   SubmenuButton(
+                    menuStyle: MenuStyle(sizeAnimationStyle: AnimationStyle.noAnimation),
                     menuChildren: <Widget>[
                       RadioMenuButton<int>(
                         value: 0,
@@ -3605,6 +3848,44 @@ void main() {
     expect(focusNode.hasFocus, false);
     expect(onFocusChangeCalled, 2);
   });
+
+  testWidgets('SubmenuButton.onFocusChange is respected', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    int onFocusChangeCalled = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return SubmenuButton(
+                  focusNode: focusNode,
+                  onFocusChange: (bool value) {
+                    setState(() {
+                      onFocusChangeCalled += 1;
+                    });
+                  },
+                  menuChildren: const <Widget>[
+                    MenuItemButton(child: Text('item 0'))
+                  ],
+                  child: const Text('Submenu 0'),
+                );
+              }
+          ),
+        ),
+      ),
+    );
+
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, true);
+    expect(onFocusChangeCalled, 1);
+
+    focusNode.unfocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, false);
+    expect(onFocusChangeCalled, 2);
+  });
 }
 
 List<Widget> createTestMenus({
@@ -3620,6 +3901,9 @@ List<Widget> createTestMenus({
     required List<Widget> menuChildren,
   }) {
     return SubmenuButton(
+      menuStyle: MenuStyle(
+        sizeAnimationStyle: AnimationStyle.noAnimation,
+      ),
       onOpen: onOpen != null ? () => onOpen(menu) : null,
       onClose: onClose != null ? () => onClose(menu) : null,
       menuChildren: menuChildren,

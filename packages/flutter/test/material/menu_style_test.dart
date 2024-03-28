@@ -55,9 +55,10 @@ void main() {
                     ),
                   ),
                   child: MenuTheme(
-                    data: const MenuThemeData(
+                    data: MenuThemeData(
                       style: MenuStyle(
-                        fixedSize: MaterialStatePropertyAll<Size>(Size(100, 100)),
+                        fixedSize: const MaterialStatePropertyAll<Size>(Size(100, 100)),
+                        sizeAnimationStyle: AnimationStyle.noAnimation,
                       ),
                     ),
                     child: MenuBar(
@@ -100,9 +101,10 @@ void main() {
                     ),
                   ),
                   child: MenuTheme(
-                    data: const MenuThemeData(
+                    data: MenuThemeData(
                       style: MenuStyle(
-                        maximumSize: MaterialStatePropertyAll<Size>(Size(100, 100)),
+                        maximumSize: const MaterialStatePropertyAll<Size>(Size(100, 100)),
+                        sizeAnimationStyle: AnimationStyle.noAnimation,
                       ),
                     ),
                     child: MenuBar(
@@ -143,9 +145,10 @@ void main() {
                     ),
                   ),
                   child: MenuTheme(
-                    data: const MenuThemeData(
+                    data: MenuThemeData(
                       style: MenuStyle(
-                        minimumSize: MaterialStatePropertyAll<Size>(Size(300, 300)),
+                        minimumSize: const MaterialStatePropertyAll<Size>(Size(300, 300)),
+                        sizeAnimationStyle: AnimationStyle.noAnimation,
                       ),
                     ),
                     child: MenuBar(
@@ -249,13 +252,14 @@ void main() {
                 MenuBarTheme(
                   data: const MenuBarThemeData(
                     style: MenuStyle(
-                      visualDensity: VisualDensity(horizontal: 1.5, vertical: -1.5),
+                      visualDensity:  VisualDensity(horizontal: 1.5, vertical: -1.5),
                     ),
                   ),
                   child: MenuTheme(
-                    data: const MenuThemeData(
+                    data: MenuThemeData(
                       style: MenuStyle(
-                        visualDensity: VisualDensity(horizontal: 0.5, vertical: -0.5),
+                        sizeAnimationStyle: AnimationStyle.noAnimation,
+                        visualDensity: const VisualDensity(horizontal: 0.5, vertical: -0.5),
                       ),
                     ),
                     child: MenuBar(
