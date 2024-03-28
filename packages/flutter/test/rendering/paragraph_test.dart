@@ -4,7 +4,7 @@
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Paragraph, TextBox;
 
-import 'package:flutter/foundation.dart' show isCanvasKit, kIsWeb;
+import 'package:flutter/foundation.dart' show ValueListenable, isCanvasKit, kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -1454,6 +1454,142 @@ void main() {
     expect(data.hasAction(SemanticsAction.longPress), true);
     expect(data.hasAction(SemanticsAction.tap), false);
   });
+
+  group('TextLayout listening', () {
+    test('Repaints on demand', () async {
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(text: 'AAAAA'),
+        textDirection: TextDirection.ltr,
+      );
+      final _TestPainter foregroundPainter = _TestPainter(paragraph.textLayout);
+      final _TestPainter backgroundPainter = _TestPainter(paragraph.textLayout);
+      final RenderCustomPaint root = RenderCustomPaint(
+        foregroundPainter: foregroundPainter,
+        painter: backgroundPainter,
+        child: paragraph,
+      );
+
+      expect(foregroundPainter.lastTextLayout, isNull);
+      expect(backgroundPainter.lastTextLayout, isNull);
+      layout(root, phase: EnginePhase.composite);
+
+      final TextPainterLayout? previousLayout = paragraph.textLayout.value;
+      expect(paragraph.textLayout.value, isNotNull);
+      expect(foregroundPainter.lastTextLayout, paragraph.textLayout.value);
+      expect(foregroundPainter.paintCount, 1);
+      expect(backgroundPainter.lastTextLayout, paragraph.textLayout.value);
+      expect(backgroundPainter.paintCount, 1);
+
+      pumpFrame(phase: EnginePhase.composite);
+      expect(paragraph.textLayout.value, previousLayout);
+      expect(foregroundPainter.lastTextLayout, paragraph.textLayout.value);
+      expect(foregroundPainter.paintCount, 1);
+      expect(backgroundPainter.lastTextLayout, paragraph.textLayout.value);
+      expect(backgroundPainter.paintCount, 1);
+
+      paragraph.textDirection = TextDirection.rtl;
+      pumpFrame(phase: EnginePhase.composite);
+      expect(paragraph.textLayout.value, isNot(previousLayout));
+      expect(foregroundPainter.lastTextLayout, paragraph.textLayout.value);
+      expect(foregroundPainter.paintCount, 2);
+      expect(backgroundPainter.lastTextLayout, paragraph.textLayout.value);
+      expect(backgroundPainter.paintCount, 2);
+    });
+
+    test('Repaints on constraints changes', () async {
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(text: 'AAAAA'),
+        textDirection: TextDirection.ltr,
+      );
+      final _TestPainter foregroundPainter = _TestPainter(paragraph.textLayout);
+      final _TestPainter backgroundPainter = _TestPainter(paragraph.textLayout);
+      final RenderConstrainedBox constrainedBox = RenderConstrainedBox(
+        child: paragraph,
+        additionalConstraints: const BoxConstraints(),
+      );
+
+      expect(foregroundPainter.lastTextLayout, isNull);
+      expect(backgroundPainter.lastTextLayout, isNull);
+      layout(
+        RenderCustomPaint(
+          foregroundPainter: foregroundPainter,
+          painter: backgroundPainter,
+          child: RenderPositionedBox(child: constrainedBox),
+        ),
+        phase: EnginePhase.composite,
+      );
+      final TextPainterLayout? previousLayout = paragraph.textLayout.value;
+
+      constrainedBox.additionalConstraints = const BoxConstraints.tightFor(width: 10);
+      pumpFrame(phase: EnginePhase.composite);
+      expect(paragraph.textLayout.value, isNot(previousLayout));
+      expect(foregroundPainter.lastTextLayout, paragraph.textLayout.value);
+      expect(foregroundPainter.paintCount, 2);
+      expect(backgroundPainter.lastTextLayout, paragraph.textLayout.value);
+      expect(backgroundPainter.paintCount, 2);
+    });
+
+    test('Repaints on TextAlign changes', () async {
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(text: 'AAAAA'),
+        textDirection: TextDirection.ltr,
+      );
+      final _TestPainter foregroundPainter = _TestPainter(paragraph.textLayout);
+      final _TestPainter backgroundPainter = _TestPainter(paragraph.textLayout);
+      final RenderCustomPaint root = RenderCustomPaint(
+        foregroundPainter: foregroundPainter,
+        painter: backgroundPainter,
+        child: paragraph,
+      );
+
+      expect(foregroundPainter.lastTextLayout, isNull);
+      expect(backgroundPainter.lastTextLayout, isNull);
+
+      layout(root, phase: EnginePhase.composite);
+
+      TextPainterLayout? previousLayout = paragraph.textLayout.value;
+      expect(paragraph.textLayout.value, isNotNull);
+      expect(foregroundPainter.lastTextLayout, paragraph.textLayout.value);
+      expect(foregroundPainter.paintCount, 1);
+      expect(backgroundPainter.lastTextLayout, paragraph.textLayout.value);
+      expect(backgroundPainter.paintCount, 1);
+
+      previousLayout = paragraph.textLayout.value;
+      paragraph.textAlign = TextAlign.center;
+      expect(paragraph.textLayout.value, isNull);
+
+      pumpFrame(phase: EnginePhase.composite);
+      expect(paragraph.textLayout.value, isNotNull);
+      expect(paragraph.textLayout.value, isNot(previousLayout));
+      expect(foregroundPainter.lastTextLayout, paragraph.textLayout.value);
+      expect(foregroundPainter.paintCount, 2);
+      expect(backgroundPainter.lastTextLayout, paragraph.textLayout.value);
+      expect(backgroundPainter.paintCount, 2);
+    });
+
+    test('intrinsic calculation is not observable', () async {
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(text: 'AAAAA'),
+        textDirection: TextDirection.ltr,
+      );
+      layout(paragraph, phase: EnginePhase.composite);
+      bool textLayoutChanged = false;
+      void onLayoutChanged() {
+        textLayoutChanged = true;
+      }
+
+      paragraph.textLayout.addListener(onLayoutChanged);
+      expect(textLayoutChanged, isFalse);
+
+      paragraph.getDryLayout(BoxConstraints.tight(Size.zero));
+      paragraph.getMaxIntrinsicHeight(10);
+      paragraph.getMinIntrinsicHeight(10);
+      paragraph.getMaxIntrinsicWidth(10);
+      paragraph.getMinIntrinsicWidth(10);
+
+      expect(textLayoutChanged, isFalse);
+    });
+  });
 }
 
 class MockCanvas extends Fake implements Canvas {
@@ -1495,5 +1631,22 @@ class TestSelectionRegistrar extends SelectionRegistrar {
   void remove(Selectable selectable) {
     expect(selectables.remove(selectable), isTrue);
   }
+}
 
+class _TestPainter extends CustomPainter {
+  _TestPainter(this.listenable) : super(repaint: listenable);
+
+  final ValueListenable<TextPainterLayout?> listenable;
+
+  TextPainterLayout? lastTextLayout;
+  int paintCount = 0;
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    lastTextLayout = listenable.value;
+    paintCount += 1;
+  }
 }

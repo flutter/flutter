@@ -18,10 +18,59 @@ import 'layout_helper.dart';
 import 'object.dart';
 import 'selection.dart';
 
+// Examples can assume:
+// late TextSpan textSpan;
+// class MyTextCustomPainter extends CustomPainter { MyTextCustomPainter({ super.repaint }); @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true; @override void paint(Canvas canvas, Size size) {} }
+
 /// The start and end positions for a word.
 typedef _WordBoundaryRecord = ({TextPosition wordStart, TextPosition wordEnd});
 
 const String _kEllipsis = '\u2026';
+
+class _TextLayoutValueNotifier extends ValueNotifier<TextPainterLayout?> {
+  _TextLayoutValueNotifier(this.paragraph) : super(paragraph._textPainter.textLayout.value);
+
+  final RenderParagraph paragraph;
+
+  /// Whether the [RenderParagraph] should never defer the text layout process to
+  /// [RenderParagraph.paint], and instead always perform text layout in
+  /// [RenderParagraph.performLayout] if the _textPainter has pending layout
+  /// changes.
+  ///
+  /// [RenderParagraph.textAlign] does not affect the size of the text so the
+  /// setter typically only needs to [markNeedsPaint] when the value changes.
+  ///
+  /// However if a [TextPainterLayout] listener is present (which can be, as is common,
+  /// tied to another RenderObject's paint process), to allow that RenderObject
+  /// make use of the [TextPainterLayout] regardless of the paint order, the [TextPainterLayout]
+  /// must be computed before [PipelineOwner.flushPaint].
+  bool get eagerTextLayout => hasListeners;
+
+  @override
+  TextPainterLayout? get value => paragraph._textPainter.textLayout.value;
+
+  @override
+  void addListener(VoidCallback listener) {
+    if (!hasListeners) {
+      paragraph._textPainter.textLayout.addListener(notifyListeners);
+      // Tell the [RenderParagraph] to call performLayout if we don't have a
+      // valid text layout yet.
+      if (paragraph._textPainter.textLayout.value == null) {
+        assert(paragraph.owner == null || !paragraph.owner!.debugDoingPaint);
+        paragraph.markNeedsLayout();
+      }
+    }
+    super.addListener(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    super.removeListener(listener);
+    if (!hasListeners) {
+      paragraph._textPainter.textLayout.removeListener(notifyListeners);
+    }
+  }
+}
 
 /// Used by the [RenderParagraph] to map its rendering children to their
 /// corresponding semantics nodes.
@@ -469,6 +518,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     _removeSelectionRegistrarSubscription();
     _disposeSelectableFragments();
     _textPainter.dispose();
+    _textLayout.dispose();
     _textIntrinsicsCache?.dispose();
     super.dispose();
   }
@@ -480,7 +530,13 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
       return;
     }
     _textPainter.textAlign = value;
-    markNeedsPaint();
+    // If another RenderObject's paint algorithm depends on the text layout,
+    // eagerly compute the text layout during [performLayout].
+    if (_textLayout.eagerTextLayout) {
+      markNeedsLayout();
+    } else {
+      markNeedsPaint();
+    }
   }
 
   /// The directionality of the text.
@@ -780,6 +836,61 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   @visibleForTesting
   bool get debugHasOverflowShader => _overflowShader != null;
 
+  /// A [ValueListenable] that reflects the current text layout of the
+  /// [RenderParagraph], in the [RenderParagraph]'s coordinates.
+  ///
+  /// {@template flutter.rendering.renderParagraph.textLayout}
+  /// The `value` of [textLayout] is the most recent text layout computed by
+  /// this [RenderObject], or `null` if the text layout is invalidated and has
+  /// yet to be re-computed. It can be used to, for example, paint contents based
+  /// on the location of a line or a character. When the `value` of the
+  /// [ValueListenable] changes, the previous [TextPainterLayout] values becomes
+  /// invalid and must not be used.
+  ///
+  /// The `value` of the [TextPainterLayout] typically should not be accessed from
+  /// another [RenderObject]'s [performLayout] implementation, or any other layout
+  /// methods from a different [RenderObject], as it's not guaranteed that this
+  /// [RenderObject] have computed the text layout at that point. If you're
+  /// accessing a [textLayout] from anthor [RenderObject], consider doing that in
+  /// paint methods (such as [RenderObject.paint] or [CustomPainter.paint]), or
+  /// at later stages such as [hitTest].
+  ///
+  /// In rare occasions, the `value` may still report a null [TextPainterLayout]
+  /// even when accessed during or after paint, if this [RenderObject] is not
+  /// laid out due to it being invisible (for example, when it's in a scrollable
+  /// list and not in the visible part of the viewport).
+  ///
+  /// The [TextPainterLayout.-] operator can be used to compare two
+  /// [TextPainterLayout] objects. This can be useful for caching the results of
+  /// text layout APIs that are potentially expensive (notably,
+  /// [TextPainterLayout.getBoxesForSelection] when the method returns a large
+  /// number of boxes): if the previous [TextPainterLayout] is the same as the
+  /// new [TextPainterLayout], or only the paint offset is different, then the
+  /// cached [TextBox]es can be reused instead of having to call
+  /// [TextPainterLayout.getBoxesForSelection] again.
+  ///
+  /// The [Listenable] interface can be used to drive the paint process of any
+  /// [RenderObject]s in the tree. The [markNeedsPaint] method can be added as
+  /// listeners of this [Listenable] and the [paint] implementation can then read
+  /// the `value` of the [textLayout]. Or more succinctly:
+  /// {@endtemplate}
+  ///
+  /// ```dart
+  /// final RenderParagraph paragraph = RenderParagraph(textSpan, textDirection: TextDirection.ltr);
+  /// final CustomPainter foreground = MyTextCustomPainter(repaint: paragraph.textLayout);
+  /// final CustomPainter background = MyTextCustomPainter(repaint: paragraph.textLayout);
+  /// final RenderCustomPaint renderCustomPaint = RenderCustomPaint(
+  ///   foregroundPainter: foreground,
+  ///   painter: background,
+  ///   child: paragraph,
+  /// );
+  /// ```
+  ///
+  /// The `addListener` method of this [ValueListenable] must not be called
+  /// during paint.
+  ValueListenable<TextPainterLayout?> get textLayout => _textLayout;
+  late final _TextLayoutValueNotifier _textLayout = _TextLayoutValueNotifier(this);
+
   @override
   void systemFontsDidChange() {
     super.systemFontsDidChange();
@@ -893,6 +1004,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    assert(_textLayout.value != null || !_textLayout.eagerTextLayout);
     // Text alignment only triggers repaint so it's possible the text layout has
     // been invalidated but performLayout wasn't called at this point. Make sure
     // the TextPainter has a valid layout.

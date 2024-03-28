@@ -963,6 +963,32 @@ void main() {
     painter.dispose();
   }, skip: true); // https://github.com/flutter/flutter/issues/13512
 
+  test('TextPainter maxIntrinsicWidth takes trailing spaces into account', () {
+    const TextStyle style = TextStyle(fontSize: 10);
+    final TextPainter painter = TextPainter(
+      textDirection: TextDirection.ltr,
+    );
+    painter
+      ..text = TextSpan(text: 'X${" " * 10}', style: style)
+      ..layout();
+    expect(painter.maxIntrinsicWidth, 11 * 10);
+
+    painter
+      ..text = TextSpan(text: ' ' * 10, style: style)
+      ..layout();
+    expect(painter.maxIntrinsicWidth, 10 * 10);
+  });
+
+  test('TextPainter longestLine and trailing spaces', () {
+    const TextStyle style = TextStyle(fontSize: 10);
+    final TextPainter painter = TextPainter(
+      textDirection: TextDirection.ltr,
+    );
+    painter.text = TextSpan(text: 'X${" " * 10}', style: style);
+    // Trailing spaces are ignored in most cases.
+    expect(painter.layout().longestLine, 10);
+  });
+
   test('TextPainter widget span', () {
     final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
@@ -1614,6 +1640,160 @@ void main() {
         expect(metrics, hasLength(1));
     }
   }, skip: kIsWeb && !isCanvasKit); // [intended] Browsers seem to always round font/glyph metrics.
+
+  test('Listenable layout', () {
+    const double fontSize = 10;
+    const String text = '12345';
+    int callbackCalled = 0;
+    void onLayoutChanged() {
+      callbackCalled += 1;
+    }
+
+    final TextPainter painter = TextPainter(
+      textDirection: TextDirection.ltr,
+      text: const TextSpan(text: text, style: TextStyle(fontSize: fontSize)),
+    )..textLayout.addListener(onLayoutChanged);
+
+    expect(callbackCalled, 0);
+    expect(painter.textLayout.value, isNull);
+
+    painter.markNeedsLayout();
+    expect(callbackCalled, 0);
+    expect(painter.textLayout.value, isNull);
+
+    expect(painter.layout(), painter.textLayout.value);
+    expect(callbackCalled, 1);
+    expect(painter.textLayout.value, isNotNull);
+
+    expect(painter.layout(), painter.textLayout.value);
+    expect(callbackCalled, 1);
+
+    painter.textDirection = TextDirection.rtl;
+    expect(callbackCalled, 2);
+    expect(painter.textLayout.value, isNull);
+
+    expect(painter.layout(), painter.textLayout.value);
+    expect(callbackCalled, 3);
+
+    expect(painter.layout(maxWidth: 9999), painter.textLayout.value);
+    expect(callbackCalled, 3);
+
+    painter.dispose();
+  });
+
+  group('TextLayout', () {
+    test('shift paint offset', () {
+      const double fontSize = 10;
+      const String text = '12345';
+      const Offset additionalOffset = Offset(100, 1000);
+      final TextPainterLayout layout = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: const TextSpan(text: text, style: TextStyle(fontSize: fontSize)),
+      ).layout().shift(additionalOffset);
+
+      // The offset applies to offsets in all kinds of metrics.
+      expect(layout.getDistanceToBaseline(TextBaseline.alphabetic), additionalOffset.dy + 7.5);
+      expect(layout.getDistanceToBaseline(TextBaseline.ideographic), additionalOffset.dy + 10.0);
+
+      expect(
+        layout.getGlyphInfoAt(0),
+        GlyphInfo(
+          const Rect.fromLTWH(0, 0, fontSize, fontSize).shift(additionalOffset),
+          const TextRange(start: 0, end: 1),
+          TextDirection.ltr,
+        ),
+      );
+      expect(
+        layout.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1)),
+        const <ui.TextBox>[TextBox.fromLTRBD(100, 1000, fontSize + 100, fontSize + 1000, TextDirection.ltr)],
+      );
+
+      expect(
+        layout.getLineMetricsAt(0),
+        LineMetrics(hardBreak: true, ascent: 7.5, descent: 2.5, unscaledAscent: 7.5, height: 10, width: 50, left: 100, baseline: 1007.5, lineNumber: 0),
+      );
+
+      // Hit Testing
+      expect(
+        layout.getClosestGlyphInfoForOffset(additionalOffset + const Offset(5, 5)),
+        GlyphInfo(
+          const Rect.fromLTWH(0, 0, fontSize, fontSize).shift(additionalOffset),
+          const TextRange(start: 0, end: 1),
+          TextDirection.ltr,
+        ),
+      );
+      expect(layout.getPositionForOffset(additionalOffset + const Offset(3, 5)), const TextPosition(offset: 0));
+    }, skip: kIsWeb && !isCanvasKit); // [intended] https://github.com/flutter/flutter/issues/122066
+
+    test('shift operation throws if given an infinite offset', () {
+      const double fontSize = 10;
+      const String text = '12345';
+      final TextPainterLayout layout = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: const TextSpan(text: text, style: TextStyle(fontSize: fontSize)),
+      ).layout();
+
+      expect(() => layout.shift(Offset.infinite), throwsAssertionError);
+      expect(() => layout.shift(const Offset(double.nan, 0)), throwsAssertionError);
+      expect(() => layout.shift(const Offset(0, double.nan)), throwsAssertionError);
+    });
+
+    test('- / = operators basic test', () {
+      const double fontSize = 10;
+      const String text = '12345';
+      final TextPainter painter = TextPainter(
+        textDirection: TextDirection.ltr,
+        textAlign: TextAlign.right,
+        text: const TextSpan(text: text, style: TextStyle(fontSize: fontSize)),
+      );
+
+      expect(painter.layout(), painter.layout());
+      expect(painter.layout() - painter.layout(), Offset.zero);
+
+      expect(painter.layout(), painter.layout(maxWidth: 50));
+      expect(painter.layout() - painter.layout(maxWidth: 50), Offset.zero);
+
+      expect(painter.layout(), isNot(painter.layout(minWidth: double.infinity)));
+      expect(painter.layout(minWidth: double.infinity) - painter.layout(), const Offset(double.infinity, 0));
+      expect(painter.layout() - painter.layout(minWidth: double.infinity), const Offset(double.negativeInfinity, 0));
+
+      expect(painter.layout(minWidth: double.infinity), painter.layout(minWidth: double.infinity));
+      expect(painter.layout(minWidth: double.infinity) - painter.layout(minWidth: double.infinity), Offset.zero);
+
+      expect(painter.layout(), isNot(TextPainter(textDirection: TextDirection.ltr, text: const TextSpan()).layout()));
+      expect(painter.layout() - TextPainter(textDirection: TextDirection.ltr, text: const TextSpan()).layout(), isNull);
+
+      // Not the same layout if lines break differently.
+      expect(painter.layout(), isNot(painter.layout(maxWidth: 10)));
+      expect(painter.layout() - painter.layout(maxWidth: 10), isNull);
+    });
+
+    test('TextLayout lifecycle', () {
+      const double fontSize = 10;
+      const String text = '12345';
+      final TextPainter painter = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: const TextSpan(text: text, style: TextStyle(fontSize: fontSize)),
+      );
+
+      final TextPainterLayout initialLayout = painter.layout();
+      expect(initialLayout.debugIsValid, isTrue);
+
+      painter..layout()..layout();
+      expect(initialLayout.debugIsValid, isTrue);
+
+      painter.layout(maxWidth: 50);
+      expect(initialLayout.debugIsValid, isTrue);
+
+      painter.layout(maxWidth: 10);
+      expect(initialLayout.debugIsValid, isFalse);
+
+      final TextPainterLayout lastLayout = painter.layout(maxWidth: 10);
+      expect(lastLayout.debugIsValid, isTrue);
+      painter.dispose();
+      expect(lastLayout.debugIsValid, isFalse);
+    });
+  });
 
   group('strut style', () {
     test('strut style applies when the span has no style', () {

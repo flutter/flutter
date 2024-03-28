@@ -20,6 +20,10 @@ import 'object.dart';
 import 'paragraph.dart';
 import 'viewport_offset.dart';
 
+// Examples can assume:
+// late RenderEditable renderEditable;
+// class MyTextCustomPainter extends CustomPainter { MyTextCustomPainter({ super.repaint }); @override bool shouldRepaint(covariant CustomPainter oldDelegate) => true; @override void paint(Canvas canvas, Size size) {} }
+
 const double _kCaretGap = 1.0; // pixels
 const double _kCaretHeightOffset = 2.0; // pixels
 
@@ -36,6 +40,32 @@ const Radius _kFloatingCursorRadius = Radius.circular(1.0);
 // it's not necessary to display both cursors at the same time.
 // This behavior is consistent with the one observed in iOS UITextField.
 const double _kShortestDistanceSquaredWithFloatingAndRegularCursors = 15.0 * 15.0;
+
+class _TextLayoutValueNotifier extends ValueNotifier<TextPainterLayout?> {
+  _TextLayoutValueNotifier(this.renderEditable) : super(renderEditable._textPainter.textLayout.value?.shift(renderEditable._paintOffset));
+
+  final RenderEditable renderEditable;
+
+  void updateTextLayoutIfNeeded() {
+    value = renderEditable._textPainter.textLayout.value?.shift(renderEditable._paintOffset);
+  }
+
+  @override
+  void addListener(VoidCallback listener) {
+    if (!hasListeners) {
+      renderEditable._textPainter.textLayout.addListener(updateTextLayoutIfNeeded);
+    }
+    super.addListener(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    super.removeListener(listener);
+    if (!hasListeners) {
+      renderEditable._textPainter.textLayout.removeListener(updateTextLayoutIfNeeded);
+    }
+  }
+}
 
 /// Represents the coordinates of the point in a selection, and the text
 /// direction at that point, relative to top left of the [RenderEditable] that
@@ -409,6 +439,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _autocorrectHighlightPainter.dispose();
     _selectionPainter.dispose();
     _caretPainter.dispose();
+    _textLayout.dispose();
     _textPainter.dispose();
     _textIntrinsicsCache?.dispose();
     if (_disposeShowCursor) {
@@ -967,6 +998,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // height of the first line in case there are hard line breaks in the text.
     // See the `_preferredHeight` method.
     _textPainter.maxLines = value == 1 ? 1 : null;
+    _textLayout.updateTextLayoutIfNeeded();
     markNeedsLayout();
   }
 
@@ -1063,11 +1095,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
     if (attached) {
       _offset.removeListener(markNeedsPaint);
+      _offset.removeListener(_textLayout.updateTextLayoutIfNeeded);
     }
     _offset = value;
     if (attached) {
       _offset.addListener(markNeedsPaint);
+      _offset.addListener(_textLayout.updateTextLayoutIfNeeded);
     }
+    _textLayout.updateTextLayoutIfNeeded();
     markNeedsLayout();
   }
 
@@ -1627,6 +1662,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       ..onTap = _handleTap;
     _longPress = LongPressGestureRecognizer(debugOwner: this)..onLongPress = _handleLongPress;
     _offset.addListener(markNeedsPaint);
+    _offset.addListener(_textLayout.updateTextLayoutIfNeeded);
     _showHideCursor();
     _showCursor.addListener(_showHideCursor);
   }
@@ -1636,6 +1672,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _tap.dispose();
     _longPress.dispose();
     _offset.removeListener(markNeedsPaint);
+    _offset.removeListener(_textLayout.updateTextLayoutIfNeeded);
     _showCursor.removeListener(_showHideCursor);
     super.detach();
     _foregroundRenderObject?.detach();
@@ -2326,6 +2363,23 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       : constraints.constrainWidth(_textIntrinsics.size.width + _caretMargin);
     return Size(width, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
   }
+
+  /// A [ValueListenable] that reflects current layout of the [RenderEditable],
+  /// in this [RenderEditable]'s coordinates.
+  ///
+  /// {@macro flutter.rendering.renderParagraph.textLayout}
+  ///
+  /// ```dart
+  /// final CustomPainter foreground = MyTextCustomPainter(repaint: renderEditable.textLayout);
+  /// final CustomPainter background = MyTextCustomPainter(repaint: renderEditable.textLayout);
+  /// final RenderCustomPaint renderCustomPaint = RenderCustomPaint(
+  ///   foregroundPainter: foreground,
+  ///   painter: background,
+  ///   child: renderEditable,
+  /// );
+  /// ```
+  ValueListenable<TextPainterLayout?> get textLayout => _textLayout;
+  late final _TextLayoutValueNotifier _textLayout = _TextLayoutValueNotifier(this);
 
   @override
   void performLayout() {

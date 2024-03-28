@@ -2080,6 +2080,215 @@ void main() {
       expect(selection, const TextSelection.collapsed(offset: text.length));
     }
   });
+
+  group('TextLayout listening', () {
+    test('Repaints on demand', () async {
+      final RenderEditable editable = RenderEditable(
+        text: const TextSpan(text: 'AAAAA'),
+        textDirection: TextDirection.ltr,
+        cursorColor: const Color(0x00000000),
+        offset: ViewportOffset.zero(),
+        textSelectionDelegate: _FakeEditableTextState(),
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+      );
+      final _TestPainter foregroundPainter = _TestPainter(editable.textLayout);
+      final _TestPainter backgroundPainter = _TestPainter(editable.textLayout);
+      final RenderCustomPaint root = RenderCustomPaint(
+        foregroundPainter: foregroundPainter,
+        painter: backgroundPainter,
+        child: editable,
+      );
+
+      expect(foregroundPainter.lastTextLayout, isNull);
+      expect(backgroundPainter.lastTextLayout, isNull);
+      layout(root, phase: EnginePhase.composite);
+
+      final TextPainterLayout? previousLayout = editable.textLayout.value;
+      expect(editable.textLayout.value, isNotNull);
+      expect(foregroundPainter.lastTextLayout, editable.textLayout.value);
+      expect(foregroundPainter.paintCount, 1);
+      expect(backgroundPainter.lastTextLayout, editable.textLayout.value);
+      expect(backgroundPainter.paintCount, 1);
+
+      pumpFrame(phase: EnginePhase.composite);
+      expect(editable.textLayout.value, previousLayout);
+      expect(foregroundPainter.lastTextLayout, editable.textLayout.value);
+      expect(foregroundPainter.paintCount, 1);
+      expect(backgroundPainter.lastTextLayout, editable.textLayout.value);
+      expect(backgroundPainter.paintCount, 1);
+
+      editable.textDirection = TextDirection.rtl;
+      pumpFrame(phase: EnginePhase.composite);
+      expect(editable.textLayout.value, isNot(previousLayout));
+      expect(foregroundPainter.lastTextLayout, editable.textLayout.value);
+      expect(foregroundPainter.paintCount, 2);
+      expect(backgroundPainter.lastTextLayout, editable.textLayout.value);
+      expect(backgroundPainter.paintCount, 2);
+    });
+
+    test('Repaints when scroll offset changes', () async {
+      final RenderEditable editable = RenderEditable(
+        text: const TextSpan(text: 'AAAAA'),
+        textDirection: TextDirection.ltr,
+        textAlign: TextAlign.left,
+        cursorColor: const Color(0x00000000),
+        offset: ViewportOffset.zero(),
+        textSelectionDelegate: _FakeEditableTextState(),
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        maxLines: null,
+      );
+      final _TestPainter foregroundPainter = _TestPainter(editable.textLayout);
+      final _TestPainter backgroundPainter = _TestPainter(editable.textLayout);
+      final RenderCustomPaint root = RenderCustomPaint(
+        foregroundPainter: foregroundPainter,
+        painter: backgroundPainter,
+        child: editable,
+      );
+
+      expect(foregroundPainter.lastTextLayout, isNull);
+      expect(backgroundPainter.lastTextLayout, isNull);
+      layout(root, phase: EnginePhase.composite);
+      expect(editable.textLayout.value?.getGlyphInfoAt(0)?.graphemeClusterLayoutBounds.topLeft, Offset.zero);
+
+      editable.offset = ViewportOffset.fixed(1000);
+      expect(
+        editable.textLayout.value?.getGlyphInfoAt(0)?.graphemeClusterLayoutBounds.topLeft,
+        const Offset(0, -1000), // Multiline
+      );
+      pumpFrame(phase: EnginePhase.composite);
+      expect(foregroundPainter.lastTextLayout, editable.textLayout.value);
+      expect(foregroundPainter.paintCount, 2);
+      expect(backgroundPainter.lastTextLayout, editable.textLayout.value);
+      expect(backgroundPainter.paintCount, 2);
+      expect(
+        editable.textLayout.value?.getGlyphInfoAt(0)?.graphemeClusterLayoutBounds.topLeft,
+        const Offset(0, -1000), // Multiline
+      );
+
+      editable.maxLines = 1;
+      pumpFrame(phase: EnginePhase.composite);
+      expect(foregroundPainter.lastTextLayout, editable.textLayout.value);
+      expect(foregroundPainter.paintCount, 3);
+      expect(backgroundPainter.lastTextLayout, editable.textLayout.value);
+      expect(backgroundPainter.paintCount, 3);
+      expect(
+        editable.textLayout.value?.getGlyphInfoAt(0)?.graphemeClusterLayoutBounds.topLeft,
+        const Offset(-1000, 0), // Single line
+      );
+    });
+
+    test('Repaints on constraints changes', () async {
+      final RenderEditable editable = RenderEditable(
+        text: const TextSpan(text: 'AAAAA'),
+        textDirection: TextDirection.ltr,
+        cursorColor: const Color(0x00000000),
+        offset: ViewportOffset.zero(),
+        textSelectionDelegate: _FakeEditableTextState(),
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        maxLines: null,
+      );
+      final _TestPainter foregroundPainter = _TestPainter(editable.textLayout);
+      final _TestPainter backgroundPainter = _TestPainter(editable.textLayout);
+      final RenderConstrainedBox constrainedBox = RenderConstrainedBox(
+        child: editable,
+        additionalConstraints: const BoxConstraints(),
+      );
+
+      expect(foregroundPainter.lastTextLayout, isNull);
+      expect(backgroundPainter.lastTextLayout, isNull);
+      layout(
+        RenderCustomPaint(
+          foregroundPainter: foregroundPainter,
+          painter: backgroundPainter,
+          child: RenderPositionedBox(child: constrainedBox),
+        ),
+        phase: EnginePhase.composite,
+      );
+      final TextPainterLayout? previousLayout = editable.textLayout.value;
+
+      constrainedBox.additionalConstraints = const BoxConstraints.tightFor(width: 10);
+      pumpFrame(phase: EnginePhase.composite);
+      expect(editable.textLayout.value, isNot(previousLayout));
+      expect(foregroundPainter.lastTextLayout, editable.textLayout.value);
+      expect(foregroundPainter.paintCount, 2);
+      expect(backgroundPainter.lastTextLayout, editable.textLayout.value);
+      expect(backgroundPainter.paintCount, 2);
+    });
+
+    test('Repaints on TextAlign changes', () async {
+      final RenderEditable editable = RenderEditable(
+        text: const TextSpan(text: 'AAAAA'),
+        textDirection: TextDirection.ltr,
+        cursorColor: const Color(0x00000000),
+        offset: ViewportOffset.zero(),
+        textSelectionDelegate: _FakeEditableTextState(),
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+      );
+      final _TestPainter foregroundPainter = _TestPainter(editable.textLayout);
+      final _TestPainter backgroundPainter = _TestPainter(editable.textLayout);
+      final RenderCustomPaint root = RenderCustomPaint(
+        foregroundPainter: foregroundPainter,
+        painter: backgroundPainter,
+        child: editable,
+      );
+
+      expect(foregroundPainter.lastTextLayout, isNull);
+      expect(backgroundPainter.lastTextLayout, isNull);
+
+      layout(root, phase: EnginePhase.composite);
+
+      TextPainterLayout? previousLayout = editable.textLayout.value;
+      expect(editable.textLayout.value, isNotNull);
+      expect(foregroundPainter.lastTextLayout, editable.textLayout.value);
+      expect(foregroundPainter.paintCount, 1);
+      expect(backgroundPainter.lastTextLayout, editable.textLayout.value);
+      expect(backgroundPainter.paintCount, 1);
+
+      previousLayout = editable.textLayout.value;
+      editable.textAlign = TextAlign.center;
+      expect(editable.textLayout.value, isNull);
+
+      pumpFrame(phase: EnginePhase.composite);
+      expect(editable.textLayout.value, isNotNull);
+      expect(editable.textLayout.value, isNot(previousLayout));
+      expect(foregroundPainter.lastTextLayout, editable.textLayout.value);
+      expect(foregroundPainter.paintCount, 2);
+      expect(backgroundPainter.lastTextLayout, editable.textLayout.value);
+      expect(backgroundPainter.paintCount, 2);
+    });
+
+    test('intrinsic calculation is not observable', () async {
+      final RenderEditable editable = RenderEditable(
+        text: const TextSpan(text: 'AAAAA'),
+        textDirection: TextDirection.ltr,
+        cursorColor: const Color(0x00000000),
+        offset: ViewportOffset.zero(),
+        textSelectionDelegate: _FakeEditableTextState(),
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+      );
+      layout(editable, phase: EnginePhase.composite);
+      bool textLayoutChanged = false;
+      void onLayoutChanged() {
+        textLayoutChanged = true;
+      }
+
+      editable.textLayout.addListener(onLayoutChanged);
+      expect(textLayoutChanged, isFalse);
+
+      editable.getDryLayout(BoxConstraints.tight(Size.zero));
+      editable.getMaxIntrinsicHeight(10);
+      editable.getMinIntrinsicHeight(10);
+      editable.getMaxIntrinsicWidth(10);
+      editable.getMinIntrinsicWidth(10);
+
+      expect(textLayoutChanged, isFalse);
+    });
+  });
 }
 
 class _TestRenderEditable extends RenderEditable {
@@ -2125,4 +2334,22 @@ class _TestRenderEditablePainter extends RenderEditablePainter {
 
   @override
   String toString() => '_TestRenderEditablePainter#${shortHash(this)}';
+}
+
+class _TestPainter extends CustomPainter {
+  _TestPainter(this.listenable) : super(repaint: listenable);
+
+  final ValueListenable<TextPainterLayout?> listenable;
+
+  TextPainterLayout? lastTextLayout;
+  int paintCount = 0;
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    lastTextLayout = listenable.value;
+    paintCount += 1;
+  }
 }
