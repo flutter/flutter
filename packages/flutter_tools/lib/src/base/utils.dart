@@ -104,9 +104,9 @@ String getSizeAsPlatformMB(int bytesLength, {
 /// removed, and calculate a diff of changes when a new list of items is
 /// available.
 class ItemListNotifier<T> {
-  ItemListNotifier(): _items = <T>{};
+  ItemListNotifier(): _items = <T>{}, _isPopulated = false;
 
-  ItemListNotifier.from(List<T> items) : _items = Set<T>.of(items);
+  ItemListNotifier.from(List<T> items) : _items = Set<T>.of(items), _isPopulated = true;
 
   Set<T> _items;
 
@@ -118,6 +118,11 @@ class ItemListNotifier<T> {
 
   List<T> get items => _items.toList();
 
+  bool _isPopulated;
+
+  /// Returns whether the list has been populated.
+  bool get isPopulated => _isPopulated;
+
   void updateWithNewList(List<T> updatedList) {
     final Set<T> updatedSet = Set<T>.of(updatedList);
 
@@ -125,9 +130,10 @@ class ItemListNotifier<T> {
     final Set<T> removedItems = _items.difference(updatedSet);
 
     _items = updatedSet;
+    _isPopulated = true;
 
-    addedItems.forEach(_addedController.add);
     removedItems.forEach(_removedController.add);
+    addedItems.forEach(_addedController.add);
   }
 
   void removeItem(T item) {

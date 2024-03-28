@@ -1642,93 +1642,28 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
 
   @override
   bool updateShouldNotifyDependent(MediaQuery oldWidget, Set<Object> dependencies) {
-    for (final Object dependency in dependencies) {
-      if (dependency is _MediaQueryAspect) {
-        switch (dependency) {
-          case _MediaQueryAspect.size:
-            if (data.size != oldWidget.data.size) {
-              return true;
-            }
-          case _MediaQueryAspect.orientation:
-            if (data.orientation != oldWidget.data.orientation) {
-              return true;
-            }
-          case _MediaQueryAspect.devicePixelRatio:
-            if (data.devicePixelRatio != oldWidget.data.devicePixelRatio) {
-              return true;
-            }
-          case _MediaQueryAspect.textScaleFactor:
-            if (data.textScaleFactor != oldWidget.data.textScaleFactor) {
-              return true;
-            }
-          case _MediaQueryAspect.textScaler:
-            if (data.textScaler != oldWidget.data.textScaler) {
-              return true;
-            }
-          case _MediaQueryAspect.platformBrightness:
-            if (data.platformBrightness != oldWidget.data.platformBrightness) {
-              return true;
-            }
-          case _MediaQueryAspect.padding:
-            if (data.padding != oldWidget.data.padding) {
-              return true;
-            }
-          case _MediaQueryAspect.viewInsets:
-            if (data.viewInsets != oldWidget.data.viewInsets) {
-              return true;
-            }
-          case _MediaQueryAspect.systemGestureInsets:
-            if (data.systemGestureInsets != oldWidget.data.systemGestureInsets) {
-              return true;
-            }
-          case _MediaQueryAspect.viewPadding:
-            if (data.viewPadding != oldWidget.data.viewPadding) {
-              return true;
-            }
-          case _MediaQueryAspect.alwaysUse24HourFormat:
-            if (data.alwaysUse24HourFormat != oldWidget.data.alwaysUse24HourFormat) {
-              return true;
-            }
-          case _MediaQueryAspect.accessibleNavigation:
-            if (data.accessibleNavigation != oldWidget.data.accessibleNavigation) {
-              return true;
-            }
-          case _MediaQueryAspect.invertColors:
-            if (data.invertColors != oldWidget.data.invertColors) {
-              return true;
-            }
-          case _MediaQueryAspect.highContrast:
-            if (data.highContrast != oldWidget.data.highContrast) {
-              return true;
-            }
-          case _MediaQueryAspect.onOffSwitchLabels:
-            if (data.onOffSwitchLabels != oldWidget.data.onOffSwitchLabels) {
-              return true;
-            }
-          case _MediaQueryAspect.disableAnimations:
-            if (data.disableAnimations != oldWidget.data.disableAnimations) {
-              return true;
-            }
-          case _MediaQueryAspect.boldText:
-            if (data.boldText != oldWidget.data.boldText) {
-              return true;
-            }
-          case _MediaQueryAspect.navigationMode:
-            if (data.navigationMode != oldWidget.data.navigationMode) {
-              return true;
-            }
-          case _MediaQueryAspect.gestureSettings:
-            if (data.gestureSettings != oldWidget.data.gestureSettings) {
-              return true;
-            }
-          case _MediaQueryAspect.displayFeatures:
-            if (data.displayFeatures != oldWidget.data.displayFeatures) {
-              return true;
-            }
-        }
-      }
-    }
-    return false;
+    return dependencies.any((Object dependency) => dependency is _MediaQueryAspect && switch (dependency) {
+      _MediaQueryAspect.size               => data.size != oldWidget.data.size,
+      _MediaQueryAspect.orientation        => data.orientation != oldWidget.data.orientation,
+      _MediaQueryAspect.devicePixelRatio   => data.devicePixelRatio != oldWidget.data.devicePixelRatio,
+      _MediaQueryAspect.textScaleFactor    => data.textScaleFactor != oldWidget.data.textScaleFactor,
+      _MediaQueryAspect.textScaler         => data.textScaler != oldWidget.data.textScaler,
+      _MediaQueryAspect.platformBrightness => data.platformBrightness != oldWidget.data.platformBrightness,
+      _MediaQueryAspect.padding            => data.padding != oldWidget.data.padding,
+      _MediaQueryAspect.viewInsets         => data.viewInsets != oldWidget.data.viewInsets,
+      _MediaQueryAspect.viewPadding        => data.viewPadding != oldWidget.data.viewPadding,
+      _MediaQueryAspect.invertColors       => data.invertColors != oldWidget.data.invertColors,
+      _MediaQueryAspect.highContrast       => data.highContrast != oldWidget.data.highContrast,
+      _MediaQueryAspect.onOffSwitchLabels  => data.onOffSwitchLabels != oldWidget.data.onOffSwitchLabels,
+      _MediaQueryAspect.disableAnimations  => data.disableAnimations != oldWidget.data.disableAnimations,
+      _MediaQueryAspect.boldText           => data.boldText != oldWidget.data.boldText,
+      _MediaQueryAspect.navigationMode     => data.navigationMode != oldWidget.data.navigationMode,
+      _MediaQueryAspect.gestureSettings    => data.gestureSettings != oldWidget.data.gestureSettings,
+      _MediaQueryAspect.displayFeatures    => data.displayFeatures != oldWidget.data.displayFeatures,
+      _MediaQueryAspect.systemGestureInsets => data.systemGestureInsets != oldWidget.data.systemGestureInsets,
+      _MediaQueryAspect.accessibleNavigation => data.accessibleNavigation != oldWidget.data.accessibleNavigation,
+      _MediaQueryAspect.alwaysUse24HourFormat => data.alwaysUse24HourFormat != oldWidget.data.alwaysUse24HourFormat,
+    });
   }
 }
 

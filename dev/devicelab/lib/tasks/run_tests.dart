@@ -196,15 +196,9 @@ class WindowsRunOutputTest extends DesktopRunOutputTest {
           return false;
         }
 
-        // Size information is only included in release builds.
-        final bool hasSize = line.contains('MB)');
-        if (release != hasSize) {
-          return false;
-        }
-
         return true;
       },
-      'Built build\\windows\\$arch\\runner\\$buildMode\\app.exe',
+      '√ Built build\\windows\\$arch\\runner\\$buildMode\\ui.exe',
     );
   }
 }

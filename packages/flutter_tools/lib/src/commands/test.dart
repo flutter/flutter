@@ -23,6 +23,7 @@ import '../test/test_time_recorder.dart';
 import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
 import '../web/compile.dart';
+import '../web/web_constants.dart';
 
 /// The name of the directory where Integration Tests are placed.
 ///
@@ -233,7 +234,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'in seconds (e.g. "60s"), '
               'as a multiplier of the default timeout (e.g. "2x"), '
               'or as the string "none" to disable the timeout entirely.',
+      )
+      ..addFlag(
+        FlutterOptions.kWebWasmFlag,
+        help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
+        negatable: false,
       );
+
     addDdsOptions(verboseHelp: verboseHelp);
     addServeObservatoryOptions(verboseHelp: verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
@@ -256,6 +263,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   final Set<Uri> _testFileUris = <Uri>{};
 
   bool get isWeb => stringArg('platform') == 'chrome';
+  bool get useWasm => boolArg(FlutterOptions.kWebWasmFlag);
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
@@ -499,6 +507,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       watcher = collector;
     }
 
+    if (!isWeb && useWasm) {
+      throwToolExit('--wasm is only supported on the web platform');
+    }
+
     Device? integrationTestDevice;
     if (_isIntegrationTest) {
       integrationTestDevice = await findTargetDevice();
@@ -577,6 +589,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         testAssetDirectory: testAssetDirectory,
         flutterProject: flutterProject,
         web: isWeb,
+        useWasm: useWasm,
         randomSeed: stringArg('test-randomize-ordering-seed'),
         reporter: stringArg('reporter'),
         fileReporter: stringArg('file-reporter'),

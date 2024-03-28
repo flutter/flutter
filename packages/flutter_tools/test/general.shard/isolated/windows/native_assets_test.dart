@@ -17,9 +17,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/windows/native_assets.dart';
 import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    hide BuildMode, Target;
-import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    as native_assets_cli;
+    hide Target;
 import 'package:package_config/package_config_types.dart';
 
 import '../../../src/common.dart';
@@ -145,12 +143,13 @@ void main() {
           Package('bar', projectUri),
         ],
         dryRunResult: FakeNativeAssetsBuilderResult(
-          assets: <Asset>[
-            Asset(
+          assets: <AssetImpl>[
+            NativeCodeAssetImpl(
               id: 'package:bar/bar.dart',
-              linkMode: LinkMode.dynamic,
-              target: native_assets_cli.Target.windowsX64,
-              path: AssetAbsolutePath(Uri.file('bar.dll')),
+              linkMode: DynamicLoadingBundledImpl(),
+              os: OSImpl.windows,
+              architecture: ArchitectureImpl.x64,
+              file: Uri.file('bar.dll'),
             ),
           ],
         ),
@@ -255,12 +254,13 @@ void main() {
             Package('bar', projectUri),
           ],
           buildResult: FakeNativeAssetsBuilderResult(
-            assets: <Asset>[
-              Asset(
+            assets: <AssetImpl>[
+              NativeCodeAssetImpl(
                 id: 'package:bar/bar.dart',
-                linkMode: LinkMode.dynamic,
-                target: native_assets_cli.Target.windowsX64,
-                path: AssetAbsolutePath(dylibAfterCompiling.uri),
+                linkMode: DynamicLoadingBundledImpl(),
+                os: OSImpl.windows,
+                architecture: ArchitectureImpl.x64,
+                file: dylibAfterCompiling.uri,
               ),
             ],
           ),
@@ -308,12 +308,13 @@ void main() {
             Package('bar', projectUri),
           ],
           dryRunResult: FakeNativeAssetsBuilderResult(
-            assets: <Asset>[
-              Asset(
+            assets: <AssetImpl>[
+              NativeCodeAssetImpl(
                 id: 'package:bar/bar.dart',
-                linkMode: LinkMode.static,
-                target: native_assets_cli.Target.windowsX64,
-                path: AssetAbsolutePath(Uri.file(OS.windows.staticlibFileName('bar'))),
+                linkMode: StaticLinkingImpl(),
+                os: OSImpl.windows,
+                architecture: ArchitectureImpl.x64,
+                file: Uri.file(OSImpl.windows.staticlibFileName('bar')),
               ),
             ],
           ),
@@ -492,10 +493,19 @@ void main() {
       fileSystem,
       logger,
     );
-    final CCompilerConfig result = await runner.cCompilerConfig;
-    expect(result.cc?.toFilePath(), msvcBinDir.childFile('cl.exe').uri.toFilePath());
-    expect(result.ar?.toFilePath(), msvcBinDir.childFile('lib.exe').uri.toFilePath());
-    expect(result.ld?.toFilePath(), msvcBinDir.childFile('link.exe').uri.toFilePath());
+    final CCompilerConfigImpl result = await runner.cCompilerConfig;
+    expect(
+      result.compiler?.toFilePath(),
+      msvcBinDir.childFile('cl.exe').uri.toFilePath(),
+    );
+    expect(
+      result.archiver?.toFilePath(),
+      msvcBinDir.childFile('lib.exe').uri.toFilePath(),
+    );
+    expect(
+      result.linker?.toFilePath(),
+      msvcBinDir.childFile('link.exe').uri.toFilePath(),
+    );
     expect(result.envScript, isNotNull);
     expect(result.envScriptArgs, isNotNull);
   });
