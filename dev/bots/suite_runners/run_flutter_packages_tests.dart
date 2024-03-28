@@ -1,5 +1,11 @@
-import 'dart:io' show Directory;
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
+import 'dart:io' show Directory, File;
+
+import 'package:file/file.dart' as fs;
+import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
 
 import '../run_command.dart';
@@ -70,4 +76,23 @@ Future<void> flutterPackagesRunner() async {
   await selectSubshard(<String, ShardRunner>{
     'analyze': runAnalyze,
   });
+}
+
+/// Returns the commit hash of the flutter/packages repository that's rolled in.
+///
+/// The flutter/packages repository is a downstream dependency, it is only used
+/// by flutter/flutter for testing purposes, to assure stable tests for a given
+/// flutter commit the flutter/packages commit hash to test against is coded in
+/// the bin/internal/flutter_packages.version file.
+///
+/// The `filesystem` parameter specified filesystem to read the packages version file from.
+/// The `packagesVersionFile` parameter allows specifying an alternative path for the
+/// packages version file, when null [flutterPackagesVersionFile] is used.
+Future<String> getFlutterPackagesVersion({
+  fs.FileSystem fileSystem = const LocalFileSystem(),
+  String? packagesVersionFile,
+}) async {
+  final File versionFile = fileSystem.file(packagesVersionFile ?? flutterPackagesVersionFile);
+  final String versionFileContents = await versionFile.readAsString();
+  return versionFileContents.trim();
 }

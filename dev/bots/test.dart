@@ -50,9 +50,9 @@
 import 'dart:convert';
 import 'dart:core' as system show print;
 import 'dart:core' hide print;
+import 'dart:io' as io;
 import 'dart:io' as system show exit;
 import 'dart:io' hide exit;
-import 'dart:io' as io;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -65,7 +65,6 @@ import 'package:process/process.dart';
 
 import 'run_command.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
-import 'suite_runners/run_flutter_packages_tests.dart';
 import 'suite_runners/run_web_long_running_tests.dart';
 import 'tool_subsharding.dart';
 import 'utils.dart';
@@ -1194,25 +1193,6 @@ Future<void> _runWebUnitTests(String webRenderer, bool useWasm) async {
   };
 
   await selectSubshard(subshards);
-}
-
-/// Returns the commit hash of the flutter/packages repository that's rolled in.
-///
-/// The flutter/packages repository is a downstream dependency, it is only used
-/// by flutter/flutter for testing purposes, to assure stable tests for a given
-/// flutter commit the flutter/packages commit hash to test against is coded in
-/// the bin/internal/flutter_packages.version file.
-///
-/// The `filesystem` parameter specified filesystem to read the packages version file from.
-/// The `packagesVersionFile` parameter allows specifying an alternative path for the
-/// packages version file, when null [flutterPackagesVersionFile] is used.
-Future<String> getFlutterPackagesVersion({
-  fs.FileSystem fileSystem = const LocalFileSystem(),
-  String? packagesVersionFile,
-}) async {
-  final File versionFile = fileSystem.file(packagesVersionFile ?? flutterPackagesVersionFile);
-  final String versionFileContents = await versionFile.readAsString();
-  return versionFileContents.trim();
 }
 
 // Runs customer_testing.
