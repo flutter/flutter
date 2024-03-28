@@ -15,6 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../assertion_helper.dart';
+
 void main() {
   testWidgets('SnackBar control test', (WidgetTester tester) async {
     const String helloSnackBar = 'Hello SnackBar';
@@ -3575,15 +3577,9 @@ void main() {
           content: Text('SnackBar'),
         ));
       },
-      throwsA(
-        isA<AssertionError>().having(
-          (AssertionError error) => error.toString(),
-          'description',
-          contains(
-            'ScaffoldMessenger.showSnackBar was called, but there are currently '
-            'no descendant Scaffolds to present to.'
-          )
-        ),
+      throwsAssertionWith(
+        'ScaffoldMessenger.showSnackBar was called, but there are currently '
+        'no descendant Scaffolds to present to.'
       ),
     );
   });

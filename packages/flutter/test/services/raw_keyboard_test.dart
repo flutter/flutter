@@ -9,6 +9,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../assertion_helper.dart';
+
 class _ModifierCheck {
   const _ModifierCheck(this.key, this.side);
   final ModifierKey key;
@@ -861,11 +863,7 @@ void main() {
             (ByteData? data) { },
           );
         },
-        throwsA(isA<AssertionError>().having(
-          (AssertionError error) => error.toString(),
-          '.toString()',
-          contains('Attempted to send a key down event when no keys are in keysPressed'),
-        )),
+        throwsAssertionWith('Attempted to send a key down event when no keys are in keysPressed'),
       );
     });
 

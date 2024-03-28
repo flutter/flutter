@@ -89,7 +89,7 @@ class StackFrame {
   ///
   /// Returns null if format is not as expected.
   static StackFrame? _tryParseWebFrame(String line) {
-    if (kDebugMode) {
+    if (kDebugMode && !kIsWasm) {
       return _tryParseWebDebugFrame(line);
     } else {
       return _tryParseWebNonDebugFrame(line);

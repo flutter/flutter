@@ -99,7 +99,11 @@ void main() {
     expect(ticker.isActive, isFalse);
   });
 
-  testWidgets('Ticker control test', (WidgetTester tester) async {
+  testWidgets(
+    'Ticker control test',
+    // Functions are inlined too aggressively by the TFA for this test to work.
+    skip: kIsWasm, // https://github.com/dart-lang/sdk/issues/55279
+    (WidgetTester tester) async {
     late Ticker ticker;
     addTearDown(() => ticker.dispose());
 

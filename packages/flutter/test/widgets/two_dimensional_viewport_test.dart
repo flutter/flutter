@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../assertion_helper.dart';
 import 'two_dimensional_utils.dart';
 
 void main() {
@@ -131,26 +132,14 @@ void main() {
           () {
             delegate.maxXIndex = -2;
           },
-          throwsA(
-            isA<AssertionError>().having(
-              (AssertionError error) => error.toString(),
-              'description',
-              contains('value == null || value >= -1'),
-            ),
-          ),
+          throwsAssertionWith('value == null || value >= -1'),
         );
         delegate.maxYIndex = -1; // No exception
         expect(
           () {
             delegate.maxYIndex = -2;
           },
-          throwsA(
-            isA<AssertionError>().having(
-              (AssertionError error) => error.toString(),
-              'description',
-              contains('value == null || value >= -1'),
-            ),
-          ),
+          throwsAssertionWith('value == null || value >= -1'),
         );
         // Constructor
         expect(
@@ -163,13 +152,7 @@ void main() {
               }
             );
           },
-          throwsA(
-            isA<AssertionError>().having(
-              (AssertionError error) => error.toString(),
-              'description',
-              contains('maxXIndex == null || maxXIndex >= -1'),
-            ),
-          ),
+          throwsAssertionWith('maxXIndex == null || maxXIndex >= -1'),
         );
         expect(
           () {
@@ -181,13 +164,7 @@ void main() {
               }
             );
           },
-          throwsA(
-            isA<AssertionError>().having(
-              (AssertionError error) => error.toString(),
-              'description',
-              contains('maxYIndex == null || maxYIndex >= -1'),
-            ),
-          ),
+          throwsAssertionWith('maxYIndex == null || maxYIndex >= -1'),
         );
       });
 
@@ -1456,13 +1433,7 @@ void main() {
           mainAxis: Axis.vertical,
         );
       },
-      throwsA(
-        isA<AssertionError>().having(
-          (AssertionError error) => error.toString(),
-          'description',
-          contains('AxisDirection is not Axis.'),
-        ),
-      ),
+      throwsAssertionWith('AxisDirection is not Axis.'),
     );
 
     // Vertical mismatch
@@ -1482,13 +1453,7 @@ void main() {
           mainAxis: Axis.vertical,
         );
       },
-      throwsA(
-        isA<AssertionError>().having(
-          (AssertionError error) => error.toString(),
-          'description',
-          contains('AxisDirection is not Axis.'),
-        ),
-      ),
+      throwsAssertionWith('AxisDirection is not Axis.'),
     );
 
     // Both
@@ -1508,13 +1473,7 @@ void main() {
           mainAxis: Axis.vertical,
         );
       },
-      throwsA(
-        isA<AssertionError>().having(
-          (AssertionError error) => error.toString(),
-          'description',
-          contains('AxisDirection is not Axis.'),
-        ),
-      ),
+      throwsAssertionWith('AxisDirection is not Axis.'),
     );
   });
 
@@ -1579,13 +1538,7 @@ void main() {
             childManager: _NullBuildContext(),
           );
         },
-        throwsA(
-          isA<AssertionError>().having(
-            (AssertionError error) => error.toString(),
-            'description',
-            contains('AxisDirection is not Axis.'),
-          ),
-        ),
+        throwsAssertionWith('AxisDirection is not Axis.'),
       );
 
       // Vertical mismatch
@@ -1606,13 +1559,7 @@ void main() {
             childManager: _NullBuildContext(),
           );
         },
-        throwsA(
-          isA<AssertionError>().having(
-            (AssertionError error) => error.toString(),
-            'description',
-            contains('AxisDirection is not Axis.'),
-          ),
-        ),
+        throwsAssertionWith('AxisDirection is not Axis.'),
       );
 
       // Both
@@ -1633,13 +1580,7 @@ void main() {
             childManager: _NullBuildContext(),
           );
         },
-        throwsA(
-          isA<AssertionError>().having(
-            (AssertionError error) => error.toString(),
-            'description',
-            contains('AxisDirection is not Axis.'),
-          ),
-        ),
+        throwsAssertionWith('AxisDirection is not Axis.'),
       );
     });
 
@@ -1678,13 +1619,7 @@ void main() {
         () {
           renderViewport.viewportDimension;
         },
-        throwsA(
-          isA<AssertionError>().having(
-            (AssertionError error) => error.toString(),
-            'description',
-            contains('hasSize'),
-          ),
-        ),
+        throwsAssertionWith('hasSize'),
       );
       expect(renderViewport.horizontalOffset.pixels, 20.0);
       expect(renderViewport.horizontalAxisDirection, AxisDirection.right);
@@ -2229,13 +2164,7 @@ void main() {
         () {
           viewport.buildOrObtainChildFor(ChildVicinity.invalid);
         },
-        throwsA(
-          isA<AssertionError>().having(
-            (AssertionError error) => error.toString(),
-            'description',
-            contains('ChildVicinity.invalid'),
-          ),
-        ),
+        throwsAssertionWith('ChildVicinity.invalid'),
       );
     }, variant: TargetPlatformVariant.all());
 
@@ -2356,49 +2285,25 @@ void main() {
         () {
           viewport.computeMinIntrinsicWidth(100);
         },
-        throwsA(
-          isA<AssertionError>().having(
-            (AssertionError error) => error.toString(),
-            'description',
-            contains('does not support returning intrinsic dimensions'),
-          ),
-        ),
+        throwsAssertionWith('does not support returning intrinsic dimensions'),
       );
       expect(
         () {
           viewport.computeMaxIntrinsicWidth(100);
         },
-        throwsA(
-          isA<AssertionError>().having(
-            (AssertionError error) => error.toString(),
-            'description',
-            contains('does not support returning intrinsic dimensions'),
-          ),
-        ),
+        throwsAssertionWith('does not support returning intrinsic dimensions'),
       );
       expect(
         () {
           viewport.computeMinIntrinsicHeight(100);
         },
-        throwsA(
-          isA<AssertionError>().having(
-            (AssertionError error) => error.toString(),
-            'description',
-            contains('does not support returning intrinsic dimensions'),
-          ),
-        ),
+        throwsAssertionWith('does not support returning intrinsic dimensions'),
       );
       expect(
         () {
           viewport.computeMaxIntrinsicHeight(100);
         },
-        throwsA(
-          isA<AssertionError>().having(
-            (AssertionError error) => error.toString(),
-            'description',
-            contains('does not support returning intrinsic dimensions'),
-          ),
-        ),
+        throwsAssertionWith('does not support returning intrinsic dimensions'),
       );
     }, variant: TargetPlatformVariant.all());
 

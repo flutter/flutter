@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../assertion_helper.dart';
+
 void main() {
   test('SnackBarThemeData copyWith, ==, hashCode basics', () {
     expect(const SnackBarThemeData(), const SnackBarThemeData().copyWith());
@@ -402,12 +404,9 @@ void main() {
           },
         ),
       ),
-    )), throwsA(isA<AssertionError>().having(
-        (AssertionError e) => e.toString(),
-        'description',
-        contains('disabledBackgroundColor must not be provided when background color is a MaterialStateColor'))
-      )
-    );
+    )), throwsAssertionWith(
+      'disabledBackgroundColor must not be provided when background color is a MaterialStateColor'
+    ));
   });
 
   testWidgets('SnackBar theme behavior is correct for floating', (WidgetTester tester) async {

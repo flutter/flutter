@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../assertion_helper.dart';
 import 'rendering_tester.dart';
 
 class RenderTestBox extends RenderBox {
@@ -208,13 +209,13 @@ void main() {
       assert(incomingConstraints != const BoxConstraints());
       expect(
         () => test.getDryBaseline(const BoxConstraints(), TextBaseline.alphabetic),
-        throwsA(isA<AssertionError>().having((AssertionError e) => e.message, 'message', contains('no dry baseline for you'))),
+        throwsAssertionWith('no dry baseline for you')
       );
 
       // Still throws when there is cache.
       expect(
         () => test.getDryBaseline(incomingConstraints, TextBaseline.alphabetic),
-        throwsA(isA<AssertionError>().having((AssertionError e) => e.message, 'message', contains('no dry baseline for you'))),
+        throwsAssertionWith('no dry baseline for you')
       );
     });
 

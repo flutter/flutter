@@ -149,6 +149,7 @@ void testWidgets(
   dynamic tags,
   int? retry,
   LeakTesting? experimentalLeakTesting,
+  bool solo = false,
 }) {
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
@@ -195,6 +196,7 @@ void testWidgets(
       timeout: timeout ?? binding.defaultTestTimeout,
       tags: tags,
       retry: retry,
+      solo: solo,
     );
   }
 }

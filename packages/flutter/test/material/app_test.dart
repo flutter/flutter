@@ -10,6 +10,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import '../assertion_helper.dart';
+
 class StateMarker extends StatefulWidget {
   const StateMarker({ super.key, this.child });
 
@@ -1527,10 +1529,7 @@ void main() {
           () {
             defaultBehavior.buildScrollbar(capturedContext, child, details);
           },
-          throwsA(
-            isA<AssertionError>().having((AssertionError error) => error.toString(),
-              'description', contains('details.controller != null')),
-          ),
+          throwsAssertionWith('details.controller != null')
         );
     }
   }, variant: TargetPlatformVariant.all());
