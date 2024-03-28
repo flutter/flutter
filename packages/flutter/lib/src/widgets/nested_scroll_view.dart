@@ -934,6 +934,14 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     goBallistic(0.0);
   }
 
+  void dragTo(double to) {
+    _outerPosition!.dragTo(nestOffset(to, _outerPosition!));
+    for (final _NestedScrollPosition position in _innerPositions) {
+      position.localDragTo(nestOffset(to, position));
+    }
+  }
+
+
   void pointerScroll(double delta) {
     // If an update is made to pointer scrolling here, consider if the same
     // (or similar) change should be made in
@@ -1454,6 +1462,11 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   }
 
   @override
+  void dragTo(double value) {
+    return coordinator.dragTo(coordinator.unnestOffset(value, this));
+  }
+
+  @override
   void pointerScroll(double delta) {
     return coordinator.pointerScroll(delta);
   }
@@ -1471,6 +1484,14 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
       didStartScroll();
       didUpdateScrollPositionBy(pixels - oldPixels);
       didEndScroll();
+    }
+  }
+
+  void localDragTo(double value) {
+    if (pixels != value) {
+      final double oldPixels = pixels;
+      forcePixels(value);
+      didUpdateScrollPositionBy(pixels - oldPixels);
     }
   }
 
