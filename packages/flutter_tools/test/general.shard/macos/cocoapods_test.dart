@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
@@ -455,6 +456,19 @@ void main() {
         buildMode: BuildMode.debug,
       ), throwsToolExit(message: 'Podfile missing'));
       expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
+    testUsingContext("doesn't throw, if using Swift Package Manager and Podfile is missing.", () async {
+      final FlutterProject projectUnderTest = setupProjectUnderTest();
+      final bool didInstall = await cocoaPodsUnderTest.processPods(
+        xcodeProject: projectUnderTest.ios,
+        buildMode: BuildMode.debug,
+      );
+      expect(didInstall, isFalse);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
     });
 
     testUsingContext('throws, if specs repo is outdated.', () async {
@@ -1380,7 +1394,11 @@ Specs satisfying the `$fakePluginName (from `Flutter/ephemeral/.symlinks/plugins
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
-  FakeXcodeProjectInterpreter({this.isInstalled = true, this.buildSettings = const <String, String>{}});
+  FakeXcodeProjectInterpreter({
+    this.isInstalled = true,
+    this.buildSettings = const <String, String>{},
+    this.version,
+  });
 
   @override
   final bool isInstalled;
@@ -1393,4 +1411,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   }) async => buildSettings;
 
   final Map<String, String> buildSettings;
+
+  @override
+  Version? version;
 }

@@ -64,6 +64,35 @@ class PlistParser {
     }
   }
 
+  /// Returns the content, converted to JSON, of the plist file located at
+  /// [filePath].
+  ///
+  /// If [filePath] points to a non-existent file or a file that's not a
+  /// valid property list file, this will return null.
+  String? plistJsonContent(String filePath) {
+    if (!_fileSystem.isFileSync(_plutilExecutable)) {
+      throw const FileNotFoundException(_plutilExecutable);
+    }
+    final List<String> args = <String>[
+      _plutilExecutable,
+      '-convert',
+      'json',
+      '-o',
+      '-',
+      filePath,
+    ];
+    try {
+      final String jsonContent = _processUtils.runSync(
+        args,
+        throwOnError: true,
+      ).stdout.trim();
+      return jsonContent;
+    } on ProcessException catch (error) {
+      _logger.printError('$error');
+      return null;
+    }
+  }
+
   /// Replaces the string key in the given plist file with the given value.
   ///
   /// If the value is null, then the key will be removed.

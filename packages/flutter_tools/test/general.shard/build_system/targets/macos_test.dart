@@ -7,11 +7,16 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../../src/common.dart';
@@ -612,4 +617,75 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => processManager,
   });
+
+  testUsingContext('output contains FlutterMacOS when not using Swift Package Manager', () async {
+    expect(
+      const DebugUnpackMacOS().outputs,
+      <Source>[
+        const Source.pattern('{OUTPUT_DIR}/FlutterMacOS.framework/Versions/A/FlutterMacOS'),
+      ],
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+  });
+
+  testUsingContext('output contains FlutterMacOS when using Swift Package Manager but no FlutterGeneratedPluginSwiftPackage', () async {
+    fileSystem.currentDirectory.childDirectory('macos').createSync(recursive: true);
+
+    expect(
+      const DebugUnpackMacOS().outputs,
+      <Source>[
+        const Source.pattern('{OUTPUT_DIR}/FlutterMacOS.framework/Versions/A/FlutterMacOS'),
+      ],
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+  });
+
+  testUsingContext('output contains FlutterMacOS when using Swift Package Manager but empty FlutterGeneratedPluginSwiftPackage', () async {
+    fileSystem.currentDirectory.childDirectory('macos').createSync(recursive: true);
+    final FlutterProject flutterProject = FlutterProject.current();
+    flutterProject.macos.flutterPluginSwiftPackageManifest
+      .createSync(recursive: true);
+
+    expect(
+      const DebugUnpackMacOS().outputs,
+      <Source>[
+        const Source.pattern('{OUTPUT_DIR}/FlutterMacOS.framework/Versions/A/FlutterMacOS'),
+      ],
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+  });
+
+  testUsingContext('output does not contains FlutterMacOS when using Swift Package Manager and FlutterGeneratedPluginSwiftPackage depends on FlutterMacOS', () async {
+    fileSystem.currentDirectory.childDirectory('macos').createSync(recursive: true);
+    final FlutterProject flutterProject = FlutterProject.current();
+    flutterProject.macos.flutterPluginSwiftPackageManifest
+      ..createSync(recursive: true)
+      ..writeAsStringSync('FlutterMacOS.xcframework');
+
+    expect(const DebugUnpackMacOS().outputs, <Source>[]);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
+    FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+  });
+}
+
+class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
+  FakeXcodeProjectInterpreter({
+    this.version,
+  });
+
+  @override
+  Version? version;
 }
