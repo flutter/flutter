@@ -1353,7 +1353,10 @@ class _TabBarState extends State<TabBar> {
         )
       : widget.indicatorWeight;
     // Only Material 3 primary TabBar with label indicatorSize should be rounded.
-    final bool primaryWithLabelIndicator = widget._isPrimary && indicatorSize == TabBarIndicatorSize.label;
+    final bool primaryWithLabelIndicator = switch (indicatorSize) {
+      TabBarIndicatorSize.label  => widget._isPrimary,
+      TabBarIndicatorSize.tab    => false,
+    };
     final BorderRadius? effectiveBorderRadius = theme.useMaterial3 && primaryWithLabelIndicator
       ? BorderRadius.only(
           topLeft: Radius.circular(effectiveIndicatorWeight),
