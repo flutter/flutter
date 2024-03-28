@@ -285,6 +285,13 @@ class ColorScheme with Diagnosticable {
   /// If the resulting color scheme is too dark, consider setting `dynamicSchemeVariant`
   /// to [DynamicSchemeVariant.fidelity], whose palettes match the seed color.
   ///
+  /// {@tool dartpad}
+  /// This sample shows how to use [ColorScheme.fromSeed] to create dynamic
+  /// color schemes with different [DynamicSchemeVariant]s.
+  ///
+  /// ** See code in examples/api/lib/material/color_scheme/color_scheme.0.dart **
+  /// {@end-tool}
+  ///
   /// See also:
   ///
   ///  * <https://m3.material.io/styles/color/the-color-system/color-roles>, the
