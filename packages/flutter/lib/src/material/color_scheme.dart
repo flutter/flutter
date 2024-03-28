@@ -39,26 +39,24 @@ enum DynamicSchemeVariant {
   /// Close to grayscale, a hint of chroma.
   neutral,
 
-  /// Pastel colors, high chroma palettes. (max). The primary palette's chroma
-  /// is at maximum. Use Fidelity instead if tokens should alter their tone to
-  /// match the palette vibrancy.
+  /// Pastel colors, high chroma palettes. The primary palette's chroma is at
+  /// maximum. Use `fidelity` instead if tokens should alter their tone to match
+  /// the palette vibrancy.
   vibrant,
 
   /// Pastel colors, medium chroma palettes. The primary palette's hue is
-  /// different from source color, for variety.
+  /// different from the seed color, for variety.
   expressive,
 
-  /// Almost identical to Fidelity. Tokens and palettes match source color.
-  /// Primary Container is source color, adjusted to ensure contrast with surfaces.
-  /// Tertiary palette is analogue of source color. Found by dividing color
-  /// wheel by 6, then finding the 2 colors adjacent to source. The one that
-  /// increases hue is used.
+  /// Almost identical to `fidelity`. Tokens and palettes match the seed color.
+  /// [ColorScheme.primaryContainer] is the seed color, adjusted to ensure
+  /// contrast with surfaces. The tertiary palette is analogue of the seed color.
   content,
 
-  /// A playful theme - the source color's hue does not appear in the theme.
+  /// A playful theme - the seed color's hue does not appear in the theme.
   rainbow,
 
-  /// A playful theme - the source color's hue does not appear in the theme.
+  /// A playful theme - the seed color's hue does not appear in the theme.
   fruitSalad,
 }
 
@@ -279,13 +277,13 @@ class ColorScheme with Diagnosticable {
   /// Given the nature of the algorithm, the `seedColor` may not wind up as
   /// one of the ColorScheme colors.
   ///
-  /// The `dynamicSchemeVariant` parameter is to create different types of
-  /// [DynamicScheme], which is used to generate different styles of [ColorScheme].
+  /// The `dynamicSchemeVariant` parameter creates different types of
+  /// [DynamicScheme]s, which are used to generate different styles of [ColorScheme]s.
   /// By default, `dynamicSchemeVariant` is set to `tonalSpot`. A [ColorScheme]
-  /// constructed by `dynamicSchemeVariant.tonalSpot` has patel palettes and
+  /// constructed by `dynamicSchemeVariant.tonalSpot` has pastel palettes and
   /// won't be too "colorful" even if the `seedColor` has a high chroma value.
   /// If the resulting color scheme is too dark, consider setting `dynamicSchemeVariant`
-  /// to [DynamicSchemeVariant.fidelity], whose palettes match source color.
+  /// to [DynamicSchemeVariant.fidelity], whose palettes match the seed color.
   ///
   /// See also:
   ///
