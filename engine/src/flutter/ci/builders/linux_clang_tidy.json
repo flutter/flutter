@@ -68,7 +68,6 @@
                 {
                     "name": "test: lint host_debug",
                     "parameters": [
-                        "--verbose",
                         "--variant",
                         "host_debug_clang_tidy",
                         "--lint-all",
@@ -98,7 +97,6 @@
                 {
                     "name": "test: lint host_debug",
                     "parameters": [
-                        "--verbose",
                         "--variant",
                         "host_debug_clang_tidy",
                         "--lint-all",
@@ -128,7 +126,6 @@
                 {
                     "name": "test: lint host_debug",
                     "parameters": [
-                        "--verbose",
                         "--variant",
                         "host_debug_clang_tidy",
                         "--lint-all",
@@ -158,7 +155,6 @@
                 {
                     "name": "test: lint host_debug",
                     "parameters": [
-                        "--verbose",
                         "--variant",
                         "host_debug_clang_tidy",
                         "--lint-all",
@@ -186,7 +182,6 @@
                 {
                     "name": "test: lint android_debug_arm64",
                     "parameters": [
-                        "--verbose",
                         "--variant",
                         "android_debug_arm64_clang_tidy",
                         "--lint-all",
