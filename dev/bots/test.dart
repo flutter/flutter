@@ -1665,11 +1665,15 @@ Future<void> runFlutterWebTest(
   List<String> tests,
   bool useWasm,
 ) async {
+  const LocalFileSystem fileSystem = LocalFileSystem();
+  final String suffix = DateTime.now().microsecondsSinceEpoch.toString();
+  final File metricFile = fileSystem.file(path.join(fileSystem.systemTempDirectory.path, 'metrics_$suffix.json'));
   await runCommand(
     flutter,
     <String>[
       'test',
       '--reporter=expanded',
+      '--file-reporter=json:${metricFile.path}',
       '-v',
       '--platform=chrome',
       if (useWasm) '--wasm',
@@ -1683,6 +1687,8 @@ Future<void> runFlutterWebTest(
       'FLUTTER_WEB': 'true',
     },
   );
+  // Delete metrics file.
+  metricFile.deleteSync();
 }
 
 
@@ -1724,7 +1730,8 @@ Future<void> _runDartTest(String workingDirectory, {
   }
 
   const LocalFileSystem fileSystem = LocalFileSystem();
-  final File metricFile = fileSystem.file(path.join(flutterRoot, 'metrics.json'));
+  final String suffix = DateTime.now().microsecondsSinceEpoch.toString();
+  final File metricFile = fileSystem.file(path.join(fileSystem.systemTempDirectory.path, 'metrics_$suffix.json'));
   final List<String> args = <String>[
     'run',
     'test',
@@ -1787,6 +1794,9 @@ Future<void> _runDartTest(String workingDirectory, {
       print('Failed to generate metrics: $e');
     }
   }
+
+  // Delete metrics file.
+  metricFile.deleteSync();
 }
 
 Future<void> _runFlutterTest(String workingDirectory, {
@@ -1809,9 +1819,13 @@ Future<void> _runFlutterTest(String workingDirectory, {
     tags.addAll(<String>['-t', 'reduced-test-set']);
   }
 
+  const LocalFileSystem fileSystem = LocalFileSystem();
+  final String suffix = DateTime.now().microsecondsSinceEpoch.toString();
+  final File metricFile = fileSystem.file(path.join(fileSystem.systemTempDirectory.path, 'metrics_$suffix.json'));
   final List<String> args = <String>[
     'test',
     '--reporter=expanded',
+    '--file-reporter=json:${metricFile.path}',
     if (shuffleTests && !_isRandomizationOff) '--test-randomize-ordering-seed=$shuffleSeed',
     if (fatalWarnings) '--fatal-warnings',
     ...options,
@@ -1848,6 +1862,9 @@ Future<void> _runFlutterTest(String workingDirectory, {
     outputMode: outputMode,
     environment: environment,
   );
+
+  // Delete metrics file.
+  metricFile.deleteSync();
 
   if (outputChecker != null) {
     final String? message = outputChecker(result);
