@@ -225,6 +225,7 @@ class _ZoomPageTransition extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Color backgroundColor = Theme.of(context).canvasColor;
     return DualTransitionBuilder(
       animation: animation,
       forwardBuilder: (
@@ -235,6 +236,7 @@ class _ZoomPageTransition extends StatelessWidget {
         return _ZoomEnterTransition(
           animation: animation,
           allowSnapshotting: allowSnapshotting && allowEnterRouteSnapshotting,
+          backgroundColor: backgroundColor,
           child: child,
         );
       },
@@ -261,6 +263,7 @@ class _ZoomPageTransition extends StatelessWidget {
             animation: animation,
             allowSnapshotting: allowSnapshotting && allowEnterRouteSnapshotting ,
             reverse: true,
+            backgroundColor: backgroundColor,
             child: child,
           );
         },
@@ -286,6 +289,7 @@ class _ZoomEnterTransition extends StatefulWidget {
     required this.animation,
     this.reverse = false,
     required this.allowSnapshotting,
+    required this.backgroundColor,
     this.child,
   });
 
@@ -293,6 +297,7 @@ class _ZoomEnterTransition extends StatefulWidget {
   final Widget? child;
   final bool allowSnapshotting;
   final bool reverse;
+  final Color backgroundColor;
 
   @override
   State<_ZoomEnterTransition> createState() => _ZoomEnterTransitionState();
@@ -349,6 +354,7 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
       fade: fadeTransition,
       scale: scaleTransition,
       animation: widget.animation,
+      backgroundColor: widget.backgroundColor,
     );
     super.initState();
   }
@@ -365,6 +371,7 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
         fade: fadeTransition,
         scale: scaleTransition,
         animation: widget.animation,
+        backgroundColor: widget.backgroundColor,
       );
     }
     super.didUpdateWidget(oldWidget);
@@ -944,6 +951,7 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
     required this.scale,
     required this.fade,
     required this.animation,
+    required this.backgroundColor,
   }) {
     animation.addListener(notifyListeners);
     animation.addStatusListener(_onStatusChange);
@@ -959,6 +967,7 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
   final Animation<double> animation;
   final Animation<double> scale;
   final Animation<double> fade;
+  final Color backgroundColor;
 
   final Matrix4 _transform = Matrix4.zero();
   final LayerHandle<OpacityLayer> _opacityHandle = LayerHandle<OpacityLayer>();
@@ -983,7 +992,7 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
     if (scrimOpacity > 0.0) {
       context.canvas.drawRect(
         offset & size,
-        Paint()..color = Colors.black.withOpacity(scrimOpacity),
+        Paint()..color = backgroundColor.withOpacity(scrimOpacity),
       );
     }
   }
