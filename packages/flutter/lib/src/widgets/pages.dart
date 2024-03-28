@@ -4,6 +4,7 @@
 
 import 'basic.dart';
 import 'framework.dart';
+import 'navigator.dart';
 import 'routes.dart';
 
 /// A modal route that replaces the entire screen.
@@ -24,6 +25,7 @@ abstract class PageRoute<T> extends ModalRoute<T> {
     this.fullscreenDialog = false,
     this.allowSnapshotting = true,
     bool barrierDismissible = false,
+    super.delegatedTransition,
   }) : _barrierDismissible = barrierDismissible;
 
   /// {@template flutter.widgets.PageRoute.fullscreenDialog}

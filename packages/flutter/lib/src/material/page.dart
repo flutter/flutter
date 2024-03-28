@@ -41,6 +41,7 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
     super.fullscreenDialog,
     super.allowSnapshotting = true,
     super.barrierDismissible = false,
+    super.delegatedTransition,
   }) {
     assert(opaque);
   }
@@ -98,7 +99,16 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
     return (nextRoute is MaterialRouteTransitionMixin && !nextRoute.fullscreenDialog)
-      || (nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog);
+      || (nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog)
+      || (nextRoute is PageRoute);
+  }
+
+  @override
+  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
+    if (previousRoute is ModalRoute<T> && navigator != null) {
+      navigator!.delegateTransitionBuilder = previousRoute.delegatedTransition;
+    }
+    return previousRoute is PageRoute;
   }
 
   @override
