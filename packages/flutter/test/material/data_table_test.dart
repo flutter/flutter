@@ -2368,13 +2368,13 @@ void main() {
   testWidgets('DataColumn label can be centered', (WidgetTester tester) async {
     const double horizontalMargin = 24.0;
 
-    Widget buildTable({ MainAxisAlignment? mainAxisAlignment, bool sortEnabled = false }) {
+    Widget buildTable({ MainAxisAlignment? headingRowAlignment, bool sortEnabled = false }) {
       return MaterialApp(
         home: Material(
           child: DataTable(
             columns: <DataColumn>[
               DataColumn(
-                mainAxisAlignment: mainAxisAlignment,
+                headingRowAlignment: headingRowAlignment,
                 onSort: sortEnabled
                   ? (int columnIndex, bool ascending) { }
                   : null,
@@ -2400,7 +2400,7 @@ void main() {
     expect(headerTopLeft.dx, equals(horizontalMargin));
 
     // Test mainAxisAlignment.center without sort arrow.
-    await tester.pumpWidget(buildTable(mainAxisAlignment: MainAxisAlignment.center));
+    await tester.pumpWidget(buildTable(headingRowAlignment: MainAxisAlignment.center));
 
     Offset headerCenter = tester.getCenter(find.text('Header'));
     expect(headerCenter.dx, equals(400));
@@ -2412,7 +2412,7 @@ void main() {
     expect(headerTopLeft.dx, equals(horizontalMargin));
 
     // Test mainAxisAlignment.center with sort arrow.
-    await tester.pumpWidget(buildTable(mainAxisAlignment: MainAxisAlignment.center, sortEnabled: true));
+    await tester.pumpWidget(buildTable(headingRowAlignment: MainAxisAlignment.center, sortEnabled: true));
 
     headerCenter = tester.getCenter(find.text('Header'));
     expect(headerCenter.dx, equals(400));
