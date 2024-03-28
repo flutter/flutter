@@ -65,6 +65,7 @@ import 'package:process/process.dart';
 
 import 'run_command.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
+import 'suite_runners/run_customer_testing_tests.dart';
 import 'suite_runners/run_web_long_running_tests.dart';
 import 'tool_subsharding.dart';
 import 'utils.dart';
@@ -250,7 +251,7 @@ Future<void> main(List<String> args) async {
       'flutter_plugins': _runFlutterPackagesTests,
       'skp_generator': _runSkpGeneratorTests,
       'realm_checker': _runRealmCheckerTest,
-      'customer_testing': _runCustomerTesting,
+      'customer_testing': () => customerTestingRunner(flutterRoot),
       'analyze': _runAnalyze,
       'fuchsia_precache': _runFuchsiaPrecache,
       'docs': _runDocs,
@@ -1277,48 +1278,6 @@ Future<void> _runFlutterPackagesTests() async {
   await selectSubshard(<String, ShardRunner>{
     'analyze': runAnalyze,
   });
-}
-
-// Runs customer_testing.
-Future<void> _runCustomerTesting() async {
-  printProgress('${green}Running customer testing$reset');
-  await runCommand(
-    'git',
-    <String>[
-      'fetch',
-      'origin',
-      'master',
-    ],
-    workingDirectory: flutterRoot,
-  );
-  await runCommand(
-    'git',
-    <String>[
-      'branch',
-      '-f',
-      'master',
-      'origin/master',
-    ],
-    workingDirectory: flutterRoot,
-  );
-  final Map<String, String> env = Platform.environment;
-  final String? revision = env['REVISION'];
-  if (revision != null) {
-    await runCommand(
-      'git',
-      <String>[
-        'checkout',
-        revision,
-      ],
-      workingDirectory: flutterRoot,
-    );
-  }
-  final String winScript = path.join(flutterRoot, 'dev', 'customer_testing', 'ci.bat');
-  await runCommand(
-    Platform.isWindows? winScript: './ci.sh',
-    <String>[],
-    workingDirectory: path.join(flutterRoot, 'dev', 'customer_testing'),
-  );
 }
 
 // Runs analysis tests.
