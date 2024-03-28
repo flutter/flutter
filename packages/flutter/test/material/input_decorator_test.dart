@@ -4362,6 +4362,57 @@ void main() {
     expect(merged.constraints, overrideTheme.constraints);
   });
 
+  testWidgets('Prefix and suffix icons inherit IconButtonTheme', (WidgetTester tester) async {
+    final ButtonStyle iconButtonStyle = IconButton.styleFrom(
+      backgroundColor: const Color(0xff00ff00),
+      foregroundColor: const Color(0xffff0000),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+    );
+
+    await tester.pumpWidget(
+      IconButtonTheme(
+        data: IconButtonThemeData(style: iconButtonStyle),
+        child: buildInputDecorator(
+          decoration: InputDecoration(
+            prefixIcon: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.person),
+            ),
+            suffixIcon: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.search),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder prefixIconMaterial = find.descendant(
+      of: find.widgetWithIcon(IconButton, Icons.person),
+      matching: find.byType(Material),
+    );
+    Material material = tester.widget<Material>(prefixIconMaterial);
+    expect(material.color, iconButtonStyle.backgroundColor?.resolve(<WidgetState>{}));
+    expect(material.shape, iconButtonStyle.shape?.resolve(<WidgetState>{}));
+    final Finder suffixIconMaterial = find.descendant(
+      of: find.widgetWithIcon(IconButton, Icons.person),
+      matching: find.byType(Material),
+    );
+    material = tester.widget<Material>(suffixIconMaterial);
+    expect(material.color, iconButtonStyle.backgroundColor?.resolve(<WidgetState>{}));
+    expect(material.shape, iconButtonStyle.shape?.resolve(<WidgetState>{}));
+
+    expect(
+      getIconStyle(tester, Icons.person)?.color,
+      iconButtonStyle.foregroundColor?.resolve(<WidgetState>{}),
+    );
+    expect(
+      getIconStyle(tester, Icons.search)?.color,
+      iconButtonStyle.foregroundColor?.resolve(<WidgetState>{}),
+    );
+  });
 
   group('Material2', () {
     // These tests are only relevant for Material 2. Once Material 2

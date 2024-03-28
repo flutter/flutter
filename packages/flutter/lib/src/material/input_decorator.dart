@@ -2189,6 +2189,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final ThemeData themeData = Theme.of(context);
     final InputDecorationTheme defaults =
       Theme.of(context).useMaterial3 ? _InputDecoratorDefaultsM3(context) :  _InputDecoratorDefaultsM2(context);
+    final IconButtonThemeData iconButtonTheme = IconButtonTheme.of(context);
 
     final TextStyle labelStyle = _getInlineLabelStyle(themeData, defaults);
     final TextBaseline textBaseline = labelStyle.textBaseline!;
@@ -2325,9 +2326,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
               ),
               child: IconButtonTheme(
                 data: IconButtonThemeData(
-                style: IconButton.styleFrom(
-                  foregroundColor: _getPrefixIconColor(themeData, defaults),
-                  iconSize: iconSize,
+                  style: iconButtonTheme.style?.merge(
+                    IconButton.styleFrom(
+                      foregroundColor: _getPrefixIconColor(themeData, defaults),
+                      iconSize: iconSize,
+                    ),
                   ),
                 ),
                 child: Semantics(
@@ -2360,9 +2363,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                 ),
                 child: IconButtonTheme(
                   data: IconButtonThemeData(
-                  style: IconButton.styleFrom(
-                    foregroundColor: _getSuffixIconColor(themeData, defaults),
-                    iconSize: iconSize,
+                    style: iconButtonTheme.style?.merge(
+                      IconButton.styleFrom(
+                        foregroundColor: _getSuffixIconColor(themeData, defaults),
+                        iconSize: iconSize,
+                      ),
                     ),
                   ),
                   child: Semantics(
