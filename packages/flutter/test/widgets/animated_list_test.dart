@@ -688,6 +688,244 @@ void main() {
     // Verify that the left/right padding is not applied.
     expect(innerMediaQueryPadding, const EdgeInsets.symmetric(horizontal: 30.0));
   });
+
+  testWidgets('AnimatedListSeparated', (WidgetTester tester) async {
+    Widget builder(BuildContext context, int index, Animation<double> animation) {
+      return SizedBox(
+        height: 100.0,
+        child: Center(
+          child: Text('item $index'),
+        ),
+      );
+    }
+    Widget separatorBuilder(BuildContext context, int index, Animation<double> animation) {
+      return SizedBox(
+        height: 100.0,
+        child: Center(
+          child: Text('separator after item $index'),
+        ),
+      );
+    }
+    Widget itemRemovalBuilder(BuildContext context, Animation<double> animation) {
+        return const SizedBox(
+          height: 100.0,
+          child: Center(child: Text('removing item')),
+        );
+      }
+    Widget separatorRemovalBuilder(BuildContext context, Animation<double> animation) {
+        return const SizedBox(
+          height: 100.0,
+          child: Center(child: Text('removing separator')),
+        );
+      }
+    final GlobalKey<AnimatedListSeparatedState> listKey = GlobalKey<AnimatedListSeparatedState>();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedListSeparated(
+          key: listKey,
+          initialItemCount: 2,
+          itemBuilder: builder,
+          separatorBuilder: separatorBuilder,
+        ),
+      ),
+    );
+
+    final Finder sliverAnimatedList = find.byType(SliverAnimatedList);
+    expect(sliverAnimatedList, findsOneWidget);
+    expect((sliverAnimatedList.evaluate().first.widget as SliverAnimatedList).initialItemCount, 3); // 2 items + 1 separator
+
+    // Test for insertItem
+    listKey.currentState!.insertItem(0);
+    await tester.pump();
+    expect(find.text('item 2'), findsOneWidget);
+    expect(find.text('separator after item 2'), findsNothing);
+    await tester.pumpAndSettle();
+
+    // Test that removeItem throws for AnimatedList.separated
+    expect(() => listKey.currentState!.removeItem(
+      2,
+      (BuildContext context, Animation<double> animation) => const SizedBox.shrink(),
+      duration: const Duration(milliseconds: 100),
+    ), throwsA(isA<Exception>().having(
+      (Exception exception) => exception.toString(),
+      'text',
+      contains('Separated list items can not be removed with this method. Use removeSeparatedItem instead.'),
+    )));
+
+     // Test for removeAllItems
+    listKey.currentState!.removeAllSeparatedItems(
+      itemRemovalBuilder,
+      separatorRemovalBuilder,
+      duration: const Duration(milliseconds: 100),
+    );
+
+    await tester.pump();
+    expect(find.text('removing item'), findsNWidgets(3));
+    expect(find.text('removing separator'), findsNWidgets(2));
+    expect(find.text('item 0'), findsNothing);
+    expect(find.text('separator after item 0'), findsNothing);
+    expect(find.text('item 1'), findsNothing);
+    expect(find.text('separator after item 1'), findsNothing);
+    expect(find.text('item 2'), findsNothing);
+
+    await tester.pumpAndSettle();
+    expect(find.text('removing item'), findsNothing);
+    expect(find.text('removing separator'), findsNothing);
+
+    // Test for insertAllItems at the beginning of the list
+    listKey.currentState!.insertAllItems(0, 2);
+    await tester.pump();
+    expect(find.text('item 0'), findsOneWidget);
+    expect(find.text('separator after item 0'), findsOneWidget);
+    expect(find.text('item 1'), findsOneWidget);
+    expect(find.text('separator after item 1'), findsNothing);
+    await tester.pumpAndSettle();
+
+
+    // Test for removeSeparatedItem
+    listKey.currentState!.removeSeparatedItem(
+      1,
+      itemRemovalBuilder,
+      separatorRemovalBuilder,
+      duration: const Duration(milliseconds: 100),
+    );
+
+    await tester.pump();
+    expect(find.text('removing separator'), findsOneWidget);
+    expect(find.text('removing item'), findsOneWidget);
+    expect(find.text('item 1'), findsNothing);
+
+    await tester.pumpAndSettle();
+    expect(find.byType(SizedBox), findsNWidgets(1));
+    expect(find.text('removing item'), findsNothing);
+    expect(find.text('removing separator'), findsNothing);
+
+    // Test for insertAllItems at the end of the list
+    listKey.currentState!.insertAllItems(1, 2);
+    await tester.pump();
+    expect(find.text('separator after item 0'), findsOneWidget);
+    expect(find.text('item 1'), findsOneWidget);
+    expect(find.text('separator after item 1'), findsOneWidget);
+    expect(find.text('item 2'), findsOneWidget);
+    expect(find.text('separator after item 2'), findsNothing);
+    await tester.pumpAndSettle();
+
+    // Test that removeAllItems throws for AnimatedList.separated
+    expect(() => listKey.currentState!.removeAllItems(
+      (BuildContext context, Animation<double> animation) => const SizedBox.shrink(),
+      duration: const Duration(milliseconds: 100),
+    ), throwsA(isA<Exception>().having(
+      (Exception exception) => exception.toString(),
+      'text',
+      contains('Separated list items can not be removed with this method. Use removeAllSeparatedItems instead.'),
+    )));
+
+    // Test for removeSeparatedItem when only one item left
+    // Prepare
+    listKey.currentState!.removeAllSeparatedItems(
+      itemRemovalBuilder,
+      separatorRemovalBuilder,
+      duration: const Duration(milliseconds: 100),
+    );
+    await tester.pumpAndSettle();
+    listKey.currentState!.insertItem(0);
+    await tester.pump();
+    expect(find.text('item 0'), findsOneWidget);
+    expect(find.text('separator after item 0'), findsNothing);
+    await tester.pumpAndSettle();
+
+    // Test
+    listKey.currentState!.removeSeparatedItem(
+      0,
+      itemRemovalBuilder,
+      separatorRemovalBuilder,
+      duration: const Duration(milliseconds: 100),
+    );
+
+    await tester.pump();
+    expect(find.text('removing item'), findsOneWidget);
+    expect(find.text('removing separator'), findsNothing);
+    expect(find.text('item 0'), findsNothing);
+
+    await tester.pumpAndSettle();
+    expect(find.byType(SizedBox), findsNothing);
+    expect(find.text('removing item'), findsNothing);
+    expect(find.text('removing separator'), findsNothing);
+
+    // Test for insertItem on empty list
+    listKey.currentState!.insertItem(0);
+    await tester.pump();
+    expect(find.text('item 0'), findsOneWidget);
+    expect(find.text('separator after item 0'), findsNothing);
+    await tester.pumpAndSettle();
+
+    // Test for insertItem on list with one item
+    listKey.currentState!.insertItem(1);
+    await tester.pump();
+    expect(find.text('separator after item 0'), findsOneWidget);
+    expect(find.text('item 1'), findsOneWidget);
+    expect(find.text('separator after item 1'), findsNothing);
+    await tester.pumpAndSettle();
+
+    // Test for removeSeparatedItem on first item in list
+    expect(find.byType(SizedBox), findsNWidgets(3));
+    listKey.currentState!.removeSeparatedItem(
+      0,
+      itemRemovalBuilder,
+      separatorRemovalBuilder,
+      duration: const Duration(milliseconds: 100),
+    );
+
+    await tester.pump();
+    expect(find.text('removing item'), findsOneWidget);
+    expect(find.text('removing separator'), findsOneWidget);
+
+    await tester.pumpAndSettle();
+    expect(find.text('removing item'), findsNothing);
+    expect(find.text('removing separator'), findsNothing);
+    expect(find.byType(SizedBox), findsOneWidget);
+  });
+
+  testWidgets(
+    'AnimatedListSeparated.of() and maybeOf called with a context that does not contain AnimatedListSeparated',
+    (WidgetTester tester) async {
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(Container(key: key));
+      late FlutterError error;
+      expect(AnimatedListSeparated.maybeOf(key.currentContext!), isNull);
+      try {
+        AnimatedListSeparated.of(key.currentContext!);
+      } on FlutterError catch (e) {
+        error = e;
+      }
+      expect(error.diagnostics.length, 4);
+      expect(error.diagnostics[2].level, DiagnosticLevel.hint);
+      expect(
+        error.diagnostics[2].toStringDeep(),
+        equalsIgnoringHashCodes(
+          'This can happen when the context provided is from the same\n'
+          'StatefulWidget that built the AnimatedListSeparated.\n'
+        ),
+      );
+      expect(error.diagnostics[3], isA<DiagnosticsProperty<Element>>());
+      expect(
+        error.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   AnimatedListSeparated.of() called with a context that does not\n'
+          '   contain an AnimatedListSeparated.\n'
+          '   No AnimatedListSeparated ancestor could be found starting from\n'
+          '   the context that was passed to AnimatedListSeparated.of().\n'
+          '   This can happen when the context provided is from the same\n'
+          '   StatefulWidget that built the AnimatedListSeparated.\n'
+          '   The context used was:\n'
+          '     Container-[GlobalKey#32cc6]\n',
+        ),
+      );
+    },
+  );
 }
 
 
