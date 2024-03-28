@@ -22,6 +22,7 @@ import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:skia_gold_client/skia_gold_client.dart';
 import 'package:stream_channel/stream_channel.dart';
 
+// ignore: deprecated_member_use
 import 'package:test_core/backend.dart' hide Compiler;
 // TODO(ditman): Fix ignores when https://github.com/flutter/flutter/issues/143599 is resolved.
 import 'package:test_core/src/runner/environment.dart'; // ignore: implementation_imports
