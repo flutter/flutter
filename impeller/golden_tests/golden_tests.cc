@@ -50,8 +50,7 @@ bool SaveScreenshot(std::unique_ptr<Screenshot> screenshot) {
 
 class GoldenTests : public ::testing::Test {
  public:
-  GoldenTests()
-      : screenshotter_(new MetalScreenshotter(/*enable_wide_gamut=*/false)) {}
+  GoldenTests() : screenshotter_(new MetalScreenshotter()) {}
 
   MetalScreenshotter& Screenshotter() { return *screenshotter_; }
 

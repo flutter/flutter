@@ -120,11 +120,10 @@ bool Playground::SupportsBackend(PlaygroundBackend backend) {
   FML_UNREACHABLE();
 }
 
-void Playground::SetupContext(PlaygroundBackend backend,
-                              const PlaygroundSwitches& switches) {
+void Playground::SetupContext(PlaygroundBackend backend) {
   FML_CHECK(SupportsBackend(backend));
 
-  impl_ = PlaygroundImpl::Create(backend, switches);
+  impl_ = PlaygroundImpl::Create(backend, switches_);
   if (!impl_) {
     FML_LOG(WARNING) << "PlaygroundImpl::Create failed.";
     return;
