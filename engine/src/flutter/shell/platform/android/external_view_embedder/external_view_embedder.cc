@@ -64,10 +64,14 @@ SkRect AndroidExternalViewEmbedder::GetViewRect(int64_t view_id) const {
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder::SubmitFlutterView(
+    int64_t flutter_view_id,
     GrDirectContext* context,
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
     std::unique_ptr<SurfaceFrame> frame) {
   TRACE_EVENT0("flutter", "AndroidExternalViewEmbedder::SubmitFlutterView");
+  // TODO(dkwingsmt): This class only supports rendering into the implicit view.
+  // Properly support multi-view in the future.
+  FML_DCHECK(flutter_view_id == kFlutterImplicitViewId);
 
   if (!FrameHasPlatformLayers()) {
     frame->Submit();
@@ -268,12 +272,8 @@ void AndroidExternalViewEmbedder::BeginFrame(
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder::PrepareFlutterView(
-    int64_t flutter_view_id,
     SkISize frame_size,
     double device_pixel_ratio) {
-  // TODO(dkwingsmt): This class only supports rendering into the implicit view.
-  // Properly support multi-view in the future.
-  FML_DCHECK(flutter_view_id == kFlutterImplicitViewId);
   Reset();
 
   // The surface size changed. Therefore, destroy existing surfaces as
