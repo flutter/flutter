@@ -9,10 +9,15 @@
         "editor.formatOnType": false,
         "editor.formatOnPaste": false,
     },
+    // We use Flutter from the "bin" directory, this allows us not to write the PATH.
+    "dart.flutterSdkPath": "bin",
+    "dart.addSdkToTerminalPath": true,
+    "dart.checkForSdkUpdates": false,
 
+    "git.enableCommitSigning": true,
     "html.format.enable": false,
     "githubPullRequests.ignoredPullRequestBranches": [
         "master"
     ],
-    "files.trimTrailingWhitespace": true
+    "files.trimTrailingWhitespace": true,
 }

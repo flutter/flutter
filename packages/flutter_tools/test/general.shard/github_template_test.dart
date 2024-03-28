@@ -196,9 +196,12 @@ version: 2.0.1+100
 flutter:
   uses-material-design: true
   module:
-    androidX: true
-    androidPackage: com.example.failing.android
-    iosBundleIdentifier: com.example.failing.ios
+    platforms:
+      android:
+        androidX: true
+        package: com.example.failing.android
+      ios:
+        bundleIdentifier: com.example.failing.ios
 ''');
 
         final File pluginsFile = projectDirectory.childFile('.flutter-plugins');

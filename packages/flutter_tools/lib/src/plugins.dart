@@ -296,7 +296,7 @@ class Plugin {
     }
 
     if (yaml == null) {
-      return <String>['Invalid "platforms" specification.'];
+      return <String>['Invalid "platforms" specification in flutter.plugin'];
     }
     final List<String> errors = <String>[];
     if (isInvalid(AndroidPlugin.kConfigKey, AndroidPlugin.validate)) {

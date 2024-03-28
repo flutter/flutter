@@ -11,6 +11,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'globals.dart' as globals;
+import 'modules.dart';
 import 'plugins.dart';
 
 /// Whether or not Impeller Scene 3D model import is enabled.
@@ -140,9 +141,19 @@ class FlutterManifest {
   ///
   /// If false the deprecated Android Support library will be used.
   bool get usesAndroidX {
-    final Object? module = _flutterDescriptor['module'];
-    if (module is YamlMap) {
-      return module['androidX'] == true;
+    final Map<String, Object?>? platforms = supportedPlatforms;
+    if (platforms == null) {
+      if (isModule) {
+        final Object? module = _flutterDescriptor['module'];
+        if (module is YamlMap) {
+          return module['androidX'] == true;
+        }
+      }
+    } else if (platforms.containsKey('android')) {
+      final Object? android = platforms['android'];
+      if (android is YamlMap) {
+        return android['androidX'] == true;
+      }
     }
     return false;
   }
@@ -190,14 +201,14 @@ class FlutterManifest {
   /// module or plugin descriptor. Returns null, if there is no
   /// such declaration.
   String? get androidPackage {
-    if (isModule) {
-      final Object? module = _flutterDescriptor['module'];
-      if (module is YamlMap) {
-        return module['androidPackage'] as String?;
-      }
-    }
     final Map<String, Object?>? platforms = supportedPlatforms;
     if (platforms == null) {
+      if (isModule) {
+        final Object? module = _flutterDescriptor['module'];
+        if (module is YamlMap) {
+          return module['androidPackage'] as String?;
+        }
+      }
       // Pre-multi-platform plugin format
       if (isPlugin) {
         final YamlMap? plugin = _flutterDescriptor['plugin'] as YamlMap?;
@@ -246,10 +257,20 @@ class FlutterManifest {
   /// Returns the iOS bundle identifier declared by this manifest in its
   /// module descriptor. Returns null if there is no such declaration.
   String? get iosBundleIdentifier {
-    if (isModule) {
-      final Object? module = _flutterDescriptor['module'];
-      if (module is YamlMap) {
-        return module['iosBundleIdentifier'] as String?;
+    final Map<String, Object?>? platforms = supportedPlatforms;
+    if (platforms == null) {
+      if (isModule) {
+        final Object? module = _flutterDescriptor['module'];
+        if (module is YamlMap) {
+          return module['iosBundleIdentifier'] as String?;
+        }
+      }
+      return null;
+    }
+    if (platforms.containsKey('ios')) {
+      final Object? ios = platforms['ios'];
+      if (ios is YamlMap) {
+        return ios['bundleIdentifier'] as String?;
       }
     }
     return null;
@@ -263,6 +284,13 @@ class FlutterManifest {
       final YamlMap? plugin = _flutterDescriptor['plugin'] as YamlMap?;
       if (plugin?.containsKey('platforms') ?? false) {
         final YamlMap? platformsMap = plugin!['platforms'] as YamlMap?;
+        return platformsMap?.value.cast<String, Object?>();
+      }
+    }
+    if (isModule) {
+      final YamlMap? module = _flutterDescriptor['module'] as YamlMap?;
+      if (module?.containsKey('platforms') ?? false) {
+        final YamlMap? platformsMap = module!['platforms'] as YamlMap?;
         return platformsMap?.value.cast<String, Object?>();
       }
     }
@@ -526,16 +554,8 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
           errors.add('Expected "$yamlKey" to be an object, but got $yamlValue (${yamlValue.runtimeType}).');
           break;
         }
-
-        if (yamlValue['androidX'] != null && yamlValue['androidX'] is! bool) {
-          errors.add('The "androidX" value must be a bool if set.');
-        }
-        if (yamlValue['androidPackage'] != null && yamlValue['androidPackage'] is! String) {
-          errors.add('The "androidPackage" value must be a string if set.');
-        }
-        if (yamlValue['iosBundleIdentifier'] != null && yamlValue['iosBundleIdentifier'] is! String) {
-          errors.add('The "iosBundleIdentifier" section must be a string if set.');
-        }
+        final List<String> pluginErrors = Module.validateModuleYaml(yamlValue);
+        errors.addAll(pluginErrors);
       case 'plugin':
         if (yamlValue is! YamlMap) {
           errors.add('Expected "$yamlKey" to be an object, but got $yamlValue (${yamlValue.runtimeType}).');

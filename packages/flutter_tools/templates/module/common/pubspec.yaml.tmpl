@@ -82,6 +82,9 @@ flutter:
   # They also do not have any bearing on your native host application's
   # identifiers, which may be completely independent or the same as these.
   module:
-    androidX: true
-    androidPackage: {{androidIdentifier}}
-    iosBundleIdentifier: {{iosIdentifier}}
+    platforms:
+      android:
+        androidX: true
+        package: {{androidIdentifier}}
+      ios:
+        bundleIdentifier: {{iosIdentifier}}
