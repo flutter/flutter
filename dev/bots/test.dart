@@ -1753,6 +1753,7 @@ Future<void> runFlutterWebTest(
     flutter,
     <String>[
       'test',
+      '--reporter=expanded',
       '-v',
       '--platform=chrome',
       if (useWasm) '--wasm',
@@ -1811,6 +1812,7 @@ Future<void> _runDartTest(String workingDirectory, {
   final List<String> args = <String>[
     'run',
     'test',
+    '--reporter=expanded',
     '--file-reporter=json:${metricFile.path}',
     if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
     '-j$cpus',
@@ -1893,6 +1895,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
 
   final List<String> args = <String>[
     'test',
+    '--reporter=expanded',
     if (shuffleTests && !_isRandomizationOff) '--test-randomize-ordering-seed=$shuffleSeed',
     if (fatalWarnings) '--fatal-warnings',
     ...options,
