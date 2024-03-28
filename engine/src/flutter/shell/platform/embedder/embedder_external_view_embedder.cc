@@ -59,13 +59,8 @@ void EmbedderExternalViewEmbedder::BeginFrame(
 
 // |ExternalViewEmbedder|
 void EmbedderExternalViewEmbedder::PrepareFlutterView(
-    int64_t flutter_view_id,
     SkISize frame_size,
     double device_pixel_ratio) {
-  // TODO(dkwingsmt): This class only supports rendering into the implicit
-  // view. Properly support multi-view in the future.
-  // https://github.com/flutter/flutter/issues/135530 item 4
-  FML_DCHECK(flutter_view_id == kFlutterImplicitViewId);
   Reset();
 
   pending_frame_size_ = frame_size;
@@ -417,6 +412,7 @@ class LayerBuilder {
 };  // namespace
 
 void EmbedderExternalViewEmbedder::SubmitFlutterView(
+    int64_t flutter_view_id,
     GrDirectContext* context,
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
     std::unique_ptr<SurfaceFrame> frame) {
@@ -494,10 +490,7 @@ void EmbedderExternalViewEmbedder::SubmitFlutterView(
 
     builder.PushLayers(presented_layers);
 
-    // TODO(loic-sharma): Currently only supports a single view.
-    // See https://github.com/flutter/flutter/issues/135530.
-    presented_layers.InvokePresentCallback(kFlutterImplicitViewId,
-                                           present_callback_);
+    presented_layers.InvokePresentCallback(flutter_view_id, present_callback_);
   }
 
   // See why this is necessary in the comment where this collection in
