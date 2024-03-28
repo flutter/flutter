@@ -89,6 +89,18 @@ bool ClipContents::RenderDepthClip(const ContentContext& renderer,
                                    const Geometry& geometry) const {
   using VS = ClipPipeline::VertexShader;
 
+  if (clip_op == Entity::ClipOperation::kIntersect &&
+      geometry.IsAxisAlignedRect() &&
+      entity.GetTransform().IsTranslationScaleOnly()) {
+    std::optional<Rect> coverage = geometry.GetCoverage(entity.GetTransform());
+    if (coverage.has_value() &&
+        coverage->Contains(Rect::MakeSize(pass.GetRenderTargetSize()))) {
+      // Skip axis-aligned intersect clips that cover the whole render target
+      // since they won't draw anything to the depth buffer.
+      return true;
+    }
+  }
+
   VS::FrameInfo info;
   info.depth = GetShaderClipDepth(entity);
 
