@@ -8,7 +8,6 @@ import 'package:path/path.dart' as path;
 
 import '../utils.dart';
 
-
 Future<void> realmCheckerTestRunner(String flutterRoot) async {
   final String engineRealmFile = path.join(flutterRoot, 'bin', 'internal', 'engine.realm');
 
