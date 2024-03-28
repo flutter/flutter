@@ -201,6 +201,14 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     await callbackManager.convertFlutterSurfaceToImage();
   }
 
+  /// Android only. Converts the image view to the Flutter surface.
+  /// Be aware that if you are conducting a perf test, you may not want to call
+  /// this method since the this is an expensive operation that affects the
+  /// rendering of a Flutter app.
+  Future<void> revertFlutterImage() async {
+    await callbackManager.revertFlutterImage();
+  }
+
   /// The callback function to response the driver side input.
   @visibleForTesting
   Future<Map<String, dynamic>> callback(Map<String, String> params) async {

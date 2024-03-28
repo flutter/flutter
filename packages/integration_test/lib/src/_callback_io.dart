@@ -75,12 +75,26 @@ class _IOCallbackManager implements CallbackManager {
     _isSurfaceRendered = true;
 
     addTearDown(() async {
-      assert(_isSurfaceRendered, 'Surface is not an image');
-      await integrationTestChannel.invokeMethod<void>(
-        'revertFlutterImage',
-      );
-      _isSurfaceRendered = false;
+      if (_isSurfaceRendered) {
+        await integrationTestChannel.invokeMethod<void>(
+          'revertFlutterImage',
+        );
+        _isSurfaceRendered = false;
+      }
     });
+  }
+
+  @override
+  Future<void> revertFlutterImage() async {
+    if (!Platform.isAndroid) {
+      // No-op on other platforms.
+      return;
+    }
+    assert(_isSurfaceRendered, 'Surface is not an image');
+    await integrationTestChannel.invokeMethod<void>(
+      'revertFlutterImage',
+    );
+    _isSurfaceRendered = false;
   }
 
   @override
