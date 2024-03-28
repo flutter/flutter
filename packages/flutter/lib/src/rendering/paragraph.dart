@@ -1478,10 +1478,12 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
     if (_textSelectionStart == null || _textSelectionEnd == null) {
       return null;
     }
+
     final int start = math.min(_textSelectionStart!.offset, _textSelectionEnd!.offset);
     final int end = math.max(_textSelectionStart!.offset, _textSelectionEnd!.offset);
     return SelectedContent(
       plainText: fullText.substring(start, end),
+      textSelection: TextSelection(baseOffset: start, extentOffset: end),
     );
   }
 
@@ -2128,6 +2130,12 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
 
   @override
   TextRange getWordBoundary(TextPosition position) => paragraph.getWordBoundary(position);
+
+
+  @override
+  int? get contentLength  {
+    return fullText.length;
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

@@ -98,6 +98,11 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   /// See also:
   ///  * [SelectionEventType], which contains all of the possible types.
   SelectionResult dispatchSelectionEvent(SelectionEvent event);
+
+  /// Gets the content length of the selectable
+  ///
+  /// Return `null` if the content length is not supported by the selectable
+  int? get contentLength;
 }
 
 /// The selected content in a [Selectable] or [SelectionHandler].
@@ -105,12 +110,27 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 // https://github.com/flutter/flutter/issues/104206.
 class SelectedContent {
   /// Creates a selected content object.
-  ///
-  /// Only supports plain text.
-  const SelectedContent({required this.plainText});
+
+  const SelectedContent({required this.plainText, required this.textSelection});
 
   /// The selected content in plain text format.
   final String plainText;
+
+  /// The selected content in [TextSelection] format.
+  final TextSelection textSelection;
+
+  /// Copy with constructor
+  ///
+  /// not all selected content supports TextSelection
+  SelectedContent copyWith({
+    String? plainText,
+    TextSelection? textSelection,
+  }) {
+    return SelectedContent(
+      plainText: plainText ?? this.plainText,
+      textSelection: textSelection ?? this.textSelection,
+    );
+  }
 }
 
 /// A mixin that can be selected by users when under a [SelectionArea] widget.
@@ -145,6 +165,10 @@ mixin Selectable implements SelectionHandler {
   /// A list of [Rect]s that represent the bounding box of this [Selectable]
   /// in local coordinates.
   List<Rect> get boundingBoxes;
+
+  /// An int that represents the content length of this [Selectable].
+  @override
+  int? get contentLength;
 
   /// Disposes resources held by the mixer.
   void dispose();
