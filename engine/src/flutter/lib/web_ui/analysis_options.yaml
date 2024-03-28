@@ -6,6 +6,12 @@
 
 include: ../../analysis_options.yaml
 
+analyzer:
+  errors:
+    # We need this in the web engine in order to prevent committing `solo: true`
+    # in tests.
+    deprecated_member_use: true
+
 linter:
   rules:
     avoid_dynamic_calls: false
