@@ -99,5 +99,39 @@ TEST(RenderPassBuilder, CreatesRenderPassWithOnlyStencil) {
   EXPECT_EQ(depth_stencil.stencilStoreOp, vk::AttachmentStoreOp::eDontCare);
 }
 
+TEST(RenderPassBuilder, CreatesMSAAResolveWithCorrectStore) {
+  RenderPassBuilderVK builder = RenderPassBuilderVK();
+  auto const context = MockVulkanContextBuilder().Build();
+
+  // Create an MSAA color attachment.
+  builder.SetColorAttachment(0, PixelFormat::kR8G8B8A8UNormInt,
+                             SampleCount::kCount4, LoadAction::kClear,
+                             StoreAction::kMultisampleResolve);
+
+  auto render_pass = builder.Build(context->GetDevice());
+
+  EXPECT_TRUE(!!render_pass);
+
+  auto maybe_color = builder.GetColorAttachments().find(0u);
+  ASSERT_NE(maybe_color, builder.GetColorAttachments().end());
+  auto color = maybe_color->second;
+
+  // MSAA Texture.
+  EXPECT_EQ(color.initialLayout, vk::ImageLayout::eGeneral);
+  EXPECT_EQ(color.finalLayout, vk::ImageLayout::eGeneral);
+  EXPECT_EQ(color.loadOp, vk::AttachmentLoadOp::eClear);
+  EXPECT_EQ(color.storeOp, vk::AttachmentStoreOp::eDontCare);
+
+  auto maybe_resolve = builder.GetResolves().find(0u);
+  ASSERT_NE(maybe_resolve, builder.GetResolves().end());
+  auto resolve = maybe_resolve->second;
+
+  // MSAA Resolve Texture.
+  EXPECT_EQ(resolve.initialLayout, vk::ImageLayout::eGeneral);
+  EXPECT_EQ(resolve.finalLayout, vk::ImageLayout::eGeneral);
+  EXPECT_EQ(resolve.loadOp, vk::AttachmentLoadOp::eClear);
+  EXPECT_EQ(resolve.storeOp, vk::AttachmentStoreOp::eStore);
+}
+
 }  // namespace testing
 }  // namespace impeller
