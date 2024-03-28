@@ -3477,6 +3477,9 @@ class _History extends Iterable<_RouteEntry> with ChangeNotifier {
 
   @override
   String toString() {
+    return _value.fold<String>('', (String value, _RouteEntry entry) {
+      return '$value, ${entry.currentState}';
+    });
     return _value.toString();
   }
 }

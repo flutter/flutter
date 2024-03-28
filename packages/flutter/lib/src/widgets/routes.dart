@@ -20,8 +20,10 @@ import 'focus_traversal.dart';
 import 'framework.dart';
 import 'modal_barrier.dart';
 import 'navigator.dart';
+import 'navigator_pop_handler.dart';
 import 'overlay.dart';
 import 'page_storage.dart';
+import 'pop_scope.dart';
 import 'primary_scroll_controller.dart';
 import 'restoration.dart';
 import 'scroll_controller.dart';
@@ -339,7 +341,17 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
 
     if (nextRoute is TransitionRoute<dynamic> && canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
       final Animation<double>? current = _secondaryAnimation.parent;
-      if (current != null) {
+
+      // If the next route is an MBSRoute, then this route needs to animate to
+      // become the topmost tab in the MBS.
+      if (nextRoute is MBSRoute && this is ModalRoute) {
+        // TODO(justinmc): Animation is actually not kicked off in this method? OR is it?
+        // TODO(justinmc): Probably needs to be tied in to proxies and/or train
+        // in order to fully work with incoming/outgoing routes.
+        final ModalRoute<T> thisModalRoute = this as ModalRoute<T>;
+        thisModalRoute._mbsAnimation!.forward();
+
+      } else if (current != null) {
         final Animation<double> currentTrain = (current is TrainHoppingAnimation ? current.currentTrain : current)!;
         final Animation<double> nextTrain = nextRoute._animation!;
         if (
@@ -957,6 +969,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
     final List<Listenable> animations = <Listenable>[
       if (widget.route.animation != null) widget.route.animation!,
       if (widget.route.secondaryAnimation != null) widget.route.secondaryAnimation!,
+      if (widget.route._mbsAnimation != null) widget.route._mbsAnimation!,
     ];
     _listenable = Listenable.merge(animations);
   }
@@ -999,6 +1012,8 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   void dispose() {
     focusScopeNode.dispose();
     primaryScrollController.dispose();
+    // TODO(justinmc): This isn't the right place for this.
+    widget.route._mbsAnimation?.dispose();
     super.dispose();
   }
 
@@ -1056,7 +1071,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                         child: AnimatedBuilder(
                           animation: _listenable, // immutable
                           builder: (BuildContext context, Widget? child) {
-                            return widget.route.buildTransitions(
+                            final Widget transitionedChild = widget.route.buildTransitions(
                               context,
                               widget.route.animation!,
                               widget.route.secondaryAnimation!,
@@ -1076,6 +1091,14 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                                 },
                                 child: child,
                               ),
+                            );
+                            if (widget.route._mbsAnimation == null) {
+                              return transitionedChild;
+                            }
+                            return MBSRoute.buildParentRouteTransitions(
+                              context,
+                              widget.route._mbsAnimation!,
+                              transitionedChild,
                             );
                           },
                           child: _page ??= RepaintBoundary(
@@ -1369,6 +1392,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     super.install();
     _animationProxy = ProxyAnimation(super.animation);
     _secondaryAnimationProxy = ProxyAnimation(super.secondaryAnimation);
+    _mbsAnimation = AnimationController(
+      vsync: navigator!,
+      duration: const Duration(milliseconds: 200),
+    );
   }
 
   @override
@@ -1666,6 +1693,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   Animation<double>? get secondaryAnimation => _secondaryAnimationProxy;
   ProxyAnimation? _secondaryAnimationProxy;
+
+  // TODO(justinmc): When this is abstracted, will need to pass in this.
+  AnimationController? _mbsAnimation;
 
   final List<WillPopCallback> _willPopCallbacks = <WillPopCallback>[];
 
@@ -2436,4 +2466,78 @@ abstract class PopEntry {
   String toString() {
     return 'PopEntry canPop: ${canPopNotifier.value}, onPopInvoked: $onPopInvoked';
   }
+}
+
+typedef NavigatorBuilder = Navigator Function(BuildContext context);
+
+// TODO(justinmc): Users of this have to know that they can't pop the first
+// route. They have to call pop on the Navigator above navigatorBuilder.
+// TODO(justinmc): Should be derived from generic controllable route.
+// TODO(justinmc): Name.
+class MBSRoute<T> extends ModalRoute<T> {
+  MBSRoute({
+    required this.navigatorBuilder,
+  });
+
+  // TODO(justinmc): Enforce must build with transitionsAreControlled to true,
+  // or something.
+  final NavigatorBuilder navigatorBuilder;
+
+  static Widget buildParentRouteTransitions(BuildContext context, Animation<double> animation, Widget child) {
+    const Offset begin = Offset.zero;
+    const Offset end = Offset(0.0, 0.05);
+    const Curve curve = Curves.ease;
+
+    final Animatable<Offset> tween = Tween<Offset>(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+    return SlideTransition(
+      position: animation.drive(tween),
+      child: child,
+    );
+  }
+
+  static Widget buildChildRouteTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    const Offset begin = Offset(0.0, 1.0);
+    const Offset end = Offset(0.0, 0.1);
+    const Curve curve = Curves.ease;
+
+    final Animatable<Offset> tween = Tween<Offset>(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+    return SlideTransition(
+      position: animation.drive(tween),
+      child: child,
+    );
+  }
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return navigatorBuilder(context);
+  }
+
+  // Animates the MBSRoute down into position as the top tab with its parent
+  // visible behind it at the top.
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    return buildChildRouteTransitions(context, animation, secondaryAnimation, child);
+  }
+
+  @override
+  Color? get barrierColor => const Color(0x20000000);
+
+  @override
+  bool get barrierDismissible => false;
+
+  @override
+  String? get barrierLabel => 'Stacked card appearance for modal bottom sheet';
+
+  // TODO(justinmc): Might be more complicated than this for multiple sheets.
+  @override
+  bool get maintainState => true;
+
+  // TODO(justinmc): Obscures routes older than the previous route, though...
+  @override
+  bool get opaque => false;
+
+  @override
+  Duration get transitionDuration => const Duration(seconds: 1);
 }
