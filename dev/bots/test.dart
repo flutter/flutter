@@ -249,7 +249,7 @@ Future<void> main(List<String> args) async {
       // All web integration tests
       'web_long_running_tests': () => webLongRunningTestsRunner(flutterRoot),
       'flutter_plugins': _runFlutterPackagesTests,
-      'skp_generator': () => skpGeneratorTestsRunner(),
+      'skp_generator': skpGeneratorTestsRunner,
       'realm_checker': _runRealmCheckerTest,
       'customer_testing': _runCustomerTesting,
       'analyze': _runAnalyze,
