@@ -3737,11 +3737,11 @@ void main() {
 
     // Test popup menu item with a Text widget.
     expect(_labelStyle(tester, 'Item 0')!.fontSize, 16.0);
-    expect(_labelStyle(tester, 'Item 0')!.color, theme.textTheme.subtitle1!.color);
+    expect(_labelStyle(tester, 'Item 0')!.color, theme.textTheme.titleMedium!.color);
 
     // Test popup menu item with a ListTile widget.
     expect(_labelStyle(tester, 'Item 1')!.fontSize, 16.0);
-    expect(_labelStyle(tester, 'Item 1')!.color, theme.textTheme.subtitle1!.color);
+    expect(_labelStyle(tester, 'Item 1')!.color, theme.textTheme.titleMedium!.color);
 
     // Close the menu.
     await tester.tapAt(const Offset(20.0, 20.0));
@@ -3754,7 +3754,7 @@ void main() {
       fontStyle: FontStyle.italic,
     );
     theme = theme.copyWith(
-      textTheme: const TextTheme(subtitle1: customTextStyle),
+      textTheme: const TextTheme(titleMedium: customTextStyle),
     );
     await tester.pumpWidget(buildMenu());
 
