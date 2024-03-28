@@ -3044,7 +3044,7 @@ class _MenuItemLabel extends StatelessWidget {
           ),
       ],
     );
-    if(semanticsLabel != null) {
+    if (semanticsLabel != null) {
       menuItemLabel = Semantics(label: semanticsLabel, excludeSemantics: true, child: menuItemLabel);
     }
     return menuItemLabel;
