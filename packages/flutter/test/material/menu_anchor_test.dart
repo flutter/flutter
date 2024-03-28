@@ -3347,7 +3347,7 @@ void main() {
 
       expect(find.bySemanticsLabel('TestWidget'), findsOneWidget);
       semantics.dispose();
-    },variant: TargetPlatformVariant.desktop());
+    }, variant: TargetPlatformVariant.desktop());
 
 
     testWidgets('SubMenuButton is not a semantic button', (WidgetTester tester) async {
