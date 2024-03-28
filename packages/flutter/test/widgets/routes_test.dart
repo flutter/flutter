@@ -1942,6 +1942,28 @@ void main() {
     expect(parentRoute, isA<MaterialPageRoute<void>>());
   });
 
+  testWidgets('ModalRoute.of works for createDependency parameter',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Text('home'),
+    ));
+    final Element context = tester.element(find.text('home'));
+
+    final InheritedElement? ancestor = ModalRoute.scopeStatusAncestor(context);
+    expect(ancestor, isNotNull);
+
+    final ModalRoute<void>? routeWithoutCreateDependency = ModalRoute.of<void>(
+      context,
+      createDependency: false,
+    );
+    expect(routeWithoutCreateDependency, isNotNull);
+    expect(context.doesDependOnInheritedElement(ancestor!), false);
+    final ModalRoute<void>? routeWithCreateDependency =
+        ModalRoute.of<void>(context);
+    expect(routeWithCreateDependency, isNotNull);
+    expect(context.doesDependOnInheritedElement(ancestor), true);
+  });
+
   testWidgets('RawDialogRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
