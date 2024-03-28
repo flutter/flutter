@@ -23,7 +23,7 @@ import 'theme.dart';
 // Apple Design Resources(https://developer.apple.com/design/resources/).
 // However the values are not exactly the same as native, so eyeballing is needed.
 const TextStyle _kCupertinoDialogTitleStyle = TextStyle(
-  fontFamily: 'CupertinoSystemDisplay',
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
   fontSize: 17.0,
   fontWeight: FontWeight.w600,
