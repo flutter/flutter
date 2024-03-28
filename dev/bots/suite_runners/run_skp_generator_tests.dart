@@ -30,7 +30,7 @@ Future<void> skpGeneratorTestsRunner() async {
   );
   await runCommand(
     './build.sh',
-    <String>[ ],
+    const <String>[ ],
     workingDirectory: path.join(checkout.path, 'skp_generator'),
   );
 }
