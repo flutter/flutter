@@ -1,4 +1,4 @@
-Signature: e6c0797d1b9015dde7fab6ef78a27c0e
+Signature: a4196b84c35c8d8f6a1478cf53a293f3
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9527,11 +9527,14 @@ ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/src/SkBidiFactory_ic
 ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/src/SkBidiFactory_icu_subset.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkKnownRuntimeEffects.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkKnownRuntimeEffects.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/DataUtils.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/DataUtils.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/SwizzlePriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/gl/GrGLCoreFunctions.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/gl/epoxy/GrGLMakeEpoxyEGLInterface.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/mtl/GrMtlBackendSemaphore.mm + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/mtl/GrMtlDirectContext.mm + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/FactoryFunctionsPriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/RasterPathUtils.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/RasterPathUtils.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/task/DrawTask.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -9560,11 +9563,14 @@ FILE: ../../../flutter/third_party/skia/modules/skunicode/src/SkBidiFactory_icu_
 FILE: ../../../flutter/third_party/skia/modules/skunicode/src/SkBidiFactory_icu_subset.h
 FILE: ../../../flutter/third_party/skia/src/core/SkKnownRuntimeEffects.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkKnownRuntimeEffects.h
+FILE: ../../../flutter/third_party/skia/src/gpu/DataUtils.cpp
+FILE: ../../../flutter/third_party/skia/src/gpu/DataUtils.h
 FILE: ../../../flutter/third_party/skia/src/gpu/SwizzlePriv.h
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/gl/GrGLCoreFunctions.h
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/gl/epoxy/GrGLMakeEpoxyEGLInterface.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/mtl/GrMtlBackendSemaphore.mm
 FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/mtl/GrMtlDirectContext.mm
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/FactoryFunctionsPriv.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/RasterPathUtils.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/RasterPathUtils.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/task/DrawTask.cpp
