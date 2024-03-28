@@ -31,11 +31,11 @@ const List<String> expectedMainErrors = <String>[
 ];
 
 const List<String> expectedUiErrors = <String>[
-  'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:14:7: (top-level declaration) (prefer_typing_uninitialized_variables)',
-  'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:14:7: (top-level declaration) (inference_failure_on_uninitialized_variable)',
-  'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:14:7: (top-level declaration) (missing_const_final_var_or_type)',
-  'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:16:20: (top-level declaration) (prefer_final_fields)',
-  'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:16:20: (top-level declaration) (unused_field)',
+  'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:12:7: (top-level declaration) (prefer_typing_uninitialized_variables)',
+  'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:12:7: (top-level declaration) (inference_failure_on_uninitialized_variable)',
+  'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:12:7: (top-level declaration) (missing_const_final_var_or_type)',
+  'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:14:20: (top-level declaration) (prefer_final_fields)',
+  'dev/bots/test/analyze-snippet-code-test-dart-ui/ui.dart:14:20: (top-level declaration) (unused_field)',
 ];
 
 final RegExp errorPrefixRE = RegExp(r'^([-a-z0-9/_.:]+): .*(\([-a-z_ ]+\) \([-a-z_ ]+\))$');

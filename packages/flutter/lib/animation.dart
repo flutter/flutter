@@ -158,7 +158,7 @@
 ///    implicitly animate changes to their properties.
 ///  * [AnimatedWidget] and its subclasses, which are [Widget]s that take an
 ///    explicit [Animation] to animate their properties.
-library animation;
+library;
 
 // AnimationController can throw TickerCanceled
 export 'package:flutter/scheduler.dart' show TickerCanceled;

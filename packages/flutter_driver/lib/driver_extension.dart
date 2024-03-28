@@ -22,7 +22,7 @@
 ///       enableFlutterDriverExtension();
 ///       runApp(ExampleApp());
 ///     }
-library flutter_driver_extension;
+library;
 
 export 'src/common/deserialization_factory.dart';
 export 'src/common/handler_factory.dart';

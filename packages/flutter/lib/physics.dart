@@ -6,7 +6,7 @@
 /// gravity, for use in user interface animations.
 ///
 /// To use, import `package:flutter/physics.dart`.
-library physics;
+library;
 
 export 'src/physics/clamped_simulation.dart';
 export 'src/physics/friction_simulation.dart';

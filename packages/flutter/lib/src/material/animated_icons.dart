@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// Flutter widgets implementing Material Design animated icons.
-library material_animated_icons;
+library material_animated_icons; // ignore: unnecessary_library_name
 
 import 'dart:math' as math show pi;
 import 'dart:ui' as ui show Canvas, Paint, Path, lerpDouble;

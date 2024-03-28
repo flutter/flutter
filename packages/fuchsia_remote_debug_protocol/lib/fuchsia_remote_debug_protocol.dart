@@ -14,7 +14,7 @@
 /// subscribe to creation and destruction of Dart VM instances, Isolates, and
 /// Flutter Views. Not all of these features are yet implemented, as this
 /// library is a work in progress.
-library fuchsia_remote_debug_protocol;
+library;
 
 export 'src/common/network.dart';
 export 'src/dart/dart_vm.dart';

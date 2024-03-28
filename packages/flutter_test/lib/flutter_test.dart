@@ -51,7 +51,7 @@
 ///  * [debugCheckIntrinsicSizes], which can be set in a
 ///    `flutter_test_config.dart` file to enable deeper [RenderBox]
 ///    tests of the intrinsic APIs automatically while laying out widgets.
-library flutter_test;
+library;
 
 export 'dart:async' show Future;
 
