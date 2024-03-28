@@ -28,36 +28,6 @@ class DesktopTextSelectionControls extends TextSelectionControls {
     return Size.zero;
   }
 
-  /// Builder for the Material-style desktop copy/paste text selection toolbar.
-  @Deprecated(
-    'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre.',
-  )
-  @override
-  Widget buildToolbar(
-    BuildContext context,
-    Rect globalEditableRegion,
-    double textLineHeight,
-    Offset selectionMidpoint,
-    List<TextSelectionPoint> endpoints,
-    TextSelectionDelegate delegate,
-    ValueListenable<ClipboardStatus>? clipboardStatus,
-    Offset? lastSecondaryTapDownPosition,
-  ) {
-    return _DesktopTextSelectionControlsToolbar(
-      clipboardStatus: clipboardStatus,
-      endpoints: endpoints,
-      globalEditableRegion: globalEditableRegion,
-      handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
-      handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
-      handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
-      handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
-      selectionMidpoint: selectionMidpoint,
-      lastSecondaryTapDownPosition: lastSecondaryTapDownPosition,
-      textLineHeight: textLineHeight,
-    );
-  }
-
   /// Builds the text selection handles, but desktop has none.
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
@@ -69,37 +39,14 @@ class DesktopTextSelectionControls extends TextSelectionControls {
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     return Offset.zero;
   }
-
-  @Deprecated(
-    'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre.',
-  )
-  @override
-  bool canSelectAll(TextSelectionDelegate delegate) {
-    // Allow SelectAll when selection is not collapsed, unless everything has
-    // already been selected. Same behavior as Android.
-    final TextEditingValue value = delegate.textEditingValue;
-    return delegate.selectAllEnabled &&
-           value.text.isNotEmpty &&
-           !(value.selection.start == 0 && value.selection.end == value.text.length);
-  }
-
-  @Deprecated(
-    'Use `contextMenuBuilder` instead. '
-    'This feature was deprecated after v3.3.0-0.5.pre.',
-  )
-  @override
-  void handleSelectAll(TextSelectionDelegate delegate) {
-    super.handleSelectAll(delegate);
-    delegate.hideToolbar();
-  }
 }
 
-// TODO(justinmc): Deprecate this after TextSelectionControls.buildToolbar is
-// deleted, when users should migrate back to desktopTextSelectionControls.
-// See https://github.com/flutter/flutter/pull/124262
 /// Desktop text selection handle controls that loosely follow Material design
 /// conventions.
+@Deprecated(
+  'Use `desktopTextSelectionControls` instead. '
+  'This feature was deprecated after v3.19.0-0.1.pre.',
+)
 final TextSelectionControls desktopTextSelectionHandleControls =
     _DesktopTextSelectionHandleControls();
 

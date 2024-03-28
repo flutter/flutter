@@ -1919,6 +1919,11 @@ void main() {
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: materialTextSelectionControls,
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(
+              editableTextState: editableTextState,
+            );
+          },
         ),
       ),
     );
@@ -1984,6 +1989,11 @@ void main() {
             style: textStyle,
             cursorColor: cursorColor,
             selectionControls: materialTextSelectionControls,
+            contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+              return AdaptiveTextSelectionToolbar.editableText(
+                editableTextState: editableTextState,
+              );
+            },
           ),
         ),
       );
@@ -2031,6 +2041,11 @@ void main() {
           focusNode: focusNode,
           style: textStyle,
           cursorColor: cursorColor,
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(
+              editableTextState: editableTextState,
+            );
+          },
           selectionControls: materialTextSelectionControls,
         ),
       ),
@@ -2069,6 +2084,11 @@ void main() {
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: materialTextSelectionControls,
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(
+              editableTextState: editableTextState,
+            );
+          },
         ),
       ),
     );
@@ -2115,6 +2135,11 @@ void main() {
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: materialTextSelectionControls,
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(
+              editableTextState: editableTextState,
+            );
+          },
         ),
       ),
     );
@@ -2168,6 +2193,11 @@ void main() {
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: materialTextSelectionControls,
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(
+              editableTextState: editableTextState,
+            );
+          },
         ),
       ),
     );
@@ -2208,6 +2238,11 @@ void main() {
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: materialTextSelectionControls,
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(
+              editableTextState: editableTextState,
+            );
+          },
         ),
       ),
     );
@@ -2224,11 +2259,11 @@ void main() {
 
     final TextSelection copySelectionRange = localController.selection;
 
-    expect(find.byType(TextSelectionToolbar), findsNothing);
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
     state.showToolbar();
     await tester.pumpAndSettle();
 
-    expect(find.byType(TextSelectionToolbar), findsOneWidget);
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
     expect(find.text('Copy'), findsOneWidget);
 
     await tester.tap(find.text('Copy'));
@@ -2248,6 +2283,11 @@ void main() {
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: materialTextSelectionControls,
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(
+              editableTextState: editableTextState,
+            );
+          },
         ),
       ),
     );
@@ -2285,10 +2325,16 @@ void main() {
           backgroundCursorColor: Colors.grey,
           controller: controller,
           focusNode: focusNode,
-          toolbarOptions: const ToolbarOptions(
-            copy: true,
-            selectAll: true,
-          ),
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.buttonItems(
+              anchors: editableTextState.contextMenuAnchors,
+              buttonItems: editableTextState.contextMenuButtonItems
+                  .where((ContextMenuButtonItem buttonItem) {
+                    return buttonItem.type == ContextMenuButtonType.copy
+                        || buttonItem.type == ContextMenuButtonType.selectAll;
+                  }).toList(),
+            );
+          },
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: materialTextSelectionControls,
@@ -2324,7 +2370,12 @@ void main() {
           backgroundCursorColor: Colors.grey,
           controller: controller,
           focusNode: focusNode,
-          toolbarOptions: ToolbarOptions.empty,
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar(
+              anchors: editableTextState.contextMenuAnchors,
+              children: const <Widget>[],
+            );
+          },
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: cupertinoTextSelectionControls,
@@ -2355,9 +2406,15 @@ void main() {
           backgroundCursorColor: Colors.grey,
           controller: controller,
           focusNode: focusNode,
-          toolbarOptions: const ToolbarOptions(
-            copy: true,
-          ),
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.buttonItems(
+              anchors: editableTextState.contextMenuAnchors,
+              buttonItems: editableTextState.contextMenuButtonItems
+                  .where((ContextMenuButtonItem buttonItem) {
+                    return buttonItem.type == ContextMenuButtonType.copy;
+                  }).toList(),
+            );
+          },
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: materialTextSelectionControls,
@@ -2383,7 +2440,7 @@ void main() {
     expect(find.text('Cut'), findsNothing);
   });
 
-  testWidgets('cut and paste are disabled in read only mode even if explicitly set', (WidgetTester tester) async {
+  testWidgets('cut and paste are removed in read only mode', (WidgetTester tester) async {
     controller.text = 'blah blah';
 
     await tester.pumpWidget(
@@ -2393,12 +2450,11 @@ void main() {
           controller: controller,
           focusNode: focusNode,
           readOnly: true,
-          toolbarOptions: const ToolbarOptions(
-            copy: true,
-            cut: true,
-            paste: true,
-            selectAll: true,
-          ),
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(
+              editableTextState: editableTextState,
+            );
+          },
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: materialTextSelectionControls,
@@ -2424,7 +2480,7 @@ void main() {
     expect(find.text('Cut'), findsNothing);
   });
 
-  testWidgets('cut and copy are disabled in obscured mode even if explicitly set', (WidgetTester tester) async {
+  testWidgets('cut and copy are removed in obscured mode', (WidgetTester tester) async {
     controller.text = 'blah blah';
 
     await tester.pumpWidget(
@@ -2434,12 +2490,11 @@ void main() {
           controller: controller,
           focusNode: focusNode,
           obscureText: true,
-          toolbarOptions: const ToolbarOptions(
-            copy: true,
-            cut: true,
-            paste: true,
-            selectAll: true,
-          ),
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(
+              editableTextState: editableTextState,
+            );
+          },
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: materialTextSelectionControls,
@@ -2448,7 +2503,7 @@ void main() {
     );
 
     final EditableTextState state =
-    tester.state<EditableTextState>(find.byType(EditableText));
+        tester.state<EditableTextState>(find.byType(EditableText));
     await tester.tap(find.byType(EditableText));
     await tester.pump();
     // Select something, but not the whole thing.
@@ -2535,300 +2590,6 @@ void main() {
     state.selectAll(SelectionChangedCause.toolbar);
     expect(state.selectAllEnabled, isFalse);
     expect(state.textEditingValue.selection.isCollapsed, isTrue);
-  });
-
-  group('buttonItemsForToolbarOptions', () {
-    testWidgets('returns null when toolbarOptions are empty', (WidgetTester tester) async {
-      controller.text = 'TEXT';
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: EditableText(
-            controller: controller,
-            toolbarOptions: ToolbarOptions.empty,
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
-            backgroundCursorColor: Colors.grey,
-          ),
-        ),
-      );
-
-      final EditableTextState state = tester.state<EditableTextState>(
-        find.byType(EditableText),
-      );
-
-      expect(state.buttonItemsForToolbarOptions(), isNull);
-    });
-
-    testWidgets('returns empty array when only cut is selected in toolbarOptions but cut is not enabled', (WidgetTester tester) async {
-      controller.text = 'TEXT';
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: EditableText(
-            controller: controller,
-            toolbarOptions: const ToolbarOptions(cut: true),
-            readOnly: true,
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
-            backgroundCursorColor: Colors.grey,
-          ),
-        ),
-      );
-
-      final EditableTextState state = tester.state<EditableTextState>(
-        find.byType(EditableText),
-      );
-
-      expect(state.cutEnabled, isFalse);
-      expect(state.buttonItemsForToolbarOptions(), isEmpty);
-    });
-
-    testWidgets('returns only cut button when only cut is selected in toolbarOptions and cut is enabled', (WidgetTester tester) async {
-      const String text = 'TEXT';
-      controller.text = text;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: EditableText(
-            controller: controller,
-            toolbarOptions: const ToolbarOptions(cut: true),
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
-            backgroundCursorColor: Colors.grey,
-          ),
-        ),
-      );
-
-      final EditableTextState state = tester.state<EditableTextState>(
-        find.byType(EditableText),
-      );
-
-      // Selecting all.
-      controller.selection = TextSelection(
-        baseOffset: 0,
-        extentOffset: controller.text.length,
-      );
-      expect(state.cutEnabled, isTrue);
-
-      final List<ContextMenuButtonItem>? items = state.buttonItemsForToolbarOptions();
-
-      expect(items, isNotNull);
-      expect(items, hasLength(1));
-
-      final ContextMenuButtonItem cutButton = items!.first;
-      expect(cutButton.type, ContextMenuButtonType.cut);
-
-      cutButton.onPressed?.call();
-      await tester.pump();
-
-      expect(controller.text, isEmpty);
-      final ClipboardData? data = await Clipboard.getData('text/plain');
-      expect(data, isNotNull);
-      expect(data!.text, equals(text));
-    });
-
-    testWidgets('returns empty array when only copy is selected in toolbarOptions but copy is not enabled', (WidgetTester tester) async {
-      controller.text = 'TEXT';
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: EditableText(
-            controller: controller,
-            toolbarOptions: const ToolbarOptions(copy: true),
-            obscureText: true,
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
-            backgroundCursorColor: Colors.grey,
-          ),
-        ),
-      );
-
-      final EditableTextState state = tester.state<EditableTextState>(
-        find.byType(EditableText),
-      );
-
-      expect(state.copyEnabled, isFalse);
-      expect(state.buttonItemsForToolbarOptions(), isEmpty);
-    });
-
-    testWidgets('returns only copy button when only copy is selected in toolbarOptions and copy is enabled', (WidgetTester tester) async {
-      const String text = 'TEXT';
-      controller.text = text;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: EditableText(
-            controller: controller,
-            toolbarOptions: const ToolbarOptions(copy: true),
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
-            backgroundCursorColor: Colors.grey,
-          ),
-        ),
-      );
-
-      final EditableTextState state = tester.state<EditableTextState>(
-        find.byType(EditableText),
-      );
-
-      // Selecting all.
-      controller.selection = TextSelection(
-        baseOffset: 0,
-        extentOffset: controller.text.length,
-      );
-      expect(state.copyEnabled, isTrue);
-
-      final List<ContextMenuButtonItem>? items = state.buttonItemsForToolbarOptions();
-
-      expect(items, isNotNull);
-      expect(items, hasLength(1));
-
-      final ContextMenuButtonItem copyButton = items!.first;
-      expect(copyButton.type, ContextMenuButtonType.copy);
-
-      copyButton.onPressed?.call();
-      await tester.pump();
-
-      expect(controller.text, equals(text));
-      final ClipboardData? data = await Clipboard.getData('text/plain');
-      expect(data, isNotNull);
-      expect(data!.text, equals(text));
-    });
-
-    testWidgets('returns empty array when only paste is selected in toolbarOptions but paste is not enabled', (WidgetTester tester) async {
-      controller.text = 'TEXT';
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: EditableText(
-            controller: controller,
-            toolbarOptions: const ToolbarOptions(paste: true),
-            readOnly: true,
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
-            backgroundCursorColor: Colors.grey,
-          ),
-        ),
-      );
-
-      final EditableTextState state = tester.state<EditableTextState>(
-        find.byType(EditableText),
-      );
-
-      expect(state.pasteEnabled, isFalse);
-      expect(state.buttonItemsForToolbarOptions(), isEmpty);
-    });
-
-    testWidgets('returns only paste button when only paste is selected in toolbarOptions and paste is enabled', (WidgetTester tester) async {
-      const String text = 'TEXT';
-      controller.text = text;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: EditableText(
-            controller: controller,
-            toolbarOptions: const ToolbarOptions(paste: true),
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
-            backgroundCursorColor: Colors.grey,
-          ),
-        ),
-      );
-
-      final EditableTextState state = tester.state<EditableTextState>(
-        find.byType(EditableText),
-      );
-
-      // Moving caret to the end.
-      controller.selection = TextSelection.collapsed(offset: controller.text.length);
-      expect(state.pasteEnabled, isTrue);
-
-      final List<ContextMenuButtonItem>? items = state.buttonItemsForToolbarOptions();
-
-      expect(items, isNotNull);
-      expect(items, hasLength(1));
-
-      final ContextMenuButtonItem pasteButton = items!.first;
-      expect(pasteButton.type, ContextMenuButtonType.paste);
-
-      // Setting data which will be pasted into the clipboard.
-      await Clipboard.setData(const ClipboardData(text: text));
-
-      pasteButton.onPressed?.call();
-      await tester.pump();
-
-      expect(controller.text, equals(text + text));
-    });
-
-    testWidgets('returns empty array when only selectAll is selected in toolbarOptions but selectAll is not enabled', (WidgetTester tester) async {
-      controller.text = 'TEXT';
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: EditableText(
-            controller: controller,
-            toolbarOptions: const ToolbarOptions(selectAll: true),
-            readOnly: true,
-            obscureText: true,
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
-            backgroundCursorColor: Colors.grey,
-          ),
-        ),
-      );
-
-      final EditableTextState state = tester.state<EditableTextState>(
-        find.byType(EditableText),
-      );
-
-      expect(state.selectAllEnabled, isFalse);
-      expect(state.buttonItemsForToolbarOptions(), isEmpty);
-    });
-
-    testWidgets('returns only selectAll button when only selectAll is selected in toolbarOptions and selectAll is enabled', (WidgetTester tester) async {
-      const String text = 'TEXT';
-      controller.text = text;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: EditableText(
-            controller: controller,
-            toolbarOptions: const ToolbarOptions(selectAll: true),
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
-            backgroundCursorColor: Colors.grey,
-          ),
-        ),
-      );
-
-      final EditableTextState state = tester.state<EditableTextState>(
-        find.byType(EditableText),
-      );
-
-      final List<ContextMenuButtonItem>? items = state.buttonItemsForToolbarOptions();
-
-      expect(items, isNotNull);
-      expect(items, hasLength(1));
-
-      final ContextMenuButtonItem selectAllButton = items!.first;
-      expect(selectAllButton.type, ContextMenuButtonType.selectAll);
-
-      selectAllButton.onPressed?.call();
-      await tester.pump();
-
-      expect(controller.text, equals(text));
-      expect(state.textEditingValue.selection.textInside(text), equals(text));
-    });
   });
 
   testWidgets('Handles the read-only flag correctly', (WidgetTester tester) async {
@@ -3404,6 +3165,11 @@ void main() {
         style: Typography.material2018().black.titleMedium!,
         cursorColor: Colors.blue,
         selectionControls: materialTextSelectionControls,
+        contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+          return AdaptiveTextSelectionToolbar.editableText(
+            editableTextState: editableTextState,
+          );
+        },
         keyboardType: TextInputType.text,
         onChanged: (String value) {
           changedValue = value;
@@ -4162,6 +3928,7 @@ void main() {
           SemanticsAction.moveCursorBackwardByCharacter,
           SemanticsAction.moveCursorBackwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.paste,
           SemanticsAction.setText,
         ],
       ),
@@ -4182,6 +3949,7 @@ void main() {
           SemanticsAction.moveCursorBackwardByWord,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.paste,
           SemanticsAction.setText,
         ],
       ),
@@ -4199,6 +3967,7 @@ void main() {
           SemanticsAction.moveCursorForwardByCharacter,
           SemanticsAction.moveCursorForwardByWord,
           SemanticsAction.setSelection,
+          SemanticsAction.paste,
           SemanticsAction.setText,
         ],
       ),
@@ -4798,6 +4567,7 @@ void main() {
                           actions: <SemanticsAction>[
                             SemanticsAction.moveCursorBackwardByCharacter,
                             SemanticsAction.setSelection,
+                            SemanticsAction.paste,
                             SemanticsAction.setText,
                             SemanticsAction.moveCursorBackwardByWord,
                           ],
@@ -4877,7 +4647,11 @@ void main() {
   });
 
   group('a11y copy/cut/paste', () {
-    Future<void> buildApp(MockTextSelectionControls controls, WidgetTester tester) {
+    Future<void> buildApp(MockTextSelectionControls controls, WidgetTester tester, {
+      bool testCanCopy = true,
+      bool testCanCut = true,
+      bool testCanPaste = true,
+    }) {
       return tester.pumpWidget(MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
@@ -4886,6 +4660,16 @@ void main() {
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: controls,
+          semanticsActions: (
+            cut: testCanCut,
+            copy: testCanCopy,
+            paste: testCanPaste,
+          ),
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(
+              editableTextState: editableTextState,
+            );
+          },
         ),
       ));
     }
@@ -4903,11 +4687,13 @@ void main() {
     testWidgets('are exposed', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
 
-      controls.testCanCopy = false;
-      controls.testCanCut = false;
-      controls.testCanPaste = false;
-
-      await buildApp(controls, tester);
+      await buildApp(
+        controls,
+        tester,
+        testCanCopy: false,
+        testCanCut: false,
+        testCanPaste: false,
+      );
       await tester.tap(find.byType(EditableText));
       await tester.pump();
 
@@ -4924,8 +4710,18 @@ void main() {
         ),
       );
 
-      controls.testCanCopy = true;
-      await buildApp(controls, tester);
+      controller.value = controller.value.copyWith(
+        selection: TextSelection(
+          baseOffset: 0,
+          extentOffset: controller.text.length,
+        ),
+      );
+      await buildApp(
+        controls,
+        tester,
+        testCanCut: false,
+        testCanPaste: false,
+      );
       expect(
         semantics,
         includesNodeWith(
@@ -4940,9 +4736,12 @@ void main() {
         ),
       );
 
-      controls.testCanCopy = false;
-      controls.testCanPaste = true;
-      await buildApp(controls, tester);
+      await buildApp(
+        controls,
+        tester,
+        testCanCopy: false,
+        testCanCut: false,
+      );
       await tester.pumpAndSettle();
       expect(
         semantics,
@@ -4958,9 +4757,12 @@ void main() {
         ),
       );
 
-      controls.testCanPaste = false;
-      controls.testCanCut = true;
-      await buildApp(controls, tester);
+      await buildApp(
+        controls,
+        tester,
+        testCanCopy: false,
+        testCanPaste: false,
+      );
       expect(
         semantics,
         includesNodeWith(
@@ -4975,9 +4777,10 @@ void main() {
         ),
       );
 
-      controls.testCanCopy = true;
-      controls.testCanCut = true;
-      controls.testCanPaste = true;
+      await buildApp(
+        controls,
+        tester,
+      );
       await buildApp(controls, tester);
       expect(
         semantics,
@@ -5000,11 +4803,16 @@ void main() {
     testWidgets('can copy/cut/paste with a11y', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
 
-      controls.testCanCopy = true;
-      controls.testCanCut = true;
-      controls.testCanPaste = true;
       await buildApp(controls, tester);
       await tester.tap(find.byType(EditableText));
+      await tester.pump();
+      final TextSelection selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: controller.text.length,
+      );
+      controller.value = controller.value.copyWith(
+        selection: selection,
+      );
       await tester.pump();
 
       final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner!;
@@ -5017,6 +4825,7 @@ void main() {
             children: <TestSemantics>[
               TestSemantics.rootChild(
                 id: 1,
+                textDirection: TextDirection.ltr, // justin
                 children: <TestSemantics>[
                   TestSemantics(
                     id: 2,
@@ -5041,7 +4850,7 @@ void main() {
                               SemanticsAction.paste,
                             ],
                             value: 'test',
-                            textSelection: TextSelection.collapsed(offset: controller.text.length),
+                            textSelection: selection,
                             textDirection: TextDirection.ltr,
                           ),
                         ],
@@ -5058,13 +4867,23 @@ void main() {
       );
 
       owner.performAction(expectedNodeId, SemanticsAction.copy);
-      expect(controls.copyCount, 1);
+      ClipboardData? clipboardData = await Clipboard.getData('text/plain');
+      expect(clipboardData?.text, controller.text);
+      expect(controller.selection.isCollapsed, isTrue);
+
+      controller.value = controller.value.copyWith(
+        selection: selection,
+      );
 
       owner.performAction(expectedNodeId, SemanticsAction.cut);
-      expect(controls.cutCount, 1);
+      await tester.pump();
+      clipboardData = await Clipboard.getData('text/plain');
+      expect(clipboardData?.text, 'test');
+      expect(controller.text, '');
 
       owner.performAction(expectedNodeId, SemanticsAction.paste);
-      expect(controls.pasteCount, 1);
+      clipboardData = await Clipboard.getData('text/plain');
+      expect(controller.text, clipboardData?.text);
 
       semantics.dispose();
     });
@@ -5125,13 +4944,19 @@ void main() {
         focusNode: focusNode,
         style: textStyle,
         cursorColor: cursorColor,
+        contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+          return AdaptiveTextSelectionToolbar.buttonItems(
+            anchors: editableTextState.contextMenuAnchors,
+            buttonItems: const <ContextMenuButtonItem>[],
+          );
+        },
       ),
     ));
     await tester.tap(find.byType(EditableText));
     await tester.pump();
 
     final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner!;
-    const int expectedNodeId = 4;
+    const int expectedNodeId = 5;
 
     expect(
       semantics,
@@ -5156,6 +4981,7 @@ void main() {
                           ],
                           actions: <SemanticsAction>[
                             SemanticsAction.setSelection,
+                            SemanticsAction.paste,
                             SemanticsAction.setText,
                           ],
                           textSelection: TextSelection.collapsed(offset: controller.text.length),
@@ -6220,6 +6046,11 @@ void main() {
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
+            contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+              return AdaptiveTextSelectionToolbar.editableText(
+                editableTextState: editableTextState,
+              );
+            },
             keyboardType: TextInputType.text,
             selectionColor: Colors.lightBlueAccent,
             maxLines: 3,
@@ -12682,6 +12513,11 @@ void main() {
                   cursorColor: Colors.blue,
                   backgroundCursorColor: Colors.grey,
                   selectionControls: enableInteractiveSelection ? materialTextSelectionControls : null,
+                  contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                    return AdaptiveTextSelectionToolbar.editableText(
+                      editableTextState: editableTextState,
+                    );
+                  },
                   controller: controller,
                   enableInteractiveSelection: enableInteractiveSelection,
                 );
@@ -14358,6 +14194,11 @@ void main() {
             style: textStyle,
             cursorColor: cursorColor,
             selectionControls: materialTextSelectionControls,
+            contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+              return AdaptiveTextSelectionToolbar.editableText(
+                editableTextState: editableTextState,
+              );
+            },
           ),
         ),
       );
@@ -14548,6 +14389,11 @@ void main() {
             style: textStyle,
             cursorColor: cursorColor,
             selectionControls: controls,
+            contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+              return AdaptiveTextSelectionToolbar.editableText(
+                editableTextState: editableTextState,
+              );
+            },
           );
         },
       ),
@@ -14598,6 +14444,11 @@ void main() {
             style: textStyle,
             cursorColor: cursorColor,
             selectionControls: controls,
+            contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+              return AdaptiveTextSelectionToolbar.editableText(
+                editableTextState: editableTextState,
+              );
+            },
           );
         },
       ),
@@ -16713,12 +16564,11 @@ void main() {
           controller: controller,
           focusNode: focusNode,
           obscureText: true,
-          toolbarOptions: const ToolbarOptions(
-            copy: true,
-            cut: true,
-            paste: true,
-            selectAll: true,
-          ),
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(
+              editableTextState: editableTextState,
+            );
+          },
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: materialTextSelectionControls,
@@ -16849,12 +16699,11 @@ void main() {
           controller: controller,
           focusNode: focusNode,
           obscureText: true,
-          toolbarOptions: const ToolbarOptions(
-            copy: true,
-            cut: true,
-            paste: true,
-            selectAll: true,
-          ),
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(
+              editableTextState: editableTextState,
+            );
+          },
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: materialTextSelectionControls,
@@ -16933,12 +16782,11 @@ void main() {
           controller: controller,
           focusNode: focusNode,
           obscureText: true,
-          toolbarOptions: const ToolbarOptions(
-            copy: true,
-            cut: true,
-            paste: true,
-            selectAll: true,
-          ),
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(
+              editableTextState: editableTextState,
+            );
+          },
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: materialTextSelectionControls,
@@ -16995,12 +16843,11 @@ void main() {
           controller: controller,
           focusNode: focusNode,
           obscureText: true,
-          toolbarOptions: const ToolbarOptions(
-            copy: true,
-            cut: true,
-            paste: true,
-            selectAll: true,
-          ),
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(
+              editableTextState: editableTextState,
+            );
+          },
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: materialTextSelectionControls,
@@ -17055,12 +16902,11 @@ void main() {
           controller: controller,
           focusNode: focusNode,
           obscureText: true,
-          toolbarOptions: const ToolbarOptions(
-            copy: true,
-            cut: true,
-            paste: true,
-            selectAll: true,
-          ),
+          contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+            return AdaptiveTextSelectionToolbar.editableText(
+              editableTextState: editableTextState,
+            );
+          },
           style: textStyle,
           cursorColor: cursorColor,
           selectionControls: materialTextSelectionControls,
@@ -17132,12 +16978,11 @@ void main() {
             controller: controller,
             focusNode: focusNode,
             obscureText: true,
-            toolbarOptions: const ToolbarOptions(
-              copy: true,
-              cut: true,
-              paste: true,
-              selectAll: true,
-            ),
+            contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+              return AdaptiveTextSelectionToolbar.editableText(
+                editableTextState: editableTextState,
+              );
+            },
             style: textStyle,
             cursorColor: cursorColor,
             selectionControls: materialTextSelectionControls,
@@ -17181,6 +17026,81 @@ void main() {
 
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
     expect(state.renderEditable.cursorColor, cursorColor.withOpacity(opacity));
+  });
+
+  group('selectAllEnabled', () {
+    Widget createEditableText({
+      String? text,
+      TextSelection? selection,
+    }) {
+      final TextEditingController controller = TextEditingController(text: text)
+        ..selection = selection ?? const TextSelection.collapsed(offset: -1);
+      addTearDown(controller.dispose);
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      return CupertinoApp(
+        home: EditableText(
+          controller: controller,
+          focusNode: focusNode,
+          style: const TextStyle(),
+          cursorColor: const Color.fromARGB(0, 0, 0, 0),
+          backgroundCursorColor: const Color.fromARGB(0, 0, 0, 0),
+        ),
+      );
+    }
+
+    testWidgets('should return false when there is no text', (WidgetTester tester) async {
+      await tester.pumpWidget(createEditableText());
+      final EditableTextState editableTextState = tester.state(find.byType(EditableText));
+      expect(editableTextState.selectAllEnabled, isFalse);
+    });
+
+    testWidgets('should return true when there is text and collapsed selection', (WidgetTester tester) async {
+      await tester.pumpWidget(createEditableText(
+        text: '123',
+      ));
+      final EditableTextState editableTextState = tester.state(find.byType(EditableText));
+      expect(
+        editableTextState.selectAllEnabled,
+        switch (defaultTargetPlatform) {
+          TargetPlatform.macOS        => isFalse,
+          TargetPlatform.iOS
+            || TargetPlatform.android
+            || TargetPlatform.fuchsia
+            || TargetPlatform.linux
+            || TargetPlatform.windows => isTrue,
+        },
+      );
+    });
+
+    testWidgets('when there is text and partial uncollapsed selection', (WidgetTester tester) async {
+      await tester.pumpWidget(createEditableText(
+        text: '123',
+        selection: const TextSelection(baseOffset: 1, extentOffset: 2),
+      ));
+      final EditableTextState editableTextState = tester.state(find.byType(EditableText));
+      expect(
+        editableTextState.selectAllEnabled,
+        switch (defaultTargetPlatform) {
+          TargetPlatform.macOS        => isFalse,
+          TargetPlatform.iOS          => isFalse,
+          TargetPlatform.android
+            || TargetPlatform.fuchsia
+            || TargetPlatform.linux
+            || TargetPlatform.windows => isTrue,
+        },
+      );
+    });
+
+    testWidgets('should return false when there is text and full selection', (WidgetTester tester) async {
+      await tester.pumpWidget(createEditableText(
+        text: '123',
+        selection: const TextSelection(baseOffset: 0, extentOffset: 3),
+      ));
+      final EditableTextState editableTextState = tester.state(find.byType(EditableText));
+      expect(editableTextState.selectAllEnabled, isFalse);
+    });
   });
 
   testWidgets('should notify on size change', (WidgetTester tester) async {
@@ -17251,67 +17171,53 @@ void main() {
 }
 
 class UnsettableController extends TextEditingController {
-  @override
-  set value(TextEditingValue v) {
-    // Do nothing for set, which causes selection to remain as -1, -1.
-  }
+@override
+set value(TextEditingValue v) {
+  // Do nothing for set, which causes selection to remain as -1, -1.
+}
 }
 
 class MockTextFormatter extends TextInputFormatter {
-  MockTextFormatter() : formatCallCount = 0, log = <String>[];
+MockTextFormatter() : formatCallCount = 0, log = <String>[];
 
-  int formatCallCount;
-  List<String> log;
-  late TextEditingValue lastOldValue;
-  late TextEditingValue lastNewValue;
+int formatCallCount;
+List<String> log;
+late TextEditingValue lastOldValue;
+late TextEditingValue lastNewValue;
 
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    lastOldValue = oldValue;
-    lastNewValue = newValue;
-    formatCallCount++;
-    log.add('[$formatCallCount]: ${oldValue.text}, ${newValue.text}');
-    TextEditingValue finalValue;
-    if (newValue.text.length < oldValue.text.length) {
-      finalValue = _handleTextDeletion(oldValue, newValue);
-    } else {
-      finalValue = _formatText(newValue);
-    }
-    return finalValue;
+@override
+TextEditingValue formatEditUpdate(
+  TextEditingValue oldValue,
+  TextEditingValue newValue,
+) {
+  lastOldValue = oldValue;
+  lastNewValue = newValue;
+  formatCallCount++;
+  log.add('[$formatCallCount]: ${oldValue.text}, ${newValue.text}');
+  TextEditingValue finalValue;
+  if (newValue.text.length < oldValue.text.length) {
+    finalValue = _handleTextDeletion(oldValue, newValue);
+  } else {
+    finalValue = _formatText(newValue);
   }
+  return finalValue;
+}
 
 
-  TextEditingValue _handleTextDeletion(TextEditingValue oldValue, TextEditingValue newValue) {
-    final String result = 'a' * (formatCallCount - 2);
-    log.add('[$formatCallCount]: deleting $result');
-    return TextEditingValue(text: newValue.text, selection: newValue.selection, composing: newValue.composing);
-  }
+TextEditingValue _handleTextDeletion(TextEditingValue oldValue, TextEditingValue newValue) {
+  final String result = 'a' * (formatCallCount - 2);
+  log.add('[$formatCallCount]: deleting $result');
+  return TextEditingValue(text: newValue.text, selection: newValue.selection, composing: newValue.composing);
+}
 
-  TextEditingValue _formatText(TextEditingValue value) {
-    final String result = 'a' * formatCallCount * 2;
-    log.add('[$formatCallCount]: normal $result');
-    return TextEditingValue(text: value.text, selection: value.selection, composing: value.composing);
-  }
+TextEditingValue _formatText(TextEditingValue value) {
+  final String result = 'a' * formatCallCount * 2;
+  log.add('[$formatCallCount]: normal $result');
+  return TextEditingValue(text: value.text, selection: value.selection, composing: value.composing);
+}
 }
 
 class MockTextSelectionControls extends Fake implements TextSelectionControls {
-  @override
-  Widget buildToolbar(
-    BuildContext context,
-    Rect globalEditableRegion,
-    double textLineHeight,
-    Offset position,
-    List<TextSelectionPoint> endpoints,
-    TextSelectionDelegate delegate,
-    ValueListenable<ClipboardStatus>? clipboardStatus,
-    Offset? lastSecondaryTapDownPosition,
-  ) {
-    return const SizedBox();
-  }
-
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
     return const SizedBox();
@@ -17326,44 +17232,6 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     return Offset.zero;
   }
-
-  bool testCanCut = false;
-  bool testCanCopy = false;
-  bool testCanPaste = false;
-
-  int cutCount = 0;
-  int pasteCount = 0;
-  int copyCount = 0;
-
-  @override
-  void handleCopy(TextSelectionDelegate delegate) {
-    copyCount += 1;
-  }
-
-  @override
-  Future<void> handlePaste(TextSelectionDelegate delegate) async {
-    pasteCount += 1;
-  }
-
-  @override
-  void handleCut(TextSelectionDelegate delegate) {
-    cutCount += 1;
-  }
-
-  @override
-  bool canCut(TextSelectionDelegate delegate) {
-    return testCanCut;
-  }
-
-  @override
-  bool canCopy(TextSelectionDelegate delegate) {
-    return testCanCopy;
-  }
-
-  @override
-  bool canPaste(TextSelectionDelegate delegate) {
-    return testCanPaste;
-  }
 }
 
 // Fake text selection controls that call a callback when paste happens.
@@ -17373,42 +17241,8 @@ class _CustomTextSelectionControls extends TextSelectionControls {
     this.onCut,
   });
 
-  static const double _kToolbarContentDistance = 8.0;
-
   final VoidCallback? onPaste;
   final VoidCallback? onCut;
-
-  @override
-  Widget buildToolbar(
-    BuildContext context,
-    Rect globalEditableRegion,
-    double textLineHeight,
-    Offset position,
-    List<TextSelectionPoint> endpoints,
-    TextSelectionDelegate delegate,
-    ValueListenable<ClipboardStatus>? clipboardStatus,
-    Offset? lastSecondaryTapDownPosition,
-  ) {
-    final Offset selectionMidpoint = position;
-    final TextSelectionPoint startTextSelectionPoint = endpoints[0];
-    final TextSelectionPoint endTextSelectionPoint = endpoints.length > 1
-      ? endpoints[1]
-      : endpoints[0];
-    final Offset anchorAbove = Offset(
-      globalEditableRegion.left + selectionMidpoint.dx,
-      globalEditableRegion.top + startTextSelectionPoint.point.dy - textLineHeight - _kToolbarContentDistance
-    );
-    final Offset anchorBelow = Offset(
-      globalEditableRegion.left + selectionMidpoint.dx,
-      globalEditableRegion.top + endTextSelectionPoint.point.dy + TextSelectionToolbar.kToolbarContentDistanceBelow,
-    );
-    return _CustomTextSelectionToolbar(
-      anchorAbove: anchorAbove,
-      anchorBelow: anchorBelow,
-      handlePaste: () => handlePaste(delegate),
-      handleCut: () => handleCut(delegate),
-    );
-  }
 
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
@@ -17423,69 +17257,6 @@ class _CustomTextSelectionControls extends TextSelectionControls {
   @override
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     return Offset.zero;
-  }
-
-  @override
-  bool canCut(TextSelectionDelegate delegate) {
-    return true;
-  }
-
-  @override
-  bool canPaste(TextSelectionDelegate delegate) {
-    return true;
-  }
-
-  @override
-  Future<void> handlePaste(TextSelectionDelegate delegate) {
-    onPaste?.call();
-    return super.handlePaste(delegate);
-  }
-
-  @override
-  void handleCut(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
-    onCut?.call();
-    return super.handleCut(delegate);
-  }
-}
-
-// A fake text selection toolbar with only a paste button.
-class _CustomTextSelectionToolbar extends StatelessWidget {
-  const _CustomTextSelectionToolbar({
-    required this.anchorAbove,
-    required this.anchorBelow,
-    this.handlePaste,
-    this.handleCut,
-  });
-
-  final Offset anchorAbove;
-  final Offset anchorBelow;
-  final VoidCallback? handlePaste;
-  final VoidCallback? handleCut;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextSelectionToolbar(
-      anchorAbove: anchorAbove,
-      anchorBelow: anchorBelow,
-      toolbarBuilder: (BuildContext context, Widget child) {
-        return ColoredBox(
-          color: Colors.pink,
-          child: child,
-        );
-      },
-      children: <Widget>[
-        TextSelectionToolbarTextButton(
-          padding: TextSelectionToolbarTextButton.getPadding(0, 2),
-          onPressed: handleCut,
-          child: const Text('Cut'),
-        ),
-        TextSelectionToolbarTextButton(
-          padding: TextSelectionToolbarTextButton.getPadding(1, 2),
-          onPressed: handlePaste,
-          child: const Text('Paste'),
-        ),
-      ],
-    );
   }
 }
 

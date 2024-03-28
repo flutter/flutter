@@ -2569,6 +2569,11 @@ void main() {
           home: SelectableRegion(
             focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
+            contextMenuBuilder: (BuildContext context, SelectableRegionState selectableRegionState) {
+              return AdaptiveTextSelectionToolbar.selectableRegion(
+                selectableRegionState: selectableRegionState,
+              );
+            },
             child: const Column(
               children: <Widget>[
                 Text('How are you?'),
@@ -2608,6 +2613,11 @@ void main() {
           home: SelectableRegion(
             focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
+            contextMenuBuilder: (BuildContext context, SelectableRegionState selectableRegionState) {
+              return AdaptiveTextSelectionToolbar.selectableRegion(
+                selectableRegionState: selectableRegionState,
+              );
+            },
             child: const Column(
               children: <Widget>[
                 Text('How are you?'),
@@ -3177,6 +3187,11 @@ void main() {
         home: SelectableRegion(
           focusNode: focusNode,
           selectionControls: materialTextSelectionControls,
+          contextMenuBuilder: (BuildContext context, SelectableRegionState selectableRegionState) {
+            return AdaptiveTextSelectionToolbar.selectableRegion(
+              selectableRegionState: selectableRegionState,
+            );
+          },
           child: const Text('How are you?'),
         ),
       ),
@@ -3823,6 +3838,11 @@ void main() {
             onSelectionChanged: (SelectedContent? selectedContent) {},
             focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
+            contextMenuBuilder: (BuildContext context, SelectableRegionState selectableRegionState) {
+              return AdaptiveTextSelectionToolbar.selectableRegion(
+                selectableRegionState: selectableRegionState,
+              );
+            },
             child: const Center(
               child: Text('How are you'),
             ),
