@@ -848,6 +848,7 @@ class MenuItemButton extends StatefulWidget {
     this.onFocusChange,
     this.focusNode,
     this.shortcut,
+    this.semanticsLabel,
     this.style,
     this.statesController,
     this.clipBehavior = Clip.none,
@@ -890,6 +891,14 @@ class MenuItemButton extends StatefulWidget {
   ///
   /// {@macro flutter.material.MenuBar.shortcuts_note}
   final MenuSerializableShortcut? shortcut;
+
+  /// An optional Semantics label, applied to the entire [MenuItemButton].
+  ///
+  /// A screen reader will default to reading the genereated text on the [MenuItemButton]
+  /// itself, which is not guaranteed to be readable.
+  ///
+  /// Null by default.
+  final String? semanticsLabel;
 
   /// Customizes this button's appearance.
   ///
@@ -1105,6 +1114,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
       child: _MenuItemLabel(
         leadingIcon: widget.leadingIcon,
         shortcut: widget.shortcut,
+        semanticsLabel: widget.semanticsLabel,
         trailingIcon: widget.trailingIcon,
         hasSubmenu: false,
         child: widget.child!,
@@ -2958,6 +2968,7 @@ class _MenuItemLabel extends StatelessWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.shortcut,
+    this.semanticsLabel,
     required this.child,
   });
 
@@ -2981,6 +2992,10 @@ class _MenuItemLabel extends StatelessWidget {
   /// the shortcut.
   final MenuSerializableShortcut? shortcut;
 
+  /// An optional Semantics label, which replaces the generated string when
+  /// read by a screen reader.
+  final String? semanticsLabel;
+
   /// The required label child widget.
   final Widget child;
 
@@ -2991,7 +3006,7 @@ class _MenuItemLabel extends StatelessWidget {
       _kLabelItemMinSpacing,
       _kLabelItemDefaultSpacing + density.horizontal * 2,
     );
-    return Row(
+    Widget menuItemLabel = Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         Row(
@@ -3029,6 +3044,10 @@ class _MenuItemLabel extends StatelessWidget {
           ),
       ],
     );
+    if (semanticsLabel != null) {
+      menuItemLabel = Semantics(label: semanticsLabel, excludeSemantics: true, child: menuItemLabel);
+    }
+    return menuItemLabel;
   }
 
   @override
