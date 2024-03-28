@@ -20,7 +20,7 @@ class ColorSchemeExample extends StatefulWidget {
 class _ColorSchemeExampleState extends State<ColorSchemeExample> {
   Color selectedColor = ColorSeed.baseColor.color;
   Brightness selectedBrightness = Brightness.light;
-  List<DynamicSchemeVariant> schemeVariants = DynamicSchemeVariant.values;
+  final List<DynamicSchemeVariant> schemeVariants = DynamicSchemeVariant.values;
 
   @override
   Widget build(BuildContext context) {
