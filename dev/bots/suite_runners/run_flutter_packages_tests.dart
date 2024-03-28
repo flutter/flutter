@@ -14,7 +14,8 @@ import '../utils.dart';
 
 
 /// Executes the test suite for the flutter/packages repo.
-Future<void> flutterPackagesRunner() async {
+Future<void> flutterPackagesRunner(String flutterRoot) async {
+
   Future<void> runAnalyze() async {
     printProgress('${green}Running analysis for flutter/packages$reset');
     final Directory checkout = Directory.systemTemp.createTempSync('flutter_packages.');
@@ -29,7 +30,7 @@ Future<void> flutterPackagesRunner() async {
       ],
       workingDirectory: checkout.path,
     );
-    final String packagesCommit = await getFlutterPackagesVersion();
+    final String packagesCommit = await getFlutterPackagesVersion(flutterRoot: flutterRoot);
     await runCommand(
       'git',
       <String>[
@@ -91,7 +92,10 @@ Future<void> flutterPackagesRunner() async {
 Future<String> getFlutterPackagesVersion({
   fs.FileSystem fileSystem = const LocalFileSystem(),
   String? packagesVersionFile,
+  required String flutterRoot,
 }) async {
+  final String flutterPackagesVersionFile = path.join(flutterRoot, 'bin', 'internal', 'flutter_packages.version');
+
   final File versionFile = fileSystem.file(packagesVersionFile ?? flutterPackagesVersionFile);
   final String versionFileContents = await versionFile.readAsString();
   return versionFileContents.trim();

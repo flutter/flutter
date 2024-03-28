@@ -65,6 +65,7 @@ import 'package:process/process.dart';
 
 import 'run_command.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
+import 'suite_runners/run_flutter_packages_tests.dart';
 import 'suite_runners/run_web_long_running_tests.dart';
 import 'tool_subsharding.dart';
 import 'utils.dart';
@@ -87,7 +88,6 @@ final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'd
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
 final String engineRealmFile = path.join(flutterRoot, 'bin', 'internal', 'engine.realm');
-final String flutterPackagesVersionFile = path.join(flutterRoot, 'bin', 'internal', 'flutter_packages.version');
 
 String get platformFolderName {
   if (Platform.isWindows) {
@@ -247,7 +247,7 @@ Future<void> main(List<String> args) async {
       'web_skwasm_tests': _runWebSkwasmUnitTests,
       // All web integration tests
       'web_long_running_tests': () => webLongRunningTestsRunner(flutterRoot),
-      'flutter_plugins': () => flutterPackagesRunner(),
+      'flutter_plugins': () => flutterPackagesRunner(flutterRoot),
       'skp_generator': _runSkpGeneratorTests,
       'realm_checker': _runRealmCheckerTest,
       'customer_testing': _runCustomerTesting,
