@@ -147,7 +147,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
         this,
         simulation,
         context.vsync,
-        outOfRange ? false : preferredHandOffIgnorePointer ?? activity?.shouldIgnorePointer ?? true,
+        !outOfRange && (preferredHandOffIgnorePointer ?? activity?.shouldIgnorePointer ?? true),
       ));
     } else {
       goIdle();
@@ -159,7 +159,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   ScrollDirection _userScrollDirection = ScrollDirection.idle;
 
   @override
-  bool? get preferredHandOffIgnorePointer => true;
+  bool? get preferredHandOffIgnorePointer => null;
 
   /// Set [userScrollDirection] to the given value.
   ///
