@@ -8,9 +8,57 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
+import 'package:material_color_utilities/scheme/scheme_fruit_salad.dart';
+import 'package:material_color_utilities/scheme/scheme_rainbow.dart';
 
 import 'colors.dart';
 import 'theme_data.dart';
+
+/// The algorithm used to construct a [ColorScheme] in [ColorScheme.fromSeed].
+///
+/// The `tonalSpot` variant builds default Material scheme colors. These colors are
+/// mapped to light or dark tones to achieve visually accessible color
+/// pairings with sufficient contrast between foreground and background elements.
+///
+/// In some cases, the tones can prevent colors from appearing as intended,
+/// such as when a color is too light to offer enough contrast for accessibility.
+/// Color fidelity (`DynamicSchemeVariant.fidelity`) is a feature that adjusts
+/// tones in these cases to produce the intended visual results without harming
+/// visual contrast.
+enum DynamicSchemeVariant {
+  /// Default for Material theme colors. Builds pastel palettes with a low chroma.
+  tonalSpot,
+
+  /// The resulting color palettes match seed color, even if the seed color
+  /// is very bright (high chroma).
+  fidelity,
+
+  /// All colors are grayscale, no chroma.
+  monochrome,
+
+  /// Close to grayscale, a hint of chroma.
+  neutral,
+
+  /// Pastel colors, high chroma palettes. The primary palette's chroma is at
+  /// maximum. Use `fidelity` instead if tokens should alter their tone to match
+  /// the palette vibrancy.
+  vibrant,
+
+  /// Pastel colors, medium chroma palettes. The primary palette's hue is
+  /// different from the seed color, for variety.
+  expressive,
+
+  /// Almost identical to `fidelity`. Tokens and palettes match the seed color.
+  /// [ColorScheme.primaryContainer] is the seed color, adjusted to ensure
+  /// contrast with surfaces. The tertiary palette is analogue of the seed color.
+  content,
+
+  /// A playful theme - the seed color's hue does not appear in the theme.
+  rainbow,
+
+  /// A playful theme - the seed color's hue does not appear in the theme.
+  fruitSalad,
+}
 
 /// {@template flutter.material.color_scheme.ColorScheme}
 /// A set of 45 colors based on the
@@ -215,19 +263,34 @@ class ColorScheme with Diagnosticable {
 
   /// Generate a [ColorScheme] derived from the given `seedColor`.
   ///
-  /// Using the seedColor as a starting point, a set of tonal palettes are
-  /// constructed. These tonal palettes are based on the Material 3 Color
-  /// system and provide all the needed colors for a [ColorScheme]. These
-  /// colors are designed to work well together and meet contrast
-  /// requirements for accessibility.
+  /// Using the `seedColor` as a starting point, a set of tonal palettes are
+  /// constructed. By default, the tonal palettes are based on the Material 3
+  /// Color system and provide all of the [ColorScheme] colors. These colors are
+  /// designed to work well together and meet contrast requirements for
+  /// accessibility.
   ///
   /// If any of the optional color parameters are non-null they will be
   /// used in place of the generated colors for that field in the resulting
   /// color scheme. This allows apps to override specific colors for their
   /// needs.
   ///
-  /// Given the nature of the algorithm, the seedColor may not wind up as
+  /// Given the nature of the algorithm, the `seedColor` may not wind up as
   /// one of the ColorScheme colors.
+  ///
+  /// The `dynamicSchemeVariant` parameter creates different types of
+  /// [DynamicScheme]s, which are used to generate different styles of [ColorScheme]s.
+  /// By default, `dynamicSchemeVariant` is set to `tonalSpot`. A [ColorScheme]
+  /// constructed by `dynamicSchemeVariant.tonalSpot` has pastel palettes and
+  /// won't be too "colorful" even if the `seedColor` has a high chroma value.
+  /// If the resulting color scheme is too dark, consider setting `dynamicSchemeVariant`
+  /// to [DynamicSchemeVariant.fidelity], whose palettes match the seed color.
+  ///
+  /// {@tool dartpad}
+  /// This sample shows how to use [ColorScheme.fromSeed] to create dynamic
+  /// color schemes with different [DynamicSchemeVariant]s.
+  ///
+  /// ** See code in examples/api/lib/material/color_scheme/color_scheme.0.dart **
+  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -238,6 +301,7 @@ class ColorScheme with Diagnosticable {
   factory ColorScheme.fromSeed({
     required Color seedColor,
     Brightness brightness = Brightness.light,
+    DynamicSchemeVariant dynamicSchemeVariant = DynamicSchemeVariant.tonalSpot,
     Color? primary,
     Color? onPrimary,
     Color? primaryContainer,
@@ -300,13 +364,7 @@ class ColorScheme with Diagnosticable {
     )
     Color? surfaceVariant,
   }) {
-    final SchemeTonalSpot scheme;
-    switch (brightness) {
-      case Brightness.light:
-        scheme = SchemeTonalSpot(sourceColorHct: Hct.fromInt(seedColor.value), isDark: false, contrastLevel: 0.0);
-      case Brightness.dark:
-        scheme = SchemeTonalSpot(sourceColorHct: Hct.fromInt(seedColor.value), isDark: true, contrastLevel: 0.0);
-    }
+    final DynamicScheme scheme = _buildDynamicScheme(brightness, seedColor, dynamicSchemeVariant);
 
     return ColorScheme(
       primary: primary ?? Color(MaterialDynamicColors.primary.getArgb(scheme)),
@@ -1615,6 +1673,7 @@ class ColorScheme with Diagnosticable {
   static Future<ColorScheme> fromImageProvider({
     required ImageProvider provider,
     Brightness brightness = Brightness.light,
+    DynamicSchemeVariant dynamicSchemeVariant = DynamicSchemeVariant.tonalSpot,
     Color? primary,
     Color? onPrimary,
     Color? primaryContainer,
@@ -1688,13 +1747,7 @@ class ColorScheme with Diagnosticable {
     final List<int> scoredResults = Score.score(colorToCount, desired: 1);
     final ui.Color baseColor = Color(scoredResults.first);
 
-    final SchemeTonalSpot scheme;
-    switch (brightness) {
-      case Brightness.light:
-        scheme = SchemeTonalSpot(sourceColorHct: Hct.fromInt(baseColor.value), isDark: false, contrastLevel: 0.0);
-      case Brightness.dark:
-        scheme = SchemeTonalSpot(sourceColorHct: Hct.fromInt(baseColor.value), isDark: true, contrastLevel: 0.0);
-    }
+    final DynamicScheme scheme = _buildDynamicScheme(brightness, baseColor, dynamicSchemeVariant);
 
     return ColorScheme(
       primary: primary ?? Color(MaterialDynamicColors.primary.getArgb(scheme)),
@@ -1829,5 +1882,21 @@ class ColorScheme with Diagnosticable {
     final int r = (abgr & onlyRMask) >> 16;
     final int b = abgr & onlyBMask;
     return (abgr & exceptRMask & exceptBMask) | (b << 16) | r;
+  }
+
+  static DynamicScheme _buildDynamicScheme(Brightness brightness, Color seedColor, DynamicSchemeVariant schemeVariant) {
+    final bool isDark = brightness == Brightness.dark;
+    final Hct sourceColor =  Hct.fromInt(seedColor.value);
+    return switch (schemeVariant) {
+      DynamicSchemeVariant.tonalSpot => SchemeTonalSpot(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: 0.0),
+      DynamicSchemeVariant.fidelity => SchemeFidelity(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: 0.0),
+      DynamicSchemeVariant.content => SchemeContent(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: 0.0),
+      DynamicSchemeVariant.monochrome => SchemeMonochrome(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: 0.0),
+      DynamicSchemeVariant.neutral => SchemeNeutral(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: 0.0),
+      DynamicSchemeVariant.vibrant => SchemeVibrant(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: 0.0),
+      DynamicSchemeVariant.expressive => SchemeExpressive(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: 0.0),
+      DynamicSchemeVariant.rainbow => SchemeRainbow(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: 0.0),
+      DynamicSchemeVariant.fruitSalad => SchemeFruitSalad(sourceColorHct: sourceColor, isDark: isDark, contrastLevel: 0.0),
+    };
   }
 }

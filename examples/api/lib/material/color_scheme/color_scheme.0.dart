@@ -19,95 +19,93 @@ class ColorSchemeExample extends StatefulWidget {
 
 class _ColorSchemeExampleState extends State<ColorSchemeExample> {
   Color selectedColor = ColorSeed.baseColor.color;
+  Brightness selectedBrightness = Brightness.light;
+  static const List<DynamicSchemeVariant> schemeVariants = DynamicSchemeVariant.values;
 
   @override
   Widget build(BuildContext context) {
-    final Color? colorSeed = selectedColor == ColorSeed.baseColor.color ? null : selectedColor;
-    final ThemeData lightTheme = ThemeData(
-      colorSchemeSeed: colorSeed,
-      brightness: Brightness.light,
-    );
-    final ThemeData darkTheme = ThemeData(
-      colorSchemeSeed: colorSeed,
-      brightness: Brightness.dark,
-    );
-
-    Widget schemeLabel(String brightness) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 15),
-        child: Text(
-          brightness,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-      );
-    }
-
-    Widget schemeView(ThemeData theme) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15),
-        child: ColorSchemeView(colorScheme: theme.colorScheme),
-      );
-    }
-
     return MaterialApp(
-      theme: ThemeData(colorSchemeSeed: selectedColor),
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: selectedColor,
+          brightness: selectedBrightness,
+        )
+      ),
       home: Builder(
         builder: (BuildContext context) => Scaffold(
           appBar: AppBar(
             title: const Text('ColorScheme'),
-            leading: MenuAnchor(
-              builder: (BuildContext context, MenuController controller, Widget? widget) {
-                return IconButton(
-                  icon: Icon(Icons.circle, color: selectedColor),
-                  onPressed: () {
-                    setState(() {
-                      if (!controller.isOpen) {
-                        controller.open();
-                      }
-                    });
-                  },
-                );
-              },
-              menuChildren: List<Widget>.generate(ColorSeed.values.length, (int index) {
-                final Color itemColor = ColorSeed.values[index].color;
-                return MenuItemButton(
-                  leadingIcon: selectedColor == ColorSeed.values[index].color
-                    ? Icon(Icons.circle, color: itemColor)
-                    : Icon(Icons.circle_outlined, color: itemColor),
-                  onPressed: () {
-                    setState(() {
-                      selectedColor = itemColor;
-                    });
-                  },
-                  child: Text(ColorSeed.values[index].label),
-                );
-              }),
-            ),
+            actions: <Widget>[
+              Row(
+                children: <Widget>[
+                  const Text('Color Seed'),
+                  MenuAnchor(
+                    builder: (BuildContext context, MenuController controller, Widget? widget) {
+                      return IconButton(
+                        icon: Icon(Icons.circle, color: selectedColor),
+                        onPressed: () {
+                          setState(() {
+                            if (!controller.isOpen) {
+                              controller.open();
+                            }
+                          });
+                        },
+                      );
+                    },
+                    menuChildren: List<Widget>.generate(ColorSeed.values.length, (int index) {
+                      final Color itemColor = ColorSeed.values[index].color;
+                      return MenuItemButton(
+                        leadingIcon: selectedColor == ColorSeed.values[index].color
+                          ? Icon(Icons.circle, color: itemColor)
+                          : Icon(Icons.circle_outlined, color: itemColor),
+                        onPressed: () {
+                          setState(() {
+                            selectedColor = itemColor;
+                          });
+                        },
+                        child: Text(ColorSeed.values[index].label),
+                      );
+                    }),
+                  ),
+                ],
+              ),
+            ],
           ),
           body: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.only(top: 5),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Column(
-                          children: <Widget>[
-                            schemeLabel('Light ColorScheme'),
-                            schemeView(lightTheme),
-                          ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Row(
+                      children: <Widget>[
+                        const Text('Brightness'),
+                        const SizedBox(width: 10),
+                        Switch(
+                          value: selectedBrightness == Brightness.light,
+                          onChanged: (bool value) {
+                            setState(() {
+                              selectedBrightness = value ? Brightness.light : Brightness.dark;
+                            });
+                          },
                         ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          children: <Widget>[
-                            schemeLabel('Dark ColorScheme'),
-                            schemeView(darkTheme),
-                          ],
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
+                  ),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: List<Widget>.generate(schemeVariants.length, (int index) {
+                        return ColorSchemeVariantColumn(
+                          selectedColor: selectedColor,
+                          brightness: selectedBrightness,
+                          schemeVariant: schemeVariants[index],
+                        );
+                      }).toList(),
+                    ),
                   ),
                 ],
               ),
@@ -115,6 +113,47 @@ class _ColorSchemeExampleState extends State<ColorSchemeExample> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class ColorSchemeVariantColumn extends StatelessWidget {
+  const ColorSchemeVariantColumn({
+    super.key,
+    this.schemeVariant = DynamicSchemeVariant.tonalSpot,
+    this.brightness = Brightness.light,
+    required this.selectedColor,
+  });
+
+  final DynamicSchemeVariant schemeVariant;
+  final Brightness brightness;
+  final Color selectedColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints.tightFor(width: 250),
+      child: Column(
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 15),
+            child: Text(
+              schemeVariant.name == 'tonalSpot' ? '${schemeVariant.name} (Default)' : schemeVariant.name,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: ColorSchemeView(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: selectedColor,
+                brightness: brightness,
+                dynamicSchemeVariant: schemeVariant,
+              ),
+            ),
+          ),
+        ],
+      )
     );
   }
 }
@@ -301,7 +340,10 @@ enum ColorSeed {
   yellow('Yellow', Colors.yellow),
   orange('Orange', Colors.orange),
   deepOrange('Deep Orange', Colors.deepOrange),
-  pink('Pink', Colors.pink);
+  pink('Pink', Colors.pink),
+  brightBlue('Bright Blue',  Color(0xFF0000FF)),
+  brightGreen('Bright Green',  Color(0xFF00FF00)),
+  brightRed('Bright Red',  Color(0xFFFF0000));
 
   const ColorSeed(this.label, this.color);
   final String label;
