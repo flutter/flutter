@@ -212,6 +212,8 @@ void main() {
   });
 
   testUsingContext('can create a skeleton (list/detail) app', () async {
+
+    final bool buildDirAlreadyExists = globals.fs.currentDirectory.childDirectory('build').existsSync();
     await _createAndAnalyzeProject(
       projectDir,
       <String>['-t', 'skeleton', '-i', 'objc', '-a', 'java', '--implementation-tests'],
@@ -246,6 +248,12 @@ void main() {
         'README.md',
       ],
     );
+
+    // Ensure there was no build directory generated during process
+    if (!buildDirAlreadyExists) {
+      expect(globals.fs.currentDirectory.childDirectory('build').existsSync(), false);
+    }
+
     return _runFlutterTest(projectDir);
   }, overrides: <Type, Generator>{
     Pub: () => Pub.test(
