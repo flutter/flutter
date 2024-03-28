@@ -3497,6 +3497,34 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('Drag and drop - feedback matches pointer in scaled MaterialApp', (WidgetTester tester) async {
+    await tester.pumpWidget(Transform.scale(
+      scale: 0.5,
+      child: const MaterialApp(
+        home: Scaffold(
+          body: Draggable<int>(
+            data: 42,
+            feedback: Text('Feedback'),
+            child: Text('Source'),
+          ),
+        ),
+      ),
+    ));
+
+    final Offset location = tester.getTopLeft(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(location);
+    final Offset secondLocation = location + const Offset(100, 100);
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+    final Offset appTopLeft = tester.getTopLeft(find.byType(MaterialApp));
+    expect(tester.getTopLeft(find.text('Source')), appTopLeft);
+    expect(tester.getTopLeft(find.text('Feedback')), secondLocation);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('configurable Draggable hit test behavior', (WidgetTester tester) async {
     const HitTestBehavior hitTestBehavior = HitTestBehavior.deferToChild;
 
