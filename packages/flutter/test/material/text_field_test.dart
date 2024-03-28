@@ -16526,6 +16526,7 @@ void main() {
     expect(focusNode.hasFocus, isTrue);
 
     // Set canRequestFocus to false: the text field cannot be focused when it is tapped/long pressed.
+    focusNode.canRequestFocus = false;
     await tester.pumpWidget(
       boilerplate(
         child: TextField(
@@ -16707,7 +16708,10 @@ void main() {
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
     testWidgets('Right clicking cannot request focus if canRequestFocus is false', (WidgetTester tester) async {
-      final FocusNode focusNode = _focusNode();
+      final FocusNode focusNode = FocusNode(
+        canRequestFocus: false,
+      );
+      addTearDown(focusNode.dispose);
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
