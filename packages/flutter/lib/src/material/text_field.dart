@@ -21,6 +21,7 @@ import 'magnifier.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
 import 'selectable_text.dart' show iOSHorizontalOffset;
+import 'selection_area.dart';
 import 'spell_check_suggestions_toolbar.dart';
 import 'text_selection.dart';
 import 'theme.dart';
@@ -1333,6 +1334,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         (widget.style!.fontSize == null || widget.style!.textBaseline == null)),
       'inherit false style must supply fontSize and textBaseline',
     );
+    final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
 
     final ThemeData theme = Theme.of(context);
     final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(context);
@@ -1458,10 +1460,88 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         };
     }
 
+    final Widget selectionAreaBuilder = SelectionArea(
+      readOnly: widget.readOnly || !_isEnabled,
+      // focusNode: focusNode,
+      child: Builder(
+        builder: (BuildContext context) {
+          final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
+          return EditableText(
+            key: editableTextKey,
+            readOnly: widget.readOnly || !_isEnabled,
+            toolbarOptions: widget.toolbarOptions,
+            showCursor: widget.showCursor,
+            showSelectionHandles: _showSelectionHandles,
+            controller: controller,
+            focusNode: focusNode,
+            undoController: widget.undoController,
+            keyboardType: widget.keyboardType,
+            textInputAction: widget.textInputAction,
+            textCapitalization: widget.textCapitalization,
+            style: style,
+            strutStyle: widget.strutStyle,
+            textAlign: widget.textAlign,
+            textDirection: widget.textDirection,
+            autofocus: widget.autofocus,
+            obscuringCharacter: widget.obscuringCharacter,
+            obscureText: widget.obscureText,
+            autocorrect: widget.autocorrect,
+            smartDashesType: widget.smartDashesType,
+            smartQuotesType: widget.smartQuotesType,
+            enableSuggestions: widget.enableSuggestions,
+            maxLines: widget.maxLines,
+            minLines: widget.minLines,
+            expands: widget.expands,
+            // Only show the selection highlight when the text field is focused.
+            selectionRegistrar: registrar,
+            selectionColor: selectionColor,
+            // selectionColor: focusNode.hasFocus ? selectionColor,
+            selectionControls: widget.selectionEnabled ? textSelectionControls : null,
+            onChanged: widget.onChanged,
+            onSelectionChanged: _handleSelectionChanged,
+            onEditingComplete: widget.onEditingComplete,
+            onSubmitted: widget.onSubmitted,
+            onAppPrivateCommand: widget.onAppPrivateCommand,
+            onSelectionHandleTapped: _handleSelectionHandleTapped,
+            onTapOutside: widget.onTapOutside,
+            inputFormatters: formatters,
+            rendererIgnoresPointer: true,
+            mouseCursor: MouseCursor.defer, // TextField will handle the cursor
+            cursorWidth: widget.cursorWidth,
+            cursorHeight: widget.cursorHeight,
+            cursorRadius: cursorRadius,
+            cursorColor: cursorColor,
+            selectionHeightStyle: widget.selectionHeightStyle,
+            selectionWidthStyle: widget.selectionWidthStyle,
+            cursorOpacityAnimates: cursorOpacityAnimates ?? false,
+            cursorOffset: cursorOffset,
+            paintCursorAboveText: paintCursorAboveText,
+            backgroundCursorColor: CupertinoColors.inactiveGray,
+            scrollPadding: widget.scrollPadding,
+            keyboardAppearance: keyboardAppearance,
+            enableInteractiveSelection: widget.enableInteractiveSelection,
+            dragStartBehavior: widget.dragStartBehavior,
+            scrollController: widget.scrollController,
+            scrollPhysics: widget.scrollPhysics,
+            autofillClient: this,
+            autocorrectionTextRectColor: autocorrectionTextRectColor,
+            clipBehavior: widget.clipBehavior,
+            restorationId: 'editable',
+            scribbleEnabled: widget.scribbleEnabled,
+            enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+            contentInsertionConfiguration: widget.contentInsertionConfiguration,
+            contextMenuBuilder: widget.contextMenuBuilder,
+            spellCheckConfiguration: spellCheckConfiguration,
+            magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
+          );
+        },
+      ),
+    );
+
     Widget child = RepaintBoundary(
       child: UnmanagedRestorationScope(
         bucket: bucket,
-        child: EditableText(
+        child: registrar == null ? selectionAreaBuilder : EditableText(
           key: editableTextKey,
           readOnly: widget.readOnly || !_isEnabled,
           toolbarOptions: widget.toolbarOptions,
@@ -1488,7 +1568,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           minLines: widget.minLines,
           expands: widget.expands,
           // Only show the selection highlight when the text field is focused.
-          selectionColor: focusNode.hasFocus ? selectionColor : null,
+          selectionRegistrar: registrar,
+          selectionColor: selectionColor,
+          // selectionColor: focusNode.hasFocus ? selectionColor,
           selectionControls: widget.selectionEnabled ? textSelectionControls : null,
           onChanged: widget.onChanged,
           onSelectionChanged: _handleSelectionChanged,
@@ -1588,10 +1670,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
                 child: child,
               );
             },
-            child: _selectionGestureDetectorBuilder.buildGestureDetector(
-              behavior: HitTestBehavior.translucent,
-              child: child,
-            ),
+            child: child,
           ),
         ),
       ),

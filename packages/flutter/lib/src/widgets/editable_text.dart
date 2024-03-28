@@ -25,7 +25,6 @@ import 'default_selection_style.dart';
 import 'default_text_editing_shortcuts.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
-import 'focus_traversal.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'magnifier.dart';
@@ -827,6 +826,7 @@ class EditableText extends StatefulWidget {
     this.autofocus = false,
     bool? showCursor,
     this.showSelectionHandles = false,
+    this.selectionRegistrar,
     this.selectionColor,
     this.selectionControls,
     TextInputType? keyboardType,
@@ -877,6 +877,7 @@ class EditableText extends StatefulWidget {
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+       assert(selectionRegistrar == null || selectionColor != null),
        assert(minLines == null || minLines > 0),
        assert(
          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
@@ -1304,6 +1305,11 @@ class EditableText extends StatefulWidget {
   // See https://github.com/flutter/flutter/issues/7035 for the rationale for this
   // keyboard behavior.
   final bool autofocus;
+
+  /// The [SelectionRegistrar] this editable is subscribed to.
+  ///
+  /// If this is set, [selectionColor] must be non-null.
+  final SelectionRegistrar? selectionRegistrar;
 
   /// The color to use when painting the selection.
   ///
@@ -4536,6 +4542,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       ? _value.selection != value.selection
       : _value != value;
     if (shouldShowCaret) {
+      debugPrint('showing caret');
       _scheduleShowCaretOnScreen(withAnimation: true);
     }
 
@@ -4722,6 +4729,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void performSelector(String selectorName) {
+    debugPrint('perform selector $selectorName');
     final Intent? intent = intentForMacOSSelector(selectorName);
 
     if (intent != null) {
@@ -4882,7 +4890,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextBoundary _characterBoundary() => widget.obscureText ? _CodePointBoundary(_value.text) : CharacterBoundary(_value.text);
   TextBoundary _nextWordBoundary() => widget.obscureText ? _documentBoundary() : renderEditable.wordBoundaries.moveByWordBoundary;
   TextBoundary _linebreak() => widget.obscureText ? _documentBoundary() : LineBoundary(renderEditable);
-  TextBoundary _paragraphBoundary() => ParagraphBoundary(_value.text);
   TextBoundary _documentBoundary() => DocumentBoundary(_value.text);
 
   Action<T> _makeOverridable<T extends Intent>(Action<T> defaultAction) {
@@ -4989,93 +4996,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _scrollController.jumpTo(destination);
   }
 
-  /// Extend the selection down by page if the `forward` parameter is true, or
-  /// up by page otherwise.
-  void _extendSelectionByPage(ExtendSelectionByPageIntent intent) {
-    if (widget.maxLines == 1) {
-      return;
-    }
-
-    final TextSelection nextSelection;
-    final Rect extentRect = renderEditable.getLocalRectForCaret(
-      _value.selection.extent,
-    );
-    final ScrollableState? state = _scrollableKey.currentState as ScrollableState?;
-    final double increment = ScrollAction.getDirectionalIncrement(
-      state!,
-      ScrollIntent(
-        direction: intent.forward ? AxisDirection.down : AxisDirection.up,
-        type: ScrollIncrementType.page,
-      ),
-    );
-    final ScrollPosition position = _scrollController.position;
-    if (intent.forward) {
-      if (_value.selection.extentOffset >= _value.text.length) {
-        return;
-      }
-      final Offset nextExtentOffset =
-          Offset(extentRect.left, extentRect.top + increment);
-      final double height = position.maxScrollExtent + renderEditable.size.height;
-      final TextPosition nextExtent = nextExtentOffset.dy + position.pixels >= height
-          ? TextPosition(offset: _value.text.length)
-          : renderEditable.getPositionForPoint(
-              renderEditable.localToGlobal(nextExtentOffset),
-            );
-      nextSelection = _value.selection.copyWith(
-        extentOffset: nextExtent.offset,
-      );
-    } else {
-      if (_value.selection.extentOffset <= 0) {
-        return;
-      }
-      final Offset nextExtentOffset =
-          Offset(extentRect.left, extentRect.top + increment);
-      final TextPosition nextExtent = nextExtentOffset.dy + position.pixels <= 0
-          ? const TextPosition(offset: 0)
-          : renderEditable.getPositionForPoint(
-              renderEditable.localToGlobal(nextExtentOffset),
-            );
-      nextSelection = _value.selection.copyWith(
-        extentOffset: nextExtent.offset,
-      );
-    }
-
-    bringIntoView(nextSelection.extent);
-    userUpdateTextEditingValue(
-      _value.copyWith(selection: nextSelection),
-      SelectionChangedCause.keyboard,
-    );
-  }
-
-  void _updateSelection(UpdateSelectionIntent intent) {
-    assert(
-      intent.newSelection.start <= intent.currentTextEditingValue.text.length,
-      'invalid selection: ${intent.newSelection}: it must not exceed the current text length ${intent.currentTextEditingValue.text.length}',
-    );
-    assert(
-      intent.newSelection.end <= intent.currentTextEditingValue.text.length,
-      'invalid selection: ${intent.newSelection}: it must not exceed the current text length ${intent.currentTextEditingValue.text.length}',
-    );
-
-    bringIntoView(intent.newSelection.extent);
-    userUpdateTextEditingValue(
-      intent.currentTextEditingValue.copyWith(selection: intent.newSelection),
-      intent.cause,
-    );
-  }
-  late final Action<UpdateSelectionIntent> _updateSelectionAction = CallbackAction<UpdateSelectionIntent>(onInvoke: _updateSelection);
-
   late final _UpdateTextSelectionVerticallyAction<DirectionalCaretMovementIntent> _verticalSelectionUpdateAction =
       _UpdateTextSelectionVerticallyAction<DirectionalCaretMovementIntent>(this);
-
-  Object? _hideToolbarIfVisible(DismissIntent intent) {
-    if (_selectionOverlay?.toolbarIsVisible ?? false) {
-      hideToolbar(false);
-      return null;
-    }
-    return Actions.invoke(context, intent);
-  }
-
 
   /// The default behavior used if [onTapOutside] is null.
   ///
@@ -5112,39 +5034,21 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     DoNothingAndStopPropagationTextIntent: DoNothingAction(consumesKey: false),
     ReplaceTextIntent: _replaceTextAction,
-    UpdateSelectionIntent: _updateSelectionAction,
-    DirectionalFocusIntent: DirectionalFocusAction.forTextField(),
-    DismissIntent: CallbackAction<DismissIntent>(onInvoke: _hideToolbarIfVisible),
+    TransposeCharactersIntent: _makeOverridable(_transposeCharactersAction),
 
-    // Delete
+    // Delete.
     DeleteCharacterIntent: _makeOverridable(_DeleteTextAction<DeleteCharacterIntent>(this, _characterBoundary, _moveBeyondTextBoundary)),
     DeleteToNextWordBoundaryIntent: _makeOverridable(_DeleteTextAction<DeleteToNextWordBoundaryIntent>(this, _nextWordBoundary, _moveBeyondTextBoundary)),
     DeleteToLineBreakIntent: _makeOverridable(_DeleteTextAction<DeleteToLineBreakIntent>(this, _linebreak, _moveToTextBoundary)),
 
-    // Extend/Move Selection
-    ExtendSelectionByCharacterIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionByCharacterIntent>(this, _characterBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: false)),
-    ExtendSelectionByPageIntent: _makeOverridable(CallbackAction<ExtendSelectionByPageIntent>(onInvoke: _extendSelectionByPage)),
-    ExtendSelectionToNextWordBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryIntent>(this, _nextWordBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
-    ExtendSelectionToNextParagraphBoundaryIntent : _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextParagraphBoundaryIntent>(this, _paragraphBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
-    ExtendSelectionToLineBreakIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToLineBreakIntent>(this, _linebreak, _moveToTextBoundary, ignoreNonCollapsedSelection: true)),
-    ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(_verticalSelectionUpdateAction),
-    ExtendSelectionVerticallyToAdjacentPageIntent: _makeOverridable(_verticalSelectionUpdateAction),
-    ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent>(this, _paragraphBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
-    ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(this, _documentBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
-    ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryOrCaretLocationIntent>(this, _nextWordBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
-    ScrollToDocumentBoundaryIntent: _makeOverridable(CallbackAction<ScrollToDocumentBoundaryIntent>(onInvoke: _scrollToDocumentBoundary)),
-    ScrollIntent: CallbackAction<ScrollIntent>(onInvoke: _scroll),
-
-    // Expand Selection
-    ExpandSelectionToLineBreakIntent: _makeOverridable(_UpdateTextSelectionAction<ExpandSelectionToLineBreakIntent>(this, _linebreak, _moveToTextBoundary, ignoreNonCollapsedSelection: true, isExpand: true)),
-    ExpandSelectionToDocumentBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExpandSelectionToDocumentBoundaryIntent>(this, _documentBoundary, _moveToTextBoundary, ignoreNonCollapsedSelection: true, isExpand: true, extentAtIndex: true)),
-
-    // Copy Paste
-    SelectAllTextIntent: _makeOverridable(_SelectAllAction(this)),
-    CopySelectionTextIntent: _makeOverridable(_CopySelectionAction(this)),
+    // Paste.
+    // Should copy, paste, and select all be together?
     PasteTextIntent: _makeOverridable(CallbackAction<PasteTextIntent>(onInvoke: (PasteTextIntent intent) => pasteText(intent.cause))),
 
-    TransposeCharactersIntent: _makeOverridable(_transposeCharactersAction),
+    // Scroll.
+    // Should these stay in EditableText? They are scrolling the document and not really related to selecting text.
+    ScrollToDocumentBoundaryIntent: _makeOverridable(CallbackAction<ScrollToDocumentBoundaryIntent>(onInvoke: _scrollToDocumentBoundary)),
+    ScrollIntent: CallbackAction<ScrollIntent>(onInvoke: _scroll),
   };
 
   @override
@@ -5268,6 +5172,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                                 minLines: widget.minLines,
                                 expands: widget.expands,
                                 strutStyle: widget.strutStyle,
+                                selectionRegistrar: widget.selectionRegistrar,
                                 selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
                                     ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
                                     : widget.selectionColor,
@@ -5398,6 +5303,7 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.minLines,
     required this.expands,
     this.strutStyle,
+    this.selectionRegistrar,
     this.selectionColor,
     required this.textScaler,
     required this.textAlign,
@@ -5436,6 +5342,7 @@ class _Editable extends MultiChildRenderObjectWidget {
   final int? minLines;
   final bool expands;
   final StrutStyle? strutStyle;
+  final SelectionRegistrar? selectionRegistrar;
   final Color? selectionColor;
   final TextScaler textScaler;
   final TextAlign textAlign;
@@ -5477,6 +5384,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       minLines: minLines,
       expands: expands,
       strutStyle: strutStyle,
+      registrar: selectionRegistrar,
       selectionColor: selectionColor,
       textScaler: textScaler,
       textAlign: textAlign,
@@ -5521,6 +5429,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..minLines = minLines
       ..expands = expands
       ..strutStyle = strutStyle
+      ..registrar = selectionRegistrar
       ..selectionColor = selectionColor
       ..textScaler = textScaler
       ..textAlign = textAlign
@@ -5784,7 +5693,7 @@ class _CodePointBoundary extends TextBoundary {
   }
 }
 
-// -------------------------------  Text Actions -------------------------------
+// -------------------------------  Text Editing Actions -------------------------------
 class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextAction<T> {
   _DeleteTextAction(this.state, this.getTextBoundary, this._applyTextBoundary);
 
@@ -5829,92 +5738,6 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
 
   @override
   bool get isActionEnabled => !state.widget.readOnly && state._value.selection.isValid;
-}
-
-class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> extends ContextAction<T> {
-  _UpdateTextSelectionAction(
-    this.state,
-    this.getTextBoundary,
-    this.applyTextBoundary, {
-    required this.ignoreNonCollapsedSelection,
-    this.isExpand = false,
-    this.extentAtIndex = false,
-  });
-
-  final EditableTextState state;
-  final bool ignoreNonCollapsedSelection;
-  final bool isExpand;
-  final bool extentAtIndex;
-  final TextBoundary Function() getTextBoundary;
-  final _ApplyTextBoundary applyTextBoundary;
-
-  static const int NEWLINE_CODE_UNIT = 10;
-
-  // Returns true iff the given position is at a wordwrap boundary in the
-  // upstream position.
-  bool _isAtWordwrapUpstream(TextPosition position) {
-    final TextPosition end = TextPosition(
-      offset: state.renderEditable.getLineAtOffset(position).end,
-      affinity: TextAffinity.upstream,
-    );
-    return end == position && end.offset != state.textEditingValue.text.length
-        && state.textEditingValue.text.codeUnitAt(position.offset) != NEWLINE_CODE_UNIT;
-  }
-
-  // Returns true if the given position at a wordwrap boundary in the
-  // downstream position.
-  bool _isAtWordwrapDownstream(TextPosition position) {
-    final TextPosition start = TextPosition(
-      offset: state.renderEditable.getLineAtOffset(position).start,
-    );
-    return start == position && start.offset != 0
-        && state.textEditingValue.text.codeUnitAt(position.offset - 1) != NEWLINE_CODE_UNIT;
-  }
-
-  @override
-  Object? invoke(T intent, [BuildContext? context]) {
-    final TextSelection selection = state._value.selection;
-    assert(selection.isValid);
-
-    final bool collapseSelection = intent.collapseSelection || !state.widget.selectionEnabled;
-    if (!selection.isCollapsed && !ignoreNonCollapsedSelection && collapseSelection) {
-      return Actions.invoke(context!, UpdateSelectionIntent(
-        state._value,
-        TextSelection.collapsed(offset: intent.forward ? selection.end : selection.start),
-        SelectionChangedCause.keyboard,
-      ));
-    }
-
-    TextPosition extent = selection.extent;
-    // If continuesAtWrap is true extent and is at the relevant wordwrap, then
-    // move it just to the other side of the wordwrap.
-    if (intent.continuesAtWrap) {
-      if (intent.forward && _isAtWordwrapUpstream(extent)) {
-        extent = TextPosition(
-          offset: extent.offset,
-        );
-      } else if (!intent.forward && _isAtWordwrapDownstream(extent)) {
-        extent = TextPosition(
-          offset: extent.offset,
-          affinity: TextAffinity.upstream,
-        );
-      }
-    }
-
-    final bool shouldTargetBase = isExpand && (intent.forward ? selection.baseOffset > selection.extentOffset : selection.baseOffset < selection.extentOffset);
-    final TextPosition newExtent = applyTextBoundary(shouldTargetBase ? selection.base : extent, intent.forward, getTextBoundary());
-    final TextSelection newSelection = collapseSelection || (!isExpand && newExtent.offset == selection.baseOffset)
-      ? TextSelection.fromPosition(newExtent)
-      : isExpand ? selection.expandTo(newExtent, extentAtIndex || selection.isCollapsed) : selection.extendTo(newExtent);
-
-    final bool shouldCollapseToBase = intent.collapseAtReversal
-      && (selection.baseOffset - selection.extentOffset) * (selection.baseOffset - newSelection.extentOffset) < 0;
-    final TextSelection newRange = shouldCollapseToBase ? TextSelection.fromPosition(selection.base) : newSelection;
-    return Actions.invoke(context!, UpdateSelectionIntent(state._value, newRange, SelectionChangedCause.keyboard));
-  }
-
-  @override
-  bool get isActionEnabled => state._value.selection.isValid;
 }
 
 class _UpdateTextSelectionVerticallyAction<T extends DirectionalCaretMovementIntent> extends ContextAction<T> {
@@ -5982,45 +5805,6 @@ class _UpdateTextSelectionVerticallyAction<T extends DirectionalCaretMovementInt
 
   @override
   bool get isActionEnabled => state._value.selection.isValid;
-}
-
-class _SelectAllAction extends ContextAction<SelectAllTextIntent> {
-  _SelectAllAction(this.state);
-
-  final EditableTextState state;
-
-  @override
-  Object? invoke(SelectAllTextIntent intent, [BuildContext? context]) {
-    return Actions.invoke(
-      context!,
-      UpdateSelectionIntent(
-        state._value,
-        TextSelection(baseOffset: 0, extentOffset: state._value.text.length),
-        intent.cause,
-      ),
-    );
-  }
-
-  @override
-  bool get isActionEnabled => state.widget.selectionEnabled;
-}
-
-class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
-  _CopySelectionAction(this.state);
-
-  final EditableTextState state;
-
-  @override
-  void invoke(CopySelectionTextIntent intent, [BuildContext? context]) {
-    if (intent.collapseSelection) {
-      state.cutSelection(intent.cause);
-    } else {
-      state.copySelection(intent.cause);
-    }
-  }
-
-  @override
-  bool get isActionEnabled => state._value.selection.isValid && !state._value.selection.isCollapsed;
 }
 
 /// The start and end glyph heights of some range of text.

@@ -18,6 +18,7 @@ import 'context_menu_button_item.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
+import 'focus_traversal.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'magnifier.dart';
@@ -215,6 +216,7 @@ class SelectableRegion extends StatefulWidget {
     required this.selectionControls,
     required this.child,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
+    this.readOnly = true,
     this.onSelectionChanged,
   });
 
@@ -247,6 +249,11 @@ class SelectableRegion extends StatefulWidget {
 
   /// Called when the selected content changes.
   final ValueChanged<SelectedContent?>? onSelectionChanged;
+
+  /// Whether the contents of this [SelectableRegion] are read only.
+  ///
+  /// Defaults to true.
+  final bool readOnly;
 
   /// Returns the [ContextMenuButtonItem]s representing the buttons in this
   /// platform's default selection menu.
@@ -327,16 +334,27 @@ class SelectableRegion extends StatefulWidget {
 /// State for a [SelectableRegion].
 class SelectableRegionState extends State<SelectableRegion> with TextSelectionDelegate implements SelectionRegistrar {
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
+    DismissIntent: CallbackAction<DismissIntent>(onInvoke: _hideToolbarIfVisible),
+    DirectionalFocusIntent: DirectionalFocusAction.forTextField(),
+    // Copy.
     SelectAllTextIntent: _makeOverridable(_SelectAllAction(this)),
     CopySelectionTextIntent: _makeOverridable(_CopySelectionAction(this)),
+
+    // Extend/Move Selection.
     ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_GranularlyExtendSelectionAction<ExtendSelectionToNextWordBoundaryOrCaretLocationIntent>(this, granularity: TextGranularity.word)),
-    ExpandSelectionToDocumentBoundaryIntent: _makeOverridable(_GranularlyExtendSelectionAction<ExpandSelectionToDocumentBoundaryIntent>(this, granularity: TextGranularity.document)),
-    ExpandSelectionToLineBreakIntent: _makeOverridable(_GranularlyExtendSelectionAction<ExpandSelectionToLineBreakIntent>(this, granularity: TextGranularity.line)),
     ExtendSelectionByCharacterIntent: _makeOverridable(_GranularlyExtendCaretSelectionAction<ExtendSelectionByCharacterIntent>(this, granularity: TextGranularity.character)),
     ExtendSelectionToNextWordBoundaryIntent: _makeOverridable(_GranularlyExtendCaretSelectionAction<ExtendSelectionToNextWordBoundaryIntent>(this, granularity: TextGranularity.word)),
     ExtendSelectionToLineBreakIntent: _makeOverridable(_GranularlyExtendCaretSelectionAction<ExtendSelectionToLineBreakIntent>(this, granularity: TextGranularity.line)),
     ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(_DirectionallyExtendCaretSelectionAction<ExtendSelectionVerticallyToAdjacentLineIntent>(this)),
     ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_GranularlyExtendCaretSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(this, granularity: TextGranularity.document)),
+    // ExtendSelectionByPageIntent: _makeOverridable(CallbackAction<ExtendSelectionByPageIntent>(onInvoke: _extendSelectionByPage)),
+    // ExtendSelectionVerticallyToAdjacentPageIntent: _makeOverridable(_verticalSelectionUpdateAction),
+    // ExtendSelectionToNextParagraphBoundaryIntent : _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextParagraphBoundaryIntent>(this, _paragraphBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
+    // ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent>(this, _paragraphBoundary, _moveBeyondTextBoundary, ignoreNonCollapsedSelection: true)),
+
+    // Expand Selection.
+    ExpandSelectionToDocumentBoundaryIntent: _makeOverridable(_GranularlyExtendSelectionAction<ExpandSelectionToDocumentBoundaryIntent>(this, granularity: TextGranularity.document)),
+    ExpandSelectionToLineBreakIntent: _makeOverridable(_GranularlyExtendSelectionAction<ExpandSelectionToLineBreakIntent>(this, granularity: TextGranularity.line)),
   };
 
   final Map<Type, GestureRecognizerFactory> _gestureRecognizers = <Type, GestureRecognizerFactory>{};
@@ -445,6 +463,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
   }
 
+  Object? _hideToolbarIfVisible(DismissIntent intent) {
+    if (_selectionOverlay?.toolbarIsVisible ?? false) {
+      hideToolbar(false);
+      return null;
+    }
+    return Actions.invoke(context, intent);
+  }
+
   Action<T> _makeOverridable<T extends Intent>(Action<T> defaultAction) {
     return Action<T>.overridable(context: context, defaultAction: defaultAction);
   }
@@ -540,7 +566,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void _startNewMouseSelectionGesture(TapDragDownDetails details) {
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
-        widget.focusNode.requestFocus();
+        // widget.focusNode.requestFocus();
         hideToolbar();
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
@@ -607,21 +633,78 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
   }
 
+  void _showMagnifier(Offset positionToShow) {
+    if (_selectionOverlay == null) {
+      return;
+    }
+
+    if (_selectionOverlay!.magnifierIsVisible) {
+      _selectionOverlay?.updateMagnifier(_buildInfoForMagnifier(
+        positionToShow,
+        _selectionDelegate.value.startSelectionPoint!,
+      ));
+    } else {
+      _selectionOverlay?.showMagnifier(_buildInfoForMagnifier(
+        positionToShow,
+        _selectionDelegate.value.startSelectionPoint!,
+      ));
+    }
+  }
+
+  void _hideMagnifier() {
+    _selectionOverlay?.hideMagnifier();
+  }
+
+  bool _longPressStartedWithoutFocus = false;
   void _handleTouchLongPressStart(LongPressStartDetails details) {
     HapticFeedback.selectionClick();
+    if (!widget.focusNode.hasFocus && defaultTargetPlatform == TargetPlatform.iOS) {
+      _longPressStartedWithoutFocus = true;
+    }
     widget.focusNode.requestFocus();
-    _selectWordAt(offset: details.globalPosition);
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        if (_longPressStartedWithoutFocus || widget.readOnly) {
+          _selectWordAt(offset: details.globalPosition);
+        } else {
+          _collapseSelectionAt(offset: details.globalPosition);
+        }
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        _selectWordAt(offset: details.globalPosition);
+    }
+
     // Platforms besides Android will show the text selection handles when
     // the long press is initiated. Android shows the text selection handles when
     // the long press has ended, usually after a pointer up event is received.
     if (defaultTargetPlatform != TargetPlatform.android) {
       _showHandles();
     }
+    _showMagnifier(details.globalPosition);
     _updateSelectedContentIfNeeded();
   }
 
   void _handleTouchLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    _selectEndTo(offset: details.globalPosition, textGranularity: TextGranularity.word);
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        if (_longPressStartedWithoutFocus || widget.readOnly) {
+          _selectEndTo(offset: details.globalPosition, textGranularity: TextGranularity.word);
+        } else {
+          _collapseSelectionAt(offset: details.globalPosition);
+        }
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        _selectEndTo(offset: details.globalPosition, textGranularity: TextGranularity.word);
+    }
+
+    _showMagnifier(details.globalPosition);
     _updateSelectedContentIfNeeded();
   }
 
@@ -632,6 +715,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     if (defaultTargetPlatform == TargetPlatform.android) {
       _showHandles();
     }
+    _longPressStartedWithoutFocus = false;
+    _hideMagnifier();
   }
 
   bool _positionIsOnActiveSelection({required Offset globalPosition}) {
@@ -1166,7 +1251,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     return _adjustingSelectionEnd = forward != isReversed;
   }
 
-  void _granularlyExtendSelection(TextGranularity granularity, bool forward) {
+  void _granularlyExtendSelection(TextGranularity granularity, bool forward, bool collapseSelection) {
     _directionalHorizontalBaseline = null;
     if (!_selectionDelegate.value.hasSelection) {
       return;
@@ -1175,6 +1260,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       GranularlyExtendSelectionEvent(
         forward: forward,
         isEnd: _determineIsAdjustingSelectionEnd(forward),
+        collapseSelection: collapseSelection,
         granularity: granularity,
       ),
     );
@@ -1522,7 +1608,7 @@ class _GranularlyExtendSelectionAction<T extends DirectionalTextEditingIntent> e
 
   @override
   void invokeAction(T intent, [BuildContext? context]) {
-    state._granularlyExtendSelection(granularity, intent.forward);
+    state._granularlyExtendSelection(granularity, intent.forward, false);
   }
 }
 
@@ -1534,11 +1620,7 @@ class _GranularlyExtendCaretSelectionAction<T extends DirectionalCaretMovementIn
 
   @override
   void invokeAction(T intent, [BuildContext? context]) {
-    if (intent.collapseSelection) {
-      // Selectable region never collapses selection.
-      return;
-    }
-    state._granularlyExtendSelection(granularity, intent.forward);
+    state._granularlyExtendSelection(granularity, intent.forward, intent.collapseSelection);
   }
 }
 
