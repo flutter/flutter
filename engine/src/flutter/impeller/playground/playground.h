@@ -57,8 +57,7 @@ class Playground {
 
   static bool ShouldOpenNewPlaygrounds();
 
-  void SetupContext(PlaygroundBackend backend,
-                    const PlaygroundSwitches& switches);
+  void SetupContext(PlaygroundBackend backend);
 
   void SetupWindow();
 

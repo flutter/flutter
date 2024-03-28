@@ -118,10 +118,6 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
     case BlendMode::kColor:
       pass.SetPipeline(renderer.GetFramebufferBlendColorPipeline(options));
       break;
-    case BlendMode::kPlusAdvanced:
-      pass.SetPipeline(
-          renderer.GetFramebufferBlendPlusAdvancedPipeline(options));
-      break;
     case BlendMode::kLuminosity:
       pass.SetPipeline(renderer.GetFramebufferBlendLuminosityPipeline(options));
       break;

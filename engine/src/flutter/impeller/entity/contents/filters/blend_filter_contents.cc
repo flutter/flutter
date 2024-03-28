@@ -338,9 +338,6 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
       case BlendMode::kColor:
         pass.SetPipeline(renderer.GetBlendColorPipeline(options));
         break;
-      case BlendMode::kPlusAdvanced:
-        pass.SetPipeline(renderer.GetBlendPlusAdvancedPipeline(options));
-        break;
       case BlendMode::kLuminosity:
         pass.SetPipeline(renderer.GetBlendLuminosityPipeline(options));
         break;
@@ -586,7 +583,6 @@ void BlendFilterContents::SetBlendMode(BlendMode blend_mode) {
       BLEND_CASE(Hue)
       BLEND_CASE(Saturation)
       BLEND_CASE(Color)
-      BLEND_CASE(PlusAdvanced)
       BLEND_CASE(Luminosity)
       default:
         FML_UNREACHABLE();
@@ -615,26 +611,19 @@ std::optional<Entity> BlendFilterContents::RenderFilter(
                          std::nullopt, GetAbsorbOpacity(), GetAlpha());
   }
 
-  BlendMode blend_mode = blend_mode_;
-  if (blend_mode == BlendMode::kPlus &&
-      !IsAlphaClampedToOne(
-          renderer.GetContext()->GetCapabilities()->GetDefaultColorFormat())) {
-    blend_mode = BlendMode::kPlusAdvanced;
-  }
-
-  if (blend_mode <= Entity::kLastPipelineBlendMode) {
-    return PipelineBlend(inputs, renderer, entity, coverage, blend_mode,
+  if (blend_mode_ <= Entity::kLastPipelineBlendMode) {
+    return PipelineBlend(inputs, renderer, entity, coverage, blend_mode_,
                          foreground_color_, GetAbsorbOpacity(), GetAlpha());
   }
 
-  if (blend_mode <= Entity::kLastAdvancedBlendMode) {
+  if (blend_mode_ <= Entity::kLastAdvancedBlendMode) {
     if (inputs.size() == 1 && foreground_color_.has_value() &&
         GetAbsorbOpacity() == ColorFilterContents::AbsorbOpacity::kYes) {
       return CreateForegroundAdvancedBlend(
           inputs[0], renderer, entity, coverage, foreground_color_.value(),
-          blend_mode, GetAlpha(), GetAbsorbOpacity());
+          blend_mode_, GetAlpha(), GetAbsorbOpacity());
     }
-    return advanced_blend_proc_(inputs, renderer, entity, coverage, blend_mode,
+    return advanced_blend_proc_(inputs, renderer, entity, coverage, blend_mode_,
                                 foreground_color_, GetAbsorbOpacity(),
                                 GetAlpha());
   }
