@@ -21,27 +21,15 @@ final class RunCommand extends CommandBase {
   }) {
     builds = runnableBuilds(environment, configs);
     debugCheckBuilds(builds);
-
-    argParser.addOption(
-      configFlag,
-      abbr: 'c',
-      defaultsTo: '',
-      help:
-          'Specify the build config to use for the target build (usually auto detected)',
-      allowed: <String>[
-        for (final Build build in runnableBuilds(environment, configs))
-          build.name,
-      ],
-      allowedHelp: <String, String>{
-        for (final Build build in runnableBuilds(environment, configs))
-          build.name: build.gn.join(' '),
-      },
-    );
+    // We default to nothing in order to automatically detect attached devices
+    // and select an appropriate target from them.
+    addConfigOption(argParser, runnableBuilds(environment, configs),
+        defaultsTo: '');
     argParser.addFlag(
       rbeFlag,
       defaultsTo: true,
       help: 'RBE is enabled by default when available. Use --no-rbe to '
-            'disable it.',
+          'disable it.',
     );
   }
 
