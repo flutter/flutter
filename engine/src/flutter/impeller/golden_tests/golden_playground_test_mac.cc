@@ -138,9 +138,12 @@ void GoldenPlaygroundTest::SetUp() {
   std::filesystem::path icd_path = target_path / "vk_swiftshader_icd.json";
   setenv("VK_ICD_FILENAMES", icd_path.c_str(), 1);
 
+  std::string test_name = GetTestName();
+  bool enable_wide_gamut = test_name.find("WideGamut_") != std::string::npos;
   switch (GetParam()) {
     case PlaygroundBackend::kMetal:
-      pimpl_->screenshotter = std::make_unique<testing::MetalScreenshotter>();
+      pimpl_->screenshotter =
+          std::make_unique<testing::MetalScreenshotter>(enable_wide_gamut);
       break;
     case PlaygroundBackend::kVulkan: {
       const std::unique_ptr<PlaygroundImpl>& playground =
@@ -160,16 +163,7 @@ void GoldenPlaygroundTest::SetUp() {
       break;
     }
   }
-  if (GetParam() == PlaygroundBackend::kMetal) {
-    pimpl_->screenshotter = std::make_unique<testing::MetalScreenshotter>();
-  } else if (GetParam() == PlaygroundBackend::kVulkan) {
-    const std::unique_ptr<PlaygroundImpl>& playground =
-        GetSharedVulkanPlayground(/*enable_validations=*/true);
-    pimpl_->screenshotter =
-        std::make_unique<testing::VulkanScreenshotter>(playground);
-  }
 
-  std::string test_name = GetTestName();
   if (std::find(kSkipTests.begin(), kSkipTests.end(), test_name) !=
       kSkipTests.end()) {
     GTEST_SKIP_(

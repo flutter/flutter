@@ -73,9 +73,12 @@ PlaygroundImplMTL::PlaygroundImplMTL(PlaygroundSwitches switches)
   if (!window) {
     return;
   }
-  auto context =
-      ContextMTL::Create(ShaderLibraryMappingsForPlayground(),
-                         is_gpu_disabled_sync_switch_, "Playground Library");
+  auto context = ContextMTL::Create(
+      ShaderLibraryMappingsForPlayground(), is_gpu_disabled_sync_switch_,
+      "Playground Library",
+      switches.enable_wide_gamut
+          ? std::optional<PixelFormat>(PixelFormat::kR16G16B16A16Float)
+          : std::nullopt);
   if (!context) {
     return;
   }

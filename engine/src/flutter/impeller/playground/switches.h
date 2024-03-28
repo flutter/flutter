@@ -33,6 +33,8 @@ struct PlaygroundSwitches {
   ///
   bool use_angle = false;
 
+  bool enable_wide_gamut = false;
+
   PlaygroundSwitches();
 
   explicit PlaygroundSwitches(const fml::CommandLine& args);
