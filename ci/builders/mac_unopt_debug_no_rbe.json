@@ -1,0 +1,38 @@
+{
+  "_comment": [
+    "This build is only used to generate compile_commands.json for clangd ",
+    "and should not be used for any other purpose."
+  ],
+  "builds": [
+    {
+      "drone_dimensions": [
+        "device_type=none",
+        "os=Mac-13",
+        "cpu=x86",
+        "mac_model=Macmini8,1"
+      ],
+      "gn": [
+        "--runtime-mode",
+        "debug",
+        "--unoptimized",
+        "--prebuilt-dart-sdk",
+        "--no-rbe",
+        "--no-goma",
+        "--xcode-symlinks"
+      ],
+      "name": "mac_unopt_debug_no_rbe",
+      "ninja": {
+        "config": "mac_unopt_debug_no_rbe",
+        "targets": ["flutter/build/dart:copy_dart_sdk"]
+      },
+      "tests": [
+        {
+          "language": "dart",
+          "name": "clangd",
+          "script": "flutter/tools/clangd_check/bin/main.dart",
+          "parameters": ["--clangd=buildtools/mac-x64/clang/bin/clangd"]
+        }
+      ]
+    }
+  ]
+}
