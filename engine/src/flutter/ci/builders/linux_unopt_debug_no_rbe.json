@@ -1,0 +1,32 @@
+{
+  "_comment": [
+    "This build is only used to generate compile_commands.json for clangd ",
+    "and should not be used for any other purpose."
+  ],
+  "builds": [
+    {
+      "drone_dimensions": ["device_type=none", "os=Linux", "cores=32"],
+      "gn": [
+        "--runtime-mode",
+        "debug",
+        "--unoptimized",
+        "--prebuilt-dart-sdk",
+        "--no-rbe",
+        "--no-goma"
+      ],
+      "name": "linux_unopt_debug_no_rbe",
+      "ninja": {
+        "config": "linux_unopt_debug_no_rbe",
+        "targets": ["flutter/build/dart:copy_dart_sdk"]
+      },
+      "tests": [
+        {
+          "language": "dart",
+          "name": "clangd",
+          "script": "flutter/tools/clangd_check/bin/main.dart",
+          "parameters": ["--clangd=buildtools/linux-x64/clang/bin/clangd"]
+        }
+      ]
+    }
+  ]
+}
