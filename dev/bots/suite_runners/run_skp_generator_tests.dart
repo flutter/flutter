@@ -9,7 +9,6 @@ import 'package:path/path.dart' as path;
 import '../run_command.dart';
 import '../utils.dart';
 
-
 /// Runs the skp_generator from the flutter/tests repo.
 ///
 /// See also the customer_tests shard.
