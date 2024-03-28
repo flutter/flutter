@@ -790,6 +790,42 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
     });
+
+    testUsingContext('generates correct gradle command for Unix-like environment', () async {
+      await lockFileDepMissingHandler.handler(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        usesAndroidX: true,
+        line: '',
+      );
+      final File gradleFile = fileSystem.currentDirectory
+        .childDirectory('android')
+        .childFile('build.gradle');
+
+      expect(testLogger.statusText, contains('To regenerate the lockfiles run: `./gradlew :generateLockfiles` in ${gradleFile.path}'));
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
+
+    testUsingContext('generates correct gradle command for Windows environment', () async {
+      await lockFileDepMissingHandler.handler(
+      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      usesAndroidX: true,
+      line: '',
+    );
+      final File gradleFile = fileSystem.currentDirectory
+        .childDirectory('android')
+        .childFile('build.gradle');
+
+      expect(testLogger.statusText, contains('To regenerate the lockfiles run: `.\\gradlew.bat :generateLockfiles` in ${gradleFile.path}'));
+    }, overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('windows'),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    });
   });
 
   group('Incompatible Kotlin version', () {
