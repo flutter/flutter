@@ -2046,7 +2046,9 @@ abstract class RenderBox extends RenderObject {
     final double? baselineOffset = _computeIntrinsics(_CachedLayoutCalculation.baseline, (constraints, baseline), _computeDryBaseline).offset;
     // This assert makes sure computeDryBaseline always gets called in debug mode,
     // in case the computeDryBaseline implementation invokes debugCannotComputeDryLayout.
-    assert(baselineOffset == computeDryBaseline(constraints, baseline));
+    // This check should be skipped when debugCheckintIntrinsics is true to avoid
+    // slowing down the app significantly.
+    assert(RenderObject.debugCheckingIntrinsics || baselineOffset == computeDryBaseline(constraints, baseline));
     return baselineOffset;
   }
 
