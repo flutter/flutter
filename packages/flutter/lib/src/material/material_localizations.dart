@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/src/material/duration.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -144,6 +145,10 @@ abstract class MaterialLocalizations {
   /// [showTimePicker] is set to the minute picker mode.
   String get timePickerMinuteModeAnnouncement;
 
+  /// The text-to-speech announcement made when a time picker invoked using
+  /// [showTimePicker] is set to the second picker mode.
+  String get timePickerSecondModeAnnouncement;
+
   /// Label read out by accessibility tools (TalkBack or VoiceOver) for a modal
   /// barrier to indicate that a tap dismisses the barrier.
   ///
@@ -203,6 +208,12 @@ abstract class MaterialLocalizations {
   /// each supported layout.
   TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false });
 
+  /// The format used to lay out the duration picker.
+  ///
+  /// The documentation for [DurationFormat] enum values provides details on
+  /// each supported layout.
+  DurationFormat durationFormat();
+
   /// Defines the localized [TextStyle] geometry for [ThemeData.textTheme].
   ///
   /// The [scriptCategory] defines the overall geometry of a [TextTheme] for
@@ -237,6 +248,21 @@ abstract class MaterialLocalizations {
   /// passed from [MediaQueryData.alwaysUse24HourFormat], which has platform-
   /// specific behavior.
   String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false });
+
+  /// Formats [Duration.hour] in the given duration according to the value
+  /// of [DurationFormat].
+  String formatDurationHour(Duration duration);
+
+  /// Formats [Duration.minute] in the given duration according to the value
+  /// of [durationFormat].
+  String formatDurationMinute(Duration duration);
+  
+  /// Formats [Duration.second] in the given duration according to the value
+  /// of [durationFormat].
+  String formatDurationSecond(Duration duration);
+
+  /// Formats [duration] according to the value of [durationFormat].
+  String formatDuration(Duration duration);
 
   /// Full unabbreviated year format, e.g. 2017 rather than 17.
   String formatYear(DateTime date);
@@ -416,6 +442,14 @@ abstract class MaterialLocalizations {
   /// [showTimePicker] when in [TimePickerEntryMode.input].
   String get timePickerInputHelpText;
 
+  /// Label used in the header of the duration picker dialog created with
+  /// [showDurationPicker] when in [DurationPickerEntryMode.dial].
+  String get durationPickerDialHelpText;
+
+  /// Label used in the header of the duration picker dialog created with
+  /// [showDurationPicker] when in [DurationPickerEntryMode.input].
+  String get durationPickerInputHelpText;
+
   /// Label used below the hour text field of the time picker dialog created
   /// with [showTimePicker] when in [TimePickerEntryMode.input].
   String get timePickerHourLabel;
@@ -423,6 +457,10 @@ abstract class MaterialLocalizations {
   /// Label used below the minute text field of the time picker dialog created
   /// with [showTimePicker] when in [TimePickerEntryMode.input].
   String get timePickerMinuteLabel;
+
+  /// Label used below the second text field of the time picker dialog created
+  /// with [showTimePicker] when in [TimePickerEntryMode.input].
+  String get timePickerSecondLabel;
 
   /// Error message for the time picker dialog created with [showTimePicker]
   /// when in [TimePickerEntryMode.input].
@@ -820,6 +858,11 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     }
   }
 
+  @override
+  String formatDurationHour(Duration duration) {
+    return _formatTwoDigitZeroPad(duration.hour);
+  }
+
   /// Formats [number] using two digits, assuming it's in the 0-99 inclusive
   /// range. Not designed to format values outside this range.
   String _formatTwoDigitZeroPad(int number) {
@@ -836,6 +879,18 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String formatMinute(TimeOfDay timeOfDay) {
     final int minute = timeOfDay.minute;
     return minute < 10 ? '0$minute' : minute.toString();
+  }
+
+  @override
+  String formatDurationMinute(Duration duration) {
+    final int minute = duration.minute;
+    return minute < 10 ? '0$minute' : minute.toString();
+  }
+
+  @override
+  String formatDurationSecond(Duration duration) {
+    final int second = duration.second;
+    return second < 10 ? '0$second' : second.toString();
   }
 
   @override
@@ -983,10 +1038,20 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get timePickerInputHelpText => 'Enter time';
 
   @override
+  String get durationPickerDialHelpText => 'Select duration';
+
+  @override
+  String get durationPickerInputHelpText => 'Enter duration';
+
+  @override
   String get timePickerHourLabel => 'Hour';
 
   @override
   String get timePickerMinuteLabel => 'Minute';
+
+  @override
+  String get timePickerSecondLabel => 'Second';
+
 
   @override
   String get invalidTimeLabel => 'Enter a valid time';
@@ -1049,6 +1114,19 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     buffer
       ..write(' ')
       ..write(_formatDayPeriod(timeOfDay));
+    return '$buffer';
+  }
+
+  @override
+  String formatDuration(Duration duration) {
+    final StringBuffer buffer = StringBuffer();
+
+    // Add hour:minute.
+    buffer
+      ..write(formatDurationHour(duration))
+      ..write(':')
+      ..write(formatDurationMinute(duration));
+
     return '$buffer';
   }
 
@@ -1218,6 +1296,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Select minutes';
 
   @override
+  String get timePickerSecondModeAnnouncement => 'Select seconds';
+
+  @override
   String get modalBarrierDismissLabel => 'Dismiss';
 
   @override
@@ -1231,6 +1312,11 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     return alwaysUse24HourFormat
       ? TimeOfDayFormat.HH_colon_mm
       : TimeOfDayFormat.h_colon_mm_space_a;
+  }
+
+  @override
+  DurationFormat durationFormat() {
+    return DurationFormat.HH_colon_mm;
   }
 
   @override

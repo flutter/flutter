@@ -77,6 +77,8 @@ export 'src/material/drawer_theme.dart';
 export 'src/material/dropdown.dart';
 export 'src/material/dropdown_menu.dart';
 export 'src/material/dropdown_menu_theme.dart';
+export 'src/material/duration.dart';
+export 'src/material/duration_picker.dart';
 export 'src/material/elevated_button.dart';
 export 'src/material/elevated_button_theme.dart';
 export 'src/material/elevation_overlay.dart';
