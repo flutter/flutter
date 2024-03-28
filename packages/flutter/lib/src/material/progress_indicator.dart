@@ -1074,6 +1074,9 @@ class _CircularProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
 
   @override
   Color get color => _colors.primary;
+
+  @override
+  Color get circularTrackColor => _colors.secondaryContainer;
 }
 
 class _LinearProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
@@ -1086,7 +1089,7 @@ class _LinearProgressIndicatorDefaultsM3 extends ProgressIndicatorThemeData {
   Color get color => _colors.primary;
 
   @override
-  Color get linearTrackColor => _colors.surfaceContainerHighest;
+  Color get linearTrackColor => _colors.secondaryContainer;
 
   @override
   double get linearMinHeight => 4.0;
