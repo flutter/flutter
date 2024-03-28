@@ -6,6 +6,8 @@
 #define FLUTTER_IMPELLER_ENTITY_ENTITY_PASS_CLIP_STACK_H_
 
 #include "impeller/entity/contents/contents.h"
+#include "impeller/entity/entity.h"
+#include "impeller/geometry/rect.h"
 
 namespace impeller {
 
@@ -21,6 +23,20 @@ struct ClipCoverageLayer {
 ///        stencil buffer is left in an identical state.
 class EntityPassClipStack {
  public:
+  struct ReplayResult {
+    Entity entity;
+    std::optional<Rect> clip_coverage;
+  };
+
+  struct ClipStateResult {
+    /// Whether or not the Entity should be rendered. If false, the Entity may
+    /// be safely skipped.
+    bool should_render = false;
+    /// Whether or not the current clip coverage changed during the call to
+    /// `ApplyClipState`.
+    bool clip_did_change = false;
+  };
+
   /// Create a new [EntityPassClipStack] with an initialized coverage rect.
   explicit EntityPassClipStack(const Rect& initial_coverage_rect);
 
@@ -34,24 +50,27 @@ class EntityPassClipStack {
 
   bool HasCoverage() const;
 
-  /// Returns true if entity should be rendered.
-  bool AppendClipCoverage(Contents::ClipCoverage clip_coverage,
-                          Entity& entity,
-                          size_t clip_depth_floor,
-                          Point global_pass_position);
+  /// @brief  Applies the current clip state to an Entity. If the given Entity
+  ///         is a clip operation, then the clip state is updated accordingly.
+  ClipStateResult ApplyClipState(Contents::ClipCoverage global_clip_coverage,
+                                 Entity& entity,
+                                 size_t clip_depth_floor,
+                                 Point global_pass_position);
 
   // Visible for testing.
-  void RecordEntity(const Entity& entity, Contents::ClipCoverage::Type type);
+  void RecordEntity(const Entity& entity,
+                    Contents::ClipCoverage::Type type,
+                    std::optional<Rect> clip_coverage);
 
   // Visible for testing.
-  const std::vector<Entity>& GetReplayEntities() const;
+  const std::vector<ReplayResult>& GetReplayEntities() const;
 
   // Visible for testing.
   const std::vector<ClipCoverageLayer> GetClipCoverageLayers() const;
 
  private:
   struct SubpassState {
-    std::vector<Entity> rendered_clip_entities;
+    std::vector<ReplayResult> rendered_clip_entities;
     std::vector<ClipCoverageLayer> clip_coverage;
   };
 

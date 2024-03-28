@@ -30,6 +30,7 @@
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/rect.h"
+#include "impeller/geometry/size.h"
 #include "impeller/playground/widgets.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/snapshot.h"
@@ -3495,6 +3496,36 @@ TEST_P(AiksTest, CanDrawPerspectiveTransformWithClips) {
     return canvas.EndRecordingAsPicture();
   };
   ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(AiksTest, CanRenderClippedBackdropFilter) {
+  Canvas canvas;
+  Paint paint;
+
+  canvas.Scale(GetContentScale());
+
+  // Draw something interesting in the background.
+  std::vector<Color> colors = {Color{0.9568, 0.2627, 0.2118, 1.0},
+                               Color{0.1294, 0.5882, 0.9529, 1.0}};
+  std::vector<Scalar> stops = {
+      0.0,
+      1.0,
+  };
+  paint.color_source = ColorSource::MakeLinearGradient(
+      {0, 0}, {100, 100}, std::move(colors), std::move(stops),
+      Entity::TileMode::kRepeat, {});
+  canvas.DrawPaint(paint);
+
+  Rect clip_rect = Rect::MakeLTRB(50, 50, 400, 300);
+
+  // Draw a clipped SaveLayer, where the clip coverage and SaveLayer size are
+  // the same.
+  canvas.ClipRRect(clip_rect, Size(100, 100),
+                   Entity::ClipOperation::kIntersect);
+  canvas.SaveLayer({}, clip_rect,
+                   ImageFilter::MakeFromColorFilter(*ColorFilter::MakeBlend(
+                       BlendMode::kExclusion, Color::Red())));
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
 }  // namespace testing
