@@ -53,7 +53,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(
           key: appKey,
           home: Container(
-            color: Colors.orange,
+            color: Colors.blue,
             width: double.infinity,
             height: double.infinity,
             child: Stack(
@@ -64,7 +64,7 @@ void main() {
                   left: magnifierPosition.dx + magnifierFocalPoint.dx,
                   top: magnifierPosition.dy + magnifierFocalPoint.dy,
                   child: Container(
-                    color: Colors.pink,
+                    color: Colors.black,
                     // Since it is the size of the magnifier but over its
                     // magnificationScale, it should take up the whole magnifier.
                     width: (magnifierSize.width * 1.5) / magnificationScale,
@@ -78,21 +78,23 @@ void main() {
                     size: magnifierSize,
                     focalPointOffset: magnifierFocalPoint,
                     magnificationScale: magnificationScale,
-                    decoration: MagnifierDecoration(shadows: <BoxShadow>[
-                      BoxShadow(
-                        spreadRadius: 10,
-                        blurRadius: 10,
-                        color: Colors.green,
-                        offset: Offset(5, 5),
-                      ),
-                    ]),
+                    clipBehavior: Clip.hardEdge,
+                    decoration: MagnifierDecoration(
+                      shadows: <BoxShadow>[
+                        BoxShadow(
+                          spreadRadius: 10.0,
+                          blurRadius: 10.0,
+                          color: Colors.yellow,
+                          offset: Offset(5.0, 5.0),
+                        ),
+                      ],
+                      opacity: 0.5,
+                    ),
                   ),
                 ),
               ],
             ),
           )));
-
-      await tester.pumpAndSettle();
 
       // Should look like an orange screen, with two pink boxes.
       // One pink box is in the magnifier (so has a green shadow) and is double
@@ -324,5 +326,12 @@ void main() {
         });
       }
     });
+  });
+
+  testWidgets('MagnifierInfo.toString', (WidgetTester tester) async {
+    expect(MagnifierInfo.empty.toString(),
+      'MagnifierInfo(position: Offset(0.0, 0.0), line: Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), '
+      'caret: Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), field: Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))',
+    );
   });
 }
