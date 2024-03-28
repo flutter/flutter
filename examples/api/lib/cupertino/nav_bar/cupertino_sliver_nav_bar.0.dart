@@ -89,6 +89,55 @@ class NextPage extends StatelessWidget {
             // when the CupertinoSliverNavigationBar is fully expanded.
             largeTitle: const Text('Family'),
           ),
+           SliverFillRemaining(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                const Text('Drag me up', textAlign: TextAlign.center),
+                // When the "leading" parameter is omitted on a route that has a previous page,
+                // the back button is automatically added to the leading position.
+                const Text('Tap on the leading button to navigate back', textAlign: TextAlign.center),
+                CupertinoButton.filled(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      CupertinoPageRoute<Widget>(
+                        builder: (BuildContext context) {
+                          return const LastPage();
+                        },
+                      ),
+                    );
+                  },
+                  child: const Text('Go to Last Page'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class LastPage extends StatelessWidget {
+  const LastPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final Brightness brightness = CupertinoTheme.brightnessOf(context);
+    return CupertinoPageScaffold(
+      child: CustomScrollView(
+        slivers: <Widget>[
+          CupertinoSliverNavigationBar(
+            backgroundColor: CupertinoColors.destructiveRed,
+            border: Border(
+              bottom: BorderSide(
+                color: brightness == Brightness.light ? CupertinoColors.black : CupertinoColors.white,
+              ),
+            ),
+            middle: const Text('Contact phone'),
+            largeTitle: const Text('Person'),
+          ),
           const SliverFillRemaining(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,

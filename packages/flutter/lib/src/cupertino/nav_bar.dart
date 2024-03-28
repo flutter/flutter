@@ -440,8 +440,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor =
-      CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ?? CupertinoTheme.of(context).barBackgroundColor;
+    final Color backgroundColor = CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ?? CupertinoTheme.of(context).barBackgroundColor;
 
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
       keys: keys,
@@ -495,6 +494,8 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
             border: widget.border,
             hasUserMiddle: widget.middle != null,
             largeExpanded: false,
+            expandedBackgroundColor: null,
+            expandedTransparent: false,
             child: navBar,
           ),
         );
@@ -555,6 +556,11 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// user scrolls, but it will also stretch when the user over-scrolls if the
 /// [stretch] value is `true`. Defaults to `false`.
 ///
+/// The [expandedTransparent] parameter determines whether the background
+/// should be transparent when expanded. The background will be transparent
+/// if the [expandedTransparent] value is true, otherwise it will take
+/// the [backgroundColor]. Defaults to `true`.
+///
 /// {@tool dartpad}
 /// This example shows [CupertinoSliverNavigationBar] in action inside a [CustomScrollView].
 ///
@@ -584,6 +590,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.trailing,
     this.border = _kDefaultNavBarBorder,
     this.backgroundColor,
+    this.expandedTransparent = true,
     this.brightness,
     this.padding,
     this.transitionBetweenRoutes = true,
@@ -665,6 +672,10 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// {@macro flutter.cupertino.CupertinoNavigationBar.backgroundColor}
   final Color? backgroundColor;
 
+  /// The background is transparent in expanded state
+  /// if the value is provided, otherwise [backgroundColor].
+  final bool expandedTransparent;
+
   /// {@macro flutter.cupertino.CupertinoNavigationBar.brightness}
   final Brightness? brightness;
 
@@ -744,6 +755,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
           persistentHeight: _kNavBarPersistentHeight + MediaQuery.paddingOf(context).top,
           alwaysShowMiddle: widget.alwaysShowMiddle && widget.middle != null,
           stretchConfiguration: widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
+          expandedTransparent: widget.expandedTransparent,
         ),
       ),
     );
@@ -766,6 +778,7 @@ class _LargeTitleNavigationBarSliverDelegate
     required this.persistentHeight,
     required this.alwaysShowMiddle,
     required this.stretchConfiguration,
+    required this.expandedTransparent,
   });
 
   final _NavigationBarStaticComponentsKeys keys;
@@ -780,6 +793,7 @@ class _LargeTitleNavigationBarSliverDelegate
   final Object heroTag;
   final double persistentHeight;
   final bool alwaysShowMiddle;
+  final bool expandedTransparent;
 
   @override
   double get minExtent => persistentHeight;
@@ -793,6 +807,7 @@ class _LargeTitleNavigationBarSliverDelegate
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final bool showLargeTitle = shrinkOffset < maxExtent - minExtent - _kNavBarShowLargeTitleThreshold;
+    final double expandedState = shrinkOffset > minExtent ? clampDouble((shrinkOffset - minExtent) / (maxExtent - minExtent) * 2, 0, 1) : 0;
 
     final _PersistentNavigationBar persistentNavigationBar =
         _PersistentNavigationBar(
@@ -803,9 +818,19 @@ class _LargeTitleNavigationBarSliverDelegate
       middleVisible: alwaysShowMiddle ? null : !showLargeTitle,
     );
 
+    final Color expandedBackgroundColor = expandedTransparent ? backgroundColor.withOpacity(0) : backgroundColor;
+
     final Widget navBar = _wrapWithBackground(
-      border: border,
-      backgroundColor: CupertinoDynamicColor.resolve(backgroundColor, context),
+      border: expandedTransparent
+          ? Border.lerp(border?.scale(0), border, expandedState)
+          : border,
+      backgroundColor: expandedTransparent
+          ? Color.lerp(
+              CupertinoDynamicColor.resolve(expandedBackgroundColor, context),
+              CupertinoDynamicColor.resolve(backgroundColor, context),
+              expandedState,
+            )!
+          : CupertinoDynamicColor.resolve(backgroundColor, context),
       brightness: brightness,
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
@@ -877,11 +902,13 @@ class _LargeTitleNavigationBarSliverDelegate
         componentsKeys: keys,
         backgroundColor: CupertinoDynamicColor.resolve(backgroundColor, context),
         backButtonTextStyle: CupertinoTheme.of(context).textTheme.navActionTextStyle,
+        expandedBackgroundColor: CupertinoDynamicColor.resolve(expandedBackgroundColor, context),
         titleTextStyle: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
         largeTitleTextStyle: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
         border: border,
         hasUserMiddle: userMiddle != null && (alwaysShowMiddle || !showLargeTitle),
         largeExpanded: showLargeTitle,
+        expandedTransparent: expandedTransparent,
         child: navBar,
       ),
     );
@@ -898,7 +925,8 @@ class _LargeTitleNavigationBarSliverDelegate
         || transitionBetweenRoutes != oldDelegate.transitionBetweenRoutes
         || persistentHeight != oldDelegate.persistentHeight
         || alwaysShowMiddle != oldDelegate.alwaysShowMiddle
-        || heroTag != oldDelegate.heroTag;
+        || heroTag != oldDelegate.heroTag
+        || expandedTransparent != oldDelegate.expandedTransparent;
   }
 }
 
@@ -1599,24 +1627,28 @@ class _TransitionableNavigationBar extends StatelessWidget {
   _TransitionableNavigationBar({
     required this.componentsKeys,
     required this.backgroundColor,
+    required this.expandedBackgroundColor,
     required this.backButtonTextStyle,
     required this.titleTextStyle,
     required this.largeTitleTextStyle,
     required this.border,
     required this.hasUserMiddle,
     required this.largeExpanded,
+    required this.expandedTransparent,
     required this.child,
   }) : assert(!largeExpanded || largeTitleTextStyle != null),
        super(key: componentsKeys.navBarBoxKey);
 
   final _NavigationBarStaticComponentsKeys componentsKeys;
   final Color? backgroundColor;
+  final Color? expandedBackgroundColor;
   final TextStyle backButtonTextStyle;
   final TextStyle titleTextStyle;
   final TextStyle? largeTitleTextStyle;
   final Border? border;
   final bool hasUserMiddle;
   final bool largeExpanded;
+  final bool expandedTransparent;
   final Widget child;
 
   RenderBox get renderBox {
@@ -1681,25 +1713,47 @@ class _NavigationBarTransition extends StatelessWidget {
     required this.topNavBar,
     required this.bottomNavBar,
   }) : heightTween = Tween<double>(
-         begin: bottomNavBar.renderBox.size.height,
-         end: topNavBar.renderBox.size.height,
-       ),
-       backgroundTween = ColorTween(
-         begin: bottomNavBar.backgroundColor,
-         end: topNavBar.backgroundColor,
-       ),
-       borderTween = BorderTween(
-         begin: bottomNavBar.border,
-         end: topNavBar.border,
-       );
+          begin: bottomNavBar.renderBox.size.height,
+          end: topNavBar.renderBox.size.height,
+        ) {
+    // If topBackgroundColor is null, take the bottomBackgroundColor with zero-opacity
+    // so that the transition animation is continuous
+    final Color? bottomBackgroundColor = bottomNavBar.largeExpanded
+        ? bottomNavBar.expandedBackgroundColor
+        : bottomNavBar.backgroundColor;
+    final Color? topBackgroundColor = topNavBar.largeExpanded
+        ? topNavBar.expandedBackgroundColor
+        : topNavBar.backgroundColor;
+    backgroundTween = ColorTween(
+      begin: bottomBackgroundColor,
+      end: topNavBar.expandedTransparent && topNavBar.largeExpanded
+          ? bottomBackgroundColor?.withOpacity(0)
+          : topBackgroundColor,
+    );
+
+    // If topBorder is null, take the bottomBorder with scale(0) so
+    // that the transition animation is continuous
+    final Border? bottomBorder =
+        bottomNavBar.expandedTransparent && bottomNavBar.largeExpanded
+            ? null
+            : bottomNavBar.border;
+    final Border? topBorder =
+        topNavBar.expandedTransparent && topNavBar.largeExpanded
+            ? bottomBorder?.scale(0)
+            : topNavBar.border;
+    borderTween = BorderTween(
+      begin: bottomBorder,
+      end: topBorder,
+    );
+  }
 
   final Animation<double> animation;
   final _TransitionableNavigationBar topNavBar;
   final _TransitionableNavigationBar bottomNavBar;
 
   final Tween<double> heightTween;
-  final ColorTween backgroundTween;
-  final BorderTween borderTween;
+  late final ColorTween backgroundTween;
+  late final BorderTween borderTween;
 
   @override
   Widget build(BuildContext context) {

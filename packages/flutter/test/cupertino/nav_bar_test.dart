@@ -100,6 +100,53 @@ void main() {
     expect(find.byType(BackdropFilter), findsOneWidget);
   });
 
+  testWidgets('Default background is the default backgroundColor with zero opacity when expanded state', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              CupertinoSliverNavigationBar(
+                largeTitle: Text('Large Title'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+  expect(
+      find.byType(CupertinoSliverNavigationBar),
+      paints..rect(color: const CupertinoThemeData().barBackgroundColor.withOpacity(0)));
+  });
+
+  testWidgets('Border is not visible when expanded state', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              CupertinoSliverNavigationBar(
+                largeTitle: Text('Large Title'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+
+    final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
+      of: find.byType(CupertinoSliverNavigationBar),
+      matching: find.byType(DecoratedBox),
+    )).first as DecoratedBox;
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+    final BorderSide side = decoration.border!.bottom;
+    expect(side.width, 0);
+  });
+
   testWidgets('Nav bar displays correctly', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
     await tester.pumpWidget(

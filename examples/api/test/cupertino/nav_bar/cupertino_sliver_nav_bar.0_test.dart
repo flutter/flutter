@@ -59,10 +59,68 @@ void main() {
     expect(nextButton, findsNothing);
 
     // Go back to the previous page.
-    final Finder backButton = find.byType(CupertinoButton);
-    expect(backButton, findsOneWidget);
+    final Finder backButton = find.byType(CupertinoButton).first;
     await tester.tap(backButton);
     await tester.pumpAndSettle();
     expect(nextButton, findsOneWidget);
+  });
+
+  testWidgets(
+      'CupertinoSliverNavigationBar with expandedTransparent has transparent background in expanded state',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const example.SliverNavBarApp(),
+    );
+
+    // Navigate to a page with expandedTransparent
+    final Finder nextButton = find.text('Go to Next Page');
+    expect(nextButton, findsOneWidget);
+    await tester.tap(nextButton);
+    await tester.pumpAndSettle();
+    final Finder lastButton = find.text('Go to Last Page');
+    expect(lastButton, findsOneWidget);
+    await tester.tap(lastButton);
+    await tester.pumpAndSettle();
+
+    // Takes navigation bar
+     final CupertinoSliverNavigationBar navigationBar = find
+        .byType(CupertinoSliverNavigationBar)
+        .evaluate()
+        .first
+        .widget as CupertinoSliverNavigationBar;
+
+
+    // Checking background and border in the expanded state
+    DecoratedBox decoratedBox = tester
+        .widgetList(find.descendant(
+          of: find.byType(CupertinoSliverNavigationBar),
+          matching: find.byType(DecoratedBox),
+        ))
+        .first as DecoratedBox;
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+    BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+
+    expect(decoration.color?.opacity, isZero);
+    BorderSide side = decoration.border!.bottom;
+    expect(side.width, isZero);
+
+
+    // Checking background and border in the non-expanded state
+    await tester.fling(find.text('Drag me up'), dragUp, 500.0);
+    await tester.pumpAndSettle();
+
+    decoratedBox = tester
+        .widgetList(find.descendant(
+          of: find.byType(CupertinoSliverNavigationBar),
+          matching: find.byType(DecoratedBox),
+        ))
+        .first as DecoratedBox;
+    decoration = decoratedBox.decoration as BoxDecoration;
+
+    expect(decoration.color?.opacity, isNonZero);
+    expect(decoration.color?.value, navigationBar.backgroundColor?.value);
+    expect(decoration.border, navigationBar.border);
+    side = decoration.border!.bottom;
+    expect(side.width, isNonZero);
   });
 }
