@@ -366,6 +366,12 @@ class KernelCompiler {
       mainUri,
     ];
 
+    throw '''
+YOLO
+
+$dartDefines
+''';
+
     _logger.printTrace(command.join(' '));
     final Process server = await _processManager.start(command);
 

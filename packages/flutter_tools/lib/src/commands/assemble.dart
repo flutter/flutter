@@ -283,6 +283,7 @@ class AssembleCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    throw argResults!.arguments;
     final List<Target> targets = createTargets();
     final List<Target> nonDeferredTargets = <Target>[];
     final List<Target> deferredTargets = <AndroidAotDeferredComponentsBundle>[];
