@@ -894,7 +894,7 @@ class MenuItemButton extends StatefulWidget {
 
   /// An optional Semantics label, applied to the entire [MenuItemButton].
   ///
-  /// A ScreenReader will default to reading the genereated text on the [MenuItemButton]
+  /// A screen reader will default to reading the genereated text on the [MenuItemButton]
   /// itself, which is not guaranteed to be readable.
   ///
   /// Null by default.
@@ -1127,7 +1127,6 @@ class _MenuItemButtonState extends State<MenuItemButton> {
         child: child,
       );
     }
-
 
     return MergeSemantics(child: child);
   }
@@ -2993,6 +2992,8 @@ class _MenuItemLabel extends StatelessWidget {
   /// the shortcut.
   final MenuSerializableShortcut? shortcut;
 
+  /// An optional Semantics label, which replaces the generated string when
+  /// read by a screen reader.
   final String? semanticsLabel;
 
   /// The required label child widget.
