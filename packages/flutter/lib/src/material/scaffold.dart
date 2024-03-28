@@ -999,8 +999,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     required this.currentFloatingActionButtonLocation,
     required this.floatingActionButtonMoveAnimationProgress,
     required this.floatingActionButtonMotionAnimator,
-    required this.isSnackBarFloating,
     required this.snackBarWidth,
+    required this.snackBarBehavior,
     required this.extendBody,
     required this.extendBodyBehindAppBar,
     required this.extendBodyBehindMaterialBanner,
@@ -1018,7 +1018,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final double floatingActionButtonMoveAnimationProgress;
   final FloatingActionButtonAnimator floatingActionButtonMotionAnimator;
 
-  final bool isSnackBarFloating;
+  final SnackBarBehavior snackBarBehavior;
   final double? snackBarWidth;
 
   final bool extendBodyBehindMaterialBanner;
@@ -1026,6 +1026,34 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   @override
   void performLayout(Size size) {
     final BoxConstraints looseConstraints = BoxConstraints.loose(size);
+
+    // SnackBar can't be presented over FAB if this one is placed ad the top of the screen
+    final bool canShowAboveFab = switch (currentFloatingActionButtonLocation) {
+        FloatingActionButtonLocation.startTop
+        || FloatingActionButtonLocation.centerTop
+        || FloatingActionButtonLocation.endTop
+        || FloatingActionButtonLocation.miniStartTop
+        || FloatingActionButtonLocation.miniCenterTop
+        || FloatingActionButtonLocation.miniEndTop => false,
+        FloatingActionButtonLocation.startDocked
+        || FloatingActionButtonLocation.startFloat
+        || FloatingActionButtonLocation.centerDocked
+        || FloatingActionButtonLocation.centerFloat
+        || FloatingActionButtonLocation.endContained
+        || FloatingActionButtonLocation.endDocked
+        || FloatingActionButtonLocation.endFloat
+        || FloatingActionButtonLocation.miniStartDocked
+        || FloatingActionButtonLocation.miniStartFloat
+        || FloatingActionButtonLocation.miniCenterDocked
+        || FloatingActionButtonLocation.miniCenterFloat
+        || FloatingActionButtonLocation.miniEndDocked
+        || FloatingActionButtonLocation.miniEndFloat => true,
+        FloatingActionButtonLocation() => true,
+      };
+
+    final bool showSnackBarAboveFab = snackBarBehavior != SnackBarBehavior.fixed && snackBarBehavior  == SnackBarBehavior.floating && canShowAboveFab;
+    final bool showSnackBarBelowFab = snackBarBehavior != SnackBarBehavior.fixed && snackBarBehavior  == SnackBarBehavior.floatingBelowFab;
+    final bool isSnackBarFloating = showSnackBarBelowFab || showSnackBarAboveFab;
 
     // This part of the layout has the same effect as putting the app bar and
     // body in a column and making the body flexible. What's different is that
@@ -1123,7 +1151,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
     // Set the size of the SnackBar early if the behavior is fixed so
     // the FAB can be positioned correctly.
-    if (hasChild(_ScaffoldSlot.snackBar) && !isSnackBarFloating) {
+    if (hasChild(_ScaffoldSlot.snackBar) && (!isSnackBarFloating || snackBarBehavior == SnackBarBehavior.floatingBelowFab)) {
       snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
     }
 
@@ -1177,29 +1205,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       }
 
       final double snackBarYOffsetBase;
-      final bool showAboveFab = switch (currentFloatingActionButtonLocation) {
-        FloatingActionButtonLocation.startTop
-        || FloatingActionButtonLocation.centerTop
-        || FloatingActionButtonLocation.endTop
-        || FloatingActionButtonLocation.miniStartTop
-        || FloatingActionButtonLocation.miniCenterTop
-        || FloatingActionButtonLocation.miniEndTop => false,
-        FloatingActionButtonLocation.startDocked
-        || FloatingActionButtonLocation.startFloat
-        || FloatingActionButtonLocation.centerDocked
-        || FloatingActionButtonLocation.centerFloat
-        || FloatingActionButtonLocation.endContained
-        || FloatingActionButtonLocation.endDocked
-        || FloatingActionButtonLocation.endFloat
-        || FloatingActionButtonLocation.miniStartDocked
-        || FloatingActionButtonLocation.miniStartFloat
-        || FloatingActionButtonLocation.miniCenterDocked
-        || FloatingActionButtonLocation.miniCenterFloat
-        || FloatingActionButtonLocation.miniEndDocked
-        || FloatingActionButtonLocation.miniEndFloat => true,
-        FloatingActionButtonLocation() => true,
-      };
-      if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating && showAboveFab) {
+
+      if (floatingActionButtonRect.size != Size.zero && showSnackBarAboveFab) {
         if (bottomNavigationBarTop != null) {
           snackBarYOffsetBase = math.min(bottomNavigationBarTop, floatingActionButtonRect.top);
         } else {
@@ -2901,7 +2908,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       );
     }
 
-    bool isSnackBarFloating = false;
+    SnackBarBehavior snackBarBehavior = SnackBarBehavior.fixed;
     double? snackBarWidth;
 
     if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty) {
@@ -2925,10 +2932,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
     // SnackBar set by ScaffoldMessenger
     if (_messengerSnackBar != null) {
-      final SnackBarBehavior snackBarBehavior = _messengerSnackBar?._widget.behavior
+      snackBarBehavior = _messengerSnackBar?._widget.behavior
         ?? themeData.snackBarTheme.behavior
         ?? SnackBarBehavior.fixed;
-      isSnackBarFloating = snackBarBehavior == SnackBarBehavior.floating;
       snackBarWidth = _messengerSnackBar?._widget.width ?? themeData.snackBarTheme.width;
 
       _addIfNonNull(
@@ -3093,7 +3099,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
                   geometryNotifier: _geometryNotifier,
                   previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
                   textDirection: textDirection,
-                  isSnackBarFloating: isSnackBarFloating,
+                  snackBarBehavior: snackBarBehavior,
                   extendBodyBehindMaterialBanner: extendBodyBehindMaterialBanner,
                   snackBarWidth: snackBarWidth,
                 ),

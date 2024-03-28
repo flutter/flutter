@@ -31,6 +31,12 @@ enum SnackBarBehavior {
   ///
   /// See <https://material.io/design/components/snackbars.html> for more details.
   floating,
+
+  /// This behavior will cause [SnackBar] to be shown below [FloatingActionButton]
+  /// and above `Scaffold.bottomNavigationBar`. In case [FloatingActionButton] is
+  /// placed to the top of the [Scaffold] setting this behavior is equal to set
+  /// it to `SnackBarBehavior.floating`.
+  floatingBelowFab,
 }
 
 /// Customizes default property values for [SnackBar] widgets.
