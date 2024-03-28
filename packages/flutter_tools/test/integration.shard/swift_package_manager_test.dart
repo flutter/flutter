@@ -523,7 +523,7 @@ List<Pattern> _expectedLines({
     // If using a Swift Package plugin, but Swift Package Manager is not enabled, it falls back to being used as a CocoaPods plugin.
     if (swiftPackageMangerEnabled) {
       expectedLines.addAll(<Pattern>[
-        '${swiftPackagePlugin.pluginName}: ${swiftPackagePlugin.pluginPath}/$platform/${swiftPackagePlugin.pluginName} @ local',
+        RegExp('${swiftPackagePlugin.pluginName}: [/private]*$appPlatformDirectoryPath/Flutter/Packages/.swift_packages/${swiftPackagePlugin.pluginName}/$platform/${swiftPackagePlugin.pluginName} @ local'),
         "➜ Explicit dependency on target '${swiftPackagePlugin.pluginName}' in project '${swiftPackagePlugin.pluginName}'",
         if (platform == 'macos')
           RegExp('ProcessXCFramework [/private]*$appPlatformDirectoryPath/Flutter/Packages/FlutterFramework/FlutterMacOS.xcframework'),

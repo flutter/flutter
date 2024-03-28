@@ -12,11 +12,14 @@ let package = Package(
         .library(name: "integration_test_macos", targets: ["integration_test_macos"]),
     ],
     dependencies: [
+        .package(name: "FlutterFramework", path: "FLUTTER_PATH"),
     ],
     targets: [
         .target(
             name: "integration_test_macos",
-            dependencies: [],
+            dependencies: [
+                .product(name: "FlutterFramework", package: "FlutterFramework"),
+            ],
             resources: [
                 .process("Resources"),
             ]

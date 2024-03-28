@@ -404,7 +404,7 @@ class Plugin {
     FileSystem fileSystem,
     String platform,
   ) {
-    final String? platformDirectoryName = _darwinPluginDirectoryName(platform);
+    final String? platformDirectoryName = darwinPluginDirectoryName(platform);
     if (platformDirectoryName == null) {
       return null;
     }
@@ -419,14 +419,14 @@ class Plugin {
   /// Expected path to the plugin's podspec. Returns null if the plugin does
   /// not support the [platform] or the [platform] is not iOS or macOS.
   String? pluginPodspecPath(FileSystem fileSystem, String platform) {
-    final String? platformDirectoryName = _darwinPluginDirectoryName(platform);
+    final String? platformDirectoryName = darwinPluginDirectoryName(platform);
     if (platformDirectoryName == null) {
       return null;
     }
     return fileSystem.path.join(path, platformDirectoryName, '$name.podspec');
   }
 
-  String? _darwinPluginDirectoryName(String platform) {
+  String? darwinPluginDirectoryName(String platform) {
     final PluginPlatform? platformPlugin = platforms[platform];
     if (platformPlugin == null ||
         (platform != IOSPlugin.kConfigKey &&
