@@ -824,7 +824,7 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
                 '│                                                                                              │\n'
                 '│ Alternatively (if your project was created before Flutter 3.19), update                      │\n'
                 '│ /android/build.gradle                                                                        │\n'
-                '│ ext.kotlin_version = \'<latest-version>\'                                                      │\n'
+                "│ ext.kotlin_version = '<latest-version>'                                                      │\n"
                 '└──────────────────────────────────────────────────────────────────────────────────────────────┘\n'
         )
       );
