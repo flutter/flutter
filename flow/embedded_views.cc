@@ -43,6 +43,7 @@ bool DisplayListEmbedderViewSlice::recording_ended() {
 }
 
 void ExternalViewEmbedder::SubmitFlutterView(
+    int64_t flutter_view_id,
     GrDirectContext* context,
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
     std::unique_ptr<SurfaceFrame> frame) {

@@ -663,8 +663,8 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
 
   DlCanvas* embedder_root_canvas = nullptr;
   if (external_view_embedder_) {
-    external_view_embedder_->PrepareFlutterView(
-        view_id, layer_tree.frame_size(), device_pixel_ratio);
+    external_view_embedder_->PrepareFlutterView(layer_tree.frame_size(),
+                                                device_pixel_ratio);
     // TODO(dkwingsmt): Add view ID here.
     embedder_root_canvas = external_view_embedder_->GetRootCanvas();
   }
@@ -752,7 +752,8 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
         (!raster_thread_merger_ || raster_thread_merger_->IsMerged())) {
       FML_DCHECK(!frame->IsSubmitted());
       external_view_embedder_->SubmitFlutterView(
-          surface_->GetContext(), surface_->GetAiksContext(), std::move(frame));
+          view_id, surface_->GetContext(), surface_->GetAiksContext(),
+          std::move(frame));
     } else {
       frame->Submit();
     }

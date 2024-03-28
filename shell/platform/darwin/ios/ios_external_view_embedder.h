@@ -36,8 +36,7 @@ class IOSExternalViewEmbedder : public ExternalViewEmbedder {
                       raster_thread_merger) override;
 
   // |ExternalViewEmbedder|
-  void PrepareFlutterView(int64_t flutter_view_id,
-                          SkISize frame_size,
+  void PrepareFlutterView(SkISize frame_size,
                           double device_pixel_ratio) override;
 
   // |ExternalViewEmbedder|
@@ -55,6 +54,7 @@ class IOSExternalViewEmbedder : public ExternalViewEmbedder {
 
   // |ExternalViewEmbedder|
   void SubmitFlutterView(
+      int64_t flutter_view_id,
       GrDirectContext* context,
       const std::shared_ptr<impeller::AiksContext>& aiks_context,
       std::unique_ptr<SurfaceFrame> frame) override;
