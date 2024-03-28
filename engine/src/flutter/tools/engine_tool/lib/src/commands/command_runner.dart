@@ -13,6 +13,7 @@ import 'format_command.dart';
 import 'lint_command.dart';
 import 'query_command.dart';
 import 'run_command.dart';
+import 'test_command.dart';
 
 const int _usageLineLength = 80;
 
@@ -31,6 +32,7 @@ final class ToolCommandRunner extends CommandRunner<int> {
       BuildCommand(environment: environment, configs: configs),
       RunCommand(environment: environment, configs: configs),
       LintCommand(environment: environment),
+      TestCommand(environment: environment, configs: configs),
     ];
     commands.forEach(addCommand);
 

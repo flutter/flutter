@@ -3,13 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:io' show Directory;
-import 'dart:math';
 
 import 'package:path/path.dart' as p;
 
 import '../dart_utils.dart';
-import '../environment.dart';
-import '../logger.dart';
+
 import '../proc_utils.dart';
 import '../worker_pool.dart';
 import 'command.dart';
@@ -112,115 +110,4 @@ final class LintCommand extends CommandBase {
     }
     return r ? 0 : 1;
   }
-}
-
-/// A WorkerPoolProgressReporter designed to work with ProcessTasks.
-class ProcessTaskProgressReporter implements WorkerPoolProgressReporter {
-  /// Construct a new reporter.
-  ProcessTaskProgressReporter(this._environment);
-
-  final Environment _environment;
-  Spinner? _spinner;
-  bool _finished = false;
-  int _longestName = 0;
-
-  @override
-  void onRun(Set<WorkerTask> tasks) {
-    for (final WorkerTask task in tasks) {
-      _longestName = max(_longestName, task.name.length);
-    }
-  }
-
-  @override
-  void onFinish() {
-    _finished = true;
-    _updateSpinner(<ProcessTask>[]);
-  }
-
-  List<ProcessTask> _makeProcessTaskList(WorkerPool pool) {
-    final List<ProcessTask> runningTasks = <ProcessTask>[];
-    for (final WorkerTask task in pool.running) {
-      if (task is! ProcessTask) {
-        continue;
-      }
-      runningTasks.add(task);
-    }
-    return runningTasks;
-  }
-
-  @override
-  void onTaskStart(WorkerPool pool, WorkerTask task) {
-    final List<ProcessTask> running = _makeProcessTaskList(pool);
-    _updateSpinner(running);
-  }
-
-  @override
-  void onTaskDone(WorkerPool pool, WorkerTask task, [Object? err]) {
-    final List<ProcessTask> running = _makeProcessTaskList(pool);
-    task as ProcessTask;
-    final ProcessArtifacts pa = task.processArtifacts;
-    final String dt = _formatDurationShort(task.runTime);
-    if (pa.exitCode != 0) {
-      final String paPath = task.processArtifactsPath;
-      _environment.logger.clearLine();
-      _environment.logger.status(
-          'FAIL: ${task.name.padLeft(_longestName)} after $dt [details in $paPath]');
-    } else {
-      _environment.logger.clearLine();
-      _environment.logger
-          .status('OKAY: ${task.name.padLeft(_longestName)} after $dt');
-    }
-    _updateSpinner(running);
-  }
-
-  void _updateSpinner(List<ProcessTask> tasks) {
-    if (_spinner != null) {
-      _spinner!.finish();
-      _spinner = null;
-    }
-    if (_finished) {
-      return;
-    }
-    _environment.logger.clearLine();
-    String runStatus = '[';
-    for (final ProcessTask pt in tasks) {
-      if (runStatus != '[') {
-        runStatus += ' ';
-      }
-      runStatus += pt.name;
-    }
-    if (tasks.isNotEmpty) {
-      runStatus += '...';
-    }
-    runStatus += ']  ';
-    _environment.logger.status('Linting $runStatus', newline: false);
-    _spinner = _environment.logger.startSpinner();
-  }
-}
-
-String _formatDurationShort(Duration dur) {
-  int micros = dur.inMicroseconds;
-  String r = '';
-  if (micros >= Duration.microsecondsPerMinute) {
-    final int minutes = micros ~/ Duration.microsecondsPerMinute;
-    micros -= minutes * Duration.microsecondsPerMinute;
-    r += '${minutes}m';
-  }
-  if (micros >= Duration.microsecondsPerSecond) {
-    final int seconds = micros ~/ Duration.microsecondsPerSecond;
-    micros -= seconds * Duration.microsecondsPerSecond;
-    if (r.isNotEmpty) {
-      r += '.';
-    }
-    r += '${seconds}s';
-  }
-  if (micros >= Duration.microsecondsPerMillisecond) {
-    final int millis = micros ~/ Duration.microsecondsPerMillisecond;
-    micros -= millis * Duration.microsecondsPerMillisecond;
-    if (r.isNotEmpty) {
-      r += '.';
-    }
-    r += '${millis}ms';
-  }
-  return r;
 }

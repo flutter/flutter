@@ -66,11 +66,9 @@ void debugCheckBuilds(List<Build> builds) {
 }
 
 /// Build the build target in the environment.
-Future<int> runBuild(
-  Environment environment,
-  Build build, {
-  List<String> extraGnArgs = const <String>[],
-}) async {
+Future<int> runBuild(Environment environment, Build build,
+    {List<String> extraGnArgs = const <String>[],
+    List<String> targets = const <String>[]}) async {
   // If RBE config files aren't in the tree, then disable RBE.
   final String rbeConfigPath = p.join(
     environment.engine.srcDir.path,
@@ -79,10 +77,11 @@ Future<int> runBuild(
     'rbe',
   );
   final List<String> gnArgs = <String>[
-    ...extraGnArgs,
     if (!io.Directory(rbeConfigPath).existsSync()) '--no-rbe',
+    ...extraGnArgs,
   ];
 
+  // TODO(loic-sharma): Fetch dependencies if needed.
   final BuildRunner buildRunner = BuildRunner(
     platform: environment.platform,
     processRunner: environment.processRunner,
@@ -91,6 +90,7 @@ Future<int> runBuild(
     build: build,
     extraGnArgs: gnArgs,
     runTests: false,
+    extraNinjaArgs: targets,
   );
 
   Spinner? spinner;

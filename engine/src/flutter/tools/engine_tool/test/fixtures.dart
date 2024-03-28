@@ -194,3 +194,15 @@ String attachedDevices() => '''
   }
 ]
 ''';
+
+// NOTE: The final empty line is intentional.
+String gnLsTestOutputs() => '''
+display_list_unittests
+flow_unittests
+fml_arc_unittests''';
+
+// NOTE: The empty blank line is intentional.
+String gnLsTestLabels() => '''
+//flutter/display_list:display_list_unittests
+//flutter/flow:flow_unittests
+//flutter/fml:fml_arc_unittests''';
