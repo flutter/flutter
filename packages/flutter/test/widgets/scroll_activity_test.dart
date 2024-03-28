@@ -132,7 +132,7 @@ void main() {
     expect(find.text('Page 9'), findsOneWidget);
   });
 
-  testWidgets('Pointer is not ignored during trackpad scrolling and settle animations.', (WidgetTester tester) async {
+  testWidgets('Pointer is not ignored during trackpad scrolling.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     addTearDown(controller.dispose);
     int? lastTapped;
@@ -178,9 +178,9 @@ void main() {
     await tester.fling(find.byType(ListView), const Offset(0, -200), 1000);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
-    expect(controller.position.activity?.shouldIgnorePointer, isFalse); // Pointer is ignored following touch scrolling.
+    expect(controller.position.activity?.shouldIgnorePointer, isTrue); // Pointer is ignored following touch scrolling.
     await tester.tap(find.text('3'), warnIfMissed: false);
-    expect(lastTapped, equals(3));
+    expect(lastTapped, isNull);
     await tester.pumpAndSettle();
 
     controller.jumpTo(0);
@@ -411,4 +411,10 @@ class _ScrollActivityDelegate extends ScrollActivityDelegate {
 
   @override
   double setPixels(double pixels) => 0.0;
+
+  @override
+  bool get outOfRange => false;
+
+  @override
+  bool? get preferredHandOffIgnorePointer => true;
 }
