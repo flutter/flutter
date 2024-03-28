@@ -4,18 +4,20 @@
 
 import 'dart:async';
 
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'basic.dart';
-import 'container.dart';
 import 'editable_text.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 import 'inherited_notifier.dart';
+import 'layout_builder.dart';
 import 'overlay.dart';
 import 'shortcuts.dart';
 import 'tap_region.dart';
+import 'value_listenable_builder.dart';
 
 // Examples can assume:
 // late BuildContext context;
@@ -300,9 +302,12 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
 }
 
 class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> {
-  final GlobalKey _fieldKey = GlobalKey();
   final LayerLink _optionsLayerLink = LayerLink();
   final OverlayPortalController _optionsViewController = OverlayPortalController(debugLabel: '_RawAutocompleteState');
+
+  // The box constraints that the field was last built with.
+  final ValueNotifier<BoxConstraints> _fieldBoxConstraints =
+      ValueNotifier<BoxConstraints>(const BoxConstraints());
 
   TextEditingController? _internalTextEditingController;
   TextEditingController get _textEditingController {
@@ -429,16 +434,35 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       OptionsViewOpenDirection.down => AlignmentDirectional.bottomStart,
     }.resolve(textDirection);
 
-    return CompositedTransformFollower(
-      link: _optionsLayerLink,
-      showWhenUnlinked: false,
-      targetAnchor: targetAnchor,
-      followerAnchor: followerAlignment,
-      child: TextFieldTapRegion(
-        child: AutocompleteHighlightedOption(
-          highlightIndexNotifier: _highlightedOptionIndex,
-          child: Builder(
-            builder: (BuildContext context) => widget.optionsViewBuilder(context, _select, _options),
+    return ValueListenableBuilder<BoxConstraints>(
+      valueListenable: _fieldBoxConstraints,
+      builder: (BuildContext context, BoxConstraints constraints, Widget? child) {
+        return Positioned(
+          width: constraints.maxWidth,
+          top: 0.0,
+          bottom: 0.0,
+          child: child!,
+        );
+      },
+      child: CompositedTransformFollower(
+        link: _optionsLayerLink,
+        showWhenUnlinked: false,
+        targetAnchor: targetAnchor,
+        followerAnchor: followerAlignment,
+        child: TextFieldTapRegion(
+          child: AutocompleteHighlightedOption(
+            highlightIndexNotifier: _highlightedOptionIndex,
+            // optionsViewBuilder must be able to look up
+            // AutocompleteHighlightedOption in its context.
+            child: Builder(
+              builder: (BuildContext context) {
+                return widget.optionsViewBuilder(
+                  context,
+                  _select,
+                  _options,
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -493,18 +517,23 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       controller: _optionsViewController,
       overlayChildBuilder: _buildOptionsView,
       child: TextFieldTapRegion(
-        child: Container(
-          key: _fieldKey,
-          child: Shortcuts(
-            shortcuts: _shortcuts,
-            child: Actions(
-              actions: _actionMap,
-              child: CompositedTransformTarget(
-                link: _optionsLayerLink,
-                child: fieldView,
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints boxConstraints) {
+            assert(boxConstraints.hasBoundedWidth);
+            SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+              _fieldBoxConstraints.value = boxConstraints;
+            });
+            return Shortcuts(
+              shortcuts: _shortcuts,
+              child: Actions(
+                actions: _actionMap,
+                child: CompositedTransformTarget(
+                  link: _optionsLayerLink,
+                  child: fieldView,
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
