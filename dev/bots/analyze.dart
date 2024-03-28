@@ -13,6 +13,7 @@ import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:crypto/crypto.dart';
+import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
@@ -152,6 +153,9 @@ Future<void> run(List<String> arguments) async {
 
   printProgress('Taboo words...');
   await verifyTabooDocumentation(flutterRoot);
+
+  printProgress('Lint Kotlin files...');
+  await lintKotlinFiles(flutterRoot);
 
   // Ensure that all package dependencies are in sync.
   printProgress('Package dependencies...');
@@ -1970,6 +1974,17 @@ Future<void> verifyTabooDocumentation(String workingDirectory, { int minimumMatc
       '${bold}Similarly, avoid using "note:" or the phrase "note that". See https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#avoid-empty-prose for details.$reset',
       ...errors,
     ]);
+  }
+}
+
+Future<void> lintKotlinFiles(String workingDirectory) async {
+  // TODO(gmackall): does ktlint live on the path when we include it in ci.yaml?
+  //_evalCommand('chmod', <String>['+x', kotlinLinterFile.path], workingDirectory: workingDirectory);
+  final EvalResult lintResult = await _evalCommand('ktlint',
+      <String>['--baseline=$flutterRoot/dev/bots/test/analyze-test-input/ktlint-baseline.xml'],
+      workingDirectory: workingDirectory);
+  if (lintResult.exitCode != 0) {
+    foundError(<String>['Found lint violations in Kotlin files:\n ${lintResult.stdout}']);
   }
 }
 

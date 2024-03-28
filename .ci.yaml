@@ -298,6 +298,10 @@ targets:
     timeout: 60
     properties:
       shard: analyze
+      dependencies: >-
+        [
+          {"dependency": "ktlint", "version": "version:version_1_1_1"}
+        ]
       tags: >
         ["framework","hostonly","shard","linux"]
 
