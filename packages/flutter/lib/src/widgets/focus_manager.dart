@@ -1377,10 +1377,18 @@ class FocusScopeNode extends FocusNode {
     _manager?._markNeedsUpdate();
   }
 
+  /// Requests that the scope itself receive focus, without trying to find
+  /// a descendant that should receive focus.
+  ///
+  /// This is used only if you want to park the focus on a scope itself.
+  void requestScopeFocus() {
+    _doRequestFocus(findFirstFocus: false);
+  }
+
   @override
   void _doRequestFocus({required bool findFirstFocus}) {
-
-    // It is possible that a previously focused child is no longer focusable.
+    // It is possible that a previously focused child is no longer focusable, so
+    // clean out the list if so.
     while (this.focusedChild != null && !this.focusedChild!.canRequestFocus) {
       _focusedChildren.removeLast();
     }

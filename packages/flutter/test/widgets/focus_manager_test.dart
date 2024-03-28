@@ -1459,6 +1459,36 @@ void main() {
       expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
     });
 
+    testWidgets('Scopes can be focused without sending focus to descendants.', (WidgetTester tester) async {
+      final FocusScopeNode scopeNode = FocusScopeNode(debugLabel: 'Scope1',);
+      final FocusNode childFocusNode = FocusNode(debugLabel: 'Child1',);
+      await tester.pumpWidget(
+        FocusScope.withExternalFocusNode(
+          focusScopeNode: scopeNode,
+          child: Focus(
+            debugLabel: 'Parent1',
+            child: FocusScope(
+              debugLabel: 'Scope2',
+              child: Focus.withExternalFocusNode(
+                focusNode: childFocusNode,
+                child: const SizedBox(),
+                ),
+              ),
+            ),
+          ),
+        );
+
+      childFocusNode.requestFocus();
+      await tester.pump();
+      expect(scopeNode.hasFocus, isTrue);
+      expect(childFocusNode.hasPrimaryFocus, isTrue);
+
+      scopeNode.requestScopeFocus();
+      await tester.pump();
+      expect(scopeNode.hasPrimaryFocus, isTrue);
+      expect(childFocusNode.hasPrimaryFocus, isFalse);
+    });
+
     testWidgets('implements debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope Label');
