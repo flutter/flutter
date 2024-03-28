@@ -28,13 +28,7 @@ void PlaygroundTest::SetUp() {
 
   ImpellerValidationErrorsSetFatal(true);
 
-  // Test names that end with "WideGamut" will render with wide gamut support.
-  std::string test_name = flutter::testing::GetCurrentTestName();
-  PlaygroundSwitches switches = switches_;
-  switches.enable_wide_gamut =
-      test_name.find("WideGamut/") != std::string::npos;
-
-  SetupContext(GetParam(), switches);
+  SetupContext(GetParam());
   SetupWindow();
 }
 

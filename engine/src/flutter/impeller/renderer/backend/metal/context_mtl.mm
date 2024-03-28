@@ -75,8 +75,7 @@ ContextMTL::ContextMTL(
     id<MTLDevice> device,
     id<MTLCommandQueue> command_queue,
     NSArray<id<MTLLibrary>>* shader_libraries,
-    std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
-    std::optional<PixelFormat> pixel_format_override)
+    std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch)
     : device_(device),
       command_queue_(command_queue),
       is_gpu_disabled_sync_switch_(std::move(is_gpu_disabled_sync_switch)) {
@@ -129,9 +128,7 @@ ContextMTL::ContextMTL(
   }
 
   device_capabilities_ =
-      InferMetalCapabilities(device_, pixel_format_override.has_value()
-                                          ? pixel_format_override.value()
-                                          : PixelFormat::kB8G8R8A8UNormInt);
+      InferMetalCapabilities(device_, PixelFormat::kB8G8R8A8UNormInt);
   command_queue_ip_ = std::make_shared<CommandQueue>();
 #ifdef IMPELLER_DEBUG
   gpu_tracer_ = std::make_shared<GPUTracerMTL>();
@@ -241,18 +238,17 @@ std::shared_ptr<ContextMTL> ContextMTL::Create(
 std::shared_ptr<ContextMTL> ContextMTL::Create(
     const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
     std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
-    const std::string& library_label,
-    std::optional<PixelFormat> pixel_format_override) {
+    const std::string& library_label) {
   auto device = CreateMetalDevice();
   auto command_queue = CreateMetalCommandQueue(device);
   if (!command_queue) {
     return nullptr;
   }
-  auto context = std::shared_ptr<ContextMTL>(new ContextMTL(
-      device, command_queue,
-      MTLShaderLibraryFromFileData(device, shader_libraries_data,
-                                   library_label),
-      std::move(is_gpu_disabled_sync_switch), pixel_format_override));
+  auto context = std::shared_ptr<ContextMTL>(
+      new ContextMTL(device, command_queue,
+                     MTLShaderLibraryFromFileData(device, shader_libraries_data,
+                                                  library_label),
+                     std::move(is_gpu_disabled_sync_switch)));
   if (!context->IsValid()) {
     FML_LOG(ERROR) << "Could not create Metal context.";
     return nullptr;
