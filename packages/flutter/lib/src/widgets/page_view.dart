@@ -324,6 +324,9 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   double? _cachedPage;
 
   @override
+  bool? get preferredHandOffIgnorePointer => false;
+
+  @override
   Future<void> ensureVisible(
     RenderObject object, {
     double alignment = 0.0,
