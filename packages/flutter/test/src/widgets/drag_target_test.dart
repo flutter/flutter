@@ -35,6 +35,8 @@ void main() {
     expect(finder, findsNWidgets(2));
     expect(tester.getTopLeft(finder.at(0)), appTopLeft);
     expect(tester.getTopLeft(finder.at(1)), appTopLeft + const Offset(100, 100));
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('Draggable feedback matches pointer in scaled MaterialApp', (WidgetTester tester) async {
@@ -67,5 +69,7 @@ void main() {
     expect(finder, findsNWidgets(2));
     expect(tester.getTopLeft(finder.at(0)), appTopLeft);
     expect(tester.getTopLeft(finder.at(1)), appTopLeft + const Offset(100, 100));
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 }
