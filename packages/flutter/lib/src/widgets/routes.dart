@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -97,7 +98,7 @@ abstract class OverlayRoute<T> extends Route<T> {
 /// See also:
 ///
 ///  * [Route], which documents the meaning of the `T` generic type argument.
-abstract class TransitionRoute<T> extends OverlayRoute<T> {
+abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveBackRoute {
   /// Creates a route that animates itself when it is pushed or popped.
   TransitionRoute({
     super.settings,
@@ -476,6 +477,84 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   ///    [ModalRoute.buildTransitions] `secondaryAnimation` to run.
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) => true;
 
+  // Begin PredictiveBackRoute.
+
+  @override
+  void handleStartBackGesture({double progress = 0.0}) {
+    assert(isCurrent);
+    _controller?.value = progress;
+    navigator?.didStartUserGesture();
+  }
+
+  @override
+  void handleUpdateBackGestureProgress({required double progress}) {
+    // If some other navigation happened during this gesture, don't mess with
+    // the transition anymore.
+    if (!isCurrent) {
+      return;
+    }
+    _controller?.value = progress;
+  }
+
+  @override
+  void handleCancelBackGesture() {
+    _handleDragEnd(animateForward: true);
+  }
+
+  @override
+  void handleCommitBackGesture() {
+    _handleDragEnd(animateForward: false);
+  }
+
+  void _handleDragEnd({required bool animateForward}) {
+    if (isCurrent) {
+      if (animateForward) {
+        // The closer the panel is to dismissing, the shorter the animation is.
+        // We want to cap the animation time, but we want to use a linear curve
+        // to determine it.
+        // These values were eyeballed to match the native predictive back
+        // animation on a Pixel 2 running Android API 34.
+        final int droppedPageForwardAnimationTime = min(
+          ui.lerpDouble(800, 0, _controller!.value)!.floor(),
+          300,
+        );
+        _controller?.animateTo(
+          1.0,
+          duration: Duration(milliseconds: droppedPageForwardAnimationTime),
+          curve: Curves.fastLinearToSlowEaseIn,
+        );
+      } else {
+        // This route is destined to pop at this point. Reuse navigator's pop.
+        navigator?.pop();
+
+        // The popping may have finished inline if already at the target destination.
+        if (_controller?.isAnimating ?? false) {
+          // Otherwise, use a custom popping animation duration and curve.
+          final int droppedPageBackAnimationTime =
+              ui.lerpDouble(0, 800, _controller!.value)!.floor();
+          _controller!.animateBack(0.0,
+              duration: Duration(milliseconds: droppedPageBackAnimationTime),
+              curve: Curves.fastLinearToSlowEaseIn);
+        }
+      }
+    }
+
+    if (_controller?.isAnimating ?? false) {
+      // Keep the userGestureInProgress in true state since AndroidBackGesturePageTransitionsBuilder
+      // depends on userGestureInProgress.
+      late final AnimationStatusListener animationStatusCallback;
+      animationStatusCallback = (AnimationStatus status) {
+        navigator?.didStopUserGesture();
+        _controller!.removeStatusListener(animationStatusCallback);
+      };
+      _controller!.addStatusListener(animationStatusCallback);
+    } else {
+      navigator?.didStopUserGesture();
+    }
+  }
+
+  // End PredictiveBackRoute.
+
   @override
   void dispose() {
     assert(!_transitionCompleter.isCompleted, 'Cannot dispose a $runtimeType twice.');
@@ -494,6 +573,39 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 
   @override
   String toString() => '${objectRuntimeType(this, 'TransitionRoute')}(animation: $_controller)';
+}
+
+/// An interface for a route that supports predictive back gestures.
+///
+/// See also:
+///
+///  * [PredictiveBackPageTransitionsBuilder], which builds page transitions for
+///    predictive back.
+abstract interface class PredictiveBackRoute {
+  /// Whether this route is the top-most route on the navigator.
+  bool get isCurrent;
+
+  /// Whether a pop gesture can be started by the user for this route.
+  bool get popGestureEnabled;
+
+  /// Handles a predictive back gesture starting.
+  ///
+  /// The `progress` parameter indicates the progress of the gesture from 0.0 to
+  /// 1.0, as in [PredictiveBackEvent.progress].
+  void handleStartBackGesture({double progress = 0.0});
+
+  /// Handles a predictive back gesture updating as the user drags across the
+  /// screen.
+  ///
+  /// The `progress` parameter indicates the progress of the gesture from 0.0 to
+  /// 1.0, as in [PredictiveBackEvent.progress].
+  void handleUpdateBackGestureProgress({required double progress});
+
+  /// Handles a predictive back gesture ending successfully.
+  void handleCommitBackGesture();
+
+  /// Handles a predictive back gesture ending in cancelation.
+  void handleCancelBackGesture();
 }
 
 /// An entry in the history of a [LocalHistoryRoute].
@@ -1465,6 +1577,56 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///    of this property.
   bool get maintainState;
 
+  /// True if a back gesture (iOS-style back swipe or Android predictive back)
+  /// is currently underway for this route.
+  ///
+  /// See also:
+  ///
+  ///  * [popGestureEnabled], which returns true if a user-triggered pop gesture
+  ///    would be allowed.
+  bool get popGestureInProgress => navigator!.userGestureInProgress;
+
+  /// Whether a pop gesture can be started by the user for this route.
+  ///
+  /// Returns true if the user can edge-swipe to a previous route.
+  ///
+  /// This should only be used between frames, not during build.
+  @override
+  bool get popGestureEnabled {
+    // If there's nothing to go back to, then obviously we don't support
+    // the back gesture.
+    if (isFirst) {
+      return false;
+    }
+    // If the route wouldn't actually pop if we popped it, then the gesture
+    // would be really confusing (or would skip internal routes), so disallow it.
+    if (willHandlePopInternally) {
+      return false;
+    }
+    // If attempts to dismiss this route might be vetoed such as in a page
+    // with forms, then do not allow the user to dismiss the route with a swipe.
+    if (hasScopedWillPopCallback ||
+        popDisposition == RoutePopDisposition.doNotPop) {
+      return false;
+    }
+    // If we're in an animation already, we cannot be manually swiped.
+    if (animation!.status != AnimationStatus.completed) {
+      return false;
+    }
+    // If we're being popped into, we also cannot be swiped until the pop above
+    // it completes. This translates to our secondary animation being
+    // dismissed.
+    if (secondaryAnimation!.status != AnimationStatus.dismissed) {
+      return false;
+    }
+    // If we're in a gesture already, we cannot start another.
+    if (popGestureInProgress) {
+      return false;
+    }
+
+    // Looks like a back gesture would be welcome!
+    return true;
+  }
 
   // The API for _ModalScope and HeroController
 
@@ -1562,13 +1724,12 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///    method checks.
   @override
   RoutePopDisposition get popDisposition {
-    final bool canPop = _popEntries.every((PopEntry popEntry) {
-      return popEntry.canPopNotifier.value;
-    });
-
-    if (!canPop) {
-      return RoutePopDisposition.doNotPop;
+    for (final PopEntry popEntry in _popEntries) {
+      if (!popEntry.canPopNotifier.value) {
+        return RoutePopDisposition.doNotPop;
+      }
     }
+
     return super.popDisposition;
   }
 

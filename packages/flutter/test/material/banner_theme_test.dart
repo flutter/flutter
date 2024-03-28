@@ -482,8 +482,8 @@ void main() {
       // Default value for ThemeData.typography is Typography.material2014()
       expect(
         content.text.style,
-        Typography.material2014().englishLike.bodyText2!.merge(
-          Typography.material2014().black.bodyText2,
+        Typography.material2014().englishLike.bodyMedium!.merge(
+          Typography.material2014().black.bodyMedium,
         ),
       );
 
@@ -545,8 +545,8 @@ void main() {
       // Default value for ThemeData.typography is Typography.material2014()
       expect(
         content.text.style,
-        Typography.material2014().englishLike.bodyText2!.merge(
-          Typography.material2014().black.bodyText2,
+        Typography.material2014().englishLike.bodyMedium!.merge(
+          Typography.material2014().black.bodyMedium,
         ),
       );
 

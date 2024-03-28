@@ -142,7 +142,7 @@ void main() {
                 showSelectionHandles: true,
                 autofocus: true,
                 focusNode: focusNode,
-                style: Typography.material2018().black.subtitle1!,
+                style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
                 keyboardType: TextInputType.text,
@@ -905,6 +905,64 @@ void main() {
 
     state = tester.state<EditableTextState>(find.byType(EditableText));
     expect(state.textInputConfiguration.enableInteractiveSelection, isFalse);
+  });
+
+  testWidgets('EditableText sends viewId to config', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapWithView: false,
+      View(
+        view: FakeFlutterView(tester.view, viewId: 77),
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: FocusScope(
+              node: focusScopeNode,
+              autofocus: true,
+              child: EditableText(
+                controller: controller,
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.textInputConfiguration.viewId, 77);
+
+    await tester.pumpWidget(
+      wrapWithView: false,
+      View(
+        view: FakeFlutterView(tester.view, viewId: 88),
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: FocusScope(
+              node: focusScopeNode,
+              autofocus: true,
+              child: EditableText(
+                enableInteractiveSelection: false,
+                controller: controller,
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNode,
+                keyboardType: TextInputType.multiline,
+                style: textStyle,
+                cursorColor: cursorColor,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.textInputConfiguration.viewId, 88);
   });
 
   testWidgets('selection persists when unfocused', (WidgetTester tester) async {
@@ -3287,6 +3345,53 @@ void main() {
     await tester.pump();
 
     expect(tester.testTextInput.setClientArgs!['obscureText'], isFalse);
+  });
+
+  testWidgets('Sends viewId and updates config when it changes', (WidgetTester tester) async {
+    int viewId = 14;
+    late StateSetter setState;
+    final GlobalKey key = GlobalKey();
+
+    await tester.pumpWidget(
+      wrapWithView: false,
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter stateSetter) {
+          setState = stateSetter;
+          return View(
+            view: FakeFlutterView(tester.view, viewId: viewId),
+            child: MediaQuery(
+              data: const MediaQueryData(),
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: EditableText(
+                  key: key,
+                  controller: controller,
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: textStyle,
+                  cursorColor: cursorColor,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    // Focus the field to establish the input connection.
+    focusNode.requestFocus();
+    await tester.pump();
+
+    expect(tester.testTextInput.setClientArgs!['viewId'], 14);
+    expect(tester.testTextInput.log, contains(matchesMethodCall('TextInput.setClient')));
+    tester.testTextInput.log.clear();
+
+    setState(() { viewId = 15; });
+    await tester.pump();
+
+    expect(tester.testTextInput.setClientArgs!['viewId'], 15);
+    expect(tester.testTextInput.log, contains(matchesMethodCall('TextInput.updateConfig')));
+    tester.testTextInput.log.clear();
   });
 
   testWidgets('Fires onChanged when text changes via TextSelectionOverlay', (WidgetTester tester) async {
@@ -9080,7 +9185,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: focusNode,
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -9174,7 +9279,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: focusNode,
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             selectionControls: materialTextSelectionControls,
@@ -14993,7 +15098,7 @@ void main() {
             showSelectionHandles: true,
             autofocus: true,
             focusNode: focusNode,
-            style: Typography.material2018().black.subtitle1!,
+            style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
             keyboardType: TextInputType.text,
@@ -15050,7 +15155,7 @@ void main() {
                 showSelectionHandles: true,
                 autofocus: true,
                 focusNode: focusNode,
-                style: Typography.material2018().black.subtitle1!,
+                style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
                 keyboardType: TextInputType.text,
@@ -15118,7 +15223,7 @@ void main() {
                 showSelectionHandles: true,
                 autofocus: true,
                 focusNode: focusNode,
-                style: Typography.material2018().black.subtitle1!,
+                style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
                 keyboardType: TextInputType.text,
@@ -15191,7 +15296,7 @@ void main() {
                 showSelectionHandles: true,
                 autofocus: true,
                 focusNode: focusNode,
-                style: Typography.material2018().black.subtitle1!,
+                style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
                 keyboardType: TextInputType.text,
@@ -15252,7 +15357,7 @@ void main() {
                 showSelectionHandles: true,
                 autofocus: true,
                 focusNode: focusNode,
-                style: Typography.material2018().black.subtitle1!,
+                style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
                 keyboardType: TextInputType.text,
@@ -15329,7 +15434,7 @@ void main() {
                 showSelectionHandles: true,
                 autofocus: true,
                 focusNode: focusNode,
-                style: Typography.material2018().black.subtitle1!,
+                style: Typography.material2018().black.titleMedium!,
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
                 keyboardType: TextInputType.text,
@@ -17510,3 +17615,15 @@ class _TestScrollController extends ScrollController {
 }
 
 class FakeSpellCheckService extends DefaultSpellCheckService {}
+
+class FakeFlutterView extends TestFlutterView {
+  FakeFlutterView(TestFlutterView view, {required this.viewId})
+      : super(
+          view: view,
+          display: view.display,
+          platformDispatcher: view.platformDispatcher,
+        );
+
+  @override
+  final int viewId;
+}

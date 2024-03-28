@@ -88,7 +88,7 @@ class CountDisplay extends StatelessWidget {
       width: 100,
       height: 100,
       padding: const EdgeInsetsDirectional.all(10),
-      child: Text('$count', style: Theme.of(context).textTheme.headline4),
+      child: Text('$count', style: Theme.of(context).textTheme.headlineMedium),
     );
   }
 }

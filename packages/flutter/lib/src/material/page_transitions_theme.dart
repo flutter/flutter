@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 import 'colors.dart';
 import 'theme.dart';
@@ -545,6 +546,9 @@ abstract class PageTransitionsBuilder {
 ///    that's similar to the one provided in Android Q.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
+///  * [PredictiveBackPageTransitionsBuilder], which defines a page
+///    transition that allows peeking behind the current route on Android U and
+///    above.
 class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that slides the page up.
   const FadeUpwardsPageTransitionsBuilder();
@@ -573,6 +577,8 @@ class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 ///    that's similar to the one provided in Android Q.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
+///  * [PredictiveBackPageTransitionsBuilder], which defines a page
+///    transition that allows peeking behind the current route on Android.
 class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the transition used on
   /// Android P.
@@ -606,6 +612,8 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 ///    that's similar to the one provided by Android P.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
+///  * [PredictiveBackPageTransitionsBuilder], which defines a page
+///    transition that allows peeking behind the current route on Android.
 class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the transition used on
   /// Android Q.
@@ -656,11 +664,11 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
 
   @override
   Widget buildTransitions<T>(
-    PageRoute<T>? route,
-    BuildContext? context,
+    PageRoute<T> route,
+    BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
-    Widget? child,
+    Widget child,
   ) {
     if (_kProfileForceDisableSnapshotting) {
       return _ZoomPageTransitionNoCache(
@@ -672,7 +680,7 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
     return _ZoomPageTransition(
       animation: animation,
       secondaryAnimation: secondaryAnimation,
-      allowSnapshotting: allowSnapshotting && (route?.allowSnapshotting ?? true),
+      allowSnapshotting: allowSnapshotting && route.allowSnapshotting,
       allowEnterRouteSnapshotting: allowEnterRouteSnapshotting,
       child: child,
     );
@@ -690,6 +698,8 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
 ///    that's similar to the one provided by Android P.
 ///  * [ZoomPageTransitionsBuilder], which defines the default page transition
 ///    that's similar to the one provided in Android Q.
+///  * [PredictiveBackPageTransitionsBuilder], which defines a page
+///    transition that allows peeking behind the current route on Android.
 class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Constructs a page transition animation that matches the iOS transition.
   const CupertinoPageTransitionsBuilder();
@@ -741,7 +751,9 @@ class PageTransitionsTheme with Diagnosticable {
   /// By default the list of builders is: [ZoomPageTransitionsBuilder]
   /// for [TargetPlatform.android], and [CupertinoPageTransitionsBuilder] for
   /// [TargetPlatform.iOS] and [TargetPlatform.macOS].
-  const PageTransitionsTheme({ Map<TargetPlatform, PageTransitionsBuilder> builders = _defaultBuilders }) : _builders = builders;
+  const PageTransitionsTheme({
+    Map<TargetPlatform, PageTransitionsBuilder> builders = _defaultBuilders,
+  }) : _builders = builders;
 
   static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders = <TargetPlatform, PageTransitionsBuilder>{
     TargetPlatform.android: ZoomPageTransitionsBuilder(),
@@ -765,17 +777,13 @@ class PageTransitionsTheme with Diagnosticable {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    TargetPlatform platform = Theme.of(context).platform;
-
-    if (CupertinoRouteTransitionMixin.isPopGestureInProgress(route)) {
-      platform = TargetPlatform.iOS;
-    }
-
-    final PageTransitionsBuilder matchingBuilder = builders[platform] ?? switch (platform) {
-      TargetPlatform.iOS => const CupertinoPageTransitionsBuilder(),
-      TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.windows || TargetPlatform.macOS || TargetPlatform.linux => const ZoomPageTransitionsBuilder(),
-    };
-    return matchingBuilder.buildTransitions<T>(route, context, animation, secondaryAnimation, child);
+    return _PageTransitionsThemeTransitions<T>(
+      builders: builders,
+      route: route,
+      animation: animation,
+      secondaryAnimation: secondaryAnimation,
+      child: child,
+    );
   }
 
   // Map the builders to a list with one PageTransitionsBuilder per platform for
@@ -811,6 +819,55 @@ class PageTransitionsTheme with Diagnosticable {
         builders,
         defaultValue: PageTransitionsTheme._defaultBuilders,
       ),
+    );
+  }
+}
+
+class _PageTransitionsThemeTransitions<T> extends StatefulWidget {
+  const _PageTransitionsThemeTransitions({
+    required this.builders,
+    required this.route,
+    required this.animation,
+    required this.secondaryAnimation,
+    required this.child,
+  });
+
+  final Map<TargetPlatform, PageTransitionsBuilder> builders;
+  final PageRoute<T> route;
+  final Animation<double> animation;
+  final Animation<double> secondaryAnimation;
+  final Widget child;
+
+  @override
+  State<_PageTransitionsThemeTransitions<T>> createState() => _PageTransitionsThemeTransitionsState<T>();
+}
+
+class _PageTransitionsThemeTransitionsState<T> extends State<_PageTransitionsThemeTransitions<T>> {
+  TargetPlatform? _transitionPlatform;
+
+  @override
+  Widget build(BuildContext context) {
+    TargetPlatform platform = Theme.of(context).platform;
+
+    // If the theme platform is changed in the middle of a pop gesture, keep the
+    // transition that the gesture began with until the gesture is finished.
+    if (widget.route.popGestureInProgress) {
+      _transitionPlatform ??= platform;
+      platform = _transitionPlatform!;
+    } else {
+      _transitionPlatform = null;
+    }
+
+    final PageTransitionsBuilder matchingBuilder = widget.builders[platform] ?? switch (platform) {
+      TargetPlatform.iOS => const CupertinoPageTransitionsBuilder(),
+      TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.windows || TargetPlatform.macOS || TargetPlatform.linux => const ZoomPageTransitionsBuilder(),
+    };
+    return matchingBuilder.buildTransitions<T>(
+      widget.route,
+      context,
+      widget.animation,
+      widget.secondaryAnimation,
+      widget.child,
     );
   }
 }

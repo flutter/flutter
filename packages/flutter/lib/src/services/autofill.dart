@@ -801,18 +801,21 @@ class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
   _AutofillScopeTextInputConfiguration({
     required this.allConfigurations,
     required TextInputConfiguration currentClientConfiguration,
-  }) : super(inputType: currentClientConfiguration.inputType,
-         obscureText: currentClientConfiguration.obscureText,
-         autocorrect: currentClientConfiguration.autocorrect,
-         smartDashesType: currentClientConfiguration.smartDashesType,
-         smartQuotesType: currentClientConfiguration.smartQuotesType,
-         enableSuggestions: currentClientConfiguration.enableSuggestions,
-         inputAction: currentClientConfiguration.inputAction,
-         textCapitalization: currentClientConfiguration.textCapitalization,
-         keyboardAppearance: currentClientConfiguration.keyboardAppearance,
-         actionLabel: currentClientConfiguration.actionLabel,
-         autofillConfiguration: currentClientConfiguration.autofillConfiguration,
-       );
+  }) : super(
+          viewId: currentClientConfiguration.viewId,
+          inputType: currentClientConfiguration.inputType,
+          obscureText: currentClientConfiguration.obscureText,
+          autocorrect: currentClientConfiguration.autocorrect,
+          smartDashesType: currentClientConfiguration.smartDashesType,
+          smartQuotesType: currentClientConfiguration.smartQuotesType,
+          enableSuggestions: currentClientConfiguration.enableSuggestions,
+          inputAction: currentClientConfiguration.inputAction,
+          textCapitalization: currentClientConfiguration.textCapitalization,
+          keyboardAppearance: currentClientConfiguration.keyboardAppearance,
+          actionLabel: currentClientConfiguration.actionLabel,
+          autofillConfiguration:
+              currentClientConfiguration.autofillConfiguration,
+        );
 
   final Iterable<TextInputConfiguration> allConfigurations;
 

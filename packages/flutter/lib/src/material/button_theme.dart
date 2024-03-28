@@ -381,7 +381,7 @@ class ButtonThemeData with Diagnosticable {
   /// minimum size, internal padding, and shape.
   ///
   /// Despite the name, this property is not the [TextTheme] whose
-  /// [TextTheme.button] is used as the button text's [TextStyle].
+  /// [TextTheme.labelLarge] is used as the button text's [TextStyle].
   ButtonTextTheme getTextTheme(MaterialButton button) => button.textTheme ?? textTheme;
 
   /// The foreground color of the [button]'s text and icon when
