@@ -96,7 +96,7 @@ class _CarouselExampleState extends State<CarouselExample> {
             SliverCarousel(
               // maxChildExtent: 200,
               clipExtent: 0, // Clip extent must <= min child extent
-              childExtentList: const <int>[3,3,3,2,1],
+              childExtentList: const <int>[1,3,1],
               delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) {
                   return Padding(
