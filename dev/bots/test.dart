@@ -50,9 +50,9 @@
 import 'dart:convert';
 import 'dart:core' as system show print;
 import 'dart:core' hide print;
+import 'dart:io' as io;
 import 'dart:io' as system show exit;
 import 'dart:io' hide exit;
-import 'dart:io' as io;
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -65,6 +65,7 @@ import 'package:process/process.dart';
 
 import 'run_command.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
+import 'suite_runners/run_realm_checker_tests.dart';
 import 'suite_runners/run_web_long_running_tests.dart';
 import 'tool_subsharding.dart';
 import 'utils.dart';
@@ -86,7 +87,6 @@ final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
-final String engineRealmFile = path.join(flutterRoot, 'bin', 'internal', 'engine.realm');
 final String flutterPackagesVersionFile = path.join(flutterRoot, 'bin', 'internal', 'flutter_packages.version');
 
 String get platformFolderName {
@@ -249,7 +249,7 @@ Future<void> main(List<String> args) async {
       'web_long_running_tests': () => webLongRunningTestsRunner(flutterRoot),
       'flutter_plugins': _runFlutterPackagesTests,
       'skp_generator': _runSkpGeneratorTests,
-      'realm_checker': _runRealmCheckerTest,
+      'realm_checker': () => realmCheckerTestRunner(flutterRoot),
       'customer_testing': _runCustomerTesting,
       'analyze': _runAnalyze,
       'fuchsia_precache': _runFuchsiaPrecache,
