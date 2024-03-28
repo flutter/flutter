@@ -61,6 +61,37 @@ class PlatformViewsRegistry {
 /// The `id` parameter is the platform view's unique identifier.
 typedef PlatformViewCreatedCallback = void Function(int id);
 
+/// Indicates the reason for a request to move keyboard navigation out of a platform view back into the widget tree.
+enum NavigationReason {
+  /// Non-directional
+  kProgrammatic,
+
+  /// Forward, e.g. Tab
+  kForward,
+
+  /// Backward, e.g. Shift + Tab
+  kBackward;
+
+  /// Map from the integer argument passed through the method channel to the enum values.
+  /// Any future changes to this enum must be reflected in this factory.
+  /// The argument passed from the engine to the framework in the `navigatedOut` method call must match this mapping.
+  factory NavigationReason.fromInt(int index) {
+    return switch (index) {
+      0 => kProgrammatic,
+      1 => kForward,
+      2 => kBackward,
+      _ => throw ArgumentError('index', 'Argument index must be in [0, 2]. Was $index')
+    };
+  }
+}
+
+/// Callback signature for when the engine notifies the framework that keyboard
+/// focus has attempted to move out of a platform view back into the widget
+/// tree.
+///
+/// The 'reason' parameter indicates the direction of navigation.
+typedef LoseFocusCallback = void Function(NavigationReason reason);
+
 /// Provides access to the platform views service.
 ///
 /// This service allows creating and controlling platform-specific views.
@@ -78,6 +109,13 @@ class PlatformViewsService {
         if (_focusCallbacks.containsKey(id)) {
           _focusCallbacks[id]!();
         }
+      case 'navigatedOut':
+        final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
+        final int id = args['id'] as int;
+        final NavigationReason reason = NavigationReason.fromInt(args['reason'] as int);
+        if (_loseFocusCallbacks.containsKey(id)) {
+          _loseFocusCallbacks[id]!(reason);
+        }
       default:
         throw UnimplementedError("${call.method} was invoked but isn't implemented by PlatformViewsService");
     }
@@ -88,6 +126,12 @@ class PlatformViewsService {
   ///
   /// The callbacks are invoked when the platform view asks to be focused.
   final Map<int, VoidCallback> _focusCallbacks = <int, VoidCallback>{};
+
+
+  /// Maps platform view IDs to focus loss callbacks.
+  ///
+  /// The callbacks are invoked when the platform view asks for keyboard focus to be returned to the widget tree.
+  final Map<int, LoseFocusCallback> _loseFocusCallbacks = <int, LoseFocusCallback>{};
 
   /// {@template flutter.services.PlatformViewsService.initAndroidView}
   /// Creates a controller for a new Android view.
@@ -291,6 +335,30 @@ class PlatformViewsService {
       _instance._focusCallbacks[id] = onFocus;
     }
     return AppKitViewController._(id, layoutDirection);
+  }
+
+  // TODO(schectman): return newly created view
+  // https://github.com/flutter/flutter/issues/143375
+  /// Factory method to create a new 'Win32View'.
+  ///
+  /// This should not be called directly by user code.
+  static Future<void> initWindowsView({
+    required int id,
+    required String viewType,
+    VoidCallback? onFocus,
+    LoseFocusCallback? onLoseFocus,
+  }) async {
+    if (onFocus != null) {
+      _instance._focusCallbacks[id] = onFocus;
+    }
+    if (onLoseFocus != null) {
+      _instance._loseFocusCallbacks[id] = onLoseFocus;
+    }
+    final Map<String, dynamic> args = <String, dynamic>{
+      'id': id,
+      'viewType': viewType,
+    };
+    await SystemChannels.platform_views.invokeMethod<void>('create', args);
   }
 }
 
