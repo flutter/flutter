@@ -4,7 +4,6 @@
 
 #include "impeller/renderer/backend/vulkan/render_pass_builder_vk.h"
 
-#include <algorithm>
 #include <vector>
 
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
@@ -37,16 +36,20 @@ RenderPassBuilderVK& RenderPassBuilderVK::SetColorAttachment(
   desc.format = ToVKImageFormat(format);
   desc.samples = ToVKSampleCount(sample_count);
   desc.loadOp = ToVKAttachmentLoadOp(load_action);
-  desc.storeOp = ToVKAttachmentStoreOp(store_action);
+  desc.storeOp = ToVKAttachmentStoreOp(store_action, false);
   desc.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
   desc.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
   desc.initialLayout = vk::ImageLayout::eGeneral;
   desc.finalLayout = vk::ImageLayout::eGeneral;
   colors_[index] = desc;
 
-  desc.samples = vk::SampleCountFlagBits::e1;
-  resolves_[index] = desc;
-
+  if (StoreActionPerformsResolve(store_action)) {
+    desc.storeOp = ToVKAttachmentStoreOp(store_action, true);
+    desc.samples = vk::SampleCountFlagBits::e1;
+    resolves_[index] = desc;
+  } else {
+    resolves_.erase(index);
+  }
   return *this;
 }
 
@@ -59,7 +62,7 @@ RenderPassBuilderVK& RenderPassBuilderVK::SetDepthStencilAttachment(
   desc.format = ToVKImageFormat(format);
   desc.samples = ToVKSampleCount(sample_count);
   desc.loadOp = ToVKAttachmentLoadOp(load_action);
-  desc.storeOp = ToVKAttachmentStoreOp(store_action);
+  desc.storeOp = ToVKAttachmentStoreOp(store_action, false);
   desc.stencilLoadOp = desc.loadOp;    // Not separable in Impeller.
   desc.stencilStoreOp = desc.storeOp;  // Not separable in Impeller.
   desc.initialLayout = vk::ImageLayout::eUndefined;
@@ -79,7 +82,7 @@ RenderPassBuilderVK& RenderPassBuilderVK::SetStencilAttachment(
   desc.loadOp = vk::AttachmentLoadOp::eDontCare;
   desc.storeOp = vk::AttachmentStoreOp::eDontCare;
   desc.stencilLoadOp = ToVKAttachmentLoadOp(load_action);
-  desc.stencilStoreOp = ToVKAttachmentStoreOp(store_action);
+  desc.stencilStoreOp = ToVKAttachmentStoreOp(store_action, false);
   desc.initialLayout = vk::ImageLayout::eUndefined;
   desc.finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
   depth_stencil_ = desc;
@@ -88,8 +91,6 @@ RenderPassBuilderVK& RenderPassBuilderVK::SetStencilAttachment(
 
 vk::UniqueRenderPass RenderPassBuilderVK::Build(
     const vk::Device& device) const {
-  FML_DCHECK(colors_.size() == resolves_.size());
-
   // This must be less than `VkPhysicalDeviceLimits::maxColorAttachments` but we
   // are not checking.
   const auto color_attachments_count =
@@ -110,12 +111,12 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
     color_refs[color.first] = color_ref;
     attachments.push_back(color.second);
 
-    if (color.second.samples != vk::SampleCountFlagBits::e1) {
+    if (auto found = resolves_.find(color.first); found != resolves_.end()) {
       vk::AttachmentReference resolve_ref;
       resolve_ref.attachment = attachments.size();
       resolve_ref.layout = vk::ImageLayout::eGeneral;
       resolve_refs[color.first] = resolve_ref;
-      attachments.push_back(resolves_.at(color.first));
+      attachments.push_back(found->second);
     }
   }
 
