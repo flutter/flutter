@@ -515,12 +515,16 @@ void main() {
       expect(box.debugController, isNotNull);
       expect(
         () => box.debugController!.dispose(),
-        throwsAssertionWith(
-          'AnimationController.dispose() called more than once.\n'
-          'A given AnimationController cannot be disposed more than once.\n'
-          'The following AnimationController object was disposed multiple times:\n'
-          '  AnimationController#00000(⏮ 0.000; paused; DISPOSED)',
-        ),
+        throwsA(isA<AssertionError>().having(
+          (AssertionError error) => error.message,
+          'message',
+          equalsIgnoringHashCodes(
+            'AnimationController.dispose() called more than once.\n'
+            'A given AnimationController cannot be disposed more than once.\n'
+            'The following AnimationController object was disposed multiple times:\n'
+            '  AnimationController#00000(⏮ 0.000; paused; DISPOSED)',
+          ),
+        )),
       );
     });
   });

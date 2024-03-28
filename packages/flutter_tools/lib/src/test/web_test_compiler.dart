@@ -259,8 +259,7 @@ class WebTestCompiler {
       processManager: _processManager,
     );
 
-    await processUtils.run(
-      throwOnError: true,
+    await processUtils.stream(
       compilationArgs,
     );
 
