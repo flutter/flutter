@@ -1761,13 +1761,6 @@ Future<void> _runSkpGeneratorTests() async {
   );
 }
 
-Future<void> _runRealmCheckerTest() async {
-  final String engineRealm = File(engineRealmFile).readAsStringSync().trim();
-  if (engineRealm.isNotEmpty) {
-    foundError(<String>['The checked-in engine.realm file must be empty.']);
-  }
-}
-
 Future<void> runFlutterWebTest(
   String webRenderer,
   String workingDirectory,
