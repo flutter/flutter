@@ -854,7 +854,7 @@ class MenuItemButton extends StatefulWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.closeOnActivate = true,
-    this.menuFlexDirection = Axis.vertical,
+    this.overflowDirection = Axis.vertical,
     required this.child,
   });
 
@@ -929,12 +929,12 @@ class MenuItemButton extends StatefulWidget {
   /// If the menu item button is created by the [MenuAnchor] or [MenuBar], then
   /// this property is ignored.
   ///
-  /// If [menuFlexDirection] is [Axis.vertical], the menu will be expanded vertically.
-  /// If [menuFlexDirection] is [Axis.horizontal], then the menu  will be
+  /// If [overflowDirection] is [Axis.vertical], the menu will be expanded vertically.
+  /// If [overflowDirection] is [Axis.horizontal], then the menu  will be
   /// expanded horizontally.
   ///
   /// Defaults to [Axis.vertical].
-  final Axis menuFlexDirection;
+  final Axis overflowDirection;
 
   /// The widget displayed in the center of this button.
   ///
@@ -1121,7 +1121,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
         shortcut: widget.shortcut,
         trailingIcon: widget.trailingIcon,
         hasSubmenu: false,
-        menuDirection: _anchor?._orientation ?? widget.menuFlexDirection,
+        overflowDirection: _anchor?._orientation ?? widget.overflowDirection,
         child: widget.child!,
       ),
     );
@@ -3068,7 +3068,7 @@ class _MenuItemLabel extends StatelessWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.shortcut,
-    this.menuDirection = Axis.vertical,
+    this.overflowDirection = Axis.vertical,
     required this.child,
   });
 
@@ -3093,7 +3093,7 @@ class _MenuItemLabel extends StatelessWidget {
   final MenuSerializableShortcut? shortcut;
 
   /// The direction in which the menu item expands.
-  final Axis menuDirection;
+  final Axis overflowDirection;
 
   /// The required label child widget.
   final Widget child;
@@ -3107,7 +3107,7 @@ class _MenuItemLabel extends StatelessWidget {
     );
 
     Widget leadings;
-    if (menuDirection == Axis.vertical) {
+    if (overflowDirection == Axis.vertical) {
       leadings = Expanded(
         child: ClipRect(
           child: Row(
