@@ -40,6 +40,25 @@ Future<void> testMain() async {
     expect(() => builder.build(), returnsNormally);
   });
 
+  test('getWordBoundary respects position affinity', () {
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle());
+    builder.addText('hello world');
+
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: double.infinity));
+
+    final TextRange downstreamWordBoundary = paragraph.getWordBoundary(const TextPosition(
+      offset: 5,
+    ));
+    expect(downstreamWordBoundary, const TextRange(start: 5, end: 6));
+
+    final TextRange upstreamWordBoundary = paragraph.getWordBoundary(const TextPosition(
+      offset: 5,
+      affinity: TextAffinity.upstream,
+    ));
+    expect(upstreamWordBoundary, const TextRange(start: 0, end: 5));
+  });
+
   test('build and layout a paragraph with an empty addText', () {
     final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle());
     builder.addText('');
