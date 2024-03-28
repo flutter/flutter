@@ -600,9 +600,9 @@ class BallisticScrollActivity extends ScrollActivity {
   /// and returns true if the overflow was zero.
   @protected
   bool applyMoveTo(double value) {
-    if (delegate.outOfRange) {
-      shouldIgnorePointer = false;
-    }
+    // if (delegate.outOfRange) {
+    //   shouldIgnorePointer = false;
+    // }
     return delegate.setPixels(value).abs() < precisionErrorTolerance;
   }
 
