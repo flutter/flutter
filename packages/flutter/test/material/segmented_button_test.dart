@@ -6,6 +6,7 @@
 // machines.
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -907,7 +908,7 @@ void main() {
 
     // The width of the SegmentedButton must be less than the width of the parent widget.
     expect(segmentedButtonWidth, lessThan(screenWidth));
-  });
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/145527
 }
 
 Set<MaterialState> enabled = const <MaterialState>{};
