@@ -480,5 +480,43 @@ TEST_F(WindowsTest, Lifecycle) {
                /* bRepaint*/ false);
 }
 
+TEST_F(WindowsTest, GetKeyboardStateHeadless) {
+  // Run the test on its own thread so that it can pump its event loop while
+  // this thread waits.
+  fml::AutoResetWaitableEvent latch;
+  auto platform_task_runner = CreateNewThread("test_platform_thread");
+  platform_task_runner->PostTask([&]() {
+    auto& context = GetContext();
+    WindowsConfigBuilder builder(context);
+    builder.SetDartEntrypoint("sendGetKeyboardState");
+
+    bool done = false;
+    context.AddNativeFunction(
+        "SignalStringValue",
+        CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+          auto handle = Dart_GetNativeArgument(args, 0);
+          ASSERT_FALSE(Dart_IsError(handle));
+          auto value = tonic::DartConverter<std::string>::FromDart(handle);
+          EXPECT_EQ(value, "Success");
+          done = true;
+          latch.Signal();
+        }));
+
+    ViewControllerPtr controller{builder.Run()};
+    ASSERT_NE(controller, nullptr);
+
+    // Pump messages for the Windows platform task runner.
+    ::MSG msg;
+    while (!done) {
+      if (::GetMessage(&msg, nullptr, 0, 0)) {
+        ::TranslateMessage(&msg);
+        ::DispatchMessage(&msg);
+      }
+    }
+  });
+
+  latch.Wait();
+}
+
 }  // namespace testing
 }  // namespace flutter
