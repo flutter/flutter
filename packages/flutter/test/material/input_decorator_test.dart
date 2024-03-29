@@ -348,7 +348,7 @@ void main() {
           );
         });
 
-        testWidgets('active indicator has correct height and color', (WidgetTester tester) async {
+        testWidgets('active indicator has correct weight and color', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -407,7 +407,7 @@ void main() {
           );
         });
 
-        testWidgets('active indicator has correct height and color', (WidgetTester tester) async {
+        testWidgets('active indicator has correct weight and color', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -459,9 +459,6 @@ void main() {
           );
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          // TODO(bleroux): check if this value is correct.
-          // Based on the spec, it probably should be theme.colorScheme.onSurface.withOpacity(0.08).
-          // See 'Hovered / State layer' in https://m3.material.io/components/text-fields/specs#f967d3f6-0139-43f7-8336-510022684fd1,
           expect(theme.hoverColor, Colors.black.withOpacity(0.04));
           expect(findBorderPainter(), paints
             ..path(
@@ -471,7 +468,7 @@ void main() {
           );
         });
 
-        testWidgets('active indicator has correct height and color', (WidgetTester tester) async {
+        testWidgets('active indicator has correct weight and color', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isHovering: true,
@@ -531,7 +528,7 @@ void main() {
           );
         });
 
-        testWidgets('active indicator has correct height and color', (WidgetTester tester) async {
+        testWidgets('active indicator has correct weight and color', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isFocused: true,
@@ -589,7 +586,7 @@ void main() {
           );
         });
 
-        testWidgets('active indicator has correct height and color', (WidgetTester tester) async {
+        testWidgets('active indicator has correct weight and color', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -605,7 +602,7 @@ void main() {
           expect(getBorderWeight(tester), 1.0);
         });
 
-        testWidgets('active indicator has correct height and color when focused', (WidgetTester tester) async {
+        testWidgets('active indicator has correct weight and color when focused', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isFocused: true,
@@ -622,7 +619,7 @@ void main() {
           expect(getBorderWeight(tester), 2.0);
         });
 
-        testWidgets('active indicator has correct height and color when hovered', (WidgetTester tester) async {
+        testWidgets('active indicator has correct weight and color when hovered', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isHovering: true,
@@ -673,7 +670,7 @@ void main() {
           expect(getBorderRadius(tester), const BorderRadius.all(Radius.circular(4.0)));
         });
 
-        testWidgets('container has correct color', (WidgetTester tester) async {
+        testWidgets('container is painted correctly', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -692,7 +689,7 @@ void main() {
           );
         });
 
-        testWidgets('outilne has correct width and color', (WidgetTester tester) async {
+        testWidgets('outline has correct weight and color', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -727,7 +724,7 @@ void main() {
           expect(getBorderRadius(tester), const BorderRadius.all(Radius.circular(4.0)));
         });
 
-        testWidgets('container has correct color', (WidgetTester tester) async {
+        testWidgets('container is painted correctly', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -747,7 +744,7 @@ void main() {
           );
         });
 
-        testWidgets('active indicator has correct height and color', (WidgetTester tester) async {
+        testWidgets('outline has correct weight and color', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -783,7 +780,7 @@ void main() {
           expect(getBorderRadius(tester), const BorderRadius.all(Radius.circular(4.0)));
         });
 
-        testWidgets('container has correct color', (WidgetTester tester) async {
+        testWidgets('container is painted correctly', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isHovering: true,
@@ -803,7 +800,7 @@ void main() {
           );
         });
 
-        testWidgets('outline has correct height and color', (WidgetTester tester) async {
+        testWidgets('outline has correct weight and color', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isHovering: true,
@@ -839,7 +836,7 @@ void main() {
           expect(getBorderRadius(tester), const BorderRadius.all(Radius.circular(4.0)));
         });
 
-        testWidgets('container has correct color', (WidgetTester tester) async {
+        testWidgets('container is painted correctly', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isFocused: true,
@@ -859,7 +856,7 @@ void main() {
           );
         });
 
-        testWidgets('outline has correct height and color', (WidgetTester tester) async {
+        testWidgets('outline has correct weight and color', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isFocused: true,
@@ -894,7 +891,7 @@ void main() {
           expect(getBorderRadius(tester), const BorderRadius.all(Radius.circular(4.0)));
         });
 
-        testWidgets('container has correct color', (WidgetTester tester) async {
+        testWidgets('container is painted correctly', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -913,7 +910,7 @@ void main() {
           );
         });
 
-        testWidgets('outline has correct height and color', (WidgetTester tester) async {
+        testWidgets('outline has correct weight and color', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -929,7 +926,7 @@ void main() {
           expect(getBorderWeight(tester), 1.0);
         });
 
-        testWidgets('outline has correct height and color when focused', (WidgetTester tester) async {
+        testWidgets('outline has correct weight and color when focused', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isFocused: true,
@@ -946,7 +943,7 @@ void main() {
           expect(getBorderWeight(tester), 2.0);
         });
 
-        testWidgets('outline has correct height and color when hovered', (WidgetTester tester) async {
+        testWidgets('outline has correct weight and color when hovered', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isHovering: true,
