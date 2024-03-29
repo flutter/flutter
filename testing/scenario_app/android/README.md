@@ -355,6 +355,32 @@ device (you might find it easier trying the `stdout` of the test first, which
 uses rudimentary log filtering). In the case of multiple runs, the logs are
 prefixed with the test configuration and run attempt.
 
+### Gradle is failing due to an "not part of the dependency lock state" error
+
+If you update dependencies in the `app/build.gradle` file, you may encounter an
+error (probably in CI) that looks like:
+
+```txt
+FAILED: scenario_app/reports/lint-results.xml
+vpython3 ../../flutter/testing/rules/run_gradle.py /b/s/w/ir/cache/builder/src/flutter/testing/scenario_app/android lint --no-daemon -Pflutter_jar=/b/s/w/ir/cache/builder/src/out/android_emulator_skia_debug_x64/flutter.jar -Pout_dir=/b/s/w/ir/cache/builder/src/out/android_emulator_skia_debug_x64/scenario_app --project-cache-dir=/b/s/w/ir/cache/builder/src/out/android_emulator_skia_debug_x64/scenario_app/.gradle --gradle-user-home=/b/s/w/ir/cache/builder/src/out/android_emulator_skia_debug_x64/scenario_app/.gradle
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:checkDebugAarMetadata'.
+> Could not resolve all files for configuration ':app:debugRuntimeClasspath'.
+   > Resolved 'org.hamcrest:hamcrest-core:1.3' which is not part of the dependency lock state
+   > Resolved 'com.google.code.findbugs:jsr305:2.0.2' which is not part of the dependency lock state
+```
+
+This is because [`gradle.lockfile`](./app/gradle.lockfile) is out of date. To
+update it, run:
+
+```sh
+cd testing/scenario_app/android
+$ENGINE_SRC/third_party/gradle/bin/gradle app:dependencies --write-locks
+```
+
 ## Getting Help
 
 To suggest changes, or highlight problems, please [file an issue](https://github.com/flutter/flutter/issues/new?labels=e:%20scenario-app,engine,platform-android,fyi-android,team-engine).
