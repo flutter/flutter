@@ -54,8 +54,9 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
     double? result;
     final RenderBox? child = this.child;
-    if (child != null) {
       assert(!debugNeedsLayout);
+    if (child != null) {
+      assert(!child.debugNeedsLayout);
       result = child.getDistanceToActualBaseline(baseline);
       final BoxParentData childParentData = child.parentData! as BoxParentData;
       if (result != null) {
@@ -279,14 +280,14 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
        _textDirection = textDirection,
        super(child);
 
+  /// The [Alignment] to use for aligning the child.
+  ///
+  /// This is the [alignment] resolved against [textDirection]. Subclasses should
+  /// use [resolvedAlignment] instead of [alignment] directly, for computing the
+  /// child's offset.
+  @protected
+  Alignment get resolvedAlignment => _resolvedAlignment ??= alignment.resolve(textDirection);
   Alignment? _resolvedAlignment;
-
-  void _resolve() {
-    if (_resolvedAlignment != null) {
-      return;
-    }
-    _resolvedAlignment = alignment.resolve(textDirection);
-  }
 
   void _markNeedResolution() {
     _resolvedAlignment = null;
@@ -340,14 +341,12 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   /// this object's own size has been set.
   @protected
   void alignChild() {
-    _resolve();
     assert(child != null);
     assert(!child!.debugNeedsLayout);
     assert(child!.hasSize);
     assert(hasSize);
-    assert(_resolvedAlignment != null);
     final BoxParentData childParentData = child!.parentData! as BoxParentData;
-    childParentData.offset = _resolvedAlignment!.alongOffset(size - child!.size as Offset);
+    childParentData.offset = resolvedAlignment.alongOffset(size - child!.size as Offset);
   }
 
   @override
