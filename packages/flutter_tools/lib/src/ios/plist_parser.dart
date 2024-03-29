@@ -143,7 +143,7 @@ class PlistParser {
   static final RegExp _nonBase64Pattern = RegExp('[^a-zA-Z0-9+/=]+');
 
   Object? _parseXmlNode(XmlElement node) {
-    return switch (node.name.local){
+    return switch (node.name.local) {
       'string'  => node.innerText,
       'real'    => double.parse(node.innerText),
       'integer' => int.parse(node.innerText),
