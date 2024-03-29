@@ -3657,7 +3657,17 @@ void main() {
     final Finder longLabelNavDestinationFinder = find.text(
       'Longer bookmark text',
     );
-    expect(longLabelNavDestinationFinder, findsOneWidget);
+    final Finder flexibleWithNavDestinationText = find.descendant(
+      of: find.byType(Flexible),
+      matching: find.descendant(
+        of: find.byType(Align),
+        matching: find.descendant(
+          of: find.byType(FadeTransition),
+          matching: longLabelNavDestinationFinder,
+        ),
+      ),
+    );
+    expect(flexibleWithNavDestinationText, findsOneWidget);
   });
 
   group('Material 2', () {
