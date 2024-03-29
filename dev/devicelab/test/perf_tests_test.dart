@@ -67,7 +67,14 @@ void main() {
       final File resultFile = File('${testDirectory.absolute.path}/build/$resultFileName.json')..createSync(recursive: true);
       resultFile.writeAsStringSync(json.encode(fakeData));
     }
-    final PerfTest perfTest = PerfTest(testDirectory.absolute.path, testTarget.absolute.path, 'test_file', resultFilename: resultFileName, device: device, flutterDriveCallback: driveCallback);
+    final PerfTest perfTest = PerfTest(
+      testDirectory.absolute.path,
+      testTarget.absolute.path,
+      'test_file',
+      resultFilename: resultFileName,
+      device: device,
+      flutterDriveCallback: driveCallback,
+      unittestMode: true);
     final TaskResult result = await perfTest.run();
     expect(result.data!['frame_count'], 5);
   });
@@ -120,7 +127,14 @@ void main() {
       final File resultFile = File('${testDirectory.absolute.path}/build/$resultFileName.json')..createSync(recursive: true);
       resultFile.writeAsStringSync(json.encode(fakeData));
     }
-    final PerfTest perfTest = PerfTest(testDirectory.absolute.path, testTarget.absolute.path, 'test_file', resultFilename: resultFileName, device: device, flutterDriveCallback: driveCallback);
+    final PerfTest perfTest = PerfTest(
+      testDirectory.absolute.path,
+      testTarget.absolute.path,
+      'test_file',
+      resultFilename: resultFileName,
+      device: device,
+      flutterDriveCallback: driveCallback,
+      unittestMode: true);
     final TaskResult result = await perfTest.run();
     expect(result.data!['30hz_frame_percentage'], 0.1);
     expect(result.data!['60hz_frame_percentage'], 0.2);
