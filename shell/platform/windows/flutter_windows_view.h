@@ -50,9 +50,6 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // Should be called before calling FlutterEngineRun using this view.
   void CreateRenderSurface();
 
-  // Destroys current rendering surface if one has been allocated.
-  void DestroyRenderSurface();
-
   // Get the EGL surface that backs the Flutter view.
   //
   // This might be nullptr or an invalid surface.

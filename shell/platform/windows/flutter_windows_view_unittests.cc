@@ -264,6 +264,12 @@ TEST(FlutterWindowsViewTest, Shutdown) {
     InSequence s;
     EXPECT_CALL(*engine_ptr, running).WillOnce(Return(true));
     EXPECT_CALL(*engine_ptr, RemoveView(view_id)).Times(1);
+    EXPECT_CALL(*engine_ptr, running).WillOnce(Return(true));
+    EXPECT_CALL(*engine_ptr, PostRasterThreadTask)
+        .WillOnce([](fml::closure callback) {
+          callback();
+          return true;
+        });
     EXPECT_CALL(*surface_ptr, Destroy).Times(1);
   }
 }
@@ -825,7 +831,14 @@ TEST(FlutterWindowsViewTest, WindowResizeTests) {
   auto windows_proc_table = std::make_shared<NiceMock<MockWindowsProcTable>>();
   std::unique_ptr<FlutterWindowsEngine> engine =
       GetTestEngine(windows_proc_table);
+
   EngineModifier engine_modifier{engine.get()};
+  engine_modifier.embedder_api().PostRenderThreadTask = MOCK_ENGINE_PROC(
+      PostRenderThreadTask,
+      ([](auto engine, VoidCallback callback, void* user_data) {
+        callback(user_data);
+        return kSuccess;
+      }));
 
   auto egl_manager = std::make_unique<egl::MockManager>();
   auto surface = std::make_unique<egl::MockWindowSurface>();
@@ -883,7 +896,14 @@ TEST(FlutterWindowsViewTest, TestEmptyFrameResizes) {
   auto windows_proc_table = std::make_shared<NiceMock<MockWindowsProcTable>>();
   std::unique_ptr<FlutterWindowsEngine> engine =
       GetTestEngine(windows_proc_table);
+
   EngineModifier engine_modifier{engine.get()};
+  engine_modifier.embedder_api().PostRenderThreadTask = MOCK_ENGINE_PROC(
+      PostRenderThreadTask,
+      ([](auto engine, VoidCallback callback, void* user_data) {
+        callback(user_data);
+        return kSuccess;
+      }));
 
   auto egl_manager = std::make_unique<egl::MockManager>();
   auto surface = std::make_unique<egl::MockWindowSurface>();
@@ -940,7 +960,14 @@ TEST(FlutterWindowsViewTest, TestEmptyFrameResizes) {
 // https://github.com/flutter/flutter/issues/141855
 TEST(FlutterWindowsViewTest, WindowResizeRace) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+
   EngineModifier engine_modifier(engine.get());
+  engine_modifier.embedder_api().PostRenderThreadTask = MOCK_ENGINE_PROC(
+      PostRenderThreadTask,
+      ([](auto engine, VoidCallback callback, void* user_data) {
+        callback(user_data);
+        return kSuccess;
+      }));
 
   auto egl_manager = std::make_unique<egl::MockManager>();
   auto surface = std::make_unique<egl::MockWindowSurface>();
@@ -980,7 +1007,14 @@ TEST(FlutterWindowsViewTest, WindowResizeRace) {
 // even though EGL initialized successfully.
 TEST(FlutterWindowsViewTest, WindowResizeInvalidSurface) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+
   EngineModifier engine_modifier(engine.get());
+  engine_modifier.embedder_api().PostRenderThreadTask = MOCK_ENGINE_PROC(
+      PostRenderThreadTask,
+      ([](auto engine, VoidCallback callback, void* user_data) {
+        callback(user_data);
+        return kSuccess;
+      }));
 
   auto egl_manager = std::make_unique<egl::MockManager>();
   auto surface = std::make_unique<egl::MockWindowSurface>();
@@ -1477,6 +1511,11 @@ TEST(FlutterWindowsViewTest, DisablesVSyncAfterStartup) {
   EXPECT_CALL(*surface_ptr, MakeCurrent).WillOnce(Return(true));
   EXPECT_CALL(*surface_ptr, SetVSyncEnabled(false)).WillOnce(Return(true));
   EXPECT_CALL(render_context, ClearCurrent).WillOnce(Return(true));
+  EXPECT_CALL(*engine.get(), PostRasterThreadTask)
+      .WillOnce([](fml::closure callback) {
+        callback();
+        return true;
+      });
   EXPECT_CALL(*surface_ptr, Destroy).Times(1);
 
   EngineModifier modifier{engine.get()};
@@ -1519,6 +1558,12 @@ TEST(FlutterWindowsViewTest, EnablesVSyncAfterStartup) {
   EXPECT_CALL(*surface_ptr, MakeCurrent).WillOnce(Return(true));
   EXPECT_CALL(*surface_ptr, SetVSyncEnabled(true)).WillOnce(Return(true));
   EXPECT_CALL(render_context, ClearCurrent).WillOnce(Return(true));
+
+  EXPECT_CALL(*engine.get(), PostRasterThreadTask)
+      .WillOnce([](fml::closure callback) {
+        callback();
+        return true;
+      });
   EXPECT_CALL(*surface_ptr, Destroy).Times(1);
 
   EngineModifier modifier{engine.get()};
