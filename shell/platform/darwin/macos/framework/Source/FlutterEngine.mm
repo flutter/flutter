@@ -847,15 +847,9 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
                                                   void* user_data                            //
                                                ) { return true; };
 
-  _compositor.present_layers_callback = [](const FlutterLayer** layers,  //
-                                           size_t layers_count,          //
-                                           void* user_data               //
-                                        ) {
-    // TODO(dkwingsmt): This callback only supports single-view, therefore it
-    // only operates on the implicit view. To support multi-view, we need a new
-    // callback that also receives a view ID.
-    return reinterpret_cast<flutter::FlutterCompositor*>(user_data)->Present(kFlutterImplicitViewId,
-                                                                             layers, layers_count);
+  _compositor.present_view_callback = [](const FlutterPresentViewInfo* info) {
+    return reinterpret_cast<flutter::FlutterCompositor*>(info->user_data)
+        ->Present(info->view_id, info->layers, info->layers_count);
   };
 
   _compositor.avoid_backing_store_cache = true;
