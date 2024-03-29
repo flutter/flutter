@@ -62,4 +62,52 @@ Future<void> testMain() async {
       ')',
     );
   });
+
+  test('.from copies every field', () {
+    final ui.Paint paint = ui.Paint();
+    paint.blendMode = ui.BlendMode.darken;
+    paint.style = ui.PaintingStyle.fill;
+    paint.strokeWidth = 1.2;
+    paint.strokeCap = ui.StrokeCap.square;
+    paint.strokeJoin = ui.StrokeJoin.bevel;
+    paint.isAntiAlias = true;
+    paint.color = const ui.Color(0xaabbccdd);
+    paint.invertColors = true;
+    paint.shader = ui.Gradient.linear(
+      const ui.Offset(0.1, 0.2),
+      const ui.Offset(1.5, 1.6),
+      const <ui.Color>[
+        ui.Color(0xaabbccdd),
+        ui.Color(0xbbccddee),
+      ],
+      <double>[0.3, 0.4],
+      ui.TileMode.decal,
+    );
+    paint.maskFilter = const ui.MaskFilter.blur(ui.BlurStyle.normal, 1.7);
+    paint.filterQuality = ui.FilterQuality.high;
+    paint.colorFilter = const ui.ColorFilter.linearToSrgbGamma();
+    paint.strokeMiterLimit = 1.8;
+    paint.imageFilter = ui.ImageFilter.blur(
+      sigmaX: 1.9,
+      sigmaY: 2.1,
+      tileMode: ui.TileMode.mirror,
+    );
+
+    final ui.Paint copy = ui.Paint.from(paint);
+
+    expect(copy.blendMode, paint.blendMode);
+    expect(copy.style, paint.style);
+    expect(copy.strokeWidth, paint.strokeWidth);
+    expect(copy.strokeCap, paint.strokeCap);
+    expect(copy.strokeJoin, paint.strokeJoin);
+    expect(copy.isAntiAlias, paint.isAntiAlias);
+    expect(copy.color, paint.color);
+    expect(copy.invertColors, paint.invertColors);
+    expect(copy.shader, paint.shader);
+    expect(copy.maskFilter, paint.maskFilter);
+    expect(copy.filterQuality, paint.filterQuality);
+    expect(copy.colorFilter, paint.colorFilter);
+    expect(copy.strokeMiterLimit, paint.strokeMiterLimit);
+    expect(copy.imageFilter, paint.imageFilter);
+  });
 }

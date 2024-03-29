@@ -1162,6 +1162,111 @@ void main() async {
     final Image image = await picture.toImage(200, 200);
     await comparer.addGoldenImage(image, 'text_decoration.png');
   });
+
+  test('Paint, when copied, has equivalent fields', () {
+    final Paint paint = Paint()
+      ..color = const Color(0xFF0000FF)
+      ..strokeWidth = 10.0
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..style = PaintingStyle.stroke
+      ..blendMode = BlendMode.srcOver
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10.0)
+      ..filterQuality = FilterQuality.high
+      ..colorFilter = const ColorFilter.mode(Color(0xFF00FF00), BlendMode.color)
+      ..imageFilter = ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0);
+
+    final Paint paintCopy = Paint.from(paint);
+    expect(paintCopy.color, equals(const Color(0xFF0000FF)));
+    expect(paintCopy.strokeWidth, equals(10.0));
+    expect(paintCopy.strokeCap, equals(StrokeCap.round));
+    expect(paintCopy.strokeJoin, equals(StrokeJoin.round));
+    expect(paintCopy.style, equals(PaintingStyle.stroke));
+    expect(paintCopy.blendMode, equals(BlendMode.srcOver));
+    expect(paintCopy.maskFilter, equals(const MaskFilter.blur(BlurStyle.normal, 10.0)));
+    expect(paintCopy.filterQuality, equals(FilterQuality.high));
+    expect(paintCopy.colorFilter, equals(const ColorFilter.mode(Color(0xFF00FF00), BlendMode.color)));
+    expect(paintCopy.imageFilter, equals(ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0)));
+  });
+
+  test('Paint, when copied, does not mutate the original instance', () {
+    final Paint paint = Paint()
+      ..color = const Color(0xFF0000FF)
+      ..strokeWidth = 10.0
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..style = PaintingStyle.stroke
+      ..blendMode = BlendMode.srcOver
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10.0)
+      ..filterQuality = FilterQuality.high
+      ..colorFilter = const ColorFilter.mode(Color(0xFF00FF00), BlendMode.color)
+      ..imageFilter = ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0);
+
+    // Make a copy, and change every field of the copy.
+    Paint.from(paint)
+      ..color = const Color(0xFF00FF00)
+      ..strokeWidth = 20.0
+      ..strokeCap = StrokeCap.butt
+      ..strokeJoin = StrokeJoin.bevel
+      ..style = PaintingStyle.fill
+      ..blendMode = BlendMode.srcIn
+      ..maskFilter = const MaskFilter.blur(BlurStyle.solid, 20.0)
+      ..filterQuality = FilterQuality.none
+      ..colorFilter = const ColorFilter.mode(Color(0xFFFF0000), BlendMode.modulate)
+      ..imageFilter = ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0);
+
+    // The original paint should not have changed.
+    expect(paint.color, equals(const Color(0xFF0000FF)));
+    expect(paint.strokeWidth, equals(10.0));
+    expect(paint.strokeCap, equals(StrokeCap.round));
+    expect(paint.strokeJoin, equals(StrokeJoin.round));
+    expect(paint.style, equals(PaintingStyle.stroke));
+    expect(paint.blendMode, equals(BlendMode.srcOver));
+    expect(paint.maskFilter, equals(const MaskFilter.blur(BlurStyle.normal, 10.0)));
+    expect(paint.filterQuality, equals(FilterQuality.high));
+    expect(paint.colorFilter, equals(const ColorFilter.mode(Color(0xFF00FF00), BlendMode.color)));
+    expect(paint.imageFilter, equals(ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0)));
+  });
+
+  test('Paint, when copied, the original changing does not mutate the copy', () {
+    final Paint paint = Paint()
+      ..color = const Color(0xFF0000FF)
+      ..strokeWidth = 10.0
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..style = PaintingStyle.stroke
+      ..blendMode = BlendMode.srcOver
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10.0)
+      ..filterQuality = FilterQuality.high
+      ..colorFilter = const ColorFilter.mode(Color(0xFF00FF00), BlendMode.color)
+      ..imageFilter = ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0);
+
+    // Make a copy, and change every field of the original.
+    final Paint paintCopy = Paint.from(paint);
+    paint
+      ..color = const Color(0xFF00FF00)
+      ..strokeWidth = 20.0
+      ..strokeCap = StrokeCap.butt
+      ..strokeJoin = StrokeJoin.bevel
+      ..style = PaintingStyle.fill
+      ..blendMode = BlendMode.srcIn
+      ..maskFilter = const MaskFilter.blur(BlurStyle.solid, 20.0)
+      ..filterQuality = FilterQuality.none
+      ..colorFilter = const ColorFilter.mode(Color(0xFFFF0000), BlendMode.modulate)
+      ..imageFilter = ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0);
+
+    // The copy should not have changed.
+    expect(paintCopy.color, equals(const Color(0xFF0000FF)));
+    expect(paintCopy.strokeWidth, equals(10.0));
+    expect(paintCopy.strokeCap, equals(StrokeCap.round));
+    expect(paintCopy.strokeJoin, equals(StrokeJoin.round));
+    expect(paintCopy.style, equals(PaintingStyle.stroke));
+    expect(paintCopy.blendMode, equals(BlendMode.srcOver));
+    expect(paintCopy.maskFilter, equals(const MaskFilter.blur(BlurStyle.normal, 10.0)));
+    expect(paintCopy.filterQuality, equals(FilterQuality.high));
+    expect(paintCopy.colorFilter, equals(const ColorFilter.mode(Color(0xFF00FF00), BlendMode.color)));
+    expect(paintCopy.imageFilter, equals(ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0)));
+  });
 }
 
 Matcher listEquals(ByteData expected) => (dynamic v) {
