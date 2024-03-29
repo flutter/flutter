@@ -175,12 +175,17 @@ class Divider extends StatelessWidget {
     return SizedBox(
       height: height,
       child: Center(
-        child: Container(
-          height: thickness,
-          margin: EdgeInsetsDirectional.only(start: indent, end: endIndent),
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: createBorderSide(context, color: color, width: thickness),
+        child: Padding(
+          padding: EdgeInsetsDirectional.only(start: indent, end: endIndent),
+          child: SizedBox(
+            height: thickness,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: createBorderSide(context, color: color, width: thickness),
+                ),
+              ),
+              child: LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()),
             ),
           ),
         ),
@@ -294,12 +299,17 @@ class VerticalDivider extends StatelessWidget {
     return SizedBox(
       width: width,
       child: Center(
-        child: Container(
-          width: thickness,
-          margin: EdgeInsetsDirectional.only(top: indent, bottom: endIndent),
-          decoration: BoxDecoration(
-            border: Border(
-              left: Divider.createBorderSide(context, color: color, width: thickness),
+        child: Padding(
+          padding: EdgeInsetsDirectional.only(top: indent, bottom: endIndent),
+          child: SizedBox(
+              width: thickness,
+              child: DecoratedBox(
+              decoration: BoxDecoration(
+                border: Border(
+                  left: Divider.createBorderSide(context, color: color, width: thickness),
+                ),
+              ),
+              child: LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()),
             ),
           ),
         ),

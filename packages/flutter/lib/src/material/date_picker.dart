@@ -536,28 +536,32 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     final Color? headerForegroundColor = datePickerTheme.headerForegroundColor ?? defaults.headerForegroundColor;
     headlineStyle = headlineStyle?.copyWith(color: headerForegroundColor);
 
-    final Widget actions = Container(
-      alignment: AlignmentDirectional.centerEnd,
+    final Widget actions = ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 52.0),
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: OverflowBar(
-        spacing: 8,
-        children: <Widget>[
-          TextButton(
-            style: datePickerTheme.cancelButtonStyle ?? defaults.cancelButtonStyle,
-            onPressed: _handleCancel,
-            child: Text(widget.cancelText ?? (
-              useMaterial3
-                ? localizations.cancelButtonLabel
-                : localizations.cancelButtonLabel.toUpperCase()
-            )),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Align(
+          alignment: AlignmentDirectional.centerEnd,
+          child: OverflowBar(
+            spacing: 8,
+            children: <Widget>[
+              TextButton(
+                style: datePickerTheme.cancelButtonStyle ?? defaults.cancelButtonStyle,
+                onPressed: _handleCancel,
+                child: Text(widget.cancelText ?? (
+                  useMaterial3
+                    ? localizations.cancelButtonLabel
+                    : localizations.cancelButtonLabel.toUpperCase()
+                )),
+              ),
+              TextButton(
+                style: datePickerTheme.confirmButtonStyle ?? defaults.confirmButtonStyle,
+                onPressed: _handleOk,
+                child: Text(widget.confirmText ?? localizations.okButtonLabel),
+              ),
+            ],
           ),
-          TextButton(
-            style: datePickerTheme.confirmButtonStyle ?? defaults.confirmButtonStyle,
-            onPressed: _handleOk,
-            child: Text(widget.confirmText ?? localizations.okButtonLabel),
-          ),
-        ],
+        ),
       ),
     );
 
@@ -578,30 +582,32 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
       return Form(
         key: _formKey,
         autovalidateMode: _autovalidateMode.value,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: SizedBox(
           height: orientation == Orientation.portrait ? _inputFormPortraitHeight : _inputFormLandscapeHeight,
-          child: Shortcuts(
-            shortcuts: _formShortcutMap,
-            child: Column(
-              children: <Widget>[
-                const Spacer(),
-                InputDatePickerFormField(
-                  initialDate: _selectedDate.value,
-                  firstDate: widget.firstDate,
-                  lastDate: widget.lastDate,
-                  onDateSubmitted: _handleDateChanged,
-                  onDateSaved: _handleDateChanged,
-                  selectableDayPredicate: widget.selectableDayPredicate,
-                  errorFormatText: widget.errorFormatText,
-                  errorInvalidText: widget.errorInvalidText,
-                  fieldHintText: widget.fieldHintText,
-                  fieldLabelText: widget.fieldLabelText,
-                  keyboardType: widget.keyboardType,
-                  autofocus: true,
-                ),
-                const Spacer(),
-              ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Shortcuts(
+              shortcuts: _formShortcutMap,
+              child: Column(
+                children: <Widget>[
+                  const Spacer(),
+                  InputDatePickerFormField(
+                    initialDate: _selectedDate.value,
+                    firstDate: widget.firstDate,
+                    lastDate: widget.lastDate,
+                    onDateSubmitted: _handleDateChanged,
+                    onDateSaved: _handleDateChanged,
+                    selectableDayPredicate: widget.selectableDayPredicate,
+                    errorFormatText: widget.errorFormatText,
+                    errorInvalidText: widget.errorInvalidText,
+                    fieldHintText: widget.fieldHintText,
+                    fieldLabelText: widget.fieldLabelText,
+                    keyboardType: widget.keyboardType,
+                    autofocus: true,
+                  ),
+                  const Spacer(),
+                ],
+              ),
             ),
           ),
         ),
@@ -1498,36 +1504,38 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
           selectedStartDate: _selectedStart.value,
           selectedEndDate: _selectedEnd.value,
           currentDate: widget.currentDate,
-          picker: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+          picker: SizedBox(
             height: orientation == Orientation.portrait
                 ? _inputFormPortraitHeight
                 : _inputFormLandscapeHeight,
-            child: Column(
-              children: <Widget>[
-                const Spacer(),
-                _InputDateRangePicker(
-                  key: _inputPickerKey,
-                  initialStartDate: _selectedStart.value,
-                  initialEndDate: _selectedEnd.value,
-                  firstDate: widget.firstDate,
-                  lastDate: widget.lastDate,
-                  onStartDateChanged: _handleStartDateChanged,
-                  onEndDateChanged: _handleEndDateChanged,
-                  autofocus: true,
-                  autovalidate: _autoValidate.value,
-                  helpText: widget.helpText,
-                  errorInvalidRangeText: widget.errorInvalidRangeText,
-                  errorFormatText: widget.errorFormatText,
-                  errorInvalidText: widget.errorInvalidText,
-                  fieldStartHintText: widget.fieldStartHintText,
-                  fieldEndHintText: widget.fieldEndHintText,
-                  fieldStartLabelText: widget.fieldStartLabelText,
-                  fieldEndLabelText: widget.fieldEndLabelText,
-                  keyboardType: widget.keyboardType,
-                ),
-                const Spacer(),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: <Widget>[
+                  const Spacer(),
+                  _InputDateRangePicker(
+                    key: _inputPickerKey,
+                    initialStartDate: _selectedStart.value,
+                    initialEndDate: _selectedEnd.value,
+                    firstDate: widget.firstDate,
+                    lastDate: widget.lastDate,
+                    onStartDateChanged: _handleStartDateChanged,
+                    onEndDateChanged: _handleEndDateChanged,
+                    autofocus: true,
+                    autovalidate: _autoValidate.value,
+                    helpText: widget.helpText,
+                    errorInvalidRangeText: widget.errorInvalidRangeText,
+                    errorFormatText: widget.errorFormatText,
+                    errorInvalidText: widget.errorInvalidText,
+                    fieldStartHintText: widget.fieldStartHintText,
+                    fieldEndHintText: widget.fieldEndHintText,
+                    fieldStartLabelText: widget.fieldStartLabelText,
+                    fieldEndLabelText: widget.fieldEndLabelText,
+                    keyboardType: widget.keyboardType,
+                  ),
+                  const Spacer(),
+                ],
+              ),
             ),
           ),
           onConfirm: _handleOk,
@@ -2142,11 +2150,11 @@ class _DayHeaders extends StatelessWidget {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final List<Widget> labels = _getDayHeaders(textStyle, localizations);
 
-    // Add leading and trailing containers for edges of the custom grid layout.
-    labels.insert(0, Container());
-    labels.add(Container());
+    // Add leading and trailing boxes for edges of the custom grid layout.
+    labels.insert(0, LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()));
+    labels.add(LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()));
 
-    return Container(
+    return ConstrainedBox(
       constraints: BoxConstraints(
         maxWidth: MediaQuery.orientationOf(context) == Orientation.landscape
           ? _maxCalendarWidthLandscape
@@ -2413,8 +2421,11 @@ class _MonthItemState extends State<_MonthItem> {
     );
   }
 
-  Widget _buildEdgeContainer(BuildContext context, bool isHighlighted) {
-    return Container(color: isHighlighted ? _highlightColor(context) : null);
+  Widget _buildEdgeBox(BuildContext context, bool isHighlighted) {
+    return DecoratedBox(
+      decoration: BoxDecoration(color: isHighlighted ? _highlightColor(context) : null),
+      child: LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()),
+    );
   }
 
   @override
@@ -2434,7 +2445,7 @@ class _MonthItemState extends State<_MonthItem> {
     // a leap year.
     for (int day = 0 - dayOffset + 1; day <= daysInMonth; day += 1) {
       if (day < 1) {
-        dayItems.add(Container());
+        dayItems.add(LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()));
       } else {
         final DateTime dayToBuild = DateTime(year, month, day);
         final Widget dayItem = _buildDayItem(
@@ -2467,7 +2478,7 @@ class _MonthItemState extends State<_MonthItem> {
         widget.selectedDateEnd != null &&
         dateAfterLeadingPadding.isAfter(widget.selectedDateStart!) &&
         !dateAfterLeadingPadding.isAfter(widget.selectedDateEnd!);
-      weekList.insert(0, _buildEdgeContainer(context, isLeadingInRange));
+      weekList.insert(0, _buildEdgeBox(context, isLeadingInRange));
 
       // Only add a trailing edge container if it is for a full week and not a
       // partial week.
@@ -2481,7 +2492,7 @@ class _MonthItemState extends State<_MonthItem> {
           widget.selectedDateEnd != null &&
           !dateBeforeTrailingPadding.isBefore(widget.selectedDateStart!) &&
           dateBeforeTrailingPadding.isBefore(widget.selectedDateEnd!);
-        weekList.add(_buildEdgeContainer(context, isTrailingInRange));
+        weekList.add(_buildEdgeBox(context, isTrailingInRange));
       }
 
       paddedDayItems.addAll(weekList);
@@ -2492,19 +2503,22 @@ class _MonthItemState extends State<_MonthItem> {
       : _maxCalendarWidthPortrait;
     return Column(
       children: <Widget>[
-        Container(
-          constraints: BoxConstraints(maxWidth: maxWidth),
-          height: _monthItemHeaderHeight,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          alignment: AlignmentDirectional.centerStart,
-          child: ExcludeSemantics(
-            child: Text(
-              localizations.formatMonthYear(widget.displayedMonth),
-              style: textTheme.bodyMedium!.apply(color: themeData.colorScheme.onSurface),
+        ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth).tighten(height: _monthItemHeaderHeight),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: ExcludeSemantics(
+                child: Text(
+                  localizations.formatMonthYear(widget.displayedMonth),
+                  style: textTheme.bodyMedium!.apply(color: themeData.colorScheme.onSurface),
+                ),
+              ),
             ),
           ),
         ),
-        Container(
+        ConstrainedBox(
           constraints: BoxConstraints(
             maxWidth: maxWidth,
             maxHeight: gridHeight,
@@ -2676,7 +2690,7 @@ class _DayItemState extends State<_DayItem> {
       semanticLabel = localizations.dateRangeEndDateSemanticLabel(semanticLabel);
     }
 
-    Widget dayWidget = Container(
+    Widget dayWidget = DecoratedBox(
       decoration: decoration,
       child: Center(
         child: Semantics(
@@ -2854,26 +2868,30 @@ class _InputDateRangePickerDialog extends StatelessWidget {
       entryModeButton: entryModeButton,
     );
 
-    final Widget actions = Container(
-      alignment: AlignmentDirectional.centerEnd,
+    final Widget actions = ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 52.0),
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: OverflowBar(
-        spacing: 8,
-        children: <Widget>[
-          TextButton(
-            onPressed: onCancel,
-            child: Text(cancelText ?? (
-              useMaterial3
-                ? localizations.cancelButtonLabel
-                : localizations.cancelButtonLabel.toUpperCase()
-            )),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Align(
+          alignment: AlignmentDirectional.centerEnd,
+          child: OverflowBar(
+            spacing: 8,
+            children: <Widget>[
+              TextButton(
+                onPressed: onCancel,
+                child: Text(cancelText ?? (
+                  useMaterial3
+                    ? localizations.cancelButtonLabel
+                    : localizations.cancelButtonLabel.toUpperCase()
+                )),
+              ),
+              TextButton(
+                onPressed: onConfirm,
+                child: Text(confirmText ?? localizations.okButtonLabel),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: onConfirm,
-            child: Text(confirmText ?? localizations.okButtonLabel),
-          ),
-        ],
+        ),
       ),
     );
 

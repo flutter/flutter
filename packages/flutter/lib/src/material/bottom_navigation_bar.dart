@@ -784,7 +784,7 @@ class _Label extends StatelessWidget {
     text = Align(
       alignment: Alignment.bottomCenter,
       heightFactor: 1.0,
-      child: Container(child: text),
+      child: text,
     );
 
     if (item.label != null) {

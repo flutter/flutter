@@ -169,8 +169,8 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
       label = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Container(
-            margin: effectiveIconMargin,
+          Padding(
+            padding: effectiveIconMargin,
             child: icon,
           ),
           _buildLabelText(),
@@ -1649,8 +1649,9 @@ class _TabBarState extends State<TabBar> {
 
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller!.length == 0) {
-      return Container(
-        height: _kTabHeight + widget.indicatorWeight,
+      return LimitedBox(
+        maxWidth: 0.0,
+        child: SizedBox(width: double.infinity, height: _kTabHeight + widget.indicatorWeight),
       );
     }
 
@@ -2196,14 +2197,17 @@ class TabPageSelectorIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      margin: const EdgeInsets.all(4.0),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        border: Border.all(color: borderColor, style: borderStyle),
-        shape: BoxShape.circle,
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: SizedBox.fromSize(
+        size: Size.square(size),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            border: Border.all(color: borderColor, style: borderStyle),
+            shape: BoxShape.circle,
+          ),
+        ),
       ),
     );
   }

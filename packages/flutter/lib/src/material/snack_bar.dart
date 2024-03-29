@@ -712,11 +712,10 @@ class _SnackBarState extends State<SnackBar> {
             Row(
               children: <Widget>[
                 Expanded(
-                  child: Container(
+                  child: Padding(
                     padding: widget.padding == null
-                        ? const EdgeInsets.symmetric(
-                            vertical: _singleLineVerticalPadding)
-                        : null,
+                        ? const EdgeInsets.symmetric(vertical: _singleLineVerticalPadding)
+                        : EdgeInsets.zero,
                     child: DefaultTextStyle(
                       style: contentTextStyle!,
                       child: widget.content,
@@ -767,10 +766,12 @@ class _SnackBarState extends State<SnackBar> {
     if (isFloatingSnackBar) {
       // If width is provided, do not include horizontal margins.
       if (width != null) {
-        snackBar = Container(
+        snackBar = Padding(
           margin: EdgeInsets.only(top: margin.top, bottom: margin.bottom),
-          width: width,
-          child: snackBar,
+          child: SizedBox(
+            width: width,
+            child: snackBar,
+          ),
         );
       } else {
         snackBar = Padding(

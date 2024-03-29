@@ -784,12 +784,15 @@ class NavigationIndicator extends StatelessWidget {
             builder: (BuildContext context, Animation<double> fadeAnimation) {
               return FadeTransition(
                 opacity: fadeAnimation,
-                child: Container(
+                child: SizedBox(
                   width: width,
                   height: height,
-                  decoration: ShapeDecoration(
-                    shape: shape ?? RoundedRectangleBorder(borderRadius: borderRadius),
-                    color: color ?? Theme.of(context).colorScheme.secondary,
+                  child: DecoratedBox(
+                    decoration: ShapeDecoration(
+                      shape: shape ?? RoundedRectangleBorder(borderRadius: borderRadius),
+                      color: color ?? Theme.of(context).colorScheme.secondary,
+                    ),
+                    child: LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()),
                   ),
                 ),
               );

@@ -772,7 +772,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
               hintText: widget.hintText,
               helperText: widget.helperText,
               errorText: widget.errorText,
-              prefixIcon: widget.leadingIcon != null ? Container(
+              prefixIcon: widget.leadingIcon != null ? SizedBox(
                   key: _leadingKey,
                   child: widget.leadingIcon
               ) : null,
@@ -800,10 +800,12 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     );
 
     if (widget.expandedInsets != null) {
-      menuAnchor = Container(
-        alignment: AlignmentDirectional.topStart,
+      menuAnchor = Padding(
         padding: widget.expandedInsets?.copyWith(top: 0.0, bottom: 0.0),
-        child: menuAnchor,
+        child: Align(
+          alignment: AlignmentDirectional.topStart,
+          child: menuAnchor,
+        ),
       );
     }
 

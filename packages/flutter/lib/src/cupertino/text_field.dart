@@ -1436,9 +1436,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       child: TextFieldTapRegion(
         child: IgnorePointer(
           ignoring: !enabled,
-          child: Container(
-            decoration: effectiveDecoration,
-            color: !enabled && effectiveDecoration == null ? disabledColor : null,
+          child: DecoratedBox(
+            decoration: effectiveDecoration ?? BoxDecoration(color: enabled ? null : disabledColor),
             child: _selectionGestureDetectorBuilder.buildGestureDetector(
               behavior: HitTestBehavior.translucent,
               child: Align(

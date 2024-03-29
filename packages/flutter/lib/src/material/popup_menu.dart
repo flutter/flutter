@@ -371,11 +371,15 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
     Widget item = AnimatedDefaultTextStyle(
       style: style,
       duration: kThemeChangeDuration,
-      child: Container(
-        alignment: AlignmentDirectional.centerStart,
+      child: ConstrainedBox(
         constraints: BoxConstraints(minHeight: widget.height),
-        padding: widget.padding ?? (theme.useMaterial3 ? _PopupMenuDefaultsM3.menuHorizontalPadding : _PopupMenuDefaultsM2.menuHorizontalPadding),
-        child: buildChild(),
+        child: Padding(
+          padding: widget.padding ?? (theme.useMaterial3 ? _PopupMenuDefaultsM3.menuHorizontalPadding : _PopupMenuDefaultsM2.menuHorizontalPadding),
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: buildChild(),
+          ),
+        ),
       ),
     );
 

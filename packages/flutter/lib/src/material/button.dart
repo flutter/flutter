@@ -391,7 +391,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
           mouseCursor: effectiveMouseCursor,
           child: IconTheme.merge(
             data: IconThemeData(color: effectiveTextColor),
-            child: Container(
+            child: Padding(
               padding: padding,
               child: Center(
                 widthFactor: 1.0,

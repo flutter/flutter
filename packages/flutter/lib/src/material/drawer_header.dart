@@ -77,25 +77,29 @@ class DrawerHeader extends StatelessWidget {
     assert(debugCheckHasMediaQuery(context));
     final ThemeData theme = Theme.of(context);
     final double statusBarHeight = MediaQuery.paddingOf(context).top;
-    return Container(
-      height: statusBarHeight + _kDrawerHeaderHeight,
-      margin: margin,
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: Divider.createBorderSide(context),
-        ),
-      ),
-      child: AnimatedContainer(
-        padding: padding.add(EdgeInsets.only(top: statusBarHeight)),
-        decoration: decoration,
-        duration: duration,
-        curve: curve,
-        child: child == null ? null : DefaultTextStyle(
-          style: theme.textTheme.bodyLarge!,
-          child: MediaQuery.removePadding(
-            context: context,
-            removeTop: true,
-            child: child!,
+    return Padding(
+      padding: margin,
+      child: SizedBox(
+        height: statusBarHeight + _kDrawerHeaderHeight,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: Divider.createBorderSide(context),
+            ),
+          ),
+          child: AnimatedContainer(
+            padding: padding.add(EdgeInsets.only(top: statusBarHeight)),
+            decoration: decoration,
+            duration: duration,
+            curve: curve,
+            child: child == null ? null : DefaultTextStyle(
+              style: theme.textTheme.bodyLarge!,
+              child: MediaQuery.removePadding(
+                context: context,
+                removeTop: true,
+                child: child!,
+              ),
+            ),
           ),
         ),
       ),

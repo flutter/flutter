@@ -703,39 +703,41 @@ class _RailDestination extends StatelessWidget {
             indicatorVerticalPadding + indicatorVerticalOffset,
           );
         }
-        content = Container(
+        content = ConstrainedBox(
           constraints: BoxConstraints(
             minWidth: minWidth,
             minHeight: minHeight,
           ),
-          padding: padding ?? const EdgeInsets.symmetric(horizontal: _horizontalDestinationPadding),
-          child: ClipRect(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                topSpacing,
-                _AddIndicator(
-                  addIndicator: useIndicator,
-                  indicatorColor: indicatorColor,
-                  indicatorShape: indicatorShape,
-                  isCircular: false,
-                  indicatorAnimation: destinationAnimation,
-                  child: themedIcon,
-                ),
-                labelSpacing,
-                Align(
-                  alignment: Alignment.topCenter,
-                  heightFactor: appearingAnimationValue,
-                  widthFactor: 1.0,
-                  child: FadeTransition(
-                    alwaysIncludeSemantics: true,
-                    opacity: labelFadeAnimation,
-                    child: styledLabel,
+          child: Padding(
+            padding: padding ?? const EdgeInsets.symmetric(horizontal: _horizontalDestinationPadding),
+            child: ClipRect(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  topSpacing,
+                  _AddIndicator(
+                    addIndicator: useIndicator,
+                    indicatorColor: indicatorColor,
+                    indicatorShape: indicatorShape,
+                    isCircular: false,
+                    indicatorAnimation: destinationAnimation,
+                    child: themedIcon,
                   ),
-                ),
-                bottomSpacing,
-              ],
+                  labelSpacing,
+                  Align(
+                    alignment: Alignment.topCenter,
+                    heightFactor: appearingAnimationValue,
+                    widthFactor: 1.0,
+                    child: FadeTransition(
+                      alwaysIncludeSemantics: true,
+                      opacity: labelFadeAnimation,
+                      child: styledLabel,
+                    ),
+                  ),
+                  bottomSpacing,
+                ],
+              ),
             ),
           ),
         );
@@ -756,27 +758,29 @@ class _RailDestination extends StatelessWidget {
             indicatorVerticalPadding + indicatorVerticalOffset,
           );
         }
-        content = Container(
+        content = ConstrainedBox(
           constraints: BoxConstraints(
             minWidth: minWidth,
             minHeight: minHeight,
           ),
-          padding: padding ?? const EdgeInsets.symmetric(horizontal: _horizontalDestinationPadding),
-          child: Column(
-            children: <Widget>[
-              topSpacing,
-              _AddIndicator(
-                addIndicator: useIndicator,
-                indicatorColor: indicatorColor,
-                indicatorShape: indicatorShape,
-                isCircular: false,
-                indicatorAnimation: destinationAnimation,
-                child: themedIcon,
-              ),
-              labelSpacing,
-              styledLabel,
-              bottomSpacing,
-            ],
+          child: Padding(
+            padding: padding ?? const EdgeInsets.symmetric(horizontal: _horizontalDestinationPadding),
+            child: Column(
+              children: <Widget>[
+                topSpacing,
+                _AddIndicator(
+                  addIndicator: useIndicator,
+                  indicatorColor: indicatorColor,
+                  indicatorShape: indicatorShape,
+                  isCircular: false,
+                  indicatorAnimation: destinationAnimation,
+                  child: themedIcon,
+                ),
+                labelSpacing,
+                styledLabel,
+                bottomSpacing,
+              ],
+            ),
           ),
         );
     }

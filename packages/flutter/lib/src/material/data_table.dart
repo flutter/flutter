@@ -857,15 +857,19 @@ class DataTable extends StatelessWidget {
       ?? dataTableTheme.headingRowHeight
       ?? themeData.dataTableTheme.headingRowHeight
       ?? _headingRowHeight;
-    label = Container(
-      padding: padding,
+    label = SizedBox(
       height: effectiveHeadingRowHeight,
-      alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
-      child: AnimatedDefaultTextStyle(
-        style: DefaultTextStyle.of(context).style.merge(effectiveHeadingTextStyle),
-        softWrap: false,
-        duration: _sortArrowAnimationDuration,
-        child: label,
+      child: Padding(
+        padding: padding,
+        child: Align(
+          alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
+          child: AnimatedDefaultTextStyle(
+            style: DefaultTextStyle.of(context).style.merge(effectiveHeadingTextStyle),
+            softWrap: false,
+            duration: _sortArrowAnimationDuration,
+            child: label,
+          ),
+        ),
       ),
     );
     if (tooltip != null) {
@@ -926,15 +930,19 @@ class DataTable extends StatelessWidget {
       ?? dataTableTheme.dataRowMaxHeight
       ?? themeData.dataTableTheme.dataRowMaxHeight
       ?? kMinInteractiveDimension;
-    label = Container(
-      padding: padding,
+    label = ConstrainedBox(
       constraints: BoxConstraints(minHeight: effectiveDataRowMinHeight, maxHeight: effectiveDataRowMaxHeight),
-      alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
-      child: DefaultTextStyle(
-        style: DefaultTextStyle.of(context).style
-          .merge(effectiveDataTextStyle)
-          .copyWith(color: placeholder ? effectiveDataTextStyle.color!.withOpacity(0.6) : null),
-        child: DropdownButtonHideUnderline(child: label),
+      child: Padding(
+        padding: padding,
+        child: Align(
+          alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
+          child: DefaultTextStyle(
+            style: DefaultTextStyle.of(context).style
+              .merge(effectiveDataTextStyle)
+              .copyWith(color: placeholder ? effectiveDataTextStyle.color!.withOpacity(0.6) : null),
+            child: DropdownButtonHideUnderline(child: label),
+          ),
+        ),
       ),
     );
     if (onTap != null ||
@@ -1147,7 +1155,7 @@ class DataTable extends StatelessWidget {
       displayColumnIndex += 1;
     }
 
-    return Container(
+    return DecoratedBox(
       decoration: decoration ?? dataTableTheme.decoration ?? theme.dataTableTheme.decoration,
       child: Material(
         type: MaterialType.transparency,

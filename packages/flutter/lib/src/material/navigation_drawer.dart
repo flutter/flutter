@@ -364,28 +364,30 @@ class _NavigationDestinationBuilder extends StatelessWidget {
       ],
     );
 
-    return Container(
+    return Padding(
       padding: info.tilePadding,
-      color: backgroundColor ?? navigationDrawerTheme.backgroundColor,
-      child: _NavigationDestinationSemantics(
-        child: SizedBox(
-          height: navigationDrawerTheme.tileHeight ?? defaults.tileHeight,
-          child: InkWell(
-            highlightColor: Colors.transparent,
-            onTap: enabled ? info.onTap : null,
-            customBorder: info.indicatorShape ?? navigationDrawerTheme.indicatorShape ?? defaults.indicatorShape!,
-            child: Stack(
-              alignment: Alignment.center,
-              children: <Widget>[
-                NavigationIndicator(
-                  animation: info.selectedAnimation,
-                  color: info.indicatorColor ?? navigationDrawerTheme.indicatorColor ?? defaults.indicatorColor!,
-                  shape: info.indicatorShape ?? navigationDrawerTheme.indicatorShape ?? defaults.indicatorShape!,
-                  width: (navigationDrawerTheme.indicatorSize ?? defaults.indicatorSize!).width,
-                  height: (navigationDrawerTheme.indicatorSize ?? defaults.indicatorSize!).height,
-                ),
-                destinationBody
-              ],
+      child: DecoratedBox(
+        decoration: BoxDecoration(color: backgroundColor ?? navigationDrawerTheme.backgroundColor),
+        child: _NavigationDestinationSemantics(
+          child: SizedBox(
+            height: navigationDrawerTheme.tileHeight ?? defaults.tileHeight,
+            child: InkWell(
+              highlightColor: Colors.transparent,
+              onTap: enabled ? info.onTap : null,
+              customBorder: info.indicatorShape ?? navigationDrawerTheme.indicatorShape ?? defaults.indicatorShape!,
+              child: Stack(
+                alignment: Alignment.center,
+                children: <Widget>[
+                  NavigationIndicator(
+                    animation: info.selectedAnimation,
+                    color: info.indicatorColor ?? navigationDrawerTheme.indicatorColor ?? defaults.indicatorColor!,
+                    shape: info.indicatorShape ?? navigationDrawerTheme.indicatorShape ?? defaults.indicatorShape!,
+                    width: (navigationDrawerTheme.indicatorSize ?? defaults.indicatorSize!).width,
+                    height: (navigationDrawerTheme.indicatorSize ?? defaults.indicatorSize!).height,
+                  ),
+                  destinationBody
+                ],
+              ),
             ),
           ),
         ),

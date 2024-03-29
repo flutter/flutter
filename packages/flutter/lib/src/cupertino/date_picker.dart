@@ -1076,17 +1076,18 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         child: pickerBuilders[i](
           offAxisFraction,
           (BuildContext context, Widget? child) {
-            return Container(
-              alignment: i == columnWidths.length - 1
-                ? alignCenterLeft
-                : alignCenterRight,
+            return Padding(
               padding: padding,
-              child: Container(
+              child: Align(
                 alignment: i == columnWidths.length - 1 ? alignCenterLeft : alignCenterRight,
-                width: i == 0 || i == columnWidths.length - 1
-                  ? null
-                  : columnWidths[i] + _kDatePickerPadSize,
-                child: child,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: i == 0 || i == columnWidths.length - 1
+                        ? double.infinity
+                        : columnWidths[i] + _kDatePickerPadSize,
+                  ),
+                  child: child,
+                ),
               ),
             );
           },
@@ -1475,15 +1476,19 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
         child: pickerBuilders[i](
           offAxisFraction,
           (BuildContext context, Widget? child) {
-            return Container(
-              alignment: i == columnWidths.length - 1
-                  ? alignCenterLeft
-                  : alignCenterRight,
+            return Padding(
               padding: i == 0 ? null : padding,
-              child: Container(
-                alignment: i == 0 ? alignCenterLeft : alignCenterRight,
-                width: columnWidths[i] + _kDatePickerPadSize,
-                child: child,
+              child: Align(
+                alignment: i == columnWidths.length - 1
+                    ? alignCenterLeft
+                    : alignCenterRight,
+                child: SizedBox(
+                  width: columnWidths[i] + _kDatePickerPadSize,
+                  child: Align(
+                    alignment: i == 0 ? alignCenterLeft : alignCenterRight,
+                    child: child,
+                  ),
+                ),
               ),
             );
           },
@@ -1774,17 +1779,21 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
         child: pickerBuilders[i](
           offAxisFraction,
           (BuildContext context, Widget? child) {
-            return Container(
-              alignment: last ? alignCenterLeft : alignCenterRight,
+            return Padding(
               padding: switch (textDirectionFactor) {
                 _ when first => null,
                 -1 => const EdgeInsets.only(left: _kDatePickerPadSize),
                 _  => const EdgeInsets.only(right: _kDatePickerPadSize),
               },
-              child: Container(
-                alignment: first ? alignCenterLeft : alignCenterRight,
-                width: columnWidths[i] + _kDatePickerPadSize,
-                child: child,
+              child: Align(
+                alignment: last ? alignCenterLeft : alignCenterRight,
+                child: SizedBox(
+                  width: columnWidths[i] + _kDatePickerPadSize,
+                  child: Align(
+                    alignment: first ? alignCenterLeft : alignCenterRight,
+                    child: child,
+                  ),
+                ),
               ),
             );
           },
@@ -2127,22 +2136,24 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     );
 
     return IgnorePointer(
-      child: Container(
-        alignment: AlignmentDirectional.centerStart.resolve(textDirection),
+      child: Padding(
         padding: padding.resolve(textDirection),
-        child: SizedBox(
-          height: numberLabelHeight,
-          child: Baseline(
-            baseline: numberLabelBaseline,
-            baselineType: TextBaseline.alphabetic,
-            child: Text(
-              text,
-              style: const TextStyle(
-                fontSize: _kTimerPickerLabelFontSize,
-                fontWeight: FontWeight.w600,
+        child: Align(
+          alignment: AlignmentDirectional.centerStart.resolve(textDirection),
+          child: SizedBox(
+            height: numberLabelHeight,
+            child: Baseline(
+              baseline: numberLabelBaseline,
+              baselineType: TextBaseline.alphabetic,
+              child: Text(
+                text,
+                style: const TextStyle(
+                  fontSize: _kTimerPickerLabelFontSize,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1,
+                softWrap: false,
               ),
-              maxLines: 1,
-              softWrap: false,
             ),
           ),
         ),
@@ -2153,14 +2164,20 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   // The picker has to be wider than its content, since the separators
   // are part of the picker.
   Widget _buildPickerNumberLabel(String text, EdgeInsetsDirectional padding) {
-    return Container(
+    return SizedBox(
       width: _kTimerPickerColumnIntrinsicWidth + padding.horizontal,
-      padding: padding.resolve(textDirection),
-      alignment: AlignmentDirectional.centerStart.resolve(textDirection),
-      child: Container(
-        width: numberLabelWidth,
-        alignment: AlignmentDirectional.centerEnd.resolve(textDirection),
-        child: Text(text, softWrap: false, maxLines: 1, overflow: TextOverflow.visible),
+      child: Padding(
+        padding: padding.resolve(textDirection),
+        child: Align(
+          alignment: AlignmentDirectional.centerStart.resolve(textDirection),
+          child: SizedBox(
+            width: numberLabelWidth,
+            child: Align(
+              alignment: AlignmentDirectional.centerEnd.resolve(textDirection),
+              child: Text(text, softWrap: false, maxLines: 1, overflow: TextOverflow.visible),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -2520,13 +2537,15 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
             ),
             child: Align(
               alignment: widget.alignment,
-              child: Container(
-                color: CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context),
-                width: totalWidth,
-                height: _kPickerHeight,
-                child: DefaultTextStyle(
-                  style: _textStyleFrom(context),
-                  child: Row(children: columns.map((Widget child) => Expanded(child: child)).toList(growable: false)),
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context)),
+                child: SizedBox(
+                  width: totalWidth,
+                  height: _kPickerHeight,
+                  child: DefaultTextStyle(
+                    style: _textStyleFrom(context),
+                    child: Row(children: columns.map((Widget child) => Expanded(child: child)).toList(growable: false)),
+                  ),
                 ),
               ),
             ),

@@ -309,9 +309,7 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
   }
 
   Widget _buildActions() {
-    Widget actionSection = Container(
-      height: 0.0,
-    );
+    Widget actionSection = const SizedBox.shrink();
     if (widget.actions.isNotEmpty) {
       actionSection = _CupertinoAlertActionSection(
         scrollController: _effectiveActionScrollController,
@@ -348,22 +346,24 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
                   removeBottom: true,
                   context: context,
                   child: Center(
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(vertical: _kDialogEdgePadding),
-                      width: isInAccessibilityMode
-                          ? _kAccessibilityCupertinoDialogWidth
-                          : _kCupertinoDialogWidth,
-                      child: CupertinoPopupSurface(
-                        isSurfacePainted: false,
-                        child: Semantics(
-                          namesRoute: true,
-                          scopesRoute: true,
-                          explicitChildNodes: true,
-                          label: localizations.alertDialogLabel,
-                          child: _CupertinoDialogRenderWidget(
-                            contentSection: _buildContent(context),
-                            actionsSection: _buildActions(),
-                            dividerColor: CupertinoColors.separator,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: _kDialogEdgePadding),
+                      child: SizedBox(
+                        width: isInAccessibilityMode
+                            ? _kAccessibilityCupertinoDialogWidth
+                            : _kCupertinoDialogWidth,
+                        child: CupertinoPopupSurface(
+                          isSurfacePainted: false,
+                          child: Semantics(
+                            namesRoute: true,
+                            scopesRoute: true,
+                            explicitChildNodes: true,
+                            label: localizations.alertDialogLabel,
+                            child: _CupertinoDialogRenderWidget(
+                              contentSection: _buildContent(context),
+                              actionsSection: _buildActions(),
+                              dividerColor: CupertinoColors.separator,
+                            ),
                           ),
                         ),
                       ),
@@ -428,7 +428,7 @@ class CupertinoPopupSurface extends StatelessWidget {
       borderRadius: const BorderRadius.all(Radius.circular(_kCornerRadius)),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
-        child: Container(
+        child: ColoredBox(
           color: isSurfacePainted ? CupertinoDynamicColor.resolve(_kDialogColor, context) : null,
           child: child,
         ),
@@ -596,9 +596,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
   Widget _buildActions() {
     if (widget.actions == null || widget.actions!.isEmpty) {
-      return Container(
-        height: 0.0,
-      );
+      return const SizedBox.shrink();
     }
     return _CupertinoAlertActionSection(
       scrollController: _effectiveActionScrollController,
@@ -659,16 +657,18 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
           label: 'Alert',
           child: CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.elevated,
-            child: Container(
-              width: actionSheetWidth,
+            child: Padding(
               margin: const EdgeInsets.symmetric(
                 horizontal: _kActionSheetEdgeHorizontalPadding,
                 vertical: _kActionSheetEdgeVerticalPadding,
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: children,
+              child: SizedBox(
+                width: actionSheetWidth,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: children,
+                ),
               ),
             ),
           ),
@@ -735,16 +735,17 @@ class CupertinoActionSheetAction extends StatelessWidget {
           ),
           child: Semantics(
             button: true,
-            child: Container(
-              alignment: Alignment.center,
+            child: Padding(
               padding: const EdgeInsets.symmetric(
                 vertical: 16.0,
                 horizontal: 10.0,
               ),
-              child: DefaultTextStyle(
-                style: style,
-                textAlign: TextAlign.center,
-                child: child,
+              child: Center(
+                child: DefaultTextStyle(
+                  style: style,
+                  textAlign: TextAlign.center,
+                  child: child,
+                ),
               ),
             ),
           ),
@@ -790,7 +791,7 @@ class _CupertinoActionSheetCancelButtonState extends State<_CupertinoActionSheet
       onTapDown: _onTapDown,
       onTapUp: _onTapUp,
       onTapCancel: _onTapCancel,
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: CupertinoDynamicColor.resolve(backgroundColor, context),
           borderRadius: const BorderRadius.all(Radius.circular(_kCornerRadius)),
@@ -1763,10 +1764,11 @@ class CupertinoDialogAction extends StatelessWidget {
           constraints: const BoxConstraints(
             minHeight: _kDialogMinButtonHeight,
           ),
-          child: Container(
-            alignment: Alignment.center,
+          child: Padding(
             padding: EdgeInsets.all(padding),
-            child: sizedContent,
+            child: Center(
+              child: sizedContent,
+            ),
           ),
         ),
       ),

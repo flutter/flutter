@@ -1849,44 +1849,46 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
       showWhenUnlinked: false,
       child: FadeTransition(
         opacity: _opacity,
-        child: Container(
-          alignment: Alignment.topLeft,
+        child: SizedBox(
           width: interactiveRect.width,
           height: interactiveRect.height,
-          child: RawGestureDetector(
-            behavior: HitTestBehavior.translucent,
-            gestures: <Type, GestureRecognizerFactory>{
-              PanGestureRecognizer: GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
-                () => PanGestureRecognizer(
-                  debugOwner: this,
-                  // Mouse events select the text and do not drag the cursor.
-                  supportedDevices: <PointerDeviceKind>{
-                    PointerDeviceKind.touch,
-                    PointerDeviceKind.stylus,
-                    PointerDeviceKind.unknown,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: RawGestureDetector(
+              behavior: HitTestBehavior.translucent,
+              gestures: <Type, GestureRecognizerFactory>{
+                PanGestureRecognizer: GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
+                  () => PanGestureRecognizer(
+                    debugOwner: this,
+                    // Mouse events select the text and do not drag the cursor.
+                    supportedDevices: <PointerDeviceKind>{
+                      PointerDeviceKind.touch,
+                      PointerDeviceKind.stylus,
+                      PointerDeviceKind.unknown,
+                    },
+                  ),
+                  (PanGestureRecognizer instance) {
+                    instance
+                      ..dragStartBehavior = widget.dragStartBehavior
+                      ..onStart = widget.onSelectionHandleDragStart
+                      ..onUpdate = widget.onSelectionHandleDragUpdate
+                      ..onEnd = widget.onSelectionHandleDragEnd;
                   },
                 ),
-                (PanGestureRecognizer instance) {
-                  instance
-                    ..dragStartBehavior = widget.dragStartBehavior
-                    ..onStart = widget.onSelectionHandleDragStart
-                    ..onUpdate = widget.onSelectionHandleDragUpdate
-                    ..onEnd = widget.onSelectionHandleDragEnd;
-                },
-              ),
-            },
-            child: Padding(
-              padding: EdgeInsets.only(
-                left: padding.left,
-                top: padding.top,
-                right: padding.right,
-                bottom: padding.bottom,
-              ),
-              child: widget.selectionControls.buildHandle(
-                context,
-                widget.type,
-                widget.preferredLineHeight,
-                widget.onSelectionHandleTapped,
+              },
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: padding.left,
+                  top: padding.top,
+                  right: padding.right,
+                  bottom: padding.bottom,
+                ),
+                child: widget.selectionControls.buildHandle(
+                  context,
+                  widget.type,
+                  widget.preferredLineHeight,
+                  widget.onSelectionHandleTapped,
+                ),
               ),
             ),
           ),

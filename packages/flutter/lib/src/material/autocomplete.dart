@@ -210,10 +210,12 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
                         Scrollable.ensureVisible(context, alignment: 0.5);
                       }, debugLabel: 'AutocompleteOptions.ensureVisible');
                     }
-                    return Container(
-                      color: highlight ? Theme.of(context).focusColor : null,
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(displayStringForOption(option)),
+                    return DecoratedBox(
+                      decoration: BoxDecoration(color: highlight ? Theme.of(context).focusColor : null),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(displayStringForOption(option)),
+                      ),
                     );
                   }
                 ),

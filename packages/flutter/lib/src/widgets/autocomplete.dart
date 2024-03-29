@@ -493,7 +493,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       controller: _optionsViewController,
       overlayChildBuilder: _buildOptionsView,
       child: TextFieldTapRegion(
-        child: Container(
+        child: SizedBox(
           key: _fieldKey,
           child: Shortcuts(
             shortcuts: _shortcuts,

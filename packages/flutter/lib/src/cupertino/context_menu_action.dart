@@ -120,33 +120,35 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
           ),
           child: Semantics(
             button: true,
-            child: Container(
+            child: DecoratedBox(
               decoration: BoxDecoration(
                 color: _isPressed
                   ? CupertinoDynamicColor.resolve(_kBackgroundColorPressed, context)
                   : CupertinoDynamicColor.resolve(_kBackgroundColor, context),
               ),
-              padding: const EdgeInsets.only(
-                top: 8,
-                bottom: 8,
-                left: 15.5,
-                right: 17.5,
-              ),
-              child: DefaultTextStyle(
-                style: _textStyle,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Flexible(
-                      child: widget.child,
-                    ),
-                    if (widget.trailingIcon != null)
-                      Icon(
-                        widget.trailingIcon,
-                        color: _textStyle.color,
-                        size: 21.0,
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  top: 8,
+                  bottom: 8,
+                  left: 15.5,
+                  right: 17.5,
+                ),
+                child: DefaultTextStyle(
+                  style: _textStyle,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Flexible(
+                        child: widget.child,
                       ),
-                  ],
+                      if (widget.trailingIcon != null)
+                        Icon(
+                          widget.trailingIcon,
+                          color: _textStyle.color,
+                          size: 21.0,
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
