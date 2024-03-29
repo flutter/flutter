@@ -8,16 +8,38 @@
 
 import 'dart:io';
 
+import 'package:args/args.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
 
 void main(List<String> arguments) {
-  print(
-    "Usage: find . -type d -name 'android' | dart dev/tools/bin/generate_gradle_lockfiles.dart\n"
-    'If you would rather enter the files manually, just run `dart dev/tools/bin/generate_gradle_lockfiles.dart`,\n'
-    "enter the absolute paths to the app's android directory, then press CTRL-D.\n"
-  );
+  const String usageMessage = "Usage: find . -type d -name 'android' | dart dev/tools/bin/generate_gradle_lockfiles.dart\n"
+      'If you would rather enter the files manually, just run `dart dev/tools/bin/generate_gradle_lockfiles.dart`,\n'
+      "enter the absolute paths to the app's android directory, then press CTRL-D.\n"
+      "If you don't wish to re-generate the settings.gradle, build.gradle, and gradle-wrapper.properties files,\n"
+      "add the flag '--no-gradle-generation'";
+
+  final ArgParser argParser = ArgParser()
+    ..addFlag(
+      'gradle-generation',
+      help: 'Re-generate gradle files in each processed directory.',
+      defaultsTo: true,
+    );
+
+  ArgResults args;
+  try {
+    args = argParser.parse(arguments);
+  } on FormatException catch (error) {
+    stderr.writeln('${error.message}\n');
+    stderr.writeln(usageMessage);
+    exit(1);
+  }
+
+  print(usageMessage);
+
+  /// Re-generate gradle files in each processed directory.
+  final bool gradleGeneration = (args['gradle-generation'] as bool?) ?? true;
 
   const FileSystem fileSystem = LocalFileSystem();
   final List<String> androidDirectories = getFilesFromStdin();
@@ -86,9 +108,11 @@ void main(List<String> arguments) {
       // noop
     }
 
-    rootBuildGradle.writeAsStringSync(rootGradleFileContent);
-    settingsGradle.writeAsStringSync(settingGradleFile);
-    wrapperGradle.writeAsStringSync(wrapperGradleFileContent);
+    if (gradleGeneration) {
+      rootBuildGradle.writeAsStringSync(rootGradleFileContent);
+      settingsGradle.writeAsStringSync(settingGradleFile);
+      wrapperGradle.writeAsStringSync(wrapperGradleFileContent);
+    }
 
     final String appDirectory = androidDirectory.parent.absolute.path;
 
@@ -99,7 +123,7 @@ void main(List<String> arguments) {
     final File gradleWrapper = androidDirectory.childFile('gradlew');
     // Generate Gradle wrapper if it doesn't exist.
     if (!gradleWrapper.existsSync()) {
-      Process.runSync(
+      exec(
         'flutter',
         <String>['build', 'apk', '--config-only'],
         workingDirectory: appDirectory,

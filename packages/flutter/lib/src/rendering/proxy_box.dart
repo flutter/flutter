@@ -274,6 +274,11 @@ class RenderConstrainedBox extends RenderProxyBox {
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    return child?.getDryBaseline(_additionalConstraints.enforce(constraints), baseline);
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     if (child != null) {
@@ -563,10 +568,8 @@ class RenderAspectRatio extends RenderProxyBox {
 
   @override
   void performLayout() {
-    size = computeDryLayout(constraints);
-    if (child != null) {
-      child!.layout(BoxConstraints.tight(size));
-    }
+    size = getDryLayout(constraints);
+    child?.layout(BoxConstraints.tight(size));
   }
 
   @override
@@ -661,7 +664,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    return computeMaxIntrinsicWidth(height);
+    return getMaxIntrinsicWidth(height);
   }
 
   @override
@@ -679,7 +682,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
       return 0.0;
     }
     if (!width.isFinite) {
-      width = computeMaxIntrinsicWidth(double.infinity);
+      width = getMaxIntrinsicWidth(double.infinity);
     }
     assert(width.isFinite);
     final double height = child!.getMinIntrinsicHeight(width);
@@ -692,7 +695,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
       return 0.0;
     }
     if (!width.isFinite) {
-      width = computeMaxIntrinsicWidth(double.infinity);
+      width = getMaxIntrinsicWidth(double.infinity);
     }
     assert(width.isFinite);
     final double height = child!.getMaxIntrinsicHeight(width);
@@ -802,7 +805,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    return computeMaxIntrinsicHeight(width);
+    return getMaxIntrinsicHeight(width);
   }
 
   Size _computeSize({required ChildLayouter layoutChild, required BoxConstraints constraints}) {
@@ -844,7 +847,12 @@ class RenderIgnoreBaseline extends RenderProxyBox {
   }) : super(child);
 
   @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+  Null computeDistanceToActualBaseline(TextBaseline baseline) {
+    return null;
+  }
+
+  @override
+  Null computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
     return null;
   }
 }

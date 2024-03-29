@@ -864,6 +864,12 @@ class _WrappingOverlayState extends State<_WrappingOverlay> {
   }
 
   @override
+  void dispose() {
+    _entry..remove()..dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Overlay(
       clipBehavior: widget.clipBehavior,

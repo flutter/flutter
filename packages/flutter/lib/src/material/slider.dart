@@ -689,29 +689,16 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   }
 
   void _actionHandler(_AdjustSliderIntent intent) {
-    final _RenderSlider renderSlider = _renderObjectKey.currentContext!.findRenderObject()! as _RenderSlider;
-    final TextDirection textDirection = Directionality.of(_renderObjectKey.currentContext!);
+    final TextDirection directionality = Directionality.of(_renderObjectKey.currentContext!);
+    final bool shouldIncrease = switch (intent.type) {
+      _SliderAdjustmentType.up    => true,
+      _SliderAdjustmentType.down  => false,
+      _SliderAdjustmentType.left  => directionality == TextDirection.rtl,
+      _SliderAdjustmentType.right => directionality == TextDirection.ltr,
+    };
 
-    switch (intent.type) {
-      case _SliderAdjustmentType.right:
-        switch (textDirection) {
-          case TextDirection.rtl:
-            renderSlider.decreaseAction();
-          case TextDirection.ltr:
-            renderSlider.increaseAction();
-        }
-      case _SliderAdjustmentType.left:
-        switch (textDirection) {
-          case TextDirection.rtl:
-            renderSlider.increaseAction();
-          case TextDirection.ltr:
-            renderSlider.decreaseAction();
-        }
-      case _SliderAdjustmentType.up:
-        renderSlider.increaseAction();
-      case _SliderAdjustmentType.down:
-        renderSlider.decreaseAction();
-    }
+    final _RenderSlider slider = _renderObjectKey.currentContext!.findRenderObject()! as _RenderSlider;
+    return shouldIncrease ? slider.increaseAction() : slider.decreaseAction();
   }
 
   bool _focused = false;
@@ -1965,6 +1952,7 @@ class _SliderDefaultsM2 extends SliderThemeData {
   SliderComponentShape? get valueIndicatorShape => const RectangularSliderValueIndicatorShape();
 }
 
+// TODO(quncheng): Update M3 defaults to match the latest specs.
 // BEGIN GENERATED TOKEN PROPERTIES - Slider
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
