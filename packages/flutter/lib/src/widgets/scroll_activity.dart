@@ -701,7 +701,7 @@ class DrivenScrollActivity extends ScrollActivity {
   }
 
   @override
-  bool get shouldIgnorePointer => false;
+  bool get shouldIgnorePointer => true;
 
   @override
   bool get isScrolling => true;
