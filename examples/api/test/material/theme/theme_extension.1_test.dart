@@ -35,6 +35,7 @@ void main() {
     expect(colors.brandColor, equals(const Color(0xFF1E88E5)));
     expect(colors.danger, equals(const Color(0xFFE53935)));
 
+    // Tap the IconButton to switch theme mode from light to dark.
     await tester.tap(find.byType(IconButton));
     await tester.pumpAndSettle();
 
@@ -91,6 +92,7 @@ void main() {
       isA<Icon>().having((Icon i) => i.icon, 'icon', equals(Icons.nightlight)),
     );
 
+    // Tap the IconButton to switch theme mode from light to dark.
     await tester.tap(find.byType(IconButton));
     await tester.pumpAndSettle();
 
