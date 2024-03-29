@@ -323,7 +323,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   // for use when resizing the viewport to non-zero next time.
   double? _cachedPage;
 
-  // @override
+  @override
   bool? get preferredHandOffIgnorePointer => false;
 
   @override

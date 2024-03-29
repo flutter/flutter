@@ -48,9 +48,11 @@ abstract class ScrollActivityDelegate {
   /// given velocity.
   void goBallistic(double velocity);
 
-  // bool? get preferredHandOffIgnorePointer;
+  /// Temporary documentation
+  bool? get preferredHandOffIgnorePointer;
 
-  // bool get outOfRange;
+  /// Temporary documentation
+  bool get outOfRange;
 }
 
 /// Base class for scrolling activities like dragging and flinging.
