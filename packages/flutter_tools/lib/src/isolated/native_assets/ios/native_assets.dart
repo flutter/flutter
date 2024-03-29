@@ -124,24 +124,19 @@ Future<List<Uri>> buildNativeAssetsIOS({
 }
 
 IOSSdkImpl _getIOSSdkImpl(EnvironmentType environmentType) {
-  switch (environmentType) {
-    case EnvironmentType.physical:
-      return IOSSdkImpl.iPhoneOS;
-    case EnvironmentType.simulator:
-      return IOSSdkImpl.iPhoneSimulator;
-  }
+  return switch (environmentType) {
+    EnvironmentType.physical  => IOSSdkImpl.iPhoneOS,
+    EnvironmentType.simulator => IOSSdkImpl.iPhoneSimulator,
+  };
 }
 
 /// Extract the [Target] from a [DarwinArch].
 Target _getNativeTarget(DarwinArch darwinArch) {
-  switch (darwinArch) {
-    case DarwinArch.armv7:
-      return Target.iOSArm;
-    case DarwinArch.arm64:
-      return Target.iOSArm64;
-    case DarwinArch.x86_64:
-      return Target.iOSX64;
-  }
+  return switch (darwinArch) {
+    DarwinArch.armv7  => Target.iOSArm,
+    DarwinArch.arm64  => Target.iOSArm64,
+    DarwinArch.x86_64 => Target.iOSX64,
+  };
 }
 
 Map<KernelAssetPath, List<AssetImpl>> _fatAssetTargetLocations(
