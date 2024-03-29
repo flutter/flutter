@@ -336,7 +336,7 @@ deps = {
   Var('flutter_git') + '/third_party/yapf' + '@' + '212c5b5ad8e172d2d914ae454c121c89cccbcb35',
 
   'src/flutter/third_party/boringssl/src':
-   'https://boringssl.googlesource.com/boringssl.git' + '@' + Var('dart_boringssl_rev'),
+  'https://boringssl.googlesource.com/boringssl.git' + '@' + Var('dart_boringssl_rev'),
 
   'src/flutter/third_party/perfetto':
    Var('flutter_git') + "/third_party/perfetto" + '@' + Var('dart_perfetto_rev'),
@@ -695,6 +695,9 @@ deps = {
   'src/flutter/third_party/pkg/archive':
   Var('chromium_git') + '/external/github.com/brendan-duncan/archive.git' + '@' + '9de7a0544457c6aba755ccb65abb41b0dc1db70d', # 3.1.2
 
+  'src/flutter/third_party/pkg/coverage':
+  Var('flutter_git') + '/third_party/coverage.git' + '@' + 'bb0ab721ee4ceef1abfa413d8d6fd46013b583b9', # 1.7.2
+
   'src/flutter/third_party/pkg/equatable':
   Var('flutter_git') + '/third_party/equatable.git' + '@' + '2117551ff3054f8edb1a58f63ffe1832a8d25623', # 2.0.5
 
@@ -706,6 +709,12 @@ deps = {
 
   'src/flutter/third_party/pkg/googleapis':
   Var('flutter_git') + '/third_party/googleapis.dart.git' + '@' + '526011f56d98eab183cc6075ee1392e8303e43e2', # various
+
+  'src/flutter/third_party/pkg/io':
+  Var('flutter_git') + '/third_party/io.git' + '@' + '997a6243aad20af4238147d9ec00bf638b9169af', # 1.0.5-wip
+
+  'src/flutter/third_party/pkg/node_preamble':
+  Var('flutter_git') + '/third_party/node_preamble.dart.git' + '@' + '47245865175929ec452d8058e563c267b64c3d64', # 2.0.2
 
   'src/flutter/third_party/pkg/platform':
   Var('dart_git') + '/platform.dart' + '@' + '1ffad63428bbd1b3ecaa15926bacfb724023648c', # 3.1.0
