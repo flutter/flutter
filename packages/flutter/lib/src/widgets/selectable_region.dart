@@ -1634,7 +1634,7 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
     return result;
   }
 
-  /// Selects a word in a selectable at the location
+  /// Selects a word in a [Selectable] at the location
   /// [SelectWordSelectionEvent.globalPosition].
   @override
   SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
@@ -1649,7 +1649,7 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
     return result;
   }
 
-  /// Selects a paragraph in a selectable at the location
+  /// Selects a paragraph in a [Selectable] at the location
   /// [SelectParagraphSelectionEvent.globalPosition].
   @override
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
@@ -1761,7 +1761,7 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
   }
 }
 
-/// An abstract base class for updating multiple selectable children.
+/// An abstract base class for updating multiple [Selectable] children.
 ///
 /// This class provide basic [SelectionEvent] handling and child [Selectable]
 /// updating. The subclass needs to implement [ensureChildUpdated] to ensure
@@ -1777,7 +1777,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     }
   }
 
-  /// Gets the list of selectables this delegate is managing.
+  /// Gets the list of [Selectable]s this delegate is managing.
   List<Selectable> selectables = <Selectable>[];
 
   /// The number of additional pixels added to the selection handle drawable
@@ -1793,11 +1793,11 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// This was an eyeballed value to create smooth user experiences.
   static const double _kSelectionHandleDrawableAreaPadding = 5.0;
 
-  /// The current selectable that contains the selection end edge.
+  /// The current [Selectable] that contains the selection end edge.
   @protected
   int currentSelectionEndIndex = -1;
 
-  /// The current selectable that contains the selection start edge.
+  /// The current [Selectable] that contains the selection start edge.
   @protected
   int currentSelectionStartIndex = -1;
 
@@ -1933,7 +1933,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     selectable.removeListener(_handleSelectableGeometryChange);
   }
 
-  /// Called when this delegate finishes updating the selectables.
+  /// Called when this delegate finishes updating the [Selectable]s.
   @protected
   @mustCallSuper
   void didChangeSelectables() {
@@ -2034,7 +2034,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     _updateSelectionGeometry();
   }
 
-  /// Gets the combined selection geometry for child selectables.
+  /// Gets the combined [SelectionGeometry] for child [Selectable]s.
   @protected
   SelectionGeometry getSelectionGeometry() {
     if (currentSelectionEndIndex == -1 ||
@@ -2210,7 +2210,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     _endHandleLayerOwner!.pushHandleLayers(null, effectiveEndHandle);
   }
 
-  /// Copies the selected contents of all selectables.
+  /// Copies the selected contents of all [Selectable]s.
   @override
   SelectedContent? getSelectedContent() {
     final List<SelectedContent> selections = <SelectedContent>[];
@@ -2260,7 +2260,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     }
   }
 
-  /// Selects all contents of all selectables.
+  /// Selects all contents of all [Selectable]s.
   @protected
   SelectionResult handleSelectAll(SelectAllSelectionEvent event) {
     for (final Selectable selectable in selectables) {
@@ -2323,21 +2323,21 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     return SelectionResult.end;
   }
 
-  /// Selects a word in a selectable at the location
+  /// Selects a word in a [Selectable] at the location
   /// [SelectWordSelectionEvent.globalPosition].
   @protected
   SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
     return _handleSelectBoundary(event);
   }
 
-  /// Selects a paragraph in a selectable at the location
+  /// Selects a paragraph in a [Selectable] at the location
   /// [SelectParagraphSelectionEvent.globalPosition].
   @protected
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
     return _handleSelectBoundary(event);
   }
 
-  /// Removes the selection of all selectables this delegate manages.
+  /// Removes the selection of all [Selectable]s this delegate manages.
   @protected
   SelectionResult handleClearSelection(ClearSelectionEvent event) {
     for (final Selectable selectable in selectables) {
@@ -2348,7 +2348,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     return SelectionResult.none;
   }
 
-  /// Extend current selection in a certain text granularity.
+  /// Extend current selection in a certain [TextGranularity].
   @protected
   SelectionResult handleGranularlyExtendSelection(GranularlyExtendSelectionEvent event) {
     assert((currentSelectionStartIndex == -1) == (currentSelectionEndIndex == -1));
@@ -2384,7 +2384,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     return result;
   }
 
-  /// Extend current selection in a certain text granularity.
+  /// Extend current selection in a certain [TextGranularity].
   @protected
   SelectionResult handleDirectionallyExtendSelection(DirectionallyExtendSelectionEvent event) {
     assert((currentSelectionStartIndex == -1) == (currentSelectionEndIndex == -1));
@@ -2491,7 +2491,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     super.dispose();
   }
 
-  /// Ensures the selectable child has received up to date selection event.
+  /// Ensures the [Selectable] child has received up to date selection event.
   ///
   /// This method is called when a new [Selectable] is added to the delegate,
   /// and its screen location falls into the previous selection.
@@ -2501,10 +2501,10 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   @protected
   void ensureChildUpdated(Selectable selectable);
 
-  /// Dispatches a selection event to a specific selectable.
+  /// Dispatches a selection event to a specific [Selectable].
   ///
   /// Override this method if subclasses need to generate additional events or
-  /// treatments prior to sending the selection events.
+  /// treatments prior to sending the [SelectionEvent].
   @protected
   SelectionResult dispatchSelectionEventToChild(Selectable selectable, SelectionEvent event) {
     return selectable.dispatchSelectionEvent(event);

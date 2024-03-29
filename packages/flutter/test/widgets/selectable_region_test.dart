@@ -941,7 +941,7 @@ void main() {
       expect(paragraph.selections.first, const TextSelection.collapsed(offset: 151));
       await tester.pump(kDoubleTapTimeout);
 
-      // triple-click.
+      // Triple-click.
       await gesture.down(textOffsetToPosition(paragraph, 151));
       await tester.pump();
       await gesture.up();
