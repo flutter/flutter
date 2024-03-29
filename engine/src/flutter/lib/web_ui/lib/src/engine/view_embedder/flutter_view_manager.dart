@@ -12,12 +12,15 @@ class FlutterViewManager {
 
   // A map of EngineFlutterViews indexed by their viewId.
   final Map<int, EngineFlutterView> _viewData = <int, EngineFlutterView>{};
+
   // A map of (optional) JsFlutterViewOptions, indexed by their viewId.
   final Map<int, JsFlutterViewOptions> _jsViewOptions =
       <int, JsFlutterViewOptions>{};
+
   // The controller of the [onViewCreated] stream.
   final StreamController<int> _onViewCreatedController =
       StreamController<int>.broadcast(sync: true);
+
   // The controller of the [onViewDisposed] stream.
   final StreamController<int> _onViewDisposedController =
       StreamController<int>.broadcast(sync: true);
@@ -82,7 +85,7 @@ class FlutterViewManager {
   ///
   /// Returns its [JsFlutterViewOptions] (if any).
   JsFlutterViewOptions? unregisterView(int viewId) {
-    _viewData.remove(viewId); // .dispose();
+    _viewData.remove(viewId);
     final JsFlutterViewOptions? jsViewOptions = _jsViewOptions.remove(viewId);
     _onViewDisposedController.add(viewId);
     return jsViewOptions;
@@ -96,14 +99,13 @@ class FlutterViewManager {
     return _jsViewOptions[viewId];
   }
 
-  /// Returns the [viewId] if [rootElement] corresponds to any of the [views].
-  int? viewIdForRootElement(DomElement rootElement)  {
-    for(final EngineFlutterView view in views) {
-      if (view.dom.rootElement == rootElement) {
-        return view.viewId;
-      }
-    }
-    return null;
+  EngineFlutterView? findViewForElement(DomElement? element) {
+    const String viewRootSelector =
+        '${DomManager.flutterViewTagName}[${GlobalHtmlAttributes.flutterViewIdAttributeName}]';
+    final DomElement? viewRoot = element?.closest(viewRootSelector);
+    final String? viewIdAttribute = viewRoot?.getAttribute(GlobalHtmlAttributes.flutterViewIdAttributeName);
+    final int? viewId = viewIdAttribute == null ? null : int.parse(viewIdAttribute);
+    return viewId == null ? null : _viewData[viewId];
   }
 
   void dispose() {

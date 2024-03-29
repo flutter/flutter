@@ -8,16 +8,7 @@ import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-
-import 'package:ui/src/engine/browser_detection.dart';
-import 'package:ui/src/engine/dom.dart';
-import 'package:ui/src/engine/raw_keyboard.dart';
-import 'package:ui/src/engine/services.dart';
-import 'package:ui/src/engine/text_editing/autofill_hint.dart';
-import 'package:ui/src/engine/text_editing/input_type.dart';
-import 'package:ui/src/engine/text_editing/text_editing.dart';
-import 'package:ui/src/engine/util.dart';
-import 'package:ui/src/engine/vector_math.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/spy.dart';
@@ -28,6 +19,11 @@ const int _kReturnKeyCode = 13;
 
 const MethodCodec codec = JSONMethodCodec();
 
+EnginePlatformDispatcher get dispatcher => EnginePlatformDispatcher.instance;
+
+DomElement get defaultTextEditingRoot =>
+    dispatcher.implicitView!.dom.textEditingHost;
+
 /// Add unit tests for [FirefoxTextEditingStrategy].
 // TODO(mdebbar): https://github.com/flutter/flutter/issues/46891
 
@@ -36,11 +32,14 @@ EditingState? lastEditingState;
 TextEditingDeltaState? editingDeltaState;
 String? lastInputAction;
 
-final InputConfiguration singlelineConfig = InputConfiguration();
+final InputConfiguration singlelineConfig = InputConfiguration(
+  viewId: kImplicitViewId,
+);
 final Map<String, dynamic> flutterSinglelineConfig =
     createFlutterConfig('text');
 
 final InputConfiguration multilineConfig = InputConfiguration(
+  viewId: kImplicitViewId,
   inputType: EngineInputType.multiline,
   inputAction: 'TextInputAction.newline',
 );
@@ -129,8 +128,38 @@ Future<void> testMain() async {
           domDocument.body);
     });
 
+    test('inserts element in the correct view', () {
+      final DomElement host = createDomElement('div');
+      domDocument.body!.append(host);
+      final EngineFlutterView view = EngineFlutterView(dispatcher, host);
+      dispatcher.viewManager.registerView(view);
+      final DomElement textEditingHost = view.dom.textEditingHost;
+
+      expect(domDocument.getElementsByTagName('input'), hasLength(0));
+      expect(textEditingHost.getElementsByTagName('input'), hasLength(0));
+
+      final InputConfiguration config = InputConfiguration(viewId: view.viewId);
+      editingStrategy!.enable(
+        config,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+      final DomElement input = editingStrategy!.domElement!;
+
+      // Input is appended to the right view.
+      expect(textEditingHost.contains(input), isTrue);
+
+      // Cleanup.
+      editingStrategy!.disable();
+      expect(textEditingHost.querySelectorAll('input'), hasLength(0));
+      dispatcher.viewManager.unregisterView(view.viewId);
+      view.dispose();
+      host.remove();
+    });
+
     test('Respects read-only config', () {
       final InputConfiguration config = InputConfiguration(
+        viewId: kImplicitViewId,
         readOnly: true,
       );
       editingStrategy!.enable(
@@ -148,6 +177,7 @@ Future<void> testMain() async {
 
     test('Knows how to create password fields', () {
       final InputConfiguration config = InputConfiguration(
+        viewId: kImplicitViewId,
         obscureText: true,
       );
       editingStrategy!.enable(
@@ -165,6 +195,7 @@ Future<void> testMain() async {
 
     test('Knows how to create non-default text actions', () {
       final InputConfiguration config = InputConfiguration(
+        viewId: kImplicitViewId,
         inputAction: 'TextInputAction.send'
       );
       editingStrategy!.enable(
@@ -186,6 +217,7 @@ Future<void> testMain() async {
 
     test('Knows to turn autocorrect off', () {
       final InputConfiguration config = InputConfiguration(
+        viewId: kImplicitViewId,
         autocorrect: false,
       );
       editingStrategy!.enable(
@@ -202,7 +234,7 @@ Future<void> testMain() async {
     });
 
     test('Knows to turn autocorrect on', () {
-      final InputConfiguration config = InputConfiguration();
+      final InputConfiguration config = InputConfiguration(viewId: kImplicitViewId);
       editingStrategy!.enable(
         config,
         onChange: trackEditingState,
@@ -217,7 +249,7 @@ Future<void> testMain() async {
     });
 
     test('Knows to turn autofill off', () {
-      final InputConfiguration config = InputConfiguration();
+      final InputConfiguration config = InputConfiguration(viewId: kImplicitViewId);
       editingStrategy!.enable(
         config,
         onChange: trackEditingState,
@@ -352,7 +384,7 @@ Future<void> testMain() async {
     });
 
     test('Triggers input action', () {
-      final InputConfiguration config = InputConfiguration();
+      final InputConfiguration config = InputConfiguration(viewId: kImplicitViewId);
       editingStrategy!.enable(
         config,
         onChange: trackEditingState,
@@ -371,10 +403,10 @@ Future<void> testMain() async {
     });
 
    test('handling keyboard event prevents triggering input action', () {
-      final ui.PlatformMessageCallback? savedCallback = ui.PlatformDispatcher.instance.onPlatformMessage;
+      final ui.PlatformMessageCallback? savedCallback = dispatcher.onPlatformMessage;
 
       bool markTextEventHandled = false;
-      ui.PlatformDispatcher.instance.onPlatformMessage = (String channel, ByteData? data,
+      dispatcher.onPlatformMessage = (String channel, ByteData? data,
           ui.PlatformMessageResponseCallback? callback) {
         final ByteData response = const JSONMessageCodec()
             .encodeMessage(<String, dynamic>{'handled': markTextEventHandled})!;
@@ -382,7 +414,7 @@ Future<void> testMain() async {
       };
       RawKeyboard.initialize();
 
-      final InputConfiguration config = InputConfiguration();
+      final InputConfiguration config = InputConfiguration(viewId: kImplicitViewId);
       editingStrategy!.enable(
         config,
         onChange: trackEditingState,
@@ -412,12 +444,13 @@ Future<void> testMain() async {
       // Input action received.
       expect(lastInputAction, 'TextInputAction.done');
 
-      ui.PlatformDispatcher.instance.onPlatformMessage = savedCallback;
+      dispatcher.onPlatformMessage = savedCallback;
       RawKeyboard.instance?.dispose();
     });
 
     test('Triggers input action in multi-line mode', () {
       final InputConfiguration config = InputConfiguration(
+        viewId: kImplicitViewId,
         inputType: EngineInputType.multiline,
       );
       editingStrategy!.enable(
@@ -443,6 +476,7 @@ Future<void> testMain() async {
 
     test('Triggers input action in multiline-none mode', () {
       final InputConfiguration config = InputConfiguration(
+        viewId: kImplicitViewId,
         inputType: EngineInputType.multilineNone,
       );
       editingStrategy!.enable(
@@ -468,7 +502,7 @@ Future<void> testMain() async {
 
     test('Triggers input action and prevent new line key event for single line field', () {
       // Regression test for https://github.com/flutter/flutter/issues/113559
-      final InputConfiguration config = InputConfiguration();
+      final InputConfiguration config = InputConfiguration(viewId: kImplicitViewId);
       editingStrategy!.enable(
         config,
         onChange: trackEditingState,
@@ -590,16 +624,24 @@ Future<void> testMain() async {
     /// Returns the `clientId` used in the platform message.
     int showKeyboard({
       required String inputType,
+      int? viewId,
       String? inputAction,
       bool decimal = false,
       bool isMultiline = false,
+      bool autofillEnabled = true,
     }) {
       final MethodCall setClient = MethodCall(
         'TextInput.setClient',
         <dynamic>[
           ++clientId,
-          createFlutterConfig(inputType,
-              inputAction: inputAction, decimal: decimal, isMultiline: isMultiline),
+          createFlutterConfig(
+            inputType,
+            viewId: viewId,
+            inputAction: inputAction,
+            decimal: decimal,
+            isMultiline: isMultiline,
+            autofillEnabled: autofillEnabled,
+          ),
         ],
       );
       sendFrameworkMessage(codec.encodeMethodCall(setClient));
@@ -2481,6 +2523,186 @@ Future<void> testMain() async {
       expect(event.defaultPrevented, isFalse);
     });
 
+    test('inserts element in the correct view', () async {
+      final DomElement host = createDomElement('div');
+      domDocument.body!.append(host);
+      final EngineFlutterView view = EngineFlutterView(dispatcher, host);
+      dispatcher.viewManager.registerView(view);
+
+      textEditing = HybridTextEditing();
+      showKeyboard(inputType: 'text', viewId: view.viewId);
+      // The Safari strategy doesn't insert the input element into the DOM until
+      // it has received the geometry information.
+      final List<double> transform = Matrix4.identity().storage.toList();
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(10, 10, transform);
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      await waitForDesktopSafariFocus();
+
+      final DomElement input = textEditing!.strategy.domElement!;
+
+
+      // Input is appended to the right view.
+      expect(view.dom.textEditingHost.contains(input), isTrue);
+
+      // Cleanup.
+      hideKeyboard();
+      dispatcher.viewManager.unregisterView(view.viewId);
+      view.dispose();
+      host.remove();
+    });
+
+    test('moves element to correct view', () {
+      final DomElement host1 = createDomElement('div');
+      domDocument.body!.append(host1);
+      final EngineFlutterView view1 = EngineFlutterView(dispatcher, host1);
+      dispatcher.viewManager.registerView(view1);
+
+      final DomElement host2 = createDomElement('div');
+      domDocument.body!.append(host2);
+      final EngineFlutterView view2 = EngineFlutterView(dispatcher, host2);
+      dispatcher.viewManager.registerView(view2);
+
+      textEditing = HybridTextEditing();
+      showKeyboard(inputType: 'text', viewId: view1.viewId, autofillEnabled: false);
+
+      final DomElement input = textEditing!.strategy.domElement!;
+
+      // Input is appended to view1.
+      expect(view1.dom.textEditingHost.contains(input), isTrue);
+
+      sendFrameworkMessage(codec.encodeMethodCall(MethodCall(
+        'TextInput.updateConfig',
+        createFlutterConfig('text', viewId: view2.viewId, autofillEnabled: false),
+      )));
+
+      // The input element is the same (no new element was created), but it has
+      // moved to view2.
+      expect(textEditing!.strategy.domElement, input);
+      expect(view2.dom.textEditingHost.contains(input), isTrue);
+
+      // Cleanup.
+      hideKeyboard();
+      dispatcher.viewManager.unregisterView(view1.viewId);
+      view1.dispose();
+      dispatcher.viewManager.unregisterView(view2.viewId);
+      view2.dispose();
+      host1.remove();
+      host2.remove();
+    });
+
+    test('places autofill form in the correct view', () async {
+      final DomElement host = createDomElement('div');
+      domDocument.body!.append(host);
+      final EngineFlutterView view = EngineFlutterView(dispatcher, host);
+      dispatcher.viewManager.registerView(view);
+
+      textEditing = HybridTextEditing();
+
+      // Create a configuration with an AutofillGroup of three text fields.
+      final Map<String, dynamic> flutterMultiAutofillElementConfig =
+          createFlutterConfig(
+            'text',
+            viewId: view.viewId,
+            autofillHint: 'username',
+            autofillHintsForFields: <String>['username', 'email', 'name'],
+          );
+      final MethodCall setClient = MethodCall(
+        'TextInput.setClient',
+        <dynamic>[123, flutterMultiAutofillElementConfig],
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const MethodCall show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+      // The Safari strategy doesn't insert the input element into the DOM until
+      // it has received the geometry information.
+      final List<double> transform = Matrix4.identity().storage.toList();
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(10, 10, transform);
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      await waitForDesktopSafariFocus();
+
+      final DomElement input = textEditing!.strategy.domElement!;
+      final DomElement form = textEditing!.configuration!.autofillGroup!.formElement;
+
+      // Input and form are appended to the right view.
+      expect(view.dom.textEditingHost.contains(input), isTrue);
+      expect(view.dom.textEditingHost.contains(form), isTrue);
+
+      // Cleanup.
+      hideKeyboard();
+      dispatcher.viewManager.unregisterView(view.viewId);
+      view.dispose();
+      host.remove();
+    });
+
+    test('moves autofill form to the correct view', () async {
+      final DomElement host1 = createDomElement('div');
+      domDocument.body!.append(host1);
+      final EngineFlutterView view1 = EngineFlutterView(dispatcher, host1);
+      dispatcher.viewManager.registerView(view1);
+
+      final DomElement host2 = createDomElement('div');
+      domDocument.body!.append(host2);
+      final EngineFlutterView view2 = EngineFlutterView(dispatcher, host2);
+      dispatcher.viewManager.registerView(view2);
+
+      textEditing = HybridTextEditing();
+
+      // Create a configuration with an AutofillGroup of three text fields.
+      final Map<String, dynamic> autofillConfig1 = createFlutterConfig(
+        'text',
+        viewId: view1.viewId,
+        autofillHint: 'username',
+        autofillHintsForFields: <String>['username', 'email', 'name'],
+      );
+      final MethodCall setClient = MethodCall(
+        'TextInput.setClient',
+        <dynamic>[123, autofillConfig1],
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const MethodCall show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      await waitForDesktopSafariFocus();
+
+      final DomElement input = textEditing!.strategy.domElement!;
+      final DomElement form = textEditing!.configuration!.autofillGroup!.formElement;
+
+      // Input and form are appended to view1.
+      expect(view1.dom.textEditingHost.contains(input), isTrue);
+      expect(view1.dom.textEditingHost.contains(form), isTrue);
+
+      // Move the input and form to view2.
+      final Map<String, dynamic> autofillConfig2 = createFlutterConfig(
+        'text',
+        viewId: view2.viewId,
+        autofillHint: 'username',
+        autofillHintsForFields: <String>['username', 'email', 'name'],
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(MethodCall(
+        'TextInput.updateConfig',
+        autofillConfig2,
+      )));
+
+      // Input and form are in view2.
+      expect(view2.dom.textEditingHost.contains(input), isTrue);
+      expect(view2.dom.textEditingHost.contains(form), isTrue);
+
+      // Cleanup.
+      hideKeyboard();
+      dispatcher.viewManager.unregisterView(view1.viewId);
+      view1.dispose();
+      dispatcher.viewManager.unregisterView(view2.viewId);
+      view2.dispose();
+      host1.remove();
+      host2.remove();
+      // TODO(mdebbar): Autofill forms don't get updated in the current system.
+      //                https://github.com/flutter/flutter/issues/145101
+    }, skip: true);
+
     tearDown(() {
       clearForms();
     });
@@ -2493,7 +2715,10 @@ Future<void> testMain() async {
           <String>['field1', 'field2', 'field3']);
       final EngineAutofillForm autofillForm =
           EngineAutofillForm.fromFrameworkMessage(
-              createAutofillInfo('username', 'field1'), fields)!;
+        kImplicitViewId,
+        createAutofillInfo('username', 'field1'),
+        fields,
+      )!;
 
       // Number of elements if number of fields sent to the constructor minus
       // one (for the focused text element).
@@ -2550,7 +2775,10 @@ Future<void> testMain() async {
           <String>['zzyyxx', 'aabbcc', 'jjkkll']);
       final EngineAutofillForm autofillForm =
           EngineAutofillForm.fromFrameworkMessage(
-              createAutofillInfo('username', 'field1'), fields)!;
+        kImplicitViewId,
+        createAutofillInfo('username', 'field1'),
+        fields,
+      )!;
 
       expect(autofillForm.formIdentifier, 'aabbcc*jjkkll*zzyyxx');
     });
@@ -2563,7 +2791,10 @@ Future<void> testMain() async {
           <String>['field1', 'fields2', 'field3']);
       final EngineAutofillForm autofillForm =
           EngineAutofillForm.fromFrameworkMessage(
-              createAutofillInfo('username', 'field1'), fields)!;
+        kImplicitViewId,
+        createAutofillInfo('username', 'field1'),
+        fields,
+      )!;
 
       final DomHTMLInputElement testInputElement = createDomHTMLInputElement();
       autofillForm.placeForm(testInputElement);
@@ -2590,7 +2821,10 @@ Future<void> testMain() async {
       );
       final EngineAutofillForm autofillForm =
           EngineAutofillForm.fromFrameworkMessage(
-              createAutofillInfo('username', 'field1'), fields)!;
+        kImplicitViewId,
+        createAutofillInfo('username', 'field1'),
+        fields,
+      )!;
 
       // The focused element is the only field. Form should be empty after
       // the initialization (focus element is appended later).
@@ -2615,7 +2849,7 @@ Future<void> testMain() async {
         <String>['field1'],
       );
       final EngineAutofillForm? autofillForm =
-          EngineAutofillForm.fromFrameworkMessage(null, fields);
+          EngineAutofillForm.fromFrameworkMessage(kImplicitViewId, null, fields);
 
       expect(autofillForm, isNull);
     });
@@ -2632,7 +2866,10 @@ Future<void> testMain() async {
       ]);
       final EngineAutofillForm autofillForm =
           EngineAutofillForm.fromFrameworkMessage(
-              createAutofillInfo('email', 'field1'), fields)!;
+        kImplicitViewId,
+        createAutofillInfo('email', 'field1'),
+        fields,
+      )!;
 
       expect(autofillForm.elements, hasLength(2));
 
@@ -2675,7 +2912,10 @@ Future<void> testMain() async {
       ]);
       final EngineAutofillForm autofillForm =
           EngineAutofillForm.fromFrameworkMessage(
-              createAutofillInfo('email', 'field1'), fields)!;
+        kImplicitViewId,
+        createAutofillInfo('email', 'field1'),
+        fields,
+      )!;
       final List<DomHTMLInputElement> formChildNodes =
           autofillForm.formElement.childNodes.toList()
               as List<DomHTMLInputElement>;
@@ -2707,7 +2947,10 @@ Future<void> testMain() async {
       ]);
       final EngineAutofillForm autofillForm =
           EngineAutofillForm.fromFrameworkMessage(
-              createAutofillInfo('email', 'field1'), fields)!;
+        kImplicitViewId,
+        createAutofillInfo('email', 'field1'),
+        fields,
+      )!;
       final List<DomHTMLInputElement> formChildNodes =
           autofillForm.formElement.childNodes.toList()
               as List<DomHTMLInputElement>;
@@ -2738,7 +2981,10 @@ Future<void> testMain() async {
       ]);
       final EngineAutofillForm autofillForm =
           EngineAutofillForm.fromFrameworkMessage(
-              createAutofillInfo('email', 'field1'), fields)!;
+        kImplicitViewId,
+        createAutofillInfo('email', 'field1'),
+        fields,
+      )!;
 
       final DomHTMLInputElement testInputElement = createDomHTMLInputElement();
       testInputElement.name = 'email';
@@ -3378,6 +3624,7 @@ void checkTextAreaEditingState(
 /// simplicity.
 Map<String, dynamic> createFlutterConfig(
   String inputType, {
+  int? viewId,
   bool readOnly = false,
   bool obscureText = false,
   bool autocorrect = true,
@@ -3397,6 +3644,7 @@ Map<String, dynamic> createFlutterConfig(
       if (decimal) 'decimal': true,
       if (isMultiline) 'isMultiline': true,
     },
+    if (viewId != null) 'viewId': viewId,
     'readOnly': readOnly,
     'obscureText': obscureText,
     'autocorrect': autocorrect,

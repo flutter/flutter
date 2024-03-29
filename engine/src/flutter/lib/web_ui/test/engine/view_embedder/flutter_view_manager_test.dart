@@ -102,13 +102,74 @@ Future<void> doTests() async {
       });
     });
 
-    group('viewIdForRootElement', () {
-      test('works', () {
-        final EngineFlutterView view = EngineFlutterView(platformDispatcher, createDomElement('div'));
-        final int viewId = view.viewId;
+    group('findViewForElement', () {
+      test('finds view for root and descendant elements', () {
+        final DomElement host = createDomElement('div');
+        final EngineFlutterView view = EngineFlutterView(platformDispatcher, host);
+
         viewManager.registerView(view);
 
-        expect(viewManager.viewIdForRootElement(view.dom.rootElement), viewId);
+        final DomElement rootElement = view.dom.rootElement;
+        final DomElement child1 = createDomElement('div');
+        final DomElement child2 = createDomElement('div');
+        final DomElement child3 = createDomElement('div');
+        rootElement.append(child1);
+        rootElement.append(child2);
+        child2.append(child3);
+
+        expect(viewManager.findViewForElement(rootElement), view);
+        expect(viewManager.findViewForElement(child1), view);
+        expect(viewManager.findViewForElement(child2), view);
+        expect(viewManager.findViewForElement(child3), view);
+      });
+
+      test('returns null for host element', () {
+        final DomElement host = createDomElement('div');
+        final EngineFlutterView view = EngineFlutterView(platformDispatcher, host);
+        viewManager.registerView(view);
+
+        expect(viewManager.findViewForElement(host), isNull);
+      });
+
+      test("returns null for elements that don't belong to any view", () {
+        final DomElement host = createDomElement('div');
+        final EngineFlutterView view = EngineFlutterView(platformDispatcher, host);
+        viewManager.registerView(view);
+
+        final DomElement disconnectedElement = createDomElement('div');
+        final DomElement childOfBody = createDomElement('div');
+
+        domDocument.body!.append(childOfBody);
+
+        expect(viewManager.findViewForElement(disconnectedElement), isNull);
+        expect(viewManager.findViewForElement(childOfBody), isNull);
+        expect(viewManager.findViewForElement(domDocument.body), isNull);
+      });
+
+      test('does not recognize elements from unregistered views', () {
+        final DomElement host = createDomElement('div');
+        final EngineFlutterView view = EngineFlutterView(platformDispatcher, host);
+        viewManager.registerView(view);
+
+        final DomElement rootElement = view.dom.rootElement;
+        final DomElement child1 = createDomElement('div');
+        final DomElement child2 = createDomElement('div');
+        final DomElement child3 = createDomElement('div');
+        rootElement.append(child1);
+        rootElement.append(child2);
+        child2.append(child3);
+
+        expect(viewManager.findViewForElement(rootElement), view);
+        expect(viewManager.findViewForElement(child1), view);
+        expect(viewManager.findViewForElement(child2), view);
+        expect(viewManager.findViewForElement(child3), view);
+
+        viewManager.unregisterView(view.viewId);
+
+        expect(viewManager.findViewForElement(rootElement), isNull);
+        expect(viewManager.findViewForElement(child1), isNull);
+        expect(viewManager.findViewForElement(child2), isNull);
+        expect(viewManager.findViewForElement(child3), isNull);
       });
     });
   });
