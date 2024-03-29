@@ -679,12 +679,12 @@ class TextSelectionOverlay {
     );
   }
 
-  // The contact position of the gesture at the current end handle location.
-  // Updated when the handle moves.
+  // The contact position of the gesture at the current end handle location, in
+  // global coordinates. Updated when the handle moves.
   late double _endHandleDragPosition;
 
   // The distance from _endHandleDragPosition to the center of the line that it
-  // corresponds to.
+  // corresponds to, in global coordinates.
   late double _endHandleDragPositionToCenterOfLine;
 
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
@@ -692,17 +692,25 @@ class TextSelectionOverlay {
       return;
     }
 
-    // This adjusts for the fact that the selection handles may not
-    // perfectly cover the TextPosition that they correspond to.
     _endHandleDragPosition = details.globalPosition.dy;
-    final Offset endPoint =
-        renderObject.localToGlobal(_selectionOverlay.selectionEndpoints.last.point);
-    final double centerOfLine = endPoint.dy - renderObject.preferredLineHeight / 2;
-    _endHandleDragPositionToCenterOfLine = centerOfLine - _endHandleDragPosition;
+
+    // Use local coordinates when dealing with line height. because in case of a
+    // scale transformation, the line height will also be scaled.
+    final double centerOfLineLocal = _selectionOverlay.selectionEndpoints.last.point.dy
+        - renderObject.preferredLineHeight / 2;
+    final double centerOfLineGlobal = renderObject.localToGlobal(
+      Offset(0.0, centerOfLineLocal),
+    ).dy;
+    _endHandleDragPositionToCenterOfLine = centerOfLineGlobal  - details.globalPosition.dy;
+    // This adjusts for the fact that the selection handles may not perfectly
+    // cover the TextPosition that they correspond to. We want to know the
+    // TextPosition of the place that the dragged handle points to, not
+    // necessarily exactly where the tap happened, which may be on the following
+    // line if the handle hangs down.
     final TextPosition position = renderObject.getPositionForPoint(
       Offset(
         details.globalPosition.dx,
-        centerOfLine,
+        centerOfLineGlobal,
       ),
     );
 
@@ -722,6 +730,9 @@ class TextSelectionOverlay {
   /// line's height away from the original handle position. In other words, the
   /// line jump happens when the contact point would be located at the same
   /// place on the handle at the new line as when the gesture started.
+  ///
+  /// Both parameters must be in local coordinates because the untransformed
+  /// line height is used, and the return value is in local coordinates as well.
   double _getHandleDy(double dragDy, double handleDy) {
     final double distanceDragged = dragDy - handleDy;
     final int dragDirection = distanceDragged < 0.0 ? -1 : 1;
@@ -735,7 +746,18 @@ class TextSelectionOverlay {
       return;
     }
 
-    _endHandleDragPosition = _getHandleDy(details.globalPosition.dy, _endHandleDragPosition);
+    // This is NOT the same as details.localPosition. That is relative to the
+    // selection handle, whereas this is relative to the RenderEditable.
+    final Offset localPosition = renderObject.globalToLocal(details.globalPosition);
+
+    final double nextEndHandleDragPositionLocal = _getHandleDy(
+      localPosition.dy,
+      renderObject.globalToLocal(Offset(0.0, _endHandleDragPosition)).dy,
+    );
+    _endHandleDragPosition = renderObject.localToGlobal(
+      Offset(0.0, nextEndHandleDragPositionLocal),
+    ).dy;
+
     final Offset adjustedOffset = Offset(
       details.globalPosition.dx,
       _endHandleDragPosition + _endHandleDragPositionToCenterOfLine,
@@ -789,12 +811,12 @@ class TextSelectionOverlay {
     ));
   }
 
-  // The contact position of the gesture at the current start handle location.
-  // Updated when the handle moves.
+  // The contact position of the gesture at the current start handle location,
+  // in global coordinates. Updated when the handle moves.
   late double _startHandleDragPosition;
 
   // The distance from _startHandleDragPosition to the center of the line that
-  // it corresponds to.
+  // it corresponds to, in global coordinates.
   late double _startHandleDragPositionToCenterOfLine;
 
   void _handleSelectionStartHandleDragStart(DragStartDetails details) {
@@ -802,17 +824,25 @@ class TextSelectionOverlay {
       return;
     }
 
-    // This adjusts for the fact that the selection handles may not
-    // perfectly cover the TextPosition that they correspond to.
     _startHandleDragPosition = details.globalPosition.dy;
-    final Offset startPoint =
-        renderObject.localToGlobal(_selectionOverlay.selectionEndpoints.first.point);
-    final double centerOfLine = startPoint.dy - renderObject.preferredLineHeight / 2;
-    _startHandleDragPositionToCenterOfLine = centerOfLine - _startHandleDragPosition;
+
+    // Use local coordinates when dealing with line height. because in case of a
+    // scale transformation, the line height will also be scaled.
+    final double centerOfLineLocal = _selectionOverlay.selectionEndpoints.first.point.dy
+        - renderObject.preferredLineHeight / 2;
+    final double centerOfLineGlobal = renderObject.localToGlobal(
+      Offset(0.0, centerOfLineLocal),
+    ).dy;
+    _startHandleDragPositionToCenterOfLine = centerOfLineGlobal - details.globalPosition.dy;
+    // This adjusts for the fact that the selection handles may not perfectly
+    // cover the TextPosition that they correspond to. We want to know the
+    // TextPosition of the place that the dragged handle points to, not
+    // necessarily exactly where the tap happened, which may be on the following
+    // line if the handle hangs down.
     final TextPosition position = renderObject.getPositionForPoint(
       Offset(
         details.globalPosition.dx,
-        centerOfLine,
+        centerOfLineGlobal,
       ),
     );
 
@@ -830,7 +860,16 @@ class TextSelectionOverlay {
       return;
     }
 
-    _startHandleDragPosition = _getHandleDy(details.globalPosition.dy, _startHandleDragPosition);
+    // This is NOT the same as details.localPosition. That is relative to the
+    // selection handle, whereas this is relative to the RenderEditable.
+    final Offset localPosition = renderObject.globalToLocal(details.globalPosition);
+    final double nextStartHandleDragPositionLocal = _getHandleDy(
+      localPosition.dy,
+      renderObject.globalToLocal(Offset(0.0, _startHandleDragPosition)).dy,
+    );
+    _startHandleDragPosition = renderObject.localToGlobal(
+      Offset(0.0, nextStartHandleDragPositionLocal),
+    ).dy;
     final Offset adjustedOffset = Offset(
       details.globalPosition.dx,
       _startHandleDragPosition + _startHandleDragPositionToCenterOfLine,
