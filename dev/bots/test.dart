@@ -1667,7 +1667,7 @@ Future<void> runFlutterWebTest(
 ) async {
   const LocalFileSystem fileSystem = LocalFileSystem();
   final String suffix = DateTime.now().microsecondsSinceEpoch.toString();
-  final File metricFile = fileSystem.file(path.join(fileSystem.systemTempDirectory.path, 'metrics_$suffix.json'));
+  final File metricFile = fileSystem.systemTempDirectory.childFile('metrics_$suffix.json');
   await runCommand(
     flutter,
     <String>[
@@ -1731,7 +1731,7 @@ Future<void> _runDartTest(String workingDirectory, {
 
   const LocalFileSystem fileSystem = LocalFileSystem();
   final String suffix = DateTime.now().microsecondsSinceEpoch.toString();
-  final File metricFile = fileSystem.file(path.join(fileSystem.systemTempDirectory.path, 'metrics_$suffix.json'));
+  final File metricFile = fileSystem.systemTempDirectory.childFile('metrics_$suffix.json');
   final List<String> args = <String>[
     'run',
     'test',
@@ -1821,7 +1821,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
 
   const LocalFileSystem fileSystem = LocalFileSystem();
   final String suffix = DateTime.now().microsecondsSinceEpoch.toString();
-  final File metricFile = fileSystem.file(path.join(fileSystem.systemTempDirectory.path, 'metrics_$suffix.json'));
+  final File metricFile = fileSystem.systemTempDirectory.childFile('metrics_$suffix.json');
   final List<String> args = <String>[
     'test',
     '--reporter=expanded',
