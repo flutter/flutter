@@ -66,6 +66,7 @@ import 'package:process/process.dart';
 import 'run_command.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
 import 'suite_runners/run_flutter_packages_tests.dart';
+import 'suite_runners/run_fuchsia_precache.dart';
 import 'suite_runners/run_skp_generator_tests.dart';
 import 'suite_runners/run_web_long_running_tests.dart';
 import 'tool_subsharding.dart';
@@ -253,7 +254,7 @@ Future<void> main(List<String> args) async {
       'realm_checker': _runRealmCheckerTest,
       'customer_testing': _runCustomerTesting,
       'analyze': _runAnalyze,
-      'fuchsia_precache': _runFuchsiaPrecache,
+      'fuchsia_precache': () => fuchsiaPrecacheRunner((flutterRoot)),
       'docs': _runDocs,
       'verify_binaries_codesigned': _runVerifyCodesigned,
       kTestHarnessShardName: _runTestHarnessTests, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
@@ -1246,31 +1247,6 @@ Future<void> _runAnalyze() async {
     <String>[
       '--enable-asserts',
       path.join(flutterRoot, 'dev', 'bots', 'analyze.dart'),
-    ],
-    workingDirectory: flutterRoot,
-  );
-}
-
-// Runs flutter_precache.
-Future<void> _runFuchsiaPrecache() async {
-  printProgress('${green}Running flutter precache tests$reset');
-  await runCommand(
-    'flutter',
-    <String>[
-      'config',
-      '--enable-fuchsia',
-    ],
-    workingDirectory: flutterRoot,
-  );
-  await runCommand(
-    'flutter',
-    <String>[
-      'precache',
-      '--flutter_runner',
-      '--fuchsia',
-      '--no-android',
-      '--no-ios',
-      '--force',
     ],
     workingDirectory: flutterRoot,
   );
