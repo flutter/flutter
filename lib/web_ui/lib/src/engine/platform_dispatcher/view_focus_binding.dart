@@ -95,11 +95,8 @@ final class ViewFocusBinding {
   }
 
   int? _viewId(DomElement? element) {
-    final DomElement? rootElement = element?.closest(DomManager.flutterViewTagName);
-    if (rootElement == null) {
-      return null;
-    }
-    return _viewManager.viewIdForRootElement(rootElement);
+    final FlutterViewManager viewManager = EnginePlatformDispatcher.instance.viewManager;
+    return viewManager.findViewForElement(element)?.viewId;
   }
 
   void _handleViewCreated(int viewId) {
