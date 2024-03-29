@@ -1091,10 +1091,12 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   // The returned list is ordered for hit testing.
   @override
   Iterable<RenderBox> get children {
+    final RenderBox? title = childForSlot(_ListTileSlot.title);
     return <RenderBox>[
       if (leading != null)
         leading!,
-      title,
+      if (title != null)
+        title,
       if (subtitle != null)
         subtitle!,
       if (trailing != null)
@@ -1315,8 +1317,9 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
       return (titleY, null, tileHeight);
     }
 
-    final double titleBaseline = getBaseline(title, childConstraints, titleBaselineType)!;
-    final double subtitleBaseline = getBaseline(subtitle, childConstraints, titleBaselineType)!;
+    final double subtitleHeight = getSize(subtitle, childConstraints).height;
+    final double titleBaseline = getBaseline(title, childConstraints, titleBaselineType) ?? titleHeight;
+    final double subtitleBaseline = getBaseline(subtitle, childConstraints, subtitleBaselineType!) ?? subtitleHeight;
 
     final double targetTitleY = (isThreeLine ? (isDense ? 22.0 : 28.0) : (isDense ? 28.0 : 32.0)) - titleBaseline;
     final double targetSubtitleY = (isThreeLine ? (isDense ? 42.0 : 48.0) : (isDense ? 48.0 : 52.0)) + visualDensity.vertical * 2.0 - subtitleBaseline;
@@ -1325,7 +1328,6 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     final double halfOverlap = math.max(targetTitleY + titleHeight - targetSubtitleY, 0) / 2;
     final double titleY = targetTitleY - halfOverlap;
     final double subtitleY = targetSubtitleY + halfOverlap;
-    final double subtitleHeight = getSize(subtitle, childConstraints).height;
     // However if either component can't maintain the minimal padding from the top/bottom edges, the ListTile enters "compat mode".
     return titleY < minVerticalPadding || subtitleY + subtitleHeight + minVerticalPadding > _targetTileHeight
       ? (minVerticalPadding, minVerticalPadding + titleHeight, 2 * _minVerticalPadding + titleHeight + subtitleHeight)
