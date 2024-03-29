@@ -1,7 +1,11 @@
 {
   "_comment": [
     "This build is only used to generate compile_commands.json for clangd ",
-    "and should not be used for any other purpose."
+    "and should not be used for any other purpose.",
+    "",
+    "Note the `flutter/tools/font_subset` target is only used because if no ",
+    "targets are specified, the build will fail, and if an empty list of ",
+    "targets are specified, all targets are built (wasteful/slow)"
   ],
   "builds": [
     {
@@ -11,13 +15,16 @@
         "debug",
         "--unoptimized",
         "--prebuilt-dart-sdk",
+        "--no-lto",
         "--no-rbe",
-        "--no-goma"
+        "--no-goma",
+        "--target-dir",
+        "linux_unopt_debug_no_rbe"
       ],
       "name": "linux_unopt_debug_no_rbe",
       "ninja": {
         "config": "linux_unopt_debug_no_rbe",
-        "targets": ["flutter/build/dart:copy_dart_sdk"]
+        "targets": ["flutter/tools/font_subset"]
       },
       "tests": [
         {
