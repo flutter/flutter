@@ -1121,13 +1121,13 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
   }
 
   /// The compare function this delegate used for determining the selection
-  /// order of the selectables.
+  /// order of the [Selectable]s.
   ///
-  /// Defaults to screen order.
+  /// Sorts the [Selectable]s by their top left [Rect].
   @override
   Comparator<Selectable> get compareOrder => _compareScreenOrder;
 
-  int _compareScreenOrder(Selectable a, Selectable b) {
+  static int _compareScreenOrder(Selectable a, Selectable b) {
     // Attempt to sort the selectables under a [_SelectableTextContainerDelegate]
     // by the top left rect.
     final Rect rectA = MatrixUtils.transformRect(
@@ -1181,7 +1181,7 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     return a.right > b.right ? 1 : -1;
   }
 
-  /// From [SelectableRegion].
+  // From [SelectableRegion].
 
   // Clears the selection on all selectables not in the range of
   // currentSelectionStartIndex..currentSelectionEndIndex.
