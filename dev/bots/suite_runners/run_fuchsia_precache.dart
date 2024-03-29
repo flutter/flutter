@@ -10,7 +10,7 @@ Future<void> fuchsiaPrecacheRunner(String flutterRoot) async {
   printProgress('${green}Running flutter precache tests$reset');
   await runCommand(
     'flutter',
-    <String>[
+    const <String>[
       'config',
       '--enable-fuchsia',
     ],
@@ -18,7 +18,7 @@ Future<void> fuchsiaPrecacheRunner(String flutterRoot) async {
   );
   await runCommand(
     'flutter',
-    <String>[
+    const <String>[
       'precache',
       '--flutter_runner',
       '--fuchsia',
