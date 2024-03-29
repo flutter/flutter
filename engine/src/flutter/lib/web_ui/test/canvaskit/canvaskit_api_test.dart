@@ -1596,7 +1596,7 @@ void _paragraphTests() {
         ..weight = canvasKit.FontWeight.Bold)
       ..fontSize = 72
       ..heightMultiplier = 1.5
-      ..halfLeading = false
+      ..halfLeading = true
       ..leading = 0
       ..strutEnabled = true
       ..forceStrutHeight = false;
@@ -1673,7 +1673,7 @@ void _paragraphTests() {
       expect(actual, within<double>(distance: actual / 100, from: expected));
     }
 
-    expectAlmost(paragraph.getAlphabeticBaseline(), 85.5);
+    expectAlmost(paragraph.getAlphabeticBaseline(), 78.6);
     expect(paragraph.didExceedMaxLines(), isFalse);
     expectAlmost(paragraph.getHeight(), 108);
     expectAlmost(paragraph.getIdeographicBaseline(), 108);
@@ -1699,7 +1699,7 @@ void _paragraphTests() {
     expectAlmost(lineMetrics.ascent, 55.6);
     expectAlmost(lineMetrics.descent, 14.8);
     expect(lineMetrics.isHardBreak, isTrue);
-    expectAlmost(lineMetrics.baseline, 85.5);
+    expectAlmost(lineMetrics.baseline, 78.6);
     expectAlmost(lineMetrics.height, 108);
     expectAlmost(lineMetrics.left, 2.5);
     expectAlmost(lineMetrics.width, 263);
