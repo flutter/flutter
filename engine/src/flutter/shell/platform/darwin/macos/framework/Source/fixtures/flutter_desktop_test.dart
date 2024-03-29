@@ -12,6 +12,10 @@ external void signalNativeTest();
 void main() {
 }
 
+@pragma('vm:entry-point')
+void empty() {
+}
+
 /// Notifies the test of a string value.
 ///
 /// This is used to notify the native side of the test of a string value from
