@@ -217,6 +217,35 @@ enum Clip {
 
 abstract class Paint {
   factory Paint() => engine.renderer.createPaint();
+
+  factory Paint.from(Paint other) {
+    // This is less efficient than copying the underlying buffer or object but
+    // it's a reasonable default, as if a user wanted to implement a copy of a
+    // paint object themselves they are unable to do much better than this.
+    //
+    // TODO(matanlurey): Web team, if important to optimize, could:
+    // 1. Add a `engine.renderer.copyPaint` method.
+    // 2. Use the below code as the default implementation.
+    // 3. Have renderer-specific implementations override with optimized code.
+    final Paint paint = Paint();
+    paint
+      ..blendMode = other.blendMode
+      ..color = other.color
+      ..colorFilter = other.colorFilter
+      ..filterQuality = other.filterQuality
+      ..imageFilter = other.imageFilter
+      ..invertColors = other.invertColors
+      ..isAntiAlias = other.isAntiAlias
+      ..maskFilter = other.maskFilter
+      ..shader = other.shader
+      ..strokeCap = other.strokeCap
+      ..strokeJoin = other.strokeJoin
+      ..strokeMiterLimit = other.strokeMiterLimit
+      ..strokeWidth = other.strokeWidth
+      ..style = other.style;
+    return paint;
+  }
+
   BlendMode get blendMode;
   set blendMode(BlendMode value);
   PaintingStyle get style;
