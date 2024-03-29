@@ -405,10 +405,6 @@ ContentContext::ContentContext(
   texture_strict_src_pipelines_.CreateDefault(*context_, options);
   position_uv_pipelines_.CreateDefault(*context_, options);
   tiled_texture_pipelines_.CreateDefault(*context_, options);
-  gaussian_blur_noalpha_decal_pipelines_.CreateDefault(*context_,
-                                                       options_trianglestrip);
-  gaussian_blur_noalpha_nodecal_pipelines_.CreateDefault(*context_,
-                                                         options_trianglestrip);
   kernel_decal_pipelines_.CreateDefault(*context_, options_trianglestrip);
   kernel_nodecal_pipelines_.CreateDefault(*context_, options_trianglestrip);
   border_mask_blur_pipelines_.CreateDefault(*context_, options_trianglestrip);
