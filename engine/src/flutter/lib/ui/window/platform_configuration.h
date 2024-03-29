@@ -262,8 +262,7 @@ class PlatformConfigurationClient {
 /// @brief      A class for holding and distributing platform-level information
 ///             to and from the Dart code in Flutter's framework.
 ///
-///             It handles communication between the engine and the framework,
-///             and owns the main window.
+///             It handles communication between the engine and the framework.
 ///
 ///             It communicates with the RuntimeController through the use of a
 ///             PlatformConfigurationClient interface, which the
@@ -315,7 +314,9 @@ class PlatformConfiguration final {
   /// @param[in]  view_id           The ID of the new view.
   /// @param[in]  viewport_metrics  The initial viewport metrics for the view.
   ///
-  void AddView(int64_t view_id, const ViewportMetrics& view_metrics);
+  /// @return     Whether the view was added.
+  ///
+  bool AddView(int64_t view_id, const ViewportMetrics& view_metrics);
 
   //----------------------------------------------------------------------------
   /// @brief      Notify the framework that a view is no longer available.

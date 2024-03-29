@@ -50,6 +50,16 @@ class Window;
 ///
 class RuntimeController : public PlatformConfigurationClient {
  public:
+  /// A callback that's invoked after this `RuntimeController` attempts to
+  /// add a view to the Dart isolate.
+  ///
+  /// If the Dart isolate is not launched yet, this callback will be stored
+  /// and invoked after the isolate is launched.
+  ///
+  /// The `added` parameter is false if the add operation fails or was
+  /// cancelled while pending using `RemoveView`.
+  using AddViewCallback = std::function<void(bool added)>;
+
   //----------------------------------------------------------------------------
   /// @brief      Creates a new instance of a runtime controller. This is
   ///             usually only done by the engine instance associated with the
@@ -174,23 +184,43 @@ class RuntimeController : public PlatformConfigurationClient {
   ///
   ///             A view must be added before other methods can refer to it,
   ///             including the implicit view. Adding a view that already exists
-  ///             triggers an assertion.
+  ///             is an error.
+  ///
+  ///             The `callback` is invoked when the add operation is attempted,
+  ///             failed, or is cancelled.
+  ///
+  ///             If the isolate is not running, the view add will be queued and
+  ///             flushed to the isolate when it starts. Calling `RemoveView`
+  ///             before the isolate is launched cancels the add operation.
+  ///
   ///
   /// @param[in]  view_id           The ID of the new view.
   /// @param[in]  viewport_metrics  The initial viewport metrics for the view.
+  /// @param[in]  callback          Callback that will be invoked after the add
+  ///                               operation is attempted or cancelled.
   ///
-  bool AddView(int64_t view_id, const ViewportMetrics& view_metrics);
+  void AddView(int64_t view_id,
+               const ViewportMetrics& view_metrics,
+               AddViewCallback callback);
 
   //----------------------------------------------------------------------------
   /// @brief      Notify the isolate that a view is no longer available.
   ///
-  ///             Removing a view that does not exist triggers an assertion.
+  ///             Views that are added before the isolate is started are
+  ///             queued until the isolate is launched. If one of these
+  ///             "pending" views are removed, the view add is cancelled:
+  ///             the `AddViewCallback` will be invoked with an `added` of
+  ///             false and `RemoveView` will return false.
   ///
   ///             The implicit view (kFlutterImplicitViewId) should never be
   ///             removed. Doing so triggers an assertion.
   ///
   /// @param[in]  view_id  The ID of the view.
   ///
+  /// @return     If the remove view operation was forwarded to the running
+  ///             isolate. False if the view does not exist. If the Dart isolate
+  ///             is not running, then the pending view creation (if any) is
+  ///             cancelled and the return value is always false.
   bool RemoveView(int64_t view_id);
 
   //----------------------------------------------------------------------------
@@ -659,6 +689,12 @@ class RuntimeController : public PlatformConfigurationClient {
   std::shared_ptr<PlatformIsolateManager> platform_isolate_manager_ =
       std::shared_ptr<PlatformIsolateManager>(new PlatformIsolateManager());
   bool has_flushed_runtime_state_ = false;
+
+  // Callbacks when `AddView` was called before the Dart isolate is launched.
+  //
+  // These views will be added when `FlushRuntimeStateToIsolate` is called.
+  // This is no longer used once the Dart isolate starts.
+  std::unordered_map<int64_t, AddViewCallback> pending_add_view_callbacks_;
 
   // Tracks the views that have been called `Render` during a frame.
   //
