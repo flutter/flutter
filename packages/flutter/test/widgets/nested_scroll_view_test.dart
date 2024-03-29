@@ -2424,7 +2424,8 @@ void main() {
       expect(tester.getCenter(find.text('Item 49')).dy, equals(585.0));
 
       // Overscroll, dragging like this will release with 0 velocity.
-      await tester.drag(find.text('Item 49'), const Offset(0.0, -50.0), warnIfMissed: false);
+      // , warnIfMissed: false
+      await tester.drag(find.text('Item 49'), const Offset(0.0, -50.0));
       await tester.pump();
       // If handled correctly, the last item should still be visible and
       // progressing back down to the bottom edge, instead of jumping further
@@ -2452,7 +2453,8 @@ void main() {
       expect(tester.getCenter(find.text('Item 49')).dy, equals(585.0));
 
       // Fling again to trigger first ballistic activity.
-      await tester.fling(find.text('Item 48'), const Offset(0.0, -50.0), 10000.0, warnIfMissed: false);
+      // , warnIfMissed: false
+      await tester.fling(find.text('Item 48'), const Offset(0.0, -50.0), 10000.0);
       await tester.pump();
 
       // Tap after releasing the overscroll to trigger secondary inner ballistic
@@ -2754,7 +2756,8 @@ void main() {
     await tester.pumpAndSettle();
 
     // Fling down for AppBar to show
-    await tester.drag(find.text('Item 29'), const Offset(0.0, 250 - 133.7981622869321), warnIfMissed: false);
+    // , warnIfMissed: false
+    await tester.drag(find.text('Item 29'), const Offset(0.0, 250 - 133.7981622869321));
 
     // Fling up to trigger ballistic activity
     await tester.fling(find.text('Item 25'), const Offset(0.0, -50.0), 4000.0);
