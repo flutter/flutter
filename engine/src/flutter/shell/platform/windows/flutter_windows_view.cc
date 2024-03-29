@@ -105,10 +105,6 @@ FlutterWindowsView::~FlutterWindowsView() {
   // Notify the engine the view's child window will no longer be visible.
   engine_->OnWindowStateEvent(GetWindowHandle(), WindowStateEvent::kHide);
 
-  // The engine renders into the view's surface. The engine must be
-  // shutdown before the view's resources can be destroyed.
-  engine_->Stop();
-
   DestroyRenderSurface();
 }
 

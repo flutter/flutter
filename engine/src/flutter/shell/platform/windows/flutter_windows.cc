@@ -130,6 +130,7 @@ FlutterDesktopViewControllerRef FlutterDesktopEngineCreateViewController(
 
 void FlutterDesktopViewControllerDestroy(FlutterDesktopViewControllerRef ref) {
   auto controller = ViewControllerFromHandle(ref);
+  controller->Destroy();
   delete controller;
 }
 

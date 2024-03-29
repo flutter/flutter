@@ -139,6 +139,9 @@ TEST_F(WindowsTest, EngineCanTransitionToHeadless) {
 
   // The engine is back in headless mode now.
   ASSERT_NE(engine, nullptr);
+
+  auto engine_ptr = reinterpret_cast<FlutterWindowsEngine*>(engine.get());
+  ASSERT_TRUE(engine_ptr->running());
 }
 
 // Verify that accessibility features are initialized when a view is created.
