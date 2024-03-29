@@ -11,6 +11,15 @@ import 'package:ui/ui.dart' as ui;
 class SkwasmPaint extends SkwasmObjectWrapper<RawPaint> implements ui.Paint {
   SkwasmPaint() : super(paintCreate(), _registry);
 
+  // Must be kept in sync with the default in paint.cc.
+  static const double _kStrokeMiterLimitDefault = 4.0;
+
+  // Must be kept in sync with the default in paint.cc.
+  static const int _kColorDefault = 0xFF000000;
+
+  // Must be kept in sync with the default in paint.cc.
+  static final int _kBlendModeDefault = ui.BlendMode.srcOver.index;
+
   static final SkwasmFinalizationRegistry<RawPaint> _registry =
     SkwasmFinalizationRegistry<RawPaint>(paintDispose);
 
@@ -173,7 +182,73 @@ class SkwasmPaint extends SkwasmObjectWrapper<RawPaint> implements ui.Paint {
     _setEffectiveColorFilter();
   }
 
-  // TODO(yjbanov): https://github.com/flutter/flutter/issues/141639
   @override
-  String toString() => 'Paint()';
+  String toString() {
+    String resultString = 'Paint()';
+
+    assert(() {
+      final StringBuffer result = StringBuffer();
+      String semicolon = '';
+      result.write('Paint(');
+      if (style == ui.PaintingStyle.stroke) {
+        result.write('$style');
+        if (strokeWidth != 0.0) {
+          result.write(' ${strokeWidth.toStringAsFixed(1)}');
+        } else {
+          result.write(' hairline');
+        }
+        if (strokeCap != ui.StrokeCap.butt) {
+          result.write(' $strokeCap');
+        }
+        if (strokeJoin == ui.StrokeJoin.miter) {
+          if (strokeMiterLimit != _kStrokeMiterLimitDefault) {
+            result.write(' $strokeJoin up to ${strokeMiterLimit.toStringAsFixed(1)}');
+          }
+        } else {
+          result.write(' $strokeJoin');
+        }
+        semicolon = '; ';
+      }
+      if (!isAntiAlias) {
+        result.write('${semicolon}antialias off');
+        semicolon = '; ';
+      }
+      if (color != const ui.Color(_kColorDefault)) {
+        result.write('$semicolon$color');
+        semicolon = '; ';
+      }
+      if (blendMode.index != _kBlendModeDefault) {
+        result.write('$semicolon$blendMode');
+        semicolon = '; ';
+      }
+      if (colorFilter != null) {
+        result.write('${semicolon}colorFilter: $colorFilter');
+        semicolon = '; ';
+      }
+      if (maskFilter != null) {
+        result.write('${semicolon}maskFilter: $maskFilter');
+        semicolon = '; ';
+      }
+      if (filterQuality != ui.FilterQuality.none) {
+        result.write('${semicolon}filterQuality: $filterQuality');
+        semicolon = '; ';
+      }
+      if (shader != null) {
+        result.write('${semicolon}shader: $shader');
+        semicolon = '; ';
+      }
+      if (imageFilter != null) {
+        result.write('${semicolon}imageFilter: $imageFilter');
+        semicolon = '; ';
+      }
+      if (invertColors) {
+        result.write('${semicolon}invert: $invertColors');
+      }
+      result.write(')');
+      resultString = result.toString();
+      return true;
+    }());
+
+    return resultString;
+  }
 }

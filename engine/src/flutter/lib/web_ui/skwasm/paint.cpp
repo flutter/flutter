@@ -82,7 +82,7 @@ SKWASM_EXPORT void paint_setMiterLimit(SkPaint* paint, SkScalar miterLimit) {
   paint->setStrokeMiter(miterLimit);
 }
 
-SKWASM_EXPORT SkScalar paint_getMiterLImit(SkPaint* paint) {
+SKWASM_EXPORT SkScalar paint_getMiterLimit(SkPaint* paint) {
   return paint->getStrokeMiter();
 }
 
