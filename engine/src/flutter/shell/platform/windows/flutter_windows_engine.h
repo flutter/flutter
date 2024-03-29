@@ -124,6 +124,9 @@ class FlutterWindowsEngine {
   std::unique_ptr<FlutterWindowsView> CreateView(
       std::unique_ptr<WindowBindingHandler> window);
 
+  // Remove a view. The engine will no longer render into it.
+  virtual void RemoveView(FlutterViewId view_id);
+
   // Get a view that displays this engine's content.
   //
   // Returns null if the view does not exist.

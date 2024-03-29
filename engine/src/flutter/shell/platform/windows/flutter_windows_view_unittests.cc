@@ -18,6 +18,7 @@
 #include "flutter/shell/platform/windows/flutter_window.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_texture_registrar.h"
+#include "flutter/shell/platform/windows/flutter_windows_view_controller.h"
 #include "flutter/shell/platform/windows/testing/egl/mock_context.h"
 #include "flutter/shell/platform/windows/testing/egl/mock_manager.h"
 #include "flutter/shell/platform/windows/testing/egl/mock_window_surface.h"
@@ -121,6 +122,7 @@ class MockFlutterWindowsEngine : public FlutterWindowsEngine {
 
   MOCK_METHOD(bool, running, (), (const));
   MOCK_METHOD(bool, Stop, (), ());
+  MOCK_METHOD(void, RemoveView, (FlutterViewId view_id), ());
   MOCK_METHOD(bool, PostRasterThreadTask, (fml::closure), (const));
 
  private:
@@ -241,6 +243,8 @@ TEST(FlutterWindowsViewTest, Shutdown) {
       std::make_unique<NiceMock<MockWindowBindingHandler>>();
   auto egl_manager = std::make_unique<egl::MockManager>();
   auto surface = std::make_unique<egl::MockWindowSurface>();
+
+  auto engine_ptr = engine.get();
   auto surface_ptr = surface.get();
 
   EngineModifier modifier{engine.get()};
@@ -250,12 +254,16 @@ TEST(FlutterWindowsViewTest, Shutdown) {
     std::unique_ptr<FlutterWindowsView> view =
         engine->CreateView(std::move(window_binding_handler));
 
+    auto view_id = view->view_id();
     ViewModifier view_modifier{view.get()};
     view_modifier.SetSurface(std::move(surface));
 
-    // The engine must be stopped before the surface can be destroyed.
+    FlutterWindowsViewController controller{std::move(engine), std::move(view)};
+
+    // The view must be removed before the surface can be destroyed.
     InSequence s;
-    EXPECT_CALL(*engine.get(), Stop).Times(1);
+    EXPECT_CALL(*engine_ptr, running).WillOnce(Return(true));
+    EXPECT_CALL(*engine_ptr, RemoveView(view_id)).Times(1);
     EXPECT_CALL(*surface_ptr, Destroy).Times(1);
   }
 }
@@ -1392,7 +1400,6 @@ TEST(FlutterWindowsViewTest, DisablesVSyncAtStartup) {
   EXPECT_CALL(*surface_ptr, SetVSyncEnabled(false)).WillOnce(Return(true));
   EXPECT_CALL(render_context, ClearCurrent).WillOnce(Return(true));
 
-  EXPECT_CALL(*engine.get(), Stop).Times(1);
   EXPECT_CALL(*surface_ptr, Destroy).Times(1);
 
   EngineModifier modifier{engine.get()};
@@ -1430,7 +1437,6 @@ TEST(FlutterWindowsViewTest, EnablesVSyncAtStartup) {
   EXPECT_CALL(*surface_ptr, SetVSyncEnabled(true)).WillOnce(Return(true));
   EXPECT_CALL(render_context, ClearCurrent).WillOnce(Return(true));
 
-  EXPECT_CALL(*engine.get(), Stop).Times(1);
   EXPECT_CALL(*surface_ptr, Destroy).Times(1);
 
   EngineModifier modifier{engine.get()};
@@ -1471,7 +1477,6 @@ TEST(FlutterWindowsViewTest, DisablesVSyncAfterStartup) {
   EXPECT_CALL(*surface_ptr, MakeCurrent).WillOnce(Return(true));
   EXPECT_CALL(*surface_ptr, SetVSyncEnabled(false)).WillOnce(Return(true));
   EXPECT_CALL(render_context, ClearCurrent).WillOnce(Return(true));
-  EXPECT_CALL(*engine.get(), Stop).Times(1);
   EXPECT_CALL(*surface_ptr, Destroy).Times(1);
 
   EngineModifier modifier{engine.get()};
@@ -1514,7 +1519,6 @@ TEST(FlutterWindowsViewTest, EnablesVSyncAfterStartup) {
   EXPECT_CALL(*surface_ptr, MakeCurrent).WillOnce(Return(true));
   EXPECT_CALL(*surface_ptr, SetVSyncEnabled(true)).WillOnce(Return(true));
   EXPECT_CALL(render_context, ClearCurrent).WillOnce(Return(true));
-  EXPECT_CALL(*engine.get(), Stop).Times(1);
   EXPECT_CALL(*surface_ptr, Destroy).Times(1);
 
   EngineModifier modifier{engine.get()};
@@ -1563,7 +1567,6 @@ TEST(FlutterWindowsViewTest, UpdatesVSyncOnDwmUpdates) {
   EXPECT_CALL(*surface_ptr, SetVSyncEnabled(false)).WillOnce(Return(true));
   EXPECT_CALL(render_context, ClearCurrent).WillOnce(Return(true));
 
-  EXPECT_CALL(*engine.get(), Stop).Times(1);
   EXPECT_CALL(*surface_ptr, Destroy).Times(1);
 
   EngineModifier engine_modifier{engine.get()};

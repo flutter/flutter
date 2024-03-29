@@ -502,6 +502,24 @@ std::unique_ptr<FlutterWindowsView> FlutterWindowsEngine::CreateView(
   return std::move(view);
 }
 
+void FlutterWindowsEngine::RemoveView(FlutterViewId view_id) {
+  FML_DCHECK(running());
+  FML_DCHECK(views_.find(view_id) != views_.end());
+
+  if (view_id == kImplicitViewId) {
+    // The engine and framework assume the implicit view always exists.
+    // Attempts to render to the implicit view will be ignored.
+    views_.erase(view_id);
+    return;
+  }
+
+  // TODO(loicsharma): Remove the view from the engine using the
+  // `FlutterEngineRemoveView` embedder API. Windows does not
+  // support views other than the implicit view yet.
+  // https://github.com/flutter/flutter/issues/144810
+  FML_UNREACHABLE();
+}
+
 void FlutterWindowsEngine::OnVsync(intptr_t baton) {
   std::chrono::nanoseconds current_time =
       std::chrono::nanoseconds(embedder_api_.GetCurrentTime());
