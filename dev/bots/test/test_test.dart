@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
+import '../suite_runners/run_flutter_packages_tests.dart';
 import '../test.dart';
 import 'common.dart';
 
@@ -92,13 +93,13 @@ void main() {
 
     test('commit hash', () async {
       packagesVersionFile.writeAsStringSync(kSampleHash);
-      final String actualHash = await getFlutterPackagesVersion(fileSystem: memoryFileSystem, packagesVersionFile: packagesVersionFile.path);
+      final String actualHash = await getFlutterPackagesVersion(flutterRoot: flutterRoot, fileSystem: memoryFileSystem, packagesVersionFile: packagesVersionFile.path);
       expect(actualHash, kSampleHash);
     });
 
     test('commit hash with newlines', () async {
       packagesVersionFile.writeAsStringSync('\n$kSampleHash\n');
-      final String actualHash = await getFlutterPackagesVersion(fileSystem: memoryFileSystem, packagesVersionFile: packagesVersionFile.path);
+      final String actualHash = await getFlutterPackagesVersion(flutterRoot: flutterRoot, fileSystem: memoryFileSystem, packagesVersionFile: packagesVersionFile.path);
       expect(actualHash, kSampleHash);
     });
   });
