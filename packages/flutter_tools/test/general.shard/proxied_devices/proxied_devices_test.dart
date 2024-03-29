@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/daemon.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/device_vm_service_discovery_for_attach.dart';
 import 'package:flutter_tools/src/proxied_devices/devices.dart';
 import 'package:flutter_tools/src/proxied_devices/file_transfer.dart';
 import 'package:test/fake.dart';
@@ -803,6 +804,121 @@ void main() {
       expect(localDds.shutdownCalled, true);
     });
   });
+
+  group('ProxiedVMServiceDiscoveryForAttach', () {
+    testWithoutContext('sends the request and forwards the port', () async {
+      final FakeProxiedPortForwarder portForwarder = FakeProxiedPortForwarder();
+      portForwarder.forwardReturnValue = 400;
+      final ProxiedVMServiceDiscoveryForAttach discovery = ProxiedVMServiceDiscoveryForAttach(
+        clientDaemonConnection,
+        'test_device',
+        proxiedPortForwarder: portForwarder,
+        fallbackDiscovery: () => throw UnimplementedError(),
+        ipv6: false,
+        logger: bufferLogger,
+      );
+
+      final Completer<Uri> uriCompleter = Completer<Uri>();
+
+      // Start listening on the stream to trigger sending the request.
+      discovery.uris.listen(uriCompleter.complete);
+
+      final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
+      final DaemonMessage startMessage = await broadcastOutput.first;
+      expect(startMessage.data['id'], isNotNull);
+      expect(startMessage.data['method'], 'device.startVMServiceDiscoveryForAttach');
+      expect(startMessage.data['params'], <String, Object?>{
+        'deviceId': 'test_device',
+        'appId': null,
+        'fuchsiaModule': null,
+        'filterDevicePort': null,
+        'ipv6': false,
+      });
+
+      serverDaemonConnection.sendResponse(startMessage.data['id']!, 'request_id');
+      serverDaemonConnection.sendEvent('device.VMServiceDiscoveryForAttach.request_id', 'http://127.0.0.1:300/auth_code');
+
+      expect(await uriCompleter.future, Uri.parse('http://127.0.0.1:400/auth_code'));
+      expect(portForwarder.forwardedDevicePort, 300);
+      expect(portForwarder.forwardedHostPort, null);
+    });
+
+    testWithoutContext('sends additional information, and forwards the correct port', () async {
+      final FakeProxiedPortForwarder portForwarder = FakeProxiedPortForwarder();
+      portForwarder.forwardReturnValue = 400;
+      final ProxiedVMServiceDiscoveryForAttach discovery = ProxiedVMServiceDiscoveryForAttach(
+        clientDaemonConnection,
+        'test_device',
+        proxiedPortForwarder: portForwarder,
+        fallbackDiscovery: () => throw UnimplementedError(),
+        appId: 'test_app_id',
+        fuchsiaModule: 'test_fuchsia_module',
+        filterDevicePort: 100,
+        expectedHostPort: 200,
+        ipv6: false,
+        logger: bufferLogger,
+      );
+
+      final Completer<Uri> uriCompleter = Completer<Uri>();
+
+      // Start listening on the stream to trigger sending the request.
+      discovery.uris.listen(uriCompleter.complete);
+
+      final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
+      final DaemonMessage startMessage = await broadcastOutput.first;
+      expect(startMessage.data['id'], isNotNull);
+      expect(startMessage.data['method'], 'device.startVMServiceDiscoveryForAttach');
+      expect(startMessage.data['params'], <String, Object?>{
+        'deviceId': 'test_device',
+        'appId': 'test_app_id',
+        'fuchsiaModule': 'test_fuchsia_module',
+        'filterDevicePort': 100,
+        'ipv6': false,
+      });
+
+      serverDaemonConnection.sendResponse(startMessage.data['id']!, 'request_id');
+      serverDaemonConnection.sendEvent('device.VMServiceDiscoveryForAttach.request_id', 'http://127.0.0.1:300/auth_code');
+
+      expect(await uriCompleter.future, Uri.parse('http://127.0.0.1:400/auth_code'));
+      expect(portForwarder.forwardedDevicePort, 300);
+      expect(portForwarder.forwardedHostPort, 200);
+    });
+
+    testWithoutContext('use the fallback discovery if the remote daemon does not support proxied discovery', () async {
+      final FakeProxiedPortForwarder portForwarder = FakeProxiedPortForwarder();
+      final Stream<Uri> fallbackUri = Stream<Uri>.value(Uri.parse('http://127.0.0.1:500/fallback_auth_code'));
+      final ProxiedVMServiceDiscoveryForAttach discovery = ProxiedVMServiceDiscoveryForAttach(
+        clientDaemonConnection,
+        'test_device',
+        proxiedPortForwarder: portForwarder,
+        fallbackDiscovery: () => FakeVMServiceDiscoveryForAttach(fallbackUri),
+        ipv6: false,
+        logger: bufferLogger,
+      );
+
+      final Completer<Uri> uriCompleter = Completer<Uri>();
+
+      // Start listening on the stream to trigger sending the request.
+      discovery.uris.listen(uriCompleter.complete);
+
+      final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
+      final DaemonMessage startMessage = await broadcastOutput.first;
+      expect(startMessage.data['id'], isNotNull);
+      expect(startMessage.data['method'], 'device.startVMServiceDiscoveryForAttach');
+      expect(startMessage.data['params'], <String, Object?>{
+        'deviceId': 'test_device',
+        'appId': null,
+        'fuchsiaModule': null,
+        'filterDevicePort': null,
+        'ipv6': false,
+      });
+      serverDaemonConnection.sendErrorResponse(startMessage.data['id']!, 'command not understood: device.startDartDevelopmentService', StackTrace.current);
+
+      expect(await uriCompleter.future, Uri.parse('http://127.0.0.1:500/fallback_auth_code'));
+      expect(portForwarder.forwardedDevicePort, null);
+      expect(portForwarder.forwardedHostPort, null);
+    });
+  });
 }
 
 class FakeDaemonStreams implements DaemonStreams {
@@ -998,4 +1114,11 @@ class FakeFileTransfer extends Fake implements FileTransfer {
 
   @override
   Future<Uint8List> binaryForRebuilding(File file, List<FileDeltaBlock> delta) async => binary!;
+}
+
+class FakeVMServiceDiscoveryForAttach extends Fake implements VMServiceDiscoveryForAttach {
+  FakeVMServiceDiscoveryForAttach(this.uris);
+
+  @override
+  Stream<Uri> uris;
 }

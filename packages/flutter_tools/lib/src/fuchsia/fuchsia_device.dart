@@ -21,6 +21,7 @@ import '../base/time.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
+import '../device_vm_service_discovery_for_attach.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
@@ -595,6 +596,33 @@ class FuchsiaDevice extends Device {
   @override
   void clearLogs() {}
 
+  @override
+  VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
+    String? appId,
+    String? fuchsiaModule,
+    int? filterDevicePort,
+    int? expectedHostPort,
+    required bool ipv6,
+    required Logger logger,
+  }) {
+    if (fuchsiaModule == null) {
+      throwToolExit("'--module' is required for attaching to a Fuchsia device");
+    }
+    if (expectedHostPort != null) {
+      throwToolExit("'--host-vmservice-port' is not supported when attaching to a Fuchsia device");
+    }
+    FuchsiaIsolateDiscoveryProtocol? isolateDiscoveryProtocol;
+    try {
+      isolateDiscoveryProtocol = getIsolateDiscoveryProtocol(fuchsiaModule);
+      return FuchsiaIsolateVMServiceDiscoveryForAttach(isolateDiscoveryProtocol);
+    } on Exception {
+      isolateDiscoveryProtocol?.dispose();
+      final List<ForwardedPort> ports = portForwarder.forwardedPorts.toList();
+      ports.forEach(portForwarder.unforward);
+      rethrow;
+    }
+  }
+
   /// [true] if the current host address is IPv6.
   late final bool ipv6 = isIPv6Address(id);
 
@@ -737,6 +765,14 @@ class FuchsiaDevice extends Device {
   Future<void> dispose() async {
     await _portForwarder?.dispose();
   }
+}
+
+class FuchsiaIsolateVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
+  FuchsiaIsolateVMServiceDiscoveryForAttach(this.isolateDiscoveryProtocol);
+  final FuchsiaIsolateDiscoveryProtocol isolateDiscoveryProtocol;
+
+  @override
+  Stream<Uri> get uris => Stream<Uri>.fromFuture(Future<Uri>.value(isolateDiscoveryProtocol.uri)).asBroadcastStream();
 }
 
 class FuchsiaIsolateDiscoveryProtocol {
