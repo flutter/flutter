@@ -11,7 +11,6 @@ import android.graphics.Canvas;
 import android.graphics.ImageFormat;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.Shader.TileMode;
 import android.hardware.HardwareBuffer;
 import android.media.Image;
@@ -62,7 +61,7 @@ public class ExternalTextureFlutterActivity extends TestActivity {
 
     String surfaceRenderer = getIntent().getStringExtra("surface_renderer");
     assert surfaceRenderer != null;
-    flutterRenderer = selectSurfaceRenderer(surfaceRenderer, getIntent().getExtras());
+    flutterRenderer = selectSurfaceRenderer(surfaceRenderer);
 
     // Create and place a SurfaceView above the Flutter content.
     SurfaceView surfaceView = new SurfaceView(getContext());
@@ -98,19 +97,18 @@ public class ExternalTextureFlutterActivity extends TestActivity {
     }
   }
 
-  private SurfaceRenderer selectSurfaceRenderer(String surfaceRenderer, Bundle extras) {
+  private SurfaceRenderer selectSurfaceRenderer(String surfaceRenderer) {
     switch (surfaceRenderer) {
       case "image":
         if (VERSION.SDK_INT >= API_LEVELS.API_23) {
           // CanvasSurfaceRenderer doesn't work correctly when used with ImageSurfaceRenderer.
           // Use MediaSurfaceRenderer for now.
-          return new ImageSurfaceRenderer(
-              selectSurfaceRenderer("media", extras), extras.getParcelable("crop"));
+          return new ImageSurfaceRenderer(selectSurfaceRenderer("media"));
         } else {
           throw new RuntimeException("ImageSurfaceRenderer not supported");
         }
       case "media":
-        return new MediaSurfaceRenderer(this::createMediaExtractor, extras.getInt("rotation", 0));
+        return new MediaSurfaceRenderer(this::createMediaExtractor);
       case "canvas":
       default:
         return new CanvasSurfaceRenderer();
@@ -220,7 +218,6 @@ public class ExternalTextureFlutterActivity extends TestActivity {
   /** Decodes a sample video into the attached Surface. */
   private static class MediaSurfaceRenderer implements SurfaceRenderer {
     private final Supplier<MediaExtractor> extractorSupplier;
-    private final int rotation;
     private CountDownLatch onFirstFrame;
 
     private Surface surface;
@@ -228,9 +225,8 @@ public class ExternalTextureFlutterActivity extends TestActivity {
     private MediaFormat format;
     private Thread decodeThread;
 
-    protected MediaSurfaceRenderer(Supplier<MediaExtractor> extractorSupplier, int rotation) {
+    protected MediaSurfaceRenderer(Supplier<MediaExtractor> extractorSupplier) {
       this.extractorSupplier = extractorSupplier;
-      this.rotation = rotation;
     }
 
     @Override
@@ -240,10 +236,6 @@ public class ExternalTextureFlutterActivity extends TestActivity {
 
       extractor = extractorSupplier.get();
       format = extractor.getTrackFormat(0);
-
-      // NOTE: MediaFormat.KEY_ROTATION was not available until 23+, but the key is still handled on
-      // API 21+.
-      format.setInteger("rotation-degrees", rotation);
 
       decodeThread = new Thread(this::decodeThreadMain);
       decodeThread.start();
@@ -338,8 +330,6 @@ public class ExternalTextureFlutterActivity extends TestActivity {
   @RequiresApi(API_LEVELS.API_23)
   private static class ImageSurfaceRenderer implements SurfaceRenderer {
     private final SurfaceRenderer inner;
-    private final Rect crop;
-
     private CountDownLatch onFirstFrame;
     private ImageReader reader;
     private ImageWriter writer;
@@ -350,9 +340,8 @@ public class ExternalTextureFlutterActivity extends TestActivity {
     private boolean canReadImage = true;
     private boolean canWriteImage = true;
 
-    protected ImageSurfaceRenderer(SurfaceRenderer inner, Rect crop) {
+    protected ImageSurfaceRenderer(SurfaceRenderer inner) {
       this.inner = inner;
-      this.crop = crop;
     }
 
     @Override
@@ -399,7 +388,6 @@ public class ExternalTextureFlutterActivity extends TestActivity {
 
       canReadImage = false;
       Image image = reader.acquireLatestImage();
-      image.setCropRect(crop);
       try {
         canWriteImage = false;
         writer.queueInputImage(image);
