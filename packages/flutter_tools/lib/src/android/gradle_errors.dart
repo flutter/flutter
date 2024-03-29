@@ -441,10 +441,17 @@ final GradleHandledError incompatibleKotlinVersionHandler = GradleHandledError(
     final File gradleFile = project.directory
         .childDirectory('android')
         .childFile('build.gradle');
+    final File settingsFile = project.directory
+        .childDirectory('android')
+        .childFile('settings.gradle');
     globals.printBox(
       '${globals.logger.terminal.warningMark} Your project requires a newer version of the Kotlin Gradle plugin.\n'
-      'Find the latest version on https://kotlinlang.org/docs/releases.html#release-details, then update ${gradleFile.path}:\n'
-      "ext.kotlin_version = '<latest-version>'",
+          'Find the latest version on https://kotlinlang.org/docs/releases.html#release-details, then update the \n'
+          'version number of the plugin with id "org.jetbrains.kotlin.android" in the plugins block of \n'
+          '${settingsFile.path}.\n\n'
+          'Alternatively (if your project was created before Flutter 3.19), update \n'
+          '${gradleFile.path}\n'
+          "ext.kotlin_version = '<latest-version>'",
       title: _boxTitle,
     );
     return GradleBuildStatus.exit;
