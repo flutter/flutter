@@ -7,7 +7,6 @@ import 'package:test/test.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
-import 'utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -49,23 +48,18 @@ Future<void> testMain() async {
       tileMode: ui.TileMode.mirror,
     );
 
-    if (!isSkwasm) {
-      expect(
-        paint.toString(),
-        'Paint('
-        'Color(0xaabbccdd); '
-        'BlendMode.darken; '
-        'colorFilter: ColorFilter.linearToSrgbGamma(); '
-        'maskFilter: MaskFilter.blur(BlurStyle.normal, 1.7); '
-        'filterQuality: FilterQuality.high; '
-        'shader: Gradient(); '
-        'imageFilter: ImageFilter.blur(1.9, 2.1, mirror); '
-        'invert: true'
-        ')',
-      );
-    } else {
-      // TODO(yjbanov): https://github.com/flutter/flutter/issues/141639
-      expect(paint.toString(), 'Paint()');
-    }
+    expect(
+      paint.toString(),
+      'Paint('
+      'Color(0xaabbccdd); '
+      'BlendMode.darken; '
+      'colorFilter: ColorFilter.linearToSrgbGamma(); '
+      'maskFilter: MaskFilter.blur(BlurStyle.normal, 1.7); '
+      'filterQuality: FilterQuality.high; '
+      'shader: Gradient(); '
+      'imageFilter: ImageFilter.blur(1.9, 2.1, mirror); '
+      'invert: true'
+      ')',
+    );
   });
 }
