@@ -87,6 +87,11 @@ void throwsRangeError(dynamic d) {
   Expect.throwsRangeError(d as void Function());
 }
 
+/// A [Matcher] that matches functions that throw a [RangeError] when invoked.
+void throwsFormatException(dynamic d) {
+  Expect.throwsFormatException(d as void Function());
+}
+
 /// Gives a [Matcher] that asserts that the value being matched is a [String]
 /// that contains `s` as a substring.
 Matcher contains(String s) => (dynamic d) {
