@@ -65,17 +65,12 @@
 
 @implementation DartVMServiceDNSServiceDelegate {
   DNSServiceRef _dnsServiceRef;
-  DNSServiceRef _legacyDnsServiceRef;
 }
 
 - (void)stopService {
   if (_dnsServiceRef) {
     DNSServiceRefDeallocate(_dnsServiceRef);
     _dnsServiceRef = NULL;
-  }
-  if (_legacyDnsServiceRef) {
-    DNSServiceRefDeallocate(_legacyDnsServiceRef);
-    _legacyDnsServiceRef = NULL;
   }
 }
 
@@ -91,7 +86,6 @@
   uint32_t interfaceIndex = 0;
 #endif  // TARGET_IPHONE_SIMULATOR
   const char* registrationType = "_dartVmService._tcp";
-  const char* legacyRegistrationType = "_dartobservatory._tcp";
 
   const char* domain = "local.";  // default domain
   uint16_t port = [[url port] unsignedShortValue];
@@ -104,20 +98,6 @@
 
   if (err == 0) {
     DNSServiceSetDispatchQueue(_dnsServiceRef, dispatch_get_main_queue());
-    return;
-  }
-
-  // TODO(bkonyi): remove once flutter_tools no longer looks for the legacy registration type.
-  // See https://github.com/dart-lang/sdk/issues/50233
-  //
-  // Try to fallback on the legacy registration type.
-  err = DNSServiceRegister(&_legacyDnsServiceRef, flags, interfaceIndex,
-                           FlutterDartVMServicePublisher.serviceName.UTF8String,
-                           legacyRegistrationType, domain, NULL, htons(port), txtData.length,
-                           txtData.bytes, RegistrationCallback, NULL);
-
-  if (err == 0) {
-    DNSServiceSetDispatchQueue(_legacyDnsServiceRef, dispatch_get_main_queue());
     return;
   }
 
