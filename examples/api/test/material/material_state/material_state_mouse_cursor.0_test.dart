@@ -40,6 +40,7 @@ void main() {
       await gesture.addPointer(
         location: tester.getCenter(find.byType(ListTile)),
       );
+      addTearDown(gesture.removePointer);
 
       expect(
         RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
@@ -65,6 +66,7 @@ void main() {
       await gesture.addPointer(
         location: tester.getCenter(find.byType(ListTile)),
       );
+      addTearDown(gesture.removePointer);
 
       expect(
         RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
