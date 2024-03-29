@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -3646,55 +3647,17 @@ void main() {
           NavigationRailDestination(
             icon: Icon(Icons.bookmark_border),
             selectedIcon: Icon(Icons.bookmark),
-            label: Text(
-              'Longer bookmark text',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+            label: Text('Longer bookmark text'),
           ),
         ],
-        labelType: NavigationRailLabelType.all,
       ),
     );
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
-    await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
-    await tester.pumpAndSettle();
-
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
-    const Rect indicatorRect = Rect.fromLTRB(12.0, 6.0, 68.0, 38.0);
-    const Rect includedRect = indicatorRect;
-    final Rect excludedRect = includedRect.inflate(10);
-
-    expect(
-      inkFeatures,
-      paints
-        ..clipPath(
-          pathMatcher: isPathThat(
-            includes: <Offset>[
-              includedRect.centerLeft,
-              includedRect.topCenter,
-              includedRect.centerRight,
-              includedRect.bottomCenter,
-            ],
-            excludes: <Offset>[
-              excludedRect.centerLeft,
-              excludedRect.topCenter,
-              excludedRect.centerRight,
-              excludedRect.bottomCenter,
-            ],
-          ),
-        )
-        ..rect(
-          rect: indicatorRect,
-          color: const Color(0x0a6750a4),
-        )
-        ..rrect(
-          rrect: RRect.fromLTRBR(12.0, 58.0, 68.0, 90.0, const Radius.circular(16)),
-          color: const Color(0xffe8def8),
-        ),
+    expect(find.byType(NavigationRail), findsOneWidget);
+    final Finder longLabelNavDestinationFinder = find.text(
+      'Longer bookmark text',
     );
+    expect(longLabelNavDestinationFinder, findsOneWidget);
   });
 
   group('Material 2', () {

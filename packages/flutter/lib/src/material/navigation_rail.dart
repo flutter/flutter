@@ -663,9 +663,10 @@ class _RailDestination extends StatelessWidget {
               ),
               child: ClipRect(
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     iconPart,
-                    Expanded(
+                    Flexible(
                       child: Align(
                         heightFactor: 1.0,
                         widthFactor: extendedTransitionAnimation.value,
