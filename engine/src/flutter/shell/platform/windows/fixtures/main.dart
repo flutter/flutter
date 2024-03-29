@@ -232,6 +232,47 @@ void sendCreatePlatformViewMethod() async {
 }
 
 @pragma('vm:entry-point')
+void sendGetKeyboardState() async {
+  // The keyboard method channel uses the standard method codec.
+  // See https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/services/message_codecs.dart#L262
+  // for the implementation of the encoding and magic number identifiers.
+  const int valueNull = 0;
+  const int valueString = 7;
+  const int valueMap = 13;
+
+  const String method = 'getKeyboardState';
+  final List<int> data = <int>[
+    // Method name
+    valueString, method.length, ...utf8.encode(method),
+    // Method arguments: null
+    valueNull, 2,
+  ];
+
+  final Completer<void> completer = Completer<void>();
+  final ByteData bytes = ByteData.sublistView(Uint8List.fromList(data));
+  ui.PlatformDispatcher.instance.sendPlatformMessage('flutter/keyboard', bytes, (ByteData? response) {
+    // For magic numbers for decoding a reply envelope, see:
+    // https://github.com/flutter/flutter/blob/67271f69f7f88a4edba6d8023099e3bd27a072d2/packages/flutter/lib/src/services/message_codecs.dart#L577-L587
+    const int replyEnvelopeSuccess = 0;
+
+    // Ensure the response is a success containing a map of keyboard states.
+    if (response == null) {
+      signalStringValue('Unexpected null response');
+    } else if (response.lengthInBytes < 2) {
+      signalStringValue('Unexpected response length of ${response.lengthInBytes} bytes');
+    } else if (response.getUint8(0) != replyEnvelopeSuccess) {
+      signalStringValue('Unexpected response envelope status: ${response.getUint8(0)}');
+    } else if (response.getUint8(1) != valueMap) {
+      signalStringValue('Unexpected response value magic number: ${response.getUint8(1)}');
+    } else {
+      signalStringValue('Success');
+    }
+    completer.complete();
+  });
+  await completer.future;
+}
+
+@pragma('vm:entry-point')
 void customEntrypoint() {}
 
 @pragma('vm:entry-point')
