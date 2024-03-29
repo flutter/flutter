@@ -1092,6 +1092,22 @@ final class Paint {
   /// their defaults.
   Paint();
 
+  /// Constructs a new [Paint] object with the same fields as [other].
+  ///
+  /// Any changes made to the object returned will not affect [other], and
+  /// changes to [other] will not affect the object returned.
+  ///
+  /// Backends (for example web versus native) may have different performance
+  /// characteristics. If the code is performance-sensitive, consider profiling
+  /// and falling back to reusing a single [Paint] object if necessary.
+  Paint.from(Paint other) {
+    // Every field on Paint is deeply immutable, so to create a copy of a Paint
+    // object, we copy the underlying data buffer and the list of objects (which
+    // are also deeply immutable).
+    _data.buffer.asUint32List().setAll(0, other._data.buffer.asUint32List());
+    _objects = other._objects?.toList();
+  }
+
   // Paint objects are encoded in two buffers:
   //
   // * _data is binary data in four-byte fields, each of which is either a
