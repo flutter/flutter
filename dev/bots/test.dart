@@ -254,7 +254,7 @@ Future<void> main(List<String> args) async {
       'realm_checker': _runRealmCheckerTest,
       'customer_testing': _runCustomerTesting,
       'analyze': _runAnalyze,
-      'fuchsia_precache': () => fuchsiaPrecacheRunner((flutterRoot)),
+      'fuchsia_precache': () => fuchsiaPrecacheRunner(flutterRoot),
       'docs': _runDocs,
       'verify_binaries_codesigned': _runVerifyCodesigned,
       kTestHarnessShardName: _runTestHarnessTests, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
