@@ -324,7 +324,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   double? _cachedPage;
 
   // @override
-  // bool? get preferredHandOffIgnorePointer => false;
+  bool? get preferredHandOffIgnorePointer => false;
 
   @override
   Future<void> ensureVisible(

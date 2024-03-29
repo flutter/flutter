@@ -160,7 +160,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   ScrollDirection _userScrollDirection = ScrollDirection.idle;
 
   // @override
-  // bool? get preferredHandOffIgnorePointer => null;
+  bool? get preferredHandOffIgnorePointer => null;
 
   /// Set [userScrollDirection] to the given value.
   ///
