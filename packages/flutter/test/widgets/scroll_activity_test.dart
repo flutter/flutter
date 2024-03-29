@@ -413,8 +413,8 @@ class _ScrollActivityDelegate extends ScrollActivityDelegate {
   double setPixels(double pixels) => 0.0;
 
   // @override
-  // bool get outOfRange => false;
+  bool get outOfRange => false;
 
   // @override
-  // bool? get preferredHandOffIgnorePointer => null;
+  bool? get preferredHandOffIgnorePointer => null;
 }
