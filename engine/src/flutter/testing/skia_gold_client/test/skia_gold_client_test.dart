@@ -7,10 +7,12 @@ import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:typed_data';
 
+import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as p;
 import 'package:process_fakes/process_fakes.dart';
 import 'package:skia_gold_client/skia_gold_client.dart';
+import 'package:skia_gold_client/src/release_version.dart';
 
 void main() {
   /// A mock commit hash that is used to simulate a successful git call.
@@ -44,13 +46,15 @@ void main() {
   SkiaGoldClient createClient(
     _TestFixture fixture, {
     required Map<String, String> environment,
+    ReleaseVersion? engineVersion,
     Map<String, String>? dimensions,
     bool verbose = false,
     io.ProcessResult Function(List<String> command) onRun = _runUnhandled,
   }) {
-    return SkiaGoldClient(
+    return SkiaGoldClient.forTesting(
       fixture.workDirectory,
       dimensions: dimensions,
+      engineRoot: Engine.fromSrcPath(fixture.engineSrcDir.path),
       httpClient: fixture.httpClient,
       processManager: FakeProcessManager(
         onRun: onRun,
@@ -214,6 +218,58 @@ void main() {
             p.join(fixture.workDirectory.path, 'temp'),
             '--test-name',
             'test-name',
+            '--png-file',
+            p.join(fixture.workDirectory.path, 'temp', 'golden.png'),
+            '--add-test-optional-key',
+            'image_matching_algorithm:fuzzy',
+            '--add-test-optional-key',
+            'fuzzy_max_different_pixels:10',
+            '--add-test-optional-key',
+            'fuzzy_pixel_delta_threshold:0',
+          ]);
+          return io.ProcessResult(0, 0, '', '');
+        },
+      );
+
+      await client.addImg(
+        'test-name.foo',
+        io.File(p.join(fixture.workDirectory.path, 'temp', 'golden.png')),
+        screenshotSize: 1000,
+      );
+    } finally {
+      fixture.dispose();
+    }
+  });
+
+  test('addImg [pre-submit] executes successfully with a release version', () async {
+    // Adds a suffix of "_Release_3_21" to the test name.
+    final _TestFixture fixture = _TestFixture(
+      // Creates a file called "engine/src/fluter/.engine-release.version" with the contents "3.21".
+      engineVersion: ReleaseVersion(
+        major: 3,
+        minor: 21,
+      ),
+    );
+    try {
+      final SkiaGoldClient client = createClient(
+        fixture,
+        environment: presubmitEnv,
+        onRun: (List<String> command) {
+          if (command case ['git', ...]) {
+            return io.ProcessResult(0, 0, mockCommitHash, '');
+          }
+          if (command case ['python tools/goldctl.py', 'imgtest', 'init', ...]) {
+            return io.ProcessResult(0, 0, '', '');
+          }
+          expect(command, <String>[
+            'python tools/goldctl.py',
+            'imgtest',
+            'add',
+            '--work-dir',
+            p.join(fixture.workDirectory.path, 'temp'),
+            '--test-name',
+            // This is the significant change.
+            'test-name_Release_3_21',
             '--png-file',
             p.join(fixture.workDirectory.path, 'temp', 'golden.png'),
             '--add-test-optional-key',
@@ -536,14 +592,32 @@ void main() {
 }
 
 final class _TestFixture {
-  _TestFixture();
+  _TestFixture({
+    ReleaseVersion? engineVersion,
+  }) {
+    workDirectory = rootDirectory.createTempSync('working');
 
-  final io.Directory workDirectory = io.Directory.systemTemp.createTempSync('skia_gold_client_test');
+    // Create the engine/src directory.
+    engineSrcDir = io.Directory(p.join(rootDirectory.path, 'engine', 'src'));
+    engineSrcDir.createSync(recursive: true);
+
+    // Create a .engine-release.version file in the engine root.
+    final io.Directory flutterDir = io.Directory(p.join(engineSrcDir.path, 'flutter'));
+    flutterDir.createSync(recursive: true);
+
+    final String version = engineVersion?.toString() ?? 'none';
+    io.File(p.join(flutterDir.path, '.engine-release.version')).writeAsStringSync(version);
+  }
+
+  final io.Directory rootDirectory = io.Directory.systemTemp.createTempSync('skia_gold_client_test');
+  late final io.Directory workDirectory;
+  late final io.Directory engineSrcDir;
+
   final _FakeHttpClient httpClient = _FakeHttpClient();
   final StringSink outputSink = StringBuffer();
 
   void dispose() {
-    workDirectory.deleteSync(recursive: true);
+    rootDirectory.deleteSync(recursive: true);
   }
 }
 

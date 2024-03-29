@@ -12,6 +12,7 @@ import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
 import 'src/errors.dart';
+import 'src/release_version.dart';
 
 export 'src/errors.dart' show SkiaGoldProcessError;
 
@@ -22,14 +23,57 @@ const String _kLuciEnvName = 'LUCI_CONTEXT';
 const String _skiaGoldHost = 'https://flutter-engine-gold.skia.org';
 const String _instance = 'flutter-engine';
 
-/// A client for uploading image tests and making baseline requests to the
-/// Flutter Gold Dashboard.
+/// Uploads images and makes baseline requests to Skia Gold.
+///
+/// For an example of how to use this class, see `tool/e2e_test.dart`.
 interface class SkiaGoldClient {
   /// Creates a [SkiaGoldClient] with the given [workDirectory].
   ///
-  /// [dimensions] allows to add attributes about the environment
-  /// used to generate the screenshots.
-  SkiaGoldClient(
+  /// A set of [dimensions] can be provided to add attributes about the
+  /// environment used to generate the screenshots, which are treated as keys
+  /// for the image:
+  ///
+  /// ```dart
+  /// final SkiaGoldClient skiaGoldClient = SkiaGoldClient(
+  ///   someDir,
+  ///   dimensions: <String, String>{
+  ///     'platform': 'linux',
+  ///   },
+  /// );
+  /// ```
+  ///
+  /// The [verbose] flag is intended for use in debugging CI issues, and
+  /// produces more detailed output that some may find useful, but would be too
+  /// spammy for regular use.
+  factory SkiaGoldClient(
+    io.Directory workDirectory, {
+    Map<String, String>? dimensions,
+    bool verbose = false,
+  }) {
+    return SkiaGoldClient.forTesting(
+      workDirectory,
+      dimensions: dimensions,
+      verbose: verbose,
+    );
+  }
+
+  /// Creates a [SkiaGoldClient] for testing.
+  ///
+  /// Similar to the default constructor, but allows for dependency injection
+  /// for testing purposes:
+  ///
+  /// - [httpClient] makes requests to Skia Gold to fetch expectations.
+  /// - [processManager] launches sub-processes.
+  /// - [stderr] is where output is written for diagnostics.
+  /// - [environment] is the environment variables for the currently running
+  ///   process, and is used to determine if Skia Gold is available, and whether
+  ///   the current environment is CI, and if so, if it's pre-submit or
+  ///   post-submit.
+  /// - [engineRoot] is the root of the engine repository, which is used for
+  ///   finding the current commit hash, as well as the location of the
+  ///   `.engine-release.version` file.
+  @visibleForTesting
+  SkiaGoldClient.forTesting(
     this.workDirectory, {
     this.dimensions,
     this.verbose = false,
@@ -37,10 +81,31 @@ interface class SkiaGoldClient {
     ProcessManager? processManager,
     StringSink? stderr,
     Map<String, String>? environment,
+    Engine? engineRoot,
   }) : httpClient = httpClient ?? io.HttpClient(),
        process = processManager ?? const LocalProcessManager(),
        _stderr = stderr ?? io.stderr,
-        _environment = environment ?? io.Platform.environment;
+       _environment = environment ?? io.Platform.environment,
+       _engineRoot = engineRoot ?? Engine.findWithin() {
+    // Lookup the release version from the engine repository.
+    final io.File releaseVersionFile = io.File(path.join(
+      _engineRoot.flutterDir.path,
+      '.engine-release.version',
+    ));
+
+    // If the file is not found or cannot be read, we are in an invalid state.
+    try {
+      _releaseVersion = ReleaseVersion.parse(releaseVersionFile.readAsStringSync());
+    } on FormatException catch (error) {
+      throw StateError('Failed to parse release version file: $error.');
+    } on io.FileSystemException catch (error) {
+      throw StateError('Failed to read release version file: $error.');
+    }
+  }
+
+  /// The root of the engine repository.
+  final Engine _engineRoot;
+  ReleaseVersion? _releaseVersion;
 
   /// Whether the client is available and can be used in this environment.
   static bool isAvailable({
@@ -244,6 +309,14 @@ interface class SkiaGoldClient {
   /// determined by the [pixelColorDelta] parameter. It's in the range [0.0,
   /// 1.0] and defaults to 0.01. A value of 0.01 means that 1% of the pixels are
   /// allowed to be different.
+  ///
+  /// ## Release Testing
+  ///
+  /// In release branches, we add a unique test suffix to the test name. For
+  /// example "testName" -> "testName_Release_3_21", based on the version in the
+  /// `.engine-release.version` file at the root of the engine repository.
+  ///
+  /// See <../README.md#release-testing> for more information.
   Future<void> addImg(
     String testName,
     io.File goldenFile, {
@@ -252,6 +325,17 @@ interface class SkiaGoldClient {
     required int screenshotSize,
   }) async {
     assert(_isPresubmit || _isPostsubmit);
+
+    // Clean the test name to remove the file extension.
+    testName = path.basenameWithoutExtension(testName);
+
+    // In release branches, we add a unique test suffix to the test name.
+    // For example "testName" -> "testName_Release_3_21".
+    // See ../README.md#release-testing for more information.
+    if (_releaseVersion case final ReleaseVersion v) {
+      testName = '${testName}_Release_${v.major}_${v.minor}';
+    }
+
     if (_isPresubmit) {
       await _tryjobAdd(testName, goldenFile, screenshotSize, pixelColorDelta, differentPixelsRate);
     }
@@ -287,7 +371,7 @@ interface class SkiaGoldClient {
       '--work-dir',
       _tempPath,
       '--test-name',
-      _cleanTestName(testName),
+      testName,
       '--png-file',
       goldenFile.path,
       // Otherwise post submit will not fail.
@@ -391,7 +475,7 @@ interface class SkiaGoldClient {
       '--work-dir',
       _tempPath,
       '--test-name',
-      _cleanTestName(testName),
+      testName,
       '--png-file',
       goldenFile.path,
       ..._getMatchingArguments(testName, screenshotSize, pixelDeltaThreshold, differentPixelsRate),
@@ -489,7 +573,7 @@ interface class SkiaGoldClient {
 
   /// Returns the current commit hash of the engine repository.
   Future<String> _getCurrentCommit() async {
-    final String engineCheckout = Engine.findWithin().flutterDir.path;
+    final String engineCheckout = _engineRoot.flutterDir.path;
     final io.ProcessResult revParse = await process.run(
       <String>['git', 'rev-parse', 'HEAD'],
       workingDirectory: engineCheckout,
@@ -519,12 +603,6 @@ interface class SkiaGoldClient {
   /// Same as [_getKeys] but encodes it in a JSON string.
   String _getKeysJSON() {
     return json.encode(_getKeys());
-  }
-
-  /// Removes the file extension from the [fileName] to represent the test name
-  /// properly.
-  static String _cleanTestName(String fileName) {
-    return path.basenameWithoutExtension(fileName);
   }
 
   /// Returns a list of arguments for initializing a tryjob based on the testing
