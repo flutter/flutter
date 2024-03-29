@@ -48,7 +48,8 @@ void main() {
     );
     expect(container.alignment, equals(Alignment.topCenter));
 
-    // Advance animation to the end.
+    // Advance animation to the end by the 2-second duration specified in
+    // the example app.
     await tester.pump(const Duration(seconds: 2));
 
     container = tester.widget(
