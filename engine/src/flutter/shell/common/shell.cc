@@ -754,7 +754,11 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
   weak_rasterizer_ = rasterizer_->GetWeakPtr();
   weak_platform_view_ = platform_view_->GetWeakPtr();
 
-  engine_->AddView(kFlutterImplicitViewId, ViewportMetrics{});
+  // Add the implicit view with empty metrics.
+  engine_->AddView(kFlutterImplicitViewId, ViewportMetrics{}, [](bool added) {
+    FML_DCHECK(added) << "Failed to add the implicit view";
+  });
+
   // Setup the time-consuming default font manager right after engine created.
   if (!settings_.prefetched_default_font_manager) {
     fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(),
@@ -2102,7 +2106,9 @@ bool Shell::OnServiceProtocolReloadAssetFonts(
   return true;
 }
 
-void Shell::AddView(int64_t view_id, const ViewportMetrics& viewport_metrics) {
+void Shell::AddView(int64_t view_id,
+                    const ViewportMetrics& viewport_metrics,
+                    AddViewCallback callback) {
   TRACE_EVENT0("flutter", "Shell::AddView");
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
@@ -2112,10 +2118,11 @@ void Shell::AddView(int64_t view_id, const ViewportMetrics& viewport_metrics) {
 
   task_runners_.GetUITaskRunner()->PostTask([engine = engine_->GetWeakPtr(),  //
                                              viewport_metrics,                //
-                                             view_id                          //
+                                             view_id,                         //
+                                             callback = std::move(callback)   //
   ] {
     if (engine) {
-      engine->AddView(view_id, viewport_metrics);
+      engine->AddView(view_id, viewport_metrics, callback);
     }
   });
 }

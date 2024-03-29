@@ -83,15 +83,18 @@ void PlatformConfiguration::DidCreateIsolate() {
                       Dart_GetField(library, tonic::ToDart("_reportTimings")));
 }
 
-void PlatformConfiguration::AddView(int64_t view_id,
+bool PlatformConfiguration::AddView(int64_t view_id,
                                     const ViewportMetrics& view_metrics) {
   auto [view_iterator, insertion_happened] =
       metrics_.emplace(view_id, view_metrics);
-  FML_DCHECK(insertion_happened);
+  if (!insertion_happened) {
+    FML_LOG(ERROR) << "View #" << view_id << " already exists.";
+    return false;
+  }
 
   std::shared_ptr<tonic::DartState> dart_state = add_view_.dart_state().lock();
   if (!dart_state) {
-    return;
+    return false;
   }
   tonic::DartState::Scope scope(dart_state);
   tonic::CheckAndHandleError(tonic::DartInvoke(
@@ -119,6 +122,7 @@ void PlatformConfiguration::AddView(int64_t view_id,
           tonic::ToDart(view_metrics.physical_display_features_state),
           tonic::ToDart(view_metrics.display_id),
       }));
+  return true;
 }
 
 bool PlatformConfiguration::RemoveView(int64_t view_id) {

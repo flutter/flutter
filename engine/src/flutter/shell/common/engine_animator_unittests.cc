@@ -313,8 +313,10 @@ TEST_F(EngineAnimatorTest, AnimatorAcceptsMultipleRenders) {
   engine_context->Run(std::move(configuration));
 
   engine_context->EngineTaskSync([](Engine& engine) {
-    engine.AddView(1, ViewportMetrics{1, 10, 10, 22, 0});
-    engine.AddView(2, ViewportMetrics{1, 10, 10, 22, 0});
+    engine.AddView(1, ViewportMetrics{1, 10, 10, 22, 0},
+                   [](bool added) { ASSERT_TRUE(added); });
+    engine.AddView(2, ViewportMetrics{1, 10, 10, 22, 0},
+                   [](bool added) { ASSERT_TRUE(added); });
   });
 
   native_latch.Wait();
@@ -368,8 +370,10 @@ TEST_F(EngineAnimatorTest, IgnoresOutOfFrameRenders) {
                                          std::move(animator));
 
   engine_context->EngineTaskSync([](Engine& engine) {
-    engine.AddView(1, ViewportMetrics{1, 10, 10, 22, 0});
-    engine.AddView(2, ViewportMetrics{1, 10, 10, 22, 0});
+    engine.AddView(1, ViewportMetrics{1, 10, 10, 22, 0},
+                   [](bool added) { ASSERT_TRUE(added); });
+    engine.AddView(2, ViewportMetrics{1, 10, 10, 22, 0},
+                   [](bool added) { ASSERT_TRUE(added); });
   });
 
   auto configuration = RunConfiguration::InferFromSettings(settings_);
@@ -444,7 +448,8 @@ TEST_F(EngineAnimatorTest, IgnoresDuplicateRenders) {
                                          std::move(animator));
 
   engine_context->EngineTaskSync([](Engine& engine) {
-    engine.AddView(kFlutterImplicitViewId, ViewportMetrics{1, 10, 10, 22, 0});
+    engine.AddView(kFlutterImplicitViewId, ViewportMetrics{1, 10, 10, 22, 0},
+                   [](bool added) { ASSERT_TRUE(added); });
   });
 
   auto configuration = RunConfiguration::InferFromSettings(settings_);
@@ -504,7 +509,8 @@ TEST_F(EngineAnimatorTest, AnimatorSubmitsImplicitViewBeforeDrawFrameEnds) {
                                          std::move(animator));
 
   engine_context->EngineTaskSync([](Engine& engine) {
-    engine.AddView(kFlutterImplicitViewId, ViewportMetrics{1.0, 10, 10, 1, 0});
+    engine.AddView(kFlutterImplicitViewId, ViewportMetrics{1.0, 10, 10, 1, 0},
+                   [](bool added) { ASSERT_TRUE(added); });
   });
 
   auto configuration = RunConfiguration::InferFromSettings(settings_);
@@ -568,7 +574,8 @@ TEST_F(EngineAnimatorTest, AnimatorSubmitWarmUpImplicitView) {
     engine.ScheduleFrame(true);
     // Add the implicit view so that the engine recognizes it and that its
     // metrics is not empty.
-    engine.AddView(kFlutterImplicitViewId, ViewportMetrics{1.0, 10, 10, 1, 0});
+    engine.AddView(kFlutterImplicitViewId, ViewportMetrics{1.0, 10, 10, 1, 0},
+                   [](bool added) { ASSERT_TRUE(added); });
   });
   continuation_ready_latch.Wait();
 
@@ -634,9 +641,12 @@ TEST_F(EngineAnimatorTest, AnimatorSubmitPartialViewsForWarmUp) {
     // Schedule a frame to make the animator create a continuation.
     engine.ScheduleFrame(true);
     // Add multiple views.
-    engine.AddView(0, ViewportMetrics{1, 10, 10, 22, 0});
-    engine.AddView(1, ViewportMetrics{1, 10, 10, 22, 0});
-    engine.AddView(2, ViewportMetrics{1, 10, 10, 22, 0});
+    engine.AddView(0, ViewportMetrics{1, 10, 10, 22, 0},
+                   [](bool added) { ASSERT_TRUE(added); });
+    engine.AddView(1, ViewportMetrics{1, 10, 10, 22, 0},
+                   [](bool added) { ASSERT_TRUE(added); });
+    engine.AddView(2, ViewportMetrics{1, 10, 10, 22, 0},
+                   [](bool added) { ASSERT_TRUE(added); });
   });
 
   continuation_ready_latch.Wait();
