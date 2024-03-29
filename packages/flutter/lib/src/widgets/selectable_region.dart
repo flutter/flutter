@@ -1957,7 +1957,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     _updateHandleLayersAndOwners();
   }
 
-  Rect _getBoundingBox(Selectable selectable) {
+  static Rect _getBoundingBox(Selectable selectable) {
     Rect result = selectable.boundingBoxes.first;
     for (int index = 1; index < selectable.boundingBoxes.length; index += 1) {
       result = result.expandToInclude(selectable.boundingBoxes[index]);

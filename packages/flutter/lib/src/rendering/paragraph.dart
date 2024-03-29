@@ -2696,6 +2696,8 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
   }
 
   TextRange? _intersect(TextRange a, TextRange b) {
+    assert(a.isNormalized);
+    assert(b.isNormalized);
     final int startMax = math.max(a.start, b.start);
     final int endMin = math.min(a.end, b.end);
     if (startMax <= endMin) {
