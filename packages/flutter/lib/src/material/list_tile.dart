@@ -25,6 +25,9 @@ import 'theme_data.dart';
 // Examples can assume:
 // int _act = 1;
 
+typedef _Sizes = ({ double titleY, BoxConstraints textConstraints, Size tileSize });
+typedef _PositionChild = void Function(RenderBox child, Offset offset);
+
 /// Defines the title font used for [ListTile] descendants of a [ListTileTheme].
 ///
 /// List tiles that appear in a [Drawer] use the theme's [TextTheme.bodyLarge]
@@ -85,9 +88,12 @@ enum ListTileTitleAlignment {
   threeLine,
 
   /// The tops of the [ListTile.leading] and [ListTile.trailing] widgets are
-  /// placed 16 units below the top of the [ListTile.title]
-  /// if the titles' overall height is greater than 72, otherwise they're
-  /// centered relative to the [ListTile.title] and [ListTile.subtitle] widgets.
+  /// placed 16 pixels below the top of the [ListTile.title]
+  /// if the titles' overall height is greater than 72, otherwise the
+  /// [ListTile.trailing] widget is centered relative to the [ListTile.title] and
+  /// [ListTile.subtitle] widgets, and the [ListTile.leading] widget is 16 pixels
+  /// below the top of [ListTile.title], or center-aligned with [ListTile.title],
+  /// whichever makes the [ListTile.leading] closer to the top edge of [ListTile.title].
   ///
   /// This is the default when [ThemeData.useMaterial3] is false.
   titleHeight,
@@ -103,7 +109,31 @@ enum ListTileTitleAlignment {
   /// The bottoms of the [ListTile.leading] and [ListTile.trailing] widgets are
   /// placed [ListTile.minVerticalPadding] above the bottom of the [ListTile]'s
   /// titles.
-  bottom,
+  bottom;
+
+  // If isLeading is true the y offset is for the leading widget, otherwise it's
+  // for the trailing child.
+  double _yOffsetFor(double childHeight, double tileHeight, _RenderListTile listTile, bool isLeading) {
+    return switch (this) {
+      ListTileTitleAlignment.threeLine => listTile.isThreeLine
+        ? ListTileTitleAlignment.top._yOffsetFor(childHeight, tileHeight, listTile, isLeading)
+        : ListTileTitleAlignment.center._yOffsetFor(childHeight, tileHeight, listTile, isLeading),
+      // This attempts to implement the redlines for the vertical position of the
+      // leading and trailing icons on the spec page:
+      //   https://m2.material.io/components/lists#specs
+      //
+      // For large tiles (> 72dp), both leading and trailing controls should be
+      // a fixed distance from top. As per guidelines this is set to 16dp.
+      ListTileTitleAlignment.titleHeight when tileHeight > 72.0 => 16.0,
+      // For smaller tiles, trailing should always be centered. Leading can be
+      // centered or closer to the top. It should never be further than 16dp
+      // to the top.
+      ListTileTitleAlignment.titleHeight => isLeading ? math.min((tileHeight - childHeight) / 2.0, 16.0) : (tileHeight - childHeight) / 2.0,
+      ListTileTitleAlignment.top => listTile.minVerticalPadding,
+      ListTileTitleAlignment.center => (tileHeight - childHeight) / 2.0,
+      ListTileTitleAlignment.bottom => tileHeight - childHeight - listTile.minVerticalPadding,
+    };
+  }
 }
 
 /// A single fixed-height row that typically contains some text as well as
@@ -1291,193 +1321,151 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     maxHeight: (isDense ? 48.0 : 56.0) + visualDensity.baseSizeAdjustment.dy,
   );
 
-  static Size _layoutBox(RenderBox? box, BoxConstraints constraints) {
-    if (box == null) {
-      return Size.zero;
-    }
-    box.layout(constraints, parentUsesSize: true);
-    return box.size;
-  }
-
   static void _positionBox(RenderBox box, Offset offset) {
     final BoxParentData parentData = box.parentData! as BoxParentData;
     parentData.offset = offset;
   }
 
-  (double titleY, double? subtitleY, double tileHeight) _childOffsetsForSubtitleLayout(
+  // Implements _RenderListTile's layout algorithm. If `positionChild` is not null,
+  // it will be called on each child with that child's layout offset.
+  //
+  // All of the dimensions below were taken from the Material Design spec:
+  // https://material.io/design/components/lists.html#specs
+  _Sizes _computeSizes(
     ChildBaselineGetter getBaseline,
     ChildLayouter getSize,
-    BoxConstraints childConstraints,
+    BoxConstraints constraints,
+    { _PositionChild? positionChild, }
   ) {
-    final RenderBox? subtitle = this.subtitle;
-    final double titleHeight = getSize(title, childConstraints).height;
-    if (subtitle == null) {
-      final double tileHeight = math.max(_targetTileHeight, titleHeight + 2.0 * _minVerticalPadding);
-      final double titleY = (tileHeight - titleHeight) / 2.0;
-      return (titleY, null, tileHeight);
-    }
-
-    final double subtitleHeight = getSize(subtitle, childConstraints).height;
-    final double titleBaseline = getBaseline(title, childConstraints, titleBaselineType) ?? titleHeight;
-    final double subtitleBaseline = getBaseline(subtitle, childConstraints, subtitleBaselineType!) ?? subtitleHeight;
-
-    final double targetTitleY = (isThreeLine ? (isDense ? 22.0 : 28.0) : (isDense ? 28.0 : 32.0)) - titleBaseline;
-    final double targetSubtitleY = (isThreeLine ? (isDense ? 42.0 : 48.0) : (isDense ? 48.0 : 52.0)) + visualDensity.vertical * 2.0 - subtitleBaseline;
-    // Prevent the title and the subtitle from overlapping by moving them away from
-    // each other by the same distance, to minimize the L2 norm to their respective target Y locations.
-    final double halfOverlap = math.max(targetTitleY + titleHeight - targetSubtitleY, 0) / 2;
-    final double titleY = targetTitleY - halfOverlap;
-    final double subtitleY = targetSubtitleY + halfOverlap;
-    // However if either component can't maintain the minimal padding from the top/bottom edges, the ListTile enters "compat mode".
-    return titleY < minVerticalPadding || subtitleY + subtitleHeight + minVerticalPadding > _targetTileHeight
-      ? (minVerticalPadding, minVerticalPadding + titleHeight, 2 * _minVerticalPadding + titleHeight + subtitleHeight)
-      : (titleY, subtitleY, _targetTileHeight);
-  }
-
-  @override
-  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
     final BoxConstraints looseConstraints = constraints.loosen();
     final double tileWidth = looseConstraints.maxWidth;
     final BoxConstraints iconConstraints = looseConstraints.enforce(maxIconHeightConstraint);
     final RenderBox? leading = this.leading;
     final RenderBox? trailing = this.trailing;
-    final RenderBox? subtitle = this.subtitle;
-    final double titleStart = leading == null
-      ? 0.0
-      : math.max(_minLeadingWidth, leading.getDryLayout(iconConstraints).width) + _effectiveHorizontalTitleGap;
 
-    final double adjustedTrailingWidth = trailing == null
-      ? 0.0
-      : math.max(trailing.getDryLayout(iconConstraints).width + _effectiveHorizontalTitleGap, 32.0);
+    final Size? leadingSize = leading == null ? null : getSize(leading, iconConstraints);
+    final Size? trailingSize = trailing == null ? null : getSize(trailing, iconConstraints);
 
-    final BoxConstraints textConstraints = looseConstraints.tighten(
-      width: tileWidth - titleStart - adjustedTrailingWidth,
-    );
-
-    final double? titleBaseline = title.getDryBaseline(textConstraints, baseline);
-    if (titleBaseline == null) {
-      return null;
-    }
-    final double titleHeight = title.getDryLayout(textConstraints).height;
-    if (subtitle == null) {
-      final double tileHeight = math.max(_targetTileHeight, titleHeight + 2 * _minVerticalPadding);
-      return (tileHeight - titleHeight) / 2.0 + titleBaseline;
-    }
-
-    final (double titleY, _, _) = _childOffsetsForSubtitleLayout(
-      ChildLayoutHelper.getDryBaseline,
-      ChildLayoutHelper.dryLayoutChild,
-      textConstraints,
-    );
-    return titleY + titleBaseline;
-  }
-
-  @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    assert(debugCannotComputeDryLayout(
-      reason: 'Layout requires baseline metrics, which are only available after a full layout.',
-    ));
-    return Size.zero;
-  }
-
-  // All of the dimensions below were taken from the Material Design spec:
-  // https://material.io/design/components/lists.html#specs
-  @override
-  void performLayout() {
-    final BoxConstraints constraints = this.constraints;
-    final bool hasLeading = leading != null;
-    final bool hasSubtitle = subtitle != null;
-    final bool hasTrailing = trailing != null;
-
-    final BoxConstraints looseConstraints = constraints.loosen();
-    final BoxConstraints iconConstraints = looseConstraints.enforce(maxIconHeightConstraint);
-
-    final double tileWidth = looseConstraints.maxWidth;
-    final Size leadingSize = _layoutBox(leading, iconConstraints);
-    final Size trailingSize = _layoutBox(trailing, iconConstraints);
     assert(
-      tileWidth != leadingSize.width || tileWidth == 0.0,
+      tileWidth != leadingSize?.width || tileWidth == 0.0,
       'Leading widget consumes entire tile width. Please use a sized widget, '
       'or consider replacing ListTile with a custom widget '
       '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)',
     );
     assert(
-      tileWidth != trailingSize.width || tileWidth == 0.0,
+      tileWidth != trailingSize?.width || tileWidth == 0.0,
       'Trailing widget consumes entire tile width. Please use a sized widget, '
       'or consider replacing ListTile with a custom widget '
       '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)',
     );
 
-    final double titleStart = hasLeading
-      ? math.max(_minLeadingWidth, leadingSize.width) + _effectiveHorizontalTitleGap
-      : 0.0;
-    final double adjustedTrailingWidth = hasTrailing
-      ? math.max(trailingSize.width + _effectiveHorizontalTitleGap, 32.0)
-      : 0.0;
+    final double titleStart = leadingSize == null
+      ? 0.0
+      : math.max(_minLeadingWidth, leadingSize.width) + _effectiveHorizontalTitleGap;
+
+    final double adjustedTrailingWidth = trailingSize == null
+      ? 0.0
+      : math.max(trailingSize.width + _effectiveHorizontalTitleGap, 32.0);
+
     final BoxConstraints textConstraints = looseConstraints.tighten(
       width: tileWidth - titleStart - adjustedTrailingWidth,
     );
 
-    final (double titleY, double? subtitleY, double tileHeight) = _childOffsetsForSubtitleLayout(
-      ChildLayoutHelper.getBaseline,
-      ChildLayoutHelper.layoutChild,
-      textConstraints,
-    );
+    final RenderBox? subtitle = this.subtitle;
+    final double titleHeight = getSize(title, textConstraints).height;
 
-    final double leadingDiff = tileHeight - leadingSize.height;
-    final double trailingDiff = tileHeight - trailingSize.height;
-
-    final (double leadingY, double trailingY) = switch (titleAlignment) {
-      ListTileTitleAlignment.threeLine when isThreeLine => (_minVerticalPadding, _minVerticalPadding),
-      ListTileTitleAlignment.threeLine => (leadingDiff / 2.0, trailingDiff / 2.0),
-      // This attempts to implement the redlines for the vertical position of the
-      // leading and trailing icons on the spec page:
-      //   https://m2.material.io/components/lists#specs
-      //
-      // For large tiles (> 72dp), both leading and trailing controls should be
-      // a fixed distance from top. As per guidelines this is set to 16dp.
-      ListTileTitleAlignment.titleHeight when tileHeight > 72.0 => (16.0, 16.0),
-      // For smaller tiles, trailing should always be centered. Leading can be
-      // centered or closer to the top. It should never be further than 16dp
-      // to the top.
-      ListTileTitleAlignment.titleHeight => (math.min(leadingDiff / 2.0, 16.0), trailingDiff / 2.0),
-      ListTileTitleAlignment.top => (_minVerticalPadding, _minVerticalPadding),
-      ListTileTitleAlignment.center => (leadingDiff / 2.0, trailingDiff / 2.0),
-      ListTileTitleAlignment.bottom => (leadingDiff - _minVerticalPadding, trailingDiff - _minVerticalPadding),
+    final bool isLTR = switch (textDirection) {
+      TextDirection.ltr => true,
+      TextDirection.rtl => false,
     };
 
-    switch (textDirection) {
-      case TextDirection.rtl: {
-        if (hasLeading) {
-          _positionBox(leading!, Offset(tileWidth - leadingSize.width, leadingY));
-        }
-        _positionBox(title, Offset(adjustedTrailingWidth, titleY));
-        if (hasSubtitle) {
-          _positionBox(subtitle!, Offset(adjustedTrailingWidth, subtitleY!));
-        }
-        if (hasTrailing) {
-          _positionBox(trailing!, Offset(0.0, trailingY));
-        }
-        break;
+    final double titleY;
+    final double tileHeight;
+    if (subtitle == null) {
+      tileHeight = math.max(_targetTileHeight, titleHeight + 2.0 * _minVerticalPadding);
+      titleY = (tileHeight - titleHeight) / 2.0;
+    } else {
+      final double subtitleHeight = getSize(subtitle, textConstraints).height;
+      final double titleBaseline = getBaseline(title, textConstraints, titleBaselineType) ?? titleHeight;
+      final double subtitleBaseline = getBaseline(subtitle, textConstraints, subtitleBaselineType!) ?? subtitleHeight;
+
+      final double targetTitleY = (isThreeLine ? (isDense ? 22.0 : 28.0) : (isDense ? 28.0 : 32.0)) - titleBaseline;
+      final double targetSubtitleY = (isThreeLine ? (isDense ? 42.0 : 48.0) : (isDense ? 48.0 : 52.0)) + visualDensity.vertical * 2.0 - subtitleBaseline;
+      // Prevent the title and the subtitle from overlapping by moving them away from
+      // each other by the same distance.
+      final double halfOverlap = math.max(targetTitleY + titleHeight - targetSubtitleY, 0) / 2;
+      final double idealTitleY = targetTitleY - halfOverlap;
+      final double idealSubtitleY = targetSubtitleY + halfOverlap;
+      // However if either component can't maintain the minimal padding from the top/bottom edges, the ListTile enters "compat mode".
+      final bool compact = idealTitleY < minVerticalPadding || idealSubtitleY + subtitleHeight + minVerticalPadding > _targetTileHeight;
+
+      // Position subtitle.
+      positionChild?.call(subtitle, Offset(
+        isLTR ? titleStart : adjustedTrailingWidth,
+        compact ? minVerticalPadding + titleHeight : idealSubtitleY,
+      ));
+      tileHeight = compact ? 2 * _minVerticalPadding + titleHeight + subtitleHeight : _targetTileHeight;
+      titleY = compact ? minVerticalPadding : idealTitleY;
+    }
+
+    if (positionChild != null) {
+      positionChild(title, Offset(
+        isLTR ? titleStart : adjustedTrailingWidth,
+        titleY,
+      ));
+
+      if (leading != null && leadingSize != null) {
+        positionChild(leading, Offset(
+          isLTR ? 0.0 : tileWidth - leadingSize.width,
+          titleAlignment._yOffsetFor(leadingSize.height, tileHeight, this, true),
+        ));
       }
-      case TextDirection.ltr: {
-        if (hasLeading) {
-          _positionBox(leading!, Offset(0.0, leadingY));
-        }
-        _positionBox(title, Offset(titleStart, titleY));
-        if (hasSubtitle) {
-          _positionBox(subtitle!, Offset(titleStart, subtitleY!));
-        }
-        if (hasTrailing) {
-          _positionBox(trailing!, Offset(tileWidth - trailingSize.width, trailingY));
-        }
-        break;
+
+      if (trailing != null && trailingSize != null) {
+        positionChild(trailing, Offset(
+          isLTR ? tileWidth - trailingSize.width : 0.0,
+          titleAlignment._yOffsetFor(trailingSize.height, tileHeight, this, false),
+        ));
       }
     }
 
-    size = constraints.constrain(Size(tileWidth, tileHeight));
-    assert(size.width == constraints.constrainWidth(tileWidth));
-    assert(size.height == constraints.constrainHeight(tileHeight));
+    return (titleY: titleY, textConstraints: textConstraints, tileSize: Size(tileWidth, tileHeight));
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final _Sizes sizes = _computeSizes(
+      ChildLayoutHelper.getDryBaseline,
+      ChildLayoutHelper.dryLayoutChild,
+      constraints,
+    );
+    final BaselineOffset titleBaseline = BaselineOffset(title.getDryBaseline(sizes.textConstraints, baseline)) + sizes.titleY;
+    return titleBaseline.offset;
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return constraints.constrain(
+      _computeSizes(
+        ChildLayoutHelper.getDryBaseline,
+        ChildLayoutHelper.dryLayoutChild,
+        constraints,
+      ).tileSize,
+    );
+  }
+
+  @override
+  void performLayout() {
+    final Size tileSize = _computeSizes(
+      ChildLayoutHelper.getBaseline,
+      ChildLayoutHelper.layoutChild,
+      constraints,
+      positionChild: _positionBox,
+    ).tileSize;
+
+    size = constraints.constrain(tileSize);
+    assert(size.width == constraints.constrainWidth(tileSize.width));
+    assert(size.height == constraints.constrainHeight(tileSize.height));
   }
 
   @override
