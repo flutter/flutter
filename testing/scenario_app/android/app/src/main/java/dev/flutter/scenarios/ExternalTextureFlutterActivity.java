@@ -91,6 +91,8 @@ public class ExternalTextureFlutterActivity extends TestActivity {
     super.waitUntilFlutterRendered();
 
     try {
+      // TODO: Remove after debugging https://github.com/flutter/flutter/issues/145988.
+      io.flutter.Log.i("Scenarios", "waitUntilFlutterRendered() | firstFrameLatch");
       firstFrameLatch.await();
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
