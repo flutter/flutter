@@ -61,11 +61,22 @@ void main(List<String> args) async {
 
   // Capture CTRL-C.
   late final StreamSubscription<void> onSigint;
+
+  // Capture requested termination. The goal is to catch timeouts.
+  late final StreamSubscription<void> onSigterm;
+  void cancelSignalHandlers() {
+    onSigint.cancel();
+    onSigterm.cancel();
+  }
   runZonedGuarded(
     () async {
       onSigint = ProcessSignal.sigint.watch().listen((_) {
-        onSigint.cancel();
+        cancelSignalHandlers();
         panic(<String>['Received SIGINT']);
+      });
+      onSigterm = ProcessSignal.sigterm.watch().listen((_) {
+        cancelSignalHandlers();
+        panic(<String>['Received SIGTERM']);
       });
       await _run(
         verbose: options.verbose,
