@@ -538,11 +538,10 @@ class AnimatedListSeparatedState extends _AnimatedScrollViewState<AnimatedListSe
   int _computeItemIndex(int index) {
     if (index == 0) {
       return index;
-    } else {
-      final int indexSeparated = index * 2 - 1;
-      final bool isNewLastIndex = indexSeparated == _itemsCount;
-      return isNewLastIndex ? indexSeparated : indexSeparated + 1;
     }
+    final int indexSeparated = index * 2 - 1;
+    final bool isNewLastIndex = indexSeparated == _itemsCount;
+    return isNewLastIndex ? indexSeparated : indexSeparated + 1;
   }
 }
 
