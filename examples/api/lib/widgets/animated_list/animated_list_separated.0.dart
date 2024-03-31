@@ -125,8 +125,8 @@ class _AnimatedListSeparatedSampleState extends State<AnimatedListSeparatedSampl
             initialItemCount: _list.length,
             itemBuilder: _buildItem,
             separatorBuilder: _buildSeparator,
-            ),
           ),
+        ),
       ),
     );
   }
