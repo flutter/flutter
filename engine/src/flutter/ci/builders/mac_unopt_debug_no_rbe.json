@@ -32,6 +32,11 @@
         "config": "mac_unopt_debug_no_rbe",
         "targets": ["flutter/tools/font_subset"]
       },
+      "properties": {
+          "$flutter/osx_sdk": {
+              "sdk_version": "15a240d"
+          }
+      },
       "tests": [
         {
           "language": "dart",
