@@ -260,7 +260,7 @@ void main() {
   });
 
   testWidgets('Save and help text is used', (WidgetTester tester) async {
-    helpText = 'help';
+    helpText = 'help select a date range please, make it so ,thanks!';
     saveText = 'make it so';
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       expect(find.text(helpText!), findsOneWidget);
