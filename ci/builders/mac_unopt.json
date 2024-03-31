@@ -12,6 +12,8 @@
                 "use_rbe": true
             },
             "gn": [
+                "--target-dir",
+                "ci/host_debug_unopt",
                 "--runtime-mode",
                 "debug",
                 "--unoptimized",
@@ -22,9 +24,9 @@
                 "--no-goma",
                 "--xcode-symlinks"
             ],
-            "name": "host_debug_unopt",
+            "name": "ci/host_debug_unopt",
             "ninja": {
-                "config": "host_debug_unopt",
+                "config": "ci/host_debug_unopt",
                 "targets": []
             },
             "properties": {
@@ -39,7 +41,7 @@
                     "script": "flutter/testing/run_tests.py",
                     "parameters": [
                         "--variant",
-                        "host_debug_unopt",
+                        "ci/host_debug_unopt",
                         "--type",
                         "dart,dart-host,engine",
                         "--engine-capture-core-dump"
@@ -80,11 +82,11 @@
                 "--no-goma",
                 "--xcode-symlinks",
                 "--target-dir",
-                "ios_debug_unopt_sim"
+                "ci/ios_debug_unopt_sim"
             ],
-            "name": "ios_debug_unopt_sim",
+            "name": "ci/ios_debug_unopt_sim",
             "ninja": {
-                "config": "ios_debug_unopt_sim",
+                "config": "ci/ios_debug_unopt_sim",
                 "targets": [
                     "flutter/testing/scenario_app",
                     "flutter/shell/platform/darwin/ios:ios_test_flutter"
@@ -97,18 +99,18 @@
                     "script": "flutter/testing/run_tests.py",
                     "parameters": [
                         "--variant",
-                        "ios_debug_unopt_sim",
+                        "ci/ios_debug_unopt_sim",
                         "--type",
                         "objc",
                         "--engine-capture-core-dump",
                         "--ios-variant",
-                        "ios_debug_unopt_sim"
+                        "ci/ios_debug_unopt_sim"
                     ]
                 },
                 {
                     "name": "Scenario App Integration Tests",
                     "parameters": [
-                        "ios_debug_unopt_sim"
+                        "ci/ios_debug_unopt_sim"
                     ],
                     "script": "flutter/testing/scenario_app/run_ios_tests.sh"
                 }
@@ -125,22 +127,24 @@
                 "use_rbe": true
             },
             "gn": [
-               "--runtime-mode",
-               "debug",
-               "--unoptimized",
-               "--no-lto",
-               "--prebuilt-dart-sdk",
-               "--force-mac-arm64",
-               "--mac-cpu",
-               "arm64",
-               "--rbe",
-               "--no-goma",
-               "--xcode-symlinks",
-               "--use-glfw-swiftshader"
+                "--target-dir",
+                "ci/host_debug_unopt_arm64",
+                "--runtime-mode",
+                "debug",
+                "--unoptimized",
+                "--no-lto",
+                "--prebuilt-dart-sdk",
+                "--force-mac-arm64",
+                "--mac-cpu",
+                "arm64",
+                "--rbe",
+                "--no-goma",
+                "--xcode-symlinks",
+                "--use-glfw-swiftshader"
             ],
-            "name": "host_debug_unopt_arm64",
+            "name": "ci/host_debug_unopt_arm64",
             "ninja": {
-                "config": "host_debug_unopt_arm64",
+                "config": "ci/host_debug_unopt_arm64",
                 "targets": [
                 ]
             },
@@ -156,7 +160,7 @@
                     "script": "flutter/testing/run_tests.py",
                     "parameters": [
                         "--variant",
-                        "host_debug_unopt_arm64",
+                        "ci/host_debug_unopt_arm64",
                         "--type",
                         "dart,dart-host,engine,impeller-golden",
                         "--engine-capture-core-dump"
@@ -195,11 +199,11 @@
                 "--no-goma",
                 "--xcode-symlinks",
                 "--target-dir",
-                "ios_debug_unopt_sim_arm64"
+                "ci/ios_debug_unopt_sim_arm64"
             ],
-            "name": "ios_debug_unopt_sim_arm64",
+            "name": "ci/ios_debug_unopt_sim_arm64",
             "ninja": {
-                "config": "ios_debug_unopt_sim_arm64",
+                "config": "ci/ios_debug_unopt_sim_arm64",
                 "targets": [
                     "flutter/testing/scenario_app",
                     "flutter/shell/platform/darwin/ios:ios_test_flutter"
@@ -212,18 +216,18 @@
                     "script": "flutter/testing/run_tests.py",
                     "parameters": [
                         "--variant",
-                        "ios_debug_unopt_sim_arm64",
+                        "ci/ios_debug_unopt_sim_arm64",
                         "--type",
                         "objc",
                         "--engine-capture-core-dump",
                         "--ios-variant",
-                        "ios_debug_unopt_sim_arm64"
+                        "ci/ios_debug_unopt_sim_arm64"
                     ]
                 },
                 {
                     "name": "Scenario App Integration Tests",
                     "parameters": [
-                        "ios_debug_unopt_sim_arm64"
+                        "ci/ios_debug_unopt_sim_arm64"
                     ],
                     "script": "flutter/testing/scenario_app/run_ios_tests.sh"
                 }
@@ -262,11 +266,11 @@
                 "--no-goma",
                 "--xcode-symlinks",
                 "--target-dir",
-                "ios_debug_unopt_sim_arm64_extension_safe"
+                "ci/ios_debug_unopt_sim_arm64_extension_safe"
             ],
-            "name": "ios_debug_unopt_sim_arm64_extension_safe",
+            "name": "ci/ios_debug_unopt_sim_arm64_extension_safe",
             "ninja": {
-                "config": "ios_debug_unopt_sim_arm64_extension_safe",
+                "config": "ci/ios_debug_unopt_sim_arm64_extension_safe",
                 "targets": [
                     "flutter/testing/scenario_app",
                     "flutter/shell/platform/darwin/ios:ios_test_flutter"
@@ -279,18 +283,18 @@
                     "script": "flutter/testing/run_tests.py",
                     "parameters": [
                         "--variant",
-                        "ios_debug_unopt_sim_arm64_extension_safe",
+                        "ci/ios_debug_unopt_sim_arm64_extension_safe",
                         "--type",
                         "objc",
                         "--engine-capture-core-dump",
                         "--ios-variant",
-                        "ios_debug_unopt_sim_arm64_extension_safe"
+                        "ci/ios_debug_unopt_sim_arm64_extension_safe"
                     ]
                 },
                 {
                     "name": "Scenario App Integration Tests",
                     "parameters": [
-                        "ios_debug_unopt_sim_arm64_extension_safe"
+                        "ci/ios_debug_unopt_sim_arm64_extension_safe"
                     ],
                     "script": "flutter/testing/scenario_app/run_ios_tests.sh"
                 }

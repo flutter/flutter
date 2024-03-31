@@ -3,14 +3,14 @@
         {
             "archives": [
                 {
-                    "name": "android_profile",
+                    "name": "ci/android_profile",
                     "type": "gcs",
-                    "base_path": "out/android_profile/zip_archives/",
+                    "base_path": "out/ci/android_profile/zip_archives/",
                     "include_paths": [
-                        "out/android_profile/zip_archives/android-arm-profile/artifacts.zip",
-                        "out/android_profile/zip_archives/android-arm-profile/linux-x64.zip",
-                        "out/android_profile/zip_archives/android-arm-profile/symbols.zip",
-                        "out/android_profile/zip_archives/download.flutter.io"
+                        "out/ci/android_profile/zip_archives/android-arm-profile/artifacts.zip",
+                        "out/ci/android_profile/zip_archives/android-arm-profile/linux-x64.zip",
+                        "out/ci/android_profile/zip_archives/android-arm-profile/symbols.zip",
+                        "out/ci/android_profile/zip_archives/download.flutter.io"
                     ],
                     "realm": "production"
                 }
@@ -23,6 +23,8 @@
                 "use_rbe": true
             },
             "gn": [
+                "--target-dir",
+                "ci/android_profile",
                 "--runtime-mode",
                 "profile",
                 "--android",
@@ -31,9 +33,9 @@
                 "--rbe",
                 "--no-goma"
             ],
-            "name": "android_profile",
+            "name": "ci/android_profile",
             "ninja": {
-                "config": "android_profile",
+                "config": "ci/android_profile",
                 "targets": [
                     "default",
                     "clang_x64/gen_snapshot",
@@ -45,14 +47,14 @@
         {
             "archives": [
                 {
-                    "name": "android_release",
+                    "name": "ci/android_release",
                     "type": "gcs",
-                    "base_path": "out/android_release/zip_archives/",
+                    "base_path": "out/ci/android_release/zip_archives/",
                     "include_paths": [
-                        "out/android_release/zip_archives/android-arm-release/artifacts.zip",
-                        "out/android_release/zip_archives/android-arm-release/linux-x64.zip",
-                        "out/android_release/zip_archives/android-arm-release/symbols.zip",
-                        "out/android_release/zip_archives/download.flutter.io"
+                        "out/ci/android_release/zip_archives/android-arm-release/artifacts.zip",
+                        "out/ci/android_release/zip_archives/android-arm-release/linux-x64.zip",
+                        "out/ci/android_release/zip_archives/android-arm-release/symbols.zip",
+                        "out/ci/android_release/zip_archives/download.flutter.io"
                     ],
                     "realm": "production"
                 }
@@ -65,6 +67,8 @@
                 "use_rbe": true
             },
             "gn": [
+                "--target-dir",
+                "ci/android_release",
                 "--runtime-mode",
                 "release",
                 "--android",
@@ -73,9 +77,9 @@
                 "--rbe",
                 "--no-goma"
             ],
-            "name": "android_release",
+            "name": "ci/android_release",
             "ninja": {
-                "config": "android_release",
+                "config": "ci/android_release",
                 "targets": [
                     "default",
                     "clang_x64/gen_snapshot",
@@ -87,15 +91,15 @@
         {
             "archives": [
                 {
-                    "name": "android_release_arm64",
+                    "name": "ci/android_release_arm64",
                     "type": "gcs",
-                    "base_path": "out/android_release_arm64/zip_archives/",
+                    "base_path": "out/ci/android_release_arm64/zip_archives/",
                     "include_paths": [
-                        "out/android_release_arm64/zip_archives/android-arm64-release/artifacts.zip",
-                        "out/android_release_arm64/zip_archives/android-arm64-release/linux-x64.zip",
-                        "out/android_release_arm64/zip_archives/android-arm64-release/symbols.zip",
-                        "out/android_release_arm64/zip_archives/android-arm64-release/analyze-snapshot-linux-x64.zip",
-                        "out/android_release_arm64/zip_archives/download.flutter.io"
+                        "out/ci/android_release_arm64/zip_archives/android-arm64-release/artifacts.zip",
+                        "out/ci/android_release_arm64/zip_archives/android-arm64-release/linux-x64.zip",
+                        "out/ci/android_release_arm64/zip_archives/android-arm64-release/symbols.zip",
+                        "out/ci/android_release_arm64/zip_archives/android-arm64-release/analyze-snapshot-linux-x64.zip",
+                        "out/ci/android_release_arm64/zip_archives/download.flutter.io"
                     ],
                     "realm": "production"
                 }
@@ -108,6 +112,8 @@
                 "use_rbe": true
             },
             "gn": [
+                "--target-dir",
+                "ci/android_release_arm64",
                 "--runtime-mode",
                 "release",
                 "--android",
@@ -116,9 +122,9 @@
                 "--rbe",
                 "--no-goma"
             ],
-            "name": "android_release_arm64",
+            "name": "ci/android_release_arm64",
             "ninja": {
-                "config": "android_release_arm64",
+                "config": "ci/android_release_arm64",
                 "targets": [
                     "default",
                     "clang_x64/gen_snapshot",
@@ -132,7 +138,7 @@
                     "language": "bash",
                     "script": "flutter/ci/binary_size_treemap.sh",
                     "parameters": [
-                        "../../src/out/android_release_arm64/libflutter.so",
+                        "../../src/out/ci/android_release_arm64/libflutter.so",
                         "${FLUTTER_LOGS_DIR}"
                     ]
                 }
@@ -141,15 +147,15 @@
         {
             "archives": [
                 {
-                    "name": "android_profile_arm64",
+                    "name": "ci/android_profile_arm64",
                     "type": "gcs",
-                    "base_path": "out/android_profile_arm64/zip_archives/",
+                    "base_path": "out/ci/android_profile_arm64/zip_archives/",
                     "include_paths": [
-                        "out/android_profile_arm64/zip_archives/android-arm64-profile/artifacts.zip",
-                        "out/android_profile_arm64/zip_archives/android-arm64-profile/linux-x64.zip",
-                        "out/android_profile_arm64/zip_archives/android-arm64-profile/symbols.zip",
-                        "out/android_profile_arm64/zip_archives/android-arm64-profile/analyze-snapshot-linux-x64.zip",
-                        "out/android_profile_arm64/zip_archives/download.flutter.io"
+                        "out/ci/android_profile_arm64/zip_archives/android-arm64-profile/artifacts.zip",
+                        "out/ci/android_profile_arm64/zip_archives/android-arm64-profile/linux-x64.zip",
+                        "out/ci/android_profile_arm64/zip_archives/android-arm64-profile/symbols.zip",
+                        "out/ci/android_profile_arm64/zip_archives/android-arm64-profile/analyze-snapshot-linux-x64.zip",
+                        "out/ci/android_profile_arm64/zip_archives/download.flutter.io"
                     ],
                     "realm": "production"
                 }
@@ -162,6 +168,8 @@
                 "use_rbe": true
             },
             "gn": [
+                "--target-dir",
+                "ci/android_profile_arm64",
                 "--android",
                 "--runtime-mode",
                 "profile",
@@ -170,9 +178,9 @@
                 "--rbe",
                 "--no-goma"
             ],
-            "name": "android_profile_arm64",
+            "name": "ci/android_profile_arm64",
             "ninja": {
-                "config": "android_profile_arm64",
+                "config": "ci/android_profile_arm64",
                 "targets": [
                     "clang_x64/gen_snapshot",
                     "default",
@@ -192,7 +200,7 @@
                     "script": "flutter/ci/firebase_testlab.py",
                     "parameters": [
                         "--variant",
-                        "android_profile_arm64"
+                        "ci/android_profile_arm64"
                     ],
                     "test_if": "main"
                 }
@@ -201,15 +209,15 @@
         {
             "archives": [
                 {
-                    "name": "android_profile_x64",
+                    "name": "ci/android_profile_x64",
                     "type": "gcs",
-                    "base_path": "out/android_profile_x64/zip_archives/",
+                    "base_path": "out/ci/android_profile_x64/zip_archives/",
                     "include_paths": [
-                        "out/android_profile_x64/zip_archives/android-x64-profile/artifacts.zip",
-                        "out/android_profile_x64/zip_archives/android-x64-profile/linux-x64.zip",
-                        "out/android_profile_x64/zip_archives/android-x64-profile/symbols.zip",
-                        "out/android_profile_x64/zip_archives/android-x64-profile/analyze-snapshot-linux-x64.zip",
-                        "out/android_profile_x64/zip_archives/download.flutter.io"
+                        "out/ci/android_profile_x64/zip_archives/android-x64-profile/artifacts.zip",
+                        "out/ci/android_profile_x64/zip_archives/android-x64-profile/linux-x64.zip",
+                        "out/ci/android_profile_x64/zip_archives/android-x64-profile/symbols.zip",
+                        "out/ci/android_profile_x64/zip_archives/android-x64-profile/analyze-snapshot-linux-x64.zip",
+                        "out/ci/android_profile_x64/zip_archives/download.flutter.io"
                     ],
                     "realm": "production"
                 }
@@ -222,6 +230,8 @@
                 "use_rbe": true
             },
             "gn": [
+                "--target-dir",
+                "ci/android_profile_x64",
                 "--runtime-mode",
                 "profile",
                 "--android",
@@ -230,9 +240,9 @@
                 "--rbe",
                 "--no-goma"
             ],
-            "name": "android_profile_x64",
+            "name": "ci/android_profile_x64",
             "ninja": {
-                "config": "android_profile_x64",
+                "config": "ci/android_profile_x64",
                 "targets": [
                     "default",
                     "clang_x64/gen_snapshot",
@@ -244,15 +254,15 @@
         {
             "archives": [
                 {
-                    "name": "android_release_x64",
+                    "name": "ci/android_release_x64",
                     "type": "gcs",
-                    "base_path": "out/android_release_x64/zip_archives/",
+                    "base_path": "out/ci/android_release_x64/zip_archives/",
                     "include_paths": [
-                        "out/android_release_x64/zip_archives/android-x64-release/artifacts.zip",
-                        "out/android_release_x64/zip_archives/android-x64-release/linux-x64.zip",
-                        "out/android_release_x64/zip_archives/android-x64-release/symbols.zip",
-                        "out/android_release_x64/zip_archives/android-x64-release/analyze-snapshot-linux-x64.zip",
-                        "out/android_release_x64/zip_archives/download.flutter.io"
+                        "out/ci/android_release_x64/zip_archives/android-x64-release/artifacts.zip",
+                        "out/ci/android_release_x64/zip_archives/android-x64-release/linux-x64.zip",
+                        "out/ci/android_release_x64/zip_archives/android-x64-release/symbols.zip",
+                        "out/ci/android_release_x64/zip_archives/android-x64-release/analyze-snapshot-linux-x64.zip",
+                        "out/ci/android_release_x64/zip_archives/download.flutter.io"
                     ],
                     "realm": "production"
                 }
@@ -265,6 +275,8 @@
                 "use_rbe": true
             },
             "gn": [
+                "--target-dir",
+                "ci/android_release_x64",
                 "--runtime-mode",
                 "release",
                 "--android",
@@ -273,9 +285,9 @@
                 "--rbe",
                 "--no-goma"
             ],
-            "name": "android_release_x64",
+            "name": "ci/android_release_x64",
             "ninja": {
-                "config": "android_release_x64",
+                "config": "ci/android_release_x64",
                 "targets": [
                     "default",
                     "clang_x64/gen_snapshot",
@@ -290,7 +302,8 @@
             {
                 "name": "Verify-export-symbols-release-binaries",
                 "parameters": [
-                    "src/out"
+                    "src/out/ci",
+                    "src/flutter/buildtools"
                 ],
                 "script": "flutter/testing/symbols/verify_exported.dart",
                 "language": "dart"

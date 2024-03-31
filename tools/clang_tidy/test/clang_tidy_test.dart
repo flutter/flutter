@@ -213,6 +213,7 @@ Future<int> main(List<String> args) async {
   test('clang-tidy specified', () async {
     _withTempFile('shard-id-valid', (String path) {
       final Options options = Options.fromCommandLine( <String>[
+          '--compile-commands=$path',
           '--clang-tidy=foo/bar',
         ],);
       expect(options.clangTidyPath, isNotNull);
