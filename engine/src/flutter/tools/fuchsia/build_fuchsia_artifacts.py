@@ -22,7 +22,7 @@ from gen_package import CreateFarPackage
 
 _script_dir = os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 _src_root_dir = os.path.join(_script_dir, '..', '..', '..')
-_out_dir = os.path.join(_src_root_dir, 'out')
+_out_dir = os.path.join(_src_root_dir, 'out', 'ci')
 _bucket_directory = os.path.join(_out_dir, 'fuchsia_bucket')
 
 

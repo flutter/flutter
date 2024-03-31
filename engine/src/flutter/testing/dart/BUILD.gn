@@ -55,7 +55,7 @@ tests = [
 
 foreach(test, tests) {
   flutter_build_dir = rebase_path("$root_gen_dir")
-  flutter_src_dir = rebase_path("$root_out_dir/../../flutter")
+  flutter_src_dir = rebase_path("//flutter")
   skia_gold_work_dir = rebase_path("$root_gen_dir/skia_gold_$test")
   flutter_frontend_server("compile_$test") {
     main_dart = test

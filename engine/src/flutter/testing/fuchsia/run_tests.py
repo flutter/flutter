@@ -142,7 +142,7 @@ if __name__ == '__main__':
   logging.basicConfig(level=logging.INFO)
   logging.info('Running tests in %s', OUT_DIR)
   sys.argv.append('--out-dir=' + OUT_DIR)
-  if VARIANT.endswith('_arm64'):
+  if VARIANT.endswith('_arm64') or VARIANT.endswith('_arm64_tester'):
     sys.argv.append('--product=terminal.qemu-arm64')
   # The 'flutter-test-type' is a place holder and has no specific meaning; the
   # _get_test_runner is overrided.
