@@ -75,7 +75,7 @@ class _AnimatedListSeparatedSampleState extends State<AnimatedListSeparatedSampl
   // Build a separator for items that have been removed from the list.
   /// The widget will be used by the [AnimatedListSeparatedState.removeSeparatedItem] method's
   /// `separatorBuilder` parameter.
-  Widget _buildRemovedSeparator(int item , BuildContext context, Animation<double> animation) => SizeTransition(
+  Widget _buildRemovedSeparator(int item, BuildContext context, Animation<double> animation) => SizeTransition(
                 sizeFactor: animation,
                 child: ItemSeparator(
                   animation: animation,
@@ -86,7 +86,8 @@ class _AnimatedListSeparatedSampleState extends State<AnimatedListSeparatedSampl
   // Insert the "next item" into the list model.
   void _insert() {
     final int index = _selectedItem == null ? _list.length : _list.indexOf(_selectedItem!);
-    _list.insert(index, _nextItem++);
+    _list.insert(index, _nextItem);
+    _nextItem++;
   }
 
   // Remove the selected item from the list model.
