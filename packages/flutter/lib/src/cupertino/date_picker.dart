@@ -1477,7 +1477,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
           offAxisFraction,
           (BuildContext context, Widget? child) {
             return Padding(
-              padding: i == 0 ? null : padding,
+              padding: i == 0 ? EdgeInsets.zero : padding,
               child: Align(
                 alignment: i == columnWidths.length - 1
                     ? alignCenterLeft
@@ -1781,7 +1781,7 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
           (BuildContext context, Widget? child) {
             return Padding(
               padding: switch (textDirectionFactor) {
-                _ when first => null,
+                _ when first => EdgeInsets.zero,
                 -1 => const EdgeInsets.only(left: _kDatePickerPadSize),
                 _  => const EdgeInsets.only(right: _kDatePickerPadSize),
               },

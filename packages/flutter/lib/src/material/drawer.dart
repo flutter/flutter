@@ -682,7 +682,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
             behavior: HitTestBehavior.translucent,
             excludeFromSemantics: true,
             dragStartBehavior: widget.dragStartBehavior,
-            child: SizedBox(width: dragAreaWidth, child: LimitedBox(maxHeight: 0.0, child: SizedBox.expand())),
+            child: SizedBox(width: dragAreaWidth, child: const LimitedBox(maxHeight: 0.0, child: SizedBox.expand())),
           ),
         );
       } else {
@@ -714,9 +714,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                     onTap: close,
                     child: Semantics(
                       label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-                      child: ColoredBox( // The drawer's "scrim"
-                        color: _scrimColorTween.evaluate(_controller),
-                        child: LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()),
+                      child: DecoratedBox( // The drawer's "scrim"
+                        decoration: BoxDecoration(color: _scrimColorTween.evaluate(_controller)),
+                        child: const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()),
                       ),
                     ),
                   ),

@@ -428,8 +428,10 @@ class CupertinoPopupSurface extends StatelessWidget {
       borderRadius: const BorderRadius.all(Radius.circular(_kCornerRadius)),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
-        child: ColoredBox(
-          color: isSurfacePainted ? CupertinoDynamicColor.resolve(_kDialogColor, context) : null,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: isSurfacePainted ? CupertinoDynamicColor.resolve(_kDialogColor, context) : null,
+          ),
           child: child,
         ),
       ),
@@ -658,7 +660,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
           child: CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.elevated,
             child: Padding(
-              margin: const EdgeInsets.symmetric(
+              padding: const EdgeInsets.symmetric(
                 horizontal: _kActionSheetEdgeHorizontalPadding,
                 vertical: _kActionSheetEdgeVerticalPadding,
               ),

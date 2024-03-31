@@ -15,7 +15,6 @@ import 'package:flutter/services.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
-import 'container.dart';
 import 'context_menu_controller.dart';
 import 'debug.dart';
 import 'editable_text.dart';

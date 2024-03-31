@@ -1156,7 +1156,7 @@ class DataTable extends StatelessWidget {
     }
 
     return DecoratedBox(
-      decoration: decoration ?? dataTableTheme.decoration ?? theme.dataTableTheme.decoration,
+      decoration: decoration ?? dataTableTheme.decoration ?? theme.dataTableTheme.decoration ?? const BoxDecoration(),
       child: Material(
         type: MaterialType.transparency,
         borderRadius: border?.borderRadius,

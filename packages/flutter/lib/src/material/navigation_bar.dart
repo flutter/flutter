@@ -792,7 +792,7 @@ class NavigationIndicator extends StatelessWidget {
                       shape: shape ?? RoundedRectangleBorder(borderRadius: borderRadius),
                       color: color ?? Theme.of(context).colorScheme.secondary,
                     ),
-                    child: LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()),
+                    child: const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()),
                   ),
                 ),
               );

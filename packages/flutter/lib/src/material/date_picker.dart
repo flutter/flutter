@@ -2151,8 +2151,8 @@ class _DayHeaders extends StatelessWidget {
     final List<Widget> labels = _getDayHeaders(textStyle, localizations);
 
     // Add leading and trailing boxes for edges of the custom grid layout.
-    labels.insert(0, LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()));
-    labels.add(LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()));
+    labels.insert(0, const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()));
+    labels.add(const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()));
 
     return ConstrainedBox(
       constraints: BoxConstraints(
@@ -2424,7 +2424,7 @@ class _MonthItemState extends State<_MonthItem> {
   Widget _buildEdgeBox(BuildContext context, bool isHighlighted) {
     return DecoratedBox(
       decoration: BoxDecoration(color: isHighlighted ? _highlightColor(context) : null),
-      child: LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()),
+      child: const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()),
     );
   }
 
@@ -2445,7 +2445,7 @@ class _MonthItemState extends State<_MonthItem> {
     // a leap year.
     for (int day = 0 - dayOffset + 1; day <= daysInMonth; day += 1) {
       if (day < 1) {
-        dayItems.add(LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()));
+        dayItems.add(const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()));
       } else {
         final DateTime dayToBuild = DateTime(year, month, day);
         final Widget dayItem = _buildDayItem(
@@ -2691,7 +2691,7 @@ class _DayItemState extends State<_DayItem> {
     }
 
     Widget dayWidget = DecoratedBox(
-      decoration: decoration,
+      decoration: decoration ?? const BoxDecoration(),
       child: Center(
         child: Semantics(
           label: semanticLabel,

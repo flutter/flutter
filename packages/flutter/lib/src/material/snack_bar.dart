@@ -767,7 +767,7 @@ class _SnackBarState extends State<SnackBar> {
       // If width is provided, do not include horizontal margins.
       if (width != null) {
         snackBar = Padding(
-          margin: EdgeInsets.only(top: margin.top, bottom: margin.bottom),
+          padding: EdgeInsets.only(top: margin.top, bottom: margin.bottom),
           child: SizedBox(
             width: width,
             child: snackBar,

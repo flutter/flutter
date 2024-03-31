@@ -801,7 +801,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
     if (widget.expandedInsets != null) {
       menuAnchor = Padding(
-        padding: widget.expandedInsets?.copyWith(top: 0.0, bottom: 0.0),
+        padding: widget.expandedInsets?.copyWith(top: 0.0, bottom: 0.0) ?? EdgeInsets.zero,
         child: Align(
           alignment: AlignmentDirectional.topStart,
           child: menuAnchor,

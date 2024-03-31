@@ -171,7 +171,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
     Widget child = SizedBox(
       height: widget.route.itemHeight,
       child: Padding(
-        padding: widget.padding,
+        padding: widget.padding ?? EdgeInsets.zero,
         child: widget.route.items[widget.itemIndex],
       ),
     );
@@ -1499,10 +1499,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
             left: 0.0,
             right: 0.0,
             bottom: bottom,
-            child: widget.underline ?? SizedBox(
+            child: widget.underline ?? const SizedBox(
               height: 1.0,
               child: DecoratedBox(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
                       color: Color(0xFFBDBDBD),

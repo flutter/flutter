@@ -72,7 +72,7 @@ class GridTileBar extends StatelessWidget {
     return SizedBox(
       height: (title != null && subtitle != null) ? 68.0 : 48.0,
       child: DecoratedBox(
-        decoration: decoration,
+        decoration: decoration ?? const BoxDecoration(),
         child: Padding(
           padding: padding,
           child: Theme(

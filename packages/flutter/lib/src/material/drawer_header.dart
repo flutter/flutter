@@ -78,7 +78,7 @@ class DrawerHeader extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final double statusBarHeight = MediaQuery.paddingOf(context).top;
     return Padding(
-      padding: margin,
+      padding: margin ?? EdgeInsets.zero,
       child: SizedBox(
         height: statusBarHeight + _kDrawerHeaderHeight,
         child: DecoratedBox(

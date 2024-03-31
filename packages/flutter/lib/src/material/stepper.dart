@@ -726,7 +726,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         ),
         if (widget.steps[index].subtitle != null)
           Padding(
-            Padding: const EdgeInsets.only(top: 2.0),
+            padding: const EdgeInsets.only(top: 2.0),
             child: AnimatedDefaultTextStyle(
               style: _subtitleStyle(index),
               duration: kThemeAnimationDuration,
@@ -800,14 +800,14 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 width: !_isLast(index) ? (widget.connectorThickness ?? 1.0) : 0.0,
                 child: ColoredBox(
                   color: _connectorColor(widget.steps[index].isActive),
-                  child: LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()),
+                  child: const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()),
                 ),
               ),
             ),
           ),
         ),
         AnimatedCrossFade(
-          firstChild: LimitedBox(maxWidth: 0.0, child: SizedBox(width: double.infinity, height: 0)),
+          firstChild: const LimitedBox(maxWidth: 0.0, child: SizedBox(width: double.infinity, height: 0)),
           secondChild: Padding(
             padding: EdgeInsetsDirectional.only(
               // Adjust [controlsBuilder] padding so that the content is
@@ -902,7 +902,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 height: widget.steps[i].stepStyle?.connectorThickness ?? widget.connectorThickness ?? 1.0,
                 child: ColoredBox(
                   color: widget.steps[i].stepStyle?.connectorColor ?? _connectorColor(widget.steps[i].isActive),
-                  child: LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()),
+                  child: const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()),
                 ),
               ),
             ),
