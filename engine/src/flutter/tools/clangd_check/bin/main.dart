@@ -58,10 +58,11 @@ void main(List<String> args) {
   final String checkFile;
   if (entry case {
     'command': final String command,
+    'directory': final String directory,
     'file': final String file,
   }) {
     // Given a path like ../../flutter/foo.cc, we want to check foo.cc.
-    checkFile = p.split(file).skip(3).join(p.separator);
+    checkFile = p.join(directory, file);
     // On CI, the command path is different from the local path.
     // Find the engine root and derive the clangd path from there.
     if (clangd == null) {

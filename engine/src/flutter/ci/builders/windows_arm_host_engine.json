@@ -3,17 +3,17 @@
         {
             "archives": [
                 {
-                    "base_path": "out/host_debug_arm64/zip_archives/",
+                    "base_path": "out/ci/host_debug_arm64/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/host_debug_arm64/zip_archives/windows-arm64/artifacts.zip",
-                        "out/host_debug_arm64/zip_archives/windows-arm64/windows-arm64-embedder.zip",
-                        "out/host_debug_arm64/zip_archives/windows-arm64/font-subset.zip",
-                        "out/host_debug_arm64/zip_archives/dart-sdk-windows-arm64.zip",
-                        "out/host_debug_arm64/zip_archives/windows-arm64-debug/windows-arm64-flutter.zip",
-                        "out/host_debug_arm64/zip_archives/windows-arm64/flutter-cpp-client-wrapper.zip"
+                        "out/ci/host_debug_arm64/zip_archives/windows-arm64/artifacts.zip",
+                        "out/ci/host_debug_arm64/zip_archives/windows-arm64/windows-arm64-embedder.zip",
+                        "out/ci/host_debug_arm64/zip_archives/windows-arm64/font-subset.zip",
+                        "out/ci/host_debug_arm64/zip_archives/dart-sdk-windows-arm64.zip",
+                        "out/ci/host_debug_arm64/zip_archives/windows-arm64-debug/windows-arm64-flutter.zip",
+                        "out/ci/host_debug_arm64/zip_archives/windows-arm64/flutter-cpp-client-wrapper.zip"
                     ],
-                    "name": "host_debug_arm64",
+                    "name": "ci/host_debug_arm64",
                     "realm": "production"
                 }
             ],
@@ -26,6 +26,8 @@
                 "use_rbe": true
             },
             "gn": [
+                "--target-dir",
+                "ci/host_debug_arm64",
                 "--runtime-mode",
                 "debug",
                 "--no-lto",
@@ -34,9 +36,9 @@
                 "--no-goma",
                 "--rbe"
             ],
-            "name": "host_debug_arm64",
+            "name": "ci\\host_debug_arm64",
             "ninja": {
-                "config": "host_debug_arm64",
+                "config": "ci/host_debug_arm64",
                 "targets": [
                     "flutter/build/archives:artifacts",
                     "flutter/build/archives:embedder",
@@ -50,12 +52,12 @@
         {
             "archives": [
                 {
-                    "base_path": "out/host_profile_arm64/zip_archives/",
+                    "base_path": "out/ci/host_profile_arm64/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/host_profile_arm64/zip_archives/windows-arm64-profile/windows-arm64-flutter.zip"
+                        "out/ci/host_profile_arm64/zip_archives/windows-arm64-profile/windows-arm64-flutter.zip"
                     ],
-                    "name": "host_profile_arm64",
+                    "name": "ci/host_profile_arm64",
                     "realm": "production"
                 }
             ],
@@ -68,6 +70,8 @@
                 "use_rbe": true
             },
             "gn": [
+                "--target-dir",
+                "ci/host_profile_arm64",
                 "--runtime-mode",
                 "profile",
                 "--no-lto",
@@ -76,9 +80,9 @@
                 "--no-goma",
                 "--rbe"
             ],
-            "name": "host_profile_arm64",
+            "name": "ci\\host_profile_arm64",
             "ninja": {
-                "config": "host_profile_arm64",
+                "config": "ci/host_profile_arm64",
                 "targets": [
                     "windows",
                     "gen_snapshot",
@@ -89,12 +93,12 @@
         {
             "archives": [
                 {
-                    "base_path": "out/host_release_arm64/zip_archives/",
+                    "base_path": "out/ci/host_release_arm64/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/host_release_arm64/zip_archives/windows-arm64-release/windows-arm64-flutter.zip"
+                        "out/ci/host_release_arm64/zip_archives/windows-arm64-release/windows-arm64-flutter.zip"
                     ],
-                    "name": "host_profile_arm64",
+                    "name": "ci/host_profile_arm64",
                     "realm": "production"
                 }
             ],
@@ -108,6 +112,8 @@
             },
             "generators": {},
             "gn": [
+                "--target-dir",
+                "ci/host_release_arm64",
                 "--runtime-mode",
                 "release",
                 "--no-lto",
@@ -116,9 +122,9 @@
                 "--no-goma",
                 "--rbe"
             ],
-            "name": "host_release_arm64",
+            "name": "ci\\host_release_arm64",
             "ninja": {
-                "config": "host_release_arm64",
+                "config": "ci/host_release_arm64",
                 "targets": [
                     "windows",
                     "gen_snapshot",

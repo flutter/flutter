@@ -3,12 +3,12 @@
         {
             "archives": [
                 {
-                    "base_path": "out/android_profile/zip_archives/",
+                    "base_path": "out/ci/android_profile/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/android_profile/zip_archives/android-arm-profile/darwin-x64.zip"
+                        "out/ci/android_profile/zip_archives/android-arm-profile/darwin-x64.zip"
                     ],
-                    "name": "android_profile",
+                    "name": "ci/android_profile",
                     "realm": "production"
                 }
             ],
@@ -21,13 +21,15 @@
                 "download_android_deps": false
             },
             "gn": [
+                "--target-dir",
+                "ci/android_profile",
                 "--runtime-mode",
                 "profile",
                 "--android"
             ],
-            "name": "android_profile",
+            "name": "ci/android_profile",
             "ninja": {
-                "config": "android_profile",
+                "config": "ci/android_profile",
                 "targets": [
                     "flutter/lib/snapshot",
                     "flutter/shell/platform/android:gen_snapshot"
@@ -42,12 +44,12 @@
         {
             "archives": [
                 {
-                    "base_path": "out/android_profile_arm64/zip_archives/",
+                    "base_path": "out/ci/android_profile_arm64/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/android_profile_arm64/zip_archives/android-arm64-profile/darwin-x64.zip"
+                        "out/ci/android_profile_arm64/zip_archives/android-arm64-profile/darwin-x64.zip"
                     ],
-                    "name": "android_profile_arm64",
+                    "name": "ci/android_profile_arm64",
                     "realm": "production"
                 }
             ],
@@ -60,14 +62,16 @@
                 "download_android_deps": false
             },
             "gn": [
+                "--target-dir",
+                "ci/android_profile_arm64",
                 "--runtime-mode",
                 "profile",
                 "--android",
                 "--android-cpu=arm64"
             ],
-            "name": "android_profile_arm64",
+            "name": "ci/android_profile_arm64",
             "ninja": {
-                "config": "android_profile_arm64",
+                "config": "ci/android_profile_arm64",
                 "targets": [
                     "flutter/lib/snapshot",
                     "flutter/shell/platform/android:gen_snapshot"
@@ -82,12 +86,12 @@
         {
             "archives": [
                 {
-                    "base_path": "out/android_profile_x64/zip_archives/",
+                    "base_path": "out/ci/android_profile_x64/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/android_profile_x64/zip_archives/android-x64-profile/darwin-x64.zip"
+                        "out/ci/android_profile_x64/zip_archives/android-x64-profile/darwin-x64.zip"
                     ],
-                    "name": "android_profile_x64",
+                    "name": "ci/android_profile_x64",
                     "realm": "production"
                 }
             ],
@@ -100,14 +104,16 @@
                 "download_android_deps": false
             },
             "gn": [
+                "--target-dir",
+                "ci/android_profile_x64",
                 "--runtime-mode",
                 "profile",
                 "--android",
                 "--android-cpu=x64"
             ],
-            "name": "android_profile_x64",
+            "name": "ci/android_profile_x64",
             "ninja": {
-                "config": "android_profile_x64",
+                "config": "ci/android_profile_x64",
                 "targets": [
                     "flutter/lib/snapshot",
                     "flutter/shell/platform/android:gen_snapshot"
@@ -122,12 +128,12 @@
         {
             "archives": [
                 {
-                    "base_path": "out/android_release/zip_archives/",
+                    "base_path": "out/ci/android_release/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/android_release/zip_archives/android-arm-release/darwin-x64.zip"
+                        "out/ci/android_release/zip_archives/android-arm-release/darwin-x64.zip"
                     ],
-                    "name": "android_release",
+                    "name": "ci/android_release",
                     "realm": "production"
                 }
             ],
@@ -140,13 +146,15 @@
                 "download_android_deps": false
             },
             "gn": [
+                "--target-dir",
+                "ci/android_release",
                 "--runtime-mode",
                 "release",
                 "--android"
             ],
-            "name": "android_release",
+            "name": "ci/android_release",
             "ninja": {
-                "config": "android_release",
+                "config": "ci/android_release",
                 "targets": [
                     "flutter/lib/snapshot",
                     "flutter/shell/platform/android:gen_snapshot"
@@ -161,12 +169,12 @@
         {
             "archives": [
                 {
-                    "base_path": "out/android_release_arm64/zip_archives/",
+                    "base_path": "out/ci/android_release_arm64/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/android_release_arm64/zip_archives/android-arm64-release/darwin-x64.zip"
+                        "out/ci/android_release_arm64/zip_archives/android-arm64-release/darwin-x64.zip"
                     ],
-                    "name": "android_release_arm64",
+                    "name": "ci/android_release_arm64",
                     "realm": "production"
                 }
             ],
@@ -179,14 +187,16 @@
                 "download_android_deps": false
             },
             "gn": [
+                "--target-dir",
+                "ci/android_release_arm64",
                 "--runtime-mode",
                 "release",
                 "--android",
                 "--android-cpu=arm64"
             ],
-            "name": "android_release_arm64",
+            "name": "ci/android_release_arm64",
             "ninja": {
-                "config": "android_release_arm64",
+                "config": "ci/android_release_arm64",
                 "targets": [
                     "flutter/lib/snapshot",
                     "flutter/shell/platform/android:gen_snapshot"
@@ -201,12 +211,12 @@
         {
             "archives": [
                 {
-                    "base_path": "out/android_release_x64/zip_archives/",
+                    "base_path": "out/ci/android_release_x64/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/android_release_x64/zip_archives/android-x64-release/darwin-x64.zip"
+                        "out/ci/android_release_x64/zip_archives/android-x64-release/darwin-x64.zip"
                     ],
-                    "name": "android_release_x64",
+                    "name": "ci/android_release_x64",
                     "realm": "production"
                 }
             ],
@@ -219,14 +229,16 @@
                 "download_android_deps": false
             },
             "gn": [
+                "--target-dir",
+                "ci/android_release_x64",
                 "--runtime-mode",
                 "release",
                 "--android",
                 "--android-cpu=x64"
             ],
-            "name": "android_release_x64",
+            "name": "ci/android_release_x64",
             "ninja": {
-                "config": "android_release_x64",
+                "config": "ci/android_release_x64",
                 "targets": [
                     "flutter/lib/snapshot",
                     "flutter/shell/platform/android:gen_snapshot"

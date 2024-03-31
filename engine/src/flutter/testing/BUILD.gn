@@ -101,8 +101,7 @@ source_set("skia") {
 }
 
 dart_snapshot_kernel("vmservice_kernel") {
-  dart_main =
-      rebase_path("//flutter/shell/vmservice/empty.dart", root_build_dir)
+  dart_main = "//flutter/shell/vmservice/empty.dart"
   dart_kernel = "$target_gen_dir/assets/vmservice_kernel.bin"
 }
 

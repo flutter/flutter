@@ -35,9 +35,12 @@ FLUTTER_DIR="$SRC_DIR/flutter"
 # directory. If not specified, we default to the build output for
 # host_debug_unopt.
 if [[ $# -eq 0 ]] ; then
-DART_BIN="$SRC_DIR/out/host_debug_unopt/dart-sdk/bin"
+  DART_BIN="$SRC_DIR/out/host_debug_unopt/dart-sdk/bin"
+  if [[ ! -d "$DART_BIN" ]]; then
+    DART_BIN="$SRC_DIR/out/ci/host_debug_unopt/dart-sdk/bin"
+  fi
 else
-DART_BIN="$1"
+  DART_BIN="$1"
 fi
 
 DART="$DART_BIN/dart"

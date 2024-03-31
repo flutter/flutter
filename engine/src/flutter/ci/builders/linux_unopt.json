@@ -10,6 +10,8 @@
                 "use_rbe": true
             },
             "gn": [
+                "--target-dir",
+                "ci/host_debug_unopt",
                 "--runtime-mode",
                 "debug",
                 "--unoptimized",
@@ -20,9 +22,9 @@
                 "--rbe",
                 "--no-goma"
             ],
-            "name": "host_debug_unopt",
+            "name": "ci/host_debug_unopt",
             "ninja": {
-                "config": "host_debug_unopt",
+                "config": "ci/host_debug_unopt",
                 "targets": [
                     "flutter/tools/font_subset",
                     "flutter:unittests",
@@ -62,7 +64,7 @@
                         "--logs-dir",
                         "${FLUTTER_LOGS_DIR}",
                         "--variant",
-                        "host_debug_unopt",
+                        "ci/host_debug_unopt",
                         "--type",
                         "dart,dart-host,engine",
                         "--engine-capture-core-dump",
@@ -82,7 +84,7 @@
                     "name": "test: observatory and service protocol",
                     "script": "flutter/shell/testing/observatory/test.dart",
                     "parameters": [
-                        "out/host_debug_unopt/flutter_tester",
+                        "out/ci/host_debug_unopt/flutter_tester",
                         "flutter/shell/testing/observatory/empty_main.dart"
                     ]
                 },
@@ -119,14 +121,14 @@
                 "--unoptimized",
                 "--prebuilt-dart-sdk",
                 "--target-dir",
-                "host_debug_unopt_impeller_tests",
+                "ci/host_debug_unopt_impeller_tests",
                 "--rbe",
                 "--no-goma",
                 "--use-glfw-swiftshader"
             ],
-            "name": "host_debug_unopt_impeller_tests",
+            "name": "ci/host_debug_unopt_impeller_tests",
             "ninja": {
-                "config": "host_debug_unopt_impeller_tests",
+                "config": "ci/host_debug_unopt_impeller_tests",
                 "targets": [
                     "flutter",
                     "flutter/sky/packages"
@@ -139,7 +141,7 @@
                     "script": "flutter/testing/run_tests.py",
                     "parameters": [
                         "--variant",
-                        "host_debug_unopt_impeller_tests",
+                        "ci/host_debug_unopt_impeller_tests",
                         "--type",
                         "impeller",
                         "--engine-capture-core-dump"
@@ -161,14 +163,14 @@
                 "--android",
                 "--embedder-for-target",
                 "--target-dir",
-                "android_embedder_debug_unopt",
+                "ci/android_embedder_debug_unopt",
                 "--unoptimized",
                 "--rbe",
                 "--no-goma"
             ],
-            "name": "android_embedder_debug_unopt",
+            "name": "ci/android_embedder_debug_unopt",
             "ninja": {
-                "config": "android_embedder_debug_unopt",
+                "config": "ci/android_embedder_debug_unopt",
                 "targets": [
                     "flutter/shell/platform/embedder:flutter_engine"
                 ]
@@ -184,6 +186,8 @@
                 "use_rbe": true
             },
             "gn": [
+                "--target-dir",
+                "ci/android_debug_arm64_validation_layers",
                 "--android",
                 "--android-cpu=arm64",
                 "--no-lto",
@@ -191,9 +195,9 @@
                 "--rbe",
                 "--no-goma"
             ],
-            "name": "android_debug_arm64_validation_layers",
+            "name": "ci/android_debug_arm64_validation_layers",
             "ninja": {
-                "config": "android_debug_arm64",
+                "config": "ci/android_debug_arm64_validation_layers",
                 "targets": [
                     "flutter",
                     "flutter/shell/platform/android:abi_jars"
@@ -215,14 +219,16 @@
                 "use_rbe": true
             },
             "gn": [
+                "--target-dir",
+                "ci/android_debug_unopt",
                 "--android",
                 "--unoptimized",
                 "--rbe",
                 "--no-goma"
             ],
-            "name": "android_debug_unopt",
+            "name": "ci/android_debug_unopt",
             "ninja": {
-                "config": "android_debug_unopt",
+                "config": "ci/android_debug_unopt",
                 "targets": [
                     "flutter/impeller",
                     "flutter/shell/platform/android:android_jar",
@@ -236,12 +242,12 @@
                     "script": "flutter/testing/run_tests.py",
                     "parameters": [
                         "--variant",
-                        "android_debug_unopt",
+                        "ci/android_debug_unopt",
                         "--type",
                         "java",
                         "--engine-capture-core-dump",
                         "--android-variant",
-                        "android_debug_unopt"
+                        "ci/android_debug_unopt"
                     ]
                 },
                 {
@@ -252,7 +258,7 @@
                         "--before-relative-to-src",
                         "flutter/impeller/tools/malioc.json",
                         "--after-relative-to-src",
-                        "out/android_debug_unopt/gen/malioc",
+                        "out/ci/android_debug_unopt/gen/malioc",
                         "--print-diff"
                     ]
                 }

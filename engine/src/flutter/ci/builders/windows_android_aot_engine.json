@@ -3,12 +3,12 @@
         {
             "archives": [
                 {
-                    "base_path": "out/android_profile/zip_archives/",
+                    "base_path": "out/ci/android_profile/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/android_profile/zip_archives/android-arm-profile/windows-x64.zip"
+                        "out/ci/android_profile/zip_archives/android-arm-profile/windows-x64.zip"
                     ],
-                    "name": "android_profile",
+                    "name": "ci/android_profile",
                     "realm": "production"
                 }
             ],
@@ -20,15 +20,17 @@
                 "use_rbe": true
             },
             "gn": [
+                "--target-dir",
+                "ci/android_profile",
                 "--runtime-mode",
                 "profile",
                 "--android",
                 "--no-goma",
                 "--rbe"
             ],
-            "name": "android_profile",
+            "name": "ci\\android_profile",
             "ninja": {
-                "config": "android_profile",
+                "config": "ci/android_profile",
                 "targets": [
                     "flutter/build/archives:archive_win_gen_snapshot"
                 ]
@@ -37,12 +39,12 @@
         {
             "archives": [
                 {
-                    "base_path": "out/android_profile_arm64/zip_archives/",
+                    "base_path": "out/ci/android_profile_arm64/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/android_profile_arm64/zip_archives/android-arm64-profile/windows-x64.zip"
+                        "out/ci/android_profile_arm64/zip_archives/android-arm64-profile/windows-x64.zip"
                     ],
-                    "name": "android_profile_arm64",
+                    "name": "ci/android_profile_arm64",
                     "realm": "production"
                 }
             ],
@@ -54,6 +56,8 @@
                 "use_rbe": true
             },
             "gn": [
+                "--target-dir",
+                "ci/android_profile_arm64",
                 "--runtime-mode",
                 "profile",
                 "--android",
@@ -61,9 +65,9 @@
                 "--no-goma",
                 "--rbe"
             ],
-            "name": "android_profile_arm64",
+            "name": "ci\\android_profile_arm64",
             "ninja": {
-                "config": "android_profile_arm64",
+                "config": "ci/android_profile_arm64",
                 "targets": [
                     "flutter/build/archives:archive_win_gen_snapshot"
                 ]
@@ -72,12 +76,12 @@
         {
             "archives": [
                 {
-                    "base_path": "out/android_profile_x64/zip_archives/",
+                    "base_path": "out/ci/android_profile_x64/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/android_profile_x64/zip_archives/android-x64-profile/windows-x64.zip"
+                        "out/ci/android_profile_x64/zip_archives/android-x64-profile/windows-x64.zip"
                     ],
-                    "name": "android_profile_x64",
+                    "name": "ci/android_profile_x64",
                     "realm": "production"
                 }
             ],
@@ -89,6 +93,8 @@
                 "use_rbe": true
             },
             "gn": [
+                "--target-dir",
+                "ci/android_profile_x64",
                 "--runtime-mode",
                 "profile",
                 "--android",
@@ -96,9 +102,9 @@
                 "--no-goma",
                 "--rbe"
             ],
-            "name": "android_profile_x64",
+            "name": "ci\\android_profile_x64",
             "ninja": {
-                "config": "android_profile_x64",
+                "config": "ci/android_profile_x64",
                 "targets": [
                     "flutter/build/archives:archive_win_gen_snapshot"
                 ]
@@ -107,12 +113,12 @@
         {
             "archives": [
                 {
-                    "base_path": "out/android_release/zip_archives/",
+                    "base_path": "out/ci/android_release/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/android_release/zip_archives/android-arm-release/windows-x64.zip"
+                        "out/ci/android_release/zip_archives/android-arm-release/windows-x64.zip"
                     ],
-                    "name": "android_release",
+                    "name": "ci/android_release",
                     "realm": "production"
                 }
             ],
@@ -124,15 +130,17 @@
                 "use_rbe": true
             },
             "gn": [
+                "--target-dir",
+                "ci/android_release",
                 "--runtime-mode",
                 "release",
                 "--android",
                 "--no-goma",
                 "--rbe"
             ],
-            "name": "android_release",
+            "name": "ci\\android_release",
             "ninja": {
-                "config": "android_release",
+                "config": "ci/android_release",
                 "targets": [
                     "flutter/build/archives:archive_win_gen_snapshot"
                 ]
@@ -141,12 +149,12 @@
         {
             "archives": [
                 {
-                    "base_path": "out/android_release_arm64/zip_archives/",
+                    "base_path": "out/ci/android_release_arm64/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/android_release_arm64/zip_archives/android-arm64-release/windows-x64.zip"
+                        "out/ci/android_release_arm64/zip_archives/android-arm64-release/windows-x64.zip"
                     ],
-                    "name": "android_release_arm64",
+                    "name": "ci/android_release_arm64",
                     "realm": "production"
                 }
             ],
@@ -158,6 +166,8 @@
                 "use_rbe": true
             },
             "gn": [
+                "--target-dir",
+                "ci/android_release_arm64",
                 "--runtime-mode",
                 "release",
                 "--android",
@@ -165,9 +175,9 @@
                 "--no-goma",
                 "--rbe"
             ],
-            "name": "android_release_arm64",
+            "name": "ci\\android_release_arm64",
             "ninja": {
-                "config": "android_release_arm64",
+                "config": "ci/android_release_arm64",
                 "targets": [
                     "flutter/build/archives:archive_win_gen_snapshot"
                 ]
@@ -176,12 +186,12 @@
         {
             "archives": [
                 {
-                    "base_path": "out/android_release_x64/zip_archives/",
+                    "base_path": "out/ci/android_release_x64/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/android_release_x64/zip_archives/android-x64-release/windows-x64.zip"
+                        "out/ci/android_release_x64/zip_archives/android-x64-release/windows-x64.zip"
                     ],
-                    "name": "android_release_x64",
+                    "name": "ci/android_release_x64",
                     "realm": "production"
                 }
             ],
@@ -193,6 +203,8 @@
                 "use_rbe": true
             },
             "gn": [
+                "--target-dir",
+                "ci/android_release_x64",
                 "--runtime-mode",
                 "release",
                 "--android",
@@ -200,9 +212,9 @@
                 "--no-goma",
                 "--rbe"
             ],
-            "name": "android_release_x64",
+            "name": "ci\\android_release_x64",
             "ninja": {
-                "config": "android_release_x64",
+                "config": "ci/android_release_x64",
                 "targets": [
                     "flutter/build/archives:archive_win_gen_snapshot"
                 ]

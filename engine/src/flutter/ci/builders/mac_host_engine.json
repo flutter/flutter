@@ -3,13 +3,13 @@
         {
             "archives": [
                 {
-                    "base_path": "out/host_debug/zip_archives/",
+                    "base_path": "out/ci/host_debug/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/host_debug/zip_archives/darwin-x64/artifacts.zip",
-                        "out/host_debug/zip_archives/dart-sdk-darwin-x64.zip"
+                        "out/ci/host_debug/zip_archives/darwin-x64/artifacts.zip",
+                        "out/ci/host_debug/zip_archives/dart-sdk-darwin-x64.zip"
                     ],
-                    "name": "host_debug",
+                    "name": "ci/host_debug",
                     "realm": "production"
                 }
             ],
@@ -23,6 +23,8 @@
                 "download_android_deps": false
             },
             "gn": [
+                "--target-dir",
+                "ci/host_debug",
                 "--runtime-mode",
                 "debug",
                 "--no-lto",
@@ -30,9 +32,9 @@
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader"
             ],
-            "name": "host_debug",
+            "name": "ci/host_debug",
             "ninja": {
-                "config": "host_debug",
+                "config": "ci/host_debug",
                 "targets": [
                     "flutter/build/archives:archive_gen_snapshot",
                     "flutter/build/archives:artifacts",
@@ -56,7 +58,7 @@
                     "script": "flutter/testing/run_tests.py",
                     "parameters": [
                         "--variant",
-                        "host_debug",
+                        "ci/host_debug",
                         "--type",
                         "dart,dart-host,engine",
                         "--engine-capture-core-dump"
@@ -67,12 +69,12 @@
         {
             "archives": [
                 {
-                    "base_path": "out/host_profile/zip_archives/",
+                    "base_path": "out/ci/host_profile/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/host_profile/zip_archives/darwin-x64-profile/artifacts.zip"
+                        "out/ci/host_profile/zip_archives/darwin-x64-profile/artifacts.zip"
                     ],
-                    "name": "host_profile",
+                    "name": "ci/host_profile",
                     "realm": "production"
                 }
             ],
@@ -86,15 +88,17 @@
                 "download_android_deps": false
             },
             "gn": [
+                "--target-dir",
+                "ci/host_profile",
                 "--runtime-mode",
                 "profile",
                 "--no-lto",
                 "--prebuilt-dart-sdk",
                 "--build-embedder-examples"
             ],
-            "name": "host_profile",
+            "name": "ci/host_profile",
             "ninja": {
-                "config": "host_profile",
+                "config": "ci/host_profile",
                 "targets": [
                     "flutter/build/dart:copy_dart_sdk",
                     "flutter/build/archives:archive_gen_snapshot",
@@ -115,7 +119,7 @@
                     "script": "flutter/testing/run_tests.py",
                     "parameters": [
                         "--variant",
-                        "host_profile",
+                        "ci/host_profile",
                         "--type",
                         "dart,dart-host,engine",
                         "--engine-capture-core-dump"
@@ -126,13 +130,13 @@
         {
             "archives": [
                 {
-                    "base_path": "out/host_release/zip_archives/",
+                    "base_path": "out/ci/host_release/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/host_release/zip_archives/darwin-x64-release/artifacts.zip",
-                        "out/host_release/zip_archives/darwin-x64/font-subset.zip"
+                        "out/ci/host_release/zip_archives/darwin-x64-release/artifacts.zip",
+                        "out/ci/host_release/zip_archives/darwin-x64/font-subset.zip"
                     ],
-                    "name": "host_release",
+                    "name": "ci/host_release",
                     "realm": "production"
                 }
             ],
@@ -152,6 +156,8 @@
                 "download_android_deps": false
             },
             "gn": [
+                "--target-dir",
+                "ci/host_release",
                 "--runtime-mode",
                 "release",
                 "--no-lto",
@@ -159,9 +165,9 @@
                 "--build-embedder-examples",
                 "--use-glfw-swiftshader"
             ],
-            "name": "host_release",
+            "name": "ci/host_release",
             "ninja": {
-                "config": "host_release",
+                "config": "ci/host_release",
                 "targets": [
                     "flutter/build/archives:archive_gen_snapshot",
                     "flutter/build/archives:artifacts",
@@ -184,7 +190,7 @@
                     "script": "flutter/testing/run_tests.py",
                     "parameters": [
                         "--variant",
-                        "host_release",
+                        "ci/host_release",
                         "--type",
                         "dart,dart-host,engine,impeller-golden"
                     ]
@@ -194,13 +200,13 @@
         {
             "archives": [
                 {
-                    "base_path": "out/mac_debug_arm64/zip_archives/",
+                    "base_path": "out/ci/mac_debug_arm64/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/mac_debug_arm64/zip_archives/darwin-arm64/artifacts.zip",
-                        "out/mac_debug_arm64/zip_archives/dart-sdk-darwin-arm64.zip"
+                        "out/ci/mac_debug_arm64/zip_archives/darwin-arm64/artifacts.zip",
+                        "out/ci/mac_debug_arm64/zip_archives/dart-sdk-darwin-arm64.zip"
                     ],
-                    "name": "mac_debug_arm64",
+                    "name": "ci/mac_debug_arm64",
                     "realm": "production"
                 }
             ],
@@ -213,6 +219,8 @@
                 "download_android_deps": false
             },
             "gn": [
+                "--target-dir",
+                "ci/mac_debug_arm64",
                 "--mac",
                 "--mac-cpu",
                 "arm64",
@@ -221,9 +229,9 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk"
             ],
-            "name": "mac_debug_arm64",
+            "name": "ci/mac_debug_arm64",
             "ninja": {
-                "config": "mac_debug_arm64",
+                "config": "ci/mac_debug_arm64",
                 "targets": [
                     "flutter/tools/font_subset",
                     "flutter/build/archives:archive_gen_snapshot",
@@ -242,12 +250,12 @@
         {
             "archives": [
                 {
-                    "base_path": "out/mac_profile_arm64/zip_archives/",
+                    "base_path": "out/ci/mac_profile_arm64/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/mac_profile_arm64/zip_archives/darwin-arm64-profile/artifacts.zip"
+                        "out/ci/mac_profile_arm64/zip_archives/darwin-arm64-profile/artifacts.zip"
                     ],
-                    "name": "mac_profile_arm64",
+                    "name": "ci/mac_profile_arm64",
                     "realm": "production"
                 }
             ],
@@ -260,6 +268,8 @@
                 "download_android_deps": false
             },
             "gn": [
+                "--target-dir",
+                "ci/mac_profile_arm64",
                 "--mac",
                 "--mac-cpu",
                 "arm64",
@@ -268,9 +278,9 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk"
             ],
-            "name": "mac_profile_arm64",
+            "name": "ci/mac_profile_arm64",
             "ninja": {
-                "config": "mac_profile_arm64",
+                "config": "ci/mac_profile_arm64",
                 "targets": [
                     "flutter/build/archives:artifacts",
                     "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
@@ -285,11 +295,11 @@
         {
             "archives": [
                 {
-                    "base_path": "out/mac_release_arm64/zip_archives/",
+                    "base_path": "out/ci/mac_release_arm64/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/mac_release_arm64/zip_archives/darwin-arm64/font-subset.zip",
-                        "out/mac_release_arm64/zip_archives/darwin-arm64-release/artifacts.zip"
+                        "out/ci/mac_release_arm64/zip_archives/darwin-arm64/font-subset.zip",
+                        "out/ci/mac_release_arm64/zip_archives/darwin-arm64-release/artifacts.zip"
                     ],
                     "name": "mac_release_arm64",
                     "realm": "production"
@@ -304,6 +314,8 @@
                 "download_android_deps": false
             },
             "gn": [
+                "--target-dir",
+                "ci/mac_release_arm64",
                 "--mac",
                 "--mac-cpu",
                 "arm64",
@@ -312,9 +324,9 @@
                 "--no-lto",
                 "--prebuilt-dart-sdk"
             ],
-            "name": "mac_release_arm64",
+            "name": "ci/mac_release_arm64",
             "ninja": {
-                "config": "mac_release_arm64",
+                "config": "ci/mac_release_arm64",
                 "targets": [
                     "flutter/tools/font_subset",
                     "flutter/build/archives:artifacts",
@@ -336,9 +348,9 @@
                     "--dst",
                     "out/debug/framework",
                     "--arm64-out-dir",
-                    "out/mac_debug_arm64",
+                    "out/ci/mac_debug_arm64",
                     "--x64-out-dir",
-                    "out/host_debug",
+                    "out/ci/host_debug",
                     "--zip"
                 ],
                 "script": "flutter/sky/tools/create_embedder_framework.py"
@@ -349,9 +361,9 @@
                     "--dst",
                     "out/release/framework",
                     "--arm64-out-dir",
-                    "out/mac_release_arm64",
+                    "out/ci/mac_release_arm64",
                     "--x64-out-dir",
-                    "out/host_release",
+                    "out/ci/host_release",
                     "--dsym",
                     "--strip",
                     "--zip"
@@ -364,9 +376,9 @@
                     "--dst",
                     "out/debug/framework",
                     "--arm64-out-dir",
-                    "out/mac_debug_arm64",
+                    "out/ci/mac_debug_arm64",
                     "--x64-out-dir",
-                    "out/host_debug",
+                    "out/ci/host_debug",
                     "--zip"
                 ],
                 "script": "flutter/sky/tools/create_macos_framework.py"
@@ -377,9 +389,9 @@
                     "--dst",
                     "out/profile/framework",
                     "--arm64-out-dir",
-                    "out/mac_profile_arm64",
+                    "out/ci/mac_profile_arm64",
                     "--x64-out-dir",
-                    "out/host_profile",
+                    "out/ci/host_profile",
                     "--zip"
                 ],
                 "script": "flutter/sky/tools/create_macos_framework.py"
@@ -387,7 +399,8 @@
             {
                 "name": "Verify-export-symbols",
                 "parameters": [
-                    "src/out"
+                    "src/out/ci",
+                    "src/flutter/buildtools"
                 ],
                 "script": "flutter/testing/symbols/verify_exported.dart",
                 "language": "dart"
@@ -398,9 +411,9 @@
                     "--dst",
                     "out/debug/snapshot",
                     "--arm64-out-dir",
-                    "out/mac_debug_arm64",
+                    "out/ci/mac_debug_arm64",
                     "--x64-out-dir",
-                    "out/host_debug",
+                    "out/ci/host_debug",
                     "--zip"
                 ],
                 "script": "flutter/sky/tools/create_macos_gen_snapshots.py"
@@ -411,9 +424,9 @@
                     "--dst",
                     "out/profile/snapshot",
                     "--arm64-out-dir",
-                    "out/mac_profile_arm64",
+                    "out/ci/mac_profile_arm64",
                     "--x64-out-dir",
-                    "out/host_profile",
+                    "out/ci/host_profile",
                     "--zip"
                 ],
                 "script": "flutter/sky/tools/create_macos_gen_snapshots.py"
@@ -424,9 +437,9 @@
                     "--dst",
                     "out/release/snapshot",
                     "--arm64-out-dir",
-                    "out/mac_release_arm64",
+                    "out/ci/mac_release_arm64",
                     "--x64-out-dir",
-                    "out/host_release",
+                    "out/ci/host_release",
                     "--zip"
                 ],
                 "script": "flutter/sky/tools/create_macos_gen_snapshots.py"
