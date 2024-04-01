@@ -671,10 +671,13 @@ class TextSelectionOverlay {
       renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomCenter,
     );
 
+    final Rect globalCaretRect =
+        renderEditable.localToGlobal(localCaretRect.topLeft) & localCaretRect.size;
+
     return MagnifierInfo(
       fieldBounds: Rect.fromPoints(globalRenderEditableTopLeft, globalRenderEditableBottomRight),
       globalGesturePosition: overlayGesturePosition,
-      caretRect: localCaretRect.shift(globalRenderEditableTopLeft),
+      caretRect: globalCaretRect,
       currentLineBoundaries: lineBoundaries.shift(globalRenderEditableTopLeft),
     );
   }
