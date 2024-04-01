@@ -32,6 +32,10 @@ class TextureGLES final : public Texture,
               TextureDescriptor desc,
               IsWrapped wrapped);
 
+  static std::shared_ptr<TextureGLES> WrapFBO(ReactorGLES::Ref reactor,
+                                              TextureDescriptor desc,
+                                              GLuint fbo);
+
   // |Texture|
   ~TextureGLES() override;
 
@@ -54,6 +58,8 @@ class TextureGLES final : public Texture,
 
   bool IsWrapped() const { return is_wrapped_; }
 
+  std::optional<GLuint> GetFBO() const { return wrapped_fbo_; }
+
  private:
   friend class AllocatorMTL;
 
@@ -62,11 +68,13 @@ class TextureGLES final : public Texture,
   HandleGLES handle_;
   mutable bool contents_initialized_ = false;
   const bool is_wrapped_;
+  const std::optional<GLuint> wrapped_fbo_;
   bool is_valid_ = false;
 
   TextureGLES(std::shared_ptr<ReactorGLES> reactor,
               TextureDescriptor desc,
-              bool is_wrapped);
+              bool is_wrapped,
+              std::optional<GLuint> fbo);
 
   // |Texture|
   void SetLabel(std::string_view label) override;
