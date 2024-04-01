@@ -170,19 +170,22 @@ struct RenderPassData {
     }
   });
 
-  const auto is_default_fbo =
-      TextureGLES::Cast(*pass_data.color_attachment).IsWrapped();
+  TextureGLES& color_gles = TextureGLES::Cast(*pass_data.color_attachment);
+  const bool is_default_fbo = color_gles.IsWrapped();
 
-  if (!is_default_fbo) {
+  if (is_default_fbo) {
+    if (color_gles.GetFBO().has_value()) {
+      // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+      gl.BindFramebuffer(GL_FRAMEBUFFER, *color_gles.GetFBO());
+    }
+  } else {
     // Create and bind an offscreen FBO.
     gl.GenFramebuffers(1u, &fbo);
     gl.BindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-    if (auto color = TextureGLES::Cast(pass_data.color_attachment.get())) {
-      if (!color->SetAsFramebufferAttachment(
-              GL_FRAMEBUFFER, TextureGLES::AttachmentType::kColor0)) {
-        return false;
-      }
+    if (!color_gles.SetAsFramebufferAttachment(
+            GL_FRAMEBUFFER, TextureGLES::AttachmentType::kColor0)) {
+      return false;
     }
 
     if (auto depth = TextureGLES::Cast(pass_data.depth_attachment.get())) {
