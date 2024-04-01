@@ -60,16 +60,10 @@ void _onBeginFrame(Duration duration) {
     return;
   }
   currentScenario!.onBeginFrame(duration);
-
-  // TODO(team): Remove after debugging https://github.com/flutter/flutter/issues/145988.
-  print('onBeginFrame: $duration');
 }
 
 void _onDrawFrame() {
   currentScenario?.onDrawFrame();
-
-  // TODO(team): Remove after debugging https://github.com/flutter/flutter/issues/145988.
-  print('onDrawFrame');
 }
 
 void _onMetricsChanged() {
