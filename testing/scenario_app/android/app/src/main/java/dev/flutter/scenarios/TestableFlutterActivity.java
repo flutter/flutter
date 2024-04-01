@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import io.flutter.Log;
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
 import java.util.concurrent.CountDownLatch;
@@ -45,8 +44,6 @@ public abstract class TestableFlutterActivity extends FlutterActivity {
 
   public void waitUntilFlutterRendered() {
     try {
-      // TODO: Remove after debugging https://github.com/flutter/flutter/issues/145988.
-      Log.i("Scenarios", "waitUntilFlutterRendered() | flutterUiRenderedLatch");
       flutterUiRenderedLatch.await();
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
