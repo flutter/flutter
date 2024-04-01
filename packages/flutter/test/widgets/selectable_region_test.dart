@@ -961,6 +961,26 @@ void main() {
       await gesture.up();
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
 
+    testWidgets('Text widgets underlying RichText under SelectionArea retains Key across rebuilds', (WidgetTester tester) async {
+      Widget buildTestWidget(String text) {
+        return MaterialApp(
+          home: SelectionArea(
+            child: Text(text),
+          ),
+        );
+      }
+      await tester.pumpWidget(buildTestWidget('Initial Text'));
+      final RichText initialRichText = tester.firstWidget(find.byType(RichText));
+      final Key? initialKey = initialRichText.key;
+      expect(initialKey, isNotNull);
+
+      // Trigger a rebuild.
+      await tester.pumpWidget(buildTestWidget('New Text'));
+
+      final RichText rebuiltRichText = tester.firstWidget(find.byType(RichText));
+      expect(initialKey, equals(rebuiltRichText.key));
+    });
+
     testWidgets('mouse can select multiple widgets on triple click drag when selecting inside a WidgetSpan', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
