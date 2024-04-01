@@ -110,6 +110,13 @@ DebugReportVK::Result DebugReportVK::OnDebugCallback(
   if (data->messageIdNumber == 0x2c36905d) {
     return Result::kContinue;
   }
+  // This is a performance warning when a fragment stage does not consume all
+  // varyings from the vertex stage. We ignore this as we want to use a single
+  // vertex stage for the runtime effect shader without trying to determine if
+  // the fragment consumes it or not.
+  if (data->messageIdNumber == 0x609A13B) {
+    return Result::kContinue;
+  }
 
   std::vector<std::pair<std::string, std::string>> items;
 
