@@ -308,6 +308,7 @@ class _Shaker extends AnimatedWidget {
 class _HelperError extends StatefulWidget {
   const _HelperError({
     this.textAlign,
+    this.helper,
     this.helperText,
     this.helperStyle,
     this.helperMaxLines,
@@ -318,6 +319,7 @@ class _HelperError extends StatefulWidget {
   });
 
   final TextAlign? textAlign;
+  final Widget? helper;
   final String? helperText;
   final TextStyle? helperStyle;
   final int? helperMaxLines;
@@ -339,6 +341,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   Widget? _helper;
   Widget? _error;
 
+  bool get _hasHelper => widget.helperText != null || widget.helper != null;
   bool get _hasError => widget.errorText != null || widget.error != null;
 
   @override
@@ -351,7 +354,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     if (_hasError) {
       _error = _buildError();
       _controller.value = 1.0;
-    } else if (widget.helperText != null) {
+    } else if (_hasHelper) {
       _helper = _buildHelper();
     }
     _controller.addListener(_handleChange);
@@ -375,20 +378,23 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
     final Widget? newError = widget.error;
     final String? newErrorText = widget.errorText;
+    final Widget? newHelper = widget.helper;
     final String? newHelperText = widget.helperText;
     final Widget? oldError = old.error;
     final String? oldErrorText = old.errorText;
+    final Widget? oldHelper = old.helper;
     final String? oldHelperText = old.helperText;
 
     final bool errorStateChanged = (newError != null) != (oldError != null);
     final bool errorTextStateChanged = (newErrorText != null) != (oldErrorText != null);
+    final bool helperStateChanged = (newHelper != null) != (oldHelper != null);
     final bool helperTextStateChanged = newErrorText == null && (newHelperText != null) != (oldHelperText != null);
 
-    if (errorStateChanged || errorTextStateChanged || helperTextStateChanged) {
+    if (errorStateChanged || errorTextStateChanged || helperStateChanged || helperTextStateChanged) {
       if (newError != null || newErrorText != null) {
         _error = _buildError();
         _controller.forward();
-      } else if (newHelperText != null) {
+      } else if (newHelper != null || newHelperText != null) {
         _helper = _buildHelper();
         _controller.reverse();
       } else {
@@ -398,12 +404,12 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   }
 
   Widget _buildHelper() {
-    assert(widget.helperText != null);
+    assert(widget.helper != null || widget.helperText != null);
     return Semantics(
       container: true,
       child: FadeTransition(
         opacity: Tween<double>(begin: 1.0, end: 0.0).animate(_controller),
-        child: Text(
+        child: widget.helper ?? Text(
           widget.helperText!,
           style: widget.helperStyle,
           textAlign: widget.textAlign,
@@ -441,7 +447,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   Widget build(BuildContext context) {
     if (_controller.isDismissed) {
       _error = null;
-      if (widget.helperText != null) {
+      if (_hasHelper) {
         return _helper = _buildHelper();
       } else {
         _helper = null;
@@ -463,7 +469,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       return _buildError();
     }
 
-    if (_error == null && widget.helperText != null) {
+    if (_error == null && _hasHelper) {
       return _buildHelper();
     }
 
@@ -479,7 +485,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       );
     }
 
-    if (widget.helperText != null) {
+    if (_hasHelper) {
       return Stack(
         children: <Widget>[
           _buildHelper(),
@@ -1311,12 +1317,15 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    return computeMinIntrinsicHeight(width);
+    return getMinIntrinsicHeight(width);
   }
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    return _boxParentData(input!).offset.dy + (input?.computeDistanceToActualBaseline(baseline) ?? 0.0);
+    final RenderBox? input = this.input;
+    return input == null
+      ? 0.0
+      : _boxParentData(input).offset.dy + (input.getDistanceToActualBaseline(baseline) ?? 0.0);
   }
 
   // Records where the label was painted.
@@ -2367,6 +2376,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     final Widget helperError = _HelperError(
       textAlign: textAlign,
+      helper: decoration.helper,
       helperText: decoration.helperText,
       helperStyle: _getHelperStyle(themeData, defaults),
       helperMaxLines: decoration.helperMaxLines,
@@ -2572,6 +2582,7 @@ class InputDecoration {
     this.labelText,
     this.labelStyle,
     this.floatingLabelStyle,
+    this.helper,
     this.helperText,
     this.helperStyle,
     this.helperMaxLines,
@@ -2619,6 +2630,7 @@ class InputDecoration {
     this.alignLabelWithHint,
     this.constraints,
   }) : assert(!(label != null && labelText != null), 'Declaring both label and labelText is not supported.'),
+       assert(!(helper != null && helperText != null), 'Declaring both helper and helperText is not supported.'),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
        assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.'),
        assert(!(error != null && errorText != null), 'Declaring both error and errorText is not supported.');
@@ -2646,6 +2658,7 @@ class InputDecoration {
        labelText = null,
        labelStyle = null,
        floatingLabelStyle = null,
+       helper = null,
        helperText = null,
        helperStyle = null,
        helperMaxLines = null,
@@ -2799,12 +2812,32 @@ class InputDecoration {
   /// {@endtemplate}
   final TextStyle? floatingLabelStyle;
 
+  /// Optional widget that appears below the [InputDecorator.child].
+  ///
+  /// If non-null, the [helper] is displayed below the [InputDecorator.child], in
+  /// the same location as [error]. If a non-null [error] or [errorText] value is
+  /// specified then the [helper] is not shown.
+  ///
+  /// {@tool dartpad}
+  /// This example shows a `TextField` with a [Text.rich] widget as the [helper].
+  /// The widget contains [Text] and [Icon] widgets with different styles.
+  ///
+  /// ** See code in examples/api/lib/material/input_decorator/input_decoration.helper.0.dart **
+  /// {@end-tool}
+  ///
+  /// Only one of [helper] and [helperText] can be specified.
+  final Widget? helper;
+
   /// Text that provides context about the [InputDecorator.child]'s value, such
   /// as how the value will be used.
   ///
   /// If non-null, the text is displayed below the [InputDecorator.child], in
   /// the same location as [errorText]. If a non-null [errorText] value is
   /// specified then the helper text is not shown.
+  ///
+  /// If a more elaborate helper text is required, consider using [helper] instead.
+  ///
+  /// Only one of [helper] and [helperText] can be specified.
   final String? helperText;
 
   /// The style to use for the [helperText].
@@ -3533,6 +3566,7 @@ class InputDecoration {
     String? labelText,
     TextStyle? labelStyle,
     TextStyle? floatingLabelStyle,
+    Widget? helper,
     String? helperText,
     TextStyle? helperStyle,
     int? helperMaxLines,
@@ -3587,6 +3621,7 @@ class InputDecoration {
       labelText: labelText ?? this.labelText,
       labelStyle: labelStyle ?? this.labelStyle,
       floatingLabelStyle: floatingLabelStyle ?? this.floatingLabelStyle,
+      helper: helper ?? this.helper,
       helperText: helperText ?? this.helperText,
       helperStyle: helperStyle ?? this.helperStyle,
       helperMaxLines : helperMaxLines ?? this.helperMaxLines,
@@ -3692,6 +3727,7 @@ class InputDecoration {
         && other.labelText == labelText
         && other.labelStyle == labelStyle
         && other.floatingLabelStyle == floatingLabelStyle
+        && other.helper == helper
         && other.helperText == helperText
         && other.helperStyle == helperStyle
         && other.helperMaxLines == helperMaxLines
@@ -3749,6 +3785,7 @@ class InputDecoration {
       labelText,
       floatingLabelStyle,
       labelStyle,
+      helper,
       helperText,
       helperStyle,
       helperMaxLines,
@@ -3807,6 +3844,7 @@ class InputDecoration {
       if (label != null) 'label: $label',
       if (labelText != null) 'labelText: "$labelText"',
       if (floatingLabelStyle != null) 'floatingLabelStyle: "$floatingLabelStyle"',
+      if (helper != null) 'helper: "$helper"',
       if (helperText != null) 'helperText: "$helperText"',
       if (helperMaxLines != null) 'helperMaxLines: "$helperMaxLines"',
       if (hintText != null) 'hintText: "$hintText"',

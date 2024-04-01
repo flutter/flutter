@@ -539,11 +539,11 @@ void main() {
 
       proxiedDevices.startPolling();
 
-      final ItemListNotifier<Device>? deviceNotifier = proxiedDevices.deviceNotifier;
+      final ItemListNotifier<Device> deviceNotifier = proxiedDevices.deviceNotifier;
       expect(deviceNotifier, isNotNull);
 
       final List<Device> devicesAdded = <Device>[];
-      deviceNotifier!.onAdded.listen((Device device) {
+      deviceNotifier.onAdded.listen((Device device) {
         devicesAdded.add(device);
       });
 
@@ -607,11 +607,70 @@ void main() {
       final FakeProxiedPortForwarder portForwarder = FakeProxiedPortForwarder();
       portForwarder.originalRemotePortReturnValue = 200;
       portForwarder.forwardReturnValue = 400;
+      final FakeProxiedPortForwarder devicePortForwarder = FakeProxiedPortForwarder();
       final ProxiedDartDevelopmentService dds = ProxiedDartDevelopmentService(
         clientDaemonConnection,
         'test_id',
         logger: bufferLogger,
         proxiedPortForwarder: portForwarder,
+        devicePortForwarder: devicePortForwarder,
+      );
+
+      final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
+
+      final Future<void> startFuture = dds.startDartDevelopmentService(
+        Uri.parse('http://127.0.0.1:100/fake'),
+        disableServiceAuthCodes: true,
+        hostPort: 150,
+        ipv6: false,
+        logger: bufferLogger,
+      );
+
+      final DaemonMessage startMessage = await broadcastOutput.first;
+      expect(startMessage.data['id'], isNotNull);
+      expect(startMessage.data['method'], 'device.startDartDevelopmentService');
+      expect(startMessage.data['params'], <String, Object?>{
+        'deviceId': 'test_id',
+        'vmServiceUri': 'http://127.0.0.1:200/fake',
+        'disableServiceAuthCodes': true,
+      });
+
+      serverDaemonConnection.sendResponse(startMessage.data['id']!, 'http://127.0.0.1:300/remote');
+
+      await startFuture;
+      expect(portForwarder.receivedLocalForwardedPort, 100);
+      expect(portForwarder.forwardedDevicePort, 300);
+      expect(portForwarder.forwardedHostPort, 150);
+      expect(portForwarder.forwardedIpv6, false);
+
+      expect(dds.uri, Uri.parse('http://127.0.0.1:400/remote'));
+
+      expect(
+        bufferLogger.eventText.trim(),
+        '{"name":"device.proxied_dds_forwarded","args":{"deviceId":"test_id","remoteUri":"http://127.0.0.1:300/remote","localUri":"http://127.0.0.1:400/remote"}}',
+      );
+
+      unawaited(dds.shutdown());
+
+      final DaemonMessage shutdownMessage = await broadcastOutput.first;
+      expect(shutdownMessage.data['id'], isNotNull);
+      expect(shutdownMessage.data['method'], 'device.shutdownDartDevelopmentService');
+      expect(shutdownMessage.data['params'], <String, Object?>{
+        'deviceId': 'test_id',
+      });
+    });
+
+    testWithoutContext('forwards start and shutdown to remote if port was forwarded by the device port forwarder', () async {
+      final FakeProxiedPortForwarder portForwarder = FakeProxiedPortForwarder();
+      portForwarder.forwardReturnValue = 400;
+      final FakeProxiedPortForwarder devicePortForwarder = FakeProxiedPortForwarder();
+      devicePortForwarder.originalRemotePortReturnValue = 200;
+      final ProxiedDartDevelopmentService dds = ProxiedDartDevelopmentService(
+        clientDaemonConnection,
+        'test_id',
+        logger: bufferLogger,
+        proxiedPortForwarder: portForwarder,
+        devicePortForwarder: devicePortForwarder,
       );
 
       final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
@@ -660,6 +719,7 @@ void main() {
 
     testWithoutContext('starts a local dds if the VM service port is not a forwarded port', () async {
       final FakeProxiedPortForwarder portForwarder = FakeProxiedPortForwarder();
+      final FakeProxiedPortForwarder devicePortForwarder = FakeProxiedPortForwarder();
       final FakeDartDevelopmentService localDds = FakeDartDevelopmentService();
       localDds.uri = Uri.parse('http://127.0.0.1:450/local');
       final ProxiedDartDevelopmentService dds = ProxiedDartDevelopmentService(
@@ -667,6 +727,7 @@ void main() {
         'test_id',
         logger: bufferLogger,
         proxiedPortForwarder: portForwarder,
+        devicePortForwarder: devicePortForwarder,
         localDds: localDds,
       );
 
@@ -696,6 +757,7 @@ void main() {
     testWithoutContext('starts a local dds if the remote VM does not support starting DDS', () async {
       final FakeProxiedPortForwarder portForwarder = FakeProxiedPortForwarder();
       portForwarder.originalRemotePortReturnValue = 200;
+      final FakeProxiedPortForwarder devicePortForwarder = FakeProxiedPortForwarder();
       final FakeDartDevelopmentService localDds = FakeDartDevelopmentService();
       localDds.uri = Uri.parse('http://127.0.0.1:450/local');
       final ProxiedDartDevelopmentService dds = ProxiedDartDevelopmentService(
@@ -703,6 +765,7 @@ void main() {
         'test_id',
         logger: bufferLogger,
         proxiedPortForwarder: portForwarder,
+        devicePortForwarder: devicePortForwarder,
         localDds: localDds,
       );
 

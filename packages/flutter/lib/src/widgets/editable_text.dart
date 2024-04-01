@@ -2982,6 +2982,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     }
 
+    // Check for changes in viewId.
+    if (_hasInputConnection) {
+      final int newViewId = View.of(context).viewId;
+      if (newViewId != _viewId) {
+        _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
+      }
+    }
+
     if (defaultTargetPlatform != TargetPlatform.iOS && defaultTargetPlatform != TargetPlatform.android) {
       return;
     }
@@ -4727,6 +4735,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   String get autofillId => 'EditableText-$hashCode';
 
+  int? _viewId;
+
   @override
   TextInputConfiguration get textInputConfiguration {
     final List<String>? autofillHints = widget.autofillHints?.toList(growable: false);
@@ -4738,7 +4748,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         )
       : AutofillConfiguration.disabled;
 
+    _viewId = View.of(context).viewId;
     return TextInputConfiguration(
+      viewId: _viewId,
       inputType: widget.keyboardType,
       readOnly: widget.readOnly,
       obscureText: widget.obscureText,

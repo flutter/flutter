@@ -7,6 +7,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -788,7 +789,41 @@ void main() {
     // "Collapsed".
     expect(tester.takeAnnouncements().first.message, localizations.expandedHint);
     handle.dispose();
-  });
+  }, skip: defaultTargetPlatform == TargetPlatform.iOS); // [intended] https://github.com/flutter/flutter/issues/122101.
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/132264.
+  testWidgets('ExpansionTile Semantics announcement is delayed on iOS', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: ExpansionTile(
+            title: Text('Title'),
+            children: <Widget>[
+              SizedBox(height: 100, width: 100),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // There is no semantics announcement without tap action.
+    expect(tester.takeAnnouncements(), isEmpty);
+
+    // Tap the title to expand ExpansionTile.
+    await tester.tap(find.text('Title'));
+    await tester.pump(const Duration(seconds: 1)); // Wait for the announcement to be made.
+
+    expect(tester.takeAnnouncements().first.message, localizations.collapsedHint);
+
+    // Tap the title to collapse ExpansionTile.
+    await tester.tap(find.text('Title'));
+    await tester.pump(const Duration(seconds: 1)); // Wait for the announcement to be made.
+
+    expect(tester.takeAnnouncements().first.message, localizations.expandedHint);
+    handle.dispose();
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets('Semantics with the onTapHint is an ancestor of ListTile', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/pull/121624

@@ -885,6 +885,13 @@ Widget _createErrorWidget(Object exception, StackTrace stackTrace) {
 ///   * [TwoDimensionalChildListDelegate], an concrete subclass of this that
 ///     uses a two dimensional array to layout children.
 abstract class TwoDimensionalChildDelegate extends ChangeNotifier {
+  /// Creates a delegate that supplies children for scrolling in two dimensions.
+  TwoDimensionalChildDelegate() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   /// Returns the child with the given [ChildVicinity], which is described in
   /// terms of x and y indices.
   ///
