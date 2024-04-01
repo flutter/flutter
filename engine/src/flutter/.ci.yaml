@@ -69,6 +69,15 @@ targets:
       - testing/scenario_app/**
       - testing/skia_gold_client/**
 
+  - name: Linux linux_android_emulator_skia_tests verbose_smoke
+    bringup: true
+    enabled_branches:
+      - main
+    recipe: engine_v2/engine_v2
+    properties:
+      config_name: linux_android_emulator_debug_on_ci
+    timeout: 90
+
   - name: Linux linux_android_emulator_skia_tests
     enabled_branches:
       - main
