@@ -22,7 +22,6 @@ ALL_PACKAGES = [
     os.path.join(ENGINE_DIR, 'flutter_frontend_server'),
     os.path.join(ENGINE_DIR, 'impeller', 'tessellator', 'dart'),
     os.path.join(ENGINE_DIR, 'shell', 'vmservice'),
-    os.path.join(ENGINE_DIR, 'testing', 'android_background_image'),
     os.path.join(ENGINE_DIR, 'testing', 'benchmark'),
     os.path.join(ENGINE_DIR, 'testing', 'dart'),
     os.path.join(ENGINE_DIR, 'testing', 'litetest'),
