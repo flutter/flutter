@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class HoverClient extends StatefulWidget {
   const HoverClient({
@@ -1838,8 +1837,6 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/67044
   testWidgets('Handle mouse events should ignore the detached MouseTrackerAnnotation',
-  // TODO(polina-c): dispose gesture recognizers https://github.com/flutter/flutter/issues/145605 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Center(
@@ -1866,6 +1863,9 @@ void main() {
 
     // Continue drag mouse should not trigger any assert.
     await gesture.moveBy(const Offset(10.0, 10.0));
+
+     // Dispose gesture
+    await gesture.cancel();
     expect(tester.takeException(), isNull);
   });
 }
