@@ -57,6 +57,20 @@ Future<void> testMain() async {
     expect(paragraph.getLineMetricsAt(7), isNull);
   });
 
+  test('respects paragraph height', () {
+    final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle(
+      fontSize: 10,
+      height: 1.5,
+    ))..addText('A' * 10);
+    final ui.Paragraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    expect(paragraph.numberOfLines, 1);
+    final ui.LineMetrics? metrics = paragraph.getLineMetricsAt(0);
+    expect(metrics, isNotNull);
+    expect(metrics!.height, 15);
+  });
+
   test('Basic glyph metrics', () {
     const double fontSize = 10;
     final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle(

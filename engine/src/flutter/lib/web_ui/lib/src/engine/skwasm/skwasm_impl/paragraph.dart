@@ -681,6 +681,31 @@ final class SkwasmStrutStyle extends SkwasmObjectWrapper<RawStrutStyle> implemen
       _forceStrutHeight,
     );
   }
+
+  @override
+  String toString() {
+    String result = super.toString();
+    assert(() {
+      final List<String>? fontFamilyFallback = _fontFamilyFallback;
+      final double? fontSize = _fontSize;
+      final double? height = _height;
+      final double? leading = _leading;
+      result = 'StrutStyle('
+          'fontFamily: ${_fontFamily ?? "unspecified"}, '
+          'fontFamilyFallback: ${_fontFamilyFallback ?? "unspecified"}, '
+          'fontFamilyFallback: ${fontFamilyFallback != null && fontFamilyFallback.isNotEmpty ? fontFamilyFallback : "unspecified"}, '
+          'fontSize: ${fontSize != null ? fontSize.toStringAsFixed(1) : "unspecified"}, '
+          'height: ${height != null ? "${height.toStringAsFixed(1)}x" : "unspecified"}, '
+          'leading: ${leading != null ? "${leading.toStringAsFixed(1)}x" : "unspecified"}, '
+          'fontWeight: ${_fontWeight ?? "unspecified"}, '
+          'fontStyle: ${_fontStyle ?? "unspecified"}, '
+          'forceStrutHeight: ${_forceStrutHeight ?? "unspecified"}, '
+          'leadingDistribution: ${_leadingDistribution ?? "unspecified"}, '
+          ')';
+      return true;
+    }());
+    return result;
+  }
 }
 
 class SkwasmParagraphStyle extends SkwasmObjectWrapper<RawParagraphStyle> implements ui.ParagraphStyle {
@@ -740,6 +765,9 @@ class SkwasmParagraphStyle extends SkwasmObjectWrapper<RawParagraphStyle> implem
     }
     if (fontSize != null) {
       textStyleSetFontSize(textStyleHandle, fontSize);
+    }
+    if (height != null) {
+      textStyleSetHeight(textStyleHandle, height);
     }
     if (fontWeight != null || fontStyle != null) {
       fontWeight ??= ui.FontWeight.normal;
