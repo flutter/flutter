@@ -91,6 +91,7 @@ void main(List<String> args) async {
         ndkStack: options.ndkStack,
         forceSurfaceProducerSurfaceTexture: options.forceSurfaceProducerSurfaceTexture,
         prefixLogsPerRun: options.prefixLogsPerRun,
+        recordScreen: options.recordScreen,
       );
       onSigint.cancel();
       exit(0);
@@ -135,6 +136,7 @@ Future<void> _run({
   required String ndkStack,
   required bool forceSurfaceProducerSurfaceTexture,
   required bool prefixLogsPerRun,
+  required bool recordScreen,
 }) async {
   const ProcessManager pm = LocalProcessManager();
   final String scenarioAppPath = join(outDir.path, 'scenario_app');
@@ -230,6 +232,7 @@ Future<void> _run({
   late Process logcatProcess;
   late Future<int> logcatProcessExitCode;
   _ImpellerBackend? actualImpellerBackend;
+  Process? screenRecordProcess;
 
   final IOSink logcat = File(logcatPath).openWrite();
   try {
@@ -361,6 +364,36 @@ Future<void> _run({
       }
     });
 
+    if (recordScreen) {
+      await step('Recording screen...', () async {
+        // Create a /tmp directory on the device to store the screen recording.
+        final int exitCode = await pm.runAndForward(<String>[
+          adb.path,
+          'shell',
+          'mkdir',
+          '-p',
+          join(_emulatorStoragePath, 'tmp'),
+        ]);
+        if (exitCode != 0) {
+          panic(<String>['could not create /tmp directory on device']);
+        }
+        final String screenRecordingPath = join(
+          _emulatorStoragePath,
+          'tmp',
+          'screen.mp4',
+        );
+        screenRecordProcess = await pm.start(<String>[
+          adb.path,
+          'shell',
+          'screenrecord',
+          '--time-limit=0',
+          '--bugreport',
+          screenRecordingPath,
+        ]);
+        log('writing screen recording to $screenRecordingPath');
+      });
+    }
+
     await step('Running instrumented tests...', () async {
       final (int exitCode, StringBuffer out) = await pm.runAndCapture(<String>[
         adb.path,
@@ -368,7 +401,7 @@ Future<void> _run({
         'am',
         'instrument',
         '-w',
-	'--no-window-animation',
+        '--no-window-animation',
         if (smokeTestFullPath != null)
           '-e class $smokeTestFullPath',
         if (enableImpeller)
@@ -446,6 +479,47 @@ Future<void> _run({
         logError('could not kill test app');
       }
     });
+
+    if (screenRecordProcess != null) {
+      await step('Killing screen recording process...', () async {
+        // Kill the screen recording process.
+        screenRecordProcess!.kill(ProcessSignal.sigkill);
+        await screenRecordProcess!.exitCode;
+
+        // Pull the screen recording from the device.
+        final String screenRecordingPath = join(
+          _emulatorStoragePath,
+          'tmp',
+          'screen.mp4',
+        );
+        final String screenRecordingLocalPath = join(
+          logsDir.path,
+          'screen.mp4',
+        );
+        final int exitCode = await pm.runAndForward(<String>[
+          adb.path,
+          'pull',
+          screenRecordingPath,
+          screenRecordingLocalPath,
+        ]);
+        if (exitCode != 0) {
+          logError('could not pull screen recording from device');
+        }
+
+        log('wrote screen recording to $screenRecordingLocalPath');
+
+        // Remove the screen recording from the device.
+        final int removeExitCode = await pm.runAndForward(<String>[
+          adb.path,
+          'shell',
+          'rm',
+          screenRecordingPath,
+        ]);
+        if (removeExitCode != 0) {
+          logError('could not remove screen recording from device');
+        }
+      });
+    }
 
     await step('Killing logcat process...', () async {
       final bool delivered = logcatProcess.kill(ProcessSignal.sigkill);
@@ -535,6 +609,8 @@ Future<void> _run({
     });
   }
 }
+
+const String _emulatorStoragePath = '/storage/emulated/0/Download';
 
 void _withTemporaryCwd(String path, void Function() callback) {
   final String originalCwd = Directory.current.path;
