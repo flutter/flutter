@@ -392,7 +392,49 @@ Future<void> _run({
         panic(<String>['$comparisonsFailed Skia Gold comparisons failed']);
       }
     });
+
+
+    if (enableImpeller) {
+      await step('Validating Impeller...', () async {
+        final _ImpellerBackend expectedImpellerBackend = impellerBackend ?? _ImpellerBackend.vulkan;
+        if (actualImpellerBackend != expectedImpellerBackend) {
+          panic(<String>[
+            '--enable-impeller was specified and expected to find "${expectedImpellerBackend.name}", which did not match "${actualImpellerBackend?.name ?? '<impeller disabled>'}".',
+          ]);
+        }
+      });
+    }
+
+    await step('Wait for pending Skia gold comparisons...', () async {
+      await Future.wait(pendingComparisons);
+    });
+
+    final bool allTestsRun = smokeTestFullPath == null;
+    final bool checkGoldens = contentsGolden != null;
+    if (allTestsRun && checkGoldens) {
+      // Check the output here.
+      await step('Check output files...', () async {
+        // TODO(matanlurey): Resolve this in a better way. On CI this file always exists.
+        File(join(screenshotPath, 'noop.txt')).writeAsStringSync('');
+        // TODO(gaaclarke): We should move this into dir_contents_diff.
+        final String diffScreenhotPath = absolute(screenshotPath);
+        _withTemporaryCwd(absolute(dirname(contentsGolden)), () {
+          final int exitCode = dirContentsDiff(basename(contentsGolden), diffScreenhotPath);
+          if (exitCode != 0) {
+            panic(<String>['Output contents incorrect.']);
+          }
+        });
+      });
+    }
   } finally {
+    // The finally clause is entered if:
+    // - The tests have completed successfully.
+    // - Any step has failed.
+    //
+    // Do *NOT* throw exceptions or errors in this block, as these are cleanup
+    // steps and the program is about to exit. Instead, just log the error and
+    // continue with the cleanup.
+
     await server.close();
     for (final Socket client in pendingConnections.toList()) {
       client.close();
@@ -401,7 +443,7 @@ Future<void> _run({
     await step('Killing test app and test runner...', () async {
       final int exitCode = await pm.runAndForward(<String>[adb.path, 'shell', 'am', 'force-stop', 'dev.flutter.scenarios']);
       if (exitCode != 0) {
-        panic(<String>['could not kill test app']);
+        logError('could not kill test app');
       }
     });
 
@@ -443,17 +485,6 @@ Future<void> _run({
       );
     });
 
-    if (enableImpeller) {
-      await step('Validating Impeller...', () async {
-        final _ImpellerBackend expectedImpellerBackend = impellerBackend ?? _ImpellerBackend.vulkan;
-        if (actualImpellerBackend != expectedImpellerBackend) {
-          panic(<String>[
-            '--enable-impeller was specified and expected to find "${expectedImpellerBackend.name}", which did not match "${actualImpellerBackend?.name ?? '<impeller disabled>'}".',
-          ]);
-        }
-      });
-    }
-
     await step('Symbolize stack traces', () async {
       final ProcessResult result = await pm.run(
         <String>[
@@ -477,47 +508,31 @@ Future<void> _run({
         'tcp:3000',
       ]);
       if (exitCode != 0) {
-        panic(<String>['could not unforward port']);
+        logError('could not unforward port');
       }
     });
 
     await step('Uninstalling app APK...', () async {
-      final int exitCode = await pm.runAndForward(
-          <String>[adb.path, 'uninstall', 'dev.flutter.scenarios']);
+      final int exitCode = await pm.runAndForward(<String>[
+        adb.path,
+        'uninstall',
+        'dev.flutter.scenarios',
+      ]);
       if (exitCode != 0) {
-        panic(<String>['could not uninstall app apk']);
+        logError('could not uninstall app apk');
       }
     });
 
     await step('Uninstalling test APK...', () async {
-      final int exitCode = await pm.runAndForward(
-          <String>[adb.path, 'uninstall', 'dev.flutter.scenarios.test']);
+      final int exitCode = await pm.runAndForward(<String>[
+        adb.path,
+        'uninstall',
+        'dev.flutter.scenarios.test',
+      ]);
       if (exitCode != 0) {
-        panic(<String>['could not uninstall app apk']);
+        logError('could not uninstall app apk');
       }
     });
-
-    await step('Wait for Skia gold comparisons...', () async {
-      await Future.wait(pendingComparisons);
-    });
-
-    final bool allTestsRun = smokeTestFullPath == null;
-    final bool checkGoldens = contentsGolden != null;
-    if (allTestsRun && checkGoldens) {
-      // Check the output here.
-      await step('Check output files...', () async {
-        // TODO(matanlurey): Resolve this in a better way. On CI this file always exists.
-        File(join(screenshotPath, 'noop.txt')).writeAsStringSync('');
-        // TODO(gaaclarke): We should move this into dir_contents_diff.
-        final String diffScreenhotPath = absolute(screenshotPath);
-        _withTemporaryCwd(absolute(dirname(contentsGolden)), () {
-          final int exitCode = dirContentsDiff(basename(contentsGolden), diffScreenhotPath);
-          if (exitCode != 0) {
-            panic(<String>['Output contents incorrect.']);
-          }
-        });
-      });
-    }
   }
 }
 
