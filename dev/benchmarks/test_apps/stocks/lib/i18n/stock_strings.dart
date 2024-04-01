@@ -21,7 +21,7 @@ import 'stock_strings_es.dart';
 /// localizationDelegates list, and the locales they support in the app's
 /// supportedLocales list. For example:
 ///
-/// ```
+/// ```dart
 /// import 'i18n/stock_strings.dart';
 ///
 /// return MaterialApp(
@@ -36,7 +36,7 @@ import 'stock_strings_es.dart';
 /// Please make sure to update your pubspec.yaml to include the following
 /// packages:
 ///
-/// ```
+/// ```yaml
 /// dependencies:
 ///   # Internationalization support.
 ///   flutter_localizations:

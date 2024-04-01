@@ -31,14 +31,14 @@ String? currentLocale;
 ///
 /// The following outputs the generated Dart code to the console as a dry run:
 ///
-/// ```
+/// ```bash
 /// dart dev/tools/localization/bin/gen_date_localizations.dart
 /// ```
 ///
 /// If the data looks good, use the `--overwrite` option to overwrite the
 /// lib/src/l10n/date_localizations.dart file:
 ///
-/// ```
+/// ```bash
 /// dart dev/tools/localization/bin/gen_date_localizations.dart --overwrite
 /// ```
 Future<void> main(List<String> rawArgs) async {
