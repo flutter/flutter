@@ -4747,7 +4747,8 @@ TEST_F(EmbedderTest,
 }
 
 TEST_F(EmbedderTest, CanRenderWithImpellerOpenGL) {
-  auto& context = GetEmbedderContext(EmbedderTestContextType::kOpenGLContext);
+  EmbedderTestContextGL& context = static_cast<EmbedderTestContextGL&>(
+      GetEmbedderContext(EmbedderTestContextType::kOpenGLContext));
   EmbedderConfigBuilder builder(context);
 
   bool present_called = false;
@@ -4767,6 +4768,24 @@ TEST_F(EmbedderTest, CanRenderWithImpellerOpenGL) {
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
+
+  // Bind to an arbitrary FBO in order to verify that Impeller binds to the
+  // provided FBO during rendering.
+  typedef void (*glGenFramebuffersProc)(GLsizei n, GLuint* ids);
+  typedef void (*glBindFramebufferProc)(GLenum target, GLuint framebuffer);
+  auto glGenFramebuffers = reinterpret_cast<glGenFramebuffersProc>(
+      context.GLGetProcAddress("glGenFramebuffers"));
+  auto glBindFramebuffer = reinterpret_cast<glBindFramebufferProc>(
+      context.GLGetProcAddress("glBindFramebuffer"));
+  const flutter::Shell& shell = ToEmbedderEngine(engine.get())->GetShell();
+  fml::AutoResetWaitableEvent raster_event;
+  shell.GetTaskRunners().GetRasterTaskRunner()->PostTask([&] {
+    GLuint fbo;
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    raster_event.Signal();
+  });
+  raster_event.Wait();
 
   // Send a window metrics events so frames may be scheduled.
   FlutterWindowMetricsEvent event = {};

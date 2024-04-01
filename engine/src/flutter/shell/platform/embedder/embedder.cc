@@ -979,9 +979,8 @@ MakeRenderTargetFromBackingStoreImpeller(
   color0_tex.storage_mode = impeller::StorageMode::kDevicePrivate;
 
   impeller::ColorAttachment color0;
-  color0.texture = std::make_shared<impeller::TextureGLES>(
-      gl_context.GetReactor(), color0_tex,
-      impeller::TextureGLES::IsWrapped::kWrapped);
+  color0.texture = impeller::TextureGLES::WrapFBO(
+      gl_context.GetReactor(), color0_tex, framebuffer->name);
   color0.clear_color = impeller::Color::DarkSlateGray();
   color0.load_action = impeller::LoadAction::kClear;
   color0.store_action = impeller::StoreAction::kStore;

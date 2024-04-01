@@ -68,21 +68,30 @@ HandleType ToHandleType(TextureGLES::Type type) {
 }
 
 TextureGLES::TextureGLES(ReactorGLES::Ref reactor, TextureDescriptor desc)
-    : TextureGLES(std::move(reactor), desc, false) {}
+    : TextureGLES(std::move(reactor), desc, false, std::nullopt) {}
 
 TextureGLES::TextureGLES(ReactorGLES::Ref reactor,
                          TextureDescriptor desc,
                          enum IsWrapped wrapped)
-    : TextureGLES(std::move(reactor), desc, true) {}
+    : TextureGLES(std::move(reactor), desc, true, std::nullopt) {}
+
+std::shared_ptr<TextureGLES> TextureGLES::WrapFBO(ReactorGLES::Ref reactor,
+                                                  TextureDescriptor desc,
+                                                  GLuint fbo) {
+  return std::shared_ptr<TextureGLES>(
+      new TextureGLES(std::move(reactor), desc, true, fbo));
+}
 
 TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
                          TextureDescriptor desc,
-                         bool is_wrapped)
+                         bool is_wrapped,
+                         std::optional<GLuint> fbo)
     : Texture(desc),
       reactor_(std::move(reactor)),
       type_(GetTextureTypeFromDescriptor(GetTextureDescriptor())),
       handle_(reactor_->CreateHandle(ToHandleType(type_))),
-      is_wrapped_(is_wrapped) {
+      is_wrapped_(is_wrapped),
+      wrapped_fbo_(fbo) {
   // Ensure the texture descriptor itself is valid.
   if (!GetTextureDescriptor().IsValid()) {
     VALIDATION_LOG << "Invalid texture descriptor.";
