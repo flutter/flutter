@@ -42,6 +42,7 @@ class DataColumn {
     this.numeric = false,
     this.onSort,
     this.mouseCursor,
+    this.headingRowAlignment,
   });
 
   /// The column heading.
@@ -97,6 +98,17 @@ class DataColumn {
   /// See also:
   ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
+
+  /// Defines the horizontal layout of the [label] and sort indicator in the
+  /// heading row.
+  ///
+  /// If [headingRowAlignment] value is [MainAxisAlignment.center] and [onSort] is
+  /// not null, then a [SizedBox] with a width of sort arrow icon size and sort
+  /// arrow padding will be placed before the [label] to ensure the label is
+  /// centered in the column.
+  ///
+  /// If null, then defaults to [MainAxisAlignment.start].
+  final MainAxisAlignment? headingRowAlignment;
 }
 
 /// Row configuration and cell data for a [DataTable].
@@ -830,12 +842,16 @@ class DataTable extends StatelessWidget {
     required bool ascending,
     required MaterialStateProperty<Color?>? overlayColor,
     required MouseCursor? mouseCursor,
+    required MainAxisAlignment headingRowAlignment,
   }) {
     final ThemeData themeData = Theme.of(context);
     final DataTableThemeData dataTableTheme = DataTableTheme.of(context);
     label = Row(
       textDirection: numeric ? TextDirection.rtl : null,
+      mainAxisAlignment: headingRowAlignment,
       children: <Widget>[
+        if (headingRowAlignment == MainAxisAlignment.center && onSort != null)
+          const SizedBox(width: _SortArrowState._arrowIconSize + _sortArrowPadding),
         label,
         if (onSort != null)
           ...<Widget>[
@@ -1117,6 +1133,7 @@ class DataTable extends StatelessWidget {
         ascending: sortAscending,
         overlayColor: effectiveHeadingRowColor,
         mouseCursor: column.mouseCursor?.resolve(headerStates) ?? dataTableTheme.headingCellCursor?.resolve(headerStates),
+        headingRowAlignment: column.headingRowAlignment ?? dataTableTheme.headingRowAlignment ?? MainAxisAlignment.start,
       );
       rowIndex = 1;
       for (final DataRow row in rows) {
