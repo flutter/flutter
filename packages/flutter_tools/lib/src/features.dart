@@ -270,15 +270,11 @@ class Feature {
 
   /// Retrieve the correct setting for the provided `channel`.
   FeatureChannelSetting getSettingForChannel(String channel) {
-    switch (channel) {
-      case 'stable':
-        return stable;
-      case 'beta':
-        return beta;
-      case 'master':
-      default:
-        return master;
-    }
+    return switch (channel) {
+      'stable' => stable,
+      'beta' => beta,
+      'master' || _ => master,
+    };
   }
 }
 
