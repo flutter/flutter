@@ -39,11 +39,13 @@ void logWarning(String msg) {
   _logWithColor(_yellow, msg);
 }
 
+void logError(String msg) {
+  _logWithColor(_red, msg);
+}
+
 final class Panic extends Error {}
 
 Never panic(List<String> messages) {
-  for (final String message in messages) {
-    _logWithColor(_red, message);
-  }
+  messages.forEach(logError);
   throw Panic();
 }
