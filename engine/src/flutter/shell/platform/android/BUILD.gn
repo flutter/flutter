@@ -524,12 +524,19 @@ action("android_jar") {
     apilevel26_toolchain = "//build/toolchain/android:clang_arm64_apilevel26"
     validation_layer_target =
         "//third_party/vulkan_validation_layers($apilevel26_toolchain)"
-    validation_layer_out_dir =
-        get_label_info(validation_layer_target, "root_out_dir")
     deps += [ validation_layer_target ]
+    if (stripped_symbols) {
+      validation_library = "lib.stripped/libVkLayer_khronos_validation.so"
+    } else {
+      validation_layer_out_dir =
+          get_label_info(validation_layer_target, "root_out_dir")
+      validation_library = rebase_path(
+              "$validation_layer_out_dir/libVkLayer_khronos_validation.so")
+    }
+
     args += [
       "--native_lib",
-      rebase_path("$validation_layer_out_dir/libVkLayer_khronos_validation.so"),
+      validation_library,
     ]
     if (current_cpu != "arm64") {
       # This may not be necessarily required anymore. It was kept to maintain
