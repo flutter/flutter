@@ -50,6 +50,34 @@ enum class RequiredAndroidDeviceExtensionVK : uint32_t {
   ///
   kANDROIDExternalMemoryAndroidHardwareBuffer,
 
+  //----------------------------------------------------------------------------
+  /// Dependency of kANDROIDExternalMemoryAndroidHardwareBuffer.
+  ///
+  /// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_sampler_ycbcr_conversion.html
+  ///
+  kKHRSamplerYcbcrConversion,
+
+  //----------------------------------------------------------------------------
+  /// Dependency of kANDROIDExternalMemoryAndroidHardwareBuffer.
+  ///
+  /// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_external_memory.html
+  ///
+  kKHRExternalMemory,
+
+  //----------------------------------------------------------------------------
+  /// Dependency of kANDROIDExternalMemoryAndroidHardwareBuffer.
+  ///
+  /// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_EXT_queue_family_foreign.html
+  ///
+  kEXTQueueFamilyForeign,
+
+  //----------------------------------------------------------------------------
+  /// Dependency of kANDROIDExternalMemoryAndroidHardwareBuffer.
+  ///
+  /// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VK_KHR_dedicated_allocation.html
+  ///
+  kKHRDedicatedAllocation,
+
   kLast,
 };
 
