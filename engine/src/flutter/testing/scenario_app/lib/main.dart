@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert';
-import 'dart:developer' as developer;
-import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -23,7 +20,6 @@ void main() {
     ..onPointerDataPacket = _onPointerDataPacket
     ..scheduleFrame();
   channelBuffers.setListener('driver', _handleDriverMessage);
-  channelBuffers.setListener('write_timeline', _handleWriteTimelineMessage);
 
   final FlutterView view = PlatformDispatcher.instance.implicitView!;
   // Asserting that this is greater than zero since this app runs on different
@@ -52,34 +48,6 @@ void _handleDriverMessage(ByteData? data, PlatformMessageResponseCallback? callb
     default:
       throw 'Unimplemented method: $methodName.';
   }
-}
-
-Future<void> _handleWriteTimelineMessage(ByteData? data, PlatformMessageResponseCallback? callback) async {
-  final String timelineData = await _getTimelineData();
-  callback!(ByteData.sublistView(utf8.encode(timelineData)));
-}
-
-Future<String> _getTimelineData() async {
-  final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
-  final Uri vmServiceTimelineUri = info.serverUri!.resolve('getVMTimeline');
-  final Map<String, dynamic> vmServiceTimelineJson = await _getJson(vmServiceTimelineUri);
-  final Map<String, dynamic> vmServiceResult = vmServiceTimelineJson['result'] as Map<String, dynamic>;
-  return json.encode(<String, dynamic>{
-    'traceEvents': <dynamic>[
-      ...vmServiceResult['traceEvents'] as List<dynamic>,
-    ],
-  });
-}
-
-Future<Map<String, dynamic>> _getJson(Uri uri) async {
-  final HttpClient client = HttpClient();
-  final HttpClientRequest request = await client.getUrl(uri);
-  final HttpClientResponse response = await request.close();
-  if (response.statusCode > 299) {
-    return <String, dynamic>{};
-  }
-  final String data = await utf8.decodeStream(response);
-  return json.decode(data) as Map<String, dynamic>;
 }
 
 void _onBeginFrame(Duration duration) {
