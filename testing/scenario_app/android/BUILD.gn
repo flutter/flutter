@@ -29,7 +29,6 @@ _android_sources = [
   "app/src/main/java/dev/flutter/scenarios/PlatformViewsActivity.java",
   "app/src/main/java/dev/flutter/scenarios/SpawnMultiEngineActivity.java",
   "app/src/main/java/dev/flutter/scenarios/SpawnedEngineActivity.java",
-  "app/src/main/java/dev/flutter/scenarios/StrictModeFlutterActivity.java",
   "app/src/main/java/dev/flutter/scenarios/SurfacePlatformViewFactory.java",
   "app/src/main/java/dev/flutter/scenarios/TestActivity.java",
   "app/src/main/java/dev/flutter/scenarios/TestableFlutterActivity.java",
