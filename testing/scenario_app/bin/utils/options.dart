@@ -165,6 +165,11 @@ extension type const Options._(ArgResults _args) {
         defaultsTo: environment.isCi,
         hide: hideUnusualOptions,
       )
+      ..addFlag(
+        'record-screen',
+        help: 'Whether to record the screen during the test run.',
+        defaultsTo: environment.isCi,
+      )
       ..addOption(
         'impeller-backend',
         help: 'The graphics backend to use when --enable-impeller is true. '
@@ -285,6 +290,9 @@ extension type const Options._(ArgResults _args) {
 
   /// Whether to enable Impeller as the graphics backend.
   bool get enableImpeller => _args['enable-impeller'] as bool;
+
+  /// Whether to record the screen during the test run.
+  bool get recordScreen => _args['record-screen'] as bool;
 
   /// The graphics backend to use when --enable-impeller is true.
   String get impellerBackend => _args['impeller-backend'] as String;
