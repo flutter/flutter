@@ -20,8 +20,8 @@ android {
         applicationId "io.flutter.examples.layers"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
-        versionCode flutter.versionCode()
-        versionName flutter.versionName()
+        versionCode flutter.versionCode
+        versionName flutter.versionName
     }
 
     buildTypes {
