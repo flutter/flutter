@@ -167,14 +167,6 @@ static const char* GetExtensionName(RequiredAndroidDeviceExtensionVK ext) {
     case RequiredAndroidDeviceExtensionVK::
         kANDROIDExternalMemoryAndroidHardwareBuffer:
       return "VK_ANDROID_external_memory_android_hardware_buffer";
-    case RequiredAndroidDeviceExtensionVK::kKHRSamplerYcbcrConversion:
-      return VK_KHR_SAMPLER_YCBCR_CONVERSION_EXTENSION_NAME;
-    case RequiredAndroidDeviceExtensionVK::kKHRExternalMemory:
-      return VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME;
-    case RequiredAndroidDeviceExtensionVK::kEXTQueueFamilyForeign:
-      return VK_EXT_QUEUE_FAMILY_FOREIGN_EXTENSION_NAME;
-    case RequiredAndroidDeviceExtensionVK::kKHRDedicatedAllocation:
-      return VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME;
     case RequiredAndroidDeviceExtensionVK::kLast:
       return "Unknown";
   }
@@ -373,9 +365,7 @@ CapabilitiesVK::GetEnabledDeviceFeatures(
     required.fillModeNonSolid = supported.fillModeNonSolid;
   }
   // VK_KHR_sampler_ycbcr_conversion features.
-  if (IsExtensionInList(
-          enabled_extensions.value(),
-          RequiredAndroidDeviceExtensionVK::kKHRSamplerYcbcrConversion)) {
+  {
     auto& required =
         required_chain
             .get<vk::PhysicalDeviceSamplerYcbcrConversionFeaturesKHR>();
