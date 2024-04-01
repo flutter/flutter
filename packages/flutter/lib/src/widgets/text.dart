@@ -650,58 +650,52 @@ class Text extends StatelessWidget {
       effectiveTextStyle = effectiveTextStyle!.merge(const TextStyle(fontWeight: FontWeight.bold));
     }
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
-    final GlobalKey? textKey = registrar == null ? null : GlobalKey();
     final TextScaler textScaler = switch ((this.textScaler, textScaleFactor)) {
       (final TextScaler textScaler, _)     => textScaler,
       // For unmigrated apps, fall back to textScaleFactor.
       (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
       (null, null)                         => MediaQuery.textScalerOf(context),
     };
-    // Use the [_RichText] wrapper when the [SelectionRegistrar] is non-null
-    // for the underlying [RenderParagraph] to register its [Selectable]s to the
-    // [SelectionContainer] created by this widget.
-    Widget result = registrar != null ? _RichText(
-      textKey: textKey,
-      textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
-      textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
-      locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
-      softWrap: softWrap ?? defaultTextStyle.softWrap,
-      overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
-      textScaler: textScaler,
-      maxLines: maxLines ?? defaultTextStyle.maxLines,
-      strutStyle: strutStyle,
-      textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
-      textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
-      selectionColor: selectionColor ?? DefaultSelectionStyle.of(context).selectionColor ?? DefaultSelectionStyle.defaultColor,
-      text: TextSpan(
-        style: effectiveTextStyle,
-        text: data,
-        children: textSpan != null ? <InlineSpan>[textSpan!] : null,
-      ),
-    ) : RichText(
-      textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
-      textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
-      locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
-      softWrap: softWrap ?? defaultTextStyle.softWrap,
-      overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
-      textScaler: textScaler,
-      maxLines: maxLines ?? defaultTextStyle.maxLines,
-      strutStyle: strutStyle,
-      textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
-      textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
-      selectionColor: selectionColor ?? DefaultSelectionStyle.of(context).selectionColor ?? DefaultSelectionStyle.defaultColor,
-      text: TextSpan(
-        style: effectiveTextStyle,
-        text: data,
-        children: textSpan != null ? <InlineSpan>[textSpan!] : null,
-      ),
-    );
+    late Widget result;
     if (registrar != null) {
       result = MouseRegion(
         cursor: DefaultSelectionStyle.of(context).mouseCursor ?? SystemMouseCursors.text,
         child: _SelectableTextContainer(
-          textKey: textKey!,
-          child: result,
+          textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
+          textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
+          locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
+          softWrap: softWrap ?? defaultTextStyle.softWrap,
+          overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
+          textScaler: textScaler,
+          maxLines: maxLines ?? defaultTextStyle.maxLines,
+          strutStyle: strutStyle,
+          textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
+          textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
+          selectionColor: selectionColor ?? DefaultSelectionStyle.of(context).selectionColor ?? DefaultSelectionStyle.defaultColor,
+          text: TextSpan(
+            style: effectiveTextStyle,
+            text: data,
+            children: textSpan != null ? <InlineSpan>[textSpan!] : null,
+          ),
+        ),
+      );
+    } else {
+      result = RichText(
+        textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
+        textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
+        locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
+        softWrap: softWrap ?? defaultTextStyle.softWrap,
+        overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
+        textScaler: textScaler,
+        maxLines: maxLines ?? defaultTextStyle.maxLines,
+        strutStyle: strutStyle,
+        textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
+        textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
+        selectionColor: selectionColor ?? DefaultSelectionStyle.of(context).selectionColor ?? DefaultSelectionStyle.defaultColor,
+        text: TextSpan(
+          style: effectiveTextStyle,
+          text: data,
+          children: textSpan != null ? <InlineSpan>[textSpan!] : null,
         ),
       );
     }
@@ -740,22 +734,96 @@ class Text extends StatelessWidget {
   }
 }
 
+class _SelectableTextContainer extends StatefulWidget {
+  const _SelectableTextContainer({
+    required this.text,
+    required this.textAlign,
+    this.textDirection,
+    required this.softWrap,
+    required this.overflow,
+    required this.textScaler,
+    this.maxLines,
+    this.locale,
+    this.strutStyle,
+    required this.textWidthBasis,
+    this.textHeightBehavior,
+    required this.selectionColor,
+  });
+
+  final InlineSpan text;
+  final TextAlign textAlign;
+  final TextDirection? textDirection;
+  final bool softWrap;
+  final TextOverflow overflow;
+  final TextScaler textScaler;
+  final int? maxLines;
+  final Locale? locale;
+  final StrutStyle? strutStyle;
+  final TextWidthBasis textWidthBasis;
+  final ui.TextHeightBehavior? textHeightBehavior;
+  final Color selectionColor;
+
+  @override
+  State<_SelectableTextContainer> createState() => _SelectableTextContainerState();
+}
+
+class _SelectableTextContainerState extends State<_SelectableTextContainer> {
+  late final _SelectableTextContainerDelegate _selectionDelegate;
+  final GlobalKey _textKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    _selectionDelegate = _SelectableTextContainerDelegate(_textKey);
+  }
+
+  @override
+  void dispose() {
+    _selectionDelegate.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SelectionContainer(
+      delegate: _selectionDelegate,
+      // Use [_RichText] wrapper so the underlying [RenderParagraph] can register
+      // its [Selectable]s to the [SelectionContainer] created by this widget.
+      child: _RichText(
+        textKey: _textKey,
+        textAlign: widget.textAlign,
+        textDirection: widget.textDirection,
+        locale: widget.locale,
+        softWrap: widget.softWrap,
+        overflow: widget.overflow,
+        textScaler: widget.textScaler,
+        maxLines: widget.maxLines,
+        strutStyle: widget.strutStyle,
+        textWidthBasis: widget.textWidthBasis,
+        textHeightBehavior: widget.textHeightBehavior,
+        selectionColor: widget.selectionColor,
+        text: widget.text,
+      ),
+    );
+  }
+}
+
 class _RichText extends StatelessWidget {
   const _RichText({
     this.textKey,
     required this.text,
-    this.textAlign = TextAlign.start,
+    required this.textAlign,
     this.textDirection,
-    this.softWrap = true,
-    this.overflow = TextOverflow.clip,
-    this.textScaler = TextScaler.noScaling,
+    required this.softWrap,
+    required this.overflow,
+    required this.textScaler,
     this.maxLines,
     this.locale,
     this.strutStyle,
-    this.textWidthBasis = TextWidthBasis.parent,
+    required this.textWidthBasis,
     this.textHeightBehavior,
-    this.selectionColor,
-  }) : assert(maxLines == null || maxLines > 0);
+    required this.selectionColor,
+  });
 
   final GlobalKey? textKey;
   final InlineSpan text;
@@ -769,7 +837,7 @@ class _RichText extends StatelessWidget {
   final StrutStyle? strutStyle;
   final TextWidthBasis textWidthBasis;
   final ui.TextHeightBehavior? textHeightBehavior;
-  final Color? selectionColor;
+  final Color selectionColor;
 
   @override
   Widget build(BuildContext context) {
@@ -789,43 +857,6 @@ class _RichText extends StatelessWidget {
       selectionRegistrar: registrar,
       selectionColor: selectionColor,
       text: text,
-    );
-  }
-}
-
-class _SelectableTextContainer extends StatefulWidget {
-  const _SelectableTextContainer({
-    required this.textKey,
-    required this.child,
-  });
-
-  final GlobalKey textKey;
-  final Widget child;
-
-  @override
-  State<_SelectableTextContainer> createState() => _SelectableTextContainerState();
-}
-
-class _SelectableTextContainerState extends State<_SelectableTextContainer> {
-  late final _SelectableTextContainerDelegate _selectionDelegate;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectionDelegate = _SelectableTextContainerDelegate(widget.textKey);
-  }
-
-  @override
-  void dispose() {
-    _selectionDelegate.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SelectionContainer(
-      delegate: _selectionDelegate,
-      child: widget.child,
     );
   }
 }
