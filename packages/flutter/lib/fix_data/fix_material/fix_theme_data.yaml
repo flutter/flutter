@@ -1698,7 +1698,7 @@ transforms:
       - kind: 'removeParameter'
         name: 'useMaterial3'
 
-  # Changes made in TBD.
+  # Changes made in https://github.com/flutter/flutter/pull/145523
   - title: "Remove 'buttonBarTheme'"
     date: 2024-04-28
     element:

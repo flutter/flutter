@@ -27,7 +27,7 @@
 #     * ThemeData: fix_theme_data.yaml
 version: 1
 transforms:
-  # Changes made in TBD.
+  # Changes made in https://github.com/flutter/flutter/pull/145523
   - title: "Migrate to 'OverflowBar'"
     date: 2024-02-28
     element:

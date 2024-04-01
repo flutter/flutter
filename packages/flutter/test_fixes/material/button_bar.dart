@@ -5,10 +5,10 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  // Changes made in TBD.
+  // Changes made in https://github.com/flutter/flutter/pull/145523
   ButtonBar();
 
-  // Changes made in TBD.
+  // Changes made in https://github.com/flutter/flutter/pull/145523
   ThemeData theme = ThemeData();
   theme = ThemeData(buttonBarTheme: ButtonBarThemeData());
 }
