@@ -175,7 +175,11 @@ class _RenderCompositionCallback extends RenderProxyBox {
 /// [TextInputFormatter]s instead for as-you-type text modification.
 ///
 /// If both the [text] and [selection] properties need to be changed, set the
-/// controller's [value] instead.
+/// controller's [value] instead. In some situations, only setting the controller's
+/// [text] property seems sufficient, but is not. For example, to clear
+/// a [TextField], it is insufficient to set [TextEditingController.text]
+/// to the empty string. Instead, use [TextEditingController.clear]
+/// to change the controller's value.
 ///
 /// Remember to [dispose] of the [TextEditingController] when it is no longer
 /// needed. This will ensure we discard any resources used by the object.
