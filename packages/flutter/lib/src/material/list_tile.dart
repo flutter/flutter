@@ -88,8 +88,8 @@ enum ListTileTitleAlignment {
   threeLine,
 
   /// The tops of the [ListTile.leading] and [ListTile.trailing] widgets are
-  /// placed 16 pixels below the top of the [ListTile.title]
-  /// if the titles' overall height is greater than 72, otherwise the
+  /// placed 16 pixels below the top of the [ListTile.title] widget,
+  /// if the [ListTile]'s overall height is greater than 72, otherwise the
   /// [ListTile.trailing] widget is centered relative to the [ListTile.title] and
   /// [ListTile.subtitle] widgets, and the [ListTile.leading] widget is 16 pixels
   /// below the top of [ListTile.title], or center-aligned with [ListTile.title],
@@ -1334,9 +1334,9 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   _Sizes _computeSizes(
     ChildBaselineGetter getBaseline,
     ChildLayouter getSize,
-    BoxConstraints constraints,
-    { _PositionChild? positionChild, }
-  ) {
+    BoxConstraints constraints, {
+    _PositionChild? positionChild,
+  }) {
     final BoxConstraints looseConstraints = constraints.loosen();
     final double tileWidth = looseConstraints.maxWidth;
     final BoxConstraints iconConstraints = looseConstraints.enforce(maxIconHeightConstraint);

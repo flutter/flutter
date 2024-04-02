@@ -657,7 +657,7 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
     child.layout(childConstraints, parentUsesSize: !childConstraints.isTight);
     final BoxParentData childParentData = child.parentData! as BoxParentData;
     final Size childSize = childConstraints.isTight ? childConstraints.smallest : child.size;
-      childParentData.offset = _getPositionForChild(size, childSize);
+    childParentData.offset = _getPositionForChild(size, childSize);
 
     if (_lastSize != childSize) {
       _lastSize = childSize;
