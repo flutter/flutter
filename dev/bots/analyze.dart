@@ -1978,7 +1978,7 @@ Future<void> verifyTabooDocumentation(String workingDirectory, { int minimumMatc
 
 Future<void> lintKotlinFiles(String workingDirectory) async {
   const String baselineRelativePath = 'dev/bots/test/analyze-test-input/ktlint-baseline.xml';
-  const String editorConfigRelativePath = '.editorconfig';
+  const String editorConfigRelativePath = 'dev/bots/test/analyze-test-input/.editorconfig';
   final EvalResult lintResult = await _evalCommand('ktlint',
       <String>['--baseline=$flutterRoot/$baselineRelativePath', '--editorconfig=$flutterRoot/$editorConfigRelativePath'],
       workingDirectory: workingDirectory);
