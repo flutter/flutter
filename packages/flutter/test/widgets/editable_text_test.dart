@@ -16382,11 +16382,13 @@ void main() {
       const double scale = 0.5;
       await tester.pumpWidget(MaterialApp(
         home: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Transform.scale(
               scale: scale,
               child: EditableText(
                 controller: controller,
+                maxLines: null,
                 showSelectionHandles: true,
                 autofocus: true,
                 focusNode: focusNode,
@@ -16426,8 +16428,6 @@ void main() {
       final RenderBox handle = handles.first;
       expect(find.byKey(magnifierKey), findsNothing);
 
-      // TODO(justinmc): Make sure that the amount that the magnifier moved is
-      // proportional to the gesture and the scale.
       final TestGesture gesture = await tester.startGesture(handle.localToGlobal(Offset(
           handle.size.width / 2,
           handle.size.height / 2,
@@ -16435,13 +16435,28 @@ void main() {
       ));
       await tester.pump(const Duration(milliseconds: 200));
       expect(find.byKey(magnifierKey), findsOneWidget);
-      expect(tester.getTopLeft(find.byKey(magnifierKey)), const Offset(545.815, 0.0));
+      final Offset magnifierStart = tester.getTopLeft(find.byKey(magnifierKey));
 
-      await gesture.moveTo(textOffsetToPosition(tester, 5));
+      // Dragging by a quarter of a line height does not move the magnifier.
+      // Typically, when not scaled, you need to drag by a full line height to
+      // get the magnifier to move vertically.
+      final double lineHeight = findRenderEditable(tester).preferredLineHeight;
+      await gesture.moveBy(Offset(0.0, lineHeight / 4));
       await tester.pump(const Duration(milliseconds: 20));
       await tester.pumpAndSettle();
       expect(find.byKey(magnifierKey), findsOneWidget);
-      expect(tester.getTopLeft(find.byKey(magnifierKey)), const Offset(559.815, 0.0));
+      expect(tester.getTopLeft(find.byKey(magnifierKey)), magnifierStart);
+
+      // Dragging by another quarter line height (total half a line height) does
+      // move the magnifier, because the text is scaled down by half.
+      await gesture.moveBy(Offset(0.0, lineHeight / 4));
+      await tester.pump(const Duration(milliseconds: 20));
+      await tester.pumpAndSettle();
+      expect(find.byKey(magnifierKey), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.byKey(magnifierKey)).dy,
+        magnifierStart.dy + lineHeight / 2,
+      );
 
       await gesture.up();
       await tester.pump(const Duration(milliseconds: 20));
