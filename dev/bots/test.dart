@@ -65,8 +65,8 @@ import 'package:process/process.dart';
 
 import 'run_command.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
-import 'suite_runners/run_docs_tests.dart';
 import 'suite_runners/run_analyze_tests.dart';
+import 'suite_runners/run_docs_tests.dart';
 import 'suite_runners/run_flutter_packages_tests.dart';
 import 'suite_runners/run_realm_checker_tests.dart';
 import 'suite_runners/run_skp_generator_tests.dart';
