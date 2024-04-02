@@ -54,10 +54,6 @@ bool FlutterCompositor::CreateBackingStore(const FlutterBackingStoreConfig* conf
 bool FlutterCompositor::Present(FlutterViewId view_id,
                                 const FlutterLayer** layers,
                                 size_t layers_count) {
-  // TODO(dkwingsmt): The macOS embedder only supports rendering to the implicit
-  // view for now. As it supports adding more views, this assertion should be
-  // lifted. https://github.com/flutter/flutter/issues/142845
-  FML_DCHECK(view_id == kFlutterImplicitViewId);
   FlutterView* view = [view_provider_ viewForId:view_id];
   if (!view) {
     return false;
