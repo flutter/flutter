@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/testing/testing.h"  // IWYU pragma: keep.
+#include "fml/closure.h"
 #include "fml/synchronization/waitable_event.h"
 #include "impeller/renderer/backend/vulkan/descriptor_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
@@ -22,27 +23,6 @@ TEST(DescriptorPoolRecyclerVKTest, GetDescriptorPoolRecyclerCreatesNewPools) {
 
   context->Shutdown();
 }
-
-namespace {
-
-// Invokes the provided callback when the destructor is called.
-//
-// Can be moved, but not copied.
-class DeathRattle final {
- public:
-  explicit DeathRattle(std::function<void()> callback)
-      : callback_(std::move(callback)) {}
-
-  DeathRattle(DeathRattle&&) = default;
-  DeathRattle& operator=(DeathRattle&&) = default;
-
-  ~DeathRattle() { callback_(); }
-
- private:
-  std::function<void()> callback_;
-};
-
-}  // namespace
 
 TEST(DescriptorPoolRecyclerVKTest, ReclaimMakesDescriptorPoolAvailable) {
   auto const context = MockVulkanContextBuilder().Build();
@@ -64,10 +44,10 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimMakesDescriptorPoolAvailable) {
     // destroyed. That should give us a non-flaky signal that the pool has been
     // reclaimed as well.
     auto waiter = fml::AutoResetWaitableEvent();
-    auto rattle = DeathRattle([&waiter]() { waiter.Signal(); });
+    auto rattle = fml::ScopedCleanupClosure([&waiter]() { waiter.Signal(); });
     {
-      UniqueResourceVKT<DeathRattle> resource(context->GetResourceManager(),
-                                              std::move(rattle));
+      UniqueResourceVKT<fml::ScopedCleanupClosure> resource(
+          context->GetResourceManager(), std::move(rattle));
     }
     waiter.Wait();
   }
@@ -98,10 +78,10 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimDropsDescriptorPoolIfSizeIsExceeded) {
   // See note above.
   for (auto i = 0u; i < 2; i++) {
     auto waiter = fml::AutoResetWaitableEvent();
-    auto rattle = DeathRattle([&waiter]() { waiter.Signal(); });
+    auto rattle = fml::ScopedCleanupClosure([&waiter]() { waiter.Signal(); });
     {
-      UniqueResourceVKT<DeathRattle> resource(context->GetResourceManager(),
-                                              std::move(rattle));
+      UniqueResourceVKT<fml::ScopedCleanupClosure> resource(
+          context->GetResourceManager(), std::move(rattle));
     }
     waiter.Wait();
   }
@@ -126,10 +106,10 @@ TEST(DescriptorPoolRecyclerVKTest, ReclaimDropsDescriptorPoolIfSizeIsExceeded) {
 
   for (auto i = 0u; i < 2; i++) {
     auto waiter = fml::AutoResetWaitableEvent();
-    auto rattle = DeathRattle([&waiter]() { waiter.Signal(); });
+    auto rattle = fml::ScopedCleanupClosure([&waiter]() { waiter.Signal(); });
     {
-      UniqueResourceVKT<DeathRattle> resource(context->GetResourceManager(),
-                                              std::move(rattle));
+      UniqueResourceVKT<fml::ScopedCleanupClosure> resource(
+          context->GetResourceManager(), std::move(rattle));
     }
     waiter.Wait();
   }
