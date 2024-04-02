@@ -681,6 +681,8 @@ class Text extends StatelessWidget {
     }
     if (semanticsLabel != null) {
       result = Semantics(
+        identifier: "id_$semanticsLabel",
+        textField: true,
         textDirection: textDirection,
         label: semanticsLabel,
         child: ExcludeSemantics(
