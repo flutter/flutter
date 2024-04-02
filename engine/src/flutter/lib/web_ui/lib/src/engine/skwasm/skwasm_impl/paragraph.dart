@@ -77,6 +77,9 @@ class SkwasmLineMetrics extends SkwasmObjectWrapper<RawLineMetrics> implements u
 
   @override
   int get lineNumber => lineMetricsGetLineNumber(handle);
+
+  int get startIndex => lineMetricsGetStartIndex(handle);
+  int get endIndex => lineMetricsGetEndIndex(handle);
 }
 
 class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Paragraph {
@@ -243,15 +246,13 @@ class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Pa
 
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
-    final int lineNumber = paragraphGetLineNumberAt(handle, position.offset);
-    final LineMetricsHandle metricsHandle =
-      paragraphGetLineMetricsAtIndex(handle, lineNumber);
-    final ui.TextRange range = ui.TextRange(
-      start: lineMetricsGetStartIndex(metricsHandle),
-      end: lineMetricsGetEndIndex(metricsHandle),
-    );
-    lineMetricsDispose(metricsHandle);
-    return range;
+    final int offset = position.offset;
+    for (final SkwasmLineMetrics metrics in computeLineMetrics()) {
+      if (offset >= metrics.startIndex && offset <= metrics.endIndex) {
+        return ui.TextRange(start: metrics.startIndex, end: metrics.endIndex);
+      }
+    }
+    return ui.TextRange.empty;
   }
 
   @override
