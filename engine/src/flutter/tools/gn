@@ -68,6 +68,9 @@ def get_out_dir(args):
   if args.darwin_extension_safe:
     target_dir.append('extension_safe')
 
+  if args.slimpeller:
+    target_dir.append('slimpeller')
+
   if args.target_dir != '':
     target_dir = [args.target_dir]
 
@@ -1258,6 +1261,15 @@ def parse_args(args):
       default=False,
       action='store_true',
       help='Do not run GN. Instead configure the Impeller cmake example build.',
+  )
+
+  parser.add_argument(
+      '--slimpeller',
+      default=False,
+      action='store_true',
+      help='Enable optimizations that attempt to reduce binary size of the ' +
+      'Flutter engine by assuming only the Impeller rendering engine is supported.' +
+      'See [go/slimpeller-dashboard](https://github.com/orgs/flutter/projects/21) for details.'
   )
 
   # Sanitizers.

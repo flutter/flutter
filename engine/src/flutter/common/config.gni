@@ -28,6 +28,13 @@ declare_args() {
   #TODO(cyanglaz): Remove above comment about test flag when the entire iOS embedder supports app extension
   #https://github.com/flutter/flutter/issues/124289
   darwin_extension_safe = false
+
+  # Whether binary size optimizations with the assumption that Impeller is the
+  # only supported rendering engine are enabled.
+  #
+  # See [go/slimpeller-dashboard](https://github.com/orgs/flutter/projects/21)
+  # for details.
+  slimpeller = false
 }
 
 # feature_defines_list ---------------------------------------------------------
@@ -60,6 +67,10 @@ if (flutter_runtime_mode == "debug") {
   ]
 } else {
   feature_defines_list += [ "FLUTTER_RUNTIME_MODE=0" ]
+}
+
+if (slimpeller) {
+  feature_defines_list += [ "SLIMPELLER=1" ]
 }
 
 if (is_ios || is_mac) {
