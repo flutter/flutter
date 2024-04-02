@@ -27,6 +27,10 @@ part of dart.ui;
 ///
 /// This API is currently experimental.
 Future<R> runOnPlatformThread<R>(FutureOr<R> Function() computation) {
+  if (!_platformIsolatesEnabled) {
+    throw UnsupportedError(
+        'Platform thread isolates are not supported by this platform.');
+  }
   if (isRunningOnPlatformThread) {
     return Future<R>(computation);
   }

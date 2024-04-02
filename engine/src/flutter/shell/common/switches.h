@@ -298,6 +298,9 @@ DEF_SWITCH(
 DEF_SWITCH(EnableEmbedderAPI,
            "enable-embedder-api",
            "Enable the embedder api. Defaults to false. iOS only.")
+DEF_SWITCH(EnablePlatformIsolates,
+           "enable-platform-isolates",
+           "Enable support for isolates that run on the platform thread.")
 DEF_SWITCHES_END
 
 void PrintUsage(const std::string& executable_name);

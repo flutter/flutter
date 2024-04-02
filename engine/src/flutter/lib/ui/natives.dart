@@ -121,3 +121,8 @@ bool _impellerEnabled = false;
 // determine the current implicit view, if any.
 @pragma('vm:entry-point')
 int? _implicitViewId;
+
+// Used internally to indicate whether isolates running on the platform thread
+// are enabled.
+@pragma('vm:entry-point')
+bool _platformIsolatesEnabled = false;

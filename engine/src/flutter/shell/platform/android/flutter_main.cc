@@ -150,6 +150,8 @@ void FlutterMain::Init(JNIEnv* env,
                         static_cast<int>(message.size()), message.c_str());
   };
 
+  settings.enable_platform_isolates = true;
+
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   // There are no ownership concerns here as all mappings are owned by the
   // embedder and not the engine.

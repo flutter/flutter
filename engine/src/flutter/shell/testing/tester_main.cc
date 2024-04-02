@@ -641,6 +641,7 @@ int main(int argc, char* argv[]) {
   }
 
   settings.leak_vm = false;
+  settings.enable_platform_isolates = true;
 
   if (settings.icu_data_path.empty()) {
     settings.icu_data_path = "icudtl.dat";
