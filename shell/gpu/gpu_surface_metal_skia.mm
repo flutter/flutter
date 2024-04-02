@@ -27,6 +27,8 @@
 #include "third_party/skia/include/gpu/GpuTypes.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
+#include "third_party/skia/include/gpu/ganesh/mtl/GrMtlBackendSurface.h"
+#include "third_party/skia/include/gpu/ganesh/mtl/GrMtlTypes.h"
 #include "third_party/skia/include/ports/SkCFObject.h"
 
 static_assert(!__has_feature(objc_arc), "ARC must be disabled.");
@@ -45,7 +47,8 @@ sk_sp<SkSurface> CreateSurfaceFromMetalTexture(GrDirectContext* context,
                                                SkSurface::ReleaseContext release_context) {
   GrMtlTextureInfo info;
   info.fTexture.reset([texture retain]);
-  GrBackendTexture backend_texture(texture.width, texture.height, skgpu::Mipmapped::kNo, info);
+  GrBackendTexture backend_texture =
+      GrBackendTextures::MakeMtl(texture.width, texture.height, skgpu::Mipmapped::kNo, info);
   return SkSurfaces::WrapBackendTexture(
       context, backend_texture, origin, static_cast<int>(sample_cnt), color_type,
       std::move(color_space), props, release_proc, release_context);
