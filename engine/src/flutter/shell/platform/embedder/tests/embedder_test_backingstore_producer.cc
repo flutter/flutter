@@ -26,6 +26,11 @@
 #include "third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h"
 #endif  // SHELL_ENABLE_VULKAN
 
+#ifdef SHELL_ENABLE_METAL
+#include "third_party/skia/include/gpu/ganesh/mtl/GrMtlBackendSurface.h"
+#include "third_party/skia/include/gpu/ganesh/mtl/GrMtlTypes.h"
+#endif
+
 // TODO(zanderso): https://github.com/flutter/flutter/issues/127701
 // NOLINTBEGIN(bugprone-unchecked-optional-access)
 
@@ -281,8 +286,9 @@ bool EmbedderTestBackingStoreProducer::CreateMTLTexture(
 
   GrMtlTextureInfo skia_texture_info;
   skia_texture_info.fTexture.reset(SkCFSafeRetain(texture_info.texture));
-  GrBackendTexture backend_texture(surface_size.width(), surface_size.height(),
-                                   skgpu::Mipmapped::kNo, skia_texture_info);
+  GrBackendTexture backend_texture =
+      GrBackendTextures::MakeMtl(surface_size.width(), surface_size.height(),
+                                 skgpu::Mipmapped::kNo, skia_texture_info);
 
   sk_sp<SkSurface> surface = SkSurfaces::WrapBackendTexture(
       context_.get(), backend_texture, kTopLeft_GrSurfaceOrigin, 1,

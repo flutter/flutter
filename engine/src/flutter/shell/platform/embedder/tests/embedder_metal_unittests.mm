@@ -24,6 +24,8 @@
 #include "third_party/skia/include/gpu/GpuTypes.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
+#include "third_party/skia/include/gpu/ganesh/mtl/GrMtlBackendSurface.h"
+#include "third_party/skia/include/gpu/ganesh/mtl/GrMtlTypes.h"
 
 // CREATE_NATIVE_ENTRY is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
@@ -64,8 +66,8 @@ static sk_sp<SkSurface> GetSurfaceFromTexture(const sk_sp<GrDirectContext>& skia
                                               void* texture) {
   GrMtlTextureInfo info;
   info.fTexture.reset([(id<MTLTexture>)texture retain]);
-  GrBackendTexture backend_texture(texture_size.width(), texture_size.height(),
-                                   skgpu::Mipmapped::kNo, info);
+  GrBackendTexture backend_texture = GrBackendTextures::MakeMtl(
+      texture_size.width(), texture_size.height(), skgpu::Mipmapped::kNo, info);
 
   return SkSurfaces::WrapBackendTexture(skia_context.get(), backend_texture,
                                         kTopLeft_GrSurfaceOrigin, 1, kBGRA_8888_SkColorType,
