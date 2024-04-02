@@ -1710,9 +1710,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   @override
   bool get sizedByParent => false;
 
-  static Size _boxSize(RenderBox? box) => box == null ? Size.zero : box.size;
-
-  static Rect _boxRect(RenderBox? box) => box == null ? Rect.zero : _boxParentData(box).offset & box.size;
+  static Rect _boxRect(RenderBox box) => _boxParentData(box).offset & box.size;
 
   static BoxParentData _boxParentData(RenderBox box) => box.parentData! as BoxParentData;
 
@@ -1933,7 +1931,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
       case TextDirection.ltr:
         double start = left;
         if (theme.showCheckmark || theme.showAvatar) {
-          avatarOffset = centerLayout(sizes.avatar, start - _boxSize(avatar).width + sizes.avatar.width);
+          avatarOffset = centerLayout(sizes.avatar, start - avatar.size.width + sizes.avatar.width);
           start += sizes.avatar.width;
         }
         labelOffset = centerLayout(sizes.label, start);
@@ -1950,7 +1948,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
         } else {
           _pressRect = Rect.zero;
         }
-        start -= _boxSize(deleteIcon).width - sizes.deleteIcon.width;
+        start -= deleteIcon.size.width - sizes.deleteIcon.width;
         if (deleteIconShowing) {
           deleteIconOffset = centerLayout(sizes.deleteIcon, start);
           _deleteButtonRect = Rect.fromLTWH(
@@ -1967,7 +1965,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     labelOffset = labelOffset +
         Offset(
           0.0,
-          ((sizes.label.height - theme.labelPadding.vertical) - _boxSize(label).height) / 2.0,
+          ((sizes.label.height - theme.labelPadding.vertical) - label.size.height) / 2.0,
         );
     _boxParentData(avatar).offset = theme.padding.topLeft + avatarOffset;
     _boxParentData(label).offset = theme.padding.topLeft + labelOffset + theme.labelPadding.topLeft;
