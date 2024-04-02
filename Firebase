@@ -1,0 +1,21 @@
+E/flutter (32503): [ERROR:flutter/runtime/dart_vm_initializer.cc(41)] Unhandled Exception: PlatformException(java.lang.Exception: Failed to load FirebaseOptions from resource. Check that you have defined values.xml correctly., Exception, Cause: null, Stacktrace: java.lang.Exception: Failed to load FirebaseOptions from resource. Check that you have defined values.xml correctly.
+E/flutter (32503): 	at io.flutter.plugins.firebase.core.FlutterFirebaseCorePlugin.lambda$optionsFromResource$4$io-flutter-plugins-firebase-core-FlutterFirebaseCorePlugin(FlutterFirebaseCorePlugin.java:207)
+E/flutter (32503): 	at io.flutter.plugins.firebase.core.FlutterFirebaseCorePlugin$$ExternalSyntheticLambda2.run(Unknown Source:4)
+E/flutter (32503): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+E/flutter (32503): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+E/flutter (32503): 	at java.lang.Thread.run(Thread.java:923)
+E/flutter (32503): , null)
+E/flutter (32503): #0      FirebaseCoreHostApi.optionsFromResource (package:firebase_core_platform_interface/src/pigeon/messages.pigeon.dart:242:7)
+E/flutter (32503): <asynchronous suspension>
+E/flutter (32503): #1      MethodChannelFirebase.initializeApp (package:firebase_core_platform_interface/src/method_channel/method_channel_firebase.dart:89:25)
+E/flutter (32503): <asynchronous suspension>
+E/flutter (32503): #2      Firebase.initializeApp (package:firebase_core/src/firebase.dart:43:31)
+E/flutter (32503): <asynchronous suspension>
+E/flutter (32503): #3      main (package:chatting_app/main.dart:11:3)
+E/flutter (32503): <asynchronous suspension>
+E/flutter (32503): 
+I/le.chatting_ap(32503): Compiler allocated 4379KB to compile void android.view.ViewRootImpl.performTraversals()
+I/le.chatting_ap(32503): ProcessProfilingInfo new_methods=1375 is saved saved_to_disk=1 resolve_classes_delay=8000
+
+
+
