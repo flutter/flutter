@@ -13,7 +13,7 @@ Future<void> customerTestingRunner(String flutterRoot) async {
   printProgress('${green}Running customer testing$reset');
   await runCommand(
     'git',
-    <String>[
+    const <String>[
       'fetch',
       'origin',
       'master',
@@ -22,7 +22,7 @@ Future<void> customerTestingRunner(String flutterRoot) async {
   );
   await runCommand(
     'git',
-    <String>[
+    const <String>[
       'branch',
       '-f',
       'master',
