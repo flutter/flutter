@@ -65,6 +65,7 @@ import 'package:process/process.dart';
 
 import 'run_command.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
+import 'suite_runners/run_analyze_tests.dart';
 import 'suite_runners/run_flutter_packages_tests.dart';
 import 'suite_runners/run_realm_checker_tests.dart';
 import 'suite_runners/run_skp_generator_tests.dart';
@@ -252,7 +253,7 @@ Future<void> main(List<String> args) async {
       'skp_generator': skpGeneratorTestsRunner,
       'realm_checker': () => realmCheckerTestRunner(flutterRoot),
       'customer_testing': _runCustomerTesting,
-      'analyze': _runAnalyze,
+      'analyze': () => analyzeRunner(flutterRoot),
       'fuchsia_precache': _runFuchsiaPrecache,
       'docs': _runDocs,
       'verify_binaries_codesigned': _runVerifyCodesigned,
@@ -1235,19 +1236,6 @@ Future<void> _runCustomerTesting() async {
     Platform.isWindows? winScript: './ci.sh',
     <String>[],
     workingDirectory: path.join(flutterRoot, 'dev', 'customer_testing'),
-  );
-}
-
-// Runs analysis tests.
-Future<void> _runAnalyze() async {
-  printProgress('${green}Running analysis testing$reset');
-  await runCommand(
-    'dart',
-    <String>[
-      '--enable-asserts',
-      path.join(flutterRoot, 'dev', 'bots', 'analyze.dart'),
-    ],
-    workingDirectory: flutterRoot,
   );
 }
 
