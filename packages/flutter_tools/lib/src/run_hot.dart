@@ -1511,24 +1511,16 @@ String _describePausedIsolates(int pausedIsolatesFound, String serviceEventKind)
     message.write('$pausedIsolatesFound isolates are ');
     plural = true;
   }
-  switch (serviceEventKind) {
-    case vm_service.EventKind.kPauseStart:
-      message.write('paused (probably due to --start-paused)');
-    case vm_service.EventKind.kPauseExit:
-      message.write('paused because ${ plural ? 'they have' : 'it has' } terminated');
-    case vm_service.EventKind.kPauseBreakpoint:
-      message.write('paused in the debugger on a breakpoint');
-    case vm_service.EventKind.kPauseInterrupted:
-      message.write('paused due in the debugger');
-    case vm_service.EventKind.kPauseException:
-      message.write('paused in the debugger after an exception was thrown');
-    case vm_service.EventKind.kPausePostRequest:
-      message.write('paused');
-    case '':
-      message.write('paused for various reasons');
-    default:
-      message.write('paused');
-  }
+  message.write(switch (serviceEventKind) {
+    vm_service.EventKind.kPauseStart       => 'paused (probably due to --start-paused)',
+    vm_service.EventKind.kPauseExit        => 'paused because ${ plural ? 'they have' : 'it has' } terminated',
+    vm_service.EventKind.kPauseBreakpoint  => 'paused in the debugger on a breakpoint',
+    vm_service.EventKind.kPauseInterrupted => 'paused due in the debugger',
+    vm_service.EventKind.kPauseException   => 'paused in the debugger after an exception was thrown',
+    vm_service.EventKind.kPausePostRequest => 'paused',
+    '' => 'paused for various reasons',
+    _  => 'paused',
+  });
   return message.toString();
 }
 
