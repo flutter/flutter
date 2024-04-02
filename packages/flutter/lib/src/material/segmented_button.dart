@@ -797,6 +797,18 @@ class _RenderSegmentedButton<T> extends RenderBox with
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final Size childSize = _calculateChildSize(constraints);
+    final BoxConstraints childConstraints = BoxConstraints.tight(childSize);
+
+    BaselineOffset baselineOffset = BaselineOffset.noBaseline;
+    for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
+      baselineOffset = baselineOffset.minOf(BaselineOffset(child.getDryBaseline(childConstraints, baseline)));
+    }
+    return baselineOffset.offset;
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     final Size childSize = _calculateChildSize(constraints);
@@ -851,9 +863,9 @@ class _RenderSegmentedButton<T> extends RenderBox with
       context.canvas.restore();
 
       // Compute a clip rect for the outer border of the child.
-      late final double segmentLeft;
-      late final double segmentRight;
-      late final double dividerPos;
+      final double segmentLeft;
+      final double segmentRight;
+      final double dividerPos;
       final double borderOutset = math.max(enabledBorder.side.strokeOutset, disabledBorder.side.strokeOutset);
       switch (textDirection) {
         case TextDirection.rtl:

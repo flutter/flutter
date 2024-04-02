@@ -160,6 +160,11 @@ class _RenderMenuItem extends RenderShiftedBox {
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    return child?.getDryBaseline(constraints, baseline);
+  }
+
+  @override
   void performLayout() {
     if (child == null) {
       size = Size.zero;
