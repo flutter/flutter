@@ -124,6 +124,10 @@ struct ProcTable {
 
 const ProcTable& GetProcTable();
 
+#ifdef TESTING
+ProcTable& GetMutableProcTable();
+#endif
+
 }  // namespace impeller::android
 
 #endif  // FLUTTER_IMPELLER_TOOLKIT_ANDROID_PROC_TABLE_H_
