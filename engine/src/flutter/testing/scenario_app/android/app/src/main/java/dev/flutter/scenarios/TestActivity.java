@@ -9,12 +9,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.Window;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.view.WindowCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.core.view.WindowInsetsControllerCompat;
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.loader.FlutterLoader;
@@ -29,7 +25,6 @@ public abstract class TestActivity extends TestableFlutterActivity {
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    hideSystemBars(getWindow());
     testFlutterLoaderCallbackWhenInitializedTwice();
   }
 
@@ -108,14 +103,5 @@ public abstract class TestActivity extends TestableFlutterActivity {
                 "Failed test: FlutterLoader#ensureInitializationCompleteAsync() did not invoke its callback.");
           }
         });
-  }
-
-  private static void hideSystemBars(Window window) {
-    final WindowInsetsControllerCompat insetController =
-        WindowCompat.getInsetsController(window, window.getDecorView());
-    assert insetController != null;
-    insetController.setSystemBarsBehavior(
-        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-    insetController.hide(WindowInsetsCompat.Type.systemBars());
   }
 }
