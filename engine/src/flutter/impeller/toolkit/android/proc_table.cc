@@ -14,6 +14,11 @@ const ProcTable& GetProcTable() {
   return gProcTable;
 }
 
+// Only used by tests.
+ProcTable& GetMutableProcTable() {
+  return const_cast<ProcTable&>(GetProcTable());
+}
+
 template <class T>
 void ResolveAndroidProc(
     AndroidProc<T>& proc,

@@ -12,6 +12,18 @@
 
 namespace impeller::android::testing {
 
+#define DISABLE_ANDROID_PROC(name)                 \
+  struct Disable##name {                           \
+    Disable##name() {                              \
+      real_proc = GetMutableProcTable().name.proc; \
+      GetMutableProcTable().name.proc = nullptr;   \
+    }                                              \
+    ~Disable##name() {                             \
+      GetMutableProcTable().name.proc = real_proc; \
+    }                                              \
+    decltype(name)* real_proc;                     \
+  } disable##name;
+
 TEST(ToolkitAndroidTest, CanCreateProcTable) {
   ProcTable proc_table;
   ASSERT_TRUE(proc_table.IsValid());
@@ -47,6 +59,11 @@ TEST(ToolkitAndroidTest, CanGetHardwareBufferIDs) {
   HardwareBuffer buffer(desc);
   ASSERT_TRUE(buffer.IsValid());
   ASSERT_TRUE(buffer.GetSystemUniqueID().has_value());
+}
+
+TEST(ToolkitAndroidTest, HardwareBufferNullIDIfAPIUnavailable) {
+  DISABLE_ANDROID_PROC(AHardwareBuffer_getId);
+  ASSERT_FALSE(HardwareBuffer::GetSystemUniqueID(nullptr).has_value());
 }
 
 TEST(ToolkitAndroidTest, CanDescribeHardwareBufferHandles) {

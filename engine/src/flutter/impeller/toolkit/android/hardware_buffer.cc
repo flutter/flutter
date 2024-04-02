@@ -108,7 +108,7 @@ std::optional<uint64_t> HardwareBuffer::GetSystemUniqueID() const {
 std::optional<uint64_t> HardwareBuffer::GetSystemUniqueID(
     AHardwareBuffer* buffer) {
   if (!GetProcTable().AHardwareBuffer_getId) {
-    return false;
+    return std::nullopt;
   }
   uint64_t out_id = 0u;
   if (GetProcTable().AHardwareBuffer_getId(buffer, &out_id) != 0) {
