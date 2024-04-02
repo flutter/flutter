@@ -298,23 +298,17 @@ Future<void> _run({
     });
 
     await step('Configuring emulator...', () async {
-      final List<List<String>> adbShellCommands = <List<String>> [
-        // Try to close all OS popups in the emulator, like "System UI stopped working".
-        <String>['am', 'broadcast', '-a', 'android.intent.action.CLOSE_SYSTEM_DIALOGS'],
-
-        // Don't show "this is how you exit fullscreen mode".
-        <String>['settings', 'put', 'secure', 'immersive_mode_confirmations', 'confirmed'],
-
-        // Hide all system bars.
-        <String>['settings', 'put', 'global', 'policy_control', 'immersive.full=*'],
-      ];
-
-      // Run all the commands.
-      for (final List<String> command in adbShellCommands) {
-        final int exitCode = await pm.runAndForward(<String>[adb.path, 'shell', ...command]);
-        if (exitCode != 0) {
-          panic(<String>['could not run command: ${command.join(' ')}']);
-        }
+      final int exitCode = await pm.runAndForward(<String>[
+        adb.path,
+        'shell',
+        'settings',
+        'put',
+        'secure',
+        'immersive_mode_confirmations',
+        'confirmed',
+      ]);
+      if (exitCode != 0) {
+        panic(<String>['could not configure emulator']);
       }
     });
 
