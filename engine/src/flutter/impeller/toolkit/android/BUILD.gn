@@ -50,6 +50,8 @@ source_set("unittests_lib") {
     ":unittests_fixtures",
     "//flutter/testing",
   ]
+
+  defines = [ "TESTING" ]
 }
 
 executable("unittests") {
