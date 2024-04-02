@@ -542,6 +542,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
     }
   }
 
+  settings.enable_platform_isolates =
+      command_line.HasOption(FlagForSwitch(Switch::EnablePlatformIsolates));
+
   return settings;
 }
 

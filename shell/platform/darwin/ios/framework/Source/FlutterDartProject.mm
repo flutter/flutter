@@ -91,6 +91,8 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
     syslog(LOG_ALERT, "%.*s", (int)log.size(), log.c_str());
   };
 
+  settings.enable_platform_isolates = true;
+
   // The command line arguments may not always be complete. If they aren't, attempt to fill in
   // defaults.
 
