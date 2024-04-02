@@ -1190,32 +1190,28 @@ void main() {
       VoidCallback? onSelectionHandleTapped,
       TextSelectionControls? selectionControls,
       TextMagnifierConfiguration? magnifierConfiguration,
-      double rootScale = 1.0,
     }) async {
       final UniqueKey column = UniqueKey();
       final LayerLink startHandleLayerLink = LayerLink();
       final LayerLink endHandleLayerLink = LayerLink();
       final LayerLink toolbarLayerLink = LayerLink();
-      await tester.pumpWidget(Transform.scale(
-        scale: rootScale,
-        child: MaterialApp(
-          home: Column(
-            key: column,
-            children: <Widget>[
-              CompositedTransformTarget(
-                link: startHandleLayerLink,
-                child: const Text('start handle'),
-              ),
-              CompositedTransformTarget(
-                link: endHandleLayerLink,
-                child: const Text('end handle'),
-              ),
-              CompositedTransformTarget(
-                link: toolbarLayerLink,
-                child: const Text('toolbar'),
-              ),
-            ],
-          ),
+      await tester.pumpWidget(MaterialApp(
+        home: Column(
+          key: column,
+          children: <Widget>[
+            CompositedTransformTarget(
+              link: startHandleLayerLink,
+              child: const Text('start handle'),
+            ),
+            CompositedTransformTarget(
+              link: endHandleLayerLink,
+              child: const Text('end handle'),
+            ),
+            CompositedTransformTarget(
+              link: toolbarLayerLink,
+              child: const Text('toolbar'),
+            ),
+          ],
         ),
       ));
 

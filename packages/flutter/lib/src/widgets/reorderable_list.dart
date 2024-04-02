@@ -1452,7 +1452,6 @@ class _DragItemProxy extends StatelessWidget {
   Widget build(BuildContext context) {
     final Widget proxyChild = proxyDecorator?.call(child, index, animation.view) ?? child;
     final Offset overlayOrigin = _overlayOrigin(context);
-    final double overlayScale = 1 / ((Overlay.of(context, debugRequiredFor: context.widget).context.findRenderObject() as RenderBox?)?.getTransformTo(null).getMaxScaleOnAxis() ?? 1);
 
     return MediaQuery(
       // Remove the top padding so that any nested list views in the item
@@ -1466,7 +1465,6 @@ class _DragItemProxy extends StatelessWidget {
           if (dropPosition != null) {
             effectivePosition = Offset.lerp(dropPosition - overlayOrigin, effectivePosition, Curves.easeOut.transform(animation.value))!;
           }
-          effectivePosition *= overlayScale;
           return Positioned(
             left: effectivePosition.dx,
             top: effectivePosition.dy,
