@@ -227,6 +227,11 @@ Offset getDecoratorCenter(WidgetTester tester) {
   return getDecoratorRect(tester).center;
 }
 
+Rect getContainerRect(WidgetTester tester) {
+  final RenderBox box = InputDecorator.containerOf(tester.element(findBorderPainter()))!;
+  return box.paintBounds;
+}
+
 InputBorder? getBorder(WidgetTester tester) {
   if (!tester.any(findBorderPainter())) {
     return null;
@@ -249,6 +254,9 @@ BorderSide? getBorderSide(WidgetTester tester) {
 BorderRadius? getBorderRadius(WidgetTester tester) {
   final InputBorder border = getBorder(tester)!;
   if (border is UnderlineInputBorder) {
+    return border.borderRadius;
+  }
+  if (border is OutlineInputBorder) {
     return border.borderRadius;
   }
   return null;
@@ -286,6 +294,1263 @@ void main() {
   // TODO(bleroux): migrate all M2 tests to M3.
   // See https://github.com/flutter/flutter/issues/139076
   // Work in progress.
+
+  group('Material3 - InputDecoration container', () {
+    // Default container height for InputDecorator (filled or outlined) is 56dp on mobile
+    // whether the label is floating or not.
+    // This value is taken from https://m3.material.io/components/text-fields/specs.
+    const double containerHeight = 56.0;
+
+    // On desktop, visual density is used to reduce the container height.
+    // Desktop default density is [VisualDensity.compact] which corresponds to a density value of -2.
+    // As a rule of thumb, a change of 1 or -1 in density corresponds to 4 logical pixels.
+    // See https://m3.material.io/foundations/layout/understanding-layout/spacing#a5674a8b-5f38-4a58-8202-5838b082390d.
+    const double desktopContainerHeight = containerHeight - 2 * 4.0; // 48.0
+
+    group('for filled text field', () {
+      group('when field is enabled', () {
+        testWidgets('container has correct height and shape', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, containerHeight);
+          expect(getBorder(tester), isA<UnderlineInputBorder>());
+          expect(getBorderRadius(tester), const BorderRadius.only(
+            topLeft: Radius.circular(4.0),
+            topRight: Radius.circular(4.0),
+          ));
+        });
+
+        testWidgets('container has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(findBorderPainter(), paints
+            ..path(
+              style: PaintingStyle.fill,
+              color: theme.colorScheme.surfaceContainerHighest,
+            )
+          );
+        });
+
+        testWidgets('active indicator has correct weight and color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getBorderColor(tester), theme.colorScheme.onSurfaceVariant);
+          expect(getBorderWeight(tester), 1.0);
+        });
+      });
+
+      group('when field is disabled', () {
+        testWidgets('container has correct height and shape', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                enabled: false,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, containerHeight);
+          expect(getBorder(tester), isA<UnderlineInputBorder>());
+          expect(getBorderRadius(tester), const BorderRadius.only(
+            topLeft: Radius.circular(4.0),
+            topRight: Radius.circular(4.0),
+          ));
+        });
+
+        testWidgets('container has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                enabled: false,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(findBorderPainter(), paints
+            ..path(
+              style: PaintingStyle.fill,
+              color: theme.colorScheme.onSurface.withOpacity(0.04),
+            )
+          );
+        });
+
+        testWidgets('active indicator has correct weight and color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                enabled: false,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getBorderColor(tester), theme.colorScheme.onSurface.withOpacity(0.38));
+          expect(getBorderWeight(tester), 1.0);
+        });
+      });
+
+      group('when field is hovered', () {
+        testWidgets('container has correct height and shape', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, containerHeight);
+          expect(getBorder(tester), isA<UnderlineInputBorder>());
+          expect(getBorderRadius(tester), const BorderRadius.only(
+            topLeft: Radius.circular(4.0),
+            topRight: Radius.circular(4.0),
+          ));
+        });
+
+        testWidgets('container has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(theme.hoverColor, Colors.black.withOpacity(0.04));
+          expect(findBorderPainter(), paints
+            ..path(
+              style: PaintingStyle.fill,
+              color: Color.alphaBlend(theme.hoverColor, theme.colorScheme.surfaceContainerHighest),
+            )
+          );
+        });
+
+        testWidgets('active indicator has correct weight and color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getBorderColor(tester), theme.colorScheme.onSurface);
+          expect(getBorderWeight(tester), 1.0);
+        });
+      });
+
+      group('when field is focused', () {
+        testWidgets('container has correct height and shape', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, containerHeight);
+          expect(getBorder(tester), isA<UnderlineInputBorder>());
+          expect(getBorderRadius(tester), const BorderRadius.only(
+            topLeft: Radius.circular(4.0),
+            topRight: Radius.circular(4.0),
+          ));
+        });
+
+        testWidgets('container has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(findBorderPainter(), paints
+            ..path(
+              style: PaintingStyle.fill,
+              color: theme.colorScheme.surfaceContainerHighest,
+            )
+          );
+        });
+
+        testWidgets('active indicator has correct weight and color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getBorderColor(tester), theme.colorScheme.primary);
+          expect(getBorderWeight(tester), 2.0);
+        });
+      });
+
+      group('when field is in error', () {
+        testWidgets('container has correct height and shape', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, containerHeight);
+          expect(getBorder(tester), isA<UnderlineInputBorder>());
+          expect(getBorderRadius(tester), const BorderRadius.only(
+            topLeft: Radius.circular(4.0),
+            topRight: Radius.circular(4.0),
+          ));
+        });
+
+        testWidgets('container has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(findBorderPainter(), paints
+            ..path(
+              style: PaintingStyle.fill,
+              color: theme.colorScheme.surfaceContainerHighest,
+            )
+          );
+        });
+
+        testWidgets('active indicator has correct weight and color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getBorderColor(tester), theme.colorScheme.error);
+          expect(getBorderWeight(tester), 1.0);
+        });
+
+        testWidgets('active indicator has correct weight and color when focused', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getBorderColor(tester), theme.colorScheme.error);
+          expect(getBorderWeight(tester), 2.0);
+        });
+
+        testWidgets('active indicator has correct weight and color when hovered', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getBorderColor(tester), theme.colorScheme.onErrorContainer);
+          expect(getBorderWeight(tester), 1.0);
+        });
+      });
+
+      testWidgets('default container height is 48dp on desktop', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(
+              filled: true,
+              labelText: labelText,
+              helperText: helperText,
+            ),
+          ),
+        );
+
+        expect(getContainerRect(tester).height, desktopContainerHeight);
+      }, variant: TargetPlatformVariant.desktop());
+    });
+
+    group('for outlined text field', () {
+      group('when field is enabled', () {
+        testWidgets('container has correct height and shape', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, containerHeight);
+          expect(getBorder(tester), isA<OutlineInputBorder>());
+          expect(getBorderRadius(tester), const BorderRadius.all(Radius.circular(4.0)));
+        });
+
+        testWidgets('container is painted correctly', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          // Default outlined text field's container is not filled.
+          expect(findBorderPainter(), paints
+            ..path(
+              style: PaintingStyle.stroke,
+            )
+          );
+        });
+
+        testWidgets('outline has correct weight and color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getBorderColor(tester), theme.colorScheme.outline);
+          expect(getBorderWeight(tester), 1.0);
+        });
+      });
+
+      group('when field is disabled', () {
+        testWidgets('container has correct height and shape', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                enabled: false,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, containerHeight);
+          expect(getBorder(tester), isA<OutlineInputBorder>());
+          expect(getBorderRadius(tester), const BorderRadius.all(Radius.circular(4.0)));
+        });
+
+        testWidgets('container is painted correctly', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                enabled: false,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          // Default outlined text field's container is not filled.
+          expect(findBorderPainter(), paints
+            ..path(
+              style: PaintingStyle.stroke,
+            )
+          );
+        });
+
+        testWidgets('outline has correct weight and color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                enabled: false,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getBorderColor(tester), theme.colorScheme.onSurface.withOpacity(0.12));
+          expect(getBorderWeight(tester), 1.0);
+        });
+      });
+
+      group('when field is hovered', () {
+        testWidgets('container has correct height and shape', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, containerHeight);
+          expect(getBorder(tester), isA<OutlineInputBorder>());
+          expect(getBorderRadius(tester), const BorderRadius.all(Radius.circular(4.0)));
+        });
+
+        testWidgets('container is painted correctly', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          // Default outlined text field's container is not filled.
+          expect(findBorderPainter(), paints
+            ..path(
+              style: PaintingStyle.stroke,
+            )
+          );
+        });
+
+        testWidgets('outline has correct weight and color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getBorderColor(tester), theme.colorScheme.onSurface);
+          expect(getBorderWeight(tester), 1.0);
+        });
+      });
+
+      group('when field is focused', () {
+        testWidgets('container has correct height and shape', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, containerHeight);
+          expect(getBorder(tester), isA<OutlineInputBorder>());
+          expect(getBorderRadius(tester), const BorderRadius.all(Radius.circular(4.0)));
+        });
+
+        testWidgets('container is painted correctly', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          // Default outlined text field's container is not filled.
+          expect(findBorderPainter(), paints
+            ..path(
+              style: PaintingStyle.stroke,
+            )
+          );
+        });
+
+        testWidgets('outline has correct weight and color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getBorderColor(tester), theme.colorScheme.primary);
+          expect(getBorderWeight(tester), 2.0);
+        });
+      });
+
+      group('when field is in error', () {
+        testWidgets('container has correct height and shape', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, containerHeight);
+          expect(getBorder(tester), isA<OutlineInputBorder>());
+          expect(getBorderRadius(tester), const BorderRadius.all(Radius.circular(4.0)));
+        });
+
+        testWidgets('container is painted correctly', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          // Default outlined text field's container is not filled.
+          expect(findBorderPainter(), paints
+            ..path(
+              style: PaintingStyle.stroke,
+            )
+          );
+        });
+
+        testWidgets('outline has correct weight and color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getBorderColor(tester), theme.colorScheme.error);
+          expect(getBorderWeight(tester), 1.0);
+        });
+
+        testWidgets('outline has correct weight and color when focused', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getBorderColor(tester), theme.colorScheme.error);
+          expect(getBorderWeight(tester), 2.0);
+        });
+
+        testWidgets('outline has correct weight and color when hovered', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getBorderColor(tester), theme.colorScheme.onErrorContainer);
+          expect(getBorderWeight(tester), 1.0);
+        });
+      });
+
+      testWidgets('default container height is 48dp on desktop', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: labelText,
+              helperText: helperText,
+            ),
+          ),
+        );
+
+        expect(getContainerRect(tester).height, desktopContainerHeight);
+      }, variant: TargetPlatformVariant.desktop());
+    });
+
+    testWidgets('InputDecorator with no input border', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration(
+            border: InputBorder.none,
+          ),
+        ),
+      );
+      expect(getBorderWeight(tester), 0.0);
+    });
+
+    testWidgets('OutlineInputBorder radius carries over when lerping', (WidgetTester tester) async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/23982
+      const Key key = Key('textField');
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Material(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: TextField(
+                key: key,
+                decoration: InputDecoration(
+                  fillColor: Colors.white,
+                  filled: true,
+                  border: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                    borderRadius: BorderRadius.zero,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // TextField has the given border.
+      expect(getBorderRadius(tester), BorderRadius.zero);
+
+      // Focusing does not change the border.
+      await tester.tap(find.byKey(key));
+      await tester.pump();
+      expect(getBorderRadius(tester), BorderRadius.zero);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(getBorderRadius(tester), BorderRadius.zero);
+      await tester.pump(kTransitionDuration);
+      expect(getBorderRadius(tester), BorderRadius.zero);
+    });
+
+    testWidgets('OutlineInputBorder async lerp', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/28724
+
+      final Completer<void> completer = Completer<void>();
+      bool waitIsOver = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return GestureDetector(
+                onTap: () async {
+                  setState(() { waitIsOver = true; });
+                  await completer.future;
+                  setState(() { waitIsOver = false;  });
+                },
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    labelText: 'Test',
+                    enabledBorder: !waitIsOver ? null : const OutlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(StatefulBuilder));
+      await tester.pump(kTransitionDuration);
+
+      completer.complete();
+      await tester.pump(kTransitionDuration);
+    });
+
+    test('InputBorder equality', () {
+      // OutlineInputBorder's equality is defined by the borderRadius, borderSide, & gapPadding.
+      const OutlineInputBorder outlineInputBorder = OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(9.0)),
+        borderSide: BorderSide(color: Colors.blue),
+        gapPadding: 32.0,
+      );
+      expect(outlineInputBorder, const OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.blue),
+        borderRadius: BorderRadius.all(Radius.circular(9.0)),
+        gapPadding: 32.0,
+      ));
+      expect(outlineInputBorder, isNot(const OutlineInputBorder()));
+      expect(outlineInputBorder, isNot(const OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.red),
+        borderRadius: BorderRadius.all(Radius.circular(9.0)),
+        gapPadding: 32.0,
+      )));
+      expect(outlineInputBorder, isNot(const OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.blue),
+        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+        gapPadding: 32.0,
+      )));
+      expect(outlineInputBorder, isNot(const OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.blue),
+        borderRadius: BorderRadius.all(Radius.circular(9.0)),
+        gapPadding: 33.0,
+      )));
+
+      // UnderlineInputBorder's equality is defined by the borderSide and borderRadius.
+      const UnderlineInputBorder underlineInputBorder = UnderlineInputBorder(
+        borderSide: BorderSide(color: Colors.blue),
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
+      );
+      expect(underlineInputBorder, const UnderlineInputBorder(
+        borderSide: BorderSide(color: Colors.blue),
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
+      ));
+      expect(underlineInputBorder, isNot(const UnderlineInputBorder()));
+      expect(underlineInputBorder, isNot(const UnderlineInputBorder(
+        borderSide: BorderSide(color: Colors.red),
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
+      )));
+      expect(underlineInputBorder, isNot(const UnderlineInputBorder(
+        borderSide: BorderSide(color: Colors.blue),
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(6.0), topRight: Radius.circular(6.0)),
+      )));
+    });
+
+    test('InputBorder hashCodes', () {
+      // OutlineInputBorder's hashCode is defined by the borderRadius, borderSide, & gapPadding.
+      const OutlineInputBorder outlineInputBorder = OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(9.0)),
+        borderSide: BorderSide(color: Colors.blue),
+        gapPadding: 32.0,
+      );
+      expect(outlineInputBorder.hashCode, const OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(9.0)),
+        borderSide: BorderSide(color: Colors.blue),
+        gapPadding: 32.0,
+      ).hashCode);
+      expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder().hashCode));
+      expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(9.0)),
+        borderSide: BorderSide(color: Colors.red),
+        gapPadding: 32.0,
+      ).hashCode));
+      expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+        borderSide: BorderSide(color: Colors.blue),
+        gapPadding: 32.0,
+      ).hashCode));
+      expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(9.0)),
+        borderSide: BorderSide(color: Colors.blue),
+        gapPadding: 33.0,
+      ).hashCode));
+
+      // UnderlineInputBorder's hashCode is defined by the borderSide and borderRadius.
+      const UnderlineInputBorder underlineInputBorder = UnderlineInputBorder(
+        borderSide: BorderSide(color: Colors.blue),
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
+      );
+      expect(underlineInputBorder.hashCode, const UnderlineInputBorder(
+        borderSide: BorderSide(color: Colors.blue),
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
+      ).hashCode);
+      expect(underlineInputBorder.hashCode, isNot(const UnderlineInputBorder(
+        borderSide: BorderSide(color: Colors.red),
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
+      ).hashCode));
+      expect(underlineInputBorder.hashCode, isNot(const UnderlineInputBorder(
+        borderSide: BorderSide(color: Colors.blue),
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(6.0), topRight: Radius.circular(6.0)),
+      ).hashCode));
+    });
+
+    testWidgets('OutlineInputBorder borders scale down to fit when large values are passed in', (WidgetTester tester) async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/34327
+      const double largerBorderRadius = 200.0;
+      const double smallerBorderRadius = 100.0;
+      const double inputDecoratorHeight = 56.0;
+      const double inputDecoratorWidth = 800.0;
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: const InputDecoration(
+            filled: true,
+            fillColor: Color(0xFF00FF00),
+            labelText: 'label text',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.only(
+                // Intentionally large values that are larger than the InputDecorator.
+                topLeft: Radius.circular(smallerBorderRadius),
+                bottomLeft: Radius.circular(smallerBorderRadius),
+                topRight: Radius.circular(largerBorderRadius),
+                bottomRight: Radius.circular(largerBorderRadius),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Skia determines the scale based on the ratios of radii to the total
+      // height or width allowed. In this case, it is the right side of the
+      // border, which have two corners with largerBorderRadius that add up
+      // to be 400.0.
+      const double denominator = largerBorderRadius * 2.0;
+
+      const double largerBorderRadiusScaled = largerBorderRadius / denominator * inputDecoratorHeight;
+      const double smallerBorderRadiusScaled = smallerBorderRadius / denominator * inputDecoratorHeight;
+
+      expect(findBorderPainter(), paints
+        ..save()
+        ..path(
+          style: PaintingStyle.fill,
+          color: const Color(0xFF00FF00),
+          includes: const <Offset>[
+            // The border should draw along the four edges of the
+            // InputDecorator.
+
+            // Top center.
+            Offset(inputDecoratorWidth / 2.0, 0.0),
+            // Bottom center.
+            Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
+            // Left center.
+            Offset(0.0, inputDecoratorHeight / 2.0),
+            // Right center.
+            Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
+
+            // The border path should contain points where each rounded corner
+            // ends.
+
+            // Bottom-right arc.
+            Offset(inputDecoratorWidth, inputDecoratorHeight - largerBorderRadiusScaled),
+            Offset(inputDecoratorWidth - largerBorderRadiusScaled, inputDecoratorHeight),
+            // Top-right arc.
+            Offset(inputDecoratorWidth,0.0 + largerBorderRadiusScaled),
+            Offset(inputDecoratorWidth - largerBorderRadiusScaled, 0.0),
+            // Bottom-left arc.
+            Offset(0.0, inputDecoratorHeight - smallerBorderRadiusScaled),
+            Offset(0.0 + smallerBorderRadiusScaled, inputDecoratorHeight),
+            // Top-left arc.
+            Offset(0.0,0.0 + smallerBorderRadiusScaled),
+            Offset(0.0 + smallerBorderRadiusScaled, 0.0),
+          ],
+          excludes: const <Offset>[
+            // The border should not contain the corner points, since the border
+            // is rounded.
+
+            // Top-left.
+            Offset.zero,
+            // Top-right.
+            Offset(inputDecoratorWidth, 0.0),
+            // Bottom-left.
+            Offset(0.0, inputDecoratorHeight),
+            // Bottom-right.
+            Offset(inputDecoratorWidth, inputDecoratorHeight),
+
+            // Corners with larger border ratio should not contain points outside
+            // of the larger radius.
+
+            // Bottom-right arc.
+            Offset(inputDecoratorWidth, inputDecoratorHeight - smallerBorderRadiusScaled),
+            Offset(inputDecoratorWidth - smallerBorderRadiusScaled, inputDecoratorWidth),
+            // Top-left arc.
+            Offset(inputDecoratorWidth, 0.0 + smallerBorderRadiusScaled),
+            Offset(inputDecoratorWidth - smallerBorderRadiusScaled, 0.0),
+          ],
+        )
+        ..restore(),
+      );
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
+
+    testWidgets('rounded OutlineInputBorder with zero padding just wraps the label', (WidgetTester tester) async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/82321
+      const double borderRadius = 30.0;
+      const String labelText = 'label text';
+
+      const double inputDecoratorHeight = 56.0;
+      const double inputDecoratorWidth = 800.0;
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: const Color(0xFF00FF00),
+            labelText: labelText,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(borderRadius),
+              gapPadding: 0.0,
+            ),
+          ),
+        ),
+      );
+
+      const double denominator = borderRadius * 2.0;
+      const double borderRadiusScaled = borderRadius / denominator * inputDecoratorHeight;
+
+      expect(find.text(labelText), findsOneWidget);
+      final Rect labelRect = tester.getRect(find.text(labelText));
+
+      expect(findBorderPainter(), paints
+        ..save()
+        ..path(
+          style: PaintingStyle.fill,
+          color: const Color(0xFF00FF00),
+          includes: <Offset>[
+            // The border should draw along the four edges of the
+            // InputDecorator.
+
+            // Top center.
+            const Offset(inputDecoratorWidth / 2.0, 0.0),
+            // Bottom center.
+            const Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
+            // Left center.
+            const Offset(0.0, inputDecoratorHeight / 2.0),
+            // Right center.
+            const Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
+
+            // The border path should contain points where each rounded corner
+            // ends.
+
+            // Bottom-right arc.
+            const Offset(inputDecoratorWidth, inputDecoratorHeight - borderRadiusScaled),
+            const Offset(inputDecoratorWidth - borderRadiusScaled, inputDecoratorHeight),
+            // Top-right arc.
+            const Offset(inputDecoratorWidth,0.0 + borderRadiusScaled),
+            const Offset(inputDecoratorWidth - borderRadiusScaled, 0.0),
+            // Bottom-left arc.
+            const Offset(0.0, inputDecoratorHeight - borderRadiusScaled),
+            const Offset(0.0 + borderRadiusScaled, inputDecoratorHeight),
+            // Top-left arc.
+            const Offset(0.0,0.0 + borderRadiusScaled),
+            const Offset(0.0 + borderRadiusScaled, 0.0),
+
+            // Gap edges:
+            // gap start x = radius - radius * cos(arc sweep).
+            // gap start y = radius - radius * sin(arc sweep).
+            const Offset(39.49999999999999, 32.284366616798906),
+            Offset(39.49999999999999 + labelRect.width, 0.0),
+          ],
+          excludes: const <Offset>[
+            // The border should not contain the corner points, since the border
+            // is rounded.
+
+            // Top-left.
+            Offset.zero,
+            // Top-right.
+            Offset(inputDecoratorWidth, 0.0),
+            // Bottom-left.
+            Offset(0.0, inputDecoratorHeight),
+            // Bottom-right.
+            Offset(inputDecoratorWidth, inputDecoratorHeight),
+          ],
+        )
+        ..restore(),
+      );
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
+
+    testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular border', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/78855.
+      const String labelText = 'Flutter';
+      const double inputDecoratorHeight = 56.0;
+      const double inputDecoratorWidth = 800.0;
+      const double borderWidth = 4.0;
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isFocused: true,
+          decoration: const InputDecoration(
+            filled: false,
+            labelText: labelText,
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.zero,
+              borderSide: BorderSide(width: borderWidth, color: Colors.red),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text(labelText), findsOneWidget);
+      expect(findBorderPainter(), paints
+        ..save()
+        ..path(
+          includes: const <Offset>[
+            // Corner points in the middle of the border line should be in the path.
+            // The path is not filled and borderWidth is 4.0 so Offset(2.0, 2.0) is in the path and Offset(1.0, 1.0) is not.
+            // See Skia SkPath::contains method.
+
+            // Top-left.
+            Offset(borderWidth / 2, borderWidth / 2),
+            // Top-right.
+            Offset(inputDecoratorWidth - 1 - borderWidth / 2, borderWidth / 2),
+            // Bottom-left.
+            Offset(borderWidth / 2, inputDecoratorHeight - 1 - borderWidth / 2),
+            // Bottom-right.
+            Offset(inputDecoratorWidth - 1 - borderWidth / 2, inputDecoratorHeight - 1 - borderWidth / 2),
+          ],
+          excludes: const <Offset>[
+            // The path is not filled and borderWidth is 4.0 so the path should not contains the corner points.
+            // See Skia SkPath::contains method.
+
+            // Top-left.
+            Offset.zero,
+            // // Top-right.
+            Offset(inputDecoratorWidth - 1, 0),
+            // // Bottom-left.
+            Offset(0, inputDecoratorHeight - 1),
+            // // Bottom-right.
+            Offset(inputDecoratorWidth - 1, inputDecoratorHeight - 1),
+          ],
+        )
+        ..restore(),
+      );
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
+
+    testWidgets('InputDecorator OutlineInputBorder fillColor is clipped by border', (WidgetTester tester) async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/15742
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: const InputDecoration(
+            filled: true,
+            fillColor: Color(0xFF00FF00),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12.0)),
+            ),
+          ),
+        ),
+      );
+
+      final RenderBox box = tester.renderObject(find.byType(InputDecorator));
+
+      // Fill is the border's outer path, a rounded rectangle.
+      expect(box, paints..path(
+        style: PaintingStyle.fill,
+        color: const Color(0xFF00FF00),
+        includes: <Offset>[const Offset(800.0/2.0, 56/2.0)],
+        excludes: <Offset>[
+          const Offset(1.0, 6.0), // outside the rounded corner, top left.
+          const Offset(800.0 - 1.0, 6.0), // top right.
+          const Offset(1.0, 56.0 - 6.0), // bottom left.
+          const Offset(800 - 1.0, 56.0 - 6.0), // bottom right.
+        ],
+      ));
+
+      // Border outline. The rrect is the -center- of the 1.0 stroked outline.
+      expect(box, paints..rrect(
+        style: PaintingStyle.stroke,
+        strokeWidth: 1.0,
+        rrect: RRect.fromLTRBR(0.5, 0.5, 799.5, 55.5, const Radius.circular(11.5)),
+      ));
+    });
+
+    testWidgets('InputDecorator UnderlineInputBorder fillColor is clipped by border', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: const InputDecoration(
+            filled: true,
+            fillColor: Color(0xFF00FF00),
+            border: UnderlineInputBorder(
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(12.0),
+                bottomRight: Radius.circular(12.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final RenderBox box = tester.renderObject(find.byType(InputDecorator));
+
+      // Fill is the border's outer path, a rounded rectangle.
+      expect(box, paints
+      ..drrect(
+        style: PaintingStyle.fill,
+        inner: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 47.5,
+            bottomRight: const Radius.elliptical(12.0, 11.5),
+            bottomLeft: const Radius.elliptical(12.0, 11.5)),
+        outer: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 48.5,
+            bottomRight: const Radius.elliptical(12.0, 12.5),
+            bottomLeft: const Radius.elliptical(12.0, 12.5)),
+      ));
+    });
+
+    testWidgets('InputDecorator OutlineBorder focused label with icon', (WidgetTester tester) async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/82321
+      Widget buildFrame(TextDirection textDirection) {
+        return MaterialApp(
+          home: Scaffold(
+            body: Container(
+              padding: const EdgeInsets.all(16.0),
+              alignment: Alignment.center,
+              child: Directionality(
+                textDirection: textDirection,
+                child: RepaintBoundary(
+                  child: InputDecorator(
+                    isFocused: true,
+                    isEmpty: true,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: const Color(0xFF00FF00),
+                      labelText: 'label text',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                        gapPadding: 0.0,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame(TextDirection.ltr));
+      await expectLater(
+        find.byType(InputDecorator),
+        matchesGoldenFile('m3_input_decorator.outline_label.ltr.png'),
+      );
+
+      await tester.pumpWidget(buildFrame(TextDirection.rtl));
+      await expectLater(
+        find.byType(InputDecorator),
+        matchesGoldenFile('m3_input_decorator.outline_label.rtl.png'),
+      );
+    });
+
+    testWidgets('InputDecorator OutlineBorder focused label with icon', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/18111
+      Widget buildFrame(TextDirection textDirection) {
+        return MaterialApp(
+          home: Scaffold(
+            body: Container(
+              padding: const EdgeInsets.all(16.0),
+              alignment: Alignment.center,
+              child: Directionality(
+                textDirection: textDirection,
+                child: const RepaintBoundary(
+                  child: InputDecorator(
+                    isFocused: true,
+                    isEmpty: true,
+                    decoration: InputDecoration(
+                      icon: Icon(Icons.insert_link),
+                      labelText: 'primaryLink',
+                      hintText: 'Primary link to story',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame(TextDirection.ltr));
+      await expectLater(
+        find.byType(InputDecorator),
+        matchesGoldenFile('m3_input_decorator.outline_icon_label.ltr.png'),
+      );
+
+      await tester.pumpWidget(buildFrame(TextDirection.rtl));
+      await expectLater(
+        find.byType(InputDecorator),
+        matchesGoldenFile('m3_input_decorator.outline_icon_label.rtl.png'),
+      );
+    });
+  });
 
   group('Material3 - InputDecoration labelText layout', () {
     testWidgets('The label appears above input', (WidgetTester tester) async {
@@ -735,686 +2000,6 @@ void main() {
 
       // Verify that the styles were passed along.
       expect(getLabelStyle(tester).color, labelStyle.color);
-    });
-  });
-
-  group('Material3 - InputDecoration border', () {
-    testWidgets('Compliant border when enabled and not focused', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        buildInputDecorator(
-          decoration: const InputDecoration(
-            labelText: labelText,
-          ),
-        ),
-      );
-
-      expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
-      expect(getBorderBottom(tester), 56.0);
-      expect(getBorderWeight(tester), 1.0);
-      final ThemeData theme = Theme.of(tester.element(find.byType(InputDecorator)));
-      expect(getBorderColor(tester), theme.colorScheme.outline);
-    });
-
-    testWidgets('Compliant border when focused', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        buildInputDecorator(
-          isFocused: true,
-          decoration: const InputDecoration(
-            labelText: labelText,
-          ),
-        ),
-      );
-
-      expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
-      expect(getBorderBottom(tester), 56.0);
-      expect(getBorderWeight(tester), 2.0);
-      final ThemeData theme = Theme.of(tester.element(find.byType(InputDecorator)));
-      expect(getBorderColor(tester), theme.colorScheme.primary);
-    });
-
-    testWidgets('Compliant border when disabled', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        buildInputDecorator(
-          decoration: const InputDecoration(
-            labelText: labelText,
-            enabled: false,
-          ),
-        ),
-      );
-
-      expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
-      expect(getBorderBottom(tester), 56.0);
-      expect(getBorderWeight(tester), 1.0);
-      final ThemeData theme = Theme.of(tester.element(find.byType(InputDecorator)));
-      expect(getBorderColor(tester), theme.colorScheme.onSurface.withOpacity(0.12));
-    });
-
-    testWidgets('Compliant border when filled, enabled and not focused', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        buildInputDecorator(
-          decoration: const InputDecoration(
-            labelText: labelText,
-            filled: true,
-          ),
-        ),
-      );
-
-      expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
-      expect(getBorderBottom(tester), 56.0);
-      expect(getBorderWeight(tester), 1.0);
-      final ThemeData theme = Theme.of(tester.element(find.byType(InputDecorator)));
-      expect(getBorderColor(tester), theme.colorScheme.onSurfaceVariant);
-    });
-
-    testWidgets('Compliant border when filled and focused', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        buildInputDecorator(
-          isFocused: true,
-          decoration: const InputDecoration(
-            labelText: labelText,
-            filled: true,
-          ),
-        ),
-      );
-
-      expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
-      expect(getBorderBottom(tester), 56.0);
-      expect(getBorderWeight(tester), 2.0);
-      final ThemeData theme = Theme.of(tester.element(find.byType(InputDecorator)));
-      expect(getBorderColor(tester), theme.colorScheme.primary);
-    });
-
-    testWidgets('Compliant border when filled and disabled', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        buildInputDecorator(
-          decoration: const InputDecoration(
-            labelText: labelText,
-            enabled: false,
-            filled: true,
-          ),
-        ),
-      );
-
-      expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
-      expect(getBorderBottom(tester), 56.0);
-      expect(getBorderWeight(tester), 1.0);
-      final ThemeData theme = Theme.of(tester.element(find.byType(InputDecorator)));
-      expect(getBorderColor(tester), theme.colorScheme.onSurface.withOpacity(0.38));
-    });
-
-    testWidgets('InputDecorator with no input border', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        buildInputDecorator(
-          isEmpty: true,
-          decoration: const InputDecoration(
-            border: InputBorder.none,
-          ),
-        ),
-      );
-      expect(getBorderWeight(tester), 0.0);
-    });
-
-    testWidgets('OutlineInputBorder radius carries over when lerping', (WidgetTester tester) async {
-      // This is a regression test for https://github.com/flutter/flutter/issues/23982
-      const Key key = Key('textField');
-
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Material(
-            child: Directionality(
-              textDirection: TextDirection.ltr,
-              child: TextField(
-                key: key,
-                decoration: InputDecoration(
-                  fillColor: Colors.white,
-                  filled: true,
-                  border: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue, width: 2.0),
-                    borderRadius: BorderRadius.zero,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      // TextField has the given border.
-      expect(getBorderRadius(tester), BorderRadius.zero);
-
-      // Focusing does not change the border.
-      await tester.tap(find.byKey(key));
-      await tester.pump();
-      expect(getBorderRadius(tester), BorderRadius.zero);
-      await tester.pump(const Duration(milliseconds: 100));
-      expect(getBorderRadius(tester), BorderRadius.zero);
-      await tester.pump(kTransitionDuration);
-      expect(getBorderRadius(tester), BorderRadius.zero);
-    });
-
-    testWidgets('OutlineInputBorder async lerp', (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/28724
-
-      final Completer<void> completer = Completer<void>();
-      bool waitIsOver = false;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return GestureDetector(
-                onTap: () async {
-                  setState(() { waitIsOver = true; });
-                  await completer.future;
-                  setState(() { waitIsOver = false;  });
-                },
-                child: InputDecorator(
-                  decoration: InputDecoration(
-                    labelText: 'Test',
-                    enabledBorder: !waitIsOver ? null : const OutlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      );
-
-      await tester.tap(find.byType(StatefulBuilder));
-      await tester.pump(kTransitionDuration);
-
-      completer.complete();
-      await tester.pump(kTransitionDuration);
-    });
-
-    test('InputBorder equality', () {
-      // OutlineInputBorder's equality is defined by the borderRadius, borderSide, & gapPadding.
-      const OutlineInputBorder outlineInputBorder = OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(9.0)),
-        borderSide: BorderSide(color: Colors.blue),
-        gapPadding: 32.0,
-      );
-      expect(outlineInputBorder, const OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.blue),
-        borderRadius: BorderRadius.all(Radius.circular(9.0)),
-        gapPadding: 32.0,
-      ));
-      expect(outlineInputBorder, isNot(const OutlineInputBorder()));
-      expect(outlineInputBorder, isNot(const OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.red),
-        borderRadius: BorderRadius.all(Radius.circular(9.0)),
-        gapPadding: 32.0,
-      )));
-      expect(outlineInputBorder, isNot(const OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.blue),
-        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-        gapPadding: 32.0,
-      )));
-      expect(outlineInputBorder, isNot(const OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.blue),
-        borderRadius: BorderRadius.all(Radius.circular(9.0)),
-        gapPadding: 33.0,
-      )));
-
-      // UnderlineInputBorder's equality is defined by the borderSide and borderRadius.
-      const UnderlineInputBorder underlineInputBorder = UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.blue),
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
-      );
-      expect(underlineInputBorder, const UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.blue),
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
-      ));
-      expect(underlineInputBorder, isNot(const UnderlineInputBorder()));
-      expect(underlineInputBorder, isNot(const UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.red),
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
-      )));
-      expect(underlineInputBorder, isNot(const UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.blue),
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(6.0), topRight: Radius.circular(6.0)),
-      )));
-    });
-
-    test('InputBorder hashCodes', () {
-      // OutlineInputBorder's hashCode is defined by the borderRadius, borderSide, & gapPadding.
-      const OutlineInputBorder outlineInputBorder = OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(9.0)),
-        borderSide: BorderSide(color: Colors.blue),
-        gapPadding: 32.0,
-      );
-      expect(outlineInputBorder.hashCode, const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(9.0)),
-        borderSide: BorderSide(color: Colors.blue),
-        gapPadding: 32.0,
-      ).hashCode);
-      expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder().hashCode));
-      expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(9.0)),
-        borderSide: BorderSide(color: Colors.red),
-        gapPadding: 32.0,
-      ).hashCode));
-      expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-        borderSide: BorderSide(color: Colors.blue),
-        gapPadding: 32.0,
-      ).hashCode));
-      expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(9.0)),
-        borderSide: BorderSide(color: Colors.blue),
-        gapPadding: 33.0,
-      ).hashCode));
-
-      // UnderlineInputBorder's hashCode is defined by the borderSide and borderRadius.
-      const UnderlineInputBorder underlineInputBorder = UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.blue),
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
-      );
-      expect(underlineInputBorder.hashCode, const UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.blue),
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
-      ).hashCode);
-      expect(underlineInputBorder.hashCode, isNot(const UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.red),
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
-      ).hashCode));
-      expect(underlineInputBorder.hashCode, isNot(const UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.blue),
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(6.0), topRight: Radius.circular(6.0)),
-      ).hashCode));
-    });
-
-    testWidgets('OutlineInputBorder borders scale down to fit when large values are passed in', (WidgetTester tester) async {
-      // This is a regression test for https://github.com/flutter/flutter/issues/34327
-      const double largerBorderRadius = 200.0;
-      const double smallerBorderRadius = 100.0;
-      const double inputDecoratorHeight = 56.0;
-      const double inputDecoratorWidth = 800.0;
-
-      await tester.pumpWidget(
-        buildInputDecorator(
-          decoration: const InputDecoration(
-            filled: true,
-            fillColor: Color(0xFF00FF00),
-            labelText: 'label text',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.only(
-                // Intentionally large values that are larger than the InputDecorator.
-                topLeft: Radius.circular(smallerBorderRadius),
-                bottomLeft: Radius.circular(smallerBorderRadius),
-                topRight: Radius.circular(largerBorderRadius),
-                bottomRight: Radius.circular(largerBorderRadius),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      // Skia determines the scale based on the ratios of radii to the total
-      // height or width allowed. In this case, it is the right side of the
-      // border, which have two corners with largerBorderRadius that add up
-      // to be 400.0.
-      const double denominator = largerBorderRadius * 2.0;
-
-      const double largerBorderRadiusScaled = largerBorderRadius / denominator * inputDecoratorHeight;
-      const double smallerBorderRadiusScaled = smallerBorderRadius / denominator * inputDecoratorHeight;
-
-      expect(findBorderPainter(), paints
-        ..save()
-        ..path(
-          style: PaintingStyle.fill,
-          color: const Color(0xFF00FF00),
-          includes: const <Offset>[
-            // The border should draw along the four edges of the
-            // InputDecorator.
-
-            // Top center
-            Offset(inputDecoratorWidth / 2.0, 0.0),
-            // Bottom center
-            Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
-            // Left center
-            Offset(0.0, inputDecoratorHeight / 2.0),
-            // Right center
-            Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
-
-            // The border path should contain points where each rounded corner
-            // ends.
-
-            // Bottom-right arc
-            Offset(inputDecoratorWidth, inputDecoratorHeight - largerBorderRadiusScaled),
-            Offset(inputDecoratorWidth - largerBorderRadiusScaled, inputDecoratorHeight),
-            // Top-right arc
-            Offset(inputDecoratorWidth,0.0 + largerBorderRadiusScaled),
-            Offset(inputDecoratorWidth - largerBorderRadiusScaled, 0.0),
-            // Bottom-left arc
-            Offset(0.0, inputDecoratorHeight - smallerBorderRadiusScaled),
-            Offset(0.0 + smallerBorderRadiusScaled, inputDecoratorHeight),
-            // Top-left arc
-            Offset(0.0,0.0 + smallerBorderRadiusScaled),
-            Offset(0.0 + smallerBorderRadiusScaled, 0.0),
-          ],
-          excludes: const <Offset>[
-            // The border should not contain the corner points, since the border
-            // is rounded.
-
-            // Top-left
-            Offset.zero,
-            // Top-right
-            Offset(inputDecoratorWidth, 0.0),
-            // Bottom-left
-            Offset(0.0, inputDecoratorHeight),
-            // Bottom-right
-            Offset(inputDecoratorWidth, inputDecoratorHeight),
-
-            // Corners with larger border ratio should not contain points outside
-            // of the larger radius.
-
-            // Bottom-right arc
-            Offset(inputDecoratorWidth, inputDecoratorHeight - smallerBorderRadiusScaled),
-            Offset(inputDecoratorWidth - smallerBorderRadiusScaled, inputDecoratorWidth),
-            // Top-left arc
-            Offset(inputDecoratorWidth, 0.0 + smallerBorderRadiusScaled),
-            Offset(inputDecoratorWidth - smallerBorderRadiusScaled, 0.0),
-          ],
-        )
-        ..restore(),
-      );
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
-
-    testWidgets('rounded OutlineInputBorder with zero padding just wraps the label', (WidgetTester tester) async {
-      // This is a regression test for https://github.com/flutter/flutter/issues/82321
-      const double borderRadius = 30.0;
-      const String labelText = 'label text';
-
-      const double inputDecoratorHeight = 56.0;
-      const double inputDecoratorWidth = 800.0;
-
-      await tester.pumpWidget(
-        buildInputDecorator(
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: const Color(0xFF00FF00),
-            labelText: labelText,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(borderRadius),
-              gapPadding: 0.0,
-            ),
-          ),
-        ),
-      );
-
-      const double denominator = borderRadius * 2.0;
-      const double borderRadiusScaled = borderRadius / denominator * inputDecoratorHeight;
-
-      expect(find.text(labelText), findsOneWidget);
-      final Rect labelRect = tester.getRect(find.text(labelText));
-
-      expect(findBorderPainter(), paints
-        ..save()
-        ..path(
-          style: PaintingStyle.fill,
-          color: const Color(0xFF00FF00),
-          includes: <Offset>[
-            // The border should draw along the four edges of the
-            // InputDecorator.
-
-            // Top center
-            const Offset(inputDecoratorWidth / 2.0, 0.0),
-            // Bottom center
-            const Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
-            // Left center
-            const Offset(0.0, inputDecoratorHeight / 2.0),
-            // Right center
-            const Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
-
-            // The border path should contain points where each rounded corner
-            // ends.
-
-            // Bottom-right arc
-            const Offset(inputDecoratorWidth, inputDecoratorHeight - borderRadiusScaled),
-            const Offset(inputDecoratorWidth - borderRadiusScaled, inputDecoratorHeight),
-            // Top-right arc
-            const Offset(inputDecoratorWidth,0.0 + borderRadiusScaled),
-            const Offset(inputDecoratorWidth - borderRadiusScaled, 0.0),
-            // Bottom-left arc
-            const Offset(0.0, inputDecoratorHeight - borderRadiusScaled),
-            const Offset(0.0 + borderRadiusScaled, inputDecoratorHeight),
-            // Top-left arc
-            const Offset(0.0,0.0 + borderRadiusScaled),
-            const Offset(0.0 + borderRadiusScaled, 0.0),
-
-            // Gap edges
-            // gap start x = radius - radius * cos(arc sweep)
-            // gap start y = radius - radius * sin(arc sweep)
-            const Offset(39.49999999999999, 32.284366616798906),
-            Offset(39.49999999999999 + labelRect.width, 0.0),
-          ],
-          excludes: const <Offset>[
-            // The border should not contain the corner points, since the border
-            // is rounded.
-
-            // Top-left
-            Offset.zero,
-            // Top-right
-            Offset(inputDecoratorWidth, 0.0),
-            // Bottom-left
-            Offset(0.0, inputDecoratorHeight),
-            // Bottom-right
-            Offset(inputDecoratorWidth, inputDecoratorHeight),
-          ],
-        )
-        ..restore(),
-      );
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
-
-    testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular border', (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/78855
-      const String labelText = 'Flutter';
-      const double inputDecoratorHeight = 56.0;
-      const double inputDecoratorWidth = 800.0;
-      const double borderWidth = 4.0;
-
-      await tester.pumpWidget(
-        buildInputDecorator(
-          isFocused: true,
-          decoration: const InputDecoration(
-            filled: false,
-            labelText: labelText,
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.zero,
-              borderSide: BorderSide(width: borderWidth, color: Colors.red),
-            ),
-          ),
-        ),
-      );
-
-      expect(find.text(labelText), findsOneWidget);
-      expect(findBorderPainter(), paints
-        ..save()
-        ..path(
-          includes: const <Offset>[
-            // Corner points in the middle of the border line should be in the path.
-            // The path is not filled and borderWidth is 4.0 so Offset(2.0, 2.0) is in the path and Offset(1.0, 1.0) is not.
-            // See Skia SkPath::contains method.
-
-            // Top-left
-            Offset(borderWidth / 2, borderWidth / 2),
-            // Top-right
-            Offset(inputDecoratorWidth - 1 - borderWidth / 2, borderWidth / 2),
-            // Bottom-left
-            Offset(borderWidth / 2, inputDecoratorHeight - 1 - borderWidth / 2),
-            // Bottom-right
-            Offset(inputDecoratorWidth - 1 - borderWidth / 2, inputDecoratorHeight - 1 - borderWidth / 2),
-          ],
-          excludes: const <Offset>[
-            // The path is not filled and borderWidth is 4.0 so the path should not contains the corner points.
-            // See Skia SkPath::contains method.
-
-            // Top-left
-            Offset.zero,
-            // // Top-right
-            Offset(inputDecoratorWidth - 1, 0),
-            // // Bottom-left
-            Offset(0, inputDecoratorHeight - 1),
-            // // Bottom-right
-            Offset(inputDecoratorWidth - 1, inputDecoratorHeight - 1),
-          ],
-        )
-        ..restore(),
-      );
-    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
-
-    testWidgets('InputDecorator OutlineInputBorder fillColor is clipped by border', (WidgetTester tester) async {
-      // This is a regression test for https://github.com/flutter/flutter/issues/15742
-      await tester.pumpWidget(
-        buildInputDecorator(
-          decoration: const InputDecoration(
-            filled: true,
-            fillColor: Color(0xFF00FF00),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12.0)),
-            ),
-          ),
-        ),
-      );
-
-      final RenderBox box = tester.renderObject(find.byType(InputDecorator));
-
-      // Fill is the border's outer path, a rounded rectangle
-      expect(box, paints..path(
-        style: PaintingStyle.fill,
-        color: const Color(0xFF00FF00),
-        includes: <Offset>[const Offset(800.0/2.0, 56/2.0)],
-        excludes: <Offset>[
-          const Offset(1.0, 6.0), // outside the rounded corner, top left
-          const Offset(800.0 - 1.0, 6.0), // top right
-          const Offset(1.0, 56.0 - 6.0), // bottom left
-          const Offset(800 - 1.0, 56.0 - 6.0), // bottom right
-        ],
-      ));
-
-      // Border outline. The rrect is the -center- of the 1.0 stroked outline.
-      expect(box, paints..rrect(
-        style: PaintingStyle.stroke,
-        strokeWidth: 1.0,
-        rrect: RRect.fromLTRBR(0.5, 0.5, 799.5, 55.5, const Radius.circular(11.5)),
-      ));
-    });
-
-    testWidgets('InputDecorator UnderlineInputBorder fillColor is clipped by border', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        buildInputDecorator(
-          decoration: const InputDecoration(
-            filled: true,
-            fillColor: Color(0xFF00FF00),
-            border: UnderlineInputBorder(
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(12.0),
-                bottomRight: Radius.circular(12.0),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      final RenderBox box = tester.renderObject(find.byType(InputDecorator));
-
-      // Fill is the border's outer path, a rounded rectangle.
-      expect(box, paints
-      ..drrect(
-        style: PaintingStyle.fill,
-        inner: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 47.5,
-            bottomRight: const Radius.elliptical(12.0, 11.5),
-            bottomLeft: const Radius.elliptical(12.0, 11.5)),
-        outer: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 48.5,
-            bottomRight: const Radius.elliptical(12.0, 12.5),
-            bottomLeft: const Radius.elliptical(12.0, 12.5)),
-      ));
-    });
-
-    testWidgets('InputDecorator OutlineBorder focused label with icon', (WidgetTester tester) async {
-      // This is a regression test for https://github.com/flutter/flutter/issues/82321
-      Widget buildFrame(TextDirection textDirection) {
-        return MaterialApp(
-          home: Scaffold(
-            body: Container(
-              padding: const EdgeInsets.all(16.0),
-              alignment: Alignment.center,
-              child: Directionality(
-                textDirection: textDirection,
-                child: RepaintBoundary(
-                  child: InputDecorator(
-                    isFocused: true,
-                    isEmpty: true,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: const Color(0xFF00FF00),
-                      labelText: 'label text',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                        gapPadding: 0.0,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      }
-
-      await tester.pumpWidget(buildFrame(TextDirection.ltr));
-      await expectLater(
-        find.byType(InputDecorator),
-        matchesGoldenFile('m3_input_decorator.outline_label.ltr.png'),
-      );
-
-      await tester.pumpWidget(buildFrame(TextDirection.rtl));
-      await expectLater(
-        find.byType(InputDecorator),
-        matchesGoldenFile('m3_input_decorator.outline_label.rtl.png'),
-      );
-    });
-
-    testWidgets('InputDecorator OutlineBorder focused label with icon', (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/18111
-      Widget buildFrame(TextDirection textDirection) {
-        return MaterialApp(
-          home: Scaffold(
-            body: Container(
-              padding: const EdgeInsets.all(16.0),
-              alignment: Alignment.center,
-              child: Directionality(
-                textDirection: textDirection,
-                child: const RepaintBoundary(
-                  child: InputDecorator(
-                    isFocused: true,
-                    isEmpty: true,
-                    decoration: InputDecoration(
-                      icon: Icon(Icons.insert_link),
-                      labelText: 'primaryLink',
-                      hintText: 'Primary link to story',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      }
-
-      await tester.pumpWidget(buildFrame(TextDirection.ltr));
-      await expectLater(
-        find.byType(InputDecorator),
-        matchesGoldenFile('m3_input_decorator.outline_icon_label.ltr.png'),
-      );
-
-      await tester.pumpWidget(buildFrame(TextDirection.rtl));
-      await expectLater(
-        find.byType(InputDecorator),
-        matchesGoldenFile('m3_input_decorator.outline_icon_label.rtl.png'),
-      );
     });
   });
 
@@ -2868,64 +3453,6 @@ void main() {
       expect(getDecoratorRect(tester).size, const Size(200, 32));
     });
   });
-
-  testWidgets('Material3 - Default height is 56dp on mobile', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      buildInputDecorator(
-        decoration: const InputDecoration(
-          labelText: 'label',
-        ),
-      ),
-    );
-
-    // Overall height for this InputDecorator is 56dp on mobile:
-    //    8 - top padding
-    //   12 - floating label (font size = 16 * 0.75, line height is forced to 1.0)
-    //    4 - gap between label and input
-    //   24 - input text (font size = 16, line height = 1.5)
-    //    8 - bottom padding
-    // TODO(bleroux): fix input decorator to not rely on a 4 pixels gap between the label and the input,
-    // this gap is not compliant with the M3 spec (M3 spec uses line height for this purpose).
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-  }, variant: TargetPlatformVariant.mobile());
-
-  testWidgets('Material3 - Default height is 48dp on desktop', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      buildInputDecorator(
-        decoration: const InputDecoration(
-          labelText: 'label',
-        ),
-      ),
-    );
-
-    // Overall height for this InputDecorator is 48dp on desktop:
-    //    4 - top padding
-    //   12 - floating label (font size = 16 * 0.75, line height is forced to 1.0)
-    //    4 - gap between label and input
-    //   24 - input text (font size = 16, line height = 1.5)
-    //    4 - bottom padding
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
-  }, variant: TargetPlatformVariant.desktop());
-
-  testWidgets('Material3 - Default height is 56dp on mobile', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      buildInputDecorator(
-        decoration: const InputDecoration(
-          labelText: 'label',
-        ),
-      ),
-    );
-
-    // Overall height for this InputDecorator is 56dp on mobile:
-    //    8 - top padding
-    //   12 - floating label (font size = 16 * 0.75, line height is forced to 1.0)
-    //    4 - gap between label and input
-    //   24 - input text (font size = 16, line height = 1.5)
-    //    8 - bottom padding
-    // TODO(bleroux): fix input decorator to not rely on a 4 pixels gap between the label and the input,
-    // this gap is not compliant with the M3 spec (M3 spec uses line height for this purpose).
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-  }, variant: TargetPlatformVariant.mobile());
 
   // This is a regression test for https://github.com/flutter/flutter/issues/139916.
   testWidgets('Prefix ignores pointer when hidden', (WidgetTester tester) async {

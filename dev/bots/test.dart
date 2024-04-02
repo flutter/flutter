@@ -66,6 +66,7 @@ import 'package:process/process.dart';
 import 'run_command.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
 import 'suite_runners/run_flutter_packages_tests.dart';
+import 'suite_runners/run_realm_checker_tests.dart';
 import 'suite_runners/run_skp_generator_tests.dart';
 import 'suite_runners/run_web_long_running_tests.dart';
 import 'tool_subsharding.dart';
@@ -88,7 +89,6 @@ final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
-final String engineRealmFile = path.join(flutterRoot, 'bin', 'internal', 'engine.realm');
 
 String get platformFolderName {
   if (Platform.isWindows) {
@@ -250,7 +250,7 @@ Future<void> main(List<String> args) async {
       'web_long_running_tests': () => webLongRunningTestsRunner(flutterRoot),
       'flutter_plugins': () => flutterPackagesRunner(flutterRoot),
       'skp_generator': skpGeneratorTestsRunner,
-      'realm_checker': _runRealmCheckerTest,
+      'realm_checker': () => realmCheckerTestRunner(flutterRoot),
       'customer_testing': _runCustomerTesting,
       'analyze': _runAnalyze,
       'fuchsia_precache': _runFuchsiaPrecache,
@@ -1652,24 +1652,21 @@ Future<bool> hasExpectedEntitlements(
   return passes;
 }
 
-Future<void> _runRealmCheckerTest() async {
-  final String engineRealm = File(engineRealmFile).readAsStringSync().trim();
-  if (engineRealm.isNotEmpty) {
-    foundError(<String>['The checked-in engine.realm file must be empty.']);
-  }
-}
-
 Future<void> runFlutterWebTest(
   String webRenderer,
   String workingDirectory,
   List<String> tests,
   bool useWasm,
 ) async {
+  const LocalFileSystem fileSystem = LocalFileSystem();
+  final String suffix = DateTime.now().microsecondsSinceEpoch.toString();
+  final File metricFile = fileSystem.systemTempDirectory.childFile('metrics_$suffix.json');
   await runCommand(
     flutter,
     <String>[
       'test',
       '--reporter=expanded',
+      '--file-reporter=json:${metricFile.path}',
       '-v',
       '--platform=chrome',
       if (useWasm) '--wasm',
@@ -1683,6 +1680,10 @@ Future<void> runFlutterWebTest(
       'FLUTTER_WEB': 'true',
     },
   );
+  // metriciFile is a transitional file that needs to be deleted once it is parsed.
+  // TODO(godofredoc): Ensure metricFile is parsed and aggregated before deleting.
+  // https://github.com/flutter/flutter/issues/146003
+  metricFile.deleteSync();
 }
 
 
@@ -1724,7 +1725,8 @@ Future<void> _runDartTest(String workingDirectory, {
   }
 
   const LocalFileSystem fileSystem = LocalFileSystem();
-  final File metricFile = fileSystem.file(path.join(flutterRoot, 'metrics.json'));
+  final String suffix = DateTime.now().microsecondsSinceEpoch.toString();
+  final File metricFile = fileSystem.systemTempDirectory.childFile('metrics_$suffix.json');
   final List<String> args = <String>[
     'run',
     'test',
@@ -1787,6 +1789,11 @@ Future<void> _runDartTest(String workingDirectory, {
       print('Failed to generate metrics: $e');
     }
   }
+
+  // metriciFile is a transitional file that needs to be deleted once it is parsed.
+  // TODO(godofredoc): Ensure metricFile is parsed and aggregated before deleting.
+  // https://github.com/flutter/flutter/issues/146003
+  metricFile.deleteSync();
 }
 
 Future<void> _runFlutterTest(String workingDirectory, {
@@ -1809,9 +1816,13 @@ Future<void> _runFlutterTest(String workingDirectory, {
     tags.addAll(<String>['-t', 'reduced-test-set']);
   }
 
+  const LocalFileSystem fileSystem = LocalFileSystem();
+  final String suffix = DateTime.now().microsecondsSinceEpoch.toString();
+  final File metricFile = fileSystem.systemTempDirectory.childFile('metrics_$suffix.json');
   final List<String> args = <String>[
     'test',
     '--reporter=expanded',
+    '--file-reporter=json:${metricFile.path}',
     if (shuffleTests && !_isRandomizationOff) '--test-randomize-ordering-seed=$shuffleSeed',
     if (fatalWarnings) '--fatal-warnings',
     ...options,
@@ -1848,6 +1859,11 @@ Future<void> _runFlutterTest(String workingDirectory, {
     outputMode: outputMode,
     environment: environment,
   );
+
+  // metriciFile is a transitional file that needs to be deleted once it is parsed.
+  // TODO(godofredoc): Ensure metricFile is parsed and aggregated before deleting.
+  // https://github.com/flutter/flutter/issues/146003
+  metricFile.deleteSync();
 
   if (outputChecker != null) {
     final String? message = outputChecker(result);
