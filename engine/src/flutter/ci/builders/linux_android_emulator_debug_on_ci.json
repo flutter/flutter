@@ -4,7 +4,7 @@
     "post-submit) in order to debug why the Android Scenario App sometimes ",
     "hangs (https://github.com/flutter/flutter/issues/145988).",
     "",
-    "This builder runs a simple test 5x in a row to see if the issue is ",
+    "This builder runs a simple test 20x in a row to see if the issue is ",
     "reproducible on something other than platform view or external texture ",
     "tests (i.e is general emulator or CI instability)."
   ],
@@ -31,7 +31,7 @@
       "tests": [
         {
           "language": "dart",
-          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 1/5",
+          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 01/20",
           "test_timeout_secs": 900,
           "max_attempts": 1,
           "test_dependencies": [
@@ -50,13 +50,12 @@
             "--out-dir=../out/ci/android_emulator_debug_x64",
             "--no-enable-impeller",
             "--no-use-skia-gold",
-            "--verbose",
             "--smoke-test=dev.flutter.scenariosui.DrawSolidBlueScreenTest"
           ]
         },
         {
           "language": "dart",
-          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 2/5",
+          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 02/20",
           "test_timeout_secs": 900,
           "max_attempts": 1,
           "test_dependencies": [
@@ -75,13 +74,12 @@
             "--out-dir=../out/ci/android_emulator_debug_x64",
             "--no-enable-impeller",
             "--no-use-skia-gold",
-            "--verbose",
             "--smoke-test=dev.flutter.scenariosui.DrawSolidBlueScreenTest"
           ]
         },
         {
           "language": "dart",
-          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 3/5",
+          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 03/20",
           "test_timeout_secs": 900,
           "max_attempts": 1,
           "test_dependencies": [
@@ -100,13 +98,12 @@
             "--out-dir=../out/ci/android_emulator_debug_x64",
             "--no-enable-impeller",
             "--no-use-skia-gold",
-            "--verbose",
             "--smoke-test=dev.flutter.scenariosui.DrawSolidBlueScreenTest"
           ]
         },
         {
           "language": "dart",
-          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 4/5",
+          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 04/20",
           "test_timeout_secs": 900,
           "max_attempts": 1,
           "test_dependencies": [
@@ -125,13 +122,12 @@
             "--out-dir=../out/ci/android_emulator_debug_x64",
             "--no-enable-impeller",
             "--no-use-skia-gold",
-            "--verbose",
             "--smoke-test=dev.flutter.scenariosui.DrawSolidBlueScreenTest"
           ]
         },
         {
           "language": "dart",
-          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 5/5",
+          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 05/20",
           "test_timeout_secs": 900,
           "max_attempts": 1,
           "test_dependencies": [
@@ -150,7 +146,366 @@
             "--out-dir=../out/ci/android_emulator_debug_x64",
             "--no-enable-impeller",
             "--no-use-skia-gold",
-            "--verbose",
+            "--smoke-test=dev.flutter.scenariosui.DrawSolidBlueScreenTest"
+          ]
+        },
+        {
+          "language": "dart",
+          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 06/20",
+          "test_timeout_secs": 900,
+          "max_attempts": 1,
+          "test_dependencies": [
+            {
+              "dependency": "android_virtual_device",
+              "version": "android_34_google_apis_x64.textpb"
+            },
+            {
+              "dependency": "avd_cipd_version",
+              "version": "build_id:8759428741582061553"
+            }
+          ],
+          "contexts": ["android_virtual_device"],
+          "script": "flutter/testing/scenario_app/bin/run_android_tests.dart",
+          "parameters": [
+            "--out-dir=../out/ci/android_emulator_debug_x64",
+            "--no-enable-impeller",
+            "--no-use-skia-gold",
+            "--smoke-test=dev.flutter.scenariosui.DrawSolidBlueScreenTest"
+          ]
+        },
+        {
+          "language": "dart",
+          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 07/20",
+          "test_timeout_secs": 900,
+          "max_attempts": 1,
+          "test_dependencies": [
+            {
+              "dependency": "android_virtual_device",
+              "version": "android_34_google_apis_x64.textpb"
+            },
+            {
+              "dependency": "avd_cipd_version",
+              "version": "build_id:8759428741582061553"
+            }
+          ],
+          "contexts": ["android_virtual_device"],
+          "script": "flutter/testing/scenario_app/bin/run_android_tests.dart",
+          "parameters": [
+            "--out-dir=../out/ci/android_emulator_debug_x64",
+            "--no-enable-impeller",
+            "--no-use-skia-gold",
+            "--smoke-test=dev.flutter.scenariosui.DrawSolidBlueScreenTest"
+          ]
+        },
+        {
+          "language": "dart",
+          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 08/20",
+          "test_timeout_secs": 900,
+          "max_attempts": 1,
+          "test_dependencies": [
+            {
+              "dependency": "android_virtual_device",
+              "version": "android_34_google_apis_x64.textpb"
+            },
+            {
+              "dependency": "avd_cipd_version",
+              "version": "build_id:8759428741582061553"
+            }
+          ],
+          "contexts": ["android_virtual_device"],
+          "script": "flutter/testing/scenario_app/bin/run_android_tests.dart",
+          "parameters": [
+            "--out-dir=../out/ci/android_emulator_debug_x64",
+            "--no-enable-impeller",
+            "--no-use-skia-gold",
+            "--smoke-test=dev.flutter.scenariosui.DrawSolidBlueScreenTest"
+          ]
+        },
+        {
+          "language": "dart",
+          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 09/20",
+          "test_timeout_secs": 900,
+          "max_attempts": 1,
+          "test_dependencies": [
+            {
+              "dependency": "android_virtual_device",
+              "version": "android_34_google_apis_x64.textpb"
+            },
+            {
+              "dependency": "avd_cipd_version",
+              "version": "build_id:8759428741582061553"
+            }
+          ],
+          "contexts": ["android_virtual_device"],
+          "script": "flutter/testing/scenario_app/bin/run_android_tests.dart",
+          "parameters": [
+            "--out-dir=../out/ci/android_emulator_debug_x64",
+            "--no-enable-impeller",
+            "--no-use-skia-gold",
+            "--smoke-test=dev.flutter.scenariosui.DrawSolidBlueScreenTest"
+          ]
+        },
+        {
+          "language": "dart",
+          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 10/20",
+          "test_timeout_secs": 900,
+          "max_attempts": 1,
+          "test_dependencies": [
+            {
+              "dependency": "android_virtual_device",
+              "version": "android_34_google_apis_x64.textpb"
+            },
+            {
+              "dependency": "avd_cipd_version",
+              "version": "build_id:8759428741582061553"
+            }
+          ],
+          "contexts": ["android_virtual_device"],
+          "script": "flutter/testing/scenario_app/bin/run_android_tests.dart",
+          "parameters": [
+            "--out-dir=../out/ci/android_emulator_debug_x64",
+            "--no-enable-impeller",
+            "--no-use-skia-gold",
+            "--smoke-test=dev.flutter.scenariosui.DrawSolidBlueScreenTest"
+          ]
+        },
+        {
+          "language": "dart",
+          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 11/20",
+          "test_timeout_secs": 900,
+          "max_attempts": 1,
+          "test_dependencies": [
+            {
+              "dependency": "android_virtual_device",
+              "version": "android_34_google_apis_x64.textpb"
+            },
+            {
+              "dependency": "avd_cipd_version",
+              "version": "build_id:8759428741582061553"
+            }
+          ],
+          "contexts": ["android_virtual_device"],
+          "script": "flutter/testing/scenario_app/bin/run_android_tests.dart",
+          "parameters": [
+            "--out-dir=../out/ci/android_emulator_debug_x64",
+            "--no-enable-impeller",
+            "--no-use-skia-gold",
+            "--smoke-test=dev.flutter.scenariosui.DrawSolidBlueScreenTest"
+          ]
+        },
+        {
+          "language": "dart",
+          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 12/20",
+          "test_timeout_secs": 900,
+          "max_attempts": 1,
+          "test_dependencies": [
+            {
+              "dependency": "android_virtual_device",
+              "version": "android_34_google_apis_x64.textpb"
+            },
+            {
+              "dependency": "avd_cipd_version",
+              "version": "build_id:8759428741582061553"
+            }
+          ],
+          "contexts": ["android_virtual_device"],
+          "script": "flutter/testing/scenario_app/bin/run_android_tests.dart",
+          "parameters": [
+            "--out-dir=../out/ci/android_emulator_debug_x64",
+            "--no-enable-impeller",
+            "--no-use-skia-gold",
+            "--smoke-test=dev.flutter.scenariosui.DrawSolidBlueScreenTest"
+          ]
+        },
+        {
+          "language": "dart",
+          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 13/20",
+          "test_timeout_secs": 900,
+          "max_attempts": 1,
+          "test_dependencies": [
+            {
+              "dependency": "android_virtual_device",
+              "version": "android_34_google_apis_x64.textpb"
+            },
+            {
+              "dependency": "avd_cipd_version",
+              "version": "build_id:8759428741582061553"
+            }
+          ],
+          "contexts": ["android_virtual_device"],
+          "script": "flutter/testing/scenario_app/bin/run_android_tests.dart",
+          "parameters": [
+            "--out-dir=../out/ci/android_emulator_debug_x64",
+            "--no-enable-impeller",
+            "--no-use-skia-gold",
+            "--smoke-test=dev.flutter.scenariosui.DrawSolidBlueScreenTest"
+          ]
+        },
+        {
+          "language": "dart",
+          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 14/20",
+          "test_timeout_secs": 900,
+          "max_attempts": 1,
+          "test_dependencies": [
+            {
+              "dependency": "android_virtual_device",
+              "version": "android_34_google_apis_x64.textpb"
+            },
+            {
+              "dependency": "avd_cipd_version",
+              "version": "build_id:8759428741582061553"
+            }
+          ],
+          "contexts": ["android_virtual_device"],
+          "script": "flutter/testing/scenario_app/bin/run_android_tests.dart",
+          "parameters": [
+            "--out-dir=../out/ci/android_emulator_debug_x64",
+            "--no-enable-impeller",
+            "--no-use-skia-gold",
+            "--smoke-test=dev.flutter.scenariosui.DrawSolidBlueScreenTest"
+          ]
+        },
+        {
+          "language": "dart",
+          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 15/20",
+          "test_timeout_secs": 900,
+          "max_attempts": 1,
+          "test_dependencies": [
+            {
+              "dependency": "android_virtual_device",
+              "version": "android_34_google_apis_x64.textpb"
+            },
+            {
+              "dependency": "avd_cipd_version",
+              "version": "build_id:8759428741582061553"
+            }
+          ],
+          "contexts": ["android_virtual_device"],
+          "script": "flutter/testing/scenario_app/bin/run_android_tests.dart",
+          "parameters": [
+            "--out-dir=../out/ci/android_emulator_debug_x64",
+            "--no-enable-impeller",
+            "--no-use-skia-gold",
+            "--smoke-test=dev.flutter.scenariosui.DrawSolidBlueScreenTest"
+          ]
+        },
+        {
+          "language": "dart",
+          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 16/20",
+          "test_timeout_secs": 900,
+          "max_attempts": 1,
+          "test_dependencies": [
+            {
+              "dependency": "android_virtual_device",
+              "version": "android_34_google_apis_x64.textpb"
+            },
+            {
+              "dependency": "avd_cipd_version",
+              "version": "build_id:8759428741582061553"
+            }
+          ],
+          "contexts": ["android_virtual_device"],
+          "script": "flutter/testing/scenario_app/bin/run_android_tests.dart",
+          "parameters": [
+            "--out-dir=../out/ci/android_emulator_debug_x64",
+            "--no-enable-impeller",
+            "--no-use-skia-gold",
+            "--smoke-test=dev.flutter.scenariosui.DrawSolidBlueScreenTest"
+          ]
+        },
+        {
+          "language": "dart",
+          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 17/20",
+          "test_timeout_secs": 900,
+          "max_attempts": 1,
+          "test_dependencies": [
+            {
+              "dependency": "android_virtual_device",
+              "version": "android_34_google_apis_x64.textpb"
+            },
+            {
+              "dependency": "avd_cipd_version",
+              "version": "build_id:8759428741582061553"
+            }
+          ],
+          "contexts": ["android_virtual_device"],
+          "script": "flutter/testing/scenario_app/bin/run_android_tests.dart",
+          "parameters": [
+            "--out-dir=../out/ci/android_emulator_debug_x64",
+            "--no-enable-impeller",
+            "--no-use-skia-gold",
+            "--smoke-test=dev.flutter.scenariosui.DrawSolidBlueScreenTest"
+          ]
+        },
+        {
+          "language": "dart",
+          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 18/20",
+          "test_timeout_secs": 900,
+          "max_attempts": 1,
+          "test_dependencies": [
+            {
+              "dependency": "android_virtual_device",
+              "version": "android_34_google_apis_x64.textpb"
+            },
+            {
+              "dependency": "avd_cipd_version",
+              "version": "build_id:8759428741582061553"
+            }
+          ],
+          "contexts": ["android_virtual_device"],
+          "script": "flutter/testing/scenario_app/bin/run_android_tests.dart",
+          "parameters": [
+            "--out-dir=../out/ci/android_emulator_debug_x64",
+            "--no-enable-impeller",
+            "--no-use-skia-gold",
+            "--smoke-test=dev.flutter.scenariosui.DrawSolidBlueScreenTest"
+          ]
+        },
+        {
+          "language": "dart",
+          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 19/20",
+          "test_timeout_secs": 900,
+          "max_attempts": 1,
+          "test_dependencies": [
+            {
+              "dependency": "android_virtual_device",
+              "version": "android_34_google_apis_x64.textpb"
+            },
+            {
+              "dependency": "avd_cipd_version",
+              "version": "build_id:8759428741582061553"
+            }
+          ],
+          "contexts": ["android_virtual_device"],
+          "script": "flutter/testing/scenario_app/bin/run_android_tests.dart",
+          "parameters": [
+            "--out-dir=../out/ci/android_emulator_debug_x64",
+            "--no-enable-impeller",
+            "--no-use-skia-gold",
+            "--smoke-test=dev.flutter.scenariosui.DrawSolidBlueScreenTest"
+          ]
+        },
+        {
+          "language": "dart",
+          "name": "Android Scenario App Integration Tests (Skia, Smoke Test) 20/20",
+          "test_timeout_secs": 900,
+          "max_attempts": 1,
+          "test_dependencies": [
+            {
+              "dependency": "android_virtual_device",
+              "version": "android_34_google_apis_x64.textpb"
+            },
+            {
+              "dependency": "avd_cipd_version",
+              "version": "build_id:8759428741582061553"
+            }
+          ],
+          "contexts": ["android_virtual_device"],
+          "script": "flutter/testing/scenario_app/bin/run_android_tests.dart",
+          "parameters": [
+            "--out-dir=../out/ci/android_emulator_debug_x64",
+            "--no-enable-impeller",
+            "--no-use-skia-gold",
             "--smoke-test=dev.flutter.scenariosui.DrawSolidBlueScreenTest"
           ]
         }
