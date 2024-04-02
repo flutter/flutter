@@ -1977,17 +1977,17 @@ Future<void> verifyTabooDocumentation(String workingDirectory, { int minimumMatc
 }
 
 Future<void> lintKotlinFiles(String workingDirectory) async {
-  final String baselinePath = '$flutterRoot/dev/bots/test/analyze-test-input/ktlint-baseline.xml';
-  final String editorConfigPath = '$flutterRoot/.editorconfig';
+  const String baselineRelativePath = 'dev/bots/test/analyze-test-input/ktlint-baseline.xml';
+  const String editorConfigRelativePath = '.editorconfig';
   final EvalResult lintResult = await _evalCommand('ktlint',
-      <String>['--baseline=$baselinePath', '--editorconfig=$editorConfigPath'],
+      <String>['--baseline=$flutterRoot/$baselineRelativePath', '--editorconfig=$flutterRoot/$editorConfigRelativePath'],
       workingDirectory: workingDirectory);
   if (lintResult.exitCode != 0) {
     final String errorMessage = 'Found lint violations in Kotlin files:\n ${lintResult.stdout}\n\n'
-        'To reproduce this lint locally:\n '
+        'To reproduce this lint locally:\n'
         '1. Identify the CIPD version tag used to resolve this particular version of ktlint (check the dependencies section of this shard in the ci.yaml). \n'
         '2. Download that version from https://chrome-infra-packages.appspot.com/p/flutter/ktlint/linux-amd64/+/<version_tag>\n'
-        '3. From the repository root, run `<path_to_ktlint>/ktlint --editorconfig=$editorConfigPath --baseline=$baselinePath`';
+        '3. From the repository root, run `<path_to_ktlint>/ktlint --editorconfig=$editorConfigRelativePath --baseline=$baselineRelativePath`';
     foundError(<String>[errorMessage]);
   }
 }
