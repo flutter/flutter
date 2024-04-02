@@ -65,6 +65,8 @@ import 'package:process/process.dart';
 
 import 'run_command.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
+import 'suite_runners/run_analyze_tests.dart';
+import 'suite_runners/run_docs_tests.dart';
 import 'suite_runners/run_flutter_packages_tests.dart';
 import 'suite_runners/run_realm_checker_tests.dart';
 import 'suite_runners/run_skp_generator_tests.dart';
@@ -252,9 +254,9 @@ Future<void> main(List<String> args) async {
       'skp_generator': skpGeneratorTestsRunner,
       'realm_checker': () => realmCheckerTestRunner(flutterRoot),
       'customer_testing': _runCustomerTesting,
-      'analyze': _runAnalyze,
+      'analyze': () => analyzeRunner(flutterRoot),
       'fuchsia_precache': _runFuchsiaPrecache,
-      'docs': _runDocs,
+      'docs': () => docsRunner(flutterRoot),
       'verify_binaries_codesigned': _runVerifyCodesigned,
       kTestHarnessShardName: _runTestHarnessTests, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });
@@ -1238,19 +1240,6 @@ Future<void> _runCustomerTesting() async {
   );
 }
 
-// Runs analysis tests.
-Future<void> _runAnalyze() async {
-  printProgress('${green}Running analysis testing$reset');
-  await runCommand(
-    'dart',
-    <String>[
-      '--enable-asserts',
-      path.join(flutterRoot, 'dev', 'bots', 'analyze.dart'),
-    ],
-    workingDirectory: flutterRoot,
-  );
-}
-
 // Runs flutter_precache.
 Future<void> _runFuchsiaPrecache() async {
   printProgress('${green}Running flutter precache tests$reset');
@@ -1271,22 +1260,6 @@ Future<void> _runFuchsiaPrecache() async {
       '--no-android',
       '--no-ios',
       '--force',
-    ],
-    workingDirectory: flutterRoot,
-  );
-}
-
-// Runs docs.
-Future<void> _runDocs() async {
-  printProgress('${green}Running flutter doc tests$reset');
-  await runCommand(
-    './dev/bots/docs.sh',
-    <String>[
-      '--output',
-      'dev/docs/api_docs.zip',
-      '--keep-staging',
-      '--staging-dir',
-      'dev/docs',
     ],
     workingDirectory: flutterRoot,
   );
