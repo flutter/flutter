@@ -168,7 +168,6 @@ extension type const Options._(ArgResults _args) {
       ..addFlag(
         'record-screen',
         help: 'Whether to record the screen during the test run.',
-        defaultsTo: environment.isCi,
       )
       ..addOption(
         'impeller-backend',
