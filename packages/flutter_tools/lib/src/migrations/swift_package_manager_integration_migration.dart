@@ -78,7 +78,7 @@ class SwiftPackageManagerIntegrationMigration {
 
   /// Path to add to .gitignore so generated files in FlutterGeneratedPluginSwiftPackage
   /// are not committed.
-  static const String flutterPackageGitignore = '**/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/';
+  static const String flutterPackageGitignore = '**/Flutter/Packages/ephemeral';
 
   File get backupProjectSettings => _fileSystem
       .directory(_xcodeProjectInfoFile.parent)
@@ -130,7 +130,12 @@ class SwiftPackageManagerIntegrationMigration {
       // Update gitignore. If unable to update the platform specific .gitignore,
       // try updating the app's .gitignore.
       if (!_updateGitIgnore(_xcodeProject.hostAppRoot.childFile('.gitignore'))) {
-        _updateGitIgnore(_xcodeProject.parent.directory.childFile('.gitignore'));
+        if (!_updateGitIgnore(_xcodeProject.parent.directory.childFile('.gitignore'))) {
+          _logger.printWarning(
+            'Unable to find .gitignore. Please add the following line to your .gitignore:\n'
+            '  $flutterPackageGitignore',
+          );
+        }
       }
 
       // Parse project.pbxproj into JSON
@@ -166,13 +171,11 @@ class SwiftPackageManagerIntegrationMigration {
         _xcodeProjectInfoFile.writeAsStringSync(newProjectContents);
 
         _logger.printTrace('Validating project settings...');
-
         // Re-parse the project settings to check for syntax errors
         final ParsedProjectInfo updatedInfo = _parsePbxproj();
         if (!_isMigrated(updatedInfo, logErrorIfNotMigrated: true)) {
           throw Exception('Settings were not updated correctly.');
         }
-
         // Get the build settings to make sure it compiles with xcodebuild
         await _xcodeProjectInterpreter.getInfo(
           _xcodeProject.hostAppRoot.path,
@@ -339,8 +342,8 @@ class SwiftPackageManagerIntegrationMigration {
     }
 
     final String packagePath = (_platform == SupportedPlatform.ios)
-        ? 'Flutter/Packages/FlutterGeneratedPluginSwiftPackage'
-        : 'Packages/FlutterGeneratedPluginSwiftPackage';
+        ? 'Flutter/Packages/ephemeral/FlutterGeneratedPluginSwiftPackage'
+        : 'Packages/ephemeral/FlutterGeneratedPluginSwiftPackage';
     final String newContent =
         '		$_flutterPluginsSwiftPackageReferenceIdentifier /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = $packagePath; sourceTree = "<group>"; };';
 
@@ -717,7 +720,7 @@ class SwiftPackageManagerIntegrationMigration {
       // If packageReferences is null, the packageReferences field is missing and must be added.
       const List<String> newContent = <String>[
         '			packageReferences = (',
-        '				$_localFlutterPluginsSwiftPackageReferenceIdentifer /* XCLocalSwiftPackageReference "Flutter/Packages/FlutterGeneratedPluginSwiftPackage" */,',
+        '				$_localFlutterPluginsSwiftPackageReferenceIdentifer /* XCLocalSwiftPackageReference "Flutter/Packages/ephemeral/FlutterGeneratedPluginSwiftPackage" */,',
         '			);',
       ];
       lines.insertAll(projectStartIndex + 1, newContent);
@@ -733,7 +736,7 @@ class SwiftPackageManagerIntegrationMigration {
         );
       }
       const String newContent =
-          '				$_localFlutterPluginsSwiftPackageReferenceIdentifer /* XCLocalSwiftPackageReference "Flutter/Packages/FlutterGeneratedPluginSwiftPackage" */,';
+          '				$_localFlutterPluginsSwiftPackageReferenceIdentifer /* XCLocalSwiftPackageReference "Flutter/Packages/ephemeral/FlutterGeneratedPluginSwiftPackage" */,';
       lines.insert(packageReferencesIndex + 1, newContent);
     }
     return lines;
@@ -770,9 +773,9 @@ class SwiftPackageManagerIntegrationMigration {
       // There isn't a XCLocalSwiftPackageReference section yet, so add it
       final List<String> newContent = <String>[
         '/* Begin XCLocalSwiftPackageReference section */',
-        '		$_localFlutterPluginsSwiftPackageReferenceIdentifer /* XCLocalSwiftPackageReference "Flutter/Packages/FlutterGeneratedPluginSwiftPackage" */ = {',
+        '		$_localFlutterPluginsSwiftPackageReferenceIdentifer /* XCLocalSwiftPackageReference "Flutter/Packages/ephemeral/FlutterGeneratedPluginSwiftPackage" */ = {',
         '			isa = XCLocalSwiftPackageReference;',
-        '			relativePath = Flutter/Packages/FlutterGeneratedPluginSwiftPackage;',
+        '			relativePath = Flutter/Packages/ephemeral/FlutterGeneratedPluginSwiftPackage;',
         '		};',
         '/* End XCLocalSwiftPackageReference section */',
       ];
@@ -788,9 +791,9 @@ class SwiftPackageManagerIntegrationMigration {
     }
 
     final List<String> newContent = <String>[
-      '		$_localFlutterPluginsSwiftPackageReferenceIdentifer /* XCLocalSwiftPackageReference "Flutter/Packages/FlutterGeneratedPluginSwiftPackage" */ = {',
+      '		$_localFlutterPluginsSwiftPackageReferenceIdentifer /* XCLocalSwiftPackageReference "Flutter/Packages/ephemeral/FlutterGeneratedPluginSwiftPackage" */ = {',
       '			isa = XCLocalSwiftPackageReference;',
-      '			relativePath = Flutter/Packages/FlutterGeneratedPluginSwiftPackage;',
+      '			relativePath = Flutter/Packages/ephemeral/FlutterGeneratedPluginSwiftPackage;',
       '		};',
     ];
 

@@ -40,18 +40,18 @@ abstract class UnpackMacOS extends Target {
 
   @override
   List<Source> get outputs {
-    // Swift Package Manager will also produce the FlutterMacOS framework if
-    // indicated in the package manifest. If both SPM and "Flutter Assemble"
-    // output the framework, the build will fail with an error about multiple
-    // commands producing the same output. Only output the framework if SPM
-    // isn't using it.
+    // Swift Package Manager will also produce the FlutterMacOS framework if it
+    // has dependencies on plugins. If both SPM and "Flutter Assemble" output
+    // the framework, the build will fail with an error about multiple commands
+    // producing the same output. Only output the framework if the
+    // FlutterGeneratedPluginSwiftPackage package doesn't depend on any plugins.
     final FlutterProject flutterProject = FlutterProject.current();
     if (flutterProject.usesSwiftPackageManager) {
       final File swiftPackage = flutterProject.macos.flutterPluginSwiftPackageManifest;
       if (swiftPackage.existsSync() &&
           swiftPackage
               .readAsStringSync()
-              .contains('FlutterMacOS.xcframework')) {
+              .contains('.symlinks/plugins')) {
         return <Source>[];
       }
     }

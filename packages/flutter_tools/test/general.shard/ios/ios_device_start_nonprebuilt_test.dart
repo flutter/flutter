@@ -238,7 +238,7 @@ void main() {
       );
 
       expect(fileSystem.directory('build/ios/iphoneos'), exists);
-      expect(flutterProject.ios.flutterPluginSwiftPackageDirectory.childLink('Flutter.xcframework').existsSync(), isFalse);
+      expect(flutterProject.ios.flutterFrameworkSwiftPackageDirectory.childLink('Flutter.xcframework').existsSync(), isFalse);
       expect(launchResult.started, true);
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
@@ -321,7 +321,7 @@ void main() {
       final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
       final BuildableIOSApp buildableIOSApp = BuildableIOSApp(flutterProject.ios, 'flutter', 'My Super Awesome App.app');
       fileSystem.directory('build/ios/Release-iphoneos/My Super Awesome App.app').createSync(recursive: true);
-      flutterProject.ios.flutterPluginSwiftPackageDirectory.createSync(recursive: true);
+      flutterProject.ios.flutterFrameworkSwiftPackageDirectory.createSync(recursive: true);
 
       processManager.addCommand(FakeCommand(command: _xattrArgs(flutterProject)));
       processManager.addCommand(const FakeCommand(command: kRunReleaseArgs));
@@ -358,7 +358,7 @@ void main() {
       );
 
       expect(fileSystem.directory('build/ios/iphoneos'), exists);
-      expect(flutterProject.ios.flutterPluginSwiftPackageDirectory.childLink('Flutter.xcframework').existsSync(), isTrue);
+      expect(flutterProject.ios.flutterFrameworkSwiftPackageDirectory.childLink('Flutter.xcframework').existsSync(), isTrue);
       expect(launchResult.started, true);
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{

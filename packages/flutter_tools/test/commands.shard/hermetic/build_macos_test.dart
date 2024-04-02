@@ -721,7 +721,7 @@ STDERR STUFF
     );
     fileSystem.directory(fileSystem.path.join('macos', 'Runner.xcworkspace'))
         .createSync(recursive: true);
-    fileSystem.directory('macos/Flutter/Packages/FlutterGeneratedPluginSwiftPackage')
+    fileSystem.directory('macos/Flutter/Packages/ephemeral/Flutter')
         .createSync(recursive: true);
     createCoreMockProjectFiles();
 
@@ -731,7 +731,7 @@ STDERR STUFF
 
     expect(
       fileSystem.link(
-        'macos/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/FlutterMacOS.xcframework'
+        'macos/Flutter/Packages/ephemeral/Flutter/FlutterMacOS.xcframework'
       ).existsSync(),
       isTrue,
     );

@@ -665,12 +665,12 @@ void main() {
     XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
   });
 
-  testUsingContext('output does not contains FlutterMacOS when using Swift Package Manager and FlutterGeneratedPluginSwiftPackage depends on FlutterMacOS', () async {
+  testUsingContext('output does not contains FlutterMacOS when using Swift Package Manager and FlutterGeneratedPluginSwiftPackage depends plugins', () async {
     fileSystem.currentDirectory.childDirectory('macos').createSync(recursive: true);
     final FlutterProject flutterProject = FlutterProject.current();
     flutterProject.macos.flutterPluginSwiftPackageManifest
       ..createSync(recursive: true)
-      ..writeAsStringSync('FlutterMacOS.xcframework');
+      ..writeAsStringSync('.package(name: "integration_test", path: "../.symlinks/plugins/integration_test/ios/integration_test"),');
 
     expect(const DebugUnpackMacOS().outputs, <Source>[]);
   }, overrides: <Type, Generator>{

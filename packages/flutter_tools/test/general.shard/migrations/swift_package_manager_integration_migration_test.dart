@@ -40,7 +40,7 @@ void main() {
     });
 
     group('migrate gitignore', () {
-      testWithoutContext('skipped if no files to update', () {
+      testWithoutContext('skipped with warning if no files to update', () {
         final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
         final BufferLogger testLogger = BufferLogger.test();
         final FakeIosProject project = FakeIosProject(
@@ -64,6 +64,13 @@ void main() {
         expect(
           testLogger.traceText.contains('Adding FlutterGeneratedPluginSwiftPackage to app_name/ios/.gitignore'),
           isFalse,
+        );
+        expect(
+          testLogger.warningText.contains(
+            'Unable to find .gitignore. Please add the following line to your .gitignore:\n'
+            '  **/Flutter/Packages/ephemeral',
+          ),
+          isTrue,
         );
       });
 
@@ -96,6 +103,7 @@ void main() {
           testLogger.traceText.contains('Adding FlutterGeneratedPluginSwiftPackage to app_name/ios/.gitignore'),
           isFalse,
         );
+        expect(testLogger.warningText, isEmpty);
       });
 
       testWithoutContext('successfully updates platform specific gitignore', () {
@@ -130,6 +138,7 @@ void main() {
           testLogger.traceText,
           contains('Adding FlutterGeneratedPluginSwiftPackage to app_name/ios/.gitignore'),
         );
+        expect(testLogger.warningText, isEmpty);
         expect(project.hostAppRoot.childFile('.gitignore').readAsStringSync(), '''
 **/Flutter/ephemeral/
 
@@ -166,6 +175,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
           testLogger.traceText,
           contains('Adding FlutterGeneratedPluginSwiftPackage to app_name/.gitignore'),
         );
+        expect(testLogger.warningText, isEmpty);
         expect(project.parent.directory.childFile('.gitignore').readAsStringSync(),
 '''
 **/Pods/
@@ -2656,8 +2666,8 @@ const String unmigratedFileReferenceSection = '''
 ''';
 String migratedFileReferenceSection(SupportedPlatform platform) {
   final String packagePath = (platform == SupportedPlatform.ios)
-      ? 'Flutter/Packages/FlutterGeneratedPluginSwiftPackage'
-      : 'Packages/FlutterGeneratedPluginSwiftPackage';
+      ? 'Flutter/Packages/ephemeral/FlutterGeneratedPluginSwiftPackage'
+      : 'Packages/ephemeral/FlutterGeneratedPluginSwiftPackage';
   return '''
 /* Begin PBXFileReference section */
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -2669,8 +2679,8 @@ String migratedFileReferenceSection(SupportedPlatform platform) {
 
 String migratedFileReferenceSectionAsJson(SupportedPlatform platform) {
   final String packagePath = (platform == SupportedPlatform.ios)
-      ? 'Flutter/Packages/FlutterGeneratedPluginSwiftPackage'
-      : 'Packages/FlutterGeneratedPluginSwiftPackage';
+      ? 'Flutter/Packages/ephemeral/FlutterGeneratedPluginSwiftPackage'
+      : 'Packages/ephemeral/FlutterGeneratedPluginSwiftPackage';
   return '''
     "7AFA3C8E1D35360C0083082E" : {
       "isa" : "PBXFileReference",
@@ -3110,7 +3120,7 @@ String migratedProjectSection(
 }) {
   final List<String> packageDependencies = <String>[
     '			packageReferences = (',
-    '				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/Packages/FlutterGeneratedPluginSwiftPackage" */,',
+    '				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/Packages/ephemeral/FlutterGeneratedPluginSwiftPackage" */,',
     if (withOtherReference)
       '				010101010101010101010101 /* XCLocalSwiftPackageReference "SomeOtherPackage" */,',
     '			);',
@@ -3271,9 +3281,9 @@ String migratedLocalSwiftPackageReferenceSection({
       '			relativePath = SomeOtherPackage;',
       '		};',
     ],
-    '		781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/Packages/FlutterGeneratedPluginSwiftPackage" */ = {',
+    '		781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/Packages/ephemeral/FlutterGeneratedPluginSwiftPackage" */ = {',
     '			isa = XCLocalSwiftPackageReference;',
-    '			relativePath = Flutter/Packages/FlutterGeneratedPluginSwiftPackage;',
+    '			relativePath = Flutter/Packages/ephemeral/FlutterGeneratedPluginSwiftPackage;',
     '		};',
     '/* End XCLocalSwiftPackageReference section */',
   ].join('\n');
@@ -3282,7 +3292,7 @@ String migratedLocalSwiftPackageReferenceSection({
 const String migratedLocalSwiftPackageReferenceSectionAsJson = '''
     "781AD8BC2B33823900A9FFBB" : {
       "isa" : "XCLocalSwiftPackageReference",
-      "relativePath" : "Flutter/Packages/FlutterGeneratedPluginSwiftPackage"
+      "relativePath" : "Flutter/Packages/ephemeral/FlutterGeneratedPluginSwiftPackage"
     }''';
 
 // XCSwiftPackageProductDependency

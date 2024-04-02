@@ -8,6 +8,7 @@ import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/template.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';
@@ -50,12 +51,12 @@ class SwiftPackageManager {
 
   final SwiftPackageSupportedPlatform _iosSwiftPackageSupportedPlatform = SwiftPackageSupportedPlatform(
     platform: SwiftPackagePlatform.ios,
-    version: '12.0',
+    version: Version(12, 0, null),
   );
 
   final SwiftPackageSupportedPlatform _macosSwiftPackageSupportedPlatform = SwiftPackageSupportedPlatform(
     platform: SwiftPackagePlatform.macos,
-    version: '10.14',
+    version: Version(10, 14, null),
   );
 
   /// Creates a Swift Package called 'FlutterGeneratedPluginSwiftPackage' that
@@ -76,7 +77,7 @@ class SwiftPackageManager {
     final (
       List<SwiftPackagePackageDependency> packageDependencies,
       List<SwiftPackageTargetDependency> targetDependencies,
-    ) = _dependenciesForPlugins(project, plugins, platform);
+    ) = _setupDependenciesForPlugins(project, plugins, platform);
 
     // If there aren't any Swift Package plugins and the project hasn't been
     // migrated yet, don't generate a Swift package or migrate the app since
@@ -117,7 +118,14 @@ class SwiftPackageManager {
     await migrateProject(project, platform);
   }
 
-  (List<SwiftPackagePackageDependency>, List<SwiftPackageTargetDependency>) _dependenciesForPlugins(
+  /// Plugins must have a dependency on the Flutter framework, but plugins are
+  /// not aware where to find the Flutter framework. To handle this, create
+  /// symlinks to plugin files except for the Package.swift. Create a copy of
+  /// the Package.swift and inject the path to the Flutter framework. Also,
+  /// update the minimum iOS and macOS target deployment version in the
+  /// Package.swift to the minimum supported by Flutter so plugins don't
+  /// support a version lower than Flutter.
+  (List<SwiftPackagePackageDependency>, List<SwiftPackageTargetDependency>) _setupDependenciesForPlugins(
     XcodeBasedProject project,
     List<Plugin> plugins,
     SupportedPlatform platform,
@@ -127,57 +135,47 @@ class SwiftPackageManager {
     final List<SwiftPackageTargetDependency> targetDependencies =
         <SwiftPackageTargetDependency>[];
 
-    final Directory pluginDirectory = project.flutterSwiftPackageDirectory.childDirectory('.swift_packages');
-    ErrorHandlingFileSystem.deleteIfExists(pluginDirectory, recursive: true);
-    pluginDirectory.createSync(recursive: true);
+    final Directory symlinkDirectory = project.ephemeralSwiftPackageDirectory
+        .childDirectory('.symlinks');
+    ErrorHandlingFileSystem.deleteIfExists(symlinkDirectory, recursive: true);
+    final Directory symlinkPluginDirectory = symlinkDirectory
+        .childDirectory('plugins');
+    symlinkPluginDirectory.createSync(recursive: true);
 
     for (final Plugin plugin in plugins) {
       final String? pluginSwiftPackageManifestPath = plugin.pluginSwiftPackageManifestPath(
         _fileSystem,
         platform.name,
       );
+      final String? platformName = plugin.darwinPluginDirectoryName(platform.name);
       if (plugin.platforms[platform.name] == null ||
           pluginSwiftPackageManifestPath == null ||
+          platformName == null ||
           !_fileSystem.file(pluginSwiftPackageManifestPath).existsSync()) {
         continue;
       }
 
-      final String platformName = plugin.darwinPluginDirectoryName(platform.name)!;
-      final Directory pluginSource = _fileSystem.directory(plugin.path);
-      final Directory pluginDestination = pluginDirectory.childDirectory(plugin.name)..createSync();
-      String packagePath = pluginSwiftPackageManifestPath;
-      for (final FileSystemEntity pluginFile in pluginSource.listSync()) {
-        if (pluginFile.basename == platformName && pluginFile is Directory) {
-          final Directory platformDestination = pluginDestination.childDirectory(platformName)..createSync();
-          for (final FileSystemEntity platformFile in pluginFile.listSync()) {
-            if (platformFile.basename == plugin.name && platformFile is Directory) {
-              final Directory platformSubDestination = platformDestination.childDirectory(plugin.name)..createSync();
-              for (final FileSystemEntity platformSubFile in platformFile.listSync()) {
-                if (platformSubFile.basename == 'Package.swift' && platformSubFile is File) {
-                  final File package = platformSubDestination.childFile('Package.swift');
-                  package.writeAsStringSync(
-                    platformSubFile.readAsStringSync().replaceFirst('FLUTTER_PATH', project.flutterFrameworkSwiftPackageDirectory.path),
-                  );
-                  packagePath = package.path;
-                } else {
-                  final Link newLink = platformSubDestination.childLink(platformSubFile.basename);
-                  newLink.createSync(platformSubFile.path);
-                }
-              }
-            } else {
-              final Link newLink = platformDestination.childLink(platformFile.basename);
-              newLink.createSync(platformFile.path);
-            }
-          }
-        } else {
-          final Link newLink = pluginDestination.childLink(pluginFile.basename);
-          newLink.createSync(pluginFile.path);
-        }
-      }
+      _createSymlinks(plugin, platformName, symlinkPluginDirectory);
+
+      final File swiftPackageManifest = symlinkPluginDirectory
+          .childDirectory(plugin.name)
+          .childDirectory(platformName)
+          .childDirectory(plugin.name)
+          .childFile('Package.swift');
+
+      _updatePluginSwiftPackageManifest(
+        project,
+        plugin,
+        platformName,
+        swiftPackageManifest,
+      );
 
       packageDependencies.add(SwiftPackagePackageDependency(
         name: plugin.name,
-        path: _fileSystem.file(packagePath).parent.path,
+        path: _fileSystem.path.relative(
+          swiftPackageManifest.parent.path,
+          from: project.flutterPluginSwiftPackageDirectory.path,
+        ),
       ));
       targetDependencies.add(SwiftPackageTargetDependency.product(
         name: plugin.name,
@@ -185,6 +183,152 @@ class SwiftPackageManager {
       ));
     }
     return (packageDependencies, targetDependencies);
+  }
+
+  void _updatePluginSwiftPackageManifest(
+    XcodeBasedProject project,
+    Plugin plugin,
+    String platformName,
+    File swiftPackageManifest,
+  ) {
+    if (!swiftPackageManifest.existsSync()) {
+      throwToolExit('Failed to copy Package.swift for ${plugin.name}.');
+    }
+    final String manifestContents = swiftPackageManifest.readAsStringSync();
+
+    // Inject the Flutter framework Swift Package path into the copied
+    // Package.swift.
+    String newContents = _updateFrameworkPackagePath(
+      project,
+      plugin,
+      manifestContents,
+    );
+
+    // Update the minimum iOS and macOS supported versions.
+    newContents = _updateMinimumSupportedVersions(plugin, newContents);
+
+    swiftPackageManifest.writeAsStringSync(newContents);
+  }
+
+  /// Overwrite flutterFrameworkPackagePath in the plugin's copied Package.swift to
+  /// the path of the Flutter framework Swift Package. Plugins must have a
+  /// dependency on the framework to compile.
+  String _updateFrameworkPackagePath(
+    XcodeBasedProject project,
+    Plugin plugin,
+    String manifestContents,
+  ) {
+    const String flutterFrameworkDependency = '.package(name: "Flutter", path: flutterFrameworkPackagePath)';
+    if (!manifestContents.contains(flutterFrameworkDependency)) {
+      throwToolExit(
+        'Invalid Package.swift for ${plugin.name}. '
+        'Missing or altered "flutterFrameworkDependency".',
+      );
+    }
+
+    return manifestContents.replaceAll(
+      flutterFrameworkDependency,
+      '.package(name: "Flutter", path: "${project.flutterFrameworkSwiftPackageDirectory.path}")',
+    );
+  }
+
+  /// Overwrite iosFlutterMinimumVersion and macosFlutterMinimumVersion
+  /// in the plugin's copied Package.swift to the minimum supported by Flutter.
+  ///
+  /// Swift Package Manager emits an error if a dependency isn’t compatible
+  /// with the top-level package’s deployment version. The deployment target of
+  /// a package’s dependencies must be lower than or equal to the top-level
+  /// package’s deployment target version for a particular platform.
+  ///
+  /// Since plugins have a dependency on the Flutter framework, the deployment
+  /// target must always be higher or equal to that of the Flutter framework.
+  String _updateMinimumSupportedVersions(
+    Plugin plugin,
+    String manifestContents,
+  ) {
+    final RegExp iosVersionPattern = RegExp(
+      r'let iosFlutterMinimumVersion = Version\("\d+.\d+.\d+"\)',
+    );
+    final String iosVersionTarget =
+        'let iosFlutterMinimumVersion = Version("${_supportedPlatformVersion(_iosSwiftPackageSupportedPlatform.version)}")';
+    if (!manifestContents.contains(iosVersionPattern)) {
+      throwToolExit(
+        'Invalid Package.swift for ${plugin.name}. '
+        'Missing or altered "flutterMinimumIOSVersion".',
+      );
+    }
+
+    final RegExp macosVersionPattern = RegExp(
+      r'let macosFlutterMinimumVersion = Version\("\d+.\d+.\d+"\)',
+    );
+    final String macosVersionTarget =
+        'let macosFlutterMinimumVersion = Version("${_supportedPlatformVersion(_macosSwiftPackageSupportedPlatform.version)}")';
+    if (!manifestContents.contains(macosVersionPattern)) {
+      throwToolExit(
+        'Invalid Package.swift for ${plugin.name}. '
+        'Missing or altered "flutterMinimumMacOSVersion".',
+      );
+    }
+
+    return manifestContents
+        .replaceAll(iosVersionPattern, iosVersionTarget)
+        .replaceAll(macosVersionPattern, macosVersionTarget);
+  }
+
+  /// Return version as three integers separated by periods. This is required
+  /// format for Swift.
+  String _supportedPlatformVersion(Version version) {
+    return '${version.major}.${version.minor}.${version.patch}';
+  }
+
+  /// Symlink each [FileSystemEntity] within the plugin, except for the
+  /// Package.swift. Create a copy of the Package.swift so that it can be
+  /// edited without affecting the source.
+  void _createSymlinks(
+    Plugin plugin,
+    String platformName,
+    Directory symlinkDirectory,
+  ) {
+    final Directory pluginSource = _fileSystem.directory(plugin.path);
+    final Directory pluginDestination = symlinkDirectory
+        .childDirectory(plugin.name)
+        ..createSync();
+    final Directory pluginPlatformDestination = pluginDestination
+        .childDirectory(platformName)
+        ..createSync();
+    final Directory pluginSwiftPackageDestination = pluginPlatformDestination
+        .childDirectory(plugin.name)
+        ..createSync();
+
+    for (final FileSystemEntity pluginEntity in pluginSource.listSync()) {
+      if (pluginEntity.basename == pluginPlatformDestination.basename && pluginEntity is Directory) {
+        for (final FileSystemEntity platformEntity in pluginEntity.listSync()) {
+          if (platformEntity.basename == pluginSwiftPackageDestination.basename && platformEntity is Directory) {
+            for (final FileSystemEntity swiftPackageEntity in platformEntity.listSync()) {
+              if (swiftPackageEntity.basename == 'Package.swift' && swiftPackageEntity is File) {
+                swiftPackageEntity.copySync(
+                  _fileSystem.path.join(
+                    pluginSwiftPackageDestination.path,
+                    'Package.swift',
+                  ),
+                );
+              } else {
+                final Link newLink = pluginSwiftPackageDestination
+                    .childLink(swiftPackageEntity.basename);
+                newLink.createSync(swiftPackageEntity.path);
+              }
+            }
+          } else {
+            final Link newLink = pluginPlatformDestination
+                .childLink(platformEntity.basename);
+            newLink.createSync(platformEntity.path);
+          }
+        }
+      } else {
+        final Link newLink = pluginDestination.childLink(pluginEntity.basename);
+        newLink.createSync(pluginEntity.path);
+      }
+    }
   }
 
   /// Adds Swift Package Manager integration to the Xcode project's project.pbxproj.
@@ -208,11 +352,16 @@ class SwiftPackageManager {
   static void _validatePlatform(SupportedPlatform platform) {
     if (platform != SupportedPlatform.ios &&
         platform != SupportedPlatform.macos) {
-      throwToolExit('The platform ${platform.name} is not compatible with Swift Package Manager. Only iOS and macOS is allowed.');
+      throwToolExit(
+        'The platform ${platform.name} is not compatible with Swift Package Manager. '
+        'Only iOS and macOS is allowed.',
+      );
     }
   }
 
-  List<SwiftPackageSupportedPlatform> supportedPlatforms(SupportedPlatform platform) {
+  List<SwiftPackageSupportedPlatform> supportedPlatforms(
+    SupportedPlatform platform,
+  ) {
     return <SwiftPackageSupportedPlatform>[
       if (platform == SupportedPlatform.ios)
         _iosSwiftPackageSupportedPlatform,
@@ -234,11 +383,11 @@ class SwiftPackageManager {
     );
     final SwiftPackage frameworkPackage = SwiftPackage(
       manifest: project.flutterFrameworkSwiftPackageManifest,
-      name: 'FlutterFramework',
+      name: 'Flutter',
       platforms: supportedPlatforms(platform),
       products: <SwiftPackageProduct>[
         SwiftPackageProduct(
-          name: 'FlutterFramework',
+          name: 'Flutter',
           targets: <String>[flutterFramework],
         ),
       ],
@@ -249,13 +398,13 @@ class SwiftPackageManager {
     frameworkPackage.createSwiftPackage();
 
     final SwiftPackagePackageDependency dependency = SwiftPackagePackageDependency(
-      name: 'FlutterFramework',
+      name: 'Flutter',
       path: project.flutterFrameworkSwiftPackageDirectory.path,
     );
 
     final SwiftPackageTargetDependency target = SwiftPackageTargetDependency.product(
-      name: 'FlutterFramework',
-      packageName: 'FlutterFramework',
+      name: 'Flutter',
+      packageName: 'Flutter',
     );
 
     // Setup the framework symlink so xcodebuild commands like -showBuildSettings
@@ -292,7 +441,8 @@ class SwiftPackageManager {
       // This can happen when Swift Package Manager is enabled, but the project
       // hasn't been migrated yet since it doesn't have any Swift Package
       // Manager plugin dependencies.
-      logger.printTrace('FlutterFramework Swift Package does not exist, skipping adding link to $xcframeworkName.');
+      logger.printTrace(
+          'Flutter Swift Package does not exist, skipping adding link to $xcframeworkName.');
       return;
     }
 

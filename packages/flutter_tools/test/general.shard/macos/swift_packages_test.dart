@@ -4,6 +4,7 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/swift_packages.dart';
 
@@ -132,7 +133,7 @@ $_doubleIndent
           manifest: swiftPackageFile,
           name: 'FlutterGeneratedPluginSwiftPackage',
           platforms: <SwiftPackageSupportedPlatform>[
-            SwiftPackageSupportedPlatform(platform: SwiftPackagePlatform.ios, version: '12.0'),
+            SwiftPackageSupportedPlatform(platform: SwiftPackagePlatform.ios, version: Version(12, 0, null)),
           ],
           products: <SwiftPackageProduct>[
             SwiftPackageProduct(name: 'Product1', targets: <String>['Target1']),
@@ -190,8 +191,8 @@ let package = Package(
           manifest: swiftPackageFile,
           name: 'FlutterGeneratedPluginSwiftPackage',
           platforms: <SwiftPackageSupportedPlatform>[
-            SwiftPackageSupportedPlatform(platform: SwiftPackagePlatform.ios, version: '12.0'),
-            SwiftPackageSupportedPlatform(platform: SwiftPackagePlatform.macos, version: '10.14'),
+            SwiftPackageSupportedPlatform(platform: SwiftPackagePlatform.ios, version: Version(12, 0, null)),
+            SwiftPackageSupportedPlatform(platform: SwiftPackagePlatform.macos, version: Version(10, 14, null)),
           ],
           products: <SwiftPackageProduct>[
             SwiftPackageProduct(name: 'Product1', targets: <String>['Target1']),
@@ -259,7 +260,7 @@ let package = Package(
   testWithoutContext('Format SwiftPackageSupportedPlatform', () {
     final SwiftPackageSupportedPlatform supportedPlatform = SwiftPackageSupportedPlatform(
       platform: SwiftPackagePlatform.ios,
-      version: '17.0',
+      version: Version(17, 0, null),
     );
     expect(supportedPlatform.format(), '.iOS("17.0")');
   });

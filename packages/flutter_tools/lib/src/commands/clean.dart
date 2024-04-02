@@ -65,11 +65,11 @@ class CleanCommand extends FlutterCommand {
     deleteFile(flutterProject.ios.deprecatedCompiledDartFramework);
     deleteFile(flutterProject.ios.deprecatedProjectFlutterFramework);
     deleteFile(flutterProject.ios.flutterPodspec);
-    deleteFile(flutterProject.ios.flutterPluginSwiftPackageDirectory);
+    deleteFile(flutterProject.ios.ephemeralSwiftPackageDirectory);
 
     deleteFile(flutterProject.linux.ephemeralDirectory);
     deleteFile(flutterProject.macos.ephemeralDirectory);
-    deleteFile(flutterProject.macos.flutterPluginSwiftPackageDirectory);
+    deleteFile(flutterProject.macos.ephemeralSwiftPackageDirectory);
     deleteFile(flutterProject.windows.ephemeralDirectory);
     deleteFile(flutterProject.flutterPluginsDependenciesFile);
     deleteFile(flutterProject.flutterPluginsFile);

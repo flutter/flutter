@@ -4,6 +4,7 @@
 
 import '../base/file_system.dart';
 import '../base/template.dart';
+import '../base/version.dart';
 
 const String minimumSwiftToolchainVersion = '5.9';
 
@@ -192,7 +193,7 @@ class SwiftPackageSupportedPlatform {
   });
 
   final SwiftPackagePlatform platform;
-  final String version;
+  final Version version;
 
   String format() {
     // platforms: [

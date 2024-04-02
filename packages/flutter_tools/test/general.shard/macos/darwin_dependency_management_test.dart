@@ -16,7 +16,10 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 
 void main() {
-  const List<SupportedPlatform> supportedPlatforms = <SupportedPlatform>[SupportedPlatform.ios, SupportedPlatform.macos];
+  const List<SupportedPlatform> supportedPlatforms = <SupportedPlatform>[
+    SupportedPlatform.ios,
+    SupportedPlatform.macos,
+  ];
 
   group('DarwinDependencyManagement', () {
     for (final SupportedPlatform platform in supportedPlatforms) {
@@ -376,17 +379,18 @@ void main() {
                 fileSystem: fs,
                 logger: testLogger,
               );
-              await dependencyManagement.setup(
-                platform: platform,
+              await expectLater(() => dependencyManagement.setup(
+                  platform: platform,
+                ),
+                throwsToolExit(
+                  message: 'Plugin swift_package_plugin_1 is only Swift Package Manager compatible. Try '
+                      'enabling Swift Package Manager by running '
+                      '"flutter config --enable-swift-package-manager" or remove the '
+                      'plugin as a dependency.',
+                ),
               );
               expect(swiftPackageManager.generated, isFalse);
-              expect(testLogger.warningText, contains(
-                'Plugin swift_package_plugin_1 is only Swift Package Manager compatible. Try '
-                'enabling Swift Package Manager by running '
-                '"flutter config --enable-swift-package-manager".'
-              ));
-              expect(testLogger.statusText, isEmpty);
-              expect(cocoaPods.podfileSetup, isTrue);
+              expect(cocoaPods.podfileSetup, isFalse);
             });
 
             testWithoutContext('when project is a module', () async {

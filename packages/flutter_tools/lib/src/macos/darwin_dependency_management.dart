@@ -176,14 +176,16 @@ class DarwinDependencyManagement {
       }
 
       // If not using Swift Package Manager and plugin does not have podspec
-      // but does have a Package.swift, warn it will not be used.
+      // but does have a Package.swift, throw an error. Otherwise, it'll error
+      // when it builds.
       if (!_project.usesSwiftPackageManager &&
           !cocoaPodsCompatible &&
           swiftPackageManagerCompatible) {
-        _logger.printWarning(
+        throwToolExit(
             'Plugin ${plugin.name} is only Swift Package Manager compatible. Try '
             'enabling Swift Package Manager by running '
-            '"flutter config --enable-swift-package-manager".');
+            '"flutter config --enable-swift-package-manager" or remove the '
+            'plugin as a dependency.');
       }
     }
 

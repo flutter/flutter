@@ -136,6 +136,7 @@ void main() {
                 .childDirectory(platformName)
                 .childDirectory('Flutter')
                 .childDirectory('Packages')
+                .childDirectory('ephemeral')
                 .childDirectory('FlutterGeneratedPluginSwiftPackage')
                 .existsSync(),
             isTrue,
@@ -187,6 +188,7 @@ void main() {
                 .childDirectory(platformName)
                 .childDirectory('Flutter')
                 .childDirectory('Packages')
+                .childDirectory('ephemeral')
                 .childDirectory('FlutterGeneratedPluginSwiftPackage')
                 .existsSync(),
             isTrue,
@@ -515,7 +517,7 @@ List<Pattern> _expectedLines({
   final List<Pattern> expectedLines = <Pattern>[];
   if (swiftPackageMangerEnabled) {
     expectedLines.addAll(<String>[
-      'FlutterGeneratedPluginSwiftPackage: $appPlatformDirectoryPath/Flutter/Packages/FlutterGeneratedPluginSwiftPackage',
+      'FlutterGeneratedPluginSwiftPackage: $appPlatformDirectoryPath/Flutter/Packages/ephemeral/FlutterGeneratedPluginSwiftPackage',
       "➜ Explicit dependency on target 'FlutterGeneratedPluginSwiftPackage' in project 'FlutterGeneratedPluginSwiftPackage'",
     ]);
   }
@@ -523,12 +525,12 @@ List<Pattern> _expectedLines({
     // If using a Swift Package plugin, but Swift Package Manager is not enabled, it falls back to being used as a CocoaPods plugin.
     if (swiftPackageMangerEnabled) {
       expectedLines.addAll(<Pattern>[
-        RegExp('${swiftPackagePlugin.pluginName}: [/private]*$appPlatformDirectoryPath/Flutter/Packages/.swift_packages/${swiftPackagePlugin.pluginName}/$platform/${swiftPackagePlugin.pluginName} @ local'),
+        RegExp('${swiftPackagePlugin.pluginName}: [/private]*$appPlatformDirectoryPath/Flutter/Packages/ephemeral/.symlinks/plugins/${swiftPackagePlugin.pluginName}/$platform/${swiftPackagePlugin.pluginName} @ local'),
         "➜ Explicit dependency on target '${swiftPackagePlugin.pluginName}' in project '${swiftPackagePlugin.pluginName}'",
         if (platform == 'macos')
-          RegExp('ProcessXCFramework [/private]*$appPlatformDirectoryPath/Flutter/Packages/FlutterFramework/FlutterMacOS.xcframework'),
+          RegExp('ProcessXCFramework [/private]*$appPlatformDirectoryPath/Flutter/Packages/ephemeral/Flutter/FlutterMacOS.xcframework'),
         if (platform == 'ios')
-          RegExp('ProcessXCFramework [/private]*$appPlatformDirectoryPath/Flutter/Packages/FlutterFramework/Flutter.xcframework'),
+          RegExp('ProcessXCFramework [/private]*$appPlatformDirectoryPath/Flutter/Packages/ephemeral/Flutter/Flutter.xcframework'),
       ]);
     } else {
       expectedLines.addAll(<String>[
@@ -581,9 +583,9 @@ List<String> _unexpectedLines({
         '${swiftPackagePlugin.pluginName}: ${swiftPackagePlugin.pluginPath}/$platform/${swiftPackagePlugin.pluginName} @ local',
         "➜ Explicit dependency on target '${swiftPackagePlugin.pluginName}' in project '${swiftPackagePlugin.pluginName}'",
         if (platform == 'macos')
-          'ProcessXCFramework $appPlatformDirectoryPath/Flutter/Packages/FlutterFramework/FlutterMacOS.xcframework',
+          'ProcessXCFramework $appPlatformDirectoryPath/Flutter/Packages/ephemeral/Flutter/FlutterMacOS.xcframework',
         if (platform == 'ios')
-          'ProcessXCFramework $appPlatformDirectoryPath/Flutter/Packages/FlutterFramework/Flutter.xcframework',
+          'ProcessXCFramework $appPlatformDirectoryPath/Flutter/Packages/ephemeral/Flutter/Flutter.xcframework',
       ]);
     }
   }

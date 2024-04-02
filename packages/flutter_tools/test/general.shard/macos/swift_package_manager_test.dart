@@ -22,7 +22,10 @@ import '../../src/common.dart';
 const String _doubleIndent = '        ';
 
 void main() {
-  const List<SupportedPlatform> supportedPlatforms = <SupportedPlatform>[SupportedPlatform.ios, SupportedPlatform.macos];
+  const List<SupportedPlatform> supportedPlatforms = <SupportedPlatform>[
+    SupportedPlatform.ios,
+    SupportedPlatform.macos,
+  ];
 
   group('SwiftPackageManager', () {
     for (final SupportedPlatform platform in supportedPlatforms) {
@@ -32,7 +35,10 @@ void main() {
           testWithoutContext('throw if invalid platform', () async {
             final MemoryFileSystem fs = MemoryFileSystem();
             final BufferLogger testLogger = BufferLogger.test();
-            final FakeIosProject project = FakeIosProject(fileSystem: fs);
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: fs,
+            );
 
             final FakeSwiftPackageManager spm = FakeSwiftPackageManager(
               artifacts: Artifacts.test(fileSystem: fs),
@@ -55,7 +61,10 @@ void main() {
           testWithoutContext('skip if no dependencies and not already migrated', () async {
             final MemoryFileSystem fs = MemoryFileSystem();
             final BufferLogger testLogger = BufferLogger.test();
-            final FakeIosProject project = FakeIosProject(fileSystem: fs);
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: fs,
+            );
 
             final FakeSwiftPackageManager spm = FakeSwiftPackageManager(
               artifacts: Artifacts.test(fileSystem: fs),
@@ -71,15 +80,17 @@ void main() {
               project,
             );
 
-            final File swiftManifest = fs.file('app_name/ios/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift');
-            expect(swiftManifest.existsSync(), isFalse);
+            expect(project.flutterPluginSwiftPackageManifest.existsSync(), isFalse);
             expect(spm.migrated, isFalse);
           });
 
           testWithoutContext('generate if no dependencies and already migrated', () async {
             final MemoryFileSystem fs = MemoryFileSystem();
             final BufferLogger testLogger = BufferLogger.test();
-            final FakeIosProject project = FakeIosProject(fileSystem: fs);
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: fs,
+            );
             project.xcodeProjectInfoFile.createSync(recursive: true);
             project.xcodeProjectInfoFile.writeAsStringSync('''
 '		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };';
@@ -99,10 +110,29 @@ void main() {
               project,
             );
 
-            final File swiftManifest = fs.file('app_name/ios/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift');
-            expect(swiftManifest.existsSync(), isTrue);
+            expect(
+              project.flutterPluginSwiftPackageManifest.existsSync(),
+              isTrue,
+            );
+            expect(
+              project.ephemeralSwiftPackageDirectory
+                  .childDirectory('.symlinks')
+                  .existsSync(),
+              isTrue,
+            );
+            expect(
+              project.ephemeralSwiftPackageDirectory
+                  .childDirectory('.symlinks')
+                  .childDirectory('plugins')
+                  .listSync(),
+              isEmpty,
+            );
+            expect(
+              project.flutterFrameworkSwiftPackageDirectory.existsSync(),
+              isFalse,
+            );
             final String supportedPlatform = platform == SupportedPlatform.ios ? '.iOS("12.0")' : '.macOS("10.14")';
-            expect(swiftManifest.readAsStringSync(), '''
+            expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
 // swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 //
@@ -135,14 +165,16 @@ $_doubleIndent
           testWithoutContext('generate with single dependency', () async {
             final MemoryFileSystem fs = MemoryFileSystem();
             final BufferLogger testLogger = BufferLogger.test();
-            final FakeIosProject project = FakeIosProject(fileSystem: fs);
-
-            final File validPlugin1Manifest = fs.file('/local/path/to/plugins/valid_plugin_1/Package.swift')..createSync(recursive: true);
-            final FakePlugin validPlugin1 = FakePlugin(
-              name: 'valid_plugin_1',
-              platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
-              pluginSwiftPackageManifestPath: validPlugin1Manifest.path,
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: fs,
             );
+            final FakePlugin validPlugin1 = _fakePluginWithManifest(
+              name: 'valid_plugin_1',
+              platform: platform,
+              fs: fs,
+            );
+
             final FakeSwiftPackageManager spm = FakeSwiftPackageManager(
               artifacts: Artifacts.test(fileSystem: fs),
               fileSystem: fs,
@@ -152,18 +184,28 @@ $_doubleIndent
               plistParser: FakePlistParser(),
             );
             await spm.generatePluginsSwiftPackage(
-              <Plugin>[
-                validPlugin1,
-              ],
+              <Plugin>[validPlugin1],
               platform,
               project,
             );
-            final File swiftManifest = fs.file('app_name/ios/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift');
 
-            final String supportedPlatform = platform == SupportedPlatform.ios ? '.iOS("12.0")' : '.macOS("10.14")';
-            final String frameworkName = platform == SupportedPlatform.ios ? 'Flutter' : 'FlutterMacOS';
-            expect(swiftManifest.existsSync(), isTrue);
-            expect(swiftManifest.readAsStringSync(), '''
+            // Validate plugin symlinks and Package.swift
+            _validatePlugin(
+              plugin: validPlugin1,
+              platform: platform,
+              project: project,
+              fs: fs,
+            );
+
+            // Validate Flutter framework
+            final String supportedPlatform = platform == SupportedPlatform.ios
+                ? '.iOS("12.0")'
+                : '.macOS("10.14")';
+            _validateFlutterFramework(project, platform, supportedPlatform, fs);
+
+            // Validate FlutterGeneratedPluginSwiftPackage
+            expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
+            expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
 // swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 //
@@ -181,61 +223,57 @@ let package = Package(
         .library(name: "FlutterGeneratedPluginSwiftPackage", targets: ["FlutterGeneratedPluginSwiftPackage"])
     ],
     dependencies: [
-        .package(name: "valid_plugin_1", path: "/local/path/to/plugins/valid_plugin_1")
+        .package(name: "valid_plugin_1", path: "../.symlinks/plugins/valid_plugin_1/${platform.name}/valid_plugin_1")
     ],
     targets: [
-        .binaryTarget(
-            name: "$frameworkName",
-            path: "$frameworkName.xcframework"
-        ),
         .target(
             name: "FlutterGeneratedPluginSwiftPackage",
             dependencies: [
-                .target(name: "$frameworkName"),
                 .product(name: "valid_plugin_1", package: "valid_plugin_1")
             ]
         )
     ]
 )
 ''');
-            final Link engineLink = fs.link('app_name/ios/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/$frameworkName.xcframework');
-            final String expectedArtifactPath = platform == SupportedPlatform.ios ? 'Artifact.flutterXcframework.TargetPlatform.ios.release' : 'Artifact.flutterMacOSXcframework.TargetPlatform.darwin.release';
-            expect(await engineLink.target(), expectedArtifactPath);
             expect(spm.migrated, isTrue);
           });
 
           testWithoutContext('generate with multiple dependencies', () async {
             final MemoryFileSystem fs = MemoryFileSystem();
             final BufferLogger testLogger = BufferLogger.test();
-            final FakeIosProject project = FakeIosProject(fileSystem: fs);
-
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: fs,
+            );
             final FakePlugin nonPlatformCompatiblePlugin = FakePlugin(
               name: 'invalid_plugin_due_to_incompatible_platform',
+              path: '/path/to/invalid_plugin_due_to_incompatible_platform',
               platforms: <String, PluginPlatform>{},
               pluginSwiftPackageManifestPath: '/some/path',
             );
             final FakePlugin pluginSwiftPackageManifestIsNull = FakePlugin(
               name: 'invalid_plugin_due_to_null_plugin_swift_package_path',
+              path: '/path/to/invalid_plugin_due_to_null_plugin_swift_package_path',
               platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
               pluginSwiftPackageManifestPath: null,
             );
             final FakePlugin pluginSwiftPackageManifestNotExists = FakePlugin(
               name: 'invalid_plugin_due_to_plugin_swift_package_path_does_not_exist',
+              path: '/path/to/invalid_plugin_due_to_plugin_swift_package_path_does_not_exist',
               platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
               pluginSwiftPackageManifestPath: '/some/path',
             );
 
-            final File validPlugin1Manifest = fs.file('/local/path/to/plugins/valid_plugin_1/Package.swift')..createSync(recursive: true);
-            final FakePlugin validPlugin1 = FakePlugin(
+            final FakePlugin validPlugin1 = _fakePluginWithManifest(
               name: 'valid_plugin_1',
-              platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
-              pluginSwiftPackageManifestPath: validPlugin1Manifest.path,
+              platform: platform,
+              fs: fs,
             );
-            final File validPlugin2Manifest = fs.file('/.pub-cache/plugins/valid_plugin_2/Package.swift')..createSync(recursive: true);
-            final FakePlugin validPlugin2 = FakePlugin(
+            final FakePlugin validPlugin2 = _fakePluginWithManifest(
               name: 'valid_plugin_2',
-              platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
-              pluginSwiftPackageManifestPath: validPlugin2Manifest.path,
+              path: '/.pub-cache/plugins/valid_plugin_2',
+              platform: platform,
+              fs: fs,
             );
 
             final FakeSwiftPackageManager spm = FakeSwiftPackageManager(
@@ -257,12 +295,30 @@ let package = Package(
               platform,
               project,
             );
-            final File swiftManifest = fs.file('app_name/ios/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift');
 
-            final String supportedPlatform = platform == SupportedPlatform.ios ? '.iOS("12.0")' : '.macOS("10.14")';
-            final String frameworkName = platform == SupportedPlatform.ios ? 'Flutter' : 'FlutterMacOS';
-            expect(swiftManifest.existsSync(), isTrue);
-            expect(swiftManifest.readAsStringSync(), '''
+            // Validate plugin symlinks and Package.swift
+            _validatePlugin(
+              plugin: validPlugin1,
+              platform: platform,
+              project: project,
+              fs: fs,
+            );
+            _validatePlugin(
+              plugin: validPlugin2,
+              platform: platform,
+              project: project,
+              fs: fs,
+            );
+
+            // Validate Flutter framework
+            final String supportedPlatform = platform == SupportedPlatform.ios
+                ? '.iOS("12.0")'
+                : '.macOS("10.14")';
+            _validateFlutterFramework(project, platform, supportedPlatform, fs);
+
+            // Validate FlutterGeneratedPluginSwiftPackage
+            expect(project.flutterPluginSwiftPackageManifest.existsSync(), isTrue);
+            expect(project.flutterPluginSwiftPackageManifest.readAsStringSync(), '''
 // swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 //
@@ -280,18 +336,13 @@ let package = Package(
         .library(name: "FlutterGeneratedPluginSwiftPackage", targets: ["FlutterGeneratedPluginSwiftPackage"])
     ],
     dependencies: [
-        .package(name: "valid_plugin_1", path: "/local/path/to/plugins/valid_plugin_1"),
-        .package(name: "valid_plugin_2", path: "/.pub-cache/plugins/valid_plugin_2")
+        .package(name: "valid_plugin_1", path: "../.symlinks/plugins/valid_plugin_1/${platform.name}/valid_plugin_1"),
+        .package(name: "valid_plugin_2", path: "../.symlinks/plugins/valid_plugin_2/${platform.name}/valid_plugin_2")
     ],
     targets: [
-        .binaryTarget(
-            name: "$frameworkName",
-            path: "$frameworkName.xcframework"
-        ),
         .target(
             name: "FlutterGeneratedPluginSwiftPackage",
             dependencies: [
-                .target(name: "$frameworkName"),
                 .product(name: "valid_plugin_1", package: "valid_plugin_1"),
                 .product(name: "valid_plugin_2", package: "valid_plugin_2")
             ]
@@ -299,17 +350,121 @@ let package = Package(
     ]
 )
 ''');
-            final Link engineLink = fs.link('app_name/ios/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/$frameworkName.xcframework');
-            final String expectedArtifactPath = platform == SupportedPlatform.ios ? 'Artifact.flutterXcframework.TargetPlatform.ios.release' : 'Artifact.flutterMacOSXcframework.TargetPlatform.darwin.release';
-            expect(await engineLink.target(), expectedArtifactPath);
             expect(spm.migrated, isTrue);
+          });
+
+          testWithoutContext('throws when missing "flutterFrameworkDependency"', () async {
+            final MemoryFileSystem fs = MemoryFileSystem();
+            final BufferLogger testLogger = BufferLogger.test();
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: fs,
+            );
+            final FakePlugin validPlugin1 = _fakePluginWithManifest(
+              name: 'valid_plugin_1',
+              platform: platform,
+              manifestContents: '',
+              fs: fs,
+            );
+
+            final FakeSwiftPackageManager spm = FakeSwiftPackageManager(
+              artifacts: Artifacts.test(fileSystem: fs),
+              fileSystem: fs,
+              logger: testLogger,
+              templateRenderer: const MustacheTemplateRenderer(),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              plistParser: FakePlistParser(),
+            );
+            await expectLater(
+              spm.generatePluginsSwiftPackage(
+                <Plugin>[validPlugin1],
+                platform,
+                project,
+              ),
+              throwsToolExit(
+                message: 'Invalid Package.swift for valid_plugin_1. Missing or altered "flutterFrameworkDependency".',
+              ),
+            );
+          });
+
+          testWithoutContext('throws when missing "flutterMinimumIOSVersion"', () async {
+            final MemoryFileSystem fs = MemoryFileSystem();
+            final BufferLogger testLogger = BufferLogger.test();
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: fs,
+            );
+            final FakePlugin validPlugin1 = _fakePluginWithManifest(
+              name: 'valid_plugin_1',
+              platform: platform,
+              manifestContents: '${_manifestFlutterFrameworkDependencyFunction('flutterFrameworkPackagePath')}\n',
+              fs: fs,
+            );
+
+            final FakeSwiftPackageManager spm = FakeSwiftPackageManager(
+              artifacts: Artifacts.test(fileSystem: fs),
+              fileSystem: fs,
+              logger: testLogger,
+              templateRenderer: const MustacheTemplateRenderer(),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              plistParser: FakePlistParser(),
+            );
+            await expectLater(
+              spm.generatePluginsSwiftPackage(
+                <Plugin>[validPlugin1],
+                platform,
+                project,
+              ),
+              throwsToolExit(
+                message: 'Invalid Package.swift for valid_plugin_1. Missing or altered "flutterMinimumIOSVersion".',
+              ),
+            );
+          });
+
+          testWithoutContext('throws when missing "flutterMinimumMacOSVersion"', () async {
+            final MemoryFileSystem fs = MemoryFileSystem();
+            final BufferLogger testLogger = BufferLogger.test();
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: fs,
+            );
+            final FakePlugin validPlugin1 = _fakePluginWithManifest(
+              name: 'valid_plugin_1',
+              platform: platform,
+              manifestContents:
+                  '${_manifestFlutterFrameworkDependencyFunction('flutterFrameworkPackagePath')}\n'
+                  '$_manifestFlutterMinimumIOSVersionFunction',
+              fs: fs,
+            );
+
+            final FakeSwiftPackageManager spm = FakeSwiftPackageManager(
+              artifacts: Artifacts.test(fileSystem: fs),
+              fileSystem: fs,
+              logger: testLogger,
+              templateRenderer: const MustacheTemplateRenderer(),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              plistParser: FakePlistParser(),
+            );
+            await expectLater(
+              spm.generatePluginsSwiftPackage(
+                <Plugin>[validPlugin1],
+                platform,
+                project,
+              ),
+              throwsToolExit(
+                message: 'Invalid Package.swift for valid_plugin_1. Missing or altered "flutterMinimumMacOSVersion".',
+              ),
+            );
           });
         });
 
         group('linkFlutterFramework', () {
           testWithoutContext('throw if invalid platform', () {
             final MemoryFileSystem fs = MemoryFileSystem();
-            final FakeIosProject project = FakeIosProject(fileSystem: fs);
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: fs,
+            );
             final BufferLogger testLogger = BufferLogger.test();
 
             expect(() => SwiftPackageManager.linkFlutterFramework(
@@ -326,7 +481,10 @@ let package = Package(
 
           testWithoutContext('skips if missing FlutterGeneratedPluginSwiftPackage', () {
             final MemoryFileSystem fs = MemoryFileSystem();
-            final FakeIosProject project = FakeIosProject(fileSystem: fs);
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: fs,
+            );
             final BufferLogger testLogger = BufferLogger.test();
 
             SwiftPackageManager.linkFlutterFramework(
@@ -338,14 +496,17 @@ let package = Package(
               logger: testLogger,
             );
             final String frameworkName = platform == SupportedPlatform.ios ? 'Flutter' : 'FlutterMacOS';
-            expect(testLogger.traceText, contains('FlutterGeneratedPluginSwiftPackage does not exist, skipping adding link to $frameworkName.'));
+            expect(testLogger.traceText, contains('Flutter Swift Package does not exist, skipping adding link to $frameworkName.'));
           });
 
           testWithoutContext('creates link if missing', () async {
             final MemoryFileSystem fs = MemoryFileSystem();
-            final FakeIosProject project = FakeIosProject(fileSystem: fs);
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: fs,
+            );
             final BufferLogger testLogger = BufferLogger.test();
-            fs.file('app_name/ios/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift').createSync(recursive: true);
+            project.flutterFrameworkSwiftPackageManifest.createSync(recursive: true);
 
             SwiftPackageManager.linkFlutterFramework(
               platform,
@@ -356,7 +517,7 @@ let package = Package(
               logger: testLogger,
             );
             final String frameworkName = platform == SupportedPlatform.ios ? 'Flutter' : 'FlutterMacOS';
-            final Link engineLink = fs.link('app_name/ios/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/$frameworkName.xcframework');
+            final Link engineLink = fs.link('${project.flutterFrameworkSwiftPackageDirectory.path}/$frameworkName.xcframework');
             final String expectedArtifactPath = platform == SupportedPlatform.ios ? 'Artifact.flutterXcframework.TargetPlatform.ios.debug' : 'Artifact.flutterMacOSXcframework.TargetPlatform.darwin.debug';
             expect(testLogger.traceText, isEmpty);
             expect(await engineLink.target(), expectedArtifactPath);
@@ -364,12 +525,15 @@ let package = Package(
 
           testWithoutContext('updates link if changed', () async {
             final MemoryFileSystem fs = MemoryFileSystem();
-            final FakeIosProject project = FakeIosProject(fileSystem: fs);
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: fs,
+            );
             final BufferLogger testLogger = BufferLogger.test();
-            fs.file('app_name/ios/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift').createSync(recursive: true);
+            fs.file(project.flutterFrameworkSwiftPackageManifest).createSync(recursive: true);
 
             final String frameworkName = platform == SupportedPlatform.ios ? 'Flutter' : 'FlutterMacOS';
-            final Link engineLink = fs.link('app_name/ios/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/$frameworkName.xcframework');
+            final Link engineLink = fs.link('${project.flutterFrameworkSwiftPackageDirectory.path}/$frameworkName.xcframework');
             const String originalTarget = 'Artifact.flutterXcframework.TargetPlatform.ios.debug';
             engineLink.createSync(originalTarget, recursive: true);
             expect(await engineLink.target(), originalTarget);
@@ -392,6 +556,192 @@ let package = Package(
   });
 }
 
+FakePlugin _fakePluginWithManifest({
+  required String name,
+  String? path,
+  String? manifestContents,
+  required SupportedPlatform platform,
+  required FileSystem fs,
+}) {
+  final Directory validPlugin1Directory = fs.directory(path ?? '/local/path/to/plugins/$name');
+  final File validPlugin1Manifest = fs.file('${validPlugin1Directory.path}/${platform.name}/$name/Package.swift')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(manifestContents ?? _fakePluginSwiftPackage(name, 'flutterFrameworkPackagePath'));
+  validPlugin1Directory.childFile('childFile.txt').createSync();
+  validPlugin1Directory.childDirectory('childDirectory').createSync();
+  return FakePlugin(
+    name: name,
+    path: validPlugin1Directory.path,
+    platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+    pluginSwiftPackageManifestPath: validPlugin1Manifest.path,
+  );
+}
+
+void _validatePlugin({
+  required Plugin plugin,
+  required SupportedPlatform platform,
+  required XcodeBasedProject project,
+  required FileSystem fs,
+}) {
+  final Directory symlinkPluginDirectory = project.ephemeralSwiftPackageDirectory
+      .childDirectory('.symlinks')
+      .childDirectory('plugins');
+  expect(symlinkPluginDirectory.existsSync(), isTrue);
+  expect(
+    symlinkPluginDirectory
+        .childDirectory(plugin.name)
+        .childLink('childFile.txt')
+        .targetSync(),
+    fs.directory(plugin.path)
+        .childFile('childFile.txt')
+        .path,
+  );
+  expect(
+    symlinkPluginDirectory
+        .childDirectory(plugin.name)
+        .childLink('childDirectory')
+        .targetSync(),
+    symlinkPluginDirectory.fileSystem
+        .directory(plugin.path)
+        .childDirectory('childDirectory')
+        .path,
+  );
+
+  // Validate plugin Package.swift is valid
+  final File symlinkPluginSwiftManifest = symlinkPluginDirectory
+      .childDirectory(plugin.name)
+      .childDirectory(platform.name)
+      .childDirectory(plugin.name)
+      .childFile('Package.swift');
+  expect(symlinkPluginSwiftManifest.existsSync(), isTrue);
+  expect(
+    symlinkPluginSwiftManifest.readAsStringSync(),
+    _fakePluginSwiftPackage(plugin.name, '"app_name/${platform.name}/Flutter/Packages/ephemeral/Flutter"'),
+  );
+}
+
+void _validateFlutterFramework(
+  XcodeBasedProject project,
+  SupportedPlatform platform,
+  String supportedPlatformForManifest,
+  FileSystem fs,
+) {
+  final String frameworkName = platform == SupportedPlatform.ios ? 'Flutter' : 'FlutterMacOS';
+  expect(project.flutterFrameworkSwiftPackageManifest.existsSync(), isTrue);
+  expect(
+    project.flutterFrameworkSwiftPackageManifest.readAsStringSync(),
+    _expectedFlutterFrameworkSwiftPackage(frameworkName, supportedPlatformForManifest),
+  );
+  final Link engineLink = fs.link('${project.flutterFrameworkSwiftPackageDirectory.path}/$frameworkName.xcframework');
+  final String expectedArtifactPath = platform == SupportedPlatform.ios
+      ? 'Artifact.flutterXcframework.TargetPlatform.ios.release'
+      : 'Artifact.flutterMacOSXcframework.TargetPlatform.darwin.release';
+  expect(engineLink.targetSync(), expectedArtifactPath);
+}
+
+String _fakePluginSwiftPackage(String name, String frameworkPath) {
+  return '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+
+import PackageDescription
+
+let pluginMinimumIOSVersion = Version("12.0.0")
+let pluginMinimumMacOSVersion = Version("10.14.0")
+
+let package = Package(
+    name: "$name",
+    platforms: [
+        flutterMinimumIOSVersion(pluginTargetVersion: pluginMinimumIOSVersion),
+        flutterMinimumMacOSVersion(pluginTargetVersion: pluginMinimumMacOSVersion),
+    ],
+    products: [
+        .library(name: "$name", targets: ["$name"])
+    ],
+    dependencies: [
+        flutterFrameworkDependency(),
+    ],
+    targets: [
+        .target(
+            name: "$name",
+            dependencies: [
+                .product(name: "Flutter", package: "Flutter")
+            ]
+        )
+    ]
+)
+
+${_manifestFlutterFrameworkDependencyFunction(frameworkPath)}
+
+$_manifestFlutterMinimumIOSVersionFunction
+
+$_manifestFlutterMinimumMacOSVersionFunction
+''';
+}
+
+String _manifestFlutterFrameworkDependencyFunction(String frameworkPath) {
+  return '''
+func flutterFrameworkDependency(localFrameworkPath: String? = nil) -> Package.Dependency {
+    let flutterFrameworkPackagePath = localFrameworkPath ?? ""
+    return .package(name: "Flutter", path: $frameworkPath)
+}
+''';
+}
+
+String _manifestFlutterMinimumIOSVersionFunction = '''
+func flutterMinimumIOSVersion(pluginTargetVersion: Version) -> SupportedPlatform {
+    let iosFlutterMinimumVersion = Version("12.0.0")
+    var versionString = pluginTargetVersion.description
+    if iosFlutterMinimumVersion > pluginTargetVersion {
+        versionString = iosFlutterMinimumVersion.description
+    }
+    return SupportedPlatform.iOS(versionString)
+}
+''';
+
+String _manifestFlutterMinimumMacOSVersionFunction = '''
+func flutterMinimumMacOSVersion(pluginTargetVersion: Version) -> SupportedPlatform {
+    let macosFlutterMinimumVersion = Version("10.14.0")
+    var versionString = pluginTargetVersion.description
+    if macosFlutterMinimumVersion > pluginTargetVersion {
+        versionString = macosFlutterMinimumVersion.description
+    }
+    return SupportedPlatform.macOS(versionString)
+}
+''';
+
+
+String _expectedFlutterFrameworkSwiftPackage(String frameworkName, String supportedPlatform) {
+  return '''
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+//
+//  Generated file. Do not edit.
+//
+
+import PackageDescription
+
+let package = Package(
+    name: "Flutter",
+    platforms: [
+        $supportedPlatform
+    ],
+    products: [
+        .library(name: "Flutter", targets: ["$frameworkName"])
+    ],
+    dependencies: [
+$_doubleIndent
+    ],
+    targets: [
+        .binaryTarget(
+            name: "$frameworkName",
+            path: "$frameworkName.xcframework"
+        )
+    ]
+)
+''';
+}
+
 class FakeSwiftPackageManager extends SwiftPackageManager {
   FakeSwiftPackageManager({
     required super.artifacts,
@@ -410,28 +760,45 @@ class FakeSwiftPackageManager extends SwiftPackageManager {
   }
 }
 
-class FakeIosProject extends Fake implements IosProject {
-  FakeIosProject({
+class FakeXcodeProject extends Fake implements IosProject {
+  FakeXcodeProject({
     required MemoryFileSystem fileSystem,
-  }) : hostAppRoot = fileSystem.directory('app_name').childDirectory('ios'),
-       xcodeProjectInfoFile = fileSystem.directory('app_name').childDirectory('ios').childDirectory('Runner.xcodeproj').childFile('project.pbxproj'),
-       flutterPluginSwiftPackageDirectory = fileSystem.directory('app_name').childDirectory('ios').childDirectory('Flutter').childDirectory('Packages').childDirectory('FlutterGeneratedPluginSwiftPackage'),
-       flutterPluginSwiftPackageManifest = fileSystem.directory('app_name').childDirectory('ios').childDirectory('Flutter').childDirectory('Packages').childDirectory('FlutterGeneratedPluginSwiftPackage').childFile('Package.swift');
+    required String platform,
+  }) : hostAppRoot = fileSystem.directory('app_name').childDirectory(platform);
 
   @override
   Directory hostAppRoot;
 
   @override
-  File xcodeProjectInfoFile;
+  Directory get xcodeProject => hostAppRoot.childDirectory('$hostAppProjectName.xcodeproj');
+
+  @override
+  File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
 
   @override
   String hostAppProjectName = 'Runner';
 
   @override
-  Directory flutterPluginSwiftPackageDirectory;
+  Directory get ephemeralSwiftPackageDirectory => hostAppRoot
+      .childDirectory('Flutter')
+      .childDirectory('Packages')
+      .childDirectory('ephemeral');
 
   @override
-  File flutterPluginSwiftPackageManifest;
+  Directory get flutterPluginSwiftPackageDirectory => ephemeralSwiftPackageDirectory
+      .childDirectory('FlutterGeneratedPluginSwiftPackage');
+
+  @override
+  File get flutterFrameworkSwiftPackageManifest =>
+      flutterFrameworkSwiftPackageDirectory.childFile('Package.swift');
+
+  @override
+  Directory get flutterFrameworkSwiftPackageDirectory => ephemeralSwiftPackageDirectory
+      .childDirectory('Flutter');
+
+  @override
+  File get flutterPluginSwiftPackageManifest =>
+      flutterPluginSwiftPackageDirectory.childFile('Package.swift');
 
   @override
   bool get flutterPluginSwiftPackageInProjectSettings {
@@ -445,6 +812,7 @@ class FakeIosProject extends Fake implements IosProject {
 class FakePlugin extends Fake implements Plugin {
   FakePlugin({
     required this.name,
+    required this.path,
     required this.platforms,
     required String? pluginSwiftPackageManifestPath,
   }) : _pluginSwiftPackageManifestPath = pluginSwiftPackageManifestPath;
@@ -455,6 +823,9 @@ class FakePlugin extends Fake implements Plugin {
   final String name;
 
   @override
+  final String path;
+
+  @override
   final Map<String, PluginPlatform> platforms;
 
   @override
@@ -463,6 +834,11 @@ class FakePlugin extends Fake implements Plugin {
     String platform,
   ) {
     return _pluginSwiftPackageManifestPath;
+  }
+
+  @override
+  String? darwinPluginDirectoryName(String platform) {
+    return platform;
   }
 }
 
