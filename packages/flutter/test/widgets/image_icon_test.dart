@@ -2,54 +2,64 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../painting/mocks_for_image_cache.dart';
 
 
-void main() {
-  late ImageProvider image;
+void main() async {
+  late ImageProvider imageProvider;
+
+  late ui.Image image;
 
   setUpAll(() async {
-    image = TestImageProvider(
+    image = await createTestImage(width: 10, height: 10);
+    imageProvider = TestImageProvider(
       21,
       42,
-      image: await createTestImage(width: 10, height: 10),
+      image: image,
     );
   });
 
+  tearDownAll(() {
+    // Evicts an entry from the image cache.
+    imageProvider.evict();
+    image.dispose();
+  });
+
   testWidgets('ImageIcon sizing - no theme, default size',
-  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
-        child: ImageIcon(image),
+        child: ImageIcon(imageProvider),
       ),
     );
 
     final RenderBox renderObject = tester.renderObject(find.byType(ImageIcon));
     expect(renderObject.size, equals(const Size.square(24.0)));
     expect(find.byType(Image), findsOneWidget);
+    // Evicts an entry from the image cache.
+    await imageProvider.evict();
   });
 
   testWidgets('Icon opacity',
-  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: IconTheme(
           data: const IconThemeData(opacity: 0.5),
-          child: ImageIcon(image),
+          child: ImageIcon(imageProvider),
         ),
       ),
     );
 
     expect(tester.widget<Image>(find.byType(Image)).color!.alpha, equals(128));
+    // Evicts an entry from the image cache.
+    await imageProvider.evict();
   });
 
   testWidgets('ImageIcon sizing - no theme, explicit size', (WidgetTester tester) async {

@@ -7,18 +7,21 @@ import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../../image_data.dart';
 
 late List<int> selectedTabs;
 
 void main() {
-  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
-  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
-
+  final MemoryImage memoryImage = MemoryImage(Uint8List.fromList(kTransparentImage));
   setUp(() {
     selectedTabs = <int>[];
+  });
+
+
+  tearDown(() {
+    // Evicts an entry from the image cache.
+    memoryImage.evict();
   });
 
   testWidgets('Last tab gets focus', (WidgetTester tester) async {
@@ -34,7 +37,7 @@ void main() {
       MaterialApp(
         home: Material(
           child: CupertinoTabScaffold(
-            tabBar: _buildTabBar(),
+            tabBar: _buildTabBar(memoryImage),
             tabBuilder: (BuildContext context, int index) {
               return TextField(
                 focusNode: focusNodes[index],
@@ -73,7 +76,7 @@ void main() {
       MaterialApp(
         home: Material(
           child: CupertinoTabScaffold(
-            tabBar: _buildTabBar(),
+            tabBar: _buildTabBar(memoryImage),
             tabBuilder: (BuildContext context, int index) {
               return Column(
                 children: <Widget>[
@@ -134,7 +137,7 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
-          tabBar: _buildTabBar(),
+          tabBar: _buildTabBar(memoryImage),
           tabBuilder: (BuildContext context, int index) {
             return const Placeholder();
           },
@@ -160,7 +163,7 @@ void main() {
           primaryColor: CupertinoColors.destructiveRed,
         ),
         home: CupertinoTabScaffold(
-          tabBar: _buildTabBar(),
+          tabBar: _buildTabBar(memoryImage),
           tabBuilder: (BuildContext context, int index) {
             return const Placeholder();
           },
@@ -198,7 +201,7 @@ void main() {
         theme: const CupertinoThemeData(brightness: Brightness.light),
         home: CupertinoTabScaffold(
           backgroundColor: backgroundColor,
-          tabBar: _buildTabBar(),
+          tabBar: _buildTabBar(memoryImage),
           tabBuilder: (BuildContext context, int index) {
             return const Placeholder();
           },
@@ -223,7 +226,7 @@ void main() {
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoTabScaffold(
           backgroundColor: backgroundColor,
-          tabBar: _buildTabBar(),
+          tabBar: _buildTabBar(memoryImage),
           tabBuilder: (BuildContext context, int index) {
             return const Placeholder();
           },
@@ -250,7 +253,7 @@ void main() {
         child: MaterialApp(
           home: Material(
             child: CupertinoTabScaffold(
-              tabBar: _buildTabBar(),
+              tabBar: _buildTabBar(memoryImage),
               tabBuilder: (BuildContext context, int index) {
                 return const TextField();
               },
@@ -272,7 +275,7 @@ void main() {
         child: MaterialApp(
           home: Material(
             child: CupertinoTabScaffold(
-              tabBar: _buildTabBar(),
+              tabBar: _buildTabBar(memoryImage),
               tabBuilder: (BuildContext context, int index) {
                 return const TextField();
               },
@@ -298,7 +301,7 @@ void main() {
               tabBar: CupertinoTabBar(
                 items: List<BottomNavigationBarItem>.generate(
                   10,
-                  (int i) => BottomNavigationBarItem(icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))), label: '$i'),
+                  (int i) => BottomNavigationBarItem(icon: ImageIcon(memoryImage), label: '$i'),
                 ),
               ),
               tabBuilder: (BuildContext context, int index) => const Text('content'),
@@ -328,18 +331,20 @@ void main() {
 
     expect(contents.length, greaterThan(0));
     expect(contents, isNot(contains(predicate((RichText t) => t.textScaler != const TextScaler.linear(99.0)))));
+    // Evicts an entry from the image cache.
+    memoryImage.evict();
   });
 }
 
-CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {
+CupertinoTabBar _buildTabBar(MemoryImage memoryImage,{ int selectedTab = 0 }) {
   return CupertinoTabBar(
     items: <BottomNavigationBarItem>[
       BottomNavigationBarItem(
-        icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+        icon: ImageIcon(memoryImage),
         label: 'Tab 1',
       ),
       BottomNavigationBarItem(
-        icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
+        icon: ImageIcon(memoryImage),
         label: 'Tab 2',
       ),
     ],

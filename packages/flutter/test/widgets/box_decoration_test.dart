@@ -9,16 +9,15 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../image_data.dart';
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
-  TestImageProvider(this.future);
+  TestImageProvider(this.future, this.image);
 
   final Future<void> future;
 
-  static late ui.Image image;
+  ui.Image image;
 
   @override
   Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
@@ -35,21 +34,27 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 
 Future<void> main() async {
   AutomatedTestWidgetsFlutterBinding();
-  TestImageProvider.image = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
+  late ImageProvider imageProvider;
+  late ui.Image loadingTestImage;
+  late ui.Image movingTestImage;
+
+  setUpAll(() async {
+    loadingTestImage = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
+    movingTestImage = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
+  });
 
   testWidgets('DecoratedBox handles loading images',
-  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final Completer<void> completer = Completer<void>();
+   final ImageProvider imageProvider = TestImageProvider(completer.future, loadingTestImage);
     await tester.pumpWidget(
       KeyedSubtree(
         key: key,
         child: DecoratedBox(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: TestImageProvider(completer.future),
+              image: imageProvider,
             ),
           ),
         ),
@@ -61,20 +66,20 @@ Future<void> main() async {
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
     expect(tester.binding.hasScheduledFrame, isFalse);
+    // Evicts an entry from the image cache.
+    imageProvider.evict();
   });
-
   testWidgets('Moving a DecoratedBox',
-  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final Completer<void> completer = Completer<void>();
+    imageProvider = TestImageProvider(completer.future, movingTestImage);
     final Widget subtree = KeyedSubtree(
       key: GlobalKey(),
       child: RepaintBoundary(
         child: DecoratedBox(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: TestImageProvider(completer.future),
+              image: imageProvider,
             ),
           ),
         ),
@@ -93,6 +98,8 @@ Future<void> main() async {
     await tester.pump();
     await tester.idle();
     expect(tester.binding.hasScheduledFrame, isFalse);
+    // Evicts an entry from the image cache.
+    imageProvider.evict();
   });
 
   testWidgets('Circles can have uniform borders', (WidgetTester tester) async {

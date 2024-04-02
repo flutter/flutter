@@ -41,7 +41,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
   // receive the event.
   WidgetController.hitTestWarningShouldBeFatal = true;
 
-  if (_isLeakTrackingEnabled()) {
+  if (true) {
     LeakTesting.enable();
 
     LeakTracking.warnForUnsupportedPlatforms = false;

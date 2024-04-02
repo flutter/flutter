@@ -7,7 +7,6 @@ import 'dart:ui' as ui show Image;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
@@ -19,8 +18,6 @@ Future<void> main() async {
   final ImageProvider image = TestImageProvider(0, 0, image: rawImage);
 
   testWidgets('ShapeDecoration.image',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -42,6 +39,8 @@ Future<void> main() async {
         ..rect(color: Colors.black)
         ..rect(color: Colors.white),
     );
+    // Evicts an entry from the image cache.
+    await image.evict();
   });
 
   testWidgets('ShapeDecoration.color', (WidgetTester tester) async {
@@ -95,8 +94,6 @@ Future<void> main() async {
   });
 
   testWidgets('TestBorder and Directionality - 2',
-  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(
@@ -119,6 +116,8 @@ Future<void> main() async {
         'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.rtl',
       ],
     );
+    // Evicts an entry from the image cache.
+    await image.evict();
   });
 
   testWidgets('Does not crash with directional gradient', (WidgetTester tester) async {
