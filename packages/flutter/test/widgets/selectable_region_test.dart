@@ -890,10 +890,13 @@ void main() {
           'This will be the start of a new line. When triple clicking this block '
           'of text all of it should be selected.';
 
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Center(
               child: Text(longText),
@@ -962,10 +965,13 @@ void main() {
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
 
     testWidgets('mouse can select multiple widgets on triple click drag when selecting inside a WidgetSpan', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Text.rich(
               WidgetSpan(
@@ -1015,10 +1021,13 @@ void main() {
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
 
     testWidgets('mouse can select multiple widgets on triple click drag', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -1078,10 +1087,13 @@ void main() {
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
 
     testWidgets('mouse can select multiple widgets on triple click drag and return to origin paragraph', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
@@ -1151,10 +1163,13 @@ void main() {
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
 
     testWidgets('mouse can reverse selection across multiple widgets on triple click drag', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             selectionControls: materialTextSelectionControls,
             child: const Column(
               children: <Widget>[
