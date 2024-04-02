@@ -2078,6 +2078,21 @@ class _RenderAppBarTitleBox extends RenderAligningShiftedBox {
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final BoxConstraints innerConstraints = constraints.copyWith(maxHeight: double.infinity);
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final double? result = child.getDryBaseline(innerConstraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    final Size childSize = child.getDryLayout(innerConstraints);
+    return result + resolvedAlignment.alongOffset(getDryLayout(constraints) - childSize as Offset).dy;
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints innerConstraints = constraints.copyWith(maxHeight: double.infinity);
     child!.layout(innerConstraints, parentUsesSize: true);
@@ -2253,28 +2268,11 @@ class _RenderExpandedTitleBox extends RenderShiftedBox {
     return child == null ? 0.0 : child.getMinIntrinsicWidth(double.infinity) + padding.horizontal;
   }
 
-  Size _computeSize(BoxConstraints constraints, ChildLayouter layoutChild) {
-    final RenderBox? child = this.child;
-    if (child == null) {
-      return Size.zero;
-    }
-    layoutChild(child, constraints.widthConstraints().deflate(padding));
-    return constraints.biggest;
-  }
-
   @override
-  Size computeDryLayout(BoxConstraints constraints) => _computeSize(constraints, ChildLayoutHelper.dryLayoutChild);
+  Size computeDryLayout(BoxConstraints constraints) => child == null ? Size.zero : constraints.biggest;
 
-  @override
-  void performLayout() {
-    final RenderBox? child = this.child;
-    if (child == null) {
-      this.size = constraints.smallest;
-      return;
-    }
-    final Size size = this.size = _computeSize(constraints, ChildLayoutHelper.layoutChild);
-    final Size childSize = child.size;
-
+  Offset _childOffsetFromSize(Size childSize, Size size) {
+    assert(child != null);
     assert(padding.isNonNegative);
     assert(titleAlignment.y == 1.0);
     // yAdjustment is the minimum additional y offset to shift the child in
@@ -2284,11 +2282,34 @@ class _RenderExpandedTitleBox extends RenderShiftedBox {
     // top padding is basically ignored since the expanded title is
     // bottom-aligned).
     final double yAdjustment = clampDouble(childSize.height + padding.bottom - maxExtent, 0, padding.bottom);
-    final double offsetY = size.height - childSize.height - padding.bottom + yAdjustment;
     final double offsetX = (titleAlignment.x + 1) / 2 * (size.width - padding.horizontal - childSize.width) + padding.left;
+    final double offsetY = size.height - childSize.height - padding.bottom + yAdjustment;
+    return Offset(offsetX, offsetY);
+  }
 
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final BoxConstraints childConstraints = constraints.widthConstraints().deflate(padding);
+    final BaselineOffset result = BaselineOffset(child.getDryBaseline(childConstraints, baseline))
+      + _childOffsetFromSize(child.getDryLayout(childConstraints), getDryLayout(constraints)).dy;
+    return result.offset;
+  }
+
+  @override
+  void performLayout() {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      size = constraints.smallest;
+      return;
+    }
+    size = constraints.biggest;
+    child.layout(constraints.widthConstraints().deflate(padding), parentUsesSize: true);
     final BoxParentData childParentData = child.parentData! as BoxParentData;
-    childParentData.offset = Offset(offsetX, offsetY);
+    childParentData.offset = _childOffsetFromSize(child.size, size);
   }
 }
 
