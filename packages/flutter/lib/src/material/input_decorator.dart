@@ -4703,19 +4703,19 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
       return BorderSide(color: _colors.onSurface.withOpacity(0.38));
     }
     if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
-        return BorderSide(color: _colors.onErrorContainer);
-      }
       if (states.contains(MaterialState.focused)) {
         return BorderSide(color: _colors.error, width: 2.0);
       }
+      if (states.contains(MaterialState.hovered)) {
+        return BorderSide(color: _colors.onErrorContainer);
+      }
       return BorderSide(color: _colors.error);
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return BorderSide(color: _colors.onSurface);
     }
     if (states.contains(MaterialState.focused)) {
       return BorderSide(color: _colors.primary, width: 2.0);
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return BorderSide(color: _colors.onSurface);
     }
     return BorderSide(color: _colors.onSurfaceVariant);
     });
@@ -4726,19 +4726,19 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
       return BorderSide(color: _colors.onSurface.withOpacity(0.12));
     }
     if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
-        return BorderSide(color: _colors.onErrorContainer);
-      }
       if (states.contains(MaterialState.focused)) {
         return BorderSide(color: _colors.error, width: 2.0);
       }
+      if (states.contains(MaterialState.hovered)) {
+        return BorderSide(color: _colors.onErrorContainer);
+      }
       return BorderSide(color: _colors.error);
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return BorderSide(color: _colors.onSurface);
     }
     if (states.contains(MaterialState.focused)) {
       return BorderSide(color: _colors.primary, width: 2.0);
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return BorderSide(color: _colors.onSurface);
     }
     return BorderSide(color: _colors.outline);
   });

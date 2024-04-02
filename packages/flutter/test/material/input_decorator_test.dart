@@ -544,6 +544,25 @@ void main() {
           expect(getBorderColor(tester), theme.colorScheme.primary);
           expect(getBorderWeight(tester), 2.0);
         });
+
+        testWidgets('active indicator has correct weight and color when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/145897.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getBorderColor(tester), theme.colorScheme.primary);
+          expect(getBorderWeight(tester), 2.0);
+        });
       });
 
       group('when field is in error', () {
@@ -634,6 +653,25 @@ void main() {
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
           expect(getBorderColor(tester), theme.colorScheme.onErrorContainer);
           expect(getBorderWeight(tester), 1.0);
+        });
+
+        testWidgets('active indicator has correct weight and color when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/145897.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getBorderColor(tester), theme.colorScheme.error);
+          expect(getBorderWeight(tester), 2.0);
         });
       });
 
@@ -872,6 +910,25 @@ void main() {
           expect(getBorderColor(tester), theme.colorScheme.primary);
           expect(getBorderWeight(tester), 2.0);
         });
+
+        testWidgets('outline has correct weight and color when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/145897.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getBorderColor(tester), theme.colorScheme.primary);
+          expect(getBorderWeight(tester), 2.0);
+        });
       });
 
       group('when field is in error', () {
@@ -958,6 +1015,25 @@ void main() {
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
           expect(getBorderColor(tester), theme.colorScheme.onErrorContainer);
           expect(getBorderWeight(tester), 1.0);
+        });
+
+        testWidgets('outline has correct weight and color when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/145897.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getBorderColor(tester), theme.colorScheme.error);
+          expect(getBorderWeight(tester), 2.0);
         });
       });
 
