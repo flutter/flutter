@@ -178,8 +178,7 @@ class _RenderCompositionCallback extends RenderProxyBox {
 /// controller's [value] instead. In some situations, only setting the controller's
 /// [text] property seems sufficient, but is not. For example, to clear
 /// a [TextField], it is insufficient to set [TextEditingController.text]
-/// to the empty string. Instead, use [TextEditingController.clear]
-/// to change the controller's value.
+/// to the empty string. Instead, use [TextEditingController.clear].
 ///
 /// Remember to [dispose] of the [TextEditingController] when it is no longer
 /// needed. This will ensure we discard any resources used by the object.
