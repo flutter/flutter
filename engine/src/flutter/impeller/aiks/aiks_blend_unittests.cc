@@ -371,7 +371,14 @@ TEST_P(AiksTest, ClearBlend) {
 static Picture BlendModeTest(Vector2 content_scale,
                              BlendMode blend_mode,
                              const std::shared_ptr<Image>& src_image,
-                             const std::shared_ptr<Image>& dst_image) {
+                             const std::shared_ptr<Image>& dst_image,
+                             Scalar src_alpha) {
+  if (AiksTest::ImGuiBegin("Controls", nullptr,
+                           ImGuiWindowFlags_AlwaysAutoResize)) {
+    ImGui::SliderFloat("Source alpha", &src_alpha, 0, 1);
+    ImGui::End();
+  }
+
   Color destination_color = Color::CornflowerBlue().WithAlpha(0.75);
   auto source_colors = std::vector<Color>({Color::White().WithAlpha(0.75),
                                            Color::LimeGreen().WithAlpha(0.75),
@@ -456,8 +463,15 @@ static Picture BlendModeTest(Vector2 content_scale,
   canvas.Save();
   canvas.SaveLayer({.blend_mode = BlendMode::kSourceOver});
   {
-    canvas.DrawImage(dst_image, {0, 0}, {.blend_mode = BlendMode::kSourceOver});
-    canvas.DrawImage(src_image, {0, 0}, {.blend_mode = blend_mode});
+    canvas.DrawImage(dst_image, {0, 0},
+                     {
+                         .blend_mode = BlendMode::kSourceOver,
+                     });
+    canvas.DrawImage(src_image, {0, 0},
+                     {
+                         .color = Color::White().WithAlpha(src_alpha),
+                         .blend_mode = blend_mode,
+                     });
   }
   canvas.Restore();
   canvas.Restore();
@@ -468,7 +482,8 @@ static Picture BlendModeTest(Vector2 content_scale,
   {
     canvas.DrawImage(dst_image, {400, 0},
                      {.blend_mode = BlendMode::kSourceOver});
-    canvas.SaveLayer({.blend_mode = blend_mode});
+    canvas.SaveLayer({.color = Color::White().WithAlpha(src_alpha),
+                      .blend_mode = blend_mode});
     {
       canvas.DrawImage(src_image, {400, 0},
                        {.blend_mode = BlendMode::kSourceOver});
@@ -481,16 +496,33 @@ static Picture BlendModeTest(Vector2 content_scale,
   return canvas.EndRecordingAsPicture();
 }
 
-#define BLEND_MODE_TEST(blend_mode)                                          \
-  TEST_P(AiksTest, BlendMode##blend_mode) {                                  \
-    auto src_image = std::make_shared<Image>(                                \
-        CreateTextureForFixture("blend_mode_src.png"));                      \
-    auto dst_image = std::make_shared<Image>(                                \
-        CreateTextureForFixture("blend_mode_dst.png"));                      \
-    OpenPlaygroundHere(BlendModeTest(                                        \
-        GetContentScale(), BlendMode::k##blend_mode, src_image, dst_image)); \
+#define BLEND_MODE_TEST(blend_mode)                                        \
+  TEST_P(AiksTest, BlendMode##blend_mode) {                                \
+    auto src_image = std::make_shared<Image>(                              \
+        CreateTextureForFixture("blend_mode_src.png"));                    \
+    auto dst_image = std::make_shared<Image>(                              \
+        CreateTextureForFixture("blend_mode_dst.png"));                    \
+    auto callback = [&](AiksContext& renderer) -> std::optional<Picture> { \
+      return BlendModeTest(GetContentScale(), BlendMode::k##blend_mode,    \
+                           src_image, dst_image, /*src_alpha=*/1.0);       \
+    };                                                                     \
+    OpenPlaygroundHere(callback);                                          \
   }
 IMPELLER_FOR_EACH_BLEND_MODE(BLEND_MODE_TEST)
+
+#define BLEND_MODE_SRC_ALPHA_TEST(blend_mode)                              \
+  TEST_P(AiksTest, BlendModeSrcAlpha##blend_mode) {                        \
+    auto src_image = std::make_shared<Image>(                              \
+        CreateTextureForFixture("blend_mode_src.png"));                    \
+    auto dst_image = std::make_shared<Image>(                              \
+        CreateTextureForFixture("blend_mode_dst.png"));                    \
+    auto callback = [&](AiksContext& renderer) -> std::optional<Picture> { \
+      return BlendModeTest(GetContentScale(), BlendMode::k##blend_mode,    \
+                           src_image, dst_image, /*src_alpha=*/0.5);       \
+    };                                                                     \
+    OpenPlaygroundHere(callback);                                          \
+  }
+IMPELLER_FOR_EACH_BLEND_MODE(BLEND_MODE_SRC_ALPHA_TEST)
 
 TEST_P(AiksTest, CanDrawPaintMultipleTimesInteractive) {
   auto modes = GetBlendModeSelection();
