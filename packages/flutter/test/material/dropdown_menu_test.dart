@@ -2108,6 +2108,29 @@ void main() {
     expect(called, 3);
     expect(controller.text, 'Green');
   });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/140596.
+  testWidgets('Long text item does not overflow', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: DropdownMenu<int>(
+          dropdownMenuEntries: <DropdownMenuEntry<int>>[
+            DropdownMenuEntry<int>(
+              value: 0,
+              label: 'This is a long text that is multiplied by 4 so it can overflow. ' * 4,
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.pump();
+    await tester.tap(find.byType(DropdownMenu<int>));
+    await tester.pumpAndSettle();
+
+    // No exception should be thrown.
+    expect(tester.takeException(), isNull);
+  });
 }
 
 enum TestMenu {

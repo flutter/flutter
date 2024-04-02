@@ -854,6 +854,7 @@ class MenuItemButton extends StatefulWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.closeOnActivate = true,
+    this.overflowAxis = Axis.horizontal,
     required this.child,
   });
 
@@ -922,6 +923,18 @@ class MenuItemButton extends StatefulWidget {
   /// Defaults to true.
   /// {@endtemplate}
   final bool closeOnActivate;
+
+  /// The direction in which the menu item expands.
+  ///
+  /// If the menu item button is a descendent of [MenuAnchor] or [MenuBar], then
+  /// this property is ignored.
+  ///
+  /// If [overflowAxis] is [Axis.vertical], the menu will be expanded vertically.
+  /// If [overflowAxis] is [Axis.horizontal], then the menu  will be
+  /// expanded horizontally.
+  ///
+  /// Defaults to [Axis.horizontal].
+  final Axis overflowAxis;
 
   /// The widget displayed in the center of this button.
   ///
@@ -1052,6 +1065,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
   // If a focus node isn't given to the widget, then we have to manage our own.
   FocusNode? _internalFocusNode;
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
+  _MenuAnchorState? get _anchor => _MenuAnchorState._maybeOf(context);
 
   @override
   void initState() {
@@ -1107,6 +1121,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
         shortcut: widget.shortcut,
         trailingIcon: widget.trailingIcon,
         hasSubmenu: false,
+        overflowAxis: _anchor?._orientation ?? widget.overflowAxis,
         child: widget.child!,
       ),
     );
@@ -2958,6 +2973,7 @@ class _MenuItemLabel extends StatelessWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.shortcut,
+    this.overflowAxis = Axis.vertical,
     required this.child,
   });
 
@@ -2981,6 +2997,9 @@ class _MenuItemLabel extends StatelessWidget {
   /// the shortcut.
   final MenuSerializableShortcut? shortcut;
 
+  /// The direction in which the menu item expands.
+  final Axis overflowAxis;
+
   /// The required label child widget.
   final Widget child;
 
@@ -2991,19 +3010,44 @@ class _MenuItemLabel extends StatelessWidget {
       _kLabelItemMinSpacing,
       _kLabelItemDefaultSpacing + density.horizontal * 2,
     );
+
+    Widget leadings;
+    if (overflowAxis == Axis.vertical) {
+      leadings = Expanded(
+        child: ClipRect(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              if (leadingIcon != null) leadingIcon!,
+              Expanded(
+                child: ClipRect(
+                  child: Padding(
+                    padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
+                    child: child,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      leadings = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          if (leadingIcon != null) leadingIcon!,
+          Padding(
+            padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
+            child: child,
+          ),
+        ],
+      );
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            if (leadingIcon != null) leadingIcon!,
-            Padding(
-              padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
-              child: child,
-            ),
-          ],
-        ),
+        leadings,
         if (trailingIcon != null)
           Padding(
             padding: EdgeInsetsDirectional.only(start: horizontalPadding),
@@ -3337,6 +3381,16 @@ class _MenuPanelState extends State<_MenuPanel> {
       }
     }
 
+    // If the menu panel is horizontal, then the children should be wrapped in
+    // an IntrinsicWidth widget to ensure that the children are as wide as the
+    // widest child.
+    List<Widget> children = widget.children;
+    if (widget.orientation == Axis.horizontal) {
+      children = children.map<Widget>((Widget child) {
+        return IntrinsicWidth(child: child);
+      }).toList();
+    }
+
     Widget menuPanel = _intrinsicCrossSize(
       child: Material(
         elevation: elevation,
@@ -3366,7 +3420,7 @@ class _MenuPanelState extends State<_MenuPanel> {
                     textDirection: Directionality.of(context),
                     direction: widget.orientation,
                     mainAxisSize: MainAxisSize.min,
-                    children: widget.children,
+                    children: children,
                   ),
                 ),
               ),

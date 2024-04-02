@@ -662,7 +662,7 @@ void main() {
       expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(0, 0, 800, 48)));
       expect(
         tester.getRect(find.text(TestMenu.subMenu10.label)),
-        equals(const Rect.fromLTRB(124.0, 73.0, 278.0, 87.0)),
+        equals(const Rect.fromLTRB(124.0, 73.0, 314.0, 87.0)),
       );
       expect(
         tester.getRect(
@@ -730,7 +730,7 @@ void main() {
       expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(0, 0, 800, 48)));
       expect(
         tester.getRect(find.text(TestMenu.subMenu10.label)),
-        equals(const Rect.fromLTRB(522.0, 73.0, 676.0, 87.0)),
+        equals(const Rect.fromLTRB(486.0, 73.0, 676.0, 87.0)),
       );
       expect(
         tester.getRect(
@@ -941,7 +941,7 @@ void main() {
       expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(22.0, 22.0, 778.0, 70.0)));
       expect(
         tester.getRect(find.text(TestMenu.subMenu10.label)),
-        equals(const Rect.fromLTRB(146.0, 95.0, 300.0, 109.0)),
+        equals(const Rect.fromLTRB(146.0, 95.0, 336.0, 109.0)),
       );
       expect(
         tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1)),
@@ -997,7 +997,7 @@ void main() {
       expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(22.0, 22.0, 778.0, 70.0)));
       expect(
         tester.getRect(find.text(TestMenu.subMenu10.label)),
-        equals(const Rect.fromLTRB(500.0, 95.0, 654.0, 109.0)),
+        equals(const Rect.fromLTRB(464.0, 95.0, 654.0, 109.0)),
       );
       expect(
         tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1)),
@@ -2070,7 +2070,7 @@ void main() {
       expect(closed, unorderedEquals(<TestMenu>[TestMenu.mainMenu1, TestMenu.subMenu11]));
       expect(opened, isEmpty);
     });
-  });
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/145527
 
   group('MenuItemButton', () {
     testWidgets('Shortcut mnemonics are displayed', (WidgetTester tester) async {
@@ -2191,7 +2191,10 @@ void main() {
       expect(mnemonic1.data, equals('Fn'));
       mnemonic2 = tester.widget(findMnemonic(TestMenu.subSubMenu112.label));
       expect(mnemonic2.data, equals('↵'));
-    }, variant: TargetPlatformVariant.all());
+    },
+      variant: TargetPlatformVariant.all(),
+      skip: kIsWeb && !isCanvasKit, // https://github.com/flutter/flutter/issues/145527
+    );
 
     testWidgets('leadingIcon is used when set', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -2247,7 +2250,7 @@ void main() {
       await tester.pump();
 
       expect(find.text('trailingIcon'), findsOneWidget);
-    });
+    }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/145527
 
     testWidgets('SubmenuButton uses supplied controller', (WidgetTester tester) async {
       final MenuController submenuController = MenuController();
@@ -2436,6 +2439,61 @@ void main() {
       await tester.pump();
       expect(find.byType(MenuItemButton), findsNWidgets(1));
     });
+
+    // This is a regression test for https://github.com/flutter/flutter/issues/129439.
+    testWidgets('MenuItemButton does not overflow when child is long', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 200,
+            child: MenuItemButton(
+              overflowAxis: Axis.vertical,
+              onPressed: () {},
+              child: const Text('MenuItem Button does not overflow when child is long'),
+            ),
+          ),
+        ),
+      ));
+
+      // No exception should be thrown.
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('MenuItemButton layout is updated by overflowAxis', (WidgetTester tester) async {
+      Widget buildMenuButton({ required Axis overflowAxis, bool constrainedLayout = false }) {
+        return MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: constrainedLayout ? 200 : null,
+              child: MenuItemButton(
+                overflowAxis: overflowAxis,
+                onPressed: () {},
+                child: const Text('This is a very long text that will wrap to the multiple lines.'),
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Test a long MenuItemButton in an unconstrained layout with vertical overflow axis.
+      await tester.pumpWidget(buildMenuButton(overflowAxis: Axis.vertical));
+      expect(tester.getSize(find.byType(MenuItemButton)), const Size(800.0, 48.0));
+
+      // Test a long MenuItemButton in an unconstrained layout with horizontal overflow axis.
+      await tester.pumpWidget(buildMenuButton(overflowAxis: Axis.horizontal));
+      expect(tester.getSize(find.byType(MenuItemButton)), const Size(800.0, 48.0));
+
+      // Test a long MenuItemButton in a constrained layout with vertical overflow axis.
+      await tester.pumpWidget(buildMenuButton(overflowAxis: Axis.vertical, constrainedLayout: true));
+      expect(tester.getSize(find.byType(MenuItemButton)), const Size(200.0, 120.0));
+
+      // Test a long MenuItemButton in a constrained layout with horizontal overflow axis.
+      await tester.pumpWidget(buildMenuButton(overflowAxis: Axis.horizontal, constrainedLayout: true));
+      expect(tester.getSize(find.byType(MenuItemButton)), const Size(200.0, 48.0));
+      // This should throw an error.
+      final AssertionError exception = tester.takeException() as AssertionError;
+      expect(exception, isAssertionError);
+    }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
   });
 
   group('Layout', () {
@@ -3159,7 +3217,7 @@ void main() {
       expect(find.text(allExpected), findsOneWidget);
       expect(find.text(charExpected), findsOneWidget);
     }, variant: TargetPlatformVariant.all());
-  });
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/145527
 
   group('CheckboxMenuButton', () {
     testWidgets('tapping toggles checkbox', (WidgetTester tester) async {
@@ -3566,7 +3624,7 @@ void main() {
     expect(material.textStyle?.fontStyle, menuTextStyle.fontStyle);
     expect(material.textStyle?.wordSpacing, menuTextStyle.wordSpacing);
     expect(material.textStyle?.decoration, menuTextStyle.decoration);
-  });
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/145527
 
   testWidgets('SubmenuButton.onFocusChange is respected', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -3604,6 +3662,31 @@ void main() {
     await tester.pump();
     expect(focusNode.hasFocus, false);
     expect(onFocusChangeCalled, 2);
+  });
+
+  testWidgets('Horizontal _MenuPanel wraps children with IntrinsicWidth', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: MenuBar(
+            children: <Widget>[
+              MenuItemButton(
+                onPressed: () {},
+                child: const Text('Menu Item'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Horizontal _MenuPanel wraps children with IntrinsicWidth to ensure MenuItemButton
+    // with vertical overflow axis is as wide as the widest child.
+    final Finder intrinsicWidthFinder = find.ancestor(
+      of: find.byType(MenuItemButton),
+      matching: find.byType(IntrinsicWidth),
+    );
+    expect(intrinsicWidthFinder, findsOneWidget);
   });
 }
 
