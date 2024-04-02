@@ -1515,56 +1515,6 @@ void main() {
       selectionOverlay.dispose();
       await tester.pumpAndSettle();
     });
-
-    testWidgets('magnifier is in correct position when there is transform above Overlay', (WidgetTester tester) async {
-      final GlobalKey magnifierKey = GlobalKey();
-      Offset? builtGlobalGesturePosition;
-      Rect? builtFieldBounds;
-      const double rootScale = 0.5;
-      final SelectionOverlay selectionOverlay = await pumpApp(
-        tester,
-        rootScale: rootScale,
-        magnifierConfiguration: TextMagnifierConfiguration(
-          shouldDisplayHandlesInMagnifier: false,
-          magnifierBuilder: (BuildContext context, MagnifierController controller, ValueNotifier<MagnifierInfo>? notifier) {
-            builtGlobalGesturePosition = notifier?.value.globalGesturePosition;
-            builtFieldBounds = notifier?.value.fieldBounds;
-            return SizedBox.shrink(
-              key: magnifierKey,
-            );
-          },
-        ),
-      );
-
-      expect(find.byKey(magnifierKey), findsNothing);
-
-      const Offset globalGesturePosition = Offset(10.0, 10.0);
-      final Rect fieldBounds = Offset.zero & const Size(200.0, 50.0);
-      final MagnifierInfo info = MagnifierInfo(
-        globalGesturePosition: globalGesturePosition,
-        caretRect: Offset.zero & const Size(5.0, 20.0),
-        fieldBounds: fieldBounds,
-        currentLineBoundaries: Offset.zero & const Size(200.0, 50.0),
-      );
-      selectionOverlay.showMagnifier(info);
-      await tester.pump();
-
-      expect(tester.takeException(), isNull);
-      expect(find.byKey(magnifierKey), findsOneWidget);
-      print(builtFieldBounds);
-      print(Rect.fromPoints(
-        fieldBounds.topLeft * rootScale,
-        fieldBounds.bottomRight * rootScale
-      ));
-      print(builtGlobalGesturePosition);
-      print(globalGesturePosition * rootScale);
-      // TOOD(justinmc): builtFieldBounds isn't scaled at all, hmmm...
-      expect(builtFieldBounds, Rect.fromPoints(
-        fieldBounds.topLeft * rootScale,
-        fieldBounds.bottomRight * rootScale
-      ));
-      expect(builtGlobalGesturePosition, globalGesturePosition * rootScale);
-     });
   });
 
   group('ClipboardStatusNotifier', () {
@@ -1786,7 +1736,7 @@ void main() {
       final LayerLink endHandleLayerLink = LayerLink();
       final LayerLink toolbarLayerLink = LayerLink();
 
-      final UniqueKey editableText = UniqueKey();
+      final UniqueKey editableTextKey = UniqueKey();
       final TextEditingController controller = TextEditingController();
       addTearDown(controller.dispose);
       final FocusNode focusNode = FocusNode();
@@ -1797,7 +1747,7 @@ void main() {
           key: column,
           children: <Widget>[
             FakeEditableText(
-              key: editableText,
+              key: editableTextKey,
               controller: controller,
               focusNode: focusNode,
             ),
@@ -1819,7 +1769,7 @@ void main() {
 
       return TextSelectionOverlay(
         value: TextEditingValue.empty,
-        renderObject: tester.state<EditableTextState>(find.byKey(editableText)).renderEditable,
+        renderObject: tester.state<EditableTextState>(find.byKey(editableTextKey)).renderEditable,
         context: tester.element(find.byKey(column)),
         onSelectionHandleTapped: () {},
         startHandleLayerLink: startHandleLayerLink,

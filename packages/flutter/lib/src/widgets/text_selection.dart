@@ -666,19 +666,25 @@ class TextSelectionOverlay {
       offset: lineAtOffset.baseOffset,
     );
 
-    final Rect lineBoundaries = Rect.fromPoints(
+    final Rect localLineBoundaries = Rect.fromPoints(
       renderEditable.getLocalRectForCaret(positionAtBeginningOfLine).topCenter,
       renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomCenter,
     );
+    final Rect globalLineBoundaries = Rect.fromPoints(
+      renderEditable.localToGlobal(localLineBoundaries.topLeft),
+      renderEditable.localToGlobal(localLineBoundaries.bottomRight),
+    );
 
-    final Rect globalCaretRect =
-        renderEditable.localToGlobal(localCaretRect.topLeft) & localCaretRect.size;
+    final Rect globalCaretRect = Rect.fromPoints(
+        renderEditable.localToGlobal(localCaretRect.topLeft),
+        renderEditable.localToGlobal(localCaretRect.bottomRight),
+    );
 
     return MagnifierInfo(
       fieldBounds: Rect.fromPoints(globalRenderEditableTopLeft, globalRenderEditableBottomRight),
       globalGesturePosition: overlayGesturePosition,
       caretRect: globalCaretRect,
-      currentLineBoundaries: lineBoundaries.shift(globalRenderEditableTopLeft),
+      currentLineBoundaries: globalLineBoundaries,
     );
   }
 

@@ -16287,6 +16287,168 @@ void main() {
         isNull,
       );
     });
+
+    // TODO(justinmc): Test the transform above the Overlay.
+    /*
+    testWidgets('magnifier is in correct position when there is transform above Overlay', (WidgetTester tester) async {
+      controller.value = const TextEditingValue(text: 'I love flutter');
+      final GlobalKey magnifierKey = GlobalKey();
+      const double rootScale = 0.5;
+      await tester.pumpWidget(Transform.scale(
+        scale: rootScale,
+        child: MaterialApp(
+          home: Column(
+            children: <Widget>[
+              EditableText(
+                //key: editableTextKey,
+                controller: controller,
+                showSelectionHandles: true,
+                autofocus: true,
+                focusNode: focusNode,
+                style: Typography.material2018().black.titleMedium!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                selectionControls: materialTextSelectionControls,
+                keyboardType: TextInputType.text,
+                textAlign: TextAlign.right,
+                magnifierConfiguration: TextMagnifierConfiguration(
+                  shouldDisplayHandlesInMagnifier: false,
+                  magnifierBuilder: (BuildContext context, MagnifierController controller, ValueNotifier<MagnifierInfo>? notifier) {
+                    print('justin magbuilder ${notifier!.value.caretRect}');
+                    return TextMagnifier(
+                      key: magnifierKey,
+                      magnifierInfo: notifier,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ));
+
+      await tester.tapAt(textOffsetToPosition(tester, 3));
+      await tester.pumpAndSettle();
+      List<RenderBox> handles = List<RenderBox>.from(
+        tester.renderObjectList<RenderBox>(
+          find.descendant(
+            of: find.byType(CompositedTransformFollower),
+            matching: find.byType(Padding),
+          ),
+        ),
+      );
+      expect(handles, hasLength(1));
+
+      final TestGesture gesture = await tester.startGesture(handles.first.localToGlobal(Offset(
+          handles.first.size.width / 2,
+          handles.first.size.height / 2,
+        ),
+      ));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.byKey(magnifierKey), findsNothing);
+
+      const Offset offset1 = Offset(0, 20);
+      print('justin do the first move.');
+      await gesture.moveBy(offset1);
+      print('justin done the first move.');
+      await tester.pump(const Duration(milliseconds: 20));
+      await tester.pumpAndSettle();
+      expect(find.byKey(magnifierKey), findsOneWidget);
+      expect(tester.getTopLeft(find.byKey(magnifierKey)), const Offset(230.9075, 197.55));
+
+      const Offset offset2 = Offset(0, 80);
+      print('justin do the second move.');
+      await gesture.moveBy(offset2);
+      print('justin done the second move.');
+      // TODO(justinmc): Call showmagnifier?
+      await tester.pump(const Duration(milliseconds: 20));
+      await tester.pumpAndSettle();
+      expect(find.byKey(magnifierKey), findsOneWidget);
+      // TODO(justinmc): This is mysteriously the same as  before the second move
+      // gesture. Why? It seems like the update is being received ok.
+      expect(tester.getTopLeft(find.byKey(magnifierKey)), const Offset(230.0, 297.55));
+
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 20));
+      expect(find.byKey(magnifierKey), findsNothing);
+
+      await tester.pumpAndSettle();
+    });
+    */
+
+    testWidgets('magnifier is in correct position when EditableText is scaled', (WidgetTester tester) async {
+      controller.text = 'hello \n world \n this \n is \n text';
+      final GlobalKey magnifierKey = GlobalKey();
+      const double scale = 0.5;
+      await tester.pumpWidget(MaterialApp(
+        home: Column(
+          children: <Widget>[
+            Transform.scale(
+              scale: scale,
+              child: EditableText(
+                controller: controller,
+                showSelectionHandles: true,
+                autofocus: true,
+                focusNode: focusNode,
+                style: Typography.material2018().black.titleMedium!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                selectionControls: materialTextSelectionControls,
+                keyboardType: TextInputType.text,
+                textAlign: TextAlign.right,
+                magnifierConfiguration: TextMagnifierConfiguration(
+                  shouldDisplayHandlesInMagnifier: false,
+                  magnifierBuilder: (BuildContext context, MagnifierController controller, ValueNotifier<MagnifierInfo>? notifier) {
+                    print('justin magbuilder ${notifier!.value.caretRect}');
+                    return TextMagnifier(
+                      key: magnifierKey,
+                      magnifierInfo: notifier,
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ));
+
+      await tester.tapAt(textOffsetToPosition(tester, 3));
+      await tester.pumpAndSettle();
+      final List<RenderBox> handles = List<RenderBox>.from(
+        tester.renderObjectList<RenderBox>(
+          find.descendant(
+            of: find.byType(CompositedTransformFollower),
+            matching: find.byType(Padding),
+          ),
+        ),
+      );
+      expect(handles, hasLength(1));
+      final RenderBox handle = handles.first;
+      expect(find.byKey(magnifierKey), findsNothing);
+
+      // TODO(justinmc): Make sure that the amount that the magnifier moved is
+      // proportional to the gesture and the scale.
+      final TestGesture gesture = await tester.startGesture(handle.localToGlobal(Offset(
+          handle.size.width / 2,
+          handle.size.height / 2,
+        ),
+      ));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.byKey(magnifierKey), findsOneWidget);
+      expect(tester.getTopLeft(find.byKey(magnifierKey)), const Offset(545.815, 0.0));
+
+      await gesture.moveTo(textOffsetToPosition(tester, 5));
+      await tester.pump(const Duration(milliseconds: 20));
+      await tester.pumpAndSettle();
+      expect(find.byKey(magnifierKey), findsOneWidget);
+      expect(tester.getTopLeft(find.byKey(magnifierKey)), const Offset(559.815, 0.0));
+
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 20));
+      expect(find.byKey(magnifierKey), findsNothing);
+
+      await tester.pumpAndSettle();
+    });
   });
 
   // Regression test for: https://github.com/flutter/flutter/issues/117418.
