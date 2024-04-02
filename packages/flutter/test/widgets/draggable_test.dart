@@ -967,6 +967,10 @@ void main() {
       await gesture.moveTo(thirdLocation);
       await tester.pump();
       expect(tester.getTopLeft(find.text('N')), thirdLocation);
+
+      // Finish gesture to release resources.
+      await gesture.up();
+      await tester.pump();
     });
 
     testWidgets('Horizontal axis draggable moves horizontally', (WidgetTester tester) async {
@@ -982,6 +986,10 @@ void main() {
       await gesture.moveTo(thirdLocation);
       await tester.pump();
       expect(tester.getTopLeft(find.text('H')), thirdLocation);
+
+      // Finish gesture to release resources.
+      await gesture.up();
+      await tester.pump();
     });
 
     testWidgets('Horizontal axis draggable does not move vertically', (WidgetTester tester) async {
@@ -1000,6 +1008,10 @@ void main() {
       await gesture.moveTo(thirdDragLocation);
       await tester.pump();
       expect(tester.getTopLeft(find.text('H')), thirdWidgetLocation);
+
+      // Finish gesture to release resources.
+      await gesture.up();
+      await tester.pump();
     });
 
     testWidgets('Vertical axis draggable moves vertically', (WidgetTester tester) async {
@@ -1015,6 +1027,10 @@ void main() {
       await gesture.moveTo(thirdLocation);
       await tester.pump();
       expect(tester.getTopLeft(find.text('V')), thirdLocation);
+
+      // Finish gesture to release resources.
+      await gesture.up();
+      await tester.pump();
     });
 
     testWidgets('Vertical axis draggable does not move horizontally', (WidgetTester tester) async {
@@ -1033,6 +1049,10 @@ void main() {
       await gesture.moveTo(thirdDragLocation);
       await tester.pump();
       expect(tester.getTopLeft(find.text('V')), thirdWidgetLocation);
+
+      // Finish gesture to release resources.
+      await gesture.up();
+      await tester.pump();
     });
   });
 
@@ -1666,6 +1686,10 @@ void main() {
     expect(find.text('Dragging'), findsOneWidget);
     expect(find.text('Target'), findsOneWidget);
     expect(find.text('Rejected'), findsNothing);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pump();
   });
 
 
@@ -3099,6 +3123,10 @@ void main() {
         ),
         findsNothing,
       );
+
+      // Finish gesture to release resources.
+      await gesture.up();
+      await tester.pump();
     });
 
   testWidgets('Drag feedback is put on root overlay with [rootOverlay] flag', (WidgetTester tester) async {
@@ -3601,6 +3629,10 @@ void main() {
 
     await tester.tap(find.text('Draggable'));
     expect(onTap, true);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pump();
   });
 
   testWidgets('configurable feedback ignore pointer behavior - LongPressDraggable', (WidgetTester tester) async {
@@ -3632,6 +3664,10 @@ void main() {
 
     await tester.tap(find.text('Draggable'));
     expect(onTap, true);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pump();
   });
 
   testWidgets('configurable DragTarget hit test behavior', (WidgetTester tester) async {
@@ -3839,6 +3875,10 @@ Future<void> _testChildAnchorFeedbackPosition({ required WidgetTester tester, do
   final Offset sourceTopLeft = tester.getTopLeft(find.text('Source'));
   final Offset dragOffset = secondLocation - firstLocation;
   expect(feedbackTopLeft, equals(sourceTopLeft + dragOffset));
+
+  // Finish gesture to release resources.
+  await gesture.up();
+  await tester.pump();
 }
 
 class DragTargetData { }
