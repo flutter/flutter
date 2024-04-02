@@ -66,6 +66,7 @@ import 'package:process/process.dart';
 import 'run_command.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
 import 'suite_runners/run_analyze_tests.dart';
+import 'suite_runners/run_docs_tests.dart';
 import 'suite_runners/run_flutter_packages_tests.dart';
 import 'suite_runners/run_realm_checker_tests.dart';
 import 'suite_runners/run_skp_generator_tests.dart';
@@ -255,7 +256,7 @@ Future<void> main(List<String> args) async {
       'customer_testing': _runCustomerTesting,
       'analyze': () => analyzeRunner(flutterRoot),
       'fuchsia_precache': _runFuchsiaPrecache,
-      'docs': _runDocs,
+      'docs': () => docsRunner(flutterRoot),
       'verify_binaries_codesigned': _runVerifyCodesigned,
       kTestHarnessShardName: _runTestHarnessTests, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });
@@ -1259,22 +1260,6 @@ Future<void> _runFuchsiaPrecache() async {
       '--no-android',
       '--no-ios',
       '--force',
-    ],
-    workingDirectory: flutterRoot,
-  );
-}
-
-// Runs docs.
-Future<void> _runDocs() async {
-  printProgress('${green}Running flutter doc tests$reset');
-  await runCommand(
-    './dev/bots/docs.sh',
-    <String>[
-      '--output',
-      'dev/docs/api_docs.zip',
-      '--keep-staging',
-      '--staging-dir',
-      'dev/docs',
     ],
     workingDirectory: flutterRoot,
   );
