@@ -10,6 +10,7 @@ import 'box.dart';
 import 'debug.dart';
 import 'debug_overflow_indicator.dart';
 import 'layer.dart';
+import 'layout_helper.dart';
 import 'object.dart';
 import 'stack.dart' show RelativeRect;
 
@@ -53,8 +54,9 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
     double? result;
     final RenderBox? child = this.child;
+    assert(!debugNeedsLayout);
     if (child != null) {
-      assert(!debugNeedsLayout);
+      assert(!child.debugNeedsLayout);
       result = child.getDistanceToActualBaseline(baseline);
       final BoxParentData childParentData = child.parentData! as BoxParentData;
       if (result != null) {
@@ -278,14 +280,16 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
        _textDirection = textDirection,
        super(child);
 
+  /// The [Alignment] to use for aligning the child.
+  ///
+  /// This is the [alignment] resolved against [textDirection]. Subclasses should
+  /// use [resolvedAlignment] instead of [alignment] directly, for computing the
+  /// child's offset.
+  ///
+  /// The [performLayout] method will be called when the value changes.
+  @protected
+  Alignment get resolvedAlignment => _resolvedAlignment ??= alignment.resolve(textDirection);
   Alignment? _resolvedAlignment;
-
-  void _resolve() {
-    if (_resolvedAlignment != null) {
-      return;
-    }
-    _resolvedAlignment = alignment.resolve(textDirection);
-  }
 
   void _markNeedResolution() {
     _resolvedAlignment = null;
@@ -339,14 +343,12 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   /// this object's own size has been set.
   @protected
   void alignChild() {
-    _resolve();
     assert(child != null);
     assert(!child!.debugNeedsLayout);
     assert(child!.hasSize);
     assert(hasSize);
-    assert(_resolvedAlignment != null);
     final BoxParentData childParentData = child!.parentData! as BoxParentData;
-    childParentData.offset = _resolvedAlignment!.alongOffset(size - child!.size as Offset);
+    childParentData.offset = resolvedAlignment.alongOffset(size - child!.size as Offset);
   }
 
   @override
@@ -1419,33 +1421,40 @@ class RenderBaseline extends RenderShiftedBox {
     markNeedsLayout();
   }
 
+  ({Size size, double top}) _computeSizes(covariant BoxConstraints constraints, ChildLayouter layoutChild, ChildBaselineGetter getBaseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return (size: constraints.smallest, top: 0);
+    }
+    final BoxConstraints childConstraints = constraints.loosen();
+    final Size childSize = layoutChild(child, childConstraints);
+    final double childBaseline = getBaseline(child, childConstraints, baselineType) ?? childSize.height;
+    final double top = baseline - childBaseline;
+    return (size: constraints.constrain(Size(childSize.width, top + childSize.height)), top: top);
+  }
+
   @override
   @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
-    if (child != null) {
-      assert(debugCannotComputeDryLayout(
-        reason: 'Baseline metrics are only available after a full layout.',
-      ));
-      return Size.zero;
+    return _computeSizes(constraints, ChildLayoutHelper.dryLayoutChild, ChildLayoutHelper.getDryBaseline).size;
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    final double? result1 = child?.getDryBaseline(constraints.loosen(), baseline);
+    final double? result2 = child?.getDryBaseline(constraints.loosen(), baselineType);
+    if (result1 == null || result2 == null) {
+      return null;
     }
-    return constraints.smallest;
+    return this.baseline + result1 - result2;
   }
 
   @override
   void performLayout() {
-    if (child != null) {
-      final BoxConstraints constraints = this.constraints;
-      child!.layout(constraints.loosen(), parentUsesSize: true);
-      final double childBaseline = child!.getDistanceToBaseline(baselineType)!;
-      final double actualBaseline = baseline;
-      final double top = actualBaseline - childBaseline;
-      final BoxParentData childParentData = child!.parentData! as BoxParentData;
-      childParentData.offset = Offset(0.0, top);
-      final Size childSize = child!.size;
-      size = constraints.constrain(Size(childSize.width, top + childSize.height));
-    } else {
-      size = constraints.smallest;
-    }
+    final (:Size size, :double top) = _computeSizes(constraints, ChildLayoutHelper.layoutChild, ChildLayoutHelper.getBaseline);
+    this.size = size;
+    (child?.parentData as BoxParentData?)?.offset = Offset(0.0, top);
   }
 
   @override

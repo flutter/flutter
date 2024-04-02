@@ -1658,9 +1658,9 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     markNeedsLayout();
   }
 
-  TextDirection? get textDirection => _textDirection;
-  TextDirection? _textDirection;
-  set textDirection(TextDirection? value) {
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
     if (_textDirection == value) {
       return;
     }
@@ -1855,7 +1855,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
       tapPosition: position,
       chipSize: size,
       deleteButtonSize: deleteIcon!.size,
-      textDirection: textDirection!,
+      textDirection: textDirection,
     );
     final RenderBox? hitTestChild = hitIsOnDeleteIcon
         ? (deleteIcon ?? label ?? avatar)
@@ -1932,7 +1932,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
 
     Offset centerLayout(Size boxSize, double x) {
       assert(sizes.content >= boxSize.height);
-      switch (textDirection!) {
+      switch (textDirection) {
         case TextDirection.rtl:
           x -= boxSize.width;
         case TextDirection.ltr:
@@ -1947,7 +1947,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     Offset avatarOffset = Offset.zero;
     Offset labelOffset = Offset.zero;
     Offset deleteIconOffset = Offset.zero;
-    switch (textDirection!) {
+    switch (textDirection) {
       case TextDirection.rtl:
         double start = right;
         if (theme.showCheckmark || theme.showAvatar) {
