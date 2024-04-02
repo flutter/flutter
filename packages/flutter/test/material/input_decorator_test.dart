@@ -3803,8 +3803,7 @@ void main() {
       .map((DiagnosticsNode node) => node.name!);
     expect(nodeNames, unorderedEquals(<String>[
       'container',
-      'counter',
-      'helperError',
+      'subtext',
       'hint',
       'icon',
       'input',
@@ -3818,7 +3817,7 @@ void main() {
     final Set<Object> nodeValues = Set<Object>.from(
       renderer.debugDescribeChildren().map<Object>((DiagnosticsNode node) => node.value!),
     );
-    expect(nodeValues.length, 11);
+    expect(nodeValues.length, 10);
   });
 
   testWidgets('InputDecorationTheme.inputDecoration', (WidgetTester tester) async {
@@ -8971,8 +8970,7 @@ void main() {
         .map((DiagnosticsNode node) => node.name!);
       expect(nodeNames, unorderedEquals(<String>[
         'container',
-        'counter',
-        'helperError',
+        'subtext',
         'hint',
         'icon',
         'input',
@@ -8986,7 +8984,7 @@ void main() {
       final Set<Object> nodeValues = Set<Object>.from(
         renderer.debugDescribeChildren().map<Object>((DiagnosticsNode node) => node.value!),
       );
-      expect(nodeValues.length, 11);
+      expect(nodeValues.length, 10);
     });
 
     testWidgets('InputDecorator with empty border and label', (WidgetTester tester) async {

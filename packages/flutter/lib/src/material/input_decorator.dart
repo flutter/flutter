@@ -582,8 +582,7 @@ enum _DecorationSlot {
   suffix,
   prefixIcon,
   suffixIcon,
-  helperError,
-  counter,
+  subtext,
   container,
 }
 
@@ -609,12 +608,11 @@ class _Decoration {
     this.suffix,
     this.prefixIcon,
     this.suffixIcon,
-    this.helperError,
-    this.counter,
+    this.subtext,
     this.container,
   });
 
-  final EdgeInsetsGeometry contentPadding;
+  final EdgeInsets contentPadding;
   final bool isCollapsed;
   final double floatingLabelHeight;
   final double floatingLabelProgress;
@@ -632,8 +630,7 @@ class _Decoration {
   final Widget? suffix;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
-  final Widget? helperError;
-  final Widget? counter;
+  final Widget? subtext;
   final Widget? container;
 
   @override
@@ -663,8 +660,7 @@ class _Decoration {
         && other.suffix == suffix
         && other.prefixIcon == prefixIcon
         && other.suffixIcon == suffixIcon
-        && other.helperError == helperError
-        && other.counter == counter
+        && other.subtext == subtext
         && other.container == container;
   }
 
@@ -687,8 +683,7 @@ class _Decoration {
     suffix,
     prefixIcon,
     suffixIcon,
-    helperError,
-    counter,
+    subtext,
     container,
   );
 }
@@ -701,17 +696,15 @@ class _RenderDecorationLayout {
     required this.boxToBaseline,
     required this.inputBaseline, // for InputBorderType.underline
     required this.outlineBaseline, // for InputBorderType.outline
-    required this.subtextBaseline,
     required this.containerHeight,
-    required this.subtextHeight,
+    required this.size,
   });
 
   final Map<RenderBox?, double> boxToBaseline;
   final double inputBaseline;
   final double outlineBaseline;
-  final double subtextBaseline; // helper/error counter
   final double containerHeight;
-  final double subtextHeight;
+  final Size size;
 }
 
 // The workhorse: layout and paint a _Decorator widget's _Decoration.
@@ -742,13 +735,13 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   RenderBox? get suffix => childForSlot(_DecorationSlot.suffix);
   RenderBox? get prefixIcon => childForSlot(_DecorationSlot.prefixIcon);
   RenderBox? get suffixIcon => childForSlot(_DecorationSlot.suffixIcon);
-  RenderBox? get helperError => childForSlot(_DecorationSlot.helperError);
-  RenderBox? get counter => childForSlot(_DecorationSlot.counter);
+  RenderBox get subtext => childForSlot(_DecorationSlot.subtext)!;
   RenderBox? get container => childForSlot(_DecorationSlot.container);
 
   // The returned list is ordered for hit testing.
   @override
   Iterable<RenderBox> get children {
+    final RenderBox? subtext = childForSlot(_DecorationSlot.subtext);
     return <RenderBox>[
       if (icon != null)
         icon!,
@@ -766,10 +759,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         label!,
       if (hint != null)
         hint!,
-      if (helperError != null)
-        helperError!,
-      if (counter != null)
-        counter!,
+      if (subtext != null)
+        subtext,
       if (container != null)
         container!,
     ];
@@ -894,34 +885,20 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     if (container != null) {
       visitor(container!);
     }
-    if (helperError != null) {
-      visitor(helperError!);
-    }
-    if (counter != null) {
-      visitor(counter!);
-    }
+    visitor(subtext);
   }
 
   @override
   bool get sizedByParent => false;
 
-  static double _minWidth(RenderBox? box, double height) {
-    return box == null ? 0.0 : box.getMinIntrinsicWidth(height);
-  }
-
-  static double _maxWidth(RenderBox? box, double height) {
-    return box == null ? 0.0 : box.getMaxIntrinsicWidth(height);
-  }
-
-  static double _minHeight(RenderBox? box, double width) {
-    return box == null ? 0.0 : box.getMinIntrinsicHeight(width);
-  }
-
-  static Size _boxSize(RenderBox? box) => box == null ? Size.zero : box.size;
+  static double _minWidth(RenderBox? box, double height) => box?.getMinIntrinsicWidth(height) ?? 0.0;
+  static double _maxWidth(RenderBox? box, double height) => box?.getMaxIntrinsicWidth(height) ?? 0.0 ;
+  static double _minHeight(RenderBox? box, double width) => box?.getMinIntrinsicHeight(width) ?? 0.0;
+  static Size _boxSize(RenderBox? box) => box?.size ?? Size.zero;
 
   static BoxParentData _boxParentData(RenderBox box) => box.parentData! as BoxParentData;
 
-  EdgeInsets get contentPadding => decoration.contentPadding as EdgeInsets;
+  EdgeInsets get contentPadding => decoration.contentPadding;
 
   // Lay out the given box if needed, and return its baseline.
   double _layoutLineBox(RenderBox? box, BoxConstraints constraints) {
@@ -955,9 +932,9 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   // Returns a value used by performLayout to position all of the renderers.
   // This method applies layout to all of the renderers except the container.
   // For convenience, the container is laid out in performLayout().
-  _RenderDecorationLayout _layout(BoxConstraints layoutConstraints) {
+  _RenderDecorationLayout _layout(BoxConstraints constraints) {
     assert(
-      layoutConstraints.maxWidth < double.infinity,
+      constraints.maxWidth < double.infinity,
       'An InputDecorator, which is typically created by a TextField, cannot '
       'have an unbounded width.\n'
       'This happens when the parent widget does not provide a finite width '
@@ -969,7 +946,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
     // Margin on each side of subtext (counter and helperError)
     final Map<RenderBox?, double> boxToBaseline = <RenderBox?, double>{};
-    final BoxConstraints boxConstraints = layoutConstraints.loosen();
+    final BoxConstraints boxConstraints = constraints.loosen();
 
     // Layout all the widgets used by InputDecorator
     boxToBaseline[icon] = _layoutLineBox(icon, boxConstraints);
@@ -1018,16 +995,10 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       hint,
       boxConstraints.copyWith(minWidth: inputWidth, maxWidth: inputWidth),
     );
-    boxToBaseline[counter] = _layoutLineBox(counter, contentConstraints);
 
     // The helper or error text can occupy the full width less the space
     // occupied by the icon and counter.
-    boxToBaseline[helperError] = _layoutLineBox(
-      helperError,
-      contentConstraints.copyWith(
-        maxWidth: math.max(0.0, contentConstraints.maxWidth - _boxSize(counter).width),
-      ),
-    );
+    boxToBaseline[subtext] = _layoutLineBox(subtext, contentConstraints);
 
     // The height of the input needs to accommodate label above and counter and
     // helperError below, when they exist.
@@ -1037,18 +1008,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double topHeight = decoration.border.isOutline
       ? math.max(labelHeight - boxToBaseline[label]!, 0)
       : labelHeight;
-    final double counterHeight = counter == null
-      ? 0
-      : boxToBaseline[counter]! + subtextGap;
-    final bool helperErrorExists = helperError?.size != null
-        && helperError!.size.height > 0;
-    final double helperErrorHeight = !helperErrorExists
-      ? 0
-      : helperError!.size.height + subtextGap;
-    final double bottomHeight = math.max(
-      counterHeight,
-      helperErrorHeight,
-    );
+    final double subTextHeight = subtext.size.height;
+    final double bottomHeight = subTextHeight > 0.0 ? (subTextHeight + subtextGap) : subTextHeight;
     final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
     boxToBaseline[input] = _layoutLineBox(
       input,
@@ -1166,37 +1127,12 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       textAlignVertical,
     );
 
-    // Find the positions of the text below the input when it exists.
-    double subtextCounterBaseline = 0;
-    double subtextHelperBaseline = 0;
-    double subtextCounterHeight = 0;
-    double subtextHelperHeight = 0;
-    if (counter != null) {
-      subtextCounterBaseline =
-        containerHeight + subtextGap + boxToBaseline[counter]!;
-      subtextCounterHeight = counter!.size.height + subtextGap;
-    }
-    if (helperErrorExists) {
-      subtextHelperBaseline =
-        containerHeight + subtextGap + boxToBaseline[helperError]!;
-      subtextHelperHeight = helperErrorHeight;
-    }
-    final double subtextBaseline = math.max(
-      subtextCounterBaseline,
-      subtextHelperBaseline,
-    );
-    final double subtextHeight = math.max(
-      subtextCounterHeight,
-      subtextHelperHeight,
-    );
-
     return _RenderDecorationLayout(
       boxToBaseline: boxToBaseline,
       containerHeight: containerHeight,
       inputBaseline: inputBaseline,
       outlineBaseline: outlineBaseline,
-      subtextBaseline: subtextBaseline,
-      subtextHeight: subtextHeight,
+      size: Size(constraints.maxWidth, containerHeight + bottomHeight),
     );
   }
 
@@ -1207,26 +1143,13 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   // alignment is greater than zero, it interpolates between the centered box's
   // top and the position that would align the bottom of the box with the bottom
   // padding.
-  double _interpolateThree(double begin, double middle, double end, TextAlignVertical textAlignVertical) {
-    if (textAlignVertical.y <= 0) {
-      // It's possible for begin, middle, and end to not be in order because of
-      // excessive padding. Those cases are handled by using middle.
-      if (begin >= middle) {
-        return middle;
-      }
-      // Do a standard linear interpolation on the first half, between begin and
-      // middle.
-      final double t = textAlignVertical.y + 1;
-      return begin + (middle - begin) * t;
-    }
-
-    if (middle >= end) {
-      return middle;
-    }
-    // Do a standard linear interpolation on the second half, between middle and
-    // end.
-    final double t = textAlignVertical.y;
-    return middle + (end - middle) * t;
+  static double _interpolateThree(double begin, double middle, double end, TextAlignVertical textAlignVertical) {
+    // It's possible for begin, middle, and end to not be in order because of
+    // excessive padding. Those cases are handled by using middle.
+    final double basis = textAlignVertical.y <= 0
+      ? math.max(middle - begin, 0)
+      : math.max(end - middle, 0);
+    return middle + basis * textAlignVertical.y;
   }
 
   @override
@@ -1282,12 +1205,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
     width = math.max(width - contentPadding.horizontal, 0.0);
 
-    final double counterHeight = _minHeight(counter, width);
-    final double counterWidth = _minWidth(counter, counterHeight);
-
-    final double helperErrorAvailableWidth = math.max(width - counterWidth, 0.0);
-    final double helperErrorHeight = _minHeight(helperError, helperErrorAvailableWidth);
-    double subtextHeight = math.max(counterHeight, helperErrorHeight);
+    double subtextHeight = _minHeight(subtext, width);
     if (subtextHeight > 0.0) {
       subtextHeight += subtextGap;
     }
@@ -1339,43 +1257,16 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     return Size.zero;
   }
 
-  ChildSemanticsConfigurationsResult _childSemanticsConfigurationDelegate(List<SemanticsConfiguration> childConfigs) {
-    final ChildSemanticsConfigurationsResultBuilder builder = ChildSemanticsConfigurationsResultBuilder();
-    List<SemanticsConfiguration>? prefixMergeGroup;
-    List<SemanticsConfiguration>? suffixMergeGroup;
-    for (final SemanticsConfiguration childConfig in childConfigs) {
-      if (childConfig.tagsChildrenWith(_InputDecoratorState._kPrefixSemanticsTag)) {
-        prefixMergeGroup ??= <SemanticsConfiguration>[];
-        prefixMergeGroup.add(childConfig);
-      } else if (childConfig.tagsChildrenWith(_InputDecoratorState._kSuffixSemanticsTag)) {
-        suffixMergeGroup ??= <SemanticsConfiguration>[];
-        suffixMergeGroup.add(childConfig);
-      } else {
-        builder.markAsMergeUp(childConfig);
-      }
-    }
-    if (prefixMergeGroup != null) {
-      builder.markAsSiblingMergeGroup(prefixMergeGroup);
-    }
-    if (suffixMergeGroup != null) {
-      builder.markAsSiblingMergeGroup(suffixMergeGroup);
-    }
-    return builder.build();
-  }
-
-  @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    config.childConfigurationsDelegate = _childSemanticsConfigurationDelegate;
-  }
-
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     _labelTransform = null;
     final _RenderDecorationLayout layout = _layout(constraints);
+    size = constraints.constrain(layout.size);
+    assert(size.width == constraints.constrainWidth(layout.size.width));
+    assert(size.height == constraints.constrainHeight(layout.size.height));
 
-    final double overallWidth = constraints.maxWidth;
-    final double overallHeight = layout.containerHeight + layout.subtextHeight;
+    final double overallWidth = layout.size.width;
 
     final RenderBox? container = this.container;
     if (container != null) {
@@ -1484,27 +1375,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       }
     }
 
-    if (helperError != null || counter != null) {
-      height = layout.subtextHeight;
-      baseline = layout.subtextBaseline;
-
-      switch (textDirection) {
-        case TextDirection.rtl:
-          if (helperError != null) {
-            baselineLayout(helperError!, right - helperError!.size.width - _boxSize(icon).width);
-          }
-          if (counter != null) {
-            baselineLayout(counter!, left);
-          }
-        case TextDirection.ltr:
-          if (helperError != null) {
-            baselineLayout(helperError!, left + _boxSize(icon).width);
-          }
-          if (counter != null) {
-            baselineLayout(counter!, right - counter!.size.width);
-          }
-      }
-    }
+    _boxParentData(subtext).offset = Offset(left, layout.containerHeight + subtextGap);
 
     if (label != null) {
       final double labelX = _boxParentData(label!).offset.dx;
@@ -1540,10 +1411,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       decoration.borderGap.start = null;
       decoration.borderGap.extent = 0.0;
     }
-
-    size = constraints.constrain(Size(overallWidth, overallHeight));
-    assert(size.width == constraints.constrainWidth(overallWidth));
-    assert(size.height == constraints.constrainHeight(overallHeight));
   }
 
   void _paintLabel(PaintingContext context, Offset offset) {
@@ -1617,8 +1484,18 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     doPaint(suffixIcon);
     doPaint(hint);
     doPaint(input);
-    doPaint(helperError);
-    doPaint(counter);
+    doPaint(subtext);
+  }
+
+  @override
+  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    if (child == label && _labelTransform != null) {
+      final Offset labelOffset = _boxParentData(label!).offset;
+      transform
+        ..multiply(_labelTransform!)
+        ..translate(-labelOffset.dx, -labelOffset.dy);
+    }
+    super.applyPaintTransform(child, transform);
   }
 
   @override
@@ -1644,15 +1521,33 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     return false;
   }
 
-  @override
-  void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    if (child == label && _labelTransform != null) {
-      final Offset labelOffset = _boxParentData(label!).offset;
-      transform
-        ..multiply(_labelTransform!)
-        ..translate(-labelOffset.dx, -labelOffset.dy);
+  ChildSemanticsConfigurationsResult _childSemanticsConfigurationDelegate(List<SemanticsConfiguration> childConfigs) {
+    final ChildSemanticsConfigurationsResultBuilder builder = ChildSemanticsConfigurationsResultBuilder();
+    List<SemanticsConfiguration>? prefixMergeGroup;
+    List<SemanticsConfiguration>? suffixMergeGroup;
+    for (final SemanticsConfiguration childConfig in childConfigs) {
+      if (childConfig.tagsChildrenWith(_InputDecoratorState._kPrefixSemanticsTag)) {
+        prefixMergeGroup ??= <SemanticsConfiguration>[];
+        prefixMergeGroup.add(childConfig);
+      } else if (childConfig.tagsChildrenWith(_InputDecoratorState._kSuffixSemanticsTag)) {
+        suffixMergeGroup ??= <SemanticsConfiguration>[];
+        suffixMergeGroup.add(childConfig);
+      } else {
+        builder.markAsMergeUp(childConfig);
+      }
     }
-    super.applyPaintTransform(child, transform);
+    if (prefixMergeGroup != null) {
+      builder.markAsSiblingMergeGroup(prefixMergeGroup);
+    }
+    if (suffixMergeGroup != null) {
+      builder.markAsSiblingMergeGroup(suffixMergeGroup);
+    }
+    return builder.build();
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    config.childConfigurationsDelegate = _childSemanticsConfigurationDelegate;
   }
 }
 
@@ -1687,8 +1582,7 @@ class _Decorator extends SlottedMultiChildRenderObjectWidget<_DecorationSlot, Re
       _DecorationSlot.suffix      => decoration.suffix,
       _DecorationSlot.prefixIcon  => decoration.prefixIcon,
       _DecorationSlot.suffixIcon  => decoration.suffixIcon,
-      _DecorationSlot.helperError => decoration.helperError,
-      _DecorationSlot.counter     => decoration.counter,
+      _DecorationSlot.subtext     => decoration.subtext,
       _DecorationSlot.container   => decoration.container,
     };
   }
@@ -2467,8 +2361,16 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         suffix: suffix,
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
-        helperError: helperError,
-        counter: counter,
+        subtext: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textDirection: textDirection,
+          textBaseline: TextBaseline.alphabetic,
+          children: <Widget>[
+            helperError,
+            if (counter != null) Expanded(child: counter),
+          ],
+        ),
         container: container
       ),
       textDirection: textDirection,
