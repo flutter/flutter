@@ -285,6 +285,8 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   /// This is the [alignment] resolved against [textDirection]. Subclasses should
   /// use [resolvedAlignment] instead of [alignment] directly, for computing the
   /// child's offset.
+  ///
+  /// The [performLayout] method will be called when the value changes.
   @protected
   Alignment get resolvedAlignment => _resolvedAlignment ??= alignment.resolve(textDirection);
   Alignment? _resolvedAlignment;
