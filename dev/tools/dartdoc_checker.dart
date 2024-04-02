@@ -41,7 +41,7 @@ const List<String> dartdocDirectiveCanaryFiles = <String>[
 /// sample code where the sequence is perfectly legal, e.g. for required named
 /// parameters of a method:
 ///
-/// ```
+/// ```dart
 /// void foo({@required int bar});
 /// ```
 void checkForUnresolvedDirectives(Directory dartDocDir) {

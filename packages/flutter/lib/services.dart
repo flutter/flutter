@@ -33,6 +33,7 @@ export 'src/services/mouse_cursor.dart';
 export 'src/services/mouse_tracking.dart';
 export 'src/services/platform_channel.dart';
 export 'src/services/platform_views.dart';
+export 'src/services/predictive_back_event.dart';
 export 'src/services/process_text.dart';
 export 'src/services/raw_keyboard.dart';
 export 'src/services/raw_keyboard_android.dart';

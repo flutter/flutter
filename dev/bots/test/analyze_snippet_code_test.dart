@@ -25,7 +25,7 @@ const List<String> expectedMainErrors = <String>[
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:153:10: (stateful widget) (annotate_overrides)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:153:10: (stateful widget) (must_call_super)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:161:7: (top-level declaration) (undefined_identifier)',
-  'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:165: Found "```" in code but it did not match RegExp: pattern=^ */// *```dart\$ flags= so something is wrong. Line was: "/// ```"',
+  'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:165: Found "```" in code but it did not match RegExp: pattern=^ */// *```dart\$ flags= so something is wrong. Line was: "/// ```none"',
   'dev/bots/test/analyze-snippet-code-test-input/short_but_still_broken.dart:9:12: (statement) (invalid_assignment)',
   'dev/bots/test/analyze-snippet-code-test-input/short_but_still_broken.dart:18:4: Empty ```dart block in snippet code.',
 ];

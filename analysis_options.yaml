@@ -1,8 +1,8 @@
 # Specify analysis options.
 #
-# For a list of lints, see: https://dart.dev/lints
+# For a list of lints, see: https://dart.dev/tools/linter-rules
 # For guidelines on configuring static analysis, see:
-# https://dart.dev/guides/language/analysis-options
+# https://dart.dev/tools/analysis
 #
 # There are other similar analysis options files in the flutter repos,
 # which should be kept in sync with this file:
@@ -33,7 +33,7 @@ analyzer:
 linter:
   rules:
     # This list is derived from the list of all available lints located at
-    # https://github.com/dart-lang/linter/blob/main/example/all.yaml
+    # https://github.com/dart-lang/sdk/blob/main/pkg/linter/example/all.yaml
     - always_declare_return_types
     - always_put_control_body_on_new_line
     # - always_put_required_named_parameters_first # we prefer having parameters in the same order as fields https://github.com/flutter/flutter/issues/10219
