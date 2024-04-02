@@ -210,7 +210,7 @@ const int kMinColumnWidth = 10;
 /// ```
 ///
 /// yields:
-/// ```
+/// ```none
 ///   Usage: app main_command <subcommand>
 ///          [arguments]
 /// ```
