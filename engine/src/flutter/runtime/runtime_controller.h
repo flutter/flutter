@@ -193,6 +193,7 @@ class RuntimeController : public PlatformConfigurationClient {
   ///             flushed to the isolate when it starts. Calling `RemoveView`
   ///             before the isolate is launched cancels the add operation.
   ///
+  ///             If the isolate is running, a frame will be scheduled.
   ///
   /// @param[in]  view_id           The ID of the new view.
   /// @param[in]  viewport_metrics  The initial viewport metrics for the view.

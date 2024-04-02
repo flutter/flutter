@@ -1265,11 +1265,163 @@ TEST_F(EmbedderTest, CanDeinitializeAnEngine) {
   engine.reset();
 }
 
-TEST_F(EmbedderTest, CanRemoveView) {
-  // TODO(loicsharma): We can't test this until views can be added!
-  // https://github.com/flutter/flutter/issues/144806
+//------------------------------------------------------------------------------
+/// Test that a view can be added to a running engine.
+///
+TEST_F(EmbedderTest, CanAddView) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+  builder.SetDartEntrypoint("window_metrics_event_all_view_ids");
+
+  fml::AutoResetWaitableEvent ready_latch, message_latch;
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&ready_latch](Dart_NativeArguments args) { ready_latch.Signal(); }));
+
+  std::string message;
+  context.AddNativeCallback("SignalNativeMessage",
+                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                              message =
+                                  tonic::DartConverter<std::string>::FromDart(
+                                      Dart_GetNativeArgument(args, 0));
+                              message_latch.Signal();
+                            }));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  ready_latch.Wait();
+
+  FlutterWindowMetricsEvent metrics = {};
+  metrics.struct_size = sizeof(FlutterWindowMetricsEvent);
+  metrics.width = 800;
+  metrics.height = 600;
+  metrics.pixel_ratio = 1.0;
+  metrics.view_id = 123;
+
+  FlutterAddViewInfo info = {};
+  info.struct_size = sizeof(FlutterAddViewInfo);
+  info.view_id = 123;
+  info.view_metrics = &metrics;
+  info.add_view_callback = [](const FlutterAddViewResult* result) {
+    EXPECT_TRUE(result->added);
+  };
+  ASSERT_EQ(FlutterEngineAddView(engine.get(), &info), kSuccess);
+  message_latch.Wait();
+  ASSERT_EQ("View IDs: [0, 123]", message);
 }
 
+//------------------------------------------------------------------------------
+/// Test that adding a view schedules a frame.
+///
+TEST_F(EmbedderTest, AddViewSchedulesFrame) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+  builder.SetDartEntrypoint("add_view_schedules_frame");
+  fml::AutoResetWaitableEvent latch;
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&latch](Dart_NativeArguments args) { latch.Signal(); }));
+
+  fml::AutoResetWaitableEvent check_latch;
+  context.AddNativeCallback(
+      "SignalNativeCount",
+      CREATE_NATIVE_ENTRY(
+          [&check_latch](Dart_NativeArguments args) { check_latch.Signal(); }));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Wait for the application to attach the listener.
+  latch.Wait();
+
+  FlutterWindowMetricsEvent metrics = {};
+  metrics.struct_size = sizeof(FlutterWindowMetricsEvent);
+  metrics.width = 800;
+  metrics.height = 600;
+  metrics.pixel_ratio = 1.0;
+  metrics.view_id = 123;
+
+  FlutterAddViewInfo info = {};
+  info.struct_size = sizeof(FlutterAddViewInfo);
+  info.view_id = 123;
+  info.view_metrics = &metrics;
+  info.add_view_callback = [](const FlutterAddViewResult* result) {
+    EXPECT_TRUE(result->added);
+  };
+  ASSERT_EQ(FlutterEngineAddView(engine.get(), &info), kSuccess);
+
+  check_latch.Wait();
+}
+
+//------------------------------------------------------------------------------
+/// Test that a view that was added can be removed.
+///
+TEST_F(EmbedderTest, CanRemoveView) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+  builder.SetDartEntrypoint("window_metrics_event_all_view_ids");
+
+  fml::AutoResetWaitableEvent ready_latch, message_latch;
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&ready_latch](Dart_NativeArguments args) { ready_latch.Signal(); }));
+
+  std::string message;
+  context.AddNativeCallback("SignalNativeMessage",
+                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                              message =
+                                  tonic::DartConverter<std::string>::FromDart(
+                                      Dart_GetNativeArgument(args, 0));
+                              message_latch.Signal();
+                            }));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  ready_latch.Wait();
+
+  // Add view 123.
+  FlutterWindowMetricsEvent metrics = {};
+  metrics.struct_size = sizeof(FlutterWindowMetricsEvent);
+  metrics.width = 800;
+  metrics.height = 600;
+  metrics.pixel_ratio = 1.0;
+  metrics.view_id = 123;
+
+  FlutterAddViewInfo add_info = {};
+  add_info.struct_size = sizeof(FlutterAddViewInfo);
+  add_info.view_id = 123;
+  add_info.view_metrics = &metrics;
+  add_info.add_view_callback = [](const FlutterAddViewResult* result) {
+    ASSERT_TRUE(result->added);
+  };
+  ASSERT_EQ(FlutterEngineAddView(engine.get(), &add_info), kSuccess);
+  message_latch.Wait();
+  ASSERT_EQ(message, "View IDs: [0, 123]");
+
+  // Remove view 123.
+  FlutterRemoveViewInfo remove_info = {};
+  remove_info.struct_size = sizeof(FlutterAddViewInfo);
+  remove_info.view_id = 123;
+  remove_info.remove_view_callback = [](const FlutterRemoveViewResult* result) {
+    EXPECT_TRUE(result->removed);
+  };
+  ASSERT_EQ(FlutterEngineRemoveView(engine.get(), &remove_info), kSuccess);
+  message_latch.Wait();
+  ASSERT_EQ(message, "View IDs: [0]");
+}
+
+//------------------------------------------------------------------------------
+/// The implicit view is a special view that the engine and framework assume
+/// can *always* be rendered to. Test that this view cannot be removed.
+///
 TEST_F(EmbedderTest, CannotRemoveImplicitView) {
   auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
   EmbedderConfigBuilder builder(context);
@@ -1287,6 +1439,146 @@ TEST_F(EmbedderTest, CannotRemoveImplicitView) {
   ASSERT_EQ(FlutterEngineRemoveView(engine.get(), &info), kInvalidArguments);
 }
 
+//------------------------------------------------------------------------------
+/// Test that a view cannot be added if its ID already exists.
+///
+TEST_F(EmbedderTest, CannotAddDuplicateViews) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+  builder.SetDartEntrypoint("window_metrics_event_all_view_ids");
+
+  fml::AutoResetWaitableEvent ready_latch, message_latch;
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&ready_latch](Dart_NativeArguments args) { ready_latch.Signal(); }));
+
+  std::string message;
+  context.AddNativeCallback("SignalNativeMessage",
+                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                              message =
+                                  tonic::DartConverter<std::string>::FromDart(
+                                      Dart_GetNativeArgument(args, 0));
+                              message_latch.Signal();
+                            }));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  ready_latch.Wait();
+
+  // Add view 123.
+  struct Captures {
+    std::atomic<int> count = 0;
+    fml::AutoResetWaitableEvent failure_latch;
+  };
+  Captures captures;
+
+  FlutterWindowMetricsEvent metrics = {};
+  metrics.struct_size = sizeof(FlutterWindowMetricsEvent);
+  metrics.width = 800;
+  metrics.height = 600;
+  metrics.pixel_ratio = 1.0;
+  metrics.view_id = 123;
+
+  FlutterAddViewInfo add_info = {};
+  add_info.struct_size = sizeof(FlutterAddViewInfo);
+  add_info.view_id = 123;
+  add_info.view_metrics = &metrics;
+  add_info.user_data = &captures;
+  add_info.add_view_callback = [](const FlutterAddViewResult* result) {
+    auto captures = reinterpret_cast<Captures*>(result->user_data);
+
+    int count = captures->count.fetch_add(1);
+
+    if (count == 0) {
+      ASSERT_TRUE(result->added);
+    } else {
+      EXPECT_FALSE(result->added);
+      captures->failure_latch.Signal();
+    }
+  };
+  ASSERT_EQ(FlutterEngineAddView(engine.get(), &add_info), kSuccess);
+  message_latch.Wait();
+  ASSERT_EQ(message, "View IDs: [0, 123]");
+  ASSERT_FALSE(captures.failure_latch.IsSignaledForTest());
+
+  // Add view 123 a second time.
+  ASSERT_EQ(FlutterEngineAddView(engine.get(), &add_info), kSuccess);
+  captures.failure_latch.Wait();
+  ASSERT_EQ(captures.count, 2);
+  ASSERT_FALSE(message_latch.IsSignaledForTest());
+}
+
+//------------------------------------------------------------------------------
+/// Test that a removed view's ID can be reused to add a new view.
+///
+TEST_F(EmbedderTest, CanReuseViewIds) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+  builder.SetDartEntrypoint("window_metrics_event_all_view_ids");
+
+  fml::AutoResetWaitableEvent ready_latch, message_latch;
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&ready_latch](Dart_NativeArguments args) { ready_latch.Signal(); }));
+
+  std::string message;
+  context.AddNativeCallback("SignalNativeMessage",
+                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                              message =
+                                  tonic::DartConverter<std::string>::FromDart(
+                                      Dart_GetNativeArgument(args, 0));
+                              message_latch.Signal();
+                            }));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  ready_latch.Wait();
+
+  // Add view 123.
+  FlutterWindowMetricsEvent metrics = {};
+  metrics.struct_size = sizeof(FlutterWindowMetricsEvent);
+  metrics.width = 800;
+  metrics.height = 600;
+  metrics.pixel_ratio = 1.0;
+  metrics.view_id = 123;
+
+  FlutterAddViewInfo add_info = {};
+  add_info.struct_size = sizeof(FlutterAddViewInfo);
+  add_info.view_id = 123;
+  add_info.view_metrics = &metrics;
+  add_info.add_view_callback = [](const FlutterAddViewResult* result) {
+    ASSERT_TRUE(result->added);
+  };
+  ASSERT_EQ(FlutterEngineAddView(engine.get(), &add_info), kSuccess);
+  message_latch.Wait();
+  ASSERT_EQ(message, "View IDs: [0, 123]");
+
+  // Remove view 123.
+  FlutterRemoveViewInfo remove_info = {};
+  remove_info.struct_size = sizeof(FlutterAddViewInfo);
+  remove_info.view_id = 123;
+  remove_info.remove_view_callback = [](const FlutterRemoveViewResult* result) {
+    ASSERT_TRUE(result->removed);
+  };
+  ASSERT_EQ(FlutterEngineRemoveView(engine.get(), &remove_info), kSuccess);
+  message_latch.Wait();
+  ASSERT_EQ(message, "View IDs: [0]");
+
+  // Re-add view 123.
+  ASSERT_EQ(FlutterEngineAddView(engine.get(), &add_info), kSuccess);
+  message_latch.Wait();
+  ASSERT_EQ(message, "View IDs: [0, 123]");
+}
+
+//------------------------------------------------------------------------------
+/// Test that attempting to remove a view that does not exist fails as expected.
+///
 TEST_F(EmbedderTest, CannotRemoveUnknownView) {
   auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
   EmbedderConfigBuilder builder(context);
@@ -1301,11 +1593,225 @@ TEST_F(EmbedderTest, CannotRemoveUnknownView) {
   info.view_id = 123;
   info.user_data = &latch;
   info.remove_view_callback = [](const FlutterRemoveViewResult* result) {
-    ASSERT_FALSE(result->removed);
+    EXPECT_FALSE(result->removed);
     reinterpret_cast<fml::AutoResetWaitableEvent*>(result->user_data)->Signal();
   };
   ASSERT_EQ(FlutterEngineRemoveView(engine.get(), &info), kSuccess);
   latch.Wait();
+}
+
+//------------------------------------------------------------------------------
+/// View operations - adding, removing, sending window metrics - must execute in
+/// order even though they are asynchronous. This is necessary to ensure the
+/// embedder's and engine's states remain synchronized.
+///
+TEST_F(EmbedderTest, ViewOperationsOrdered) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+  builder.SetDartEntrypoint("window_metrics_event_all_view_ids");
+
+  fml::AutoResetWaitableEvent ready_latch;
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&ready_latch](Dart_NativeArguments args) { ready_latch.Signal(); }));
+
+  std::atomic<int> message_count = 0;
+  context.AddNativeCallback("SignalNativeMessage",
+                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                              message_count.fetch_add(1);
+                            }));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  ready_latch.Wait();
+
+  // Enqueue multiple view operations at once:
+  //
+  // 1. Add view 123 - This must succeed.
+  // 2. Add duplicate view 123 - This must fail asynchronously.
+  // 3. Add second view 456 - This must succeed.
+  // 4. Remove second view 456 - This must succeed.
+  //
+  // The engine must execute view operations asynchronously in serial order.
+  // If step 2 succeeds instead of step 1, this indicates the engine did not
+  // execute the view operations in the correct order. If step 4 fails,
+  // this indicates the engine did not wait until the add second view completed.
+  FlutterWindowMetricsEvent metrics123 = {};
+  metrics123.struct_size = sizeof(FlutterWindowMetricsEvent);
+  metrics123.width = 800;
+  metrics123.height = 600;
+  metrics123.pixel_ratio = 1.0;
+  metrics123.view_id = 123;
+
+  FlutterWindowMetricsEvent metrics456 = {};
+  metrics456.struct_size = sizeof(FlutterWindowMetricsEvent);
+  metrics456.width = 800;
+  metrics456.height = 600;
+  metrics456.pixel_ratio = 1.0;
+  metrics456.view_id = 456;
+
+  struct Captures {
+    fml::AutoResetWaitableEvent add_first_view;
+    fml::AutoResetWaitableEvent add_duplicate_view;
+    fml::AutoResetWaitableEvent add_second_view;
+    fml::AutoResetWaitableEvent remove_second_view;
+  };
+  Captures captures;
+
+  // Add view 123.
+  FlutterAddViewInfo add_view_info = {};
+  add_view_info.struct_size = sizeof(FlutterAddViewInfo);
+  add_view_info.view_id = 123;
+  add_view_info.view_metrics = &metrics123;
+  add_view_info.user_data = &captures;
+  add_view_info.add_view_callback = [](const FlutterAddViewResult* result) {
+    auto captures = reinterpret_cast<Captures*>(result->user_data);
+
+    ASSERT_TRUE(result->added);
+    ASSERT_FALSE(captures->add_first_view.IsSignaledForTest());
+    ASSERT_FALSE(captures->add_duplicate_view.IsSignaledForTest());
+    ASSERT_FALSE(captures->add_second_view.IsSignaledForTest());
+    ASSERT_FALSE(captures->remove_second_view.IsSignaledForTest());
+
+    captures->add_first_view.Signal();
+  };
+
+  // Add duplicate view 123.
+  FlutterAddViewInfo add_duplicate_view_info = {};
+  add_duplicate_view_info.struct_size = sizeof(FlutterAddViewInfo);
+  add_duplicate_view_info.view_id = 123;
+  add_duplicate_view_info.view_metrics = &metrics123;
+  add_duplicate_view_info.user_data = &captures;
+  add_duplicate_view_info.add_view_callback =
+      [](const FlutterAddViewResult* result) {
+        auto captures = reinterpret_cast<Captures*>(result->user_data);
+
+        ASSERT_FALSE(result->added);
+        ASSERT_TRUE(captures->add_first_view.IsSignaledForTest());
+        ASSERT_FALSE(captures->add_duplicate_view.IsSignaledForTest());
+        ASSERT_FALSE(captures->add_second_view.IsSignaledForTest());
+        ASSERT_FALSE(captures->remove_second_view.IsSignaledForTest());
+
+        captures->add_duplicate_view.Signal();
+      };
+
+  // Add view 456.
+  FlutterAddViewInfo add_second_view_info = {};
+  add_second_view_info.struct_size = sizeof(FlutterAddViewInfo);
+  add_second_view_info.view_id = 456;
+  add_second_view_info.view_metrics = &metrics456;
+  add_second_view_info.user_data = &captures;
+  add_second_view_info.add_view_callback =
+      [](const FlutterAddViewResult* result) {
+        auto captures = reinterpret_cast<Captures*>(result->user_data);
+
+        ASSERT_TRUE(result->added);
+        ASSERT_TRUE(captures->add_first_view.IsSignaledForTest());
+        ASSERT_TRUE(captures->add_duplicate_view.IsSignaledForTest());
+        ASSERT_FALSE(captures->add_second_view.IsSignaledForTest());
+        ASSERT_FALSE(captures->remove_second_view.IsSignaledForTest());
+
+        captures->add_second_view.Signal();
+      };
+
+  // Remove view 456.
+  FlutterRemoveViewInfo remove_second_view_info = {};
+  remove_second_view_info.struct_size = sizeof(FlutterRemoveViewInfo);
+  remove_second_view_info.view_id = 456;
+  remove_second_view_info.user_data = &captures;
+  remove_second_view_info.remove_view_callback =
+      [](const FlutterRemoveViewResult* result) {
+        auto captures = reinterpret_cast<Captures*>(result->user_data);
+
+        ASSERT_TRUE(result->removed);
+        ASSERT_TRUE(captures->add_first_view.IsSignaledForTest());
+        ASSERT_TRUE(captures->add_duplicate_view.IsSignaledForTest());
+        ASSERT_TRUE(captures->add_second_view.IsSignaledForTest());
+        ASSERT_FALSE(captures->remove_second_view.IsSignaledForTest());
+
+        captures->remove_second_view.Signal();
+      };
+
+  ASSERT_EQ(FlutterEngineAddView(engine.get(), &add_view_info), kSuccess);
+  ASSERT_EQ(FlutterEngineAddView(engine.get(), &add_duplicate_view_info),
+            kSuccess);
+  ASSERT_EQ(FlutterEngineAddView(engine.get(), &add_second_view_info),
+            kSuccess);
+  ASSERT_EQ(FlutterEngineRemoveView(engine.get(), &remove_second_view_info),
+            kSuccess);
+  captures.remove_second_view.Wait();
+  captures.add_second_view.Wait();
+  captures.add_duplicate_view.Wait();
+  captures.add_first_view.Wait();
+  ASSERT_EQ(message_count, 3);
+}
+
+//------------------------------------------------------------------------------
+/// Test the engine can present to multiple views.
+///
+TEST_F(EmbedderTest, CanRenderMultipleViews) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("render_all_views");
+
+  builder.SetRenderTargetType(
+      EmbedderTestBackingStoreProducer::RenderTargetType::kSoftwareBuffer);
+
+  fml::AutoResetWaitableEvent latch0, latch123;
+  context.GetCompositor().SetPresentCallback(
+      [&](FlutterViewId view_id, const FlutterLayer** layers,
+          size_t layers_count) {
+        switch (view_id) {
+          case 0:
+            latch0.Signal();
+            break;
+          case 123:
+            latch123.Signal();
+            break;
+          default:
+            FML_UNREACHABLE();
+        }
+      },
+      /* one_shot= */ false);
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Give the implicit view a non-zero size so that it renders something.
+  FlutterWindowMetricsEvent metrics0 = {};
+  metrics0.struct_size = sizeof(FlutterWindowMetricsEvent);
+  metrics0.width = 800;
+  metrics0.height = 600;
+  metrics0.pixel_ratio = 1.0;
+  metrics0.view_id = 0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &metrics0),
+            kSuccess);
+
+  // Add view 123.
+  FlutterWindowMetricsEvent metrics123 = {};
+  metrics123.struct_size = sizeof(FlutterWindowMetricsEvent);
+  metrics123.width = 800;
+  metrics123.height = 600;
+  metrics123.pixel_ratio = 1.0;
+  metrics123.view_id = 123;
+
+  FlutterAddViewInfo add_view_info = {};
+  add_view_info.struct_size = sizeof(FlutterAddViewInfo);
+  add_view_info.view_id = 123;
+  add_view_info.view_metrics = &metrics123;
+  add_view_info.add_view_callback = [](const FlutterAddViewResult* result) {
+    ASSERT_TRUE(result->added);
+  };
+
+  ASSERT_EQ(FlutterEngineAddView(engine.get(), &add_view_info), kSuccess);
+
+  latch0.Wait();
+  latch123.Wait();
 }
 
 TEST_F(EmbedderTest, CanUpdateLocales) {

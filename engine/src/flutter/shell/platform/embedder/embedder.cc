@@ -2184,6 +2184,66 @@ FlutterEngineResult FlutterEngineRunInitialized(
 }
 
 FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineAddView(FLUTTER_API_SYMBOL(FlutterEngine)
+                                             engine,
+                                         const FlutterAddViewInfo* info) {
+  if (!engine) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+  if (!info || !info->view_metrics || !info->add_view_callback) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Add view info handle was invalid.");
+  }
+
+  FlutterViewId view_id = info->view_id;
+  if (view_id == kFlutterImplicitViewId) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "Add view info was invalid. The implicit view cannot be added.");
+  }
+  if (SAFE_ACCESS(info->view_metrics, view_id, kFlutterImplicitViewId) !=
+      view_id) {
+    if (view_id == kFlutterImplicitViewId) {
+      return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                                "Add view info was invalid. The info and "
+                                "window metric view IDs must match.");
+    }
+  }
+
+  // TODO(loicsharma): Return an error if the engine was initialized with
+  // callbacks that are incompatible with multiple views.
+  // https://github.com/flutter/flutter/issues/144806
+
+  std::variant<flutter::ViewportMetrics, std::string> metrics_or_error =
+      MakeViewportMetricsFromWindowMetrics(info->view_metrics);
+
+  if (const std::string* error = std::get_if<std::string>(&metrics_or_error)) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, error->c_str());
+  }
+
+  auto metrics = std::get<flutter::ViewportMetrics>(metrics_or_error);
+
+  // The engine must be running to add a view.
+  auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  if (!embedder_engine->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+
+  flutter::Shell::AddViewCallback callback =
+      [c_callback = info->add_view_callback,
+       user_data = info->user_data](bool added) {
+        FlutterAddViewResult result = {};
+        result.struct_size = sizeof(FlutterAddViewResult);
+        result.added = added;
+        result.user_data = user_data;
+        c_callback(&result);
+      };
+
+  embedder_engine->GetShell().AddView(view_id, metrics, callback);
+  return kSuccess;
+}
+
+FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineRemoveView(FLUTTER_API_SYMBOL(FlutterEngine)
                                                 engine,
                                             const FlutterRemoveViewInfo* info) {
@@ -2200,6 +2260,10 @@ FlutterEngineResult FlutterEngineRemoveView(FLUTTER_API_SYMBOL(FlutterEngine)
         kInvalidArguments,
         "Remove view info was invalid. The implicit view cannot be removed.");
   }
+
+  // TODO(loicsharma): Return an error if the engine was initialized with
+  // callbacks that are incompatible with multiple views.
+  // https://github.com/flutter/flutter/issues/144806
 
   // The engine must be running to remove a view.
   auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
