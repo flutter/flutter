@@ -551,7 +551,7 @@ class DartdocGenerator {
       ...findPackageNames(filesystem),
       // TODO(goderbauer): Figure out how to only include `dart:ui` of
       // `sky_engine` below, https://github.com/dart-lang/dartdoc/issues/2278.
-      // 'sky_engine',
+      'sky_engine',
     ];
 
     // Generate the documentation. We don't need to exclude flutter_tools in
