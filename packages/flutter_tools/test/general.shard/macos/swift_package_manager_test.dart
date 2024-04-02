@@ -551,6 +551,94 @@ let package = Package(
             expect(await engineLink.target(), expectedArtifactPath);
           });
         });
+
+        group('updateMinimumDeployment', () {
+          testWithoutContext('return if invalid deploymentTarget', () {
+            final MemoryFileSystem fs = MemoryFileSystem();
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: fs,
+            );
+            final String supportedPlatform = platform == SupportedPlatform.ios ? '.iOS("12.0")' : '.macOS("10.14")';
+            project.flutterPluginSwiftPackageManifest.createSync(recursive: true);
+            project.flutterPluginSwiftPackageManifest.writeAsStringSync(supportedPlatform);
+            SwiftPackageManager.updateMinimumDeployment(
+              project: project,
+              platform: platform,
+              deploymentTarget: '',
+            );
+            expect(
+              project.flutterPluginSwiftPackageManifest.readAsLinesSync(),
+              contains(supportedPlatform),
+            );
+          });
+
+          testWithoutContext('return if deploymentTarget is lower than default', () {
+            final MemoryFileSystem fs = MemoryFileSystem();
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: fs,
+            );
+            final String supportedPlatform = platform == SupportedPlatform.ios ? '.iOS("12.0")' : '.macOS("10.14")';
+            project.flutterPluginSwiftPackageManifest.createSync(recursive: true);
+            project.flutterPluginSwiftPackageManifest.writeAsStringSync(supportedPlatform);
+            SwiftPackageManager.updateMinimumDeployment(
+              project: project,
+              platform: platform,
+              deploymentTarget: '9.0',
+            );
+            expect(
+              project.flutterPluginSwiftPackageManifest.readAsLinesSync(),
+              contains(supportedPlatform),
+            );
+          });
+
+          testWithoutContext('return if deploymentTarget is same than default', () {
+            final MemoryFileSystem fs = MemoryFileSystem();
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: fs,
+            );
+            final String supportedPlatform = platform == SupportedPlatform.ios ? '.iOS("12.0")' : '.macOS("10.14")';
+            project.flutterPluginSwiftPackageManifest.createSync(recursive: true);
+            project.flutterPluginSwiftPackageManifest.writeAsStringSync(supportedPlatform);
+            SwiftPackageManager.updateMinimumDeployment(
+              project: project,
+              platform: platform,
+              deploymentTarget: platform == SupportedPlatform.ios ? '12.0' : '10.14',
+            );
+            expect(
+              project.flutterPluginSwiftPackageManifest.readAsLinesSync(),
+              contains(supportedPlatform),
+            );
+          });
+
+          testWithoutContext('update if deploymentTarget is higher than default', () {
+            final MemoryFileSystem fs = MemoryFileSystem();
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: fs,
+            );
+            final String supportedPlatform = platform == SupportedPlatform.ios ? '.iOS("12.0")' : '.macOS("10.14")';
+            project.flutterPluginSwiftPackageManifest.createSync(recursive: true);
+            project.flutterPluginSwiftPackageManifest.writeAsStringSync(supportedPlatform);
+            SwiftPackageManager.updateMinimumDeployment(
+              project: project,
+              platform: platform,
+              deploymentTarget: '14.0',
+            );
+            expect(
+              project.flutterPluginSwiftPackageManifest
+                  .readAsLinesSync()
+                  .contains(supportedPlatform),
+              isFalse,
+            );
+            expect(
+              project.flutterPluginSwiftPackageManifest.readAsLinesSync(),
+              contains(platform == SupportedPlatform.ios ? '.iOS("14.0")' : '.macOS("14.0")'),
+            );
+          });
+        });
       });
     }
   });

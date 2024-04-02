@@ -253,6 +253,15 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildInfo: buildInfo,
   );
   if (project.usesSwiftPackageManager) {
+    final String? iosDeploymentTarget = buildSettings['IPHONEOS_DEPLOYMENT_TARGET'];
+    if (iosDeploymentTarget != null) {
+      SwiftPackageManager.updateMinimumDeployment(
+        platform: SupportedPlatform.ios,
+        project: project.ios,
+        deploymentTarget: iosDeploymentTarget,
+      );
+    }
+
     SwiftPackageManager.linkFlutterFramework(
       SupportedPlatform.ios,
       project.ios,

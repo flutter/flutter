@@ -49,12 +49,12 @@ class SwiftPackageManager {
 
   static const String _defaultFlutterPluginsSwiftPackageName = 'FlutterGeneratedPluginSwiftPackage';
 
-  final SwiftPackageSupportedPlatform _iosSwiftPackageSupportedPlatform = SwiftPackageSupportedPlatform(
+  static final SwiftPackageSupportedPlatform _iosSwiftPackageSupportedPlatform = SwiftPackageSupportedPlatform(
     platform: SwiftPackagePlatform.ios,
     version: Version(12, 0, null),
   );
 
-  final SwiftPackageSupportedPlatform _macosSwiftPackageSupportedPlatform = SwiftPackageSupportedPlatform(
+  static final SwiftPackageSupportedPlatform _macosSwiftPackageSupportedPlatform = SwiftPackageSupportedPlatform(
     platform: SwiftPackagePlatform.macos,
     version: Version(10, 14, null),
   );
@@ -467,5 +467,50 @@ class SwiftPackageManager {
     } else if (frameworkSymlink.targetSync() != engineFlutterFrameworkArtifactPath) {
       frameworkSymlink.updateSync(engineFlutterFrameworkArtifactPath);
     }
+  }
+
+  /// If the project's IPHONEOS_DEPLOYMENT_TARGET/MACOSX_DEPLOYMENT_TARGET is
+  /// higher than the FlutterGeneratedPluginSwiftPackage's default
+  /// SupportedPlatform, increase the SupportedPlatform to match the project's
+  /// deployment target.
+  ///
+  /// This is done for the use case of a plugin requiring a higher iOS/macOS
+  /// version than a project's default. To still be able to use the plugin, the
+  /// user can increase the Xcode project's iOS/macOS deployment target. However,
+  /// if FlutterGeneratedPluginSwiftPackage still supports a lower version, it
+  /// will fail to build. So FlutterGeneratedPluginSwiftPackage must be updated,
+  /// as well.
+  static void updateMinimumDeployment({
+    required XcodeBasedProject project,
+    required SupportedPlatform platform,
+    required String deploymentTarget,
+  }) {
+    final Version? projectDeploymentTargetVersion = Version.parse(deploymentTarget);
+    final SwiftPackageSupportedPlatform defaultPlatform;
+    final SwiftPackagePlatform packagePlatform;
+    if (platform == SupportedPlatform.ios) {
+      defaultPlatform = _iosSwiftPackageSupportedPlatform;
+      packagePlatform = SwiftPackagePlatform.ios;
+    } else {
+      defaultPlatform = _macosSwiftPackageSupportedPlatform;
+      packagePlatform = SwiftPackagePlatform.macos;
+    }
+
+    if (projectDeploymentTargetVersion == null ||
+        projectDeploymentTargetVersion <= defaultPlatform.version ||
+        !project.flutterPluginSwiftPackageManifest.existsSync()) {
+      return;
+    }
+
+    final String manifestContents = project.flutterPluginSwiftPackageManifest.readAsStringSync();
+    final String oldSupportedPlatform = defaultPlatform.format();
+    final String newSupportedPlatform = SwiftPackageSupportedPlatform(
+      platform: packagePlatform,
+      version: projectDeploymentTargetVersion,
+    ).format();
+
+    project.flutterPluginSwiftPackageManifest.writeAsStringSync(
+      manifestContents.replaceFirst(oldSupportedPlatform, newSupportedPlatform),
+    );
   }
 }
