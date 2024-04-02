@@ -1978,8 +1978,9 @@ Future<void> verifyTabooDocumentation(String workingDirectory, { int minimumMatc
 }
 
 Future<void> lintKotlinFiles(String workingDirectory) async {
-  // TODO(gmackall): does ktlint live on the path when we include it in ci.yaml?
-  //_evalCommand('chmod', <String>['+x', kotlinLinterFile.path], workingDirectory: workingDirectory);
+  const String ktlintExecutable = 'ktlint';
+  final String ktlintPath = (await _evalCommand('which', <String>[ktlintExecutable], workingDirectory: workingDirectory)).stdout;
+  await _evalCommand('chmod', <String>['+x', ktlintPath], workingDirectory: workingDirectory);
   final EvalResult lintResult = await _evalCommand('ktlint',
       <String>['--baseline=$flutterRoot/dev/bots/test/analyze-test-input/ktlint-baseline.xml'],
       workingDirectory: workingDirectory);
