@@ -179,6 +179,10 @@ void RuntimeController::AddView(int64_t view_id,
 
   platform_data_.viewport_metrics_for_views[view_id] = view_metrics;
   bool added = platform_configuration->AddView(view_id, view_metrics);
+  if (added) {
+    ScheduleFrame();
+  }
+
   callback(added);
 }
 
