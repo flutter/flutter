@@ -74,7 +74,7 @@ void main() {
       resultFilename: resultFileName,
       device: device,
       flutterDriveCallback: driveCallback,
-      unittestMode: true);
+    );
     final TaskResult result = await perfTest.run();
     expect(result.data!['frame_count'], 5);
   });
@@ -134,7 +134,7 @@ void main() {
       resultFilename: resultFileName,
       device: device,
       flutterDriveCallback: driveCallback,
-      unittestMode: true);
+    );
     final TaskResult result = await perfTest.run();
     expect(result.data!['30hz_frame_percentage'], 0.1);
     expect(result.data!['60hz_frame_percentage'], 0.2);

@@ -7,8 +7,8 @@ import 'dart:convert' show LineSplitter, json, utf8;
 import 'dart:ffi' show Abi;
 import 'dart:io';
 import 'dart:math' as math;
-
 import 'package:meta/meta.dart';
+
 import 'package:path/path.dart' as path;
 import 'package:xml/xml.dart';
 
@@ -18,14 +18,17 @@ import '../framework/host_agent.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
-/// Must match flutter_driver/lib/src/common.dart.
-///
-/// Redefined here to avoid taking a dependency on flutter_driver.
-String _testOutputDirectory(String testDirectory, bool unittestMode) {
-  if (!unittestMode) {
-    return Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? '$testDirectory/build';
+
+void copyToOutputLogs(String outputLog)
+{
+  final String? outputDirectory = Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'];
+  /// Noop if `FLUTTER_TEST_OUTPUTS_DIR` is not set.
+  if (outputDirectory == null) {
+    return;
   }
-  return '$testDirectory/build';
+  final String outputFileName = path.basename(outputLog);
+  final File originFile = File(outputLog);
+  originFile.copySync(path.join(outputDirectory, outputFileName));
 }
 
 TaskFunction createComplexLayoutScrollPerfTest({
@@ -44,21 +47,19 @@ TaskFunction createComplexLayoutScrollPerfTest({
     measureCpuGpu: measureCpuGpu,
     enableImpeller: enableImpeller,
     forceOpenGLES: forceOpenGLES,
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createTilesScrollPerfTest({bool? enableImpeller, bool unittestMode = false}) {
+TaskFunction createTilesScrollPerfTest({bool? enableImpeller}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
     'tiles_scroll_perf',
     enableImpeller: enableImpeller,
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createUiKitViewScrollPerfTest({bool? enableImpeller, bool unittestMode = false}) {
+TaskFunction createUiKitViewScrollPerfTest({bool? enableImpeller}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
     'test_driver/uikit_view_scroll_perf.dart',
@@ -66,11 +67,10 @@ TaskFunction createUiKitViewScrollPerfTest({bool? enableImpeller, bool unittestM
     testDriver: 'test_driver/scroll_perf_test.dart',
     needsFullTimeline: false,
     enableImpeller: enableImpeller,
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createUiKitViewScrollPerfAdBannersTest({bool? enableImpeller, bool unittestMode = false}) {
+TaskFunction createUiKitViewScrollPerfAdBannersTest({bool? enableImpeller}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
     'test_driver/uikit_view_scroll_perf_ad_banners.dart',
@@ -78,11 +78,10 @@ TaskFunction createUiKitViewScrollPerfAdBannersTest({bool? enableImpeller, bool 
     testDriver: 'test_driver/scroll_perf_ad_banners_test.dart',
     needsFullTimeline: false,
     enableImpeller: enableImpeller,
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createUiKitViewScrollPerfNonIntersectingTest({bool? enableImpeller, bool unittestMode = false}) {
+TaskFunction createUiKitViewScrollPerfNonIntersectingTest({bool? enableImpeller}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
     'test_driver/uikit_view_scroll_perf_non_intersecting.dart',
@@ -90,11 +89,10 @@ TaskFunction createUiKitViewScrollPerfNonIntersectingTest({bool? enableImpeller,
     testDriver: 'test_driver/scroll_perf_non_intersecting_test.dart',
     needsFullTimeline: false,
     enableImpeller: enableImpeller,
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createAndroidTextureScrollPerfTest({bool? enableImpeller, bool unittestMode = false}) {
+TaskFunction createAndroidTextureScrollPerfTest({bool? enableImpeller}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
     'test_driver/android_view_scroll_perf.dart',
@@ -102,69 +100,61 @@ TaskFunction createAndroidTextureScrollPerfTest({bool? enableImpeller, bool unit
     testDriver: 'test_driver/scroll_perf_test.dart',
     needsFullTimeline: false,
     enableImpeller: enableImpeller,
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createAndroidViewScrollPerfTest({bool unittestMode = false}) {
+TaskFunction createAndroidViewScrollPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout_hybrid_composition',
     'test_driver/android_view_scroll_perf.dart',
     'platform_views_scroll_perf_hybrid_composition',
     testDriver: 'test_driver/scroll_perf_test.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createHomeScrollPerfTest({bool unittestMode = false}) {
+TaskFunction createHomeScrollPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
     'test_driver/scroll_perf.dart',
     'home_scroll_perf',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createCullOpacityPerfTest({bool unittestMode = false}) {
+TaskFunction createCullOpacityPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
     'cull_opacity_perf',
     testDriver: 'test_driver/cull_opacity_perf_test.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createCullOpacityPerfE2ETest({bool unittestMode = false}) {
+TaskFunction createCullOpacityPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/cull_opacity_perf_e2e.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createCubicBezierPerfTest({bool unittestMode = false}) {
+TaskFunction createCubicBezierPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
     'cubic_bezier_perf',
     testDriver: 'test_driver/cubic_bezier_perf_test.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createCubicBezierPerfE2ETest({bool unittestMode = false}) {
+TaskFunction createCubicBezierPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/cubic_bezier_perf_e2e.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
 TaskFunction createBackdropFilterPerfTest({
     bool measureCpuGpu = true,
     bool? enableImpeller,
-    bool unittestMode = false,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -175,11 +165,10 @@ TaskFunction createBackdropFilterPerfTest({
     saveTraceFile: true,
     enableImpeller: enableImpeller,
     disablePartialRepaint: true,
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createAnimationWithMicrotasksPerfTest({bool measureCpuGpu = true, bool unittestMode = false}) {
+TaskFunction createAnimationWithMicrotasksPerfTest({bool measureCpuGpu = true}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -187,19 +176,17 @@ TaskFunction createAnimationWithMicrotasksPerfTest({bool measureCpuGpu = true, b
     measureCpuGpu: measureCpuGpu,
     testDriver: 'test_driver/animation_with_microtasks_perf_test.dart',
     saveTraceFile: true,
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createBackdropFilterPerfE2ETest({bool unittestMode = false}) {
+TaskFunction createBackdropFilterPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/backdrop_filter_perf_e2e.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = true, bool unittestMode = false}) {
+TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = true}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -207,14 +194,12 @@ TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = true, bool u
     measureCpuGpu: measureCpuGpu,
     testDriver: 'test_driver/post_backdrop_filter_perf_test.dart',
     saveTraceFile: true,
-    unittestMode: unittestMode,
   ).run;
 }
 
 TaskFunction createSimpleAnimationPerfTest({
   bool measureCpuGpu = true,
   bool? enableImpeller,
-  bool unittestMode = false,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -224,47 +209,42 @@ TaskFunction createSimpleAnimationPerfTest({
     testDriver: 'test_driver/simple_animation_perf_test.dart',
     saveTraceFile: true,
     enableImpeller: enableImpeller,
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createAnimatedPlaceholderPerfE2ETest({bool unittestMode = false}) {
+TaskFunction createAnimatedPlaceholderPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/animated_placeholder_perf_e2e.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createPictureCachePerfTest({bool unittestMode = false}) {
+TaskFunction createPictureCachePerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
     'picture_cache_perf',
     testDriver: 'test_driver/picture_cache_perf_test.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createPictureCachePerfE2ETest({bool unittestMode = false}) {
+TaskFunction createPictureCachePerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/picture_cache_perf_e2e.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createPictureCacheComplexityScoringPerfTest({bool unittestMode = false}) {
+TaskFunction createPictureCacheComplexityScoringPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
     'picture_cache_complexity_scoring_perf',
     testDriver: 'test_driver/picture_cache_complexity_scoring_perf_test.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createOpenPayScrollPerfTest({bool measureCpuGpu = true, bool unittestMode = false}) {
+TaskFunction createOpenPayScrollPerfTest({bool measureCpuGpu = true}) {
   return PerfTest(
     openpayDirectory.path,
     'test_driver/scroll_perf.dart',
@@ -272,7 +252,6 @@ TaskFunction createOpenPayScrollPerfTest({bool measureCpuGpu = true, bool unitte
     measureCpuGpu: measureCpuGpu,
     testDriver: 'test_driver/scroll_perf_test.dart',
     saveTraceFile: true,
-    unittestMode: unittestMode,
   ).run;
 }
 
@@ -341,37 +320,33 @@ TaskFunction createTextfieldPerfTest({bool unittestMode = false}) {
     'test_driver/run_app.dart',
     'textfield_perf',
     testDriver: 'test_driver/textfield_perf_test.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createTextfieldPerfE2ETest({bool unittestMode = false}) {
+TaskFunction createTextfieldPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/textfield_perf_e2e.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createVeryLongPictureScrollingPerfE2ETest({required bool enableImpeller, bool unittestMode = false}) {
+TaskFunction createVeryLongPictureScrollingPerfE2ETest({required bool enableImpeller}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/very_long_picture_scrolling_perf_e2e.dart',
     enableImpeller: enableImpeller,
-    unittestMode: unittestMode,
   ).run;
 }
-TaskFunction createSlidersPerfTest({bool unittestMode = false}) {
+TaskFunction createSlidersPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
     'sliders_perf',
     testDriver: 'test_driver/sliders_perf_test.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createStackSizeTest({bool unittestMode = false}) {
+TaskFunction createStackSizeTest() {
   final String testDirectory =
       '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
   const String testTarget = 'test_driver/run_app.dart';
@@ -393,9 +368,11 @@ TaskFunction createStackSizeTest({bool unittestMode = false}) {
         '-d',
         deviceId,
       ]);
+      final String logFileName = path.join(testDirectory, 'build', 'stack_size.json');
       final Map<String, dynamic> data = json.decode(
-        file('${_testOutputDirectory(testDirectory, unittestMode)}/stack_size.json').readAsStringSync(),
+        file(logFileName).readAsStringSync(),
       ) as Map<String, dynamic>;
+      copyToOutputLogs(logFileName);
 
       final Map<String, dynamic> result = <String, dynamic>{
         'stack_size_per_nesting_level': data['stack_size'],
@@ -408,101 +385,90 @@ TaskFunction createStackSizeTest({bool unittestMode = false}) {
   };
 }
 
-TaskFunction createFullscreenTextfieldPerfTest({bool unittestMode = false}) {
+TaskFunction createFullscreenTextfieldPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
     'fullscreen_textfield_perf',
     testDriver: 'test_driver/fullscreen_textfield_perf_test.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
 TaskFunction createFullscreenTextfieldPerfE2ETest({
-  bool? enableImpeller, bool unittestMode = false
+  bool? enableImpeller
 }) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/fullscreen_textfield_perf_e2e.dart',
     enableImpeller: enableImpeller,
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createClipperCachePerfE2ETest({bool unittestMode = false}) {
+TaskFunction createClipperCachePerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/clipper_cache_perf_e2e.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createColorFilterAndFadePerfTest({bool unittestMode = false}) {
+TaskFunction createColorFilterAndFadePerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
     'color_filter_and_fade_perf',
     testDriver: 'test_driver/color_filter_and_fade_perf_test.dart',
     saveTraceFile: true,
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createColorFilterAndFadePerfE2ETest({bool? enableImpeller, bool unittestMode = false}) {
+TaskFunction createColorFilterAndFadePerfE2ETest({bool? enableImpeller}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/color_filter_and_fade_perf_e2e.dart',
     enableImpeller: enableImpeller,
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createColorFilterCachePerfE2ETest({bool unittestMode = false}) {
+TaskFunction createColorFilterCachePerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/color_filter_cache_perf_e2e.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createColorFilterWithUnstableChildPerfE2ETest({bool unittestMode = false}) {
+TaskFunction createColorFilterWithUnstableChildPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/color_filter_with_unstable_child_perf_e2e.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createRasterCacheUseMemoryPerfE2ETest({bool unittestMode = false}) {
+TaskFunction createRasterCacheUseMemoryPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/raster_cache_use_memory_perf_e2e.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createShaderMaskCachePerfE2ETest({bool unittestMode = false}) {
+TaskFunction createShaderMaskCachePerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/shader_mask_cache_perf_e2e.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createFadingChildAnimationPerfTest({bool unittestMode = false}) {
+TaskFunction createFadingChildAnimationPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
     'fading_child_animation_perf',
     testDriver: 'test_driver/fading_child_animation_perf_test.dart',
     saveTraceFile: true,
-    unittestMode: unittestMode,
   ).run;
 }
 
 TaskFunction createImageFilteredTransformAnimationPerfTest({
   bool? enableImpeller,
-  bool unittestMode = false,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -511,28 +477,25 @@ TaskFunction createImageFilteredTransformAnimationPerfTest({
     testDriver: 'test_driver/imagefiltered_transform_animation_perf_test.dart',
     saveTraceFile: true,
     enableImpeller: enableImpeller,
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createsMultiWidgetConstructPerfE2ETest({bool unittestMode = false}) {
+TaskFunction createsMultiWidgetConstructPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/multi_widget_construction_perf_e2e.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createListTextLayoutPerfE2ETest({bool? enableImpeller, bool unittestMode = false}) {
+TaskFunction createListTextLayoutPerfE2ETest({bool? enableImpeller}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/list_text_layout_perf_e2e.dart',
     enableImpeller: enableImpeller,
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createsScrollSmoothnessPerfTest({bool unittestMode = false}) {
+TaskFunction createsScrollSmoothnessPerfTest() {
   final String testDirectory =
       '${flutterDirectory.path}/dev/benchmarks/complex_layout';
   const String testTarget = 'test/measure_scroll_smoothness.dart';
@@ -552,10 +515,11 @@ TaskFunction createsScrollSmoothnessPerfTest({bool unittestMode = false}) {
         '-d',
         deviceId,
       ]);
+      final String logFileName = path.join(testDirectory, 'build', 'scroll_smoothness_test.json');
       final Map<String, dynamic> data = json.decode(
-        file('${_testOutputDirectory(testDirectory, unittestMode)}/scroll_smoothness_test.json').readAsStringSync(),
+        file(logFileName).readAsStringSync(),
       ) as Map<String, dynamic>;
-
+      copyToOutputLogs(logFileName);
       final Map<String, dynamic> result = <String, dynamic>{};
       void addResult(dynamic data, String suffix) {
         assert(data is Map<String, dynamic>);
@@ -583,7 +547,7 @@ TaskFunction createsScrollSmoothnessPerfTest({bool unittestMode = false}) {
   };
 }
 
-TaskFunction createFramePolicyIntegrationTest({bool unittestMode = false}) {
+TaskFunction createFramePolicyIntegrationTest() {
   final String testDirectory =
       '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
   const String testTarget = 'test/frame_policy.dart';
@@ -603,9 +567,11 @@ TaskFunction createFramePolicyIntegrationTest({bool unittestMode = false}) {
         '-d',
         deviceId,
       ]);
+       final String logFileName = path.join(testDirectory, 'build', 'frame_policy_event_delay.json');
       final Map<String, dynamic> data = json.decode(
-        file('${_testOutputDirectory(testDirectory, unittestMode)}/frame_policy_event_delay.json').readAsStringSync(),
+        file(logFileName).readAsStringSync(),
       ) as Map<String, dynamic>;
+      copyToOutputLogs(logFileName);
       final Map<String, dynamic> fullLiveData = data['fullyLive'] as Map<String, dynamic>;
       final Map<String, dynamic> benchmarkLiveData = data['benchmarkLive'] as Map<String, dynamic>;
       final Map<String, dynamic> dataFormatted = <String, dynamic>{
@@ -627,90 +593,79 @@ TaskFunction createFramePolicyIntegrationTest({bool unittestMode = false}) {
   };
 }
 
-TaskFunction createOpacityPeepholeOneRectPerfE2ETest({bool unittestMode = false}) {
+TaskFunction createOpacityPeepholeOneRectPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/opacity_peephole_one_rect_perf_e2e.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createOpacityPeepholeColOfRowsPerfE2ETest({bool unittestMode = false}) {
+TaskFunction createOpacityPeepholeColOfRowsPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/opacity_peephole_col_of_rows_perf_e2e.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createOpacityPeepholeOpacityOfGridPerfE2ETest({bool unittestMode = false}) {
+TaskFunction createOpacityPeepholeOpacityOfGridPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/opacity_peephole_opacity_of_grid_perf_e2e.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createOpacityPeepholeGridOfOpacityPerfE2ETest({bool unittestMode = false}) {
+TaskFunction createOpacityPeepholeGridOfOpacityPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/opacity_peephole_grid_of_opacity_perf_e2e.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createOpacityPeepholeFadeTransitionTextPerfE2ETest({bool unittestMode = false}) {
+TaskFunction createOpacityPeepholeFadeTransitionTextPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/opacity_peephole_fade_transition_text_perf_e2e.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createOpacityPeepholeGridOfAlphaSaveLayersPerfE2ETest({bool unittestMode = false}) {
+TaskFunction createOpacityPeepholeGridOfAlphaSaveLayersPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/opacity_peephole_grid_of_alpha_savelayers_perf_e2e.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createOpacityPeepholeColOfAlphaSaveLayerRowsPerfE2ETest({bool unittestMode = false}) {
+TaskFunction createOpacityPeepholeColOfAlphaSaveLayerRowsPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/opacity_peephole_col_of_alpha_savelayer_rows_perf_e2e.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createGradientDynamicPerfE2ETest({bool unittestMode = false}) {
+TaskFunction createGradientDynamicPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/gradient_dynamic_perf_e2e.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createGradientConsistentPerfE2ETest({bool unittestMode = false}) {
+TaskFunction createGradientConsistentPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/gradient_consistent_perf_e2e.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createGradientStaticPerfE2ETest({bool unittestMode = false}) {
+TaskFunction createGradientStaticPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/gradient_static_perf_e2e.dart',
-    unittestMode: unittestMode,
   ).run;
 }
 
 TaskFunction createAnimatedAdvancedBlendPerfTest({
   bool? enableImpeller,
   bool? forceOpenGLES,
-  bool unittestMode = false,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -720,14 +675,12 @@ TaskFunction createAnimatedAdvancedBlendPerfTest({
     forceOpenGLES: forceOpenGLES,
     testDriver: 'test_driver/animated_advanced_blend_perf_test.dart',
     saveTraceFile: true,
-    unittestMode: unittestMode,
   ).run;
 }
 
 TaskFunction createAnimatedBlurBackropFilterPerfTest({
   bool? enableImpeller,
   bool? forceOpenGLES,
-  bool unittestMode = false,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -737,13 +690,11 @@ TaskFunction createAnimatedBlurBackropFilterPerfTest({
     forceOpenGLES: forceOpenGLES,
     testDriver: 'test_driver/animated_blur_backdrop_filter_perf_test.dart',
     saveTraceFile: true,
-    unittestMode: unittestMode,
   ).run;
 }
 
 TaskFunction createDrawPointsPerfTest({
   bool? enableImpeller,
-  bool unittestMode = false,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -752,13 +703,11 @@ TaskFunction createDrawPointsPerfTest({
     enableImpeller: enableImpeller,
     testDriver: 'test_driver/draw_points_perf_test.dart',
     saveTraceFile: true,
-    unittestMode: unittestMode,
   ).run;
 }
 
 TaskFunction createDrawAtlasPerfTest({
   bool? forceOpenGLES,
-  bool unittestMode = false,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -768,13 +717,11 @@ TaskFunction createDrawAtlasPerfTest({
     testDriver: 'test_driver/draw_atlas_perf_test.dart',
     saveTraceFile: true,
     forceOpenGLES: forceOpenGLES,
-    unittestMode: unittestMode,
   ).run;
 }
 
 TaskFunction createDrawVerticesPerfTest({
   bool? forceOpenGLES,
-  bool unittestMode = false,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -784,11 +731,10 @@ TaskFunction createDrawVerticesPerfTest({
     testDriver: 'test_driver/draw_vertices_perf_test.dart',
     saveTraceFile: true,
     forceOpenGLES: forceOpenGLES,
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createPathTessellationStaticPerfTest({bool unittestMode = false}) {
+TaskFunction createPathTessellationStaticPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -796,11 +742,10 @@ TaskFunction createPathTessellationStaticPerfTest({bool unittestMode = false}) {
     enableImpeller: true,
     testDriver: 'test_driver/path_tessellation_static_perf_test.dart',
     saveTraceFile: true,
-    unittestMode: unittestMode,
   ).run;
 }
 
-TaskFunction createPathTessellationDynamicPerfTest({bool unittestMode = false}) {
+TaskFunction createPathTessellationDynamicPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -808,31 +753,26 @@ TaskFunction createPathTessellationDynamicPerfTest({bool unittestMode = false}) 
     enableImpeller: true,
     testDriver: 'test_driver/path_tessellation_dynamic_perf_test.dart',
     saveTraceFile: true,
-    unittestMode: unittestMode,
   ).run;
 }
 
 TaskFunction createAnimatedComplexOpacityPerfE2ETest({
   bool? enableImpeller,
-  bool unittestMode = false,
 }) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/animated_complex_opacity_perf_e2e.dart',
     enableImpeller: enableImpeller,
-    unittestMode: unittestMode,
   ).run;
 }
 
 TaskFunction createAnimatedComplexImageFilteredPerfE2ETest({
   bool? enableImpeller,
-  bool unittestMode = false,
 }) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/animated_complex_image_filtered_perf_e2e.dart',
     enableImpeller: enableImpeller,
-    unittestMode: unittestMode,
   ).run;
 }
 
@@ -1095,10 +1035,12 @@ class StartupTest {
         );
         timer.cancel();
         if (result == 0) {
+          final String logFileName = path.join(testDirectory, 'build', 'start_up_info.json');
           final Map<String, dynamic> data = json.decode(
-            file('${_testOutputDirectory(testDirectory, unittestMode)}/start_up_info.json').readAsStringSync(),
+            file(logFileName).readAsStringSync(),
           ) as Map<String, dynamic>;
           results.add(data);
+          copyToOutputLogs(logFileName);
         } else {
           currentFailures += 1;
           await _flutterScreenshot(
@@ -1271,7 +1213,6 @@ class PerfTest {
     this.forceOpenGLES,
     this.disablePartialRepaint = false,
     this.createPlatforms = const <String>[],
-    this.unittestMode = false,
   }): _resultFilename = resultFilename;
 
   const PerfTest.e2e(
@@ -1292,7 +1233,6 @@ class PerfTest {
     this.forceOpenGLES,
     this.disablePartialRepaint = false,
     this.createPlatforms = const <String>[],
-    this.unittestMode = false,
   }) : saveTraceFile = false, timelineFileName = null, _resultFilename = resultFilename;
 
   /// The directory where the app under test is defined.
@@ -1337,9 +1277,6 @@ class PerfTest {
 
   /// Number of seconds to time out the test after, allowing debug callbacks to run.
   final int? timeoutSeconds;
-
-  /// Bool representing if this script is running in unit test mode.
-  final bool unittestMode;
 
   /// The keys of the values that need to be reported.
   ///
@@ -1478,9 +1415,11 @@ class PerfTest {
         await resetPlist();
       }
 
+      final String logFileName = path.join(testDirectory, 'build', '$resultFilename.json');
       final Map<String, dynamic> data = json.decode(
-        file('${_testOutputDirectory(testDirectory, unittestMode)}/$resultFilename.json').readAsStringSync(),
+        file(logFileName).readAsStringSync(),
       ) as Map<String, dynamic>;
+      copyToOutputLogs(logFileName);
 
       if (data['frame_count'] as int < 5) {
         return TaskResult.failure(
@@ -1508,11 +1447,15 @@ class PerfTest {
       // TODO(liyuqian): Remove isAndroid restriction once
       // https://github.com/flutter/flutter/issues/61567 is fixed.
       final bool isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
+      if (saveTraceFile) {
+        final String logFileName = path.join(testDirectory, 'build', '$traceFilename.json');
+        copyToOutputLogs(logFileName);
+      }
       return TaskResult.success(
         data,
         detailFiles: <String>[
           if (saveTraceFile)
-            '${_testOutputDirectory(testDirectory, unittestMode)}/$traceFilename.json',
+            logFileName,
         ],
         benchmarkScoreKeys: benchmarkScoreKeys ?? <String>[
           ..._kCommonScoreKeys,
