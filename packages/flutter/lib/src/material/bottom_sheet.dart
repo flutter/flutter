@@ -615,6 +615,21 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
     return _getSize(constraints);
   }
 
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final BoxConstraints childConstraints = _getConstraintsForChild(constraints);
+    final double? result = child.getDryBaseline(childConstraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    final Size childSize = childConstraints.isTight ? childConstraints.smallest : child.getDryLayout(childConstraints);
+    return result + _getPositionForChild(_getSize(constraints), childSize).dy;
+  }
+
   BoxConstraints _getConstraintsForChild(BoxConstraints constraints) {
     return BoxConstraints(
       minWidth: constraints.maxWidth,
@@ -632,18 +647,21 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
   @override
   void performLayout() {
     size = _getSize(constraints);
-    if (child != null) {
-      final BoxConstraints childConstraints = _getConstraintsForChild(constraints);
-      assert(childConstraints.debugAssertIsValid(isAppliedConstraint: true));
-      child!.layout(childConstraints, parentUsesSize: !childConstraints.isTight);
-      final BoxParentData childParentData = child!.parentData! as BoxParentData;
-      childParentData.offset = _getPositionForChild(size, childConstraints.isTight ? childConstraints.smallest : child!.size);
-      final Size childSize = childConstraints.isTight ? childConstraints.smallest : child!.size;
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return;
+    }
 
-      if (_lastSize != childSize) {
-        _lastSize = childSize;
-        _onChildSizeChanged.call(_lastSize);
-      }
+    final BoxConstraints childConstraints = _getConstraintsForChild(constraints);
+    assert(childConstraints.debugAssertIsValid(isAppliedConstraint: true));
+    child.layout(childConstraints, parentUsesSize: !childConstraints.isTight);
+    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    final Size childSize = childConstraints.isTight ? childConstraints.smallest : child.size;
+    childParentData.offset = _getPositionForChild(size, childSize);
+
+    if (_lastSize != childSize) {
+      _lastSize = childSize;
+      _onChildSizeChanged.call(_lastSize);
     }
   }
 }
