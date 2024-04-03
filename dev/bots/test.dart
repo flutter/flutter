@@ -71,6 +71,7 @@ import 'suite_runners/run_docs_tests.dart';
 import 'suite_runners/run_flutter_packages_tests.dart';
 import 'suite_runners/run_realm_checker_tests.dart';
 import 'suite_runners/run_skp_generator_tests.dart';
+import 'suite_runners/run_tool_tests.dart';
 import 'suite_runners/run_web_long_running_tests.dart';
 import 'tool_subsharding.dart';
 import 'utils.dart';
@@ -237,7 +238,7 @@ Future<void> main(List<String> args) async {
       'build_tests': _runBuildTests,
       'framework_coverage': _runFrameworkCoverage,
       'framework_tests': _runFrameworkTests,
-      'tool_tests': _runToolTests,
+      'tool_tests': () => toolTestsRunner(flutterRoot),
       // web_tool_tests is also used by HHH: https://dart.googlesource.com/recipes/+/refs/heads/master/recipes/dart/flutter_engine.py
       'web_tool_tests': _runWebToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
@@ -427,27 +428,6 @@ Future<void> _runTestHarnessTests() async {
 
 final String _toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
 
-Future<void> _runGeneralToolTests() async {
-  await _runDartTest(
-    _toolsPath,
-    testPaths: <String>[path.join('test', 'general.shard')],
-    enableFlutterToolAsserts: false,
-
-    // Detect unit test time regressions (poor time delay handling, etc).
-    // This overrides the 15 minute default for tools tests.
-    // See the README.md and dart_test.yaml files in the flutter_tools package.
-    perTestTimeout: const Duration(seconds: 2),
-  );
-}
-
-Future<void> _runCommandsToolTests() async {
-  await _runDartTest(
-    _toolsPath,
-    forceSingleCore: true,
-    testPaths: <String>[path.join('test', 'commands.shard')],
-  );
-}
-
 Future<void> _runWebToolTests() async {
   final List<File> allFiles = Directory(path.join(_toolsPath, 'test', 'web.shard'))
       .listSync(recursive: true).whereType<File>().toList();
@@ -500,13 +480,6 @@ Future<void> _runAndroidPreviewIntegrationToolTests() async {
     testPaths: _selectIndexOfTotalSubshard<String>(allTests),
     collectMetrics: true,
   );
-}
-
-Future<void> _runToolTests() async {
-  await selectSubshard(<String, ShardRunner>{
-    'general': _runGeneralToolTests,
-    'commands': _runCommandsToolTests,
-  });
 }
 
 Future<void> runForbiddenFromReleaseTests() async {
