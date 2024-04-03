@@ -148,7 +148,6 @@ class _RenderCompositionCallback extends RenderProxyBox {
   }
 }
 
-// TODO(victorsanni): Update documentation to discourage using the TextEditingController.text setter
 /// A controller for an editable text field.
 ///
 /// Whenever the user modifies a text field with an associated
