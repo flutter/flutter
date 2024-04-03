@@ -395,7 +395,7 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 
 /// Return the input string as a Dart-parseable string.
 ///
-/// ```
+/// ```none
 /// foo => 'foo'
 /// foo "bar" => 'foo "bar"'
 /// foo 'bar' => "foo 'bar'"
@@ -407,7 +407,7 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 /// in JSON files are escaped. For example, the backspace character (\b)
 /// has to be properly escaped by this function so that the generated
 /// Dart code correctly represents this character:
-/// ```
+/// ```none
 /// foo\bar => 'foo\\bar'
 /// foo\nbar => 'foo\\nbar'
 /// foo\\nbar => 'foo\\\\nbar'

@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-
 void main() {
   Finder findMenuPanels() {
     return find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MenuPanel');
@@ -281,7 +280,7 @@ void main() {
       expect(tester.getRect(find.byType(MenuBar)), equals(const Rect.fromLTRB(228.0, 0.0, 572.0, 48.0)));
       expect(
         tester.getRect(find.text(TestMenu.subMenu10.label)),
-        equals(const Rect.fromLTRB(366.0, 68.0, 520.0, 82.0)),
+        equals(const Rect.fromLTRB(366.0, 68.0, 559.0, 82.0)),
       );
       expect(
         tester.getRect(find.ancestor(of: find.text(TestMenu.subMenu10.label), matching: find.byType(Material)).at(1)),

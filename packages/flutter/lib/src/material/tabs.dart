@@ -1343,11 +1343,20 @@ class _TabBarState extends State<TabBar> {
       color = Colors.white;
     }
 
-    final bool primaryWithLabelIndicator = widget._isPrimary && indicatorSize == TabBarIndicatorSize.label;
-    final double effectiveIndicatorWeight = theme.useMaterial3 && primaryWithLabelIndicator
-      ? math.max(widget.indicatorWeight, _TabsPrimaryDefaultsM3.indicatorWeight)
+    final double effectiveIndicatorWeight = theme.useMaterial3
+      ? math.max(
+          widget.indicatorWeight,
+          switch (widget._isPrimary) {
+            true  => _TabsPrimaryDefaultsM3.indicatorWeight(indicatorSize),
+            false => _TabsSecondaryDefaultsM3.indicatorWeight,
+          },
+        )
       : widget.indicatorWeight;
     // Only Material 3 primary TabBar with label indicatorSize should be rounded.
+    final bool primaryWithLabelIndicator = switch (indicatorSize) {
+      TabBarIndicatorSize.label  => widget._isPrimary,
+      TabBarIndicatorSize.tab    => false,
+    };
     final BorderRadius? effectiveBorderRadius = theme.useMaterial3 && primaryWithLabelIndicator
       ? BorderRadius.only(
           topLeft: Radius.circular(effectiveIndicatorWeight),
@@ -1410,18 +1419,23 @@ class _TabBarState extends State<TabBar> {
       ?? tabBarTheme.indicatorSize
       ?? _defaults.indicatorSize!;
 
+    final _IndicatorPainter? oldPainter = _indicatorPainter;
+
     _indicatorPainter = !_controllerIsValid ? null : _IndicatorPainter(
       controller: _controller!,
       indicator: _getIndicator(indicatorSize),
       indicatorSize: indicatorSize,
       indicatorPadding: widget.indicatorPadding,
       tabKeys: _tabKeys,
-      old: _indicatorPainter,
+      // Passing old painter so that the constructor can copy some values from it.
+      old: oldPainter,
       labelPaddings: _labelPaddings,
       dividerColor: widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor,
       dividerHeight: widget.dividerHeight ?? tabBarTheme.dividerHeight ?? _defaults.dividerHeight,
       showDivider: theme.useMaterial3 && !widget.isScrollable,
     );
+
+    oldPainter?.dispose();
   }
 
   @override
@@ -2424,7 +2438,12 @@ class _TabsPrimaryDefaultsM3 extends TabBarTheme {
   @override
   TabAlignment? get tabAlignment => isScrollable ? TabAlignment.startOffset : TabAlignment.fill;
 
-  static double indicatorWeight = 3.0;
+  static double indicatorWeight(TabBarIndicatorSize indicatorSize) {
+    return switch (indicatorSize) {
+      TabBarIndicatorSize.label => 3.0,
+      TabBarIndicatorSize.tab => 2.0,
+    };
+  }
 
   // TODO(davidmartos96): This value doesn't currently exist in
   // https://m3.material.io/components/tabs/specs
@@ -2497,6 +2516,8 @@ class _TabsSecondaryDefaultsM3 extends TabBarTheme {
 
   @override
   TabAlignment? get tabAlignment => isScrollable ? TabAlignment.startOffset : TabAlignment.fill;
+
+  static double indicatorWeight = 2.0;
 }
 
 // END GENERATED TOKEN PROPERTIES - Tabs

@@ -3061,6 +3061,48 @@ void main() {
     expect(box.size.height, 32);
   });
 
+  testWidgets('Tapping outside searchbar should unfocus the searchbar on mobile', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      addTearDown(focusNode.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SearchAnchor(
+              builder: (BuildContext context, SearchController controller){
+                return SearchBar(
+                  controller: controller,
+                  onTap: () {
+                    controller.openView();
+                  },
+                  onTapOutside: (PointerDownEvent event) {
+                    focusNode.unfocus();
+                  },
+                  onChanged: (_) {
+                    controller.openView();
+                  },
+                  autoFocus: true,
+                  focusNode: focusNode,
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller){
+                return List<ListTile>.generate(5, (int index) {
+                  final String item = 'item $index';
+                  return ListTile(title: Text(item));
+                });
+              },
+            )
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      await tester.tapAt(const Offset(50, 50));
+      await tester.pump();
+
+      expect(focusNode.hasPrimaryFocus, isFalse);
+    }, variant: TargetPlatformVariant.mobile());
+
   testWidgets('The default clear button only shows when text input is not empty '
       'on the search view', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
@@ -3088,6 +3130,104 @@ void main() {
     await tester.enterText(findTextField(), '');
     await tester.pump();
     expect(find.widgetWithIcon(IconButton, Icons.close), findsNothing);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/139880.
+  testWidgets('suggestionsBuilder with Future is not called twice on layout resize', (WidgetTester tester) async {
+    int suggestionsLoadingCount = 0;
+
+    Future<List<String>> createListData() async {
+      return List<String>.generate(1000, (int index) {
+        return  'Hello World - $index';
+      });
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: SearchAnchor(
+            builder: (BuildContext context, SearchController controller) {
+              return const Icon(Icons.search);
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[
+                FutureBuilder<List<String>>(
+                  future: createListData(),
+                  builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+                    if (snapshot.connectionState != ConnectionState.done) {
+                      return const LinearProgressIndicator();
+                    }
+                    final List<String>? result = snapshot.data;
+                    if (result == null) {
+                      return const LinearProgressIndicator();
+                    }
+                    suggestionsLoadingCount++;
+                    return SingleChildScrollView(
+                      child: Column(
+                        children: result.map((String text) {
+                          return ListTile(title: Text(text));
+                        }).toList(),
+                      ),
+                    );
+                  },
+                ),
+              ];
+            },
+          ),
+        ),
+      ),
+    ));
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.search)); // Open search view.
+    await tester.pumpAndSettle();
+
+    // Simulate the keyboard opening resizing the view.
+    tester.view.viewInsets = const FakeViewPadding(bottom: 500.0);
+    addTearDown(tester.view.reset);
+    await tester.pumpAndSettle();
+
+    expect(suggestionsLoadingCount, 1);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/139880.
+  testWidgets('suggestionsBuilder is not called when the search value does not change', (WidgetTester tester) async {
+    int suggestionsBuilderCalledCount = 0;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: SearchAnchor(
+            builder: (BuildContext context, SearchController controller) {
+              return const Icon(Icons.search);
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              suggestionsBuilderCalledCount++;
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    ));
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.search)); // Open search view.
+    await tester.pumpAndSettle();
+
+    // Simulate the keyboard opening resizing the view.
+    tester.view.viewInsets = const FakeViewPadding(bottom: 500.0);
+    addTearDown(tester.view.reset);
+    // Show the keyboard.
+    await tester.showKeyboard(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    expect(suggestionsBuilderCalledCount, 2);
+
+    // Remove the viewInset, as if the keyboard were hidden.
+    tester.view.resetViewInsets();
+    // Hide the keyboard.
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+
+    expect(suggestionsBuilderCalledCount, 2);
   });
 }
 

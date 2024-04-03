@@ -854,6 +854,7 @@ class MenuItemButton extends StatefulWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.closeOnActivate = true,
+    this.overflowAxis = Axis.horizontal,
     required this.child,
   });
 
@@ -922,6 +923,18 @@ class MenuItemButton extends StatefulWidget {
   /// Defaults to true.
   /// {@endtemplate}
   final bool closeOnActivate;
+
+  /// The direction in which the menu item expands.
+  ///
+  /// If the menu item button is a descendent of [MenuAnchor] or [MenuBar], then
+  /// this property is ignored.
+  ///
+  /// If [overflowAxis] is [Axis.vertical], the menu will be expanded vertically.
+  /// If [overflowAxis] is [Axis.horizontal], then the menu  will be
+  /// expanded horizontally.
+  ///
+  /// Defaults to [Axis.horizontal].
+  final Axis overflowAxis;
 
   /// The widget displayed in the center of this button.
   ///
@@ -1052,6 +1065,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
   // If a focus node isn't given to the widget, then we have to manage our own.
   FocusNode? _internalFocusNode;
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
+  _MenuAnchorState? get _anchor => _MenuAnchorState._maybeOf(context);
 
   @override
   void initState() {
@@ -1107,6 +1121,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
         shortcut: widget.shortcut,
         trailingIcon: widget.trailingIcon,
         hasSubmenu: false,
+        overflowAxis: _anchor?._orientation ?? widget.overflowAxis,
         child: widget.child!,
       ),
     );
@@ -2427,130 +2442,35 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       return;
     }
     final bool buttonIsFocused = anchor.widget.childFocusNode?.hasPrimaryFocus ?? false;
-    Axis orientation;
-    if (buttonIsFocused && anchor._parent != null) {
-      orientation = anchor._parent!._orientation;
-    } else {
-      orientation = anchor._orientation;
-    }
+    final Axis? parentOrientation = anchor._parent?._orientation;
+    final Axis orientation = (buttonIsFocused ? parentOrientation : null) ?? anchor._orientation;
+    final bool differentParent = orientation != parentOrientation;
     final bool firstItemIsFocused = anchor._firstItemFocusNode?.hasPrimaryFocus ?? false;
+    final bool rtl = switch (Directionality.of(context)) {
+      TextDirection.rtl => true,
+      TextDirection.ltr => false,
+    };
+
     assert(_debugMenuInfo('In _MenuDirectionalFocusAction, current node is ${anchor.widget.childFocusNode?.debugLabel}, '
         'button is${buttonIsFocused ? '' : ' not'} focused. Assuming ${orientation.name} orientation.'));
 
-    switch (intent.direction) {
-      case TraversalDirection.up:
-        switch (orientation) {
-          case Axis.horizontal:
-            if (_moveToParent(anchor)) {
-              return;
-            }
-          case Axis.vertical:
-            if (firstItemIsFocused) {
-              if (_moveToParent(anchor)) {
-                return;
-              }
-            }
-            if (_moveToPrevious(anchor)) {
-              return;
-            }
-        }
-      case TraversalDirection.down:
-        switch (orientation) {
-          case Axis.horizontal:
-            if (_moveToSubmenu(anchor)) {
-              return;
-            }
-          case Axis.vertical:
-            if (_moveToNext(anchor)) {
-              return;
-            }
-        }
-      case TraversalDirection.left:
-        switch (orientation) {
-          case Axis.horizontal:
-            switch (Directionality.of(context)) {
-              case TextDirection.rtl:
-                if (_moveToNext(anchor)) {
-                  return;
-                }
-              case TextDirection.ltr:
-                if (_moveToPrevious(anchor)) {
-                  return;
-                }
-            }
-          case Axis.vertical:
-            switch (Directionality.of(context)) {
-              case TextDirection.rtl:
-                if (buttonIsFocused) {
-                  if (_moveToSubmenu(anchor)) {
-                    return;
-                  }
-                } else {
-                  if (_moveToNextFocusableTopLevel(anchor)) {
-                    return;
-                  }
-                }
-              case TextDirection.ltr:
-                switch (anchor._parent?._orientation) {
-                  case Axis.horizontal:
-                  case null:
-                    if (_moveToPreviousFocusableTopLevel(anchor)) {
-                      return;
-                    }
-                  case Axis.vertical:
-                    if (buttonIsFocused) {
-                      if (_moveToPreviousFocusableTopLevel(anchor)) {
-                        return;
-                      }
-                    } else {
-                      if (_moveToParent(anchor)) {
-                        return;
-                      }
-                    }
-                }
-            }
-        }
-      case TraversalDirection.right:
-        switch (orientation) {
-          case Axis.horizontal:
-            switch (Directionality.of(context)) {
-              case TextDirection.rtl:
-                if (_moveToPrevious(anchor)) {
-                  return;
-                }
-              case TextDirection.ltr:
-                if (_moveToNext(anchor)) {
-                  return;
-                }
-            }
-          case Axis.vertical:
-            switch (Directionality.of(context)) {
-              case TextDirection.rtl:
-                switch (anchor._parent?._orientation) {
-                  case Axis.horizontal:
-                  case null:
-                    if (_moveToPreviousFocusableTopLevel(anchor)) {
-                      return;
-                    }
-                  case Axis.vertical:
-                    if (_moveToParent(anchor)) {
-                      return;
-                    }
-                }
-              case TextDirection.ltr:
-                if (buttonIsFocused) {
-                  if (_moveToSubmenu(anchor)) {
-                    return;
-                  }
-                } else {
-                  if (_moveToNextFocusableTopLevel(anchor)) {
-                    return;
-                  }
-                }
-            }
-        }
+    final bool Function(_MenuAnchorState) traversal = switch ((intent.direction, orientation)) {
+      (TraversalDirection.up, Axis.horizontal) => _moveToParent,
+      (TraversalDirection.up, Axis.vertical) => firstItemIsFocused ? _moveToParent: _moveToPrevious,
+      (TraversalDirection.down, Axis.horizontal) => _moveToSubmenu,
+      (TraversalDirection.down, Axis.vertical) => _moveToNext,
+      (TraversalDirection.left, Axis.horizontal) => rtl ? _moveToNext : _moveToPrevious,
+      (TraversalDirection.right, Axis.horizontal) => rtl ? _moveToPrevious : _moveToNext,
+      (TraversalDirection.left, Axis.vertical) when rtl => buttonIsFocused ? _moveToSubmenu : _moveToNextFocusableTopLevel,
+      (TraversalDirection.left, Axis.vertical) when differentParent => _moveToPreviousFocusableTopLevel,
+      (TraversalDirection.left, Axis.vertical) => buttonIsFocused ? _moveToPreviousFocusableTopLevel : _moveToParent,
+      (TraversalDirection.right, Axis.vertical) when !rtl => buttonIsFocused ? _moveToSubmenu : _moveToNextFocusableTopLevel,
+      (TraversalDirection.right, Axis.vertical) when differentParent => _moveToPreviousFocusableTopLevel,
+      (TraversalDirection.right, Axis.vertical) => buttonIsFocused ? _moveToPreviousFocusableTopLevel : _moveToParent,
+    };
+    if (!traversal(anchor)) {
+      super.invoke(intent);
     }
-    super.invoke(intent);
   }
 
   bool _moveToNext(_MenuAnchorState currentMenu) {
@@ -3053,6 +2973,7 @@ class _MenuItemLabel extends StatelessWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.shortcut,
+    this.overflowAxis = Axis.vertical,
     required this.child,
   });
 
@@ -3076,6 +2997,9 @@ class _MenuItemLabel extends StatelessWidget {
   /// the shortcut.
   final MenuSerializableShortcut? shortcut;
 
+  /// The direction in which the menu item expands.
+  final Axis overflowAxis;
+
   /// The required label child widget.
   final Widget child;
 
@@ -3086,19 +3010,44 @@ class _MenuItemLabel extends StatelessWidget {
       _kLabelItemMinSpacing,
       _kLabelItemDefaultSpacing + density.horizontal * 2,
     );
+
+    Widget leadings;
+    if (overflowAxis == Axis.vertical) {
+      leadings = Expanded(
+        child: ClipRect(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              if (leadingIcon != null) leadingIcon!,
+              Expanded(
+                child: ClipRect(
+                  child: Padding(
+                    padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
+                    child: child,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      leadings = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          if (leadingIcon != null) leadingIcon!,
+          Padding(
+            padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
+            child: child,
+          ),
+        ],
+      );
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            if (leadingIcon != null) leadingIcon!,
-            Padding(
-              padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
-              child: child,
-            ),
-          ],
-        ),
+        leadings,
         if (trailingIcon != null)
           Padding(
             padding: EdgeInsetsDirectional.only(start: horizontalPadding),
@@ -3359,6 +3308,12 @@ class _MenuPanelState extends State<_MenuPanel> {
   ScrollController scrollController = ScrollController();
 
   @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final (MenuStyle? themeStyle, MenuStyle defaultStyle) = switch (widget.orientation) {
       Axis.horizontal => (MenuBarTheme.of(context).style, _MenuBarDefaultsM3(context)),
@@ -3426,6 +3381,16 @@ class _MenuPanelState extends State<_MenuPanel> {
       }
     }
 
+    // If the menu panel is horizontal, then the children should be wrapped in
+    // an IntrinsicWidth widget to ensure that the children are as wide as the
+    // widest child.
+    List<Widget> children = widget.children;
+    if (widget.orientation == Axis.horizontal) {
+      children = children.map<Widget>((Widget child) {
+        return IntrinsicWidth(child: child);
+      }).toList();
+    }
+
     Widget menuPanel = _intrinsicCrossSize(
       child: Material(
         elevation: elevation,
@@ -3455,7 +3420,7 @@ class _MenuPanelState extends State<_MenuPanel> {
                     textDirection: Directionality.of(context),
                     direction: widget.orientation,
                     mainAxisSize: MainAxisSize.min,
-                    children: widget.children,
+                    children: children,
                   ),
                 ),
               ),
