@@ -153,6 +153,9 @@ Future<void> run(List<String> arguments) async {
   printProgress('Taboo words...');
   await verifyTabooDocumentation(flutterRoot);
 
+  printProgress('Lint Kotlin files...');
+  await lintKotlinFiles(flutterRoot);
+
   // Ensure that all package dependencies are in sync.
   printProgress('Package dependencies...');
   await runCommand(flutter, <String>['update-packages', '--verify-only'],
@@ -1970,6 +1973,22 @@ Future<void> verifyTabooDocumentation(String workingDirectory, { int minimumMatc
       '${bold}Similarly, avoid using "note:" or the phrase "note that". See https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#avoid-empty-prose for details.$reset',
       ...errors,
     ]);
+  }
+}
+
+Future<void> lintKotlinFiles(String workingDirectory) async {
+  const String baselineRelativePath = 'dev/bots/test/analyze-test-input/ktlint-baseline.xml';
+  const String editorConfigRelativePath = 'dev/bots/test/analyze-test-input/.editorconfig';
+  final EvalResult lintResult = await _evalCommand('ktlint',
+      <String>['--baseline=$flutterRoot/$baselineRelativePath', '--editorconfig=$flutterRoot/$editorConfigRelativePath'],
+      workingDirectory: workingDirectory);
+  if (lintResult.exitCode != 0) {
+    final String errorMessage = 'Found lint violations in Kotlin files:\n ${lintResult.stdout}\n\n'
+        'To reproduce this lint locally:\n'
+        '1. Identify the CIPD version tag used to resolve this particular version of ktlint (check the dependencies section of this shard in the ci.yaml). \n'
+        '2. Download that version from https://chrome-infra-packages.appspot.com/p/flutter/ktlint/linux-amd64/+/<version_tag>\n'
+        '3. From the repository root, run `<path_to_ktlint>/ktlint --editorconfig=$editorConfigRelativePath --baseline=$baselineRelativePath`';
+    foundError(<String>[errorMessage]);
   }
 }
 
