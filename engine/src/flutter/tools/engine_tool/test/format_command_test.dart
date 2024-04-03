@@ -34,6 +34,7 @@ void main() {
       platform: FakePlatform(
         resolvedExecutable: '/dart',
         operatingSystem: Platform.linux,
+        pathSeparator: '/',
       ),
       processRunner: ProcessRunner(
         processManager: processManager,

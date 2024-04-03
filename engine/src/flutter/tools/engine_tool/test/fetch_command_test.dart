@@ -33,7 +33,8 @@ void main() {
         engine: engine,
         platform: FakePlatform(
             operatingSystem: Platform.linux,
-            resolvedExecutable: io.Platform.resolvedExecutable),
+            resolvedExecutable: io.Platform.resolvedExecutable,
+            pathSeparator: '/'),
         processRunner: ProcessRunner(
           processManager: FakeProcessManager(onStart: (List<String> command) {
             runHistory.add(command);
