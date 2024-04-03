@@ -888,9 +888,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     visitor(subtext);
   }
 
-  @override
-  bool get sizedByParent => false;
-
   static double _minWidth(RenderBox? box, double height) => box?.getMinIntrinsicWidth(height) ?? 0.0;
   static double _maxWidth(RenderBox? box, double height) => box?.getMaxIntrinsicWidth(height) ?? 0.0 ;
   static double _minHeight(RenderBox? box, double width) => box?.getMinIntrinsicHeight(width) ?? 0.0;
