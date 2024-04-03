@@ -326,6 +326,15 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   }
 
   @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    assert(debugCannotComputeDryLayout(reason:
+      'Calculating the dry baseline would require running the layout callback '
+      'speculatively, which might mutate the live render object tree.',
+    ));
+    return null;
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     rebuildIfNecessary();
@@ -339,10 +348,8 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
 
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    if (child != null) {
-      return child!.getDistanceToActualBaseline(baseline);
-    }
-    return super.computeDistanceToActualBaseline(baseline);
+    return child?.getDistanceToActualBaseline(baseline)
+        ?? super.computeDistanceToActualBaseline(baseline);
   }
 
   @override
