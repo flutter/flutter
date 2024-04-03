@@ -2,16 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This script generates `android/build.gradle` for each directory specify in the stdin.
+// For each directory specified in the stdin, this script generates:
+//     1. The top-level build.gradle (android/build.gradle).
+//     2. The top level settings.gradle (android/settings.gradle).
+//     3. The gradle wrapper file (android/gradle/wrapper/gradle-wrapper.properties).
 // Then it generate the lockfiles for each Gradle project.
-// To regenerate these files, run `find . -type d -name 'android' | dart dev/tools/bin/generate_gradle_lockfiles.dart`
+// To regenerate these files, run `find . -type d -name 'android' | dart dev/tools/bin/generate_gradle_lockfiles.dart`.
 
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
+import 'package:yaml/yaml.dart';
 
 void main(List<String> arguments) {
   const String usageMessage = "Usage: find . -type d -name 'android' | dart dev/tools/bin/generate_gradle_lockfiles.dart\n"
@@ -44,11 +49,27 @@ void main(List<String> arguments) {
   const FileSystem fileSystem = LocalFileSystem();
   final List<String> androidDirectories = getFilesFromStdin();
 
+  // Load the exclusion set.
+  final File exclusionFile = fileSystem
+      .currentDirectory
+      .childDirectory('config')
+      .childFile('lockfile_exclusion.yaml');
+  final HashSet<String> exclusionSet = HashSet<String>.from(
+      (loadYaml(exclusionFile.readAsStringSync()) as YamlList)
+          .toList()
+          .cast<String>()
+  );
+
   for (final String androidDirectoryPath in androidDirectories) {
     final Directory androidDirectory = fileSystem.directory(path.normalize(androidDirectoryPath));
 
     if (!androidDirectory.existsSync()) {
       throw '$androidDirectory does not exist';
+    }
+
+    if (exclusionSet.contains(androidDirectory.path)) {
+      print('${androidDirectory.path} is included in the exclusion config file at ${exclusionFile.path} - skipping');
+      continue;
     }
 
     final File rootBuildGradle = androidDirectory.childFile('build.gradle');
