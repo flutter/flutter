@@ -1707,9 +1707,6 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   bool get isDrawingCheckmark => theme.showCheckmark && !checkmarkAnimation.isDismissed;
   bool get deleteIconShowing => !deleteDrawerAnimation.isDismissed;
 
-  @override
-  bool get sizedByParent => false;
-
   static Rect _boxRect(RenderBox box) => _boxParentData(box).offset & box.size;
 
   static BoxParentData _boxParentData(RenderBox box) => box.parentData! as BoxParentData;
@@ -1754,8 +1751,8 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     return (BaselineOffset(label.getDistanceToActualBaseline(baseline)) + _boxParentData(label).offset.dy).offset;
   }
 
-  Size _layoutLabel(BoxConstraints contentConstraints, double iconSizes, Size size, Size rawSize, [ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
-    // Now that we know the label height and the width of the icons, we can
+  BoxConstraints _labelConstraintsFrom(BoxConstraints contentConstraints, double iconSizes, Size size, Size rawSize) {
+     // Now that we know the label height and the width of the icons, we can
     // determine how much to shrink the width constraints for the "real" layout.
     final double maxLabelWidth = contentConstraints.maxWidth.isFinite
       ? math.max(
@@ -1763,13 +1760,11 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
           contentConstraints.maxWidth - iconSizes - theme.labelPadding.horizontal - theme.padding.horizontal,
         )
       : size.width;
-    final BoxConstraints labelConstraints = BoxConstraints(
+    return BoxConstraints(
       minHeight: rawSize.height,
       maxHeight: size.height,
       maxWidth: maxLabelWidth,
     );
-    final Size updatedSize = layoutChild(label, labelConstraints);
-    return theme.labelPadding.inflateSize(updatedSize);
   }
 
   Size _layoutAvatar(double contentSize, [ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
@@ -1830,6 +1825,15 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     return _computeSizes(constraints, ChildLayoutHelper.dryLayoutChild).size;
   }
 
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final _ChipSizes sizes = _computeSizes(constraints, ChildLayoutHelper.dryLayoutChild);
+    final BaselineOffset labelBaseline = BaselineOffset(label.getDryBaseline(sizes.labelConstraints, baseline))
+        + (sizes.content - sizes.label.height + sizes.densityAdjustment.dy) / 2
+        + theme.padding.top + theme.labelPadding.top;
+    return labelBaseline.offset;
+  }
+
   _ChipSizes _computeSizes(BoxConstraints constraints, ChildLayouter layoutChild) {
     final BoxConstraints contentConstraints = constraints.loosen();
     // Find out the height of the label within the constraints.
@@ -1841,14 +1845,15 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     );
     final Size avatarSize = _layoutAvatar(contentSize, layoutChild);
     final Size deleteIconSize = _layoutDeleteIcon(contentSize, layoutChild);
-    final Size labelSize = _layoutLabel(
+
+    final BoxConstraints labelConstraints = _labelConstraintsFrom(
       contentConstraints,
       avatarSize.width + deleteIconSize.width,
       Size(rawLabelSize.width, contentSize),
       rawLabelSize,
-      layoutChild,
     );
 
+    final Size labelSize = theme.labelPadding.inflateSize(layoutChild(label, labelConstraints));
     // This is the overall size of the content: it doesn't include
     // theme.padding, that is added in at the end.
     final Size overallSize = Size(
@@ -1866,6 +1871,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
       content: contentSize,
       densityAdjustment: densityAdjustment,
       avatar: avatarSize,
+      labelConstraints: labelConstraints,
       label: labelSize,
       deleteIcon: deleteIconSize,
     );
@@ -2211,6 +2217,7 @@ class _ChipSizes {
     required this.overall,
     required this.content,
     required this.avatar,
+    required this.labelConstraints,
     required this.label,
     required this.deleteIcon,
     required this.densityAdjustment,
@@ -2219,6 +2226,7 @@ class _ChipSizes {
   final Size overall;
   final double content;
   final Size avatar;
+  final BoxConstraints labelConstraints;
   final Size label;
   final Size deleteIcon;
   final Offset densityAdjustment;
