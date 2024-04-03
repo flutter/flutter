@@ -30,6 +30,7 @@ import '../runner/flutter_command_runner.dart';
 import '../tracing.dart';
 import '../vmservice.dart';
 import '../web/compile.dart';
+import '../web/web_constants.dart';
 import '../web/web_runner.dart';
 import 'daemon.dart';
 
@@ -179,7 +180,13 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         hide: !verboseHelp,
         help: 'Uninstall previous versions of the app on the device '
               'before reinstalling. Currently only supported on iOS.',
-    );
+      )
+      ..addFlag(
+        FlutterOptions.kWebWasmFlag,
+        help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
+        negatable: false,
+      );
+;
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
@@ -264,6 +271,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webBrowserFlags: webBrowserFlags,
         webHeaders: webHeaders,
         webRenderer: webRenderer,
+        webUseWasm: boolArg(FlutterOptions.kWebWasmFlag),
         enableImpeller: enableImpeller,
         enableVulkanValidation: enableVulkanValidation,
         uninstallFirst: uninstallFirst,
@@ -314,6 +322,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webLaunchUrl: featureFlags.isWebEnabled ? stringArg('web-launch-url') : null,
         webHeaders: webHeaders,
         webRenderer: webRenderer,
+        webUseWasm: boolArg(FlutterOptions.kWebWasmFlag),
         vmserviceOutFile: stringArg('vmservice-out-file'),
         fastStart: argParser.options.containsKey('fast-start')
           && boolArg('fast-start')

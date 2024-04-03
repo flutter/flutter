@@ -405,6 +405,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
       debugLogsDirectoryPath: debugLogsDirectoryPath,
       webRenderer: webRenderer,
+      webUseWasm: useWasm,
     );
 
     String? testAssetDirectory;
@@ -589,7 +590,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         testAssetDirectory: testAssetDirectory,
         flutterProject: flutterProject,
         web: isWeb,
-        useWasm: useWasm,
         randomSeed: stringArg('test-randomize-ordering-seed'),
         reporter: stringArg('reporter'),
         fileReporter: stringArg('file-reporter'),

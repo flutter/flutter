@@ -120,6 +120,7 @@ class WebAssetServer implements AssetReader {
     this._nullSafetyMode,
     this._ddcModuleSystem, {
     required this.webRenderer,
+    required this.isWasm,
   }) : basePath = _getWebTemplate('index.html', _kDefaultIndex).getBaseHref();
 
   // Fallback to "application/octet-stream" on null which
@@ -180,6 +181,7 @@ class WebAssetServer implements AssetReader {
     Map<String, String> extraHeaders,
     NullSafetyMode nullSafetyMode, {
     required WebRendererMode webRenderer,
+    required bool isWasm,
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
     // TODO(markzipan): Make sure this default value aligns with that in the debugger options.
@@ -232,13 +234,14 @@ class WebAssetServer implements AssetReader {
       nullSafetyMode,
       ddcModuleSystem,
       webRenderer: webRenderer,
+      isWasm: isWasm,
     );
     if (testMode) {
       return server;
     }
 
-    // In release builds deploy a simpler proxy server.
-    if (buildInfo.mode != BuildMode.debug) {
+    // In release builds (or wasm builds) deploy a simpler proxy server.
+    if (buildInfo.mode != BuildMode.debug || isWasm) {
       final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer(
         entrypoint,
         fileSystem: globals.fs,
@@ -528,16 +531,24 @@ class WebAssetServer implements AssetReader {
   /// Determines what rendering backed to use.
   final WebRendererMode webRenderer;
 
+  /// Whether the build we are hosting is compiled to wasm.
+  final bool isWasm;
+
   String get _buildConfigString {
+    final Map<String, dynamic> build = isWasm
+      ? <String, dynamic>{
+        'compileTarget': 'dart2wasm',
+        'renderer': webRenderer.name,
+        'mainWasmPath': 'main.dart.wasm',
+        'jsSupportRuntimePath': 'main.dart.mjs',
+      } : <String, dynamic>{
+        'compileTarget': 'dartdevc',
+        'renderer': webRenderer.name,
+        'mainJsPath': 'main.dart.js',
+      };
     final Map<String, dynamic> buildConfig = <String, dynamic>{
       'engineRevision': globals.flutterVersion.engineRevision,
-      'builds': <dynamic>[
-        <String, dynamic>{
-          'compileTarget': 'dartdevc',
-          'renderer': webRenderer.name,
-          'mainJsPath': 'main.dart.js',
-        },
-      ],
+      'builds': <dynamic>[build],
     };
     return '''
 if (!window._flutter) {
@@ -737,6 +748,7 @@ class WebDevFS implements DevFS {
     required this.nullSafetyMode,
     required this.ddcModuleSystem,
     required this.webRenderer,
+    required this.isWasm,
     required this.rootDirectory,
     this.testMode = false,
   }) : _port = port;
@@ -763,6 +775,7 @@ class WebDevFS implements DevFS {
   final String? tlsCertPath;
   final String? tlsCertKeyPath;
   final WebRendererMode webRenderer;
+  final bool isWasm;
 
   late WebAssetServer webAssetServer;
 
@@ -863,6 +876,7 @@ class WebDevFS implements DevFS {
       extraHeaders,
       nullSafetyMode,
       webRenderer: webRenderer,
+      isWasm: isWasm,
       testMode: testMode,
       ddcModuleSystem: ddcModuleSystem,
     );
@@ -1174,14 +1188,21 @@ class ReleaseAssetServer {
               'application/octet-stream';
       return shelf.Response.ok(bytes, headers: <String, String>{
         'Content-Type': mimeType,
+        if (file.basename == 'index.html') ...<String, String>{
+          'Cross-Origin-Opener-Policy': 'same-origin',
+          'Cross-Origin-Embedder-Policy': 'require-corp',
+        }
       });
     }
 
     final File file = _fileSystem
         .file(_fileSystem.path.join(_webBuildDirectory!, 'index.html'));
-    return shelf.Response.ok(file.readAsBytesSync(), headers: <String, String>{
-      'Content-Type': 'text/html',
-    });
+    return shelf.Response.ok(file.readAsBytesSync(),
+      headers: <String, String>{
+        'Content-Type': 'text/html',
+        'Cross-Origin-Opener-Policy': 'same-origin',
+        'Cross-Origin-Embedder-Policy': 'require-corp',
+      });
   }
 }
 
