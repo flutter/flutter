@@ -1195,7 +1195,7 @@ class PubspecHeader extends PubspecLine {
   ///
   /// The value of this field extracted from the following line is "version".
   ///
-  /// ```
+  /// ```none
   /// version: 0.16.5
   /// ```
   final String? name;
@@ -1207,7 +1207,7 @@ class PubspecHeader extends PubspecLine {
   ///
   /// The value of this field extracted from the following line is "0.16.5".
   ///
-  /// ```
+  /// ```none
   /// version: 0.16.5
   /// ```
   final String? value;
@@ -1565,7 +1565,7 @@ class PubDependencyTree {
   ///
   /// That output is of this form:
   ///
-  /// ```
+  /// ```none
   /// package_name 0.0.0
   ///
   /// dependencies:
