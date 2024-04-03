@@ -176,8 +176,9 @@ class _RenderCompositionCallback extends RenderProxyBox {
 /// If both the [text] and [selection] properties need to be changed, set the
 /// controller's [value] instead. In some situations, only setting the controller's
 /// [text] property seems sufficient, but is not. For example, to clear
-/// a [TextField], it is insufficient to set [TextEditingController.text]
-/// to the empty string. Instead, use [TextEditingController.clear].
+/// a [TextField], consider using [TextEditingController.clear]
+/// instead of setting [TextEditingController.text] to the empty string
+/// to also reset the [selection].
 ///
 /// Remember to [dispose] of the [TextEditingController] when it is no longer
 /// needed. This will ensure we discard any resources used by the object.
@@ -247,6 +248,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// [TextEditingController]; **however, one should not also set [selection]
   /// in a separate statement. To change both the [text] and the [selection]
   /// change the controller's [value].**
+  ///
+  /// Setting this will clear the current selection.
   set text(String newText) {
     value = value.copyWith(
       text: newText,
