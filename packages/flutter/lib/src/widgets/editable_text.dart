@@ -174,11 +174,8 @@ class _RenderCompositionCallback extends RenderProxyBox {
 /// [TextInputFormatter]s instead for as-you-type text modification.
 ///
 /// If both the [text] and [selection] properties need to be changed, set the
-/// controller's [value] instead. In some situations, only setting the controller's
-/// [text] property seems sufficient, but is not. For example, to clear
-/// a [TextField], consider using [TextEditingController.clear]
-/// instead of setting [TextEditingController.text] to the empty string
-/// to also reset the [selection].
+/// controller's [value] instead. Setting [text] will clear the selection
+/// and composing range.
 ///
 /// Remember to [dispose] of the [TextEditingController] when it is no longer
 /// needed. This will ensure we discard any resources used by the object.
@@ -247,9 +244,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// This property can be set from a listener added to this
   /// [TextEditingController]; **however, one should not also set [selection]
   /// in a separate statement. To change both the [text] and the [selection]
-  /// change the controller's [value].**
-  ///
-  /// Setting this will clear the current selection.
+  /// change the controller's [value].** Setting this here will clear
+  /// the current selection and composing range.
   set text(String newText) {
     value = value.copyWith(
       text: newText,
