@@ -66,6 +66,7 @@ import 'package:process/process.dart';
 import 'run_command.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
 import 'suite_runners/run_analyze_tests.dart';
+import 'suite_runners/run_customer_testing_tests.dart';
 import 'suite_runners/run_docs_tests.dart';
 import 'suite_runners/run_flutter_packages_tests.dart';
 import 'suite_runners/run_realm_checker_tests.dart';
@@ -253,7 +254,7 @@ Future<void> main(List<String> args) async {
       'flutter_plugins': () => flutterPackagesRunner(flutterRoot),
       'skp_generator': skpGeneratorTestsRunner,
       'realm_checker': () => realmCheckerTestRunner(flutterRoot),
-      'customer_testing': _runCustomerTesting,
+      'customer_testing': () => customerTestingRunner(flutterRoot),
       'analyze': () => analyzeRunner(flutterRoot),
       'fuchsia_precache': _runFuchsiaPrecache,
       'docs': () => docsRunner(flutterRoot),
@@ -1196,48 +1197,6 @@ Future<void> _runWebUnitTests(String webRenderer, bool useWasm) async {
   };
 
   await selectSubshard(subshards);
-}
-
-// Runs customer_testing.
-Future<void> _runCustomerTesting() async {
-  printProgress('${green}Running customer testing$reset');
-  await runCommand(
-    'git',
-    <String>[
-      'fetch',
-      'origin',
-      'master',
-    ],
-    workingDirectory: flutterRoot,
-  );
-  await runCommand(
-    'git',
-    <String>[
-      'branch',
-      '-f',
-      'master',
-      'origin/master',
-    ],
-    workingDirectory: flutterRoot,
-  );
-  final Map<String, String> env = Platform.environment;
-  final String? revision = env['REVISION'];
-  if (revision != null) {
-    await runCommand(
-      'git',
-      <String>[
-        'checkout',
-        revision,
-      ],
-      workingDirectory: flutterRoot,
-    );
-  }
-  final String winScript = path.join(flutterRoot, 'dev', 'customer_testing', 'ci.bat');
-  await runCommand(
-    Platform.isWindows? winScript: './ci.sh',
-    <String>[],
-    workingDirectory: path.join(flutterRoot, 'dev', 'customer_testing'),
-  );
 }
 
 // Runs flutter_precache.

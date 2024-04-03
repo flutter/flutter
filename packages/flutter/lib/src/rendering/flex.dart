@@ -602,8 +602,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       double totalFlex = 0.0;
       double inflexibleSpace = 0.0;
       double maxFlexFractionSoFar = 0.0;
-      RenderBox? child = firstChild;
-      while (child != null) {
+      for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
         final int flex = _getFlex(child);
         totalFlex += flex;
         if (flex > 0) {
@@ -612,8 +611,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         } else {
           inflexibleSpace += childSize(child, extent);
         }
-        final FlexParentData childParentData = child.parentData! as FlexParentData;
-        child = childParentData.nextSibling;
       }
       return maxFlexFractionSoFar * totalFlex + inflexibleSpace;
     } else {
