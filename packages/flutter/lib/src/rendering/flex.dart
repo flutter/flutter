@@ -607,7 +607,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         final int flex = _getFlex(child);
         totalFlex += flex;
         if (flex > 0) {
-          final double flexFraction = childSize(child, extent) / _getFlex(child);
+          final double flexFraction = childSize(child, extent) / flex;
           maxFlexFractionSoFar = math.max(maxFlexFractionSoFar, flexFraction);
         } else {
           inflexibleSpace += childSize(child, extent);
@@ -621,24 +621,27 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       // Intrinsic cross size is the max of the intrinsic cross sizes of the
       // children, after the flexible children are fit into the available space,
       // with the children sized using their max intrinsic dimensions.
-
-      final BoxConstraints constraints = switch (direction) {
-        Axis.horizontal => BoxConstraints(maxWidth: extent),
-        Axis.vertical   => BoxConstraints(maxHeight: extent),
+      final bool isHorizontal = switch (direction) {
+        Axis.horizontal => true,
+        Axis.vertical   => false,
       };
 
       Size layoutChild(RenderBox child, BoxConstraints constraints) {
-        final double maxMainAxisSize = switch (direction) {
-          Axis.horizontal => constraints.maxWidth,
-          Axis.vertical   => constraints.maxHeight,
-        };
-        final double crossSize = childSize(child, maxMainAxisSize);
-        return switch (direction) {
-          Axis.horizontal => Size(maxMainAxisSize, crossSize),
-          Axis.vertical   => Size(crossSize, maxMainAxisSize),
-        };
+        final double mainAxisSizeFromConstraints = isHorizontal ? constraints.maxWidth : constraints.maxHeight;
+        // A infinite mainAxisSizeFromConstraints means this child is flexible (or extent is double.infinity).
+        assert((_getFlex(child) != 0 && extent.isFinite) == mainAxisSizeFromConstraints.isFinite);
+        final double maxMainAxisSize = mainAxisSizeFromConstraints.isFinite
+          ? mainAxisSizeFromConstraints
+          : (isHorizontal ? child.getMaxIntrinsicWidth(double.infinity) : child.getMaxIntrinsicHeight(double.infinity));
+        return isHorizontal
+          ? Size(maxMainAxisSize, childSize(child, maxMainAxisSize))
+          : Size(childSize(child, maxMainAxisSize), maxMainAxisSize);
       }
-      return _computeSizes(constraints: constraints, layoutChild: layoutChild, getBaseline: ChildLayoutHelper.getDryBaseline).axisSize.crossAxisExtent;
+      return _computeSizes(
+        constraints: isHorizontal ? BoxConstraints(maxWidth: extent) : BoxConstraints(maxHeight: extent),
+        layoutChild: layoutChild,
+        getBaseline: ChildLayoutHelper.getDryBaseline,
+      ).axisSize.crossAxisExtent;
     }
   }
 
