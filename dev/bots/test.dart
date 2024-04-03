@@ -330,18 +330,18 @@ Future<void> _runTestHarnessTests() async {
   // on 20-core machines. However, we have a race condition, so for now...
   // Race condition issue: https://github.com/flutter/flutter/issues/90026
   final List<ShardRunner> tests = <ShardRunner>[
-    () => _runFlutterTest(
+    () => runFlutterTest(
       automatedTests,
       script: path.join('test_smoke_test', 'pass_test.dart'),
       printOutput: false,
     ),
-    () => _runFlutterTest(
+    () => runFlutterTest(
       automatedTests,
       script: path.join('test_smoke_test', 'fail_test.dart'),
       expectFailure: true,
       printOutput: false,
     ),
-    () => _runFlutterTest(
+    () => runFlutterTest(
       automatedTests,
       script: path.join('test_smoke_test', 'pending_timer_fail_test.dart'),
       expectFailure: true,
@@ -354,7 +354,7 @@ Future<void> _runTestHarnessTests() async {
             'stderr:\n${result.flattenedStderr}';
       },
     ),
-    () => _runFlutterTest(
+    () => runFlutterTest(
       automatedTests,
       script: path.join('test_smoke_test', 'fail_test_on_exception_after_test.dart'),
       expectFailure: true,
@@ -372,31 +372,31 @@ Future<void> _runTestHarnessTests() async {
           'Actual stderr:\n${result.flattenedStderr}';
       },
     ),
-    () => _runFlutterTest(
+    () => runFlutterTest(
       automatedTests,
       script: path.join('test_smoke_test', 'crash1_test.dart'),
       expectFailure: true,
       printOutput: false,
     ),
-    () => _runFlutterTest(
+    () => runFlutterTest(
       automatedTests,
       script: path.join('test_smoke_test', 'crash2_test.dart'),
       expectFailure: true,
       printOutput: false,
     ),
-    () => _runFlutterTest(
+    () => runFlutterTest(
       automatedTests,
       script: path.join('test_smoke_test', 'syntax_error_test.broken_dart'),
       expectFailure: true,
       printOutput: false,
     ),
-    () => _runFlutterTest(
+    () => runFlutterTest(
       automatedTests,
       script: path.join('test_smoke_test', 'missing_import_test.broken_dart'),
       expectFailure: true,
       printOutput: false,
     ),
-    () => _runFlutterTest(
+    () => runFlutterTest(
       automatedTests,
       script: path.join('test_smoke_test', 'disallow_error_reporter_modification_test.dart'),
       expectFailure: true,
@@ -804,7 +804,7 @@ Future<void> _runFrameworkTests() async {
   Future<void> runWidgets() async {
     printProgress('${green}Running packages/flutter tests $reset for ${cyan}test/widgets/$reset');
     for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
-      await _runFlutterTest(
+      await runFlutterTest(
         path.join(flutterRoot, 'packages', 'flutter'),
         options: <String>[trackWidgetCreationOption],
         tests: <String>[ path.join('test', 'widgets') + path.separator ],
@@ -812,20 +812,20 @@ Future<void> _runFrameworkTests() async {
     }
     // Try compiling code outside of the packages/flutter directory with and without --track-widget-creation
     for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
-      await _runFlutterTest(
+      await runFlutterTest(
         path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery'),
         options: <String>[trackWidgetCreationOption],
         fatalWarnings: false, // until we've migrated video_player
       );
     }
     // Run release mode tests (see packages/flutter/test_release/README.md)
-    await _runFlutterTest(
+    await runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter'),
       options: <String>['--dart-define=dart.vm.product=true'],
       tests: <String>['test_release${path.separator}'],
     );
     // Run profile mode tests (see packages/flutter/test_profile/README.md)
-    await _runFlutterTest(
+    await runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter'),
       options: <String>['--dart-define=dart.vm.product=false', '--dart-define=dart.vm.profile=true'],
       tests: <String>['test_profile${path.separator}'],
@@ -834,7 +834,7 @@ Future<void> _runFrameworkTests() async {
 
   Future<void> runImpeller() async {
     printProgress('${green}Running packages/flutter tests $reset in Impeller$reset');
-    await _runFlutterTest(
+    await runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter'),
       options: <String>['--enable-impeller'],
     );
@@ -850,7 +850,7 @@ Future<void> _runFrameworkTests() async {
       .toList();
     printProgress('${green}Running packages/flutter tests$reset for $cyan${tests.join(", ")}$reset');
     for (final String trackWidgetCreationOption in trackWidgetCreationAlternatives) {
-      await _runFlutterTest(
+      await runFlutterTest(
         path.join(flutterRoot, 'packages', 'flutter'),
         options: <String>[trackWidgetCreationOption],
         tests: tests,
@@ -873,7 +873,7 @@ Future<void> _runFrameworkTests() async {
       if (entity is! Directory || !Directory(path.join(entity.path, 'test')).existsSync()) {
         continue;
       }
-      await _runFlutterTest(entity.path);
+      await runFlutterTest(entity.path);
     }
   }
 
@@ -881,7 +881,7 @@ Future<void> _runFrameworkTests() async {
     final String tracingDirectory = path.join(flutterRoot, 'dev', 'tracing_tests');
 
     // run the tests for debug mode
-    await _runFlutterTest(tracingDirectory, options: <String>['--enable-vmservice']);
+    await runFlutterTest(tracingDirectory, options: <String>['--enable-vmservice']);
 
     Future<List<String>> verifyTracingAppBuild({
       required String modeArgument,
@@ -1015,7 +1015,7 @@ Future<void> _runFrameworkTests() async {
     printProgress('${green}Running package tests$reset for directories other than packages/flutter');
     await _runTestHarnessTests();
     await runExampleTests();
-    await _runFlutterTest(
+    await runFlutterTest(
       path.join(flutterRoot, 'dev', 'a11y_assessments'),
       tests: <String>[ 'test' ],
     );
@@ -1023,16 +1023,16 @@ Future<void> _runFrameworkTests() async {
     await _runDartTest(path.join(flutterRoot, 'dev', 'devicelab'), ensurePrecompiledTool: false); // See https://github.com/flutter/flutter/issues/86209
     await _runDartTest(path.join(flutterRoot, 'dev', 'conductor', 'core'), forceSingleCore: true);
     // TODO(gspencergoog): Remove the exception for fatalWarnings once https://github.com/flutter/flutter/issues/113782 has landed.
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), fatalWarnings: false);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'ui'));
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools'));
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_defaults'));
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_keycodes'));
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'));
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tests: <String>[path.join('test', 'src', 'real_tests')]);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'integration_test'), options: <String>[
+    await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), fatalWarnings: false);
+    await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'ui'));
+    await runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
+    await runFlutterTest(path.join(flutterRoot, 'dev', 'tools'));
+    await runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
+    await runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_defaults'));
+    await runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_keycodes'));
+    await runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'));
+    await runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tests: <String>[path.join('test', 'src', 'real_tests')]);
+    await runFlutterTest(path.join(flutterRoot, 'packages', 'integration_test'), options: <String>[
       '--enable-vmservice',
       // Web-specific tests depend on Chromium, so they run as part of the web_long_running_tests shard.
       '--exclude-tags=web',
@@ -1054,18 +1054,18 @@ Future<void> _runFrameworkTests() async {
       ],
       workingDirectory: path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android'),
     );
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'));
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'));
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'));
+    await runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'));
+    await runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
+    await runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
+    await runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'));
+    await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'));
     const String httpClientWarning =
       'Warning: At least one test in this suite creates an HttpClient. When running a test suite that uses\n'
       'TestWidgetsFlutterBinding, all HTTP requests will return status code 400, and no network request\n'
       'will actually be made. Any test expecting a real network connection and status code will fail.\n'
       'To test code that needs an HttpClient, provide your own HttpClient implementation to the code under\n'
       'test, so that your test can consistently provide a testable response to the code under test.';
-    await _runFlutterTest(
+    await runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter_test'),
       script: path.join('test', 'bindings_test_failure.dart'),
       expectFailure: true,
@@ -1102,7 +1102,7 @@ Future<void> _runFrameworkCoverage() async {
     return;
   }
   coverageFile.deleteSync();
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'),
+  await runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'),
     options: const <String>['--coverage'],
   );
   if (!coverageFile.existsSync()) {
@@ -1769,7 +1769,7 @@ Future<void> _runDartTest(String workingDirectory, {
   metricFile.deleteSync();
 }
 
-Future<void> _runFlutterTest(String workingDirectory, {
+Future<void> runFlutterTest(String workingDirectory, {
   String? script,
   bool expectFailure = false,
   bool printOutput = true,
