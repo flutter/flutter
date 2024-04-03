@@ -1,4 +1,4 @@
-# Tests that are excluded from batch gradle updating.
+# Tests that are excluded from batch gradle updating and lockfile generation.
 # Each exclusion must have an associated reason. Please avoid adding to this list unless necessary,
 # as each exclusion must be updated by hand.
 
