@@ -10,6 +10,7 @@ import '../base/logger.dart';
 import '../base/template.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../convert.dart';
 import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';
 import '../migrations/swift_package_manager_integration_migration.dart';
@@ -196,18 +197,59 @@ class SwiftPackageManager {
     }
     final String manifestContents = swiftPackageManifest.readAsStringSync();
 
+    String newContents = manifestContents;
+
+    // Ensure Swift toolchain version is specified and add
+    // "Generated file. Do not edit." comment.
+    newContents = _updateTopOfFileComments(plugin, newContents);
+
     // Inject the Flutter framework Swift Package path into the copied
     // Package.swift.
-    String newContents = _updateFrameworkPackagePath(
+    newContents = _updateFrameworkPackagePath(
       project,
       plugin,
-      manifestContents,
+      newContents,
     );
 
     // Update the minimum iOS and macOS supported versions.
     newContents = _updateMinimumSupportedVersions(plugin, newContents);
 
     swiftPackageManifest.writeAsStringSync(newContents);
+  }
+
+  /// Ensure "swift-tools-version" is at the top of the Package.swift. Also,
+  /// add "Generated file. Do not edit." comment following any other comments.
+  ///
+  /// Since this manifest is copied and altered by the Flutter CLI, any changes
+  /// made to it will not persist.
+  String _updateTopOfFileComments(Plugin plugin, String manifestContents) {
+    final List<String> manifestLines = LineSplitter.split(manifestContents)
+      .where((String s) => s.isNotEmpty)
+      .toList();
+    String? lastCommentedLine;
+    for (final String line in manifestLines) {
+      final String trimmedLine = line.trim();
+      if (trimmedLine.startsWith('//')) {
+        lastCommentedLine = line;
+        continue;
+      }
+      break;
+    }
+
+    if (lastCommentedLine == null) {
+      // Swift tools version must be first non-empty line of Package.swift or
+      // Xcode will error.
+      throwToolExit(
+        'Invalid Package.swift for ${plugin.name}. Swift tools version is not '
+        'specified. Add the following at the top of Package.swift:\n'
+        '  // swift-tools-version: 5.9',
+      );
+    }
+
+    return manifestContents.replaceFirst(
+      lastCommentedLine,
+      '$lastCommentedLine\n//\n//  Generated file. Do not edit.\n//\n'
+    );
   }
 
   /// Overwrite flutterFrameworkPackagePath in the plugin's copied Package.swift to

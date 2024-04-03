@@ -353,7 +353,7 @@ let package = Package(
             expect(spm.migrated, isTrue);
           });
 
-          testWithoutContext('throws when missing "flutterFrameworkDependency"', () async {
+          testWithoutContext('throws when missing "swift-tools-version"', () async {
             final MemoryFileSystem fs = MemoryFileSystem();
             final BufferLogger testLogger = BufferLogger.test();
             final FakeXcodeProject project = FakeXcodeProject(
@@ -364,6 +364,43 @@ let package = Package(
               name: 'valid_plugin_1',
               platform: platform,
               manifestContents: '',
+              fs: fs,
+            );
+
+            final FakeSwiftPackageManager spm = FakeSwiftPackageManager(
+              artifacts: Artifacts.test(fileSystem: fs),
+              fileSystem: fs,
+              logger: testLogger,
+              templateRenderer: const MustacheTemplateRenderer(),
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              plistParser: FakePlistParser(),
+            );
+            await expectLater(
+              spm.generatePluginsSwiftPackage(
+                <Plugin>[validPlugin1],
+                platform,
+                project,
+              ),
+              throwsToolExit(
+                message: 'Invalid Package.swift for valid_plugin_1. Swift tools version is not '
+                  'specified. Add the following at the top of Package.swift:\n'
+                  '  // swift-tools-version: 5.9',
+              ),
+            );
+          });
+
+
+          testWithoutContext('throws when missing "flutterFrameworkDependency"', () async {
+            final MemoryFileSystem fs = MemoryFileSystem();
+            final BufferLogger testLogger = BufferLogger.test();
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: fs,
+            );
+            final FakePlugin validPlugin1 = _fakePluginWithManifest(
+              name: 'valid_plugin_1',
+              platform: platform,
+              manifestContents: _manifestSwiftToolVersion,
               fs: fs,
             );
 
@@ -397,7 +434,9 @@ let package = Package(
             final FakePlugin validPlugin1 = _fakePluginWithManifest(
               name: 'valid_plugin_1',
               platform: platform,
-              manifestContents: '${_manifestFlutterFrameworkDependencyFunction('flutterFrameworkPackagePath')}\n',
+              manifestContents:
+                  '$_manifestSwiftToolVersion\n\n'
+                  '${_manifestFlutterFrameworkDependencyFunction('flutterFrameworkPackagePath')}\n',
               fs: fs,
             );
 
@@ -432,6 +471,7 @@ let package = Package(
               name: 'valid_plugin_1',
               platform: platform,
               manifestContents:
+                  '$_manifestSwiftToolVersion\n\n'
                   '${_manifestFlutterFrameworkDependencyFunction('flutterFrameworkPackagePath')}\n'
                   '$_manifestFlutterMinimumIOSVersionFunction',
               fs: fs,
@@ -654,7 +694,7 @@ FakePlugin _fakePluginWithManifest({
   final Directory validPlugin1Directory = fs.directory(path ?? '/local/path/to/plugins/$name');
   final File validPlugin1Manifest = fs.file('${validPlugin1Directory.path}/${platform.name}/$name/Package.swift')
       ..createSync(recursive: true)
-      ..writeAsStringSync(manifestContents ?? _fakePluginSwiftPackage(name, 'flutterFrameworkPackagePath'));
+      ..writeAsStringSync(manifestContents ?? _fakePluginSwiftPackage(name, 'flutterFrameworkPackagePath', false));
   validPlugin1Directory.childFile('childFile.txt').createSync();
   validPlugin1Directory.childDirectory('childDirectory').createSync();
   return FakePlugin(
@@ -704,7 +744,7 @@ void _validatePlugin({
   expect(symlinkPluginSwiftManifest.existsSync(), isTrue);
   expect(
     symlinkPluginSwiftManifest.readAsStringSync(),
-    _fakePluginSwiftPackage(plugin.name, '"app_name/${platform.name}/Flutter/Packages/ephemeral/Flutter"'),
+    _fakePluginSwiftPackage(plugin.name, '"app_name/${platform.name}/Flutter/Packages/ephemeral/Flutter"', true),
   );
 }
 
@@ -727,11 +767,19 @@ void _validateFlutterFramework(
   expect(engineLink.targetSync(), expectedArtifactPath);
 }
 
-String _fakePluginSwiftPackage(String name, String frameworkPath) {
+String _fakePluginSwiftPackage(
+  String name,
+  String frameworkPath,
+  bool generated,
+) {
+  String generatedComment = '';
+  if (generated) {
+    generatedComment =  '//\n//  Generated file. Do not edit.\n//\n\n';
+  }
   return '''
 // swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
-
+$generatedComment
 import PackageDescription
 
 let pluginMinimumIOSVersion = Version("12.0.0")
@@ -767,6 +815,7 @@ $_manifestFlutterMinimumMacOSVersionFunction
 ''';
 }
 
+String _manifestSwiftToolVersion = '// swift-tools-version: 5.9';
 String _manifestFlutterFrameworkDependencyFunction(String frameworkPath) {
   return '''
 func flutterFrameworkDependency(localFrameworkPath: String? = nil) -> Package.Dependency {
