@@ -787,7 +787,7 @@ void main() {
         seedColor: const Color(0xFF6559F5),
         dynamicSchemeVariant: DynamicSchemeVariant.fidelity
       ),
-      const Color(0xFF3F2CD0)
+      const Color(0xFF4C3CDB)
     );
     await _testFilledButtonColor(
       tester,
