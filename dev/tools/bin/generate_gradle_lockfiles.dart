@@ -51,7 +51,7 @@ void main(List<String> arguments) {
 
   // Load the exclusion set.
   final File exclusionFile = fileSystem
-      .currentDirectory
+      .currentDirectory.childDirectory('dev').childDirectory('tools').childDirectory('bin')
       .childDirectory('config')
       .childFile('lockfile_exclusion.yaml');
   final HashSet<String> exclusionSet = HashSet<String>.from(
