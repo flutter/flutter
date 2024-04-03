@@ -39,8 +39,8 @@ Future<void> main() async {
         ..rect(color: Colors.black)
         ..rect(color: Colors.white),
     );
-    // Evicts an entry from the image cache.
-    await image.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(image.evict);
   });
 
   testWidgets('ShapeDecoration.color', (WidgetTester tester) async {
@@ -116,8 +116,8 @@ Future<void> main() async {
         'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.rtl',
       ],
     );
-    // Evicts an entry from the image cache.
-    await image.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(image.evict);
   });
 
   testWidgets('Does not crash with directional gradient', (WidgetTester tester) async {

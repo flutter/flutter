@@ -111,8 +111,8 @@ void main() {
     expect(tabsPainted, const <int>[0, 1, 0]);
     // CupertinoTabBar's onTap callbacks are passed on.
     expect(selectedTabs, const <int>[1, 0]);
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Tabs are lazy built and moved offstage when inactive', (WidgetTester tester) async {
@@ -148,8 +148,8 @@ void main() {
     expect(tabsBuilt, const <int>[0, 0, 1, 0, 1]);
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 2', skipOffstage: false), isOffstage);
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Last tab gets focus', (WidgetTester tester) async {
@@ -189,8 +189,8 @@ void main() {
 
     expect(focusNodes[0].hasFocus, isTrue);
     expect(focusNodes[1].hasFocus, isFalse);
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
+   // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Do not affect focus order in the route', (WidgetTester tester) async {
@@ -257,8 +257,8 @@ void main() {
       focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
       1,
     );
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Programmatic tab switching by changing the index of an existing controller',
@@ -300,8 +300,8 @@ void main() {
 
     expect(tabsPainted, const <int>[1, 0, 1]);
     expect(selectedTabs, const <int>[1]);
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Programmatic tab switching by passing in a new controller', (WidgetTester tester) async {
@@ -354,8 +354,8 @@ void main() {
 
     expect(tabsPainted, const <int>[0, 1, 0]);
     expect(selectedTabs, const <int>[0]);
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Tab bar respects themes', (WidgetTester tester) async {
@@ -414,8 +414,8 @@ void main() {
       matching: find.byType(RichText),
     ));
     expect(tab2.text.style!.color, isSameColorAs(CupertinoColors.systemRed.darkColor));
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Tab contents are padded when there are view insets', (WidgetTester tester) async {
@@ -442,8 +442,8 @@ void main() {
     // Don't generate more media query padding from the translucent bottom
     // tab since the tab is behind the keyboard now.
     expect(MediaQuery.of(innerContext).padding.bottom, 0);
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Tab contents are not inset when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
@@ -471,8 +471,8 @@ void main() {
     // Media query padding shows up in the inner content because it wasn't masked
     // by the view inset.
     expect(MediaQuery.of(innerContext).padding.bottom, 50);
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Tab contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
@@ -521,8 +521,8 @@ void main() {
     final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
 
     expect(initialPoint, finalPoint);
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
   });
 
   testWidgets(
@@ -585,8 +585,8 @@ void main() {
 
     expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 400));
     expect(MediaQuery.of(innerContext).padding.bottom, 0);
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Deleting tabs after selecting them should switch to the last available tab', (WidgetTester tester) async {
@@ -656,8 +656,8 @@ void main() {
     expect(find.text('Page 1', skipOffstage: false), findsNothing);
     expect(find.text('Page 2', skipOffstage: false), findsNothing);
     expect(find.text('Page 4', skipOffstage: false), findsNothing);
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/33455
@@ -714,8 +714,8 @@ void main() {
 
     // Tapping the tabs should still work.
     expect(tabsPainted, const <int>[0, 0, 18]);
-    // Evicts an entry from the image cache.
-   await memoryImage.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
   });
 
   testWidgets(
@@ -780,8 +780,8 @@ void main() {
 
       // Changing [index] of the oldController should not work.
       expect(tabsPainted, const <int> [0, 0, 1]);
-      // Evicts an entry from the image cache.
-      memoryImage.evict();
+      // Evicts an entry from the image cache after test-case is executed.
+      addTearDown(memoryImage.evict);
     },
   );
 
@@ -1019,8 +1019,8 @@ void main() {
     final String message = tester.takeException().toString();
     expect(message, contains('current index ${controller.index}'));
     expect(message, contains('with 3 tabs'));
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
   });
 
   testWidgets("Don't replace focus nodes for existing tabs when changing tab count", (WidgetTester tester) async {
@@ -1076,8 +1076,8 @@ void main() {
     await tester.pump();
 
     expect(scopes.sublist(0, 3), equals(newScopes.sublist(0, 3)));
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Current tab index cannot go below zero or be null', (WidgetTester tester) async {
@@ -1137,8 +1137,8 @@ void main() {
     // The exact same state instance is still there.
     expect(tester.state<EditableTextState>(find.byType(EditableText)), editableState);
     expect(find.text("don't lose me"), findsOneWidget);
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
   });
 
   testWidgets('textScaleFactor is set to 1.0',
@@ -1314,8 +1314,8 @@ void main() {
     tearDown(() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(SystemChannels.platform, null);
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     });
 
     testWidgets('System back navigation inside of tabs',
@@ -1417,8 +1417,8 @@ void main() {
       expect(find.text('Page 1 of tab 2'), findsOneWidget);
       expect(find.text('Page 2 of tab 2'), findsNothing);
       expect(lastFrameworkHandlesBack, isFalse);
-      // Evicts an entry from the image cache.
-      memoryImage.evict();
+      // Evicts an entry from the image cache after test-case is executed.
+      addTearDown(memoryImage.evict);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
       skip: kIsWeb, // [intended] frameworkHandlesBack not used on web.

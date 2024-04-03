@@ -62,8 +62,8 @@ void main() {
 
     expect(focusNodes[0].hasFocus, isTrue);
     expect(focusNodes[1].hasFocus, isFalse);
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Do not affect focus order in the route', (WidgetTester tester) async {
@@ -133,8 +133,8 @@ void main() {
       focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
       1,
     );
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Tab bar respects themes', (WidgetTester tester) async {
@@ -193,8 +193,8 @@ void main() {
       matching: find.byType(RichText),
     ));
     expect(tab2.text.style!.color!.value, CupertinoColors.systemRed.darkColor.value);
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
   });
 
   testWidgets('dark mode background color', (WidgetTester tester) async {
@@ -248,8 +248,8 @@ void main() {
     ).decoration as BoxDecoration;
 
     expect(tabDecoration.color!.value, backgroundColor.darkColor.value);
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Does not lose state when focusing on text input', (WidgetTester tester) async {
@@ -296,8 +296,8 @@ void main() {
     // The exact same state instance is still there.
     expect(tester.state<EditableTextState>(find.byType(EditableText)), editableState);
     expect(find.text("don't lose me"), findsOneWidget);
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
   });
 
   testWidgets('textScaleFactor is set to 1.0', (WidgetTester tester) async {
@@ -341,8 +341,8 @@ void main() {
 
     expect(contents.length, greaterThan(0));
     expect(contents, isNot(contains(predicate((RichText t) => t.textScaler != const TextScaler.linear(99.0)))));
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
   });
 }
 

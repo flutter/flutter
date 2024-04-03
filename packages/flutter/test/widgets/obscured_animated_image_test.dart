@@ -44,7 +44,7 @@ Future<void> main() async {
     await tester.pump(const Duration(milliseconds: 100));
     final ui.Image? image4 = renderImage.image;
     expect(image3, same(image4));
-    // Evicts an entry from the image cache.
-    fakeImageProvider.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(fakeImageProvider.evict);
   });
 }

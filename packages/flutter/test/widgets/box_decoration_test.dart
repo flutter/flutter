@@ -66,8 +66,8 @@ Future<void> main() async {
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
     expect(tester.binding.hasScheduledFrame, isFalse);
-    // Evicts an entry from the image cache.
-    imageProvider.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(imageProvider.evict);
   });
   testWidgets('Moving a DecoratedBox',
   (WidgetTester tester) async {
@@ -98,8 +98,8 @@ Future<void> main() async {
     await tester.pump();
     await tester.idle();
     expect(tester.binding.hasScheduledFrame, isFalse);
-    // Evicts an entry from the image cache.
-    imageProvider.evict();
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(imageProvider.evict);
   });
 
   testWidgets('Circles can have uniform borders', (WidgetTester tester) async {
