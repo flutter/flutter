@@ -4,24 +4,24 @@ publish_to: 'none'
 version: 0.1.0
 
 environment:
-  sdk: '>=3.4.0-190.0.dev <4.0.0'
+  sdk: '>=3.2.0-0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-  vector_graphics: ^1.1.11+1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
-  vector_graphics_compiler: 1.1.11+1
   integration_test:
     sdk: flutter
+  capitalizer_transformer:
+    path: ./capitalizer_transformer
 
 flutter:
   uses-material-design: true
   assets:
-    - path: assets/test.svg
+    - path: assets/test_asset.txt
       transformers:
-        - package: vector_graphics_compiler
+        - package: capitalizer_transformer
