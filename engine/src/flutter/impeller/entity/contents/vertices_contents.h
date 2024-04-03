@@ -108,6 +108,52 @@ class VerticesUVContents final : public Contents {
   VerticesUVContents& operator=(const VerticesUVContents&) = delete;
 };
 
+/// A vertices contents for per-color vertices + texture and porter duff
+/// blended.
+class VerticesSimpleBlendContents final : public Contents {
+ public:
+  VerticesSimpleBlendContents();
+
+  ~VerticesSimpleBlendContents() override;
+
+  void SetGeometry(std::shared_ptr<VerticesGeometry> geometry);
+
+  void SetAlpha(Scalar alpha);
+
+  void SetBlendMode(BlendMode blend_mode);
+
+  void SetTexture(std::shared_ptr<Texture> texture);
+
+  void SetSamplerDescriptor(SamplerDescriptor descriptor);
+
+  void SetTileMode(Entity::TileMode tile_mode_x, Entity::TileMode tile_mode_y);
+
+  void SetEffectTransform(Matrix transform);
+
+  // |Contents|
+  std::optional<Rect> GetCoverage(const Entity& entity) const override;
+
+  // |Contents|
+  bool Render(const ContentContext& renderer,
+              const Entity& entity,
+              RenderPass& pass) const override;
+
+ private:
+  Scalar alpha_ = 1.0;
+  std::shared_ptr<VerticesGeometry> geometry_;
+  std::shared_ptr<Texture> texture_;
+  BlendMode blend_mode_ = BlendMode::kSource;
+  SamplerDescriptor descriptor_ = {};
+  Entity::TileMode tile_mode_x_ = Entity::TileMode::kClamp;
+  Entity::TileMode tile_mode_y_ = Entity::TileMode::kClamp;
+  Matrix inverse_matrix_ = {};
+
+  VerticesSimpleBlendContents(const VerticesSimpleBlendContents&) = delete;
+
+  VerticesSimpleBlendContents& operator=(const VerticesSimpleBlendContents&) =
+      delete;
+};
+
 }  // namespace impeller
 
 #endif  // FLUTTER_IMPELLER_ENTITY_CONTENTS_VERTICES_CONTENTS_H_

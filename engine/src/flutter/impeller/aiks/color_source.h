@@ -166,6 +166,8 @@ class ColorSource {
 
   std::shared_ptr<ColorSourceContents> GetContents(const Paint& paint) const;
 
+  const ColorSourceData& GetData() const;
+
  private:
   Type type_ = Type::kColor;
   ColorSourceData color_source_data_;

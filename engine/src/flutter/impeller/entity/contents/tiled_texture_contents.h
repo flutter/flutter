@@ -9,7 +9,6 @@
 #include <memory>
 #include <vector>
 
-#include "flutter/fml/macros.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"

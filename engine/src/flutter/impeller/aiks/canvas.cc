@@ -4,11 +4,13 @@
 
 #include "impeller/aiks/canvas.h"
 
+#include <memory>
 #include <optional>
 #include <utility>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
+#include "impeller/aiks/color_source.h"
 #include "impeller/aiks/image_filter.h"
 #include "impeller/aiks/paint_pass_delegate.h"
 #include "impeller/entity/contents/atlas_contents.h"
@@ -20,6 +22,7 @@
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/contents/vertices_contents.h"
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/path_builder.h"
 
@@ -74,6 +77,47 @@ static std::shared_ptr<Contents> CreateContentsForGeometryWithFilters(
   }
 
   return contents_copy;
+}
+
+struct GetTextureColorSourceDataVisitor {
+  GetTextureColorSourceDataVisitor() {}
+
+  std::optional<ImageData> operator()(const LinearGradientData& data) {
+    return std::nullopt;
+  }
+
+  std::optional<ImageData> operator()(const RadialGradientData& data) {
+    return std::nullopt;
+  }
+
+  std::optional<ImageData> operator()(const ConicalGradientData& data) {
+    return std::nullopt;
+  }
+
+  std::optional<ImageData> operator()(const SweepGradientData& data) {
+    return std::nullopt;
+  }
+
+  std::optional<ImageData> operator()(const ImageData& data) { return data; }
+
+  std::optional<ImageData> operator()(const RuntimeEffectData& data) {
+    return std::nullopt;
+  }
+
+  std::optional<ImageData> operator()(const std::monostate& data) {
+    return std::nullopt;
+  }
+
+#if IMPELLER_ENABLE_3D
+  std::optional<ImageData> operator()(const SceneData& data) {
+    return std::nullopt;
+  }
+#endif  // IMPELLER_ENABLE_3D
+};
+
+static std::optional<ImageData> GetImageColorSourceData(
+    const ColorSource& color_source) {
+  return std::visit(GetTextureColorSourceDataVisitor{}, color_source.GetData());
 }
 
 static std::shared_ptr<Contents> CreatePathContentsWithFilters(
@@ -883,6 +927,27 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
     entity.SetContents(CreateContentsForGeometryWithFilters(paint, vertices));
     AddEntityToCurrentPass(std::move(entity));
     return;
+  }
+
+  // If there is are per-vertex colors, an image, and the blend mode
+  // is simple we can draw without a sub-renderpass.
+  if (blend_mode <= BlendMode::kModulate && vertices->HasVertexColors()) {
+    if (std::optional<ImageData> maybe_image_data =
+            GetImageColorSourceData(paint.color_source)) {
+      const ImageData& image_data = maybe_image_data.value();
+      auto contents = std::make_shared<VerticesSimpleBlendContents>();
+      contents->SetBlendMode(blend_mode);
+      contents->SetAlpha(paint.color.alpha);
+      contents->SetGeometry(vertices);
+
+      contents->SetEffectTransform(image_data.effect_transform);
+      contents->SetTexture(image_data.texture);
+      contents->SetTileMode(image_data.x_tile_mode, image_data.y_tile_mode);
+
+      entity.SetContents(paint.WithFilters(std::move(contents)));
+      AddEntityToCurrentPass(std::move(entity));
+      return;
+    }
   }
 
   auto src_paint = paint;

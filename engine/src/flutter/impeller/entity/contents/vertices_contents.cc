@@ -4,7 +4,11 @@
 
 #include "vertices_contents.h"
 
+#include "fml/logging.h"
+#include "impeller/core/formats.h"
 #include "impeller/entity/contents/content_context.h"
+#include "impeller/entity/contents/contents.h"
+#include "impeller/entity/contents/filters/blend_filter_contents.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/entity/geometry/vertices_geometry.h"
@@ -14,6 +18,29 @@
 #include "impeller/renderer/render_pass.h"
 
 namespace impeller {
+
+namespace {
+static std::optional<SamplerAddressMode> TileModeToAddressMode(
+    Entity::TileMode tile_mode,
+    const Capabilities& capabilities) {
+  switch (tile_mode) {
+    case Entity::TileMode::kClamp:
+      return SamplerAddressMode::kClampToEdge;
+      break;
+    case Entity::TileMode::kMirror:
+      return SamplerAddressMode::kMirror;
+      break;
+    case Entity::TileMode::kRepeat:
+      return SamplerAddressMode::kRepeat;
+      break;
+    case Entity::TileMode::kDecal:
+      if (capabilities.SupportsDecalSamplerAddressMode()) {
+        return SamplerAddressMode::kDecal;
+      }
+      return std::nullopt;
+  }
+}
+}  // namespace
 
 VerticesContents::VerticesContents() = default;
 
@@ -53,6 +80,7 @@ bool VerticesContents::Render(const ContentContext& renderer,
   if (blend_mode_ == BlendMode::kClear) {
     return true;
   }
+
   std::shared_ptr<Contents> src_contents = src_contents_;
   src_contents->SetCoverageHint(GetCoverageHint());
   if (geometry_->HasTextureCoordinates()) {
@@ -194,6 +222,121 @@ bool VerticesColorContents::Render(const ContentContext& renderer,
   FS::FragInfo frag_info;
   frag_info.alpha = alpha_;
   FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+
+  return pass.Draw().ok();
+}
+
+//------------------------------------------------------
+// VerticesSimpleBlendContents
+
+VerticesSimpleBlendContents::VerticesSimpleBlendContents() {}
+
+VerticesSimpleBlendContents::~VerticesSimpleBlendContents() {}
+
+void VerticesSimpleBlendContents::SetGeometry(
+    std::shared_ptr<VerticesGeometry> geometry) {
+  geometry_ = std::move(geometry);
+}
+
+void VerticesSimpleBlendContents::SetAlpha(Scalar alpha) {
+  alpha_ = alpha;
+}
+
+void VerticesSimpleBlendContents::SetBlendMode(BlendMode blend_mode) {
+  FML_DCHECK(blend_mode <= BlendMode::kModulate);
+  blend_mode_ = blend_mode;
+}
+
+void VerticesSimpleBlendContents::SetTexture(std::shared_ptr<Texture> texture) {
+  texture_ = std::move(texture);
+}
+
+std::optional<Rect> VerticesSimpleBlendContents::GetCoverage(
+    const Entity& entity) const {
+  return geometry_->GetCoverage(entity.GetTransform());
+}
+
+void VerticesSimpleBlendContents::SetSamplerDescriptor(
+    SamplerDescriptor descriptor) {
+  descriptor_ = std::move(descriptor);
+}
+
+void VerticesSimpleBlendContents::SetTileMode(Entity::TileMode tile_mode_x,
+                                              Entity::TileMode tile_mode_y) {
+  tile_mode_x_ = tile_mode_x;
+  tile_mode_y_ = tile_mode_y;
+}
+
+void VerticesSimpleBlendContents::SetEffectTransform(Matrix transform) {
+  inverse_matrix_ = transform.Invert();
+}
+
+bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
+                                         const Entity& entity,
+                                         RenderPass& pass) const {
+  FML_DCHECK(texture_);
+  FML_DCHECK(geometry_->HasVertexColors());
+
+  // Simple Porter-Duff blends can be accomplished without a sub renderpass.
+  using VS = PorterDuffBlendPipeline::VertexShader;
+  using FS = PorterDuffBlendPipeline::FragmentShader;
+
+  GeometryResult geometry_result = geometry_->GetPositionUVColorBuffer(
+      Rect::MakeSize(texture_->GetSize()), inverse_matrix_, renderer, entity,
+      pass);
+  if (geometry_result.vertex_buffer.vertex_count == 0) {
+    return true;
+  }
+  FML_DCHECK(geometry_result.mode == GeometryResult::Mode::kNormal);
+
+#ifdef IMPELLER_DEBUG
+  pass.SetCommandLabel(SPrintF("DrawVertices Porterduff Blend (%s)",
+                               BlendModeToString(blend_mode_)));
+#endif  // IMPELLER_DEBUG
+  pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
+  pass.SetStencilReference(entity.GetClipDepth());
+
+  auto options = OptionsFromPassAndEntity(pass, entity);
+  options.primitive_type = geometry_result.type;
+  pass.SetPipeline(renderer.GetPorterDuffBlendPipeline(options));
+
+  auto dst_sampler_descriptor = descriptor_;
+  dst_sampler_descriptor.width_address_mode =
+      TileModeToAddressMode(tile_mode_x_, renderer.GetDeviceCapabilities())
+          .value_or(SamplerAddressMode::kClampToEdge);
+  dst_sampler_descriptor.height_address_mode =
+      TileModeToAddressMode(tile_mode_y_, renderer.GetDeviceCapabilities())
+          .value_or(SamplerAddressMode::kClampToEdge);
+
+  const std::unique_ptr<const Sampler>& dst_sampler =
+      renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+          dst_sampler_descriptor);
+  FS::BindTextureSamplerDst(pass, texture_, dst_sampler);
+
+  FS::FragInfo frag_info;
+  VS::FrameInfo frame_info;
+
+  frame_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
+  frag_info.output_alpha = alpha_;
+  frag_info.input_alpha = 1.0;
+
+  auto inverted_blend_mode =
+      InvertPorterDuffBlend(blend_mode_).value_or(BlendMode::kSource);
+  auto blend_coefficients =
+      kPorterDuffCoefficients[static_cast<int>(inverted_blend_mode)];
+  frag_info.src_coeff = blend_coefficients[0];
+  frag_info.src_coeff_dst_alpha = blend_coefficients[1];
+  frag_info.dst_coeff = blend_coefficients[2];
+  frag_info.dst_coeff_src_alpha = blend_coefficients[3];
+  frag_info.dst_coeff_src_color = blend_coefficients[4];
+
+  auto& host_buffer = renderer.GetTransientsBuffer();
+  FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+
+  frame_info.mvp = geometry_result.transform;
+
+  auto uniform_view = host_buffer.EmplaceUniform(frame_info);
+  VS::BindFrameInfo(pass, uniform_view);
 
   return pass.Draw().ok();
 }
