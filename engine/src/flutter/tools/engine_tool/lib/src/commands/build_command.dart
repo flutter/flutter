@@ -17,7 +17,9 @@ final class BuildCommand extends CommandBase {
   }) {
     builds = runnableBuilds(environment, configs);
     debugCheckBuilds(builds);
-    addConfigOption(argParser, runnableBuilds(environment, configs));
+    addConfigOption(
+      environment, argParser, runnableBuilds(environment, configs),
+    );
     argParser.addFlag(
       rbeFlag,
       defaultsTo: true,
@@ -39,8 +41,9 @@ final class BuildCommand extends CommandBase {
   Future<int> run() async {
     final String configName = argResults![configFlag] as String;
     final bool useRbe = argResults![rbeFlag] as bool;
+    final String demangledName = demangleConfigName(environment, configName);
     final Build? build =
-        builds.where((Build build) => build.name == configName).firstOrNull;
+        builds.where((Build build) => build.name == demangledName).firstOrNull;
     if (build == null) {
       environment.logger.error('Could not find config $configName');
       return 1;

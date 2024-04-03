@@ -23,19 +23,19 @@ import 'fixtures.dart' as fixtures;
 void main() {
   final BuilderConfig linuxTestConfig = BuilderConfig.fromJson(
     path: 'ci/builders/linux_test_config.json',
-    map: convert.jsonDecode(fixtures.testConfig('Linux'))
+    map: convert.jsonDecode(fixtures.testConfig('Linux', Platform.linux))
         as Map<String, Object?>,
   );
 
   final BuilderConfig macTestConfig = BuilderConfig.fromJson(
     path: 'ci/builders/mac_test_config.json',
-    map: convert.jsonDecode(fixtures.testConfig('Mac-12'))
+    map: convert.jsonDecode(fixtures.testConfig('Mac-12', Platform.macOS))
         as Map<String, Object?>,
   );
 
   final BuilderConfig winTestConfig = BuilderConfig.fromJson(
     path: 'ci/builders/win_test_config.json',
-    map: convert.jsonDecode(fixtures.testConfig('Windows-11'))
+    map: convert.jsonDecode(fixtures.testConfig('Windows-11', Platform.windows))
         as Map<String, Object?>,
   );
 
@@ -67,7 +67,8 @@ void main() {
         engine: engine,
         platform: FakePlatform(
             operatingSystem: Platform.linux,
-            resolvedExecutable: io.Platform.resolvedExecutable),
+            resolvedExecutable: io.Platform.resolvedExecutable,
+            pathSeparator: '/'),
         processRunner: ProcessRunner(
           processManager: FakeProcessManager(
             canRun: (Object? exe, {String? workingDirectory}) => true,
@@ -101,7 +102,7 @@ void main() {
     try {
       final List<Build> result = runnableBuilds(env, configs);
       expect(result.length, equals(8));
-      expect(result[0].name, equals('build_name'));
+      expect(result[0].name, equals('ci/build_name'));
     } finally {
       cleanupEnv(env);
     }
@@ -118,7 +119,7 @@ void main() {
       final int result = await runner.run(<String>[
         'build',
         '--config',
-        'build_name',
+        'ci/build_name',
       ]);
       expect(result, equals(0));
       expect(runHistory.length, greaterThanOrEqualTo(1));
@@ -140,7 +141,7 @@ void main() {
       final int result = await runner.run(<String>[
         'build',
         '--config',
-        'build_name',
+        'ci/build_name',
       ]);
       expect(result, equals(0));
       expect(runHistory.length, greaterThanOrEqualTo(2));
@@ -162,7 +163,7 @@ void main() {
       final int result = await runner.run(<String>[
         'build',
         '--config',
-        'build_name',
+        'ci/build_name',
       ]);
       expect(result, equals(0));
       expect(runHistory.length, greaterThanOrEqualTo(3));
@@ -186,7 +187,7 @@ void main() {
       final int result = await runner.run(<String>[
         'build',
         '--config',
-        'build_name',
+        'ci/build_name',
       ]);
       expect(result, equals(0));
       expect(runHistory.length, lessThanOrEqualTo(3));
@@ -208,7 +209,7 @@ void main() {
       final int result = await runner.run(<String>[
         'build',
         '--config',
-        'android_debug_rbe_arm64',
+        'ci/android_debug_rbe_arm64',
       ]);
       expect(result, equals(0));
       expect(runHistory[0][0], contains(path.join('tools', 'gn')));
@@ -232,7 +233,7 @@ void main() {
       final int result = await runner.run(<String>[
         'build',
         '--config',
-        'android_debug_rbe_arm64',
+        'ci/android_debug_rbe_arm64',
         '--no-rbe',
       ]);
       expect(result, equals(0));
@@ -255,12 +256,90 @@ void main() {
       final int result = await runner.run(<String>[
         'build',
         '--config',
-        'android_debug_rbe_arm64',
+        'ci/android_debug_rbe_arm64',
       ]);
       expect(result, equals(0));
       expect(runHistory[0][0], contains(path.join('tools', 'gn')));
       expect(runHistory[0], doesNotContainAny(<String>['--rbe']));
       expect(runHistory[1][0], contains(path.join('ninja', 'ninja')));
+    } finally {
+      cleanupEnv(env);
+    }
+  });
+
+  test('mangleConfigName removes the OS and adds ci/ as needed', () {
+    final Logger logger = Logger.test();
+    final (Environment env, _) = linuxEnv(logger);
+    expect(mangleConfigName(env, 'linux/build'), equals('build'));
+    expect(mangleConfigName(env, 'ci/build'), equals('ci/build'));
+  });
+
+  test('mangleConfigName throws when the input config name is malformed', () {
+    final Logger logger = Logger.test();
+    final (Environment env, _) = linuxEnv(logger);
+    expectArgumentError(() => mangleConfigName(env, 'build'));
+  });
+
+  test('demangleConfigName adds the OS and removes ci/ as needed', () {
+    final Logger logger = Logger.test();
+    final (Environment env, _) = linuxEnv(logger);
+    expect(demangleConfigName(env, 'build'), equals('linux/build'));
+    expect(demangleConfigName(env, 'ci/build'), equals('ci/build'));
+  });
+
+  test('local config name on the command line is correctly translated', () async {
+    final BuilderConfig namespaceTestConfigs = BuilderConfig.fromJson(
+      path: 'ci/builders/namespace_test_config.json',
+      map: convert.jsonDecode(fixtures.configsToTestNamespacing)
+          as Map<String, Object?>,
+    );
+    final Map<String, BuilderConfig> configs = <String, BuilderConfig>{
+      'namespace_test_config': namespaceTestConfigs,
+    };
+    final Logger logger = Logger.test();
+    final (Environment env, List<List<String>> runHistory) = linuxEnv(logger);
+    try {
+      final ToolCommandRunner runner = ToolCommandRunner(
+        environment: env,
+        configs: configs,
+      );
+      final int result = await runner.run(<String>[
+        'build',
+        '--config',
+        'host_debug',
+      ]);
+      expect(result, equals(0));
+      expect(runHistory[1][0], contains(path.join('ninja', 'ninja')));
+      expect(runHistory[1][2], contains('local_host_debug'));
+    } finally {
+      cleanupEnv(env);
+    }
+  });
+
+  test('ci config name on the command line is correctly translated', () async {
+    final BuilderConfig namespaceTestConfigs = BuilderConfig.fromJson(
+      path: 'ci/builders/namespace_test_config.json',
+      map: convert.jsonDecode(fixtures.configsToTestNamespacing)
+          as Map<String, Object?>,
+    );
+    final Map<String, BuilderConfig> configs = <String, BuilderConfig>{
+      'namespace_test_config': namespaceTestConfigs,
+    };
+    final Logger logger = Logger.test();
+    final (Environment env, List<List<String>> runHistory) = linuxEnv(logger);
+    try {
+      final ToolCommandRunner runner = ToolCommandRunner(
+        environment: env,
+        configs: configs,
+      );
+      final int result = await runner.run(<String>[
+        'build',
+        '--config',
+        'ci/host_debug',
+      ]);
+      expect(result, equals(0));
+      expect(runHistory[1][0], contains(path.join('ninja', 'ninja')));
+      expect(runHistory[1][2], contains('ci/host_debug'));
     } finally {
       cleanupEnv(env);
     }

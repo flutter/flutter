@@ -61,7 +61,8 @@ class TestEnvironment {
       engine: engine,
       platform: FakePlatform(
           operatingSystem: _operatingSystemForAbi(abi),
-          resolvedExecutable: io.Platform.resolvedExecutable),
+          resolvedExecutable: io.Platform.resolvedExecutable,
+          pathSeparator: _pathSeparatorForAbi(abi)),
       processRunner: ProcessRunner(
           processManager: FakeProcessManager(onStart: (List<String> command) {
         final FakeProcess processResult =
@@ -99,6 +100,17 @@ String _operatingSystemForAbi(ffi.Abi abi) {
       return Platform.macOS;
     default:
       throw UnimplementedError('Unhandled abi=$abi');
+  }
+}
+
+String _pathSeparatorForAbi(ffi.Abi abi) {
+  switch (abi) {
+    case ffi.Abi.windowsArm64:
+    case ffi.Abi.windowsIA32:
+    case ffi.Abi.windowsX64:
+      return r'\';
+    default:
+      return '/';
   }
 }
 

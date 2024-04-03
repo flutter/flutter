@@ -31,19 +31,19 @@ void main() {
 
   final BuilderConfig linuxTestConfig = BuilderConfig.fromJson(
     path: 'ci/builders/linux_test_config.json',
-    map: convert.jsonDecode(fixtures.testConfig('Linux'))
+    map: convert.jsonDecode(fixtures.testConfig('Linux', Platform.linux))
         as Map<String, Object?>,
   );
 
   final BuilderConfig macTestConfig = BuilderConfig.fromJson(
     path: 'ci/builders/mac_test_config.json',
-    map: convert.jsonDecode(fixtures.testConfig('Mac-12'))
+    map: convert.jsonDecode(fixtures.testConfig('Mac-12', Platform.macOS))
         as Map<String, Object?>,
   );
 
   final BuilderConfig winTestConfig = BuilderConfig.fromJson(
     path: 'ci/builders/win_test_config.json',
-    map: convert.jsonDecode(fixtures.testConfig('Windows-11'))
+    map: convert.jsonDecode(fixtures.testConfig('Windows-11', Platform.windows))
         as Map<String, Object?>,
   );
 
@@ -62,7 +62,8 @@ void main() {
         engine: engine,
         platform: FakePlatform(
             operatingSystem: Platform.linux,
-            resolvedExecutable: io.Platform.resolvedExecutable),
+            resolvedExecutable: io.Platform.resolvedExecutable,
+            pathSeparator: '/'),
         processRunner: ProcessRunner(
           processManager: FakeProcessManager(onStart: (List<String> command) {
             runHistory.add(command);
@@ -152,9 +153,9 @@ void main() {
           'flutter',
           'run',
           '--local-engine',
-          'android_debug_arm64',
+          'linux/android_debug_arm64',
           '--local-engine-host',
-          'host_debug',
+          'linux/host_debug',
           '-d',
           'emulator'
         ]));

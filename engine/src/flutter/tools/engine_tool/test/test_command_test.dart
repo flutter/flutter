@@ -11,6 +11,7 @@ import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:engine_tool/src/commands/command_runner.dart';
 import 'package:engine_tool/src/environment.dart';
 import 'package:litetest/litetest.dart';
+import 'package:platform/platform.dart';
 
 import 'fixtures.dart' as fixtures;
 import 'utils.dart';
@@ -27,19 +28,19 @@ void main() {
 
   final BuilderConfig linuxTestConfig = BuilderConfig.fromJson(
     path: 'ci/builders/linux_test_config.json',
-    map: convert.jsonDecode(fixtures.testConfig('Linux'))
+    map: convert.jsonDecode(fixtures.testConfig('Linux', Platform.linux))
         as Map<String, Object?>,
   );
 
   final BuilderConfig macTestConfig = BuilderConfig.fromJson(
     path: 'ci/builders/mac_test_config.json',
-    map: convert.jsonDecode(fixtures.testConfig('Mac-12'))
+    map: convert.jsonDecode(fixtures.testConfig('Mac-12', Platform.macOS))
         as Map<String, Object?>,
   );
 
   final BuilderConfig winTestConfig = BuilderConfig.fromJson(
     path: 'ci/builders/win_test_config.json',
-    map: convert.jsonDecode(fixtures.testConfig('Windows-11'))
+    map: convert.jsonDecode(fixtures.testConfig('Windows-11', Platform.windows))
         as Map<String, Object?>,
   );
 

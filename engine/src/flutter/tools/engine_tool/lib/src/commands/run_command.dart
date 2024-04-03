@@ -23,8 +23,10 @@ final class RunCommand extends CommandBase {
     debugCheckBuilds(builds);
     // We default to nothing in order to automatically detect attached devices
     // and select an appropriate target from them.
-    addConfigOption(argParser, runnableBuilds(environment, configs),
-        defaultsTo: '');
+    addConfigOption(
+      environment, argParser, runnableBuilds(environment, configs),
+      defaultsTo: '',
+    );
     argParser.addFlag(
       rbeFlag,
       defaultsTo: true,
@@ -47,26 +49,27 @@ final class RunCommand extends CommandBase {
       'See `flutter run --help` for a listing';
 
   Build? _lookup(String configName) {
-    return builds.where((Build build) => build.name == configName).firstOrNull;
+    final String demangledName = demangleConfigName(environment, configName);
+    return builds.where((Build build) => build.name == demangledName).firstOrNull;
   }
 
   Build? _findHostBuild(Build? targetBuild) {
     if (targetBuild == null) {
       return null;
     }
-
-    final String name = targetBuild.name;
-    if (name.startsWith('host_')) {
+    final String mangledName = mangleConfigName(environment, targetBuild.name);
+    if (mangledName.contains('host_')) {
       return targetBuild;
     }
     // TODO(johnmccutchan): This is brittle, it would be better if we encoded
     // the host config name in the target config.
-    if (name.contains('_debug')) {
-      return _lookup('host_debug');
-    } else if (name.contains('_profile')) {
-      return _lookup('host_profile');
-    } else if (name.contains('_release')) {
-      return _lookup('host_release');
+    final String ci = mangledName.startsWith('ci') ? mangledName.substring(0, 3) : '';
+    if (mangledName.contains('_debug')) {
+      return _lookup('${ci}host_debug');
+    } else if (mangledName.contains('_profile')) {
+      return _lookup('${ci}host_profile');
+    } else if (mangledName.contains('_release')) {
+      return _lookup('${ci}host_release');
     }
     return null;
   }
@@ -101,13 +104,13 @@ final class RunCommand extends CommandBase {
   Future<String?> _selectTargetConfig() async {
     final String configName = argResults![configFlag] as String;
     if (configName.isNotEmpty) {
-      return configName;
+      return demangleConfigName(environment, configName);
     }
     final String deviceId = _getDeviceId();
     final RunTarget? target =
         await detectAndSelectRunTarget(environment, deviceId);
     if (target == null) {
-      return 'host_debug';
+      return demangleConfigName(environment, 'host_debug');
     }
     environment.logger.status(
         'Building to run on "${target.name}" running ${target.targetPlatform}');

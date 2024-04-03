@@ -23,7 +23,9 @@ final class TestCommand extends CommandBase {
   }) {
     builds = runnableBuilds(environment, configs);
     debugCheckBuilds(builds);
-    addConfigOption(argParser, runnableBuilds(environment, configs));
+    addConfigOption(
+      environment, argParser, runnableBuilds(environment, configs),
+    );
   }
 
   /// List of compatible builds.
@@ -40,8 +42,9 @@ final class TestCommand extends CommandBase {
   @override
   Future<int> run() async {
     final String configName = argResults![configFlag] as String;
+    final String demangledName = demangleConfigName(environment, configName);
     final Build? build =
-        builds.where((Build build) => build.name == configName).firstOrNull;
+        builds.where((Build build) => build.name == demangledName).firstOrNull;
     if (build == null) {
       environment.logger.error('Could not find config $configName');
       return 1;

@@ -129,12 +129,6 @@ List<String> checkForInvalidBuildNames(Map<String, BuilderConfig> configs) {
       ? osNames
       : ciNames;
     if (!goodPrefixes.any(build.name.startsWith)) {
-      if (name.contains('local_engine')) {
-        // TODO(zanderso): Check these builds as well after local_engine is
-        // fixed.
-        // https://github.com/flutter/flutter/issues/145263
-        return;
-      }
       errors.add(
         '${build.name} in $name must start with one of '
         '{${goodPrefixes.join(', ')}}',

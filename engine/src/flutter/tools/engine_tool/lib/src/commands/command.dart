@@ -6,6 +6,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:engine_build_configs/engine_build_configs.dart';
 
+import '../build_utils.dart';
 import '../environment.dart';
 import 'flags.dart';
 
@@ -19,18 +20,24 @@ abstract base class CommandBase extends Command<int> {
 }
 
 /// Adds the -c (--config) option to the parser.
-void addConfigOption(ArgParser parser, List<Build> builds,
-    {String defaultsTo = 'host_debug'}) {
+void addConfigOption(
+  Environment environment,
+  ArgParser parser,
+  List<Build> builds, {
+  String defaultsTo = 'host_debug',
+}) {
   parser.addOption(
     configFlag,
     abbr: 'c',
     defaultsTo: defaultsTo,
     help: 'Specify the build config to use',
     allowed: <String>[
-      for (final Build config in builds) config.name,
+      for (final Build config in builds)
+        mangleConfigName(environment, config.name),
     ],
     allowedHelp: <String, String>{
-      for (final Build config in builds) config.name: config.gn.join(' '),
+      for (final Build config in builds)
+        mangleConfigName(environment, config.name): config.gn.join(' '),
     },
   );
 }

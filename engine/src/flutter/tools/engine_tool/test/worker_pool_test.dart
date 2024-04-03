@@ -73,7 +73,10 @@ void main() {
       Environment(
         abi: ffi.Abi.macosArm64,
         engine: engine,
-        platform: FakePlatform(operatingSystem: Platform.macOS),
+        platform: FakePlatform(
+          operatingSystem: Platform.macOS,
+          pathSeparator: '/',
+        ),
         processRunner: ProcessRunner(
             processManager: FakeProcessManager(onStart: (List<String> command) {
           runHistory.add(command);

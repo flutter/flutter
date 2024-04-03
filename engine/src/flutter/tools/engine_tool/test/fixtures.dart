@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-String testConfig(String os) => '''
+String testConfig(String osDimension, String osPlatform) => '''
 {
   "builds": [
     {
@@ -16,13 +16,13 @@ String testConfig(String os) => '''
         }
       ],
       "drone_dimensions": [
-        "os=$os"
+        "os=$osDimension"
       ],
       "gclient_variables": {
         "variable": false
       },
       "gn": ["--gn-arg", "--lto", "--goma", "--no-rbe"],
-      "name": "build_name",
+      "name": "ci/build_name",
       "ninja": {
         "config": "build_name",
         "targets": ["ninja_target"]
@@ -51,10 +51,10 @@ String testConfig(String os) => '''
     {},
     {
       "drone_dimensions": [
-        "os=$os"
+        "os=$osDimension"
       ],
       "gn": ["--gn-arg", "--lto", "--goma", "--no-rbe"],
-      "name": "host_debug",
+      "name": "$osPlatform/host_debug",
       "ninja": {
         "config": "host_debug",
         "targets": ["ninja_target"]
@@ -62,10 +62,10 @@ String testConfig(String os) => '''
     },
     {
       "drone_dimensions": [
-        "os=$os"
+        "os=$osDimension"
       ],
       "gn": ["--gn-arg", "--lto", "--goma", "--no-rbe"],
-      "name": "android_debug_arm64",
+      "name": "$osPlatform/android_debug_arm64",
       "ninja": {
         "config": "android_debug_arm64",
         "targets": ["ninja_target"]
@@ -73,10 +73,10 @@ String testConfig(String os) => '''
     },
     {
       "drone_dimensions": [
-        "os=$os"
+        "os=$osDimension"
       ],
       "gn": ["--gn-arg", "--lto", "--no-goma", "--rbe"],
-      "name": "android_debug_rbe_arm64",
+      "name": "ci/android_debug_rbe_arm64",
       "ninja": {
         "config": "android_debug_rbe_arm64",
         "targets": ["ninja_target"]
@@ -98,7 +98,7 @@ String testConfig(String os) => '''
       "name": "global test",
       "recipe": "engine_v2/tester_engine",
       "drone_dimensions": [
-        "os=$os"
+        "os=$osDimension"
       ],
       "gclient_variables": {
         "variable": false
@@ -117,6 +117,35 @@ String testConfig(String os) => '''
           "script": "global/test/script.py"
         }
       ]
+    }
+  ]
+}
+''';
+
+const String configsToTestNamespacing = '''
+{
+  "builds": [
+    {
+      "drone_dimensions": [
+        "os=Linux"
+      ],
+      "gn": ["--gn-arg", "--lto", "--goma", "--no-rbe"],
+      "name": "linux/host_debug",
+      "ninja": {
+        "config": "local_host_debug",
+        "targets": ["ninja_target"]
+      }
+    },
+    {
+      "drone_dimensions": [
+        "os=Linux"
+      ],
+      "gn": ["--gn-arg", "--lto", "--goma", "--no-rbe"],
+      "name": "ci/host_debug",
+      "ninja": {
+        "config": "ci/host_debug",
+        "targets": ["ninja_target"]
+      }
     }
   ]
 }
