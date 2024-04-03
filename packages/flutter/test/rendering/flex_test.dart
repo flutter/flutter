@@ -773,9 +773,42 @@ void main() {
       expect(flex.getDryLayout(BoxConstraints.loose(size)), const Size(200.0, 30.0));
       expect(flex.getDryBaseline(BoxConstraints.loose(size), TextBaseline.alphabetic), 20.0);
       size = const Size(300, 100);
-      // box 1 one line, box 2 one.
+      // box 1 one line, box 2 one line.
       expect(flex.getDryLayout(BoxConstraints.loose(size)), const Size(300.0, 20.0));
       expect(flex.getDryBaseline(BoxConstraints.loose(size), TextBaseline.alphabetic), 10.0);
+    });
+
+    test('baseline aligned children cross intrinsic size', () {
+      // box1 has its baseline placed at the top of the box.
+      final RenderFlowBaselineTestBox box1 = RenderFlowBaselineTestBox()
+        ..baselinePlacer = ((double height) => 0.0)
+        ..gridCount = 10;
+
+      // box2 has its baseline placed at the bottom of the box.
+      final RenderFlowBaselineTestBox box2 = RenderFlowBaselineTestBox()
+        ..baselinePlacer = ((double height) => height)
+        ..gridCount = 10;
+
+      final RenderFlex flex = RenderFlex(
+        textDirection: TextDirection.ltr,
+        textBaseline: TextBaseline.alphabetic,
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        children: <RenderBox>[box1, box2],
+      );
+      final FlexParentData box1ParentData = box1.parentData! as FlexParentData;
+      box1ParentData.flex = 2;
+      box1ParentData.fit = FlexFit.tight;
+      final FlexParentData box2ParentData = box2.parentData! as FlexParentData;
+      box2ParentData.flex = 1;
+      box2ParentData.fit = FlexFit.loose;
+
+      // box 1 one line, box 2 two lines.
+      expect(flex.getMaxIntrinsicHeight(200), 30);
+      expect(flex.getMinIntrinsicHeight(200), 30);
+
+      // box 1 one line, box 2 one line.
+      expect(flex.getMaxIntrinsicHeight(300), 20);
+      expect(flex.getMinIntrinsicHeight(300), 20);
     });
 
     test('children with no baselines do not affect the baseline location', () {
