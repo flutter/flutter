@@ -229,6 +229,9 @@ struct Settings {
   bool enable_impeller = false;
 #endif
 
+  // Log a warning during shell initialization if Impeller is not enabled.
+  bool warn_on_impeller_opt_out = false;
+
   // The selected Android rendering API.
   AndroidRenderingAPI android_rendering_api =
       AndroidRenderingAPI::kSkiaOpenGLES;

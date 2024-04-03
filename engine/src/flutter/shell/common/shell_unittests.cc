@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <strstream>
 #define FML_USED_ON_EMBEDDER
 
 #include <algorithm>
@@ -10,6 +9,7 @@
 #include <ctime>
 #include <future>
 #include <memory>
+#include <strstream>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -4915,6 +4915,28 @@ TEST_F(ShellTest, RuntimeStageBackendWithImpeller) {
   DestroyShell(std::move(shell), task_runners);
 }
 #endif  // IMPELLER_SUPPORTS_RENDERING
+
+TEST_F(ShellTest, WillLogWarningWhenImpellerIsOptedOut) {
+#if !IMPELLER_SUPPORTS_RENDERING
+  GTEST_SKIP() << "This platform doesn't support Impeller.";
+#endif
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  Settings settings = CreateSettingsForFixture();
+  settings.enable_impeller = false;
+  settings.warn_on_impeller_opt_out = true;
+  // Log captures are thread specific. Just put the shell in single threaded
+  // configuration.
+  const auto& runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
+  TaskRunners task_runners("test", runner, runner, runner, runner);
+  std::ostringstream stream;
+  fml::LogMessage::CaptureNextLog(&stream);
+  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
+  ASSERT_TRUE(stream.str().find(
+                  "[Action Required] The application opted out of Impeller") !=
+              std::string::npos);
+  ASSERT_TRUE(shell);
+  DestroyShell(std::move(shell), task_runners);
+}
 
 }  // namespace testing
 }  // namespace flutter

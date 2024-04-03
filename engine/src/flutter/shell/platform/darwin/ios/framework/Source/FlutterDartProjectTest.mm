@@ -235,6 +235,11 @@ FLUTTER_ASSERT_ARC
   [mockMainBundle stopMocking];
 }
 
+- (void)testRequestsWarningWhenImpellerOptOut {
+  auto settings = FLTDefaultSettingsForBundle();
+  XCTAssertEqual(settings.warn_on_impeller_opt_out, YES);
+}
+
 - (void)testEnableImpellerSettingIsCorrectlyParsed {
   id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
   OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableImpeller"]).andReturn(@"YES");

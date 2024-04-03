@@ -202,6 +202,8 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
     }
   }
 
+  settings.warn_on_impeller_opt_out = true;
+
   NSNumber* enableTraceSystrace = [mainBundle objectForInfoDictionaryKey:@"FLTTraceSystrace"];
   // Change the default only if the option is present.
   if (enableTraceSystrace != nil) {
