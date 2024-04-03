@@ -38,12 +38,11 @@ void main() async {
         child: ImageIcon(imageProvider),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(imageProvider.evict);
     final RenderBox renderObject = tester.renderObject(find.byType(ImageIcon));
     expect(renderObject.size, equals(const Size.square(24.0)));
     expect(find.byType(Image), findsOneWidget);
-    // Evicts an entry from the image cache after test-case is executed.
-    addTearDown(imageProvider.evict);
   });
 
   testWidgets('Icon opacity',
@@ -56,10 +55,9 @@ void main() async {
         ),
       ),
     );
-
-    expect(tester.widget<Image>(find.byType(Image)).color!.alpha, equals(128));
     // Evicts an entry from the image cache after test-case is executed.
     addTearDown(imageProvider.evict);
+    expect(tester.widget<Image>(find.byType(Image)).color!.alpha, equals(128));
   });
 
   testWidgets('ImageIcon sizing - no theme, explicit size', (WidgetTester tester) async {

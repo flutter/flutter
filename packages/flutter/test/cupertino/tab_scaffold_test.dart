@@ -61,7 +61,6 @@ void main() {
 
   testWidgets('Tab switching', (WidgetTester tester) async {
     final List<int> tabsPainted = <int>[];
-
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
@@ -77,7 +76,8 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     expect(tabsPainted, const <int>[0]);
     RichText tab1 = tester.widget(find.descendant(
       of: find.text('Tab 1'),
@@ -111,13 +111,10 @@ void main() {
     expect(tabsPainted, const <int>[0, 1, 0]);
     // CupertinoTabBar's onTap callbacks are passed on.
     expect(selectedTabs, const <int>[1, 0]);
-    // Evicts an entry from the image cache after test-case is executed.
-    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Tabs are lazy built and moved offstage when inactive', (WidgetTester tester) async {
     final List<int> tabsBuilt = <int>[];
-
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
@@ -129,7 +126,8 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     expect(tabsBuilt, const <int>[0]);
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 2'), findsNothing);
@@ -148,8 +146,6 @@ void main() {
     expect(tabsBuilt, const <int>[0, 0, 1, 0, 1]);
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 2', skipOffstage: false), isOffstage);
-    // Evicts an entry from the image cache after test-case is executed.
-    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Last tab gets focus', (WidgetTester tester) async {
@@ -175,7 +171,8 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     expect(focusNodes[0].hasFocus, isTrue);
 
     await tester.tap(find.text('Tab 2'));
@@ -189,8 +186,6 @@ void main() {
 
     expect(focusNodes[0].hasFocus, isTrue);
     expect(focusNodes[1].hasFocus, isFalse);
-   // Evicts an entry from the image cache after test-case is executed.
-    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Do not affect focus order in the route', (WidgetTester tester) async {
@@ -225,7 +220,8 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     expect(
       focusNodes.any((FocusNode node) => node.hasFocus),
       isFalse,
@@ -257,8 +253,6 @@ void main() {
       focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
       1,
     );
-    // Evicts an entry from the image cache after test-case is executed.
-    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Programmatic tab switching by changing the index of an existing controller',
@@ -284,7 +278,8 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     expect(tabsPainted, const <int>[1]);
 
     controller.index = 0;
@@ -300,8 +295,6 @@ void main() {
 
     expect(tabsPainted, const <int>[1, 0, 1]);
     expect(selectedTabs, const <int>[1]);
-    // Evicts an entry from the image cache after test-case is executed.
-    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Programmatic tab switching by passing in a new controller', (WidgetTester tester) async {
@@ -322,7 +315,8 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     expect(tabsPainted, const <int>[0]);
 
     final CupertinoTabController controller = CupertinoTabController(initialIndex: 1);
@@ -343,7 +337,8 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     expect(tabsPainted, const <int>[0, 1]);
     // onTap is not called when changing tabs programmatically.
     expect(selectedTabs, isEmpty);
@@ -354,8 +349,6 @@ void main() {
 
     expect(tabsPainted, const <int>[0, 1, 0]);
     expect(selectedTabs, const <int>[0]);
-    // Evicts an entry from the image cache after test-case is executed.
-    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Tab bar respects themes', (WidgetTester tester) async {
@@ -369,7 +362,8 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     BoxDecoration tabDecoration = tester.widget<DecoratedBox>(find.descendant(
       of: find.byType(CupertinoTabBar),
       matching: find.byType(DecoratedBox),
@@ -395,7 +389,8 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     tabDecoration = tester.widget<DecoratedBox>(find.descendant(
       of: find.byType(CupertinoTabBar),
       matching: find.byType(DecoratedBox),
@@ -414,8 +409,6 @@ void main() {
       matching: find.byType(RichText),
     ));
     expect(tab2.text.style!.color, isSameColorAs(CupertinoColors.systemRed.darkColor));
-    // Evicts an entry from the image cache after test-case is executed.
-    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Tab contents are padded when there are view insets', (WidgetTester tester) async {
@@ -437,13 +430,12 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 400));
     // Don't generate more media query padding from the translucent bottom
     // tab since the tab is behind the keyboard now.
     expect(MediaQuery.of(innerContext).padding.bottom, 0);
-    // Evicts an entry from the image cache after test-case is executed.
-    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Tab contents are not inset when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
@@ -466,13 +458,12 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 600));
     // Media query padding shows up in the inner content because it wasn't masked
     // by the view inset.
     expect(MediaQuery.of(innerContext).padding.bottom, 50);
-    // Evicts an entry from the image cache after test-case is executed.
-    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Tab contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
@@ -493,7 +484,8 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     await tester.pumpWidget(
       CupertinoApp(
         home: MediaQuery(
@@ -521,8 +513,6 @@ void main() {
     final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
 
     expect(initialPoint, finalPoint);
-    // Evicts an entry from the image cache after test-case is executed.
-    addTearDown(memoryImage.evict);
   });
 
   testWidgets(
@@ -582,11 +572,10 @@ void main() {
         ),
       ),
     );
-
-    expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 400));
-    expect(MediaQuery.of(innerContext).padding.bottom, 0);
     // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
+    expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 400));
+    expect(MediaQuery.of(innerContext).padding.bottom, 0);
   });
 
   testWidgets('Deleting tabs after selecting them should switch to the last available tab', (WidgetTester tester) async {
@@ -639,7 +628,8 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     expect(tabsBuilt, const <int>[0, 1]);
     // We didn't tap on any additional tabs to invoke the onTap callback. We
     // just deleted a tab.
@@ -656,8 +646,6 @@ void main() {
     expect(find.text('Page 1', skipOffstage: false), findsNothing);
     expect(find.text('Page 2', skipOffstage: false), findsNothing);
     expect(find.text('Page 4', skipOffstage: false), findsNothing);
-    // Evicts an entry from the image cache after test-case is executed.
-    addTearDown(memoryImage.evict);
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/33455
@@ -706,7 +694,8 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     expect(tabsPainted, const <int> [0, 0]);
 
     await tester.tap(find.text('Tab 19'));
@@ -714,8 +703,6 @@ void main() {
 
     // Tapping the tabs should still work.
     expect(tabsPainted, const <int>[0, 0, 18]);
-    // Evicts an entry from the image cache after test-case is executed.
-    addTearDown(memoryImage.evict);
   });
 
   testWidgets(
@@ -766,7 +753,8 @@ void main() {
           ),
         ),
       );
-
+      // Evicts an entry from the image cache after test-case is executed.
+      addTearDown(memoryImage.evict);
       expect(tabsPainted, const <int> [0, 0]);
 
       await tester.tap(find.text('Tab 2'));
@@ -780,8 +768,6 @@ void main() {
 
       // Changing [index] of the oldController should not work.
       expect(tabsPainted, const <int> [0, 0, 1]);
-      // Evicts an entry from the image cache after test-case is executed.
-      addTearDown(memoryImage.evict);
     },
   );
 
@@ -1069,6 +1055,8 @@ void main() {
           ),
         ),
     );
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     for (int i = 0; i < 5; i++) {
       controller.index = i;
       await tester.pump();
@@ -1076,8 +1064,6 @@ void main() {
     await tester.pump();
 
     expect(scopes.sublist(0, 3), equals(newScopes.sublist(0, 3)));
-    // Evicts an entry from the image cache after test-case is executed.
-    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Current tab index cannot go below zero or be null', (WidgetTester tester) async {
@@ -1113,7 +1099,6 @@ void main() {
         ),
       ),
     );
-
     final EditableTextState editableState = tester.state<EditableTextState>(find.byType(EditableText));
 
     await tester.enterText(find.byType(CupertinoTextField), "don't lose me");
@@ -1133,12 +1118,11 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     // The exact same state instance is still there.
     expect(tester.state<EditableTextState>(find.byType(EditableText)), editableState);
     expect(find.text("don't lose me"), findsOneWidget);
-    // Evicts an entry from the image cache after test-case is executed.
-    addTearDown(memoryImage.evict);
   });
 
   testWidgets('textScaleFactor is set to 1.0',
@@ -1371,7 +1355,8 @@ void main() {
           ),
         ),
       );
-
+      // Evicts an entry from the image cache after test-case is executed.
+      addTearDown(memoryImage.evict);
       expect(find.text('Page 1 of tab 1'), findsOneWidget);
       expect(find.text('Page 2 of tab 1'), findsNothing);
       expect(lastFrameworkHandlesBack, isFalse);
@@ -1417,8 +1402,6 @@ void main() {
       expect(find.text('Page 1 of tab 2'), findsOneWidget);
       expect(find.text('Page 2 of tab 2'), findsNothing);
       expect(lastFrameworkHandlesBack, isFalse);
-      // Evicts an entry from the image cache after test-case is executed.
-      addTearDown(memoryImage.evict);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
       skip: kIsWeb, // [intended] frameworkHandlesBack not used on web.

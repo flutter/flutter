@@ -48,7 +48,8 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     expect(focusNodes[0].hasFocus, isTrue);
 
     await tester.tap(find.text('Tab 2'));
@@ -62,8 +63,6 @@ void main() {
 
     expect(focusNodes[0].hasFocus, isTrue);
     expect(focusNodes[1].hasFocus, isFalse);
-    // Evicts an entry from the image cache after test-case is executed.
-    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Do not affect focus order in the route', (WidgetTester tester) async {
@@ -101,7 +100,8 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     expect(
       focusNodes.any((FocusNode node) => node.hasFocus),
       isFalse,
@@ -133,8 +133,6 @@ void main() {
       focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
       1,
     );
-    // Evicts an entry from the image cache after test-case is executed.
-    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Tab bar respects themes', (WidgetTester tester) async {
@@ -148,7 +146,8 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     BoxDecoration tabDecoration = tester.widget<DecoratedBox>(find.descendant(
       of: find.byType(CupertinoTabBar),
       matching: find.byType(DecoratedBox),
@@ -174,7 +173,8 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     tabDecoration = tester.widget<DecoratedBox>(find.descendant(
       of: find.byType(CupertinoTabBar),
       matching: find.byType(DecoratedBox),
@@ -193,8 +193,6 @@ void main() {
       matching: find.byType(RichText),
     ));
     expect(tab2.text.style!.color!.value, CupertinoColors.systemRed.darkColor.value);
-    // Evicts an entry from the image cache after test-case is executed.
-    addTearDown(memoryImage.evict);
   });
 
   testWidgets('dark mode background color', (WidgetTester tester) async {
@@ -214,7 +212,8 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     // The DecoratedBox with the smallest depth is the DecoratedBox of the
     // CupertinoTabScaffold.
     BoxDecoration tabDecoration = tester.firstWidget<DecoratedBox>(
@@ -239,7 +238,8 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     tabDecoration = tester.firstWidget<DecoratedBox>(
       find.descendant(
         of: find.byType(CupertinoTabScaffold),
@@ -248,8 +248,6 @@ void main() {
     ).decoration as BoxDecoration;
 
     expect(tabDecoration.color!.value, backgroundColor.darkColor.value);
-    // Evicts an entry from the image cache after test-case is executed.
-    addTearDown(memoryImage.evict);
   });
 
   testWidgets('Does not lose state when focusing on text input', (WidgetTester tester) async {
@@ -270,7 +268,8 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     final EditableTextState editableState = tester.state<EditableTextState>(find.byType(EditableText));
 
     await tester.enterText(find.byType(TextField), "don't lose me");
@@ -292,12 +291,11 @@ void main() {
         ),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     // The exact same state instance is still there.
     expect(tester.state<EditableTextState>(find.byType(EditableText)), editableState);
     expect(find.text("don't lose me"), findsOneWidget);
-    // Evicts an entry from the image cache after test-case is executed.
-    addTearDown(memoryImage.evict);
   });
 
   testWidgets('textScaleFactor is set to 1.0', (WidgetTester tester) async {
@@ -320,7 +318,8 @@ void main() {
         }),
       ),
     );
-
+    // Evicts an entry from the image cache after test-case is executed.
+    addTearDown(memoryImage.evict);
     final Iterable<RichText> barItems = tester.widgetList<RichText>(
       find.descendant(
         of: find.byType(CupertinoTabBar),
@@ -341,8 +340,6 @@ void main() {
 
     expect(contents.length, greaterThan(0));
     expect(contents, isNot(contains(predicate((RichText t) => t.textScaler != const TextScaler.linear(99.0)))));
-    // Evicts an entry from the image cache after test-case is executed.
-    addTearDown(memoryImage.evict);
   });
 }
 
