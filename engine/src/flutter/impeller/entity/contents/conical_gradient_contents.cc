@@ -118,9 +118,6 @@ bool ConicalGradientContents::RenderTexture(const ContentContext& renderer,
     return false;
   }
 
-  auto geometry_result =
-      GetGeometry()->GetPositionBuffer(renderer, entity, pass);
-
   VS::FrameInfo frame_info;
   frame_info.matrix = GetInverseEffectTransform();
 
