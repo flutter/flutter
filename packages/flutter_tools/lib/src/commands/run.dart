@@ -186,7 +186,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
         negatable: false,
       );
-;
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);

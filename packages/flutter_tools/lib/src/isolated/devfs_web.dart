@@ -120,7 +120,6 @@ class WebAssetServer implements AssetReader {
     this._nullSafetyMode,
     this._ddcModuleSystem, {
     required this.webRenderer,
-    required this.isWasm,
   }) : basePath = _getWebTemplate('index.html', _kDefaultIndex).getBaseHref();
 
   // Fallback to "application/octet-stream" on null which
@@ -234,7 +233,6 @@ class WebAssetServer implements AssetReader {
       nullSafetyMode,
       ddcModuleSystem,
       webRenderer: webRenderer,
-      isWasm: isWasm,
     );
     if (testMode) {
       return server;
@@ -531,24 +529,16 @@ class WebAssetServer implements AssetReader {
   /// Determines what rendering backed to use.
   final WebRendererMode webRenderer;
 
-  /// Whether the build we are hosting is compiled to wasm.
-  final bool isWasm;
-
   String get _buildConfigString {
-    final Map<String, dynamic> build = isWasm
-      ? <String, dynamic>{
-        'compileTarget': 'dart2wasm',
-        'renderer': webRenderer.name,
-        'mainWasmPath': 'main.dart.wasm',
-        'jsSupportRuntimePath': 'main.dart.mjs',
-      } : <String, dynamic>{
-        'compileTarget': 'dartdevc',
-        'renderer': webRenderer.name,
-        'mainJsPath': 'main.dart.js',
-      };
     final Map<String, dynamic> buildConfig = <String, dynamic>{
       'engineRevision': globals.flutterVersion.engineRevision,
-      'builds': <dynamic>[build],
+      'builds': <dynamic>[
+        <String, dynamic>{
+          'compileTarget': 'dartdevc',
+          'renderer': webRenderer.name,
+          'mainJsPath': 'main.dart.js',
+        },
+      ],
     };
     return '''
 if (!window._flutter) {
