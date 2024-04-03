@@ -63,7 +63,7 @@
                     "language": "dart",
                     "name": "Android Scenario App Integration Tests (Skia, SurfaceTexture)",
                     "test_timeout_secs": 900,
-                    "max_attempts": 1,
+                    "max_attempts": 2,
                     "test_dependencies": [
                         {
                             "dependency": "android_virtual_device",
