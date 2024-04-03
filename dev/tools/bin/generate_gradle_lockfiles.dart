@@ -67,10 +67,6 @@ void main(List<String> arguments) {
       throw '$androidDirectory does not exist';
     }
 
-    print('HI GRAY');
-    print('${androidDirectory.path}');
-    print('${androidDirectoryPath}');
-    print('${exclusionSet}');
     if (exclusionSet.contains(androidDirectory.path)) {
       print('${androidDirectory.path} is included in the exclusion config file at ${exclusionFile.path} - skipping');
       continue;
