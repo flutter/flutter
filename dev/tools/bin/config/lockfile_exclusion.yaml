@@ -4,10 +4,10 @@
 
 # flutter_gallery uses abandoned plugins with old AGP versions that block the app itself using
 # a newer AGP version.
-- dev/integration_tests/flutter_gallery
+- dev/integration_tests/flutter_gallery/android
 
 # gradle_deprecated_settings intentionally uses a gradle structure matching an old output of
 # `flutter create`. It must be updated manually, by changing the desired versions in the Gradle
 # files, and then running `rm buildscript-gradle.lockfile && ./gradlew :generateLockfiles` from
 # its android subdirectory.
-- dev/integration_tests/gradle_deprecated_settings
+- dev/integration_tests/gradle_deprecated_settings/android
