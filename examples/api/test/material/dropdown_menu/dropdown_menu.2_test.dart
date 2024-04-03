@@ -19,29 +19,25 @@ void main() {
       return find.byType(TextField).at(index);
     }
 
-    // Hover over the enabled and requestFocusOnTap set to true text field.
+    // Hover over the "enabled and requestFocusOnTap set to true" text field.
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.moveTo(tester.getCenter(textFieldFinder(0)));
 
-    // The cursor should be a text cursor.
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
 
-    // Hover over the enabled and requestFocusOnTap set to false text field.
+    // Hover over the "enabled and requestFocusOnTap set to false" text field.
     await gesture.moveTo(tester.getCenter(textFieldFinder(1)));
 
-    // The cursor should be a text cursor.
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
 
-    // Hover over the disabled and requestFocusOnTap set to true text field.
+    // Hover over the "disabled and requestFocusOnTap set to true" text field.
     await gesture.moveTo(tester.getCenter(textFieldFinder(2)));
 
-    // The cursor should be defer.
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
 
-    // Hover over the disabled and requestFocusOnTap set to false text field.
-    await gesture.moveTo(tester.getCenter(textFieldFinder(3)));
+    // Hover over the "disabled and requestFocusOnTap set to false" text field.
+   await gesture.moveTo(tester.getCenter(textFieldFinder(3)));
 
-    // The cursor should be defer.
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 }

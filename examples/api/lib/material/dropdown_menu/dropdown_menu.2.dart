@@ -128,7 +128,7 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                   return DropdownMenuEntry<String>(value: value, label: value);
                 }).toList(),
               ),
-              const Text('Defeered cursor is shown when hovering over the DropdownMenu.'),
+              const Text('Default cursor is shown when hovering over the DropdownMenu.'),
             ],
           ),
         ),
@@ -159,7 +159,7 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                   return DropdownMenuEntry<String>(value: value, label: value);
                 }).toList(),
               ),
-              const Text('Defeered cursor is shown when hovering over the DropdownMenu.'),
+              const Text('Default cursor is shown when hovering over the DropdownMenu.'),
             ],
           ),
         ),
