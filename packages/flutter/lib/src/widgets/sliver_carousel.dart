@@ -9,6 +9,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
+import 'scroll_metrics.dart';
+import 'scroll_physics.dart';
 import 'sliver.dart';
 
 class SliverCarousel extends SliverMultiBoxAdaptorWidget {
@@ -130,15 +132,21 @@ class RenderSliverCarousel extends RenderSliverMultiBoxAdaptor {
   double get minChildExtent => childExtentList.min * extentPerWeightUnit;
 
   int get _firstVisibleItemIndex => (constraints.scrollOffset / firstChildExtent).floor();
-  double get _gapBetweenCurrentAndPrev => constraints.scrollOffset % firstChildExtent;
-  double get _firstVisibleItemExtent => firstChildExtent - _gapBetweenCurrentAndPrev;
+  double get _gapBetweenCurrentAndPrev {
+    return constraints.scrollOffset - (constraints.scrollOffset / firstChildExtent).floor() * firstChildExtent;
+    // when scroll offset is 400, and first child extent is 133.33333333333334, mod result is 133.33333333333331 which is supposed to be almost 0.
+    // return constraints.scrollOffset % firstChildExtent;
+  }
+  double get _firstVisibleItemExtent {
+    return firstChildExtent - _gapBetweenCurrentAndPrev;
+  }
 
   /// The layout offset for the child with the given index.
   double indexToLayoutOffset(int index) {
     if (_firstVisibleItemIndex == index && firstChildExtent - _gapBetweenCurrentAndPrev > clipExtent) { // pinned
       return constraints.scrollOffset;
     } else if (_firstVisibleItemIndex == index) { // do not pin
-      return firstChildExtent * index + (firstChildExtent - clipExtent);
+      return constraints.scrollOffset - _gapBetweenCurrentAndPrev;
     } else if (index > _firstVisibleItemIndex) {
       double visibleItemsTotalExtent = _firstVisibleItemExtent;
       for (int i = _firstVisibleItemIndex + 1; i < index; i++) {
@@ -146,7 +154,6 @@ class RenderSliverCarousel extends RenderSliverMultiBoxAdaptor {
       }
       return constraints.scrollOffset + visibleItemsTotalExtent;
     }
-
     return firstChildExtent * index;
   }
 
@@ -328,4 +335,59 @@ enum CarouselLayout {
 
   /// The center-aligned hero layout shows at least one large item and two small items.
   centeredHero,
+}
+
+class CarouselScrollPhysics extends ScrollPhysics {
+  const CarouselScrollPhysics({super.parent});
+
+  @override
+  CarouselScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return CarouselScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  double _getTargetPixels(
+    ScrollMetrics position,
+    Tolerance tolerance,
+    double velocity,
+  ) {
+    final double itemWidth = position.viewportDimension / (1+4+1) * 1;
+    print(itemWidth);
+    double item = position.pixels / itemWidth;
+    print('viewport: ${position.viewportDimension}, position pixels: ${position.pixels}, item width: $itemWidth, $item');
+    if (velocity < -tolerance.velocity) {
+      item -= 0.5;
+    } else if (velocity > tolerance.velocity) {
+      item += 0.5;
+    }
+    return math.min(
+      item.roundToDouble() * itemWidth,
+      position.maxScrollExtent,
+    );
+  }
+
+  @override
+  Simulation? createBallisticSimulation(
+    ScrollMetrics position,
+    double velocity,
+  ) {
+    if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
+        (velocity >= 0.0 && position.pixels >= position.maxScrollExtent)) {
+      return super.createBallisticSimulation(position, velocity);
+    }
+    final Tolerance tolerance = toleranceFor(position);
+    final double target = _getTargetPixels(position, tolerance, velocity);
+    if (target != position.pixels) {
+      return ScrollSpringSimulation(
+        spring,
+        position.pixels,
+        target,
+        velocity,
+        tolerance: tolerance,
+      );
+    }
+    return null;
+  }
+
+  @override
+  bool get allowImplicitScrolling => true;
 }
