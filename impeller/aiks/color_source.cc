@@ -266,4 +266,8 @@ std::shared_ptr<ColorSourceContents> ColorSource::GetContents(
   return std::visit(CreateContentsVisitor{paint}, color_source_data_);
 }
 
+const ColorSourceData& ColorSource::GetData() const {
+  return color_source_data_;
+}
+
 }  // namespace impeller

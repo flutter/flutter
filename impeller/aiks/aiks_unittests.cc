@@ -2733,6 +2733,39 @@ TEST_P(AiksTest, VerticesGeometryUVPositionDataWithTranslate) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+// Regression test for https://github.com/flutter/flutter/issues/145707
+TEST_P(AiksTest, VerticesGeometryColorUVPositionData) {
+  Canvas canvas;
+  Paint paint;
+  auto texture = CreateTextureForFixture("table_mountain_nx.png");
+
+  paint.color_source =
+      ColorSource::MakeImage(texture, Entity::TileMode::kClamp,
+                             Entity::TileMode::kClamp, {}, Matrix());
+
+  auto vertices = {
+      Point(0, 0),
+      Point(texture->GetSize().width, 0),
+      Point(0, texture->GetSize().height),
+      Point(texture->GetSize().width, 0),
+      Point(0, 0),
+      Point(texture->GetSize().width, texture->GetSize().height),
+  };
+  std::vector<uint16_t> indices = {};
+  std::vector<Point> texture_coordinates = {};
+  std::vector<Color> vertex_colors = {
+      Color::Red().WithAlpha(0.5),   Color::Blue().WithAlpha(0.5),
+      Color::Green().WithAlpha(0.5), Color::Red().WithAlpha(0.5),
+      Color::Blue().WithAlpha(0.5),  Color::Green().WithAlpha(0.5),
+  };
+  auto geometry = std::make_shared<VerticesGeometry>(
+      vertices, indices, texture_coordinates, vertex_colors,
+      Rect::MakeLTRB(0, 0, 1, 1), VerticesGeometry::VertexMode::kTriangles);
+
+  canvas.DrawVertices(geometry, BlendMode::kDestinationOver, paint);
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, MatrixImageFilterMagnify) {
   Canvas canvas;
   canvas.Scale(GetContentScale());
