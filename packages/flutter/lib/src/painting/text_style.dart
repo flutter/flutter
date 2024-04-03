@@ -5,6 +5,7 @@
 import 'dart:collection';
 import 'dart:ui' as ui show
   ParagraphStyle,
+  Shadow,
   StrutStyle,
   TextStyle,
   lerpDouble;
@@ -1277,7 +1278,7 @@ class TextStyle with Diagnosticable {
           ? a.background ?? (Paint()..color = a.backgroundColor!)
           : b.background ?? (Paint()..color = b.backgroundColor!)
         : null,
-      shadows: t < 0.5 ? a.shadows : b.shadows,
+      shadows: ui.Shadow.lerpList(a.shadows, b.shadows, t),
       fontFeatures: t < 0.5 ? a.fontFeatures : b.fontFeatures,
       fontVariations: lerpFontVariations(a.fontVariations, b.fontVariations, t),
       decoration: t < 0.5 ? a.decoration : b.decoration,
