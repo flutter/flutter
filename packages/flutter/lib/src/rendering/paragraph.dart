@@ -144,9 +144,9 @@ mixin RenderInlineChildrenContainerDefaults on RenderBox, ContainerRenderObjectM
   /// for each child managed by the [ContainerRenderObjectMixin] mixin.
   ///
   /// The `getChildBaseline` parameter and the `layoutChild` parameter must be
-  /// consistent: `isDryLayout` must be set to true, if `layoutChild` computes
-  /// the size of the child without modifying the actual layout of that child,
-  /// and vice versa.
+  /// consistent: if `layoutChild` computes the size of the child without
+  /// modifying the actual layout of that child, then `getChildBaseline` must
+  /// also be "dry", and vice versa.
   ///
   /// Since this method does not impose a maximum height constraint on the
   /// inline children, some children may become taller than this [RenderBox].
