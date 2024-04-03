@@ -31,7 +31,7 @@ void main(List<String> arguments) {
       help: 'Re-generate gradle files in each processed directory.',
       defaultsTo: true,
     )..addFlag(
-      'use-exclusion',
+      'exclusion',
       help: 'Run the script using the config file at ./configs/lockfile_exclusion.yaml to skip the specified subdirectories.',
       defaultsTo: true,
     );
@@ -51,7 +51,7 @@ void main(List<String> arguments) {
   final bool gradleGeneration = (args['gradle-generation'] as bool?) ?? true;
 
   // Skip android subdirectories specified in the ./config/lockfile_exclusion.yaml file.
-  final bool useExclusion = (args['use-exclusion'] as bool?) ?? true;
+  final bool useExclusion = (args['exclusion'] as bool?) ?? true;
 
   const FileSystem fileSystem = LocalFileSystem();
   final List<String> androidDirectories = getFilesFromStdin();
@@ -69,10 +69,10 @@ void main(List<String> arguments) {
             .toList()
             .cast<String>()
     );
-    print('Loaded exclusion file from ${exclusionFile.path}');
+    print('Loaded exclusion file from ${exclusionFile.path}.');
   } else {
     exclusionSet = <String>{};
-    print('Running without exclusion');
+    print('Running without exclusion.');
   }
 
 
