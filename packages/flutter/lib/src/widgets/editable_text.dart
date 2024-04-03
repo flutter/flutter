@@ -245,7 +245,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// [TextEditingController]; **however, one should not also set [selection]
   /// in a separate statement. To change both the [text] and the [selection]
   /// change the controller's [value].** Setting this here will clear
-  /// the current selection and composing range.
+  /// the current selection and composing range, so avoid using it directly
+  /// unless that is the desired behavior..
   set text(String newText) {
     value = value.copyWith(
       text: newText,
