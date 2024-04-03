@@ -276,10 +276,14 @@ class _UntilTextBoundary extends TextBoundary {
 }
 
 class _TextLayout {
-  _TextLayout._(this._paragraph, this.writingDirection, this.rawString);
+  _TextLayout._(this._paragraph, this.writingDirection, this._painter);
 
   final TextDirection writingDirection;
-  final String rawString;
+
+  // Computing plainText is a bit expensive and is currently not needed for
+  // simple static text. Pass in the entire text painter so `TextPainter.plainText`
+  // is only called when needed.
+  final TextPainter _painter;
 
   // This field is not final because the owner TextPainter could create a new
   // ui.Paragraph with the exact same text layout (for example, when only the
@@ -340,6 +344,7 @@ class _TextLayout {
   /// line ended with a line feed.
   late final _LineCaretMetrics _endOfTextCaretMetrics = _computeEndOfTextCaretAnchorOffset();
   _LineCaretMetrics _computeEndOfTextCaretAnchorOffset() {
+    final String rawString = _painter.plainText;
     final int lastLineIndex = _paragraph.numberOfLines - 1;
     assert(lastLineIndex >= 0);
     final ui.LineMetrics lineMetrics = _paragraph.getLineMetricsAt(lastLineIndex)!;
@@ -1189,7 +1194,7 @@ class TextPainter {
     //    called.
     final ui.Paragraph paragraph = (cachedLayout?.paragraph ?? _createParagraph(text))
       ..layout(ui.ParagraphConstraints(width: layoutMaxWidth));
-    final _TextLayout layout = _TextLayout._(paragraph, textDirection, plainText);
+    final _TextLayout layout = _TextLayout._(paragraph, textDirection, this);
     final double contentWidth = layout._contentWidthFor(minWidth, maxWidth, textWidthBasis);
 
     final _TextPainterLayoutCacheWithOffset newLayoutCache;
