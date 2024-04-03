@@ -7,9 +7,9 @@
 
 #include <functional>
 #include <memory>
+#include <variant>
 #include <vector>
 
-#include "flutter/fml/macros.h"
 #include "impeller/entity/contents/runtime_effect_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/color.h"
@@ -25,6 +25,77 @@ namespace impeller {
 
 struct Paint;
 
+struct LinearGradientData {
+  Point start_point;
+  Point end_point;
+  std::vector<Color> colors;
+  std::vector<Scalar> stops;
+  Entity::TileMode tile_mode;
+  Matrix effect_transform;
+};
+
+struct RadialGradientData {
+  Point center;
+  Scalar radius;
+  std::vector<Color> colors;
+  std::vector<Scalar> stops;
+  Entity::TileMode tile_mode;
+  Matrix effect_transform;
+};
+
+struct ConicalGradientData {
+  Point center;
+  Scalar radius;
+  std::vector<Color> colors;
+  std::vector<Scalar> stops;
+  Point focus_center;
+  Scalar focus_radius;
+  Entity::TileMode tile_mode;
+  Matrix effect_transform;
+};
+
+struct SweepGradientData {
+  Point center;
+  Degrees start_angle;
+  Degrees end_angle;
+  std::vector<Color> colors;
+  std::vector<Scalar> stops;
+  Entity::TileMode tile_mode;
+  Matrix effect_transform;
+};
+
+struct ImageData {
+  std::shared_ptr<Texture> texture;
+  Entity::TileMode x_tile_mode;
+  Entity::TileMode y_tile_mode;
+  SamplerDescriptor sampler_descriptor;
+  Matrix effect_transform;
+};
+
+struct RuntimeEffectData {
+  std::shared_ptr<RuntimeStage> runtime_stage;
+  std::shared_ptr<std::vector<uint8_t>> uniform_data;
+  std::vector<RuntimeEffectContents::TextureInput> texture_inputs;
+};
+
+#if IMPELLER_ENABLE_3D
+struct SceneData {
+  std::shared_ptr<scene::Node> scene_node;
+  Matrix camera_transform;
+};
+#endif  // IMPELLER_ENABLE_3D
+
+using ColorSourceData = std::variant<LinearGradientData,
+                                     RadialGradientData,
+                                     ConicalGradientData,
+                                     SweepGradientData,
+                                     ImageData,
+                                     RuntimeEffectData,
+#if IMPELLER_ENABLE_3D
+                                     SceneData,
+#endif  // IMPELLER_ENABLE_3D
+                                     std::monostate>;
+
 class ColorSource {
  public:
   enum class Type {
@@ -37,9 +108,6 @@ class ColorSource {
     kRuntimeEffect,
     kScene,
   };
-
-  using ColorSourceProc =
-      std::function<std::shared_ptr<ColorSourceContents>(const Paint& paint)>;
 
   ColorSource() noexcept;
 
@@ -100,7 +168,7 @@ class ColorSource {
 
  private:
   Type type_ = Type::kColor;
-  ColorSourceProc proc_;
+  ColorSourceData color_source_data_;
 };
 
 }  // namespace impeller
