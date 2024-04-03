@@ -17,7 +17,7 @@ import 'common.dart';
 /// Flutter Driver test output directory.
 ///
 /// Tests should write any output files to this directory. Defaults to `build`.
-String testOutputsDirectory = 'build';
+String testOutputsDirectory = fs.systemTempDirectory.childDirectory('build').path;
 
 /// The callback type to handle [Response.data] after the test
 /// succeeds.

@@ -25,4 +25,4 @@ void restoreFileSystem() {
 /// Flutter Driver test output directory.
 ///
 /// Tests should write any output files to this directory. Defaults `build`.
-String get testOutputsDirectory => 'build';
+String get testOutputsDirectory => fs.systemTempDirectory.childDirectory('build').path;
