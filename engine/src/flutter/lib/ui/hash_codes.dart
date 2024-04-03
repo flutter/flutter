@@ -4,7 +4,6 @@
 part of dart.ui;
 
 // Examples can assume:
-// // ignore_for_file: deprecated_member_use
 // int foo = 0;
 // int bar = 0;
 // List<int> quux = <int>[];
