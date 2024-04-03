@@ -99,7 +99,8 @@ std::tuple<Range, std::shared_ptr<DeviceBuffer>> HostBuffer::EmplaceInternal(
     DeviceBufferDescriptor desc;
     desc.size = length;
     desc.storage_mode = StorageMode::kHostVisible;
-    auto device_buffer = allocator_->CreateBuffer(desc);
+    std::shared_ptr<DeviceBuffer> device_buffer =
+        allocator_->CreateBuffer(desc);
     if (!device_buffer) {
       return {};
     }
@@ -107,7 +108,7 @@ std::tuple<Range, std::shared_ptr<DeviceBuffer>> HostBuffer::EmplaceInternal(
       cb(device_buffer->OnGetContents());
       device_buffer->Flush(Range{0, length});
     }
-    return std::make_tuple(Range{0, length}, device_buffer);
+    return std::make_tuple(Range{0, length}, std::move(device_buffer));
   }
 
   size_t padding = 0;
@@ -120,14 +121,14 @@ std::tuple<Range, std::shared_ptr<DeviceBuffer>> HostBuffer::EmplaceInternal(
     offset_ += padding;
   }
 
-  auto current_buffer = GetCurrentBuffer();
+  const std::shared_ptr<DeviceBuffer>& current_buffer = GetCurrentBuffer();
   auto contents = current_buffer->OnGetContents();
   cb(contents + offset_);
   Range output_range(offset_, length);
   current_buffer->Flush(output_range);
 
   offset_ += length;
-  return std::make_tuple(output_range, std::move(current_buffer));
+  return std::make_tuple(output_range, current_buffer);
 }
 
 std::tuple<Range, std::shared_ptr<DeviceBuffer>> HostBuffer::EmplaceInternal(
@@ -139,7 +140,8 @@ std::tuple<Range, std::shared_ptr<DeviceBuffer>> HostBuffer::EmplaceInternal(
     DeviceBufferDescriptor desc;
     desc.size = length;
     desc.storage_mode = StorageMode::kHostVisible;
-    auto device_buffer = allocator_->CreateBuffer(desc);
+    std::shared_ptr<DeviceBuffer> device_buffer =
+        allocator_->CreateBuffer(desc);
     if (!device_buffer) {
       return {};
     }
@@ -149,7 +151,7 @@ std::tuple<Range, std::shared_ptr<DeviceBuffer>> HostBuffer::EmplaceInternal(
         return {};
       }
     }
-    return std::make_tuple(Range{0, length}, device_buffer);
+    return std::make_tuple(Range{0, length}, std::move(device_buffer));
   }
 
   auto old_length = GetLength();
@@ -158,14 +160,14 @@ std::tuple<Range, std::shared_ptr<DeviceBuffer>> HostBuffer::EmplaceInternal(
   }
   old_length = GetLength();
 
-  auto current_buffer = GetCurrentBuffer();
+  const std::shared_ptr<DeviceBuffer>& current_buffer = GetCurrentBuffer();
   auto contents = current_buffer->OnGetContents();
   if (buffer) {
     ::memmove(contents + old_length, buffer, length);
     current_buffer->Flush(Range{old_length, length});
   }
   offset_ += length;
-  return std::make_tuple(Range{old_length, length}, std::move(current_buffer));
+  return std::make_tuple(Range{old_length, length}, current_buffer);
 }
 
 std::tuple<Range, std::shared_ptr<DeviceBuffer>>
@@ -184,6 +186,10 @@ HostBuffer::EmplaceInternal(const void* buffer, size_t length, size_t align) {
   }
 
   return EmplaceInternal(buffer, length);
+}
+
+const std::shared_ptr<DeviceBuffer>& HostBuffer::GetCurrentBuffer() const {
+  return device_buffers_[frame_index_][current_buffer_];
 }
 
 void HostBuffer::Reset() {
