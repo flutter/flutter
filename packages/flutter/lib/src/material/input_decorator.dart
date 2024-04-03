@@ -944,7 +944,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       'TextField that contains it.',
     );
 
-    // Margin on each side of subtext (counter and helperError)
     final Map<RenderBox?, double> boxToBaseline = <RenderBox?, double>{};
     final BoxConstraints boxConstraints = constraints.loosen();
 
