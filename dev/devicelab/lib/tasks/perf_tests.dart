@@ -36,7 +36,6 @@ TaskFunction createComplexLayoutScrollPerfTest({
   bool badScroll = false,
   bool? enableImpeller,
   bool forceOpenGLES = false,
-  bool unittestMode = false,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
@@ -314,7 +313,7 @@ TaskFunction createBasicMaterialCompileTest() {
   };
 }
 
-TaskFunction createTextfieldPerfTest({bool unittestMode = false}) {
+TaskFunction createTextfieldPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -395,7 +394,7 @@ TaskFunction createFullscreenTextfieldPerfTest() {
 }
 
 TaskFunction createFullscreenTextfieldPerfE2ETest({
-  bool? enableImpeller
+  bool? enableImpeller,
 }) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -923,14 +922,12 @@ class StartupTest {
     this.reportMetrics = true,
     this.target = 'lib/main.dart',
     this.runEnvironment,
-    this.unittestMode = false,
   });
 
   final String testDirectory;
   final bool reportMetrics;
   final String target;
   final Map<String, String>? runEnvironment;
-  final bool unittestMode;
 
   Future<TaskResult> run() async {
     return inDirectory<TaskResult>(testDirectory, () async {
