@@ -6,9 +6,9 @@ package dev.flutter.scenariosui;
 
 import android.content.Intent;
 import androidx.annotation.NonNull;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
-import androidx.test.runner.AndroidJUnit4;
 import dev.flutter.scenarios.PlatformViewsActivity;
 import org.junit.Before;
 import org.junit.Rule;
