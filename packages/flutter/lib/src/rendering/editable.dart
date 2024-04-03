@@ -4,7 +4,7 @@
 
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, LineMetrics, PlaceholderAlignment, TextBox;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, LineMetrics, TextBox;
 
 import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
@@ -777,7 +777,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _textPainter.text = value;
     _cachedAttributedValue = null;
     _cachedCombinedSemanticsInfos = null;
-    _canComputeIntrinsicsCached = null;
     markNeedsLayout();
     markNeedsSemanticsUpdate();
   }
@@ -1828,10 +1827,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    if (!_canComputeIntrinsics) {
-      return 0.0;
-    }
-    final List<PlaceholderDimensions> placeholderDimensions = layoutInlineChildren(double.infinity, (RenderBox child, BoxConstraints constraints) => Size(child.getMinIntrinsicWidth(double.infinity), 0.0));
+    final List<PlaceholderDimensions> placeholderDimensions = layoutInlineChildren(
+      double.infinity,
+      (RenderBox child, BoxConstraints constraints) => Size(child.getMinIntrinsicWidth(double.infinity), 0.0),
+      ChildLayoutHelper.getDryBaseline,
+    );
     final (double minWidth, double maxWidth) = _adjustConstraints();
     return (_textIntrinsics
       ..setPlaceholderDimensions(placeholderDimensions)
@@ -1841,14 +1841,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    if (!_canComputeIntrinsics) {
-      return 0.0;
-    }
     final List<PlaceholderDimensions> placeholderDimensions = layoutInlineChildren(
       double.infinity,
       // Height and baseline is irrelevant as all text will be laid
       // out in a single line. Therefore, using 0.0 as a dummy for the height.
       (RenderBox child, BoxConstraints constraints) => Size(child.getMaxIntrinsicWidth(double.infinity), 0.0),
+      ChildLayoutHelper.getDryBaseline,
     );
     final (double minWidth, double maxWidth) = _adjustConstraints();
     return (_textIntrinsics
@@ -1926,10 +1924,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    if (!_canComputeIntrinsics) {
-      return 0.0;
-    }
-    _textIntrinsics.setPlaceholderDimensions(layoutInlineChildren(width, ChildLayoutHelper.dryLayoutChild));
+    _textIntrinsics.setPlaceholderDimensions(
+      layoutInlineChildren(width, ChildLayoutHelper.dryLayoutChild, ChildLayoutHelper.getDryBaseline),
+    );
     return _preferredHeight(width);
   }
 
@@ -2291,35 +2288,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       );
   }
 
-  bool _canComputeDryLayoutForInlineWidgets() {
-    return text?.visitChildren((InlineSpan span) {
-      return (span is! PlaceholderSpan) || switch (span.alignment) {
-        ui.PlaceholderAlignment.baseline ||
-        ui.PlaceholderAlignment.aboveBaseline ||
-        ui.PlaceholderAlignment.belowBaseline => false,
-        ui.PlaceholderAlignment.top ||
-        ui.PlaceholderAlignment.middle ||
-        ui.PlaceholderAlignment.bottom => true,
-      };
-    }) ?? true;
-  }
-
-  bool? _canComputeIntrinsicsCached;
-  bool get _canComputeIntrinsics => _canComputeIntrinsicsCached ??= _canComputeDryLayoutForInlineWidgets();
-
   @override
   @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
-    if (!_canComputeIntrinsics) {
-      assert(debugCannotComputeDryLayout(
-        reason: 'Dry layout not available for alignments that require baseline.',
-      ));
-      return Size.zero;
-    }
-
     final (double minWidth, double maxWidth) = _adjustConstraints(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     _textIntrinsics
-      ..setPlaceholderDimensions(layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.dryLayoutChild))
+      ..setPlaceholderDimensions(layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.dryLayoutChild, ChildLayoutHelper.getDryBaseline))
       ..layout(minWidth: minWidth, maxWidth: maxWidth);
     final double width = forceLine
       ? constraints.maxWidth
@@ -2330,7 +2304,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    _placeholderDimensions = layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.layoutChild);
+    _placeholderDimensions = layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.layoutChild, ChildLayoutHelper.getBaseline);
     final (double minWidth, double maxWidth) = _adjustConstraints(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     _textPainter
       ..setPlaceholderDimensions(_placeholderDimensions)
