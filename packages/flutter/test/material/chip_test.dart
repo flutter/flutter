@@ -5684,6 +5684,27 @@ void main() {
       expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
     });
   });
+
+  testWidgets('Chip Baseline location', (WidgetTester tester) async {
+    const Text text = Text('A', style: TextStyle(fontSize: 10.0, height: 1.0));
+    await tester.pumpWidget(wrapForChip(child: const Align(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
+        children: <Widget>[
+          text,
+          RawChip(label: text)
+        ],
+      ),
+    )));
+
+    expect(find.text('A'), findsNWidgets(2));
+    // Baseline aligning text.
+    expect(
+      tester.getTopLeft(find.text('A').first).dy,
+      tester.getTopLeft(find.text('A').last).dy,
+    );
+  });
 }
 
 class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStateOutlinedBorder {
