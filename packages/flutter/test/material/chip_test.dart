@@ -5705,6 +5705,18 @@ void main() {
       tester.getTopLeft(find.text('A').last).dy,
     );
   });
+
+  testWidgets('Chip label only does layout once', (WidgetTester tester) async {
+    final RenderLayoutCount renderLayoutCount = RenderLayoutCount();
+    final Widget layoutCounter = Center(
+      key: GlobalKey(),
+      child: WidgetToRenderBoxAdapter(renderBox: renderLayoutCount),
+    );
+
+    await tester.pumpWidget(wrapForChip(child: RawChip(label: layoutCounter)));
+
+    expect(renderLayoutCount.layoutCount, 1);
+  });
 }
 
 class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStateOutlinedBorder {
@@ -5723,4 +5735,17 @@ class _MaterialStateBorderSide extends MaterialStateBorderSide {
 
   @override
   BorderSide? resolve(Set<MaterialState> states) => resolver(states);
+}
+
+class RenderLayoutCount extends RenderBox {
+  int layoutCount = 0;
+
+  @override
+  Size computeDryLayout(covariant BoxConstraints constraints) => constraints.biggest;
+
+  @override
+  void performLayout() {
+    layoutCount += 1;
+    size = constraints.biggest;
+  }
 }
