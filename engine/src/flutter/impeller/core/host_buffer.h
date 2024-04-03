@@ -147,9 +147,7 @@ class HostBuffer {
 
   void MaybeCreateNewBuffer();
 
-  std::shared_ptr<DeviceBuffer>& GetCurrentBuffer() {
-    return device_buffers_[frame_index_][current_buffer_];
-  }
+  const std::shared_ptr<DeviceBuffer>& GetCurrentBuffer() const;
 
   [[nodiscard]] BufferView Emplace(const void* buffer, size_t length);
 
