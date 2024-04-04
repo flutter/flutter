@@ -29,9 +29,9 @@ class TestAssetDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
+    return FutureBuilder<String>(
       future: rootBundle.loadString('assets/test_asset.txt'),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
         if (snapshot.hasError) {
           throw snapshot.error!;
         }

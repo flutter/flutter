@@ -7,11 +7,11 @@ import 'dart:io';
 import 'package:args/args.dart';
 
 void main(List<String> args) {
-  final parser = ArgParser()
+  final ArgParser parser = ArgParser()
     ..addOption('input')
     ..addOption('output');
 
-  final parsedArgs = parser.parse(args);
+  final ArgResults parsedArgs = parser.parse(args);
 
   final String inputFilePath = parsedArgs['input'] as String;
   final String outputFilePath = parsedArgs['output'] as String;
