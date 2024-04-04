@@ -344,6 +344,11 @@ class FlutterWindowsEngine {
   // Send the currently enabled accessibility features to the engine.
   void SendAccessibilityFeatures();
 
+  // Present content to a view. Returns true if the content was presented.
+  //
+  // This is invoked on the raster thread.
+  bool Present(const FlutterPresentViewInfo* info);
+
   // The handle to the embedder.h engine instance.
   FLUTTER_API_SYMBOL(FlutterEngine) engine_ = nullptr;
 

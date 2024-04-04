@@ -393,7 +393,7 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
     // constructors: https://github.com/flutter/flutter/issues/143375
     compositor_ = std::make_unique<CompositorOpenGL>(this, resolver);
   } else {
-    compositor_ = std::make_unique<CompositorSoftware>(this);
+    compositor_ = std::make_unique<CompositorSoftware>();
   }
 
   FlutterCompositor compositor = {};
@@ -418,8 +418,7 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
       [](const FlutterPresentViewInfo* info) -> bool {
     auto host = static_cast<FlutterWindowsEngine*>(info->user_data);
 
-    return host->compositor_->Present(info->view_id, info->layers,
-                                      info->layers_count);
+    return host->Present(info);
   };
   args.compositor = &compositor;
 
@@ -871,6 +870,17 @@ void FlutterWindowsEngine::OnChannelUpdate(std::string name, bool listening) {
   } else if (name == "flutter/lifecycle" && listening) {
     lifecycle_manager_->BeginProcessingLifecycle();
   }
+}
+
+bool FlutterWindowsEngine::Present(const FlutterPresentViewInfo* info) {
+  auto iterator = views_.find(info->view_id);
+  if (iterator == views_.end()) {
+    return false;
+  }
+
+  FlutterWindowsView* view = iterator->second;
+
+  return compositor_->Present(view, info->layers, info->layers_count);
 }
 
 }  // namespace flutter

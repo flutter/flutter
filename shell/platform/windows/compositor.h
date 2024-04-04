@@ -9,6 +9,8 @@
 
 namespace flutter {
 
+class FlutterWindowsView;
+
 // Enables the Flutter engine to render content on Windows.
 //
 // The engine uses this to:
@@ -31,7 +33,7 @@ class Compositor {
   virtual bool CollectBackingStore(const FlutterBackingStore* store) = 0;
 
   // Present Flutter content and platform views onto the view.
-  virtual bool Present(FlutterViewId view_id,
+  virtual bool Present(FlutterWindowsView* view,
                        const FlutterLayer** layers,
                        size_t layers_count) = 0;
 };
