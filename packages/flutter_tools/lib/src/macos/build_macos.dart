@@ -113,8 +113,7 @@ Future<void> buildMacOS({
     targetOverride: targetOverride,
     useMacOSConfig: true,
   );
-  if (flutterProject.usesSwiftPackageManager) {
-  }
+
   await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode);
   // If the xcfilelists do not exist, create empty version.
   if (!flutterProject.macos.inputFileList.existsSync()) {

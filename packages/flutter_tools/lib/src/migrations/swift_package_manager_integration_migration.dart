@@ -15,7 +15,7 @@ import '../ios/xcodeproj.dart';
 import '../project.dart';
 
 /// Swift Package Manager integration requires changes to the Xcode project's
-/// project.pbxproj. This class handles making those changes.
+/// project.pbxproj and xcscheme. This class handles making those changes.
 class SwiftPackageManagerIntegrationMigration {
   SwiftPackageManagerIntegrationMigration(
     XcodeBasedProject project,
@@ -122,9 +122,11 @@ class SwiftPackageManagerIntegrationMigration {
     schemeInfo?.backupSchemeFile?.copySync(schemeInfo.schemeFile.path);
   }
 
-  /// Add Swift Package Manager integration to Xcode project's project.pbxproj.
-  /// If migration fails or project.pbxproj becomes invalid, will revert any
-  /// changes made and throw an error.
+  /// Add Swift Package Manager integration to Xcode project's project.pbxproj
+  /// and Runner.xcscheme.
+  ///
+  /// If migration fails or project.pbxproj or Runner.xcscheme becomes invalid,
+  /// will revert any changes made and throw an error.
   ///
   /// Also, adds [flutterPackageGitignore] to .gitignore if found.
   Future<void> migrate() async {
@@ -188,7 +190,7 @@ class SwiftPackageManagerIntegrationMigration {
           'An error occured when adding Swift Package Manager integration:\n'
           '  $e\n\n'
           'Swift Package Manager is currently an experimental feature, please file a bug at\n'
-          '  https://github.com/flutter/flutter/issues/new?assignees=&labels=&projects=&template=1_activation.yml\n\n'
+          '  https://github.com/flutter/flutter/issues/new?template=1_activation.yml \n\n'
           'To avoid this failure, disable Flutter Swift Package Manager integration for the project\n'
           'by adding the following in the project\'s pubspec.yaml under the "flutter" section:\n'
           '  "disable-swift-package-manager: true"\n'
@@ -261,10 +263,24 @@ class SwiftPackageManagerIntegrationMigration {
     final File schemeFile = schemeInfo.schemeFile;
     final String schemeContent = schemeInfo.schemeContent;
 
+    // If using flavors or renamed project, throw an error with instructions on
+    // how to do manually.
     if (scheme != 'Runner') {
       throw _defaultSchemeException(_platform);
     }
 
+    // The scheme should have a BuildableReference already in it with a
+    // BlueprintIdentifier matching the Runner Native Target. Copy from it
+    // since BuildableName, BlueprintName, ReferencedContainer may have been
+    // changed from "Runner". Ensures the expected attributes are found.
+    // Example:
+    // <BuildableReference
+    //     BuildableIdentifier = "primary"
+    //     BlueprintIdentifier = "97C146ED1CF9000F007C117D"
+    //     BuildableName = "Runner.app"
+    //     BlueprintName = "Runner"
+    //     ReferencedContainer = "container:Runner.xcodeproj">
+    // </BuildableReference>
     final List<String> schemeLines = LineSplitter.split(schemeContent).toList();
     final int index = schemeLines.indexWhere((String line) => line.contains('BlueprintIdentifier = "$_runnerNativeTargetIdentifer"'));
     if (index == -1 || index + 3 >= schemeLines.length) {

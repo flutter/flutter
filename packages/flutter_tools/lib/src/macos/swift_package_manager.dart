@@ -43,11 +43,6 @@ class SwiftPackageManager {
   /// Creates a Swift Package called 'FlutterGeneratedPluginSwiftPackage' that
   /// has dependencies on Flutter plugins that are compatible with Swift
   /// Package Manager.
-  ///
-  /// Also, has a dependency on the Flutter/FlutterMacOS.xcframework and
-  /// creates a [Link] to it.
-  ///
-  /// Also, migrates the app to use Swift Package Manager integration.
   Future<void> generatePluginsSwiftPackage(
     List<Plugin> plugins,
     SupportedPlatform platform,
@@ -69,30 +64,30 @@ class SwiftPackageManager {
       return;
     }
 
-    final List<SwiftPackageTarget> packageTargets = <SwiftPackageTarget>[
-      SwiftPackageTarget.defaultTarget(
-        name: _defaultFlutterPluginsSwiftPackageName,
-        dependencies: targetDependencies,
-      ),
-    ];
+    final SwiftPackageSupportedPlatform swiftSupportedPlatform;
+    if (platform == SupportedPlatform.ios) {
+      swiftSupportedPlatform = _iosSwiftPackageSupportedPlatform;
+    } else {
+      swiftSupportedPlatform = _macosSwiftPackageSupportedPlatform;
+    }
+
+    final SwiftPackageProduct generatedProduct = SwiftPackageProduct(
+      name: _defaultFlutterPluginsSwiftPackageName,
+      targets: <String>[_defaultFlutterPluginsSwiftPackageName],
+    );
+
+    final SwiftPackageTarget generatedTarget = SwiftPackageTarget.defaultTarget(
+      name: _defaultFlutterPluginsSwiftPackageName,
+      dependencies: targetDependencies,
+    );
 
     final SwiftPackage pluginsPackage = SwiftPackage(
       manifest: project.flutterPluginSwiftPackageManifest,
       name: _defaultFlutterPluginsSwiftPackageName,
-      platforms: <SwiftPackageSupportedPlatform>[
-        if (platform == SupportedPlatform.ios)
-          _iosSwiftPackageSupportedPlatform,
-        if (platform == SupportedPlatform.macos)
-          _macosSwiftPackageSupportedPlatform,
-      ],
-      products: <SwiftPackageProduct>[
-        SwiftPackageProduct(
-          name: _defaultFlutterPluginsSwiftPackageName,
-          targets: <String>[_defaultFlutterPluginsSwiftPackageName],
-        ),
-      ],
+      platforms: <SwiftPackageSupportedPlatform>[swiftSupportedPlatform],
+      products: <SwiftPackageProduct>[generatedProduct],
       dependencies: packageDependencies,
-      targets: packageTargets,
+      targets: <SwiftPackageTarget>[generatedTarget],
       templateRenderer: _templateRenderer,
     );
     pluginsPackage.createSwiftPackage();

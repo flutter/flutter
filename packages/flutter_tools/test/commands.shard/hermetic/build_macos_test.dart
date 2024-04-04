@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
-import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -21,7 +20,6 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
@@ -708,23 +706,4 @@ STDERR STUFF
     Usage: () => usage,
     Analytics: () => fakeAnalytics,
   });
-}
-
-class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
-  FakeXcodeProjectInterpreter({
-    this.version,
-  });
-
-  @override
-  Version? version;
-
-  @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
-    return XcodeProjectInfo(
-      <String>['Runner'],
-      <String>['Debug', 'Release'],
-      <String>['Runner'],
-      BufferLogger.test(),
-    );
-  }
 }

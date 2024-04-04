@@ -11,12 +11,9 @@ let package = Package(
     products: [
         .library(name: "integration_test_macos", targets: ["integration_test_macos"]),
     ],
-    dependencies: [
-    ],
     targets: [
         .target(
             name: "integration_test_macos",
-            dependencies: [],
             resources: [
                 .process("Resources"),
             ]

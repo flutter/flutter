@@ -36,34 +36,34 @@ void main() {
 
           // Create and build an app using the CocoaPods version of
           // integration_test.
-          final String app = await _createApp(
+          final String appDirectoryPath = await _createApp(
             flutterBin,
             workingDirectoryPath,
             iosLanguage: iosLanguage,
             platform: platformName,
           );
           _addDependency(
-            appDirectoryPath: app,
+            appDirectoryPath: appDirectoryPath,
             plugin: integrationTestPlugin,
           );
           await _buildApp(
             flutterBin,
-            app,
+            appDirectoryPath,
             options: <String>[platformName, '--debug', '-v'],
             expectedLines: _expectedLines(
               platform: platformName,
-              appDirectoryPath: app,
+              appDirectoryPath: appDirectoryPath,
               cococapodsPlugin: integrationTestPlugin,
             ),
             unexpectedLines: _unexpectedLines(
               platform: platformName,
-              appDirectoryPath: app,
+              appDirectoryPath: appDirectoryPath,
               cococapodsPlugin: integrationTestPlugin,
             ),
           );
           expect(
             fileSystem
-                .directory(app)
+                .directory(appDirectoryPath)
                 .childDirectory(platformName)
                 .childFile('Podfile')
                 .existsSync(),
@@ -71,7 +71,7 @@ void main() {
           );
           expect(
             fileSystem
-                .directory(app)
+                .directory(appDirectoryPath)
                 .childDirectory(platformName)
                 .childDirectory('Flutter')
                 .childDirectory('Packages')

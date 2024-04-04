@@ -38,14 +38,16 @@ class DarwinDependencyManagement {
 
   /// Generates/updates required files and project settings for Darwin
   /// Dependency Managers (CocoaPods and Swift Package Manager). Projects may
-  /// use only CocoaPods, only Swift Package Manager, or both. This only
-  /// generates files for the manager(s) being used.
+  /// use only CocoaPods (if no SPM compatible dependencies or SPM has been
+  /// disabled), only Swift Package Manager (if no CocoaPod dependencies), or
+  /// both. This only generates files for the manager(s) being used.
   ///
   /// CocoaPods requires a Podfile and certain values in the Flutter xcconfig
   /// files.
   ///
-  /// Swift Package Manager requires a Package.swift, link to the Flutter
-  /// framework, and certain settings in the Xcode project's project.pbxproj.
+  /// Swift Package Manager requires a generated Package.swift and certain
+  /// settings in the Xcode project's project.pbxproj and xcscheme (done later
+  /// before build).
   Future<void> setup({
     required SupportedPlatform platform,
   }) async {
@@ -78,34 +80,35 @@ class DarwinDependencyManagement {
 
     // Skip updating Podfile if project is a module, since it will use a
     // different module-specific Podfile.
-    if (!_project.isModule) {
-      final (int pluginCount, int swiftPackageCount, int cocoapodCount) = await _evaluatePluginsAndPrintWarnings(
-        platform: platform,
-        xcodeProject: xcodeProject,
-      );
+    if (_project.isModule) {
+      return;
+    }
+    final (int pluginCount, int swiftPackageCount, int cocoapodCount) = await _evaluatePluginsAndPrintWarnings(
+      platform: platform,
+      xcodeProject: xcodeProject,
+    );
 
-      final bool useCocoapods;
-      if (_project.usesSwiftPackageManager) {
-        useCocoapods = _usingCocoaPodsPlugin(
-          pluginCount: pluginCount,
-          swiftPackageCount: swiftPackageCount,
-          cocoapodCount: cocoapodCount,
-        );
-      } else {
-        // When Swift Package Manager is not enabled, setup Podfile if plugins
-        // is not empty, regardless of if plugins are CocoaPod compatible. This
-        // is done because `processPodsIfNeeded` uses `hasPlugins` to determine
-        // whether to run.
-        useCocoapods = _plugins.isNotEmpty;
-      }
-      if (useCocoapods) {
-        await _cocoapods.setupPodfile(xcodeProject);
-      }
-      /// The user may have a custom maintained Podfile that they're running `pod install`
-      /// on themselves.
-      else if (xcodeProject.podfile.existsSync() && xcodeProject.podfileLock.existsSync()) {
-        _cocoapods.addPodsDependencyToFlutterXcconfig(xcodeProject);
-      }
+    final bool useCocoapods;
+    if (_project.usesSwiftPackageManager) {
+      useCocoapods = _usingCocoaPodsPlugin(
+        pluginCount: pluginCount,
+        swiftPackageCount: swiftPackageCount,
+        cocoapodCount: cocoapodCount,
+      );
+    } else {
+      // When Swift Package Manager is not enabled, setup Podfile if plugins
+      // is not empty, regardless of if plugins are CocoaPod compatible. This
+      // is done because `processPodsIfNeeded` uses `hasPlugins` to determine
+      // whether to run.
+      useCocoapods = _plugins.isNotEmpty;
+    }
+    if (useCocoapods) {
+      await _cocoapods.setupPodfile(xcodeProject);
+    }
+    /// The user may have a custom maintained Podfile that they're running `pod install`
+    /// on themselves.
+    else if (xcodeProject.podfile.existsSync() && xcodeProject.podfileLock.existsSync()) {
+      _cocoapods.addPodsDependencyToFlutterXcconfig(xcodeProject);
     }
   }
 
