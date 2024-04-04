@@ -40,13 +40,6 @@ TaskFunction createIntegrationTestFlavorsTest({Map<String, String>? environment}
   ).call;
 }
 
-TaskFunction createAssetTransformationIntegrationTest() {
-  return IntegrationTest(
-    '${flutterDirectory.path}/dev/integration_tests/asset_transformation',
-    'integration_test/integration_test.dart',
-  ).call;
-}
-
 TaskFunction createExternalTexturesFrameRateIntegrationTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/external_textures',
