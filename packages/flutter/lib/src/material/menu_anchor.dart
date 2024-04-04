@@ -894,8 +894,13 @@ class MenuItemButton extends StatefulWidget {
 
   /// An optional Semantics label, applied to the entire [MenuItemButton].
   ///
-  /// A screen reader will default to reading the genereated text on the [MenuItemButton]
-  /// itself, which is not guaranteed to be readable.
+  /// A screen reader will default to reading the derived text on the
+  /// [MenuItemButton] itself, which is not guaranteed to be readable.
+  ///
+  /// Setting this label overwrites the semantics properties of the entire
+  /// Widget, including its children. Consider wrapping this widget in
+  /// [Semantics] if you want to customize other properties besides just
+  /// the label.
   ///
   /// Null by default.
   final String? semanticsLabel;
