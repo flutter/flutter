@@ -83,22 +83,15 @@ enum WrapAlignment {
   /// after the first and last objects.
   spaceEvenly;
 
-  WrapAlignment get _flipped => switch (this) {
-    WrapAlignment.start => WrapAlignment.end,
-    WrapAlignment.end => WrapAlignment.start,
-    WrapAlignment.center ||
-    WrapAlignment.spaceBetween ||
-    WrapAlignment.spaceAround ||
-    WrapAlignment.spaceEvenly => this,
-  };
-
-  (double leadingSpace, double betweenSpace) _distributeSpace(double freeSpace, double itemSpacing, int itemCount) {
+  (double leadingSpace, double betweenSpace) _distributeSpace(double freeSpace, double itemSpacing, int itemCount, bool flipped) {
     assert(itemCount > 0);
     return switch (this) {
-      WrapAlignment.start =>  (0,               itemSpacing),
-      WrapAlignment.end =>    (freeSpace,       itemSpacing),
+      WrapAlignment.start =>  (flipped ? freeSpace : 0.0,       itemSpacing),
+
+      WrapAlignment.end =>    WrapAlignment.start._distributeSpace(freeSpace, itemSpacing, itemCount, !flipped),
+      WrapAlignment.spaceBetween when itemCount < 2 => WrapAlignment.start._distributeSpace(freeSpace, itemSpacing, itemCount, flipped),
+
       WrapAlignment.center => (freeSpace / 2.0, itemSpacing),
-      WrapAlignment.spaceBetween when itemCount < 2 => (0, itemSpacing),
       WrapAlignment.spaceBetween => (0,                           freeSpace / (itemCount - 1) + itemSpacing),
       WrapAlignment.spaceAround =>  (freeSpace / itemCount / 2,   freeSpace / itemCount + itemSpacing),
       WrapAlignment.spaceEvenly =>  (freeSpace / (itemCount + 1), freeSpace / (itemCount + 1) + itemSpacing),
@@ -703,13 +696,12 @@ class RenderWrap extends RenderBox
     final double crossAxisFreeSpace = math.max(0.0, freeAxisSize.crossAxisExtent);
 
     final (bool flipMainAxis, bool flipCrossAxis) = _areAxesFlipped;
-    final WrapAlignment effectiveAlignment = flipMainAxis ? alignment._flipped : alignment;
     final WrapCrossAlignment effectiveCrossAlignment = flipCrossAxis ? crossAxisAlignment._flipped : crossAxisAlignment;
-    final WrapAlignment effectiveRunAlignment = flipCrossAxis? runAlignment._flipped : runAlignment;
-    final (double runLeadingSpace, double runBetweenSpace) = effectiveRunAlignment._distributeSpace(
+    final (double runLeadingSpace, double runBetweenSpace) = runAlignment._distributeSpace(
       crossAxisFreeSpace,
       runSpacing,
       runMetrics.length,
+      flipCrossAxis,
     );
     final _NextChild nextChild = flipMainAxis ? childBefore : childAfter;
 
@@ -720,7 +712,7 @@ class RenderWrap extends RenderBox
       final int childCount = run.childCount;
 
       final double mainAxisFreeSpace = math.max(0.0, containerAxisSize.mainAxisExtent - run.axisSize.mainAxisExtent);
-      final (double childLeadingSpace, double childBetweenSpace) = effectiveAlignment._distributeSpace(mainAxisFreeSpace, spacing, childCount);
+      final (double childLeadingSpace, double childBetweenSpace) = alignment._distributeSpace(mainAxisFreeSpace, spacing, childCount, flipMainAxis);
 
       double childMainAxisOffset = childLeadingSpace;
 
