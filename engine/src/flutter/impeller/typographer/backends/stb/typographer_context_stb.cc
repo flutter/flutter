@@ -220,8 +220,7 @@ static void DrawGlyph(BitmapSTB* bitmap,
   // Glyph in place
   if (!has_color || DISABLE_COLOR_FONT_SUPPORT) {
     stbtt_MakeGlyphBitmap(typeface_stb->GetFontInfo(), output,
-                          location.GetWidth() - kPadding,
-                          location.GetHeight() - kPadding,
+                          location.GetWidth(), location.GetHeight(),
                           bitmap->GetRowBytes(), scale_x, scale_y, glyph.index);
   } else {
     // But for color bitmaps we need to get the glyph pixels and then carry all
