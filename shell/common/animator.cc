@@ -237,7 +237,7 @@ void Animator::DrawLastLayerTrees(
 }
 
 void Animator::RequestFrame(bool regenerate_layer_trees) {
-  if (regenerate_layer_trees) {
+  if (regenerate_layer_trees && !regenerate_layer_trees_) {
     // This event will be closed by BeginFrame. BeginFrame will only be called
     // if regenerating the layer trees. If a frame has been requested to update
     // an external texture, this will be false and no BeginFrame call will

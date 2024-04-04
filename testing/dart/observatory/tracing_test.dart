@@ -13,6 +13,7 @@ import 'package:vm_service/vm_service_io.dart';
 import 'package:vm_service_protos/vm_service_protos.dart';
 
 import '../impeller_enabled.dart';
+import '../serialized_test_suite.dart';
 
 Future<void> _testChromeFormatTrace(vms.VmService vmService) async {
   final vms.Timeline timeline = await vmService.getVMTimeline();
@@ -69,7 +70,9 @@ Future<void> _testPerfettoFormatTrace(vms.VmService vmService) async {
 }
 
 void main() {
-  test('Canvas.saveLayer emits tracing', () async {
+  final SerializedTestSuite suite = SerializedTestSuite();
+
+  suite.test('Canvas.saveLayer emits tracing', () async {
     final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
 
     if (info.serverUri == null) {
@@ -79,6 +82,7 @@ void main() {
     final vms.VmService vmService = await vmServiceConnectUri(
       'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws',
     );
+    await vmService.clearVMTimeline();
 
     final Completer<void> completer = Completer<void>();
     PlatformDispatcher.instance.onBeginFrame = (Duration timeStamp) async {
@@ -109,6 +113,52 @@ void main() {
 
     await _testChromeFormatTrace(vmService);
     await _testPerfettoFormatTrace(vmService);
+    await vmService.dispose();
+  });
+
+  suite.test('Frame request pending begin/end pairs are matched', () async {
+    final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
+
+    if (info.serverUri == null) {
+      fail('This test must not be run with --disable-vm-service.');
+    }
+
+    final vms.VmService vmService = await vmServiceConnectUri(
+      'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws',
+    );
+    await vmService.clearVMTimeline();
+
+    final Completer<void> completer = Completer<void>();
+    PlatformDispatcher.instance.onBeginFrame = (Duration timeStamp) async {
+      completer.complete();
+    };
+
+    // Schedule some frames.
+    for (int i = 0; i < 5; i++) {
+      PlatformDispatcher.instance.scheduleFrame();
+    }
+    await completer.future;
+
+    // Check that each "Frame Request Pending" event is ended before the next
+    // one begins.
+    final vms.Timeline timeline = await vmService.getVMTimeline();
+    bool eventStarted = false;
+    int frameCount = 0;
+    for (final vms.TimelineEvent event in timeline.traceEvents!) {
+      final Map<String, dynamic> json = event.json!;
+      if (json['name'] == 'Frame Request Pending') {
+        if (json['ph'] == 'b') {
+          expect(eventStarted, false);
+          eventStarted = true;
+          frameCount++;
+        } else if (json['ph'] == 'e') {
+          expect(eventStarted, true);
+          eventStarted = false;
+        }
+      }
+    }
+    expect(frameCount, greaterThan(0));
+
     await vmService.dispose();
   });
 }
