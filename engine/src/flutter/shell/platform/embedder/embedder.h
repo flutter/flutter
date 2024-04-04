@@ -1780,6 +1780,9 @@ typedef struct {
   size_t struct_size;
   /// The size of the render target the engine expects to render into.
   FlutterSize size;
+  /// The identifier for the view that the engine will use this backing store to
+  /// render into.
+  FlutterViewId view_id;
 } FlutterBackingStoreConfig;
 
 typedef enum {
@@ -1893,9 +1896,13 @@ typedef struct {
   /// `FlutterBackingStore::struct_size` when specifying a new backing store to
   /// the engine. This only matters if the embedder expects to be used with
   /// engines older than the version whose headers it used during compilation.
+  ///
+  /// The callback should return true if the operation was successful.
   FlutterBackingStoreCreateCallback create_backing_store_callback;
   /// A callback invoked by the engine to release the backing store. The
   /// embedder may collect any resources associated with the backing store.
+  ///
+  /// The callback should return true if the operation was successful.
   FlutterBackingStoreCollectCallback collect_backing_store_callback;
   /// Callback invoked by the engine to composite the contents of each layer
   /// onto the implicit view.
@@ -1907,6 +1914,8 @@ typedef struct {
   /// Only one of `present_layers_callback` and `present_view_callback` may be
   /// provided. Providing both is an error and engine initialization will
   /// terminate.
+  ///
+  /// The callback should return true if the operation was successful.
   FlutterLayersPresentCallback present_layers_callback;
   /// Avoid caching backing stores provided by this compositor.
   bool avoid_backing_store_cache;
@@ -1916,6 +1925,8 @@ typedef struct {
   /// Only one of `present_layers_callback` and `present_view_callback` may be
   /// provided. Providing both is an error and engine initialization will
   /// terminate.
+  ///
+  /// The callback should return true if the operation was successful.
   FlutterPresentViewCallback present_view_callback;
 } FlutterCompositor;
 

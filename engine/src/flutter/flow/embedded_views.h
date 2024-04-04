@@ -400,6 +400,15 @@ class ExternalViewEmbedder {
 
   virtual ~ExternalViewEmbedder() = default;
 
+  // Deallocate the resources for displaying a view.
+  //
+  // This method must be called when a view is removed from the engine.
+  //
+  // When the ExternalViewEmbedder is requested to draw an unrecognized view, it
+  // implicitly allocates necessary resources. These resources must be
+  // explicitly deallocated.
+  virtual void CollectView(int64_t view_id);
+
   // Usually, the root canvas is not owned by the view embedder. However, if
   // the view embedder wants to provide a canvas to the rasterizer, it may
   // return one here. This canvas takes priority over the canvas materialized
