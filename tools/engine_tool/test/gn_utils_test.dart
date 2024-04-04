@@ -9,6 +9,7 @@ import 'package:engine_tool/src/environment.dart';
 import 'package:engine_tool/src/gn_utils.dart';
 import 'package:litetest/litetest.dart';
 
+import 'fixtures.dart';
 import 'utils.dart';
 
 void main() {
@@ -22,32 +23,22 @@ void main() {
   }
 
   final List<CannedProcess> cannedProcesses = <CannedProcess>[
-    CannedProcess((List<String> command) => command.contains('--as=label'),
-        stdout: '''
-//flutter/display_list:display_list_unittests
-//flutter/flow:flow_unittests
-//flutter/fml:fml_arc_unittests
-'''),
-    CannedProcess((List<String> command) => command.contains('--as=output'),
-        stdout: '''
-display_list_unittests
-flow_unittests
-fml_arc_unittests
-''')
+    CannedProcess((List<String> command) => command.contains('desc'),
+        stdout: gnDescOutput()),
   ];
 
   test('find test targets', () async {
     final TestEnvironment testEnvironment =
         TestEnvironment(engine, cannedProcesses: cannedProcesses);
     final Environment env = testEnvironment.environment;
-    final Map<String, TestTarget> testTargets =
-        await findTestTargets(env, engine.outDir);
+    final Map<String, BuildTarget> testTargets =
+        await findTargets(env, engine.outDir);
     expect(testTargets.length, equals(3));
     expect(testTargets['//flutter/display_list:display_list_unittests'],
         notEquals(null));
     expect(
         testTargets['//flutter/display_list:display_list_unittests']!
-            .executable
+            .executable!
             .path,
         endsWith('display_list_unittests'));
   });
@@ -56,8 +47,8 @@ fml_arc_unittests
     final TestEnvironment testEnvironment =
         TestEnvironment(engine, cannedProcesses: cannedProcesses);
     final Environment env = testEnvironment.environment;
-    final Map<String, TestTarget> testTargets =
-        await findTestTargets(env, engine.outDir);
+    final Map<String, BuildTarget> testTargets =
+        await findTargets(env, engine.outDir);
     expect(selectTargets(<String>['//...'], testTargets).length, equals(3));
     expect(
         selectTargets(<String>['//flutter/display_list'], testTargets).length,

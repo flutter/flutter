@@ -48,7 +48,7 @@ final class QueryCommand extends CommandBase {
       environment: environment,
       configs: configs,
     ));
-    addSubcommand(QueryTestsCommand(
+    addSubcommand(QueryTargetsCommand(
       environment: environment,
       configs: configs,
     ));
@@ -131,17 +131,25 @@ final class QueryBuildersCommand extends CommandBase {
   }
 }
 
-/// The query tests command.
-final class QueryTestsCommand extends CommandBase {
-  /// Constructs the 'query tests' command.
-  QueryTestsCommand({
+/// The query targets command.
+final class QueryTargetsCommand extends CommandBase {
+  /// Constructs the 'query targets' command.
+  QueryTargetsCommand({
     required super.environment,
     required this.configs,
   }) {
     builds = runnableBuilds(environment, configs);
     debugCheckBuilds(builds);
     addConfigOption(
-      environment, argParser, runnableBuilds(environment, configs),
+      environment,
+      argParser,
+      runnableBuilds(environment, configs),
+    );
+    argParser.addFlag(
+      testOnlyFlag,
+      abbr: 't',
+      help: 'Filter build targets to only include tests',
+      negatable: false,
     );
   }
 
@@ -152,14 +160,17 @@ final class QueryTestsCommand extends CommandBase {
   late final List<Build> builds;
 
   @override
-  String get name => 'tests';
+  String get name => 'targets';
 
   @override
-  String get description => 'Provides information about test targets';
+  String get description => 'Provides information about build targets'
+      'et query targets --testonly         # List only test targets'
+      'et query targets //flutter/fml/...  # List all targets under `//flutter/fml`';
 
   @override
   Future<int> run() async {
     final String configName = argResults![configFlag] as String;
+    final bool testOnly = argResults![testOnlyFlag] as bool;
     final String demangledName = demangleConfigName(environment, configName);
     final Build? build =
         builds.where((Build build) => build.name == demangledName).firstOrNull;
@@ -167,9 +178,20 @@ final class QueryTestsCommand extends CommandBase {
       environment.logger.error('Could not find config $configName');
       return 1;
     }
-    final Map<String, TestTarget> targets = await findTestTargets(environment,
+    final Map<String, BuildTarget> allTargets = await findTargets(environment,
         Directory(p.join(environment.engine.outDir.path, build.ninja.config)));
-    for (final TestTarget target in targets.values) {
+    final Set<BuildTarget> selectedTargets =
+        selectTargets(argResults!.rest, allTargets);
+    if (selectedTargets.isEmpty) {
+      environment.logger.error(
+          'No build targets matched ${argResults!.rest}\nRun `et query targets` to see list of targets.');
+      return 1;
+    }
+    for (final BuildTarget target in selectedTargets) {
+      if (testOnly &&
+          (!target.testOnly || target.type != BuildTargetType.executable)) {
+        continue;
+      }
       environment.logger.status(target.label);
     }
     return 0;

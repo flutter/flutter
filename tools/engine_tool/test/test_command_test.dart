@@ -52,18 +52,8 @@ void main() {
   };
 
   final List<CannedProcess> cannedProcesses = <CannedProcess>[
-    CannedProcess((List<String> command) => command.contains('--as=label'),
-        stdout: '''
-//flutter/display_list:display_list_unittests
-//flutter/flow:flow_unittests
-//flutter/fml:fml_arc_unittests
-'''),
-    CannedProcess((List<String> command) => command.contains('--as=output'),
-        stdout: '''
-display_list_unittests
-flow_unittests
-fml_arc_unittests
-''')
+    CannedProcess((List<String> command) => command.contains('desc'),
+        stdout: fixtures.gnDescOutput()),
   ];
 
   test('test command executes test', () async {
