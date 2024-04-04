@@ -28,7 +28,6 @@ Future<void> main() async {
         },
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(fakeImageProvider.evict);
     final RenderImage renderImage = tester.renderObject(find.byType(Image));
     final ui.Image? image1 = renderImage.image;

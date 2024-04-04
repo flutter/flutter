@@ -19,10 +19,7 @@ void main() {
   });
 
 
-  tearDown(() {
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
-  });
+  tearDown(memoryImage.evict);
 
   testWidgets('Last tab gets focus', (WidgetTester tester) async {
     // 2 nodes for 2 tabs
@@ -48,7 +45,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     expect(focusNodes[0].hasFocus, isTrue);
 
@@ -100,7 +96,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     expect(
       focusNodes.any((FocusNode node) => node.hasFocus),
@@ -146,7 +141,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     BoxDecoration tabDecoration = tester.widget<DecoratedBox>(find.descendant(
       of: find.byType(CupertinoTabBar),
@@ -173,7 +167,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     tabDecoration = tester.widget<DecoratedBox>(find.descendant(
       of: find.byType(CupertinoTabBar),
@@ -212,7 +205,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     // The DecoratedBox with the smallest depth is the DecoratedBox of the
     // CupertinoTabScaffold.
@@ -238,7 +230,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     tabDecoration = tester.firstWidget<DecoratedBox>(
       find.descendant(
@@ -268,7 +259,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     final EditableTextState editableState = tester.state<EditableTextState>(find.byType(EditableText));
 
@@ -291,7 +281,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     // The exact same state instance is still there.
     expect(tester.state<EditableTextState>(find.byType(EditableText)), editableState);
@@ -318,7 +307,6 @@ void main() {
         }),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     final Iterable<RichText> barItems = tester.widgetList<RichText>(
       find.descendant(

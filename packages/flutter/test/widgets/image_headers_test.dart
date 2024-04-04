@@ -23,8 +23,7 @@ void main() {
       ));
 
       expect(MockHttpHeaders.headers['flutter'], <String>['flutter']);
-      // Evicts an entry from the image cache.
-      await image.image.evict();
+      addTearDown(image.image.evict);
     }, createHttpClient: (SecurityContext? _) {
       return client;
     });

@@ -32,7 +32,6 @@ Future<void> main() async {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(image.evict);
     expect(
       find.byType(DecoratedBox),
@@ -109,7 +108,6 @@ Future<void> main() async {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(image.evict);
     expect(
       log,

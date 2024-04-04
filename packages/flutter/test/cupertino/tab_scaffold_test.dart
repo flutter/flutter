@@ -47,10 +47,7 @@ void main() {
     selectedTabs = <int>[];
   });
 
-  tearDown(() {
-    // Evicts an entry from the image cache.
-    memoryImage.evict();
-  });
+  tearDown(memoryImage.evict);
 
   BottomNavigationBarItem tabGenerator(int index) {
     return BottomNavigationBarItem(
@@ -76,7 +73,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     expect(tabsPainted, const <int>[0]);
     RichText tab1 = tester.widget(find.descendant(
@@ -126,7 +122,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     expect(tabsBuilt, const <int>[0]);
     expect(find.text('Page 1'), findsOneWidget);
@@ -171,7 +166,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     expect(focusNodes[0].hasFocus, isTrue);
 
@@ -220,7 +214,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     expect(
       focusNodes.any((FocusNode node) => node.hasFocus),
@@ -278,7 +271,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     expect(tabsPainted, const <int>[1]);
 
@@ -315,7 +307,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     expect(tabsPainted, const <int>[0]);
 
@@ -337,7 +328,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     expect(tabsPainted, const <int>[0, 1]);
     // onTap is not called when changing tabs programmatically.
@@ -362,7 +352,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     BoxDecoration tabDecoration = tester.widget<DecoratedBox>(find.descendant(
       of: find.byType(CupertinoTabBar),
@@ -389,7 +378,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     tabDecoration = tester.widget<DecoratedBox>(find.descendant(
       of: find.byType(CupertinoTabBar),
@@ -430,7 +418,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 400));
     // Don't generate more media query padding from the translucent bottom
@@ -458,7 +445,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 600));
     // Media query padding shows up in the inner content because it wasn't masked
@@ -484,7 +470,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     await tester.pumpWidget(
       CupertinoApp(
@@ -572,7 +557,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 400));
     expect(MediaQuery.of(innerContext).padding.bottom, 0);
@@ -628,7 +612,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     expect(tabsBuilt, const <int>[0, 1]);
     // We didn't tap on any additional tabs to invoke the onTap callback. We
@@ -694,7 +677,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     expect(tabsPainted, const <int> [0, 0]);
 
@@ -753,7 +735,6 @@ void main() {
           ),
         ),
       );
-      // Evicts an entry from the image cache after test-case is executed.
       addTearDown(memoryImage.evict);
       expect(tabsPainted, const <int> [0, 0]);
 
@@ -1005,7 +986,6 @@ void main() {
     final String message = tester.takeException().toString();
     expect(message, contains('current index ${controller.index}'));
     expect(message, contains('with 3 tabs'));
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
   });
 
@@ -1055,7 +1035,6 @@ void main() {
           ),
         ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     for (int i = 0; i < 5; i++) {
       controller.index = i;
@@ -1118,7 +1097,6 @@ void main() {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     // The exact same state instance is still there.
     expect(tester.state<EditableTextState>(find.byType(EditableText)), editableState);
@@ -1298,7 +1276,6 @@ void main() {
     tearDown(() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(SystemChannels.platform, null);
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(memoryImage.evict);
     });
 
@@ -1355,7 +1332,6 @@ void main() {
           ),
         ),
       );
-      // Evicts an entry from the image cache after test-case is executed.
       addTearDown(memoryImage.evict);
       expect(find.text('Page 1 of tab 1'), findsOneWidget);
       expect(find.text('Page 2 of tab 1'), findsNothing);

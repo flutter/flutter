@@ -26,7 +26,6 @@ void main() async {
   });
 
   tearDownAll(() {
-    // Evicts an entry from the image cache.
     imageProvider.evict();
     image.dispose();
   });
@@ -38,7 +37,6 @@ void main() async {
         child: ImageIcon(imageProvider),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(imageProvider.evict);
     final RenderBox renderObject = tester.renderObject(find.byType(ImageIcon));
     expect(renderObject.size, equals(const Size.square(24.0)));
@@ -55,7 +53,6 @@ void main() async {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(imageProvider.evict);
     expect(tester.widget<Image>(find.byType(Image)).color!.alpha, equals(128));
   });

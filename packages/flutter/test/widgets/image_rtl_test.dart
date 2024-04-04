@@ -37,7 +37,6 @@ void main() {
   });
 
   tearDownAll(() {
-    // Evicts an entry from the image cache.
     imageProvider.evict();
     testImage.dispose();
   });

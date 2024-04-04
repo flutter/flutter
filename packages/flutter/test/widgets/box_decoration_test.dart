@@ -60,7 +60,6 @@ Future<void> main() async {
         ),
       ),
     );
-    // Evicts an entry from the image cache after test-case is executed.
     addTearDown(imageProvider.evict);
     expect(tester.binding.hasScheduledFrame, isFalse);
     completer.complete();
