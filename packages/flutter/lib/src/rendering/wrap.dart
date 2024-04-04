@@ -130,7 +130,7 @@ enum WrapCrossAlignment {
 
   /// Place the children as close to the middle of the run in the cross axis as
   /// possible.
-   center;
+  center;
 
   // TODO(ianh): baseline.
 
@@ -156,7 +156,7 @@ class _RunMetrics {
 
   // Look ahead, creates a new run if incorporating the child would exceed the allowed line width.
   _RunMetrics? tryAddingNewChild(RenderBox child, _AxisSize childSize, bool flipMainAxis, double spacing, double maxMainExtent) {
-    final bool needsNewRun = axisSize.mainAxisExtent + childSize.mainAxisExtent + spacing - maxMainExtent > -precisionErrorTolerance;
+    final bool needsNewRun = axisSize.mainAxisExtent + childSize.mainAxisExtent + spacing - maxMainExtent > precisionErrorTolerance;
     if (needsNewRun) {
       return _RunMetrics(child, childSize);
     } else {
@@ -572,6 +572,28 @@ class RenderWrap extends RenderBox
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    if (firstChild == null) {
+      return null;
+    }
+    final BoxConstraints childConstraints = switch (direction) {
+      Axis.horizontal => BoxConstraints(maxWidth: constraints.maxWidth),
+      Axis.vertical => BoxConstraints(maxHeight: constraints.maxHeight),
+    };
+
+    final (_AxisSize childrenAxisSize, List<_RunMetrics> runMetrics) = _computeRuns(constraints, ChildLayoutHelper.dryLayoutChild);
+    final _AxisSize containerAxisSize = childrenAxisSize.applyConstraints(constraints, direction);
+
+    BaselineOffset baselineOffset = BaselineOffset.noBaseline;
+    void findHighestBaseline(Offset offset, RenderBox child) {
+      baselineOffset = baselineOffset.minOf(BaselineOffset(child.getDryBaseline(childConstraints, baseline)) + offset.dy);
+    }
+    Size getChildSize(RenderBox child) => child.getDryLayout(childConstraints);
+    _positionChildren(runMetrics, childrenAxisSize, containerAxisSize, findHighestBaseline, getChildSize);
+    return baselineOffset.offset;
+  }
+
+  @override
   @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
     return _computeDryLayout(constraints);
@@ -629,12 +651,22 @@ class RenderWrap extends RenderBox
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     assert(_debugHasNecessaryDirections);
-    RenderBox? child = firstChild;
-    if (child == null) {
+    if (firstChild == null) {
       size = constraints.smallest;
       _hasVisualOverflow = false;
       return;
     }
+
+    final (_AxisSize childrenAxisSize, List<_RunMetrics> runMetrics) = _computeRuns(constraints, ChildLayoutHelper.layoutChild);
+    final _AxisSize containerAxisSize = childrenAxisSize.applyConstraints(constraints, direction);
+    size = containerAxisSize.toSize(direction);
+    final _AxisSize freeAxisSize = containerAxisSize - childrenAxisSize;
+    _hasVisualOverflow = freeAxisSize.mainAxisExtent < 0.0 || freeAxisSize.crossAxisExtent < 0.0;
+    _positionChildren(runMetrics, freeAxisSize, containerAxisSize, _setChildPosition, _getChildSize);
+  }
+
+  (_AxisSize childrenSize, List<_RunMetrics> runMetrics) _computeRuns(BoxConstraints constraints, ChildLayouter layoutChild) {
+    assert(firstChild != null);
     final (BoxConstraints childConstraints, double mainAxisLimit) = switch (direction) {
       Axis.horizontal => (BoxConstraints(maxWidth: constraints.maxWidth), constraints.maxWidth),
       Axis.vertical => (BoxConstraints(maxHeight: constraints.maxHeight), constraints.maxHeight),
@@ -646,9 +678,8 @@ class RenderWrap extends RenderBox
 
     _RunMetrics? currentRun;
     _AxisSize childrenAxisSize = _AxisSize.empty;
-    for (;child != null; child = childAfter(child)) {
-      child.layout(childConstraints, parentUsesSize: true);
-      final _AxisSize childSize = _AxisSize.fromSize(size: child.size, direction: direction);
+    for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
+      final _AxisSize childSize = _AxisSize.fromSize(size: layoutChild(child, childConstraints), direction: direction);
       final _RunMetrics? newRun = currentRun == null
         ? _RunMetrics(child, childSize)
         : currentRun.tryAddingNewChild(child, childSize, flipMainAxis, spacing, mainAxisLimit);
@@ -661,13 +692,7 @@ class RenderWrap extends RenderBox
     assert(runMetrics.isNotEmpty);
     final double totalRunSpacing = runSpacing * (runMetrics.length - 1);
     childrenAxisSize += _AxisSize(mainAxisExtent: totalRunSpacing, crossAxisExtent: 0.0) + currentRun!.axisSize.flipped;
-    childrenAxisSize = childrenAxisSize.flipped;
-
-    final _AxisSize containerAxisSize = childrenAxisSize.applyConstraints(constraints, direction);
-    size = containerAxisSize.toSize(direction);
-    final _AxisSize freeAxisSize = containerAxisSize - childrenAxisSize;
-    _hasVisualOverflow = freeAxisSize.mainAxisExtent < 0.0 || freeAxisSize.crossAxisExtent < 0.0;
-    _positionChildren(runMetrics, freeAxisSize, containerAxisSize, _setChildPosition, _getChildSize);
+    return (childrenAxisSize.flipped, runMetrics);
   }
 
   void _positionChildren(List<_RunMetrics> runMetrics, _AxisSize freeAxisSize, _AxisSize containerAxisSize, _PositionChild positionChild, _GetChildSize getChildSize) {
