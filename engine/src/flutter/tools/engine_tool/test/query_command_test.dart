@@ -57,18 +57,8 @@ void main() {
   }
 
   final List<CannedProcess> cannedProcesses = <CannedProcess>[
-    CannedProcess((List<String> command) => command.contains('--as=label'),
-        stdout: '''
-//flutter/display_list:display_list_unittests
-//flutter/flow:flow_unittests
-//flutter/fml:fml_arc_unittests
-'''),
-    CannedProcess((List<String> command) => command.contains('--as=output'),
-        stdout: '''
-display_list_unittests
-flow_unittests
-fml_arc_unittests
-''')
+    CannedProcess((List<String> command) => command.contains('desc'),
+        stdout: fixtures.gnDescOutput()),
   ];
 
   test('query command returns builds for the host platform.', () async {
@@ -152,7 +142,7 @@ fml_arc_unittests
     );
   });
 
-  test('query tests', () async {
+  test('query targets', () async {
     final TestEnvironment testEnvironment = TestEnvironment(engine,
         abi: ffi.Abi.linuxX64, cannedProcesses: cannedProcesses);
     final Environment env = testEnvironment.environment;
@@ -162,7 +152,7 @@ fml_arc_unittests
     );
     final int result = await runner.run(<String>[
       'query',
-      'tests',
+      'targets',
     ]);
     expect(result, equals(0));
     expect(

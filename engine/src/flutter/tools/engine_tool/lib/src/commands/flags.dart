@@ -19,3 +19,4 @@ const String quietFlag = 'quiet';
 const String rbeFlag = 'rbe';
 const String runTestsFlag = 'run-tests';
 const String verboseFlag = 'verbose';
+const String testOnlyFlag = 'testonly';

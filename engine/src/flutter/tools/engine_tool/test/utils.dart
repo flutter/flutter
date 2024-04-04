@@ -37,13 +37,14 @@ class CannedProcess {
 
 /// ExecutedProcess includes the command and the result.
 class ExecutedProcess {
-  ExecutedProcess(this.command, this.result);
+  ExecutedProcess(this.command, this.result, this.exitCode);
   final List<String> command;
   final FakeProcess result;
+  final int exitCode;
 
   @override
   String toString() {
-    return command.join(' ');
+    return '${command.join(' ')} exitCode=$exitCode';
   }
 }
 
@@ -67,7 +68,9 @@ class TestEnvironment {
           processManager: FakeProcessManager(onStart: (List<String> command) {
         final FakeProcess processResult =
             _getCannedResult(command, cannedProcesses);
-        processHistory.add(ExecutedProcess(command, processResult));
+        processResult.exitCode.then((int exitCode) {
+          processHistory.add(ExecutedProcess(command, processResult, exitCode));
+        });
         return processResult;
       }, onRun: (List<String> command) {
         throw UnimplementedError('onRun');
