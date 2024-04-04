@@ -263,10 +263,6 @@ class ExpansionTile extends StatefulWidget {
        expandedCrossAxisAlignment != CrossAxisAlignment.baseline,
        'CrossAxisAlignment.baseline is not supported since the expanded children '
            'are aligned in a column, not a row. Try to use another constant.',
-       ),
-       assert(showTrailingIcon || trailing == null,
-       'Cannot use showTrailingIcon when a trailing widget is provided. Either use '
-           'showTrailingIcon: false or do not provide a trailing widget.'
        );
 
   /// A widget to display before the title.
@@ -717,9 +713,6 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       color: backgroundColor,
       shape: expansionTileBorder,
     );
-
-    final Widget? trailing = widget.trailing
-      ?? (widget.showTrailingIcon ? _buildTrailingIcon(context) : null);
 
     final Widget tile = Padding(
       padding: decoration.padding,
