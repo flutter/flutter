@@ -1,7 +1,6 @@
 name: capitalizer_transformer
 description: A simple command-line application that capitalizes the string from an input file.
 version: 1.0.0
-# repository: https://github.com/my_org/my_repo
 
 environment:
   sdk: '>=3.2.0-0 <4.0.0'
@@ -9,5 +8,4 @@ environment:
 dependencies:
   args: 2.4.2
 
-dev_dependencies:
-  lints: ^3.0.0
+# PUBSPEC CHECKSUM: 3cfd
