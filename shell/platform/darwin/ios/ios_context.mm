@@ -6,12 +6,9 @@
 #include "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 
 #include "flutter/fml/logging.h"
-#include "flutter/shell/platform/darwin/ios/ios_context_software.h"
-
-#if SHELL_ENABLE_METAL
 #include "flutter/shell/platform/darwin/ios/ios_context_metal_impeller.h"
 #include "flutter/shell/platform/darwin/ios/ios_context_metal_skia.h"
-#endif  // SHELL_ENABLE_METAL
+#include "flutter/shell/platform/darwin/ios/ios_context_software.h"
 
 namespace flutter {
 
@@ -32,7 +29,6 @@ std::unique_ptr<IOSContext> IOSContext::Create(
              "in an environment that does not support Metal. Enabling GPU pass through in your "
              "environment may fix this. If that is not possible, then disable Impeller.";
       return std::make_unique<IOSContextSoftware>();
-#if SHELL_ENABLE_METAL
     case IOSRenderingAPI::kMetal:
       switch (backend) {
         case IOSRenderingBackend::kSkia:
@@ -40,7 +36,6 @@ std::unique_ptr<IOSContext> IOSContext::Create(
         case IOSRenderingBackend::kImpeller:
           return std::make_unique<IOSContextMetalImpeller>(is_gpu_disabled_sync_switch);
       }
-#endif  // SHELL_ENABLE_METAL
     default:
       break;
   }
