@@ -16,6 +16,7 @@ Future<void> main(List<String> args) async {
   }
 
   final String dart = Platform.resolvedExecutable;
+  final String dartaotruntime = path.join(path.dirname(Platform.resolvedExecutable), 'dartaotruntime');
   final String buildDir = args[0];
   final String frontendServer = args[1];
   final String sdkRoot = args[2];
@@ -35,7 +36,7 @@ Future<void> main(List<String> args) async {
   }
 
   test('Without flag', () {
-    checkProcessResult(Process.runSync(dart, <String>[
+    checkProcessResult(Process.runSync(dartaotruntime, <String>[
       frontendServer,
       '--sdk-root=$sdkRoot',
       '--target=flutter',
@@ -59,7 +60,7 @@ Future<void> main(List<String> args) async {
   });
 
   test('With flag', () {
-    checkProcessResult(Process.runSync(dart, <String>[
+    checkProcessResult(Process.runSync(dartaotruntime, <String>[
       frontendServer,
       '--sdk-root=$sdkRoot',
       '--target=flutter',

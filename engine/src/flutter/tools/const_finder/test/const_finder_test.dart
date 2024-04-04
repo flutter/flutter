@@ -45,6 +45,7 @@ void expectInstances(dynamic value, dynamic expected, Compiler compiler) {
 // This test is assuming the `dart` used to invoke the tests is compatible
 // with the version of package:kernel in //third-party/dart/pkg/kernel
 final String dart = Platform.resolvedExecutable;
+final String dartaotruntime = path.join(path.dirname(Platform.resolvedExecutable), 'dartaotruntime');
 
 void _checkRecursion(String dillPath, Compiler compiler) {
   stdout.writeln('Checking recursive calls.');
@@ -443,7 +444,7 @@ class _Test {
   }
 
   void _compileAOTDill() {
-    checkProcessResult(Process.runSync(dart, <String>[
+    checkProcessResult(Process.runSync(dartaotruntime, <String>[
       frontendServer,
       '--sdk-root=$sdkRoot',
       '--target=flutter',
