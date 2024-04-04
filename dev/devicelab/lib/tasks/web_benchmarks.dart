@@ -147,7 +147,6 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
         userDataDirectory: userDataDir,
         headless: isUncalibratedSmokeTest,
         debugPort: chromeDebugPort,
-        enableWasmGC: benchmarkOptions.useWasm,
       );
 
       print('Launching Chrome.');

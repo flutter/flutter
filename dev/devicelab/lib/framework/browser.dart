@@ -8,6 +8,7 @@ import 'dart:io' as io;
 import 'dart:math' as math;
 
 import 'package:path/path.dart' as path;
+import 'package:uuid/uuid.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 /// The number of samples used to extract metrics, such as noise, means,
@@ -25,7 +26,6 @@ class ChromeOptions {
     this.windowHeight = 1024,
     this.headless,
     this.debugPort,
-    this.enableWasmGC = false,
   });
 
   /// If not null passed as `--user-data-dir`.
@@ -54,9 +54,6 @@ class ChromeOptions {
   /// mode without a debug port, Chrome quits immediately. For most tests it is
   /// typical to set [headless] to true and set a non-null debug port.
   final int? debugPort;
-
-  /// Whether to enable experimental WasmGC flags
-  final bool enableWasmGC;
 }
 
 /// A function called when the Chrome process encounters an error.
@@ -64,15 +61,25 @@ typedef ChromeErrorCallback = void Function(String);
 
 /// Manages a single Chrome process.
 class Chrome {
-  Chrome._(this._chromeProcess, this._onError, this._debugConnection) {
+  Chrome._(this._chromeProcess, this._onError, this._debugConnection, this._onClose) {
     // If the Chrome process quits before it was asked to quit, notify the
     // error listener.
     _chromeProcess.exitCode.then((int exitCode) {
+      _onClose?.call();
       if (!_isStopped) {
         _onError('Chrome process exited prematurely with exit code $exitCode');
       }
     });
   }
+
+  static String? get logDumpDirectory {
+    final String? path = io.Platform.environment['FLUTTER_LOGS_DIR'];
+    if (path != null) {
+      io.Directory(path).createSync(recursive: true);
+    }
+    return path;
+  }
+
 
   /// Launches Chrome with the give [options].
   ///
@@ -87,10 +94,32 @@ class Chrome {
       print('Launching Chrome...');
     }
 
-    final String jsFlags = options.enableWasmGC ? <String>[
-      '--experimental-wasm-gc',
-      '--experimental-wasm-type-reflection',
-    ].join(' ') : '';
+    final String? logDirectory = logDumpDirectory;
+    final String? outputLogPath;
+    final Future<void> Function()? onClose;
+    if (logDirectory != null && options.userDataDirectory != null) {
+      final String logFilename = 'Chrome-Logs-${const Uuid().v4()}.txt';
+      outputLogPath = path.join(
+        logDirectory,
+        logFilename,
+      );
+      print('Log dump directory found. Will dump chrome logs to $outputLogPath');
+      onClose = () async {
+        try {
+          final io.File logFile = io.File(path.join(
+            options.userDataDirectory!,
+            'Default',
+            'chrome_debug.log',
+          ));
+          logFile.copySync(outputLogPath!);
+        } on io.FileSystemException catch (e) {
+          print('Failed to copy Chrome log output to $outputLogPath with error: $e');
+        }
+      };
+    } else {
+      outputLogPath = null;
+      onClose = null;
+    }
     final bool withDebugging = options.debugPort != null;
     final List<String> args = <String>[
       if (options.userDataDirectory != null)
@@ -112,7 +141,10 @@ class Chrome {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
-      if (jsFlags.isNotEmpty) '--js-flags=$jsFlags',
+      if (outputLogPath != null) ...<String>[
+        '--enable-logging',
+        '--v=1'
+      ],
     ];
 
     final io.Process chromeProcess = await _spawnChromiumProcess(
@@ -126,12 +158,13 @@ class Chrome {
       debugConnection = await _connectToChromeDebugPort(chromeProcess, options.debugPort!);
     }
 
-    return Chrome._(chromeProcess, onError, debugConnection);
+    return Chrome._(chromeProcess, onError, debugConnection, onClose);
   }
 
   final io.Process _chromeProcess;
   final ChromeErrorCallback _onError;
   final WipConnection? _debugConnection;
+  final Future<void> Function()? _onClose;
   bool _isStopped = false;
 
   Completer<void> ?_tracingCompleter;

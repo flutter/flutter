@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:usage/uuid/uuid.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../base/common.dart';
@@ -149,6 +150,14 @@ class ChromiumLauncher {
   /// The executable this launcher will use.
   String findExecutable() =>  _browserFinder(_platform, _fileSystem);
 
+  String? get logDumpDirectory {
+    final String? path = _platform.environment['FLUTTER_LOGS_DIR'];
+    if (path != null) {
+      _fileSystem.directory(path).createSync(recursive: true);
+    }
+    return path;
+  }
+
   /// Launch a Chromium browser to a particular `host` page.
   ///
   /// [headless] defaults to false, and controls whether we open a headless or
@@ -196,6 +205,19 @@ class ChromiumLauncher {
       _restoreUserSessionInformation(cacheDir, userDataDir);
     }
 
+    final String? logDirectory = logDumpDirectory;
+    final String? outputLogPath;
+    if (logDirectory != null) {
+      final String logFilename = 'Chrome-Logs-${Uuid().generateV4()}.txt';
+      outputLogPath = _fileSystem.path.join(
+        logDirectory,
+        logFilename,
+      );
+      _logger.printStatus('Log dump directory found. Will dump chrome logs to $outputLogPath');
+    } else {
+      outputLogPath = null;
+    }
+
     final int port = debugPort ?? await _operatingSystemUtils.findFreePort();
     final List<String> args = <String>[
       chromeExecutable,
@@ -214,6 +236,10 @@ class ChromiumLauncher {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
+      if (outputLogPath != null) ...<String>[
+        '--enable-logging',
+        '--v=1'
+      ],
       if (headless)
         ...<String>[
           '--headless',
@@ -227,18 +253,33 @@ class ChromiumLauncher {
 
     final Process process = await _spawnChromiumProcess(args, chromeExecutable);
 
-    // When the process exits, copy the user settings back to the provided data-dir.
-    if (cacheDir != null) {
-      unawaited(process.exitCode.whenComplete(() {
+    Future<void> cleanupChromiumProcess() async {
+      if (outputLogPath != null) {
+        try {
+          final File logFile = _fileSystem.file(_fileSystem.path.join(
+            userDataDir.path,
+            'Default',
+            'chrome_debug.log',
+          ));
+          logFile.copySync(outputLogPath);
+        } on FileSystemException catch (e) {
+          _logger.printWarning('Failed to copy Chrome log output to $outputLogPath with error: $e');
+        }
+      }
+
+      // When the process exits, copy the user settings back to the provided data-dir.
+      if (cacheDir != null) {
         _cacheUserSessionInformation(userDataDir, cacheDir);
+
         // cleanup temp dir
         try {
           userDataDir.deleteSync(recursive: true);
         } on FileSystemException {
           // ignore
         }
-      }));
+      }
     }
+
     return connect(Chromium(
       port,
       ChromeConnection('localhost', port),
@@ -246,6 +287,7 @@ class ChromiumLauncher {
       process: process,
       chromiumLauncher: this,
       logger: _logger,
+      onClose: cleanupChromiumProcess,
     ), skipCheck);
   }
 
@@ -473,6 +515,7 @@ class Chromium {
     required Process process,
     required ChromiumLauncher chromiumLauncher,
     required Logger logger,
+    this.onClose,
   })  : _process = process,
         _chromiumLauncher = chromiumLauncher,
         _logger = logger;
@@ -483,6 +526,7 @@ class Chromium {
   final ChromeConnection chromeConnection;
   final ChromiumLauncher _chromiumLauncher;
   final Logger _logger;
+  final Future<void> Function()? onClose;
 
   /// Resolves to browser's main process' exit code, when the browser exits.
   Future<int> get onExit async => _process.exitCode;
@@ -523,5 +567,6 @@ class Chromium {
         return 0;
       });
     });
+    await onClose?.call();
   }
 }
