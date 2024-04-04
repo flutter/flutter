@@ -42,6 +42,8 @@ bool DisplayListEmbedderViewSlice::recording_ended() {
   return builder_ == nullptr;
 }
 
+void ExternalViewEmbedder::CollectView(int64_t view_id) {}
+
 void ExternalViewEmbedder::SubmitFlutterView(
     int64_t flutter_view_id,
     GrDirectContext* context,

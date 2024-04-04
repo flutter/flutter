@@ -19,6 +19,10 @@ namespace flutter {
 /// @brief      A cache used to reference render targets that are owned by the
 ///             embedder but needed by th engine to render a frame.
 ///
+///             A map of class is managed by EmbedderExternalViewEmbedder. Each
+///             instance of this class manages the cached render targets for a
+///             view.
+///
 class EmbedderRenderTargetCache {
  public:
   EmbedderRenderTargetCache();
