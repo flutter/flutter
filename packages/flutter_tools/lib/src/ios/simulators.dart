@@ -990,22 +990,6 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   }
 }
 
-int compareIosVersions(String v1, String v2) {
-  final List<int> v1Fragments = v1.split('.').map<int>(int.parse).toList();
-  final List<int> v2Fragments = v2.split('.').map<int>(int.parse).toList();
-
-  int i = 0;
-  while (i < v1Fragments.length && i < v2Fragments.length) {
-    final int v1Fragment = v1Fragments[i];
-    final int v2Fragment = v2Fragments[i];
-    if (v1Fragment != v2Fragment) {
-      return v1Fragment.compareTo(v2Fragment);
-    }
-    i += 1;
-  }
-  return v1Fragments.length.compareTo(v2Fragments.length);
-}
-
 class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
   _IOSSimulatorDevicePortForwarder(this.device);
 
