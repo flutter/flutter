@@ -244,8 +244,8 @@ class StackParentData extends ContainerBoxParentData<RenderBox> {
       (final double top?, final double bottom?) => math.max(0.0, stackSize.height - bottom - top),
       (_, _) => this.height,
     };
-    assert(width == null || !width.isNaN);
-    assert(height == null || !height.isNaN);
+    assert(width == null || (!width.isNaN && width >= 0.0));
+    assert(height == null || (!height.isNaN && height >= 0.0));
     return BoxConstraints.tightFor(width: width, height: height);
   }
 
@@ -549,7 +549,7 @@ class RenderStack extends RenderBox
     };
 
     final Alignment alignment = _resolvedAlignment;
-    final Size size = computeDryLayout(constraints);
+    final Size size = getDryLayout(constraints);
 
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
     for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
@@ -771,7 +771,7 @@ class RenderIndexedStack extends RenderStack {
     };
 
     final Alignment alignment = _resolvedAlignment;
-    final Size size = computeDryLayout(constraints);
+    final Size size = getDryLayout(constraints);
 
     return RenderStack._baselineForChild(displayedChild, size, nonPositionedChildConstraints, alignment, baseline);
   }
