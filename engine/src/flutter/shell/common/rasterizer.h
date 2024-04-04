@@ -261,11 +261,12 @@ class Rasterizer final : public SnapshotDelegate,
   //----------------------------------------------------------------------------
   /// @brief      Deallocate the resources for displaying a view.
   ///
-  ///             This method must be called when a view is removed.
+  ///             This method must be called on the raster task runner when a
+  ///             view is removed from the engine.
   ///
-  ///             The rasterizer don't need views to be registered. Last-frame
-  ///             states for views are recorded when layer trees are rasterized
-  ///             to the view and used during `Rasterizer::DrawLastLayerTrees`.
+  ///             When the rasterizer is requested to draw an unrecognized view,
+  ///             it implicitly allocates necessary resources. These resources
+  ///             must be explicitly deallocated.
   ///
   /// @param[in]  view_id  The ID of the view.
   ///
