@@ -849,7 +849,7 @@ class _StretchController extends ChangeNotifier {
     velocity = clampDouble(velocity, 1, 10000);
     _stretchSizeTween.begin = _stretchSize.value;
     _stretchSizeTween.end = math.min(_stretchIntensity + (_flingFriction / velocity), 1.0);
-    _stretchController.duration = Duration(milliseconds: (velocity * 0.02).round());
+    _stretchController.duration = Duration(milliseconds: math.max(velocity * 0.02, 1).round());
     _stretchController.forward(from: 0.0);
     _state = _StretchState.absorb;
     _stretchDirection = totalOverscroll > 0 ? _StretchDirection.trailing : _StretchDirection.leading;
