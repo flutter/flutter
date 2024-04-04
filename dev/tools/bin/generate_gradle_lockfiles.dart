@@ -24,7 +24,7 @@ void main(List<String> arguments) {
       "enter the absolute paths to the app's android directory, then press CTRL-D.\n"
       "If you don't wish to re-generate the settings.gradle, build.gradle, and gradle-wrapper.properties files,\n"
       'add the flag `--no-gradle-generation`.\n'
-      'Automatically excludes a set of android subdirectories, defined at dev/tools/bin/config/lockfile_exclusion.yaml.\n'
+      'This tool automatically excludes a set of android subdirectories, defined at dev/tools/bin/config/lockfile_exclusion.yaml.\n'
       'To disable this behavior, run with `--no-exclusion`.\n';
 
   final ArgParser argParser = ArgParser()
