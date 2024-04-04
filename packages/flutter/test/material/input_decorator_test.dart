@@ -5020,12 +5020,12 @@ void main() {
 
   testWidgets('Prefix IconButton color respects IconButtonTheme foreground color states', (WidgetTester tester) async {
     const IconData prefixIcon = Icons.person;
-    const Color IconErrorColor = Color(0xffff0000);
+    const Color iconErrorColor = Color(0xffff0000);
     const Color iconColor = Color(0xff00ff00);
     final ButtonStyle iconButtonStyle = ButtonStyle(
       foregroundColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
         if (states.contains(MaterialState.error)) {
-          return IconErrorColor;
+          return iconErrorColor;
         }
         return iconColor;
       }),
@@ -5045,7 +5045,7 @@ void main() {
       ),
     );
 
-    expect(getIconStyle(tester, prefixIcon)?.color, IconErrorColor);
+    expect(getIconStyle(tester, prefixIcon)?.color, iconErrorColor);
 
     // Test the prefix IconButton color when there is no error text.
     await tester.pumpWidget(
@@ -5066,12 +5066,12 @@ void main() {
 
   testWidgets('Suffix IconButton color respects IconButtonTheme foreground color states', (WidgetTester tester) async {
     const IconData suffixIcon = Icons.search;
-    const Color IconErrorColor = Color(0xffff0000);
+    const Color iconErrorColor = Color(0xffff0000);
     const Color iconColor = Color(0xff00ff00);
     final ButtonStyle iconButtonStyle = ButtonStyle(
       foregroundColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
         if (states.contains(MaterialState.error)) {
-          return IconErrorColor;
+          return iconErrorColor;
         }
         return iconColor;
       }),
@@ -5091,7 +5091,7 @@ void main() {
       ),
     );
 
-    expect(getIconStyle(tester, suffixIcon)?.color, IconErrorColor);
+    expect(getIconStyle(tester, suffixIcon)?.color, iconErrorColor);
 
     // Test the prefix IconButton color when there is no error text.
     await tester.pumpWidget(
