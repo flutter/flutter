@@ -84,7 +84,7 @@ class SwiftPackageManagerIntegrationMigration {
 
   /// Path to add to .gitignore so generated files in FlutterGeneratedPluginSwiftPackage
   /// are not committed.
-  static const String flutterPackageGitignore = '**/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/';
+  static const String flutterPackageGitignore = '**/Flutter/Packages/FlutterGeneratedPluginSwiftPackage';
 
   File get backupProjectSettings => _fileSystem
       .directory(_xcodeProjectInfoFile.parent)
@@ -114,30 +114,12 @@ class SwiftPackageManagerIntegrationMigration {
         : _macosProjectIdentifier;
   }
 
-  File? _schemeFile;
-  File? _backupSchemeFile;
-
-  final _SchemeException _defaultSchemeException = _SchemeException(
-    "Flutter detected you're using a customized scheme and is unable to "
-    'automate adding Swift Package Manager integration. \n'
-    'To manually add this integration, open your project in Xcode and complete the following steps:\n'
-    '1. Select Product > Scheme > Edit Scheme.\n'
-    '2. Select the ">" beside Build in the left sidebar and select "Pre-actions".\n'
-    '3. Select the "+" button and select "New Run Script Action" from the dropdown.\n'
-    '4. Click the "Run Script" title and change to "Run Prepare Flutter Framework Script".\n'
-    '5. Change the "Provide build settings from" to the app.\n'
-    '6. Input the following in the text box: \n'
-    r'     /bin/sh "$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh" prepare'
-  );
-
-  void restoreFromBackup() {
+  void restoreFromBackup(SchemeInfo? schemeInfo) {
     if (backupProjectSettings.existsSync()) {
       _logger.printTrace('Restoring project settings from backup file...');
       backupProjectSettings.copySync(_xcodeProject.xcodeProjectInfoFile.path);
     }
-    if (_schemeFile != null && _backupSchemeFile != null && _backupSchemeFile!.existsSync()) {
-      _backupSchemeFile!.copySync(_schemeFile!.path);
-    }
+    schemeInfo?.backupSchemeFile?.copySync(schemeInfo.schemeFile.path);
   }
 
   /// Add Swift Package Manager integration to Xcode project's project.pbxproj.
@@ -147,9 +129,16 @@ class SwiftPackageManagerIntegrationMigration {
   /// Also, adds [flutterPackageGitignore] to .gitignore if found.
   Future<void> migrate() async {
     Status? migrationStatus;
+    SchemeInfo? schemeInfo;
     try {
       if (!_xcodeProjectInfoFile.existsSync()) {
         throw Exception('Xcode project not found.');
+      }
+
+      schemeInfo = await _getSchemeFile();
+
+      if (_isSchemeMigrated(schemeInfo) && _xcodeProject.flutterPluginSwiftPackageInProjectSettings) {
+        return;
       }
 
       // Update gitignore. If unable to update the platform specific .gitignore,
@@ -163,55 +152,27 @@ class SwiftPackageManagerIntegrationMigration {
         }
       }
 
-      // Parse project.pbxproj into JSON
-      final ParsedProjectInfo parsedInfo = _parsePbxproj();
-
-      // If project is already migrated, skip
-      if (_isMigrated(parsedInfo)) {
-        return;
-      }
-
       migrationStatus = _logger.startProgress(
         'Adding Swift Package Manager integration...',
       );
 
-      await _migrateScheme();
+      _migrateScheme(schemeInfo);
+      _migratePbxproj();
 
-      final String originalProjectContents =
-          _xcodeProjectInfoFile.readAsStringSync();
+      _logger.printTrace('Validating project settings...');
 
-      List<String> lines = LineSplitter.split(originalProjectContents).toList();
-      lines = _migrateBuildFile(lines, parsedInfo);
-      lines = _migrateFileReference(lines, parsedInfo);
-      lines = _migrateFrameworksBuildPhase(lines, parsedInfo);
-      lines = _migrateGroups(lines, parsedInfo);
-      lines = _migrateNativeTarget(lines, parsedInfo);
-      lines = _migrateProjectObject(lines, parsedInfo);
-      lines = _migrateLocalPackageProductDependencies(lines, parsedInfo);
-      lines = _migratePackageProductDependencies(lines, parsedInfo);
-
-      final String newProjectContents = '${lines.join('\n')}\n';
-
-      if (originalProjectContents != newProjectContents) {
-        _logger.printTrace('Updating project settings...');
-        _xcodeProjectInfoFile.copySync(backupProjectSettings.path);
-        _xcodeProjectInfoFile.writeAsStringSync(newProjectContents);
-
-        _logger.printTrace('Validating project settings...');
-
-        // Re-parse the project settings to check for syntax errors
-        final ParsedProjectInfo updatedInfo = _parsePbxproj();
-        if (!_isMigrated(updatedInfo, logErrorIfNotMigrated: true)) {
-          throw Exception('Settings were not updated correctly.');
-        }
-
-        // Get the build settings to make sure it compiles with xcodebuild
-        await _xcodeProjectInterpreter.getInfo(
-          _xcodeProject.hostAppRoot.path,
-        );
+      // Re-parse the project settings to check for syntax errors
+      final ParsedProjectInfo updatedInfo = _parsePbxproj();
+      if (!_isPbxprojMigrated(updatedInfo, logErrorIfNotMigrated: true)) {
+        throw Exception('Settings were not updated correctly.');
       }
+
+      // Get the project info to make sure it compiles with xcodebuild
+      await _xcodeProjectInterpreter.getInfo(
+        _xcodeProject.hostAppRoot.path,
+      );
     } on _SchemeException catch (e) {
-      restoreFromBackup();
+      restoreFromBackup(schemeInfo);
       throwToolExit(
           'An error occured when adding Swift Package Manager integration:\n'
           '$e\n\n'
@@ -222,10 +183,10 @@ class SwiftPackageManagerIntegrationMigration {
           'following command:\n'
           '  "flutter config --no-enable-swift-package-manager"\n');
     } on Exception catch (e) {
-      restoreFromBackup();
+      restoreFromBackup(schemeInfo);
       throwToolExit(
           'An error occured when adding Swift Package Manager integration:\n'
-          '  $e\n'
+          '  $e\n\n'
           'Swift Package Manager is currently an experimental feature, please file a bug at\n'
           '  https://github.com/flutter/flutter/issues/new?assignees=&labels=&projects=&template=1_activation.yml\n\n'
           'To avoid this failure, disable Flutter Swift Package Manager integration for the project\n'
@@ -236,8 +197,8 @@ class SwiftPackageManagerIntegrationMigration {
           '  "flutter config --no-enable-swift-package-manager"\n');
     } finally {
       ErrorHandlingFileSystem.deleteIfExists(backupProjectSettings);
-      if (_backupSchemeFile != null) {
-        ErrorHandlingFileSystem.deleteIfExists(_backupSchemeFile!);
+      if (schemeInfo?.backupSchemeFile != null) {
+        ErrorHandlingFileSystem.deleteIfExists(schemeInfo!.backupSchemeFile!);
       }
       migrationStatus?.stop();
     }
@@ -260,6 +221,142 @@ class SwiftPackageManagerIntegrationMigration {
       gitignore.writeAsStringSync(newProjectContents);
     }
     return true;
+  }
+
+    Future<SchemeInfo> _getSchemeFile() async {
+    final XcodeProjectInfo? projectInfo = await _xcodeProject.projectInfo();
+    if (projectInfo == null) {
+      throw Exception('Unable to get Xcode project info.');
+    }
+    if (_xcodeProject.xcodeWorkspace == null) {
+      throw Exception('Xcode workspace not found.');
+    }
+    final String? scheme = projectInfo.schemeFor(_buildInfo);
+    if (scheme == null) {
+      projectInfo.reportFlavorNotFoundAndExit();
+    }
+
+    final File schemeFile = _xcodeProject.xcodeProjectSchemeFile(scheme: scheme);
+    if (!schemeFile.existsSync()) {
+      throw Exception('Unable to get scheme file for $scheme.');
+    }
+
+    final String schemeContent = schemeFile.readAsStringSync();
+    return SchemeInfo(
+      schemeName: scheme,
+      schemeFile: schemeFile,
+      schemeContent: schemeContent,
+    );
+  }
+
+  bool _isSchemeMigrated(SchemeInfo schemeInfo) {
+    if (schemeInfo.schemeContent.contains('Run Prepare Flutter Framework Script')) {
+      return true;
+    }
+    return false;
+  }
+
+  void _migrateScheme(SchemeInfo schemeInfo) {
+    final String scheme = schemeInfo.schemeName;
+    final File schemeFile = schemeInfo.schemeFile;
+    final String schemeContent = schemeInfo.schemeContent;
+
+    if (scheme != 'Runner') {
+      throw _defaultSchemeException(_platform);
+    }
+
+    final List<String> schemeLines = LineSplitter.split(schemeContent).toList();
+    final int index = schemeLines.indexWhere((String line) => line.contains('BlueprintIdentifier = "$_runnerNativeTargetIdentifer"'));
+    if (index == -1 || index + 3 >= schemeLines.length) {
+      throw _defaultSchemeException(_platform);
+    }
+
+    final String buildableName = schemeLines[index + 1].trim();
+    if (!buildableName.contains('BuildableName')) {
+      throw Exception('Failed to parse ${schemeFile.basename}: Could not find BuildableName.');
+    }
+
+    final String blueprintName = schemeLines[index + 2].trim();
+    if (!blueprintName.contains('BlueprintName')) {
+      throw Exception('Failed to parse ${schemeFile.basename}: Could not find BlueprintName.');
+    }
+
+    final String referencedContainer = schemeLines[index + 3].trim();
+    if (!referencedContainer.contains('ReferencedContainer')) {
+      throw Exception('Failed to parse ${schemeFile.basename}: Could not find ReferencedContainer.');
+    }
+
+    schemeInfo.backupSchemeFile = schemeFile.parent.childFile('${schemeFile.basename}.backup');
+    schemeFile.copySync(schemeInfo.backupSchemeFile!.path);
+
+    final String scriptText;
+    if (_platform == SupportedPlatform.ios) {
+      scriptText = r'scriptText = "/bin/sh &quot;$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh&quot; prepare&#10;">';
+    } else {
+      scriptText = r'scriptText = "&quot;$FLUTTER_ROOT&quot;/packages/flutter_tools/bin/macos_assemble.sh prepare&#10;">';
+    }
+
+    String newContent = '''
+         <ExecutionAction
+            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
+            <ActionContent
+               title = "Run Prepare Flutter Framework Script"
+               $scriptText
+               <EnvironmentBuildable>
+                  <BuildableReference
+                     BuildableIdentifier = "primary"
+                     BlueprintIdentifier = "$_runnerNativeTargetIdentifer"
+                     $buildableName
+                     $blueprintName
+                     $referencedContainer
+                  </BuildableReference>
+               </EnvironmentBuildable>
+            </ActionContent>
+         </ExecutionAction>''';
+    String newScheme = schemeContent;
+    if (schemeContent.contains('PreActions')) {
+      newScheme = schemeContent.replaceFirst('<PreActions>', '<PreActions>\n$newContent');
+    } else {
+      newContent = '''
+      <PreActions>
+$newContent
+      </PreActions>
+''';
+      final String? buildActionEntries = schemeLines.where((String line) => line.contains('<BuildActionEntries>')).firstOrNull;
+      if (buildActionEntries == null) {
+        throw Exception('Failed to parse ${schemeFile.basename}: Could not find BuildActionEntries.');
+      } else {
+        newScheme = schemeContent.replaceFirst(buildActionEntries, '$newContent$buildActionEntries');
+      }
+    }
+
+    schemeFile.writeAsStringSync(newScheme);
+    try {
+      XmlDocument.parse(newScheme);
+    } on XmlException catch (exception) {
+      throw Exception('Failed to parse ${schemeFile.basename}: Invalid xml: $newScheme\n$exception');
+    }
+  }
+
+  _SchemeException _defaultSchemeException(SupportedPlatform platform) {
+    final String command;
+    if (platform == SupportedPlatform.ios) {
+      command = r'     /bin/sh "$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh" prepare';
+    } else {
+      command = r'     "$FLUTTER_ROOT"/packages/flutter_tools/bin/macos_assemble.sh prepare';
+    }
+    return _SchemeException(
+      "Flutter detected you're using a customized scheme and is unable to "
+      'automate adding Swift Package Manager integration. \n'
+      'To manually add this integration, open your project in Xcode and complete the following steps:\n'
+      '1. Select Product > Scheme > Edit Scheme.\n'
+      '2. Select the ">" beside Build in the left sidebar and select "Pre-actions".\n'
+      '3. Select the "+" button and select "New Run Script Action" from the dropdown.\n'
+      '4. Click the "Run Script" title and change to "Run Prepare Flutter Framework Script".\n'
+      '5. Change the "Provide build settings from" to the app.\n'
+      '6. Input the following in the text box: \n'
+      '$command'
+    );
   }
 
   /// Parses the project.pbxproj into [ParsedProjectInfo]. Will throw an
@@ -287,7 +384,7 @@ class SwiftPackageManagerIntegrationMigration {
 
   /// Checks if all sections have been migrated. If [logErrorIfNotMigrated] is
   /// true, will log an error for each section that is not migrated.
-  bool _isMigrated(
+  bool _isPbxprojMigrated(
     ParsedProjectInfo projectInfo, {
     bool logErrorIfNotMigrated = false,
   }) {
@@ -333,105 +430,29 @@ class SwiftPackageManagerIntegrationMigration {
         swiftPackageMigrated;
   }
 
-  Future<void> _migrateScheme() async {
-    final XcodeProjectInfo? projectInfo = await _xcodeProject.projectInfo();
-    if (projectInfo == null) {
-      throw Exception('Xcode project not found.');
-    }
-    if (_xcodeProject.xcodeWorkspace == null) {
-      throw Exception('Xcode workspace not found.');
-    }
-    final String? scheme = projectInfo.schemeFor(_buildInfo);
-    if (scheme == null) {
-      projectInfo.reportFlavorNotFoundAndExit();
-    }
+  void _migratePbxproj() {
+    // Parse project.pbxproj into JSON
+    final ParsedProjectInfo parsedInfo = _parsePbxproj();
 
-    final File schemeFile = _xcodeProject.xcodeProjectSchemeFile(scheme: scheme);
-    if (!schemeFile.existsSync()) {
-      throw Exception('Unable to get scheme file for $scheme.');
-    }
-    _schemeFile = schemeFile;
+    final String originalProjectContents =
+        _xcodeProjectInfoFile.readAsStringSync();
 
-    final String schemeContent = schemeFile.readAsStringSync();
-    if (schemeContent.contains('Run Prepare Flutter Framework Script')) {
-      return;
-    }
+    List<String> lines = LineSplitter.split(originalProjectContents).toList();
+    lines = _migrateBuildFile(lines, parsedInfo);
+    lines = _migrateFileReference(lines, parsedInfo);
+    lines = _migrateFrameworksBuildPhase(lines, parsedInfo);
+    lines = _migrateGroups(lines, parsedInfo);
+    lines = _migrateNativeTarget(lines, parsedInfo);
+    lines = _migrateProjectObject(lines, parsedInfo);
+    lines = _migrateLocalPackageProductDependencies(lines, parsedInfo);
+    lines = _migratePackageProductDependencies(lines, parsedInfo);
 
-    if (scheme != 'Runner' || !schemeContent.contains('BlueprintIdentifier = "$_runnerNativeTargetIdentifer"')) {
-      throw _defaultSchemeException;
-    }
+    final String newProjectContents = '${lines.join('\n')}\n';
 
-    final List<String> schemeLines = LineSplitter.split(schemeContent).toList();
-    final int index = schemeLines.indexWhere((String line) => line.contains('BlueprintIdentifier = "$_runnerNativeTargetIdentifer"'));
-    if (index == -1 || index + 3 >= schemeLines.length) {
-      throw _defaultSchemeException;
-    }
-
-    final String buildableName = schemeLines[index + 1].trim();
-    if (!buildableName.contains('BuildableName')) {
-      throw Exception('Failed to parse ${schemeFile.basename}: Could not find BuildableName.');
-    }
-
-    final String blueprintName = schemeLines[index + 2].trim();
-    if (!blueprintName.contains('BlueprintName')) {
-      throw Exception('Failed to parse ${schemeFile.basename}: Could not find BlueprintName.');
-    }
-
-    final String referencedContainer = schemeLines[index + 3].trim();
-    if (!referencedContainer.contains('ReferencedContainer')) {
-      throw Exception('Failed to parse ${schemeFile.basename}: Could not find ReferencedContainer.');
-    }
-
-    _backupSchemeFile = schemeFile.parent.childFile('${schemeFile.basename}.backup');
-    schemeFile.copySync(_backupSchemeFile!.path);
-
-    final String scriptText;
-    if (_platform == SupportedPlatform.ios) {
-      scriptText = r'scriptText = "/bin/sh &quot;$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh&quot; prepare&#10;">';
-    } else {
-      scriptText = r'scriptText = "&quot;$FLUTTER_ROOT&quot;/packages/flutter_tools/bin/macos_assemble.sh prepare&#10;">';
-    }
-
-    String newContent = '''
-         <ExecutionAction
-            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
-            <ActionContent
-               title = "Run Prepare Flutter Framework Script"
-               $scriptText
-               <EnvironmentBuildable>
-                  <BuildableReference
-                     BuildableIdentifier = "primary"
-                     BlueprintIdentifier = "$_runnerNativeTargetIdentifer"
-                     $buildableName
-                     $blueprintName
-                     $referencedContainer
-                  </BuildableReference>
-               </EnvironmentBuildable>
-            </ActionContent>
-         </ExecutionAction>
-''';
-    String newScheme = schemeContent;
-    if (schemeContent.contains('PreActions')) {
-      newScheme = schemeContent.replaceFirst('<PreActions>', '<PreActions>\n$newContent');
-    } else {
-      newContent = '''
-      <PreActions>
-$newContent
-      </PreActions>
-''';
-      final String? buildActionEntries = schemeLines.where((String line) => line.contains('<BuildActionEntries>')).firstOrNull;
-      if (buildActionEntries == null) {
-        throw Exception('Failed to parse ${schemeFile.basename}: Could not find BuildActionEntries.');
-      } else {
-        newScheme = schemeContent.replaceFirst(buildActionEntries, '$newContent$buildActionEntries');
-      }
-    }
-
-    schemeFile.writeAsStringSync(newScheme);
-    try {
-      XmlDocument.parse(newScheme);
-    } on XmlException catch (exception) {
-      throw Exception('Failed to parse ${schemeFile.basename}: $exception');
+    if (originalProjectContents != newProjectContents) {
+      _logger.printTrace('Updating project settings...');
+      _xcodeProjectInfoFile.copySync(backupProjectSettings.path);
+      _xcodeProjectInfoFile.writeAsStringSync(newProjectContents);
     }
   }
 
@@ -1028,6 +1049,19 @@ $newContent
     }
     return (startSectionIndex, endSectionIndex);
   }
+}
+
+class SchemeInfo {
+  SchemeInfo({
+    required this.schemeName,
+    required this.schemeFile,
+    required this.schemeContent,
+  });
+
+  final String schemeName;
+  final File schemeFile;
+  final String schemeContent;
+  File? backupSchemeFile;
 }
 
 /// Representation of data parsed from Xcode project's project.pbxproj.
