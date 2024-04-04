@@ -27,7 +27,6 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace = "dev.flutter.manual_tests"
     compileSdk flutter.compileSdkVersion
 
     compileOptions {

@@ -27,7 +27,6 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace = "com.example.android_embedding_v2_smoke_test"
     compileSdk flutter.compileSdkVersion
 
     compileOptions {
