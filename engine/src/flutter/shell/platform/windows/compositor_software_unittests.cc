@@ -46,12 +46,6 @@ class CompositorSoftwareTest : public WindowsTest {
   FlutterWindowsEngine* engine() { return engine_.get(); }
   MockFlutterWindowsView* view() { return view_.get(); }
 
-  void UseHeadlessEngine() {
-    FlutterWindowsEngineBuilder builder{GetContext()};
-
-    engine_ = builder.Build();
-  }
-
   void UseEngineWithView() {
     FlutterWindowsEngineBuilder builder{GetContext()};
 
@@ -62,9 +56,6 @@ class CompositorSoftwareTest : public WindowsTest {
     engine_ = builder.Build();
     view_ = std::make_unique<MockFlutterWindowsView>(engine_.get(),
                                                      std::move(window));
-
-    EngineModifier modifier{engine_.get()};
-    modifier.SetImplicitView(view_.get());
   }
 
  private:
@@ -77,9 +68,7 @@ class CompositorSoftwareTest : public WindowsTest {
 }  // namespace
 
 TEST_F(CompositorSoftwareTest, CreateBackingStore) {
-  UseHeadlessEngine();
-
-  auto compositor = CompositorSoftware{engine()};
+  CompositorSoftware compositor;
 
   FlutterBackingStoreConfig config = {};
   FlutterBackingStore backing_store = {};
@@ -91,7 +80,7 @@ TEST_F(CompositorSoftwareTest, CreateBackingStore) {
 TEST_F(CompositorSoftwareTest, Present) {
   UseEngineWithView();
 
-  auto compositor = CompositorSoftware{engine()};
+  CompositorSoftware compositor;
 
   FlutterBackingStoreConfig config = {};
   FlutterBackingStore backing_store = {};
@@ -104,7 +93,7 @@ TEST_F(CompositorSoftwareTest, Present) {
   const FlutterLayer* layer_ptr = &layer;
 
   EXPECT_CALL(*view(), PresentSoftwareBitmap).WillOnce(Return(true));
-  EXPECT_TRUE(compositor.Present(view()->view_id(), &layer_ptr, 1));
+  EXPECT_TRUE(compositor.Present(view(), &layer_ptr, 1));
 
   ASSERT_TRUE(compositor.CollectBackingStore(&backing_store));
 }
@@ -112,54 +101,10 @@ TEST_F(CompositorSoftwareTest, Present) {
 TEST_F(CompositorSoftwareTest, PresentEmpty) {
   UseEngineWithView();
 
-  auto compositor = CompositorSoftware{engine()};
+  CompositorSoftware compositor;
 
   EXPECT_CALL(*view(), ClearSoftwareBitmap).WillOnce(Return(true));
-  EXPECT_TRUE(compositor.Present(view()->view_id(), nullptr, 0));
-}
-
-TEST_F(CompositorSoftwareTest, UnknownViewIgnored) {
-  UseEngineWithView();
-
-  auto compositor = CompositorSoftware{engine()};
-
-  FlutterBackingStoreConfig config = {};
-  FlutterBackingStore backing_store = {};
-
-  ASSERT_TRUE(compositor.CreateBackingStore(config, &backing_store));
-
-  FlutterLayer layer = {};
-  layer.type = kFlutterLayerContentTypeBackingStore;
-  layer.backing_store = &backing_store;
-  const FlutterLayer* layer_ptr = &layer;
-
-  FlutterViewId unknown_view_id = 123;
-  ASSERT_NE(view()->view_id(), unknown_view_id);
-  ASSERT_EQ(engine()->view(unknown_view_id), nullptr);
-
-  EXPECT_FALSE(compositor.Present(unknown_view_id, &layer_ptr, 1));
-
-  ASSERT_TRUE(compositor.CollectBackingStore(&backing_store));
-}
-
-TEST_F(CompositorSoftwareTest, HeadlessPresentIgnored) {
-  UseHeadlessEngine();
-
-  auto compositor = CompositorSoftware{engine()};
-
-  FlutterBackingStoreConfig config = {};
-  FlutterBackingStore backing_store = {};
-
-  ASSERT_TRUE(compositor.CreateBackingStore(config, &backing_store));
-
-  FlutterLayer layer = {};
-  layer.type = kFlutterLayerContentTypeBackingStore;
-  layer.backing_store = &backing_store;
-  const FlutterLayer* layer_ptr = &layer;
-
-  EXPECT_FALSE(compositor.Present(kImplicitViewId, &layer_ptr, 1));
-
-  ASSERT_TRUE(compositor.CollectBackingStore(&backing_store));
+  EXPECT_TRUE(compositor.Present(view(), nullptr, 0));
 }
 
 }  // namespace testing
