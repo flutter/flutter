@@ -30,6 +30,9 @@ const Duration _kTransitionDuration = Duration(milliseconds: 167);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 const double _kFinalLabelScale = 0.75;
 
+typedef _SubtextSize = ({ double ascent, double descent });
+typedef _ChildBaselineGetter = double Function(RenderBox child, BoxConstraints constraints);
+
 // The default duration for hint fade in/out transitions.
 //
 // Animating hint is not mentioned in the Material specification.
@@ -582,7 +585,8 @@ enum _DecorationSlot {
   suffix,
   prefixIcon,
   suffixIcon,
-  subtext,
+  helperError,
+  counter,
   container,
 }
 
@@ -608,7 +612,8 @@ class _Decoration {
     this.suffix,
     this.prefixIcon,
     this.suffixIcon,
-    this.subtext,
+    this.helperError,
+    this.counter,
     this.container,
   });
 
@@ -630,7 +635,8 @@ class _Decoration {
   final Widget? suffix;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
-  final Widget? subtext;
+  final Widget? helperError;
+  final Widget? counter;
   final Widget? container;
 
   @override
@@ -660,7 +666,8 @@ class _Decoration {
         && other.suffix == suffix
         && other.prefixIcon == prefixIcon
         && other.suffixIcon == suffixIcon
-        && other.subtext == subtext
+        && other.helperError == helperError
+        && other.counter == counter
         && other.container == container;
   }
 
@@ -683,7 +690,8 @@ class _Decoration {
     suffix,
     prefixIcon,
     suffixIcon,
-    subtext,
+    helperError,
+    counter,
     container,
   );
 }
@@ -697,6 +705,7 @@ class _RenderDecorationLayout {
     required this.inputBaseline, // for InputBorderType.underline
     required this.outlineBaseline, // for InputBorderType.outline
     required this.containerHeight,
+    required this.subtextSize,
     required this.size,
   });
 
@@ -704,6 +713,7 @@ class _RenderDecorationLayout {
   final double inputBaseline;
   final double outlineBaseline;
   final double containerHeight;
+  final _SubtextSize subtextSize;
   final Size size;
 }
 
@@ -735,13 +745,14 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   RenderBox? get suffix => childForSlot(_DecorationSlot.suffix);
   RenderBox? get prefixIcon => childForSlot(_DecorationSlot.prefixIcon);
   RenderBox? get suffixIcon => childForSlot(_DecorationSlot.suffixIcon);
-  RenderBox get subtext => childForSlot(_DecorationSlot.subtext)!;
+  RenderBox get helperError => childForSlot(_DecorationSlot.helperError)!;
+  RenderBox? get counter => childForSlot(_DecorationSlot.counter);
   RenderBox? get container => childForSlot(_DecorationSlot.container);
 
   // The returned list is ordered for hit testing.
   @override
   Iterable<RenderBox> get children {
-    final RenderBox? subtext = childForSlot(_DecorationSlot.subtext);
+    final RenderBox? helperError = childForSlot(_DecorationSlot.helperError);
     return <RenderBox>[
       if (icon != null)
         icon!,
@@ -759,8 +770,10 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         label!,
       if (hint != null)
         hint!,
-      if (subtext != null)
-        subtext,
+      if (helperError != null)
+        helperError,
+      if (counter != null)
+        counter!,
       if (container != null)
         container!,
     ];
@@ -885,17 +898,57 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     if (container != null) {
       visitor(container!);
     }
-    visitor(subtext);
+    visitor(helperError);
+    if (counter != null) {
+      visitor(counter!);
+    }
   }
 
   static double _minWidth(RenderBox? box, double height) => box?.getMinIntrinsicWidth(height) ?? 0.0;
   static double _maxWidth(RenderBox? box, double height) => box?.getMaxIntrinsicWidth(height) ?? 0.0 ;
   static double _minHeight(RenderBox? box, double width) => box?.getMinIntrinsicHeight(width) ?? 0.0;
   static Size _boxSize(RenderBox? box) => box?.size ?? Size.zero;
-
+  static double _getBaseline(RenderBox box, BoxConstraints boxConstraints) {
+    return ChildLayoutHelper.getBaseline(box, boxConstraints, TextBaseline.alphabetic) ?? box.size.height;
+  }
+  static double _getDryBaseline(RenderBox box, BoxConstraints boxConstraints) {
+    return ChildLayoutHelper.getDryBaseline(box, boxConstraints, TextBaseline.alphabetic)
+        ?? ChildLayoutHelper.dryLayoutChild(box, boxConstraints).height;
+  }
   static BoxParentData _boxParentData(RenderBox box) => box.parentData! as BoxParentData;
 
   EdgeInsets get contentPadding => decoration.contentPadding;
+
+  _SubtextSize _computeSubtextSizes({
+    required BoxConstraints constraints,
+    required ChildLayouter layoutChild,
+    required _ChildBaselineGetter getBaseline,
+  }) {
+    double ascent = 0.0;
+    double descent = 0.0;
+    final RenderBox? counter = this.counter;
+    Size counterSize;
+    if (counter != null) {
+      counterSize = layoutChild(counter, constraints);
+      final double counterAscent = getBaseline(counter, constraints);
+      ascent = counterAscent;
+      descent = counterSize.height - counterAscent;
+    } else {
+      counterSize = Size.zero;
+    }
+
+    final BoxConstraints helperErrorConstraints = constraints.deflate(EdgeInsets.only(left: counterSize.width));
+    final double helperErrorHeight = layoutChild(helperError, helperErrorConstraints).height;
+    final double heplerErrorAscent = getBaseline(helperError, helperErrorConstraints);
+
+    ascent = math.max(ascent, heplerErrorAscent);
+    descent = math.max(descent, helperErrorHeight - heplerErrorAscent);
+
+    if (ascent + descent > 0.0) {
+      ascent += subtextGap;
+    }
+    return (ascent: ascent, descent: descent);
+  }
 
   // Lay out the given box if needed, and return its baseline.
   double _layoutLineBox(RenderBox? box, BoxConstraints constraints) {
@@ -903,12 +956,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       return 0.0;
     }
     box.layout(constraints, parentUsesSize: true);
-    // Since internally, all layout is performed against the alphabetic baseline,
-    // (eg, ascents/descents are all relative to alphabetic, even if the font is
-    // an ideographic or hanging font), we should always obtain the reference
-    // baseline from the alphabetic baseline. The ideographic baseline is for
-    // use post-layout and is derived from the alphabetic baseline combined with
-    // the font metrics.
     final double baseline = box.getDistanceToBaseline(TextBaseline.alphabetic)!;
 
     assert(() {
@@ -994,7 +1041,11 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
     // The helper or error text can occupy the full width less the space
     // occupied by the icon and counter.
-    boxToBaseline[subtext] = _layoutLineBox(subtext, contentConstraints);
+    final _SubtextSize subtextSize = _computeSubtextSizes(
+      constraints: contentConstraints,
+      layoutChild: ChildLayoutHelper.layoutChild,
+      getBaseline: _getBaseline,
+    );
 
     // The height of the input needs to accommodate label above and counter and
     // helperError below, when they exist.
@@ -1004,8 +1055,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double topHeight = decoration.border.isOutline
       ? math.max(labelHeight - boxToBaseline[label]!, 0)
       : labelHeight;
-    final double subTextHeight = subtext.size.height;
-    final double bottomHeight = subTextHeight > 0.0 ? (subTextHeight + subtextGap) : subTextHeight;
+    final double bottomHeight = subtextSize.ascent + subtextSize.descent;
     final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
     boxToBaseline[input] = _layoutLineBox(
       input,
@@ -1128,6 +1178,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       containerHeight: containerHeight,
       inputBaseline: inputBaseline,
       outlineBaseline: outlineBaseline,
+      subtextSize: subtextSize,
       size: Size(constraints.maxWidth, containerHeight + bottomHeight),
     );
   }
@@ -1201,11 +1252,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
     width = math.max(width - contentPadding.horizontal, 0.0);
 
-    double subtextHeight = _minHeight(subtext, width);
-    if (subtextHeight > 0.0) {
-      subtextHeight += subtextGap;
-    }
-
     final double prefixHeight = _minHeight(prefix, width);
     final double prefixWidth = _minWidth(prefix, prefixHeight);
 
@@ -1226,7 +1272,21 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double minContainerHeight = decoration.isDense! || expands
       ? 0.0
       : kMinInteractiveDimension;
-    return math.max(containerHeight, minContainerHeight) + subtextHeight;
+
+    // The logic is similar to RenderFlex's intrisic cross size calculation.
+    Size layoutChild(RenderBox child, BoxConstraints constraints) {
+      final double width = identical(child, counter)
+        ? child.getMaxIntrinsicWidth(double.infinity)
+        : constraints.maxWidth;
+      return Size(width, child.getMinIntrinsicHeight(width));
+    }
+
+    final _SubtextSize subtext = _computeSubtextSizes(
+      constraints: BoxConstraints(maxWidth: width),
+      layoutChild: layoutChild,
+      getBaseline: _getDryBaseline,
+    );
+    return math.max(containerHeight, minContainerHeight) + subtext.ascent + subtext.descent;
   }
 
   @override
@@ -1278,23 +1338,12 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       _boxParentData(container).offset = Offset(x, 0.0);
     }
 
-    late double height;
+
     double centerLayout(RenderBox box, double x) {
+      final double height = layout.containerHeight;
       _boxParentData(box).offset = Offset(x, (height - box.size.height) / 2.0);
       return box.size.width;
     }
-
-    late double baseline;
-    double baselineLayout(RenderBox box, double x) {
-      _boxParentData(box).offset = Offset(x, baseline - layout.boxToBaseline[box]!);
-      return box.size.width;
-    }
-
-    final double left = contentPadding.left;
-    final double right = overallWidth - contentPadding.right;
-
-    height = layout.containerHeight;
-    baseline = _isOutlineAligned ? layout.outlineBaseline : layout.inputBaseline;
 
     if (icon != null) {
       final double x = switch (textDirection) {
@@ -1302,6 +1351,31 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         TextDirection.ltr => 0.0,
       };
       centerLayout(icon!, x);
+    }
+
+    final double left = contentPadding.left;
+    final double right = overallWidth - contentPadding.right;
+    final double subtextBaseline = layout.subtextSize.ascent + layout.containerHeight;
+    final RenderBox? counter = this.counter;
+    final double helperErrorBaseline = helperError.getDistanceToBaseline(TextBaseline.alphabetic)!;
+    final double counterBaseline = counter?.getDistanceToBaseline(TextBaseline.alphabetic)! ?? 0.0;
+    switch (textDirection) {
+      case TextDirection.ltr:
+        _boxParentData(helperError).offset = Offset(left + _boxSize(icon).width, subtextBaseline - helperErrorBaseline);
+        if (counter != null) {
+          _boxParentData(counter).offset = Offset(right - counter.size.width, subtextBaseline - counterBaseline);
+        }
+      case TextDirection.rtl:
+        _boxParentData(helperError).offset = Offset(right - _boxSize(icon).width - helperError.size.width, subtextBaseline - helperErrorBaseline);
+        if (counter != null) {
+          _boxParentData(counter).offset = Offset(left, subtextBaseline - counterBaseline);
+        }
+    }
+
+    double baselineLayout(RenderBox box, double x) {
+      final double baseline = _isOutlineAligned ? layout.outlineBaseline : layout.inputBaseline;
+      _boxParentData(box).offset = Offset(x, baseline - layout.boxToBaseline[box]!);
+      return box.size.width;
     }
 
     switch (textDirection) {
@@ -1370,8 +1444,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         break;
       }
     }
-
-    _boxParentData(subtext).offset = Offset(left, layout.containerHeight + subtextGap);
 
     if (label != null) {
       final double labelX = _boxParentData(label!).offset.dx;
@@ -1480,7 +1552,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     doPaint(suffixIcon);
     doPaint(hint);
     doPaint(input);
-    doPaint(subtext);
+    doPaint(helperError);
+    doPaint(counter);
   }
 
   @override
@@ -1578,7 +1651,8 @@ class _Decorator extends SlottedMultiChildRenderObjectWidget<_DecorationSlot, Re
       _DecorationSlot.suffix      => decoration.suffix,
       _DecorationSlot.prefixIcon  => decoration.prefixIcon,
       _DecorationSlot.suffixIcon  => decoration.suffixIcon,
-      _DecorationSlot.subtext     => decoration.subtext,
+      _DecorationSlot.helperError => decoration.helperError,
+      _DecorationSlot.counter     => decoration.counter,
       _DecorationSlot.container   => decoration.container,
     };
   }
@@ -2357,16 +2431,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         suffix: suffix,
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
-        subtext: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textDirection: textDirection,
-          textBaseline: TextBaseline.alphabetic,
-          children: <Widget>[
-            helperError,
-            if (counter != null) Expanded(child: counter),
-          ],
-        ),
+        helperError: helperError,
+        counter: counter,
         container: container
       ),
       textDirection: textDirection,
