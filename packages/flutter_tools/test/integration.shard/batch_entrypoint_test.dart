@@ -12,20 +12,78 @@ import '../src/common.dart';
 import 'test_utils.dart';
 
 final String flutterRootPath = getFlutterRoot();
-final Directory flutterRoot = fileSystem.directory(flutterRootPath);
 
 Future<void> main() async {
   // Regression test for https://github.com/flutter/flutter/issues/132592
   test('flutter/bin/dart updates the Dart SDK without hanging', () async {
-    // Run the Dart entrypoint once to ensure the Dart SDK is downloaded.
-    await runDartBatch();
+    // Copy the parts of the Flutter SDK that are needed by the body code of
+    // this test into a temp directory to avoid operating on files that are
+    // currently being accessed to run this test, i.e.
+    // dartaotruntime.exe and frontend_server_aot.dart.snapshot.
+    final Directory tempDir = createResolvedTempDirectorySync('batch_entrypoint_test.');
+    final Directory flutterRootInTempDir = tempDir.childDirectory('flutter');
+    flutterRootInTempDir.createSync();
+    final File xcopyExcludeFile = tempDir.childFile('exclude.txt');
+    xcopyExcludeFile.writeAsStringSync(r'''
+bin\cache\dart-sdk
+bin\cache\engine-dart-sdk.stamp
+packages\flutter_tools\test
+''');
+    await processManager.run(
+      <String>[
+        'xcopy',
+        '/s',
+        '/e',
+        '/h',
+        '.git',
+        '${flutterRootInTempDir.childDirectory('.git').path}\\',
+      ],
+      workingDirectory: flutterRootPath,
+    );
+    await processManager.run(
+      <String>[
+        'xcopy',
+        '/s',
+        '/e',
+        '/h',
+        '/exclude:${xcopyExcludeFile.path}',
+        'bin',
+        '${flutterRootInTempDir.childDirectory('bin').path}\\',
+      ],
+      workingDirectory: flutterRootPath,
+    );
+    await processManager.run(
+      <String>[
+        'xcopy',
+        '/s',
+        '/e',
+        '/h',
+        '/exclude:${xcopyExcludeFile.path}',
+        r'packages\flutter_tools',
+        '${flutterRootInTempDir.childDirectory('packages').childDirectory('flutter_tools').path}\\',
+      ],
+      workingDirectory: flutterRootPath,
+    );
+    expect(flutterRootInTempDir.existsSync(), true);
+    expect(
+      flutterRootInTempDir
+        .childDirectory('packages')
+        .childDirectory('flutter_tools')
+        .childDirectory('lib')
+        .childFile('executable.dart')
+        .existsSync(),
+      true,
+    );
 
-    expect(dartSdkStamp.existsSync(), true);
+    // Run the Dart entrypoint once to ensure the Dart SDK is downloaded.
+    await runDartBatch(flutterRootInTempDir);
+
+    expect(getDartSdkStamp(flutterRootInTempDir).existsSync(), true);
 
     // Remove the Dart SDK stamp and run the Dart entrypoint again to trigger
     // the Dart SDK update.
-    dartSdkStamp.deleteSync();
-    final Future<String> runFuture = runDartBatch();
+    getDartSdkStamp(flutterRootInTempDir).deleteSync();
+    final Future<String> runFuture = runDartBatch(flutterRootInTempDir);
     final Timer timer = Timer(const Duration(minutes: 5), () {
       // This print is useful for people debugging this test. Normally we would
       // avoid printing in a test but this is an exception because it's useful
@@ -47,30 +105,34 @@ Future<void> main() async {
     // If 7-Zip is installed, unexpected overwrites causes this to hang.
     // If 7-Zip is not installed, unexpected overwrites results in error messages.
     // See: https://github.com/flutter/flutter/issues/132592
-    expect(dartSdkStamp.existsSync(), true);
+    expect(getDartSdkStamp(flutterRootInTempDir).existsSync(), true);
     expect(output, contains('Downloading Dart SDK from Flutter engine ...'));
     // Do not assert on the exact unzipping method, as this could change on CI
     expect(output, contains(RegExp(r'Expanding downloaded archive with (.*)...')));
     expect(output, isNot(contains('Use the -Force parameter' /* Luke */)));
+
+    tempDir.deleteSync(recursive: true);
   },
   skip: !platform.isWindows); // [intended] Only Windows uses the batch entrypoint
 }
 
-Future<String> runDartBatch() async {
+Future<String> runDartBatch(Directory flutterRoot) async {
   String output = '';
   final Process process = await processManager.start(
     <String>[
-      dartBatch.path
+      getDartBatch(flutterRoot).path
     ],
   );
   final Future<Object?> stdoutFuture = process.stdout
     .transform<String>(utf8.decoder)
     .forEach((String str) {
+      print(str);
       output += str;
     });
   final Future<Object?> stderrFuture = process.stderr
     .transform<String>(utf8.decoder)
     .forEach((String str) {
+      print(str);
       output += str;
     });
 
@@ -91,16 +153,17 @@ Future<String> runDartBatch() async {
   return output;
 }
 
-// The executable batch entrypoint for the Dart binary.
-File get dartBatch {
+// The executable batch entrypoint for the Dart binary within the Flutter SDK
+// located at [flutterRoot].
+File getDartBatch(Directory flutterRoot) {
   return flutterRoot
     .childDirectory('bin')
     .childFile('dart.bat')
     .absolute;
 }
 
-// The Dart SDK's stamp file.
-File get dartSdkStamp {
+// The Dart SDK's stamp file within the Flutter SDK located at [flutterRoot].
+File getDartSdkStamp(Directory flutterRoot) {
   return flutterRoot
     .childDirectory('bin')
     .childDirectory('cache')
