@@ -235,6 +235,7 @@ class ExpansionTile extends StatefulWidget {
     this.onExpansionChanged,
     this.children = const <Widget>[],
     this.trailing,
+    this.showTrailingIcon = true,
     this.initiallyExpanded = false,
     this.maintainState = false,
     this.tilePadding,
@@ -321,6 +322,9 @@ class ExpansionTile extends StatefulWidget {
   /// Depending on the value of [controlAffinity], the [trailing] widget
   /// may replace the rotating expansion arrow icon.
   final Widget? trailing;
+
+  /// Specifies if the [ExpansionTile] should build a default trailing icon if [trailing] is null.
+  final bool showTrailingIcon;
 
   /// Specifies if the list tile is initially expanded (true) or collapsed (false, the default).
   final bool initiallyExpanded;
@@ -731,7 +735,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
                 leading: widget.leading ?? _buildLeadingIcon(context),
                 title: widget.title,
                 subtitle: widget.subtitle,
-                trailing: widget.trailing ?? _buildTrailingIcon(context),
+                trailing: widget.showTrailingIcon ? widget.trailing ?? _buildTrailingIcon(context) : null,
                 minTileHeight: widget.minTileHeight,
               ),
             ),

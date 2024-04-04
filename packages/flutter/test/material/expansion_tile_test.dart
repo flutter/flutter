@@ -1532,4 +1532,40 @@ void main() {
     expect(find.text('Child 0'), findsOneWidget);
     expect(controller.isExpanded, isTrue);
   });
+
+  testWidgets('ExpansionTile does not include the default trailing icon when showTrailingIcon: false (#145268)', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          enabled: false,
+          tilePadding: EdgeInsets.zero,
+          title: ColoredBox(color: Colors.red, child: Text('Title')),
+          showTrailingIcon: false,
+        ),
+      ),
+    ));
+
+    final Size materialAppSize = tester.getSize(find.byType(MaterialApp));
+    final Size titleSize = tester.getSize(find.byType(ColoredBox));
+
+    expect(titleSize.width, materialAppSize.width);
+  });
+
+  testWidgets('ExpansionTile with smaller trailing widget allocates at least 32.0 units of space (preserves original behavior) (#145268)', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(
+        child: ExpansionTile(
+          enabled: false,
+          tilePadding: EdgeInsets.zero,
+          title: ColoredBox(color: Colors.red, child: Text('Title')),
+          trailing: SizedBox.shrink(),
+        ),
+      ),
+    ));
+
+    final Size materialAppSize = tester.getSize(find.byType(MaterialApp));
+    final Size titleSize = tester.getSize(find.byType(ColoredBox));
+
+    expect(titleSize.width, materialAppSize.width - 32.0);
+  });
 }
