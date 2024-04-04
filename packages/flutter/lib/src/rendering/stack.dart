@@ -236,17 +236,20 @@ class StackParentData extends ContainerBoxParentData<RenderBox> {
   BoxConstraints positionedChildConstraints(Size stackSize) {
     assert(isPositioned);
     final double? width = switch ((left, right)) {
-      (final double left?, final double right?) => math.max(0.0, stackSize.width - right - left),
+      (final double left?, final double right?) => stackSize.width - right - left,
       (_, _) => this.width,
     };
 
     final double? height = switch ((top, bottom)) {
-      (final double top?, final double bottom?) => math.max(0.0, stackSize.height - bottom - top),
+      (final double top?, final double bottom?) => stackSize.height - bottom - top,
       (_, _) => this.height,
     };
-    assert(width == null || (!width.isNaN && width >= 0.0));
-    assert(height == null || (!height.isNaN && height >= 0.0));
-    return BoxConstraints.tightFor(width: width, height: height);
+    assert(height == null || !height.isNaN);
+    assert(width == null || !width.isNaN);
+    return BoxConstraints.tightFor(
+      width: width == null ? null : math.max(0.0, width),
+      height: height == null ? null : math.max(0.0, height),
+    );
   }
 
   @override
