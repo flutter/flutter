@@ -24,7 +24,6 @@
 #include "impeller/renderer/backend/vulkan/sampler_vk.h"
 #include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
-#include "impeller/renderer/backend/vulkan/vk.h"
 #include "vulkan/vulkan_handles.hpp"
 
 namespace impeller {
@@ -298,8 +297,7 @@ SharedHandleVK<vk::Framebuffer> RenderPassVK::CreateVKFramebuffer(
 // |RenderPass|
 void RenderPassVK::SetPipeline(
     const std::shared_ptr<Pipeline<PipelineDescriptor>>& pipeline) {
-  pipeline_ = pipeline;
-
+  pipeline_ = pipeline.get();
   if (!pipeline_) {
     return;
   }
@@ -456,7 +454,7 @@ fml::Status RenderPassVK::Draw() {
           fml::StatusCode::kAborted,
           "Could not create pipeline variant with immutable sampler.");
     }
-    pipeline_ = std::move(pipeline_variant);
+    pipeline_ = pipeline_variant.get();
   }
 
   const auto& context_vk = ContextVK::Cast(*context_);
