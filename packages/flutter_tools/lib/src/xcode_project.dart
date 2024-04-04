@@ -136,6 +136,15 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
             .readAsStringSync()
             .contains('FlutterGeneratedPluginSwiftPackage');
   }
+
+  Future<XcodeProjectInfo?> projectInfo() async {
+    final XcodeProjectInterpreter? xcodeProjectInterpreter = globals.xcodeProjectInterpreter;
+    if (!xcodeProject.existsSync() || xcodeProjectInterpreter == null || !xcodeProjectInterpreter.isInstalled) {
+      return null;
+    }
+    return _projectInfo ??= await xcodeProjectInterpreter.getInfo(hostAppRoot.path);
+  }
+  XcodeProjectInfo? _projectInfo;
 }
 
 /// Represents the iOS sub-project of a Flutter project.
@@ -464,15 +473,6 @@ class IosProject extends XcodeBasedProject {
   }
 
   final Map<XcodeProjectBuildContext, Map<String, String>> _buildSettingsByBuildContext = <XcodeProjectBuildContext, Map<String, String>>{};
-
-  Future<XcodeProjectInfo?> projectInfo() async {
-    final XcodeProjectInterpreter? xcodeProjectInterpreter = globals.xcodeProjectInterpreter;
-    if (!xcodeProject.existsSync() || xcodeProjectInterpreter == null || !xcodeProjectInterpreter.isInstalled) {
-      return null;
-    }
-    return _projectInfo ??= await xcodeProjectInterpreter.getInfo(hostAppRoot.path);
-  }
-  XcodeProjectInfo? _projectInfo;
 
   Future<Map<String, String>?> _xcodeProjectBuildSettings(XcodeProjectBuildContext buildContext) async {
     final XcodeProjectInterpreter? xcodeProjectInterpreter = globals.xcodeProjectInterpreter;

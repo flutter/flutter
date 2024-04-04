@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/migrations/swift_package_manager_integration_migration.dart';
@@ -29,6 +30,7 @@ void main() {
       final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
         FakeIosProject(fileSystem: memoryFileSystem),
         SupportedPlatform.ios,
+        BuildInfo.debug,
         xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         logger: testLogger,
         fileSystem: memoryFileSystem,
@@ -51,6 +53,7 @@ void main() {
         final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
           project,
           SupportedPlatform.ios,
+          BuildInfo.debug,
           xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           logger: testLogger,
           fileSystem: memoryFileSystem,
@@ -82,6 +85,7 @@ void main() {
         final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
           project,
           SupportedPlatform.ios,
+          BuildInfo.debug,
           xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           logger: testLogger,
           fileSystem: memoryFileSystem,
@@ -116,6 +120,7 @@ void main() {
         final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
           project,
           SupportedPlatform.ios,
+          BuildInfo.debug,
           xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           logger: testLogger,
           fileSystem: memoryFileSystem,
@@ -152,6 +157,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
         final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
           project,
           SupportedPlatform.ios,
+          BuildInfo.debug,
           xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           logger: testLogger,
           fileSystem: memoryFileSystem,
@@ -188,6 +194,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
         final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
           project,
           SupportedPlatform.ios,
+          BuildInfo.debug,
           xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           logger: testLogger,
           fileSystem: memoryFileSystem,
@@ -207,6 +214,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
         final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
           project,
           SupportedPlatform.ios,
+          BuildInfo.debug,
           xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           logger: testLogger,
           fileSystem: memoryFileSystem,
@@ -229,6 +237,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
         final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
           project,
           SupportedPlatform.ios,
+          BuildInfo.debug,
           xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           logger: testLogger,
           fileSystem: memoryFileSystem,
@@ -254,6 +263,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
           final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
             project,
             platform,
+            BuildInfo.debug,
             xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             logger: testLogger,
             fileSystem: memoryFileSystem,
@@ -291,6 +301,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -313,6 +324,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -351,6 +363,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -390,6 +403,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -431,6 +445,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -471,6 +486,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -508,6 +524,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -549,6 +566,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -589,6 +607,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -626,6 +645,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -665,6 +685,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -708,6 +729,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -745,6 +767,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -799,6 +822,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -849,6 +873,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -908,6 +933,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -948,6 +974,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -985,6 +1012,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1021,6 +1049,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1061,6 +1090,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1105,6 +1135,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1160,6 +1191,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1214,6 +1246,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1258,6 +1291,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1295,6 +1329,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1331,6 +1366,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1370,6 +1406,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1413,6 +1450,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1467,6 +1505,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1513,6 +1552,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1569,6 +1609,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1609,6 +1650,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1646,6 +1688,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1686,6 +1729,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1730,6 +1774,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1766,6 +1811,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1822,6 +1868,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1868,6 +1915,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1924,6 +1972,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1964,6 +2013,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -1994,6 +2044,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -2039,6 +2090,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -2085,6 +2137,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -2139,6 +2192,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -2179,6 +2233,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -2209,6 +2264,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -2250,6 +2306,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -2296,6 +2353,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -2350,6 +2408,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
             final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
+              BuildInfo.debug,
               xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               logger: testLogger,
               fileSystem: memoryFileSystem,
@@ -2388,6 +2447,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
           final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
             project,
             platform,
+            BuildInfo.debug,
             xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
             logger: testLogger,
             fileSystem: memoryFileSystem,
@@ -2454,6 +2514,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
           final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
             project,
             platform,
+            BuildInfo.debug,
             xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
               throwErrorOnGetInfo: true,
             ),
@@ -2488,6 +2549,7 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
           final FakeSwiftPackageManagerIntegrationMigration projectMigration = FakeSwiftPackageManagerIntegrationMigration(
             project,
             platform,
+            BuildInfo.debug,
             xcodeProjectInterpreter: FakeXcodeProjectInterpreter(
               throwErrorOnGetInfo: true,
             ),
@@ -3406,7 +3468,8 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 class FakeSwiftPackageManagerIntegrationMigration extends SwiftPackageManagerIntegrationMigration {
   FakeSwiftPackageManagerIntegrationMigration(
     super.project,
-    super.platform, {
+    super.platform,
+    super.buildInfo, {
     required super.xcodeProjectInterpreter,
     required super.logger,
     required super.fileSystem,

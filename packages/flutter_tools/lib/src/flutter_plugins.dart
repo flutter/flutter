@@ -1098,12 +1098,8 @@ Future<void> injectPlugins(
       plugins: plugins,
       cocoapods: globals.cocoaPods!,
       swiftPackageManager: SwiftPackageManager(
-        artifacts: globals.artifacts!,
         fileSystem: globals.fs,
-        logger: globals.logger,
         templateRenderer: globals.templateRenderer,
-        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
-        plistParser: globals.plistParser,
       ),
       fileSystem: globals.fs,
       logger: globals.logger,

@@ -16,6 +16,7 @@ import '../convert.dart';
 import '../globals.dart' as globals;
 import '../ios/xcode_build_settings.dart';
 import '../ios/xcodeproj.dart';
+import '../migrations/swift_package_manager_integration_migration.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
 import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
@@ -25,7 +26,6 @@ import 'cocoapod_utils.dart';
 import 'migrations/flutter_application_migration.dart';
 import 'migrations/macos_deployment_target_migration.dart';
 import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
-import 'swift_package_manager.dart';
 
 /// When run in -quiet mode, Xcode should only print from the underlying tasks to stdout.
 /// Passing this regexp to trace moves the stdout output to stderr.
@@ -89,6 +89,19 @@ Future<void> buildMacOS({
   final ProjectMigration migration = ProjectMigration(migrators);
   migration.run();
 
+  if (flutterProject.usesSwiftPackageManager && flutterProject.macos.flutterPluginSwiftPackageManifest.existsSync()) {
+    final SwiftPackageManagerIntegrationMigration spmMigration = SwiftPackageManagerIntegrationMigration(
+      flutterProject.macos,
+      SupportedPlatform.macos,
+      buildInfo,
+      xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+      logger: globals.logger,
+      fileSystem: globals.fs,
+      plistParser: globals.plistParser,
+    );
+    await spmMigration.migrate();
+  }
+
   final Directory flutterBuildDir = globals.fs.directory(getMacOSBuildDirectory());
   if (!flutterBuildDir.existsSync()) {
     flutterBuildDir.createSync(recursive: true);
@@ -101,14 +114,6 @@ Future<void> buildMacOS({
     useMacOSConfig: true,
   );
   if (flutterProject.usesSwiftPackageManager) {
-    SwiftPackageManager.linkFlutterFramework(
-      SupportedPlatform.macos,
-      flutterProject.macos,
-      buildInfo.mode,
-      artifacts: globals.artifacts!,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-    );
   }
   await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode);
   // If the xcfilelists do not exist, create empty version.

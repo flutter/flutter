@@ -96,27 +96,27 @@ void main() {
           // integration_test.
           await _enableSwiftPackageManager(flutterBin, workingDirectoryPath);
 
-          final String app = await _createApp(
+          final String appDirectoryPath = await _createApp(
             flutterBin,
             workingDirectoryPath,
             iosLanguage: iosLanguage,
             platform: platformName,
             usesSwiftPackageManager: true,
           );
-          _addDependency(appDirectoryPath: app, plugin: integrationTestPlugin);
+          _addDependency(appDirectoryPath: appDirectoryPath, plugin: integrationTestPlugin);
           await _buildApp(
             flutterBin,
-            app,
+            appDirectoryPath,
             options: <String>[platformName, '--debug', '-v'],
             expectedLines: _expectedLines(
               platform: platformName,
-              appDirectoryPath: app,
+              appDirectoryPath: appDirectoryPath,
               swiftPackageMangerEnabled: true,
               swiftPackagePlugin: integrationTestPlugin,
             ),
             unexpectedLines: _unexpectedLines(
               platform: platformName,
-              appDirectoryPath: app,
+              appDirectoryPath: appDirectoryPath,
               swiftPackageMangerEnabled: true,
               swiftPackagePlugin: integrationTestPlugin,
             ),
@@ -124,7 +124,7 @@ void main() {
 
           expect(
             fileSystem
-                .directory(app)
+                .directory(appDirectoryPath)
                 .childDirectory(platformName)
                 .childFile('Podfile')
                 .existsSync(),
@@ -132,7 +132,7 @@ void main() {
           );
           expect(
             fileSystem
-                .directory(app)
+                .directory(appDirectoryPath)
                 .childDirectory(platformName)
                 .childDirectory('Flutter')
                 .childDirectory('Packages')
@@ -142,7 +142,7 @@ void main() {
           );
 
           // Build an app using both a CocoaPods and Swift Package Manager plugin.
-          await _cleanApp(flutterBin, app);
+          await _cleanApp(flutterBin, appDirectoryPath);
           final _Plugin createdCocoaPodsPlugin = await _createPlugin(
             flutterBin,
             workingDirectoryPath,
@@ -150,23 +150,23 @@ void main() {
             iosLanguage: iosLanguage,
           );
           _addDependency(
-            appDirectoryPath: app,
+            appDirectoryPath: appDirectoryPath,
             plugin: createdCocoaPodsPlugin,
           );
           await _buildApp(
             flutterBin,
-            app,
+            appDirectoryPath,
             options: <String>[platformName, '--debug', '-v'],
             expectedLines: _expectedLines(
               platform: platformName,
-              appDirectoryPath: app,
+              appDirectoryPath: appDirectoryPath,
               cococapodsPlugin: createdCocoaPodsPlugin,
               swiftPackageMangerEnabled: true,
               swiftPackagePlugin: integrationTestPlugin,
             ),
             unexpectedLines: _unexpectedLines(
               platform: platformName,
-              appDirectoryPath: app,
+              appDirectoryPath: appDirectoryPath,
               cococapodsPlugin: createdCocoaPodsPlugin,
               swiftPackageMangerEnabled: true,
               swiftPackagePlugin: integrationTestPlugin,
@@ -175,7 +175,7 @@ void main() {
 
           expect(
             fileSystem
-                .directory(app)
+                .directory(appDirectoryPath)
                 .childDirectory(platformName)
                 .childFile('Podfile')
                 .existsSync(),
@@ -183,7 +183,7 @@ void main() {
           );
           expect(
             fileSystem
-                .directory(app)
+                .directory(appDirectoryPath)
                 .childDirectory(platformName)
                 .childDirectory('Flutter')
                 .childDirectory('Packages')
@@ -195,19 +195,19 @@ void main() {
           // Build app again but with Swift Package Manager disabled by config.
           // App will now use CocoaPods version of integration_test plugin.
           await _disableSwiftPackageManager(flutterBin, workingDirectoryPath);
-          await _cleanApp(flutterBin, app);
+          await _cleanApp(flutterBin, appDirectoryPath);
           await _buildApp(
             flutterBin,
-            app,
+            appDirectoryPath,
             options: <String>[platformName, '--debug', '-v'],
             expectedLines: _expectedLines(
               platform: platformName,
-              appDirectoryPath: app,
+              appDirectoryPath: appDirectoryPath,
               cococapodsPlugin: integrationTestPlugin,
             ),
             unexpectedLines: _unexpectedLines(
               platform: platformName,
-              appDirectoryPath: app,
+              appDirectoryPath: appDirectoryPath,
               cococapodsPlugin: integrationTestPlugin,
             ),
           );
@@ -215,20 +215,20 @@ void main() {
           // Build app again but with Swift Package Manager disabled by pubspec.
           // App will still use CocoaPods version of integration_test plugin.
           await _enableSwiftPackageManager(flutterBin, workingDirectoryPath);
-          await _cleanApp(flutterBin, app);
-          _disableSwiftPackageManagerByPubspec(appDirectoryPath: app);
+          await _cleanApp(flutterBin, appDirectoryPath);
+          _disableSwiftPackageManagerByPubspec(appDirectoryPath: appDirectoryPath);
           await _buildApp(
             flutterBin,
-            app,
+            appDirectoryPath,
             options: <String>[platformName, '--debug', '-v'],
             expectedLines: _expectedLines(
               platform: platformName,
-              appDirectoryPath: app,
+              appDirectoryPath: appDirectoryPath,
               cococapodsPlugin: integrationTestPlugin,
             ),
             unexpectedLines: _unexpectedLines(
               platform: platformName,
-              appDirectoryPath: app,
+              appDirectoryPath: appDirectoryPath,
               cococapodsPlugin: integrationTestPlugin,
             ),
           );
@@ -335,10 +335,10 @@ Future<void> _buildApp(
   String flutterBin,
   String workingDirectory, {
   required List<String> options,
-  List<String>? expectedLines,
+  List<Pattern>? expectedLines,
   List<String>? unexpectedLines,
 }) async {
-  final List<String> remainingExpectedLines = expectedLines ?? <String>[];
+  final List<Pattern> remainingExpectedLines = expectedLines ?? <Pattern>[];
   final List<String> unexpectedLinesFound = <String>[];
 
   final ProcessResult result = await processManager.run(
@@ -364,7 +364,7 @@ Future<void> _buildApp(
       }
     }
     remainingExpectedLines.remove(trimmedLine);
-    remainingExpectedLines.removeWhere((String expectedLine) => trimmedLine.contains(expectedLine));
+    remainingExpectedLines.removeWhere((Pattern expectedLine) => trimmedLine.contains(expectedLine));
     if (unexpectedLines != null && unexpectedLines.contains(trimmedLine)) {
       unexpectedLinesFound.add(trimmedLine);
     }
@@ -499,7 +499,7 @@ _Plugin _integrationTestPlugin(String platform) {
   );
 }
 
-List<String> _expectedLines({
+List<Pattern> _expectedLines({
   required String platform,
   required String appDirectoryPath,
   _Plugin? cococapodsPlugin,
@@ -512,7 +512,7 @@ List<String> _expectedLines({
     platform,
   );
 
-  final List<String> expectedLines = <String>[];
+  final List<Pattern> expectedLines = <Pattern>[];
   if (swiftPackageMangerEnabled) {
     expectedLines.addAll(<String>[
       'FlutterGeneratedPluginSwiftPackage: $appPlatformDirectoryPath/Flutter/Packages/FlutterGeneratedPluginSwiftPackage',
@@ -522,13 +522,9 @@ List<String> _expectedLines({
   if (swiftPackagePlugin != null) {
     // If using a Swift Package plugin, but Swift Package Manager is not enabled, it falls back to being used as a CocoaPods plugin.
     if (swiftPackageMangerEnabled) {
-      expectedLines.addAll(<String>[
-        '${swiftPackagePlugin.pluginName}: ${swiftPackagePlugin.pluginPath}/$platform/${swiftPackagePlugin.pluginName} @ local',
+      expectedLines.addAll(<Pattern>[
+        RegExp('${swiftPackagePlugin.pluginName}: [/private]*${swiftPackagePlugin.pluginPath}/$platform/${swiftPackagePlugin.pluginName} @ local'),
         "➜ Explicit dependency on target '${swiftPackagePlugin.pluginName}' in project '${swiftPackagePlugin.pluginName}'",
-        if (platform == 'macos')
-          'ProcessXCFramework $appPlatformDirectoryPath/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/FlutterMacOS.xcframework',
-        if (platform == 'ios')
-          'ProcessXCFramework $appPlatformDirectoryPath/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/Flutter.xcframework',
       ]);
     } else {
       expectedLines.addAll(<String>[
@@ -558,10 +554,6 @@ List<String> _unexpectedLines({
   bool swiftPackageMangerEnabled = false,
 }) {
   final String frameworkName = platform == 'ios' ? 'Flutter' : 'FlutterMacOS';
-  final String appPlatformDirectoryPath = fileSystem.path.join(
-    appDirectoryPath,
-    platform,
-  );
   final List<String> unexpectedLines = <String>[];
   if (cococapodsPlugin == null) {
     unexpectedLines.addAll(<String>[
@@ -580,10 +572,6 @@ List<String> _unexpectedLines({
       unexpectedLines.addAll(<String>[
         '${swiftPackagePlugin.pluginName}: ${swiftPackagePlugin.pluginPath}/$platform/${swiftPackagePlugin.pluginName} @ local',
         "➜ Explicit dependency on target '${swiftPackagePlugin.pluginName}' in project '${swiftPackagePlugin.pluginName}'",
-        if (platform == 'macos')
-          'ProcessXCFramework $appPlatformDirectoryPath/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/FlutterMacOS.xcframework',
-        if (platform == 'ios')
-          'ProcessXCFramework $appPlatformDirectoryPath/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/Flutter.xcframework',
       ]);
     }
   }

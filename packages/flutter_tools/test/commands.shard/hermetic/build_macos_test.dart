@@ -708,41 +708,6 @@ STDERR STUFF
     Usage: () => usage,
     Analytics: () => fakeAnalytics,
   });
-
-  testUsingContext('macOS build links framework when using Swift Package Manager', () async {
-    final BuildCommand command = BuildCommand(
-      artifacts: artifacts,
-      androidSdk: FakeAndroidSdk(),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: fileSystem,
-      logger: logger,
-      processUtils: processUtils,
-      osUtils: FakeOperatingSystemUtils(),
-    );
-    fileSystem.directory(fileSystem.path.join('macos', 'Runner.xcworkspace'))
-        .createSync(recursive: true);
-    fileSystem.directory('macos/Flutter/Packages/FlutterGeneratedPluginSwiftPackage')
-        .createSync(recursive: true);
-    createCoreMockProjectFiles();
-
-    await createTestCommandRunner(command).run(
-        const <String>['build', 'macos', '--no-pub']
-    );
-
-    expect(
-      fileSystem.link(
-        'macos/Flutter/Packages/FlutterGeneratedPluginSwiftPackage/FlutterMacOS.xcframework'
-      ).existsSync(),
-      isTrue,
-    );
-  }, overrides: <Type, Generator>{
-    Platform: () => macosPlatform,
-    FileSystem: () => fileSystem,
-    ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true, isSwiftPackageManagerEnabled: true),
-    Analytics: () => fakeAnalytics,
-    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
-  });
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {

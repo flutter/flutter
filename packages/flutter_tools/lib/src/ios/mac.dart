@@ -24,6 +24,7 @@ import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../macos/swift_package_manager.dart';
 import '../macos/xcode.dart';
+import '../migrations/swift_package_manager_integration_migration.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
 import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
@@ -166,6 +167,20 @@ Future<XcodeBuildResult> buildXcodeProject({
   final ProjectMigration migration = ProjectMigration(migrators);
   migration.run();
 
+  final FlutterProject project = FlutterProject.current();
+  if (project.usesSwiftPackageManager && app.project.flutterPluginSwiftPackageManifest.existsSync()) {
+    final SwiftPackageManagerIntegrationMigration spmMigration = SwiftPackageManagerIntegrationMigration(
+      app.project,
+      SupportedPlatform.ios,
+      buildInfo,
+      xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+      logger: globals.logger,
+      fileSystem: globals.fs,
+      plistParser: globals.plistParser,
+    );
+    await spmMigration.migrate();
+  }
+
   if (!_checkXcodeVersion()) {
     return XcodeBuildResult(success: false);
   }
@@ -246,21 +261,20 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
-  final FlutterProject project = FlutterProject.current();
   await updateGeneratedXcodeProperties(
     project: project,
     targetOverride: targetOverride,
     buildInfo: buildInfo,
   );
   if (project.usesSwiftPackageManager) {
-    SwiftPackageManager.linkFlutterFramework(
-      SupportedPlatform.ios,
-      project.ios,
-      buildInfo.mode,
-      artifacts: globals.artifacts!,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-    );
+    final String? iosDeploymentTarget = buildSettings['IPHONEOS_DEPLOYMENT_TARGET'];
+    if (iosDeploymentTarget != null) {
+      SwiftPackageManager.updateMinimumDeployment(
+        platform: SupportedPlatform.ios,
+        project: project.ios,
+        deploymentTarget: iosDeploymentTarget,
+      );
+    }
   }
   await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode);
   if (configOnly) {

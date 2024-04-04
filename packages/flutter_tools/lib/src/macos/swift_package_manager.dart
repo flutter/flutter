@@ -2,15 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/template.dart';
-import '../build_info.dart';
-import '../ios/plist_parser.dart';
-import '../ios/xcodeproj.dart';
-import '../migrations/swift_package_manager_integration_migration.dart';
+import '../base/version.dart';
 import '../plugins.dart';
 import '../project.dart';
 import 'swift_packages.dart';
@@ -25,36 +20,24 @@ import 'swift_packages.dart';
 ///     documentation on Swift Package Manager manifest file, Package.swift.
 class SwiftPackageManager {
   SwiftPackageManager({
-    required Artifacts artifacts,
     required FileSystem fileSystem,
-    required Logger logger,
     required TemplateRenderer templateRenderer,
-    required XcodeProjectInterpreter xcodeProjectInterpreter,
-    required PlistParser plistParser,
-  })  : _artifacts = artifacts,
-        _fileSystem = fileSystem,
-        _logger = logger,
-        _templateRenderer = templateRenderer,
-        _xcodeProjectInterpreter = xcodeProjectInterpreter,
-        _plistParser = plistParser;
+  })  : _fileSystem = fileSystem,
+        _templateRenderer = templateRenderer;
 
-  final Artifacts _artifacts;
   final FileSystem _fileSystem;
   final TemplateRenderer _templateRenderer;
-  final Logger _logger;
-  final XcodeProjectInterpreter _xcodeProjectInterpreter;
-  final PlistParser _plistParser;
 
   static const String _defaultFlutterPluginsSwiftPackageName = 'FlutterGeneratedPluginSwiftPackage';
 
-  final SwiftPackageSupportedPlatform _iosSwiftPackageSupportedPlatform = SwiftPackageSupportedPlatform(
+  static final SwiftPackageSupportedPlatform _iosSwiftPackageSupportedPlatform = SwiftPackageSupportedPlatform(
     platform: SwiftPackagePlatform.ios,
-    version: '12.0',
+    version: Version(12, 0, null),
   );
 
-  final SwiftPackageSupportedPlatform _macosSwiftPackageSupportedPlatform = SwiftPackageSupportedPlatform(
+  static final SwiftPackageSupportedPlatform _macosSwiftPackageSupportedPlatform = SwiftPackageSupportedPlatform(
     platform: SwiftPackagePlatform.macos,
-    version: '10.14',
+    version: Version(10, 14, null),
   );
 
   /// Creates a Swift Package called 'FlutterGeneratedPluginSwiftPackage' that
@@ -86,29 +69,10 @@ class SwiftPackageManager {
       return;
     }
 
-    SwiftPackageTarget? frameworkTarget;
-    SwiftPackageTargetDependency? frameworkTargetDependency;
-    if (packageDependencies.isNotEmpty) {
-      final String flutterFramework = platform == SupportedPlatform.ios
-        ? 'Flutter'
-        : 'FlutterMacOS';
-      frameworkTarget = SwiftPackageTarget.binaryTarget(
-        name: flutterFramework,
-        relativePath: '$flutterFramework.xcframework',
-      );
-      frameworkTargetDependency = SwiftPackageTargetDependency.target(
-        name: flutterFramework,
-      );
-    }
-
     final List<SwiftPackageTarget> packageTargets = <SwiftPackageTarget>[
-      if (frameworkTarget != null) frameworkTarget,
       SwiftPackageTarget.defaultTarget(
         name: _defaultFlutterPluginsSwiftPackageName,
-        dependencies: <SwiftPackageTargetDependency>[
-          if (frameworkTargetDependency != null) frameworkTargetDependency,
-          ...targetDependencies,
-        ],
+        dependencies: targetDependencies,
       ),
     ];
 
@@ -132,19 +96,6 @@ class SwiftPackageManager {
       templateRenderer: _templateRenderer,
     );
     pluginsPackage.createSwiftPackage();
-
-    // Setup the framework symlink so xcodebuild commands like -showBuildSettings
-    // will still work. The BuildMode is not known yet, so set to release for
-    // now. The correct framework will be symlinked when the project is built.
-    linkFlutterFramework(
-      platform,
-      project,
-      BuildMode.release,
-      artifacts: _artifacts,
-      fileSystem: _fileSystem,
-      logger: _logger,
-    );
-    await migrateProject(project, platform);
   }
 
   (List<SwiftPackagePackageDependency>, List<SwiftPackageTargetDependency>) _dependenciesForPlugins(
@@ -179,73 +130,59 @@ class SwiftPackageManager {
     return (packageDependencies, targetDependencies);
   }
 
-  /// Adds Swift Package Manager integration to the Xcode project's project.pbxproj.
-  Future<void> migrateProject(
-    XcodeBasedProject project,
-    SupportedPlatform platform,
-  ) async {
-    _validatePlatform(platform);
-    final SwiftPackageManagerIntegrationMigration migration = SwiftPackageManagerIntegrationMigration(
-      project,
-      platform,
-      xcodeProjectInterpreter: _xcodeProjectInterpreter,
-      logger: _logger,
-      fileSystem: _fileSystem,
-      plistParser: _plistParser,
-    );
-    await migration.migrate();
-  }
-
   /// Validates the platform is either iOS or macOS, otherwise throw an error.
   static void _validatePlatform(SupportedPlatform platform) {
     if (platform != SupportedPlatform.ios &&
         platform != SupportedPlatform.macos) {
-      throwToolExit('The platform ${platform.name} is not compatible with Swift Package Manager. Only iOS and macOS is allowed.');
+      throwToolExit(
+        'The platform ${platform.name} is not compatible with Swift Package Manager. '
+        'Only iOS and macOS is allowed.',
+      );
     }
   }
 
-  /// Create a [Link] in the [flutterPackageDirectory] to the
-  /// [Artifact.flutterXcframework] / [Artifact.flutterMacOSXcframework]. If the
-  /// link already exists, update it if needed.
-  static void linkFlutterFramework(
-    SupportedPlatform platform,
-    XcodeBasedProject project,
-    BuildMode buildMode, {
-    required Artifacts artifacts,
-    required FileSystem fileSystem,
-    required Logger logger,
+  /// If the project's IPHONEOS_DEPLOYMENT_TARGET/MACOSX_DEPLOYMENT_TARGET is
+  /// higher than the FlutterGeneratedPluginSwiftPackage's default
+  /// SupportedPlatform, increase the SupportedPlatform to match the project's
+  /// deployment target.
+  ///
+  /// This is done for the use case of a plugin requiring a higher iOS/macOS
+  /// version than a project's default. To still be able to use the plugin, the
+  /// user can increase the Xcode project's iOS/macOS deployment target. However,
+  /// if FlutterGeneratedPluginSwiftPackage still supports a lower version, it
+  /// will fail to build. So FlutterGeneratedPluginSwiftPackage must be updated,
+  /// as well.
+  static void updateMinimumDeployment({
+    required XcodeBasedProject project,
+    required SupportedPlatform platform,
+    required String deploymentTarget,
   }) {
-    _validatePlatform(platform);
-    final String xcframeworkName = platform == SupportedPlatform.macos
-        ? 'FlutterMacOS.xcframework'
-        : 'Flutter.xcframework';
-    if (!project.flutterPluginSwiftPackageDirectory.existsSync()) {
-      // This can happen when Swift Package Manager is enabled, but the project
-      // hasn't been migrated yet since it doesn't have any Swift Package
-      // Manager plugin dependencies.
-      logger.printTrace('FlutterGeneratedPluginSwiftPackage does not exist, skipping adding link to $xcframeworkName.');
+    final Version? projectDeploymentTargetVersion = Version.parse(deploymentTarget);
+    final SwiftPackageSupportedPlatform defaultPlatform;
+    final SwiftPackagePlatform packagePlatform;
+    if (platform == SupportedPlatform.ios) {
+      defaultPlatform = _iosSwiftPackageSupportedPlatform;
+      packagePlatform = SwiftPackagePlatform.ios;
+    } else {
+      defaultPlatform = _macosSwiftPackageSupportedPlatform;
+      packagePlatform = SwiftPackagePlatform.macos;
+    }
+
+    if (projectDeploymentTargetVersion == null ||
+        projectDeploymentTargetVersion <= defaultPlatform.version ||
+        !project.flutterPluginSwiftPackageManifest.existsSync()) {
       return;
     }
 
-    String engineFlutterFrameworkArtifactPath;
-    if (platform == SupportedPlatform.macos) {
-      engineFlutterFrameworkArtifactPath = artifacts.getArtifactPath(
-        Artifact.flutterMacOSXcframework,
-        platform: TargetPlatform.darwin,
-        mode: buildMode,
-      );
-    } else {
-      engineFlutterFrameworkArtifactPath = artifacts.getArtifactPath(
-        Artifact.flutterXcframework,
-        platform: TargetPlatform.ios,
-        mode: buildMode,
-      );
-    }
-    final Link frameworkSymlink = project.flutterPluginSwiftPackageDirectory.childLink(xcframeworkName);
-    if (!frameworkSymlink.existsSync()) {
-      frameworkSymlink.createSync(engineFlutterFrameworkArtifactPath);
-    } else if (frameworkSymlink.targetSync() != engineFlutterFrameworkArtifactPath) {
-      frameworkSymlink.updateSync(engineFlutterFrameworkArtifactPath);
-    }
+    final String manifestContents = project.flutterPluginSwiftPackageManifest.readAsStringSync();
+    final String oldSupportedPlatform = defaultPlatform.format();
+    final String newSupportedPlatform = SwiftPackageSupportedPlatform(
+      platform: packagePlatform,
+      version: projectDeploymentTargetVersion,
+    ).format();
+
+    project.flutterPluginSwiftPackageManifest.writeAsStringSync(
+      manifestContents.replaceFirst(oldSupportedPlatform, newSupportedPlatform),
+    );
   }
 }
