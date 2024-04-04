@@ -17,7 +17,6 @@ if (localPropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.yourcompany.platforminteraction"
     compileSdk flutter.compileSdkVersion
 
     compileOptions {
