@@ -315,9 +315,49 @@ void drawHelloWorld() {
       ..addPicture(ui.Offset.zero, picture)
       ..pop();
 
-    ui.window.render(sceneBuilder.build());
+    ui.PlatformDispatcher.instance.implicitView?.render(sceneBuilder.build());
   };
 
   ui.PlatformDispatcher.instance.scheduleFrame();
   notifyFirstFrameScheduled();
+}
+
+ui.Picture _createColoredBox(ui.Color color, ui.Size size) {
+  final ui.Paint paint = ui.Paint();
+  paint.color = color;
+  final ui.PictureRecorder baseRecorder = ui.PictureRecorder();
+  final ui.Canvas canvas = ui.Canvas(baseRecorder);
+  canvas.drawRect(ui.Rect.fromLTRB(0.0, 0.0, size.width, size.height), paint);
+  return baseRecorder.endRecording();
+}
+
+@pragma('vm:entry-point')
+void renderImplicitView() {
+  ui.PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    final ui.Size size = ui.Size(800.0, 600.0);
+    final ui.Color red = ui.Color.fromARGB(127, 255, 0, 0);
+
+    final ui.SceneBuilder builder = ui.SceneBuilder();
+
+    builder.pushOffset(0.0, 0.0);
+
+    builder.addPicture(
+        ui.Offset(0.0, 0.0), _createColoredBox(red, size));
+
+    builder.pop();
+
+    ui.PlatformDispatcher.instance.implicitView?.render(builder.build());
+  };
+  ui.PlatformDispatcher.instance.scheduleFrame();
+}
+
+@pragma('vm:entry-point')
+void signalViewIds() {
+  final Iterable<ui.FlutterView> views = ui.PlatformDispatcher.instance.views;
+  final List<int> viewIds =
+      views.map((ui.FlutterView view) => view.viewId).toList();
+
+  viewIds.sort();
+
+  signalStringValue('View IDs: [${viewIds.join(', ')}]');
 }

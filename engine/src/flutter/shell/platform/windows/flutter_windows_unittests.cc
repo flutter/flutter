@@ -47,6 +47,16 @@ class MockWindowsLifecycleManager : public WindowsLifecycleManager {
   MOCK_METHOD(void, SetLifecycleState, (AppLifecycleState), (override));
 };
 
+// Process the next win32 message if there is one. This can be used to
+// pump the Windows platform thread task runner.
+void PumpMessage() {
+  ::MSG msg;
+  if (::GetMessage(&msg, nullptr, 0, 0)) {
+    ::TranslateMessage(&msg);
+    ::DispatchMessage(&msg);
+  }
+}
+
 }  // namespace
 
 // Verify that we can fetch a texture registrar.
@@ -116,8 +126,26 @@ TEST_F(WindowsTest, LaunchCustomEntrypointInEngineRunInvocation) {
 TEST_F(WindowsTest, LaunchHeadlessEngine) {
   auto& context = GetContext();
   WindowsConfigBuilder builder(context);
+  builder.SetDartEntrypoint("signalViewIds");
   EnginePtr engine{builder.RunHeadless()};
   ASSERT_NE(engine, nullptr);
+
+  std::string view_ids;
+  fml::AutoResetWaitableEvent latch;
+  context.AddNativeFunction(
+      "SignalStringValue", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+        auto handle = Dart_GetNativeArgument(args, 0);
+        ASSERT_FALSE(Dart_IsError(handle));
+        view_ids = tonic::DartConverter<std::string>::FromDart(handle);
+        latch.Signal();
+      }));
+
+  ViewControllerPtr controller{builder.Run()};
+  ASSERT_NE(controller, nullptr);
+
+  // Verify a headless app has the implicit view.
+  latch.Wait();
+  EXPECT_EQ(view_ids, "View IDs: [0]");
 }
 
 // Verify that the engine can return to headless mode.
@@ -283,6 +311,7 @@ TEST_F(WindowsTest, NextFrameCallback) {
     fml::AutoResetWaitableEvent frame_scheduled_latch;
     fml::AutoResetWaitableEvent frame_drawn_latch;
     std::thread::id thread_id;
+    bool done = false;
   };
   Captures captures;
 
@@ -315,20 +344,56 @@ TEST_F(WindowsTest, NextFrameCallback) {
           ASSERT_EQ(std::this_thread::get_id(), captures->thread_id);
 
           // Signal the test passed and end the Windows message loop.
+          captures->done = true;
           captures->frame_drawn_latch.Signal();
-          ::PostQuitMessage(0);
         },
         &captures);
 
     // Pump messages for the Windows platform task runner.
-    ::MSG msg;
-    while (::GetMessage(&msg, nullptr, 0, 0)) {
-      ::TranslateMessage(&msg);
-      ::DispatchMessage(&msg);
+    while (!captures.done) {
+      PumpMessage();
     }
   });
 
   captures.frame_drawn_latch.Wait();
+}
+
+// Verify the embedder ignores presents to the implicit view when there is no
+// implicit view.
+TEST_F(WindowsTest, PresentHeadless) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  builder.SetDartEntrypoint("renderImplicitView");
+
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  bool done = false;
+  FlutterDesktopEngineSetNextFrameCallback(
+      engine.get(),
+      [](void* user_data) {
+        // This executes on the platform thread.
+        auto done = reinterpret_cast<std::atomic<bool>*>(user_data);
+        *done = true;
+      },
+      &done);
+
+  // This app is in headless mode, however, the engine assumes the implicit
+  // view always exists. Send window metrics for the implicit view, causing
+  // the engine to present to the implicit view. The embedder must not crash.
+  auto engine_ptr = reinterpret_cast<FlutterWindowsEngine*>(engine.get());
+  FlutterWindowMetricsEvent metrics = {};
+  metrics.struct_size = sizeof(FlutterWindowMetricsEvent);
+  metrics.width = 100;
+  metrics.height = 100;
+  metrics.pixel_ratio = 1.0;
+  metrics.view_id = kImplicitViewId;
+  engine_ptr->SendWindowMetricsEvent(metrics);
+
+  // Pump messages for the Windows platform task runner.
+  while (!done) {
+    PumpMessage();
+  }
 }
 
 // Implicit view has the implicit view ID.
@@ -481,41 +546,28 @@ TEST_F(WindowsTest, Lifecycle) {
 }
 
 TEST_F(WindowsTest, GetKeyboardStateHeadless) {
-  // Run the test on its own thread so that it can pump its event loop while
-  // this thread waits.
-  fml::AutoResetWaitableEvent latch;
-  auto platform_task_runner = CreateNewThread("test_platform_thread");
-  platform_task_runner->PostTask([&]() {
-    auto& context = GetContext();
-    WindowsConfigBuilder builder(context);
-    builder.SetDartEntrypoint("sendGetKeyboardState");
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  builder.SetDartEntrypoint("sendGetKeyboardState");
 
-    bool done = false;
-    context.AddNativeFunction(
-        "SignalStringValue",
-        CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-          auto handle = Dart_GetNativeArgument(args, 0);
-          ASSERT_FALSE(Dart_IsError(handle));
-          auto value = tonic::DartConverter<std::string>::FromDart(handle);
-          EXPECT_EQ(value, "Success");
-          done = true;
-          latch.Signal();
-        }));
+  std::atomic<bool> done = false;
+  context.AddNativeFunction(
+      "SignalStringValue", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+        auto handle = Dart_GetNativeArgument(args, 0);
+        ASSERT_FALSE(Dart_IsError(handle));
+        auto value = tonic::DartConverter<std::string>::FromDart(handle);
+        EXPECT_EQ(value, "Success");
+        done = true;
+      }));
 
-    ViewControllerPtr controller{builder.Run()};
-    ASSERT_NE(controller, nullptr);
+  ViewControllerPtr controller{builder.Run()};
+  ASSERT_NE(controller, nullptr);
 
-    // Pump messages for the Windows platform task runner.
-    ::MSG msg;
-    while (!done) {
-      if (::GetMessage(&msg, nullptr, 0, 0)) {
-        ::TranslateMessage(&msg);
-        ::DispatchMessage(&msg);
-      }
-    }
-  });
-
-  latch.Wait();
+  // Pump messages for the Windows platform task runner.
+  ::MSG msg;
+  while (!done) {
+    PumpMessage();
+  }
 }
 
 }  // namespace testing

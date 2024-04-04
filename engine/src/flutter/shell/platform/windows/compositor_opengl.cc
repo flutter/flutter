@@ -92,13 +92,10 @@ bool CompositorOpenGL::CollectBackingStore(const FlutterBackingStore* store) {
   return true;
 }
 
-bool CompositorOpenGL::Present(FlutterViewId view_id,
+bool CompositorOpenGL::Present(FlutterWindowsView* view,
                                const FlutterLayer** layers,
                                size_t layers_count) {
-  FlutterWindowsView* view = engine_->view(view_id);
-  if (!view) {
-    return false;
-  }
+  FML_DCHECK(view != nullptr);
 
   // Clear the view if there are no layers to present.
   if (layers_count == 0) {
