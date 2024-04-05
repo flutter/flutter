@@ -163,9 +163,11 @@ final class QueryTargetsCommand extends CommandBase {
   String get name => 'targets';
 
   @override
-  String get description => 'Provides information about build targets'
-      'et query targets --testonly         # List only test targets'
-      'et query targets //flutter/fml/...  # List all targets under `//flutter/fml`';
+  String get description => '''
+Provides information about build targets
+et query targets --testonly         # List only test targets
+et query targets //flutter/fml/...  # List all targets under `//flutter/fml`
+''';
 
   @override
   Future<int> run() async {

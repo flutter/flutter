@@ -42,11 +42,13 @@ final class RunCommand extends CommandBase {
   String get name => 'run';
 
   @override
-  String get description => 'Run a Flutter app with a local engine build. '
-      'All arguments after -- are forwarded to flutter run, e.g.: '
-      'et run -- --profile '
-      'et run -- -d macos '
-      'See `flutter run --help` for a listing';
+  String get description => '''
+Run a Flutter app with a local engine build.
+  All arguments after -- are forwarded to flutter run, e.g.:
+  et run -- --profile
+  et run -- -d macos
+See `flutter run --help` for a listing
+''';
 
   Build? _lookup(String configName) {
     final String demangledName = demangleConfigName(environment, configName);
