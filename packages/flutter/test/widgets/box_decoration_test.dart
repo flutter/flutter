@@ -34,7 +34,6 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 
 Future<void> main() async {
   AutomatedTestWidgetsFlutterBinding();
-  late ImageProvider imageProvider;
   late ui.Image loadingTestImage;
   late ui.Image movingTestImage;
 
@@ -47,7 +46,7 @@ Future<void> main() async {
   (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final Completer<void> completer = Completer<void>();
-   final ImageProvider imageProvider = TestImageProvider(completer.future, loadingTestImage);
+    final ImageProvider imageProvider = TestImageProvider(completer.future, loadingTestImage);
     await tester.pumpWidget(
       KeyedSubtree(
         key: key,
@@ -71,7 +70,7 @@ Future<void> main() async {
   testWidgets('Moving a DecoratedBox',
   (WidgetTester tester) async {
     final Completer<void> completer = Completer<void>();
-    imageProvider = TestImageProvider(completer.future, movingTestImage);
+    final ImageProvider imageProvider = TestImageProvider(completer.future, movingTestImage);
     final Widget subtree = KeyedSubtree(
       key: GlobalKey(),
       child: RepaintBoundary(
@@ -84,6 +83,7 @@ Future<void> main() async {
         ),
       ),
     );
+    addTearDown(imageProvider.evict);
     await tester.pumpWidget(subtree);
     await tester.idle();
     expect(tester.binding.hasScheduledFrame, isFalse);

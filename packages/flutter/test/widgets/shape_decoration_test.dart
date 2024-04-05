@@ -16,7 +16,7 @@ Future<void> main() async {
   AutomatedTestWidgetsFlutterBinding();
   final ui.Image rawImage = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
   final ImageProvider image = TestImageProvider(0, 0, image: rawImage);
-
+  tearDown(image.evict);
   testWidgets('ShapeDecoration.image',
   (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -32,7 +32,7 @@ Future<void> main() async {
         ),
       ),
     );
-    addTearDown(image.evict);
+    // addTearDown(image.evict);
     expect(
       find.byType(DecoratedBox),
       paints
@@ -108,7 +108,7 @@ Future<void> main() async {
         ),
       ),
     );
-    addTearDown(image.evict);
+    // addTearDown(image.evict);
     expect(
       log,
       <String>[

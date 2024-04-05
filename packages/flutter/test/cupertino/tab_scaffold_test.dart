@@ -47,7 +47,7 @@ void main() {
     selectedTabs = <int>[];
   });
 
-  tearDown(memoryImage.evict);
+  tearDownAll(memoryImage.evict);
 
   BottomNavigationBarItem tabGenerator(int index) {
     return BottomNavigationBarItem(
@@ -73,7 +73,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+    
     expect(tabsPainted, const <int>[0]);
     RichText tab1 = tester.widget(find.descendant(
       of: find.text('Tab 1'),
@@ -122,7 +122,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     expect(tabsBuilt, const <int>[0]);
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 2'), findsNothing);
@@ -166,7 +166,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     expect(focusNodes[0].hasFocus, isTrue);
 
     await tester.tap(find.text('Tab 2'));
@@ -214,7 +214,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     expect(
       focusNodes.any((FocusNode node) => node.hasFocus),
       isFalse,
@@ -271,7 +271,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     expect(tabsPainted, const <int>[1]);
 
     controller.index = 0;
@@ -307,7 +307,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     expect(tabsPainted, const <int>[0]);
 
     final CupertinoTabController controller = CupertinoTabController(initialIndex: 1);
@@ -328,7 +328,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     expect(tabsPainted, const <int>[0, 1]);
     // onTap is not called when changing tabs programmatically.
     expect(selectedTabs, isEmpty);
@@ -352,7 +352,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     BoxDecoration tabDecoration = tester.widget<DecoratedBox>(find.descendant(
       of: find.byType(CupertinoTabBar),
       matching: find.byType(DecoratedBox),
@@ -378,7 +378,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     tabDecoration = tester.widget<DecoratedBox>(find.descendant(
       of: find.byType(CupertinoTabBar),
       matching: find.byType(DecoratedBox),
@@ -418,7 +418,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 400));
     // Don't generate more media query padding from the translucent bottom
     // tab since the tab is behind the keyboard now.
@@ -445,7 +445,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 600));
     // Media query padding shows up in the inner content because it wasn't masked
     // by the view inset.
@@ -470,7 +470,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     await tester.pumpWidget(
       CupertinoApp(
         home: MediaQuery(
@@ -557,7 +557,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 400));
     expect(MediaQuery.of(innerContext).padding.bottom, 0);
   });
@@ -612,7 +612,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     expect(tabsBuilt, const <int>[0, 1]);
     // We didn't tap on any additional tabs to invoke the onTap callback. We
     // just deleted a tab.
@@ -677,7 +677,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     expect(tabsPainted, const <int> [0, 0]);
 
     await tester.tap(find.text('Tab 19'));
@@ -735,7 +735,7 @@ void main() {
           ),
         ),
       );
-      addTearDown(memoryImage.evict);
+
       expect(tabsPainted, const <int> [0, 0]);
 
       await tester.tap(find.text('Tab 2'));
@@ -986,7 +986,7 @@ void main() {
     final String message = tester.takeException().toString();
     expect(message, contains('current index ${controller.index}'));
     expect(message, contains('with 3 tabs'));
-    addTearDown(memoryImage.evict);
+
   });
 
   testWidgets("Don't replace focus nodes for existing tabs when changing tab count", (WidgetTester tester) async {
@@ -1035,7 +1035,7 @@ void main() {
           ),
         ),
     );
-    addTearDown(memoryImage.evict);
+
     for (int i = 0; i < 5; i++) {
       controller.index = i;
       await tester.pump();
@@ -1097,7 +1097,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     // The exact same state instance is still there.
     expect(tester.state<EditableTextState>(find.byType(EditableText)), editableState);
     expect(find.text("don't lose me"), findsOneWidget);
@@ -1276,7 +1276,7 @@ void main() {
     tearDown(() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(SystemChannels.platform, null);
-    addTearDown(memoryImage.evict);
+
     });
 
     testWidgets('System back navigation inside of tabs',
@@ -1332,7 +1332,7 @@ void main() {
           ),
         ),
       );
-      addTearDown(memoryImage.evict);
+
       expect(find.text('Page 1 of tab 1'), findsOneWidget);
       expect(find.text('Page 2 of tab 1'), findsNothing);
       expect(lastFrameworkHandlesBack, isFalse);

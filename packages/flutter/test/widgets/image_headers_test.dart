@@ -17,13 +17,12 @@ void main() {
   (WidgetTester tester) async {
     HttpOverrides.runZoned<Future<void>>(() async {
       late Image image;
-      await tester.pumpWidget( image = Image.network(
+      await tester.pumpWidget(image = Image.network(
         'https://www.example.com/images/frame.png',
         headers: const <String, String>{'flutter': 'flutter'},
       ));
-
-      expect(MockHttpHeaders.headers['flutter'], <String>['flutter']);
       addTearDown(image.image.evict);
+      expect(MockHttpHeaders.headers['flutter'], <String>['flutter']);
     }, createHttpClient: (SecurityContext? _) {
       return client;
     });

@@ -19,7 +19,7 @@ void main() {
   });
 
 
-  tearDown(memoryImage.evict);
+ tearDownAll(memoryImage.evict);
 
   testWidgets('Last tab gets focus', (WidgetTester tester) async {
     // 2 nodes for 2 tabs
@@ -45,7 +45,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+    
     expect(focusNodes[0].hasFocus, isTrue);
 
     await tester.tap(find.text('Tab 2'));
@@ -96,7 +96,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     expect(
       focusNodes.any((FocusNode node) => node.hasFocus),
       isFalse,
@@ -141,7 +141,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     BoxDecoration tabDecoration = tester.widget<DecoratedBox>(find.descendant(
       of: find.byType(CupertinoTabBar),
       matching: find.byType(DecoratedBox),
@@ -167,7 +167,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     tabDecoration = tester.widget<DecoratedBox>(find.descendant(
       of: find.byType(CupertinoTabBar),
       matching: find.byType(DecoratedBox),
@@ -205,7 +205,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     // The DecoratedBox with the smallest depth is the DecoratedBox of the
     // CupertinoTabScaffold.
     BoxDecoration tabDecoration = tester.firstWidget<DecoratedBox>(
@@ -230,7 +230,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     tabDecoration = tester.firstWidget<DecoratedBox>(
       find.descendant(
         of: find.byType(CupertinoTabScaffold),
@@ -259,7 +259,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     final EditableTextState editableState = tester.state<EditableTextState>(find.byType(EditableText));
 
     await tester.enterText(find.byType(TextField), "don't lose me");
@@ -281,7 +281,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     // The exact same state instance is still there.
     expect(tester.state<EditableTextState>(find.byType(EditableText)), editableState);
     expect(find.text("don't lose me"), findsOneWidget);
@@ -307,7 +307,7 @@ void main() {
         }),
       ),
     );
-    addTearDown(memoryImage.evict);
+
     final Iterable<RichText> barItems = tester.widgetList<RichText>(
       find.descendant(
         of: find.byType(CupertinoTabBar),
