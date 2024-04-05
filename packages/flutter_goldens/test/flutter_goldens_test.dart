@@ -18,6 +18,8 @@ import 'package:process/process.dart';
 
 import 'json_templates.dart';
 
+// TODO(ianh): make sure all constructors order their arguments in a manner consistent with the defined parameter order
+
 const String _kFlutterRoot = '/flutter';
 
 // 1x1 transparent pixel
@@ -714,6 +716,7 @@ void main() {
       final Directory basedir = FlutterGoldenFileComparator.getBaseDirectory(
         defaultComparator,
         platform,
+        fs: fs,
       );
       expect(
         basedir.uri,
@@ -852,6 +855,7 @@ void main() {
           platform,
           goldens: fakeSkiaClient,
           log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
+          fs: fs,
         );
         expect(fakeSkiaClient.initCalls, 0);
       });
@@ -1049,6 +1053,7 @@ void main() {
           platform,
           goldens: fakeSkiaClient,
           log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
+          fs: fs,
         );
         expect(fakeSkiaClient.tryInitCalls, 0);
       });
@@ -1358,6 +1363,7 @@ void main() {
           goldens: fakeSkiaClient,
           baseDirectory: fakeDirectory,
           log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
+          fs: fs,
         );
         expect(comparator1.runtimeType, FlutterSkippingFileComparator);
 
@@ -1367,6 +1373,7 @@ void main() {
           goldens: fakeSkiaClient,
           baseDirectory: fakeDirectory,
           log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
+          fs: fs,
         );
         expect(comparator2.runtimeType, FlutterSkippingFileComparator);
 
@@ -1376,6 +1383,7 @@ void main() {
           goldens: fakeSkiaClient,
           baseDirectory: fakeDirectory,
           log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
+          fs: fs,
         );
         expect(comparator3.runtimeType, FlutterSkippingFileComparator);
 
