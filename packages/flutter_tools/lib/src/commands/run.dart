@@ -233,6 +233,16 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
   String? get traceAllowlist => stringArg('trace-allowlist');
 
+  bool get useWasm => boolArg(FlutterOptions.kWebWasmFlag);
+
+  WebRendererMode get webRenderer {
+    final String? webRendererString = stringArg('web-renderer');
+    if (webRendererString == null) {
+      return useWasm ? WebRendererMode.skwasm : WebRendererMode.auto;
+    }
+    return WebRendererMode.values.byName(webRendererString);
+  }
+
   /// Create a debugging options instance for the current `run` or `drive` invocation.
   @visibleForTesting
   @protected
@@ -248,10 +258,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     final Map<String, String> webHeaders = featureFlags.isWebEnabled
         ? extractWebHeaders()
         : const <String, String>{};
-    final String? webRendererString = stringArg('web-renderer');
-    final WebRendererMode webRenderer = (webRendererString != null)
-        ? WebRendererMode.values.byName(webRendererString)
-        : WebRendererMode.auto;
 
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
@@ -270,7 +276,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webBrowserFlags: webBrowserFlags,
         webHeaders: webHeaders,
         webRenderer: webRenderer,
-        webUseWasm: boolArg(FlutterOptions.kWebWasmFlag),
+        webUseWasm: useWasm,
         enableImpeller: enableImpeller,
         enableVulkanValidation: enableVulkanValidation,
         uninstallFirst: uninstallFirst,
@@ -321,7 +327,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webLaunchUrl: featureFlags.isWebEnabled ? stringArg('web-launch-url') : null,
         webHeaders: webHeaders,
         webRenderer: webRenderer,
-        webUseWasm: boolArg(FlutterOptions.kWebWasmFlag),
+        webUseWasm: useWasm,
         vmserviceOutFile: stringArg('vmservice-out-file'),
         fastStart: argParser.options.containsKey('fast-start')
           && boolArg('fast-start')
@@ -638,11 +644,20 @@ class RunCommand extends RunCommandBase {
     if (devices!.any((Device device) => device is AndroidDevice)) {
       _deviceDeprecationBehavior = DeprecationBehavior.exit;
     }
+
     // Only support "web mode" with a single web device due to resident runner
     // refactoring required otherwise.
     webMode = featureFlags.isWebEnabled &&
       devices!.length == 1  &&
       await devices!.single.targetPlatform == TargetPlatform.web_javascript;
+
+    if (useWasm && !webMode) {
+      throwToolExit('--wasm is only supported on the web platform');
+    }
+
+    if (webRenderer == WebRendererMode.skwasm && !useWasm) {
+      throwToolExit('Skwasm renderer requires --wasm');
+    }
 
     final String? flavor = stringArg('flavor');
     final bool flavorsSupportedOnEveryDevice = devices!

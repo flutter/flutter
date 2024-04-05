@@ -986,6 +986,36 @@ void main() {
         DeviceManager: () => testDeviceManager,
       });
 
+      testUsingContext('throws a ToolExit when using --wasm on a non-web platform', () async {
+        final RunCommand command = RunCommand();
+        await expectLater(
+          () => createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub',
+            '--wasm',
+          ]), throwsToolExit(message: '--wasm is only supported on the web platform'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      });
+
+      testUsingContext('throws a ToolExit when using the skwasm renderer without --wasm', () async {
+        final RunCommand command = RunCommand();
+        await expectLater(
+          () => createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub',
+            '--web-renderer=skwasm',
+          ]), throwsToolExit(message: 'Skwasm renderer requires --wasm'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      });
+
       testUsingContext('accepts headers with commas in them', () async {
         final RunCommand command = RunCommand();
         await expectLater(
