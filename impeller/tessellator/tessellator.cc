@@ -187,6 +187,9 @@ std::vector<Point> Tessellator::TessellateConvex(const Path& path,
                           [this](Path::Polyline::PointBufferPtr point_buffer) {
                             point_buffer_ = std::move(point_buffer);
                           });
+  if (polyline.points->size() == 0) {
+    return output;
+  }
 
   output.reserve(polyline.points->size() +
                  (4 * (polyline.contours.size() - 1)));
