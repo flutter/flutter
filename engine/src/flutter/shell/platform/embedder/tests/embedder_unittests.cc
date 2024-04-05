@@ -3446,6 +3446,7 @@ TEST_F(EmbedderTest, EmbedderThreadHostUseCustomThreadConfig) {
       flutter::EmbedderThreadHost::CreateEmbedderOrEngineManagedThreadHost(
           nullptr, MockThreadConfigSetter);
 
+  fml::AutoResetWaitableEvent ui_latch;
   int ui_policy;
   struct sched_param ui_param;
 
@@ -3453,15 +3454,21 @@ TEST_F(EmbedderTest, EmbedderThreadHostUseCustomThreadConfig) {
     pthread_t current_thread = pthread_self();
     pthread_getschedparam(current_thread, &ui_policy, &ui_param);
     ASSERT_EQ(ui_param.sched_priority, 10);
+    ui_latch.Signal();
   });
 
+  fml::AutoResetWaitableEvent io_latch;
   int io_policy;
   struct sched_param io_param;
   thread_host->GetTaskRunners().GetIOTaskRunner()->PostTask([&] {
     pthread_t current_thread = pthread_self();
     pthread_getschedparam(current_thread, &io_policy, &io_param);
     ASSERT_EQ(io_param.sched_priority, 1);
+    io_latch.Signal();
   });
+
+  ui_latch.Wait();
+  io_latch.Wait();
 }
 #endif
 
