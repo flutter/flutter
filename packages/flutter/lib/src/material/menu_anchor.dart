@@ -848,6 +848,7 @@ class MenuItemButton extends StatefulWidget {
     this.onFocusChange,
     this.focusNode,
     this.shortcut,
+    this.semanticsLabel,
     this.style,
     this.statesController,
     this.clipBehavior = Clip.none,
@@ -891,6 +892,21 @@ class MenuItemButton extends StatefulWidget {
   ///
   /// {@macro flutter.material.MenuBar.shortcuts_note}
   final MenuSerializableShortcut? shortcut;
+
+  /// An optional Semantics label, applied to the entire [MenuItemButton].
+  ///
+  /// A screen reader will default to reading the derived text on the
+  /// [MenuItemButton] itself, which is not guaranteed to be readable.
+  /// (For some shortcuts, such as comma, semicolon, and other
+  /// punctuation, screen readers read silence)
+  ///
+  /// Setting this label overwrites the semantics properties of the entire
+  /// Widget, including its children. Consider wrapping this widget in
+  /// [Semantics] if you want to customize other properties besides just
+  /// the label.
+  ///
+  /// Null by default.
+  final String? semanticsLabel;
 
   /// Customizes this button's appearance.
   ///
@@ -1119,6 +1135,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
       child: _MenuItemLabel(
         leadingIcon: widget.leadingIcon,
         shortcut: widget.shortcut,
+        semanticsLabel: widget.semanticsLabel,
         trailingIcon: widget.trailingIcon,
         hasSubmenu: false,
         overflowAxis: _anchor?._orientation ?? widget.overflowAxis,
@@ -2973,6 +2990,7 @@ class _MenuItemLabel extends StatelessWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.shortcut,
+    this.semanticsLabel,
     this.overflowAxis = Axis.vertical,
     required this.child,
   });
@@ -2997,6 +3015,10 @@ class _MenuItemLabel extends StatelessWidget {
   /// the shortcut.
   final MenuSerializableShortcut? shortcut;
 
+  /// An optional Semantics label, which replaces the generated string when
+  /// read by a screen reader.
+  final String? semanticsLabel;
+
   /// The direction in which the menu item expands.
   final Axis overflowAxis;
 
@@ -3010,7 +3032,6 @@ class _MenuItemLabel extends StatelessWidget {
       _kLabelItemMinSpacing,
       _kLabelItemDefaultSpacing + density.horizontal * 2,
     );
-
     Widget leadings;
     if (overflowAxis == Axis.vertical) {
       leadings = Expanded(
@@ -3044,7 +3065,7 @@ class _MenuItemLabel extends StatelessWidget {
       );
     }
 
-    return Row(
+    Widget menuItemLabel = Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         leadings,
@@ -3073,6 +3094,10 @@ class _MenuItemLabel extends StatelessWidget {
           ),
       ],
     );
+    if (semanticsLabel != null) {
+      menuItemLabel = Semantics(label: semanticsLabel, excludeSemantics: true, child: menuItemLabel);
+    }
+    return menuItemLabel;
   }
 
   @override
