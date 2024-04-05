@@ -701,7 +701,7 @@ class _Decoration {
 // all of the renderer children of a _RenderDecoration.
 class _RenderDecorationLayout {
   const _RenderDecorationLayout({
-    required this.boxToBaseline,
+    //required this.boxToBaseline,
     required this.inputBaseline, // for InputBorderType.underline
     required this.outlineBaseline, // for InputBorderType.outline
     required this.containerHeight,
@@ -709,7 +709,6 @@ class _RenderDecorationLayout {
     required this.size,
   });
 
-  final Map<RenderBox?, double> boxToBaseline;
   final double inputBaseline;
   final double outlineBaseline;
   final double containerHeight;
@@ -915,6 +914,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     return ChildLayoutHelper.getDryBaseline(box, boxConstraints, TextBaseline.alphabetic)
         ?? ChildLayoutHelper.dryLayoutChild(box, boxConstraints).height;
   }
+
   static BoxParentData _boxParentData(RenderBox box) => box.parentData! as BoxParentData;
 
   EdgeInsetsDirectional get contentPadding => decoration.contentPadding;
@@ -950,29 +950,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     return (ascent: ascent, descent: descent);
   }
 
-  // Lay out the given box if needed, and return its baseline.
-  double _layoutLineBox(RenderBox? box, BoxConstraints constraints) {
-    if (box == null) {
-      return 0.0;
-    }
-    box.layout(constraints, parentUsesSize: true);
-    final double baseline = box.getDistanceToBaseline(TextBaseline.alphabetic)!;
-
-    assert(() {
-      if (baseline >= 0) {
-        return true;
-      }
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary("One of InputDecorator's children reported a negative baseline offset."),
-        ErrorDescription(
-          '${box.runtimeType}, of size ${box.size}, reported a negative '
-          'alphabetic baseline of $baseline.',
-        ),
-      ]);
-    }());
-    return baseline;
-  }
-
   // Returns a value used by performLayout to position all of the renderers.
   // This method applies layout to all of the renderers except the container.
   // For convenience, the container is laid out in performLayout().
@@ -988,7 +965,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       'TextField that contains it.',
     );
 
-    final Map<RenderBox?, double> boxToBaseline = <RenderBox?, double>{};
     final BoxConstraints boxConstraints = constraints.loosen();
 
     // Layout all the widgets used by InputDecorator
@@ -1006,78 +982,64 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
     final RenderBox? prefixIcon = this.prefixIcon;
     final RenderBox? suffixIcon = this.suffixIcon;
-    prefixIcon?.layout(containerConstraints, parentUsesSize: true);
-    suffixIcon?.layout(containerConstraints, parentUsesSize: true);
-    prefix?.layout(contentConstraints, parentUsesSize: true);
-    suffix?.layout(contentConstraints, parentUsesSize: true);
+    final Size prefixIconSize = (prefixIcon?..layout(containerConstraints, parentUsesSize: true))?.size ?? Size.zero;
+    final Size suffixIconSize = (suffixIcon?..layout(containerConstraints, parentUsesSize: true))?.size ?? Size.zero;
+    final RenderBox? prefix = this.prefix;
+    final RenderBox? suffix = this.suffix;
+    final Size prefixSize = (prefix?..layout(contentConstraints, parentUsesSize: true))?.size ?? Size.zero;
+    final Size suffixSize = (suffix?..layout(contentConstraints, parentUsesSize: true))?.size ?? Size.zero;
 
     final EdgeInsetsDirectional accessoryHorizontalInsets = EdgeInsetsDirectional.only(
-      start: iconWidth + _boxSize(prefix).width + (prefixIcon == null ? contentPadding.start : prefixIcon.size.width),
-      end: _boxSize(suffix).width + (suffixIcon == null ? contentPadding.end : suffixIcon.size.width),
-    );
-
-    final EdgeInsetsDirectional prefixHorizontalInsets = EdgeInsetsDirectional.only(
-      start: _boxSize(prefix).width,
-      end: _boxSize(suffix).width,
+      start: iconWidth + prefixSize.width + (prefixIcon == null ? contentPadding.start : prefixIcon.size.width),
+      end: suffixSize.width + (suffixIcon == null ? contentPadding.end : suffixIcon.size.width),
     );
 
     final double inputWidth = math.max(0.0, constraints.maxWidth - accessoryHorizontalInsets.horizontal);
     // Increase the available width for the label when it is scaled down.
     final double invertedLabelScale = lerpDouble(1.00, 1 / _kFinalLabelScale, decoration.floatingLabelProgress)!;
-    double suffixIconWidth = _boxSize(suffixIcon).width;
-    if (decoration.border.isOutline) {
-      suffixIconWidth = lerpDouble(suffixIconWidth, 0.0, decoration.floatingLabelProgress)!;
+    final RenderBox? label = this.label;
+    if (label != null) {
+      final double suffixIconSpace = decoration.border.isOutline
+        ? lerpDouble(suffixIconSize.width, 0.0, decoration.floatingLabelProgress)!
+        : suffixIconSize.width;
+      final double labelWidth = math.max(
+        0.0,
+        constraints.maxWidth - (iconWidth + contentPadding.horizontal + prefixIconSize.width + suffixIconSpace),
+      );
+      final BoxConstraints labelConstraints = boxConstraints.copyWith(maxWidth: labelWidth * invertedLabelScale);
+      label.layout(labelConstraints, parentUsesSize: true);
     }
-    final double labelWidth = math.max(
-      0.0,
-      constraints.maxWidth - (
-        _boxSize(icon).width
-        + contentPadding.horizontal
-        + _boxSize(prefixIcon).width
-        + suffixIconWidth),
-    );
-    boxToBaseline[label] = _layoutLineBox(label, boxConstraints.copyWith(maxWidth: labelWidth * invertedLabelScale));
-    boxToBaseline[hint] = _layoutLineBox(hint, boxConstraints.tighten(width: inputWidth));
 
     // The height of the input needs to accommodate label above and counter and
     // helperError below, when they exist.
-    final double labelHeight = label == null
-      ? 0
-      : decoration.floatingLabelHeight;
+    final double labelHeight = label == null ? 0 : decoration.floatingLabelHeight;
     final double topHeight = decoration.border.isOutline
-      ? math.max(labelHeight - boxToBaseline[label]!, 0)
+      ? math.max(labelHeight - (label?.getDistanceToBaseline(TextBaseline.alphabetic) ?? 0.0), 0.0)
       : labelHeight;
     final double bottomHeight = subtextSize.ascent + subtextSize.descent;
     final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
-    boxToBaseline[input] = _layoutLineBox(
-      input,
-      boxConstraints.deflate(EdgeInsets.only(
-        top: contentPadding.top + topHeight + densityOffset.dy / 2,
-        bottom: contentPadding.bottom + bottomHeight + densityOffset.dy / 2,
-      )).copyWith(
-        minWidth: inputWidth,
-        maxWidth: inputWidth,
-      ),
-    );
+    final BoxConstraints inputConstraints = boxConstraints
+      .deflate(EdgeInsets.only(top: contentPadding.vertical + topHeight + bottomHeight + densityOffset.dy))
+      .tighten(width: inputWidth);
+
+    final RenderBox? input = this.input;
+    final RenderBox? hint = this.hint;
+    final Size inputSize = (input?..layout(inputConstraints, parentUsesSize: true))?.size ?? Size.zero;
+    final Size hintSize = (hint?..layout(boxConstraints.tighten(width: inputWidth), parentUsesSize: true))?.size ?? Size.zero;
+    final double inputBaseline = input == null ? 0.0 : _getBaseline(input, inputConstraints);
+    final double hintBaseline = hint == null ? 0.0 : _getBaseline(hint, boxConstraints.tighten(width: inputWidth));
 
     // The field can be occupied by a hint or by the input itself
-    final double hintHeight = hint?.size.height ?? 0;
-    final double inputDirectHeight = input?.size.height ?? 0;
-    final double inputHeight = math.max(hintHeight, inputDirectHeight);
-    final double inputInternalBaseline = math.max(
-      boxToBaseline[input]!,
-      boxToBaseline[hint]!,
-    );
+    final double inputHeight = math.max(hintSize.height, inputSize.height);
+    final double inputInternalBaseline = math.max(inputBaseline, hintBaseline);
 
-    final double prefixBaseline = prefix == null ? 0.0 : _getBaseline(prefix!, contentConstraints);
-    final double suffixBaseline = suffix == null ? 0.0 : _getBaseline(suffix!, contentConstraints);
+    final double prefixBaseline = prefix == null ? 0.0 : _getBaseline(prefix, contentConstraints);
+    final double suffixBaseline = suffix == null ? 0.0 : _getBaseline(suffix, contentConstraints);
     // Calculate the amount that prefix/suffix affects height above and below
     // the input.
-    final double prefixHeight = prefix?.size.height ?? 0;
-    final double suffixHeight = suffix?.size.height ?? 0;
     final double fixHeight = math.max(prefixBaseline, suffixBaseline);
     final double fixAboveInput = math.max(0, fixHeight - inputInternalBaseline);
-    final double fixBelowBaseline = math.max(prefixHeight - prefixBaseline, suffixHeight - suffixBaseline);
+    final double fixBelowBaseline = math.max(prefixSize.height - prefixBaseline, suffixSize.height - suffixBaseline);
     // TODO(justinmc): fixBelowInput should have no effect when there is no
     // prefix/suffix below the input.
     // https://github.com/flutter/flutter/issues/66050
@@ -1087,9 +1049,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     );
 
     // Calculate the height of the input text container.
-    final double prefixIconHeight = prefixIcon?.size.height ?? 0;
-    final double suffixIconHeight = suffixIcon?.size.height ?? 0;
-    final double fixIconHeight = math.max(prefixIconHeight, suffixIconHeight);
+    final double fixIconHeight = math.max(prefixIconSize.height, suffixIconSize.height);
     final double contentHeight = math.max(
       fixIconHeight,
       topHeight
@@ -1137,7 +1097,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double alignableHeight = fixAboveInput + inputHeight + fixBelowInput;
     final double maxVerticalOffset = maxContentHeight - alignableHeight;
     final double textAlignVerticalOffset = maxVerticalOffset * textAlignVerticalFactor;
-    final double inputBaseline = topInputBaseline + textAlignVerticalOffset;
 
     // The three main alignments for the baseline when an outline is present are
     //
@@ -1162,9 +1121,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     );
 
     return _RenderDecorationLayout(
-      boxToBaseline: boxToBaseline,
       containerHeight: containerHeight,
-      inputBaseline: inputBaseline,
+      inputBaseline: topInputBaseline + textAlignVerticalOffset,
       outlineBaseline: outlineBaseline,
       subtextSize: subtextSize,
       size: Size(constraints.maxWidth, containerHeight + bottomHeight),
@@ -1360,8 +1318,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         }
     }
 
+    final double baseline = _isOutlineAligned ? layout.outlineBaseline : layout.inputBaseline;
     double baselineLayout(RenderBox box, double x) {
-      final double baseline = _isOutlineAligned ? layout.outlineBaseline : layout.inputBaseline;
       _boxParentData(box).offset = Offset(x, baseline - box.getDistanceToBaseline(TextBaseline.alphabetic)!);
       return box.size.width;
     }
