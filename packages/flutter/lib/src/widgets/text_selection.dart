@@ -646,15 +646,6 @@ class TextSelectionOverlay {
     required Offset globalGesturePosition,
     required TextPosition currentTextPosition,
   }) {
-    final RenderBox? overlay = Overlay.of(context, rootOverlay: true).context.findRenderObject() as RenderBox?;
-    final Offset overlayGesturePosition = overlay?.globalToLocal(globalGesturePosition) ?? globalGesturePosition;
-    final Offset globalRenderEditableTopLeft = renderEditable.localToGlobal(Offset.zero, ancestor: overlay);
-    final Offset globalRenderEditableBottomRight = renderEditable.localToGlobal(
-      (Offset.zero & renderEditable.size).bottomRight,
-      ancestor: overlay,
-    );
-    final Rect localCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
-
     final TextSelection lineAtOffset = renderEditable.getLineAtOffset(currentTextPosition);
     final TextPosition positionAtEndOfLine = TextPosition(
         offset: lineAtOffset.extentOffset,
@@ -670,21 +661,30 @@ class TextSelectionOverlay {
       renderEditable.getLocalRectForCaret(positionAtBeginningOfLine).topCenter,
       renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomCenter,
     );
-    final Rect globalLineBoundaries = Rect.fromPoints(
-      renderEditable.localToGlobal(localLineBoundaries.topLeft),
-      renderEditable.localToGlobal(localLineBoundaries.bottomRight),
+    final RenderBox? overlay = Overlay.of(context, rootOverlay: true).context.findRenderObject() as RenderBox?;
+    final Rect overlayLineBoundaries = Rect.fromPoints(
+      renderEditable.localToGlobal(localLineBoundaries.topLeft, ancestor: overlay),
+      renderEditable.localToGlobal(localLineBoundaries.bottomRight, ancestor: overlay),
     );
 
-    final Rect globalCaretRect = Rect.fromPoints(
-        renderEditable.localToGlobal(localCaretRect.topLeft),
-        renderEditable.localToGlobal(localCaretRect.bottomRight),
+    final Rect localCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
+    final Rect overlayCaretRect = Rect.fromPoints(
+        renderEditable.localToGlobal(localCaretRect.topLeft, ancestor: overlay),
+        renderEditable.localToGlobal(localCaretRect.bottomRight, ancestor: overlay),
     );
+
+    final Offset overlayRenderEditableTopLeft = renderEditable.localToGlobal(Offset.zero, ancestor: overlay);
+    final Offset overlayRenderEditableBottomRight = renderEditable.localToGlobal(
+      (Offset.zero & renderEditable.size).bottomRight,
+      ancestor: overlay,
+    );
+    final Offset overlayGesturePosition = overlay?.globalToLocal(globalGesturePosition) ?? globalGesturePosition;
 
     return MagnifierInfo(
-      fieldBounds: Rect.fromPoints(globalRenderEditableTopLeft, globalRenderEditableBottomRight),
+      fieldBounds: Rect.fromPoints(overlayRenderEditableTopLeft, overlayRenderEditableBottomRight),
       globalGesturePosition: overlayGesturePosition,
-      caretRect: globalCaretRect,
-      currentLineBoundaries: globalLineBoundaries,
+      caretRect: overlayCaretRect,
+      currentLineBoundaries: overlayLineBoundaries,
     );
   }
 
@@ -711,11 +711,10 @@ class TextSelectionOverlay {
       Offset(0.0, centerOfLineLocal),
     ).dy;
     _endHandleDragPositionToCenterOfLine = centerOfLineGlobal  - details.globalPosition.dy;
-    // This adjusts for the fact that the selection handles may not perfectly
-    // cover the TextPosition that they correspond to. We want to know the
-    // TextPosition of the place that the dragged handle points to, not
-    // necessarily exactly where the tap happened, which may be on the following
-    // line if the handle hangs down.
+    // Instead of finding the TextPosition at the handle's location directly,
+    // use the vertical center of the line that it points to. This is because
+    // selection handles typically hang above or below the line that they point
+    // to.
     final TextPosition position = renderObject.getPositionForPoint(
       Offset(
         details.globalPosition.dx,
@@ -767,12 +766,12 @@ class TextSelectionOverlay {
       Offset(0.0, nextEndHandleDragPositionLocal),
     ).dy;
 
-    final Offset adjustedOffset = Offset(
+    final Offset handlePointingAtGlobal = Offset(
       details.globalPosition.dx,
       _endHandleDragPosition + _endHandleDragPositionToCenterOfLine,
     );
 
-    final TextPosition position = renderObject.getPositionForPoint(adjustedOffset);
+    final TextPosition position = renderObject.getPositionForPoint(handlePointingAtGlobal);
 
     if (_selection.isCollapsed) {
       _selectionOverlay.updateMagnifier(_buildMagnifier(
@@ -843,11 +842,10 @@ class TextSelectionOverlay {
       Offset(0.0, centerOfLineLocal),
     ).dy;
     _startHandleDragPositionToCenterOfLine = centerOfLineGlobal - details.globalPosition.dy;
-    // This adjusts for the fact that the selection handles may not perfectly
-    // cover the TextPosition that they correspond to. We want to know the
-    // TextPosition of the place that the dragged handle points to, not
-    // necessarily exactly where the tap happened, which may be on the following
-    // line if the handle hangs down.
+    // Instead of finding the TextPosition at the handle's location directly,
+    // use the vertical center of the line that it points to. This is because
+    // selection handles typically hang above or below the line that they point
+    // to.
     final TextPosition position = renderObject.getPositionForPoint(
       Offset(
         details.globalPosition.dx,
