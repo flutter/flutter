@@ -497,6 +497,8 @@ std::unique_ptr<FlutterWindowsView> FlutterWindowsEngine::CreateView(
   auto view = std::make_unique<FlutterWindowsView>(
       kImplicitViewId, this, std::move(window), windows_proc_table_);
 
+  view->CreateRenderSurface();
+
   views_[kImplicitViewId] = view.get();
 
   return std::move(view);
