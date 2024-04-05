@@ -617,7 +617,7 @@ class _Decoration {
     this.container,
   });
 
-  final EdgeInsets contentPadding;
+  final EdgeInsetsDirectional contentPadding;
   final bool isCollapsed;
   final double floatingLabelHeight;
   final double floatingLabelProgress;
@@ -917,7 +917,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   }
   static BoxParentData _boxParentData(RenderBox box) => box.parentData! as BoxParentData;
 
-  EdgeInsets get contentPadding => decoration.contentPadding;
+  EdgeInsetsDirectional get contentPadding => decoration.contentPadding;
 
   _SubtextSize _computeSubtextSizes({
     required BoxConstraints constraints,
@@ -992,29 +992,36 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final BoxConstraints boxConstraints = constraints.loosen();
 
     // Layout all the widgets used by InputDecorator
-    boxToBaseline[icon] = _layoutLineBox(icon, boxConstraints);
-    final BoxConstraints containerConstraints = boxConstraints.copyWith(
-      maxWidth: boxConstraints.maxWidth - _boxSize(icon).width,
-    );
-    boxToBaseline[prefixIcon] = _layoutLineBox(prefixIcon, containerConstraints);
-    boxToBaseline[suffixIcon] = _layoutLineBox(suffixIcon, containerConstraints);
-    final BoxConstraints contentConstraints = containerConstraints.copyWith(
-      maxWidth: math.max(0.0, containerConstraints.maxWidth - contentPadding.horizontal),
-    );
-    boxToBaseline[prefix] = _layoutLineBox(prefix, contentConstraints);
-    boxToBaseline[suffix] = _layoutLineBox(suffix, contentConstraints);
+    final double iconWidth = (icon?..layout(boxConstraints, parentUsesSize: true))?.size.width ?? 0.0;
+    final BoxConstraints containerConstraints = boxConstraints.deflate(EdgeInsets.only(left: iconWidth));
+    final BoxConstraints contentConstraints = containerConstraints.deflate(contentPadding);
 
-    final double inputWidth = math.max(
-      0.0,
-      constraints.maxWidth - (
-        _boxSize(icon).width
-        + (prefixIcon != null ? 0 : (textDirection == TextDirection.ltr ? contentPadding.left : contentPadding.right))
-        + _boxSize(prefixIcon).width
-        + _boxSize(prefix).width
-        + _boxSize(suffix).width
-        + _boxSize(suffixIcon).width
-        + (suffixIcon != null ? 0 : (textDirection == TextDirection.ltr ? contentPadding.right : contentPadding.left))),
+    // The helper or error text can occupy the full width less the space
+    // occupied by the icon and counter.
+    final _SubtextSize subtextSize = _computeSubtextSizes(
+      constraints: contentConstraints,
+      layoutChild: ChildLayoutHelper.layoutChild,
+      getBaseline: _getBaseline,
     );
+
+    final RenderBox? prefixIcon = this.prefixIcon;
+    final RenderBox? suffixIcon = this.suffixIcon;
+    prefixIcon?.layout(containerConstraints, parentUsesSize: true);
+    suffixIcon?.layout(containerConstraints, parentUsesSize: true);
+    prefix?.layout(contentConstraints, parentUsesSize: true);
+    suffix?.layout(contentConstraints, parentUsesSize: true);
+
+    final EdgeInsetsDirectional accessoryHorizontalInsets = EdgeInsetsDirectional.only(
+      start: iconWidth + _boxSize(prefix).width + (prefixIcon == null ? contentPadding.start : prefixIcon.size.width),
+      end: _boxSize(suffix).width + (suffixIcon == null ? contentPadding.end : suffixIcon.size.width),
+    );
+
+    final EdgeInsetsDirectional prefixHorizontalInsets = EdgeInsetsDirectional.only(
+      start: _boxSize(prefix).width,
+      end: _boxSize(suffix).width,
+    );
+
+    final double inputWidth = math.max(0.0, constraints.maxWidth - accessoryHorizontalInsets.horizontal);
     // Increase the available width for the label when it is scaled down.
     final double invertedLabelScale = lerpDouble(1.00, 1 / _kFinalLabelScale, decoration.floatingLabelProgress)!;
     double suffixIconWidth = _boxSize(suffixIcon).width;
@@ -1025,27 +1032,12 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       0.0,
       constraints.maxWidth - (
         _boxSize(icon).width
-        + contentPadding.left
+        + contentPadding.horizontal
         + _boxSize(prefixIcon).width
-        + suffixIconWidth
-        + contentPadding.right),
+        + suffixIconWidth),
     );
-    boxToBaseline[label] = _layoutLineBox(
-      label,
-      boxConstraints.copyWith(maxWidth: labelWidth * invertedLabelScale),
-    );
-    boxToBaseline[hint] = _layoutLineBox(
-      hint,
-      boxConstraints.copyWith(minWidth: inputWidth, maxWidth: inputWidth),
-    );
-
-    // The helper or error text can occupy the full width less the space
-    // occupied by the icon and counter.
-    final _SubtextSize subtextSize = _computeSubtextSizes(
-      constraints: contentConstraints,
-      layoutChild: ChildLayoutHelper.layoutChild,
-      getBaseline: _getBaseline,
-    );
+    boxToBaseline[label] = _layoutLineBox(label, boxConstraints.copyWith(maxWidth: labelWidth * invertedLabelScale));
+    boxToBaseline[hint] = _layoutLineBox(hint, boxConstraints.tighten(width: inputWidth));
 
     // The height of the input needs to accommodate label above and counter and
     // helperError below, when they exist.
@@ -1077,19 +1069,15 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       boxToBaseline[hint]!,
     );
 
+    final double prefixBaseline = prefix == null ? 0.0 : _getBaseline(prefix!, contentConstraints);
+    final double suffixBaseline = suffix == null ? 0.0 : _getBaseline(suffix!, contentConstraints);
     // Calculate the amount that prefix/suffix affects height above and below
     // the input.
     final double prefixHeight = prefix?.size.height ?? 0;
     final double suffixHeight = suffix?.size.height ?? 0;
-    final double fixHeight = math.max(
-      boxToBaseline[prefix]!,
-      boxToBaseline[suffix]!,
-    );
+    final double fixHeight = math.max(prefixBaseline, suffixBaseline);
     final double fixAboveInput = math.max(0, fixHeight - inputInternalBaseline);
-    final double fixBelowBaseline = math.max(
-      prefixHeight - boxToBaseline[prefix]!,
-      suffixHeight - boxToBaseline[suffix]!,
-    );
+    final double fixBelowBaseline = math.max(prefixHeight - prefixBaseline, suffixHeight - suffixBaseline);
     // TODO(justinmc): fixBelowInput should have no effect when there is no
     // prefix/suffix below the input.
     // https://github.com/flutter/flutter/issues/66050
@@ -1202,25 +1190,25 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   @override
   double computeMinIntrinsicWidth(double height) {
     return _minWidth(icon, height)
-      + (prefixIcon != null ? 0.0 : (textDirection == TextDirection.ltr ? contentPadding.left : contentPadding.right))
+      + (prefixIcon != null ? 0.0 : contentPadding.start)
       + _minWidth(prefixIcon, height)
       + _minWidth(prefix, height)
       + math.max(_minWidth(input, height), _minWidth(hint, height))
       + _minWidth(suffix, height)
       + _minWidth(suffixIcon, height)
-      + (suffixIcon != null ? 0.0 : (textDirection == TextDirection.ltr ? contentPadding.right : contentPadding.left));
+      + (suffixIcon != null ? 0.0 : contentPadding.end);
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
     return _maxWidth(icon, height)
-      + (prefixIcon != null ? 0.0 : (textDirection == TextDirection.ltr ? contentPadding.left : contentPadding.right))
+      + (prefixIcon != null ? 0.0 : contentPadding.start)
       + _maxWidth(prefixIcon, height)
       + _maxWidth(prefix, height)
       + math.max(_maxWidth(input, height), _maxWidth(hint, height))
       + _maxWidth(suffix, height)
       + _maxWidth(suffixIcon, height)
-      + (suffixIcon != null ? 0.0 : (textDirection == TextDirection.ltr ? contentPadding.right : contentPadding.left));
+      + (suffixIcon != null ? 0.0 : contentPadding.end);
   }
 
   double _lineHeight(double width, List<RenderBox?> boxes) {
@@ -1353,37 +1341,37 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       centerLayout(icon!, x);
     }
 
-    final double left = contentPadding.left;
-    final double right = overallWidth - contentPadding.right;
+    //final double left = contentPadding.left;
+    //final double right = overallWidth - contentPadding.right;
     final double subtextBaseline = layout.subtextSize.ascent + layout.containerHeight;
     final RenderBox? counter = this.counter;
     final double helperErrorBaseline = helperError.getDistanceToBaseline(TextBaseline.alphabetic)!;
     final double counterBaseline = counter?.getDistanceToBaseline(TextBaseline.alphabetic)! ?? 0.0;
     switch (textDirection) {
       case TextDirection.ltr:
-        _boxParentData(helperError).offset = Offset(left + _boxSize(icon).width, subtextBaseline - helperErrorBaseline);
+        _boxParentData(helperError).offset = Offset(contentPadding.start + _boxSize(icon).width, subtextBaseline - helperErrorBaseline);
         if (counter != null) {
-          _boxParentData(counter).offset = Offset(right - counter.size.width, subtextBaseline - counterBaseline);
+          _boxParentData(counter).offset = Offset(overallWidth - contentPadding.end - counter.size.width, subtextBaseline - counterBaseline);
         }
       case TextDirection.rtl:
-        _boxParentData(helperError).offset = Offset(right - _boxSize(icon).width - helperError.size.width, subtextBaseline - helperErrorBaseline);
+        _boxParentData(helperError).offset = Offset(overallWidth - contentPadding.start - _boxSize(icon).width - helperError.size.width, subtextBaseline - helperErrorBaseline);
         if (counter != null) {
-          _boxParentData(counter).offset = Offset(left, subtextBaseline - counterBaseline);
+          _boxParentData(counter).offset = Offset(contentPadding.end, subtextBaseline - counterBaseline);
         }
     }
 
     double baselineLayout(RenderBox box, double x) {
       final double baseline = _isOutlineAligned ? layout.outlineBaseline : layout.inputBaseline;
-      _boxParentData(box).offset = Offset(x, baseline - layout.boxToBaseline[box]!);
+      _boxParentData(box).offset = Offset(x, baseline - box.getDistanceToBaseline(TextBaseline.alphabetic)!);
       return box.size.width;
     }
 
     switch (textDirection) {
       case TextDirection.rtl: {
-        double start = right - _boxSize(icon).width;
-        double end = left;
+        double start = overallWidth - contentPadding.start - _boxSize(icon).width;
+        double end = contentPadding.end;
         if (prefixIcon != null) {
-          start += contentPadding.right;
+          start += contentPadding.start;
           start -= centerLayout(prefixIcon!, start - prefixIcon!.size.width);
         }
         if (label != null) {
@@ -1403,7 +1391,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
           baselineLayout(hint!, start - hint!.size.width);
         }
         if (suffixIcon != null) {
-          end -= contentPadding.left;
+          end -= contentPadding.end;
           end += centerLayout(suffixIcon!, end);
         }
         if (suffix != null) {
@@ -1412,10 +1400,10 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         break;
       }
       case TextDirection.ltr: {
-        double start = left + _boxSize(icon).width;
-        double end = right;
+        double start = contentPadding.start + _boxSize(icon).width;
+        double end = overallWidth - contentPadding.end;
         if (prefixIcon != null) {
-          start -= contentPadding.left;
+          start -= contentPadding.start;
           start += centerLayout(prefixIcon!, start);
         }
         if (label != null) {
@@ -1435,7 +1423,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
           baselineLayout(hint!, start);
         }
         if (suffixIcon != null) {
-          end += contentPadding.right;
+          end += contentPadding.end;
           end -= centerLayout(suffixIcon!, end - suffixIcon!.size.width);
         }
         if (suffix != null) {
@@ -1456,7 +1444,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         case TextDirection.rtl:
           double offsetToPrefixIcon = 0.0;
           if (prefixIcon != null && !decoration.alignLabelWithHint) {
-            offsetToPrefixIcon = material3 ? _boxSize(prefixIcon).width - left : 0;
+            offsetToPrefixIcon = material3 ? _boxSize(prefixIcon).width - contentPadding.end : 0;
           }
           decoration.borderGap.start = lerpDouble(labelX + _boxSize(label).width + offsetToPrefixIcon,
             _boxSize(container).width / 2.0 + floatWidth / 2.0,
@@ -1468,7 +1456,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
           // floating label is centered, it's already relative to _BorderContainer.
           double offsetToPrefixIcon = 0.0;
           if (prefixIcon != null && !decoration.alignLabelWithHint) {
-            offsetToPrefixIcon = material3 ? (-_boxSize(prefixIcon).width + left) : 0;
+            offsetToPrefixIcon = material3 ? (-_boxSize(prefixIcon).width + contentPadding.start) : 0;
           }
           decoration.borderGap.start = lerpDouble(labelX - _boxSize(icon).width + offsetToPrefixIcon,
             _boxSize(container).width / 2.0 - floatWidth / 2.0,
@@ -1519,13 +1507,13 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
           startX = labelOffset.dx + labelWidth * (1.0 - scale);
           floatStartX = startX;
           if (prefixIcon != null && !decoration.alignLabelWithHint && isOutlineBorder) {
-            floatStartX += material3 ? _boxSize(prefixIcon).width - contentPadding.left : 0.0;
+            floatStartX += material3 ? _boxSize(prefixIcon).width - contentPadding.end : 0.0;
           }
         case TextDirection.ltr: // origin on the left
           startX = labelOffset.dx;
           floatStartX = startX;
           if (prefixIcon != null && !decoration.alignLabelWithHint && isOutlineBorder) {
-            floatStartX += material3 ? -_boxSize(prefixIcon).width + contentPadding.left : 0.0;
+            floatStartX += material3 ? -_boxSize(prefixIcon).width + contentPadding.start : 0.0;
           }
       }
       final double floatEndX = lerpDouble(floatStartX, centeredFloatX, floatAlign)!;
@@ -2369,46 +2357,58 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     // The _Decoration widget and _RenderDecoration assume that contentPadding
     // has been resolved to EdgeInsets.
     final TextDirection textDirection = Directionality.of(context);
-    final EdgeInsets? decorationContentPadding = decoration.contentPadding?.resolve(textDirection);
+    final bool flipHorizontal = switch (textDirection) {
+      TextDirection.ltr => false,
+      TextDirection.rtl => true,
+    };
+    final EdgeInsets? resolvedPadding = decoration.contentPadding?.resolve(textDirection);
+    final EdgeInsetsDirectional? decorationContentPadding = resolvedPadding == null
+      ? null
+      : EdgeInsetsDirectional.fromSTEB(
+          flipHorizontal ? resolvedPadding.right : resolvedPadding.left,
+          resolvedPadding.top,
+          flipHorizontal ? resolvedPadding.left : resolvedPadding.right,
+          resolvedPadding.bottom,
+        );
 
-    final EdgeInsets contentPadding;
+    final EdgeInsetsDirectional contentPadding;
     final double floatingLabelHeight;
 
     if (decoration.isCollapsed ?? themeData.inputDecorationTheme.isCollapsed) {
       floatingLabelHeight = 0.0;
-      contentPadding = decorationContentPadding ?? EdgeInsets.zero;
+      contentPadding = decorationContentPadding ?? EdgeInsetsDirectional.zero;
     } else if (!border.isOutline) {
       // 4.0: the vertical gap between the inline elements and the floating label.
       floatingLabelHeight = MediaQuery.textScalerOf(context).scale(4.0 + 0.75 * labelStyle.fontSize!);
       if (decoration.filled ?? false) {
         contentPadding = decorationContentPadding ?? (Theme.of(context).useMaterial3
           ? decorationIsDense
-            ? const EdgeInsets.fromLTRB(12.0, 4.0, 12.0, 4.0)
-            : const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
+            ? const EdgeInsetsDirectional.fromSTEB(12.0, 4.0, 12.0, 4.0)
+            : const EdgeInsetsDirectional.fromSTEB(12.0, 8.0, 12.0, 8.0)
           : decorationIsDense
-            ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
-            : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
+            ? const EdgeInsetsDirectional.fromSTEB(12.0, 8.0, 12.0, 8.0)
+            : const EdgeInsetsDirectional.fromSTEB(12.0, 12.0, 12.0, 12.0));
       } else {
         // No left or right padding for underline borders that aren't filled
         // is a small concession to backwards compatibility. This eliminates
         // the most noticeable layout change introduced by #13734.
         contentPadding = decorationContentPadding ?? (Theme.of(context).useMaterial3
           ? decorationIsDense
-            ? const EdgeInsets.fromLTRB(0.0, 4.0, 0.0, 4.0)
-            : const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0)
+            ? const EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 4.0)
+            : const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 8.0)
           : decorationIsDense
-            ? const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0)
-            : const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
+            ? const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 8.0)
+            : const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 12.0));
       }
     } else {
       floatingLabelHeight = 0.0;
       contentPadding = decorationContentPadding ?? (Theme.of(context).useMaterial3
         ? decorationIsDense
-          ? const EdgeInsets.fromLTRB(12.0, 16.0, 12.0, 8.0)
-          : const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
+          ? const EdgeInsetsDirectional.fromSTEB(12.0, 16.0, 12.0, 8.0)
+          : const EdgeInsetsDirectional.fromSTEB(12.0, 20.0, 12.0, 12.0)
         : decorationIsDense
-          ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
-          : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
+          ? const EdgeInsetsDirectional.fromSTEB(12.0, 20.0, 12.0, 12.0)
+          : const EdgeInsetsDirectional.fromSTEB(12.0, 24.0, 12.0, 16.0));
     }
 
     final _Decorator decorator = _Decorator(
