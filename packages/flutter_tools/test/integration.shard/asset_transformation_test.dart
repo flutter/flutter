@@ -56,14 +56,14 @@ class MyApp extends StatelessWidget {
 
 Future<void> main() async {
   testWithoutContext('asset is transformed when declared with a transformation', () async {
-    final Directory tempDir = createResolvedTempDirectorySync(
+    final Directory tempProjectDirectory = createResolvedTempDirectorySync(
       'asset_transformation_test.',
     );
 
     try {
-      _setUpCapitalizerTransformer(tempDir);
-      await _AssetTransformationTestProject().setUpIn(tempDir);
-      tempDir.childDirectory('assets').childFile('text_asset.txt')
+      _setUpCapitalizerTransformer(tempProjectDirectory);
+      await _AssetTransformationTestProject().setUpIn(tempProjectDirectory);
+      tempProjectDirectory.childDirectory('assets').childFile('text_asset.txt')
         ..createSync(recursive: true)
         ..writeAsStringSync('abc');
 
@@ -78,14 +78,14 @@ Future<void> main() async {
           'build',
           'web',
         ],
-        workingDirectory: tempDir.path,
+        workingDirectory: tempProjectDirectory.path,
       );
 
       expect(result.exitCode, 0, reason: result.stderr as String);
 
       final File asset = fileSystem.file(
         fileSystem.path.join(
-          tempDir.path,
+          tempProjectDirectory.path,
           'build',
           'web',
           'assets',
@@ -105,7 +105,7 @@ Future<void> main() async {
           'configured in the pubspec.',
       );
     } finally {
-      tryToDelete(tempDir);
+      tryToDelete(tempProjectDirectory);
     }
   });
 }
