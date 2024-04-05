@@ -480,6 +480,19 @@ TEST(TessellatorTest, FilledRoundRectTessellationVertices) {
        Rect::MakeXYWH(5000, 10000, 2000, 3000), {50, 70});
 }
 
+TEST(TessellatorTest, EarlyReturnEmptyConvexShape) {
+  // This path is not technically empty (it has a size in one dimension),
+  // but is otherwise completely flat.
+  auto tessellator = std::make_shared<Tessellator>();
+  PathBuilder builder;
+  builder.MoveTo({0, 0});
+  builder.MoveTo({10, 10}, /*relative=*/true);
+
+  auto points = tessellator->TessellateConvex(builder.TakePath(), 3.0);
+
+  EXPECT_TRUE(points.empty());
+}
+
 #if !NDEBUG
 TEST(TessellatorTest, ChecksConcurrentPolylineUsage) {
   auto tessellator = std::make_shared<Tessellator>();
