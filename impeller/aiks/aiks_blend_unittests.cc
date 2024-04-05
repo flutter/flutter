@@ -6,6 +6,9 @@
 
 #include "flutter/testing/testing.h"
 #include "impeller/aiks/canvas.h"
+#include "impeller/aiks/color_filter.h"
+#include "impeller/geometry/color.h"
+#include "impeller/geometry/scalar.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // This is for tests of Canvas that are interested the results of rendering
@@ -551,6 +554,32 @@ TEST_P(AiksTest, CanDrawPaintMultipleTimesInteractive) {
     return canvas.EndRecordingAsPicture();
   };
   ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(AiksTest, ForegroundPipelineBlendAppliesTransformCorrectly) {
+  auto texture = CreateTextureForFixture("airplane.jpg",
+                                         /*enable_mipmapping=*/true);
+
+  Canvas canvas;
+  canvas.Rotate(Degrees(30));
+  canvas.DrawImage(std::make_shared<Image>(texture), {200, 200},
+                   {.color_filter = ColorFilter::MakeBlend(BlendMode::kSourceIn,
+                                                           Color::Orange())});
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, ForegroundAdvancedBlendAppliesTransformCorrectly) {
+  auto texture = CreateTextureForFixture("airplane.jpg",
+                                         /*enable_mipmapping=*/true);
+
+  Canvas canvas;
+  canvas.Rotate(Degrees(30));
+  canvas.DrawImage(std::make_shared<Image>(texture), {200, 200},
+                   {.color_filter = ColorFilter::MakeBlend(
+                        BlendMode::kColorDodge, Color::Orange())});
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
 }  // namespace testing
