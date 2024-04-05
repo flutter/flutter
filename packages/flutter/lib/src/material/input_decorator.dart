@@ -701,16 +701,13 @@ class _Decoration {
 // all of the renderer children of a _RenderDecoration.
 class _RenderDecorationLayout {
   const _RenderDecorationLayout({
-    //required this.boxToBaseline,
-    required this.inputBaseline, // for InputBorderType.underline
-    required this.outlineBaseline, // for InputBorderType.outline
+    required this.baseline,
     required this.containerHeight,
     required this.subtextSize,
     required this.size,
   });
 
-  final double inputBaseline;
-  final double outlineBaseline;
+  final double baseline;
   final double containerHeight;
   final _SubtextSize subtextSize;
   final Size size;
@@ -942,7 +939,11 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double heplerErrorAscent = getBaseline(helperError, helperErrorConstraints);
 
     ascent = math.max(ascent, heplerErrorAscent);
-    descent = math.max(descent, helperErrorHeight - heplerErrorAscent);
+
+    // TODO(LongCatIsLooong): use the real descent and make sure the subtext line
+    // box is tall enough for both children.
+    // See https://github.com/flutter/flutter/issues/13715
+    descent = math.max(helperErrorHeight, counterSize.height) - ascent;
 
     if (ascent + descent > 0.0) {
       ascent += subtextGap;
@@ -1096,34 +1097,38 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double maxContentHeight = containerHeight - contentPadding.vertical - topHeight - densityOffset.dy;
     final double alignableHeight = fixAboveInput + inputHeight + fixBelowInput;
     final double maxVerticalOffset = maxContentHeight - alignableHeight;
-    final double textAlignVerticalOffset = maxVerticalOffset * textAlignVerticalFactor;
 
-    // The three main alignments for the baseline when an outline is present are
-    //
-    //  * top (-1.0): topmost point considering padding.
-    //  * center (0.0): the absolute center of the input ignoring padding but
-    //      accommodating the border and floating label.
-    //  * bottom (1.0): bottommost point considering padding.
-    //
-    // That means that if the padding is uneven, center is not the exact
-    // midpoint of top and bottom. To account for this, the above center and
-    // below center alignments are interpolated independently.
-    final double outlineCenterBaseline = inputInternalBaseline
-      + baselineAdjustment / 2.0
-      + (containerHeight - inputHeight) / 2.0;
-    final double outlineTopBaseline = topInputBaseline;
-    final double outlineBottomBaseline = topInputBaseline + maxVerticalOffset;
-    final double outlineBaseline = _interpolateThree(
-      outlineTopBaseline,
-      outlineCenterBaseline,
-      outlineBottomBaseline,
-      textAlignVertical,
-    );
+    final double baseline;
+    if (_isOutlineAligned) {
+      // The three main alignments for the baseline when an outline is present are
+      //
+      //  * top (-1.0): topmost point considering padding.
+      //  * center (0.0): the absolute center of the input ignoring padding but
+      //      accommodating the border and floating label.
+      //  * bottom (1.0): bottommost point considering padding.
+      //
+      // That means that if the padding is uneven, center is not the exact
+      // midpoint of top and bottom. To account for this, the above center and
+      // below center alignments are interpolated independently.
+      final double outlineCenterBaseline = inputInternalBaseline
+        + baselineAdjustment / 2.0
+        + (containerHeight - inputHeight) / 2.0;
+      final double outlineTopBaseline = topInputBaseline;
+      final double outlineBottomBaseline = topInputBaseline + maxVerticalOffset;
+      baseline = _interpolateThree(
+        outlineTopBaseline,
+        outlineCenterBaseline,
+        outlineBottomBaseline,
+        textAlignVertical,
+      );
+    } else {
+      final double textAlignVerticalOffset = maxVerticalOffset * textAlignVerticalFactor;
+      baseline = topInputBaseline + textAlignVerticalOffset;
+    }
 
     return _RenderDecorationLayout(
       containerHeight: containerHeight,
-      inputBaseline: topInputBaseline + textAlignVerticalOffset,
-      outlineBaseline: outlineBaseline,
+      baseline: baseline,
       subtextSize: subtextSize,
       size: Size(constraints.maxWidth, containerHeight + bottomHeight),
     );
@@ -1284,9 +1289,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       _boxParentData(container).offset = Offset(x, 0.0);
     }
 
-
+    final double height = layout.containerHeight;
     double centerLayout(RenderBox box, double x) {
-      final double height = layout.containerHeight;
       _boxParentData(box).offset = Offset(x, (height - box.size.height) / 2.0);
       return box.size.width;
     }
@@ -1299,8 +1303,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       centerLayout(icon!, x);
     }
 
-    //final double left = contentPadding.left;
-    //final double right = overallWidth - contentPadding.right;
     final double subtextBaseline = layout.subtextSize.ascent + layout.containerHeight;
     final RenderBox? counter = this.counter;
     final double helperErrorBaseline = helperError.getDistanceToBaseline(TextBaseline.alphabetic)!;
@@ -1318,7 +1320,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         }
     }
 
-    final double baseline = _isOutlineAligned ? layout.outlineBaseline : layout.inputBaseline;
+    final double baseline = layout.baseline;
     double baselineLayout(RenderBox box, double x) {
       _boxParentData(box).offset = Offset(x, baseline - box.getDistanceToBaseline(TextBaseline.alphabetic)!);
       return box.size.width;
