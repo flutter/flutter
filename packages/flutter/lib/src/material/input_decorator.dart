@@ -967,7 +967,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     // Layout all the widgets used by InputDecorator
     final double iconWidth = (icon?..layout(boxConstraints, parentUsesSize: true))?.size.width ?? 0.0;
     final BoxConstraints containerConstraints = boxConstraints.deflate(EdgeInsets.only(left: iconWidth));
-    final BoxConstraints contentConstraints = containerConstraints.deflate(contentPadding);
+    final BoxConstraints contentConstraints = containerConstraints.deflate(EdgeInsets.only(left: contentPadding.horizontal));
 
     // The helper or error text can occupy the full width less the space
     // occupied by the icon and counter.
@@ -992,8 +992,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     );
 
     final double inputWidth = math.max(0.0, constraints.maxWidth - accessoryHorizontalInsets.horizontal);
-    // Increase the available width for the label when it is scaled down.
-    final double invertedLabelScale = lerpDouble(1.00, 1 / _kFinalLabelScale, decoration.floatingLabelProgress)!;
     final RenderBox? label = this.label;
     if (label != null) {
       final double suffixIconSpace = decoration.border.isOutline
@@ -1003,6 +1001,9 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         0.0,
         constraints.maxWidth - (iconWidth + contentPadding.horizontal + prefixIconSize.width + suffixIconSpace),
       );
+
+    // Increase the available width for the label when it is scaled down.
+    final double invertedLabelScale = lerpDouble(1.00, 1 / _kFinalLabelScale, decoration.floatingLabelProgress)!;
       final BoxConstraints labelConstraints = boxConstraints.copyWith(maxWidth: labelWidth * invertedLabelScale);
       label.layout(labelConstraints, parentUsesSize: true);
     }
