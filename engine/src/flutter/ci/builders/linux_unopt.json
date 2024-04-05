@@ -23,6 +23,7 @@
                 "--no-goma"
             ],
             "name": "ci/host_debug_unopt",
+            "description": "Builds a debug mode unopt Linux engine. Builds and runs many tests and lints.",
             "ninja": {
                 "config": "ci/host_debug_unopt",
                 "targets": [
@@ -127,6 +128,7 @@
                 "--use-glfw-swiftshader"
             ],
             "name": "ci/host_debug_unopt_impeller_tests",
+            "description": "Builds a debug mode unopt Linux engine with swiftshader. Runs Impeller unit tests.",
             "ninja": {
                 "config": "ci/host_debug_unopt_impeller_tests",
                 "targets": [
@@ -169,6 +171,7 @@
                 "--no-goma"
             ],
             "name": "ci/android_embedder_debug_unopt",
+            "description": "Builds embedder artifacts targeting 32-bit arm Android.",
             "ninja": {
                 "config": "ci/android_embedder_debug_unopt",
                 "targets": [
@@ -196,6 +199,7 @@
                 "--no-goma"
             ],
             "name": "ci/android_debug_arm64_validation_layers",
+            "description": "Builds a debug mode engine targeting 64-bit arm Android with Vulkan validation layers.",
             "ninja": {
                 "config": "ci/android_debug_arm64_validation_layers",
                 "targets": [
@@ -227,6 +231,7 @@
                 "--no-goma"
             ],
             "name": "ci/android_debug_unopt",
+            "description": "Builds a debug mode unopt engine targeting 32-bit arm Android. Runs host-side Java unit tests and malioc.",
             "ninja": {
                 "config": "ci/android_debug_unopt",
                 "targets": [

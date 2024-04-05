@@ -30,6 +30,7 @@
                 "--no-goma"
             ],
             "name": "ci/android_jit_release_x86",
+            "description": "Produces jit-release mode artifacts to target x86 Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_jit_release_x86",
                 "targets": [
@@ -89,6 +90,7 @@
                 "--no-goma"
             ],
             "name": "ci/android_debug",
+            "description": "Produces debug mode artifacts to target 32-bit arm Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_debug",
                 "targets": [
@@ -147,6 +149,7 @@
                 "--no-goma"
             ],
             "name": "ci/android_debug_arm64",
+            "description": "Produces debug mode artifacts to target 64-bit arm Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_debug_arm64",
                 "targets": [
@@ -186,6 +189,7 @@
                 "--no-goma"
             ],
             "name": "ci/android_debug_x86",
+            "description": "Produces debug mode artifacts to target x86 Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_debug_x86",
                 "targets": [
@@ -225,6 +229,7 @@
                 "--no-goma"
             ],
             "name": "ci/android_debug_x64",
+            "description": "Produces debug mode artifacts to target x64 Android from a Linux host.",
             "ninja": {
                 "config": "ci/android_debug_x64",
                 "targets": [

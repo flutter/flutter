@@ -24,6 +24,7 @@
         "--no-goma"
     ],
     "name": "ci\\host_debug_unopt",
+    "description": "Builds a debug mode unopt engine for Windows and runs unit tests.",
     "ninja": {
         "config": "ci/host_debug_unopt"
     },

@@ -31,6 +31,7 @@
                 "ci/host_debug_desktop"
             ],
             "name": "ci/host_debug_desktop",
+            "description": "Produces debug mode artifacts for x64 Linux desktop.",
             "ninja": {
                 "config": "ci/host_debug_desktop",
                 "targets": [
@@ -70,6 +71,7 @@
                 "ci/host_profile_desktop"
             ],
             "name": "ci/host_profile_desktop",
+            "description": "Produces profile mode artifacts for x64 Linux desktop.",
             "ninja": {
                 "config": "ci/host_profile_desktop",
                 "targets": [
@@ -108,6 +110,7 @@
                 "ci/host_release_desktop"
             ],
             "name": "ci/host_release_desktop",
+            "description": "Produces release mode artifacts for x64 Linux desktop.",
             "ninja": {
                 "config": "ci/host_release_desktop",
                 "targets": [

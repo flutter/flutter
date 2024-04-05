@@ -23,6 +23,7 @@
                 "--xcode-symlinks"
             ],
             "name": "ci/host_debug_clang_tidy",
+            "description": "A debug mode macOS host build used only as the basis for a clang-tidy run.",
             "ninja": {
                 "config": "ci/host_debug_clang_tidy"
             }
@@ -51,6 +52,7 @@
                 "--xcode-symlinks"
             ],
             "name": "ci/ios_debug_sim_clang_tidy",
+            "description": "A debug mode iOS simulator build used only as the basis for a clang-tidy run.",
             "ninja": {
                 "config": "ci/ios_debug_sim_clang_tidy"
             }

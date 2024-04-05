@@ -35,6 +35,7 @@
                 "--no-goma"
             ],
             "name": "ci/host_debug",
+            "description": "Produces debug mode Linux host-side tooling and builds host-side unit tests for Linux.",
             "ninja": {
                 "config": "ci/host_debug",
                 "targets": [
@@ -91,6 +92,7 @@
                 "--no-goma"
             ],
             "name": "ci/host_profile",
+            "description": "Produces profile mode Linux host-side tooling and builds host-side unit tests for Linux.",
             "ninja": {
                 "config": "ci/host_profile",
                 "targets": [
@@ -152,6 +154,7 @@
                 "--no-goma"
             ],
             "name": "ci/host_release",
+            "description": "Produces release mode Linux host-side tooling and builds host-side unit tests and benchmarks for Linux.",
             "ninja": {
                 "config": "ci/host_release",
                 "targets": [

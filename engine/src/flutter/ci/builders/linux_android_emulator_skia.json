@@ -26,6 +26,7 @@
                 }
             ],
             "name": "ci/android_emulator_skia_debug_x64",
+            "description": "Build for debug mode x64 Android Skia scenario app tests.",
             "ninja": {
                 "config": "ci/android_emulator_skia_debug_x64",
                 "targets": [

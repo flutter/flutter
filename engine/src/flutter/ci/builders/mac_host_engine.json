@@ -33,6 +33,7 @@
                 "--use-glfw-swiftshader"
             ],
             "name": "ci/host_debug",
+            "description": "Produces debug mode x64 macOS host-side tooling and builds host-side unit tests for x64 macOS.",
             "ninja": {
                 "config": "ci/host_debug",
                 "targets": [
@@ -97,6 +98,7 @@
                 "--build-embedder-examples"
             ],
             "name": "ci/host_profile",
+            "description": "Produces profile mode x64 macOS host-side tooling and builds host-side unit tests for x64 macOS.",
             "ninja": {
                 "config": "ci/host_profile",
                 "targets": [
@@ -166,6 +168,7 @@
                 "--use-glfw-swiftshader"
             ],
             "name": "ci/host_release",
+            "description": "Produces release mode x64 macOS host-side tooling and builds host-side unit tests for x64 macOS.",
             "ninja": {
                 "config": "ci/host_release",
                 "targets": [
@@ -230,6 +233,7 @@
                 "--prebuilt-dart-sdk"
             ],
             "name": "ci/mac_debug_arm64",
+            "description": "Produces debug mode arm64 macOS host-side tooling.",
             "ninja": {
                 "config": "ci/mac_debug_arm64",
                 "targets": [
@@ -279,6 +283,7 @@
                 "--prebuilt-dart-sdk"
             ],
             "name": "ci/mac_profile_arm64",
+            "description": "Produces profile mode arm64 macOS host-side tooling.",
             "ninja": {
                 "config": "ci/mac_profile_arm64",
                 "targets": [
@@ -325,6 +330,7 @@
                 "--prebuilt-dart-sdk"
             ],
             "name": "ci/mac_release_arm64",
+            "description": "Produces release mode arm64 macOS host-side tooling.",
             "ninja": {
                 "config": "ci/mac_release_arm64",
                 "targets": [

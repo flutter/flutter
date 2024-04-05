@@ -20,6 +20,7 @@
                 "--no-goma"
             ],
             "name": "ci/android_debug_arm64_clang_tidy",
+            "description": "A debug mode arm64 Android build used only as the basis for a clang-tidy run.",
             "ninja": {
                 "config": "ci/android_debug_arm64_clang_tidy"
             }
@@ -44,6 +45,7 @@
                 "--no-goma"
             ],
             "name": "ci/host_debug_clang_tidy",
+            "description": "A debug mode Linux host build used only as the basis for a clang-tidy run.",
             "ninja": {
                 "config": "ci/host_debug_clang_tidy"
             }

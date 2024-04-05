@@ -16,6 +16,7 @@
                 "--no-lto"
             ],
             "name": "ci/ios_debug_sim",
+            "description": "Produces debug mode artifacts to target the x64 iOS simulator.",
             "ninja": {
                 "config": "ci/ios_debug_sim"
             },
@@ -41,6 +42,7 @@
                 "--no-lto"
             ],
             "name": "ci/ios_debug_sim_arm64",
+            "description": "Produces debug mode artifacts to target the arm64 iOS simulator.",
             "ninja": {
                 "config": "ci/ios_debug_sim_arm64"
             },
@@ -63,6 +65,7 @@
                 "debug"
             ],
             "name": "ci/ios_debug",
+            "description": "Produces debug mode artifacts to target iOS.",
             "ninja": {
                 "config": "ci/ios_debug",
                 "targets": [
@@ -88,6 +91,7 @@
                 "profile"
             ],
             "name": "ci/ios_profile",
+            "description": "Produces profile mode artifacts to target iOS.",
             "ninja": {
                 "config": "ci/ios_profile",
                 "targets": [
@@ -114,6 +118,7 @@
                 "release"
             ],
             "name": "ci/ios_release",
+            "description": "Produces release mode artifacts to target iOS.",
             "ninja": {
                 "config": "ci/ios_release",
                 "targets": [
@@ -144,6 +149,7 @@
                 "--darwin-extension-safe"
             ],
             "name": "ci/ios_debug_sim_extension_safe",
+            "description": "Produces extension safe debug mode artifacts to target the x64 iOS simulator.",
             "ninja": {
                 "config": "ci/ios_debug_sim_extension_safe"
             },
@@ -170,6 +176,7 @@
                 "--darwin-extension-safe"
             ],
             "name": "ci/ios_debug_sim_arm64_extension_safe",
+            "description": "Produces extension safe debug mode artifacts to target the arm64 iOS simulator.",
             "ninja": {
                 "config": "ci/ios_debug_sim_arm64_extension_safe"
             },
@@ -193,6 +200,7 @@
                 "--darwin-extension-safe"
             ],
             "name": "ci/ios_debug_extension_safe",
+            "description": "Produces extension safe debug mode artifacts to target iOS.",
             "ninja": {
                 "config": "ci/ios_debug_extension_safe",
                 "targets": [
@@ -219,6 +227,7 @@
                 "--darwin-extension-safe"
             ],
             "name": "ci/ios_profile_extension_safe",
+            "description": "Produces extension safe profile mode artifacts to target iOS.",
             "ninja": {
                 "config": "ci/ios_profile_extension_safe",
                 "targets": [
@@ -246,6 +255,7 @@
                 "--darwin-extension-safe"
             ],
             "name": "ci/ios_release_extension_safe",
+            "description": "Produces extension safe release mode artifacts to target iOS.",
             "ninja": {
                 "config": "ci/ios_release_extension_safe",
                 "targets": [

@@ -37,6 +37,7 @@
                 "--rbe"
             ],
             "name": "ci\\host_debug_arm64",
+            "description": "Produces debug mode artifacts to target arm64 Windows from an x64 Windows host.",
             "ninja": {
                 "config": "ci/host_debug_arm64",
                 "targets": [
@@ -81,6 +82,7 @@
                 "--rbe"
             ],
             "name": "ci\\host_profile_arm64",
+            "description": "Produces profile mode artifacts to target arm64 Windows from an x64 Windows host.",
             "ninja": {
                 "config": "ci/host_profile_arm64",
                 "targets": [
@@ -123,6 +125,7 @@
                 "--rbe"
             ],
             "name": "ci\\host_release_arm64",
+            "description": "Produces release mode artifacts to target arm64 Windows from an x64 Windows host.",
             "ninja": {
                 "config": "ci/host_release_arm64",
                 "targets": [

@@ -18,6 +18,7 @@
         "--no-goma"
     ],
     "name": "ci/host_release_benchmarks",
+    "description": "Builds and runs host-side benchmarks on Linux.",
     "ninja": {
         "config": "ci/host_release_benchmarks",
         "targets": [
