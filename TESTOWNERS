@@ -289,9 +289,7 @@
 /dev/devicelab/bin/tasks/web_benchmarks_skwasm.dart @eyebrowsoffire @flutter/web
 /dev/devicelab/bin/tasks/windows_home_scroll_perf__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/windows_startup_test.dart @loic-sharma @flutter/desktop
-# Linux asset_transformation
 /dev/devicelab/bin/tasks/asset_transformation_test.dart @andrewkolos @flutter/tool
-
 
 ## Host only framework tests
 # Linux docs_deploy_beta
