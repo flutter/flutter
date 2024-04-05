@@ -173,24 +173,19 @@ class SwiftPackageManagerIntegrationMigration {
       await _xcodeProjectInterpreter.getInfo(
         _xcodeProject.hostAppRoot.path,
       );
-    } on _SchemeException catch (e) {
-      restoreFromBackup(schemeInfo);
-      throwToolExit(
-          'An error occured when adding Swift Package Manager integration:\n'
-          '$e\n\n'
-          'To avoid this failure, disable Flutter Swift Package Manager integration for the project\n'
-          'by adding the following in the project\'s pubspec.yaml under the "flutter" section:\n'
-          '  "disable-swift-package-manager: true"\n'
-          'Alternatively, disable Flutter Swift Package Manager integration globally with the\n'
-          'following command:\n'
-          '  "flutter config --no-enable-swift-package-manager"\n');
     } on Exception catch (e) {
       restoreFromBackup(schemeInfo);
+      // TODO(vashworth): Add link to instructions on how to manually integrate
+      // once available on website.
       throwToolExit(
           'An error occured when adding Swift Package Manager integration:\n'
           '  $e\n\n'
           'Swift Package Manager is currently an experimental feature, please file a bug at\n'
-          '  https://github.com/flutter/flutter/issues/new?template=1_activation.yml \n\n'
+          '  https://github.com/flutter/flutter/issues/new?template=1_activation.yml \n'
+          'Consider including a copy of the following files in your bug report:\n'
+          '  ${_platform.name}/Runner.xcodeproj/project.pbxproj\n'
+          '  ${_platform.name}/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme '
+          '(or the scheme for the flavor used)\n\n'
           'To avoid this failure, disable Flutter Swift Package Manager integration for the project\n'
           'by adding the following in the project\'s pubspec.yaml under the "flutter" section:\n'
           '  "disable-swift-package-manager: true"\n'
@@ -259,15 +254,8 @@ class SwiftPackageManagerIntegrationMigration {
   }
 
   void _migrateScheme(SchemeInfo schemeInfo) {
-    final String scheme = schemeInfo.schemeName;
     final File schemeFile = schemeInfo.schemeFile;
     final String schemeContent = schemeInfo.schemeContent;
-
-    // If using flavors or renamed project, throw an error with instructions on
-    // how to do manually.
-    if (scheme != 'Runner') {
-      throw _defaultSchemeException(_platform);
-    }
 
     // The scheme should have a BuildableReference already in it with a
     // BlueprintIdentifier matching the Runner Native Target. Copy from it
@@ -282,9 +270,13 @@ class SwiftPackageManagerIntegrationMigration {
     //     ReferencedContainer = "container:Runner.xcodeproj">
     // </BuildableReference>
     final List<String> schemeLines = LineSplitter.split(schemeContent).toList();
-    final int index = schemeLines.indexWhere((String line) => line.contains('BlueprintIdentifier = "$_runnerNativeTargetIdentifer"'));
+    final int index = schemeLines.indexWhere((String line) =>
+      line.contains('BlueprintIdentifier = "$_runnerNativeTargetIdentifer"'),
+    );
     if (index == -1 || index + 3 >= schemeLines.length) {
-      throw _defaultSchemeException(_platform);
+      throw Exception(
+        'Failed to parse ${schemeFile.basename}: Could not find BuildableReference '
+        'for ${_xcodeProject.hostAppProjectName}.');
     }
 
     final String buildableName = schemeLines[index + 1].trim();
@@ -352,27 +344,6 @@ $newContent
     } on XmlException catch (exception) {
       throw Exception('Failed to parse ${schemeFile.basename}: Invalid xml: $newScheme\n$exception');
     }
-  }
-
-  _SchemeException _defaultSchemeException(SupportedPlatform platform) {
-    final String command;
-    if (platform == SupportedPlatform.ios) {
-      command = r'     /bin/sh "$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh" prepare';
-    } else {
-      command = r'     "$FLUTTER_ROOT"/packages/flutter_tools/bin/macos_assemble.sh prepare';
-    }
-    return _SchemeException(
-      "Flutter detected you're using a customized scheme and is unable to "
-      'automate adding Swift Package Manager integration. \n'
-      'To manually add this integration, open your project in Xcode and complete the following steps:\n'
-      '1. Select Product > Scheme > Edit Scheme.\n'
-      '2. Select the ">" beside Build in the left sidebar and select "Pre-actions".\n'
-      '3. Select the "+" button and select "New Run Script Action" from the dropdown.\n'
-      '4. Click the "Run Script" title and change to "Run Prepare Flutter Framework Script".\n'
-      '5. Change the "Provide build settings from" to the app.\n'
-      '6. Input the following in the text box: \n'
-      '$command'
-    );
   }
 
   /// Parses the project.pbxproj into [ParsedProjectInfo]. Will throw an
@@ -1287,14 +1258,4 @@ class ParsedProject {
   final Map<String, Object?> data;
   final String identifier;
   final List<String>? packageReferences;
-}
-
-/// Specialized exception to be caught.
-class _SchemeException implements Exception {
-  _SchemeException(this.message);
-
-  final String message;
-
-  @override
-  String toString() => message;
 }

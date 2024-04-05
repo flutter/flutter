@@ -359,50 +359,6 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
     group('migrate scheme', () {
       for (final SupportedPlatform platform in supportedPlatforms) {
         group('for ${platform.name}', () {
-          testWithoutContext('fails if using flavor', () async {
-            final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-            final BufferLogger testLogger = BufferLogger.test();
-            final FakeXcodeProject project = FakeXcodeProject(
-              platform: platform.name,
-              fileSystem: memoryFileSystem,
-              logger: testLogger,
-            );
-            _createProjectFiles(project, platform, scheme: 'flavor');
-            project.xcodeProjectSchemeFile().writeAsStringSync('');
-            project._projectInfo = XcodeProjectInfo(
-              <String>[],
-              <String>[],
-              <String>['flavor'],
-              testLogger,
-            );
-
-            final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
-              project,
-              platform,
-              const BuildInfo(
-                BuildMode.debug,
-                'flavor',
-                trackWidgetCreation: true,
-                treeShakeIcons: false,
-              ),
-              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              logger: testLogger,
-              fileSystem: memoryFileSystem,
-              plistParser: FakePlistParser(),
-            );
-
-            final String command;
-            if (platform == SupportedPlatform.ios) {
-              command = r'/bin/sh "$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh" prepare';
-            } else {
-              command = r'"$FLUTTER_ROOT"/packages/flutter_tools/bin/macos_assemble.sh prepare';
-            }
-            await expectLater(
-              () => projectMigration.migrate(),
-              throwsToolExit(message: command),
-            );
-          });
-
           testWithoutContext('fails if scheme is missing BlueprintIdentifier for Runner native target', () async {
             final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
             final BufferLogger testLogger = BufferLogger.test();
@@ -423,16 +379,9 @@ ${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
               fileSystem: memoryFileSystem,
               plistParser: FakePlistParser(),
             );
-
-            final String command;
-            if (platform == SupportedPlatform.ios) {
-              command = r'/bin/sh "$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh" prepare';
-            } else {
-              command = r'"$FLUTTER_ROOT"/packages/flutter_tools/bin/macos_assemble.sh prepare';
-            }
             await expectLater(
               () => projectMigration.migrate(),
-              throwsToolExit(message: command),
+              throwsToolExit(message: 'Failed to parse Runner.xcscheme: Could not find BuildableReference'),
             );
           });
 

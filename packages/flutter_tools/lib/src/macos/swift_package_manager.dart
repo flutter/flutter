@@ -142,11 +142,16 @@ class SwiftPackageManager {
   /// deployment target.
   ///
   /// This is done for the use case of a plugin requiring a higher iOS/macOS
-  /// version than a project's default. To still be able to use the plugin, the
-  /// user can increase the Xcode project's iOS/macOS deployment target. However,
-  /// if FlutterGeneratedPluginSwiftPackage still supports a lower version, it
-  /// will fail to build. So FlutterGeneratedPluginSwiftPackage must be updated,
-  /// as well.
+  /// version than FlutterGeneratedPluginSwiftPackage.
+  ///
+  /// Swift Package Manager emits an error if a dependency isn’t compatible
+  /// with the top-level package’s deployment version. The deployment target of
+  /// a package’s dependencies must be lower than or equal to the top-level
+  /// package’s deployment target version for a particular platform.
+  ///
+  /// To still be able to use the plugin, the user can increase the Xcode
+  /// project's iOS/macOS deployment target and this will then increase the
+  /// deployment target for FlutterGeneratedPluginSwiftPackage.
   static void updateMinimumDeployment({
     required XcodeBasedProject project,
     required SupportedPlatform platform,
