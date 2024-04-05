@@ -694,7 +694,7 @@ class TextSelectionOverlay {
 
   // The distance from _endHandleDragPosition to the center of the line that it
   // corresponds to, in global coordinates.
-  late double _endHandleDragPositionToCenterOfLine;
+  late double _endHandleDragTarget;
 
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
     if (!renderObject.attached) {
@@ -710,7 +710,7 @@ class TextSelectionOverlay {
     final double centerOfLineGlobal = renderObject.localToGlobal(
       Offset(0.0, centerOfLineLocal),
     ).dy;
-    _endHandleDragPositionToCenterOfLine = centerOfLineGlobal  - details.globalPosition.dy;
+    _endHandleDragTarget = centerOfLineGlobal  - details.globalPosition.dy;
     // Instead of finding the TextPosition at the handle's location directly,
     // use the vertical center of the line that it points to. This is because
     // selection handles typically hang above or below the line that they point
@@ -766,12 +766,12 @@ class TextSelectionOverlay {
       Offset(0.0, nextEndHandleDragPositionLocal),
     ).dy;
 
-    final Offset handlePointingAtGlobal = Offset(
+    final Offset handleTargetGlobal = Offset(
       details.globalPosition.dx,
-      _endHandleDragPosition + _endHandleDragPositionToCenterOfLine,
+      _endHandleDragPosition + _endHandleDragTarget,
     );
 
-    final TextPosition position = renderObject.getPositionForPoint(handlePointingAtGlobal);
+    final TextPosition position = renderObject.getPositionForPoint(handleTargetGlobal);
 
     if (_selection.isCollapsed) {
       _selectionOverlay.updateMagnifier(_buildMagnifier(
@@ -825,7 +825,7 @@ class TextSelectionOverlay {
 
   // The distance from _startHandleDragPosition to the center of the line that
   // it corresponds to, in global coordinates.
-  late double _startHandleDragPositionToCenterOfLine;
+  late double _startHandleDragTarget;
 
   void _handleSelectionStartHandleDragStart(DragStartDetails details) {
     if (!renderObject.attached) {
@@ -841,7 +841,7 @@ class TextSelectionOverlay {
     final double centerOfLineGlobal = renderObject.localToGlobal(
       Offset(0.0, centerOfLineLocal),
     ).dy;
-    _startHandleDragPositionToCenterOfLine = centerOfLineGlobal - details.globalPosition.dy;
+    _startHandleDragTarget = centerOfLineGlobal - details.globalPosition.dy;
     // Instead of finding the TextPosition at the handle's location directly,
     // use the vertical center of the line that it points to. This is because
     // selection handles typically hang above or below the line that they point
@@ -877,11 +877,11 @@ class TextSelectionOverlay {
     _startHandleDragPosition = renderObject.localToGlobal(
       Offset(0.0, nextStartHandleDragPositionLocal),
     ).dy;
-    final Offset adjustedOffset = Offset(
+    final Offset handleTargetGlobal = Offset(
       details.globalPosition.dx,
-      _startHandleDragPosition + _startHandleDragPositionToCenterOfLine,
+      _startHandleDragPosition + _startHandleDragTarget,
     );
-    final TextPosition position = renderObject.getPositionForPoint(adjustedOffset);
+    final TextPosition position = renderObject.getPositionForPoint(handleTargetGlobal);
 
     if (_selection.isCollapsed) {
       _selectionOverlay.updateMagnifier(_buildMagnifier(
