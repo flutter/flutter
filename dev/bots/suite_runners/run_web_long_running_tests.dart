@@ -49,6 +49,16 @@ Future<void> webLongRunningTestsRunner(String flutterRoot) async {
       ),
       () => _runFlutterDriverWebTest(
         testAppDirectory: path.join('packages', 'integration_test', 'example'),
+        target: path.join('integration_test', 'example_test.dart'),
+        driver: path.join('test_driver', 'integration_test.dart'),
+        buildMode: buildMode,
+        renderer: 'skwasm',
+        wasm: true,
+        expectWriteResponseFile: true,
+        expectResponseFileContent: 'null',
+      ),
+      () => _runFlutterDriverWebTest(
+        testAppDirectory: path.join('packages', 'integration_test', 'example'),
         target: path.join('integration_test', 'extended_test.dart'),
         driver: path.join('test_driver', 'extended_integration_test.dart'),
         buildMode: buildMode,
