@@ -32,7 +32,6 @@ Future<void> main() async {
         ),
       ),
     );
-    // addTearDown(image.evict);
     expect(
       find.byType(DecoratedBox),
       paints
@@ -108,7 +107,6 @@ Future<void> main() async {
         ),
       ),
     );
-    // addTearDown(image.evict);
     expect(
       log,
       <String>[
