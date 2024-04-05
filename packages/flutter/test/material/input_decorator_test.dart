@@ -44,6 +44,7 @@ Widget buildInputDecorator({
   InputDecoration decoration = const InputDecoration(),
   ThemeData? theme,
   InputDecorationTheme? inputDecorationTheme,
+  IconButtonThemeData? iconButtonTheme,
   TextDirection textDirection = TextDirection.ltr,
   bool expands = false,
   bool isEmpty = false,
@@ -81,6 +82,7 @@ Widget buildInputDecorator({
           return Theme(
             data: (theme ?? Theme.of(context)).copyWith(
               inputDecorationTheme: inputDecorationTheme,
+              iconButtonTheme: iconButtonTheme,
               visualDensity: visualDensity,
             ),
             child: Align(
@@ -544,6 +546,25 @@ void main() {
           expect(getBorderColor(tester), theme.colorScheme.primary);
           expect(getBorderWeight(tester), 2.0);
         });
+
+        testWidgets('active indicator has correct weight and color when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/145897.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getBorderColor(tester), theme.colorScheme.primary);
+          expect(getBorderWeight(tester), 2.0);
+        });
       });
 
       group('when field is in error', () {
@@ -634,6 +655,25 @@ void main() {
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
           expect(getBorderColor(tester), theme.colorScheme.onErrorContainer);
           expect(getBorderWeight(tester), 1.0);
+        });
+
+        testWidgets('active indicator has correct weight and color when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/145897.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getBorderColor(tester), theme.colorScheme.error);
+          expect(getBorderWeight(tester), 2.0);
         });
       });
 
@@ -872,6 +912,25 @@ void main() {
           expect(getBorderColor(tester), theme.colorScheme.primary);
           expect(getBorderWeight(tester), 2.0);
         });
+
+        testWidgets('outline has correct weight and color when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/145897.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getBorderColor(tester), theme.colorScheme.primary);
+          expect(getBorderWeight(tester), 2.0);
+        });
       });
 
       group('when field is in error', () {
@@ -958,6 +1017,25 @@ void main() {
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
           expect(getBorderColor(tester), theme.colorScheme.onErrorContainer);
           expect(getBorderWeight(tester), 1.0);
+        });
+
+        testWidgets('outline has correct weight and color when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/145897.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getBorderColor(tester), theme.colorScheme.error);
+          expect(getBorderWeight(tester), 2.0);
         });
       });
 
@@ -4889,6 +4967,148 @@ void main() {
     expect(merged.constraints, overrideTheme.constraints);
   });
 
+  testWidgets('Prefix and suffix IconButtons inherit IconButtonTheme', (WidgetTester tester) async {
+    const IconData prefixIcon = Icons.person;
+    const IconData suffixIcon = Icons.search;
+    const Color backgroundColor = Color(0xffff0000);
+    const Color foregroundColor = Color(0xff00ff00);
+    final OutlinedBorder shape =RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(10.0),
+    );
+    final ButtonStyle iconButtonStyle = IconButton.styleFrom(
+      backgroundColor: backgroundColor,
+      foregroundColor: foregroundColor,
+      shape: shape,
+    );
+
+    await tester.pumpWidget(
+      IconButtonTheme(
+        data: IconButtonThemeData(style: iconButtonStyle),
+        child: buildInputDecorator(
+          decoration: InputDecoration(
+            prefixIcon: IconButton(
+              onPressed: () {},
+              icon: const Icon(prefixIcon),
+            ),
+            suffixIcon: IconButton(
+              onPressed: () {},
+              icon: const Icon(suffixIcon),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder prefixIconMaterial = find.descendant(
+      of: find.widgetWithIcon(IconButton, prefixIcon),
+      matching: find.byType(Material),
+    );
+    Material material = tester.widget<Material>(prefixIconMaterial);
+    expect(material.color, backgroundColor);
+    expect(material.shape, iconButtonStyle.shape?.resolve(<WidgetState>{}));
+    final Finder suffixIconMaterial = find.descendant(
+      of: find.widgetWithIcon(IconButton, suffixIcon),
+      matching: find.byType(Material),
+    );
+    material = tester.widget<Material>(suffixIconMaterial);
+    expect(material.color, backgroundColor);
+    expect(material.shape, shape);
+
+    expect(getIconStyle(tester, prefixIcon)?.color, foregroundColor);
+    expect(getIconStyle(tester, suffixIcon)?.color, foregroundColor);
+  });
+
+  testWidgets('Prefix IconButton color respects IconButtonTheme foreground color states', (WidgetTester tester) async {
+    const IconData prefixIcon = Icons.person;
+    const Color iconErrorColor = Color(0xffff0000);
+    const Color iconColor = Color(0xff00ff00);
+    final ButtonStyle iconButtonStyle = ButtonStyle(
+      foregroundColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+        if (states.contains(MaterialState.error)) {
+          return iconErrorColor;
+        }
+        return iconColor;
+      }),
+    );
+
+    // Test the prefix IconButton color when there is an error text.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        iconButtonTheme: IconButtonThemeData(style: iconButtonStyle),
+        decoration: InputDecoration(
+          errorText: 'error',
+          prefixIcon: IconButton(
+            onPressed: () {},
+            icon: const Icon(prefixIcon),
+          ),
+        ),
+      ),
+    );
+
+    expect(getIconStyle(tester, prefixIcon)?.color, iconErrorColor);
+
+    // Test the prefix IconButton color when there is no error text.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        iconButtonTheme: IconButtonThemeData(style: iconButtonStyle),
+        decoration: InputDecoration(
+          prefixIcon: IconButton(
+            onPressed: () {},
+            icon: const Icon(prefixIcon),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(getIconStyle(tester, prefixIcon)?.color, iconColor);
+  });
+
+  testWidgets('Suffix IconButton color respects IconButtonTheme foreground color states', (WidgetTester tester) async {
+    const IconData suffixIcon = Icons.search;
+    const Color iconErrorColor = Color(0xffff0000);
+    const Color iconColor = Color(0xff00ff00);
+    final ButtonStyle iconButtonStyle = ButtonStyle(
+      foregroundColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+        if (states.contains(MaterialState.error)) {
+          return iconErrorColor;
+        }
+        return iconColor;
+      }),
+    );
+
+    // Test the prefix IconButton color when there is an error text.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        iconButtonTheme: IconButtonThemeData(style: iconButtonStyle),
+        decoration: InputDecoration(
+          errorText: 'error',
+          suffixIcon: IconButton(
+            onPressed: () {},
+            icon: const Icon(suffixIcon),
+          ),
+        ),
+      ),
+    );
+
+    expect(getIconStyle(tester, suffixIcon)?.color, iconErrorColor);
+
+    // Test the prefix IconButton color when there is no error text.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        iconButtonTheme: IconButtonThemeData(style: iconButtonStyle),
+        decoration: InputDecoration(
+          suffixIcon: IconButton(
+            onPressed: () {},
+            icon: const Icon(suffixIcon),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(getIconStyle(tester, suffixIcon)?.color, iconColor);
+  });
 
   group('Material2', () {
     // These tests are only relevant for Material 2. Once Material 2

@@ -2055,15 +2055,24 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       ?? MaterialStateProperty.resolveAs(defaults.iconColor!, materialState);
   }
 
-  Color _getPrefixIconColor(ThemeData themeData, InputDecorationTheme defaults) {
+  Color _getPrefixIconColor(
+    InputDecorationTheme inputDecorationTheme,
+    IconButtonThemeData iconButtonTheme,
+    InputDecorationTheme defaults) {
     return MaterialStateProperty.resolveAs(decoration.prefixIconColor, materialState)
-      ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.prefixIconColor, materialState)
+      ?? MaterialStateProperty.resolveAs(inputDecorationTheme.prefixIconColor, materialState)
+      ?? iconButtonTheme.style?.foregroundColor?.resolve(materialState)
       ?? MaterialStateProperty.resolveAs(defaults.prefixIconColor!, materialState);
   }
 
-  Color _getSuffixIconColor(ThemeData themeData, InputDecorationTheme defaults) {
+  Color _getSuffixIconColor(
+    InputDecorationTheme inputDecorationTheme,
+    IconButtonThemeData iconButtonTheme,
+    InputDecorationTheme defaults,
+  ) {
     return MaterialStateProperty.resolveAs(decoration.suffixIconColor, materialState)
-      ?? MaterialStateProperty.resolveAs(themeData.inputDecorationTheme.suffixIconColor, materialState)
+      ?? MaterialStateProperty.resolveAs(inputDecorationTheme.suffixIconColor, materialState)
+      ?? iconButtonTheme.style?.foregroundColor?.resolve(materialState)
       ?? MaterialStateProperty.resolveAs(defaults.suffixIconColor!, materialState);
   }
 
@@ -2189,6 +2198,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final ThemeData themeData = Theme.of(context);
     final InputDecorationTheme defaults =
       Theme.of(context).useMaterial3 ? _InputDecoratorDefaultsM3(context) :  _InputDecoratorDefaultsM2(context);
+    final InputDecorationTheme inputDecorationTheme = themeData.inputDecorationTheme;
+    final IconButtonThemeData iconButtonTheme = IconButtonTheme.of(context);
 
     final TextStyle labelStyle = _getInlineLabelStyle(themeData, defaults);
     final TextBaseline textBaseline = labelStyle.textBaseline!;
@@ -2320,15 +2331,15 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
               ),
             child: IconTheme.merge(
               data: IconThemeData(
-                color: _getPrefixIconColor(themeData, defaults),
+                color: _getPrefixIconColor(inputDecorationTheme, iconButtonTheme, defaults),
                 size: iconSize,
               ),
               child: IconButtonTheme(
                 data: IconButtonThemeData(
-                style: IconButton.styleFrom(
-                  foregroundColor: _getPrefixIconColor(themeData, defaults),
-                  iconSize: iconSize,
-                  ),
+                  style: IconButton.styleFrom(
+                    foregroundColor: _getPrefixIconColor(inputDecorationTheme, iconButtonTheme, defaults),
+                    iconSize: iconSize,
+                  ).merge(iconButtonTheme.style),
                 ),
                 child: Semantics(
                   child: decoration.prefixIcon,
@@ -2355,15 +2366,15 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
               ),
               child: IconTheme.merge(
                 data: IconThemeData(
-                  color: _getSuffixIconColor(themeData, defaults),
+                  color: _getSuffixIconColor(inputDecorationTheme, iconButtonTheme, defaults),
                   size: iconSize,
                 ),
                 child: IconButtonTheme(
                   data: IconButtonThemeData(
-                  style: IconButton.styleFrom(
-                    foregroundColor: _getSuffixIconColor(themeData, defaults),
-                    iconSize: iconSize,
-                    ),
+                    style: IconButton.styleFrom(
+                      foregroundColor: _getSuffixIconColor(inputDecorationTheme, iconButtonTheme, defaults),
+                      iconSize: iconSize,
+                    ).merge(iconButtonTheme.style),
                   ),
                   child: Semantics(
                     child: decoration.suffixIcon,
@@ -4703,19 +4714,19 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
       return BorderSide(color: _colors.onSurface.withOpacity(0.38));
     }
     if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
-        return BorderSide(color: _colors.onErrorContainer);
-      }
       if (states.contains(MaterialState.focused)) {
         return BorderSide(color: _colors.error, width: 2.0);
       }
+      if (states.contains(MaterialState.hovered)) {
+        return BorderSide(color: _colors.onErrorContainer);
+      }
       return BorderSide(color: _colors.error);
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return BorderSide(color: _colors.onSurface);
     }
     if (states.contains(MaterialState.focused)) {
       return BorderSide(color: _colors.primary, width: 2.0);
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return BorderSide(color: _colors.onSurface);
     }
     return BorderSide(color: _colors.onSurfaceVariant);
     });
@@ -4726,19 +4737,19 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
       return BorderSide(color: _colors.onSurface.withOpacity(0.12));
     }
     if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
-        return BorderSide(color: _colors.onErrorContainer);
-      }
       if (states.contains(MaterialState.focused)) {
         return BorderSide(color: _colors.error, width: 2.0);
       }
+      if (states.contains(MaterialState.hovered)) {
+        return BorderSide(color: _colors.onErrorContainer);
+      }
       return BorderSide(color: _colors.error);
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return BorderSide(color: _colors.onSurface);
     }
     if (states.contains(MaterialState.focused)) {
       return BorderSide(color: _colors.primary, width: 2.0);
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return BorderSide(color: _colors.onSurface);
     }
     return BorderSide(color: _colors.outline);
   });
