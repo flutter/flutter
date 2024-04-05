@@ -129,6 +129,10 @@ class SwiftPackageManagerIntegrationMigration {
         return;
       }
 
+      migrationStatus = _logger.startProgress(
+        'Adding Swift Package Manager integration...',
+      );
+
       // Update gitignore. If unable to update the platform specific .gitignore,
       // try updating the app's .gitignore.
       if (!_updateGitIgnore(_xcodeProject.hostAppRoot.childFile('.gitignore'))) {
@@ -139,10 +143,6 @@ class SwiftPackageManagerIntegrationMigration {
           );
         }
       }
-
-      migrationStatus = _logger.startProgress(
-        'Adding Swift Package Manager integration...',
-      );
 
       if (isSchemeMigrated) {
         _logger.printTrace('${schemeInfo.schemeFile.basename} already migrated. Skipping...');
