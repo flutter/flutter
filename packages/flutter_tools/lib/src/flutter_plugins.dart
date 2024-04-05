@@ -1168,8 +1168,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
         final Plugin? resolution = _resolveImplementationOfPlugin(
           platformKey,
           implCandidatesEntry,
-          defaultPackageName:
-          defaultImplementations[implCandidatesEntry.key],
+          defaultPackageName: defaultImplementations[implCandidatesEntry.key],
         );
         if (resolution != null) {
           pluginResolution[implCandidatesEntry.key] = resolution;
@@ -1193,6 +1192,8 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
   return pluginResolutions;
 }
 
+/// Get the [resolutionPluginName] as the first choice for the plugin
+/// implementation and the [defaultImplementation] as fallback.
 (String? resolutionPluginName, String? defaultImplementation) _getPluginImplementationCandidate(Plugin plugin, String platformKey) {
   String? defaultImplementation = plugin.defaultPackagePlatforms[platformKey];
   if (plugin.platforms[platformKey] == null && defaultImplementation == null) {
@@ -1248,6 +1249,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
   return (implementsPackage, null);
 }
 
+/// Get the resolved plugin name serving as implementation for a plugin.
 Plugin? _resolveImplementationOfPlugin(
   String platformKey,
   MapEntry<String, List<Plugin>> implCandidatesEntry, {
@@ -1286,6 +1288,7 @@ Plugin? _resolveImplementationOfPlugin(
         '${candidates.map((Plugin plugin) => '  ${plugin.name}\n').join()}'
         'To fix this issue, add one of these dependencies to pubspec.yaml.\n');
   }
+  // No implementation provided
   return null;
 }
 
