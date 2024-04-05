@@ -77,6 +77,7 @@ void SetTileMode(SamplerDescriptor* descriptor,
 /// transparent gutter required for the blur halo.
 fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
     const ContentContext& renderer,
+    const std::shared_ptr<CommandBuffer>& command_buffer,
     std::shared_ptr<Texture> input_texture,
     const SamplerDescriptor& sampler_descriptor,
     const Quad& uvs,
@@ -118,12 +119,13 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
         return pass.Draw().ok();
       };
   fml::StatusOr<RenderTarget> render_target = renderer.MakeSubpass(
-      "Gaussian Blur Filter", subpass_size, subpass_callback);
+      "Gaussian Blur Filter", subpass_size, command_buffer, subpass_callback);
   return render_target;
 }
 
 fml::StatusOr<RenderTarget> MakeBlurSubpass(
     const ContentContext& renderer,
+    const std::shared_ptr<CommandBuffer>& command_buffer,
     const RenderTarget& input_pass,
     const SamplerDescriptor& sampler_descriptor,
     Entity::TileMode tile_mode,
@@ -184,10 +186,11 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
       };
   if (destination_target.has_value()) {
     return renderer.MakeSubpass("Gaussian Blur Filter",
-                                destination_target.value(), subpass_callback);
+                                destination_target.value(), command_buffer,
+                                subpass_callback);
   } else {
     return renderer.MakeSubpass("Gaussian Blur Filter", subpass_size,
-                                subpass_callback);
+                                command_buffer, subpass_callback);
   }
 }
 
@@ -459,9 +462,15 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   Quad uvs = CalculateUVs(inputs[0], entity, source_rect_padded,
                           input_snapshot->texture->GetSize());
 
+  std::shared_ptr<CommandBuffer> command_buffer =
+      renderer.GetContext()->CreateCommandBuffer();
+  if (!command_buffer) {
+    return std::nullopt;
+  }
+
   fml::StatusOr<RenderTarget> pass1_out = MakeDownsampleSubpass(
-      renderer, input_snapshot->texture, input_snapshot->sampler_descriptor,
-      uvs, subpass_size, tile_mode_);
+      renderer, command_buffer, input_snapshot->texture,
+      input_snapshot->sampler_descriptor, uvs, subpass_size, tile_mode_);
 
   if (!pass1_out.ok()) {
     return std::nullopt;
@@ -494,7 +503,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   }
 
   fml::StatusOr<RenderTarget> pass2_out = MakeBlurSubpass(
-      renderer, /*input_pass=*/pass1_out.value(),
+      renderer, command_buffer, /*input_pass=*/pass1_out.value(),
       input_snapshot->sampler_descriptor, tile_mode_,
       BlurParameters{
           .blur_uv_offset = Point(0.0, pass1_pixel_size.y),
@@ -515,7 +524,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
                                : std::optional<RenderTarget>(std::nullopt);
 
   fml::StatusOr<RenderTarget> pass3_out = MakeBlurSubpass(
-      renderer, /*input_pass=*/pass2_out.value(),
+      renderer, command_buffer, /*input_pass=*/pass2_out.value(),
       input_snapshot->sampler_descriptor, tile_mode_,
       BlurParameters{
           .blur_uv_offset = Point(pass1_pixel_size.x, 0.0),
@@ -526,6 +535,13 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
       pass3_destination, blur_uvs);
 
   if (!pass3_out.ok()) {
+    return std::nullopt;
+  }
+
+  if (!renderer.GetContext()
+           ->GetCommandQueue()
+           ->Submit(/*buffers=*/{command_buffer})
+           .ok()) {
     return std::nullopt;
   }
 

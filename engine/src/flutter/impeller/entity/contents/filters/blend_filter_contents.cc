@@ -223,9 +223,21 @@ static std::optional<Entity> AdvancedBlend(
     return pass.Draw().ok();
   };
 
+  std::shared_ptr<CommandBuffer> command_buffer =
+      renderer.GetContext()->CreateCommandBuffer();
+  if (!command_buffer) {
+    return std::nullopt;
+  }
   fml::StatusOr<RenderTarget> render_target = renderer.MakeSubpass(
-      "Advanced Blend Filter", ISize(subpass_coverage.GetSize()), callback);
+      "Advanced Blend Filter", ISize(subpass_coverage.GetSize()),
+      command_buffer, callback);
   if (!render_target.ok()) {
+    return std::nullopt;
+  }
+  if (!renderer.GetContext()
+           ->GetCommandQueue()
+           ->Submit(/*buffers=*/{std::move(command_buffer)})
+           .ok()) {
     return std::nullopt;
   }
 
@@ -525,10 +537,24 @@ static std::optional<Entity> PipelineBlend(
     return true;
   };
 
+  std::shared_ptr<CommandBuffer> command_buffer =
+      renderer.GetContext()->CreateCommandBuffer();
+  if (!command_buffer) {
+    return std::nullopt;
+  }
+
   fml::StatusOr<RenderTarget> render_target = renderer.MakeSubpass(
-      "Pipeline Blend Filter", ISize(subpass_coverage.GetSize()), callback);
+      "Pipeline Blend Filter", ISize(subpass_coverage.GetSize()),
+      command_buffer, callback);
 
   if (!render_target.ok()) {
+    return std::nullopt;
+  }
+
+  if (!renderer.GetContext()
+           ->GetCommandQueue()
+           ->Submit(/*buffers=*/{std::move(command_buffer)})
+           .ok()) {
     return std::nullopt;
   }
 
