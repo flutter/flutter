@@ -1,3 +1,4 @@
 # asset_transformation
 
-Integration test of user-defined transformation of assets using pub packages.
+Project that can be used to test user-defined transformation of assets using
+pub packages.
