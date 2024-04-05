@@ -4638,7 +4638,6 @@ void main() {
   testWidgets('Growable TextField when content height exceeds parent', (WidgetTester tester) async {
     const double height = 200.0;
     const double padding = 24.0;
-    const double helperTextFontSize = 12.0;
 
     Widget containedTextFieldBuilder({
       Widget? counter,
@@ -4704,7 +4703,7 @@ void main() {
       helperText: 'I am helperText',
     ));
     expect(findEditableText(), equals(inputBox));
-    expect(inputBox.size.height, height - padding - counterSpace - 0.25 * helperTextFontSize);
+    expect(inputBox.size.height, height - padding - counterSpace);
 
     // When a label is present, EditableText shrinks to fit it at the top so
     // that the bottom of the input still lines up perfectly with the parent.

@@ -3881,6 +3881,8 @@ void main() {
       .map((DiagnosticsNode node) => node.name!);
     expect(nodeNames, unorderedEquals(<String>[
       'container',
+      'counter',
+      'helperError',
       'hint',
       'icon',
       'input',
@@ -3889,8 +3891,6 @@ void main() {
       'prefixIcon',
       'suffix',
       'suffixIcon',
-      'helperError',
-      'counter',
     ]));
 
     final Set<Object> nodeValues = Set<Object>.from(
@@ -4533,42 +4533,42 @@ void main() {
     expect(intrinsicHeight, equals(height));
   });
 
-  //testWidgets('Error message for negative baseline', (WidgetTester tester) async {
-  //  FlutterErrorDetails? errorDetails;
-  //  final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-  //  FlutterError.onError = (FlutterErrorDetails details) {
-  //    errorDetails ??= details;
-  //  };
-  //  try {
-  //    await tester.pumpWidget(
-  //      const MaterialApp(
-  //        home: Center(
-  //          child: Directionality(
-  //            textDirection: TextDirection.ltr,
-  //            child: InputDecorator(
-  //              decoration: InputDecoration(),
-  //              child: Stack(
-  //                children: <Widget>[
-  //                  SizedBox(height: 0),
-  //                  Positioned(
-  //                    bottom: 5,
-  //                    child: Text('ok'),
-  //                  ),
-  //                ],
-  //              ),
-  //            ),
-  //          ),
-  //        ),
-  //      ),
-  //      phase: EnginePhase.layout,
-  //    );
-  //  } finally {
-  //    FlutterError.onError = oldHandler;
-  //  }
+  testWidgets('Error message for negative baseline', (WidgetTester tester) async {
+    FlutterErrorDetails? errorDetails;
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errorDetails ??= details;
+    };
+    try {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Center(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: InputDecorator(
+                decoration: InputDecoration(),
+                child: Stack(
+                  children: <Widget>[
+                    SizedBox(height: 0),
+                    Positioned(
+                      bottom: 5,
+                      child: Text('ok'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        phase: EnginePhase.layout,
+      );
+    } finally {
+      FlutterError.onError = oldHandler;
+    }
 
-  //  expect(errorDetails?.toString(), contains("InputDecorator's children reported a negative baseline"));
-  //  expect(errorDetails?.toString(), contains('RenderStack'));
-  //});
+    expect(errorDetails?.toString(), contains("InputDecorator's children reported a negative baseline"));
+    expect(errorDetails?.toString(), contains('RenderStack'));
+  });
 
   testWidgets('Min intrinsic height for TextField with no content padding', (WidgetTester tester) async {
     // Regression test for: https://github.com/flutter/flutter/issues/75509
@@ -9191,6 +9191,8 @@ void main() {
         .map((DiagnosticsNode node) => node.name!);
       expect(nodeNames, unorderedEquals(<String>[
         'container',
+        'counter',
+        'helperError',
         'hint',
         'icon',
         'input',
@@ -9199,8 +9201,6 @@ void main() {
         'prefixIcon',
         'suffix',
         'suffixIcon',
-        'helperError',
-        'counter',
       ]));
 
       final Set<Object> nodeValues = Set<Object>.from(

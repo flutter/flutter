@@ -229,29 +229,6 @@ class StackParentData extends ContainerBoxParentData<RenderBox> {
   /// children in the stack.
   bool get isPositioned => top != null || right != null || bottom != null || left != null || width != null || height != null;
 
-  /// Computes the [BoxConstraints] the stack layout algorithm would give to
-  /// this child, given the [Size] of the stack.
-  ///
-  /// This method should only be called when [isPositioned] is true for the child.
-  BoxConstraints positionedChildConstraints(Size stackSize) {
-    assert(isPositioned);
-    final double? width = switch ((left, right)) {
-      (final double left?, final double right?) => stackSize.width - right - left,
-      (_, _) => this.width,
-    };
-
-    final double? height = switch ((top, bottom)) {
-      (final double top?, final double bottom?) => stackSize.height - bottom - top,
-      (_, _) => this.height,
-    };
-    assert(height == null || !height.isNaN);
-    assert(width == null || !width.isNaN);
-    return BoxConstraints.tightFor(
-      width: width == null ? null : math.max(0.0, width),
-      height: height == null ? null : math.max(0.0, height),
-    );
-  }
-
   @override
   String toString() {
     final List<String> values = <String>[
@@ -377,11 +354,17 @@ class RenderStack extends RenderBox
     }
   }
 
-  Alignment get _resolvedAlignment => _resolvedAlignmentCache ??= alignment.resolve(textDirection);
-  Alignment? _resolvedAlignmentCache;
+  Alignment? _resolvedAlignment;
+
+  void _resolve() {
+    if (_resolvedAlignment != null) {
+      return;
+    }
+    _resolvedAlignment = alignment.resolve(textDirection);
+  }
 
   void _markNeedResolution() {
-    _resolvedAlignmentCache = null;
+    _resolvedAlignment = null;
     markNeedsLayout();
   }
 
@@ -506,59 +489,53 @@ class RenderStack extends RenderBox
   static bool layoutPositionedChild(RenderBox child, StackParentData childParentData, Size size, Alignment alignment) {
     assert(childParentData.isPositioned);
     assert(child.parentData == childParentData);
-    final BoxConstraints childConstraints = childParentData.positionedChildConstraints(size);
+
+    bool hasVisualOverflow = false;
+    BoxConstraints childConstraints = const BoxConstraints();
+
+    if (childParentData.left != null && childParentData.right != null) {
+      childConstraints = childConstraints.tighten(width: size.width - childParentData.right! - childParentData.left!);
+    } else if (childParentData.width != null) {
+      childConstraints = childConstraints.tighten(width: childParentData.width);
+    }
+
+    if (childParentData.top != null && childParentData.bottom != null) {
+      childConstraints = childConstraints.tighten(height: size.height - childParentData.bottom! - childParentData.top!);
+    } else if (childParentData.height != null) {
+      childConstraints = childConstraints.tighten(height: childParentData.height);
+    }
+
     child.layout(childConstraints, parentUsesSize: true);
 
-    final double x = switch (childParentData) {
-      StackParentData(:final double left?) => left,
-      StackParentData(:final double right?) => size.width - right - child.size.width,
-      StackParentData() => alignment.alongOffset(size - child.size as Offset).dx,
-    };
+    final double x;
+    if (childParentData.left != null) {
+      x = childParentData.left!;
+    } else if (childParentData.right != null) {
+      x = size.width - childParentData.right! - child.size.width;
+    } else {
+      x = alignment.alongOffset(size - child.size as Offset).dx;
+    }
 
-    final double y = switch (childParentData) {
-      StackParentData(:final double top?) => top,
-      StackParentData(:final double bottom?) => size.height - bottom - child.size.height,
-      StackParentData() => alignment.alongOffset(size - child.size as Offset).dy,
-    };
+    if (x < 0.0 || x + child.size.width > size.width) {
+      hasVisualOverflow = true;
+    }
+
+    final double y;
+    if (childParentData.top != null) {
+      y = childParentData.top!;
+    } else if (childParentData.bottom != null) {
+      y = size.height - childParentData.bottom! - child.size.height;
+    } else {
+      y = alignment.alongOffset(size - child.size as Offset).dy;
+    }
+
+    if (y < 0.0 || y + child.size.height > size.height) {
+      hasVisualOverflow = true;
+    }
 
     childParentData.offset = Offset(x, y);
-    return x < 0.0 || x + child.size.width > size.width
-        || y < 0.0 || y + child.size.height > size.height;
-  }
 
-  static double? _baselineForChild(RenderBox child, Size stackSize, BoxConstraints nonPositionedChildConstraints, Alignment alignment, TextBaseline baseline) {
-    final StackParentData childParentData = child.parentData! as StackParentData;
-    final BoxConstraints childConstraints = childParentData.isPositioned
-      ? childParentData.positionedChildConstraints(stackSize)
-      : nonPositionedChildConstraints;
-    final double? baselineOffset = child.getDryBaseline(childConstraints, baseline);
-    if (baselineOffset == null) {
-      return null;
-    }
-    final double y = switch (childParentData) {
-      StackParentData(:final double top?) => top,
-      StackParentData(:final double bottom?) => stackSize.height - bottom - child.getDryLayout(childConstraints).height,
-      StackParentData() => alignment.alongOffset(stackSize - child.getDryLayout(childConstraints) as Offset).dy,
-    };
-    return baselineOffset + y;
-  }
-
-  @override
-  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
-    final BoxConstraints nonPositionedChildConstraints = switch (fit) {
-      StackFit.loose => constraints.loosen(),
-      StackFit.expand => BoxConstraints.tight(constraints.biggest),
-      StackFit.passthrough => constraints,
-    };
-
-    final Alignment alignment = _resolvedAlignment;
-    final Size size = getDryLayout(constraints);
-
-    BaselineOffset baselineOffset = BaselineOffset.noBaseline;
-    for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
-      baselineOffset = baselineOffset.minOf(BaselineOffset(_baselineForChild(child, size, nonPositionedChildConstraints, alignment, baseline)));
-    }
-    return baselineOffset.offset;
+    return hasVisualOverflow;
   }
 
   @override
@@ -571,6 +548,8 @@ class RenderStack extends RenderBox
   }
 
   Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
+    _resolve();
+    assert(_resolvedAlignment != null);
     bool hasNonPositionedChildren = false;
     if (childCount == 0) {
       return (constraints.biggest.isFinite) ? constraints.biggest : constraints.smallest;
@@ -624,15 +603,15 @@ class RenderStack extends RenderBox
       layoutChild: ChildLayoutHelper.layoutChild,
     );
 
-    final Alignment resolvedAlignment = _resolvedAlignment;
+    assert(_resolvedAlignment != null);
     RenderBox? child = firstChild;
     while (child != null) {
       final StackParentData childParentData = child.parentData! as StackParentData;
 
       if (!childParentData.isPositioned) {
-        childParentData.offset = resolvedAlignment.alongOffset(size - child.size as Offset);
+        childParentData.offset = _resolvedAlignment!.alongOffset(size - child.size as Offset);
       } else {
-        _hasVisualOverflow = layoutPositionedChild(child, childParentData, size, resolvedAlignment) || _hasVisualOverflow;
+        _hasVisualOverflow = layoutPositionedChild(child, childParentData, size, _resolvedAlignment!) || _hasVisualOverflow;
       }
 
       assert(child.parentData == childParentData);
@@ -760,25 +739,6 @@ class RenderIndexedStack extends RenderStack {
     final BaselineOffset offset = BaselineOffset(displayedChild.getDistanceToActualBaseline(baseline)) + childParentData.offset.dy;
     return offset.offset;
   }
-
-  @override
-  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
-    final RenderBox? displayedChild = _childAtIndex();
-    if (displayedChild == null) {
-      return null;
-    }
-    final BoxConstraints nonPositionedChildConstraints = switch (fit) {
-      StackFit.loose => constraints.loosen(),
-      StackFit.expand => BoxConstraints.tight(constraints.biggest),
-      StackFit.passthrough => constraints,
-    };
-
-    final Alignment alignment = _resolvedAlignment;
-    final Size size = getDryLayout(constraints);
-
-    return RenderStack._baselineForChild(displayedChild, size, nonPositionedChildConstraints, alignment, baseline);
-  }
-
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
