@@ -1222,7 +1222,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     // The logic is similar to RenderFlex's intrisic cross size calculation.
     Size layoutChild(RenderBox child, BoxConstraints constraints) {
       final double width = identical(child, counter)
-        ? child.getMaxIntrinsicWidth(double.infinity)
+        ? child.getMinIntrinsicWidth(double.infinity)
         : constraints.maxWidth;
       return Size(width, child.getMinIntrinsicHeight(width));
     }
