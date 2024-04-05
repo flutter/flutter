@@ -100,6 +100,7 @@ abstract class DriverService {
     List<String> webBrowserFlags,
     List<String>? browserDimension,
     String? profileMemory,
+    String? testOutputDirectory,
   });
 
   /// Stop the running application and uninstall it from the device.
@@ -258,6 +259,7 @@ class FlutterDriverService extends DriverService {
     List<String> webBrowserFlags = const <String>[],
     List<String>? browserDimension,
     String? profileMemory,
+    String? testOutputDirectory,
   }) async {
     if (profileMemory != null) {
       unawaited(_devtoolsLauncher.launch(
@@ -268,13 +270,20 @@ class FlutterDriverService extends DriverService {
       await _devtoolsLauncher.processStart;
     }
     try {
-      final int result = await _processUtils.stream(<String>[
+      final List<String> cmd = <String>[
         _dartSdkPath,
         ...<String>[...arguments, testFile, '-rexpanded'],
-      ], environment: <String, String>{
-        'VM_SERVICE_URL': _vmServiceUri,
-        ...environment,
-      });
+      ];
+      if (testOutputDirectory != null) {
+        cmd.addAll(<String>['--test-output-directory', testOutputDirectory]);
+      }
+      final int result = await _processUtils.stream(
+        cmd,
+        environment: <String, String>{
+          'VM_SERVICE_URL': _vmServiceUri,
+          ...environment,
+        }
+      );
       return result;
     } finally {
       if (profileMemory != null) {

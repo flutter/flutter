@@ -13,18 +13,18 @@ import 'package:flutter_driver/flutter_driver.dart';
 import 'package:path/path.dart' as path;
 
 import 'common.dart';
+import 'integration_test_driver.dart';
 
 /// Flutter Driver test output directory.
 ///
 /// Tests should write any output files to this directory. Defaults to the path
 /// set in the FLUTTER_TEST_OUTPUTS_DIR environment variable, or `build` if
 /// unset.
-String testOutputsDirectory =
-    Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? 'build';
+final String defaultTestOutputsDirectory = fs.systemTempDirectory.createTempSync('build').path;
 
 /// The callback type to handle [Response.data] after the test
 /// succeeds.
-typedef ResponseDataCallback = FutureOr<void> Function(Map<String, dynamic>?);
+typedef ResponseDataCallback = FutureOr<void> Function(Map<String, dynamic>?, {String testOutputFilename, String testOutputsDirectory});
 
 /// Writes a json-serializable data to
 /// [testOutputsDirectory]/`testOutputFilename.json`.
@@ -33,12 +33,11 @@ typedef ResponseDataCallback = FutureOr<void> Function(Map<String, dynamic>?);
 Future<void> writeResponseData(
   Map<String, dynamic>? data, {
   String testOutputFilename = 'integration_response_data',
-  String? destinationDirectory,
+  String testOutputsDirectory = '',
 }) async {
-  destinationDirectory ??= testOutputsDirectory;
-  await fs.directory(destinationDirectory).create(recursive: true);
+  await fs.directory(testOutputsDirectory).create(recursive: true);
   final File file = fs.file(path.join(
-    destinationDirectory,
+    testOutputsDirectory,
     '$testOutputFilename.json',
   ));
   final String resultString = _encodeJson(data, true);
@@ -83,11 +82,13 @@ Future<void> writeResponseData(
 /// `writeResponseOnFailure` determines whether the `responseDataCallback`
 /// function will be called to process the [Response.data] when a test fails.
 /// The default value is `false`.
-Future<void> integrationDriver({
+Future<void> integrationDriver(String zzz, {
   FlutterDriver? driver,
   ScreenshotCallback? onScreenshot,
   ResponseDataCallback? responseDataCallback = writeResponseData,
   bool writeResponseOnFailure = false,
+  String testOutputDirectory = '',
+  String testOutputFilename = '',
 }) async {
   driver ??= await FlutterDriver.connect();
   // Test states that it's waiting on web driver commands.
@@ -175,13 +176,13 @@ Future<void> integrationDriver({
   if (response.allTestsPassed) {
     print('All tests passed.');
     if (responseDataCallback != null) {
-      await responseDataCallback(response.data);
+      await responseDataCallback(response.data, testOutputFilename: testOutputFilename, testOutputsDirectory: testOutputDirectory);
     }
     exit(0);
   } else {
     print('Failure Details:\n${response.formattedFailureDetails}');
     if (responseDataCallback != null && writeResponseOnFailure) {
-      await responseDataCallback(response.data);
+      await responseDataCallback(response.data, testOutputFilename: testOutputFilename, testOutputsDirectory: testOutputDirectory);
     }
     exit(1);
   }

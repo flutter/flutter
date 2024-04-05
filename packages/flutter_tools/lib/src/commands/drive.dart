@@ -145,7 +145,9 @@ class DriveCommand extends RunCommandBase {
         help: 'Timeout the test after the given number of seconds. If the '
               '"--screenshot" option is provided, a screenshot will be taken '
               'before exiting. Defaults to no timeout.',
-        valueHelp: '360');
+        valueHelp: '360')
+       ..addOption('test-output-directory',
+        help: 'Directory location to write logs and test results.');
   }
 
   final Signals signals;
@@ -200,6 +202,8 @@ class DriveCommand extends RunCommandBase {
       includeDevicesUnsupportedByProject: applicationBinaryPath == null,
     );
   }
+
+  String? get testOutputDirectory => stringArg('test-output-directory');
 
   // Wireless iOS devices need `publish-port` to be enabled because it requires mDNS.
   // If the flag wasn't provided as an actual argument and it's a wireless device,
@@ -314,6 +318,7 @@ class DriveCommand extends RunCommandBase {
           : null,
         androidEmulator: boolArg('android-emulator'),
         profileMemory: stringArg('profile-memory'),
+        testOutputDirectory: stringArg('test-output-directory'),
       );
 
       if (screenshot != null) {
@@ -353,7 +358,6 @@ class DriveCommand extends RunCommandBase {
       }
       rethrow;
     }
-
     return FlutterCommandResult.success();
   }
 

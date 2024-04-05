@@ -16,15 +16,12 @@ import 'common.dart';
 
 /// Flutter Driver test output directory.
 ///
-/// Tests should write any output files to this directory. Defaults to the path
-/// set in the FLUTTER_TEST_OUTPUTS_DIR environment variable, or `build` if
-/// unset.
-String testOutputsDirectory =
-    Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? 'build';
+/// Tests should write any output files to this directory. Defaults to `build`.
+String defaultTestOutputsDirectory = fs.systemTempDirectory.createTempSync('build').path;
 
 /// The callback type to handle [Response.data] after the test
 /// succeeds.
-typedef ResponseDataCallback = FutureOr<void> Function(Map<String, dynamic>?);
+typedef ResponseDataCallback = FutureOr<void> Function(Map<String, dynamic>?, {String testOutputFilename, String testOutputsDirectory});
 
 /// Writes a json-serializable data to
 /// [testOutputsDirectory]/`testOutputFilename.json`.
@@ -33,12 +30,11 @@ typedef ResponseDataCallback = FutureOr<void> Function(Map<String, dynamic>?);
 Future<void> writeResponseData(
   Map<String, dynamic>? data, {
   String testOutputFilename = 'integration_response_data',
-  String? destinationDirectory,
+  String? testOutputsDirectory,
 }) async {
-  destinationDirectory ??= testOutputsDirectory;
-  await fs.directory(destinationDirectory).create(recursive: true);
+  await fs.directory(testOutputsDirectory).create(recursive: true);
   final File file = fs.file(path.join(
-    destinationDirectory,
+    testOutputsDirectory ?? defaultTestOutputsDirectory,
     '$testOutputFilename.json',
   ));
   final String resultString = _encodeJson(data, true);

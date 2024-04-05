@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
-
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
@@ -26,7 +24,5 @@ void restoreFileSystem() {
 
 /// Flutter Driver test output directory.
 ///
-/// Tests should write any output files to this directory. Defaults to the path
-/// set in the FLUTTER_TEST_OUTPUTS_DIR environment variable, or `build` if
-/// unset.
-String get testOutputsDirectory => Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? 'build';
+/// Tests should write any output files to this directory. Defaults `build`.
+String get testOutputsDirectory => fs.systemTempDirectory.createTempSync('build').path;

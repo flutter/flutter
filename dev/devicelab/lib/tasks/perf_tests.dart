@@ -8,6 +8,7 @@ import 'dart:ffi' show Abi;
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:file/local.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:xml/xml.dart';
@@ -18,11 +19,15 @@ import '../framework/host_agent.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
-/// Must match flutter_driver/lib/src/common.dart.
-///
-/// Redefined here to avoid taking a dependency on flutter_driver.
-String _testOutputDirectory(String testDirectory) {
-  return Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? '$testDirectory/build';
+void copyToOutputLogs(String outputLog) {
+  final String? outputDirectory = Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'];
+  /// Noop if `FLUTTER_TEST_OUTPUTS_DIR` is not set.
+  if (outputDirectory == null) {
+    return;
+  }
+  final String outputFileName = path.basename(outputLog);
+  final File originFile = File(outputLog);
+  originFile.copySync(path.join(outputDirectory, outputFileName));
 }
 
 TaskFunction createComplexLayoutScrollPerfTest({
@@ -344,6 +349,7 @@ TaskFunction createStackSizeTest() {
       '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
   const String testTarget = 'test_driver/run_app.dart';
   const String testDriver = 'test_driver/stack_size_perf_test.dart';
+  final String outputDirectory = const LocalFileSystem().systemTempDirectory.createTempSync('build').path;
   return () {
     return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
@@ -360,9 +366,11 @@ TaskFunction createStackSizeTest() {
         '--driver', testDriver,
         '-d',
         deviceId,
+        '--test-output-directory',
+        outputDirectory,
       ]);
       final Map<String, dynamic> data = json.decode(
-        file('${_testOutputDirectory(testDirectory)}/stack_size.json').readAsStringSync(),
+        file(path.join(outputDirectory, 'stack_size.json')).readAsStringSync(),
       ) as Map<String, dynamic>;
 
       final Map<String, dynamic> result = <String, dynamic>{
@@ -490,6 +498,7 @@ TaskFunction createsScrollSmoothnessPerfTest() {
   final String testDirectory =
       '${flutterDirectory.path}/dev/benchmarks/complex_layout';
   const String testTarget = 'test/measure_scroll_smoothness.dart';
+  final String outputDirectory = const LocalFileSystem().systemTempDirectory.createTempSync('build').path;
   return () {
     return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
@@ -505,9 +514,11 @@ TaskFunction createsScrollSmoothnessPerfTest() {
         '-t', testTarget,
         '-d',
         deviceId,
+        '--test-output-directory',
+        outputDirectory,
       ]);
       final Map<String, dynamic> data = json.decode(
-        file('${_testOutputDirectory(testDirectory)}/scroll_smoothness_test.json').readAsStringSync(),
+        file(path.join(outputDirectory, 'scroll_smoothness_test.json')).readAsStringSync(),
       ) as Map<String, dynamic>;
 
       final Map<String, dynamic> result = <String, dynamic>{};
@@ -541,6 +552,7 @@ TaskFunction createFramePolicyIntegrationTest() {
   final String testDirectory =
       '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
   const String testTarget = 'test/frame_policy.dart';
+  final String outputDirectory = const LocalFileSystem().systemTempDirectory.createTempSync('build').path;
   return () {
     return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
@@ -556,9 +568,11 @@ TaskFunction createFramePolicyIntegrationTest() {
         '-t', testTarget,
         '-d',
         deviceId,
+        '--test-output-directory',
+        outputDirectory,
       ]);
       final Map<String, dynamic> data = json.decode(
-        file('${_testOutputDirectory(testDirectory)}/frame_policy_event_delay.json').readAsStringSync(),
+        file(path.join(outputDirectory, 'frame_policy_event_delay.json')).readAsStringSync(),
       ) as Map<String, dynamic>;
       final Map<String, dynamic> fullLiveData = data['fullyLive'] as Map<String, dynamic>;
       final Map<String, dynamic> benchmarkLiveData = data['benchmarkLive'] as Map<String, dynamic>;
@@ -906,17 +920,21 @@ Future<void> _resetManifest(String testDirectory) async {
 
 /// Measure application startup performance.
 class StartupTest {
-  const StartupTest(
+  StartupTest(
     this.testDirectory, {
     this.reportMetrics = true,
     this.target = 'lib/main.dart',
     this.runEnvironment,
-  });
+    String? testOuputDirectory,
+  }) {
+    _testOutputDirectory = testOuputDirectory ?? const LocalFileSystem().systemTempDirectory.createTempSync('build').path;
+  }
 
   final String testDirectory;
   final bool reportMetrics;
   final String target;
   final Map<String, String>? runEnvironment;
+  String? _testOutputDirectory;
 
   Future<TaskResult> run() async {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -1015,6 +1033,8 @@ class StartupTest {
             device.deviceId,
             if (applicationBinaryPath != null)
               '--use-application-binary=$applicationBinaryPath',
+            '--test-output-directory',
+            _testOutputDirectory!
           ],
           environment: runEnvironment,
           canFail: true,
@@ -1022,7 +1042,7 @@ class StartupTest {
         timer.cancel();
         if (result == 0) {
           final Map<String, dynamic> data = json.decode(
-            file('${_testOutputDirectory(testDirectory)}/start_up_info.json').readAsStringSync(),
+            file(path.join(_testOutputDirectory!, 'start_up_info.json')).readAsStringSync(),
           ) as Map<String, dynamic>;
           results.add(data);
         } else {
@@ -1177,7 +1197,7 @@ typedef FlutterDriveCallback = void Function(List<String> options);
 /// Measures application runtime performance, specifically per-frame
 /// performance.
 class PerfTest {
-  const PerfTest(
+  PerfTest(
     this.testDirectory,
     this.testTarget,
     this.timelineFileName, {
@@ -1197,9 +1217,12 @@ class PerfTest {
     this.forceOpenGLES,
     this.disablePartialRepaint = false,
     this.createPlatforms = const <String>[],
-  }): _resultFilename = resultFilename;
+    String? testOuputDirectory,
+  }):_resultFilename = resultFilename {
+    _testOutputDirectory = testOuputDirectory ?? const LocalFileSystem().systemTempDirectory.createTempSync('build').path;
+  }
 
-  const PerfTest.e2e(
+  PerfTest.e2e(
     this.testDirectory,
     this.testTarget, {
     this.measureCpuGpu = false,
@@ -1217,7 +1240,10 @@ class PerfTest {
     this.forceOpenGLES,
     this.disablePartialRepaint = false,
     this.createPlatforms = const <String>[],
-  }) : saveTraceFile = false, timelineFileName = null, _resultFilename = resultFilename;
+     String? testOuputDirectory,
+  }) : saveTraceFile = false, timelineFileName = null, _resultFilename = resultFilename {
+    _testOutputDirectory = testOuputDirectory ?? const LocalFileSystem().systemTempDirectory.createTempSync('build').path;
+  }
 
   /// The directory where the app under test is defined.
   final String testDirectory;
@@ -1261,6 +1287,10 @@ class PerfTest {
 
   /// Number of seconds to time out the test after, allowing debug callbacks to run.
   final int? timeoutSeconds;
+
+  /// String with the path an existent directorty where test outputs will be writter
+  /// to.
+  late String? _testOutputDirectory;
 
   /// The keys of the values that need to be reported.
   ///
@@ -1388,6 +1418,8 @@ class PerfTest {
             '--no-enable-impeller',
           '-d',
           deviceId,
+          '--test-output-directory',
+          _testOutputDirectory!
         ];
         if (flutterDriveCallback != null) {
           flutterDriveCallback!(options);
@@ -1398,10 +1430,11 @@ class PerfTest {
         await resetManifest();
         await resetPlist();
       }
-
+      final String resultFile = path.join(_testOutputDirectory!, '$resultFilename.json');
       final Map<String, dynamic> data = json.decode(
-        file('${_testOutputDirectory(testDirectory)}/$resultFilename.json').readAsStringSync(),
+        file(resultFile).readAsStringSync(),
       ) as Map<String, dynamic>;
+      copyToOutputLogs(resultFile);
 
       if (data['frame_count'] as int < 5) {
         return TaskResult.failure(
@@ -1429,11 +1462,16 @@ class PerfTest {
       // TODO(liyuqian): Remove isAndroid restriction once
       // https://github.com/flutter/flutter/issues/61567 is fixed.
       final bool isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
+      String traceFileName = '';
+      if (saveTraceFile) {
+        traceFileName = path.join(_testOutputDirectory!, '$traceFilename.json');
+        copyToOutputLogs(traceFileName);
+      }
       return TaskResult.success(
         data,
         detailFiles: <String>[
-          if (saveTraceFile)
-            '${_testOutputDirectory(testDirectory)}/$traceFilename.json',
+          if (traceFileName.isNotEmpty)
+            traceFileName,
         ],
         benchmarkScoreKeys: benchmarkScoreKeys ?? <String>[
           ..._kCommonScoreKeys,

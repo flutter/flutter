@@ -2,10 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/args.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
-Future<void> main() async {
+Future<void> main(List<String> args) async {
+  final ArgParser parser = ArgParser();
+  parser.addOption('reporter', abbr: 'r', allowed: <String>['expanded']);
+  parser.addOption('test-output-directory');
+  final ArgResults argResults = parser.parse(args);
+
+  //throw FormatException('Expected at least 1 section $args ${argResults["test-output-directory"]}');
+
   const String fileName = 'animated_image';
 
   test('Animate for 250 frames', () async {
@@ -17,7 +25,7 @@ Future<void> main() async {
       await driver.requestData('waitForAnimation');
     });
     final TimelineSummary summary = TimelineSummary.summarize(timeline);
-    await summary.writeTimelineToFile(fileName, pretty: true);
+    await summary.writeTimelineToFile(fileName, pretty: true, destinationDirectory: argResults['test-output-directory'] as String);
 
     await driver.close();
   }, timeout: Timeout.none);

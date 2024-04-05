@@ -150,6 +150,7 @@ class WebDriverService extends DriverService {
     List<String> webBrowserFlags = const <String>[],
     List<String>? browserDimension,
     String? profileMemory,
+    String? testOutputDirectory,
   }) async {
     late async_io.WebDriver webDriver;
     final Browser browser = Browser.fromCliName(browserName);
@@ -189,15 +190,19 @@ class WebDriverService extends DriverService {
       await window.setLocation(const math.Point<int>(0, 0));
       await window.setSize(math.Rectangle<int>(0, 0, x, y));
     }
-    final int result = await _processUtils.stream(<String>[
+    final List<String> cmd = <String>[
       _dartSdkPath,
-      ...arguments,
-      testFile,
-      '-rexpanded',
-    ], environment: <String, String>{
-      'VM_SERVICE_URL': _webUri.toString(),
-      ..._additionalDriverEnvironment(webDriver, browserName, androidEmulator),
-      ...environment,
+      ...<String>[...arguments, testFile, '-rexpanded'],
+    ];
+    if (testOutputDirectory != null) {
+      cmd.addAll(<String>['--test-output-directory', testOutputDirectory]);
+    }
+    final int result = await _processUtils.stream(
+      cmd,
+      environment: <String, String>{
+        'VM_SERVICE_URL': _webUri.toString(),
+        ..._additionalDriverEnvironment(webDriver, browserName, androidEmulator),
+        ...environment,
     });
     await webDriver.quit();
     return result;
