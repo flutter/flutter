@@ -76,6 +76,12 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
     return std::nullopt;
   }
 
+  std::shared_ptr<CommandBuffer> command_buffer =
+      renderer.GetContext()->CreateCommandBuffer();
+  if (!command_buffer) {
+    return std::nullopt;
+  }
+
   // Pad Contents snapshots with 1 pixel borders to ensure correct sampling
   // behavior. Not doing so results in a coverage leak for filters that support
   // customizing the input sampling mode. Snapshots of contents should be
@@ -91,7 +97,7 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
 
   ISize subpass_size = ISize::Ceil(coverage->GetSize());
   fml::StatusOr<RenderTarget> render_target = renderer.MakeSubpass(
-      label, subpass_size,
+      label, subpass_size, command_buffer,
       [&contents = *this, &entity, &coverage](const ContentContext& renderer,
                                               RenderPass& pass) -> bool {
         Entity sub_entity;
@@ -105,6 +111,12 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
       std::min(mip_count, static_cast<int32_t>(subpass_size.MipCount())));
 
   if (!render_target.ok()) {
+    return std::nullopt;
+  }
+  if (!renderer.GetContext()
+           ->GetCommandQueue()
+           ->Submit(/*buffers=*/{std::move(command_buffer)})
+           .ok()) {
     return std::nullopt;
   }
 

@@ -74,9 +74,24 @@ class GaussianBlurFilterContentsTest : public EntityPlayground {
  public:
   /// Create a texture that has been cleared to transparent black.
   std::shared_ptr<Texture> MakeTexture(ISize size) {
+    std::shared_ptr<CommandBuffer> command_buffer =
+        GetContentContext()->GetContext()->CreateCommandBuffer();
+    if (!command_buffer) {
+      return nullptr;
+    }
+
     auto render_target = GetContentContext()->MakeSubpass(
-        "Clear Subpass", size,
+        "Clear Subpass", size, command_buffer,
         [](const ContentContext&, RenderPass&) { return true; });
+
+    if (!GetContentContext()
+             ->GetContext()
+             ->GetCommandQueue()
+             ->Submit(/*buffers=*/{command_buffer})
+             .ok()) {
+      return nullptr;
+    }
+
     if (render_target.ok()) {
       return render_target.value().GetRenderTargetTexture();
     }

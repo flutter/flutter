@@ -783,8 +783,9 @@ class ContentContext {
   /// @brief  Creates a new texture of size `texture_size` and calls
   ///         `subpass_callback` with a `RenderPass` for drawing to the texture.
   fml::StatusOr<RenderTarget> MakeSubpass(
-      const std::string& label,
+      std::string_view label,
       ISize texture_size,
+      const std::shared_ptr<CommandBuffer>& command_buffer,
       const SubpassCallback& subpass_callback,
       bool msaa_enabled = true,
       bool depth_stencil_enabled = false,
@@ -792,8 +793,9 @@ class ContentContext {
 
   /// Makes a subpass that will render to `subpass_target`.
   fml::StatusOr<RenderTarget> MakeSubpass(
-      const std::string& label,
+      std::string_view label,
       const RenderTarget& subpass_target,
+      const std::shared_ptr<CommandBuffer>& command_buffer,
       const SubpassCallback& subpass_callback) const;
 
   const std::shared_ptr<LazyGlyphAtlas>& GetLazyGlyphAtlas() const {
