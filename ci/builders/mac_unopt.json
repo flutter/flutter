@@ -25,6 +25,7 @@
                 "--xcode-symlinks"
             ],
             "name": "ci/host_debug_unopt",
+            "description": "Builds a debug mode unopt x64 macOS engine and runs host-side tests.",
             "ninja": {
                 "config": "ci/host_debug_unopt",
                 "targets": []
@@ -85,6 +86,7 @@
                 "ci/ios_debug_unopt_sim"
             ],
             "name": "ci/ios_debug_unopt_sim",
+            "description": "Builds a debug mode engine for x64 iOS simulator. Runs unit tests and the scenario app tests.",
             "ninja": {
                 "config": "ci/ios_debug_unopt_sim",
                 "targets": [
@@ -143,6 +145,7 @@
                 "--use-glfw-swiftshader"
             ],
             "name": "ci/host_debug_unopt_arm64",
+            "description": "Builds a debug mode unopt arm64 macOS engine and runs host-side tests.",
             "ninja": {
                 "config": "ci/host_debug_unopt_arm64",
                 "targets": [
@@ -202,6 +205,7 @@
                 "ci/ios_debug_unopt_sim_arm64"
             ],
             "name": "ci/ios_debug_unopt_sim_arm64",
+            "description": "Builds a debug mode engine for arm64 iOS simulator. Runs unit tests and the scenario app tests.",
             "ninja": {
                 "config": "ci/ios_debug_unopt_sim_arm64",
                 "targets": [
@@ -269,6 +273,7 @@
                 "ci/ios_debug_unopt_sim_arm64_extension_safe"
             ],
             "name": "ci/ios_debug_unopt_sim_arm64_extension_safe",
+            "description": "Builds an extension safe debug mode engine for arm64 iOS simulator. Runs unit tests and the scenario app tests.",
             "ninja": {
                 "config": "ci/ios_debug_unopt_sim_arm64_extension_safe",
                 "targets": [

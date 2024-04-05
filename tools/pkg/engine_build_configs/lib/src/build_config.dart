@@ -174,6 +174,7 @@ final class BuilderConfig extends BuildConfigBase {
 /// "builds" contains a list of maps with fields like:
 /// {
 ///   "name": "",
+///   "description": "",
 ///   "gn": [""],
 ///   "ninja": {},
 ///   "tests": [],
@@ -188,6 +189,7 @@ final class Build extends BuildConfigBase {
   factory Build.fromJson(Map<String, Object?> map) {
     final List<String> errors = <String>[];
     final String? name = stringOfJson(map, 'name', errors);
+    final String? description = stringOfJson(map, 'description', errors);
     final List<String>? gn = stringListOfJson(map, 'gn', errors);
     final List<BuildTest>? tests = objListOfJson(
       map,
@@ -247,6 +249,7 @@ final class Build extends BuildConfigBase {
     }
 
     if (name == null ||
+        description == null ||
         gn == null ||
         ninja == null ||
         archives == null ||
@@ -258,6 +261,7 @@ final class Build extends BuildConfigBase {
     }
     return Build._(
       name,
+      description,
       gn,
       ninja,
       tests,
@@ -270,6 +274,7 @@ final class Build extends BuildConfigBase {
 
   Build._(
     this.name,
+    this.description,
     this.gn,
     this.ninja,
     this.tests,
@@ -281,6 +286,7 @@ final class Build extends BuildConfigBase {
 
   Build._invalid(super.errors)
       : name = '',
+        description = '',
         gn = <String>[],
         ninja = BuildNinja.nop(),
         tests = <BuildTest>[],
@@ -292,6 +298,9 @@ final class Build extends BuildConfigBase {
   /// The name of the build which may also be used to reference it as a
   /// depdendency of a global test.
   final String name;
+
+  /// The human-readable description of what a build accomplishes.
+  final String description;
 
   /// The parameters to pass to `flutter/tools/gn` to configure the build.
   final List<String> gn;

@@ -37,7 +37,7 @@ void addConfigOption(
     ],
     allowedHelp: <String, String>{
       for (final Build config in builds)
-        mangleConfigName(environment, config.name): config.gn.join(' '),
+        mangleConfigName(environment, config.name): config.description,
     },
   );
 }
