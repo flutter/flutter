@@ -2449,10 +2449,12 @@
 ../../../flutter/third_party/skia/modules/skshaper/include/BUILD.bazel
 ../../../flutter/third_party/skia/modules/skshaper/src/BUILD.bazel
 ../../../flutter/third_party/skia/modules/skshaper/tests
+../../../flutter/third_party/skia/modules/skshaper/utils/BUILD.bazel
 ../../../flutter/third_party/skia/modules/skunicode/BUILD.bazel
 ../../../flutter/third_party/skia/modules/skunicode/include/BUILD.bazel
 ../../../flutter/third_party/skia/modules/skunicode/src/BUILD.bazel
 ../../../flutter/third_party/skia/modules/skunicode/tests
+../../../flutter/third_party/skia/modules/svg/BUILD.bazel
 ../../../flutter/third_party/skia/modules/svg/include/BUILD.bazel
 ../../../flutter/third_party/skia/modules/svg/src/BUILD.bazel
 ../../../flutter/third_party/skia/modules/svg/tests

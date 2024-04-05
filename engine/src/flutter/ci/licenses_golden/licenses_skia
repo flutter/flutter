@@ -1,4 +1,4 @@
-Signature: ebe0257b3bc4e75d52fe53a3df7a6de4
+Signature: d4c5e203d66e5385044532e2f4c8557a
 
 ====================================================================================================
 LIBRARY: etc1
@@ -402,6 +402,7 @@ FILE: ../../../flutter/third_party/skia/relnotes/GraphiteContextMaxTextureSize.m
 FILE: ../../../flutter/third_party/skia/relnotes/MTLBinaryArchive.md
 FILE: ../../../flutter/third_party/skia/relnotes/SkBitmap_setColorSpace.md
 FILE: ../../../flutter/third_party/skia/relnotes/metal_backendsurface.md
+FILE: ../../../flutter/third_party/skia/relnotes/shaping_behavior.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
@@ -9514,8 +9515,11 @@ ORIGIN: ../../../flutter/third_party/skia/include/gpu/ganesh/mtl/GrMtlBackendSur
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/ganesh/mtl/GrMtlDirectContext.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/gl/epoxy/GrGLMakeEpoxyEGLInterface.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skshaper/include/SkShaper_coretext.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/skshaper/include/SkShaper_factory.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skshaper/include/SkShaper_harfbuzz.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skshaper/include/SkShaper_skunicode.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/skshaper/src/SkShaper_factory.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/skshaper/utils/FactoryHelpers.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_client.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_icu.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_icu4x.h + ../../../flutter/third_party/skia/LICENSE
@@ -9552,8 +9556,11 @@ FILE: ../../../flutter/third_party/skia/include/gpu/ganesh/mtl/GrMtlBackendSurfa
 FILE: ../../../flutter/third_party/skia/include/gpu/ganesh/mtl/GrMtlDirectContext.h
 FILE: ../../../flutter/third_party/skia/include/gpu/gl/epoxy/GrGLMakeEpoxyEGLInterface.h
 FILE: ../../../flutter/third_party/skia/modules/skshaper/include/SkShaper_coretext.h
+FILE: ../../../flutter/third_party/skia/modules/skshaper/include/SkShaper_factory.h
 FILE: ../../../flutter/third_party/skia/modules/skshaper/include/SkShaper_harfbuzz.h
 FILE: ../../../flutter/third_party/skia/modules/skshaper/include/SkShaper_skunicode.h
+FILE: ../../../flutter/third_party/skia/modules/skshaper/src/SkShaper_factory.cpp
+FILE: ../../../flutter/third_party/skia/modules/skshaper/utils/FactoryHelpers.h
 FILE: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_client.h
 FILE: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_icu.h
 FILE: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_icu4x.h
