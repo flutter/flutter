@@ -907,10 +907,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   static double _getBaseline(RenderBox box, BoxConstraints boxConstraints) {
     return ChildLayoutHelper.getBaseline(box, boxConstraints, TextBaseline.alphabetic) ?? box.size.height;
   }
-  static double _getDryBaseline(RenderBox box, BoxConstraints boxConstraints) {
-    return ChildLayoutHelper.getDryBaseline(box, boxConstraints, TextBaseline.alphabetic)
-        ?? ChildLayoutHelper.dryLayoutChild(box, boxConstraints).height;
-  }
 
   static BoxParentData _boxParentData(RenderBox box) => box.parentData! as BoxParentData;
 
@@ -1203,6 +1199,18 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
     width = math.max(width - contentPadding.horizontal, 0.0);
 
+    // TODO(LongCatIsLooong): use _computeSubtextSizes for subtext intrinsic sizes.
+    // See https://github.com/flutter/flutter/issues/13715.
+    final double counterHeight = _minHeight(counter, width);
+    final double counterWidth = _minWidth(counter, counterHeight);
+
+    final double helperErrorAvailableWidth = math.max(width - counterWidth, 0.0);
+    final double helperErrorHeight = _minHeight(helperError, helperErrorAvailableWidth);
+    double subtextHeight = math.max(counterHeight, helperErrorHeight);
+    if (subtextHeight > 0.0) {
+      subtextHeight += subtextGap;
+    }
+
     final double prefixHeight = _minHeight(prefix, width);
     final double prefixWidth = _minWidth(prefix, prefixHeight);
 
@@ -1224,20 +1232,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       ? 0.0
       : kMinInteractiveDimension;
 
-    // The logic is similar to RenderFlex's intrisic cross size calculation.
-    Size layoutChild(RenderBox child, BoxConstraints constraints) {
-      final double width = identical(child, counter)
-        ? child.getMinIntrinsicWidth(double.infinity)
-        : constraints.maxWidth;
-      return Size(width, child.getMinIntrinsicHeight(width));
-    }
-
-    final _SubtextSize subtext = _computeSubtextSizes(
-      constraints: BoxConstraints(maxWidth: width),
-      layoutChild: layoutChild,
-      getBaseline: _getDryBaseline,
-    );
-    return math.max(containerHeight, minContainerHeight) + subtext.ascent + subtext.descent;
+    return math.max(containerHeight, minContainerHeight) + subtextHeight;
   }
 
   @override
