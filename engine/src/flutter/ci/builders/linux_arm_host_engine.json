@@ -33,6 +33,7 @@
                 "--no-goma"
             ],
             "name": "ci/linux_profile_arm64",
+            "description": "Produces profile mode artifacts to target arm64 Linux from a Linux host.",
             "ninja": {
                 "config": "ci/linux_profile_arm64",
                 "targets": [
@@ -75,6 +76,7 @@
                 "--no-goma"
             ],
             "name": "ci/linux_debug_arm64",
+            "description": "Produces debug mode artifacts to target arm64 Linux from a Linux host.",
             "ninja": {
                 "config": "ci/linux_debug_arm64",
                 "targets": [
@@ -117,6 +119,7 @@
                 "--no-goma"
             ],
             "name": "ci/linux_release_arm64",
+            "description": "Produces release mode artifacts to target arm64 Linux from a Linux host.",
             "ninja": {
                 "config": "ci/linux_release_arm64",
                 "targets": [

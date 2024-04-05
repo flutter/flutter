@@ -23,6 +23,7 @@ const String buildConfigJson = '''
       },
       "gn": ["--gn-arg", "--lto", "--goma", "--no-rbe"],
       "name": "build_name",
+      "description": "build_description",
       "ninja": {
         "config": "build_name",
         "targets": ["ninja_target"]

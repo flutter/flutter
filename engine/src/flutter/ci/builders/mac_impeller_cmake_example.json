@@ -3,6 +3,7 @@
         {
             "cas_archive": false,
             "name": "ci/impeller-cmake-example",
+            "description": "Builds the Impeller cmake example.",
             "archives": [],
             "drone_dimensions": [
                 "device_type=none",

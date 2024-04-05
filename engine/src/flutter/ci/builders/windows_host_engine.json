@@ -35,6 +35,7 @@
                 "--rbe"
             ],
             "name": "ci\\host_debug",
+            "description": "Produces debug mode Windows host-side tooling and builds host-side unit tests for Windows.",
             "ninja": {
                 "config": "ci/host_debug",
                 "targets": [
@@ -91,6 +92,7 @@
                 "--rbe"
             ],
             "name": "ci\\host_profile",
+            "description": "Produces profile mode Windows host-side tooling.",
             "ninja": {
                 "config": "ci/host_profile",
                 "targets": [
@@ -131,6 +133,7 @@
                 "--rbe"
             ],
             "name": "ci\\host_release",
+            "description": "Produces release mode Windows host-side tooling.",
             "ninja": {
                 "config": "ci/host_release",
                 "targets": [

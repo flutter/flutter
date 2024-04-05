@@ -26,6 +26,7 @@
                 }
             ],
             "name": "ci/android_emulator_debug_x64",
+            "description": "Build for debug mode x64 Android emulator tests, and Impeller scenario app tests.",
             "ninja": {
                 "config": "ci/android_emulator_debug_x64",
                 "targets": [
@@ -118,6 +119,7 @@
                 }
             ],
             "name": "ci/android_emulator_debug_x86",
+            "description": "Build for debug mode x86 Android emulator tests.",
             "ninja": {
                 "config": "ci/android_emulator_debug_x86",
                 "targets": [

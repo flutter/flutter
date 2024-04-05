@@ -5,6 +5,7 @@
     ],
     "cas_archive": false,
     "name": "licenses",
+    "description": "Runs the license check script.",
     "tests": [
         {
             "name": "licenses check",

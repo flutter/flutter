@@ -21,6 +21,7 @@
                 "--no-goma"
             ],
             "name": "ci/fuchsia_profile_arm64",
+            "description": "Produces profile mode artifacts to target arm64 Fuchsia from a Linux host.",
             "ninja": {
                 "config": "ci/fuchsia_profile_arm64",
                 "targets": [
@@ -53,6 +54,7 @@
                 "--no-goma"
             ],
             "name": "ci/fuchsia_profile_arm64_tester",
+            "description": "Builds profile mode tests of arm64 Fuchsia.",
             "ninja": {
                 "config": "ci/fuchsia_profile_arm64_tester",
                 "targets": [
@@ -94,6 +96,7 @@
                 "--no-goma"
             ],
             "name": "ci/fuchsia_release_arm64",
+            "description": "Produces release mode artifacts to target arm64 Fuchsia from a Linux host.",
             "ninja": {
                 "config": "ci/fuchsia_release_arm64",
                 "targets": [
@@ -126,6 +129,7 @@
                 "--no-goma"
             ],
             "name": "ci/fuchsia_release_arm64_tester",
+            "description": "Builds release mode tests of arm64 Fuchsia.",
             "ninja": {
                 "config": "ci/fuchsia_release_arm64_tester",
                 "targets": [
@@ -168,6 +172,7 @@
                 "--no-goma"
             ],
             "name": "ci/fuchsia_debug_arm64",
+            "description": "Produces debug mode artifacts to target arm64 Fuchsia from a Linux host.",
             "ninja": {
                 "config": "ci/fuchsia_debug_arm64",
                 "targets": [
@@ -215,6 +220,7 @@
                 "--no-goma"
             ],
             "name": "ci/fuchsia_debug_arm64_tester",
+            "description": "Builds debug mode tests of arm64 Fuchsia.",
             "ninja": {
                 "config": "ci/fuchsia_debug_arm64_tester",
                 "targets": [
@@ -256,6 +262,7 @@
                 "--no-goma"
             ],
             "name": "ci/fuchsia_profile_x64",
+            "description": "Produces profile mode artifacts to target x64 Fuchsia from a Linux host.",
             "ninja": {
                 "config": "ci/fuchsia_profile_x64",
                 "targets": [
@@ -288,6 +295,7 @@
                 "--no-goma"
             ],
             "name": "ci/fuchsia_profile_x64_tester",
+            "description": "Builds profile mode tests of x64 Fuchsia.",
             "ninja": {
                 "config": "ci/fuchsia_profile_x64_tester",
                 "targets": [
@@ -330,6 +338,7 @@
                 "--no-goma"
             ],
             "name": "ci/fuchsia_release_x64",
+            "description": "Produces release mode artifacts to target x64 Fuchsia from a Linux host.",
             "ninja": {
                 "config": "ci/fuchsia_release_x64",
                 "targets": [
@@ -362,6 +371,7 @@
                 "--no-goma"
             ],
             "name": "ci/fuchsia_release_x64_tester",
+            "description": "Builds release mode tests of x64 Fuchsia.",
             "ninja": {
                 "config": "ci/fuchsia_release_x64_tester",
                 "targets": [
@@ -405,6 +415,7 @@
                 "--no-goma"
             ],
             "name": "ci/fuchsia_debug_x64",
+            "description": "Produces debug mode artifacts to target x64 Fuchsia from a Linux host.",
             "ninja": {
                 "config": "ci/fuchsia_debug_x64",
                 "targets": [
@@ -452,6 +463,7 @@
                 "--no-goma"
             ],
             "name": "ci/fuchsia_debug_x64_tester",
+            "description": "Builds debug mode tests of x64 Fuchsia.",
             "ninja": {
                 "config": "ci/fuchsia_debug_x64_tester",
                 "targets": [

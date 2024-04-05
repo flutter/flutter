@@ -29,6 +29,7 @@
                 "--rbe"
             ],
             "name": "ci\\android_profile",
+            "description": "Produces profile mode artifacts to target 32-bit arm Android from a Windows host.",
             "ninja": {
                 "config": "ci/android_profile",
                 "targets": [
@@ -66,6 +67,7 @@
                 "--rbe"
             ],
             "name": "ci\\android_profile_arm64",
+            "description": "Produces profile mode artifacts to target 64-bit arm Android from a Windows host.",
             "ninja": {
                 "config": "ci/android_profile_arm64",
                 "targets": [
@@ -103,6 +105,7 @@
                 "--rbe"
             ],
             "name": "ci\\android_profile_x64",
+            "description": "Produces profile mode artifacts to target x64 Android from a Windows host.",
             "ninja": {
                 "config": "ci/android_profile_x64",
                 "targets": [
@@ -139,6 +142,7 @@
                 "--rbe"
             ],
             "name": "ci\\android_release",
+            "description": "Produces release mode artifacts to target 32-bit arm Android from a Windows host.",
             "ninja": {
                 "config": "ci/android_release",
                 "targets": [
@@ -176,6 +180,7 @@
                 "--rbe"
             ],
             "name": "ci\\android_release_arm64",
+            "description": "Produces release mode artifacts to target 64-bit arm Android from a Windows host.",
             "ninja": {
                 "config": "ci/android_release_arm64",
                 "targets": [
@@ -213,6 +218,7 @@
                 "--rbe"
             ],
             "name": "ci\\android_release_x64",
+            "description": "Produces release mode artifacts to target x64 Android from a Windows host.",
             "ninja": {
                 "config": "ci/android_release_x64",
                 "targets": [
