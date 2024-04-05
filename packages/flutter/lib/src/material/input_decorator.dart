@@ -1307,16 +1307,22 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final RenderBox? counter = this.counter;
     final double helperErrorBaseline = helperError.getDistanceToBaseline(TextBaseline.alphabetic)!;
     final double counterBaseline = counter?.getDistanceToBaseline(TextBaseline.alphabetic)! ?? 0.0;
+
+    double start, end;
     switch (textDirection) {
       case TextDirection.ltr:
-        _boxParentData(helperError).offset = Offset(contentPadding.start + _boxSize(icon).width, subtextBaseline - helperErrorBaseline);
+        start = contentPadding.start + _boxSize(icon).width;
+        end = overallWidth - contentPadding.end;
+        _boxParentData(helperError).offset = Offset(start, subtextBaseline - helperErrorBaseline);
         if (counter != null) {
-          _boxParentData(counter).offset = Offset(overallWidth - contentPadding.end - counter.size.width, subtextBaseline - counterBaseline);
+          _boxParentData(counter).offset = Offset(end - counter.size.width, subtextBaseline - counterBaseline);
         }
       case TextDirection.rtl:
-        _boxParentData(helperError).offset = Offset(overallWidth - contentPadding.start - _boxSize(icon).width - helperError.size.width, subtextBaseline - helperErrorBaseline);
+        start = overallWidth - contentPadding.start - _boxSize(icon).width;
+        end = contentPadding.end;
+        _boxParentData(helperError).offset = Offset(start - helperError.size.width, subtextBaseline - helperErrorBaseline);
         if (counter != null) {
-          _boxParentData(counter).offset = Offset(contentPadding.end, subtextBaseline - counterBaseline);
+          _boxParentData(counter).offset = Offset(end, subtextBaseline - counterBaseline);
         }
     }
 
@@ -1328,8 +1334,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
     switch (textDirection) {
       case TextDirection.rtl: {
-        double start = overallWidth - contentPadding.start - _boxSize(icon).width;
-        double end = contentPadding.end;
         if (prefixIcon != null) {
           start += contentPadding.start;
           start -= centerLayout(prefixIcon!, start - prefixIcon!.size.width);
@@ -1360,8 +1364,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         break;
       }
       case TextDirection.ltr: {
-        double start = contentPadding.start + _boxSize(icon).width;
-        double end = overallWidth - contentPadding.end;
         if (prefixIcon != null) {
           start -= contentPadding.start;
           start += centerLayout(prefixIcon!, start);
