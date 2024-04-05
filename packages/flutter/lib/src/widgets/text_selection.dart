@@ -662,26 +662,22 @@ class TextSelectionOverlay {
       renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomCenter,
     );
     final RenderBox? overlay = Overlay.of(context, rootOverlay: true).context.findRenderObject() as RenderBox?;
-    final Rect overlayLineBoundaries = Rect.fromPoints(
-      renderEditable.localToGlobal(localLineBoundaries.topLeft, ancestor: overlay),
-      renderEditable.localToGlobal(localLineBoundaries.bottomRight, ancestor: overlay),
+    final Matrix4 transformToOverlay = renderEditable.getTransformTo(overlay);
+    final Rect overlayLineBoundaries = MatrixUtils.transformRect(
+      transformToOverlay,
+      localLineBoundaries,
     );
 
     final Rect localCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
-    final Rect overlayCaretRect = Rect.fromPoints(
-        renderEditable.localToGlobal(localCaretRect.topLeft, ancestor: overlay),
-        renderEditable.localToGlobal(localCaretRect.bottomRight, ancestor: overlay),
+    final Rect overlayCaretRect = MatrixUtils.transformRect(
+      transformToOverlay,
+      localCaretRect,
     );
 
-    final Offset overlayRenderEditableTopLeft = renderEditable.localToGlobal(Offset.zero, ancestor: overlay);
-    final Offset overlayRenderEditableBottomRight = renderEditable.localToGlobal(
-      (Offset.zero & renderEditable.size).bottomRight,
-      ancestor: overlay,
-    );
     final Offset overlayGesturePosition = overlay?.globalToLocal(globalGesturePosition) ?? globalGesturePosition;
 
     return MagnifierInfo(
-      fieldBounds: Rect.fromPoints(overlayRenderEditableTopLeft, overlayRenderEditableBottomRight),
+      fieldBounds: MatrixUtils.transformRect(transformToOverlay, renderEditable.paintBounds),
       globalGesturePosition: overlayGesturePosition,
       caretRect: overlayCaretRect,
       currentLineBoundaries: overlayLineBoundaries,
