@@ -14,7 +14,8 @@ namespace impeller {
 
 static constexpr const char* kInstanceLayer = "ImpellerInstance";
 
-CapabilitiesVK::CapabilitiesVK(bool enable_validations) {
+CapabilitiesVK::CapabilitiesVK(bool enable_validations,
+                               bool fatal_missing_validations) {
   auto extensions = vk::enumerateInstanceExtensionProperties();
   auto layers = vk::enumerateInstanceLayerProperties();
 
@@ -45,6 +46,9 @@ CapabilitiesVK::CapabilitiesVK(bool enable_validations) {
         << "Requested Impeller context creation with validations but the "
            "validation layers could not be found. Expect no Vulkan validation "
            "checks!";
+    if (fatal_missing_validations) {
+      FML_LOG(FATAL) << "Validation missing. Exiting.";
+    }
   }
   if (validations_enabled_) {
     FML_LOG(INFO) << "Vulkan validations are enabled.";

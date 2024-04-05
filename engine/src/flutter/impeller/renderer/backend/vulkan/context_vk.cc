@@ -168,8 +168,8 @@ void ContextVK::Setup(Settings settings) {
   enable_validation = true;
 #endif
 
-  auto caps =
-      std::shared_ptr<CapabilitiesVK>(new CapabilitiesVK(enable_validation));
+  auto caps = std::shared_ptr<CapabilitiesVK>(new CapabilitiesVK(
+      enable_validation, settings.fatal_missing_validations));
 
   if (!caps->IsValid()) {
     VALIDATION_LOG << "Could not determine device capabilities.";
