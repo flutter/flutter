@@ -94,10 +94,9 @@ template("flutter_frontend_server") {
       if (is_win) {
         ext = ".exe"
       }
-      dart = rebase_path("$host_prebuilt_dart_sdk/bin/dartaotruntime$ext",
-                         root_out_dir)
+      dart = rebase_path("$host_prebuilt_dart_sdk/bin/dart$ext", root_out_dir)
       frontend_server =
-          rebase_path("$root_gen_dir/frontend_server_aot.dart.snapshot")
+          rebase_path("$root_gen_dir/frontend_server.dart.snapshot")
 
       args = [ dart ] + common_vm_args + [ frontend_server ] + common_args
     }
