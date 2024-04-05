@@ -49,6 +49,8 @@ class ContextVK final : public Context,
     fml::UniqueFD cache_directory;
     bool enable_validation = false;
     bool enable_gpu_tracing = false;
+    /// If validations are requested but cannot be enabled, log a fatal error.
+    bool fatal_missing_validations = false;
 
     Settings() = default;
 

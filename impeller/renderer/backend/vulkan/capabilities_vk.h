@@ -113,7 +113,8 @@ enum class OptionalDeviceExtensionVK : uint32_t {
 class CapabilitiesVK final : public Capabilities,
                              public BackendCast<CapabilitiesVK, Capabilities> {
  public:
-  explicit CapabilitiesVK(bool enable_validations);
+  explicit CapabilitiesVK(bool enable_validations,
+                          bool fatal_missing_validations = false);
 
   ~CapabilitiesVK();
 
