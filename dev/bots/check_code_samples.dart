@@ -311,9 +311,7 @@ class SampleChecker {
 final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/bottom_app_bar/bottom_app_bar.2_test.dart',
   'examples/api/test/material/bottom_app_bar/bottom_app_bar.1_test.dart',
-  'examples/api/test/material/theme/theme_extension.1_test.dart',
   'examples/api/test/material/material_state/material_state_border_side.0_test.dart',
-  'examples/api/test/material/material_state/material_state_mouse_cursor.0_test.dart',
   'examples/api/test/material/material_state/material_state_outlined_border.0_test.dart',
   'examples/api/test/material/material_state/material_state_property.0_test.dart',
   'examples/api/test/material/selectable_region/selectable_region.0_test.dart',
@@ -480,7 +478,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/implicit_animations/animated_positioned.0_test.dart',
   'examples/api/test/widgets/implicit_animations/animated_padding.0_test.dart',
   'examples/api/test/widgets/implicit_animations/sliver_animated_opacity.0_test.dart',
-  'examples/api/test/widgets/implicit_animations/animated_container.0_test.dart',
   'examples/api/test/widgets/dismissible/dismissible.0_test.dart',
   'examples/api/test/widgets/scroll_view/custom_scroll_view.1_test.dart',
   'examples/api/test/widgets/preferred_size/preferred_size.0_test.dart',

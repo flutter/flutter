@@ -298,6 +298,10 @@ targets:
     timeout: 60
     properties:
       shard: analyze
+      dependencies: >-
+        [
+          {"dependency": "ktlint", "version": "version_1_1_1"}
+        ]
       tags: >
         ["framework","hostonly","shard","linux"]
 
@@ -2239,7 +2243,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]

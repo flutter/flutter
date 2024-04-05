@@ -469,7 +469,6 @@ class TestFeatureFlags implements FeatureFlags {
     this.isIOSEnabled = true,
     this.isFuchsiaEnabled = false,
     this.areCustomDevicesEnabled = false,
-    this.isFlutterWebWasmEnabled = false,
     this.isCliAnimationEnabled = true,
     this.isNativeAssetsEnabled = false,
     this.isPreviewDeviceEnabled = false,
@@ -498,9 +497,6 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool areCustomDevicesEnabled;
-
-  @override
-  final bool isFlutterWebWasmEnabled;
 
   @override
   final bool isCliAnimationEnabled;
