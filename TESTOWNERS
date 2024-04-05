@@ -308,8 +308,6 @@
 /dev/integration_tests/android_views @gmackall @flutter/android
 # Linux deferred components
 /dev/integration_tests/deferred_components_test @gmackall @flutter/android
-# Linux asset_transformation
-/dev/integration_tests/asset_transformation @andrewkolos @flutter/tool
 
 ## Firebase tests
 /dev/integration_tests/abstract_method_smoke_test @reidbaker @flutter/android
