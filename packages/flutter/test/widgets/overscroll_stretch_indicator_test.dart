@@ -1180,8 +1180,6 @@ void main() {
 
 testWidgets('Stretching animation completes after fling under scroll physics with high friction', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/146277
-    // OverscrollNotification velocity after fling is lower than 25.
-    // This tests the animation duration lower limit.
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -1226,7 +1224,6 @@ testWidgets('Stretching animation completes after fling under scroll physics wit
     expect(box3.localToGlobal(Offset.zero).dy, 350.0);
   });
 }
-
 
 final class _HighFrictionClampingScrollPhysics extends ScrollPhysics {
   const _HighFrictionClampingScrollPhysics({super.parent});
