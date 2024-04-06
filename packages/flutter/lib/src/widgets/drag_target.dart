@@ -414,6 +414,8 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     super.ignoringFeedbackPointer,
     this.delay = kLongPressTimeout,
     super.allowedButtonsFilter,
+    super.hitTestBehavior,
+    super.rootOverlay,
   });
 
   /// Whether haptic feedback should be triggered on drag start.
