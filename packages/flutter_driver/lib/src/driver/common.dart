@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/args.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
@@ -26,3 +27,11 @@ void restoreFileSystem() {
 ///
 /// Tests should write any output files to this directory. Defaults `build`.
 String get testOutputsDirectory => fs.systemTempDirectory.createTempSync('build').path;
+
+String? parseTestDriverArguments(List<String> args) {
+  final ArgParser parser = ArgParser();
+  parser.addOption('reporter', abbr: 'r', allowed: <String>['expanded']);
+  parser.addOption('test-output-directory');
+  final ArgResults argResults = parser.parse(args);
+  return argResults['test-output-directory'] as String;
+}

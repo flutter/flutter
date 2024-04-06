@@ -14,10 +14,11 @@ const int _kScreenshotHeight = 1024;
 /// Convenience wrapper around [test.integrationDriver].
 ///
 /// Adds the capability to take test screenshots.
-Future<void> runTestWithScreenshots({
+Future<void> runTestWithScreenshots(List<String> args, {
   int browserWidth = _kScreenshotWidth,
   int browserHeight = _kScreenshotHeight,
 }) async {
+  final String? testOutputDirectory = parseTestDriverArguments(args);
   final WebFlutterDriver driver =
       await FlutterDriver.connect() as WebFlutterDriver;
 
@@ -29,5 +30,6 @@ Future<void> runTestWithScreenshots({
       // TODO(yjbanov): implement, see https://github.com/flutter/flutter/issues/86120
       return true;
     },
+    testOutputDirectory: testOutputDirectory!,
   );
 }
