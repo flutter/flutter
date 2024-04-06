@@ -37,6 +37,7 @@ void main() async {
         child: ImageIcon(imageProvider),
       ),
     );
+    addTearDown(imageProvider.evict);
     final RenderBox renderObject = tester.renderObject(find.byType(ImageIcon));
     expect(renderObject.size, equals(const Size.square(24.0)));
     expect(find.byType(Image), findsOneWidget);
@@ -52,6 +53,7 @@ void main() async {
         ),
       ),
     );
+    addTearDown(imageProvider.evict);
     expect(tester.widget<Image>(find.byType(Image)).color!.alpha, equals(128));
   });
 
