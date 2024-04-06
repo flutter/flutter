@@ -934,7 +934,7 @@ class StartupTest {
   final bool reportMetrics;
   final String target;
   final Map<String, String>? runEnvironment;
-  String? _testOutputDirectory;
+  late String? _testOutputDirectory;
 
   Future<TaskResult> run() async {
     return inDirectory<TaskResult>(testDirectory, () async {

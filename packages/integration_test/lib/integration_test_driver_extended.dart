@@ -13,7 +13,6 @@ import 'package:flutter_driver/flutter_driver.dart';
 import 'package:path/path.dart' as path;
 
 import 'common.dart';
-import 'integration_test_driver.dart';
 
 /// Flutter Driver test output directory.
 ///
