@@ -1033,8 +1033,6 @@ class StartupTest {
             device.deviceId,
             if (applicationBinaryPath != null)
               '--use-application-binary=$applicationBinaryPath',
-            '--test-output-directory',
-            _testOutputDirectory!
           ],
           environment: runEnvironment,
           canFail: true,
@@ -1240,7 +1238,7 @@ class PerfTest {
     this.forceOpenGLES,
     this.disablePartialRepaint = false,
     this.createPlatforms = const <String>[],
-     String? testOuputDirectory,
+    String? testOuputDirectory,
   }) : saveTraceFile = false, timelineFileName = null, _resultFilename = resultFilename {
     _testOutputDirectory = testOuputDirectory ?? const LocalFileSystem().systemTempDirectory.createTempSync('build').path;
   }

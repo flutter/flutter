@@ -24,7 +24,7 @@ String defaultTestOutputsDirectory = fs.systemTempDirectory.createTempSync('buil
 typedef ResponseDataCallback = FutureOr<void> Function(Map<String, dynamic>?, {String testOutputFilename, String testOutputDirectory});
 
 /// Writes a json-serializable data to
-/// [testOutputsDirectory]/`testOutputFilename.json`.
+/// [testOutputDirectory]/`testOutputFilename.json`.
 ///
 /// This is the default `responseDataCallback` in [integrationDriver].
 Future<void> writeResponseData(
@@ -71,6 +71,7 @@ Future<void> integrationDriver({
   Duration timeout = const Duration(minutes: 20),
   ResponseDataCallback? responseDataCallback = writeResponseData,
   bool writeResponseOnFailure = false,
+  String? testOutputDirectory,
 }) async {
   final FlutterDriver driver = await FlutterDriver.connect();
   final String jsonResult = await driver.requestData(null, timeout: timeout);
@@ -87,7 +88,7 @@ Future<void> integrationDriver({
   } else {
     print('Failure Details:\n${response.formattedFailureDetails}');
     if (responseDataCallback != null && writeResponseOnFailure) {
-      await responseDataCallback(response.data);
+      await responseDataCallback(response.data, testOutputDirectory: testOutputDirectory!);
     }
     exit(1);
   }
