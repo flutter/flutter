@@ -1143,7 +1143,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
   for (final String platformKey in platformKeys) {
     // Key: the plugin name, value: the list of plugin candidates for the implementation of [platformKey].
     final Map<String, List<Plugin>> pluginImplCandidates = <String, List<Plugin>>{};
-    
+
     // Key: the plugin name, value: the plugin name of the default implementation of [platformKey].
     final Map<String, String> defaultImplementations = <String, String>{};
 
@@ -1260,7 +1260,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
     return (null, null);
   }
 
-  // If it hasn't been skipped, it's a candidate for auto-registration, 
+  // If it hasn't been skipped, it's a candidate for auto-registration,
   // means it can serve as implementation for [implementsPackage],
   // so add it as implementation candidate.
   return (implementsPackage, null);
