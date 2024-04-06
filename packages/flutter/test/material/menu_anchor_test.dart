@@ -79,6 +79,7 @@ void main() {
     Offset alignmentOffset = Offset.zero,
     TextDirection textDirection = TextDirection.ltr,
     bool consumesOutsideTap = false,
+    bool closeMenuWhenViewChange = true,
     void Function(TestMenu)? onPressed,
     void Function(TestMenu)? onOpen,
     void Function(TestMenu)? onClose,
@@ -102,6 +103,7 @@ void main() {
                 controller: controller,
                 alignmentOffset: alignmentOffset,
                 consumeOutsideTap: consumesOutsideTap,
+                closeMenuWhenViewChange: closeMenuWhenViewChange,
                 style: MenuStyle(alignment: alignment),
                 onOpen: () {
                   onOpen?.call(TestMenu.anchorButton);
@@ -573,6 +575,13 @@ void main() {
 
     expect(focusInOnPressed, equals(buttonFocus));
     expect(FocusManager.instance.primaryFocus, equals(buttonFocus));
+  });
+
+  testWidgets('Menu functions Menus will not close when the view changes size if closeMenuWhenViewChange is false', (WidgetTester tester) async {
+    await tester.pumpWidget(buildTestApp(closeMenuWhenViewChange: false,));
+    await changeSurfaceSize(tester, const Size(800, 800));
+    await tester.pump();
+    expect(controller.isOpen, isFalse);
   });
 
   group('Menu functions', () {

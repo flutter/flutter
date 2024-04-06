@@ -142,6 +142,7 @@ class MenuAnchor extends StatefulWidget {
     required this.menuChildren,
     this.builder,
     this.child,
+    this.closeMenuWhenViewChange = true,
   });
 
   /// An optional controller that allows opening and closing of the menu from
@@ -267,6 +268,10 @@ class MenuAnchor extends StatefulWidget {
   /// to rebuild this child when those change.
   final Widget? child;
 
+  /// Close the menus if the view changes size.
+  /// Defaults to true.
+  final bool closeMenuWhenViewChange;
+
   @override
   State<MenuAnchor> createState() => _MenuAnchorState();
 
@@ -345,7 +350,9 @@ class _MenuAnchorState extends State<MenuAnchor> {
     final Size newSize = MediaQuery.sizeOf(context);
     if (_viewSize != null && newSize != _viewSize) {
       // Close the menus if the view changes size.
-      _root._close();
+      if (_topLevel.widget.closeMenuWhenViewChange) {
+        _root._close();
+      }
     }
     _viewSize = newSize;
   }
