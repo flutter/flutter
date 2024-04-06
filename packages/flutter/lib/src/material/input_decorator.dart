@@ -30,7 +30,7 @@ const Duration _kTransitionDuration = Duration(milliseconds: 167);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 const double _kFinalLabelScale = 0.75;
 
-typedef _SubtextSize = ({ double ascent, double descent });
+typedef _SubtextSize = ({ double ascent, double bottomHeight, double subtextHeight });
 typedef _ChildBaselineGetter = double Function(RenderBox child, BoxConstraints constraints);
 
 // The default duration for hint fade in/out transitions.
@@ -709,7 +709,7 @@ class _RenderDecorationLayout {
 
   final double baseline;
   final double containerHeight;
-  final _SubtextSize subtextSize;
+  final _SubtextSize? subtextSize;
   final Size size;
 }
 
@@ -912,41 +912,36 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
   EdgeInsetsDirectional get contentPadding => decoration.contentPadding;
 
-  _SubtextSize _computeSubtextSizes({
+  _SubtextSize? _computeSubtextSizes({
     required BoxConstraints constraints,
     required ChildLayouter layoutChild,
     required _ChildBaselineGetter getBaseline,
   }) {
-    double ascent = 0.0;
-    double descent = 0.0;
     final RenderBox? counter = this.counter;
     Size counterSize;
+    final double counterAscent;
     if (counter != null) {
       counterSize = layoutChild(counter, constraints);
-      final double counterAscent = getBaseline(counter, constraints);
-      ascent = counterAscent;
-      // TODO(LongCatIsLooong): the descent is being ignored because the the
-      // counter can take the full available height. We should let the counter
-      // take its intrinsic height.
+      counterAscent = getBaseline(counter, constraints);
     } else {
       counterSize = Size.zero;
+      counterAscent = 0.0;
     }
 
     final BoxConstraints helperErrorConstraints = constraints.deflate(EdgeInsets.only(left: counterSize.width));
     final double helperErrorHeight = layoutChild(helperError, helperErrorConstraints).height;
-    final double heplerErrorAscent = getBaseline(helperError, helperErrorConstraints);
 
-    ascent = math.max(ascent, heplerErrorAscent);
-
-    // TODO(LongCatIsLooong): use the real descent and make sure the subtext line
-    // box is tall enough for both children.
-    // See https://github.com/flutter/flutter/issues/13715
-    descent = math.max(helperErrorHeight, counterSize.height) - ascent;
-
-    if (ascent + descent > 0.0) {
-      ascent += subtextGap;
+    if (helperErrorHeight == 0.0 && counterSize.height == 0.0) {
+      return null;
     }
-    return (ascent: ascent, descent: descent);
+
+    // TODO(LongCatIsLooong): the bottomHeight expression doesn't make much sense.
+    // Use the real descent and make sure the subtext line box is tall enough for both children.
+    // See https://github.com/flutter/flutter/issues/13715
+    final double ascent = math.max(counterAscent, getBaseline(helperError, helperErrorConstraints)) + subtextGap;
+    final double bottomHeight = math.max(counterAscent, helperErrorHeight) + subtextGap;
+    final double subtextHeight = math.max(counterSize.height, helperErrorHeight) + subtextGap;
+    return (ascent: ascent, bottomHeight: bottomHeight, subtextHeight: subtextHeight);
   }
 
   // Returns a value used by performLayout to position all of the renderers.
@@ -973,7 +968,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
     // The helper or error text can occupy the full width less the space
     // occupied by the icon and counter.
-    final _SubtextSize subtextSize = _computeSubtextSizes(
+    final _SubtextSize? subtextSize = _computeSubtextSizes(
       constraints: contentConstraints,
       layoutChild: ChildLayoutHelper.layoutChild,
       getBaseline: _getBaseline,
@@ -1016,7 +1011,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double topHeight = decoration.border.isOutline
       ? math.max(labelHeight - (label?.getDistanceToBaseline(TextBaseline.alphabetic) ?? 0.0), 0.0)
       : labelHeight;
-    final double bottomHeight = subtextSize.ascent + subtextSize.descent;
+    final double bottomHeight = subtextSize?.bottomHeight ?? 0.0;
     final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
     final BoxConstraints inputConstraints = boxConstraints
       .deflate(EdgeInsets.only(top: contentPadding.vertical + topHeight + bottomHeight + densityOffset.dy))
@@ -1129,7 +1124,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       containerHeight: containerHeight,
       baseline: baseline,
       subtextSize: subtextSize,
-      size: Size(constraints.maxWidth, containerHeight + bottomHeight),
+      size: Size(constraints.maxWidth, containerHeight + (subtextSize?.subtextHeight ?? 0.0)),
     );
   }
 
@@ -1301,7 +1296,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       centerLayout(icon!, x);
     }
 
-    final double subtextBaseline = layout.subtextSize.ascent + layout.containerHeight;
+    final double subtextBaseline = (layout.subtextSize?.ascent ?? 0.0) + layout.containerHeight;
     final RenderBox? counter = this.counter;
     final double helperErrorBaseline = helperError.getDistanceToBaseline(TextBaseline.alphabetic)!;
     final double counterBaseline = counter?.getDistanceToBaseline(TextBaseline.alphabetic)! ?? 0.0;
