@@ -925,7 +925,9 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       counterSize = layoutChild(counter, constraints);
       final double counterAscent = getBaseline(counter, constraints);
       ascent = counterAscent;
-      descent = counterSize.height - counterAscent;
+      // TODO(LongCatIsLooong): the descent is being ignored because the the
+      // counter can take the full available height. We should let the counter
+      // take its intrinsic height.
     } else {
       counterSize = Size.zero;
     }
