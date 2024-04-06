@@ -21,7 +21,7 @@ String defaultTestOutputsDirectory = fs.systemTempDirectory.createTempSync('buil
 
 /// The callback type to handle [Response.data] after the test
 /// succeeds.
-typedef ResponseDataCallback = FutureOr<void> Function(Map<String, dynamic>?, {String testOutputFilename, String testOutputsDirectory});
+typedef ResponseDataCallback = FutureOr<void> Function(Map<String, dynamic>?, {String testOutputFilename, String testOutputDirectory});
 
 /// Writes a json-serializable data to
 /// [testOutputsDirectory]/`testOutputFilename.json`.
@@ -30,11 +30,11 @@ typedef ResponseDataCallback = FutureOr<void> Function(Map<String, dynamic>?, {S
 Future<void> writeResponseData(
   Map<String, dynamic>? data, {
   String testOutputFilename = 'integration_response_data',
-  String? testOutputsDirectory,
+  String? testOutputDirectory,
 }) async {
   await fs.directory(testOutputsDirectory).create(recursive: true);
   final File file = fs.file(path.join(
-    testOutputsDirectory ?? defaultTestOutputsDirectory,
+    testOutputDirectory ?? defaultTestOutputsDirectory,
     '$testOutputFilename.json',
   ));
   final String resultString = _encodeJson(data, true);

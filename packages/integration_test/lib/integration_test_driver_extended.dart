@@ -82,7 +82,7 @@ Future<void> writeResponseData(
 /// `writeResponseOnFailure` determines whether the `responseDataCallback`
 /// function will be called to process the [Response.data] when a test fails.
 /// The default value is `false`.
-Future<void> integrationDriver(String zzz, {
+Future<void> integrationDriver({
   FlutterDriver? driver,
   ScreenshotCallback? onScreenshot,
   ResponseDataCallback? responseDataCallback = writeResponseData,
