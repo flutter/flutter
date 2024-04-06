@@ -73,7 +73,7 @@ void main() {
         ),
       ),
     );
-    
+
     expect(tabsPainted, const <int>[0]);
     RichText tab1 = tester.widget(find.descendant(
       of: find.text('Tab 1'),

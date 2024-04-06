@@ -45,7 +45,7 @@ void main() {
         ),
       ),
     );
-    
+
     expect(focusNodes[0].hasFocus, isTrue);
 
     await tester.tap(find.text('Tab 2'));
