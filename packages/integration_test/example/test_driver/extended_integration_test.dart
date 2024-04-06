@@ -5,7 +5,8 @@
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:integration_test/integration_test_driver_extended.dart';
 
-Future<void> main() async {
+Future<void> main(List<String> args) async {
+  final String? testOutputDirectory = parseTestDriverArguments(args);
   final FlutterDriver driver = await FlutterDriver.connect();
   await integrationDriver(
     driver: driver,
@@ -25,5 +26,6 @@ Future<void> main() async {
       }
       return true;
     },
-    writeResponseOnFailure: true);
+    writeResponseOnFailure: true,
+    testOutputDirectory: testOutputDirectory!);
 }
