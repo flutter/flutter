@@ -60,6 +60,7 @@ final class AssetTransformer {
     File tempOutputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(1));
     ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
 
+    final Stopwatch stopwatch = Stopwatch()..start();
     try {
       for (final (int i, AssetTransformerEntry transformer) in transformerEntries.indexed) {
         final AssetTransformationFailure? transformerFailure = await _applyTransformer(
@@ -90,6 +91,7 @@ final class AssetTransformer {
     } finally {
       ErrorHandlingFileSystem.deleteIfExists(tempInputFile);
       ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
+      logger.printTrace("Finished transforming asset at path '${asset.path}' (${stopwatch.elapsedMilliseconds}ms)");
     }
 
     return null;
