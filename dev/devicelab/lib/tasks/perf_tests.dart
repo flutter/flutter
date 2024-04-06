@@ -1033,6 +1033,8 @@ class StartupTest {
             device.deviceId,
             if (applicationBinaryPath != null)
               '--use-application-binary=$applicationBinaryPath',
+            '--trace-to-file',
+            path.join(_testOutputDirectory!, 'start_up_info.json'),
           ],
           environment: runEnvironment,
           canFail: true,

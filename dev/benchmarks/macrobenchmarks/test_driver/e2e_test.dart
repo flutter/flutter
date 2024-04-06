@@ -6,7 +6,7 @@ import 'package:flutter_driver/flutter_driver.dart';
 import 'package:integration_test/integration_test_driver.dart' as driver;
 
 Future<void> main(List<String> args) {
-  String? testOutputDirectory = parseTestDriverArguments(args);
+  final String? testOutputDirectory = parseTestDriverArguments(args);
   return driver.integrationDriver(
     responseDataCallback: (Map<String, dynamic>? data, {String? testOutputDirectory, String? testOutputFilename}) async {
       await driver.writeResponseData(
