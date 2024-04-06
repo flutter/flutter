@@ -17,6 +17,8 @@ Future<void> main() async {
   final FakeCodec fakeCodec = await FakeCodec.fromData(Uint8List.fromList(kAnimatedGif));
   final FakeImageProvider fakeImageProvider = FakeImageProvider(fakeCodec);
 
+  tearDownAll(fakeCodec.dispose);
+
   testWidgets('Obscured image does not animate',
   (WidgetTester tester) async {
     final GlobalKey imageKey = GlobalKey();
@@ -44,6 +46,5 @@ Future<void> main() async {
     await tester.pump(const Duration(milliseconds: 100));
     final ui.Image? image4 = renderImage.image;
     expect(image3, same(image4));
-    fakeImageProvider.evict();
   });
 }
