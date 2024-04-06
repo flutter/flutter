@@ -28,6 +28,10 @@ void restoreFileSystem() {
 /// Tests should write any output files to this directory. Defaults `build`.
 String get testOutputsDirectory => fs.systemTempDirectory.createTempSync('build').path;
 
+/// Parses the arguments passed to test driver main function.
+///
+/// Some flags and options from `flutter drive` are propagated to the test driver
+/// as arguments to its main function.
 String? parseTestDriverArguments(List<String> args) {
   final ArgParser parser = ArgParser();
   parser.addOption('reporter', abbr: 'r', allowed: <String>['expanded']);
