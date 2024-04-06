@@ -2984,6 +2984,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery.ui/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.scenic.scheduling/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.scheduler/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.session/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.settings.policy/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/meta.json
