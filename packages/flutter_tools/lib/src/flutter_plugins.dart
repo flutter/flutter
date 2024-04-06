@@ -1141,21 +1141,24 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
   bool hasResolutionError = false;
 
   for (final String platformKey in platformKeys) {
-    // Key: the plugin name
+    // Key: the plugin name, value: the list of plugin candidates for the implementation of [platformKey].
     final Map<String, List<Plugin>> pluginImplCandidates = <String, List<Plugin>>{};
+    
+    // Key: the plugin name, value: the plugin name of the default implementation of [platformKey].
     final Map<String, String> defaultImplementations = <String, String>{};
 
     for (final Plugin plugin in plugins) {
-      final (String? resolutionPluginName, String? defaultImplementation) = _getPluginImplementationCandidate(
+      final (String? implementsPluginName, String? defaultImplPluginName) = _getPluginImplCandidateAndDefaultPlugin(
         plugin,
         platformKey,
       );
-      if (defaultImplementation != null) {
-        defaultImplementations[plugin.name] = defaultImplementation;
+      if (defaultImplPluginName != null) {
+        // Each plugin can only have one default implementation for this [platformKey].
+        defaultImplementations[plugin.name] = defaultImplPluginName;
       }
-      if (resolutionPluginName != null) {
-        pluginImplCandidates.putIfAbsent(resolutionPluginName, () => <Plugin>[]);
-        pluginImplCandidates[resolutionPluginName]!.add(plugin);
+      if (implementsPluginName != null) {
+        pluginImplCandidates.putIfAbsent(implementsPluginName, () => <Plugin>[]);
+        pluginImplCandidates[implementsPluginName]!.add(plugin);
       }
     }
 
@@ -1192,12 +1195,23 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
   return pluginResolutions;
 }
 
-/// Get the [resolutionPluginName] as the first choice for the plugin
-/// implementation and the [defaultImplementation] as fallback.
-(String? resolutionPluginName, String? defaultImplementation) _getPluginImplementationCandidate(Plugin plugin, String platformKey) {
-  String? defaultImplementation = plugin.defaultPackagePlatforms[platformKey];
-  if (plugin.platforms[platformKey] == null && defaultImplementation == null) {
-    // The plugin doesn't implement this platform.
+/// Determine whether this plugin serves as implementation for an app-facing
+/// package with [implementsPluginName] or/and whether it references a default
+/// plugin [defaultImplPluginName] for the given platform [platformKey].
+///
+/// Options:
+///   * The [plugin] (e.g. 'url_launcher_linux') serves as implementation for
+///     [implementsPluginName] (e.g. 'url_launcher').
+///   * The [plugin] (e.g. 'url_launcher') references a default implementation
+///     [defaultImplPluginName] (e.g. 'url_launcher_linux').
+///   * The [plugin] (e.g. 'url_launcher') implements itself [implementsPluginName]
+///     and then serves as its own default implementation [defaultImplPluginName].
+///   * The [plugin] neither provides an implementation for [implementsPluginName]
+///     nor references a default implementation [defaultImplPluginName].
+(String? implementsPluginName, String? defaultImplPluginName) _getPluginImplCandidateAndDefaultPlugin(Plugin plugin, String platformKey) {
+  String? defaultImplPluginName = plugin.defaultPackagePlatforms[platformKey];
+  if (plugin.platforms[platformKey] == null && defaultImplPluginName == null) {
+    // The plugin doesn't implement this platform nor reference a default implementation.
     return (null, null);
   }
   String? implementsPackage = plugin.implementsPackage;
@@ -1205,12 +1219,13 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
       plugin.pluginDartClassPlatforms[platformKey] != null &&
           plugin.pluginDartClassPlatforms[platformKey] != 'none';
   if (implementsPackage == null || implementsPackage.isEmpty) {
-    if (defaultImplementation == null && !hasInlineDartImplementation) {
-      // Skip native inline PluginPlatform implementation
+    // Plugin does not serve as implementation for another app-facing package.
+    if (defaultImplPluginName == null && !hasInlineDartImplementation) {
+      // Skip native inline PluginPlatform implementation.
       return (null, null);
     }
-    if (defaultImplementation != null) {
-      return (null, defaultImplementation);
+    if (defaultImplPluginName != null) {
+      return (null, defaultImplPluginName);
     } else {
       // An app-facing package (i.e., one with no 'implements') with an
       // inline implementation should be its own default implementation.
@@ -1228,24 +1243,26 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
       final bool hasMinVersionForImplementsRequirement = minFlutterVersion != null &&
           minFlutterVersion.compareTo(semver.Version(2, 11, 0)) >= 0;
       if (!isDesktop || hasMinVersionForImplementsRequirement) {
-        // Given: implementsPackage == null, defaultImplementation == null, hasInlineDartImplementation == true
+        // Dart plugin serves as its own default implementation.
         implementsPackage = plugin.name;
-        defaultImplementation = plugin.name;
-        return (implementsPackage, defaultImplementation);
+        defaultImplPluginName = plugin.name;
+        return (implementsPackage, defaultImplPluginName);
       } else {
-        // If it doesn't meet any of the conditions, it isn't eligible for
-        // auto-registration.
+        // If the inline dart implementation is desktop and it's flutter min
+        // constraint isn't fulfilled, it isn't eligible for auto-registration.
         return (null, null);
       }
     }
   }
-  // If there's no Dart implementation, there's nothing to register.
+
   if (!hasInlineDartImplementation) {
+    // If there's no Dart implementation, there's nothing to register.
     return (null, null);
   }
 
-  // If it hasn't been skipped, it's a candidate for auto-registration, so
-  // add it as a possible resolution.
+  // If it hasn't been skipped, it's a candidate for auto-registration, 
+  // means it can serve as implementation for [implementsPackage],
+  // so add it as implementation candidate.
   return (implementsPackage, null);
 }
 
