@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import 'binding.dart';
@@ -6767,6 +6768,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
     _child = updateChild(_child, (widget as SingleChildRenderObjectWidget).child, null);
+    _disposeImage();
   }
 
   @override
@@ -6797,6 +6799,11 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
     assert(renderObject.child == child);
     renderObject.child = null;
     assert(renderObject == this.renderObject);
+  }
+   void _disposeImage() {
+      if(_child != null && _child!.widget is Image) {
+        (_child!.widget as Image).image.evict();
+      }
   }
 }
 
