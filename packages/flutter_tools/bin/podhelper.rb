@@ -315,16 +315,16 @@ def flutter_install_plugin_pods(application_path = nil, relative_symlink_dir, pl
     next unless plugin_name && plugin_path && has_native_build
     symlink = File.join(symlink_plugins_dir, plugin_name)
     system('mkdir', '-p', symlink)
-      Dir.glob("#{plugin_path}/**/*").each do |file|
-        relative_path = file.gsub("#{plugin_path}/", '')
-        target_path = File.join(symlink, relative_path)
+    Dir.glob("#{plugin_path}/**/*").each do |file|
+      relative_path = file.gsub("#{plugin_path}/", '')
+      target_path = File.join(symlink, relative_path)
         
-        if File.directory?(file)
-          FileUtils.mkdir_p(target_path)
-        else
-          FileUtils.ln(file, target_path)
-        end
+      if File.directory?(file)
+        FileUtils.mkdir_p(target_path)
+      else
+        FileUtils.ln(file, target_path)
       end
+    end
 
     # Keep pod path relative so it can be checked into Podfile.lock.
     relative = flutter_relative_path_from_podfile(symlink)
