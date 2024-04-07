@@ -1746,7 +1746,7 @@ void main() {
       expect(closed, isNotEmpty);
     });
 
-    testWidgets('Menu functions Menus will not close when the view changes size if closeMenuWhenViewChange is false', (WidgetTester tester) async {
+    testWidgets('menus not close on view size change if closeMenuWhenViewChange is false', (WidgetTester tester) async {
       final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.view);
       Widget build(Size size) {
         return MaterialApp(
