@@ -18,6 +18,21 @@ import 'framework.dart';
 ///    a [ValueListenable] changes value.
 typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, Widget? child);
 
+/// Callback function signature for determining whether the widget should rebuild.
+///
+/// The `last` parameter represents the last value used to build the widget, and the
+/// `current` parameter represents the current value from the [ValueListenable].
+/// The function should return true if the widget should rebuild, and false otherwise.
+///
+/// Example:
+///
+/// ```dart
+/// bool shouldRebuild(int? last, int current) {
+///   return last != current; // Rebuild if the value has changed.
+/// }
+/// ```
+typedef ShouldRebuildCallback<T> = bool Function(T? last, T current);
+
 /// A widget whose content stays synced with a [ValueListenable].
 ///
 /// Given a [ValueListenable<T>] and a [builder] which builds widgets from
@@ -68,6 +83,7 @@ class ValueListenableBuilder<T> extends StatefulWidget {
     required this.valueListenable,
     required this.builder,
     this.child,
+    this.shouldRebuild,
   });
 
   /// The [ValueListenable] whose value you depend on in order to build.
@@ -75,6 +91,34 @@ class ValueListenableBuilder<T> extends StatefulWidget {
   /// This widget does not ensure that the [ValueListenable]'s value is not
   /// null, therefore your [builder] may need to handle null values.
   final ValueListenable<T> valueListenable;
+
+  /// Determines whether the widget should rebuild based on changes in the [ValueListenable].
+  ///
+  /// This callback function is called whenever the value provided by the [ValueListenable]
+  /// changes. It can operate on the last value seen by the widget with the current value and
+  /// returns true if the widget should rebuild, and false otherwise.
+  ///
+  /// If this callback is not provided, the default behavior is to rebuild the widget
+  /// whenever the [ValueListenable] value changes.
+  ///
+  /// Example usage:
+  ///
+  /// ```dart
+  /// final ValueListenable<int> count = ValueNotifier<int>(0);
+  ///
+  /// ShouldRebuildCallback<int> shouldRebuild = (int? last, int current) {
+  ///   return current % 2 == 0; // Rebuild only on even count values.
+  /// };
+  ///
+  /// ValueListenableBuilder<int>(
+  ///   valueListenable: count,
+  ///   builder: (BuildContext context, int value, Widget? child) {
+  ///     return Text('$value');
+  ///   },
+  ///   shouldRebuild: shouldRebuild,
+  /// );
+  /// ```
+  final ShouldRebuildCallback<T>? shouldRebuild;
 
   /// A [ValueWidgetBuilder] which builds a widget depending on the
   /// [valueListenable]'s value.
@@ -98,6 +142,7 @@ class ValueListenableBuilder<T> extends StatefulWidget {
 
 class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {
   late T value;
+  T? lastValue;
 
   @override
   void initState() {
@@ -122,8 +167,19 @@ class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {
     super.dispose();
   }
 
+  void _updateValues() {
+    lastValue = value;
+    value = widget.valueListenable.value;
+  }
+
   void _valueChanged() {
-    setState(() { value = widget.valueListenable.value; });
+    final bool rebuild = widget.shouldRebuild?.call(value, widget.valueListenable.value) ?? true;
+
+    if (rebuild) {
+      return setState(_updateValues);
+    }
+
+    _updateValues();
   }
 
   @override

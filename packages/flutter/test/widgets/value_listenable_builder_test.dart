@@ -64,6 +64,38 @@ void main() {
     expect(find.text('Dinesh'), findsOneWidget);
   });
 
+  testWidgets('Widget does not update when value changes but shouldRebuild returns false', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ValueListenableBuilder<String?>(
+          valueListenable: valueListenable,
+          shouldRebuild: (String? last, String? current) => (current?.length ?? 0) > (last?.length ?? 0),
+          builder: (BuildContext context, String? value, Widget? child) {
+            if (value == null) {
+              return const Placeholder();
+            }
+            return Text(value);
+          },
+        ),
+      ),
+    );
+
+    valueListenable.value = 'Gilfoyle';
+    await tester.pump();
+    expect(find.text('Gilfoyle'), findsOneWidget);
+
+    valueListenable.value = 'Dinesh';
+    await tester.pump();
+    expect(find.text('Gilfoyle'), findsOneWidget);
+    expect(find.text('Dinesh'), findsNothing);
+
+    valueListenable.value = 'Gilfoylee';
+    await tester.pump();
+    expect(find.text('Gilfoylee'), findsOneWidget);
+    expect(find.text('Gilfoyle'), findsNothing);
+  });
+
   testWidgets('Can change listenable', (WidgetTester tester) async {
     await tester.pumpWidget(textBuilderUnderTest);
 
