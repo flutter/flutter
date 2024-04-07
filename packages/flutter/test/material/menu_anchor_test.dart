@@ -577,13 +577,6 @@ void main() {
     expect(FocusManager.instance.primaryFocus, equals(buttonFocus));
   });
 
-  testWidgets('Menu functions Menus will not close when the view changes size if closeMenuWhenViewChange is false', (WidgetTester tester) async {
-    await tester.pumpWidget(buildTestApp(closeMenuWhenViewChange: false,));
-    await changeSurfaceSize(tester, const Size(800, 800));
-    await tester.pump();
-    expect(controller.isOpen, isFalse);
-  });
-
   group('Menu functions', () {
     testWidgets('basic menu structure', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1751,6 +1744,29 @@ void main() {
 
       expect(opened, isEmpty);
       expect(closed, isNotEmpty);
+    });
+
+    testWidgets('Menu functions Menus will not close when the view changes size if closeMenuWhenViewChange is false', (WidgetTester tester) async {
+      final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.view);
+      Widget build(Size size) {
+        return MaterialApp(
+          home: Material(
+            child: MediaQuery(
+              data: mediaQueryData.copyWith(size: size),
+              child: buildTestApp(closeMenuWhenViewChange: false),
+            ),
+          ),
+        );
+      }
+      await tester.pumpWidget(build(mediaQueryData.size));
+      controller.open();
+      await tester.pump();
+
+      const Size smallSize = Size(200, 200);
+      await changeSurfaceSize(tester, smallSize);
+      await tester.pumpWidget(build(smallSize));
+      await tester.pump();
+      expect(controller.isOpen, isTrue);
     });
   });
 
