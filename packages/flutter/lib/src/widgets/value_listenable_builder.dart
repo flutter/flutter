@@ -55,6 +55,10 @@ typedef ShouldRebuildCallback<T> = bool Function(T? last, T current);
 /// Using this pre-built child is entirely optional, but can improve
 /// performance significantly in some cases and is therefore a good practice.
 ///
+/// If provided, the [shouldRebuild] callback determines whether the widget
+/// should rebuild based on changes in the [ValueListenable]. If not provided,
+/// the widget rebuilds whenever the [ValueListenable] value changes.
+///
 /// {@tool dartpad}
 /// This sample shows how you could use a [ValueListenableBuilder] instead of
 /// setting state on the whole [Scaffold] in a counter app.
