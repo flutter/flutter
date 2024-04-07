@@ -109,6 +109,43 @@ void resetScrollOffset(WidgetTester tester) {
 }
 
 void main() {
+  testWidgets('hitTestBehavior is respected', (WidgetTester tester) async {
+    HitTestBehavior? getBehavior() {
+      final RawGestureDetector widget = tester.widget(find.descendant(
+        of: find.byType(Scrollable),
+        matching: find.byType(RawGestureDetector),
+      ));
+      return widget.behavior;
+    }
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SingleChildScrollView(
+          hitTestBehavior: HitTestBehavior.translucent,
+        ),
+      ),
+    );
+    expect(getBehavior(), HitTestBehavior.translucent);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: CustomScrollView(
+          hitTestBehavior: HitTestBehavior.translucent,
+        ),
+      ),
+    );
+    expect(getBehavior(), HitTestBehavior.translucent);
+    
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListView(
+          hitTestBehavior: HitTestBehavior.translucent,
+        ),
+      ),
+    );
+    expect(getBehavior(), HitTestBehavior.translucent);
+  });
+
   testWidgets('Flings on different platforms', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.android);
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
