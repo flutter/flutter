@@ -80,9 +80,9 @@ class Icon extends StatelessWidget {
     this.semanticLabel,
     this.textDirection,
     this.applyTextScaling,
-  }) : assert(fill == null || (0.0 <= fill && fill <= 1.0)),
-       assert(weight == null || (0.0 < weight)),
-       assert(opticalSize == null || (0.0 < opticalSize));
+  })  : assert(fill == null || (0.0 <= fill && fill <= 1.0)),
+        assert(weight == null || (0.0 < weight)),
+        assert(opticalSize == null || (0.0 < opticalSize));
 
   /// The icon to display. The available icons are described in [Icons].
   ///
@@ -244,15 +244,19 @@ class Icon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(this.textDirection != null || debugCheckHasDirectionality(context));
-    final TextDirection textDirection = this.textDirection ?? Directionality.of(context);
+    final TextDirection textDirection =
+        this.textDirection ?? Directionality.of(context);
 
     final IconThemeData iconTheme = IconTheme.of(context);
 
-    final bool applyTextScaling = this.applyTextScaling ?? iconTheme.applyTextScaling ?? false;
+    final bool applyTextScaling =
+        this.applyTextScaling ?? iconTheme.applyTextScaling ?? false;
 
     final double tentativeIconSize = size ?? iconTheme.size ?? kDefaultFontSize;
 
-    final double iconSize = applyTextScaling ? MediaQuery.textScalerOf(context).scale(tentativeIconSize) : tentativeIconSize;
+    final double iconSize = applyTextScaling
+        ? MediaQuery.textScalerOf(context).scale(tentativeIconSize)
+        : tentativeIconSize;
 
     final double? iconFill = fill ?? iconTheme.fill;
 
@@ -292,13 +296,15 @@ class Icon extends StatelessWidget {
       package: icon.fontPackage,
       fontFamilyFallback: icon.fontFamilyFallback,
       shadows: iconShadows,
-      height: 1.0,  // Makes sure the font's body is vertically centered within the iconSize x iconSize square.
+      height:
+          1.0, // Makes sure the font's body is vertically centered within the iconSize x iconSize square.
       leadingDistribution: TextLeadingDistribution.even,
     );
 
     Widget iconWidget = RichText(
       overflow: TextOverflow.visible, // Never clip.
-      textDirection: textDirection, // Since we already fetched it for the assert...
+      textDirection:
+          textDirection, // Since we already fetched it for the assert...
       text: TextSpan(
         text: String.fromCharCode(icon.codePoint),
         style: fontStyle,
@@ -336,16 +342,23 @@ class Icon extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IconDataProperty('icon', icon, ifNull: '<empty>', showName: false));
+    properties.add(
+        IconDataProperty('icon', icon, ifNull: '<empty>', showName: false));
     properties.add(DoubleProperty('size', size, defaultValue: null));
     properties.add(DoubleProperty('fill', fill, defaultValue: null));
     properties.add(DoubleProperty('weight', weight, defaultValue: null));
     properties.add(DoubleProperty('grade', grade, defaultValue: null));
-    properties.add(DoubleProperty('opticalSize', opticalSize, defaultValue: null));
+    properties
+        .add(DoubleProperty('opticalSize', opticalSize, defaultValue: null));
     properties.add(ColorProperty('color', color, defaultValue: null));
-    properties.add(IterableProperty<Shadow>('shadows', shadows, defaultValue: null));
-    properties.add(StringProperty('semanticLabel', semanticLabel, defaultValue: null));
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('applyTextScaling', applyTextScaling, defaultValue: null));
+    properties
+        .add(IterableProperty<Shadow>('shadows', shadows, defaultValue: null));
+    properties.add(
+        StringProperty('semanticLabel', semanticLabel, defaultValue: null));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection,
+        defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>(
+        'applyTextScaling', applyTextScaling,
+        defaultValue: null));
   }
 }
