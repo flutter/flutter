@@ -50,7 +50,6 @@ platform_properties:
 # You may use those names for the android_virtual_device version.
 targets:
   - name: Linux local_engine_builds
-    bringup: true
     enabled_branches:
       - main
     recipe: engine_v2/engine_v2
