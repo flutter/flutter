@@ -369,7 +369,7 @@ Iterable<UnicodeRange> processRanges(
 
 /// Example:
 ///
-/// ```
+/// ```none
 /// 0x01C4..0x0293; ALetter
 /// 0x0294..0x0294; ALetter
 /// 0x0295..0x02AF; ALetter
@@ -377,7 +377,7 @@ Iterable<UnicodeRange> processRanges(
 ///
 /// will get combined into:
 ///
-/// ```
+/// ```none
 /// 0x01C4..0x02AF; ALetter
 /// ```
 List<UnicodeRange> combineAdjacentRanges(

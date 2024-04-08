@@ -181,7 +181,7 @@ base class EngineFlutterView implements ui.FlutterView {
   /// so it can push/shrink inside its `hostElement`. That way, a Flutter app
   /// can change the layout of the container page.
   ///
-  /// ```
+  /// ```none
   /// <p>Some HTML content...</p>
   /// +--- (div) hostElement ------------------------------------+
   /// | +--- rootElement ---------------------+                  |

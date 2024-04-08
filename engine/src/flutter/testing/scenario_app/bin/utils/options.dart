@@ -65,7 +65,7 @@ extension type const Options._(ArgResults _args) {
   /// This is a shortcut that can be used to determine if the usage information
   /// before parsing the remaining command line arguments. For example:
   ///
-  /// ```
+  /// ```dart
   /// void main(List<String> args) {
   ///   if (Options.showUsage(args)) {
   ///     stdout.writeln(Options.usage);
@@ -88,7 +88,7 @@ extension type const Options._(ArgResults _args) {
   /// be enabled before parsing the remaining command line arguments. For
   /// example:
   ///
-  /// ```
+  /// ```dart
   /// void main(List<String> args) {
   ///   final bool verbose = Options.showVerbose(args);
   ///   // ...
