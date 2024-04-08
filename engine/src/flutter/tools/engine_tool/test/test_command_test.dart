@@ -3,11 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:convert' as convert;
-import 'dart:ffi' as ffi show Abi;
-import 'dart:io' as io;
 
 import 'package:engine_build_configs/engine_build_configs.dart';
-import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:engine_tool/src/commands/command_runner.dart';
 import 'package:engine_tool/src/environment.dart';
 import 'package:litetest/litetest.dart';
@@ -17,15 +14,6 @@ import 'fixtures.dart' as fixtures;
 import 'utils.dart';
 
 void main() {
-  final Engine engine;
-  try {
-    engine = Engine.findWithin();
-  } catch (e) {
-    io.stderr.writeln(e);
-    io.exitCode = 1;
-    return;
-  }
-
   final BuilderConfig linuxTestConfig = BuilderConfig.fromJson(
     path: 'ci/builders/linux_test_config.json',
     map: convert.jsonDecode(fixtures.testConfig('Linux', Platform.linux))
@@ -57,21 +45,26 @@ void main() {
   ];
 
   test('test command executes test', () async {
-    final TestEnvironment testEnvironment = TestEnvironment(engine,
-        abi: ffi.Abi.linuxX64, cannedProcesses: cannedProcesses);
-    final Environment env = testEnvironment.environment;
-    final ToolCommandRunner runner = ToolCommandRunner(
-      environment: env,
-      configs: configs,
+    final TestEnvironment testEnvironment = TestEnvironment.withTestEngine(
+      cannedProcesses: cannedProcesses,
     );
-    final int result = await runner.run(<String>[
-      'test',
-      '//flutter/display_list:display_list_unittests',
-    ]);
-    expect(result, equals(0));
-    expect(testEnvironment.processHistory.length, greaterThan(3));
-    final int offset = testEnvironment.processHistory.length - 1;
-    expect(testEnvironment.processHistory[offset].command[0],
-        endsWith('display_list_unittests'));
+    try {
+      final Environment env = testEnvironment.environment;
+      final ToolCommandRunner runner = ToolCommandRunner(
+        environment: env,
+        configs: configs,
+      );
+      final int result = await runner.run(<String>[
+        'test',
+        '//flutter/display_list:display_list_unittests',
+      ]);
+      expect(result, equals(0));
+      expect(testEnvironment.processHistory.length, greaterThan(3));
+      final int offset = testEnvironment.processHistory.length - 1;
+      expect(testEnvironment.processHistory[offset].command[0],
+          endsWith('display_list_unittests'));
+    } finally {
+      testEnvironment.cleanup();
+    }
   });
 }

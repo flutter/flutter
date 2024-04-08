@@ -3,11 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:convert' as convert;
-import 'dart:ffi' as ffi show Abi;
-import 'dart:io' as io;
 
 import 'package:engine_build_configs/engine_build_configs.dart';
-import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:engine_tool/src/build_utils.dart';
 import 'package:engine_tool/src/commands/command_runner.dart';
 import 'package:engine_tool/src/environment.dart';
@@ -49,43 +46,23 @@ void main() {
         stdout: fixtures.gnDescOutput()),
   ];
 
-  TestEnvironment makeTestEnv({bool withRbe = false}) {
-    final io.Directory rootDir = io.Directory.systemTemp.createTempSync('et');
-    final TestEngine engine = TestEngine.createTemp(rootDir: rootDir);
-    if (withRbe) {
-      io.Directory(path.join(
-        engine.srcDir.path,
-        'flutter',
-        'build',
-        'rbe',
-      )).createSync(recursive: true);
-    }
-    final TestEnvironment testEnvironment = TestEnvironment(engine,
-        abi: ffi.Abi.linuxX64, cannedProcesses: cannedProcesses);
-    return testEnvironment;
-  }
-
-  void cleanupEnv(TestEnvironment testEnv) {
-    try {
-      testEnv.environment.engine.srcDir.parent.deleteSync(recursive: true);
-    } catch (_) {
-      // Ignore failure to clean up.
-    }
-  }
-
   test('can find host runnable build', () async {
-    final TestEnvironment testEnv = makeTestEnv();
+    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: cannedProcesses,
+    );
     try {
       final List<Build> result = runnableBuilds(testEnv.environment, configs);
       expect(result.length, equals(8));
       expect(result[0].name, equals('ci/build_name'));
     } finally {
-      cleanupEnv(testEnv);
+      testEnv.cleanup();
     }
   });
 
   test('build command invokes gn', () async {
-    final TestEnvironment testEnv = makeTestEnv();
+    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: cannedProcesses,
+    );
     try {
       final ToolCommandRunner runner = ToolCommandRunner(
         environment: testEnv.environment,
@@ -96,17 +73,18 @@ void main() {
         '--config',
         'ci/build_name',
       ]);
-      print(testEnv.processHistory);
       expect(result, equals(0));
       expect(testEnv.processHistory.length, greaterThanOrEqualTo(1));
       expect(testEnv.processHistory[0].command[0], contains('gn'));
     } finally {
-      cleanupEnv(testEnv);
+      testEnv.cleanup();
     }
   });
 
   test('build command invokes ninja', () async {
-    final TestEnvironment testEnv = makeTestEnv();
+    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: cannedProcesses,
+    );
     try {
       final ToolCommandRunner runner = ToolCommandRunner(
         environment: testEnv.environment,
@@ -119,14 +97,16 @@ void main() {
       ]);
       expect(result, equals(0));
       expect(testEnv.processHistory.length, greaterThanOrEqualTo(2));
-      expect(testEnv.processHistory[2].command[0], contains('ninja'));
+      expect(testEnv.processHistory[1].command[0], contains('ninja'));
     } finally {
-      cleanupEnv(testEnv);
+      testEnv.cleanup();
     }
   });
 
   test('build command invokes generator', () async {
-    final TestEnvironment testEnv = makeTestEnv();
+    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: cannedProcesses,
+    );
     try {
       final ToolCommandRunner runner = ToolCommandRunner(
         environment: testEnv.environment,
@@ -140,16 +120,18 @@ void main() {
       expect(result, equals(0));
       expect(testEnv.processHistory.length, greaterThanOrEqualTo(3));
       expect(
-        testEnv.processHistory[3].command,
+        testEnv.processHistory[2].command,
         containsStringsInOrder(<String>['python3', 'gen/script.py']),
       );
     } finally {
-      cleanupEnv(testEnv);
+      testEnv.cleanup();
     }
   });
 
   test('build command does not invoke tests', () async {
-    final TestEnvironment testEnv = makeTestEnv();
+    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: cannedProcesses,
+    );
     try {
       final ToolCommandRunner runner = ToolCommandRunner(
         environment: testEnv.environment,
@@ -163,12 +145,15 @@ void main() {
       expect(result, equals(0));
       expect(testEnv.processHistory.length, lessThanOrEqualTo(4));
     } finally {
-      cleanupEnv(testEnv);
+      testEnv.cleanup();
     }
   });
 
   test('build command runs rbe on an rbe build', () async {
-    final TestEnvironment testEnv = makeTestEnv(withRbe: true);
+    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
+      withRbe: true,
+      cannedProcesses: cannedProcesses,
+    );
     try {
       final ToolCommandRunner runner = ToolCommandRunner(
         environment: testEnv.environment,
@@ -180,18 +165,21 @@ void main() {
         'ci/android_debug_rbe_arm64',
       ]);
       expect(result, equals(0));
-      expect(testEnv.processHistory[1].command[0],
+      expect(testEnv.processHistory[0].command[0],
           contains(path.join('tools', 'gn')));
-      expect(testEnv.processHistory[1].command[4], equals('--rbe'));
-      expect(testEnv.processHistory[2].command[0],
+      expect(testEnv.processHistory[0].command[4], equals('--rbe'));
+      expect(testEnv.processHistory[1].command[0],
           contains(path.join('reclient', 'bootstrap')));
     } finally {
-      cleanupEnv(testEnv);
+      testEnv.cleanup();
     }
   });
 
   test('build command does not run rbe when disabled', () async {
-    final TestEnvironment testEnv = makeTestEnv(withRbe: true);
+    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
+      withRbe: true,
+      cannedProcesses: cannedProcesses,
+    );
     try {
       final ToolCommandRunner runner = ToolCommandRunner(
         environment: testEnv.environment,
@@ -204,20 +192,22 @@ void main() {
         '--no-rbe',
       ]);
       expect(result, equals(0));
-      expect(testEnv.processHistory[1].command[0],
+      expect(testEnv.processHistory[0].command[0],
           contains(path.join('tools', 'gn')));
-      expect(testEnv.processHistory[1].command,
+      expect(testEnv.processHistory[0].command,
           doesNotContainAny(<String>['--rbe']));
-      expect(testEnv.processHistory[2].command[0],
+      expect(testEnv.processHistory[1].command[0],
           contains(path.join('ninja', 'ninja')));
     } finally {
-      cleanupEnv(testEnv);
+      testEnv.cleanup();
     }
   });
 
   test('build command does not run rbe when rbe configs do not exist',
       () async {
-    final TestEnvironment testEnv = makeTestEnv();
+    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: cannedProcesses,
+    );
     try {
       final ToolCommandRunner runner = ToolCommandRunner(
         environment: testEnv.environment,
@@ -229,35 +219,53 @@ void main() {
         'ci/android_debug_rbe_arm64',
       ]);
       expect(result, equals(0));
-      expect(testEnv.processHistory[1].command[0],
+      expect(testEnv.processHistory[0].command[0],
           contains(path.join('tools', 'gn')));
-      expect(testEnv.processHistory[1].command,
+      expect(testEnv.processHistory[0].command,
           doesNotContainAny(<String>['--rbe']));
-      expect(testEnv.processHistory[2].command[0],
+      expect(testEnv.processHistory[1].command[0],
           contains(path.join('ninja', 'ninja')));
     } finally {
-      cleanupEnv(testEnv);
+      testEnv.cleanup();
     }
   });
 
   test('mangleConfigName removes the OS and adds ci/ as needed', () {
-    final TestEnvironment testEnv = makeTestEnv();
-    final Environment env = testEnv.environment;
-    expect(mangleConfigName(env, 'linux/build'), equals('build'));
-    expect(mangleConfigName(env, 'ci/build'), equals('ci/build'));
+    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: cannedProcesses,
+    );
+    try {
+      final Environment env = testEnv.environment;
+      expect(mangleConfigName(env, 'linux/build'), equals('build'));
+      expect(mangleConfigName(env, 'ci/build'), equals('ci/build'));
+    } finally {
+      testEnv.cleanup();
+    }
   });
 
   test('mangleConfigName throws when the input config name is malformed', () {
-    final TestEnvironment testEnv = makeTestEnv();
-    final Environment env = testEnv.environment;
-    expectArgumentError(() => mangleConfigName(env, 'build'));
+    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: cannedProcesses,
+    );
+    try {
+      final Environment env = testEnv.environment;
+      expectArgumentError(() => mangleConfigName(env, 'build'));
+    } finally {
+      testEnv.cleanup();
+    }
   });
 
   test('demangleConfigName adds the OS and removes ci/ as needed', () {
-    final TestEnvironment testEnv = makeTestEnv();
-    final Environment env = testEnv.environment;
-    expect(demangleConfigName(env, 'build'), equals('linux/build'));
-    expect(demangleConfigName(env, 'ci/build'), equals('ci/build'));
+    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: cannedProcesses,
+    );
+    try {
+        final Environment env = testEnv.environment;
+        expect(demangleConfigName(env, 'build'), equals('linux/build'));
+        expect(demangleConfigName(env, 'ci/build'), equals('ci/build'));
+    } finally {
+      testEnv.cleanup();
+    }
   });
 
   test('local config name on the command line is correctly translated',
@@ -270,7 +278,9 @@ void main() {
     final Map<String, BuilderConfig> configs = <String, BuilderConfig>{
       'namespace_test_config': namespaceTestConfigs,
     };
-    final TestEnvironment testEnv = makeTestEnv();
+    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: cannedProcesses,
+    );
     try {
       final ToolCommandRunner runner = ToolCommandRunner(
         environment: testEnv.environment,
@@ -282,12 +292,12 @@ void main() {
         'host_debug',
       ]);
       expect(result, equals(0));
-      expect(testEnv.processHistory[2].command[0],
+      expect(testEnv.processHistory[1].command[0],
           contains(path.join('ninja', 'ninja')));
       expect(
-          testEnv.processHistory[2].command[2], contains('local_host_debug'));
+          testEnv.processHistory[1].command[2], contains('local_host_debug'));
     } finally {
-      cleanupEnv(testEnv);
+      testEnv.cleanup();
     }
   });
 
@@ -300,7 +310,9 @@ void main() {
     final Map<String, BuilderConfig> configs = <String, BuilderConfig>{
       'namespace_test_config': namespaceTestConfigs,
     };
-    final TestEnvironment testEnv = makeTestEnv();
+    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: cannedProcesses,
+    );
     final Environment env = testEnv.environment;
     try {
       final ToolCommandRunner runner = ToolCommandRunner(
@@ -313,11 +325,75 @@ void main() {
         'ci/host_debug',
       ]);
       expect(result, equals(0));
-      expect(testEnv.processHistory[2].command[0],
+      expect(testEnv.processHistory[1].command[0],
           contains(path.join('ninja', 'ninja')));
-      expect(testEnv.processHistory[2].command[2], contains('ci/host_debug'));
+      expect(testEnv.processHistory[1].command[2], contains('ci/host_debug'));
     } finally {
-      cleanupEnv(testEnv);
+      testEnv.cleanup();
+    }
+  });
+
+  test('build command invokes ninja with the specified target', () async {
+    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: cannedProcesses,
+    );
+    try {
+      final ToolCommandRunner runner = ToolCommandRunner(
+        environment: testEnv.environment,
+        configs: configs,
+      );
+      final int result = await runner.run(<String>[
+        'build',
+        '--config',
+        'host_debug',
+        '//flutter/fml:fml_arc_unittests',
+      ]);
+      expect(result, equals(0));
+      expect(testEnv.processHistory.length, greaterThanOrEqualTo(2));
+      expect(testEnv.processHistory[3].command[0], contains('ninja'));
+      expect(testEnv.processHistory[3].command[2], endsWith('/host_debug'));
+      expect(
+        testEnv.processHistory[3].command[5],
+        equals('flutter/fml:fml_arc_unittests'),
+      );
+    } finally {
+      testEnv.cleanup();
+    }
+  });
+
+  test('build command invokes ninja with all matched targets', () async {
+    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: cannedProcesses,
+    );
+    try {
+      final ToolCommandRunner runner = ToolCommandRunner(
+        environment: testEnv.environment,
+        configs: configs,
+      );
+      final int result = await runner.run(<String>[
+        'build',
+        '--config',
+        'host_debug',
+        '//flutter/...',
+      ]);
+      expect(result, equals(0));
+      expect(testEnv.processHistory.length, greaterThanOrEqualTo(2));
+      expect(testEnv.processHistory[3].command[0], contains('ninja'));
+      expect(testEnv.processHistory[3].command[2], endsWith('/host_debug'));
+      expect(
+        testEnv.processHistory[3].command[5],
+        equals('flutter/display_list:display_list_unittests'),
+      );
+      expect(
+        testEnv.processHistory[3].command[6],
+        equals('flutter/flow:flow_unittests'),
+      );
+      expect(
+        testEnv.processHistory[3].command[7],
+        equals('flutter/fml:fml_arc_unittests'),
+      );
+    } finally {
+      testEnv.cleanup();
     }
   });
 }

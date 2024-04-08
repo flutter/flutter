@@ -5,9 +5,11 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:path/path.dart' as p;
 import 'package:process_runner/process_runner.dart';
 
+import 'build_utils.dart';
 import 'environment.dart';
 import 'json_utils.dart';
 import 'proc_utils.dart';
@@ -177,4 +179,67 @@ Set<BuildTarget> selectTargets(
     }
   }
   return selected;
+}
+
+/// Given a list of target specifications from the command line, return a list
+/// of [BuildTarget]s from the [Build] that match those specifications.
+///
+/// If `commandLineTargets` is empty, by default this will return the empty
+/// list, which indicates that the caller should delegate the selection of
+/// build targets to whatever is specified by the [Build] object. However,
+/// if `defaultToAll` is `true`, then this function will return the list of
+/// all build targets.
+Future<List<BuildTarget>?> targetsFromCommandLine(
+  Environment environment,
+  Build build,
+  List<String> commandLineTargets, {
+  bool defaultToAll = false,
+}) async {
+  // If there are no targets specified on the command line, then delegate to
+  // the default targets specified in the Build object unless directed
+  // otherwise by the defaultToAll argument.
+  if (commandLineTargets.isEmpty && !defaultToAll) {
+    return <BuildTarget>[];
+  }
+
+  final Directory buildDir = Directory(p.join(
+    environment.engine.outDir.path,
+    build.ninja.config,
+  ));
+  // If the expected build output directory doesn't exist yet, eagerly run
+  // the build's GN step to try to produce it.
+  if (!buildDir.existsSync()) {
+    environment.logger.status(
+      'Build output directory at ${buildDir.path} not found. Running GN.',
+    );
+    final int gnResult = await runGn(environment, build);
+    if (gnResult != 0 || !buildDir.existsSync()) {
+      environment.logger.error(
+        'The specified build did not produce the expected build '
+        'output directory.',
+      );
+      return null;
+    }
+  }
+
+  // Find all targets buildable in the configuration.
+  final Map<String, BuildTarget> allTargets = await findTargets(
+    environment,
+    buildDir,
+  );
+  // Use the targets specified on the command line to filter the list of
+  // all targets.
+  final Set<BuildTarget> selectedTargets = selectTargets(
+    commandLineTargets,
+    allTargets,
+  );
+  // Report an error if applying the filter yields no results.
+  if (selectedTargets.isEmpty) {
+    environment.logger.error(
+      'No build targets matched ${commandLineTargets.join(',')}\n'
+      'Run `et query targets` to see list of targets.',
+    );
+    return null;
+  }
+  return selectedTargets.toList();
 }

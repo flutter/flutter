@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:engine_build_configs/engine_build_configs.dart';
-import 'package:path/path.dart' as p;
 
 import '../build_utils.dart';
 import '../gn_utils.dart';
@@ -63,22 +60,27 @@ et build //flutter/fml:fml_benchmarks  # Build a specific target in `//flutter/f
       if (!useRbe) '--no-rbe',
     ];
 
-    final Map<String, BuildTarget> allTargets = await findTargets(environment,
-        Directory(p.join(environment.engine.outDir.path, build.ninja.config)));
-    final Set<BuildTarget> selectedTargets =
-        selectTargets(argResults!.rest, allTargets);
-    if (selectedTargets.isEmpty) {
-      environment.logger.error(
-          'No build targets matched ${argResults!.rest}\nRun `et query targets` to see list of targets.');
+    final List<BuildTarget>? selectedTargets = await targetsFromCommandLine(
+      environment,
+      build,
+      argResults!.rest,
+    );
+    if (selectedTargets == null) {
+      // The user typed something wrong and targetsFromCommandLine has already
+      // logged the error message.
       return 1;
     }
 
     // Chop off the '//' prefix.
-    final List<String> buildTargets = selectedTargets
-        .map<String>(
-            (BuildTarget target) => target.label.substring('//'.length))
-        .toList();
-    return runBuild(environment, build,
-        extraGnArgs: extraGnArgs, targets: buildTargets);
+    final List<String> ninjaTargets = selectedTargets.map<String>(
+      (BuildTarget target) => target.label.substring('//'.length),
+    ).toList();
+
+    return runBuild(
+      environment,
+      build,
+      extraGnArgs: extraGnArgs,
+      targets: ninjaTargets,
+    );
   }
 }

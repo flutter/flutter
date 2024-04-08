@@ -2,14 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert' as convert;
 import 'dart:io' as io;
 
+import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:engine_repo_tools/engine_repo_tools.dart';
+import 'package:engine_tool/src/build_utils.dart';
 import 'package:engine_tool/src/environment.dart';
 import 'package:engine_tool/src/gn_utils.dart';
 import 'package:litetest/litetest.dart';
+import 'package:platform/platform.dart';
 
-import 'fixtures.dart';
+import 'fixtures.dart' as fixtures;
 import 'utils.dart';
 
 void main() {
@@ -22,9 +26,19 @@ void main() {
     return;
   }
 
+  final BuilderConfig linuxTestConfig = BuilderConfig.fromJson(
+    path: 'ci/builders/linux_test_config.json',
+    map: convert.jsonDecode(fixtures.testConfig('Linux', Platform.linux))
+        as Map<String, Object?>,
+  );
+
+  final Map<String, BuilderConfig> configs = <String, BuilderConfig>{
+    'linux_test_config': linuxTestConfig,
+  };
+
   final List<CannedProcess> cannedProcesses = <CannedProcess>[
     CannedProcess((List<String> command) => command.contains('desc'),
-        stdout: gnDescOutput()),
+        stdout: fixtures.gnDescOutput()),
   ];
 
   test('find test targets', () async {
@@ -62,5 +76,45 @@ void main() {
                 testTargets)
             .length,
         equals(1));
+  });
+
+  test('targetsFromCommandLine respects defaultToAll when false', () async {
+    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: cannedProcesses,
+    );
+    try {
+      final Environment env = testEnv.environment;
+      final List<Build> builds = runnableBuilds(env, configs);
+      final Build? build = builds.where(
+        (Build build) => build.name == 'linux/host_debug',
+      ).firstOrNull;
+      final List<BuildTarget>? selectedTargets = await targetsFromCommandLine(
+        env, build!, <String>[],
+      );
+      expect(selectedTargets, isNotNull);
+      expect(selectedTargets, isEmpty);
+    } finally {
+      testEnv.cleanup();
+    }
+  });
+
+  test('targetsFromCommandLine respects defaultToAll when true', () async {
+    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: cannedProcesses,
+    );
+    try {
+      final Environment env = testEnv.environment;
+      final List<Build> builds = runnableBuilds(env, configs);
+      final Build? build = builds.where(
+        (Build build) => build.name == 'linux/host_debug',
+      ).firstOrNull;
+      final List<BuildTarget>? selectedTargets = await targetsFromCommandLine(
+        env, build!, <String>[], defaultToAll: true,
+      );
+      expect(selectedTargets, isNotNull);
+      expect(selectedTargets, isNotEmpty);
+    } finally {
+      testEnv.cleanup();
+    }
   });
 }
