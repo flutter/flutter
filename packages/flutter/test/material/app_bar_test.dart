@@ -3135,5 +3135,52 @@ void main() {
         ));
       }
     });
+
+    testWidgets('The second page should have a back button when used on nested navigator', (WidgetTester tester) async {
+      final Page<void> page1 = MaterialPage<void>(
+          key: const ValueKey<String>('1'),
+          child: Scaffold(
+            key: const ValueKey<String>('1'),
+            appBar: AppBar(),
+            endDrawer: const Drawer(),
+          )
+      );
+      final Page<void> page2 = MaterialPage<void>(
+          key: const ValueKey<String>('2'),
+          child: Scaffold(
+            key: const ValueKey<String>('2'),
+            appBar: AppBar(),
+            endDrawer: const Drawer(),
+          )
+      );
+
+      final List<Page<void>> navigatorPages = <Page<void>>[ page2 ];
+      final Page<void> navigatorPage = MaterialPage<void>(
+          key: const ValueKey<String>('nested-navigator'),
+          child: Navigator(
+            pages: navigatorPages,
+            onPopPage: (Route<Object?> route, Object? result) => false,
+          )
+      );
+
+      final List<Page<void>> pages = <Page<void>>[ page1, navigatorPage ];
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Navigator(
+            pages: pages,
+            onPopPage: (Route<Object?> route, Object? result) => false,
+          ),
+        ),
+      );
+
+      // The page2 should have a back button.
+      expect(
+          find.descendant(
+            of: find.byKey(const ValueKey<String>('2')),
+            matching: find.byType(BackButton),
+          ),
+          findsOneWidget
+      );
+    });
   });
 }
