@@ -562,12 +562,32 @@ abstract class Route<T> extends _RoutePlaceholder {
     return currentRouteEntry.route == this;
   }
 
+  bool _hasActiveParentRouteBelow(NavigatorState? parent) {
+    if (parent != null) {
+      for (final _RouteEntry entry in parent._history) {
+        if (_RouteEntry.isPresentPredicate(entry)) {
+          return true;
+        }
+      }
+
+      return _hasActiveParentRouteBelow(parent._parentNavigator);
+    }
+
+    return false;
+  }
+
   /// Whether there is at least one active route underneath this route.
   @protected
   bool get hasActiveRouteBelow {
     if (_navigator == null) {
       return false;
     }
+
+    final bool hasActiveParentRouteBelow = _hasActiveParentRouteBelow(_navigator!._parentNavigator);
+    if (hasActiveParentRouteBelow) {
+      return true;
+    }
+
     for (final _RouteEntry entry in _navigator!._history) {
       if (entry.route == this) {
         return false;
@@ -3523,6 +3543,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   bool get _usingPagesAPI => widget.pages != const <Page<dynamic>>[];
 
+  NavigatorState? _parentNavigator;
+
   void _handleHistoryChanged() {
     final bool navigatorCanPop = canPop();
     late final bool routeBlocksPop;
@@ -3699,6 +3721,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final NavigatorState? parentNavigator = context.findAncestorStateOfType<NavigatorState>();
+    if (_parentNavigator != parentNavigator) {
+      _parentNavigator = parentNavigator;
+    }
+
     _updateHeroController(HeroControllerScope.maybeOf(context));
     for (final _RouteEntry entry in _history) {
       entry.route.changedExternalState();
