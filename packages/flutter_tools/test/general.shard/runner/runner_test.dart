@@ -353,6 +353,7 @@ void main() {
   group('unified_analytics', () {
     late FakeAnalytics fakeAnalytics;
     late MemoryFileSystem fs;
+    late TestUsage testUsage;
 
     setUp(() {
       fs = MemoryFileSystem.test();
@@ -361,6 +362,7 @@ void main() {
         fs: fs,
         fakeFlutterVersion: FakeFlutterVersion(),
       );
+      testUsage = TestUsage();
     });
 
     testUsingContext(
@@ -384,6 +386,46 @@ void main() {
         Analytics: () => fakeAnalytics,
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'runner disable legacy analytics if opted out of package:unified_analytics',
+      () async {
+        io.setExitFunctionForTests((int exitCode) {});
+
+        // Begin by opting out of telemetry for package:unified_analytics
+        // and leaving legacy analytics opted in
+        await fakeAnalytics.setTelemetry(false);
+        expect(fakeAnalytics.telemetryEnabled, false);
+        expect(testUsage.enabled, true);
+
+        await runner.run(
+          <String>[],
+          () => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect(
+          testUsage.events,
+          contains(const TestUsageEvent(
+            'analytics',
+            'enabled',
+            label: 'false',
+          )),
+        );
+        expect(fakeAnalytics.telemetryEnabled, false);
+        expect(testUsage.enabled, false);
+        expect(fakeAnalytics.sentEvents, isEmpty);
+
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+        Usage: () => testUsage,
       },
     );
 
