@@ -78,7 +78,7 @@ class ColorItem extends StatelessWidget {
   }
 }
 
-class PaletteTabView extends StatelessWidget {
+class PaletteTabView extends StatefulWidget {
   PaletteTabView({
     super.key,
     required this.colors,
@@ -90,26 +90,34 @@ class PaletteTabView extends StatelessWidget {
   static const List<int> accentKeys = <int>[100, 200, 400, 700];
 
   @override
+  State<PaletteTabView> createState() => _PaletteTabViewState();
+}
+
+class _PaletteTabViewState extends State<PaletteTabView> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final TextStyle whiteTextStyle = textTheme.bodyMedium!.copyWith(color: Colors.white);
     final TextStyle blackTextStyle = textTheme.bodyMedium!.copyWith(color: Colors.black);
     return Scrollbar(
+      controller: _scrollController,
       child: ListView(
-        primary: true,
+        controller: _scrollController,
         itemExtent: kColorItemHeight,
         children: <Widget>[
-          ...primaryKeys.map<Widget>((int index) {
+          ...PaletteTabView.primaryKeys.map<Widget>((int index) {
             return DefaultTextStyle(
-              style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
-              child: ColorItem(index: index, color: colors.primary![index]!),
+              style: index > widget.colors.threshold ? whiteTextStyle : blackTextStyle,
+              child: ColorItem(index: index, color: widget.colors.primary![index]!),
             );
           }),
-          if (colors.accent != null)
-            ...accentKeys.map<Widget>((int index) {
+          if (widget.colors.accent != null)
+            ...PaletteTabView.accentKeys.map<Widget>((int index) {
               return DefaultTextStyle(
-                style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
-                child: ColorItem(index: index, color: colors.accent![index]!, prefix: 'A'),
+                style: index > widget.colors.threshold ? whiteTextStyle : blackTextStyle,
+                child: ColorItem(index: index, color: widget.colors.accent![index]!, prefix: 'A'),
               );
             }),
         ],
