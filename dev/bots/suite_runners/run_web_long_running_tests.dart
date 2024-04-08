@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:io' show File, HttpClient, HttpClientRequest, HttpClientResponse, Process, RawSocket, SocketDirection, SocketException;
 import 'dart:math' as math;
+import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
 
 import '../browser.dart';
@@ -218,8 +219,10 @@ Future<void> _runFlutterDriverWebTest({
     <String>[ 'clean' ],
     workingDirectory: testAppDirectory,
   );
+
+  final String outputDirectory = const LocalFileSystem().systemTempDirectory.createTempSync('build').path;
   final String responseFile =
-      path.join(testAppDirectory, 'build', 'integration_response_data.json');
+      path.join(outputDirectory, 'integration_response_data.json');
   if (File(responseFile).existsSync()) {
     File(responseFile).deleteSync();
   }
@@ -235,6 +238,8 @@ Future<void> _runFlutterDriverWebTest({
       'web-server',
       '--$buildMode',
       '--web-renderer=$renderer',
+      '--test-output-directory',
+      outputDirectory
     ],
     expectNonZeroExit: expectFailure,
     workingDirectory: testAppDirectory,
