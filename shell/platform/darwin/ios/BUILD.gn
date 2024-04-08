@@ -19,7 +19,7 @@ shell_gpu_configuration("ios_gpu_configuration") {
   enable_software = true
   enable_gl = false
   enable_vulkan = false
-  enable_metal = shell_enable_metal
+  enable_metal = true
 }
 
 # The headers that will be copied to the Flutter.framework and be accessed
@@ -147,12 +147,22 @@ source_set("flutter_framework_source") {
     "framework/Source/vsync_waiter_ios.mm",
     "ios_context.h",
     "ios_context.mm",
+    "ios_context_metal_impeller.h",
+    "ios_context_metal_impeller.mm",
+    "ios_context_metal_skia.h",
+    "ios_context_metal_skia.mm",
     "ios_context_software.h",
     "ios_context_software.mm",
+    "ios_external_texture_metal.h",
+    "ios_external_texture_metal.mm",
     "ios_external_view_embedder.h",
     "ios_external_view_embedder.mm",
     "ios_surface.h",
     "ios_surface.mm",
+    "ios_surface_metal_impeller.h",
+    "ios_surface_metal_impeller.mm",
+    "ios_surface_metal_skia.h",
+    "ios_surface_metal_skia.mm",
     "ios_surface_software.h",
     "ios_surface_software.mm",
     "platform_message_handler_ios.h",
@@ -170,23 +180,6 @@ source_set("flutter_framework_source") {
     defines += [ "APPLICATION_EXTENSION_API_ONLY=1" ]
   }
 
-  if (shell_enable_metal) {
-    sources += [
-      "ios_context_metal_impeller.h",
-      "ios_context_metal_impeller.mm",
-      "ios_context_metal_skia.h",
-      "ios_context_metal_skia.mm",
-      "ios_external_texture_metal.h",
-      "ios_external_texture_metal.mm",
-      "ios_surface_metal_impeller.h",
-      "ios_surface_metal_impeller.mm",
-      "ios_surface_metal_skia.h",
-      "ios_surface_metal_skia.mm",
-    ]
-
-    deps += [ "//flutter/shell/platform/darwin/graphics" ]
-  }
-
   deps += [
     ":ios_gpu_configuration",
     "//flutter/common",
@@ -200,6 +193,7 @@ source_set("flutter_framework_source") {
     "//flutter/shell/platform/common:common_cpp_input",
     "//flutter/shell/platform/darwin/common",
     "//flutter/shell/platform/darwin/common:framework_common",
+    "//flutter/shell/platform/darwin/graphics",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/shell/profiling:profiling",
     "//flutter/skia",
