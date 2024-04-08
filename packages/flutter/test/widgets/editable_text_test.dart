@@ -17443,7 +17443,9 @@ void main() {
       state.textEditingValue.selection,
       const TextSelection(baseOffset: 12, extentOffset: 17),
     );
-  });
+  },
+    skip: kIsWeb, // [intended]
+  );
 
   testWidgets('selectWordsInRange is correct when EditableText is scaled', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
@@ -17489,7 +17491,9 @@ void main() {
       state.textEditingValue.selection,
       const TextSelection(baseOffset: 12, extentOffset: 17),
     );
-  });
+  },
+    skip: kIsWeb, // [intended]
+  );
 
   testWidgets('selectWordEdge is correct when EditableText is scaled', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
