@@ -92,7 +92,7 @@ Future<int> run(
 
           // TODO(eliasyishak): Set the telemetry for the unified_analytics
           //  package as well, the above will be removed once we have
-          //  fully transitioned to using the new package
+          //  fully transitioned to using the new package, , https://github.com/flutter/flutter/issues/128251
           await globals.analytics.setTelemetry(false);
         }
 
@@ -111,8 +111,18 @@ Future<int> run(
 
           // TODO(eliasyishak): Set the telemetry for the unified_analytics
           //  package as well, the above will be removed once we have
-          //  fully transitioned to using the new package
+          //  fully transitioned to using the new package, , https://github.com/flutter/flutter/issues/128251
           await globals.analytics.setTelemetry(true);
+        }
+
+        // Ensure that anyone opted out of package:unified_analytics is also
+        // opted out of legacy analytics and that analytics is not being suppressed
+        // TODO(eliasyishak): remove once GA3 sunset, https://github.com/flutter/flutter/issues/128251
+        if (!globals.analytics.telemetryEnabled &&
+            globals.flutterUsage.enabled &&
+            !globals.flutterUsage.suppressAnalytics) {
+          AnalyticsConfigEvent(enabled: false).send();
+          globals.flutterUsage.enabled = false;
         }
 
 
