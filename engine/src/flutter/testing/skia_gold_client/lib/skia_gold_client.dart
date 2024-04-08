@@ -297,7 +297,7 @@ interface class SkiaGoldClient {
   /// [pixelColorDelta] defines maximum acceptable difference in RGB channels of
   /// each pixel, such that:
   ///
-  /// ```
+  /// ```dart
   /// bool isSame(Color image, Color golden, int pixelDeltaThreshold) {
   ///   return abs(image.r - golden.r)
   ///     + abs(image.g - golden.g)

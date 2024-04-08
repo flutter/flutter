@@ -231,7 +231,7 @@ class FlutterConfiguration {
   ///
   /// Example:
   ///
-  /// ```
+  /// ```bash
   /// flutter run \
   ///   -d chrome \
   ///   --web-renderer=canvaskit \
@@ -279,7 +279,7 @@ class FlutterConfiguration {
   ///
   /// Example:
   ///
-  /// ```
+  /// ```bash
   /// flutter run -d chrome --profile --dart-define=FLUTTER_WEB_DEBUG_SHOW_SEMANTICS=true
   /// ```
   bool get debugShowSemanticsNodes =>
