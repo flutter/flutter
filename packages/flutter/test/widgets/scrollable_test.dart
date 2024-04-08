@@ -135,7 +135,7 @@ void main() {
       ),
     );
     expect(getBehavior(), HitTestBehavior.translucent);
-    
+
     await tester.pumpWidget(
       MaterialApp(
         home: ListView(
