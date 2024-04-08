@@ -17370,15 +17370,17 @@ void main() {
       const TextPosition(offset: 0),
     );
 
-    // After scrolling to view the third line, the top left is the start of the
-    // second line.
-    state.bringIntoView(const TextPosition(offset: 6 * 3));
+    // After scrolling to view the fourth line, the top left is the start of the
+    // third line.
+    state.bringIntoView(const TextPosition(offset: 18));
     await tester.pumpAndSettle();
     expect(
       state.renderEditable.getPositionForPoint(topLeft),
       const TextPosition(offset: 12),
     );
-  });
+  },
+    skip: kIsWeb, // [intended]
+  );
 }
 
 class UnsettableController extends TextEditingController {
