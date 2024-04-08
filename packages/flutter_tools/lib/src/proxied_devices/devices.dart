@@ -958,6 +958,8 @@ class ProxiedVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
             if (e is String && e.contains('command not understood')) {
               // Use a fallback if the daemon does not support VM service discovery.
               controller.addStream(fallbackDiscovery().uris);
+            } else {
+              controller.addError(e);
             }
           },
         );

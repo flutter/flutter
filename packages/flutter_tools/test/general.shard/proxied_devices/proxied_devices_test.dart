@@ -918,6 +918,72 @@ void main() {
       expect(portForwarder.forwardedDevicePort, null);
       expect(portForwarder.forwardedHostPort, null);
     });
+
+    testWithoutContext('forwards other error from the daemon', () async {
+      final FakeProxiedPortForwarder portForwarder = FakeProxiedPortForwarder();
+      final Stream<Uri> fallbackUri = Stream<Uri>.value(Uri.parse('http://127.0.0.1:500/fallback_auth_code'));
+      final ProxiedVMServiceDiscoveryForAttach discovery = ProxiedVMServiceDiscoveryForAttach(
+        clientDaemonConnection,
+        'test_device',
+        proxiedPortForwarder: portForwarder,
+        fallbackDiscovery: () => FakeVMServiceDiscoveryForAttach(fallbackUri),
+        ipv6: false,
+        logger: bufferLogger,
+      );
+
+      // Start listening on the stream to trigger sending the request.
+      final Future<Uri> uriFuture = discovery.uris.first;
+
+      final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
+      final DaemonMessage startMessage = await broadcastOutput.first;
+      expect(startMessage.data['id'], isNotNull);
+      expect(startMessage.data['method'], 'device.startVMServiceDiscoveryForAttach');
+      expect(startMessage.data['params'], <String, Object?>{
+        'deviceId': 'test_device',
+        'appId': null,
+        'fuchsiaModule': null,
+        'filterDevicePort': null,
+        'ipv6': false,
+      });
+      serverDaemonConnection.sendErrorResponse(startMessage.data['id']!, 'other error', StackTrace.current);
+
+      expect(uriFuture, throwsA('other error'));
+      expect(portForwarder.forwardedDevicePort, null);
+      expect(portForwarder.forwardedHostPort, null);
+    });
+
+    testWithoutContext('forwards the port forwarder error', () async {
+      final FakeProxiedPortForwarder portForwarder = FakeProxiedPortForwarder();
+      portForwarder.forwardThrowException = TestException();
+      final ProxiedVMServiceDiscoveryForAttach discovery = ProxiedVMServiceDiscoveryForAttach(
+        clientDaemonConnection,
+        'test_device',
+        proxiedPortForwarder: portForwarder,
+        fallbackDiscovery: () => throw UnimplementedError(),
+        ipv6: false,
+        logger: bufferLogger,
+      );
+
+      // Start listening on the stream to trigger sending the request.
+      final Future<Uri> uriFuture = discovery.uris.first;
+
+      final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands.asBroadcastStream();
+      final DaemonMessage startMessage = await broadcastOutput.first;
+      expect(startMessage.data['id'], isNotNull);
+      expect(startMessage.data['method'], 'device.startVMServiceDiscoveryForAttach');
+      expect(startMessage.data['params'], <String, Object?>{
+        'deviceId': 'test_device',
+        'appId': null,
+        'fuchsiaModule': null,
+        'filterDevicePort': null,
+        'ipv6': false,
+      });
+
+      serverDaemonConnection.sendResponse(startMessage.data['id']!, 'request_id');
+      serverDaemonConnection.sendEvent('device.VMServiceDiscoveryForAttach.request_id', 'http://127.0.0.1:300/auth_code');
+
+      expect(uriFuture, throwsA(isA<TestException>()));
+    });
   });
 }
 
@@ -1050,6 +1116,7 @@ class FakeProxiedPortForwarder extends Fake implements ProxiedPortForwarder {
   int? originalRemotePortReturnValue;
   int? receivedLocalForwardedPort;
 
+  Exception? forwardThrowException;
   int? forwardReturnValue;
   int? forwardedDevicePort;
   int? forwardedHostPort;
@@ -1066,6 +1133,9 @@ class FakeProxiedPortForwarder extends Fake implements ProxiedPortForwarder {
     forwardedDevicePort = devicePort;
     forwardedHostPort = hostPort;
     forwardedIpv6 = ipv6;
+    if (forwardThrowException != null) {
+      throw forwardThrowException!;
+    }
     return forwardReturnValue!;
   }
 }
@@ -1122,3 +1192,5 @@ class FakeVMServiceDiscoveryForAttach extends Fake implements VMServiceDiscovery
   @override
   Stream<Uri> uris;
 }
+
+class TestException implements Exception {}
