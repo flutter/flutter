@@ -108,8 +108,8 @@ if (build_engine_artifacts && !is_android) {
           destination = "vm_isolate_snapshot.bin"
         },
         {
-          source = "$root_gen_dir/frontend_server.dart.snapshot"
-          destination = "frontend_server.dart.snapshot"
+          source = "$root_gen_dir/frontend_server_aot.dart.snapshot"
+          destination = "frontend_server_aot.dart.snapshot"
         },
       ]
     }
