@@ -3387,6 +3387,27 @@ void main() {
       semantics.dispose();
     });
 
+   testWidgets('MenuItemButton semantics respects label', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: MenuItemButton(
+              semanticsLabel: 'TestWidget',
+              shortcut: const SingleActivator(LogicalKeyboardKey.comma),
+              style: MenuItemButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
+              onPressed: () {},
+              child: const Text('ABC'),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.bySemanticsLabel('TestWidget'), findsOneWidget);
+      semantics.dispose();
+    }, variant: TargetPlatformVariant.desktop());
+
+
     testWidgets('SubMenuButton is not a semantic button', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(
