@@ -1343,7 +1343,6 @@ Future<void> _runDartTest(String workingDirectory, {
   metricFile.deleteSync();
 }
 
-
 Future<void> _runFlutterTest(String workingDirectory, {
   String? script,
   bool expectFailure = false,
