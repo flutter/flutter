@@ -37,5 +37,5 @@ String? parseTestDriverArguments(List<String> args) {
   parser.addOption('reporter', abbr: 'r', allowed: <String>['expanded']);
   parser.addOption('test-output-directory');
   final ArgResults argResults = parser.parse(args);
-  return argResults['test-output-directory'] as String;
+  return (argResults['test-output-directory'] ?? '') as String;
 }

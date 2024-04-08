@@ -19,11 +19,11 @@ import 'common.dart';
 /// Tests should write any output files to this directory. Defaults to the path
 /// set in the FLUTTER_TEST_OUTPUTS_DIR environment variable, or `build` if
 /// unset.
-final String defaultTestOutputsDirectory = fs.systemTempDirectory.createTempSync('build').path;
+final String defaultTestOutputDirectory = fs.systemTempDirectory.createTempSync('build').path;
 
 /// The callback type to handle [Response.data] after the test
 /// succeeds.
-typedef ResponseDataCallback = FutureOr<void> Function(Map<String, dynamic>?, {String testOutputFilename, String testOutputsDirectory});
+typedef ResponseDataCallback = FutureOr<void> Function(Map<String, dynamic>?, {String testOutputFilename, String testOutputDirectory});
 
 /// Writes a json-serializable data to
 /// [testOutputsDirectory]/`testOutputFilename.json`.
@@ -32,8 +32,9 @@ typedef ResponseDataCallback = FutureOr<void> Function(Map<String, dynamic>?, {S
 Future<void> writeResponseData(
   Map<String, dynamic>? data, {
   String testOutputFilename = 'integration_response_data',
-  String testOutputsDirectory = '',
+  String testOutputDirectory = '',
 }) async {
+  testOutputDirectory = testOutputDirectory.isEmpty? defaultTestOutputDirectory : testOutputDirectory;
   await fs.directory(testOutputsDirectory).create(recursive: true);
   final File file = fs.file(path.join(
     testOutputsDirectory,
@@ -175,13 +176,13 @@ Future<void> integrationDriver({
   if (response.allTestsPassed) {
     print('All tests passed.');
     if (responseDataCallback != null) {
-      await responseDataCallback(response.data, testOutputFilename: testOutputFilename, testOutputsDirectory: testOutputDirectory);
+      await responseDataCallback(response.data, testOutputFilename: testOutputFilename, testOutputDirectory: testOutputDirectory);
     }
     exit(0);
   } else {
     print('Failure Details:\n${response.formattedFailureDetails}');
     if (responseDataCallback != null && writeResponseOnFailure) {
-      await responseDataCallback(response.data, testOutputFilename: testOutputFilename, testOutputsDirectory: testOutputDirectory);
+      await responseDataCallback(response.data, testOutputFilename: testOutputFilename, testOutputDirectory: testOutputDirectory);
     }
     exit(1);
   }
