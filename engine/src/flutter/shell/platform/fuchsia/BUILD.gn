@@ -60,7 +60,7 @@ fuchsia_host_bundle("dart_binaries") {
 
   _frontend_server_path =
       rebase_path(get_label_info(_frontend_server_label, "root_gen_dir") +
-                  "/frontend_server.dart.snapshot")
+                  "/frontend_server_aot.dart.snapshot")
 
   _list_libraries_path =
       rebase_path(get_label_info(_list_libraries_label, "root_gen_dir") +

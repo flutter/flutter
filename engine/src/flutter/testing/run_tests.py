@@ -932,7 +932,7 @@ def build_dart_host_test_list(build_dir):
           os.path.join('flutter', 'flutter_frontend_server'),
           [
               build_dir,
-              os.path.join(build_dir, 'gen', 'frontend_server.dart.snapshot'),
+              os.path.join(build_dir, 'gen', 'frontend_server_aot.dart.snapshot'),
               os.path.join(build_dir, 'flutter_patched_sdk')
           ],
       ),
@@ -949,7 +949,7 @@ def build_dart_host_test_list(build_dir):
       (
           os.path.join('flutter', 'tools', 'const_finder'),
           [
-              os.path.join(build_dir, 'gen', 'frontend_server.dart.snapshot'),
+              os.path.join(build_dir, 'gen', 'frontend_server_aot.dart.snapshot'),
               os.path.join(build_dir, 'flutter_patched_sdk'),
               os.path.join(build_dir, 'dart-sdk', 'lib', 'libraries.json'),
           ],
