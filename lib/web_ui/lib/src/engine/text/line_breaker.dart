@@ -210,7 +210,7 @@ bool _isSurrogatePair(int? codePoint) {
 /// way from 0 to the string length. For example, here are the indices for the
 /// string "foo bar":
 ///
-/// ```
+/// ```none
 ///   f   o   o       b   a   r
 /// ^   ^   ^   ^   ^   ^   ^   ^
 /// 0   1   2   3   4   5   6   7

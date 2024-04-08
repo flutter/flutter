@@ -33,9 +33,9 @@ typedef Action<R> = R Function();
 ///
 /// Example:
 ///
-/// ```
+/// ```dart
 /// final result = timeAction('expensive_operation', () {
-///   ... expensive work ...
+///   // ... expensive work ...
 ///   return someValue;
 /// });
 /// ```

@@ -49,7 +49,7 @@ class EngineColorFilter implements SceneImageFilter, ui.ColorFilter {
   /// The matrix is in row-major order and the translation column is specified
   /// in unnormalized, 0...255, space. For example, the identity matrix is:
   ///
-  /// ```
+  /// ```dart
   /// const ColorMatrix identity = ColorFilter.matrix(<double>[
   ///   1, 0, 0, 0, 0,
   ///   0, 1, 0, 0, 0,
@@ -62,7 +62,7 @@ class EngineColorFilter implements SceneImageFilter, ui.ColorFilter {
   ///
   /// An inversion color matrix:
   ///
-  /// ```
+  /// ```dart
   /// const ColorFilter invert = ColorFilter.matrix(<double>[
   ///   -1,  0,  0, 0, 255,
   ///    0, -1,  0, 0, 255,
@@ -73,7 +73,7 @@ class EngineColorFilter implements SceneImageFilter, ui.ColorFilter {
   ///
   /// A sepia-toned color matrix (values based on the [Filter Effects Spec](https://www.w3.org/TR/filter-effects-1/#sepiaEquivalent)):
   ///
-  /// ```
+  /// ```dart
   /// const ColorFilter sepia = ColorFilter.matrix(<double>[
   ///   0.393, 0.769, 0.189, 0, 0,
   ///   0.349, 0.686, 0.168, 0, 0,
@@ -84,7 +84,7 @@ class EngineColorFilter implements SceneImageFilter, ui.ColorFilter {
   ///
   /// A greyscale color filter (values based on the [Filter Effects Spec](https://www.w3.org/TR/filter-effects-1/#grayscaleEquivalent)):
   ///
-  /// ```
+  /// ```dart
   /// const ColorFilter greyscale = ColorFilter.matrix(<double>[
   ///   0.2126, 0.7152, 0.0722, 0, 0,
   ///   0.2126, 0.7152, 0.0722, 0, 0,
