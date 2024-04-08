@@ -120,11 +120,11 @@ Future<int> run(
         // TODO(eliasyishak): remove once GA3 sunset, https://github.com/flutter/flutter/issues/128251
         if (!globals.analytics.telemetryEnabled &&
             globals.flutterUsage.enabled &&
-            !globals.flutterUsage.suppressAnalytics) {
+            !globals.flutterUsage.suppressAnalytics &&
+            globals.analytics is! NoOpAnalytics) {
           AnalyticsConfigEvent(enabled: false).send();
           globals.flutterUsage.enabled = false;
         }
-
 
         await runner.run(args);
 
