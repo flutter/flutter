@@ -2,20 +2,37 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import sys
-
 import argparse
 import os
-import zipfile
 import subprocess
+import sys
+import zipfile
 
 
-def run_command_checked(command):
+def run_command_checked(command, env=None):
   try:
-    subprocess.check_output(command, stderr=subprocess.STDOUT, text=True)
+    env = env if env is not None else os.environ
+    subprocess.check_output(command, stderr=subprocess.STDOUT, text=True, env=env)
   except subprocess.CalledProcessError as cpe:
     print(cpe.output)
     raise cpe
+
+
+def is_mac():
+  return sys.platform == 'darwin'
+
+
+def java_home():
+  script_path = os.path.dirname(os.path.realpath(__file__))
+  if is_mac():
+    return os.path.join(
+        script_path, '..', '..', '..', '..', 'third_party', 'java', 'openjdk', 'Contents', 'Home'
+    )
+  return os.path.join(script_path, '..', '..', 'third_party', 'java', 'openjdk')
+
+
+def java_bin():
+  return os.path.join(java_home(), 'bin')
 
 
 def main():
@@ -55,6 +72,9 @@ def main():
   unsigned_apk_path = os.path.join(args.gen_dir, '%s.unsigned' % apk_name)
   apk_path = args.output_path
 
+  java_path = ':'.join([java_bin(), os.environ['PATH']])
+  env = dict(os.environ, PATH=java_path, JAVA_HOME=java_home())
+
   # Create the skeleton of the APK using aapt2.
   aapt2_command = [
       args.aapt2_bin,
@@ -66,7 +86,7 @@ def main():
       '-o',
       unaligned_apk_path,
   ]
-  run_command_checked(aapt2_command)
+  run_command_checked(aapt2_command, env=env)
 
   # Stuff the library in the APK which is just a regular ZIP file. Libraries are not compressed.
   with zipfile.ZipFile(unaligned_apk_path, 'a', compression=zipfile.ZIP_STORED) as zipf:
@@ -81,14 +101,14 @@ def main():
       unaligned_apk_path,
       unsigned_apk_path,
   ]
-  run_command_checked(zipalign_command)
+  run_command_checked(zipalign_command, env=env)
 
   # Sign the APK.
   apksigner_command = [
       args.apksigner_bin, 'sign', '--ks', args.keystore, '--ks-pass', 'pass:android', '--out',
       apk_path, unsigned_apk_path
   ]
-  run_command_checked(apksigner_command)
+  run_command_checked(apksigner_command, env=env)
 
   return 0
 
