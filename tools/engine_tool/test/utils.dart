@@ -8,6 +8,7 @@ import 'dart:io' as io;
 import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:engine_tool/src/environment.dart';
 import 'package:engine_tool/src/logger.dart';
+import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 import 'package:process_fakes/process_fakes.dart';
 import 'package:process_runner/process_runner.dart';
@@ -77,6 +78,47 @@ class TestEnvironment {
       })),
       logger: logger,
     );
+  }
+
+  factory TestEnvironment.withTestEngine({
+    bool withRbe = false,
+    ffi.Abi abi = ffi.Abi.linuxX64,
+    List<CannedProcess> cannedProcesses = const <CannedProcess>[],
+  }) {
+    final io.Directory rootDir = io.Directory.systemTemp.createTempSync('et');
+    final TestEngine engine = TestEngine.createTemp(rootDir: rootDir);
+    if (withRbe) {
+      io.Directory(path.join(
+        engine.srcDir.path,
+        'flutter',
+        'build',
+        'rbe',
+      )).createSync(recursive: true);
+    }
+    // When GN runs, always try to create out/host_debug.
+    final CannedProcess cannedGn = CannedProcess((List<String> command) {
+      if (command[0].endsWith('/gn') && !command.contains('desc')) {
+        io.Directory(path.join(
+          engine.outDir.path,
+          'host_debug',
+        )).createSync(recursive: true);
+        return true;
+      }
+      return false;
+    });
+    final TestEnvironment testEnvironment = TestEnvironment(engine,
+        abi: abi, cannedProcesses: cannedProcesses + <CannedProcess>[cannedGn]);
+    return testEnvironment;
+  }
+
+  void cleanup() {
+    try {
+      if (environment.engine is TestEngine) {
+        environment.engine.srcDir.parent.deleteSync(recursive: true);
+      }
+    } catch (_) {
+      // Ignore failure to clean up.
+    }
   }
 
   /// Environment.
