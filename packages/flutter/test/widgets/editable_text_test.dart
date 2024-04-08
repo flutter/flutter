@@ -16369,6 +16369,24 @@ void main() {
         magnifierStart.dy + lineHeight / 2,
       );
 
+      // Drag back up by a quarter line height, cursor doesn't move.
+      await gesture.moveBy(Offset(0.0, -lineHeight / 4));
+      await tester.pump(const Duration(milliseconds: 20));
+      await tester.pumpAndSettle();
+      expect(find.byKey(magnifierKey), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.byKey(magnifierKey)).dy,
+        magnifierStart.dy + lineHeight / 2,
+      );
+
+      // Continuing the drag up to a half line height (whole line height scaled)
+      // does move the cursor.
+      await gesture.moveBy(Offset(0.0, -lineHeight / 4));
+      await tester.pump(const Duration(milliseconds: 20));
+      await tester.pumpAndSettle();
+      expect(find.byKey(magnifierKey), findsOneWidget);
+      expect(tester.getTopLeft(find.byKey(magnifierKey)), magnifierStart);
+
       await gesture.up();
       await tester.pump(const Duration(milliseconds: 20));
       expect(find.byKey(magnifierKey), findsNothing);

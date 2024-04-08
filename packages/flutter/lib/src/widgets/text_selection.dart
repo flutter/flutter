@@ -733,7 +733,14 @@ class TextSelectionOverlay {
   /// The handle jumps instantly between lines when the drag reaches a full
   /// line's height away from the original handle position. In other words, the
   /// line jump happens when the contact point would be located at the same
-  /// place on the handle at the new line as when the gesture started.
+  /// place on the handle at the new line as when the gesture started, for both
+  /// directions.
+  ///
+  /// This is not the same as simply maintaining an offset from the target and
+  /// the contact point. There is no point at which moving the drag up and down
+  /// a small sub-line-height distance will cause the cursor to jump up and down
+  /// between lines. The drag distance must be a full line height for the cursor
+  /// to change lines, for both directions.
   ///
   /// Both parameters must be in local coordinates because the untransformed
   /// line height is used, and the return value is in local coordinates as well.
