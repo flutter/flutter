@@ -17490,6 +17490,60 @@ void main() {
       const TextSelection(baseOffset: 12, extentOffset: 17),
     );
   });
+
+  testWidgets('selectWordEdge is correct when EditableText is scaled', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    controller.text = 'Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Transform.scale(
+            scale: 0.5,
+            child: EditableText(
+              key: key,
+              cursorColor: cursorColor,
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 2,
+              minLines: 2,
+              style: textStyle,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    //final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: -1),
+    );
+
+    // Scroll to the fourth line.
+    state.bringIntoView(const TextPosition(offset: 18));
+    await tester.pumpAndSettle();
+
+    // Secondary tap inside of the 3rd line.
+    state.renderEditable.handleSecondaryTapDown(TapDownDetails(
+      globalPosition: textOffsetToPosition(tester, 13),
+    ));
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: -1),
+    );
+
+    // selectWordEdge moves the selection to the end of the 3rd line.
+    state.renderEditable.selectWordEdge(
+      cause: SelectionChangedCause.tap,
+    );
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: 17, affinity: TextAffinity.upstream),
+    );
+  });
 }
 
 class UnsettableController extends TextEditingController {
