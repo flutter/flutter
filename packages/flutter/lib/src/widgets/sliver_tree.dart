@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
+// import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -30,27 +30,27 @@ import 'ticker_provider.dart';
 
 /// A data structure for configuring children of a [SliverTree].
 ///
-/// A [TreeNode.content] can be of any type, but must correspond with the same
+/// A [SliverTreeNode.content] can be of any type, but must correspond with the same
 /// type of the [SliverTree].
 ///
 /// Getters for [depth], [parent] and [isExpanded] are managed by the
 /// [SliverTree]'s state.
-class TreeNode<T> {
-  /// Creates a [TreeNode] instance for use in a [SliverTree].
-  TreeNode(
+class SliverTreeNode<T> {
+  /// Creates a [SliverTreeNode] instance for use in a [SliverTree].
+  SliverTreeNode(
     this.content, {
-    List<TreeNode<T>>? children,
+    List<SliverTreeNode<T>>? children,
     bool expanded = false,
   })  : _expanded = children != null && children.isNotEmpty && expanded,
-        children = children ?? <TreeNode<T>>[];
+        children = children ?? <SliverTreeNode<T>>[];
 
   /// The subject matter of the node.
   ///
   /// Must correspond with the type of [SliverTree].
   final T content;
 
-  /// Other [TreeNode]s this this node will be [parent] to.
-  final List<TreeNode<T>> children;
+  /// Other [SliverTreeNode]s this this node will be [parent] to.
+  final List<SliverTreeNode<T>> children;
 
   /// Whether or not this node is expanded in the tree.
   ///
@@ -62,31 +62,31 @@ class TreeNode<T> {
   int? get depth => _depth;
   int? _depth;
 
-  /// The parent [TreeNode] of this node.
-  TreeNode<T>? get parent => _parent;
-  TreeNode<T>? _parent;
+  /// The parent [SliverTreeNode] of this node.
+  SliverTreeNode<T>? get parent => _parent;
+  SliverTreeNode<T>? _parent;
 
   @override
   String toString() {
-    return 'TreeNode: $content, depth: ${depth == 0 ? 'root' : depth}, '
+    return 'SliverTreeNode: $content, depth: ${depth == 0 ? 'root' : depth}, '
       '${children.isEmpty ? 'leaf' : 'parent, expanded: $isExpanded'}';
   }
 }
 
 
 /// Signature for a function that creates a [Widget] to represent the given
-/// [TreeNode] in the [SliverTree].
+/// [SliverTreeNode] in the [SliverTree].
 ///
 /// Used by [SliverTree.treeRowBuilder] to build rows on demand for the
 /// tree.
 typedef TreeRowBuilder = Widget Function(
   BuildContext context,
-  TreeNode<dynamic> node, {
+  SliverTreeNode<dynamic> node, {
   AnimationStyle? animationStyle,
 });
 
 /// Signature for a function that returns an extent for the given
-/// [TreeNode] in the [SliverTree].
+/// [SliverTreeNode] in the [SliverTree].
 ///
 /// Used by [SliverTree.treeRowExtentBuilder] to size rows on demand in the
 /// tree. The provided [SliverLayoutDimensions] provide information about the
@@ -97,20 +97,24 @@ typedef TreeRowBuilder = Widget Function(
 ///   * [SliverVariedExtentList], which uses a similar item extent builder for
 ///     dynamic child sizing in the list.
 typedef TreeRowExtentBuilder = double Function(
-  TreeNode<dynamic> node,
+  SliverTreeNode<dynamic> node,
   SliverLayoutDimensions dimensions,
 );
 
-/// Signature for a function that is called when a [TreeNode] is toggled,
+/// Signature for a function that is called when a [SliverTreeNode] is toggled,
 /// changing its expanded state.
 ///
 /// See also:
 ///
-///   * [TreeNode.toggleNode], for controlling node expansion programmatically.
-typedef TreeNodeCallback = void Function(TreeNode<dynamic> node);
+///   * [SliverTreeNode.toggleNode], for controlling node expansion
+///     programmatically.
+typedef TreeNodeCallback = void Function(SliverTreeNode<dynamic> node);
 
-// For code simplicity where used.
-typedef _AnimationRecord = ({AnimationController controller, Animation<double> animation});
+// For code simplicity where used in the widget layer.
+typedef _AnimationRecord = ({
+  AnimationController controller,
+  Animation<double> animation,
+});
 
 /// A mixin for classes implementing a tree structure as expected by a
 /// [TreeController].
@@ -120,36 +124,36 @@ typedef _AnimationRecord = ({AnimationController controller, Animation<double> a
 /// This allows the [TreeController] to be used in other widgets that implement
 /// this interface.
 mixin TreeStateMixin<T> {
-  /// Returns whether or not the given [TreeNode] is expanded.
-  bool isExpanded(TreeNode<T> node);
+  /// Returns whether or not the given [SliverTreeNode] is expanded.
+  bool isExpanded(SliverTreeNode<T> node);
 
-  /// Returns whether or not the given [TreeNode] is enclosed within its parent
-  /// [TreeNode].
+  /// Returns whether or not the given [SliverTreeNode] is enclosed within its parent
+  /// [SliverTreeNode].
   ///
   /// If the [TreeNode.parent] [isExpanded], or this is a root node, the given
   /// node is active and this method will return true. This does not reflect
   /// whether or not the node is visible in the [Viewport].
-  bool isActive(TreeNode<T> node);
+  bool isActive(SliverTreeNode<T> node);
 
-  /// Switches the given [TreeNode]s expanded state.
+  /// Switches the given [SliverTreeNode]s expanded state.
   ///
   /// May trigger an animation to reveal or hide the node's children based on
   /// the [SliverTree.animationStyle].
   ///
   /// If the node does not have any children, nothing will happen.
-  void toggleNode(TreeNode<T> node);
+  void toggleNode(SliverTreeNode<T> node);
 
-  /// Closes all parent [TreeNode]s in the tree.
+  /// Closes all parent [SliverTreeNode]s in the tree.
   void collapseAll();
 
-  /// Expands all parent [TreeNode]s in the tree.
+  /// Expands all parent [SliverTreeNode]s in the tree.
   void expandAll();
 
-  /// Retrieves the [TreeNode] containing the associated content, if it exists.
+  /// Retrieves the [SliverTreeNode] containing the associated content, if it exists.
   ///
   /// If no node exists, this will return null. This does not reflect whether
   /// or not a node [isActive], or if it is visible in the viewport.
-  TreeNode<T>? getNodeFor(T content);
+  SliverTreeNode<T>? getNodeFor(T content);
 }
 
 /// Enables control over the [TreeNodes] of a [SliverTree].
@@ -170,7 +174,7 @@ class TreeController {
 
   TreeStateMixin<dynamic>? _state;
 
-  /// Whether the given [TreeNode] built with this controller is in an
+  /// Whether the given [SliverTreeNode] built with this controller is in an
   /// expanded state.
   ///
   /// This property doesn't take the animation into account. It reports `true`
@@ -178,46 +182,46 @@ class TreeController {
   ///
   /// See also:
   ///
-  ///  * [expandNode], which expands a given [TreeNode].
-  ///  * [collapseNode], which collapses a given [TreeNode].
+  ///  * [expandNode], which expands a given [SliverTreeNode].
+  ///  * [collapseNode], which collapses a given [SliverTreeNode].
   ///  * [SliverTree.controller] to create an SliverTree with a controller.
-  bool isExpanded(TreeNode<dynamic> node) {
+  bool isExpanded(SliverTreeNode<dynamic> node) {
     assert(_state != null);
     return _state!.isExpanded(node);
   }
 
-  /// Whether or not the given [TreeNode] is enclosed within its parent
-  /// [TreeNode].
+  /// Whether or not the given [SliverTreeNode] is enclosed within its parent
+  /// [SliverTreeNode].
   ///
   /// If the [TreeNode.parent] [isExpanded], or this is a root node, the given
   /// node is active and this method will return true. This does not reflect
   /// whether or not the node is visible in the [Viewport].
-  bool isActive(TreeNode<dynamic> node) {
+  bool isActive(SliverTreeNode<dynamic> node) {
     assert(_state != null);
     return _state!.isActive(node);
   }
 
-  /// Returns the [TreeNode] containing the associated content, if it exists.
+  /// Returns the [SliverTreeNode] containing the associated content, if it exists.
   ///
   /// If no node exists, this will return null. This does not reflect whether
   /// or not a node [isActive], or if it is currently visible in the viewport.
-  TreeNode<dynamic>? getNodeFor(dynamic content) {
+  SliverTreeNode<dynamic>? getNodeFor(dynamic content) {
     assert(_state != null);
     return _state!.getNodeFor(content);
   }
 
-  /// Switches the given [TreeNode]s expanded state.
+  /// Switches the given [SliverTreeNode]s expanded state.
   ///
   /// May trigger an animation to reveal or hide the node's children based on
   /// the [SliverTree.animationStyle].
   ///
   /// If the node does not have any children, nothing will happen.
-  void toggleNode(TreeNode<dynamic> node) {
+  void toggleNode(SliverTreeNode<dynamic> node) {
     assert(_state != null);
     return _state!.toggleNode(node);
   }
 
-  /// Expands the [TreeNode] that was built with this controller.
+  /// Expands the [SliverTreeNode] that was built with this controller.
   ///
   /// If the node is already in the expanded state (see [isExpanded]), calling
   /// this method has no effect.
@@ -229,29 +233,29 @@ class TreeController {
   ///
   /// See also:
   ///
-  ///  * [collapseNode], which collapses the [TreeNode].
+  ///  * [collapseNode], which collapses the [SliverTreeNode].
   ///  * [isExpanded] to check whether the tile is expanded.
   ///  * [SliverTree.controller] to create an SliverTree with a controller.
-  void expandNode(TreeNode<dynamic> node) {
+  void expandNode(SliverTreeNode<dynamic> node) {
     assert(_state != null);
     if (!node.isExpanded) {
       _state!.toggleNode(node);
     }
   }
 
-  /// Expands all parent [TreeNode]s in the tree.
+  /// Expands all parent [SliverTreeNode]s in the tree.
   void expandAll() {
     assert(_state != null);
     _state!.expandAll();
   }
 
-  /// Closes all parent [TreeNode]s in the tree.
+  /// Closes all parent [SliverTreeNode]s in the tree.
   void collapseAll() {
     assert(_state != null);
     _state!.collapseAll();
   }
 
-  /// Collapses the [TreeNode] that was built with this controller.
+  /// Collapses the [SliverTreeNode] that was built with this controller.
   ///
   /// If the node is already in the collapsed state (see [isExpanded]), calling
   /// this method has no effect.
@@ -266,7 +270,7 @@ class TreeController {
   ///  * [expandNode], which expands the tile.
   ///  * [isExpanded] to check whether the tile is expanded.
   ///  * [SliverTree.controller] to create an SliverTree with a controller.
-  void collapseNode(TreeNode<dynamic> node) {
+  void collapseNode(SliverTreeNode<dynamic> node) {
     assert(_state != null);
     if (node.isExpanded) {
       _state!.toggleNode(node);
@@ -348,7 +352,7 @@ class TreeController {
   }
 }
 
-/// A sliver for lazily displaying [TreeNode]s that expand and collapse in a
+/// A sliver for lazily displaying [SliverTreeNode]s that expand and collapse in a
 /// vertically scrolling [Viewport].
 class SliverTree<T> extends StatefulWidget {
   /// Creates an instance of a SliverTree.
@@ -367,13 +371,13 @@ class SliverTree<T> extends StatefulWidget {
     this.animationStyle,
   });
 
-  /// The list of [TreeNode]s that may be displayed in the [SliverTree].
+  /// The list of [SliverTreeNode]s that may be displayed in the [SliverTree].
   ///
-  /// Beyond root nodes, whether or not a given [TreeNode] is displayed depends
-  /// on the [TreeNode.isExpanded] value of its parent. The [SliverTree] will
-  /// set the [TreeNode.parent] and [TreeNode.depth] as nodes are built on
+  /// Beyond root nodes, whether or not a given [SliverTreeNode] is displayed depends
+  /// on the [SliverTreeNode.isExpanded] value of its parent. The [SliverTree] will
+  /// set the [SliverTreeNode.parent] and [SliverTreeNode.depth] as nodes are built on
   /// demand to ensure the integrity of the tree.
-  final List<TreeNode<T>> tree;
+  final List<SliverTreeNode<T>> tree;
 
   /// Called to build and entry of the [SliverTree] for the given node.
   ///
@@ -382,7 +386,7 @@ class SliverTree<T> extends StatefulWidget {
   final TreeRowBuilder treeRowBuilder;
 
   /// Called to calculate the extent of the widget built for the given
-  /// [TreeNode].
+  /// [SliverTreeNode].
   ///
   /// By default, if this is unset, the [SliverTree.defaultTreeRowExtentBuilder]
   /// is used.
@@ -394,13 +398,13 @@ class SliverTree<T> extends StatefulWidget {
   final TreeRowExtentBuilder treeRowExtentBuilder;
 
   /// If provided, the controller can be used to expand and collapse
-  /// [TreeNode]s, or lookup information about the current state of the
+  /// [SliverTreeNode]s, or lookup information about the current state of the
   /// [SliverTree].
   final TreeController? controller;
 
-  /// Called when a [TreeNode] expands or collapses.
+  /// Called when a [SliverTreeNode] expands or collapses.
   ///
-  /// This will not be called if a [TreeNode] does not have any children.
+  /// This will not be called if a [SliverTreeNode] does not have any children.
   final TreeNodeCallback? onNodeToggle;
 
   /// {@macro flutter.widgets.SliverChildBuilderDelegate.addAutomaticKeepAlives}
@@ -435,7 +439,7 @@ class SliverTree<T> extends StatefulWidget {
   /// expanding and collapsing node animation.
   static const Duration defaultAnimationDuration = Duration(milliseconds: 150);
 
-  /// A wrapper method for triggering the expansion or collapse of a [TreeNode].
+  /// A wrapper method for triggering the expansion or collapse of a [SliverTreeNode].
   ///
   /// Use as part of [SliverTree.defaultTreeRowBuilder] to wrap the leading icon
   /// of parent [TreeNodes] such that tapping on it triggers the animation.
@@ -444,7 +448,7 @@ class SliverTree<T> extends StatefulWidget {
   /// to wrap any part, or all, of the returned widget in order to trigger the
   /// change in state for the node.
   static Widget toggleNodeWith({
-    required TreeNode<dynamic> node,
+    required SliverTreeNode<dynamic> node,
     required Widget child,
   }) {
     return Builder(builder: (BuildContext context) {
@@ -461,23 +465,23 @@ class SliverTree<T> extends StatefulWidget {
   ///
   /// Used by [SliverTree.defaultTreeRowExtentBuilder].
   static double defaultTreeRowExtentBuilder(
-    TreeNode<dynamic> node,
+    SliverTreeNode<dynamic> node,
     SliverLayoutDimensions dimensions,
   ) {
     return 40.0;
   }
 
-  /// Returns the default tree row for a given [TreeNode].
+  /// Returns the default tree row for a given [SliverTreeNode].
   ///
   /// Used by [SliverTree.defaultTreeRowBuilder].
   ///
-  /// This will return a [Row] containing the [toString] of [TreeNode.content].
-  /// If the [TreeNode] is a parent of additional nodes, a arrow icon will
+  /// This will return a [Row] containing the [toString] of [SliverTreeNode.content].
+  /// If the [SliverTreeNode] is a parent of additional nodes, a arrow icon will
   /// precede the content, and will trigger an expand and collapse animation
   /// when tapped.
   static Widget defaultTreeRowBuilder(
     BuildContext context,
-    TreeNode<dynamic> node, {
+    SliverTreeNode<dynamic> node, {
     AnimationStyle? animationStyle
   }) {
     return Padding(
@@ -516,17 +520,17 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
   TreeController get controller => _treeController!;
   TreeController? _treeController;
 
-  final List<TreeNode<T>> _activeNodes = <TreeNode<T>>[];
+  final List<SliverTreeNode<T>> _activeNodes = <SliverTreeNode<T>>[];
   void _unpackActiveNodes({
     int depth = 0,
-    List<TreeNode<T>>? nodes,
-    TreeNode<T>? parent,
+    List<SliverTreeNode<T>>? nodes,
+    SliverTreeNode<T>? parent,
   }) {
     if (nodes == null) {
       _activeNodes.clear();
       nodes = widget.tree;
     }
-    for (final TreeNode<T> node in nodes) {
+    for (final SliverTreeNode<T> node in nodes) {
       node._depth = depth;
       node._parent = parent;
       _activeNodes.add(node);
@@ -540,13 +544,14 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
     }
   }
 
-  final Map<TreeNode<T>, _AnimationRecord> _currentAnimationForParent = <TreeNode<T>, _AnimationRecord>{};
-  double? _animationValueFor(TreeNode<T> node) {
-    if (node.parent == null) {
-      return null;
-    }
-    return _currentAnimationForParent[node.parent!]?.animation.value;
-  }
+  final Map<SliverTreeNode<T>, _AnimationRecord> _currentAnimationForParent = <SliverTreeNode<T>, _AnimationRecord>{};
+  final Map<UniqueKey, SliverTreeNodesAnimation> _activeAnimations = <UniqueKey, SliverTreeNodesAnimation>{};
+  // double? _animationValueFor(SliverTreeNode<T> node) {
+  //   if (node.parent == null) {
+  //     return null;
+  //   }
+  //   return _currentAnimationForParent[node.parent!]?.animation.value;
+  // }
 
   @override
   void initState() {
@@ -585,8 +590,8 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
       _treeController!._state = this;
     }
     // Internal or provided, there is always a tree controller.
-    // TODO(Piinks): ^ Why? Is this an artifact from a previously public state?
     assert(_treeController != null);
+    assert(_treeController!._state != null);
     super.didUpdateWidget(oldWidget);
   }
 
@@ -600,8 +605,9 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
   Widget build(BuildContext context) {
     return _SliverTree(
       itemCount: _activeNodes.length,
+      activeAnimations: _activeAnimations,
       itemBuilder: (BuildContext context, int index) {
-        final TreeNode<T> node = _activeNodes[index];
+        final SliverTreeNode<T> node = _activeNodes[index];
         Widget child = widget.treeRowBuilder(
           context,
           node,
@@ -612,7 +618,7 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
           child = RepaintBoundary(child: child);
         }
         if (widget.addSemanticIndexes) {
-          // TODO(Piinks), see todo on constructor
+          // TODO(Piinks): see todo on constructor
           // final int? semanticIndex = widget.semanticIndexCallback(child, index);
           // if (semanticIndex != null) {
             child = IndexedSemantics(index: index/*semanticIndex + semanticIndexOffset*/, child: child);
@@ -621,16 +627,11 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
 
         return _TreeNodeParentDataWidget(
           hasAnimatingChildren: _currentAnimationForParent.keys.contains(node),
-          animationValue: _animationValueFor(node),
           depth: node.depth!,
           child: child,
         );
       },
       itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
-        if (index >= _activeNodes.length) {
-          // See
-          return 100;
-        }
         return widget.treeRowExtentBuilder(_activeNodes[index], dimensions);
       },
       addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
@@ -641,17 +642,17 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
   // TreeStateMixin Implementation
 
   @override
-  bool isExpanded(TreeNode<T> node) {
+  bool isExpanded(SliverTreeNode<T> node) {
     return _getNode(node.content, widget.tree)?.isExpanded ?? false;
   }
 
   @override
-  bool isActive(TreeNode<T> node) => _activeNodes.contains(node);
+  bool isActive(SliverTreeNode<T> node) => _activeNodes.contains(node);
 
   @override
-  TreeNode<T>? getNodeFor(T content) => _getNode(content, widget.tree);
-  TreeNode<T>? _getNode(T content, List<TreeNode<T>> tree) {
-    for (final TreeNode<T> node in tree) {
+  SliverTreeNode<T>? getNodeFor(T content) => _getNode(content, widget.tree);
+  SliverTreeNode<T>? _getNode(T content, List<SliverTreeNode<T>> tree) {
+    for (final SliverTreeNode<T> node in tree) {
       if (node.content == content) {
         return node;
       }
@@ -664,8 +665,8 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
 
   @override
   void expandAll() => _expand(widget.tree);
-  void _expand(List<TreeNode<T>> tree) {
-    for (final TreeNode<T> node in tree) {
+  void _expand(List<SliverTreeNode<T>> tree) {
+    for (final SliverTreeNode<T> node in tree) {
       if (node.children.isNotEmpty) {
         if (!node.isExpanded) {
           toggleNode(node);
@@ -677,8 +678,8 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
 
   @override
   void collapseAll() => _collapse(widget.tree);
-  void _collapse(List<TreeNode<T>> tree) {
-    for (final TreeNode<T> node in tree) {
+  void _collapse(List<SliverTreeNode<T>> tree) {
+    for (final SliverTreeNode<T> node in tree) {
       if (node.children.isNotEmpty) {
         if (node.isExpanded) {
           toggleNode(node);
@@ -689,7 +690,7 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
   }
 
   @override
-  void toggleNode(TreeNode<T> node) {
+  void toggleNode(SliverTreeNode<T> node) {
     assert(_activeNodes.contains(node));
     if (node.children.isEmpty) {
       // No state to change.
@@ -700,6 +701,7 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
       if (widget.onNodeToggle != null) {
         widget.onNodeToggle!(node);
       }
+      final UniqueKey animationKey = UniqueKey();
       final AnimationController controller = _currentAnimationForParent[node]?.controller
         ?? AnimationController(
           value: node._expanded ? 0.0 : 1.0,
@@ -710,6 +712,7 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
             case AnimationStatus.dismissed:
             case AnimationStatus.completed:
               _currentAnimationForParent[node]!.controller.dispose();
+              _activeAnimations.remove(animationKey);
               _currentAnimationForParent.remove(node);
             case AnimationStatus.forward:
             case AnimationStatus.reverse:
@@ -729,7 +732,18 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
         parent: controller,
         curve: widget.animationStyle?.curve ?? SliverTree.defaultAnimationCurve,
       );
-      _currentAnimationForParent[node] = (controller: controller, animation: newAnimation);
+      _currentAnimationForParent[node] = (
+        controller: controller,
+        animation: newAnimation,
+      );
+      final SliverTreeNodesAnimation animatingChildren = (
+        // TODO : Fix
+        fromIndex: 0,
+        toIndex: 0,
+        value: newAnimation.value,
+      );
+      // TODO: Update every other currently running naimation whose index has changed!
+      _activeAnimations[animationKey] = animatingChildren;
       _unpackActiveNodes();
       switch (node._expanded) {
         case true:
@@ -756,12 +770,6 @@ class _TreeNodeParentData extends SliverMultiBoxAdaptorParentData {
   // animation can be respected.
   bool hasAnimatingChildren = false;
 
-  // The current value of the expand or collapse animation that affects this
-  // node of the tree.
-  //
-  // Used by the render object to offset the layout position of the row.
-  double? animationValue;
-
   // The depth of the node, used by the render object to traverse nodes in a
   // depth or breadth order.
   int depth = 0;
@@ -770,13 +778,11 @@ class _TreeNodeParentData extends SliverMultiBoxAdaptorParentData {
 class _TreeNodeParentDataWidget extends ParentDataWidget<_TreeNodeParentData> {
   const _TreeNodeParentDataWidget({
     this.hasAnimatingChildren = false,
-    required this.animationValue,
     required this.depth,
     required super.child,
   }) : assert(depth >= 0);
 
   final bool hasAnimatingChildren;
-  final double? animationValue;
   final int depth;
 
   @override
@@ -785,12 +791,6 @@ class _TreeNodeParentDataWidget extends ParentDataWidget<_TreeNodeParentData> {
     bool needsLayout = false;
     if (parentData.hasAnimatingChildren != hasAnimatingChildren) {
       parentData.hasAnimatingChildren = hasAnimatingChildren;
-      needsLayout = true;
-    }
-
-    if (parentData.animationValue != animationValue) {
-      assert(animationValue == null || animationValue! >= 0);
-      parentData.animationValue = animationValue;
       needsLayout = true;
     }
 
@@ -811,9 +811,6 @@ class _TreeNodeParentDataWidget extends ParentDataWidget<_TreeNodeParentData> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    if (animationValue != null) {
-      properties.add(DoubleProperty('animationValue', animationValue));
-    }
     properties.add(IntProperty('depth', depth));
   }
 }
@@ -822,6 +819,7 @@ class _SliverTree extends SliverVariedExtentList {
   _SliverTree({
     required NullableIndexedWidgetBuilder itemBuilder,
     required super.itemExtentBuilder,
+    required this.activeAnimations,
     ChildIndexGetter? findChildIndexCallback,
     int? itemCount,
     bool addAutomaticKeepAlives = true,
@@ -834,29 +832,75 @@ class _SliverTree extends SliverVariedExtentList {
     addSemanticIndexes: false, // Added in the _SliverTreeState
   ));
 
+  final Map<UniqueKey, SliverTreeNodesAnimation> activeAnimations;
+
   @override
   RenderSliverTree createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
     return RenderSliverTree(
       itemExtentBuilder: itemExtentBuilder,
+      activeAnimations: activeAnimations,
       childManager: element,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderSliverTree renderObject) {
-    renderObject.itemExtentBuilder = itemExtentBuilder;
+    renderObject
+      ..itemExtentBuilder = itemExtentBuilder
+      ..activeAnimations = activeAnimations;
   }
 }
+
+// For code simplicity where used in the rendering layer.
+///
+typedef SliverTreeNodesAnimation = ({
+  int fromIndex,
+  int toIndex,
+  double value,
+});
 
 // This will likely need to move to the same file as RenderSliverMultiBoxAdaptor
 // to access private API around keep alives
 // Lazily lays out children in the tree, accounting for animation offsets.
+///
 class RenderSliverTree extends RenderSliverVariedExtentList {
+  ///
   RenderSliverTree({
     required super.childManager,
     required super.itemExtentBuilder,
-  });
+    required Map<UniqueKey, SliverTreeNodesAnimation> activeAnimations,
+  }) : _activeAnimations = activeAnimations {
+    _updateAnimationCache();
+  }
+
+  ///
+  Map<UniqueKey, SliverTreeNodesAnimation> get activeAnimations => _activeAnimations;
+  Map<UniqueKey, SliverTreeNodesAnimation> _activeAnimations;
+  set activeAnimations(Map<UniqueKey, SliverTreeNodesAnimation> value) {
+    if (_activeAnimations == value) {
+      return;
+    }
+    _activeAnimations = value;
+    _updateAnimationCache();
+    markNeedsLayout();
+  }
+
+  Map<int, UniqueKey> _animationLeadingIndices = <int, UniqueKey>{};
+  // Map<int, UniqueKey> _animationIndices = <int, UniqueKey>{};
+  Map<UniqueKey, double> _animationOffsets = <UniqueKey, double>{};
+  void _updateAnimationCache() {
+    // _animationIndices.clear();
+    _animationLeadingIndices.clear();
+    _activeAnimations.forEach((UniqueKey key, SliverTreeNodesAnimation animation) {
+      _animationLeadingIndices[animation.fromIndex] = key;
+      // for (int i = animation.fromIndex; i <= animation.toIndex; i++) {
+      //   _animationIndices[i] = key;
+      // }
+    });
+    // Remove any stored offsets that are no longer actively animating.
+    _animationOffsets.removeWhere((UniqueKey key, _) => !_activeAnimations.keys.contains(key));
+  }
 
   @override
   void setupParentData(RenderBox child) {
@@ -865,197 +909,65 @@ class RenderSliverTree extends RenderSliverVariedExtentList {
     }
   }
 
-  int _calculateLeadingGarbage(int firstIndex) {
-    RenderBox? walker = firstChild;
-    int leadingGarbage = 0;
-    while (walker != null && indexOf(walker) < firstIndex) {
-      leadingGarbage += 1;
-      walker = childAfter(walker);
-    }
-    return leadingGarbage;
-  }
-
-  int _calculateTrailingGarbage(int targetLastIndex) {
-    RenderBox? walker = lastChild;
-    int trailingGarbage = 0;
-    while (walker != null && indexOf(walker) > targetLastIndex) {
-      trailingGarbage += 1;
-      walker = childBefore(walker);
-    }
-    return trailingGarbage;
-  }
-
-  BoxConstraints _getChildConstraints(int index) {
-    final double extent = itemExtentBuilder(index, _currentLayoutDimensions);
-    return constraints.asBoxConstraints(
-      minExtent: extent,
-      maxExtent: extent,
-    );
-  }
-
-  _TreeNodeParentData _getParentData(RenderBox child) {
-    return child.parentData! as _TreeNodeParentData;
-  }
-
-
   late SliverLayoutDimensions _currentLayoutDimensions;
-
   @override
   void performLayout() {
-    final SliverConstraints constraints = this.constraints;
-    assert(constraints.axisDirection == AxisDirection.down);
-    childManager.didStartLayout();
-    childManager.setDidUnderflow(false);
-
-    // final double itemFixedExtent = itemExtent ?? 0;
-    final double scrollOffset = constraints.scrollOffset + constraints.cacheOrigin;
-    assert(scrollOffset >= 0.0);
-    final double remainingExtent = constraints.remainingCacheExtent;
-    assert(remainingExtent >= 0.0);
-    final double targetEndScrollOffset = scrollOffset + remainingExtent;
-
     _currentLayoutDimensions = SliverLayoutDimensions(
         scrollOffset: constraints.scrollOffset,
         precedingScrollExtent: constraints.precedingScrollExtent,
         viewportMainAxisExtent: constraints.viewportMainAxisExtent,
         crossAxisExtent: constraints.crossAxisExtent
     );
+    super.performLayout();
+  }
 
-    final int firstIndex = getMinChildIndexForScrollOffset(scrollOffset, -1);
-    // This is an estimate. Animation offsets may necessitate more children
-    final int? targetLastIndex = targetEndScrollOffset.isFinite ?
-        getMaxChildIndexForScrollOffset(targetEndScrollOffset, -1) : null;
-
-    // TODO(Piinks): Move garbage collection to later when firstChild == null,
-    // after we have accounted for animation offsets
-    if (firstChild != null) {
-      final int leadingGarbage = _calculateLeadingGarbage(firstIndex);
-      final int trailingGarbage = targetLastIndex != null ? _calculateTrailingGarbage(targetLastIndex) : 0;
-      collectGarbage(leadingGarbage, trailingGarbage);
-    } else {
-      collectGarbage(0, 0);
+  @override
+  int getMinChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
+    // itemExtent is deprecated in the super class, we ignore it because we use
+    // the builder anyways.
+    if (scrollOffset == 0.0) {
+      return 0;
     }
-
-    if (firstChild == null) {
-      // TODO(Piinks): collect garbage
-      // collectGarbage(0, 0);
-      if (!addInitialChild(index: firstIndex, layoutOffset: indexToLayoutOffset(-1, firstIndex))) {
-        // There are either no children, or we are past the end of all our children.
-        final double max;
-        if (firstIndex <= 0) {
-          max = 0.0;
-        } else {
-          max = computeMaxScrollOffset(constraints, -1);
+    double position = 0.0;
+    int index = 0;
+    double totalAnimationOffset = 0.0;
+    double? itemExtent;
+    final int? childCount = childManager.estimatedChildCount;
+    while (position < scrollOffset) {
+      if (childCount != null && index > childCount - 1) {
+        break;
+      }
+      itemExtent = itemExtentBuilder(index, _currentLayoutDimensions);
+      if (itemExtent == null) {
+        break;
+      }
+      if (_animationLeadingIndices.keys.contains(index)) {
+        if (_animationOffsets[_animationLeadingIndices[index]] == null) {
+          // We have not computed the distance this block is traversing over the
+          // lifetime of the animation.
+          _computeAnimationOffsetFor(_animationLeadingIndices[index]!, position);
         }
-        geometry = SliverGeometry(
-          scrollExtent: max,
-          maxPaintExtent: max,
-        );
-        childManager.didFinishLayout();
-        return;
+        totalAnimationOffset += _animationOffsets[_animationLeadingIndices[index]]!;
       }
+      position += itemExtent - totalAnimationOffset;
+      ++index;
     }
+    return index - 1;
+  }
 
-    RenderBox? trailingChildWithLayout;
+  void _computeAnimationOffsetFor(UniqueKey key, double position) {
+    assert(_activeAnimations[key] != null);
+    final targetPosition = constraints.scrollOffset + constraints.remainingCacheExtent;
+    double currentPosition = position;
+    // We animate only a portion of children that would be visible/in the cache
+    // extent, unless all would fit on the screen.
+    final int startingIndex = _activeAnimations[key]!.fromIndex;
+    final int lastIndex = _activeAnimations[key]!.toIndex;
+    int currentIndex = startingIndex;
+    double totalOffset = 0.0;
+    while (startingIndex <= lastIndex && currentPosition < targetPosition) {
 
-    // Layout children that come before the pre-existing firstChild.
-    // This happens when, after the last frame, the user scrolled back up,
-    // scrolling the firstChild of the last frame down the screen.
-    for (int index = indexOf(firstChild!) - 1; index >= firstIndex; --index) {
-      final RenderBox? child = insertAndLayoutLeadingChild(_getChildConstraints(index));
-      if (child == null) {
-        // Items before the previous firstChild are no longer present.
-        // Reset the scroll offset to offset all items prior and up to the
-        // missing item. Let parent re-layout everything.
-        geometry = SliverGeometry(scrollOffsetCorrection: indexToLayoutOffset(-1, index));
-        return;
-      }
-      final _TreeNodeParentData childParentData = child.parentData! as _TreeNodeParentData;
-      childParentData.layoutOffset = indexToLayoutOffset(-1, index);
-      assert(childParentData.index == index);
-      trailingChildWithLayout ??= child;
     }
-
-    // If we have managed to not lay anything out yet. Layout first child.
-    if (trailingChildWithLayout == null) {
-      firstChild!.layout(_getChildConstraints(indexOf(firstChild!)));
-      final _TreeNodeParentData childParentData = firstChild!.parentData! as _TreeNodeParentData;
-      childParentData.layoutOffset = indexToLayoutOffset(-1, firstIndex);
-      trailingChildWithLayout = firstChild;
-    }
-
-    // Lay out the children that follow after now.
-    double estimatedMaxScrollOffset = double.infinity;
-    for (int index = indexOf(trailingChildWithLayout!) + 1; targetLastIndex == null || index <= targetLastIndex; ++index) {
-      RenderBox? child = childAfter(trailingChildWithLayout!);
-      if (child == null || indexOf(child) != index) {
-        child = insertAndLayoutChild(_getChildConstraints(index), after: trailingChildWithLayout);
-        if (child == null) {
-          // We have run out of children.
-          estimatedMaxScrollOffset = indexToLayoutOffset(-1, index);
-          break;
-        }
-      } else {
-        child.layout(_getChildConstraints(index));
-      }
-      trailingChildWithLayout = child;
-      final _TreeNodeParentData childParentData = child.parentData! as _TreeNodeParentData;
-      assert(childParentData.index == index);
-      childParentData.layoutOffset = indexToLayoutOffset(-1, childParentData.index!);
-    }
-
-    final int lastIndex = indexOf(lastChild!);
-    final double leadingScrollOffset = indexToLayoutOffset(-1, firstIndex);
-    final double trailingScrollOffset = indexToLayoutOffset(-1, lastIndex + 1);
-
-    assert(firstIndex == 0 || childScrollOffset(firstChild!)! - scrollOffset <= precisionErrorTolerance);
-    assert(debugAssertChildListIsNonEmptyAndContiguous());
-    assert(indexOf(firstChild!) == firstIndex);
-    assert(targetLastIndex == null || lastIndex <= targetLastIndex);
-
-    estimatedMaxScrollOffset = math.min(
-      estimatedMaxScrollOffset,
-      estimateMaxScrollOffset(
-        constraints,
-        firstIndex: firstIndex,
-        lastIndex: lastIndex,
-        leadingScrollOffset: leadingScrollOffset,
-        trailingScrollOffset: trailingScrollOffset,
-      ),
-    );
-
-    final double paintExtent = calculatePaintOffset(
-      constraints,
-      from: leadingScrollOffset,
-      to: trailingScrollOffset,
-    );
-
-    final double cacheExtent = calculateCacheOffset(
-      constraints,
-      from: leadingScrollOffset,
-      to: trailingScrollOffset,
-    );
-
-    final double targetEndScrollOffsetForPaint = constraints.scrollOffset + constraints.remainingPaintExtent;
-    final int? targetLastIndexForPaint = targetEndScrollOffsetForPaint.isFinite ?
-        getMaxChildIndexForScrollOffset(targetEndScrollOffsetForPaint, -1) : null;
-
-    geometry = SliverGeometry(
-      scrollExtent: estimatedMaxScrollOffset,
-      paintExtent: paintExtent,
-      cacheExtent: cacheExtent,
-      maxPaintExtent: estimatedMaxScrollOffset,
-      // Conservative to avoid flickering away the clip during scroll.
-      hasVisualOverflow: (targetLastIndexForPaint != null && lastIndex >= targetLastIndexForPaint)
-        || constraints.scrollOffset > 0.0,
-    );
-
-    // We may have started the layout while scrolled to the end, which would not
-    // expose a new child.
-    if (estimatedMaxScrollOffset == trailingScrollOffset) {
-      childManager.setDidUnderflow(true);
-    }
-    childManager.didFinishLayout();
   }
 
   @override
