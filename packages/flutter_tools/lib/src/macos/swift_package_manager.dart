@@ -71,9 +71,12 @@ class SwiftPackageManager {
       swiftSupportedPlatform = _macosSwiftPackageSupportedPlatform;
     }
 
+    // FlutterGeneratedPluginSwiftPackage must be statically linked to ensure
+    // any dynamic dependencies are linked to Runner and prevent undefined symbols.
     final SwiftPackageProduct generatedProduct = SwiftPackageProduct(
       name: _defaultFlutterPluginsSwiftPackageName,
       targets: <String>[_defaultFlutterPluginsSwiftPackageName],
+      libraryType: SwiftPackageLibraryType.static,
     );
 
     final SwiftPackageTarget generatedTarget = SwiftPackageTarget.defaultTarget(
@@ -117,8 +120,13 @@ class SwiftPackageManager {
         name: plugin.name,
         path: _fileSystem.file(pluginSwiftPackageManifestPath).parent.path,
       ));
+
+      // The target dependency product name is hyphen separated because it's
+      // the dependency's library name, which Swift Package Manager will
+      // automatically use as the CFBundleIdentifier if linked dynamically. The
+      // CFBundleIdentifier cannot contain underscores.
       targetDependencies.add(SwiftPackageTargetDependency.product(
-        name: plugin.name,
+        name: plugin.name.replaceAll('_', '-'),
         packageName: plugin.name,
       ));
     }

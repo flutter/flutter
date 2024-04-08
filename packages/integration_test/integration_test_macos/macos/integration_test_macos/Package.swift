@@ -9,7 +9,7 @@ let package = Package(
         .macOS("10.14"),
     ],
     products: [
-        .library(name: "integration_test_macos", targets: ["integration_test_macos"]),
+        .library(name: "integration-test-macos", targets: ["integration_test_macos"]),
     ],
     targets: [
         .target(

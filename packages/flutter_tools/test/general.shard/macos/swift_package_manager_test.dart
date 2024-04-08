@@ -106,7 +106,7 @@ let package = Package(
         $supportedPlatform
     ],
     products: [
-        .library(name: "FlutterGeneratedPluginSwiftPackage", targets: ["FlutterGeneratedPluginSwiftPackage"])
+        .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
     ],
     dependencies: [
 $_doubleIndent
@@ -160,7 +160,7 @@ let package = Package(
         $supportedPlatform
     ],
     products: [
-        .library(name: "FlutterGeneratedPluginSwiftPackage", targets: ["FlutterGeneratedPluginSwiftPackage"])
+        .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
     ],
     dependencies: [
         .package(name: "valid_plugin_1", path: "/local/path/to/plugins/valid_plugin_1")
@@ -169,7 +169,7 @@ let package = Package(
         .target(
             name: "FlutterGeneratedPluginSwiftPackage",
             dependencies: [
-                .product(name: "valid_plugin_1", package: "valid_plugin_1")
+                .product(name: "valid-plugin-1", package: "valid_plugin_1")
             ]
         )
     ]
@@ -247,7 +247,7 @@ let package = Package(
         $supportedPlatform
     ],
     products: [
-        .library(name: "FlutterGeneratedPluginSwiftPackage", targets: ["FlutterGeneratedPluginSwiftPackage"])
+        .library(name: "FlutterGeneratedPluginSwiftPackage", type: .static, targets: ["FlutterGeneratedPluginSwiftPackage"])
     ],
     dependencies: [
         .package(name: "valid_plugin_1", path: "/local/path/to/plugins/valid_plugin_1"),
@@ -257,8 +257,8 @@ let package = Package(
         .target(
             name: "FlutterGeneratedPluginSwiftPackage",
             dependencies: [
-                .product(name: "valid_plugin_1", package: "valid_plugin_1"),
-                .product(name: "valid_plugin_2", package: "valid_plugin_2")
+                .product(name: "valid-plugin-1", package: "valid_plugin_1"),
+                .product(name: "valid-plugin-2", package: "valid_plugin_2")
             ]
         )
     ]

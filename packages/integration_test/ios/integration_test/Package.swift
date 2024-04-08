@@ -9,7 +9,7 @@ let package = Package(
         .iOS("12.0"),
     ],
     products: [
-        .library(name: "integration_test", targets: ["integration_test"]),
+        .library(name: "integration-test", targets: ["integration_test"]),
     ],
     targets: [
         .target(
