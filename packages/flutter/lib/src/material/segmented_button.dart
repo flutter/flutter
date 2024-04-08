@@ -130,6 +130,7 @@ class SegmentedButton<T> extends StatefulWidget {
     this.onSelectionChanged,
     this.multiSelectionEnabled = false,
     this.emptySelectionAllowed = false,
+    this.expandedInsets,
     this.style,
     this.showSelectedIcon = true,
     this.selectedIcon,
@@ -189,6 +190,13 @@ class SegmentedButton<T> extends StatefulWidget {
   /// the user taps on the only selected segment it will not be deselected, and
   /// [onSelectionChanged] will not be called.
   final bool emptySelectionAllowed;
+
+  /// Determines the segmented button's size and padding based on [expandedInsets].
+  ///
+  /// If null (default), the button adopts its intrinsic content size. When specified,
+  /// the button expands to fill its parent's space, with the [EdgeInsets]
+  /// defining the padding.
+  final EdgeInsets? expandedInsets;
 
   /// A static convenience method that constructs a segmented button
   /// [ButtonStyle] given simple values.
@@ -539,13 +547,17 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
       surfaceTintColor: resolve<Color?>((ButtonStyle? style) => style?.surfaceTintColor),
       child: TextButtonTheme(
         data: TextButtonThemeData(style: segmentThemeStyle),
-        child: _SegmentedButtonRenderWidget<T>(
-          tapTargetVerticalPadding: tapTargetVerticalPadding,
-          segments: widget.segments,
-          enabledBorder: _enabled ? enabledBorder : disabledBorder,
-          disabledBorder: disabledBorder,
-          direction: direction,
-          children: buttons,
+        child: Padding(
+          padding: widget.expandedInsets ?? EdgeInsets.zero,
+          child: _SegmentedButtonRenderWidget<T>(
+            tapTargetVerticalPadding: tapTargetVerticalPadding,
+            segments: widget.segments,
+            enabledBorder: _enabled ? enabledBorder : disabledBorder,
+            disabledBorder: disabledBorder,
+            direction: direction,
+            isExpanded: widget.expandedInsets != null,
+            children: buttons,
+          ),
         ),
       ),
     );
@@ -588,6 +600,7 @@ class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
     required this.disabledBorder,
     required this.direction,
     required this.tapTargetVerticalPadding,
+    required this.isExpanded,
     required super.children,
   }) : assert(children.length == segments.length);
 
@@ -596,6 +609,7 @@ class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
   final OutlinedBorder disabledBorder;
   final TextDirection direction;
   final double tapTargetVerticalPadding;
+  final bool isExpanded;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -605,6 +619,7 @@ class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
       disabledBorder: disabledBorder,
       textDirection: direction,
       tapTargetVerticalPadding: tapTargetVerticalPadding,
+      isExpanded: isExpanded,
     );
   }
 
@@ -633,11 +648,13 @@ class _RenderSegmentedButton<T> extends RenderBox with
     required OutlinedBorder disabledBorder,
     required TextDirection textDirection,
     required double tapTargetVerticalPadding,
+    required bool isExpanded,
   }) : _segments = segments,
        _enabledBorder = enabledBorder,
        _disabledBorder = disabledBorder,
        _textDirection = textDirection,
-       _tapTargetVerticalPadding = tapTargetVerticalPadding;
+       _tapTargetVerticalPadding = tapTargetVerticalPadding,
+       _isExpanded = isExpanded;
 
   List<ButtonSegment<T>> get segments => _segments;
   List<ButtonSegment<T>> _segments;
@@ -686,6 +703,16 @@ class _RenderSegmentedButton<T> extends RenderBox with
       return;
     }
     _tapTargetVerticalPadding = value;
+    markNeedsLayout();
+  }
+
+  bool get isExpanded => _isExpanded;
+  bool _isExpanded;
+  set isExpanded(bool value) {
+    if (value == _isExpanded) {
+      return;
+    }
+    _isExpanded = value;
     markNeedsLayout();
   }
 
@@ -770,13 +797,18 @@ class _RenderSegmentedButton<T> extends RenderBox with
 
   Size _calculateChildSize(BoxConstraints constraints) {
     double maxHeight = 0;
-    double childWidth = constraints.minWidth / childCount;
     RenderBox? child = firstChild;
-    while (child != null) {
-      childWidth = math.max(childWidth, child.getMaxIntrinsicWidth(double.infinity));
-      child = childAfter(child);
+    double childWidth;
+    if (_isExpanded) {
+      childWidth = constraints.maxWidth / childCount;
+    } else {
+      childWidth = constraints.minWidth / childCount;
+      while (child != null) {
+        childWidth = math.max(childWidth, child.getMaxIntrinsicWidth(double.infinity));
+        child = childAfter(child);
+      }
+      childWidth = math.min(childWidth, constraints.maxWidth / childCount);
     }
-    childWidth = math.min(childWidth, constraints.maxWidth / childCount);
     child = firstChild;
     while (child != null) {
       final double boxHeight = child.getMaxIntrinsicHeight(childWidth);
@@ -794,6 +826,18 @@ class _RenderSegmentedButton<T> extends RenderBox with
   Size computeDryLayout(BoxConstraints constraints) {
     final Size childSize = _calculateChildSize(constraints);
     return _computeOverallSizeFromChildSize(childSize);
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final Size childSize = _calculateChildSize(constraints);
+    final BoxConstraints childConstraints = BoxConstraints.tight(childSize);
+
+    BaselineOffset baselineOffset = BaselineOffset.noBaseline;
+    for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
+      baselineOffset = baselineOffset.minOf(BaselineOffset(child.getDryBaseline(childConstraints, baseline)));
+    }
+    return baselineOffset.offset;
   }
 
   @override
@@ -851,9 +895,9 @@ class _RenderSegmentedButton<T> extends RenderBox with
       context.canvas.restore();
 
       // Compute a clip rect for the outer border of the child.
-      late final double segmentLeft;
-      late final double segmentRight;
-      late final double dividerPos;
+      final double segmentLeft;
+      final double segmentRight;
+      final double dividerPos;
       final double borderOutset = math.max(enabledBorder.side.strokeOutset, disabledBorder.side.strokeOutset);
       switch (textDirection) {
         case TextDirection.rtl:
