@@ -118,10 +118,14 @@
       }
     },
     {
+      "cas_archive": false,
       "drone_dimensions": [
         "os=Mac-13",
         "device_type=none"
       ],
+      "gclient_variables": {
+        "use_rbe": true
+      },
       "gn": [
         "--runtime-mode",
         "profile",
