@@ -15,7 +15,7 @@ shell_gpu_configuration("macos_gpu_configuration") {
   enable_software = true
   enable_gl = true
   enable_vulkan = false
-  enable_metal = shell_enable_metal
+  enable_metal = true
 }
 
 group("macos") {
