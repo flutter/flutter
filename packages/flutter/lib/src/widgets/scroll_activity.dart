@@ -48,10 +48,14 @@ abstract class ScrollActivityDelegate {
   /// given velocity.
   void goBallistic(double velocity);
 
-  /// Temporary documentation
-  bool? get preferredHandOffIgnorePointer;
+  /// Some ballistic activities may want to allow input on child widgets.
+  /// This flag takes precedence over [ScrollActivity.shouldIgnorePointer] when
+  /// starting a ballistic activity.
+  bool? get preferredBallisticIgnorePointer;
 
-  /// Temporary documentation
+  /// Flag to indicate whether the scroll view is over-scrolled. Meaning the
+  /// user has scrolled beyond the extents of the scrollable. This is possible
+  /// e.g. with [BouncingScrollPhysics].
   bool get outOfRange;
 }
 
