@@ -17357,7 +17357,6 @@ void main() {
 
   testWidgets('getPositionForPoint is correct when EditableText is scaled', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
-    const double opacity = 0.55;
     controller.text = 'Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8';
 
     await tester.pumpWidget(
@@ -17367,7 +17366,7 @@ void main() {
             scale: 0.5,
             child: EditableText(
               key: key,
-              cursorColor: cursorColor.withOpacity(opacity),
+              cursorColor: cursorColor,
               backgroundCursorColor: Colors.grey,
               controller: controller,
               focusNode: focusNode,
@@ -17402,7 +17401,6 @@ void main() {
 
   testWidgets('selectPositionAt is correct when EditableText is scaled', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
-    const double opacity = 0.55;
     controller.text = 'Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8';
 
     await tester.pumpWidget(
@@ -17412,7 +17410,7 @@ void main() {
             scale: 0.5,
             child: EditableText(
               key: key,
-              cursorColor: cursorColor.withOpacity(opacity),
+              cursorColor: cursorColor,
               backgroundCursorColor: Colors.grey,
               controller: controller,
               focusNode: focusNode,
@@ -17436,6 +17434,52 @@ void main() {
     state.bringIntoView(const TextPosition(offset: 18));
     await tester.pumpAndSettle();
     state.renderEditable.selectPositionAt(
+      from: topLeft,
+      to: topLeft + const Offset(100.0, 0.0),
+      cause: SelectionChangedCause.drag,
+    );
+    await tester.pumpAndSettle();
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection(baseOffset: 12, extentOffset: 17),
+    );
+  });
+
+  testWidgets('selectWordsInRange is correct when EditableText is scaled', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    controller.text = 'Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Transform.scale(
+            scale: 0.5,
+            child: EditableText(
+              key: key,
+              cursorColor: cursorColor,
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 2,
+              minLines: 2,
+              style: textStyle,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
+    expect(
+      state.textEditingValue.selection,
+      const TextSelection.collapsed(offset: -1),
+    );
+
+    // Scroll to the fourth line and select the full line above that.
+    state.bringIntoView(const TextPosition(offset: 18));
+    await tester.pumpAndSettle();
+    state.renderEditable.selectWordsInRange(
       from: topLeft,
       to: topLeft + const Offset(100.0, 0.0),
       cause: SelectionChangedCause.drag,
