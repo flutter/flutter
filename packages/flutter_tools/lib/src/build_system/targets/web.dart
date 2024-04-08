@@ -93,7 +93,6 @@ class WebEntrypointTarget extends Target {
   }
 }
 
-/// Compiles a web entry point with dart2js.
 abstract class Dart2WebTarget extends Target {
   const Dart2WebTarget();
 
@@ -102,7 +101,8 @@ abstract class Dart2WebTarget extends Target {
   WebCompilerConfig get compilerConfig;
 
   Map<String, Object?> get buildConfig;
-  List<String> get buildFiles;
+  Iterable<File> buildFiles(Environment environment);
+  Iterable<String> get buildPatternStems;
 
   @override
   List<Target> get dependencies => const <Target>[
@@ -120,14 +120,15 @@ abstract class Dart2WebTarget extends Target {
   ];
 
   @override
-  List<Source> get outputs => buildFiles.map(
-    (String file) => Source.pattern('{BUILD_DIR}/$file')
-  ).toList();
+  List<Source> get outputs => <Source>[
+    for (final String stem in buildPatternStems) Source.pattern('{BUILD_DIR}/$stem'),
+  ];
 
   @override
   String get buildKey => compilerConfig.buildKey;
 }
 
+/// Compiles a web entry point with dart2js.
 class Dart2JSTarget extends Dart2WebTarget {
   Dart2JSTarget(this.compilerConfig);
 
@@ -230,12 +231,43 @@ class Dart2JSTarget extends Dart2WebTarget {
   };
 
   @override
-  List<String> get buildFiles => <String>[
+  Iterable<File> buildFiles(Environment environment)
+    => environment.buildDir
+      .listSync(recursive: true)
+      .whereType<File>()
+      .where((File file) {
+        if (file.basename == 'main.dart.js') {
+          return true;
+        }
+        if (file.basename == 'main.dart.js.map') {
+          return compilerConfig.sourceMaps;
+        }
+        final RegExp partFileRegex = RegExp(r'main\.dart\.js_[0-9].*\.part\.js');
+        if (partFileRegex.hasMatch(file.basename)) {
+          return true;
+        }
+
+        if (compilerConfig.sourceMaps) {
+          final RegExp partFileSourceMapRegex = RegExp(r'main\.dart\.js_[0-9].*.part\.js\.map');
+          if (partFileSourceMapRegex.hasMatch(file.basename)) {
+            return true;
+          }
+        }
+        return false;
+      });
+
+  @override
+  Iterable<String> get buildPatternStems => <String>[
     'main.dart.js',
-    if (compilerConfig.sourceMaps) 'main.dart.js.map',
+    'main.dart.js_*.part.js',
+    if (compilerConfig.sourceMaps) ...<String>[
+      'main.dart.js.map',
+      'main.dart.js_*.part.js.map',
+    ],
   ];
 }
 
+/// Compiles a web entry point with dart2wasm.
 class Dart2WasmTarget extends Dart2WebTarget {
   Dart2WasmTarget(this.compilerConfig);
 
@@ -273,7 +305,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       if (compilerConfig.renderer == WebRendererMode.skwasm) ...<String>[
         '--extra-compiler-option=--import-shared-memory',
         '--extra-compiler-option=--shared-memory-max-pages=32768',
-        ],
+      ],
       if (buildMode == BuildMode.profile)
         '-Ddart.vm.profile=true'
       else
@@ -320,7 +352,17 @@ class Dart2WasmTarget extends Dart2WebTarget {
   };
 
   @override
-  List<String> get buildFiles => <String>[
+  Iterable<File> buildFiles(Environment environment)
+    => environment.buildDir
+      .listSync(recursive: true)
+      .whereType<File>()
+      .where((File file) => switch (file.basename) {
+        'main.dart.wasm' || 'main.dart.mjs' => true,
+        _ => false,
+      });
+
+  @override
+  Iterable<String> get buildPatternStems => const <String>[
     'main.dart.wasm',
     'main.dart.mjs',
   ];
@@ -361,11 +403,6 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
   final List<Dart2WebTarget> compileTargets;
   final WebTemplatedFiles templatedFilesTarget;
 
-  List<String> get buildFiles => compileTargets.fold(
-    const Iterable<String>.empty(),
-    (Iterable<String> current, Dart2WebTarget target) => current.followedBy(target.buildFiles)
-  ).toList();
-
   @override
   String get name => 'web_release_bundle';
 
@@ -375,15 +412,19 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     templatedFilesTarget,
   ];
 
+  Iterable<String> get buildPatternStems => compileTargets.expand(
+    (Dart2WebTarget target) => target.buildPatternStems,
+  );
+
   @override
   List<Source> get inputs => <Source>[
     const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
-    ...buildFiles.map((String file) => Source.pattern('{BUILD_DIR}/$file'))
+    ...buildPatternStems.map((String file) => Source.pattern('{BUILD_DIR}/$file'))
   ];
 
   @override
   List<Source> get outputs => <Source>[
-    ...buildFiles.map((String file) => Source.pattern('{OUTPUT_DIR}/$file'))
+    ...buildPatternStems.map((String file) => Source.pattern('{OUTPUT_DIR}/$file'))
   ];
 
   @override
@@ -395,9 +436,8 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
   @override
   Future<void> build(Environment environment) async {
     final FileSystem fileSystem = environment.fileSystem;
-    for (final File outputFile in environment.buildDir.listSync(recursive: true).whereType<File>()) {
-      final String basename = fileSystem.path.basename(outputFile.path);
-      if (buildFiles.contains(basename)) {
+    for (final Dart2WebTarget target in compileTargets) {
+      for (final File outputFile in target.buildFiles(environment)) {
         outputFile.copySync(
           environment.outputDir.childFile(fileSystem.path.basename(outputFile.path)).path
         );
