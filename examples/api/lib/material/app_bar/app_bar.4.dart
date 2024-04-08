@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [AppBar].
+/// Flutter code sample for [AppBar.shape].
 
 void main() => runApp(const AppBarExampleApp());
 
