@@ -350,7 +350,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
     final Size newSize = MediaQuery.sizeOf(context);
     if (_viewSize != null && newSize != _viewSize) {
       // Close the menus if the view changes size.
-      if (_topLevel.widget.closeMenuWhenViewChange) {
+      if (_root.widget.closeMenuWhenViewChange) {
         _root._close();
       }
     }
@@ -764,6 +764,7 @@ class MenuBar extends StatelessWidget {
     this.clipBehavior = Clip.none,
     this.controller,
     required this.children,
+    this.closeMenuWhenViewChange = true,
   });
 
   /// The [MenuStyle] that defines the visual attributes of the menu bar.
@@ -791,6 +792,10 @@ class MenuBar extends StatelessWidget {
   /// {@macro flutter.material.MenuBar.shortcuts_note}
   final List<Widget> children;
 
+  /// Close the menus if the view changes size.
+  /// Defaults to true.
+  final bool closeMenuWhenViewChange;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
@@ -799,6 +804,7 @@ class MenuBar extends StatelessWidget {
       clipBehavior: clipBehavior,
       style: style,
       menuChildren: children,
+      closeMenuWhenViewChange: closeMenuWhenViewChange,
     );
   }
 
@@ -2308,6 +2314,7 @@ class _MenuBarAnchor extends MenuAnchor {
     super.controller,
     super.clipBehavior,
     super.style,
+    super.closeMenuWhenViewChange,
   });
 
   @override
