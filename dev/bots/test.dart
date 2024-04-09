@@ -63,9 +63,9 @@ import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
 import 'run_command.dart';
+import 'runner_utils.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
 import 'suite_runners/run_analyze_tests.dart';
-import 'suite_runners/run_android_preview_integration_tool_tests.dart';
 import 'suite_runners/run_customer_testing_tests.dart';
 import 'suite_runners/run_docs_tests.dart';
 import 'suite_runners/run_flutter_packages_tests.dart';
@@ -174,22 +174,6 @@ const Map<String, List<String>> kWebTestFileKnownFailures = <String, List<String
 
 const String kTestHarnessShardName = 'test_harness_tests';
 
-// The seed used to shuffle tests. If not passed with
-// --test-randomize-ordering-seed=<seed> on the command line, it will be set the
-// first time it is accessed. Pass zero to turn off shuffling.
-String? _shuffleSeed;
-String get shuffleSeed {
-  if (_shuffleSeed == null) {
-    // Change the seed at 7am, UTC.
-    final DateTime seedTime = DateTime.now().toUtc().subtract(const Duration(hours: 7));
-    // Generates YYYYMMDD as the seed, so that testing continues to fail for a
-    // day after the seed changes, and on other days the seed can be used to
-    // replicate failures.
-    _shuffleSeed = '${seedTime.year * 10000 + seedTime.month * 100 + seedTime.day}';
-  }
-  return _shuffleSeed!;
-}
-
 final bool _isRandomizationOff = bool.tryParse(Platform.environment['TEST_RANDOMIZATION_OFF'] ?? '') ?? false;
 
 /// When you call this, you can pass additional arguments to pass custom
@@ -241,7 +225,7 @@ Future<void> main(List<String> args) async {
       // web_tool_tests is also used by HHH: https://dart.googlesource.com/recipes/+/refs/heads/master/recipes/dart/flutter_engine.py
       'web_tool_tests': _runWebToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
-      'android_preview_tool_integration_tests': () => androidPreviewIntegrationToolTestsRunner(flutterRoot),
+      'android_preview_tool_integration_tests': _runAndroidPreviewIntegrationToolTests,
       'tool_host_cross_arch_tests': _runToolHostCrossArchTests,
       // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=html`
       'web_tests': _runWebHtmlUnitTests,
@@ -428,7 +412,7 @@ Future<void> _runTestHarnessTests() async {
 final String _toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
 
 Future<void> _runGeneralToolTests() async {
-  await _runDartTest(
+  await runDartTest(
     _toolsPath,
     testPaths: <String>[path.join('test', 'general.shard')],
     enableFlutterToolAsserts: false,
@@ -441,7 +425,7 @@ Future<void> _runGeneralToolTests() async {
 }
 
 Future<void> _runCommandsToolTests() async {
-  await _runDartTest(
+  await runDartTest(
     _toolsPath,
     forceSingleCore: true,
     testPaths: <String>[path.join('test', 'commands.shard')],
@@ -457,7 +441,7 @@ Future<void> _runWebToolTests() async {
       allTests.add(file.path);
     }
   }
-  await _runDartTest(
+  await runDartTest(
     _toolsPath,
     forceSingleCore: true,
     testPaths: _selectIndexOfTotalSubshard<String>(allTests),
@@ -466,7 +450,7 @@ Future<void> _runWebToolTests() async {
 }
 
 Future<void> _runToolHostCrossArchTests() {
-  return _runDartTest(
+  return runDartTest(
     _toolsPath,
     // These are integration tests
     forceSingleCore: true,
@@ -480,7 +464,21 @@ Future<void> _runIntegrationToolTests() async {
       .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
       .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
 
-  await _runDartTest(
+  await runDartTest(
+    _toolsPath,
+    forceSingleCore: true,
+    testPaths: _selectIndexOfTotalSubshard<String>(allTests),
+    collectMetrics: true,
+  );
+}
+
+Future<void> _runAndroidPreviewIntegrationToolTests() async {
+  final List<String> allTests = Directory(path.join(_toolsPath, 'test', 'android_preview_integration.shard'))
+      .listSync(recursive: true).whereType<File>()
+      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
+      .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
+
+  await runDartTest(
     _toolsPath,
     forceSingleCore: true,
     testPaths: _selectIndexOfTotalSubshard<String>(allTests),
@@ -1006,9 +1004,9 @@ Future<void> _runFrameworkTests() async {
       path.join(flutterRoot, 'dev', 'a11y_assessments'),
       tests: <String>[ 'test' ],
     );
-    await _runDartTest(path.join(flutterRoot, 'dev', 'bots'));
-    await _runDartTest(path.join(flutterRoot, 'dev', 'devicelab'), ensurePrecompiledTool: false); // See https://github.com/flutter/flutter/issues/86209
-    await _runDartTest(path.join(flutterRoot, 'dev', 'conductor', 'core'), forceSingleCore: true);
+    await runDartTest(path.join(flutterRoot, 'dev', 'bots'));
+    await runDartTest(path.join(flutterRoot, 'dev', 'devicelab'), ensurePrecompiledTool: false); // See https://github.com/flutter/flutter/issues/86209
+    await runDartTest(path.join(flutterRoot, 'dev', 'conductor', 'core'), forceSingleCore: true);
     // TODO(gspencergoog): Remove the exception for fatalWarnings once https://github.com/flutter/flutter/issues/113782 has landed.
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), fatalWarnings: false);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'ui'));
@@ -1076,30 +1074,6 @@ Future<void> _runFrameworkTests() async {
     'misc': runMisc,
     'impeller': runImpeller,
   });
-}
-
-Future<void> _runFrameworkCoverage() async {
-  final File coverageFile = File(path.join(flutterRoot, 'packages', 'flutter', 'coverage', 'lcov.info'));
-  if (!coverageFile.existsSync()) {
-    foundError(<String>[
-      '${red}Coverage file not found.$reset',
-      'Expected to find: $cyan${coverageFile.absolute.path}$reset',
-      'This file is normally obtained by running `${green}flutter update-packages$reset`.',
-    ]);
-    return;
-  }
-  coverageFile.deleteSync();
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'),
-    options: const <String>['--coverage'],
-  );
-  if (!coverageFile.existsSync()) {
-    foundError(<String>[
-      '${red}Coverage file not found.$reset',
-      'Expected to find: $cyan${coverageFile.absolute.path}$reset',
-      'This file should have been generated by the `${green}flutter test --coverage$reset` script, but was not.',
-    ]);
-    return;
-  }
 }
 
 Future<void> _runWebHtmlUnitTests() {
@@ -1657,17 +1631,6 @@ Future<void> _runFlutterTest(String workingDirectory, {
   }
 }
 
-/// This will force the next run of the Flutter tool (if it uses the provided
-/// environment) to have asserts enabled, by setting an environment variable.
-void adjustEnvironmentToEnableFlutterAsserts(Map<String, String> environment) {
-  // If an existing env variable exists append to it, but only if
-  // it doesn't appear to already include enable-asserts.
-  String toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
-  if (!toolsArgs.contains('--enable-asserts')) {
-    toolsArgs += ' --enable-asserts';
-  }
-  environment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
-}
 
 /// Checks the given file's contents to determine if they match the allowed
 /// pattern for version strings.
