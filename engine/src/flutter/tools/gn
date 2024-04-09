@@ -212,6 +212,13 @@ def buildtools_dir():
   return '%s-%s' % (host_os, host_cpu)
 
 
+def get_dart_path():
+  new_dart_path = os.path.join(SRC_ROOT, 'flutter', 'third_party', 'dart')
+  if os.path.exists(new_dart_path):
+    return new_dart_path
+  return os.path.join(SRC_ROOT, 'third_party', 'dart')
+
+
 def setup_rbe(args):
   rbe_gn_args = {}
   # RBE is default-off. If it is not asked for, then silently keep all default
@@ -380,8 +387,7 @@ def setup_git_versions():
   skia_path = os.path.join(SRC_ROOT, 'flutter', 'third_party', 'skia')
   revision_args['skia_version'] = get_repository_version(skia_path)
 
-  dart_path = os.path.join(SRC_ROOT, 'third_party', 'dart')
-  revision_args['dart_version'] = get_repository_version(dart_path)
+  revision_args['dart_version'] = get_repository_version(get_dart_path())
 
   return revision_args
 
@@ -609,7 +615,7 @@ def to_gn_args(args):
   # Hardcoding this avoids invoking a relatively expensive python script from
   # GN, but removes the ability to use git-worktrees in the Dart checkout from
   # within the Engine repo, but it's unlikely anyone is using that.
-  gn_args['default_git_folder'] = os.path.join(SRC_ROOT, 'third_party', 'dart', '.git')
+  gn_args['default_git_folder'] = os.path.join(get_dart_path(), '.git')
 
   # By default, the Dart GN build will invoke a relatively expensive python
   # script to calculate an SDK "hash" that ensures compatibility between the

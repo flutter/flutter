@@ -17,44 +17,44 @@ dev_dependencies:
 
 dependency_overrides: # Must include all transitive dependencies from the "any" packages above.
   _fe_analyzer_shared:
-    path: ../../third_party/dart/pkg/_fe_analyzer_shared
+    path: ../third_party/dart/pkg/_fe_analyzer_shared
   _macros:
-    path: ../../third_party/dart/pkg/_macros
+    path: ../third_party/dart/pkg/_macros
   analyzer:
-    path: ../../third_party/dart/pkg/analyzer
+    path: ../third_party/dart/pkg/analyzer
   async:
-    path: ../../third_party/dart/third_party/pkg/async
+    path: ../third_party/dart/third_party/pkg/async
   collection:
-    path: ../../third_party/dart/third_party/pkg/collection
+    path: ../third_party/dart/third_party/pkg/collection
   convert:
-    path: ../../third_party/dart/third_party/pkg/convert
+    path: ../third_party/dart/third_party/pkg/convert
   crypto:
-    path: ../../third_party/dart/third_party/pkg/crypto
+    path: ../third_party/dart/third_party/pkg/crypto
   dart_internal:
-    path: ../../third_party/dart/pkg/dart_internal
+    path: ../third_party/dart/pkg/dart_internal
   file:
-    path: ../../third_party/dart/third_party/pkg/file/packages/file
+    path: ../third_party/dart/third_party/pkg/file/packages/file
   glob:
-    path: ../../third_party/dart/third_party/pkg/glob
+    path: ../third_party/dart/third_party/pkg/glob
   macros:
-    path: ../../third_party/dart/pkg/macros
+    path: ../third_party/dart/pkg/macros
   meta:
-    path: ../../third_party/dart/pkg/meta
+    path: ../third_party/dart/pkg/meta
   package_config:
-    path: ../../third_party/dart/third_party/pkg/package_config
+    path: ../third_party/dart/third_party/pkg/package_config
   path:
-    path: ../../third_party/dart/third_party/pkg/path
+    path: ../third_party/dart/third_party/pkg/path
   pub_semver:
-    path: ../../third_party/dart/third_party/pkg/pub_semver
+    path: ../third_party/dart/third_party/pkg/pub_semver
   source_span:
-    path: ../../third_party/dart/third_party/pkg/source_span
+    path: ../third_party/dart/third_party/pkg/source_span
   string_scanner:
-    path: ../../third_party/dart/third_party/pkg/string_scanner
+    path: ../third_party/dart/third_party/pkg/string_scanner
   term_glyph:
-    path: ../../third_party/dart/third_party/pkg/term_glyph
+    path: ../third_party/dart/third_party/pkg/term_glyph
   typed_data:
-    path: ../../third_party/dart/third_party/pkg/typed_data
+    path: ../third_party/dart/third_party/pkg/typed_data
   watcher:
-    path: ../../third_party/dart/third_party/pkg/watcher
+    path: ../third_party/dart/third_party/pkg/watcher
   yaml:
-    path: ../../third_party/dart/third_party/pkg/yaml
+    path: ../third_party/dart/third_party/pkg/yaml

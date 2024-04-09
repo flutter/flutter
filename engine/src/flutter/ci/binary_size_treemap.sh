@@ -28,5 +28,5 @@ NM="third_party/android_tools/ndk/toolchains/llvm/prebuilt/$NDK_PLATFORM/bin/llv
 # Run the binary size script from the buildroot directory so the treemap path
 # navigation will start from there.
 cd "$ENGINE_BUILDROOT"
-RUN_BINARY_SIZE_ANALYSIS="third_party/dart/third_party/binary_size/src/run_binary_size_analysis.py"
+RUN_BINARY_SIZE_ANALYSIS="flutter/third_party/dart/third_party/binary_size/src/run_binary_size_analysis.py"
 python3 "$RUN_BINARY_SIZE_ANALYSIS" --library "$INPUT_PATH" --destdir "$DEST_DIR" --addr2line-binary "$ADDR2LINE" --nm-binary "$NM" --jobs 1 --no-check-support

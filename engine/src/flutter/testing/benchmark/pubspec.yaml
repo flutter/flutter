@@ -28,21 +28,21 @@ dependency_overrides:
   _discoveryapis_commons:
     path: ../../third_party/pkg/googleapis/discoveryapis_commons
   args:
-    path: ../../../third_party/dart/third_party/pkg/args
+    path: ../../third_party/dart/third_party/pkg/args
   async_helper:
-    path: ../../../third_party/dart/pkg/async_helper
+    path: ../../third_party/dart/pkg/async_helper
   async:
-    path: ../../../third_party/dart/third_party/pkg/async
+    path: ../../third_party/dart/third_party/pkg/async
   collection:
-    path: ../../../third_party/dart/third_party/pkg/collection
+    path: ../../third_party/dart/third_party/pkg/collection
   convert:
-    path: ../../../third_party/dart/third_party/pkg/convert
+    path: ../../third_party/dart/third_party/pkg/convert
   crypto :
-    path: ../../../third_party/dart/third_party/pkg/crypto
+    path: ../../third_party/dart/third_party/pkg/crypto
   equatable:
     path: ../../third_party/pkg/equatable
   expect:
-    path: ../../../third_party/dart/pkg/expect
+    path: ../../third_party/dart/pkg/expect
   gcloud:
     path: ../../third_party/pkg/gcloud
   googleapis:
@@ -50,28 +50,28 @@ dependency_overrides:
   googleapis_auth:
     path: ../../third_party/pkg/googleapis/googleapis_auth
   http:
-    path: ../../../third_party/dart/third_party/pkg/http/pkgs/http
+    path: ../../third_party/dart/third_party/pkg/http/pkgs/http
   http_parser:
-    path: ../../../third_party/dart/third_party/pkg/http_parser
+    path: ../../third_party/dart/third_party/pkg/http_parser
   js:
-    path: ../../../third_party/dart/pkg/js
+    path: ../../third_party/dart/pkg/js
   litetest:
     path: ../litetest
   meta:
-    path: ../../../third_party/dart/pkg/meta
+    path: ../../third_party/dart/pkg/meta
   metrics_center:
     path: ../../third_party/pkg/flutter_packages/packages/metrics_center
   path:
-    path: ../../../third_party/dart/third_party/pkg/path
+    path: ../../third_party/dart/third_party/pkg/path
   smith:
-    path: ../../../third_party/dart/pkg/smith
+    path: ../../third_party/dart/pkg/smith
   source_span:
-    path: ../../../third_party/dart/third_party/pkg/source_span
+    path: ../../third_party/dart/third_party/pkg/source_span
   string_scanner:
-    path: ../../../third_party/dart/third_party/pkg/string_scanner
+    path: ../../third_party/dart/third_party/pkg/string_scanner
   term_glyph:
-    path: ../../../third_party/dart/third_party/pkg/term_glyph
+    path: ../../third_party/dart/third_party/pkg/term_glyph
   typed_data:
-    path: ../../../third_party/dart/third_party/pkg/typed_data
+    path: ../../third_party/dart/third_party/pkg/typed_data
   web:
-    path: ../../../third_party/dart/third_party/pkg/web
+    path: ../../third_party/dart/third_party/pkg/web
