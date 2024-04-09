@@ -165,6 +165,7 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
 void main([List<String> args = const <String>[]]) {
   final bool withSemantics = args.contains('--with_semantics');
   final bool hybrid = args.contains('--hybrid');
+  final String testOutputDirectory = parseTestDriverArguments(args) ?? defaultTestOutputDirectory;
   group('flutter gallery transitions', () {
     late FlutterDriver driver;
     setUpAll(() async {
@@ -219,8 +220,8 @@ void main([List<String> args = const <String>[]]) {
       // that follows a 'Start Transition' event. The Gallery app adds a
       // 'Start Transition' event when a demo is launched (see GalleryItem).
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      await summary.writeTimelineToFile('transitions', pretty: true);
-      final String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
+      await summary.writeTimelineToFile('transitions', pretty: true, destinationDirectory: testOutputDirectory);
+      final String histogramPath = path.join(testOutputDirectory, 'transition_durations.timeline.json');
       await saveDurationsHistogram(
           List<Map<String, dynamic>>.from(timeline.json['traceEvents'] as List<dynamic>),
           histogramPath);

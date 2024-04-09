@@ -1,0 +1,12 @@
+{"protocolVersion":"0.1.1","runnerVersion":"1.25.2","pid":44245,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"/Users/godofredoc/flutter_checkouts/flutter/dev/integration_tests/ui/integration_test/integration_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading /Users/godofredoc/flutter_checkouts/flutter/dev/integration_tests/ui/integration_test/integration_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":0}
+{"count":1,"time":3,"type":"allSuites"}
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":13774}
+{"group":{"id":2,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":null,"column":null,"url":null},"type":"group","time":13776}
+{"group":{"id":3,"suiteID":0,"parentID":2,"name":"Integration Test","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":10,"column":3,"url":"file:///Users/godofredoc/flutter_checkouts/flutter/dev/integration_tests/ui/integration_test/integration_test.dart"},"type":"group","time":13777}
+{"test":{"id":4,"name":"Integration Test smoke test","suiteID":0,"groupIDs":[2,3],"metadata":{"skip":false,"skipReason":null},"line":165,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":11,"root_column":5,"root_url":"file:///Users/godofredoc/flutter_checkouts/flutter/dev/integration_tests/ui/integration_test/integration_test.dart"},"type":"testStart","time":13777}
+{"testID":4,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":14260}
+{"test":{"id":5,"name":"(tearDownAll)","suiteID":0,"groupIDs":[2],"metadata":{"skip":false,"skipReason":null},"line":42,"column":5,"url":"package:integration_test/integration_test.dart"},"type":"testStart","time":14260}
+{"testID":5,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":14262}
+{"success":true,"type":"done","time":14269}

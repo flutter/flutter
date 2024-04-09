@@ -32,18 +32,25 @@ class WebFlutterDriver extends FlutterDriver {
     this._connection, {
     bool printCommunication = false,
     bool logCommunicationToFile = true,
+    String? testOutputDirectory,
   })  : _printCommunication = printCommunication,
         _logCommunicationToFile = logCommunicationToFile,
         _startTime = DateTime.now(),
         _driverId = _nextDriverId++
     {
-      _logFilePathName = path.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log');
+      _testOutputDirectory = testOutputDirectory ?? defaultTestOutputDirectory;
+      _logFilePathName = path.join(_testOutputDirectory!, 'flutter_driver_commands_$_driverId.log');
     }
 
 
   final FlutterWebConnection _connection;
   DateTime _startTime;
   static int _nextDriverId = 0;
+
+  /// String with the path an existent directorty where test outputs will be writter
+  /// to.
+  String? get testOutputDirectory => _testOutputDirectory;
+  String? _testOutputDirectory;
 
   /// The unique ID of this driver instance.
   final int _driverId;

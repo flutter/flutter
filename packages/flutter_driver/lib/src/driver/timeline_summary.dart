@@ -369,7 +369,7 @@ class TimelineSummary {
     bool pretty = false,
     bool includeSummary = true,
   }) async {
-    destinationDirectory ??= testOutputsDirectory;
+    destinationDirectory ??= defaultTestOutputDirectory;
     await fs.directory(destinationDirectory).create(recursive: true);
     final File file = fs.file(path.join(destinationDirectory, '$traceName.timeline.json'));
     await file.writeAsString(_encodeJson(_timeline.json, pretty));

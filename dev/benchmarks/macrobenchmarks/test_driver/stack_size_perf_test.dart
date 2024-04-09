@@ -14,7 +14,9 @@ import 'util.dart';
 
 const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');
 
-void main() {
+void main(List<String> args) {
+
+  final String testOutputDirectory = parseTestDriverArguments(args) ?? defaultTestOutputDirectory;
   test('stack_size', () async {
     late int stackSizeInBytes;
     await runDriverTestForRoute(kStackSizeRouteName, (FlutterDriver driver) async {
@@ -25,8 +27,8 @@ void main() {
 
     expect(stackSizeInBytes > 0, isTrue);
 
-    await fs.directory(testOutputsDirectory).create(recursive: true);
-    final File file = fs.file(path.join(testOutputsDirectory, 'stack_size.json'));
+    await fs.directory(testOutputDirectory).create(recursive: true);
+    final File file = fs.file(path.join(testOutputDirectory, 'stack_size.json'));
     await file.writeAsString(_encodeJson(<String, dynamic>{
       'stack_size': stackSizeInBytes,
     }));

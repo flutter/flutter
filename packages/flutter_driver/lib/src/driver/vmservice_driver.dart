@@ -23,11 +23,13 @@ class VMServiceFlutterDriver extends FlutterDriver {
     this._appIsolate, {
       bool printCommunication = false,
       bool logCommunicationToFile = true,
+      String? testOutputDirectory,
     }) : _printCommunication = printCommunication,
       _logCommunicationToFile = logCommunicationToFile,
       _driverId = _nextDriverId++
     {
-      _logFilePathName = p.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log');
+      final String localTestOutputDirectory = testOutputDirectory ?? defaultTestOutputDirectory;
+      _logFilePathName = p.join(localTestOutputDirectory, 'flutter_driver_commands_$_driverId.log');
     }
 
   /// Connects to a Flutter application.

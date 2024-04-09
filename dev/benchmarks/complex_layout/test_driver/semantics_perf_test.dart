@@ -10,7 +10,9 @@ import 'package:flutter_driver/flutter_driver.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
-void main() {
+void main(List<String> args) {
+
+  final String testOutputDirectory = parseTestDriverArguments(args) ?? defaultTestOutputDirectory;
   group('semantics performance test', () {
     late FlutterDriver driver;
 
@@ -60,7 +62,7 @@ void main() {
       final Duration semanticsTreeCreation = Duration(microseconds: semanticsEvents!.last.timestampMicros! - semanticsEvents.first.timestampMicros!);
 
       final String jsonEncoded = json.encode(<String, dynamic>{'initialSemanticsTreeCreation': semanticsTreeCreation.inMilliseconds});
-      File(p.join(testOutputsDirectory, 'complex_layout_semantics_perf.json')).writeAsStringSync(jsonEncoded);
+      File(p.join(testOutputDirectory, 'complex_layout_semantics_perf.json')).writeAsStringSync(jsonEncoded);
     }, timeout: Timeout.none);
   });
 }

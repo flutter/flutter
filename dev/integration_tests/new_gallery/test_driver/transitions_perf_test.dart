@@ -224,6 +224,8 @@ Future<void> runDemos(
 }
 
 void main([List<String> args = const <String>[]]) {
+
+  final String testOutputDirectory = parseTestDriverArguments(args) ?? defaultTestOutputDirectory;
   group('Flutter Gallery transitions', () {
     late FlutterDriver driver;
 
@@ -291,7 +293,7 @@ void main([List<String> args = const <String>[]]) {
       );
 
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      await summary.writeTimelineToFile('transitions-crane', pretty: true);
+      await summary.writeTimelineToFile('transitions-crane', pretty: true, destinationDirectory: testOutputDirectory);
     }, timeout: Timeout.none);
 
     test('only Reply', () async {
@@ -337,7 +339,7 @@ void main([List<String> args = const <String>[]]) {
       );
 
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      await summary.writeTimelineToFile('transitions-reply', pretty: true);
+      await summary.writeTimelineToFile('transitions-reply', pretty: true, destinationDirectory: testOutputDirectory);
     }, timeout: Timeout.none);
 
     test('all demos', () async {
@@ -358,7 +360,7 @@ void main([List<String> args = const <String>[]]) {
       );
 
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      await summary.writeTimelineToFile('transitions', pretty: true);
+      await summary.writeTimelineToFile('transitions', pretty: true, destinationDirectory: testOutputDirectory);
 
       // Execute the remaining tests.
       final Set<String> unprofiledDemos = Set<String>.from(_allDemos)

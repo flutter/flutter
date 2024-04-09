@@ -7,7 +7,9 @@ import 'dart:async';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
-void main() {
+void main(List<String> args) {
+
+  final String testOutputDirectory = parseTestDriverArguments(args) ?? defaultTestOutputDirectory;
   group('scrolling performance test', () {
     late FlutterDriver driver;
 
@@ -39,7 +41,7 @@ void main() {
       });
 
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      await summary.writeTimelineToFile('stocks_scroll_perf', pretty: true);
+      await summary.writeTimelineToFile('stocks_scroll_perf', pretty: true, destinationDirectory: testOutputDirectory);
     }, timeout: Timeout.none);
   });
 }
