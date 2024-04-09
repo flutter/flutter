@@ -1027,8 +1027,7 @@ public class FlutterJNI {
    * will be dropped (ignored). Therefore, when using {@code FlutterJNI} to integrate a Flutter
    * context in an app, a {@link PlatformMessageHandler} must be registered for 2-way Java/Dart
    * communication to operate correctly. Moreover, the handler must be implemented such that
-   * fundamental platform messages are handled as expected. See {@link
-   * io.flutter.view.FlutterNativeView} for an example implementation.
+   * fundamental platform messages are handled as expected.
    */
   @UiThread
   public void setPlatformMessageHandler(@Nullable PlatformMessageHandler platformMessageHandler) {
