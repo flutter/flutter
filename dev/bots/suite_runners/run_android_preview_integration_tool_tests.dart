@@ -6,6 +6,8 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
+import '../runner_utils.dart';
+
 Future<void> androidPreviewIntegrationToolTestsRunner(String flutterRoot) async {
   final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
 
@@ -14,10 +16,10 @@ Future<void> androidPreviewIntegrationToolTestsRunner(String flutterRoot) async 
       .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: toolsPath))
       .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
 
-  await _runDartTest(
+  await runDartTest(
     toolsPath,
     forceSingleCore: true,
-    testPaths: _selectIndexOfTotalSubshard<String>(allTests),
+    testPaths: selectIndexOfTotalSubshard<String>(allTests),
     collectMetrics: true,
   );
 }

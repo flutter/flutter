@@ -9,8 +9,10 @@
 // See https://github.com/flutter/flutter/issues/72368
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:file/file.dart' as fs;
+import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
 
 import 'run_command.dart';
@@ -24,6 +26,8 @@ final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
+
+const String kSubshardKey = 'SUBSHARD';
 
 /// Environment variables to override the local engine when running `pub test`,
 /// if such flags are provided to `test.dart`.
@@ -160,4 +164,49 @@ void adjustEnvironmentToEnableFlutterAsserts(Map<String, String> environment) {
     toolsArgs += ' --enable-asserts';
   }
   environment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
+}
+
+/// Parse (one-)index/total-named subshards from environment variable SUBSHARD
+/// and equally distribute [tests] between them.
+/// Subshard format is "{index}_{total number of shards}".
+/// The scheduler can change the number of total shards without needing an additional
+/// commit in this repository.
+///
+/// Examples:
+/// 1_3
+/// 2_3
+/// 3_3
+List<T> selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubshardKey}) {
+  // Example: "1_3" means the first (one-indexed) shard of three total shards.
+  final String? subshardName = Platform.environment[subshardKey];
+  if (subshardName == null) {
+    print('$kSubshardKey environment variable is missing, skipping sharding');
+    return tests;
+  }
+  printProgress('$bold$subshardKey=$subshardName$reset');
+
+  final RegExp pattern = RegExp(r'^(\d+)_(\d+)$');
+  final Match? match = pattern.firstMatch(subshardName);
+  if (match == null || match.groupCount != 2) {
+    foundError(<String>[
+      '${red}Invalid subshard name "$subshardName". Expected format "[int]_[int]" ex. "1_3"',
+    ]);
+    throw Exception('Invalid subshard name: $subshardName');
+  }
+  // One-indexed.
+  final int index = int.parse(match.group(1)!);
+  final int total = int.parse(match.group(2)!);
+  if (index > total) {
+    foundError(<String>[
+      '${red}Invalid subshard name "$subshardName". Index number must be greater or equal to total.',
+    ]);
+    return <T>[];
+  }
+
+  final int testsPerShard = (tests.length / total).ceil();
+  final int start = (index - 1) * testsPerShard;
+  final int end = math.min(index * testsPerShard, tests.length);
+
+  print('Selecting subshard $index of $total (tests ${start + 1}-$end of ${tests.length})');
+  return tests.sublist(start, end);
 }
