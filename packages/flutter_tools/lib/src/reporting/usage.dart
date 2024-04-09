@@ -230,6 +230,9 @@ class _DefaultUsage implements Usage {
       analytics.analyticsOpt = AnalyticsOpt.optOut;
     }
 
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+    print('Suppress analytics flag = $suppressAnalytics');
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
     return _DefaultUsage._(
       suppressAnalytics: suppressAnalytics,
       analytics: analytics,
