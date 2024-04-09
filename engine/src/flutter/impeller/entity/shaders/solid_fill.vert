@@ -12,7 +12,7 @@ frame_info;
 
 in vec2 position;
 
-IMPELLER_MAYBE_FLAT out f16vec4 v_color;
+IMPELLER_MAYBE_FLAT out mediump f16vec4 v_color;
 
 void main() {
   v_color = frame_info.color;

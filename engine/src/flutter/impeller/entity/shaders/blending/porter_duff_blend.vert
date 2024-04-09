@@ -16,7 +16,7 @@ in vec2 texture_coords;
 in vec4 color;
 
 out vec2 v_texture_coords;
-out f16vec4 v_color;
+out mediump f16vec4 v_color;
 
 void main() {
   gl_Position = frame_info.mvp * vec4(vertices, 0.0, 1.0);
