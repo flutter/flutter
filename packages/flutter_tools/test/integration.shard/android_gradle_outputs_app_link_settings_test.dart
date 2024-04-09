@@ -329,7 +329,7 @@ void main() {
     expect(json['applicationId'], 'com.example.testapp');
     expect(json['deeplinkingFlagEnabled'], true);
     final List<dynamic> deeplinks = json['deeplinks']! as List<dynamic>;
-    expect(deeplinks.length, 8);
+    expect(deeplinks.length, 10);
     testDeeplink(deeplinks[0], 'http', 'pure-http.com', '.*', hasAutoVerify:true, hasActionView: true, hasDefaultCategory:true, hasBrowsableCategory: true);
     testDeeplink(deeplinks[1], 'custom', 'custom.com', '.*', hasAutoVerify:true, hasActionView: true, hasDefaultCategory:true, hasBrowsableCategory: true);
     testDeeplink(deeplinks[2], 'custom', 'hybrid.com', '.*', hasAutoVerify:true, hasActionView: true, hasDefaultCategory:true, hasBrowsableCategory: true);
