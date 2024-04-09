@@ -167,8 +167,14 @@ class _DefaultUsage implements Usage {
       skipAnalyticsSessionSetup = true;
     }
     if (usingLogFile) {
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+        print('Using log file for legacy analytics.');
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
       setupAnalytics ??= LogToFileAnalytics(logFilePath);
     } else {
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+        print('Using real analytics instance!');
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
       try {
         ErrorHandlingFileSystem.noExitOnFailure(() {
           setupAnalytics = analyticsFactory(
