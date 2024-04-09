@@ -17,9 +17,13 @@ import 'run_command.dart';
 import 'tool_subsharding.dart';
 import 'utils.dart';
 
-final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
+final String exe = Platform.isWindows ? '.exe' : '';
 final String bat = Platform.isWindows ? '.bat' : '';
+final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
+final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
+final String pubCache = path.join(flutterRoot, '.pub-cache');
+final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
 
 /// Environment variables to override the local engine when running `pub test`,
 /// if such flags are provided to `test.dart`.
