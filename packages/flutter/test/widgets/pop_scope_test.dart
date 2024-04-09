@@ -47,7 +47,7 @@ void main() {
               builder: (BuildContext buildContext, StateSetter stateSetter) {
                 context = buildContext;
                 setState = stateSetter;
-                return PopScope(
+                return PopScope<Object?>(
                   canPop: canPop,
                   child: const Center(
                     child: Column(
@@ -305,7 +305,7 @@ void main() {
                 if (!usePopScope) {
                   return child;
                 }
-                return const PopScope(
+                return const PopScope<Object?>(
                   canPop: false,
                   child: child,
                 );
@@ -348,12 +348,12 @@ void main() {
               return Column(
                 children: <Widget>[
                   if (usePopScope1)
-                    const PopScope(
+                    const PopScope<Object?>(
                       canPop: false,
                       child: Text('hello'),
                     ),
                   if (usePopScope2)
-                    const PopScope(
+                    const PopScope<Object?>(
                       canPop: false,
                       child: Text('hello'),
                     ),
