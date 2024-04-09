@@ -13,12 +13,13 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
+typedef ShardRunner = Future<void> Function();
+
 const Duration _quietTimeout = Duration(minutes: 10); // how long the output should be hidden between calls to printProgress before just being verbose
 
 // If running from LUCI set to False.
 final bool isLuci =  Platform.environment['LUCI_CI'] == 'True';
 final bool hasColor = stdout.supportsAnsiEscapes && !isLuci;
-
 
 final String bold = hasColor ? '\x1B[1m' : ''; // shard titles
 final String red = hasColor ? '\x1B[31m' : ''; // errors
@@ -39,6 +40,7 @@ const int kCSIIntermediateRangeEnd = 0x2F;
 const int kCSIFinalRangeStart = 0x40;
 const int kCSIFinalRangeEnd = 0x7E;
 
+const String kSubshardKey = 'SUBSHARD';
 
 String get redLine {
   if (hasColor) {
@@ -259,4 +261,56 @@ Future<bool> _isPortAvailable(int port) async {
 
 String locationInFile(ResolvedUnitResult unit, AstNode node, String workingDirectory) {
   return '${path.relative(path.relative(unit.path, from: workingDirectory))}:${unit.lineInfo.getLocation(node.offset).lineNumber}';
+}
+
+Future<void> runShardRunnerIndexOfTotalSubshard(List<ShardRunner> tests) async {
+  final List<ShardRunner> sublist = selectIndexOfTotalSubshard<ShardRunner>(tests);
+  for (final ShardRunner test in sublist) {
+    await test();
+  }
+}
+
+/// Parse (one-)index/total-named subshards from environment variable SUBSHARD
+/// and equally distribute [tests] between them.
+/// Subshard format is "{index}_{total number of shards}".
+/// The scheduler can change the number of total shards without needing an additional
+/// commit in this repository.
+///
+/// Examples:
+/// 1_3
+/// 2_3
+/// 3_3
+List<T> selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubshardKey}) {
+  // Example: "1_3" means the first (one-indexed) shard of three total shards.
+  final String? subshardName = Platform.environment[subshardKey];
+  if (subshardName == null) {
+    print('$kSubshardKey environment variable is missing, skipping sharding');
+    return tests;
+  }
+  printProgress('$bold$subshardKey=$subshardName$reset');
+
+  final RegExp pattern = RegExp(r'^(\d+)_(\d+)$');
+  final Match? match = pattern.firstMatch(subshardName);
+  if (match == null || match.groupCount != 2) {
+    foundError(<String>[
+      '${red}Invalid subshard name "$subshardName". Expected format "[int]_[int]" ex. "1_3"',
+    ]);
+    throw Exception('Invalid subshard name: $subshardName');
+  }
+  // One-indexed.
+  final int index = int.parse(match.group(1)!);
+  final int total = int.parse(match.group(2)!);
+  if (index > total) {
+    foundError(<String>[
+      '${red}Invalid subshard name "$subshardName". Index number must be greater or equal to total.',
+    ]);
+    return <T>[];
+  }
+
+  final int testsPerShard = (tests.length / total).ceil();
+  final int start = (index - 1) * testsPerShard;
+  final int end = math.min(index * testsPerShard, tests.length);
+
+  print('Selecting subshard $index of $total (tests ${start + 1}-$end of ${tests.length})');
+  return tests.sublist(start, end);
 }

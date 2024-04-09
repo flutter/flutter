@@ -408,7 +408,7 @@ Future<void> _runTestHarnessTests() async {
   // Run all tests unless sharding is explicitly specified.
   final String? shardName = Platform.environment[kShardKey];
   if (shardName == kTestHarnessShardName) {
-    testsToRun = _selectIndexOfTotalSubshard<ShardRunner>(tests);
+    testsToRun = selectIndexOfTotalSubshard<ShardRunner>(tests);
   } else {
     testsToRun = tests;
   }
@@ -458,7 +458,7 @@ Future<void> _runWebToolTests() async {
   await _runDartTest(
     _toolsPath,
     forceSingleCore: true,
-    testPaths: _selectIndexOfTotalSubshard<String>(allTests),
+    testPaths: selectIndexOfTotalSubshard<String>(allTests),
     includeLocalEngineEnv: true,
   );
 }
@@ -481,7 +481,7 @@ Future<void> _runIntegrationToolTests() async {
   await _runDartTest(
     _toolsPath,
     forceSingleCore: true,
-    testPaths: _selectIndexOfTotalSubshard<String>(allTests),
+    testPaths: selectIndexOfTotalSubshard<String>(allTests),
     collectMetrics: true,
   );
 }
@@ -495,7 +495,7 @@ Future<void> _runAndroidPreviewIntegrationToolTests() async {
   await _runDartTest(
     _toolsPath,
     forceSingleCore: true,
-    testPaths: _selectIndexOfTotalSubshard<String>(allTests),
+    testPaths: selectIndexOfTotalSubshard<String>(allTests),
     collectMetrics: true,
   );
 }
@@ -1615,58 +1615,6 @@ Future<String?> verifyVersion(File file) async {
     return 'The version logic generated an invalid version string: "$version".';
   }
   return null;
-}
-
-/// Parse (one-)index/total-named subshards from environment variable SUBSHARD
-/// and equally distribute [tests] between them.
-/// Subshard format is "{index}_{total number of shards}".
-/// The scheduler can change the number of total shards without needing an additional
-/// commit in this repository.
-///
-/// Examples:
-/// 1_3
-/// 2_3
-/// 3_3
-List<T> _selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubshardKey}) {
-  // Example: "1_3" means the first (one-indexed) shard of three total shards.
-  final String? subshardName = Platform.environment[subshardKey];
-  if (subshardName == null) {
-    print('$kSubshardKey environment variable is missing, skipping sharding');
-    return tests;
-  }
-  printProgress('$bold$subshardKey=$subshardName$reset');
-
-  final RegExp pattern = RegExp(r'^(\d+)_(\d+)$');
-  final Match? match = pattern.firstMatch(subshardName);
-  if (match == null || match.groupCount != 2) {
-    foundError(<String>[
-      '${red}Invalid subshard name "$subshardName". Expected format "[int]_[int]" ex. "1_3"',
-    ]);
-    throw Exception('Invalid subshard name: $subshardName');
-  }
-  // One-indexed.
-  final int index = int.parse(match.group(1)!);
-  final int total = int.parse(match.group(2)!);
-  if (index > total) {
-    foundError(<String>[
-      '${red}Invalid subshard name "$subshardName". Index number must be greater or equal to total.',
-    ]);
-    return <T>[];
-  }
-
-  final int testsPerShard = (tests.length / total).ceil();
-  final int start = (index - 1) * testsPerShard;
-  final int end = math.min(index * testsPerShard, tests.length);
-
-  print('Selecting subshard $index of $total (tests ${start + 1}-$end of ${tests.length})');
-  return tests.sublist(start, end);
-}
-
-Future<void> runShardRunnerIndexOfTotalSubshard(List<ShardRunner> tests) async {
-  final List<ShardRunner> sublist = _selectIndexOfTotalSubshard<ShardRunner>(tests);
-  for (final ShardRunner test in sublist) {
-    await test();
-  }
 }
 
 Future<void> selectShard(Map<String, ShardRunner> shards) => _runFromList(shards, kShardKey, 'shard', 0);
