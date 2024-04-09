@@ -164,7 +164,7 @@ TEST_P(SceneTest, TwoTriangles) {
     ImGui::End();
     Node& node = *scene.GetRoot().GetChildren()[0];
     node.SetLocalTransform(node.GetLocalTransform() *
-                           Matrix::MakeRotation(0.02, {0, 1, 0, 0}));
+                           Matrix::MakeRotation(Radians(0.02), {0, 1, 0, 0}));
 
     static ImVec2 mouse_pos_prev = ImGui::GetMousePos();
     ImVec2 mouse_pos = ImGui::GetMousePos();
@@ -269,7 +269,7 @@ TEST_P(SceneTest, Dash) {
     ImGui::End();
     Node& node = *scene.GetRoot().GetChildren()[0];
     node.SetLocalTransform(node.GetLocalTransform() *
-                           Matrix::MakeRotation(0.02, {0, 1, 0, 0}));
+                           Matrix::MakeRotation(Radians(0.02), {0, 1, 0, 0}));
 
     static ImVec2 mouse_pos_prev = ImGui::GetMousePos();
     ImVec2 mouse_pos = ImGui::GetMousePos();

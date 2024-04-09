@@ -24,5 +24,134 @@ TEST(MatrixTest, Multiply) {
                                         11.0, 21.0, 0.0, 1.0)));
 }
 
+TEST(MatrixTest, HasPerspective2D) {
+  EXPECT_FALSE(Matrix().HasPerspective2D());
+
+  auto test = [](int index, bool expect) {
+    Matrix matrix;
+    EXPECT_FALSE(matrix.HasPerspective2D());
+    matrix.m[index] = 0.5f;
+    EXPECT_EQ(matrix.HasPerspective2D(), expect) << "index: " << index;
+  };
+
+  // clang-format off
+  test( 0, false);  test( 1, false);  test( 2, false);  test( 3, true);
+  test( 4, false);  test( 5, false);  test( 6, false);  test( 7, true);
+  test( 8, false);  test( 9, false);  test(10, false);  test(11, false);
+  test(12, false);  test(13, false);  test(14, false);  test(15, true);
+  // clang-format on
+}
+
+TEST(MatrixTest, HasPerspective) {
+  EXPECT_FALSE(Matrix().HasPerspective());
+
+  auto test = [](int index, bool expect) {
+    Matrix matrix;
+    EXPECT_FALSE(matrix.HasPerspective());
+    matrix.m[index] = 0.5f;
+    EXPECT_EQ(matrix.HasPerspective(), expect) << "index: " << index;
+  };
+
+  // clang-format off
+  test( 0, false);  test( 1, false);  test( 2, false);  test( 3, true);
+  test( 4, false);  test( 5, false);  test( 6, false);  test( 7, true);
+  test( 8, false);  test( 9, false);  test(10, false);  test(11, true);
+  test(12, false);  test(13, false);  test(14, false);  test(15, true);
+  // clang-format on
+}
+
+TEST(MatrixTest, IsAligned2D) {
+  EXPECT_TRUE(Matrix().IsAligned2D());
+  EXPECT_TRUE(Matrix::MakeScale({1.0f, 1.0f, 2.0f}).IsAligned2D());
+
+  auto test = [](int index, bool expect) {
+    Matrix matrix;
+    EXPECT_TRUE(matrix.IsAligned2D());
+    matrix.m[index] = 0.5f;
+    EXPECT_EQ(matrix.IsAligned2D(), expect) << "index: " << index;
+  };
+
+  // clang-format off
+  test( 0, true);   test( 1, false);  test( 2, true);   test( 3, false);
+  test( 4, false);  test( 5, true);   test( 6, true);   test( 7, false);
+  test( 8, true);   test( 9, true);   test(10, true);   test(11, true);
+  test(12, true);   test(13, true);   test(14, true);   test(15, false);
+  // clang-format on
+
+  // True for quadrant rotations from -250 to +250 full circles
+  for (int i = -1000; i < 1000; i++) {
+    Degrees d = Degrees(i * 90);
+    Matrix matrix = Matrix::MakeRotationZ(Degrees(d));
+    EXPECT_TRUE(matrix.IsAligned2D()) << "degrees: " << d.degrees;
+  }
+
+  // False for half degree rotations from -999.5 to +1000.5 degrees
+  for (int i = -1000; i < 1000; i++) {
+    Degrees d = Degrees(i + 0.5f);
+    Matrix matrix = Matrix::MakeRotationZ(Degrees(d));
+    EXPECT_FALSE(matrix.IsAligned2D()) << "degrees: " << d.degrees;
+  }
+}
+
+TEST(MatrixTest, IsAligned) {
+  EXPECT_TRUE(Matrix().IsAligned());
+  EXPECT_TRUE(Matrix::MakeScale({1.0f, 1.0f, 2.0f}).IsAligned());
+
+  // Begin Legacy tests transferred over from geometry_unittests.cc
+  {
+    auto m = Matrix::MakeTranslation({1, 2, 3});
+    bool result = m.IsAligned();
+    ASSERT_TRUE(result);
+  }
+
+  {
+    auto m = Matrix::MakeRotationZ(Degrees{123});
+    bool result = m.IsAligned();
+    ASSERT_FALSE(result);
+  }
+  // End Legacy tests transferred over from geometry_unittests.cc
+
+  auto test = [](int index, bool expect) {
+    Matrix matrix;
+    EXPECT_TRUE(matrix.IsAligned());
+    matrix.m[index] = 0.5f;
+    EXPECT_EQ(matrix.IsAligned(), expect) << "index: " << index;
+  };
+
+  // clang-format off
+  test( 0, true);   test( 1, false);  test( 2, false);  test( 3, false);
+  test( 4, false);  test( 5, true);   test( 6, false);  test( 7, false);
+  test( 8, false);  test( 9, false);  test(10, true);   test(11, false);
+  test(12, true);   test(13, true);   test(14, true);   test(15, false);
+  // clang-format on
+
+  // True for quadrant rotations from -250 to +250 full circles
+  for (int i = -1000; i < 1000; i++) {
+    Degrees d = Degrees(i * 90);
+    Matrix matrix = Matrix::MakeRotationZ(Degrees(d));
+    EXPECT_TRUE(matrix.IsAligned()) << "degrees: " << d.degrees;
+  }
+
+  // False for half degree rotations from -999.5 to +1000.5 degrees
+  for (int i = -1000; i < 1000; i++) {
+    Degrees d = Degrees(i + 0.5f);
+    Matrix matrix = Matrix::MakeRotationZ(Degrees(d));
+    EXPECT_FALSE(matrix.IsAligned()) << "degrees: " << d.degrees;
+  }
+}
+
+TEST(MatrixTest, TransformHomogenous) {
+  Matrix matrix = Matrix::MakeColumn(
+      // clang-format off
+       2.0f,  3.0f,  5.0f,  7.0f,
+      11.0f, 13.0f, 17.0f, 19.0f,
+      23.0f, 29.0f, 31.0f, 37.0f,
+      41.0f, 43.0f, 47.0f, 53.0f
+      // clang-format on
+  );
+  EXPECT_EQ(matrix.TransformHomogenous({1.0f, -1.0f}),
+            Vector3(32.0f, 33.0f, 41.0f));
+}
+
 }  // namespace testing
 }  // namespace impeller

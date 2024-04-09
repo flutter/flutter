@@ -10,13 +10,62 @@
 #include "flutter/impeller/geometry/rect.h"
 #include "third_party/skia/include/core/SkM44.h"
 #include "third_party/skia/include/core/SkMatrix.h"
+#include "third_party/skia/include/core/SkPoint3.h"
 
 namespace flutter {
 
 namespace {
 
 static constexpr float kPiOver4 = impeller::kPiOver4;
-static constexpr float kFieldOfView = impeller::kPiOver2 + impeller::kPiOver4;
+
+static constexpr float kSimplePerspective[16] = {
+    // clang-format off
+    2.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 2.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 3.0f
+    // clang-format on
+};
+
+// The following matrices slowly slide a perspective-skewed transform of
+// the rect past the near clipping plane. Keeping the Y perspective factor
+// at -0.006 allows the X perspective factor to slowly move the transformed
+// rectangle into the clipping pane over the range of [-0.01, to -0.025].
+static constexpr float kClipOneCornerPerspective[16] = {
+    // clang-format off
+    2.0f, 0.0f, 0.0f, -0.01f,
+    0.0f, 2.0f, 0.0f, -0.006f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 3.0f
+    // clang-format on
+};
+
+static constexpr float kClipTwoCornersPerspective[16] = {
+    // clang-format off
+    2.0f, 0.0f, 0.0f, -.015f,
+    0.0f, 2.0f, 0.0f, -.006f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 3.0f
+    // clang-format on
+};
+
+static constexpr float kClipThreeCornersPerspective[16] = {
+    // clang-format off
+    2.0f, 0.0f, 0.0f, -.02f,
+    0.0f, 2.0f, 0.0f, -.006f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 3.0f
+    // clang-format on
+};
+
+static constexpr float kClipFourCornersPerspective[16] = {
+    // clang-format off
+    2.0f, 0.0f, 0.0f, -.025f,
+    0.0f, 2.0f, 0.0f, -.006f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 3.0f
+    // clang-format on
+};
 
 enum class AdapterType {
   kSkMatrix,
@@ -70,11 +119,9 @@ class TransformAdapter {
   virtual void InitPoint(TestPoint& point, float x, float y) const = 0;
 
   // The actual methods that do work and are the meat of the benchmarks.
-  virtual void SetIdentity(TestTransform& result) const = 0;
-  virtual void SetPerspective(TestTransform& result,
-                              float fov_radians,
-                              float near,
-                              float far) const = 0;
+  virtual void InitTransformIdentity(TestTransform& result) const = 0;
+  virtual void InitTransformColMatrix(TestTransform& result,
+                                      const float m[16]) const = 0;
 
   virtual void Translate(TestTransform& result, float tx, float ty) const = 0;
   virtual void Scale(TestTransform& result, float sx, float sy) const = 0;
@@ -91,9 +138,14 @@ class TransformAdapter {
                                const TestPoint in[],
                                TestPoint out[],
                                int n) const = 0;
-  virtual void TransformRect(const TestTransform& transform,
-                             const TestRect& in,
-                             TestRect& out) const = 0;
+  virtual void TransformRectFast(const TestTransform& transform,
+                                 const TestRect& in,
+                                 TestRect& out) const = 0;
+  virtual void TransformAndClipRect(const TestTransform& transform,
+                                    const TestRect& in,
+                                    TestRect& out) const = 0;
+  virtual int CountClippedCorners(const TestTransform& transform,
+                                  const TestRect& rect) const = 0;
   virtual void InvertUnchecked(const TestTransform& transform,
                                TestTransform& result) const = 0;
   virtual bool InvertAndCheck(const TestTransform& transform,
@@ -116,11 +168,6 @@ class SkiaAdapterBase : public TransformAdapter {
                     float bottom) const override {
     rect.sk_rect.setLTRB(left, top, right, bottom);
   }
-
- protected:
-  static SkM44 MakePerspective(float fov_radians, float near, float far) {
-    return SkM44::Perspective(near, far, fov_radians);
-  }
 };
 
 class SkMatrixAdapter : public SkiaAdapterBase {
@@ -128,15 +175,13 @@ class SkMatrixAdapter : public SkiaAdapterBase {
   SkMatrixAdapter() = default;
   ~SkMatrixAdapter() = default;
 
-  void SetIdentity(TestTransform& result) const override {
+  void InitTransformIdentity(TestTransform& result) const override {
     result.sk_matrix.setIdentity();
   }
 
-  virtual void SetPerspective(TestTransform& result,
-                              float fov_radians,
-                              float near,
-                              float far) const override {
-    result.sk_matrix = MakePerspective(fov_radians, near, far).asM33();
+  virtual void InitTransformColMatrix(TestTransform& result,
+                                      const float m[16]) const override {
+    result.sk_matrix = SkM44::ColMajor(m).asM33();
   }
 
   void Translate(TestTransform& result, float tx, float ty) const override {
@@ -172,10 +217,33 @@ class SkMatrixAdapter : public SkiaAdapterBase {
                                   reinterpret_cast<const SkPoint*>(in), n);
   }
 
-  void TransformRect(const TestTransform& transform,
-                     const TestRect& in,
-                     TestRect& out) const override {
-    out.sk_rect = transform.sk_matrix.mapRect(in.sk_rect);
+  void TransformRectFast(const TestTransform& transform,
+                         const TestRect& in,
+                         TestRect& out) const override {
+    out.sk_rect =
+        transform.sk_matrix.mapRect(in.sk_rect, SkApplyPerspectiveClip::kNo);
+  }
+
+  void TransformAndClipRect(const TestTransform& transform,
+                            const TestRect& in,
+                            TestRect& out) const override {
+    out.sk_rect =
+        transform.sk_matrix.mapRect(in.sk_rect, SkApplyPerspectiveClip::kYes);
+  }
+
+  int CountClippedCorners(const TestTransform& transform,
+                          const TestRect& rect) const {
+    SkPoint3 homogenous[4];
+    SkPoint corners[4];
+    rect.sk_rect.toQuad(corners);
+    transform.sk_matrix.mapHomogeneousPoints(homogenous, corners, 4);
+    int count = 0;
+    for (SkPoint3 hpt : homogenous) {
+      if (hpt.fZ <= 0) {
+        count++;
+      }
+    }
+    return count;
   }
 
   void InvertUnchecked(const TestTransform& transform,
@@ -195,15 +263,13 @@ class SkM44Adapter : public SkiaAdapterBase {
   SkM44Adapter() = default;
   ~SkM44Adapter() = default;
 
-  void SetIdentity(TestTransform& storage) const override {
+  void InitTransformIdentity(TestTransform& storage) const override {
     storage.sk_m44.setIdentity();
   }
 
-  virtual void SetPerspective(TestTransform& result,
-                              float fov_radians,
-                              float near,
-                              float far) const override {
-    result.sk_m44 = MakePerspective(fov_radians, near, far);
+  virtual void InitTransformColMatrix(TestTransform& result,
+                                      const float m[16]) const override {
+    result.sk_m44 = SkM44::ColMajor(m);
   }
 
   void Translate(TestTransform& storage, float tx, float ty) const override {
@@ -239,10 +305,39 @@ class SkM44Adapter : public SkiaAdapterBase {
                                        reinterpret_cast<const SkPoint*>(in), n);
   }
 
-  void TransformRect(const TestTransform& transform,
-                     const TestRect& in,
-                     TestRect& out) const override {
-    out.sk_rect = transform.sk_m44.asM33().mapRect(in.sk_rect);
+  void TransformRectFast(const TestTransform& transform,
+                         const TestRect& in,
+                         TestRect& out) const override {
+    // clang-format off
+    out.sk_rect = transform.sk_m44
+                      .asM33()
+                      .mapRect(in.sk_rect, SkApplyPerspectiveClip::kNo);
+    // clang-format on
+  }
+
+  void TransformAndClipRect(const TestTransform& transform,
+                            const TestRect& in,
+                            TestRect& out) const override {
+    // clang-format off
+    out.sk_rect = transform.sk_m44
+                      .asM33()
+                      .mapRect(in.sk_rect, SkApplyPerspectiveClip::kYes);
+    // clang-format on
+  }
+
+  int CountClippedCorners(const TestTransform& transform,
+                          const TestRect& rect) const {
+    SkPoint3 homogenous[4];
+    SkPoint corners[4];
+    rect.sk_rect.toQuad(corners);
+    transform.sk_m44.asM33().mapHomogeneousPoints(homogenous, corners, 4);
+    int count = 0;
+    for (SkPoint3 hpt : homogenous) {
+      if (hpt.fZ <= 0) {
+        count++;
+      }
+    }
+    return count;
   }
 
   void InvertUnchecked(const TestTransform& transform,
@@ -276,17 +371,20 @@ class ImpellerMatrixAdapter : public TransformAdapter {
     rect.impeller_rect = impeller::Rect::MakeLTRB(left, top, right, bottom);
   }
 
-  void SetIdentity(TestTransform& storage) const override {
+  void InitTransformIdentity(TestTransform& storage) const override {
     storage.impeller_matrix = impeller::Matrix();
   }
 
-  virtual void SetPerspective(TestTransform& result,
-                              float fov_radians,
-                              float near,
-                              float far) const override {
-    impeller::Radians fov = impeller::Radians(fov_radians);
-    result.impeller_matrix =
-        impeller::Matrix::MakePerspective(fov, 1.0f, near, far);
+  virtual void InitTransformColMatrix(TestTransform& result,
+                                      const float m[16]) const override {
+    // clang-format off
+    result.impeller_matrix = impeller::Matrix::MakeColumn(
+        m[ 0], m[ 1], m[ 2], m[ 3],
+        m[ 4], m[ 5], m[ 6], m[ 7],
+        m[ 8], m[ 9], m[10], m[11],
+        m[12], m[13], m[14], m[15]
+    );
+    // clang-format on
   }
 
   void Translate(TestTransform& storage, float tx, float ty) const override {
@@ -324,11 +422,31 @@ class ImpellerMatrixAdapter : public TransformAdapter {
     }
   }
 
-  void TransformRect(const TestTransform& transform,
-                     const TestRect& in,
-                     TestRect& out) const override {
+  void TransformRectFast(const TestTransform& transform,
+                         const TestRect& in,
+                         TestRect& out) const override {
     out.impeller_rect =
         in.impeller_rect.TransformBounds(transform.impeller_matrix);
+  }
+
+  void TransformAndClipRect(const TestTransform& transform,
+                            const TestRect& in,
+                            TestRect& out) const override {
+    out.impeller_rect =
+        in.impeller_rect.TransformAndClipBounds(transform.impeller_matrix);
+  }
+
+  int CountClippedCorners(const TestTransform& transform,
+                          const TestRect& rect) const {
+    auto corners = rect.impeller_rect.GetPoints();
+    int count = 0;
+    for (auto pt : corners) {
+      auto hpt = transform.impeller_matrix.TransformHomogenous(pt);
+      if (hpt.z <= 0) {
+        count++;
+      }
+    }
+    return count;
   }
 
   void InvertUnchecked(const TestTransform& transform,
@@ -343,44 +461,99 @@ class ImpellerMatrixAdapter : public TransformAdapter {
   }
 };
 
-using SetupFunction = std::function<void(TransformAdapter*, TestTransform&)>;
+// The rect argument is passed in by the TransformRect benchmarks so that
+// the setup function can make sure that it sets up a transform that
+// clips the desired number of corners during the bounds transform.
+using SetupFunction =
+    std::function<void(TransformAdapter*, TestTransform&, const TestRect*)>;
 
 static void SetupIdentity(const TransformAdapter* adapter,
-                          TestTransform& transform) {
-  adapter->SetIdentity(transform);
+                          TestTransform& transform,
+                          const TestRect* rect) {
+  adapter->InitTransformIdentity(transform);
 }
 
 static void SetupTranslate(const TransformAdapter* adapter,
-                           TestTransform& transform) {
-  adapter->SetIdentity(transform);
+                           TestTransform& transform,
+                           const TestRect* rect) {
+  adapter->InitTransformIdentity(transform);
   adapter->Translate(transform, 10.2, 12.3);
 }
 
 static void SetupScale(const TransformAdapter* adapter,
-                       TestTransform& transform) {
-  adapter->SetIdentity(transform);
+                       TestTransform& transform,
+                       const TestRect* rect) {
+  adapter->InitTransformIdentity(transform);
   adapter->Scale(transform, 2.0, 2.0);
 }
 
 static void SetupScaleTranslate(const TransformAdapter* adapter,
-                                TestTransform& transform) {
-  adapter->SetIdentity(transform);
+                                TestTransform& transform,
+                                const TestRect* rect) {
+  adapter->InitTransformIdentity(transform);
   adapter->Scale(transform, 2.0, 2.0);
   adapter->Translate(transform, 10.2, 12.3);
 }
 
 static void SetupRotate(const TransformAdapter* adapter,
-                        TestTransform& transform) {
-  adapter->SetIdentity(transform);
+                        TestTransform& transform,
+                        const TestRect* rect) {
+  adapter->InitTransformIdentity(transform);
   adapter->RotateRadians(transform, kPiOver4);
 }
 
 static void SetupPerspective(const TransformAdapter* adapter,
-                             TestTransform& transform) {
-  auto fov_radians = kFieldOfView;
-  auto near = 1.0f;
-  auto far = 100.0f;
-  adapter->SetPerspective(transform, fov_radians, near, far);
+                             TestTransform& transform,
+                             const TestRect* rect) {
+  adapter->InitTransformColMatrix(transform, kSimplePerspective);
+  if (rect) {
+    FML_CHECK(adapter->CountClippedCorners(transform, *rect) == 0);
+  }
+}
+
+static void SetupPerspectiveClipNone(const TransformAdapter* adapter,
+                                     TestTransform& transform,
+                                     const TestRect* rect) {
+  adapter->InitTransformColMatrix(transform, kSimplePerspective);
+  if (rect) {
+    FML_CHECK(adapter->CountClippedCorners(transform, *rect) == 0);
+  }
+}
+
+static void SetupPerspectiveClipOne(const TransformAdapter* adapter,
+                                    TestTransform& transform,
+                                    const TestRect* rect) {
+  adapter->InitTransformColMatrix(transform, kClipOneCornerPerspective);
+  if (rect) {
+    FML_CHECK(adapter->CountClippedCorners(transform, *rect) == 1);
+  }
+}
+
+static void SetupPerspectiveClipTwo(const TransformAdapter* adapter,
+                                    TestTransform& transform,
+                                    const TestRect* rect) {
+  adapter->InitTransformColMatrix(transform, kClipTwoCornersPerspective);
+  if (rect) {
+    FML_CHECK(adapter->CountClippedCorners(transform, *rect) == 2);
+  }
+}
+
+static void SetupPerspectiveClipThree(const TransformAdapter* adapter,
+                                      TestTransform& transform,
+                                      const TestRect* rect) {
+  adapter->InitTransformColMatrix(transform, kClipThreeCornersPerspective);
+  if (rect) {
+    FML_CHECK(adapter->CountClippedCorners(transform, *rect) == 3);
+  }
+}
+
+static void SetupPerspectiveClipFour(const TransformAdapter* adapter,
+                                     TestTransform& transform,
+                                     const TestRect* rect) {
+  adapter->InitTransformColMatrix(transform, kClipFourCornersPerspective);
+  if (rect) {
+    FML_CHECK(adapter->CountClippedCorners(transform, *rect) == 4);
+  }
 }
 
 // We use a function to return the appropriate adapter so that all methods
@@ -414,18 +587,15 @@ static void BM_SetIdentity(benchmark::State& state, AdapterType type) {
   auto adapter = GetAdapter(type);
   TestTransform transform;
   while (state.KeepRunning()) {
-    adapter->SetIdentity(transform);
+    adapter->InitTransformIdentity(transform);
   }
 }
 
 static void BM_SetPerspective(benchmark::State& state, AdapterType type) {
   auto adapter = GetAdapter(type);
   TestTransform transform;
-  auto fov_radians = kFieldOfView;
-  auto near = 1.0f;
-  auto far = 100.0f;
   while (state.KeepRunning()) {
-    adapter->SetPerspective(transform, fov_radians, near, far);
+    adapter->InitTransformColMatrix(transform, kSimplePerspective);
   }
 }
 
@@ -435,7 +605,7 @@ static void BM_Translate(benchmark::State& state,
                          float ty) {
   auto adapter = GetAdapter(type);
   TestTransform transform;
-  adapter->SetIdentity(transform);
+  adapter->InitTransformIdentity(transform);
   bool flip = true;
   while (state.KeepRunning()) {
     if (flip) {
@@ -450,7 +620,7 @@ static void BM_Translate(benchmark::State& state,
 static void BM_Scale(benchmark::State& state, AdapterType type, float scale) {
   auto adapter = GetAdapter(type);
   TestTransform transform;
-  adapter->SetIdentity(transform);
+  adapter->InitTransformIdentity(transform);
   float inv_scale = 1.0f / scale;
   bool flip = true;
   while (state.KeepRunning()) {
@@ -468,7 +638,7 @@ static void BM_Rotate(benchmark::State& state,
                       float radians) {
   auto adapter = GetAdapter(type);
   TestTransform transform;
-  adapter->SetIdentity(transform);
+  adapter->InitTransformIdentity(transform);
   while (state.KeepRunning()) {
     adapter->RotateRadians(transform, radians);
   }
@@ -480,8 +650,8 @@ static void BM_Concat(benchmark::State& state,
                       const SetupFunction& b_setup) {
   auto adapter = GetAdapter(type);
   TestTransform a, b, result;
-  a_setup(adapter.get(), a);
-  b_setup(adapter.get(), b);
+  a_setup(adapter.get(), a, nullptr);
+  b_setup(adapter.get(), b, nullptr);
   while (state.KeepRunning()) {
     adapter->Concat(a, b, result);
   }
@@ -492,7 +662,7 @@ static void BM_TransformPoint(benchmark::State& state,
                               const SetupFunction& setup) {
   auto adapter = GetAdapter(type);
   TestTransform transform;
-  setup(adapter.get(), transform);
+  setup(adapter.get(), transform, nullptr);
   TestPoint point, result;
   adapter->InitPoint(point, 25.7, 32.4);
   while (state.KeepRunning()) {
@@ -505,7 +675,7 @@ static void BM_TransformPoints(benchmark::State& state,
                                const SetupFunction& setup) {
   auto adapter = GetAdapter(type);
   TestTransform transform;
-  setup(adapter.get(), transform);
+  setup(adapter.get(), transform, nullptr);
   const int Xs = 10;
   const int Ys = 10;
   const int N = Xs * Ys;
@@ -526,16 +696,29 @@ static void BM_TransformPoints(benchmark::State& state,
   state.SetItemsProcessed(item_count);
 }
 
-static void BM_TransformRect(benchmark::State& state,
-                             AdapterType type,
-                             const SetupFunction& setup) {
+static void BM_TransformRectFast(benchmark::State& state,
+                                 AdapterType type,
+                                 const SetupFunction& setup) {
   auto adapter = GetAdapter(type);
   TestTransform transform;
-  setup(adapter.get(), transform);
   TestRect rect, result;
   adapter->InitRectLTRB(rect, 100, 100, 200, 200);
+  setup(adapter.get(), transform, &rect);
   while (state.KeepRunning()) {
-    adapter->TransformRect(transform, rect, result);
+    adapter->TransformRectFast(transform, rect, result);
+  }
+}
+
+static void BM_TransformAndClipRect(benchmark::State& state,
+                                    AdapterType type,
+                                    const SetupFunction& setup) {
+  auto adapter = GetAdapter(type);
+  TestTransform transform;
+  TestRect rect, result;
+  adapter->InitRectLTRB(rect, 100, 100, 200, 200);
+  setup(adapter.get(), transform, &rect);
+  while (state.KeepRunning()) {
+    adapter->TransformAndClipRect(transform, rect, result);
   }
 }
 
@@ -544,7 +727,7 @@ static void BM_InvertUnchecked(benchmark::State& state,
                                const SetupFunction& setup) {
   auto adapter = GetAdapter(type);
   TestTransform transform;
-  setup(adapter.get(), transform);
+  setup(adapter.get(), transform, nullptr);
   TestTransform result;
   while (state.KeepRunning()) {
     adapter->InvertUnchecked(transform, result);
@@ -556,7 +739,7 @@ static void BM_InvertAndCheck(benchmark::State& state,
                               const SetupFunction& setup) {
   auto adapter = GetAdapter(type);
   TestTransform transform;
-  setup(adapter.get(), transform);
+  setup(adapter.get(), transform, nullptr);
   TestTransform result;
   while (state.KeepRunning()) {
     adapter->InvertAndCheck(transform, result);
@@ -642,11 +825,26 @@ BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformPoints, ScaleTranslate);
 BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformPoints, Rotate);
 BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformPoints, Perspective);
 
-BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformRect, Identity);
-BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformRect, Translate);
-BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformRect, Scale);
-BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformRect, ScaleTranslate);
-BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformRect, Rotate);
-BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformRect, Perspective);
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformRectFast, Identity);
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformRectFast, Translate);
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformRectFast, Scale);
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformRectFast, ScaleTranslate);
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformRectFast, Rotate);
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformRectFast, PerspectiveClipNone);
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformRectFast, PerspectiveClipOne);
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformRectFast, PerspectiveClipTwo);
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformRectFast, PerspectiveClipThree);
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformRectFast, PerspectiveClipFour);
+
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformAndClipRect, Identity);
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformAndClipRect, Translate);
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformAndClipRect, Scale);
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformAndClipRect, ScaleTranslate);
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformAndClipRect, Rotate);
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformAndClipRect, PerspectiveClipNone);
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformAndClipRect, PerspectiveClipOne);
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformAndClipRect, PerspectiveClipTwo);
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformAndClipRect, PerspectiveClipThree);
+BENCHMARK_CAPTURE_ALL_SETUP(BM_TransformAndClipRect, PerspectiveClipFour);
 
 }  // namespace flutter

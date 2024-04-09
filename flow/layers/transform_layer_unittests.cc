@@ -167,18 +167,19 @@ TEST_F(TransformLayerTest, SimpleM44) {
 TEST_F(TransformLayerTest, ComplexM44) {
   SkPath child_path;
   child_path.addRect(5.0f, 6.0f, 20.5f, 21.5f);
-  SkMatrix initial_transform = SkMatrix::Translate(-0.5f, -0.5f);
-  SkRect local_cull_rect = SkRect::MakeXYWH(2.0f, 2.0f, 14.0f, 14.0f);
+  SkMatrix initial_transform = SkMatrix::Translate(-2.0f, -2.0f);
+  SkRect local_cull_rect = SkRect::MakeXYWH(4.0f, 4.0f, 16.0f, 16.0f);
   SkRect device_cull_rect = initial_transform.mapRect(local_cull_rect);
   SkM44 layer_transform44 = SkM44();
-  layer_transform44.preTranslate(2.5f, 2.5f);
+  layer_transform44.preTranslate(1.0f, 1.0f);
   // 20 degrees around the X axis
   layer_transform44.preConcat(SkM44::Rotate({1.0f, 0.0f, 0.0f}, M_PI / 9.0f));
   // 10 degrees around the Y axis
   layer_transform44.preConcat(SkM44::Rotate({0.0f, 1.0f, 0.0f}, M_PI / 18.0f));
+  SkM44 inverse_layer_transform44;
+  EXPECT_TRUE(layer_transform44.invert(&inverse_layer_transform44));
   SkMatrix layer_transform = layer_transform44.asM33();
-  SkMatrix inverse_layer_transform;
-  EXPECT_TRUE(layer_transform.invert(&inverse_layer_transform));
+  SkMatrix inverse_layer_transform = inverse_layer_transform44.asM33();
 
   auto mock_layer = std::make_shared<MockLayer>(child_path, DlPaint());
   auto layer = std::make_shared<TransformLayer>(layer_transform44);
@@ -195,8 +196,19 @@ TEST_F(TransformLayerTest, ComplexM44) {
   EXPECT_TRUE(layer->needs_painting(paint_context()));
   EXPECT_EQ(mock_layer->parent_matrix(),
             SkMatrix::Concat(initial_transform, layer_transform));
-  EXPECT_EQ(mock_layer->parent_cull_rect(),
-            inverse_layer_transform.mapRect(local_cull_rect));
+
+  // Even having switched to binary-ieee friendly numbers for the
+  // initial conditions, these numbers which are based on a matrix
+  // concatenation and inversion still aren't exact, so we are using
+  // fuzzy float comparisons to check them.
+  SkRect parent_cull_rect = mock_layer->parent_cull_rect();
+  SkRect expect_parent_cull_rect =
+      inverse_layer_transform.mapRect(local_cull_rect);
+  EXPECT_FLOAT_EQ(parent_cull_rect.fLeft, expect_parent_cull_rect.fLeft);
+  EXPECT_FLOAT_EQ(parent_cull_rect.fTop, expect_parent_cull_rect.fTop);
+  EXPECT_FLOAT_EQ(parent_cull_rect.fRight, expect_parent_cull_rect.fRight);
+  EXPECT_FLOAT_EQ(parent_cull_rect.fBottom, expect_parent_cull_rect.fBottom);
+
   EXPECT_EQ(mock_layer->parent_mutators(),
             std::vector({Mutator(layer_transform)}));
 
