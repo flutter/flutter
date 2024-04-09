@@ -3,22 +3,31 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMutatorView.h"
 
 #include "flutter/fml/logging.h"
 
 namespace flutter {
 
 namespace {
-std::vector<PlatformViewLayerWithIndex> CopyPlatformViewLayers(const FlutterLayer** layers,
-                                                               size_t layer_count) {
-  std::vector<PlatformViewLayerWithIndex> platform_views;
+std::vector<LayerVariant> CopyLayers(const FlutterLayer** layers, size_t layer_count) {
+  std::vector<LayerVariant> layers_copy;
   for (size_t i = 0; i < layer_count; i++) {
-    if (layers[i]->type == kFlutterLayerContentTypePlatformView) {
-      platform_views.push_back(std::make_pair(PlatformViewLayer(layers[i]), i));
+    const auto& layer = layers[i];
+    if (layer->type == kFlutterLayerContentTypePlatformView) {
+      layers_copy.push_back(PlatformViewLayer(layer));
+    } else if (layer->type == kFlutterLayerContentTypeBackingStore) {
+      std::vector<FlutterRect> rects;
+      auto present_info = layer->backing_store_present_info;
+      if (present_info != nullptr && present_info->paint_region != nullptr) {
+        rects.reserve(present_info->paint_region->rects_count);
+        std::copy(present_info->paint_region->rects,
+                  present_info->paint_region->rects + present_info->paint_region->rects_count,
+                  std::back_inserter(rects));
+      }
+      layers_copy.push_back(BackingStoreLayer{rects});
     }
   }
-  return platform_views;
+  return layers_copy;
 }
 }  // namespace
 
@@ -91,17 +100,16 @@ bool FlutterCompositor::Present(FlutterViewId view_id,
 
   // Notify block below may be called asynchronously, hence the need to copy
   // the layer information instead of passing the original pointers from embedder.
-  auto platform_views_layers = std::make_shared<std::vector<PlatformViewLayerWithIndex>>(
-      CopyPlatformViewLayers(layers, layers_count));
+  auto layers_copy = std::make_shared<std::vector<LayerVariant>>(CopyLayers(layers, layers_count));
 
-  [view.surfaceManager presentSurfaces:surfaces
-                                atTime:presentation_time
-                                notify:^{
-                                  // Gets a presenter or create a new one for the view.
-                                  ViewPresenter& presenter = presenters_[view_id];
-                                  presenter.PresentPlatformViews(view, *platform_views_layers,
-                                                                 platform_view_controller_);
-                                }];
+  [view.surfaceManager
+      presentSurfaces:surfaces
+               atTime:presentation_time
+               notify:^{
+                 // Gets a presenter or create a new one for the view.
+                 ViewPresenter& presenter = presenters_[view_id];
+                 presenter.PresentPlatformViews(view, *layers_copy, platform_view_controller_);
+               }];
 
   return true;
 }
@@ -111,7 +119,7 @@ FlutterCompositor::ViewPresenter::ViewPresenter()
 
 void FlutterCompositor::ViewPresenter::PresentPlatformViews(
     FlutterView* default_base_view,
-    const std::vector<PlatformViewLayerWithIndex>& platform_views,
+    const std::vector<LayerVariant>& layers,
     const FlutterPlatformViewController* platform_view_controller) {
   FML_DCHECK([[NSThread currentThread] isMainThread])
       << "Must be on the main thread to present platform views";
@@ -119,10 +127,37 @@ void FlutterCompositor::ViewPresenter::PresentPlatformViews(
   // Active mutator views for this frame.
   NSMutableArray<FlutterMutatorView*>* present_mutators = [NSMutableArray array];
 
-  for (const auto& platform_view : platform_views) {
-    FlutterMutatorView* container = PresentPlatformView(
-        default_base_view, platform_view.first, platform_view.second, platform_view_controller);
-    [present_mutators addObject:container];
+  for (size_t i = 0; i < layers.size(); i++) {
+    const auto& layer = layers[i];
+    if (!std::holds_alternative<PlatformViewLayer>(layer)) {
+      continue;
+    }
+    const auto& platform_view = std::get<PlatformViewLayer>(layer);
+    FlutterMutatorView* mutator_view =
+        PresentPlatformView(default_base_view, platform_view, i, platform_view_controller);
+    [present_mutators addObject:mutator_view];
+
+    // Gather all overlay regions above this mutator view.
+    [mutator_view resetHitTestRegion];
+    for (size_t j = i + 1; j < layers.size(); j++) {
+      const auto& overlay_layer = layers[j];
+      if (!std::holds_alternative<BackingStoreLayer>(overlay_layer)) {
+        continue;
+      }
+      const auto& backing_store_layer = std::get<BackingStoreLayer>(overlay_layer);
+      for (const auto& flutter_rect : backing_store_layer.paint_region) {
+        double scale = default_base_view.layer.contentsScale;
+        CGRect rect = CGRectMake(flutter_rect.left / scale, flutter_rect.top / scale,
+                                 (flutter_rect.right - flutter_rect.left) / scale,
+                                 (flutter_rect.bottom - flutter_rect.top) / scale);
+        CGRect intersection = CGRectIntersection(rect, mutator_view.frame);
+        if (!CGRectIsNull(intersection)) {
+          intersection.origin.x -= mutator_view.frame.origin.x;
+          intersection.origin.y -= mutator_view.frame.origin.y;
+          [mutator_view addHitTestIgnoreRegion:intersection];
+        }
+      }
+    }
   }
 
   NSMutableArray<FlutterMutatorView*>* obsolete_mutators =
@@ -150,10 +185,15 @@ FlutterMutatorView* FlutterCompositor::ViewPresenter::PresentPlatformView(
 
   FML_DCHECK(platform_view) << "Platform view not found for id: " << platform_view_id;
 
+  if (cursor_coordinator_ == nil) {
+    cursor_coordinator_ = [[FlutterCursorCoordinator alloc] initWithFlutterView:default_base_view];
+  }
+
   FlutterMutatorView* container = [mutator_views_ objectForKey:platform_view];
 
   if (!container) {
-    container = [[FlutterMutatorView alloc] initWithPlatformView:platform_view];
+    container = [[FlutterMutatorView alloc] initWithPlatformView:platform_view
+                                                cursorCoordiator:cursor_coordinator_];
     [mutator_views_ setObject:container forKey:platform_view];
     [default_base_view addSubview:container];
   }

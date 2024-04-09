@@ -77,6 +77,13 @@ constexpr FlutterViewId kFlutterImplicitViewId = 0ll;
  */
 - (void)setBackgroundColor:(nonnull NSColor*)color;
 
+/**
+ * Called from the engine to notify the view that mouse cursor was updated while
+ * the mouse is over the view. The view is responsible from restoring the cursor
+ * when the mouse enters the view from another subview.
+ */
+- (void)didUpdateMouseCursor:(nonnull NSCursor*)cursor;
+
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERVIEW_H_

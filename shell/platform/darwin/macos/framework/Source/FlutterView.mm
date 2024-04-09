@@ -14,6 +14,7 @@
   __weak id<FlutterViewDelegate> _viewDelegate;
   FlutterThreadSynchronizer* _threadSynchronizer;
   FlutterSurfaceManager* _surfaceManager;
+  NSCursor* _lastCursor;
 }
 
 @end
@@ -94,13 +95,25 @@
   return [_viewDelegate viewShouldAcceptFirstResponder:self];
 }
 
+- (void)didUpdateMouseCursor:(NSCursor*)cursor {
+  _lastCursor = cursor;
+}
+
+// Restores mouse cursor. There are few cases when this is needed and framework will not handle this
+// automatically:
+// - When mouse cursor leaves subview of FlutterView (technically still within bound of FlutterView
+// tracking area so the framework won't be notified)
+// - When context menu above FlutterView is closed. Context menu will change current cursor to arrow
+// and will not restore it back.
 - (void)cursorUpdate:(NSEvent*)event {
-  // When adding/removing views AppKit will schedule call to current hit-test view
-  // cursorUpdate: at the end of frame to determine possible cursor change. If
-  // the view doesn't implement cursorUpdate: AppKit will set the default (arrow) cursor
-  // instead. This would replace the cursor set by FlutterMouseCursorPlugin.
-  // Empty cursorUpdate: implementation prevents this behavior.
-  // https://github.com/flutter/flutter/issues/111425
+  [_lastCursor set];
+  // It is possible that there is a platform view with NSTrackingArea below flutter content.
+  // This could override the mouse cursor as a result of mouse move event. There is no good way
+  // to prevent that short of swizzling [NSCursor set], so as a workaround force flutter cursor
+  // in next runloop turn. This is not ideal, as it may cause the cursor flicker a bit.
+  [[NSRunLoop currentRunLoop] performBlock:^{
+    [_lastCursor set];
+  }];
 }
 
 - (void)viewDidChangeBackingProperties {
