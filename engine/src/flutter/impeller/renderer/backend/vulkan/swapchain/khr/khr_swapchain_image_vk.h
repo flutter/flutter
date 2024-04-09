@@ -9,7 +9,6 @@
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_source_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
-#include "vulkan/vulkan_handles.hpp"
 
 namespace impeller {
 
@@ -24,33 +23,21 @@ class KHRSwapchainImageVK final : public TextureSourceVK {
 
   bool IsValid() const;
 
-  PixelFormat GetPixelFormat() const;
-
-  ISize GetSize() const;
-
   // |TextureSourceVK|
   vk::Image GetImage() const override;
-
-  std::shared_ptr<Texture> GetMSAATexture() const;
-
-  std::shared_ptr<Texture> GetDepthStencilTexture() const;
 
   // |TextureSourceVK|
   vk::ImageView GetImageView() const override;
 
+  // |TextureSourceVK|
   vk::ImageView GetRenderTargetView() const override;
 
-  void SetMSAATexture(std::shared_ptr<Texture> texture);
-
-  void SetDepthStencilTexture(std::shared_ptr<Texture> texture);
-
-  bool IsSwapchainImage() const override { return true; }
+  // |TextureSourceVK|
+  bool IsSwapchainImage() const override;
 
  private:
   vk::Image image_ = VK_NULL_HANDLE;
   vk::UniqueImageView image_view_ = {};
-  std::shared_ptr<Texture> msaa_texture_;
-  std::shared_ptr<Texture> depth_stencil_texture_;
   bool is_valid_ = false;
 
   KHRSwapchainImageVK(const KHRSwapchainImageVK&) = delete;

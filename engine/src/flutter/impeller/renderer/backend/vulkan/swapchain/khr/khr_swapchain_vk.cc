@@ -10,25 +10,22 @@
 
 namespace impeller {
 
-std::shared_ptr<KHRSwapchainVK> KHRSwapchainVK::Create(
-    const std::shared_ptr<Context>& context,
-    vk::UniqueSurfaceKHR surface,
-    const ISize& size,
-    bool enable_msaa) {
-  auto impl = KHRSwapchainImplVK::Create(context, std::move(surface), size,
-                                         enable_msaa);
-  if (!impl || !impl->IsValid()) {
-    VALIDATION_LOG << "Failed to create SwapchainVK implementation.";
-    return nullptr;
-  }
-  return std::shared_ptr<KHRSwapchainVK>(
-      new KHRSwapchainVK(std::move(impl), size, enable_msaa));
-}
-
-KHRSwapchainVK::KHRSwapchainVK(std::shared_ptr<KHRSwapchainImplVK> impl,
+KHRSwapchainVK::KHRSwapchainVK(const std::shared_ptr<Context>& context,
+                               vk::UniqueSurfaceKHR surface,
                                const ISize& size,
                                bool enable_msaa)
-    : impl_(std::move(impl)), size_(size), enable_msaa_(enable_msaa) {}
+    : size_(size), enable_msaa_(enable_msaa) {
+  auto impl = KHRSwapchainImplVK::Create(context,             //
+                                         std::move(surface),  //
+                                         size_,               //
+                                         enable_msaa_         //
+  );
+  if (!impl || !impl->IsValid()) {
+    VALIDATION_LOG << "Failed to create SwapchainVK implementation.";
+    return;
+  }
+  impl_ = std::move(impl);
+}
 
 KHRSwapchainVK::~KHRSwapchainVK() = default;
 
