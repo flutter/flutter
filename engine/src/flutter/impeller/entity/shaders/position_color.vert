@@ -13,7 +13,7 @@ frame_info;
 in vec2 position;
 in vec4 color;
 
-out f16vec4 v_color;
+out mediump f16vec4 v_color;
 
 void main() {
   gl_Position = frame_info.mvp * vec4(position, 0.0, 1.0);

@@ -25,7 +25,7 @@ in vec2 glyph_position;
 
 out vec2 v_uv;
 
-IMPELLER_MAYBE_FLAT out f16vec4 v_text_color;
+IMPELLER_MAYBE_FLAT out mediump f16vec4 v_text_color;
 
 mat4 basis(mat4 m) {
   return mat4(m[0][0], m[0][1], m[0][2], 0.0,  //
