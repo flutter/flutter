@@ -47,6 +47,27 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/boringssl/src/fuzz', // testing tools, not shipped
   r'flutter/third_party/boringssl/src/rust', // rust-related code is not shipped
   r'flutter/third_party/boringssl/src/util', // code generators, not shipped
+  r'flutter/third_party/dart/benchmarks', // not shipped in binary
+  r'flutter/third_party/dart/build', // not shipped in binary
+  r'flutter/third_party/dart/docs', // not shipped in binary
+  r'flutter/third_party/dart/pkg', // packages that don't become part of the binary (e.g. the analyzer)
+  r'flutter/third_party/dart/runtime/bin/ffi_test',
+  r'flutter/third_party/dart/runtime/docs',
+  r'flutter/third_party/dart/runtime/vm/service',
+  r'flutter/third_party/dart/sdk/lib/html/doc',
+  r'flutter/third_party/dart/sdk/lib/svg/dart2js', // generated from other sources
+  r'flutter/third_party/dart/third_party/binary_size', // not linked in
+  r'flutter/third_party/dart/third_party/binaryen', // not linked in
+  r'flutter/third_party/dart/third_party/d3', // Siva says "that is the charting library used by the binary size tool"
+  r'flutter/third_party/dart/third_party/d8', // testing tool for dart2js
+  r'flutter/third_party/dart/third_party/devtools', // not linked in
+  r'flutter/third_party/dart/third_party/fallback_root_certificates/certdata.pem',
+  r'flutter/third_party/dart/third_party/fallback_root_certificates/certdata.txt',
+  r'flutter/third_party/dart/third_party/firefox_jsshell', // testing tool for dart2js
+  r'flutter/third_party/dart/third_party/pkg',
+  r'flutter/third_party/dart/third_party/pkg_tested',
+  r'flutter/third_party/dart/third_party/requirejs', // only used by DDC
+  r'flutter/third_party/dart/tools', // not shipped in binary
   r'flutter/third_party/depot_tools', // only used for the Windows build system.
   r'flutter/third_party/expat/expat/doc',
   r'flutter/third_party/expat/expat/win32/expat.iss',
@@ -189,27 +210,6 @@ final Set<String> skippedPaths = <String>{
   r'out', // output of build
   r'third_party/android_embedding_dependencies', // Not shipped. Used only for the build-time classpath, and for the in-tree testing framework for Android
   r'third_party/android_tools', // excluded on advice
-  r'third_party/dart/benchmarks', // not shipped in binary
-  r'third_party/dart/build', // not shipped in binary
-  r'third_party/dart/docs', // not shipped in binary
-  r'third_party/dart/pkg', // packages that don't become part of the binary (e.g. the analyzer)
-  r'third_party/dart/runtime/bin/ffi_test',
-  r'third_party/dart/runtime/docs',
-  r'third_party/dart/runtime/vm/service',
-  r'third_party/dart/sdk/lib/html/doc',
-  r'third_party/dart/sdk/lib/svg/dart2js', // generated from other sources
-  r'third_party/dart/third_party/binary_size', // not linked in
-  r'third_party/dart/third_party/binaryen', // not linked in
-  r'third_party/dart/third_party/d3', // Siva says "that is the charting library used by the binary size tool"
-  r'third_party/dart/third_party/d8', // testing tool for dart2js
-  r'third_party/dart/third_party/devtools', // not linked in
-  r'third_party/dart/third_party/fallback_root_certificates/certdata.pem',
-  r'third_party/dart/third_party/fallback_root_certificates/certdata.txt',
-  r'third_party/dart/third_party/firefox_jsshell', // testing tool for dart2js
-  r'third_party/dart/third_party/pkg',
-  r'third_party/dart/third_party/pkg_tested',
-  r'third_party/dart/third_party/requirejs', // only used by DDC
-  r'third_party/dart/tools', // not shipped in binary
   r'third_party/gradle',
   r'third_party/java', // only used for Android builds
   r'third_party/libcxx/benchmarks',
@@ -466,7 +466,7 @@ final List<Pattern> skippedFilePatterns = <Pattern>[
   RegExp(r'^flutter/third_party/boringssl/(?:.+/)*[^/]+_test\.[^/]+$'),
   RegExp(r'^flutter/third_party/boringssl/src/crypto/fipsmodule/bn/[^/]+.go$'),
   RegExp(r'^flutter/third_party/boringssl/src/crypto/fipsmodule/ec/[^/]+.go$'),
+  RegExp(r'^flutter/third_party/dart/(?:.+/)*[^/]+_test\.[^/]+$'),
   RegExp(r'^flutter/third_party/freetype2/docs/(?!FTL\.TXT$).+'), // ignore all documentation except the license
-  RegExp(r'^third_party/dart/(?:.+/)*[^/]+_test\.[^/]+$'),
   RegExp(r'^third_party/zlib/(?:.+/)*[^/]+_unittest\.[^/]+$'),
 ];

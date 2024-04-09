@@ -24,10 +24,10 @@ dependencies:
 
 dependency_overrides:
   async_helper:
-    path: ../../../third_party/dart/pkg/async_helper
+    path: ../../third_party/dart/pkg/async_helper
   expect:
-    path: ../../../third_party/dart/pkg/expect
+    path: ../../third_party/dart/pkg/expect
   meta:
-    path: ../../../third_party/dart/pkg/meta
+    path: ../../third_party/dart/pkg/meta
   smith:
-    path: ../../../third_party/dart/pkg/smith
+    path: ../../third_party/dart/pkg/smith

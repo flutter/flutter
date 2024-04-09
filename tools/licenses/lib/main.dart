@@ -991,6 +991,7 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
 
   static const Map<String, _Constructor> _specialCaseFiles = <String, _Constructor>{
     '/flutter/third_party/boringssl/src/LICENSE': _RepositoryOpenSSLLicenseFile.new,
+    '/flutter/third_party/dart/LICENSE': _RepositoryDartLicenseFile.new,
     '/flutter/third_party/freetype2/LICENSE.TXT': _RepositoryFreetypeLicenseFile.new,
     '/flutter/third_party/icu/LICENSE': _RepositoryIcuLicenseFile.new,
     '/flutter/third_party/inja/third_party/include/nlohmann/json.hpp': _RepositoryInjaJsonFile.new,
@@ -1002,7 +1003,6 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
     '/flutter/third_party/vulkan-deps/vulkan-validation-layers/src/LICENSE.txt': _RepositoryVulkanApacheLicenseFile.new,
     '/fuchsia/sdk/linux/LICENSE.vulkan': _RepositoryFuchsiaSdkLinuxLicenseFile.new,
     '/fuchsia/sdk/mac/LICENSE.vulkan': _RepositoryFuchsiaSdkLinuxLicenseFile.new,
-    '/third_party/dart/LICENSE': _RepositoryDartLicenseFile.new,
     '/third_party/khronos/LICENSE': _RepositoryKhronosLicenseFile.new,
     '/third_party/libcxx/LICENSE.TXT': _RepositoryCxxStlDualLicenseFile.new,
     '/third_party/libcxxabi/LICENSE.TXT': _RepositoryCxxStlDualLicenseFile.new,
@@ -1409,12 +1409,11 @@ class _EngineSrcDirectory extends _RepositoryDirectory {
   List<_RepositoryDirectory> get virtualSubdirectories {
     // Dart and Skia are updated more frequently than other third party
     // libraries and is therefore represented as a separate top-level component.
-    final fs.Directory thirdPartyNode = findChildDirectory(ioDirectory, 'third_party')!;
-    final fs.Directory dartNode = findChildDirectory(thirdPartyNode, 'dart')!;
-
     final fs.Directory flutterNode = findChildDirectory(ioDirectory, 'flutter')!;
     final fs.Directory flutterThirdPartyNode = findChildDirectory(flutterNode, 'third_party')!;
     final fs.Directory skiaNode = findChildDirectory(flutterThirdPartyNode, 'skia')!;
+    final fs.Directory dartNode = findChildDirectory(flutterThirdPartyNode, 'dart')!;
+
     return <_RepositoryDirectory>[
       _RepositoryDartDirectory(this, dartNode),
       _RepositorySkiaDirectory(this, skiaNode),
@@ -1431,12 +1430,6 @@ class _RepositoryGenericThirdPartyDirectory extends _RepositoryDirectory {
 
 class _RepositoryRootThirdPartyDirectory extends _RepositoryGenericThirdPartyDirectory {
   _RepositoryRootThirdPartyDirectory(super.parent, super.io);
-
-  @override
-  bool shouldRecurse(fs.IoNode entry) {
-    return entry.name != 'dart' // handled as a virtual directory of the root
-        && super.shouldRecurse(entry);
-  }
 
   @override
   _RepositoryDirectory createSubdirectory(fs.Directory entry) {
@@ -1745,6 +1738,7 @@ class _RepositoryFlutterThirdPartyDirectory extends _RepositoryGenericThirdParty
   @override
   bool shouldRecurse(fs.IoNode entry) {
     return entry.name != 'skia' // handled as a virtual directory of the root
+        && entry.name != 'dart' // handled as a virtual directory of the root
         && super.shouldRecurse(entry);
   }
 

@@ -54,7 +54,7 @@ trap cleanup EXIT
 
 # Find all files named GeneratedPluginRegistrant.java in the project.
 echo "Finding all files named GeneratedPluginRegistrant.java in the project..."
-GENERATED_PLUGIN_REGISTRANT_PATHS=$(find . -name "GeneratedPluginRegistrant.java")
+GENERATED_PLUGIN_REGISTRANT_PATHS=$(find . -name "GeneratedPluginRegistrant.java" | grep -v third_party)
 
 # Iterate over the found paths and check if they are expected.
 for path in $GENERATED_PLUGIN_REGISTRANT_PATHS; do

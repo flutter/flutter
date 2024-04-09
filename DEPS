@@ -269,7 +269,7 @@ vars = {
   'fuchsia_gn_sdk_version': 'RgErspyYHapUO2SpcW-vo2p8yaRUMUrq0eWjRVPfQjoC',
 }
 
-gclient_gn_args_file = 'src/third_party/dart/build/config/gclient_args.gni'
+gclient_gn_args_file = 'src/flutter/third_party/dart/build/config/gclient_args.gni'
 gclient_gn_args = [
   'checkout_llvm'
 ]
@@ -349,189 +349,189 @@ deps = {
   # 'src/flutter/build/secondary/third_party/protobuf':
   #  Var('flutter_git') + '/third_party/protobuf-gn' + '@' + Var('dart_protobuf_gn_rev'),
 
-  'src/third_party/dart':
+  'src/flutter/third_party/dart':
    Var('dart_git') + '/sdk.git' + '@' + Var('dart_revision'),
 
   # WARNING: Unused Dart dependencies in the list below till "WARNING:" marker are removed automatically - see create_updated_flutter_deps.py.
 
-  'src/third_party/dart/third_party/binaryen/src':
+  'src/flutter/third_party/dart/third_party/binaryen/src':
    Var('chromium_git') + '/external/github.com/WebAssembly/binaryen.git@9784f012848a7eb321c2037bdb363dfe0eab8bc9',
 
-  'src/third_party/dart/third_party/devtools':
+  'src/flutter/third_party/dart/third_party/devtools':
    {'dep_type': 'cipd', 'packages': [{'package': 'dart/third_party/flutter/devtools', 'version': 'git_revision:8be1bc8d6862a3fcf8f43917f6e0c783cac06d51'}]},
 
-  'src/third_party/dart/third_party/pkg/args':
+  'src/flutter/third_party/dart/third_party/pkg/args':
    Var('dart_git') + '/args.git@788d93541a578e49f066699e1584bc3ce591c376',
 
-  'src/third_party/dart/third_party/pkg/async':
+  'src/flutter/third_party/dart/third_party/pkg/async':
    Var('dart_git') + '/async.git@47968047eb9888f74ca0691640821bd55b47e763',
 
-  'src/third_party/dart/third_party/pkg/bazel_worker':
+  'src/flutter/third_party/dart/third_party/pkg/bazel_worker':
    Var('dart_git') + '/bazel_worker.git@8619b92baa9959e55b9fc49d2afcd6dda2ec1c10',
 
-  'src/third_party/dart/third_party/pkg/boolean_selector':
+  'src/flutter/third_party/dart/third_party/pkg/boolean_selector':
    Var('dart_git') + '/boolean_selector.git@24635df68661bb44c1c13fb405562421e24298e5',
 
-  'src/third_party/dart/third_party/pkg/browser_launcher':
+  'src/flutter/third_party/dart/third_party/pkg/browser_launcher':
    Var('dart_git') + '/browser_launcher.git' + '@' + Var('dart_browser_launcher_rev'),
 
-  'src/third_party/dart/third_party/pkg/cli_util':
+  'src/flutter/third_party/dart/third_party/pkg/cli_util':
    Var('dart_git') + '/cli_util.git@12cd216263be587a648600b40017463341bccaf8',
 
-  'src/third_party/dart/third_party/pkg/clock':
+  'src/flutter/third_party/dart/third_party/pkg/clock':
    Var('dart_git') + '/clock.git' + '@' + Var('dart_clock_rev'),
 
-  'src/third_party/dart/third_party/pkg/collection':
+  'src/flutter/third_party/dart/third_party/pkg/collection':
    Var('dart_git') + '/collection.git' + '@' + Var('dart_collection_rev'),
 
-  'src/third_party/dart/third_party/pkg/convert':
+  'src/flutter/third_party/dart/third_party/pkg/convert':
    Var('dart_git') + '/convert.git@186ac2281f0436451b49e1bd8458ff791b42637d',
 
-  'src/third_party/dart/third_party/pkg/crypto':
+  'src/flutter/third_party/dart/third_party/pkg/crypto':
    Var('dart_git') + '/crypto.git@1c7fbadd92a44322ee1e89eec9747a24dc6c6746',
 
-  'src/third_party/dart/third_party/pkg/csslib':
+  'src/flutter/third_party/dart/third_party/pkg/csslib':
    Var('dart_git') + '/csslib.git@171ed4885f1db13e22b04b513a169e7a99d2c5d5',
 
-  'src/third_party/dart/third_party/pkg/dart_style':
+  'src/flutter/third_party/dart/third_party/pkg/dart_style':
    Var('dart_git') + '/dart_style.git@a6ad7693555a9add6f98ad6fd94de80d35c89415',
 
-  'src/third_party/dart/third_party/pkg/dartdoc':
+  'src/flutter/third_party/dart/third_party/pkg/dartdoc':
    Var('dart_git') + '/dartdoc.git@bf6080c8a12bf3a2f29f517d152bbd5fa1bb0a37',
 
-  'src/third_party/dart/third_party/pkg/file':
+  'src/flutter/third_party/dart/third_party/pkg/file':
    Var('dart_git') + '/external/github.com/google/file.dart@3aa06490bf34bddf04c7ea964a50c177a4ca0de7',
 
-  'src/third_party/dart/third_party/pkg/fixnum':
+  'src/flutter/third_party/dart/third_party/pkg/fixnum':
    Var('dart_git') + '/fixnum.git@dec16eb715f70f2fe0ed509da2e118354bea21d8',
 
-  'src/third_party/dart/third_party/pkg/glob':
+  'src/flutter/third_party/dart/third_party/pkg/glob':
    Var('dart_git') + '/glob.git@379d60c7cc5c0e9fe7d0d45549ad0b1ca51396c8',
 
-  'src/third_party/dart/third_party/pkg/html':
+  'src/flutter/third_party/dart/third_party/pkg/html':
    Var('dart_git') + '/html.git@5b99b43f71da0c6b0f962244c7f5dfa8ca970fef',
 
-  'src/third_party/dart/third_party/pkg/http':
+  'src/flutter/third_party/dart/third_party/pkg/http':
    Var('dart_git') + '/http.git@5214f7647ea7a7dd360f12625358bd39f8e6aec0',
 
-  'src/third_party/dart/third_party/pkg/http_multi_server':
+  'src/flutter/third_party/dart/third_party/pkg/http_multi_server':
    Var('dart_git') + '/http_multi_server.git@ba9d07f3596b24718ddf45c9e071d40879cca565',
 
-  'src/third_party/dart/third_party/pkg/http_parser':
+  'src/flutter/third_party/dart/third_party/pkg/http_parser':
    Var('dart_git') + '/http_parser.git@84db8b029d9b51859a0bb4966859af009f9442e3',
 
-  'src/third_party/dart/third_party/pkg/intl':
+  'src/flutter/third_party/dart/third_party/pkg/intl':
    Var('dart_git') + '/intl.git@5d65e3808ce40e6282e40881492607df4e35669f',
 
-  'src/third_party/dart/third_party/pkg/json_rpc_2':
+  'src/flutter/third_party/dart/third_party/pkg/json_rpc_2':
    Var('dart_git') + '/json_rpc_2.git@639857be892050159f5164c749d7947694976a4a',
 
-  'src/third_party/dart/third_party/pkg/leak_tracker':
+  'src/flutter/third_party/dart/third_party/pkg/leak_tracker':
    Var('dart_git') + '/leak_tracker.git@f5620600a5ce1c44f65ddaa02001e200b096e14c',
 
-  'src/third_party/dart/third_party/pkg/logging':
+  'src/flutter/third_party/dart/third_party/pkg/logging':
    Var('dart_git') + '/logging.git@dcaf2498e5ce34b17b48770b4e78c44fc9e63cd3',
 
-  'src/third_party/dart/third_party/pkg/markdown':
+  'src/flutter/third_party/dart/third_party/pkg/markdown':
    Var('dart_git') + '/markdown.git@782b1803a29aa964410d93b4437d5d1efa47f6b4',
 
-  'src/third_party/dart/third_party/pkg/matcher':
+  'src/flutter/third_party/dart/third_party/pkg/matcher':
    Var('dart_git') + '/matcher.git@54c2798d9b75c6db5cdcc7acbf5b9ae215316ed5',
 
-  'src/third_party/dart/third_party/pkg/mime':
+  'src/flutter/third_party/dart/third_party/pkg/mime':
    Var('dart_git') + '/mime.git@0a32241c4fcd077a945949760b287677e4d7aff4',
 
-  'src/third_party/dart/third_party/pkg/mockito':
+  'src/flutter/third_party/dart/third_party/pkg/mockito':
    Var('dart_git') + '/mockito.git@3ef744f8749864f2a036eba60c4203cc8f638949',
 
-  'src/third_party/dart/third_party/pkg/native':
+  'src/flutter/third_party/dart/third_party/pkg/native':
    Var('dart_git') + '/native.git@71ada4b5c8001e6b8207ed40331d158e0912cd94',
 
-  'src/third_party/dart/third_party/pkg/package_config':
+  'src/flutter/third_party/dart/third_party/pkg/package_config':
    Var('dart_git') + '/package_config.git@3d90e6955ef19b7ce4f1b742a06a20ed4260700a',
 
-  'src/third_party/dart/third_party/pkg/path':
+  'src/flutter/third_party/dart/third_party/pkg/path':
    Var('dart_git') + '/path.git@a7284b9917830c18618b26d396d0f0bffc92bb01',
 
-  'src/third_party/dart/third_party/pkg/pool':
+  'src/flutter/third_party/dart/third_party/pkg/pool':
    Var('dart_git') + '/pool.git@8055cbb290590e761e1149dfbf7c2283fdd88e4f',
 
-  'src/third_party/dart/third_party/pkg/protobuf':
+  'src/flutter/third_party/dart/third_party/pkg/protobuf':
    Var('dart_git') + '/protobuf.git' + '@' + Var('dart_protobuf_rev'),
 
-  'src/third_party/dart/third_party/pkg/pub':
+  'src/flutter/third_party/dart/third_party/pkg/pub':
    Var('dart_git') + '/pub.git' + '@' + Var('dart_pub_rev'),
 
-  'src/third_party/dart/third_party/pkg/pub_semver':
+  'src/flutter/third_party/dart/third_party/pkg/pub_semver':
    Var('dart_git') + '/pub_semver.git@3175ba0a58a96fb23f8d68b5f5c44d1a5b30cc16',
 
-  'src/third_party/dart/third_party/pkg/shelf':
+  'src/flutter/third_party/dart/third_party/pkg/shelf':
    Var('dart_git') + '/shelf.git@68cb8641c3181cc76006887a7e93b9d3a423f590',
 
-  'src/third_party/dart/third_party/pkg/source_map_stack_trace':
+  'src/flutter/third_party/dart/third_party/pkg/source_map_stack_trace':
    Var('dart_git') + '/source_map_stack_trace.git@d03fd9b1cc11f2ad61ccc2e71bfd8d2558019a6d',
 
-  'src/third_party/dart/third_party/pkg/source_maps':
+  'src/flutter/third_party/dart/third_party/pkg/source_maps':
    Var('dart_git') + '/source_maps.git@55e92a4b0a8560d5b2b3bb7255249afdb8186ea6',
 
-  'src/third_party/dart/third_party/pkg/source_span':
+  'src/flutter/third_party/dart/third_party/pkg/source_span':
    Var('dart_git') + '/source_span.git@21a403a75b6887fbd811fb53b74b08c2cef67ab6',
 
-  'src/third_party/dart/third_party/pkg/sse':
+  'src/flutter/third_party/dart/third_party/pkg/sse':
    Var('dart_git') + '/sse.git@1ab266ad570134294468225d1c2ffe86338005be',
 
-  'src/third_party/dart/third_party/pkg/stack_trace':
+  'src/flutter/third_party/dart/third_party/pkg/stack_trace':
    Var('dart_git') + '/stack_trace.git@c39ae6e955a76a2ff183288f051f4eee7a5e94d1',
 
-  'src/third_party/dart/third_party/pkg/stream_channel':
+  'src/flutter/third_party/dart/third_party/pkg/stream_channel':
    Var('dart_git') + '/stream_channel.git@5f72035464ea675c75982b80db967943a0cfddcb',
 
-  'src/third_party/dart/third_party/pkg/string_scanner':
+  'src/flutter/third_party/dart/third_party/pkg/string_scanner':
    Var('dart_git') + '/string_scanner.git@8dbfddf9a7e8cdd4978ddd3cdab188cfabc543fd',
 
-  'src/third_party/dart/third_party/pkg/tar':
+  'src/flutter/third_party/dart/third_party/pkg/tar':
    Var('dart_git') + '/external/github.com/simolus3/tar.git@6150a0c88d9bd17e3e961593a9a7a9564866e8b4',
 
-  'src/third_party/dart/third_party/pkg/term_glyph':
+  'src/flutter/third_party/dart/third_party/pkg/term_glyph':
    Var('dart_git') + '/term_glyph.git@2ad48ce95b6e6d001251d55b15719ee113caf802',
 
-  'src/third_party/dart/third_party/pkg/test':
+  'src/flutter/third_party/dart/third_party/pkg/test':
    Var('dart_git') + '/test.git@2b1ed13ea25c0dfcf112af676533e1daf906a3f0',
 
-  'src/third_party/dart/third_party/pkg/test_reflective_loader':
+  'src/flutter/third_party/dart/third_party/pkg/test_reflective_loader':
    Var('dart_git') + '/test_reflective_loader.git@d7167a2375d8a0c02c12b960c059a115a777f238',
 
-  'src/third_party/dart/third_party/pkg/tools':
+  'src/flutter/third_party/dart/third_party/pkg/tools':
    Var('dart_git') + '/tools.git' + '@' + Var('dart_tools_rev'),
 
-  'src/third_party/dart/third_party/pkg/typed_data':
+  'src/flutter/third_party/dart/third_party/pkg/typed_data':
    Var('dart_git') + '/typed_data.git@8c7393cbbbba7a5d38c6772371f92d6b38e433fc',
 
-  'src/third_party/dart/third_party/pkg/usage':
+  'src/flutter/third_party/dart/third_party/pkg/usage':
    Var('dart_git') + '/usage.git@67ecd7d1328347ec15cbf8d8a46918df75a66af8',
 
-  'src/third_party/dart/third_party/pkg/watcher':
+  'src/flutter/third_party/dart/third_party/pkg/watcher':
    Var('dart_git') + '/watcher.git' + '@' + Var('dart_watcher_rev'),
 
-  'src/third_party/dart/third_party/pkg/web':
+  'src/flutter/third_party/dart/third_party/pkg/web':
    Var('dart_git') + '/web.git' + '@' + Var('dart_web_rev'),
 
-  'src/third_party/dart/third_party/pkg/web_socket_channel':
+  'src/flutter/third_party/dart/third_party/pkg/web_socket_channel':
    Var('dart_git') + '/web_socket_channel.git@ced3a37193f89d5ee95792f342eeb15d3d55d8c1',
 
-  'src/third_party/dart/third_party/pkg/webdev':
+  'src/flutter/third_party/dart/third_party/pkg/webdev':
    Var('dart_git') + '/webdev.git' + '@' + Var('dart_webdev_rev'),
 
-  'src/third_party/dart/third_party/pkg/webkit_inspection_protocol':
+  'src/flutter/third_party/dart/third_party/pkg/webkit_inspection_protocol':
    Var('dart_git') + '/external/github.com/google/webkit_inspection_protocol.dart.git' + '@' + Var('dart_webkit_inspection_protocol_rev'),
 
-  'src/third_party/dart/third_party/pkg/yaml':
+  'src/flutter/third_party/dart/third_party/pkg/yaml':
    Var('dart_git') + '/yaml.git@5a1c4be2437bc4122ccf08a3a0f06a7683e62f30',
 
-  'src/third_party/dart/third_party/pkg/yaml_edit':
+  'src/flutter/third_party/dart/third_party/pkg/yaml_edit':
    Var('dart_git') + '/yaml_edit.git' + '@' + Var('dart_yaml_edit_rev'),
 
-  'src/third_party/dart/tools/sdks/dart-sdk':
+  'src/flutter/third_party/dart/tools/sdks/dart-sdk':
    {'dep_type': 'cipd', 'packages': [{'package': 'dart/dart-sdk/${{platform}}', 'version': 'version:3.4.0-247.0.dev'}]},
 
   # WARNING: end of dart dependencies list that is cleaned up automatically - see create_updated_flutter_deps.py.
@@ -1090,13 +1090,13 @@ hooks = [
     # Generate the Dart SDK's .dart_tool/package_confg.json file.
     'name': 'Generate .dart_tool/package_confg.json',
     'pattern': '.',
-    'action': ['python3', 'src/third_party/dart/tools/generate_package_config.py'],
+    'action': ['python3', 'src/flutter/third_party/dart/tools/generate_package_config.py'],
   },
   {
     # Generate the sdk/version file.
     'name': 'Generate sdk/version',
     'pattern': '.',
-    'action': ['python3', 'src/third_party/dart/tools/generate_sdk_version_file.py'],
+    'action': ['python3', 'src/flutter/third_party/dart/tools/generate_sdk_version_file.py'],
   },
   {
     # Update the Windows toolchain if necessary.
