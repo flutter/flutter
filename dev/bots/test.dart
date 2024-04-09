@@ -57,7 +57,6 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
-import 'package:file/file.dart' as fs;
 import 'package:file/local.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -66,6 +65,7 @@ import 'package:process/process.dart';
 import 'run_command.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
 import 'suite_runners/run_analyze_tests.dart';
+import 'suite_runners/run_android_preview_integration_tool_tests.dart';
 import 'suite_runners/run_customer_testing_tests.dart';
 import 'suite_runners/run_docs_tests.dart';
 import 'suite_runners/run_flutter_packages_tests.dart';
@@ -73,7 +73,6 @@ import 'suite_runners/run_fuchsia_precache.dart';
 import 'suite_runners/run_realm_checker_tests.dart';
 import 'suite_runners/run_skp_generator_tests.dart';
 import 'suite_runners/run_web_long_running_tests.dart';
-import 'tool_subsharding.dart';
 import 'utils.dart';
 
 typedef ShardRunner = Future<void> Function();
@@ -242,7 +241,7 @@ Future<void> main(List<String> args) async {
       // web_tool_tests is also used by HHH: https://dart.googlesource.com/recipes/+/refs/heads/master/recipes/dart/flutter_engine.py
       'web_tool_tests': _runWebToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
-      'android_preview_tool_integration_tests': _runAndroidPreviewIntegrationToolTests,
+      'android_preview_tool_integration_tests': () => androidPreviewIntegrationToolTestsRunner(flutterRoot),
       'tool_host_cross_arch_tests': _runToolHostCrossArchTests,
       // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=html`
       'web_tests': _runWebHtmlUnitTests,
@@ -477,20 +476,6 @@ Future<void> _runToolHostCrossArchTests() {
 
 Future<void> _runIntegrationToolTests() async {
   final List<String> allTests = Directory(path.join(_toolsPath, 'test', 'integration.shard'))
-      .listSync(recursive: true).whereType<File>()
-      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
-      .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
-
-  await _runDartTest(
-    _toolsPath,
-    forceSingleCore: true,
-    testPaths: _selectIndexOfTotalSubshard<String>(allTests),
-    collectMetrics: true,
-  );
-}
-
-Future<void> _runAndroidPreviewIntegrationToolTests() async {
-  final List<String> allTests = Directory(path.join(_toolsPath, 'test', 'android_preview_integration.shard'))
       .listSync(recursive: true).whereType<File>()
       .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
       .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
@@ -1594,115 +1579,6 @@ Future<void> runFlutterWebTest(
   metricFile.deleteSync();
 }
 
-
-// TODO(sigmund): includeLocalEngineEnv should default to true. Currently we
-// only enable it on flutter-web test because some test suites do not work
-// properly when overriding the local engine (for example, because some platform
-// dependent targets are only built on some engines).
-// See https://github.com/flutter/flutter/issues/72368
-Future<void> _runDartTest(String workingDirectory, {
-  List<String>? testPaths,
-  bool enableFlutterToolAsserts = true,
-  bool useBuildRunner = false,
-  String? coverage,
-  bool forceSingleCore = false,
-  Duration? perTestTimeout,
-  bool includeLocalEngineEnv = false,
-  bool ensurePrecompiledTool = true,
-  bool shuffleTests = true,
-  bool collectMetrics = false,
-}) async {
-  int? cpus;
-  final String? cpuVariable = Platform.environment['CPU']; // CPU is set in cirrus.yml
-  if (cpuVariable != null) {
-    cpus = int.tryParse(cpuVariable, radix: 10);
-    if (cpus == null) {
-      foundError(<String>[
-        '${red}The CPU environment variable, if set, must be set to the integer number of available cores.$reset',
-        'Actual value: "$cpuVariable"',
-      ]);
-      return;
-    }
-  } else {
-    cpus = 2; // Don't default to 1, otherwise we won't catch race conditions.
-  }
-  // Integration tests that depend on external processes like chrome
-  // can get stuck if there are multiple instances running at once.
-  if (forceSingleCore) {
-    cpus = 1;
-  }
-
-  const LocalFileSystem fileSystem = LocalFileSystem();
-  final String suffix = DateTime.now().microsecondsSinceEpoch.toString();
-  final File metricFile = fileSystem.systemTempDirectory.childFile('metrics_$suffix.json');
-  final List<String> args = <String>[
-    'run',
-    'test',
-    '--reporter=expanded',
-    '--file-reporter=json:${metricFile.path}',
-    if (shuffleTests) '--test-randomize-ordering-seed=$shuffleSeed',
-    '-j$cpus',
-    if (!hasColor)
-      '--no-color',
-    if (coverage != null)
-      '--coverage=$coverage',
-    if (perTestTimeout != null)
-      '--timeout=${perTestTimeout.inMilliseconds}ms',
-    if (testPaths != null)
-      for (final String testPath in testPaths)
-        testPath,
-  ];
-  final Map<String, String> environment = <String, String>{
-    'FLUTTER_ROOT': flutterRoot,
-    if (includeLocalEngineEnv)
-      ...localEngineEnv,
-    if (Directory(pubCache).existsSync())
-      'PUB_CACHE': pubCache,
-  };
-  if (enableFlutterToolAsserts) {
-    adjustEnvironmentToEnableFlutterAsserts(environment);
-  }
-  if (ensurePrecompiledTool) {
-    // We rerun the `flutter` tool here just to make sure that it is compiled
-    // before tests run, because the tests might time out if they have to rebuild
-    // the tool themselves.
-    await runCommand(flutter, <String>['--version'], environment: environment);
-  }
-  await runCommand(
-    dart,
-    args,
-    workingDirectory: workingDirectory,
-    environment: environment,
-    removeLine: useBuildRunner ? (String line) => line.startsWith('[INFO]') : null,
-  );
-
-  final TestFileReporterResults test = TestFileReporterResults.fromFile(metricFile); // --file-reporter name
-  final File info = fileSystem.file(path.join(flutterRoot, 'error.log'));
-  info.writeAsStringSync(json.encode(test.errors));
-
-  if (collectMetrics) {
-    try {
-      final List<String> testList = <String>[];
-      final Map<int, TestSpecs> allTestSpecs = test.allTestSpecs;
-      for (final TestSpecs testSpecs in allTestSpecs.values) {
-        testList.add(testSpecs.toJson());
-      }
-      if (testList.isNotEmpty) {
-        final String testJson = json.encode(testList);
-        final File testResults = fileSystem.file(
-            path.join(flutterRoot, 'test_results.json'));
-        testResults.writeAsStringSync(testJson);
-      }
-    } on fs.FileSystemException catch (e) {
-      print('Failed to generate metrics: $e');
-    }
-  }
-
-  // metriciFile is a transitional file that needs to be deleted once it is parsed.
-  // TODO(godofredoc): Ensure metricFile is parsed and aggregated before deleting.
-  // https://github.com/flutter/flutter/issues/146003
-  metricFile.deleteSync();
-}
 
 Future<void> _runFlutterTest(String workingDirectory, {
   String? script,
