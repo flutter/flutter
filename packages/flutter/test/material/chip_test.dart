@@ -662,7 +662,7 @@ void main() {
     expect(tester.getSize(find.byType(Text)).width, closeTo(40.4, 0.01));
     expect(tester.getSize(find.byType(Text)).height, equals(14.0));
     expect(tester.getSize(find.byType(Chip)), const Size(800.0, 48.0));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Material2 - Chip responds to materialTapTargetSize', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -708,7 +708,7 @@ void main() {
     expect(tester.getSize(find.byType(Chip).first).height, equals(48.0));
     expect(tester.getSize(find.byType(Chip).last).width, closeTo(48.1, 0.01));
     expect(tester.getSize(find.byType(Chip).last).height, equals(38.0));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Delete button tap target is the right proportion of the chip', (WidgetTester tester) async {
     final UniqueKey deleteKey = UniqueKey();
@@ -962,7 +962,7 @@ void main() {
     expect(tester.getSize(find.byType(Chip).first).height, equals(78.0));
     expect(tester.getSize(find.byType(Chip).last).width, closeTo(138.59, 0.01));
     expect(tester.getSize(find.byType(Chip).last).height, equals(48.0));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Material2 - Labels can be non-text widgets', (WidgetTester tester) async {
     final Key keyA = GlobalKey();
@@ -1017,7 +1017,7 @@ void main() {
     expect(tester.getSize(find.byType(Chip).first).width, moreOrLessEquals(138.5, epsilon: 0.1));
     expect(tester.getSize(find.byType(Chip).first).height, equals(48.0));
     expect(tester.getSize(find.byType(Chip).last), const Size(60.0, 48.0));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Avatars can be non-circle avatar widgets', (WidgetTester tester) async {
     final Key keyA = GlobalKey();
@@ -1381,7 +1381,7 @@ void main() {
     expect(tester.getSize(find.byType(RawChip)).height, equals(48.0));
     expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(17.0, 14.0)));
     expect(find.byKey(avatarKey), findsNothing);
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Material2 - Delete button drawer works as expected on RawChip', (WidgetTester tester) async {
     const Key labelKey = Key('label');
@@ -1628,7 +1628,7 @@ void main() {
     expect(tester.getSize(find.byType(RawChip)).height, equals(48.0));
     expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(17.0, 14.0)));
     expect(find.byKey(deleteButtonKey), findsNothing);
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Delete button takes up at most half of the chip', (WidgetTester tester) async {
     final UniqueKey chipKey = UniqueKey();
@@ -2283,7 +2283,7 @@ void main() {
     // Simulate a tap on the label to select the chip.
     await tester.tap(find.byKey(labelKey));
     expect(selected, equals(true));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(kIsWeb && isCanvasKit ? 3 : 1));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(kIsWeb && isSkiaWeb ? 3 : 1));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     expect(getSelectProgress(tester), moreOrLessEquals(0.002, epsilon: 0.01));
@@ -2302,7 +2302,7 @@ void main() {
     // Simulate another tap on the label to deselect the chip.
     await tester.tap(find.byKey(labelKey));
     expect(selected, equals(false));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(kIsWeb && isCanvasKit ? 3 : 1));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(kIsWeb && isSkiaWeb ? 3 : 1));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 20));
     expect(getSelectProgress(tester), moreOrLessEquals(0.875, epsilon: 0.01));
@@ -2316,7 +2316,7 @@ void main() {
     expect(getSelectProgress(tester), equals(0.0));
     expect(getAvatarDrawerProgress(tester), equals(1.0));
     expect(getDeleteDrawerProgress(tester), equals(0.0));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Material2 - Selection without avatar works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
@@ -2435,7 +2435,7 @@ void main() {
     // Simulate a tap on the label to select the chip.
     await tester.tap(find.byKey(labelKey));
     expect(selected, equals(true));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(kIsWeb && isCanvasKit ? 3 : 1));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(kIsWeb && isSkiaWeb ? 3 : 1));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     expect(getSelectProgress(tester), moreOrLessEquals(0.002, epsilon: 0.01));
@@ -2455,7 +2455,7 @@ void main() {
     // Simulate another tap on the label to deselect the chip.
     await tester.tap(find.byKey(labelKey));
     expect(selected, equals(false));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(kIsWeb && isCanvasKit ? 3 : 1));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(kIsWeb && isSkiaWeb ? 3 : 1));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 20));
     expect(getSelectProgress(tester), moreOrLessEquals(0.875, epsilon: 0.01));
@@ -2469,7 +2469,7 @@ void main() {
     expect(getSelectProgress(tester), equals(0.0));
     expect(getAvatarDrawerProgress(tester), equals(0.0));
     expect(getDeleteDrawerProgress(tester), equals(0.0));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Material2 - Activation works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
@@ -2569,7 +2569,7 @@ void main() {
 
     await tester.tap(find.byKey(labelKey));
     expect(selected, equals(true));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(kIsWeb && isCanvasKit ? 3 : 1));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(kIsWeb && isSkiaWeb ? 3 : 1));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     expect(getSelectProgress(tester), moreOrLessEquals(0.002, epsilon: 0.01));
@@ -2584,7 +2584,7 @@ void main() {
     expect(getAvatarDrawerProgress(tester), equals(1.0));
     expect(getDeleteDrawerProgress(tester), equals(0.0));
     await tester.pumpAndSettle();
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Chip uses ThemeData chip theme if present', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(chipTheme: const ChipThemeData(backgroundColor: Color(0xffff0000)));
@@ -2755,7 +2755,7 @@ void main() {
 
     expect(tester.getSize(find.byKey(key2)).width, moreOrLessEquals(90.4, epsilon: 0.1));
     expect(tester.getSize(find.byKey(key2)).height, equals(38.0));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData(
@@ -4656,7 +4656,7 @@ void main() {
     box = tester.getRect(find.byKey(key));
     expect(box.size.width, moreOrLessEquals(130.4, epsilon: 0.1));
     expect(box.size.height, equals(24.0 + 16.0));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Chip delete button tooltip is disabled if deleteButtonTooltipMessage is empty', (WidgetTester tester) async {
     final UniqueKey deleteButtonKey = UniqueKey();

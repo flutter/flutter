@@ -261,23 +261,23 @@ void main() {
     await tester.pumpWidget(buildApp(textScaler: TextScaler.noScaling));
     expect(find.text(label), findsOneWidget);
 
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(tester.getSize(find.text(label)), const Size(14.25, 20.0));
     }
 
     await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(1.1)));
     await tester.pumpAndSettle();
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(_sizeAlmostEqual(tester.getSize(find.text(label)), const Size(15.65, 22.0)), true);
     }
 
     await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(1.5)));
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(_sizeAlmostEqual(tester.getSize(find.text(label)), const Size(21.25, 30)), true);
     }
 
     await tester.pumpWidget(buildApp(textScaler: const TextScaler.linear(4)));
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(_sizeAlmostEqual(tester.getSize(find.text(label)), const Size(21.25, 30)), true);
     }
   });

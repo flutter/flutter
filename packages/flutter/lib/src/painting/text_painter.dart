@@ -1476,7 +1476,7 @@ class TextPainter {
       );
     } else {
       // Fall back to glyphInfo. This should only happen when using the HTML renderer.
-      assert(kIsWeb && !isCanvasKit);
+      assert(kIsWeb && !isSkiaWeb);
       final Rect graphemeBounds = glyphInfo.graphemeClusterLayoutBounds;
       final double dx = switch (glyphInfo.writingDirection) {
         TextDirection.ltr => anchorToLeadingEdge ? graphemeBounds.left : graphemeBounds.right,

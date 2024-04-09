@@ -387,7 +387,7 @@ class SkiaGoldClient {
   // differences are very small (typically not noticeable to human eye).
   List<String> _getPixelMatchingArguments() {
     // Only use fuzzy pixel matching in the HTML renderer.
-    if (!_isBrowserTest || _isBrowserCanvasKitTest) {
+    if (!_isBrowserTest || _isBrowserSkiaTest) {
       return const <String>[];
     }
 
@@ -499,6 +499,7 @@ class SkiaGoldClient {
   /// image was rendered on, and for web tests, the browser the image was
   /// rendered on.
   String _getKeysJSON() {
+    final String? webRenderer = _webRendererValue;
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
       'Abi': abi.toString(),
@@ -509,8 +510,8 @@ class SkiaGoldClient {
     if (_isBrowserTest) {
       keys['Browser'] = _browserKey;
       keys['Platform'] = '${keys['Platform']}-browser';
-      if (_isBrowserCanvasKitTest) {
-        keys['WebRenderer'] = 'canvaskit';
+      if (webRenderer != null) {
+        keys['WebRenderer'] = webRenderer;
       }
     }
     return json.encode(keys);
@@ -556,8 +557,15 @@ class SkiaGoldClient {
     return platform.environment[_kTestBrowserKey] != null;
   }
 
-  bool get _isBrowserCanvasKitTest {
-    return _isBrowserTest && platform.environment[_kWebRendererKey] == 'canvaskit';
+  bool get _isBrowserSkiaTest {
+    return _isBrowserTest && switch (platform.environment[_kWebRendererKey]) {
+      'canvaskit' || 'skwasm' => true,
+      _ => false,
+    };
+  }
+
+  String? get _webRendererValue {
+    return _isBrowserSkiaTest ? platform.environment[_kWebRendererKey] : null;
   }
 
   bool get _isImpeller {
@@ -573,11 +581,12 @@ class SkiaGoldClient {
   /// the latest positive digest on Flutter Gold with a hex-encoded md5 hash of
   /// the image keys.
   String getTraceID(String testName) {
+    final String? webRenderer = _webRendererValue;
     final Map<String, Object?> keys = <String, Object?>{
       if (_isBrowserTest)
         'Browser' : _browserKey,
-      if (_isBrowserCanvasKitTest)
-        'WebRenderer' : 'canvaskit',
+      if (webRenderer != null)
+        'WebRenderer' : webRenderer,
       'CI' : 'luci',
       'Platform' : platform.operatingSystem,
       'Abi': abi.toString(),

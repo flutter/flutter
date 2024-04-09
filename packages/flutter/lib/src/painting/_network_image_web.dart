@@ -117,7 +117,7 @@ class NetworkImage
 
     // We use a different method when headers are set because the
     // `ui_web.createImageCodecFromUrl` method is not capable of handling headers.
-    if (isCanvasKit || containsNetworkImageHeaders) {
+    if (isSkiaWeb || containsNetworkImageHeaders) {
       final Completer<web.XMLHttpRequest> completer =
           Completer<web.XMLHttpRequest>();
       final web.XMLHttpRequest request = httpRequestFactory();

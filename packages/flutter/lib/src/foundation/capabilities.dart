@@ -9,3 +9,13 @@ import '_capabilities_io.dart'
 ///
 /// Only to be used for web.
 bool get isCanvasKit => capabilities.isCanvasKit;
+
+/// Returns true if the application is using Skwasm.
+///
+/// Only to be used for web.
+bool get isSkwasm => capabilities.isSkwasm;
+
+/// Returns true if the application is using CanvasKit or Skwasm.
+///
+/// Only to be used for web.
+bool get isSkiaWeb => isCanvasKit || isSkwasm;

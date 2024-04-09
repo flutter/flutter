@@ -154,7 +154,7 @@ void main() {
     await tester.pumpWidget(buildFrame(isTwoLine: true, textScaler: const TextScaler.linear(4.0)));
     testChildren();
     testHorizontalGeometry();
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       testVerticalGeometry(192.0);
     }
 
@@ -162,14 +162,14 @@ void main() {
     await tester.pumpWidget(buildFrame(isTwoLine: true, textScaler: const TextScaler.linear(0.5), subtitleScaler: const TextScaler.linear(4.0)));
     testChildren();
     testHorizontalGeometry();
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       testVerticalGeometry(108.0);
     }
 
     await tester.pumpWidget(buildFrame(isThreeLine: true, textScaler: const TextScaler.linear(4.0)));
     testChildren();
     testHorizontalGeometry();
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       testVerticalGeometry(192.0);
     }
   });
@@ -505,7 +505,7 @@ void main() {
       ),
     );
 
-    if (kIsWeb && !isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (kIsWeb && !isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       return;
     }
     const double height = 300;

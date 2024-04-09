@@ -93,7 +93,7 @@ class TestGoldenComparator {
     final Map<String, String> environment = <String, String>{
       // Chrome is the only supported browser currently.
       'FLUTTER_TEST_BROWSER': 'chrome',
-      'FLUTTER_WEB_RENDERER': webRenderer == WebRendererMode.html ? 'html' : 'canvaskit',
+      'FLUTTER_WEB_RENDERER': webRenderer.name,
     };
     return _processManager.start(command, environment: environment);
   }
