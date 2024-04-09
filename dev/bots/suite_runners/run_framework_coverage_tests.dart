@@ -6,7 +6,6 @@ import 'dart:io' show File;
 
 import 'package:path/path.dart' as path;
 
-import '../test.dart';
 import '../utils.dart';
 
 Future<void> frameworkCoverageRunner(String flutterRoot) async {
