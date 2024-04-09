@@ -1102,6 +1102,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     String? dillOutputPath,
     this.machine = false,
     ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
+    String? testOutputDirectory,
   }) : mainPath = globals.fs.file(target).absolute.path,
        packagesFilePath = debuggingOptions.buildInfo.packagesPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
@@ -1120,6 +1121,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       artifactDirectory.createSync(recursive: true);
     }
     _residentDevtoolsHandler = devtoolsHandler(DevtoolsLauncher.instance, this, globals.logger);
+    _testOutputDirectory = testOutputDirectory ?? globals.fs.systemTempDirectory.createTempSync('build').path;
   }
 
   @override
@@ -1147,6 +1149,11 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   final CommandHelp commandHelp;
   final bool machine;
+
+  /// String with the path an existent directorty where test outputs will be writter
+  /// to.
+  String? get testOutputDirectory => _testOutputDirectory;
+  String? _testOutputDirectory;
 
   @override
   ResidentDevtoolsHandler? get residentDevtoolsHandler => _residentDevtoolsHandler;

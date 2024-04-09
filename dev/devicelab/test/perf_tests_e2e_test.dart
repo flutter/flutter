@@ -37,4 +37,18 @@ void main() {
     final TaskResult result = await perfTest.run();
     expect(result.succeeded, isTrue);
   }, timeout: const Timeout(Duration(minutes: 2)));
+
+  test('runs perf tests, startup metrics', () async {
+    const FakeDevice physicalDevice = FakeDevice(deviceId: 'macOS');
+    final PerfTest perfTest = PerfTest(
+      path.join(flutterDirectory.absolute.path, 'dev/benchmarks/complex_layout'),
+      'test_driver/scroll_perf.dart',
+      'complex_layout_scroll_perf',
+      device: physicalDevice,
+      testOuputDirectory: testOutputDirectory.absolute.path,
+      timeoutSeconds: 50,
+    );
+    final TaskResult result = await perfTest.run();
+    expect(result.succeeded, isTrue);
+  }, timeout: const Timeout(Duration(minutes: 2)));
 }

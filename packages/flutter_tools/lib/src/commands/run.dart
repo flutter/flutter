@@ -179,6 +179,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         hide: !verboseHelp,
         help: 'Uninstall previous versions of the app on the device '
               'before reinstalling. Currently only supported on iOS.',
+      )
+      ..addOption('test-output-directory',
+        help: 'Directory location to write logs and test results.'
     );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
@@ -213,6 +216,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
+  String? get testOutputDirectory => stringArg('test-output-directory');
 
   @override
   bool get refreshWirelessDevices => true;
@@ -698,6 +702,7 @@ class RunCommand extends RunCommandBase {
           : globals.fs.file(applicationBinaryPath),
       ipv6: ipv6 ?? false,
       stayResident: stayResident,
+      testOutputDirectory: testOutputDirectory,
     );
   }
 

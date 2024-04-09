@@ -17,7 +17,7 @@ import 'common.dart';
 /// Flutter Driver test output directory.
 ///
 /// Tests should write any output files to this directory. Defaults to `build`.
-String defaultTestOutputsDirectory = fs.systemTempDirectory.createTempSync('build').path;
+//String defaultTestOutputDirectory = fs.systemTempDirectory.createTempSync('build').path;
 
 /// The callback type to handle [Response.data] after the test
 /// succeeds.
@@ -32,9 +32,9 @@ Future<void> writeResponseData(
   String testOutputFilename = 'integration_response_data',
   String? testOutputDirectory,
 }) async {
-  await fs.directory(testOutputsDirectory).create(recursive: true);
+  await fs.directory(testOutputDirectory).create(recursive: true);
   final File file = fs.file(path.join(
-    testOutputDirectory ?? defaultTestOutputsDirectory,
+    testOutputDirectory ?? defaultTestOutputDirectory,
     '$testOutputFilename.json',
   ));
   final String resultString = _encodeJson(data, true);

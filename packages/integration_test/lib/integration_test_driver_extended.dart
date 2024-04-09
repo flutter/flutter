@@ -19,7 +19,7 @@ import 'common.dart';
 /// Tests should write any output files to this directory. Defaults to the path
 /// set in the FLUTTER_TEST_OUTPUTS_DIR environment variable, or `build` if
 /// unset.
-final String defaultTestOutputDirectory = fs.systemTempDirectory.createTempSync('build').path;
+//final String defaultTestOutputDirectory = fs.systemTempDirectory.createTempSync('build').path;
 
 /// The callback type to handle [Response.data] after the test
 /// succeeds.
@@ -35,9 +35,9 @@ Future<void> writeResponseData(
   String testOutputDirectory = '',
 }) async {
   testOutputDirectory = testOutputDirectory.isEmpty? defaultTestOutputDirectory : testOutputDirectory;
-  await fs.directory(testOutputsDirectory).create(recursive: true);
+  await fs.directory(testOutputDirectory).create(recursive: true);
   final File file = fs.file(path.join(
-    testOutputsDirectory,
+    testOutputDirectory,
     '$testOutputFilename.json',
   ));
   final String resultString = _encodeJson(data, true);

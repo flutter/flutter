@@ -4,10 +4,17 @@
 
 import 'dart:async';
 
+import 'package:args/args.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
-void main() {
+void main(List<String> args) {
+
+  final ArgParser parser = ArgParser();
+  parser.addOption('reporter', abbr: 'r', allowed: <String>['expanded']);
+  parser.addOption('test-output-directory');
+  final ArgResults argResults = parser.parse(args);
+
   group('scrolling performance test', () {
     late FlutterDriver driver;
 
@@ -49,7 +56,7 @@ void main() {
       }, retainPriorEvents: true);
 
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      await summary.writeTimelineToFile(summaryName, pretty: true);
+      await summary.writeTimelineToFile(summaryName, pretty: true, destinationDirectory: argResults['test-output-directory'] as String);
     }
 
     test('complex_layout_scroll_perf', () async {
