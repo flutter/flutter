@@ -397,16 +397,6 @@ class ContentContext {
 
   bool IsValid() const;
 
-  /// This setting does two things:
-  /// 1. Enables clipping with the depth buffer, freeing up the stencil buffer.
-  ///    See also: https://github.com/flutter/flutter/issues/138460
-  /// 2. Switches the generic tessellation fallback to use stencil-then-cover.
-  ///    See also: https://github.com/flutter/flutter/issues/123671
-  ///
-  // TODO(bdero): Remove this setting once StC is fully de-risked
-  //              https://github.com/flutter/flutter/issues/123671
-  static constexpr bool kEnableStencilThenCover = true;
-
 #if IMPELLER_ENABLE_3D
   std::shared_ptr<scene::SceneContext> GetSceneContext() const;
 #endif  // IMPELLER_ENABLE_3D
