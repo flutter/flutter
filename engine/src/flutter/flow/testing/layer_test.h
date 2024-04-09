@@ -15,6 +15,7 @@
 
 #include "flutter/flow/testing/mock_raster_cache.h"
 #include "flutter/fml/macros.h"
+#include "flutter/testing/assertions_skia.h"
 #include "flutter/testing/canvas_test.h"
 #include "flutter/testing/display_list_testing.h"
 #include "flutter/testing/mock_canvas.h"
