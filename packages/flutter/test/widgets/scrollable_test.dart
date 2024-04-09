@@ -146,6 +146,32 @@ void main() {
     expect(getBehavior(), HitTestBehavior.translucent);
   });
 
+  testWidgets(
+      'hitTestBehavior.translucent lets widgets underneath catch the hit',
+      (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    bool tapped = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Stack(
+          children: <Widget>[
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => tapped = true,
+                child: SizedBox(key: key, height: 300),
+              ),
+            ),
+            const SingleChildScrollView(
+                hitTestBehavior: HitTestBehavior.translucent),
+          ],
+        ),
+      ),
+    );
+    await tester.tapAt(tester.getCenter(find.byKey(key)));
+    expect(tapped, isTrue);
+  });
+
   testWidgets('Flings on different platforms', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.android);
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);
