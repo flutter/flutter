@@ -23,9 +23,6 @@ abstract class VMServiceDiscoveryForAttach {
   /// Port forwarding is only attempted when this is invoked, for each VM
   /// Service URI in the stream.
   Stream<Uri> get uris;
-
-  /// Returns true if this instance uses mdns for discovery.
-  bool get usesMdns => false;
 }
 
 /// An implementation of [VMServiceDiscoveryForAttach] that uses log scanning
@@ -97,9 +94,6 @@ class MdnsVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
 
     return Stream<Uri?>.fromFuture(mDNSDiscoveryFuture).where((Uri? uri) => uri != null).cast<Uri>().asBroadcastStream();
   }
-
-  @override
-  bool get usesMdns => true;
 }
 
 /// An implementation of [VMServiceDiscoveryForAttach] that delegates to other
@@ -113,7 +107,4 @@ class DelegateVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
   Stream<Uri> get uris =>
       StreamGroup.merge<Uri>(
         delegates.map((VMServiceDiscoveryForAttach delegate) => delegate.uris));
-
-  @override
-  bool get usesMdns => delegates.any((VMServiceDiscoveryForAttach delegate) => delegate.usesMdns);
 }

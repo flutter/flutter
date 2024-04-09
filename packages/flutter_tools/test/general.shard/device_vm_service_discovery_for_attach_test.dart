@@ -91,30 +91,6 @@ void main() {
       delegateDiscovery = DelegateVMServiceDiscoveryForAttach(<VMServiceDiscoveryForAttach>[fakeDiscovery1, fakeDiscovery2]);
     });
 
-    testWithoutContext('usesMdns if one of the delegates uses mdns', () {
-      fakeDiscovery1.usesMdns = true;
-      fakeDiscovery2.usesMdns = false;
-      expect(delegateDiscovery.usesMdns, true);
-    });
-
-    testWithoutContext('usesMdns if both delegates use mdns', () {
-      fakeDiscovery1.usesMdns = true;
-      fakeDiscovery2.usesMdns = true;
-      expect(delegateDiscovery.usesMdns, true);
-    });
-
-    testWithoutContext('not usesMdns if neither of the delegates uses mdns', () {
-      fakeDiscovery1.usesMdns = false;
-      fakeDiscovery2.usesMdns = false;
-      expect(delegateDiscovery.usesMdns, false);
-    });
-
-    testWithoutContext('not usesMdns if neither of the delegates uses mdns', () {
-      fakeDiscovery1.usesMdns = false;
-      fakeDiscovery2.usesMdns = false;
-      expect(delegateDiscovery.usesMdns, false);
-    });
-
     testWithoutContext('uris returns from both delegates', () async {
       uris1.add(Uri.parse('http://127.0.0.1:1'));
       uris1.add(Uri.parse('http://127.0.0.2:2'));
@@ -147,13 +123,10 @@ class FakePortForwarder extends Fake implements DevicePortForwarder {
 }
 
 class FakeVmServiceDiscoveryForAttach extends Fake implements VMServiceDiscoveryForAttach {
-  FakeVmServiceDiscoveryForAttach(this._uris, { this.usesMdns = false });
+  FakeVmServiceDiscoveryForAttach(this._uris);
 
   final List<Uri> _uris;
 
   @override
   Stream<Uri> get uris => Stream<Uri>.fromIterable(_uris);
-
-  @override
-  bool usesMdns = false;
 }

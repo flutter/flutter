@@ -308,10 +308,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       final Status discoveryStatus = _logger.startSpinner(
         timeout: const Duration(seconds: 30),
         slowWarningCallback: () {
-          // If relying on mDNS to find Dart VM Service, remind the user to allow local network permissions.
-          if (vmServiceDiscovery.usesMdns) {
+          // On iOS we rely on mDNS to find Dart VM Service. Remind the user to allow local network permissions on the device.
+          if (_isIOSDevice(device)) {
             return 'The Dart VM Service was not discovered after 30 seconds. This is taking much longer than expected...\n\n'
-              'Click "Allow" to the prompt asking if you would like to find and connect devices on your local network. '
+              'Click "Allow" to the prompt on your device asking if you would like to find and connect devices on your local network. '
               'If you selected "Don\'t Allow", you can turn it on in Settings > Your App Name > Local Network. '
               "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again.\n";
           }
@@ -490,8 +490,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   Future<void> _validateArguments() async { }
 
   bool _isIOSDevice(Device device) {
-    return (device is IOSDevice) ||
-        (device is IOSSimulator) ||
+    return (device.platformType == PlatformType.ios) ||
         (device is MacOSDesignedForIPadDevice);
   }
 }

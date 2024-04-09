@@ -611,16 +611,7 @@ class FuchsiaDevice extends Device {
     if (expectedHostPort != null) {
       throwToolExit("'--host-vmservice-port' is not supported when attaching to a Fuchsia device");
     }
-    FuchsiaIsolateDiscoveryProtocol? isolateDiscoveryProtocol;
-    try {
-      isolateDiscoveryProtocol = getIsolateDiscoveryProtocol(fuchsiaModule);
-      return FuchsiaIsolateVMServiceDiscoveryForAttach(isolateDiscoveryProtocol);
-    } on Exception {
-      isolateDiscoveryProtocol?.dispose();
-      final List<ForwardedPort> ports = portForwarder.forwardedPorts.toList();
-      ports.forEach(portForwarder.unforward);
-      rethrow;
-    }
+    return FuchsiaIsolateVMServiceDiscoveryForAttach(getIsolateDiscoveryProtocol(fuchsiaModule));
   }
 
   /// [true] if the current host address is IPv6.
@@ -772,7 +763,23 @@ class FuchsiaIsolateVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAtt
   final FuchsiaIsolateDiscoveryProtocol isolateDiscoveryProtocol;
 
   @override
-  Stream<Uri> get uris => Stream<Uri>.fromFuture(Future<Uri>.value(isolateDiscoveryProtocol.uri)).asBroadcastStream();
+  Stream<Uri> get uris {
+    final Future<Uri> uriFuture = (() async {
+      // Wrapping the call in an anonymous async function for easier error handling.
+      try {
+        return await isolateDiscoveryProtocol.uri;
+      } on Exception {
+        final FuchsiaDevice device = isolateDiscoveryProtocol._device;
+        isolateDiscoveryProtocol.dispose();
+        final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
+        for (final ForwardedPort port in ports) {
+          await device.portForwarder.unforward(port);
+        }
+        rethrow;
+      }
+    })();
+    return Stream<Uri>.fromFuture(uriFuture).asBroadcastStream();
+  }
 }
 
 class FuchsiaIsolateDiscoveryProtocol {
