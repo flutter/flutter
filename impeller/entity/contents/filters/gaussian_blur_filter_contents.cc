@@ -232,9 +232,6 @@ Entity ApplyClippedBlurStyle(Entity::ClipOperation clip_operation,
         blur_entity.SetNewClipDepth(entity.GetNewClipDepth());
         blur_entity.SetTransform(entity.GetTransform() * blur_transform);
         result = blur_entity.Render(renderer, pass) && result;
-        if constexpr (!ContentContext::kEnableStencilThenCover) {
-          result = restore->Render(renderer, entity, pass) && result;
-        }
         return result;
       });
   auto coverage =

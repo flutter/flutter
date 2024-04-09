@@ -756,9 +756,6 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
 static void SetClipScissor(std::optional<Rect> clip_coverage,
                            RenderPass& pass,
                            Point global_pass_position) {
-  if constexpr (!ContentContext::kEnableStencilThenCover) {
-    return;
-  }
   // Set the scissor to the clip coverage area. We do this prior to rendering
   // the clip itself and all its contents.
   IRect scissor;

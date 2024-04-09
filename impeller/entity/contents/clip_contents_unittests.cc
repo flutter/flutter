@@ -22,11 +22,6 @@ namespace testing {
 using EntityTest = EntityPlayground;
 
 TEST_P(EntityTest, ClipContentsOptimizesFullScreenIntersectClips) {
-  if (!ContentContext::kEnableStencilThenCover) {
-    GTEST_SKIP();
-    return;
-  }
-
   // Set up mock environment.
 
   auto content_context = GetContentContext();
