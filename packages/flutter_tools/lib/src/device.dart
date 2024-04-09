@@ -16,6 +16,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'devfs.dart';
 import 'device_port_forwarder.dart';
+import 'device_vm_service_discovery_for_attach.dart';
 import 'project.dart';
 import 'vmservice.dart';
 import 'web/compile.dart';
@@ -736,6 +737,35 @@ abstract class Device {
 
   /// Clear the device's logs.
   void clearLogs();
+
+  /// Get the [VMServiceDiscoveryForAttach] instance for this device, which
+  /// discovers, and forwards any necessary ports to the vm service uri of a
+  /// running app on the device.
+  ///
+  /// If `appId` is specified, on supported platforms, the service discovery
+  /// will only return the VM service URI from the given app.
+  ///
+  /// If `fuchsiaModule` is specified, this will only return the VM service uri
+  /// from the specified Fuchsia module.
+  ///
+  /// If `filterDevicePort` is specified, this will only return the VM service
+  /// uri that matches the given port on the device.
+  VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
+    String? appId,
+    String? fuchsiaModule,
+    int? filterDevicePort,
+    int? expectedHostPort,
+    required bool ipv6,
+    required Logger logger,
+  }) =>
+      LogScanningVMServiceDiscoveryForAttach(
+        Future<DeviceLogReader>.value(getLogReader()),
+        portForwarder: portForwarder,
+        devicePort: filterDevicePort,
+        hostPort: expectedHostPort,
+        ipv6: ipv6,
+        logger: logger,
+      );
 
   /// Start an app package on the current device.
   ///
