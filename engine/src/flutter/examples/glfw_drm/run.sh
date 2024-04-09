@@ -31,4 +31,4 @@ cd -
 #################################################################
 # Run the Flutter Engine Embedder
 #################################################################
-./flutter_glfw ./myapp ../../../../third_party/icu/common/icudtl.dat
+./flutter_glfw ./myapp ../../../third_party/icu/common/icudtl.dat
