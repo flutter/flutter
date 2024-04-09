@@ -118,13 +118,17 @@ Future<int> run(
         // Ensure that anyone opted out of package:unified_analytics is also
         // opted out of legacy analytics and that analytics is not being suppressed
         // TODO(eliasyishak): remove once GA3 sunset, https://github.com/flutter/flutter/issues/128251
-        if (!globals.analytics.telemetryEnabled &&
-            globals.flutterUsage.enabled &&
-            !globals.flutterUsage.suppressAnalytics &&
-            globals.analytics is! NoOpAnalytics) {
-          AnalyticsConfigEvent(enabled: false).send();
-          globals.flutterUsage.enabled = false;
-        }
+        // if (!globals.analytics.telemetryEnabled &&
+        //     globals.flutterUsage.enabled &&
+        //     !globals.flutterUsage.suppressAnalytics &&
+        //     globals.analytics is! NoOpAnalytics) {
+        //   AnalyticsConfigEvent(enabled: false).send();
+        //   globals.flutterUsage.enabled = false;
+        // }
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+        print('UA Runtime Type = ${globals.analytics.runtimeType}');
+        print('Legacy Runtime Type = ${globals.flutterUsage.runtimeType}');
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
 
         await runner.run(args);
 
