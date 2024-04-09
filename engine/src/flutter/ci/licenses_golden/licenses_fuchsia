@@ -1,4 +1,4 @@
-Signature: 746ffd2c0fb7ec4f3968338e43ece294
+Signature: fdf5668bf28a91b80e670a47ef2554a0
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -10739,8 +10739,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_cpp/outgoing_directory.cc + ../../../
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_cpp/service_directory.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/component_context_provider.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/service_directory_provider.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_inspect_cpp/component.cc + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_inspect_cpp/include/lib/sys/inspect/cpp/component.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/include/lib/sys/service/cpp/service.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/include/lib/sys/service/cpp/service_aggregate.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/include/lib/sys/service/cpp/service_handler.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -11148,8 +11146,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp/outgoing_directory.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp/service_directory.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/component_context_provider.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/service_directory_provider.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/sys_inspect_cpp/component.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/sys_inspect_cpp/include/lib/sys/inspect/cpp/component.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/include/lib/sys/service/cpp/service.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/include/lib/sys/service/cpp/service_aggregate.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/include/lib/sys/service/cpp/service_handler.h
@@ -11838,7 +11834,6 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.development/development.f
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.development/iterators.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.development/types.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.test/realm.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_provider_controller.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.gpu.agis/agis.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio.signalprocessing/signal_processing.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/codec_connector.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -12018,7 +12013,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.development/development.fid
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.development/iterators.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.development/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.test/realm.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_provider_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.gpu.agis/agis.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio.signalprocessing/signal_processing.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/codec_connector.fidl

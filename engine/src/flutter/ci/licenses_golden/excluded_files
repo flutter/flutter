@@ -3434,7 +3434,6 @@
 ../../../fuchsia/sdk/linux/pkg/sys_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/include/lib/sys/cpp/testing
 ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/meta.json
-../../../fuchsia/sdk/linux/pkg/sys_inspect_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/syslog/meta.json
 ../../../fuchsia/sdk/linux/pkg/syslog_structured_backend/meta.json
