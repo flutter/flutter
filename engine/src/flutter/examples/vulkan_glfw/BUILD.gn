@@ -10,6 +10,8 @@ executable("vulkan_glfw") {
 
   sources = [ "src/main.cc" ]
 
+  ldflags = [ "-rdynamic" ]
+
   deps = [
     "//flutter/shell/platform/embedder:embedder",
     "//flutter/third_party/glfw",
