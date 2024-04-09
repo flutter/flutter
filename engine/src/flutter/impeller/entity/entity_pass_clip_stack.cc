@@ -101,22 +101,11 @@ EntityPassClipStack::ClipStateResult EntityPassClipStack::ApplyClipState(
       subpass_state.clip_coverage.resize(restoration_index + 1);
       result.clip_did_change = true;
 
-      if constexpr (ContentContext::kEnableStencilThenCover) {
-        // Skip all clip restores when stencil-then-cover is enabled.
-        if (subpass_state.clip_coverage.back().coverage.has_value()) {
-          RecordEntity(entity, global_clip_coverage.type, Rect());
-        }
-        return result;
+      // Skip all clip restores when stencil-then-cover is enabled.
+      if (subpass_state.clip_coverage.back().coverage.has_value()) {
+        RecordEntity(entity, global_clip_coverage.type, Rect());
       }
-
-      if (!subpass_state.clip_coverage.back().coverage.has_value()) {
-        // Running this restore op won't make anything renderable, so skip it.
-        return result;
-      }
-
-      auto restore_contents =
-          static_cast<ClipRestoreContents*>(entity.GetContents().get());
-      restore_contents->SetRestoreCoverage(restore_coverage);
+      return result;
 
     } break;
   }

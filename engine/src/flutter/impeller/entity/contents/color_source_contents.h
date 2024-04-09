@@ -203,11 +203,7 @@ class ColorSourceContents : public Contents {
       options.stencil_mode =
           ContentContextOptions::StencilMode::kLegacyClipIncrement;
     }
-    if constexpr (ContentContext::kEnableStencilThenCover) {
-      pass.SetStencilReference(0);
-    } else {
-      pass.SetStencilReference(entity.GetClipDepth());
-    }
+    pass.SetStencilReference(0);
 
     VertexShaderT::BindFrameInfo(
         pass, renderer.GetTransientsBuffer().EmplaceUniform(frame_info));
@@ -232,13 +228,9 @@ class ColorSourceContents : public Contents {
     if (geometry_result.mode == GeometryResult::Mode::kPreventOverdraw) {
       auto restore = ClipRestoreContents();
       restore.SetRestoreCoverage(GetCoverage(entity));
-      if constexpr (ContentContext::kEnableStencilThenCover) {
-        Entity restore_entity = entity.Clone();
-        restore_entity.SetClipDepth(0);
-        return restore.Render(renderer, restore_entity, pass);
-      } else {
-        return restore.Render(renderer, entity, pass);
-      }
+      Entity restore_entity = entity.Clone();
+      restore_entity.SetClipDepth(0);
+      return restore.Render(renderer, restore_entity, pass);
     }
     return true;
   }

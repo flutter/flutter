@@ -250,11 +250,7 @@ bool ClipContents::Render(const ContentContext& renderer,
   if (!geometry_) {
     return true;
   }
-  if constexpr (ContentContext::kEnableStencilThenCover) {
-    return RenderDepthClip(renderer, entity, pass, clip_op_, *geometry_);
-  } else {
-    return RenderStencilClip(renderer, entity, pass, clip_op_, *geometry_);
-  }
+  return RenderDepthClip(renderer, entity, pass, clip_op_, *geometry_);
 }
 
 /*******************************************************************************
