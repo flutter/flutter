@@ -259,8 +259,8 @@ SKWASM_EXPORT void surface_renderPicturesOnWorker(Surface* surface,
                                                   uint32_t callbackId,
                                                   double rasterStart) {
   // This will release the pictures when they leave scope.
-  std::unique_ptr<sk_sp<SkPicture>> picturesPointer =
-      std::unique_ptr<sk_sp<SkPicture>>(pictures);
+  std::unique_ptr<sk_sp<SkPicture>[]> picturesPointer =
+      std::unique_ptr<sk_sp<SkPicture>[]>(pictures);
   surface->renderPicturesOnWorker(pictures, pictureCount, callbackId,
                                   rasterStart);
 }
