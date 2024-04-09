@@ -2840,25 +2840,204 @@ TEST(RectTest, RectProject) {
 
 TEST(RectTest, RectRoundOut) {
   {
-    auto r = Rect::MakeLTRB(-100, -100, 100, 100);
+    auto r = Rect::MakeLTRB(-100, -200, 300, 400);
     EXPECT_EQ(Rect::RoundOut(r), r);
   }
   {
-    auto r = Rect::MakeLTRB(-100.1, -100.1, 100.1, 100.1);
-    EXPECT_EQ(Rect::RoundOut(r), Rect::MakeLTRB(-101, -101, 101, 101));
+    auto r = Rect::MakeLTRB(-100.1, -200.1, 300.1, 400.1);
+    EXPECT_EQ(Rect::RoundOut(r), Rect::MakeLTRB(-101, -201, 301, 401));
   }
 }
 
 TEST(RectTest, IRectRoundOut) {
   {
-    auto r = Rect::MakeLTRB(-100, -100, 100, 100);
-    auto ir = IRect::MakeLTRB(-100, -100, 100, 100);
+    auto r = Rect::MakeLTRB(-100, -200, 300, 400);
+    auto ir = IRect::MakeLTRB(-100, -200, 300, 400);
     EXPECT_EQ(IRect::RoundOut(r), ir);
   }
   {
-    auto r = Rect::MakeLTRB(-100.1, -100.1, 100.1, 100.1);
-    auto ir = IRect::MakeLTRB(-101, -101, 101, 101);
+    auto r = Rect::MakeLTRB(-100.1, -200.1, 300.1, 400.1);
+    auto ir = IRect::MakeLTRB(-101, -201, 301, 401);
     EXPECT_EQ(IRect::RoundOut(r), ir);
+  }
+}
+
+TEST(RectTest, RectRound) {
+  {
+    auto r = Rect::MakeLTRB(-100, -200, 300, 400);
+    EXPECT_EQ(Rect::Round(r), r);
+  }
+  {
+    auto r = Rect::MakeLTRB(-100.4, -200.4, 300.4, 400.4);
+    EXPECT_EQ(Rect::Round(r), Rect::MakeLTRB(-100, -200, 300, 400));
+  }
+  {
+    auto r = Rect::MakeLTRB(-100.5, -200.5, 300.5, 400.5);
+    EXPECT_EQ(Rect::Round(r), Rect::MakeLTRB(-101, -201, 301, 401));
+  }
+}
+
+TEST(RectTest, IRectRound) {
+  {
+    auto r = Rect::MakeLTRB(-100, -200, 300, 400);
+    auto ir = IRect::MakeLTRB(-100, -200, 300, 400);
+    EXPECT_EQ(IRect::Round(r), ir);
+  }
+  {
+    auto r = Rect::MakeLTRB(-100.4, -200.4, 300.4, 400.4);
+    auto ir = IRect::MakeLTRB(-100, -200, 300, 400);
+    EXPECT_EQ(IRect::Round(r), ir);
+  }
+  {
+    auto r = Rect::MakeLTRB(-100.5, -200.5, 300.5, 400.5);
+    auto ir = IRect::MakeLTRB(-101, -201, 301, 401);
+    EXPECT_EQ(IRect::Round(r), ir);
+  }
+}
+
+// EXPECT_RECT_NEAR will allow a fixed difference between the values that
+// assumes a compatible range of values being tested. Some of the values
+// below are well outside that range and so if the values are a single
+// "bit" off, then they will differ by far more than the fixed allowable
+// difference. The EXPECT_FLOAT_EQ macro will compare the values and
+// fail only if their difference in mantissa is in the last N bits,
+// which is a range agnostic way to compare floats with allowances for
+// bit errors in computations.
+#define EXPECT_RECT_EQ(a, b)                       \
+  do {                                             \
+    EXPECT_FLOAT_EQ(a.GetLeft(), b.GetLeft());     \
+    EXPECT_FLOAT_EQ(a.GetTop(), b.GetTop());       \
+    EXPECT_FLOAT_EQ(a.GetRight(), b.GetRight());   \
+    EXPECT_FLOAT_EQ(a.GetBottom(), b.GetBottom()); \
+  } while (0)
+
+TEST(RectTest, TransformAndClipBounds) {
+  {
+    // This matrix should clip no corners.
+    auto matrix = impeller::Matrix::MakeColumn(
+        // clang-format off
+        2.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 4.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 8.0f
+        // clang-format on
+    );
+    Rect src = Rect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
+    // None of these should have a W<0
+    EXPECT_EQ(matrix.TransformHomogenous(src.GetLeftTop()),
+              Vector3(200.0f, 400.0f, 8.0f));
+    EXPECT_EQ(matrix.TransformHomogenous(src.GetRightTop()),
+              Vector3(400.0f, 400.0f, 8.0f));
+    EXPECT_EQ(matrix.TransformHomogenous(src.GetLeftBottom()),
+              Vector3(200.0f, 800.0f, 8.0f));
+    EXPECT_EQ(matrix.TransformHomogenous(src.GetRightBottom()),
+              Vector3(400.0f, 800.0f, 8.0f));
+
+    Rect expect = Rect::MakeLTRB(25.0f, 50.0f, 50.0f, 100.0f);
+    EXPECT_FALSE(src.TransformAndClipBounds(matrix).IsEmpty());
+    EXPECT_EQ(src.TransformAndClipBounds(matrix), expect);
+  }
+
+  {
+    // This matrix should clip one corner.
+    auto matrix = impeller::Matrix::MakeColumn(
+        // clang-format off
+        2.0f, 0.0f, 0.0f, -0.01f,
+        0.0f, 2.0f, 0.0f, -0.006f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 3.0f
+        // clang-format on
+    );
+    Rect src = Rect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
+    // Exactly one of these should have a W<0
+    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftTop()),
+                        Vector3(200.0f, 200.0f, 1.4f));
+    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightTop()),
+                        Vector3(400.0f, 200.0f, 0.4f));
+    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftBottom()),
+                        Vector3(200.0f, 400.0f, 0.8f));
+    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightBottom()),
+                        Vector3(400.0f, 400.0f, -0.2f));
+
+    Rect expect = Rect::MakeLTRB(142.85715f, 142.85715f, 6553600.f, 6553600.f);
+    EXPECT_FALSE(src.TransformAndClipBounds(matrix).IsEmpty());
+    EXPECT_RECT_EQ(src.TransformAndClipBounds(matrix), expect);
+  }
+
+  {
+    // This matrix should clip two corners.
+    auto matrix = impeller::Matrix::MakeColumn(
+        // clang-format off
+        2.0f, 0.0f, 0.0f, -.015f,
+        0.0f, 2.0f, 0.0f, -.006f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 3.0f
+        // clang-format on
+    );
+    Rect src = Rect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
+    // Exactly two of these should have a W<0
+    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftTop()),
+                        Vector3(200.0f, 200.0f, 0.9f));
+    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightTop()),
+                        Vector3(400.0f, 200.0f, -0.6f));
+    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftBottom()),
+                        Vector3(200.0f, 400.0f, 0.3f));
+    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightBottom()),
+                        Vector3(400.0f, 400.0f, -1.2f));
+
+    Rect expect = Rect::MakeLTRB(222.2222f, 222.2222f, 5898373.f, 6553600.f);
+    EXPECT_FALSE(src.TransformAndClipBounds(matrix).IsEmpty());
+    EXPECT_RECT_EQ(src.TransformAndClipBounds(matrix), expect);
+  }
+
+  {
+    // This matrix should clip three corners.
+    auto matrix = impeller::Matrix::MakeColumn(
+        // clang-format off
+        2.0f, 0.0f, 0.0f, -.02f,
+        0.0f, 2.0f, 0.0f, -.006f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 3.0f
+        // clang-format on
+    );
+    Rect src = Rect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
+    // Exactly three of these should have a W<0
+    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftTop()),
+                        Vector3(200.0f, 200.0f, 0.4f));
+    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightTop()),
+                        Vector3(400.0f, 200.0f, -1.6f));
+    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftBottom()),
+                        Vector3(200.0f, 400.0f, -0.2f));
+    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightBottom()),
+                        Vector3(400.0f, 400.0f, -2.2f));
+
+    Rect expect = Rect::MakeLTRB(499.99988f, 499.99988f, 5898340.f, 4369400.f);
+    EXPECT_FALSE(src.TransformAndClipBounds(matrix).IsEmpty());
+    EXPECT_RECT_EQ(src.TransformAndClipBounds(matrix), expect);
+  }
+
+  {
+    // This matrix should clip all four corners.
+    auto matrix = impeller::Matrix::MakeColumn(
+        // clang-format off
+        2.0f, 0.0f, 0.0f, -.025f,
+        0.0f, 2.0f, 0.0f, -.006f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 3.0f
+        // clang-format on
+    );
+    Rect src = Rect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
+    // All of these should have a W<0
+    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftTop()),
+                        Vector3(200.0f, 200.0f, -0.1f));
+    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightTop()),
+                        Vector3(400.0f, 200.0f, -2.6f));
+    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetLeftBottom()),
+                        Vector3(200.0f, 400.0f, -0.7f));
+    EXPECT_VECTOR3_NEAR(matrix.TransformHomogenous(src.GetRightBottom()),
+                        Vector3(400.0f, 400.0f, -3.2f));
+
+    EXPECT_TRUE(src.TransformAndClipBounds(matrix).IsEmpty());
   }
 }
 

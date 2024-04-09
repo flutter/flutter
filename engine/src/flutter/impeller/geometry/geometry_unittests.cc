@@ -462,20 +462,6 @@ TEST(GeometryTest, MatrixGetDirectionScale) {
   }
 }
 
-TEST(GeometryTest, MatrixIsAligned) {
-  {
-    auto m = Matrix::MakeTranslation({1, 2, 3});
-    bool result = m.IsAligned();
-    ASSERT_TRUE(result);
-  }
-
-  {
-    auto m = Matrix::MakeRotationZ(Degrees{123});
-    bool result = m.IsAligned();
-    ASSERT_FALSE(result);
-  }
-}
-
 TEST(GeometryTest, MatrixTranslationScaleOnly) {
   {
     auto m = Matrix();

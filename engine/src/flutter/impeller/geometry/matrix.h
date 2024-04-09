@@ -148,12 +148,13 @@ struct Matrix {
     // clang-format on
   }
 
-  static Matrix MakeRotation(Scalar radians, const Vector4& r) {
+  static Matrix MakeRotation(Radians radians, const Vector4& r) {
     const Vector4 v = r.Normalize();
 
-    const Scalar cosine = cos(radians);
+    const Vector2 cos_sin = CosSin(radians);
+    const Scalar cosine = cos_sin.x;
     const Scalar cosp = 1.0f - cosine;
-    const Scalar sine = sin(radians);
+    const Scalar sine = cos_sin.y;
 
     // clang-format off
     return Matrix(
@@ -180,8 +181,10 @@ struct Matrix {
   }
 
   static Matrix MakeRotationX(Radians r) {
-    const Scalar cosine = cos(r.radians);
-    const Scalar sine = sin(r.radians);
+    const Vector2 cos_sin = CosSin(r);
+    const Scalar cosine = cos_sin.x;
+    const Scalar sine = cos_sin.y;
+
     // clang-format off
     return Matrix(
       1.0f,  0.0f,    0.0f,    0.0f,
@@ -193,8 +196,9 @@ struct Matrix {
   }
 
   static Matrix MakeRotationY(Radians r) {
-    const Scalar cosine = cos(r.radians);
-    const Scalar sine = sin(r.radians);
+    const Vector2 cos_sin = CosSin(r);
+    const Scalar cosine = cos_sin.x;
+    const Scalar sine = cos_sin.y;
 
     // clang-format off
     return Matrix(
@@ -207,8 +211,9 @@ struct Matrix {
   }
 
   static Matrix MakeRotationZ(Radians r) {
-    const Scalar cosine = cos(r.radians);
-    const Scalar sine = sin(r.radians);
+    const Vector2 cos_sin = CosSin(r);
+    const Scalar cosine = cos_sin.x;
+    const Scalar sine = cos_sin.y;
 
     // clang-format off
     return Matrix (
@@ -318,11 +323,33 @@ struct Matrix {
             m[9] == 0 && m[10] == 1 && m[11] == 0 && m[14] == 0 && m[15] == 1);
   }
 
+  constexpr bool HasPerspective2D() const {
+    return m[3] != 0 || m[7] != 0 || m[15] != 1;
+  }
+
   constexpr bool HasPerspective() const {
     return m[3] != 0 || m[7] != 0 || m[11] != 0 || m[15] != 1;
   }
 
+  constexpr bool IsAligned2D(Scalar tolerance = 0) const {
+    if (HasPerspective2D()) {
+      return false;
+    }
+    if (ScalarNearlyZero(m[1], tolerance) &&
+        ScalarNearlyZero(m[4], tolerance)) {
+      return true;
+    }
+    if (ScalarNearlyZero(m[0], tolerance) &&
+        ScalarNearlyZero(m[5], tolerance)) {
+      return true;
+    }
+    return false;
+  }
+
   constexpr bool IsAligned(Scalar tolerance = 0) const {
+    if (HasPerspective()) {
+      return false;
+    }
     int v[] = {!ScalarNearlyZero(m[0], tolerance),  //
                !ScalarNearlyZero(m[1], tolerance),  //
                !ScalarNearlyZero(m[2], tolerance),  //
@@ -433,6 +460,12 @@ struct Matrix {
     return result * w;
   }
 
+  constexpr Vector3 TransformHomogenous(const Point& v) const {
+    return Vector3(v.x * m[0] + v.y * m[4] + m[12],
+                   v.x * m[1] + v.y * m[5] + m[13],
+                   v.x * m[3] + v.y * m[7] + m[15]);
+  }
+
   constexpr Vector4 TransformDirection(const Vector4& v) const {
     return Vector4(v.x * m[0] + v.y * m[4] + v.z * m[8],
                    v.x * m[1] + v.y * m[5] + v.z * m[9],
@@ -509,6 +542,43 @@ struct Matrix {
       -right.Dot(position), -up.Dot(position), -forward.Dot(position), 1.0f
     };
     // clang-format on
+  }
+
+ private:
+  static constexpr Vector2 CosSin(Radians radians) {
+    // The precision of a float around 1.0 is much lower than it is
+    // around 0.0, so we end up with cases on quadrant rotations where
+    // we get a +/-1.0 for one of the values and a non-zero value for
+    // the other. This happens around quadrant rotations which makes it
+    // especially common and results in unclean quadrant rotation
+    // matrices which do not return true from |IsAligned[2D]| even
+    // though that is exactly where you need them to exhibit that property.
+    // It also injects small floating point mantissa errors into the
+    // matrices whenever you concatenate them with a quadrant rotation.
+    //
+    // This issue is also exacerbated by the fact that, in radians, the
+    // angles for quadrant rotations are irrational numbers. The measuring
+    // error for representing 90 degree multiples is small enough that
+    // either sin or cos will return a value near +/-1.0, but not small
+    // enough that the other value will be a clean 0.0.
+    //
+    // Some geometry packages simply discard very small numbers from
+    // sin/cos, but the following approach specifically targets just the
+    // area around a quadrant rotation (where either the sin or cos are
+    // measuring as +/-1.0) for symmetry of precision.
+
+    Scalar sin = std::sin(radians.radians);
+    if (std::abs(sin) == 1.0f) {
+      // 90 or 270 degrees (mod 360)
+      return {0.0f, sin};
+    } else {
+      Scalar cos = std::cos(radians.radians);
+      if (std::abs(cos) == 1.0f) {
+        // 0 or 180 degrees (mod 360)
+        return {cos, 0.0f};
+      }
+      return {cos, sin};
+    }
   }
 };
 

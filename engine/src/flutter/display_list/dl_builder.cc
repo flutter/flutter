@@ -664,7 +664,8 @@ void DisplayListBuilder::saveLayer(const SkRect& bounds,
     // The filtered bounds will be clipped to the existing clip rect when
     // this layer is restored.
     // If bounds is null then the original cull_rect will be used.
-    tracker_.resetCullRect(in_options.bounds_from_caller() ? &bounds : nullptr);
+    tracker_.resetLocalCullRect(in_options.bounds_from_caller() ? &bounds
+                                                                : nullptr);
   } else if (in_options.bounds_from_caller()) {
     // Even though Skia claims that the bounds are only a hint, they actually
     // use them as the temporary layer bounds during rendering the layer, so

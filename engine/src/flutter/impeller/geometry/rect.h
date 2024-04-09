@@ -401,6 +401,41 @@ struct TRect {
   }
 
   /// @brief  Creates a new bounding box that contains this transformed
+  ///         rectangle, clipped against the near clipping plane if
+  ///         necessary.
+  [[nodiscard]] constexpr TRect TransformAndClipBounds(
+      const Matrix& transform) const {
+    if (!transform.HasPerspective2D()) {
+      return TransformBounds(transform);
+    }
+
+    if (IsEmpty()) {
+      return {};
+    }
+
+    auto ul = transform.TransformHomogenous({left_, top_});
+    auto ur = transform.TransformHomogenous({right_, top_});
+    auto ll = transform.TransformHomogenous({left_, bottom_});
+    auto lr = transform.TransformHomogenous({right_, bottom_});
+
+    // It can probably be proven that we only ever have 5 points at most
+    // which happens when only 1 corner is clipped and we get 2 points
+    // in return for it as we interpolate against its neighbors.
+    Point points[8];
+    int index = 0;
+
+    // Process (clip and interpolate) each point against its 2 neighbors:
+    //                                 left, pt, right
+    index = ClipAndInsert(points, index, ll, ul, ur);
+    index = ClipAndInsert(points, index, ul, ur, lr);
+    index = ClipAndInsert(points, index, ur, lr, ll);
+    index = ClipAndInsert(points, index, lr, ll, ul);
+
+    auto bounds = TRect::MakePointBounds(points, points + index);
+    return bounds.value_or(TRect{});
+  }
+
+  /// @brief  Creates a new bounding box that contains this transformed
   ///         rectangle.
   [[nodiscard]] constexpr TRect TransformBounds(const Matrix& transform) const {
     if (IsEmpty()) {
@@ -612,6 +647,14 @@ struct TRect {
                            saturated::Cast<U, Type>(ceil(r.GetBottom())));
   }
 
+  ONLY_ON_FLOAT_M([[nodiscard]] constexpr static, TRect)
+  Round(const TRect<U>& r) {
+    return TRect::MakeLTRB(saturated::Cast<U, Type>(round(r.GetLeft())),
+                           saturated::Cast<U, Type>(round(r.GetTop())),
+                           saturated::Cast<U, Type>(round(r.GetRight())),
+                           saturated::Cast<U, Type>(round(r.GetBottom())));
+  }
+
   [[nodiscard]] constexpr static std::optional<TRect> Union(
       const TRect& a,
       const std::optional<TRect> b) {
@@ -656,6 +699,48 @@ struct TRect {
   Type top_;
   Type right_;
   Type bottom_;
+
+  static constexpr Scalar kMinimumHomogenous = 1.0f / (1 << 14);
+
+  // Clip p against the near clipping plane (W = kMinimumHomogenous)
+  // and interpolate a crossing point against the nearby neighbors
+  // left and right if p is clipped and either of them is not.
+  // This method can produce 0, 1, or 2 points per call depending on
+  // how many of the points are clipped.
+  // 0 - all points are clipped
+  // 1 - p is unclipped OR
+  //     p is clipped and exactly one of the neighbors is not
+  // 2 - p is clipped and both neighbors are not
+  static constexpr int ClipAndInsert(Point clipped[],
+                                     int index,
+                                     const Vector3& left,
+                                     const Vector3& p,
+                                     const Vector3& right) {
+    if (p.z >= kMinimumHomogenous) {
+      clipped[index++] = {p.x / p.z, p.y / p.z};
+    } else {
+      index = InterpolateAndInsert(clipped, index, p, left);
+      index = InterpolateAndInsert(clipped, index, p, right);
+    }
+    return index;
+  }
+
+  // Interpolate (a clipped) point p against one of its neighbors
+  // and insert the point into the array where the line between them
+  // veers from clipped space to unclipped, if such a point exists.
+  static constexpr int InterpolateAndInsert(Point clipped[],
+                                            int index,
+                                            const Vector3& p,
+                                            const Vector3& neighbor) {
+    if (neighbor.z >= kMinimumHomogenous) {
+      auto t = (kMinimumHomogenous - p.z) / (neighbor.z - p.z);
+      clipped[index++] = {
+          (t * p.x + (1.0f - t) * neighbor.x) / kMinimumHomogenous,
+          (t * p.y + (1.0f - t) * neighbor.y) / kMinimumHomogenous,
+      };
+    }
+    return index;
+  }
 };
 
 using Rect = TRect<Scalar>;
