@@ -12,26 +12,26 @@ dependencies:
 
 dependency_overrides:
   args:
-    path: ../../../third_party/dart/third_party/pkg/args
+    path: ../../third_party/dart/third_party/pkg/args
   async:
-    path: ../../../third_party/dart/third_party/pkg/async
+    path: ../../third_party/dart/third_party/pkg/async
   collection:
-    path: ../../../third_party/dart/third_party/pkg/collection
+    path: ../../third_party/dart/third_party/pkg/collection
   http:
-    path: ../../../third_party/dart/third_party/pkg/http/pkgs/http
+    path: ../../third_party/dart/third_party/pkg/http/pkgs/http
   http_parser:
-    path: ../../../third_party/dart/third_party/pkg/http_parser
+    path: ../../third_party/dart/third_party/pkg/http_parser
   meta:
-    path: ../../../third_party/dart/pkg/meta
+    path: ../../third_party/dart/pkg/meta
   path:
-    path: ../../../third_party/dart/third_party/pkg/path
+    path: ../../third_party/dart/third_party/pkg/path
   source_span:
-    path: ../../../third_party/dart/third_party/pkg/source_span
+    path: ../../third_party/dart/third_party/pkg/source_span
   string_scanner:
-    path: ../../../third_party/dart/third_party/pkg/string_scanner
+    path: ../../third_party/dart/third_party/pkg/string_scanner
   term_glyph:
-    path: ../../../third_party/dart/third_party/pkg/term_glyph
+    path: ../../third_party/dart/third_party/pkg/term_glyph
   typed_data:
-    path: ../../../third_party/dart/third_party/pkg/typed_data
+    path: ../../third_party/dart/third_party/pkg/typed_data
   web:
-    path: ../../../third_party/dart/third_party/pkg/web
+    path: ../../third_party/dart/third_party/pkg/web

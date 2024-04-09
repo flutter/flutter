@@ -4,7 +4,7 @@
     "flutter": {
       "include": [
         {
-          "path": "../../../third_party/dart/sdk/lib/libraries.json",
+          "path": "../../third_party/dart/sdk/lib/libraries.json",
           "target": "vm_common"
         }
       ],

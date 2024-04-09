@@ -32,22 +32,22 @@ dependency_overrides:
   archive:
     path: ../../third_party/pkg/archive
   args:
-    path: ../../../third_party/dart/third_party/pkg/args
+    path: ../../third_party/dart/third_party/pkg/args
   async_helper:
-    path: ../../../third_party/dart/pkg/async_helper
+    path: ../../third_party/dart/pkg/async_helper
   collection:
-    path: ../../../third_party/dart/third_party/pkg/collection
+    path: ../../third_party/dart/third_party/pkg/collection
   crypto:
-    path: ../../../third_party/dart/third_party/pkg/crypto
+    path: ../../third_party/dart/third_party/pkg/crypto
   expect:
-    path: ../../../third_party/dart/pkg/expect
+    path: ../../third_party/dart/pkg/expect
   litetest:
     path: ../../testing/litetest
   meta:
-    path: ../../../third_party/dart/pkg/meta
+    path: ../../third_party/dart/pkg/meta
   path:
-    path: ../../../third_party/dart/third_party/pkg/path
+    path: ../../third_party/dart/third_party/pkg/path
   smith:
-    path: ../../../third_party/dart/pkg/smith
+    path: ../../third_party/dart/pkg/smith
   typed_data:
-    path: ../../../third_party/dart/third_party/pkg/typed_data
+    path: ../../third_party/dart/third_party/pkg/typed_data

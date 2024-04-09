@@ -975,9 +975,10 @@ final class HeaderFormatChecker extends FormatChecker {
     super.messageCallback,
   });
 
-  // $ENGINE/third_party/dart/tools/sdks/dart-sdk/bin/dart
+  // $ENGINE/flutter/third_party/dart/tools/sdks/dart-sdk/bin/dart
   late final String _dartBin = path.join(
     repoDir.absolute.parent.path,
+    'flutter',
     'third_party',
     'dart',
     'tools',

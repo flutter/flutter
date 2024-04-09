@@ -3,5 +3,5 @@
 # found in the LICENSE file.
 
 declare_args() {
-  dart_src = "//third_party/dart"
+  dart_src = "//flutter/third_party/dart"
 }
