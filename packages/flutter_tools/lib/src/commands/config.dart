@@ -134,7 +134,7 @@ class ConfigCommand extends FlutterCommand {
       // TODO(eliasyishak): Set the telemetry for the unified_analytics
       //  package as well, the above will be removed once we have
       //  fully transitioned to using the new package,
-      //  https://github.com/flutter/flutter/issues/128251 
+      //  https://github.com/flutter/flutter/issues/128251
       await globals.analytics.setTelemetry(value);
     }
 
