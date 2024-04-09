@@ -195,6 +195,9 @@ class _DefaultUsage implements Usage {
     }
 
     final Analytics analytics = setupAnalytics!;
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+    print('Runtime type for `setupAnalytics` in legacy analytics = ${analytics.runtimeType}');
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
     if (!skipAnalyticsSessionSetup) {
       // Report a more detailed OS version string than package:usage does by default.
       analytics.setSessionValue(
