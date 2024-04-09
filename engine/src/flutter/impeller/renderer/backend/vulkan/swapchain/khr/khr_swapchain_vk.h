@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "impeller/geometry/size.h"
+#include "impeller/renderer/backend/vulkan/swapchain/swapchain_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/surface.h"
@@ -17,37 +18,34 @@ namespace impeller {
 class KHRSwapchainImplVK;
 
 //------------------------------------------------------------------------------
-/// @brief      A swapchain that adapts to the underlying surface going out of
-///             date. If the caller cannot acquire the next drawable, it is due
-///             to an unrecoverable error and the swapchain must be recreated
-///             with a new surface.
+/// @brief      A swapchain implemented backed by VK_KHR_swapchain and
+///             VK_KHR_surface.
 ///
-class KHRSwapchainVK {
+class KHRSwapchainVK final : public SwapchainVK {
  public:
-  static std::shared_ptr<KHRSwapchainVK> Create(
-      const std::shared_ptr<Context>& context,
-      vk::UniqueSurfaceKHR surface,
-      const ISize& size,
-      bool enable_msaa = true);
-
   ~KHRSwapchainVK();
 
-  bool IsValid() const;
+  // |SwapchainVK|
+  bool IsValid() const override;
 
-  std::unique_ptr<Surface> AcquireNextDrawable();
+  // |SwapchainVK|
+  std::unique_ptr<Surface> AcquireNextDrawable() override;
 
-  vk::Format GetSurfaceFormat() const;
+  // |SwapchainVK|
+  vk::Format GetSurfaceFormat() const override;
 
-  /// @brief Mark the current swapchain configuration as dirty, forcing it to be
-  ///        recreated on the next frame.
-  void UpdateSurfaceSize(const ISize& size);
+  // |SwapchainVK|
+  void UpdateSurfaceSize(const ISize& size) override;
 
  private:
+  friend class SwapchainVK;
+
   std::shared_ptr<KHRSwapchainImplVK> impl_;
   ISize size_;
   const bool enable_msaa_;
 
-  KHRSwapchainVK(std::shared_ptr<KHRSwapchainImplVK> impl,
+  KHRSwapchainVK(const std::shared_ptr<Context>& context,
+                 vk::UniqueSurfaceKHR surface,
                  const ISize& size,
                  bool enable_msaa);
 
