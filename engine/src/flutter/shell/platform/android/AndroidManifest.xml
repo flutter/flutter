@@ -3,27 +3,12 @@
      Use of this source code is governed by a BSD-style license that can be
      found in the LICENSE file.
  -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="io.flutter.app" android:versionCode="1" android:versionName="0.0.1">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="io.flutter.embedding" android:versionCode="1" android:versionName="0.0.1">
 
     <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="34" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="true" />
-
-    <application android:label="Flutter Shell" android:name="FlutterApplication" android:debuggable="true">
-        <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale"
-                  android:hardwareAccelerated="true"
-                  android:launchMode="standard"
-                  android:name="FlutterActivity"
-                  android:theme="@android:style/Theme.Black.NoTitleBar"
-                  android:windowSoftInputMode="adjustResize"
-                  android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-    </application>
 
     <!-- Required for io.flutter.plugin.text.ProcessTextPlugin to query activities that can process text. -->
     <queries>
