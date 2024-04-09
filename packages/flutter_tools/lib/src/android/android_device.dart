@@ -18,6 +18,7 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
+import '../device_vm_service_discovery_for_attach.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import 'android.dart';
@@ -799,6 +800,26 @@ class AndroidDevice extends Device {
       );
     }
   }
+
+  @override
+  VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
+    String? appId,
+    String? fuchsiaModule,
+    int? filterDevicePort,
+    int? expectedHostPort,
+    required bool ipv6,
+    required Logger logger,
+  }) =>
+      LogScanningVMServiceDiscoveryForAttach(
+        // If it's an Android device, attaching relies on past log searching
+        // to find the service protocol.
+        Future<DeviceLogReader>.value(getLogReader(includePastLogs: true)),
+        portForwarder: portForwarder,
+        ipv6: ipv6,
+        devicePort: filterDevicePort,
+        hostPort: expectedHostPort,
+        logger: logger,
+      );
 
   @override
   late final DevicePortForwarder? portForwarder = () {

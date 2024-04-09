@@ -14,6 +14,7 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
+import '../device_vm_service_discovery_for_attach.dart';
 import '../ios/ios_workflow.dart';
 import '../project.dart';
 
@@ -58,6 +59,37 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
 
   @override
   String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo) => null;
+
+  @override
+  VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
+    String? appId,
+    String? fuchsiaModule,
+    int? filterDevicePort,
+    int? expectedHostPort,
+    required bool ipv6,
+    required Logger logger,
+  }) {
+    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
+      device: this,
+      appId: appId,
+      deviceVmservicePort: filterDevicePort,
+      hostVmservicePort: expectedHostPort,
+      usesIpv6: ipv6,
+      useDeviceIPAsHost: false,
+    );
+
+    return DelegateVMServiceDiscoveryForAttach(<VMServiceDiscoveryForAttach>[
+      mdnsVMServiceDiscoveryForAttach,
+      super.getVMServiceDiscoveryForAttach(
+        appId: appId,
+        fuchsiaModule: fuchsiaModule,
+        filterDevicePort: filterDevicePort,
+        expectedHostPort: expectedHostPort,
+        ipv6: ipv6,
+        logger: logger,
+      ),
+    ]);
+  }
 
   @override
   Future<LaunchResult> startApp(
