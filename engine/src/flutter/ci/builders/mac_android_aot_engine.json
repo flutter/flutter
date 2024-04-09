@@ -18,14 +18,18 @@
                 "cpu=x86"
             ],
             "gclient_variables": {
-                "download_android_deps": false
+                "download_android_deps": false,
+                "use_rbe": true
             },
             "gn": [
                 "--target-dir",
                 "ci/android_profile",
                 "--runtime-mode",
                 "profile",
-                "--android"
+                "--android",
+                "--rbe",
+                "--no-goma",
+                "--xcode-symlinks"
             ],
             "name": "ci/android_profile",
             "description": "Produces profile mode artifacts to target 32-bit arm Android from a macOS host.",
@@ -34,6 +38,17 @@
                 "targets": [
                     "flutter/lib/snapshot",
                     "flutter/shell/platform/android:gen_snapshot"
+                ]
+            },
+            "postsubmit_overrides": {
+                "gn": [
+                    "--target-dir",
+                    "ci/android_profile",
+                    "--runtime-mode",
+                    "profile",
+                    "--android",
+                    "--no-rbe",
+                    "--no-goma"
                 ]
             },
             "properties": {
