@@ -11,5 +11,7 @@ void main() {
   testWidgets('isCanvasKit returns false in HTML mode', (WidgetTester tester) async {
     await tester.pumpAndSettle();
     expect(isCanvasKit, false);
+    expect(isSkwasm, false);
+    expect(isSkiaWeb, false);
   });
 }

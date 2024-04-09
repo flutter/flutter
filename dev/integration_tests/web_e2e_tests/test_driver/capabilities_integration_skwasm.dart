@@ -12,7 +12,7 @@ void main() {
   testWidgets('isCanvaskit returns false in Skwasm mode', (WidgetTester tester) async {
     await tester.pumpAndSettle();
     expect(isCanvasKit, false);
-
-    expect(const bool.fromEnvironment('dart.library.ffi'), true);
+    expect(isSkwasm, true);
+    expect(isSkiaWeb, true);
   });
 }
