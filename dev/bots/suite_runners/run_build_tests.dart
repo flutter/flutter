@@ -9,7 +9,6 @@ import 'dart:math' as math;
 import 'package:path/path.dart' as path;
 
 import '../run_command.dart';
-import '../test.dart';
 import '../utils.dart';
 
 /// Verifies that APK, and IPA (if on macOS), and native desktop builds the
@@ -19,7 +18,8 @@ import '../utils.dart';
 /// Flutter SDK and target app.
 ///
 /// Also does some checking about types included in hello_world.
-Future<void> buildTestsRunner(String flutterRoot) async {
+Future<void> buildTestsRunner() async {
+
   final List<Directory> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).listSync()
     // API example builds will be tested in a separate shard.
     .where((FileSystemEntity entity) => entity is Directory && path.basename(entity.path) != 'api').cast<Directory>().toList()

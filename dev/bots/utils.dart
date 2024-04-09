@@ -17,6 +17,14 @@ typedef ShardRunner = Future<void> Function();
 
 const Duration _quietTimeout = Duration(minutes: 10); // how long the output should be hidden between calls to printProgress before just being verbose
 
+final String exe = Platform.isWindows ? '.exe' : '';
+final String bat = Platform.isWindows ? '.bat' : '';
+final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
+final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
+final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
+final String pubCache = path.join(flutterRoot, '.pub-cache');
+final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
+
 // If running from LUCI set to False.
 final bool isLuci =  Platform.environment['LUCI_CI'] == 'True';
 final bool hasColor = stdout.supportsAnsiEscapes && !isLuci;
