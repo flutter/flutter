@@ -82,17 +82,20 @@ bool ClipContents::CanInheritOpacity(const Entity& entity) const {
 
 void ClipContents::SetInheritedOpacity(Scalar opacity) {}
 
-bool ClipContents::RenderDepthClip(const ContentContext& renderer,
-                                   const Entity& entity,
-                                   RenderPass& pass,
-                                   Entity::ClipOperation clip_op,
-                                   const Geometry& geometry) const {
+bool ClipContents::Render(const ContentContext& renderer,
+                          const Entity& entity,
+                          RenderPass& pass) const {
+  if (!geometry_) {
+    return true;
+  }
+
   using VS = ClipPipeline::VertexShader;
 
-  if (clip_op == Entity::ClipOperation::kIntersect &&
-      geometry.IsAxisAlignedRect() &&
+  if (clip_op_ == Entity::ClipOperation::kIntersect &&
+      geometry_->IsAxisAlignedRect() &&
       entity.GetTransform().IsTranslationScaleOnly()) {
-    std::optional<Rect> coverage = geometry.GetCoverage(entity.GetTransform());
+    std::optional<Rect> coverage =
+        geometry_->GetCoverage(entity.GetTransform());
     if (coverage.has_value() &&
         coverage->Contains(Rect::MakeSize(pass.GetRenderTargetSize()))) {
       // Skip axis-aligned intersect clips that cover the whole render target
@@ -104,7 +107,7 @@ bool ClipContents::RenderDepthClip(const ContentContext& renderer,
   VS::FrameInfo info;
   info.depth = GetShaderClipDepth(entity);
 
-  auto geometry_result = geometry.GetPositionBuffer(renderer, entity, pass);
+  auto geometry_result = geometry_->GetPositionBuffer(renderer, entity, pass);
   auto options = OptionsFromPass(pass);
   options.blend_mode = BlendMode::kDestination;
 
@@ -147,7 +150,7 @@ bool ClipContents::RenderDepthClip(const ContentContext& renderer,
   options.depth_write_enabled = true;
   options.primitive_type = PrimitiveType::kTriangleStrip;
   Rect cover_area;
-  switch (clip_op) {
+  switch (clip_op_) {
     case Entity::ClipOperation::kIntersect:
       pass.SetCommandLabel("Intersect Clip");
       options.stencil_mode =
@@ -158,7 +161,7 @@ bool ClipContents::RenderDepthClip(const ContentContext& renderer,
       pass.SetCommandLabel("Difference Clip");
       options.stencil_mode = ContentContextOptions::StencilMode::kCoverCompare;
       std::optional<Rect> maybe_cover_area =
-          geometry.GetCoverage(entity.GetTransform());
+          geometry_->GetCoverage(entity.GetTransform());
       if (!maybe_cover_area.has_value()) {
         return true;
       }
@@ -178,79 +181,6 @@ bool ClipContents::RenderDepthClip(const ContentContext& renderer,
   VS::BindFrameInfo(pass, renderer.GetTransientsBuffer().EmplaceUniform(info));
 
   return pass.Draw().ok();
-}
-
-bool ClipContents::RenderStencilClip(const ContentContext& renderer,
-                                     const Entity& entity,
-                                     RenderPass& pass,
-                                     Entity::ClipOperation clip_op,
-                                     const Geometry& geometry) const {
-  using VS = ClipPipeline::VertexShader;
-
-  VS::FrameInfo info;
-  info.depth = GetShaderClipDepth(entity);
-
-  auto options = OptionsFromPass(pass);
-  options.blend_mode = BlendMode::kDestination;
-  pass.SetStencilReference(entity.GetClipDepth());
-
-  if (clip_op == Entity::ClipOperation::kDifference) {
-    {
-      pass.SetCommandLabel("Difference Clip (Increment)");
-
-      options.stencil_mode =
-          ContentContextOptions::StencilMode::kLegacyClipIncrement;
-
-      auto points = Rect::MakeSize(pass.GetRenderTargetSize()).GetPoints();
-      auto vertices =
-          VertexBufferBuilder<VS::PerVertexData>{}
-              .AddVertices({{points[0]}, {points[1]}, {points[2]}, {points[3]}})
-              .CreateVertexBuffer(renderer.GetTransientsBuffer());
-
-      pass.SetVertexBuffer(std::move(vertices));
-
-      info.mvp = pass.GetOrthographicTransform();
-      VS::BindFrameInfo(pass,
-                        renderer.GetTransientsBuffer().EmplaceUniform(info));
-
-      options.primitive_type = PrimitiveType::kTriangleStrip;
-      pass.SetPipeline(renderer.GetClipPipeline(options));
-      pass.Draw();
-    }
-
-    {
-      pass.SetCommandLabel("Difference Clip (Punch)");
-      pass.SetStencilReference(entity.GetClipDepth() + 1);
-
-      options.stencil_mode =
-          ContentContextOptions::StencilMode::kLegacyClipDecrement;
-    }
-  } else {
-    pass.SetCommandLabel("Intersect Clip");
-
-    options.stencil_mode =
-        ContentContextOptions::StencilMode::kLegacyClipIncrement;
-  }
-
-  auto geometry_result = geometry.GetPositionBuffer(renderer, entity, pass);
-  options.primitive_type = geometry_result.type;
-  pass.SetPipeline(renderer.GetClipPipeline(options));
-
-  pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
-
-  info.mvp = geometry_result.transform;
-  VS::BindFrameInfo(pass, renderer.GetTransientsBuffer().EmplaceUniform(info));
-
-  return pass.Draw().ok();
-}
-
-bool ClipContents::Render(const ContentContext& renderer,
-                          const Entity& entity,
-                          RenderPass& pass) const {
-  if (!geometry_) {
-    return true;
-  }
-  return RenderDepthClip(renderer, entity, pass, clip_op_, *geometry_);
 }
 
 /*******************************************************************************
