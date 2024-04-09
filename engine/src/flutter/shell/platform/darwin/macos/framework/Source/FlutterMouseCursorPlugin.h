@@ -10,6 +10,10 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h"
 
+@protocol FlutterMouseCursorPluginDelegate <NSObject>
+- (void)didUpdateMouseCursor:(nonnull NSCursor*)cursor;
+@end
+
 /**
  * A plugin to handle mouse cursor.
  *
@@ -17,6 +21,9 @@
  * Flutter framework mouse cursor classes, via system channels.
  */
 @interface FlutterMouseCursorPlugin : NSObject <FlutterPlugin>
+
++ (void)registerWithRegistrar:(nonnull id<FlutterPluginRegistrar>)registrar
+                     delegate:(nullable id<FlutterMouseCursorPluginDelegate>)delegate;
 
 @end
 

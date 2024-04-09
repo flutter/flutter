@@ -25,6 +25,11 @@ static NSCursor* GetCursorForKind(NSString* kind) {
   // The following mapping must be kept in sync with Flutter framework's
   // mouse_cursor.dart
 
+  if ([kind isEqualToString:kKindValueNone]) {
+    NSImage* image = [[NSImage alloc] initWithSize:NSMakeSize(1, 1)];
+    return [[NSCursor alloc] initWithImage:image hotSpot:NSMakePoint(0, 0)];
+  }
+
   if (systemCursors == nil) {
     systemCursors = @{
       @"alias" : [NSCursor dragLinkCursor],
@@ -58,10 +63,8 @@ static NSCursor* GetCursorForKind(NSString* kind) {
 }
 
 @interface FlutterMouseCursorPlugin ()
-/**
- * Whether the cursor is currently hidden.
- */
-@property(nonatomic) BOOL hidden;
+
+@property(nonatomic, weak) id<FlutterMouseCursorPluginDelegate> delegate;
 
 /**
  * Handles the method call that activates a system cursor.
@@ -78,11 +81,6 @@ static NSCursor* GetCursorForKind(NSString* kind) {
  * internal states.
  */
 - (void)displayCursorObject:(nonnull NSCursor*)cursorObject;
-
-/**
- * Hides the cursor.
- */
-- (void)hide;
 
 /**
  * Handles all method calls from Flutter.
@@ -105,12 +103,6 @@ NSMutableDictionary* cachedSystemCursors;
   return self;
 }
 
-- (void)dealloc {
-  if (_hidden) {
-    [NSCursor unhide];
-  }
-}
-
 - (FlutterError*)activateSystemCursor:(nonnull NSDictionary*)arguments {
   NSString* kindArg = arguments[kKindKey];
   if (!kindArg) {
@@ -118,10 +110,7 @@ NSMutableDictionary* cachedSystemCursors;
                                message:@"Missing argument"
                                details:@"Missing argument while trying to activate system cursor"];
   }
-  if ([kindArg isEqualToString:kKindValueNone]) {
-    [self hide];
-    return nil;
-  }
+
   NSCursor* cursorObject = [FlutterMouseCursorPlugin cursorFromKind:kindArg];
   [self displayCursorObject:cursorObject];
   return nil;
@@ -129,17 +118,7 @@ NSMutableDictionary* cachedSystemCursors;
 
 - (void)displayCursorObject:(nonnull NSCursor*)cursorObject {
   [cursorObject set];
-  if (_hidden) {
-    [NSCursor unhide];
-  }
-  _hidden = NO;
-}
-
-- (void)hide {
-  if (!_hidden) {
-    [NSCursor hide];
-  }
-  _hidden = YES;
+  [self.delegate didUpdateMouseCursor:cursorObject];
 }
 
 + (NSCursor*)cursorFromKind:(NSString*)kind {
@@ -154,9 +133,15 @@ NSMutableDictionary* cachedSystemCursors;
 #pragma mark - FlutterPlugin implementation
 
 + (void)registerWithRegistrar:(id<FlutterPluginRegistrar>)registrar {
+  [self registerWithRegistrar:registrar delegate:nil];
+}
+
++ (void)registerWithRegistrar:(id<FlutterPluginRegistrar>)registrar
+                     delegate:(id<FlutterMouseCursorPluginDelegate>)delegate {
   FlutterMethodChannel* channel = [FlutterMethodChannel methodChannelWithName:kMouseCursorChannel
                                                               binaryMessenger:registrar.messenger];
   FlutterMouseCursorPlugin* instance = [[FlutterMouseCursorPlugin alloc] init];
+  instance.delegate = delegate;
   [registrar addMethodCallDelegate:instance channel:channel];
 }
 

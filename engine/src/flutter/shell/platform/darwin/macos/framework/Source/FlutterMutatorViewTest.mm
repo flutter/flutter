@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#import <OCMock/OCMock.h>
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterMutatorView.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
 
 #include "third_party/googletest/googletest/include/gtest/gtest.h"
 
@@ -531,4 +533,179 @@ TEST(FlutterMutatorViewTest, PathClipViewsAreAddedAndRemoved) {
 
   EXPECT_TRUE(CGRectEqualToRect(mutatorView.frame, CGRectMake(100, 50, 30, 20)));
   EXPECT_EQ(mutatorView.pathClipViews.count, 0ull);
+}
+
+TEST(FlutterMutatorViewTest, HitTestIgnoreRegion) {
+  NSView* platformView = [[NSView alloc] init];
+  FlutterMutatorView* mutatorView = [[FlutterMutatorView alloc] initWithPlatformView:platformView];
+  ApplyFlutterLayer(mutatorView, FlutterSize{100, 100}, {});
+  EXPECT_EQ([mutatorView hitTest:NSMakePoint(10, 10)], platformView);
+  EXPECT_EQ([mutatorView hitTest:NSMakePoint(50, 10)], platformView);
+
+  [mutatorView resetHitTestRegion];
+  [mutatorView addHitTestIgnoreRegion:CGRectMake(0, 0, 50, 50)];
+  [mutatorView addHitTestIgnoreRegion:CGRectMake(50, 50, 50, 50)];
+
+  EXPECT_EQ([mutatorView hitTest:NSMakePoint(10, 10)], nil);
+  EXPECT_EQ([mutatorView hitTest:NSMakePoint(49, 10)], nil);
+  EXPECT_EQ([mutatorView hitTest:NSMakePoint(10, 49)], nil);
+  EXPECT_EQ([mutatorView hitTest:NSMakePoint(50, 50)], nil);
+  EXPECT_EQ([mutatorView hitTest:NSMakePoint(50, 10)], platformView);
+  EXPECT_EQ([mutatorView hitTest:NSMakePoint(10, 50)], platformView);
+
+  [mutatorView resetHitTestRegion];
+  EXPECT_EQ([mutatorView hitTest:NSMakePoint(10, 10)], platformView);
+  EXPECT_EQ([mutatorView hitTest:NSMakePoint(49, 10)], platformView);
+  EXPECT_EQ([mutatorView hitTest:NSMakePoint(10, 49)], platformView);
+  EXPECT_EQ([mutatorView hitTest:NSMakePoint(50, 50)], platformView);
+  EXPECT_EQ([mutatorView hitTest:NSMakePoint(50, 10)], platformView);
+  EXPECT_EQ([mutatorView hitTest:NSMakePoint(10, 50)], platformView);
+}
+
+@interface FlutterCursorCoordinatorTest : NSObject
+
+@end
+
+@implementation FlutterCursorCoordinatorTest
+- (void)testCoordinatorEventWithinFlutterContent {
+  id flutterView = OCMClassMock([FlutterView class]);
+  FlutterCursorCoordinator* coordinator =
+      [[FlutterCursorCoordinator alloc] initWithFlutterView:flutterView];
+  {
+    id platformView = OCMClassMock([NSView class]);
+    OCMStub([flutterView cursorUpdate:[OCMArg any]]);
+    id mutatorView = OCMStrictClassMock([FlutterMutatorView class]);
+    OCMStub([mutatorView platformView]).andReturn(platformView);
+    CGPoint location = NSMakePoint(50, 50);
+    OCMStub([mutatorView convertPoint:location fromView:[OCMArg any]]).andReturn(location);
+    NSEvent* event = [NSEvent mouseEventWithType:NSEventTypeMouseMoved
+                                        location:location
+                                   modifierFlags:0
+                                       timestamp:0
+                                    windowNumber:0
+                                         context:nil
+                                     eventNumber:0
+                                      clickCount:0
+                                        pressure:0];
+    [coordinator processMouseMoveEvent:event
+                        forMutatorView:mutatorView
+                         overlayRegion:{CGRectMake(0, 0, 100, 100)}];
+    OCMVerify([flutterView cursorUpdate:event]);
+  }
+  {
+    id platformView = OCMClassMock([NSView class]);
+    // Make sure once event is handled the coordinator will not send cursorUpdate again.
+    OCMReject([flutterView cursorUpdate:[OCMArg any]]);
+    id mutatorView = OCMStrictClassMock([FlutterMutatorView class]);
+    OCMStub([mutatorView platformView]).andReturn(platformView);
+    CGPoint location = NSMakePoint(50, 50);
+    OCMStub([mutatorView convertPoint:location fromView:[OCMArg any]]).andReturn(location);
+    NSEvent* event = [NSEvent mouseEventWithType:NSEventTypeMouseMoved
+                                        location:location
+                                   modifierFlags:0
+                                       timestamp:0
+                                    windowNumber:0
+                                         context:nil
+                                     eventNumber:0
+                                      clickCount:0
+                                        pressure:0];
+    [coordinator processMouseMoveEvent:event
+                        forMutatorView:mutatorView
+                         overlayRegion:{CGRectMake(0, 0, 100, 100)}];
+  }
+  EXPECT_TRUE(coordinator.cleanupScheduled);
+  [[NSRunLoop mainRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+  EXPECT_FALSE(coordinator.cleanupScheduled);
+}
+
+- (void)testCoordinatorEventOutsideFlutterContent {
+  id flutterView = OCMClassMock([FlutterView class]);
+  OCMReject([flutterView cursorUpdate:[OCMArg any]]);
+  FlutterCursorCoordinator* coordinator =
+      [[FlutterCursorCoordinator alloc] initWithFlutterView:flutterView];
+  id platformViewWindow = OCMClassMock([NSWindow class]);
+  {
+    id platformView = OCMClassMock([NSView class]);
+    OCMStub([platformViewWindow invalidateCursorRectsForView:platformView]);
+    OCMStub([platformView window]).andReturn(platformViewWindow);
+    OCMStub([flutterView cursorUpdate:[OCMArg any]]);
+    id mutatorView = OCMStrictClassMock([FlutterMutatorView class]);
+    OCMStub([mutatorView platformView]).andReturn(platformView);
+    CGPoint location = NSMakePoint(150, 150);
+    OCMStub([mutatorView convertPoint:location fromView:[OCMArg any]]).andReturn(location);
+    NSEvent* event = [NSEvent mouseEventWithType:NSEventTypeMouseMoved
+                                        location:location
+                                   modifierFlags:0
+                                       timestamp:0
+                                    windowNumber:0
+                                         context:nil
+                                     eventNumber:0
+                                      clickCount:0
+                                        pressure:0];
+    [coordinator processMouseMoveEvent:event
+                        forMutatorView:mutatorView
+                         overlayRegion:{CGRectMake(0, 0, 100, 100)}];
+    OCMVerify([platformViewWindow invalidateCursorRectsForView:platformView]);
+  }
+  {
+    // Make sure this is not called again for subsequent invocation during same run loop turn.
+    OCMReject([platformViewWindow invalidateCursorRectsForView:[OCMArg any]]);
+
+    id platformView = OCMClassMock([NSView class]);
+    OCMStub([platformViewWindow invalidateCursorRectsForView:platformView]);
+    OCMStub([platformView window]).andReturn(platformViewWindow);
+    OCMStub([flutterView cursorUpdate:[OCMArg any]]);
+    id mutatorView = OCMStrictClassMock([FlutterMutatorView class]);
+    OCMStub([mutatorView platformView]).andReturn(platformView);
+    CGPoint location = NSMakePoint(150, 150);
+    OCMStub([mutatorView convertPoint:location fromView:[OCMArg any]]).andReturn(location);
+    NSEvent* event = [NSEvent mouseEventWithType:NSEventTypeMouseMoved
+                                        location:location
+                                   modifierFlags:0
+                                       timestamp:0
+                                    windowNumber:0
+                                         context:nil
+                                     eventNumber:0
+                                      clickCount:0
+                                        pressure:0];
+    [coordinator processMouseMoveEvent:event
+                        forMutatorView:mutatorView
+                         overlayRegion:{CGRectMake(0, 0, 100, 100)}];
+  }
+  EXPECT_TRUE(coordinator.cleanupScheduled);
+  [[NSRunLoop mainRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+  EXPECT_FALSE(coordinator.cleanupScheduled);
+
+  // Check that invalidateCursorRectsForView is called again
+  platformViewWindow = OCMClassMock([NSWindow class]);
+  {
+    id platformView = OCMClassMock([NSView class]);
+    OCMStub([platformViewWindow invalidateCursorRectsForView:platformView]);
+    OCMStub([platformView window]).andReturn(platformViewWindow);
+    OCMStub([flutterView cursorUpdate:[OCMArg any]]);
+    id mutatorView = OCMStrictClassMock([FlutterMutatorView class]);
+    OCMStub([mutatorView platformView]).andReturn(platformView);
+    CGPoint location = NSMakePoint(150, 150);
+    OCMStub([mutatorView convertPoint:location fromView:[OCMArg any]]).andReturn(location);
+    NSEvent* event = [NSEvent mouseEventWithType:NSEventTypeMouseMoved
+                                        location:location
+                                   modifierFlags:0
+                                       timestamp:0
+                                    windowNumber:0
+                                         context:nil
+                                     eventNumber:0
+                                      clickCount:0
+                                        pressure:0];
+    [coordinator processMouseMoveEvent:event
+                        forMutatorView:mutatorView
+                         overlayRegion:{CGRectMake(0, 0, 100, 100)}];
+    OCMVerify([platformViewWindow invalidateCursorRectsForView:platformView]);
+  }
+  [[NSRunLoop mainRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+}
+@end
+
+TEST(FlutterMutatorViewTest, CursorCoordinator) {
+  [[[FlutterCursorCoordinatorTest alloc] init] testCoordinatorEventWithinFlutterContent];
+  [[[FlutterCursorCoordinatorTest alloc] init] testCoordinatorEventOutsideFlutterContent];
 }
