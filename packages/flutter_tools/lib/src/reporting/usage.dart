@@ -167,14 +167,8 @@ class _DefaultUsage implements Usage {
       skipAnalyticsSessionSetup = true;
     }
     if (usingLogFile) {
-        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-        print('Using log file for legacy analytics.');
-        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
       setupAnalytics ??= LogToFileAnalytics(logFilePath);
     } else {
-        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-        print('Using real analytics instance!');
-        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
       try {
         ErrorHandlingFileSystem.noExitOnFailure(() {
           setupAnalytics = analyticsFactory(
@@ -195,9 +189,6 @@ class _DefaultUsage implements Usage {
     }
 
     final Analytics analytics = setupAnalytics!;
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-    print('Runtime type for `setupAnalytics` in legacy analytics = ${analytics.runtimeType}');
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
     if (!skipAnalyticsSessionSetup) {
       // Report a more detailed OS version string than package:usage does by default.
       analytics.setSessionValue(
@@ -230,9 +221,6 @@ class _DefaultUsage implements Usage {
       analytics.analyticsOpt = AnalyticsOpt.optOut;
     }
 
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-    print('Suppress analytics flag = $suppressAnalytics');
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
     return _DefaultUsage._(
       suppressAnalytics: suppressAnalytics,
       analytics: analytics,
