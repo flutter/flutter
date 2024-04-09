@@ -26,7 +26,7 @@ import 'common.dart';
 typedef ResponseDataCallback = FutureOr<void> Function(Map<String, dynamic>?, {String testOutputFilename, String testOutputDirectory});
 
 /// Writes a json-serializable data to
-/// [testOutputsDirectory]/`testOutputFilename.json`.
+/// [testOutputDirectory]/`testOutputFilename.json`.
 ///
 /// This is the default `responseDataCallback` in [integrationDriver].
 Future<void> writeResponseData(
