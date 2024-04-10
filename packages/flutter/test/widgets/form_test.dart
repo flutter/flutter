@@ -1236,7 +1236,7 @@ void main() {
     await tester.enterText(find.byType(TextFormField).first, 'foo');
     await tester.pumpAndSettle();
 
-    //click in the second TextFormField to trigger validation
+    // Click in the second TextFormField to trigger validation
     await tester.tap(find.byType(TextFormField).last);
     await tester.pumpAndSettle();
 
