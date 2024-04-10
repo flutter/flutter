@@ -24,7 +24,7 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
   // For InputDecorator, focused state should take precedence over hovered state.
   // For instance, the focused state increases border width (2dp) and applies bright
   // colors (primary color or error color) while the hovered state has the same border
-  // than the non-focused state (1dp) and use a color a little darker than non-focused
+  // than the non-focused state (1dp) and uses a color a little darker than non-focused
   // state. On desktop, it is also very common that a text field is focused and hovered
   // because users often rely on mouse selection.
   // For other widgets, hovered state takes precedence over focused state, because it
