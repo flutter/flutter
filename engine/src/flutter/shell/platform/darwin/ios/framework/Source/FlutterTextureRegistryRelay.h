@@ -22,7 +22,7 @@ FLUTTER_DARWIN_EXPORT
 /**
  * A weak reference to a FlutterEngine that will be passed texture registration.
  */
-@property(nonatomic, assign) NSObject<FlutterTextureRegistry>* parent;
+@property(nonatomic, weak) NSObject<FlutterTextureRegistry>* parent;
 - (instancetype)initWithParent:(NSObject<FlutterTextureRegistry>*)parent;
 @end
 

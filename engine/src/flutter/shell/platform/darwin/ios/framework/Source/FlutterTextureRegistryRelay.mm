@@ -6,6 +6,8 @@
 
 #include "flutter/fml/logging.h"
 
+FLUTTER_ASSERT_ARC
+
 @implementation FlutterTextureRegistryRelay : NSObject
 
 #pragma mark - FlutterTextureRegistry

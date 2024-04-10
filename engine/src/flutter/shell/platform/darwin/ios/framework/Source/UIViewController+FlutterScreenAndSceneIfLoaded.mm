@@ -5,6 +5,9 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
 
 #include "flutter/fml/logging.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+
+FLUTTER_ASSERT_ARC
 
 @implementation UIViewController (FlutterScreenAndSceneIfLoaded)
 
