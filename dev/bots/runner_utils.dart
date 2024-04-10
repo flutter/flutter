@@ -32,6 +32,10 @@ final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engi
 const String kShardKey = 'SHARD';
 const String kSubshardKey = 'SUBSHARD';
 
+final String luciBotId = Platform.environment['SWARMING_BOT_ID'] ?? '';
+final bool runningInDartHHHBot =
+    luciBotId.startsWith('luci-dart-') || luciBotId.startsWith('dart-tests-');
+
 const String CIRRUS_TASK_NAME = 'CIRRUS_TASK_NAME';
 
 /// Environment variables to override the local engine when running `pub test`,

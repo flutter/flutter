@@ -678,7 +678,7 @@ class WebTestsSuite {
         '--platform=chrome',
         if (useWasm) '--wasm',
         '--web-renderer=$webRenderer',
-        '--dart-define=DART_HHH_BOT=$_runningInDartHHHBot',
+        '--dart-define=DART_HHH_BOT=$runningInDartHHHBot',
         ...flutterTestArgs,
         ...tests,
       ],
