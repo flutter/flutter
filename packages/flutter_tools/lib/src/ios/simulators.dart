@@ -183,20 +183,14 @@ class SimControl {
 
   /// Returns all the connected simulator devices.
   Future<List<BootedSimDevice>> getConnectedDevices() async {
-    final List<BootedSimDevice> devices = <BootedSimDevice>[];
-
     final Map<String, Object?> devicesSection = await _listBootedDevices();
 
-    for (final String deviceCategory in devicesSection.keys) {
-      final Object? devicesData = devicesSection[deviceCategory];
-      if (devicesData != null && devicesData is List<Object?>) {
-        for (final Map<String, Object?> data in devicesData.map<Map<String, Object?>?>(castStringKeyedMap).whereType<Map<String, Object?>>()) {
-          devices.add(BootedSimDevice(deviceCategory, data));
-        }
-      }
-    }
-
-    return devices;
+    return <BootedSimDevice>[
+      for (final String deviceCategory in devicesSection.keys)
+        if (devicesSection[deviceCategory] case final List<Object?> devicesData)
+          for (final Object? data in devicesData.map<Map<String, Object?>?>(castStringKeyedMap))
+            if (data is Map<String, Object?>) BootedSimDevice(deviceCategory, data),
+    ];
   }
 
   Future<bool> isInstalled(String deviceId, String appId) {
