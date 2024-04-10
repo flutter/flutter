@@ -255,8 +255,8 @@ void main() {
 
   void testDeeplink(
     dynamic deeplink,
-    String scheme,
-    String host,
+    String? scheme,
+    String? host,
     String path, {
     required bool hasAutoVerify,
     required bool hasActionView,
@@ -338,8 +338,8 @@ void main() {
     testDeeplink(deeplinks[5], 'http', 'non-action.com', '.*', hasAutoVerify:true, hasActionView: false, hasDefaultCategory:true, hasBrowsableCategory: true);
     testDeeplink(deeplinks[6], 'http', 'non-default-category.com', '.*', hasAutoVerify:true, hasActionView: true, hasDefaultCategory:false, hasBrowsableCategory: true);
     testDeeplink(deeplinks[7], 'http', 'non-browsable-category.com', '.*', hasAutoVerify:true, hasActionView: true, hasDefaultCategory:true, hasBrowsableCategory: false);
-    testDeeplink(deeplinks[8], '', 'non-browsable-category.com', '.*', hasAutoVerify:true, hasActionView: true, hasDefaultCategory:true, hasBrowsableCategory: true);
-    testDeeplink(deeplinks[9], 'http', '', '/path1', hasAutoVerify:true, hasActionView: true, hasDefaultCategory:true, hasBrowsableCategory: true);
+    testDeeplink(deeplinks[8], null, 'non-browsable-category.com', '.*', hasAutoVerify:true, hasActionView: true, hasDefaultCategory:true, hasBrowsableCategory: true);
+    testDeeplink(deeplinks[9], 'http', null, '/path1', hasAutoVerify:true, hasActionView: true, hasDefaultCategory:true, hasBrowsableCategory: true);
   });
 
   testWithoutContext(

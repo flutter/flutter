@@ -571,8 +571,8 @@ class FlutterPlugin implements Plugin<Project> {
                                     }
                                 }
                                 if(!hosts.isEmpty() || !paths.isEmpty()){
-                                    if(schemes.isEmpty()){schemes.add('')}
-                                    if(hosts.isEmpty()){hosts.add('')}
+                                    if(schemes.isEmpty()){schemes.add(null)}
+                                    if(hosts.isEmpty()){hosts.add(null)}
                                     if(paths.isEmpty()){paths.add('.*')}
                                     schemes.each { scheme ->
                                         hosts.each { host ->
