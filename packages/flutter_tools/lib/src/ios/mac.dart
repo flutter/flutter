@@ -151,6 +151,8 @@ Future<XcodeBuildResult> buildXcodeProject({
     return XcodeBuildResult(success: false);
   }
 
+  final FlutterProject project = FlutterProject.current();
+
   final List<ProjectMigrator> migrators = <ProjectMigrator>[
     RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.flutterUsage, globals.analytics),
     XcodeBuildSystemMigration(app.project, globals.logger),
@@ -162,24 +164,20 @@ Future<XcodeBuildResult> buildXcodeProject({
     XcodeScriptBuildPhaseMigration(app.project, globals.logger),
     RemoveBitcodeMigration(app.project, globals.logger),
     XcodeThinBinaryBuildPhaseInputPathsMigration(app.project, globals.logger),
+    if (project.usesSwiftPackageManager && app.project.flutterPluginSwiftPackageManifest.existsSync())
+      SwiftPackageManagerIntegrationMigration(
+        app.project,
+        SupportedPlatform.ios,
+        buildInfo,
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+        logger: globals.logger,
+        fileSystem: globals.fs,
+        plistParser: globals.plistParser,
+      ),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
   await migration.run();
-
-  final FlutterProject project = FlutterProject.current();
-  if (project.usesSwiftPackageManager && app.project.flutterPluginSwiftPackageManifest.existsSync()) {
-    final SwiftPackageManagerIntegrationMigration spmMigration = SwiftPackageManagerIntegrationMigration(
-      app.project,
-      SupportedPlatform.ios,
-      buildInfo,
-      xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
-      logger: globals.logger,
-      fileSystem: globals.fs,
-      plistParser: globals.plistParser,
-    );
-    await spmMigration.migrate();
-  }
 
   if (!_checkXcodeVersion()) {
     return XcodeBuildResult(success: false);

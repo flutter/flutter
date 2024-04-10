@@ -8,6 +8,7 @@ import '../base/common.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/project_migrator.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../ios/plist_parser.dart';
@@ -16,7 +17,7 @@ import '../project.dart';
 
 /// Swift Package Manager integration requires changes to the Xcode project's
 /// project.pbxproj and xcscheme. This class handles making those changes.
-class SwiftPackageManagerIntegrationMigration {
+class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   SwiftPackageManagerIntegrationMigration(
     XcodeBasedProject project,
     SupportedPlatform platform,
@@ -31,8 +32,8 @@ class SwiftPackageManagerIntegrationMigration {
         _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
         _xcodeProjectInterpreter = xcodeProjectInterpreter,
         _fileSystem = fileSystem,
-        _logger = logger,
-        _plistParser = plistParser;
+        _plistParser = plistParser,
+        super(logger);
 
   final XcodeBasedProject _xcodeProject;
   final SupportedPlatform _platform;
@@ -40,7 +41,6 @@ class SwiftPackageManagerIntegrationMigration {
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final FileSystem _fileSystem;
   final File _xcodeProjectInfoFile;
-  final Logger _logger;
   final PlistParser _plistParser;
 
   /// New identifer for FlutterGeneratedPluginSwiftPackage PBXBuildFile.
@@ -94,7 +94,7 @@ class SwiftPackageManagerIntegrationMigration {
 
   void restoreFromBackup(SchemeInfo? schemeInfo) {
     if (backupProjectSettings.existsSync()) {
-      _logger.printTrace('Restoring project settings from backup file...');
+      logger.printTrace('Restoring project settings from backup file...');
       backupProjectSettings.copySync(_xcodeProject.xcodeProjectInfoFile.path);
     }
     schemeInfo?.backupSchemeFile?.copySync(schemeInfo.schemeFile.path);
@@ -105,6 +105,7 @@ class SwiftPackageManagerIntegrationMigration {
   ///
   /// If migration fails or project.pbxproj or Runner.xcscheme becomes invalid,
   /// will revert any changes made and throw an error.
+  @override
   Future<void> migrate() async {
     Status? migrationStatus;
     SchemeInfo? schemeInfo;
@@ -123,22 +124,22 @@ class SwiftPackageManagerIntegrationMigration {
         return;
       }
 
-      migrationStatus = _logger.startProgress(
+      migrationStatus = logger.startProgress(
         'Adding Swift Package Manager integration...',
       );
 
       if (isSchemeMigrated) {
-        _logger.printTrace('${schemeInfo.schemeFile.basename} already migrated. Skipping...');
+        logger.printTrace('${schemeInfo.schemeFile.basename} already migrated. Skipping...');
       } else {
         _migrateScheme(schemeInfo);
       }
       if (isPbxprojMigrated) {
-        _logger.printTrace('${_xcodeProjectInfoFile.basename} already migrated. Skipping...');
+        logger.printTrace('${_xcodeProjectInfoFile.basename} already migrated. Skipping...');
       } else {
         _migratePbxproj();
       }
 
-      _logger.printTrace('Validating project settings...');
+      logger.printTrace('Validating project settings...');
 
       // Re-parse the project settings to check for syntax errors.
       final ParsedProjectInfo updatedInfo = _parsePbxproj();
@@ -389,7 +390,7 @@ $newContent
     final String newProjectContents = '${lines.join('\n')}\n';
 
     if (originalProjectContents != newProjectContents) {
-      _logger.printTrace('Updating project settings...');
+      logger.printTrace('Updating project settings...');
       _xcodeProjectInfoFile.copySync(backupProjectSettings.path);
       _xcodeProjectInfoFile.writeAsStringSync(newProjectContents);
     }
@@ -414,7 +415,7 @@ $newContent
     final bool migrated = projectInfo.buildFileIdentifiers
         .contains(_flutterPluginsSwiftPackageBuildFileIdentifier);
     if (logErrorIfNotMigrated && !migrated) {
-      _logger.printError('PBXBuildFile was not migrated or was migrated incorrectly.');
+      logger.printError('PBXBuildFile was not migrated or was migrated incorrectly.');
     }
     return migrated;
   }
@@ -424,7 +425,7 @@ $newContent
     ParsedProjectInfo projectInfo,
   ) {
     if (_isBuildFilesMigrated(projectInfo)) {
-      _logger.printTrace('PBXBuildFile already migrated. Skipping...');
+      logger.printTrace('PBXBuildFile already migrated. Skipping...');
       return lines;
     }
 
@@ -449,7 +450,7 @@ $newContent
         .toList()
         .isNotEmpty;
     if (logErrorIfNotMigrated && !migrated) {
-      _logger.printError('PBXFrameworksBuildPhase was not migrated or was migrated incorrectly.');
+      logger.printError('PBXFrameworksBuildPhase was not migrated or was migrated incorrectly.');
     }
     return migrated;
   }
@@ -459,7 +460,7 @@ $newContent
     ParsedProjectInfo projectInfo,
   ) {
     if (_isFrameworksBuildPhaseMigrated(projectInfo)) {
-      _logger.printTrace('PBXFrameworksBuildPhase already migrated. Skipping...');
+      logger.printTrace('PBXFrameworksBuildPhase already migrated. Skipping...');
       return lines;
     }
 
@@ -535,7 +536,7 @@ $newContent
         .toList()
         .isNotEmpty;
     if (logErrorIfNotMigrated && !migrated) {
-      _logger.printError('PBXNativeTarget was not migrated or was migrated incorrectly.');
+      logger.printError('PBXNativeTarget was not migrated or was migrated incorrectly.');
     }
     return migrated;
   }
@@ -545,7 +546,7 @@ $newContent
     ParsedProjectInfo projectInfo,
   ) {
     if (_isNativeTargetMigrated(projectInfo)) {
-      _logger.printTrace('PBXNativeTarget already migrated. Skipping...');
+      logger.printTrace('PBXNativeTarget already migrated. Skipping...');
       return lines;
     }
 
@@ -614,7 +615,7 @@ $newContent
         .toList()
         .isNotEmpty;
     if (logErrorIfNotMigrated && !migrated) {
-      _logger.printError('PBXProject was not migrated or was migrated incorrectly.');
+      logger.printError('PBXProject was not migrated or was migrated incorrectly.');
     }
     return migrated;
   }
@@ -624,7 +625,7 @@ $newContent
     ParsedProjectInfo projectInfo,
   ) {
     if (_isProjectObjectMigrated(projectInfo)) {
-      _logger.printTrace('PBXProject already migrated. Skipping...');
+      logger.printTrace('PBXProject already migrated. Skipping...');
       return lines;
     }
 
@@ -688,7 +689,7 @@ $newContent
     final bool migrated = projectInfo.localSwiftPackageProductDependencies
         .contains(_localFlutterPluginsSwiftPackageReferenceIdentifer);
     if (logErrorIfNotMigrated && !migrated) {
-      _logger.printError('XCLocalSwiftPackageReference was not migrated or was migrated incorrectly.');
+      logger.printError('XCLocalSwiftPackageReference was not migrated or was migrated incorrectly.');
     }
     return migrated;
   }
@@ -698,7 +699,7 @@ $newContent
     ParsedProjectInfo projectInfo,
   ) {
     if (_isLocalSwiftPackageProductDependencyMigrated(projectInfo)) {
-      _logger.printTrace('XCLocalSwiftPackageReference already migrated. Skipping...');
+      logger.printTrace('XCLocalSwiftPackageReference already migrated. Skipping...');
       return lines;
     }
 
@@ -748,7 +749,7 @@ $newContent
     final bool migrated = projectInfo.swiftPackageProductDependencies
         .contains(_flutterPluginsSwiftPackageProductDependencyIdentifer);
     if (logErrorIfNotMigrated && !migrated) {
-      _logger.printError('XCSwiftPackageProductDependency was not migrated or was migrated incorrectly.');
+      logger.printError('XCSwiftPackageProductDependency was not migrated or was migrated incorrectly.');
     }
     return migrated;
   }
@@ -758,7 +759,7 @@ $newContent
     ParsedProjectInfo projectInfo,
   ) {
     if (_isSwiftPackageProductDependencyMigrated(projectInfo)) {
-      _logger.printTrace('XCSwiftPackageProductDependency already migrated. Skipping...');
+      logger.printTrace('XCSwiftPackageProductDependency already migrated. Skipping...');
       return lines;
     }
 

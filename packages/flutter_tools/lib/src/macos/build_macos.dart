@@ -84,23 +84,20 @@ Future<void> buildMacOS({
     XcodeScriptBuildPhaseMigration(flutterProject.macos, globals.logger),
     XcodeThinBinaryBuildPhaseInputPathsMigration(flutterProject.macos, globals.logger),
     FlutterApplicationMigration(flutterProject.macos, globals.logger),
+    if (flutterProject.usesSwiftPackageManager && flutterProject.macos.flutterPluginSwiftPackageManifest.existsSync())
+      SwiftPackageManagerIntegrationMigration(
+        flutterProject.macos,
+        SupportedPlatform.macos,
+        buildInfo,
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+        logger: globals.logger,
+        fileSystem: globals.fs,
+        plistParser: globals.plistParser,
+      )
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
   await migration.run();
-
-  if (flutterProject.usesSwiftPackageManager && flutterProject.macos.flutterPluginSwiftPackageManifest.existsSync()) {
-    final SwiftPackageManagerIntegrationMigration spmMigration = SwiftPackageManagerIntegrationMigration(
-      flutterProject.macos,
-      SupportedPlatform.macos,
-      buildInfo,
-      xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
-      logger: globals.logger,
-      fileSystem: globals.fs,
-      plistParser: globals.plistParser,
-    );
-    await spmMigration.migrate();
-  }
 
   final Directory flutterBuildDir = globals.fs.directory(getMacOSBuildDirectory());
   if (!flutterBuildDir.existsSync()) {
