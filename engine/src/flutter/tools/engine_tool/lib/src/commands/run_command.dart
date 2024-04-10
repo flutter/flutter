@@ -18,13 +18,14 @@ final class RunCommand extends CommandBase {
   RunCommand({
     required super.environment,
     required Map<String, BuilderConfig> configs,
+    super.verbose = false,
   }) {
-    builds = runnableBuilds(environment, configs);
+    builds = runnableBuilds(environment, configs, verbose);
     debugCheckBuilds(builds);
     // We default to nothing in order to automatically detect attached devices
     // and select an appropriate target from them.
     addConfigOption(
-      environment, argParser, runnableBuilds(environment, configs),
+      environment, argParser, builds,
       defaultsTo: '',
     );
     argParser.addFlag(

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:engine_build_configs/engine_build_configs.dart';
 
@@ -26,15 +25,16 @@ final class ToolCommandRunner extends CommandRunner<int> {
   ToolCommandRunner({
     required this.environment,
     required this.configs,
+    this.verbose = false,
   }) : super(toolName, toolDescription, usageLineLength: _usageLineLength) {
     final List<Command<int>> commands = <Command<int>>[
       FetchCommand(environment: environment),
       FormatCommand(environment: environment),
-      QueryCommand(environment: environment, configs: configs),
-      BuildCommand(environment: environment, configs: configs),
-      RunCommand(environment: environment, configs: configs),
+      QueryCommand(environment: environment, configs: configs, verbose: verbose),
+      BuildCommand(environment: environment, configs: configs, verbose: verbose),
+      RunCommand(environment: environment, configs: configs, verbose: verbose),
       LintCommand(environment: environment),
-      TestCommand(environment: environment, configs: configs),
+      TestCommand(environment: environment, configs: configs, verbose: verbose),
     ];
     commands.forEach(addCommand);
 
@@ -61,15 +61,16 @@ final class ToolCommandRunner extends CommandRunner<int> {
   /// Build configurations loaded from the engine from under ci/builders.
   final Map<String, BuilderConfig> configs;
 
+  /// Whether et should emit verbose logs.
+  final bool verbose;
+
   @override
   Future<int> run(Iterable<String> args) async {
-    final ArgResults argResults = parse(args);
-    final bool verbose = argResults[verboseFlag]! as bool;
     if (verbose) {
       environment.logger.level = Logger.infoLevel;
     }
     try {
-      return await runCommand(argResults) ?? 0;
+      return await runCommand(parse(args)) ?? 0;
     } on FormatException catch (e) {
       environment.logger.error(e);
       return 1;
