@@ -108,63 +108,9 @@ final List<String> flutterTestArgs = <String>[];
 final Map<String,String> localEngineEnv = <String, String>{};
 
 const String kShardKey = 'SHARD';
-const String kSubshardKey = 'SUBSHARD';
-
-/// The number of Cirrus jobs that run Web tests in parallel.
-///
-/// The default is 8 shards. Typically .cirrus.yml would define the
-/// WEB_SHARD_COUNT environment variable rather than relying on the default.
-///
-/// WARNING: if you change this number, also change .cirrus.yml
-/// and make sure it runs _all_ shards.
-///
-/// The last shard also runs the Web plugin tests.
-int get webShardCount => Platform.environment.containsKey('WEB_SHARD_COUNT')
-  ? int.parse(Platform.environment['WEB_SHARD_COUNT']!)
-  : 8;
-
-/// Tests that we don't run on Web.
-///
-/// In general avoid adding new tests here. If a test cannot run on the web
-/// because it fails at runtime, such as when a piece of functionality is not
-/// implemented or not implementable on the web, prefer using `skip` in the
-/// test code. Only add tests here that cannot be skipped using `skip`. For
-/// example:
-///
-///  * Test code cannot be compiled because it uses Dart VM-specific
-///    functionality. In this case `skip` doesn't help because the code cannot
-///    reach the point where it can even run the skipping logic.
-///  * Migrations. It is OK to put tests here that need to be temporarily
-///    disabled in certain modes because of some migration or initial bringup.
-///
-/// The key in the map is the renderer type that the list applies to. The value
-/// is the list of tests known to fail for that renderer.
-//
-// TODO(yjbanov): we're getting rid of this as part of https://github.com/flutter/flutter/projects/60
-const Map<String, List<String>> kWebTestFileKnownFailures = <String, List<String>>{
-  'html': <String>[
-    // These tests are not compilable on the web due to dependencies on
-    // VM-specific functionality.
-    'test/services/message_codecs_vm_test.dart',
-    'test/examples/sector_layout_test.dart',
-  ],
-  'canvaskit': <String>[
-    // These tests are not compilable on the web due to dependencies on
-    // VM-specific functionality.
-    'test/services/message_codecs_vm_test.dart',
-    'test/examples/sector_layout_test.dart',
-
-    // These tests are broken and need to be fixed.
-    // TODO(yjbanov): https://github.com/flutter/flutter/issues/71604
-    'test/material/text_field_test.dart',
-    'test/widgets/performance_overlay_test.dart',
-    'test/widgets/html_element_view_test.dart',
-    'test/cupertino/scaffold_test.dart',
-    'test/rendering/platform_view_test.dart',
-  ],
-};
-
 const String kTestHarnessShardName = 'test_harness_tests';
+
+const String CIRRUS_TASK_NAME = 'CIRRUS_TASK_NAME';
 
 final bool _isRandomizationOff = bool.tryParse(Platform.environment['TEST_RANDOMIZATION_OFF'] ?? '') ?? false;
 
@@ -206,6 +152,7 @@ Future<void> main(List<String> args) async {
     if (Platform.environment.containsKey(CIRRUS_TASK_NAME)) {
       printProgress('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
     }
+    final WebTestsSuite webTestsSuite = WebTestsSuite(flutterRoot, flutterTestArgs);
     await selectShard(<String, ShardRunner>{
       'add_to_app_life_cycle_tests': () => addToAppLifeCycleRunner(flutterRoot),
       'build_tests': _runBuildTests,
@@ -218,13 +165,13 @@ Future<void> main(List<String> args) async {
       'android_preview_tool_integration_tests': _runAndroidPreviewIntegrationToolTests,
       'tool_host_cross_arch_tests': _runToolHostCrossArchTests,
       // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=html`
-      'web_tests': _runWebHtmlUnitTests,
+      'web_tests': webTestsSuite.runWebHtmlUnitTests,
       // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=canvaskit`
-      'web_canvaskit_tests': _runWebCanvasKitUnitTests,
+      'web_canvaskit_tests': webTestsSuite.runWebCanvasKitUnitTests,
       // All the unit/widget tests run using `flutter test --platform=chrome --wasm --web-renderer=skwasm`
-      'web_skwasm_tests': _runWebSkwasmUnitTests,
+      'web_skwasm_tests': webTestsSuite.runWebSkwasmUnitTests,
       // All web integration tests
-      'web_long_running_tests': WebLongRunningTestsSuite(flutterRoot).webLongRunningTestsRunner,
+      'web_long_running_tests': webTestsSuite.webLongRunningTestsRunner,
       'flutter_plugins': () => flutterPackagesRunner(flutterRoot),
       'skp_generator': skpGeneratorTestsRunner,
       'realm_checker': () => realmCheckerTestRunner(flutterRoot),
@@ -384,7 +331,7 @@ Future<void> _runTestHarnessTests() async {
   // Run all tests unless sharding is explicitly specified.
   final String? shardName = Platform.environment[kShardKey];
   if (shardName == kTestHarnessShardName) {
-    testsToRun = _selectIndexOfTotalSubshard<ShardRunner>(tests);
+    testsToRun = selectIndexOfTotalSubshard<ShardRunner>(tests);
   } else {
     testsToRun = tests;
   }
@@ -434,7 +381,7 @@ Future<void> _runWebToolTests() async {
   await runDartTest(
     _toolsPath,
     forceSingleCore: true,
-    testPaths: _selectIndexOfTotalSubshard<String>(allTests),
+    testPaths: selectIndexOfTotalSubshard<String>(allTests),
     includeLocalEngineEnv: true,
   );
 }
@@ -457,7 +404,7 @@ Future<void> _runIntegrationToolTests() async {
   await runDartTest(
     _toolsPath,
     forceSingleCore: true,
-    testPaths: _selectIndexOfTotalSubshard<String>(allTests),
+    testPaths: selectIndexOfTotalSubshard<String>(allTests),
     collectMetrics: true,
   );
 }
@@ -471,7 +418,7 @@ Future<void> _runAndroidPreviewIntegrationToolTests() async {
   await runDartTest(
     _toolsPath,
     forceSingleCore: true,
-    testPaths: _selectIndexOfTotalSubshard<String>(allTests),
+    testPaths: selectIndexOfTotalSubshard<String>(allTests),
     collectMetrics: true,
   );
 }
@@ -1090,89 +1037,6 @@ Future<void> _runFrameworkCoverage() async {
   }
 }
 
-Future<void> _runWebHtmlUnitTests() {
-  return _runWebUnitTests('html', false);
-}
-
-Future<void> _runWebCanvasKitUnitTests() {
-  return _runWebUnitTests('canvaskit', false);
-}
-
-Future<void> _runWebSkwasmUnitTests() {
-  return _runWebUnitTests('skwasm', true);
-}
-
-Future<void> _runWebUnitTests(String webRenderer, bool useWasm) async {
-  final Map<String, ShardRunner> subshards = <String, ShardRunner>{};
-
-  final Directory flutterPackageDirectory = Directory(path.join(flutterRoot, 'packages', 'flutter'));
-  final Directory flutterPackageTestDirectory = Directory(path.join(flutterPackageDirectory.path, 'test'));
-
-  final List<String> allTests = flutterPackageTestDirectory
-    .listSync()
-    .whereType<Directory>()
-    .expand((Directory directory) => directory
-      .listSync(recursive: true)
-      .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart'))
-    )
-    .whereType<File>()
-    .map<String>((File file) => path.relative(file.path, from: flutterPackageDirectory.path))
-    .where((String filePath) => !kWebTestFileKnownFailures[webRenderer]!.contains(path.split(filePath).join('/')))
-    .toList()
-    // Finally we shuffle the list because we want the average cost per file to be uniformly
-    // distributed. If the list is not sorted then different shards and batches may have
-    // very different characteristics.
-    // We use a constant seed for repeatability.
-    ..shuffle(math.Random(0));
-
-  assert(webShardCount >= 1);
-  final int testsPerShard = (allTests.length / webShardCount).ceil();
-  assert(testsPerShard * webShardCount >= allTests.length);
-
-  // This for loop computes all but the last shard.
-  for (int index = 0; index < webShardCount - 1; index += 1) {
-    subshards['$index'] = () => runFlutterWebTest(
-      webRenderer,
-      flutterPackageDirectory.path,
-      allTests.sublist(
-        index * testsPerShard,
-        (index + 1) * testsPerShard,
-      ),
-      useWasm,
-    );
-  }
-
-  // The last shard also runs the flutter_web_plugins tests.
-  //
-  // We make sure the last shard ends in _last so it's easier to catch mismatches
-  // between `.cirrus.yml` and `test.dart`.
-  subshards['${webShardCount - 1}_last'] = () async {
-    await runFlutterWebTest(
-      webRenderer,
-      flutterPackageDirectory.path,
-      allTests.sublist(
-        (webShardCount - 1) * testsPerShard,
-        allTests.length,
-      ),
-      useWasm,
-    );
-    await runFlutterWebTest(
-      webRenderer,
-      path.join(flutterRoot, 'packages', 'flutter_web_plugins'),
-      <String>['test'],
-      useWasm,
-    );
-    await runFlutterWebTest(
-      webRenderer,
-      path.join(flutterRoot, 'packages', 'flutter_driver'),
-      <String>[path.join('test', 'src', 'web_tests', 'web_extension_test.dart')],
-      useWasm,
-    );
-  };
-
-  await selectSubshard(subshards);
-}
-
 // Verifies binaries are codesigned.
 Future<void> _runVerifyCodesigned() async {
   printProgress('${green}Running binaries codesign verification$reset');
@@ -1533,40 +1397,6 @@ Future<bool> hasExpectedEntitlements(
   return passes;
 }
 
-Future<void> runFlutterWebTest(
-  String webRenderer,
-  String workingDirectory,
-  List<String> tests,
-  bool useWasm,
-) async {
-  const LocalFileSystem fileSystem = LocalFileSystem();
-  final String suffix = DateTime.now().microsecondsSinceEpoch.toString();
-  final File metricFile = fileSystem.systemTempDirectory.childFile('metrics_$suffix.json');
-  await runCommand(
-    flutter,
-    <String>[
-      'test',
-      '--reporter=expanded',
-      '--file-reporter=json:${metricFile.path}',
-      '-v',
-      '--platform=chrome',
-      if (useWasm) '--wasm',
-      '--web-renderer=$webRenderer',
-      '--dart-define=DART_HHH_BOT=$_runningInDartHHHBot',
-      ...flutterTestArgs,
-      ...tests,
-    ],
-    workingDirectory: workingDirectory,
-    environment: <String, String>{
-      'FLUTTER_WEB': 'true',
-    },
-  );
-  // metriciFile is a transitional file that needs to be deleted once it is parsed.
-  // TODO(godofredoc): Ensure metricFile is parsed and aggregated before deleting.
-  // https://github.com/flutter/flutter/issues/146003
-  metricFile.deleteSync();
-}
-
 
 Future<void> _runFlutterTest(String workingDirectory, {
   String? script,
@@ -1665,86 +1495,4 @@ Future<String?> verifyVersion(File file) async {
     return 'The version logic generated an invalid version string: "$version".';
   }
   return null;
-}
-
-/// Parse (one-)index/total-named subshards from environment variable SUBSHARD
-/// and equally distribute [tests] between them.
-/// Subshard format is "{index}_{total number of shards}".
-/// The scheduler can change the number of total shards without needing an additional
-/// commit in this repository.
-///
-/// Examples:
-/// 1_3
-/// 2_3
-/// 3_3
-List<T> _selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubshardKey}) {
-  // Example: "1_3" means the first (one-indexed) shard of three total shards.
-  final String? subshardName = Platform.environment[subshardKey];
-  if (subshardName == null) {
-    print('$kSubshardKey environment variable is missing, skipping sharding');
-    return tests;
-  }
-  printProgress('$bold$subshardKey=$subshardName$reset');
-
-  final RegExp pattern = RegExp(r'^(\d+)_(\d+)$');
-  final Match? match = pattern.firstMatch(subshardName);
-  if (match == null || match.groupCount != 2) {
-    foundError(<String>[
-      '${red}Invalid subshard name "$subshardName". Expected format "[int]_[int]" ex. "1_3"',
-    ]);
-    throw Exception('Invalid subshard name: $subshardName');
-  }
-  // One-indexed.
-  final int index = int.parse(match.group(1)!);
-  final int total = int.parse(match.group(2)!);
-  if (index > total) {
-    foundError(<String>[
-      '${red}Invalid subshard name "$subshardName". Index number must be greater or equal to total.',
-    ]);
-    return <T>[];
-  }
-
-  final int testsPerShard = (tests.length / total).ceil();
-  final int start = (index - 1) * testsPerShard;
-  final int end = math.min(index * testsPerShard, tests.length);
-
-  print('Selecting subshard $index of $total (tests ${start + 1}-$end of ${tests.length})');
-  return tests.sublist(start, end);
-}
-
-Future<void> runShardRunnerIndexOfTotalSubshard(List<ShardRunner> tests) async {
-  final List<ShardRunner> sublist = _selectIndexOfTotalSubshard<ShardRunner>(tests);
-  for (final ShardRunner test in sublist) {
-    await test();
-  }
-}
-
-Future<void> selectShard(Map<String, ShardRunner> shards) => _runFromList(shards, kShardKey, 'shard', 0);
-Future<void> selectSubshard(Map<String, ShardRunner> subshards) => _runFromList(subshards, kSubshardKey, 'subshard', 1);
-
-const String CIRRUS_TASK_NAME = 'CIRRUS_TASK_NAME';
-
-Future<void> _runFromList(Map<String, ShardRunner> items, String key, String name, int positionInTaskName) async {
-  String? item = Platform.environment[key];
-  if (item == null && Platform.environment.containsKey(CIRRUS_TASK_NAME)) {
-    final List<String> parts = Platform.environment[CIRRUS_TASK_NAME]!.split('-');
-    assert(positionInTaskName < parts.length);
-    item = parts[positionInTaskName];
-  }
-  if (item == null) {
-    for (final String currentItem in items.keys) {
-      printProgress('$bold$key=$currentItem$reset');
-      await items[currentItem]!();
-    }
-  } else {
-    printProgress('$bold$key=$item$reset');
-    if (!items.containsKey(item)) {
-      foundError(<String>[
-        '${red}Invalid $name: $item$reset',
-        'The available ${name}s are: ${items.keys.join(", ")}',
-      ]);
-      return;
-    }
-    await items[item]!();
-  }
 }

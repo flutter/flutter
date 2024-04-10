@@ -19,6 +19,8 @@ import 'run_command.dart';
 import 'tool_subsharding.dart';
 import 'utils.dart';
 
+typedef ShardRunner = Future<void> Function();
+
 final String exe = Platform.isWindows ? '.exe' : '';
 final String bat = Platform.isWindows ? '.bat' : '';
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
@@ -27,7 +29,10 @@ final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'd
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
 
+const String kShardKey = 'SHARD';
 const String kSubshardKey = 'SUBSHARD';
+
+const String CIRRUS_TASK_NAME = 'CIRRUS_TASK_NAME';
 
 /// Environment variables to override the local engine when running `pub test`,
 /// if such flags are provided to `test.dart`.
@@ -166,6 +171,15 @@ void adjustEnvironmentToEnableFlutterAsserts(Map<String, String> environment) {
   environment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
 }
 
+Future<void> selectShard(Map<String, ShardRunner> shards) => _runFromList(shards, kShardKey, 'shard', 0);
+Future<void> selectSubshard(Map<String, ShardRunner> subshards) => _runFromList(subshards, kSubshardKey, 'subshard', 1);
+
+Future<void> runShardRunnerIndexOfTotalSubshard(List<ShardRunner> tests) async {
+  final List<ShardRunner> sublist = selectIndexOfTotalSubshard<ShardRunner>(tests);
+  for (final ShardRunner test in sublist) {
+    await test();
+  }
+}
 /// Parse (one-)index/total-named subshards from environment variable SUBSHARD
 /// and equally distribute [tests] between them.
 /// Subshard format is "{index}_{total number of shards}".
@@ -209,4 +223,29 @@ List<T> selectIndexOfTotalSubshard<T>(List<T> tests, {String subshardKey = kSubs
 
   print('Selecting subshard $index of $total (tests ${start + 1}-$end of ${tests.length})');
   return tests.sublist(start, end);
+}
+
+Future<void> _runFromList(Map<String, ShardRunner> items, String key, String name, int positionInTaskName) async {
+  String? item = Platform.environment[key];
+  if (item == null && Platform.environment.containsKey(CIRRUS_TASK_NAME)) {
+    final List<String> parts = Platform.environment[CIRRUS_TASK_NAME]!.split('-');
+    assert(positionInTaskName < parts.length);
+    item = parts[positionInTaskName];
+  }
+  if (item == null) {
+    for (final String currentItem in items.keys) {
+      printProgress('$bold$key=$currentItem$reset');
+      await items[currentItem]!();
+    }
+  } else {
+    printProgress('$bold$key=$item$reset');
+    if (!items.containsKey(item)) {
+      foundError(<String>[
+        '${red}Invalid $name: $item$reset',
+        'The available ${name}s are: ${items.keys.join(", ")}',
+      ]);
+      return;
+    }
+    await items[item]!();
+  }
 }

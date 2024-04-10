@@ -3,23 +3,82 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' show File, HttpClient, HttpClientRequest, HttpClientResponse, Process, RawSocket, SocketDirection, SocketException;
+import 'dart:io' show Directory, File, FileSystemEntity, HttpClient, HttpClientRequest, HttpClientResponse, Platform, Process, RawSocket, SocketDirection, SocketException;
 import 'dart:math' as math;
+import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
 
 import '../browser.dart';
 import '../run_command.dart';
+import '../runner_utils.dart';
 import '../service_worker_test.dart';
-import '../test.dart';
 import '../utils.dart';
 
-class WebLongRunningTestsSuite {
+typedef ShardRunner = Future<void> Function();
 
-  WebLongRunningTestsSuite(this.flutterRoot);
+class WebTestsSuite {
+
+  WebTestsSuite(this.flutterRoot, this.flutterTestArgs);
+
+  /// Tests that we don't run on Web.
+  ///
+  /// In general avoid adding new tests here. If a test cannot run on the web
+  /// because it fails at runtime, such as when a piece of functionality is not
+  /// implemented or not implementable on the web, prefer using `skip` in the
+  /// test code. Only add tests here that cannot be skipped using `skip`. For
+  /// example:
+  ///
+  ///  * Test code cannot be compiled because it uses Dart VM-specific
+  ///    functionality. In this case `skip` doesn't help because the code cannot
+  ///    reach the point where it can even run the skipping logic.
+  ///  * Migrations. It is OK to put tests here that need to be temporarily
+  ///    disabled in certain modes because of some migration or initial bringup.
+  ///
+  /// The key in the map is the renderer type that the list applies to. The value
+  /// is the list of tests known to fail for that renderer.
+  //
+  // TODO(yjbanov): we're getting rid of this as part of https://github.com/flutter/flutter/projects/60
+  static const Map<String, List<String>> kWebTestFileKnownFailures = <String, List<String>>{
+    'html': <String>[
+      // These tests are not compilable on the web due to dependencies on
+      // VM-specific functionality.
+      'test/services/message_codecs_vm_test.dart',
+      'test/examples/sector_layout_test.dart',
+    ],
+    'canvaskit': <String>[
+      // These tests are not compilable on the web due to dependencies on
+      // VM-specific functionality.
+      'test/services/message_codecs_vm_test.dart',
+      'test/examples/sector_layout_test.dart',
+
+      // These tests are broken and need to be fixed.
+      // TODO(yjbanov): https://github.com/flutter/flutter/issues/71604
+      'test/material/text_field_test.dart',
+      'test/widgets/performance_overlay_test.dart',
+      'test/widgets/html_element_view_test.dart',
+      'test/cupertino/scaffold_test.dart',
+      'test/rendering/platform_view_test.dart',
+    ],
+  };
+
+  /// The number of Cirrus jobs that run Web tests in parallel.
+  ///
+  /// The default is 8 shards. Typically .cirrus.yml would define the
+  /// WEB_SHARD_COUNT environment variable rather than relying on the default.
+  ///
+  /// WARNING: if you change this number, also change .cirrus.yml
+  /// and make sure it runs _all_ shards.
+  ///
+  /// The last shard also runs the Web plugin tests.
+  int get webShardCount => Platform.environment.containsKey('WEB_SHARD_COUNT')
+    ? int.parse(Platform.environment['WEB_SHARD_COUNT']!)
+    : 8;
+
 
   static const List<String> _kAllBuildModes = <String>['debug', 'profile', 'release'];
 
   final String flutterRoot;
+  final List<String> flutterTestArgs;
 
   /// Coarse-grained integration tests running on the Web.
   Future<void> webLongRunningTestsRunner() async {
@@ -164,19 +223,19 @@ class WebLongRunningTestsSuite {
       ),
       () => _runWebDebugTest('lib/sound_mode.dart'),
       () => _runWebReleaseTest('lib/sound_mode.dart'),
-      () => runFlutterWebTest(
+      () => _runFlutterWebTest(
         'html',
         path.join(flutterRoot, 'packages', 'integration_test'),
         <String>['test/web_extension_test.dart'],
         false,
       ),
-      () => runFlutterWebTest(
+      () => _runFlutterWebTest(
         'canvaskit',
         path.join(flutterRoot, 'packages', 'integration_test'),
         <String>['test/web_extension_test.dart'],
         false,
       ),
-      () => runFlutterWebTest(
+      () => _runFlutterWebTest(
         'skwasm',
         path.join(flutterRoot, 'packages', 'integration_test'),
         <String>['test/web_extension_test.dart'],
@@ -191,6 +250,18 @@ class WebLongRunningTestsSuite {
     await _ensureChromeDriverIsRunning();
     await runShardRunnerIndexOfTotalSubshard(tests);
     await _stopChromeDriver();
+  }
+
+  Future<void> runWebHtmlUnitTests() {
+    return _runWebUnitTests('html', false);
+  }
+
+  Future<void> runWebCanvasKitUnitTests() {
+    return _runWebUnitTests('canvaskit', false);
+  }
+
+  Future<void> runWebSkwasmUnitTests() {
+    return _runWebUnitTests('skwasm', true);
   }
 
   /// Runs one of the `dev/integration_tests/web_e2e_tests` tests.
@@ -515,6 +586,111 @@ class WebLongRunningTestsSuite {
         '${red}Web release mode test failed.$reset',
       ]);
     }
+  }
+
+  Future<void> _runWebUnitTests(String webRenderer, bool useWasm) async {
+    final Map<String, ShardRunner> subshards = <String, ShardRunner>{};
+
+    final Directory flutterPackageDirectory = Directory(path.join(flutterRoot, 'packages', 'flutter'));
+    final Directory flutterPackageTestDirectory = Directory(path.join(flutterPackageDirectory.path, 'test'));
+
+    final List<String> allTests = flutterPackageTestDirectory
+      .listSync()
+      .whereType<Directory>()
+      .expand((Directory directory) => directory
+        .listSync(recursive: true)
+        .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart'))
+      )
+      .whereType<File>()
+      .map<String>((File file) => path.relative(file.path, from: flutterPackageDirectory.path))
+      .where((String filePath) => !kWebTestFileKnownFailures[webRenderer]!.contains(path.split(filePath).join('/')))
+      .toList()
+      // Finally we shuffle the list because we want the average cost per file to be uniformly
+      // distributed. If the list is not sorted then different shards and batches may have
+      // very different characteristics.
+      // We use a constant seed for repeatability.
+      ..shuffle(math.Random(0));
+
+    assert(webShardCount >= 1);
+    final int testsPerShard = (allTests.length / webShardCount).ceil();
+    assert(testsPerShard * webShardCount >= allTests.length);
+
+    // This for loop computes all but the last shard.
+    for (int index = 0; index < webShardCount - 1; index += 1) {
+      subshards['$index'] = () => _runFlutterWebTest(
+        webRenderer,
+        flutterPackageDirectory.path,
+        allTests.sublist(
+          index * testsPerShard,
+          (index + 1) * testsPerShard,
+        ),
+        useWasm,
+      );
+    }
+
+    // The last shard also runs the flutter_web_plugins tests.
+    //
+    // We make sure the last shard ends in _last so it's easier to catch mismatches
+    // between `.cirrus.yml` and `test.dart`.
+    subshards['${webShardCount - 1}_last'] = () async {
+      await _runFlutterWebTest(
+        webRenderer,
+        flutterPackageDirectory.path,
+        allTests.sublist(
+          (webShardCount - 1) * testsPerShard,
+          allTests.length,
+        ),
+        useWasm,
+      );
+      await _runFlutterWebTest(
+        webRenderer,
+        path.join(flutterRoot, 'packages', 'flutter_web_plugins'),
+        <String>['test'],
+        useWasm,
+      );
+      await _runFlutterWebTest(
+        webRenderer,
+        path.join(flutterRoot, 'packages', 'flutter_driver'),
+        <String>[path.join('test', 'src', 'web_tests', 'web_extension_test.dart')],
+        useWasm,
+      );
+    };
+
+    await selectSubshard(subshards);
+  }
+
+  Future<void> _runFlutterWebTest(
+    String webRenderer,
+    String workingDirectory,
+    List<String> tests,
+    bool useWasm,
+  ) async {
+    const LocalFileSystem fileSystem = LocalFileSystem();
+    final String suffix = DateTime.now().microsecondsSinceEpoch.toString();
+    final File metricFile = fileSystem.systemTempDirectory.childFile('metrics_$suffix.json');
+    await runCommand(
+      flutter,
+      <String>[
+        'test',
+        '--reporter=expanded',
+        '--file-reporter=json:${metricFile.path}',
+        '-v',
+        '--platform=chrome',
+        if (useWasm) '--wasm',
+        '--web-renderer=$webRenderer',
+        '--dart-define=DART_HHH_BOT=$_runningInDartHHHBot',
+        ...flutterTestArgs,
+        ...tests,
+      ],
+      workingDirectory: workingDirectory,
+      environment: <String, String>{
+        'FLUTTER_WEB': 'true',
+      },
+    );
+    // metriciFile is a transitional file that needs to be deleted once it is parsed.
+    // TODO(godofredoc): Ensure metricFile is parsed and aggregated before deleting.
+    // https://github.com/flutter/flutter/issues/146003
+    metricFile.deleteSync();
   }
 
   // The `chromedriver` process created by this test.
