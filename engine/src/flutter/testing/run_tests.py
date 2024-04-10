@@ -385,6 +385,10 @@ shuffle_flags = [
     '--gtest_shuffle',
 ]
 
+repeat_flags = [
+    '--repeat=2',
+]
+
 
 def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
   logger.info('Running Engine Unit-tests.')
@@ -392,10 +396,6 @@ def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
   if capture_core_dump and is_linux():
     import resource  # pylint: disable=import-outside-toplevel
     resource.setrlimit(resource.RLIMIT_CORE, (resource.RLIM_INFINITY, resource.RLIM_INFINITY))
-
-  repeat_flags = [
-      '--repeat=2',
-  ]
 
   def make_test(name, flags=None, extra_env=None):
     if flags is None:
@@ -507,9 +507,10 @@ def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
       )
     extra_env = metal_validation_env()
     extra_env.update(vulkan_validation_env(build_dir))
-    mac_impeller_unittests_flags = shuffle_flags + [
+    mac_impeller_unittests_flags = repeat_flags + [
+        '--gtest_filter=-*OpenGLES',  # These are covered in the golden tests.
+        '--',
         '--enable_vulkan_validation',
-        '--gtest_filter=-*OpenGLES'  # These are covered in the golden tests.
     ]
     # Impeller tests are only supported on macOS for now.
     run_engine_executable(
@@ -519,6 +520,7 @@ def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
         mac_impeller_unittests_flags,
         coverage=coverage,
         extra_env=extra_env,
+        gtest=True,
         # TODO(https://github.com/flutter/flutter/issues/123733): Remove this allowlist.
         # See also https://github.com/flutter/flutter/issues/114872.
         allowed_failure_output=[
@@ -1272,9 +1274,10 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
           build_dir,
           'impeller_unittests',
           engine_filter,
-          shuffle_flags,
+          repeat_flags,
           coverage=args.coverage,
-          extra_env=extra_env
+          extra_env=extra_env,
+          gtest=True
       )
     finally:
       xvfb.stop_virtual_x(build_name)
