@@ -160,6 +160,11 @@ class _RenderMenuItem extends RenderShiftedBox {
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    return child?.getDryBaseline(constraints, baseline);
+  }
+
+  @override
   void performLayout() {
     if (child == null) {
       size = Size.zero;
@@ -1507,7 +1512,7 @@ class _PopupMenuDefaultsM2 extends PopupMenuThemeData {
   late final TextTheme _textTheme = _theme.textTheme;
 
   @override
-  TextStyle? get textStyle => _textTheme.subtitle1;
+  TextStyle? get textStyle => _textTheme.titleMedium;
 
   static EdgeInsets menuHorizontalPadding = const EdgeInsets.symmetric(horizontal: 16.0);
 }

@@ -886,7 +886,7 @@ void main() {
       final Offset subHeaderTextTopLeft = tester.getTopLeft(subHeaderText);
       final Offset dividerTopRight = tester.getTopRight(divider);
       expect(subHeaderTextTopLeft.dx, dividerTopRight.dx + 24.0);
-      if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
         expect(subHeaderTextTopLeft.dy,  dialogTopLeft.dy + 16.0);
       }
 
@@ -902,7 +902,7 @@ void main() {
       final Offset calendarPageViewTopLeft = tester.getTopLeft(calendarPageView);
       final Offset subHeaderTextBottomLeft = tester.getBottomLeft(subHeaderText);
       expect(calendarPageViewTopLeft.dx, dividerTopRight.dx);
-      if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
         expect(calendarPageViewTopLeft.dy, subHeaderTextBottomLeft.dy + 16.0);
       }
 
@@ -964,7 +964,7 @@ void main() {
       final Offset headerTextTextTopLeft = tester.getTopLeft(headerText);
       final Offset helpTextBottomLeft = tester.getBottomLeft(helpText);
       expect(headerTextTextTopLeft.dx, dialogTopLeft.dx + 24.0);
-      if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
         expect(headerTextTextTopLeft.dy, helpTextBottomLeft.dy + 28.0);
       }
 
@@ -986,7 +986,7 @@ void main() {
       final Offset subHeaderTextTopLeft = tester.getTopLeft(subHeaderText);
       final Offset dividerBottomLeft = tester.getBottomLeft(divider);
       expect(subHeaderTextTopLeft.dx, dialogTopLeft.dx + 24.0);
-      if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
         expect(subHeaderTextTopLeft.dy, dividerBottomLeft.dy + 16.0);
       }
 
@@ -1011,7 +1011,7 @@ void main() {
       final Offset calendarPageViewTopLeft = tester.getTopLeft(calendarPageView);
       final Offset subHeaderTextBottomLeft = tester.getBottomLeft(subHeaderText);
       expect(calendarPageViewTopLeft.dx, dialogTopLeft.dx);
-      if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
         expect(calendarPageViewTopLeft.dy, subHeaderTextBottomLeft.dy + 16.0);
       }
 

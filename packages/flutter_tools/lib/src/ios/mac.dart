@@ -165,7 +165,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
-  migration.run();
+  await migration.run();
 
   final FlutterProject project = FlutterProject.current();
   if (project.usesSwiftPackageManager && app.project.flutterPluginSwiftPackageManifest.existsSync()) {

@@ -133,7 +133,7 @@ class BottomSheet extends StatefulWidget {
   /// using [dragHandleColor]. The default size is `Size(32,4)` and can be customized
   /// with [dragHandleSize].
   ///
-  /// If null, then the value of  [BottomSheetThemeData.showDragHandle] is used. If
+  /// If null, then the value of [BottomSheetThemeData.showDragHandle] is used. If
   /// that is also null, defaults to false.
   ///
   /// If this is true, the [animationController] must not be null.
@@ -234,13 +234,13 @@ class BottomSheet extends StatefulWidget {
   /// Creates an [AnimationController] suitable for a
   /// [BottomSheet.animationController].
   ///
-  /// This API available as a convenience for a Material compliant bottom sheet
+  /// This API is available as a convenience for a Material compliant bottom sheet
   /// animation. If alternative animation durations are required, a different
   /// animation controller could be provided.
   static AnimationController createAnimationController(
-    TickerProvider vsync,
-    { AnimationStyle? sheetAnimationStyle }
-  ) {
+    TickerProvider vsync, {
+    AnimationStyle? sheetAnimationStyle,
+  }) {
     return AnimationController(
       duration: sheetAnimationStyle?.duration ?? _bottomSheetEnterDuration,
       reverseDuration: sheetAnimationStyle?.reverseDuration ?? _bottomSheetExitDuration,
@@ -334,8 +334,7 @@ class _BottomSheetState extends State<BottomSheet> {
       setState(() {
         if (hovering){
           dragHandleMaterialState.add(MaterialState.hovered);
-        }
-        else{
+        } else {
           dragHandleMaterialState.remove(MaterialState.hovered);
         }
       });
@@ -528,7 +527,7 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
 
   _SizeChangeCallback<Size> get onChildSizeChanged => _onChildSizeChanged;
   _SizeChangeCallback<Size> _onChildSizeChanged;
-    set onChildSizeChanged(_SizeChangeCallback<Size> newCallback) {
+  set onChildSizeChanged(_SizeChangeCallback<Size> newCallback) {
     if (_onChildSizeChanged == newCallback) {
       return;
     }
@@ -615,6 +614,21 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
     return _getSize(constraints);
   }
 
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final BoxConstraints childConstraints = _getConstraintsForChild(constraints);
+    final double? result = child.getDryBaseline(childConstraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    final Size childSize = childConstraints.isTight ? childConstraints.smallest : child.getDryLayout(childConstraints);
+    return result + _getPositionForChild(_getSize(constraints), childSize).dy;
+  }
+
   BoxConstraints _getConstraintsForChild(BoxConstraints constraints) {
     return BoxConstraints(
       minWidth: constraints.maxWidth,
@@ -632,18 +646,21 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
   @override
   void performLayout() {
     size = _getSize(constraints);
-    if (child != null) {
-      final BoxConstraints childConstraints = _getConstraintsForChild(constraints);
-      assert(childConstraints.debugAssertIsValid(isAppliedConstraint: true));
-      child!.layout(childConstraints, parentUsesSize: !childConstraints.isTight);
-      final BoxParentData childParentData = child!.parentData! as BoxParentData;
-      childParentData.offset = _getPositionForChild(size, childConstraints.isTight ? childConstraints.smallest : child!.size);
-      final Size childSize = childConstraints.isTight ? childConstraints.smallest : child!.size;
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return;
+    }
 
-      if (_lastSize != childSize) {
-        _lastSize = childSize;
-        _onChildSizeChanged.call(_lastSize);
-      }
+    final BoxConstraints childConstraints = _getConstraintsForChild(constraints);
+    assert(childConstraints.debugAssertIsValid(isAppliedConstraint: true));
+    child.layout(childConstraints, parentUsesSize: !childConstraints.isTight);
+    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    final Size childSize = childConstraints.isTight ? childConstraints.smallest : child.size;
+    childParentData.offset = _getPositionForChild(size, childSize);
+
+    if (_lastSize != childSize) {
+      _lastSize = childSize;
+      _onChildSizeChanged.call(_lastSize);
     }
   }
 }
@@ -874,8 +891,8 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final bool isScrollControlled;
 
   /// The max height constraint ratio for the bottom sheet
-  /// when [isScrollControlled] set to false,
-  /// no ratio will be applied when [isScrollControlled] set to true.
+  /// when [isScrollControlled] is set to false,
+  /// no ratio will be applied when [isScrollControlled] is set to true.
   ///
   /// Defaults to 9 / 16.
   final double scrollControlDisabledMaxHeightRatio;
@@ -962,7 +979,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// using dragHandleColor. The default size is `Size(32,4)` and can be customized
   /// with dragHandleSize.
   ///
-  /// If null, then the value of  [BottomSheetThemeData.showDragHandle] is used. If
+  /// If null, then the value of [BottomSheetThemeData.showDragHandle] is used. If
   /// that is also null, defaults to false.
   final bool? showDragHandle;
 
@@ -1036,7 +1053,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// Updates the details regarding how the [SemanticsNode.rect] (focus) of
   /// the barrier for this [ModalBottomSheetRoute] should be clipped.
   ///
-  /// returns true if the clipDetails did change and false otherwise.
+  /// Returns true if the clipDetails did change and false otherwise.
   bool _didChangeBarrierSemanticsClip(EdgeInsets newClipDetails) {
     if (_clipDetailsNotifier.value == newClipDetails) {
       return false;
@@ -1161,8 +1178,9 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
-/// The 'barrierLabel' parameter can be used to set a custom barrierlabel.
-/// Will default to modalBarrierDismissLabel of context if not set.
+/// The 'barrierLabel' parameter can be used to set a custom barrier label.
+/// Will default to [MaterialLocalizations.modalBarrierDismissLabel] of context
+/// if not set.
 ///
 /// {@tool dartpad}
 /// This example demonstrates how to use [showModalBottomSheet] to display a
