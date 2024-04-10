@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 
-import 'dart:ui' as ui show PointerChange, PointerData, PointerSignalKind;
+import 'dart:ui' as ui show PlatformDispatcher, PointerChange, PointerData, PointerDataResponse, PointerSignalKind;
 
 import 'events.dart';
 
@@ -283,6 +283,16 @@ abstract final class PointerEventConverter {
                 position: position,
                 scrollDelta: scrollDelta,
                 embedderId: datum.embedderId,
+                // Add an acknowledgePointerData(ui.PointerDataResponse);
+                allowPlatformDefault: () {
+                  // This could be added to all pointer *signals*.
+                  ui.PlatformDispatcher.instance.acknowledgePointerData(
+                    datum,
+                    ui.PointerDataResponse(
+                      preventPlatformDefault: false,
+                    )
+                  );
+                },
               );
             case ui.PointerSignalKind.scrollInertiaCancel:
               return PointerScrollInertiaCancelEvent(

@@ -1794,7 +1794,16 @@ class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescriptio
     super.position,
     this.scrollDelta = Offset.zero,
     super.embedderId,
-  });
+    void Function()? allowPlatformDefault,
+  }) : _allowPlatformDefault = allowPlatformDefault;
+
+  /// Callback called when this event is [ignore]d.
+  final void Function()? _allowPlatformDefault;
+
+  /// Function to call when this event is ignored by the framework.
+  void allowPlatformDefault() {
+    _allowPlatformDefault?.call();
+  }
 
   @override
   final Offset scrollDelta;
@@ -1834,6 +1843,14 @@ class _TransformedPointerScrollEvent extends _TransformedPointerEvent with _Copy
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Offset>('scrollDelta', scrollDelta));
   }
+
+  @override
+  void allowPlatformDefault() {
+    return original.allowPlatformDefault();
+  }
+
+  @override
+  void Function()? get _allowPlatformDefault => original._allowPlatformDefault;
 }
 
 mixin _CopyPointerScrollInertiaCancelEvent on PointerEvent {

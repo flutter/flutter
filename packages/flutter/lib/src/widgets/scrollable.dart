@@ -916,6 +916,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   void _receivedPointerSignal(PointerSignalEvent event) {
     if (event is PointerScrollEvent && _position != null) {
       if (_physics != null && !_physics!.shouldAcceptUserOffset(position)) {
+        // Let the engine know the framework doesn't care about this event...
+        event.allowPlatformDefault();
         return;
       }
       final double delta = _pointerSignalEventDelta(event);
