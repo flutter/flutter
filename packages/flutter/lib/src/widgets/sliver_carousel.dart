@@ -17,24 +17,20 @@ import 'sliver.dart';
 class Carousel extends StatefulWidget {
   Carousel({
     super.key,
-    required this.itemWeights,
     this.itemSnap = false,
     this.clipExtent,
     this.controller,
-    required List<Widget> children,
-  }) : childrenDelegate = SliverChildBuilderDelegate(
-    (BuildContext context, int index) {
-      print(children.isEmpty);
-      return children.elementAt(index);
-    },
-    childCount: children.length,
-  );
+    this.backgroundChildren,
+    required this.childWeights,
+    required this.children,
+  });
 
   final double? clipExtent;
   final bool itemSnap;
-  final List<int> itemWeights;
   final CarouselController? controller;
-  final SliverChildBuilderDelegate childrenDelegate;
+  final List<Widget>? backgroundChildren;
+  final List<int> childWeights;
+  final List<Widget> children;
 
   @override
   State<Carousel> createState() => _CarouselState();
@@ -47,14 +43,14 @@ class _CarouselState extends State<Carousel> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _initController(widget.itemWeights);
+    _initController(widget.childWeights);
   }
 
   // @override
   // void didUpdateWidget(covariant Carousel oldWidget) {
   //   super.didUpdateWidget(oldWidget);
-  //   if (widget.itemWeights != oldWidget.itemWeights) {
-  //     _initController(widget.itemWeights);
+  //   if (widget.childWeights != oldWidget.childWeights) {
+  //     _initController(widget.childWeights);
   //   }
   // }
 
@@ -77,7 +73,6 @@ class _CarouselState extends State<Carousel> {
     final ScrollPhysics physics = widget.itemSnap
       ? const CarouselScrollPhysics()
       : ScrollConfiguration.of(context).getScrollPhysics(context);
-      print('scroll offset: ${_controller.offset}');
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
         // TODO(qunc): get last reported carousel index
@@ -99,7 +94,7 @@ class _CarouselState extends State<Carousel> {
         // restorationId: widget.restorationId,
         // scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
         viewportBuilder: (BuildContext context, ViewportOffset position) {
-          print('viewport');
+          print('controller offset: ${_controller.offset}');
           return Viewport(
             cacheExtent: 0.0,
             axisDirection: AxisDirection.right,
@@ -108,13 +103,49 @@ class _CarouselState extends State<Carousel> {
             slivers: <Widget>[
               SliverCarousel(
                 clipExtent: widget.clipExtent ?? 0,
-                childExtentList: widget.itemWeights,
-                delegate: widget.childrenDelegate,
+                childExtentList: widget.childWeights,
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) {
+                    return _CarouselItemStack(
+                      background: widget.backgroundChildren?.elementAt(index),
+                      foreground: widget.children.elementAt(index)
+                    );
+                  },
+                  childCount: widget.children.length,
+                ),
               ),
             ],
           );
         },
       ),
+    );
+  }
+}
+
+class _CarouselItemStack extends StatefulWidget {
+  const _CarouselItemStack({
+    this.background,
+    required this.foreground,
+  });
+
+  final Widget? background;
+  final Widget foreground;
+
+  @override
+  State<_CarouselItemStack> createState() => __CarouselItemStackState();
+}
+
+class __CarouselItemStackState extends State<_CarouselItemStack> {
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: AlignmentDirectional.center,
+      children: [
+        if (widget.background != null) Positioned.fill(
+          child: widget.background!
+        ),
+        widget.foreground,
+      ],
     );
   }
 }
