@@ -1176,6 +1176,7 @@ void main() {
     expect(find.text(errorText('foo')!), findsNothing);
 
     // Tap on the second TextFormField to trigger validation.
+    // This should trigger validation for the first TextFormField as well.
     await tester.tap(find.byType(TextFormField).last);
     await tester.pumpAndSettle();
 
@@ -1208,7 +1209,7 @@ void main() {
                     children: <Widget>[
                       TextFormField(
                         autovalidateMode: AutovalidateMode.always,
-                        initialValue: 'bar',
+                        initialValue: 'foo',
                         validator: errorText,
                       ),
                       TextFormField(
@@ -1229,7 +1230,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     // Verify that the error text is displayed for the first TextFormField.
-    expect(find.text(errorText('bar')!), findsOneWidget);
+    expect(find.text(errorText('foo')!), findsOneWidget);
 
     // Enter text in the TextFormField.
     await tester.enterText(find.byType(TextFormField).first, 'foo');
@@ -1251,7 +1252,6 @@ void main() {
   });
 
 
-  // Test for avoid validate conflicting FocusNode
   testWidgets('FocusNode should move to next field when TextInputAction.next is received', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     final FocusNode focusNode1 = FocusNode();

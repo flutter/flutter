@@ -227,22 +227,14 @@ class FormState extends State<Form> {
   void _register(FormFieldState<dynamic> field) {
     _fields.add(field);
     if (widget.autovalidateMode == AutovalidateMode.onUnfocus) {
-      _updateListener(field);
+      field._focusNode.addListener(() => _updateField(field));
     }
   }
 
   void _unregister(FormFieldState<dynamic> field) {
     _fields.remove(field);
     if (widget.autovalidateMode == AutovalidateMode.onUnfocus) {
-     _updateListener(field, removeListener: true);
-    }
-  }
-
-  void _updateListener(FormFieldState<dynamic> field, {bool removeListener = false}) {
-    if (removeListener) {
       field._focusNode.removeListener(()=> _updateField(field));
-    } else {
-      field._focusNode.addListener(() => _updateField(field));
     }
   }
 
@@ -349,7 +341,7 @@ class FormState extends State<Form> {
     final bool validateOnFocusChange = widget.autovalidateMode == AutovalidateMode.onUnfocus;
 
     for (final FormFieldState<dynamic> field in _fields) {
-      if (!validateOnFocusChange || (!field._focusNode.hasFocus && validateOnFocusChange)) {
+      if (!validateOnFocusChange || !field._focusNode.hasFocus) {
         final bool isFieldValid = field.validate();
         hasError = !isFieldValid || hasError;
         errorMessage += field.errorText ?? '';
@@ -363,8 +355,8 @@ class FormState extends State<Form> {
       final TextDirection directionality = Directionality.of(context);
       if (defaultTargetPlatform == TargetPlatform.iOS) {
         unawaited(Future<void>(() async {
-         await Future<void>.delayed(_kIOSAnnouncementDelayDuration);
-         SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
+          await Future<void>.delayed(_kIOSAnnouncementDelayDuration);
+          SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
         }));
       } else {
         SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
