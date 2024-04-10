@@ -48,13 +48,13 @@ class DarwinDependencyManagement {
   /// Swift Package Manager requires a generated Package.swift and certain
   /// settings in the Xcode project's project.pbxproj and xcscheme (done later
   /// before build).
-  Future<void> setup({
+  Future<void> setUp({
     required SupportedPlatform platform,
   }) async {
     if (platform != SupportedPlatform.ios &&
         platform != SupportedPlatform.macos) {
       throwToolExit(
-        'The platform ${platform.name} is incompatible with Darwin Dependency Managers. Only iOS and macOS is allowed.',
+        'The platform ${platform.name} is incompatible with Darwin Dependency Managers. Only iOS and macOS are allowed.',
       );
     }
     final XcodeBasedProject xcodeProject = platform == SupportedPlatform.ios
@@ -83,7 +83,7 @@ class DarwinDependencyManagement {
     if (_project.isModule) {
       return;
     }
-    final (int pluginCount, int swiftPackageCount, int cocoapodCount) = await _evaluatePluginsAndPrintWarnings(
+    final (:int totalCount, :int swiftPackageCount, :int podCount) = await _evaluatePluginsAndPrintWarnings(
       platform: platform,
       xcodeProject: xcodeProject,
     );
@@ -91,12 +91,12 @@ class DarwinDependencyManagement {
     final bool useCocoapods;
     if (_project.usesSwiftPackageManager) {
       useCocoapods = _usingCocoaPodsPlugin(
-        pluginCount: pluginCount,
+        pluginCount: totalCount,
         swiftPackageCount: swiftPackageCount,
-        cocoapodCount: cocoapodCount,
+        cocoapodCount: podCount,
       );
     } else {
-      // When Swift Package Manager is not enabled, setup Podfile if plugins
+      // When Swift Package Manager is not enabled, set up Podfile if plugins
       // is not empty, regardless of if plugins are CocoaPod compatible. This
       // is done because `processPodsIfNeeded` uses `hasPlugins` to determine
       // whether to run.
@@ -122,10 +122,7 @@ class DarwinDependencyManagement {
         return false;
       }
     }
-    if (cocoapodCount > 0) {
-      return true;
-    }
-    return false;
+    return cocoapodCount > 0;
   }
 
   /// Returns count of total number of plugins, number of Swift Package Manager
@@ -137,7 +134,7 @@ class DarwinDependencyManagement {
   ///
   /// Prints message prompting the user to deintegrate CocoaPods if using all
   /// Swift Package plugins.
-  Future<(int, int, int)> _evaluatePluginsAndPrintWarnings({
+  Future<({int totalCount, int swiftPackageCount, int podCount})> _evaluatePluginsAndPrintWarnings({
     required SupportedPlatform platform,
     required XcodeBasedProject xcodeProject,
   }) async {
@@ -192,7 +189,11 @@ class DarwinDependencyManagement {
       }
     }
 
+    // Only show warnings to remove CocoaPods if the project is using Swift
+    // Package Manager, has already been migrated to have SPM integration, and
+    // all plugins are Swift Packages.
     if (_project.usesSwiftPackageManager &&
+        xcodeProject.flutterPluginSwiftPackageInProjectSettings &&
         pluginCount == swiftPackageCount &&
         swiftPackageCount != 0) {
       final bool podfileExists = xcodeProject.podfile.existsSync();
@@ -203,14 +204,20 @@ class DarwinDependencyManagement {
           xcodeProject,
           xcodeProject.xcodeProject,
         );
+
+        final String configWarning = '${_podIncludeInConfigWarning(xcodeProject, 'Debug')}'
+              '${_podIncludeInConfigWarning(xcodeProject, 'Release')}';
+
         if (xcodeProject.podfile.readAsStringSync() ==
             podfileTemplate.readAsStringSync()) {
           _logger.printWarning(
               'All plugins found for ${platform.name} are Swift Packages, but your '
               'project still has CocoaPods integration. To remove CocoaPods '
-              'integration, in the ${platform.name}/ directory run "pod deintegrate" '
-              'and delete the Podfile. Removing CocoaPods integration will improve '
-              "the project's build time.");
+              'integration, complete the following steps:\n'
+              '  * In the ${platform.name}/ directory run "pod deintegrate"\n'
+              '  * Also in the ${platform.name}/ directory, delete the Podfile\n'
+              '$configWarning\n'
+              "Removing CocoaPods integration will improve the project's build time.");
         } else {
           // If all plugins are Swift Packages, but the Podfile has custom logic,
           // recommend migrating manually.
@@ -218,12 +225,33 @@ class DarwinDependencyManagement {
               'All plugins found for ${platform.name} are Swift Packages, but your '
               'project still has CocoaPods integration. Your project uses a '
               'non-standard Podfile and will need to be migrated to Swift Package '
-              'Manager manually. Removing CocoaPods integration will improve the '
-              "project's build time.");
+              'Manager manually. Some steps you may need to complete include:\n'
+              '  * In the ${platform.name}/ directory run "pod deintegrate"\n'
+              '  * Transition any Pod dependencies to Swift Package equivalents. '
+              'See https://developer.apple.com/documentation/xcode/adding-package-dependencies-to-your-app\n'
+              '  * Transition any custom logic\n'
+              '$configWarning\n'
+              "Removing CocoaPods integration will improve the project's build time.");
         }
       }
     }
 
-    return (pluginCount, swiftPackageCount, cocoapodCount);
+    return (
+      totalCount: pluginCount,
+      swiftPackageCount: swiftPackageCount,
+      podCount: cocoapodCount,
+    );
+  }
+
+  String _podIncludeInConfigWarning(XcodeBasedProject xcodeProject, String mode) {
+    final File xcconfigFile = xcodeProject.xcodeConfigFor(mode);
+    final bool configIncludesPods = _cocoapods.xcconfigIncludesPods(xcconfigFile);
+    if (configIncludesPods) {
+      return '  * Remove the include to '
+          '"${_cocoapods.includePodsXcconfig(mode)}" in your '
+          '${xcconfigFile.parent.parent.basename}/${xcconfigFile.parent.basename}/${xcconfigFile.basename}\n';
+    }
+
+    return '';
   }
 }

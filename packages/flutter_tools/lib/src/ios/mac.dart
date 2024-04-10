@@ -899,8 +899,12 @@ Future<bool> _handleIssues(
         'Your project uses both CocoaPods and Swift Package Manager, which can '
         'cause the above error. It may be caused by there being both a CocoaPod '
         'and Swift Package Manager dependency for the following module(s): '
-        '${duplicateModules.join(', ')}.\n'
-        'Try disabling Swift Package Manager for the project by adding the '
+        '${duplicateModules.join(', ')}.\n\n'
+        'You can try to identify which Pod the conflicting module is from by '
+        'looking at your "ios/Podfile.lock" dependency tree and requesting the '
+        'author add Swift Package Manager compatibility. See https://stackoverflow.com/a/27955017 '
+        'to learn more about understanding Podlock dependency tree. \n\n'
+        'You can also disable Swift Package Manager for the project by adding the '
         'following in the project\'s pubspec.yaml under the "flutter" section:\n'
         '  "disable-swift-package-manager: true"\n',
       );

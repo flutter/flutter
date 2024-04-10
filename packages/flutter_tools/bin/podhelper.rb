@@ -324,12 +324,12 @@ def flutter_install_plugin_pods(application_path = nil, relative_symlink_dir, pl
 
     # If Swift Package Manager is enabled and the plugin has a Package.swift,
     # skip from installing as a pod.
-    next if swift_package_manager_enabled && File.exists?(File.join(relative, platform_directory, plugin_name, "Package.swift"))
+    swift_package_exists = File.exists?(File.join(relative, platform_directory, plugin_name, "Package.swift"))
+    next if swift_package_manager_enabled && swift_package_exists
 
     # If a plugin is Swift Package Manager compatible but not CocoaPods compatible, skip it.
     # The tool will print an error about it.
-    next if File.exists?(File.join(relative, platform_directory, plugin_name, "Package.swift")) &&
-                                    !File.exists?(File.join(relative, platform_directory, plugin_name + ".podspec"))
+    next if swift_package_exists && !File.exists?(File.join(relative, platform_directory, plugin_name + ".podspec"))
 
     pod plugin_name, path: File.join(relative, platform_directory)
   end
@@ -340,8 +340,7 @@ def flutter_parse_plugins_file(file)
   return [] unless File.exist? file_path
 
   dependencies_file = File.read(file)
-  dependencies_hash = JSON.parse(dependencies_file)
-  dependencies_hash
+  JSON.parse(dependencies_file)
 end
 
 # .flutter-plugins-dependencies format documented at

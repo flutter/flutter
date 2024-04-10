@@ -74,6 +74,7 @@ void main() {
                 .directory(appDirectoryPath)
                 .childDirectory(platformName)
                 .childDirectory('Flutter')
+                .childDirectory('ephemeral')
                 .childDirectory('Packages')
                 .childDirectory('FlutterGeneratedPluginSwiftPackage')
                 .existsSync(),
@@ -135,6 +136,7 @@ void main() {
                 .directory(appDirectoryPath)
                 .childDirectory(platformName)
                 .childDirectory('Flutter')
+                .childDirectory('ephemeral')
                 .childDirectory('Packages')
                 .childDirectory('FlutterGeneratedPluginSwiftPackage')
                 .existsSync(),
@@ -186,6 +188,7 @@ void main() {
                 .directory(appDirectoryPath)
                 .childDirectory(platformName)
                 .childDirectory('Flutter')
+                .childDirectory('ephemeral')
                 .childDirectory('Packages')
                 .childDirectory('FlutterGeneratedPluginSwiftPackage')
                 .existsSync(),
@@ -515,7 +518,7 @@ List<Pattern> _expectedLines({
   final List<Pattern> expectedLines = <Pattern>[];
   if (swiftPackageMangerEnabled) {
     expectedLines.addAll(<String>[
-      'FlutterGeneratedPluginSwiftPackage: $appPlatformDirectoryPath/Flutter/Packages/FlutterGeneratedPluginSwiftPackage',
+      'FlutterGeneratedPluginSwiftPackage: $appPlatformDirectoryPath/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage',
       "➜ Explicit dependency on target 'FlutterGeneratedPluginSwiftPackage' in project 'FlutterGeneratedPluginSwiftPackage'",
     ]);
   }

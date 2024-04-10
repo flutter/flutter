@@ -202,160 +202,6 @@ void main() {
       expect(testLogger.errorText, isEmpty);
     });
 
-    group('migrate gitignore', () {
-      testWithoutContext('skipped with warning if no files to update', () async {
-        final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-        final BufferLogger testLogger = BufferLogger.test();
-        final FakeXcodeProject project = FakeXcodeProject(
-          platform: SupportedPlatform.ios.name,
-          fileSystem: memoryFileSystem,
-          logger: testLogger,
-        );
-        _createProjectFiles(project, SupportedPlatform.ios);
-
-        final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
-          project,
-          SupportedPlatform.ios,
-          BuildInfo.debug,
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-          logger: testLogger,
-          fileSystem: memoryFileSystem,
-          plistParser: FakePlistParser(),
-        );
-        await expectLater(() => projectMigration.migrate(), throwsToolExit());
-        expect(
-          testLogger.traceText.contains('Adding FlutterGeneratedPluginSwiftPackage to app_name/.gitignore'),
-          isFalse,
-        );
-        expect(
-          testLogger.traceText.contains('Adding FlutterGeneratedPluginSwiftPackage to app_name/ios/.gitignore'),
-          isFalse,
-        );
-        expect(
-          testLogger.warningText,
-          contains(
-            'Unable to find .gitignore. Please add the following line to your .gitignore:\n'
-            '  **/Flutter/Packages/FlutterGeneratedPluginSwiftPackage',
-          ),
-        );
-      });
-
-      testWithoutContext('skipped if already updated', () async {
-        final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-        final BufferLogger testLogger = BufferLogger.test();
-        final FakeXcodeProject project = FakeXcodeProject(
-          platform: SupportedPlatform.ios.name,
-          fileSystem: memoryFileSystem,
-          logger: testLogger,
-        );
-        _createProjectFiles(project, SupportedPlatform.ios);
-        project.parent.directory.childFile('.gitignore')
-            .writeAsStringSync(
-              SwiftPackageManagerIntegrationMigration.flutterPackageGitignore,
-            );
-        project.hostAppRoot.childFile('.gitignore')
-            .writeAsStringSync(
-              SwiftPackageManagerIntegrationMigration.flutterPackageGitignore,
-            );
-
-        final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
-          project,
-          SupportedPlatform.ios,
-          BuildInfo.debug,
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-          logger: testLogger,
-          fileSystem: memoryFileSystem,
-          plistParser: FakePlistParser(),
-        );
-        await expectLater(() => projectMigration.migrate(), throwsToolExit());
-        expect(
-          testLogger.traceText.contains('Adding FlutterGeneratedPluginSwiftPackage to app_name/.gitignore'),
-          isFalse,
-        );
-        expect(
-          testLogger.traceText.contains('Adding FlutterGeneratedPluginSwiftPackage to app_name/ios/.gitignore'),
-          isFalse,
-        );
-        expect(testLogger.warningText, isEmpty);
-      });
-
-        testWithoutContext('successfully updates platform specific gitignore', () async {
-          final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-          final BufferLogger testLogger = BufferLogger.test();
-          final FakeXcodeProject project = FakeXcodeProject(
-            platform: SupportedPlatform.ios.name,
-            fileSystem: memoryFileSystem,
-            logger: testLogger,
-          );
-          _createProjectFiles(project, SupportedPlatform.ios);
-          project.hostAppRoot.childFile('.gitignore').writeAsStringSync('');
-
-          final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
-            project,
-            SupportedPlatform.ios,
-            BuildInfo.debug,
-            xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-            logger: testLogger,
-            fileSystem: memoryFileSystem,
-            plistParser: FakePlistParser(),
-          );
-          await expectLater(() => projectMigration.migrate(), throwsToolExit());
-          expect(
-            testLogger.traceText.contains('Adding FlutterGeneratedPluginSwiftPackage to app_name/.gitignore'),
-            isFalse,
-          );
-          expect(
-            testLogger.traceText,
-            contains('Adding FlutterGeneratedPluginSwiftPackage to app_name/ios/.gitignore'),
-          );
-          expect(
-            project.hostAppRoot.childFile('.gitignore').readAsStringSync(),
-            '''
-
-${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
-''',
-          );
-      });
-
-      testWithoutContext('successfully updates app gitignore', () async {
-        final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-        final BufferLogger testLogger = BufferLogger.test();
-        final FakeXcodeProject project = FakeXcodeProject(
-            platform: SupportedPlatform.ios.name,
-            fileSystem: memoryFileSystem,
-            logger: testLogger,
-          );
-        _createProjectFiles(project, SupportedPlatform.ios);
-        project.parent.directory.childFile('.gitignore').writeAsStringSync('build');
-
-        final SwiftPackageManagerIntegrationMigration projectMigration = SwiftPackageManagerIntegrationMigration(
-          project,
-          SupportedPlatform.ios,
-          BuildInfo.debug,
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-          logger: testLogger,
-          fileSystem: memoryFileSystem,
-          plistParser: FakePlistParser(),
-        );
-        await expectLater(() => projectMigration.migrate(), throwsToolExit());
-        expect(
-          testLogger.traceText.contains('Adding FlutterGeneratedPluginSwiftPackage to app_name/ios/.gitignore'),
-          isFalse,
-        );
-        expect(
-          testLogger.traceText,
-          contains('Adding FlutterGeneratedPluginSwiftPackage to app_name/.gitignore'),
-        );
-        expect(
-          project.parent.directory.childFile('.gitignore').readAsStringSync(),
-          '''
-build
-${SwiftPackageManagerIntegrationMigration.flutterPackageGitignore}
-''',
-          );
-      });
-    });
-
     group('migrate scheme', () {
       testWithoutContext('skipped if already updated', () async {
         final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
@@ -3040,7 +2886,7 @@ String migratedProjectSection(
 }) {
   final List<String> packageDependencies = <String>[
     '			packageReferences = (',
-    '				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/Packages/FlutterGeneratedPluginSwiftPackage" */,',
+    '				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */,',
     if (withOtherReference)
       '				010101010101010101010101 /* XCLocalSwiftPackageReference "SomeOtherPackage" */,',
     '			);',
@@ -3201,9 +3047,9 @@ String migratedLocalSwiftPackageReferenceSection({
       '			relativePath = SomeOtherPackage;',
       '		};',
     ],
-    '		781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/Packages/FlutterGeneratedPluginSwiftPackage" */ = {',
+    '		781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */ = {',
     '			isa = XCLocalSwiftPackageReference;',
-    '			relativePath = Flutter/Packages/FlutterGeneratedPluginSwiftPackage;',
+    '			relativePath = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage;',
     '		};',
     '/* End XCLocalSwiftPackageReference section */',
   ].join('\n');
@@ -3212,7 +3058,7 @@ String migratedLocalSwiftPackageReferenceSection({
 const String migratedLocalSwiftPackageReferenceSectionAsJson = '''
     "781AD8BC2B33823900A9FFBB" : {
       "isa" : "XCLocalSwiftPackageReference",
-      "relativePath" : "Flutter/Packages/FlutterGeneratedPluginSwiftPackage"
+      "relativePath" : "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage"
     }''';
 
 // XCSwiftPackageProductDependency
@@ -3337,6 +3183,7 @@ class FakeXcodeProject extends Fake implements IosProject {
   @override
   Directory get flutterPluginSwiftPackageDirectory => hostAppRoot
       .childDirectory('Flutter')
+      .childDirectory('ephemeral')
       .childDirectory('Packages')
       .childDirectory('FlutterGeneratedPluginSwiftPackage');
 

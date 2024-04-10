@@ -70,10 +70,6 @@ class SwiftPackageManagerIntegrationMigration {
   /// Existing macOS identifer for Runner PBXProject.
   static const String _macosProjectIdentifier = '33CC10E52044A3C60003C045';
 
-  /// Path to add to .gitignore so generated files in FlutterGeneratedPluginSwiftPackage
-  /// are not committed.
-  static const String flutterPackageGitignore = '**/Flutter/Packages/FlutterGeneratedPluginSwiftPackage';
-
   File get backupProjectSettings => _fileSystem
       .directory(_xcodeProjectInfoFile.parent)
       .childFile('project.pbxproj.backup');
@@ -109,8 +105,6 @@ class SwiftPackageManagerIntegrationMigration {
   ///
   /// If migration fails or project.pbxproj or Runner.xcscheme becomes invalid,
   /// will revert any changes made and throw an error.
-  ///
-  /// Also, adds [flutterPackageGitignore] to .gitignore if found.
   Future<void> migrate() async {
     Status? migrationStatus;
     SchemeInfo? schemeInfo;
@@ -132,17 +126,6 @@ class SwiftPackageManagerIntegrationMigration {
       migrationStatus = _logger.startProgress(
         'Adding Swift Package Manager integration...',
       );
-
-      // Update gitignore. If unable to update the platform specific .gitignore,
-      // try updating the app's .gitignore.
-      if (!_updateGitIgnore(_xcodeProject.hostAppRoot.childFile('.gitignore'))) {
-        if (!_updateGitIgnore(_xcodeProject.parent.directory.childFile('.gitignore'))) {
-          _logger.printWarning(
-            'Unable to find .gitignore. Please add the following line to your .gitignore:\n'
-            '  $flutterPackageGitignore',
-          );
-        }
-      }
 
       if (isSchemeMigrated) {
         _logger.printTrace('${schemeInfo.schemeFile.basename} already migrated. Skipping...');
@@ -199,26 +182,7 @@ class SwiftPackageManagerIntegrationMigration {
     }
   }
 
-  bool _updateGitIgnore(File gitignore) {
-    if (!gitignore.existsSync()) {
-      return false;
-    }
-    final String originalProjectContents = gitignore.readAsStringSync();
-    if (originalProjectContents.contains(flutterPackageGitignore)) {
-      return true;
-    }
-    String newProjectContents = originalProjectContents;
-    newProjectContents = '$newProjectContents\n$flutterPackageGitignore\n';
-
-    if (originalProjectContents != newProjectContents) {
-      _logger.printTrace(
-          'Adding FlutterGeneratedPluginSwiftPackage to ${gitignore.dirname}/${gitignore.basename}...');
-      gitignore.writeAsStringSync(newProjectContents);
-    }
-    return true;
-  }
-
-    Future<SchemeInfo> _getSchemeFile() async {
+  Future<SchemeInfo> _getSchemeFile() async {
     final XcodeProjectInfo? projectInfo = await _xcodeProject.projectInfo();
     if (projectInfo == null) {
       throw Exception('Unable to get Xcode project info.');
@@ -695,7 +659,7 @@ $newContent
       // If packageReferences is null, the packageReferences field is missing and must be added.
       const List<String> newContent = <String>[
         '			packageReferences = (',
-        '				$_localFlutterPluginsSwiftPackageReferenceIdentifer /* XCLocalSwiftPackageReference "Flutter/Packages/FlutterGeneratedPluginSwiftPackage" */,',
+        '				$_localFlutterPluginsSwiftPackageReferenceIdentifer /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */,',
         '			);',
       ];
       lines.insertAll(projectStartIndex + 1, newContent);
@@ -711,7 +675,7 @@ $newContent
         );
       }
       const String newContent =
-          '				$_localFlutterPluginsSwiftPackageReferenceIdentifer /* XCLocalSwiftPackageReference "Flutter/Packages/FlutterGeneratedPluginSwiftPackage" */,';
+          '				$_localFlutterPluginsSwiftPackageReferenceIdentifer /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */,';
       lines.insert(packageReferencesIndex + 1, newContent);
     }
     return lines;
@@ -748,9 +712,9 @@ $newContent
       // There isn't a XCLocalSwiftPackageReference section yet, so add it
       final List<String> newContent = <String>[
         '/* Begin XCLocalSwiftPackageReference section */',
-        '		$_localFlutterPluginsSwiftPackageReferenceIdentifer /* XCLocalSwiftPackageReference "Flutter/Packages/FlutterGeneratedPluginSwiftPackage" */ = {',
+        '		$_localFlutterPluginsSwiftPackageReferenceIdentifer /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */ = {',
         '			isa = XCLocalSwiftPackageReference;',
-        '			relativePath = Flutter/Packages/FlutterGeneratedPluginSwiftPackage;',
+        '			relativePath = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage;',
         '		};',
         '/* End XCLocalSwiftPackageReference section */',
       ];
@@ -766,9 +730,9 @@ $newContent
     }
 
     final List<String> newContent = <String>[
-      '		$_localFlutterPluginsSwiftPackageReferenceIdentifer /* XCLocalSwiftPackageReference "Flutter/Packages/FlutterGeneratedPluginSwiftPackage" */ = {',
+      '		$_localFlutterPluginsSwiftPackageReferenceIdentifer /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */ = {',
       '			isa = XCLocalSwiftPackageReference;',
-      '			relativePath = Flutter/Packages/FlutterGeneratedPluginSwiftPackage;',
+      '			relativePath = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage;',
       '		};',
     ];
 

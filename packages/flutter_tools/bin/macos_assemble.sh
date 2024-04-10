@@ -145,6 +145,9 @@ BuildApp() {
     flutter_args+=("-dCodeSizeDirectory=${CODE_SIZE_DIRECTORY}")
   fi
 
+  # Run flutter assemble with the build mode specific target that was passed in.
+  # If no target was passed it, default to build mode specific
+  # macos_bundle_flutter_assets target.
   if [[ -n "$1" ]]; then
     flutter_args+=("${build_mode}$1")
   else

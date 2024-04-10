@@ -114,6 +114,10 @@ Future<void> buildMacOS({
     useMacOSConfig: true,
   );
 
+  // TODO(vashworth): Call `SwiftPackageManager.updateMinimumDeployment`
+  // using MACOSX_DEPLOYMENT_TARGET once https://github.com/flutter/flutter/issues/146204
+  // is fixed.
+
   await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode);
   // If the xcfilelists do not exist, create empty version.
   if (!flutterProject.macos.inputFileList.existsSync()) {

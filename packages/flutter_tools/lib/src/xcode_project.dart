@@ -116,10 +116,20 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
       .childDirectory('Target Support Files')
       .childDirectory('Pods-Runner');
 
+  /// The directory in the project that is managed by Flutter. As much as
+  /// possible, files that are edited by Flutter tooling after initial project
+  /// creation should live here.
+  Directory get managedDirectory => hostAppRoot.childDirectory('Flutter');
+
+  /// The subdirectory of [managedDirectory] that contains files that are
+  /// generated on the fly. All generated files that are not intended to be
+  /// checked in should live here.
+  Directory get ephemeralDirectory => managedDirectory
+      .childDirectory('ephemeral');
+
   /// The Flutter generated directory for the Swift Package handling plugin
   /// dependencies.
-  Directory get flutterPluginSwiftPackageDirectory => hostAppRoot
-      .childDirectory('Flutter')
+  Directory get flutterPluginSwiftPackageDirectory => ephemeralDirectory
       .childDirectory('Packages')
       .childDirectory('FlutterGeneratedPluginSwiftPackage');
 
@@ -197,16 +207,16 @@ class IosProject extends XcodeBasedProject {
   /// Whether the Flutter application has an iOS project.
   bool get exists => hostAppRoot.existsSync();
 
-  /// Put generated files here.
-  Directory get ephemeralDirectory => _flutterLibRoot.childDirectory('Flutter').childDirectory('ephemeral');
+  @override
+  Directory get managedDirectory => _flutterLibRoot.childDirectory('Flutter');
 
   @override
-  File xcodeConfigFor(String mode) => _flutterLibRoot.childDirectory('Flutter').childFile('$mode.xcconfig');
+  File xcodeConfigFor(String mode) => managedDirectory.childFile('$mode.xcconfig');
 
   @override
-  File get generatedEnvironmentVariableExportScript => _flutterLibRoot.childDirectory('Flutter').childFile('flutter_export_environment.sh');
+  File get generatedEnvironmentVariableExportScript => managedDirectory.childFile('flutter_export_environment.sh');
 
-  File get appFrameworkInfoPlist => _flutterLibRoot.childDirectory('Flutter').childFile('AppFrameworkInfo.plist');
+  File get appFrameworkInfoPlist => managedDirectory.childFile('AppFrameworkInfo.plist');
 
   File get infoPlist => _editableDirectory.childDirectory('Runner').childFile('Info.plist');
 
@@ -712,16 +722,6 @@ class MacOSProject extends XcodeBasedProject {
 
   @override
   Directory get hostAppRoot => parent.directory.childDirectory('macos');
-
-  /// The directory in the project that is managed by Flutter. As much as
-  /// possible, files that are edited by Flutter tooling after initial project
-  /// creation should live here.
-  Directory get managedDirectory => hostAppRoot.childDirectory('Flutter');
-
-  /// The subdirectory of [managedDirectory] that contains files that are
-  /// generated on the fly. All generated files that are not intended to be
-  /// checked in should live here.
-  Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
 
   /// The xcfilelist used to track the inputs for the Flutter script phase in
   /// the Xcode build.

@@ -14,7 +14,6 @@ const String _doubleIndent = '        ';
 
 void main() {
   group('SwiftPackage', () {
-
     testWithoutContext('createSwiftPackage also creates source file for each default target', () {
       final MemoryFileSystem fs = MemoryFileSystem();
       final File swiftPackageFile = fs.systemTempDirectory.childFile('Packages/FlutterGeneratedPluginSwiftPackage/Package.swift');

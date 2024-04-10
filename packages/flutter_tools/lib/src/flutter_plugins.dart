@@ -1105,12 +1105,12 @@ Future<void> injectPlugins(
       logger: globals.logger,
     );
     if (iosPlatform) {
-      await darwinDependencyManagerSetup.setup(
+      await darwinDependencyManagerSetup.setUp(
         platform: SupportedPlatform.ios,
       );
     }
     if (macOSPlatform) {
-      await darwinDependencyManagerSetup.setup(
+      await darwinDependencyManagerSetup.setUp(
         platform: SupportedPlatform.macos,
       );
     }

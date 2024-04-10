@@ -6,6 +6,7 @@ import '../base/file_system.dart';
 import '../base/template.dart';
 import '../base/version.dart';
 
+/// Swift toolchain version included with Xcode 15.0.
 const String minimumSwiftToolchainVersion = '5.9';
 
 const String _swiftPackageTemplate = '''
@@ -46,7 +47,7 @@ const String _singleIndent = '    ';
 const String _doubleIndent = '$_singleIndent$_singleIndent';
 
 /// A Swift Package is reusable code that can be shared across projects and
-/// with other developers in iOS and macO applications. A Swift Package
+/// with other developers in iOS and macOS applications. A Swift Package
 /// requires a Package.swift. This class handles the formatting and creation of
 /// a Package.swift.
 ///

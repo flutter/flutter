@@ -301,12 +301,24 @@ class CocoaPods {
     _addPodsDependencyToFlutterXcconfig(xcodeProject, 'Release');
   }
 
+  String includePodsXcconfig(String mode) {
+    return 'Pods/Target Support Files/Pods-Runner/Pods-Runner.${mode
+        .toLowerCase()}.xcconfig';
+  }
+
+  bool xcconfigIncludesPods(File xcodeConfig) {
+    if (xcodeConfig.existsSync()) {
+      final String content = xcodeConfig.readAsStringSync();
+      return content.contains('Pods/Target Support Files/Pods-');
+    }
+    return false;
+  }
+
   void _addPodsDependencyToFlutterXcconfig(XcodeBasedProject xcodeProject, String mode) {
     final File file = xcodeProject.xcodeConfigFor(mode);
     if (file.existsSync()) {
       final String content = file.readAsStringSync();
-      final String includeFile = 'Pods/Target Support Files/Pods-Runner/Pods-Runner.${mode
-          .toLowerCase()}.xcconfig';
+      final String includeFile = includePodsXcconfig(mode);
       final String include = '#include? "$includeFile"';
       if (!content.contains('Pods/Target Support Files/Pods-')) {
         file.writeAsStringSync('$include\n$content', flush: true);

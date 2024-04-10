@@ -19,7 +19,7 @@ import 'swift_packages.dart';
 ///   * https://developer.apple.com/documentation/packagedescription/package -
 ///     documentation on Swift Package Manager manifest file, Package.swift.
 class SwiftPackageManager {
-  SwiftPackageManager({
+  const SwiftPackageManager({
     required FileSystem fileSystem,
     required TemplateRenderer templateRenderer,
   })  : _fileSystem = fileSystem,
@@ -139,7 +139,7 @@ class SwiftPackageManager {
         platform != SupportedPlatform.macos) {
       throwToolExit(
         'The platform ${platform.name} is not compatible with Swift Package Manager. '
-        'Only iOS and macOS is allowed.',
+        'Only iOS and macOS are allowed.',
       );
     }
   }

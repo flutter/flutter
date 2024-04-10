@@ -44,7 +44,7 @@ void main() {
                 SupportedPlatform.android,
                 project,
               ),
-              throwsToolExit(message: 'The platform android is not compatible with Swift Package Manager. Only iOS and macOS is allowed.'),
+              throwsToolExit(message: 'The platform android is not compatible with Swift Package Manager. Only iOS and macOS are allowed.'),
             );
           });
 
@@ -380,6 +380,7 @@ class FakeXcodeProject extends Fake implements IosProject {
   @override
   Directory get flutterPluginSwiftPackageDirectory => hostAppRoot
       .childDirectory('Flutter')
+      .childDirectory('ephemeral')
       .childDirectory('Packages')
       .childDirectory('FlutterGeneratedPluginSwiftPackage');
 
