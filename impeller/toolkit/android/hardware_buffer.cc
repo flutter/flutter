@@ -24,16 +24,13 @@ static AHardwareBuffer_Desc ToAHardwareBufferDesc(
   ahb_desc.height = desc.size.height;
   ahb_desc.format = ToAHardwareBufferFormat(desc.format);
   ahb_desc.layers = 1u;
-  if (desc.usage & static_cast<HardwareBufferUsage>(
-                       HardwareBufferUsageFlags::kFrameBufferAttachment)) {
+  if (desc.usage & HardwareBufferUsageFlags::kFrameBufferAttachment) {
     ahb_desc.usage |= AHARDWAREBUFFER_USAGE_GPU_FRAMEBUFFER;
   }
-  if (desc.usage & static_cast<HardwareBufferUsage>(
-                       HardwareBufferUsageFlags::kCompositorOverlay)) {
+  if (desc.usage & HardwareBufferUsageFlags::kCompositorOverlay) {
     ahb_desc.usage |= AHARDWAREBUFFER_USAGE_COMPOSER_OVERLAY;
   }
-  if (desc.usage & static_cast<HardwareBufferUsage>(
-                       HardwareBufferUsageFlags::kSampledImage)) {
+  if (desc.usage & HardwareBufferUsageFlags::kSampledImage) {
     ahb_desc.usage |= AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE;
   }
   return ahb_desc;
@@ -80,12 +77,9 @@ HardwareBufferDescriptor HardwareBufferDescriptor::MakeForSwapchainImage(
   desc.format = HardwareBufferFormat::kR8G8B8A8UNormInt;
   // Zero sized hardware buffers cannot be allocated.
   desc.size = size.Max(ISize{1u, 1u});
-  desc.usage =
-      static_cast<HardwareBufferUsage>(
-          HardwareBufferUsageFlags::kFrameBufferAttachment) |
-      static_cast<HardwareBufferUsage>(
-          HardwareBufferUsageFlags::kCompositorOverlay) |
-      static_cast<HardwareBufferUsage>(HardwareBufferUsageFlags::kSampledImage);
+  desc.usage = HardwareBufferUsageFlags::kFrameBufferAttachment |
+               HardwareBufferUsageFlags::kCompositorOverlay |
+               HardwareBufferUsageFlags::kSampledImage;
   return desc;
 }
 
