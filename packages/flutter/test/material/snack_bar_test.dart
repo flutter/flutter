@@ -2965,7 +2965,7 @@ void main() {
     await expectLater(find.byType(MaterialApp), matchesGoldenFile('m3_snack_bar.scaffold.nested.png'));
     final Offset snackBarTopRight = tester.getTopRight(find.byType(SnackBar));
 
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(snackBarTopRight.dy, 465.0);
     }
   });
