@@ -1794,18 +1794,7 @@ class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescriptio
     super.position,
     this.scrollDelta = Offset.zero,
     super.embedderId,
-    this.whenIgnored,
   });
-
-  /// Callback called when this event is [ignore]d.
-  final Function? whenIgnored;
-
-  /// Function to call when this event is ignored by the framework.
-  void ignore() {
-    if (whenIgnored != null) {
-      whenIgnored!();
-    }
-  }
 
   @override
   final Offset scrollDelta;
@@ -1845,14 +1834,6 @@ class _TransformedPointerScrollEvent extends _TransformedPointerEvent with _Copy
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Offset>('scrollDelta', scrollDelta));
   }
-
-  @override
-  void ignore() {
-    return original.ignore();
-  }
-
-  @override
-  Function? get whenIgnored => original.whenIgnored;
 }
 
 mixin _CopyPointerScrollInertiaCancelEvent on PointerEvent {
