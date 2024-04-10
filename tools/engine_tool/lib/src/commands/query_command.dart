@@ -15,6 +15,7 @@ final class QueryCommand extends CommandBase {
   QueryCommand({
     required super.environment,
     required this.configs,
+    super.verbose = false,
   }) {
     // Add options here that are common to all queries.
     argParser
@@ -33,7 +34,6 @@ final class QueryCommand extends CommandBase {
             if (entry.value.canRunOn(environment.platform)) entry.key,
         ],
         allowedHelp: <String, String>{
-          // TODO(zanderso): Add human readable descriptions to the json files.
           for (final MapEntry<String, BuilderConfig> entry in configs.entries)
             if (entry.value.canRunOn(environment.platform))
               entry.key: entry.value.path,
@@ -43,10 +43,12 @@ final class QueryCommand extends CommandBase {
     addSubcommand(QueryBuildersCommand(
       environment: environment,
       configs: configs,
+      verbose: verbose,
     ));
     addSubcommand(QueryTargetsCommand(
       environment: environment,
       configs: configs,
+      verbose: verbose,
     ));
   }
 
@@ -67,6 +69,7 @@ final class QueryBuildersCommand extends CommandBase {
   QueryBuildersCommand({
     required super.environment,
     required this.configs,
+    super.verbose = false,
   });
 
   /// Build configurations loaded from the engine from under ci/builders.
@@ -85,7 +88,6 @@ final class QueryBuildersCommand extends CommandBase {
     // current platform.
     final bool all = parent!.argResults![allFlag]! as bool;
     final String? builderName = parent!.argResults![builderFlag] as String?;
-    final bool verbose = globalResults![verboseFlag]! as bool;
     if (!verbose) {
       environment.logger.status(
         'Add --verbose to see detailed information about each builder',
@@ -133,13 +135,14 @@ final class QueryTargetsCommand extends CommandBase {
   QueryTargetsCommand({
     required super.environment,
     required this.configs,
+    super.verbose = false,
   }) {
-    builds = runnableBuilds(environment, configs);
+    builds = runnableBuilds(environment, configs, verbose);
     debugCheckBuilds(builds);
     addConfigOption(
       environment,
       argParser,
-      runnableBuilds(environment, configs),
+      builds,
     );
     argParser.addFlag(
       testOnlyFlag,

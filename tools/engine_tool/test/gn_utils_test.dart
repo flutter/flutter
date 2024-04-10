@@ -84,7 +84,7 @@ void main() {
     );
     try {
       final Environment env = testEnv.environment;
-      final List<Build> builds = runnableBuilds(env, configs);
+      final List<Build> builds = runnableBuilds(env, configs, true);
       final Build? build = builds.where(
         (Build build) => build.name == 'linux/host_debug',
       ).firstOrNull;
@@ -104,7 +104,7 @@ void main() {
     );
     try {
       final Environment env = testEnv.environment;
-      final List<Build> builds = runnableBuilds(env, configs);
+      final List<Build> builds = runnableBuilds(env, configs, true);
       final Build? build = builds.where(
         (Build build) => build.name == 'linux/host_debug',
       ).firstOrNull;
