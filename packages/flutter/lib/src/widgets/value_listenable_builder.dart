@@ -111,10 +111,10 @@ class ValueListenableBuilder<T> extends StatefulWidget {
   /// final ValueListenable<int> count = ValueNotifier<int>(0);
   ///
   /// bool shouldRebuild(int? last, int current) {
-  ///   return current % 2 == 0; // Rebuild only on even count values.
-  /// };
+  ///   return current.isEven; // Rebuild only on even count values.
+  /// }
   ///
-  /// ValueListenableBuilder<int>(
+  /// final ValueListenableBuilder<int> builder = ValueListenableBuilder<int>(
   ///   valueListenable: count,
   ///   builder: (BuildContext context, int value, Widget? child) {
   ///     return Text('$value');
