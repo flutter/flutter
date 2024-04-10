@@ -25,11 +25,15 @@ dev_dependencies:
   path: any
 
 dependency_overrides:
+  _fe_analyzer_shared:
+    path: ../../third_party/dart/pkg/_fe_analyzer_shared
   args:
     path: ../../third_party/dart/third_party/pkg/args
   collection:
     path: ../../third_party/dart/third_party/pkg/collection
   kernel:
     path: ../../third_party/dart/pkg/kernel
+  meta:
+    path: ../../third_party/dart/pkg/meta
   path:
     path: ../../third_party/dart/third_party/pkg/path
