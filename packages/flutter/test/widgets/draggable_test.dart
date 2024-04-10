@@ -3152,7 +3152,7 @@ void main() {
     final Offset secondLocation = tester.getCenter(find.text('Target 1'));
     await gesture.moveTo(secondLocation);
     await tester.pump();
-    
+
     // Expect that the feedback widget is a descendant of the root overlay,
     // but not a descendant of the child overlay.
     expect(
