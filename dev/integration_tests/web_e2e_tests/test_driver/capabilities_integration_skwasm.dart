@@ -9,7 +9,7 @@ import 'package:integration_test/integration_test.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('isCanvaskit returns false in Skwasm mode', (WidgetTester tester) async {
+  testWidgets('capabilities are set properly in Skwasm mode', (WidgetTester tester) async {
     await tester.pumpAndSettle();
     expect(isCanvasKit, false);
     expect(isSkwasm, true);
