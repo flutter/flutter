@@ -107,7 +107,6 @@ final List<String> flutterTestArgs = <String>[];
 /// if such flags are provided to `test.dart`.
 final Map<String,String> localEngineEnv = <String, String>{};
 
-const String kShardKey = 'SHARD';
 const String kTestHarnessShardName = 'test_harness_tests';
 
 const String CIRRUS_TASK_NAME = 'CIRRUS_TASK_NAME';
