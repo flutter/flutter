@@ -33,19 +33,19 @@ const String kSubshardKey = 'SUBSHARD';
 /// if such flags are provided to `test.dart`.
 final Map<String,String> localEngineEnv = <String, String>{};
 
-
-// The seed used to shuffle tests. If not passed with
-// --test-randomize-ordering-seed=<seed> on the command line, it will be set the
-// first time it is accessed. Pass zero to turn off shuffling.
 String? _shuffleSeed;
+
 String get shuffleSeed {
   if (_shuffleSeed == null) {
-    // Change the seed at 7am, UTC.
-    final DateTime seedTime = DateTime.now().toUtc().subtract(const Duration(hours: 7));
-    // Generates YYYYMMDD as the seed, so that testing continues to fail for a
-    // day after the seed changes, and on other days the seed can be used to
-    // replicate failures.
-    _shuffleSeed = '${seedTime.year * 10000 + seedTime.month * 100 + seedTime.day}';
+    // Attempt to load from the command-line argument
+    final String? seedArg = Platform.environment['--test-randomize-ordering-seed'];
+    if (seedArg != null) {
+      _shuffleSeed = seedArg;
+    } else {
+      // Fallback to the original time-based seed generation
+      final DateTime seedTime = DateTime.now().toUtc().subtract(const Duration(hours: 7));
+      _shuffleSeed = '${seedTime.year * 10000 + seedTime.month * 100 + seedTime.day}';
+    }
   }
   return _shuffleSeed!;
 }
