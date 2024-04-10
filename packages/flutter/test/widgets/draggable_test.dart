@@ -3105,71 +3105,71 @@ void main() {
     });
 
   testWidgets('Drag feedback is put on root overlay with [rootOverlay] flag', (WidgetTester tester) async {
-      final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
-      final GlobalKey<NavigatorState> childNavigatorKey = GlobalKey<NavigatorState>();
-      // Create a [MaterialApp], with a nested [Navigator], which has the
-      // [Draggable].
-      await tester.pumpWidget(MaterialApp(
-        navigatorKey: rootNavigatorKey,
-        home: Column(
-          children: <Widget>[
-            SizedBox(
-              height: 200.0,
-              child: Navigator(
-                key: childNavigatorKey,
-                onGenerateRoute: (RouteSettings settings) {
-                  if (settings.name == '/') {
-                    return MaterialPageRoute<void>(
-                      settings: settings,
-                      builder: (BuildContext context) => const LongPressDraggable<int>(
-                        data: 1,
-                        feedback: Text('Dragging'),
-                        rootOverlay: true,
-                        child: Text('Source'),
-                      ),
-                    );
-                  }
-                  throw UnsupportedError('Unsupported route: $settings');
-                },
-              ),
-            ),
-            DragTarget<int>(
-              builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
-                return const SizedBox(
-                    height: 300.0, child: Center(child: Text('Target 1')),
-                );
+    final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> childNavigatorKey = GlobalKey<NavigatorState>();
+    // Create a [MaterialApp], with a nested [Navigator], which has the
+    // [Draggable].
+    await tester.pumpWidget(MaterialApp(
+      navigatorKey: rootNavigatorKey,
+      home: Column(
+        children: <Widget>[
+          SizedBox(
+            height: 200.0,
+            child: Navigator(
+              key: childNavigatorKey,
+              onGenerateRoute: (RouteSettings settings) {
+                if (settings.name == '/') {
+                  return MaterialPageRoute<void>(
+                    settings: settings,
+                    builder: (BuildContext context) => const LongPressDraggable<int>(
+                      data: 1,
+                      feedback: Text('Dragging'),
+                      rootOverlay: true,
+                      child: Text('Source'),
+                    ),
+                  );
+                }
+                throw UnsupportedError('Unsupported route: $settings');
               },
             ),
-          ],
-        ),
-      ));
+          ),
+          DragTarget<int>(
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+              return const SizedBox(
+                  height: 300.0, child: Center(child: Text('Target 1')),
+              );
+            },
+          ),
+        ],
+      ),
+    ));
 
-      final Offset firstLocation = tester.getCenter(find.text('Source'));
-      final TestGesture gesture =
-          await tester.startGesture(firstLocation, pointer: 7);
-      await tester.pump(kLongPressTimeout);
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture =
+        await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump(kLongPressTimeout);
 
-      final Offset secondLocation = tester.getCenter(find.text('Target 1'));
-      await gesture.moveTo(secondLocation);
-      await tester.pump();
-
-      // Expect that the feedback widget is a descendant of the root overlay,
-      // but not a descendant of the child overlay.
-      expect(
-        find.descendant(
-          of: find.byType(Overlay).first,
-          matching: find.text('Dragging'),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: find.byType(Overlay).last,
-          matching: find.text('Dragging'),
-        ),
-        findsNothing,
-      );
-    });
+    final Offset secondLocation = tester.getCenter(find.text('Target 1'));
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+    
+    // Expect that the feedback widget is a descendant of the root overlay,
+    // but not a descendant of the child overlay.
+    expect(
+      find.descendant(
+        of: find.byType(Overlay).first,
+        matching: find.text('Dragging'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byType(Overlay).last,
+        matching: find.text('Dragging'),
+      ),
+      findsNothing,
+    );
+  });
 
   testWidgets('configurable DragTarget hit test behavior', (WidgetTester tester) async {
     const HitTestBehavior hitTestBehavior = HitTestBehavior.opaque;
