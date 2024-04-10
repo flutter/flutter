@@ -7,10 +7,6 @@ the sub-build-generated artifacts explicitly. The Build Definition Language, Eng
 Recipes V2 and the generation of artifacts using GN+Ninja set the groundwork
 for efficient builds with dependency reusability.
 
-**Author: Godofredo Contreras (godofredoc)**\
-**Go Link: flutter.dev/go/engine-build-definition-language**\
-**Created:** 01/2023   /  **Last updated:** 04/2023
-
 ## Glossary
 
 * **[recipes](https://github.com/luci/recipes-py)** - domain specific
@@ -143,13 +139,14 @@ The following is the high level structure of the build component:
            "generators": [],
            "ninja": {},
            "tests": []
+           "postsubmit_overrides": {}
 }
 ```
 
 Each build element will be translated to an independent sub-build and its
 entire out directory will be uploaded to CAS.
 
-`gn`, `ninja`, `generators` and `tests` properties are optional. Gn and
+`gn`, `ninja`, `generators`, `tests` and `postsubmit_overrides` properties are optional. Gn and
 ninja properties can be used without generators or tests. Generators with
 no gn and ninja properties is also supported.
 
@@ -345,6 +342,33 @@ to an [environment variable "token_path"](https://flutter.googlesource.com/recip
 Note that to keep the recipes generic they don’t know anything about what
 the test script is doing and it is the responsibility of the test script to
 copy the relevant files to the FLUTTER\_LOGS\_DIR directory.
+
+#### postsubmit_overrides
+
+Used to override top level build properties for postsubmit environments. An example is when we need to run different gn commands for presubmit and postsubmit
+environments. Currently only `gn` override is supported.
+
+```json
+{
+   "name": "host_debug",
+   "gn": [
+      "--runtime-mode",
+      "debug",
+      "--prebuilt-dart-sdk",
+      "--build-embedder-examples"
+   ],
+   "ninja": {},
+   "postsubmit_overrides": {
+     "gn": [
+        "--runtime-mode",
+        "release"
+     ],
+   }
+}
+```
+
+The example above shows how to override the gn command for postsubmit builds of host_debug.
+
 
 #### Generators
 
