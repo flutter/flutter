@@ -113,6 +113,62 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
+  testWidgets('pop scope can have Object? generic type while route has stricter generic type', (WidgetTester tester) async {
+    Object? receivedResult;
+    const int poppedResult = 13;
+    final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        initialRoute: '/',
+        navigatorKey: nav,
+        home: Scaffold(
+          body: PopScope<Object?>(
+            canPop: false,
+            onPopInvoked: (bool didPop, Object? result) {
+              receivedResult = result;
+            },
+            child: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text('Home/PopScope Page'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    nav.currentState!.push(
+      MaterialPageRoute<int>(
+        builder: (BuildContext context) {
+          return Scaffold(
+            body: PopScope<Object?>(
+              canPop: false,
+              onPopInvoked: (bool didPop, Object? result) {
+                receivedResult = result;
+              },
+              child: const Center(
+                child: Text('new page'),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('new page'), findsOneWidget);
+
+
+    nav.currentState!.maybePop(poppedResult);
+    await tester.pumpAndSettle();
+    expect(receivedResult, poppedResult);
+  },
+    variant: TargetPlatformVariant.all(),
+  );
+
   testWidgets('toggling canPop on secondary route allows/prevents backs', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
     bool canPop = true;
@@ -151,7 +207,7 @@ void main() {
                 setState = stateSetter;
                 return PopScope<Object?>(
                   canPop: canPop,
-                  onPopInvoked: (bool didPop, _) {
+                  onPopInvoked: (bool didPop, Object? result) {
                     lastPopSuccess = didPop;
                   },
                   child: const Center(

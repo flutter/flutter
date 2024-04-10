@@ -106,7 +106,9 @@ class _PopScopeState<T> extends State<PopScope<T>> implements PopEntry<T> {
   ModalRoute<dynamic>? _route;
 
   @override
-  PopInvokedCallback<T>? get onPopInvoked => widget.onPopInvoked;
+  void onPopInvoked(bool didPop, T? result) {
+    widget.onPopInvoked?.call(didPop, result);
+  }
 
   @override
   late final ValueNotifier<bool> canPopNotifier;

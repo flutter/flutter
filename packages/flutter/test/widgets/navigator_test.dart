@@ -4910,7 +4910,7 @@ void main() {
                 builderSetState = setState;
                 return PopScope<Object?>(
                   canPop: canPop(),
-                  onPopInvoked: (bool success, _) {
+                  onPopInvoked: (bool success, Object? result) {
                     if (success || pages.last == _Page.noPop) {
                       return;
                     }
@@ -5026,7 +5026,7 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return PopScope<Object?>(
                   canPop: canPop(),
-                  onPopInvoked: (bool success, _) {
+                  onPopInvoked: (bool success, Object? result) {
                     if (success || pages.last == _Page.noPop) {
                       return;
                     }
@@ -5119,7 +5119,7 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return PopScope<Object?>(
                   canPop: canPop(),
-                  onPopInvoked: (bool success, _) {
+                  onPopInvoked: (bool success, Object? result) {
                     if (success || pages.last == _PageWithYesPop.noPop) {
                       return;
                     }
@@ -5189,7 +5189,7 @@ void main() {
                             child: _LinksPage(
                               title: 'Can pop page',
                               canPop: true,
-                              onPopInvoked: (bool didPop, _) {
+                              onPopInvoked: (bool didPop, void result) {
                                 onPopInvokedCallCount += 1;
                               },
                             ),

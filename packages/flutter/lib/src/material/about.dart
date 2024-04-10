@@ -1230,9 +1230,9 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
   }
 
   MaterialPageRoute<void> _detailPageRoute(Object? arguments) {
-    return MaterialPageRoute<dynamic>(builder: (BuildContext context) {
-      return PopScope<dynamic>(
-        onPopInvoked: (bool didPop, dynamic result) {
+    return MaterialPageRoute<void>(builder: (BuildContext context) {
+      return PopScope<void>(
+        onPopInvoked: (bool didPop, void result) {
           // No need for setState() as rebuild happens on navigation pop.
           focus = _Focus.master;
         },

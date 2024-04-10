@@ -1669,7 +1669,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   final List<WillPopCallback> _willPopCallbacks = <WillPopCallback>[];
 
-  final Set<PopEntry<T>> _popEntries = <PopEntry<T>>{};
+  // Holding as Object? instead of T so that PopScope in this route can be
+  // declared with any supertype of T.
+  final Set<PopEntry<Object?>> _popEntries = <PopEntry<Object?>>{};
 
   /// Returns [RoutePopDisposition.doNotPop] if any of callbacks added with
   /// [addScopedWillPopCallback] returns either false or null. If they all
@@ -1724,7 +1726,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///    method checks.
   @override
   RoutePopDisposition get popDisposition {
-    for (final PopEntry<T> popEntry in _popEntries) {
+    for (final PopEntry<Object?> popEntry in _popEntries) {
       if (!popEntry.canPopNotifier.value) {
         return RoutePopDisposition.doNotPop;
       }
@@ -1735,8 +1737,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   void onPopInvoked(bool didPop, T? result) {
-    for (final PopEntry<T> popEntry in _popEntries) {
-      popEntry.onPopInvoked?.call(didPop, result);
+    for (final PopEntry<Object?> popEntry in _popEntries) {
+      popEntry.onPopInvoked(didPop, result);
     }
   }
 
@@ -1793,7 +1795,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// See also:
   ///
   ///  * [unregisterPopEntry], which performs the opposite operation.
-  void registerPopEntry(PopEntry<T> popEntry) {
+  void registerPopEntry(PopEntry<Object?> popEntry) {
     _popEntries.add(popEntry);
     popEntry.canPopNotifier.addListener(_handlePopEntryChange);
     _handlePopEntryChange();
@@ -1804,7 +1806,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// See also:
   ///
   ///  * [registerPopEntry], which performs the opposite operation.
-  void unregisterPopEntry(PopEntry<T> popEntry) {
+  void unregisterPopEntry(PopEntry<Object?> popEntry) {
     _popEntries.remove(popEntry);
     popEntry.canPopNotifier.removeListener(_handlePopEntryChange);
     _handlePopEntryChange();
@@ -2427,7 +2429,11 @@ typedef PopInvokedCallback<T> = void Function(bool didPop, T? result);
 ///  * [ModalRoute.unregisterPopEntry], which unregisters instances of this.
 abstract class PopEntry<T> {
   /// {@macro flutter.widgets.PopScope.onPopInvoked}
-  PopInvokedCallback<T>? get onPopInvoked;
+  // This can't be a function getter since dart vm doesn't allow upcasting
+  // generic type of the function getter. This prevents customers from declaring
+  // PopScope with any generic type that is subtype of ModalRoute._popEntries.
+  // See https://github.com/dart-lang/sdk/issues/55427.
+  void onPopInvoked(bool didPop, T? result);
 
   /// {@macro flutter.widgets.PopScope.canPop}
   ValueListenable<bool> get canPopNotifier;
