@@ -1450,12 +1450,17 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   Future<void> enableObservatory() async {
     assert(debuggingOptions.serveObservatory);
-    final List<Future<vm_service.Response?>> serveObservatoryRequests = <Future<vm_service.Response?>>[
-      for (final FlutterDevice? device in flutterDevices)
-        if (device != null)
-          // Notify the VM service if the user wants Observatory to be served.
-          device.vmService?.callMethodWrapper('_serveObservatory') ?? Future<vm_service.Response?>.value(),
-    ];
+    final List<Future<vm_service.Response?>> serveObservatoryRequests = <Future<vm_service.Response?>>[];
+    for (final FlutterDevice? device in flutterDevices) {
+      if (device == null) {
+        continue;
+      }
+      // Notify the VM service if the user wants Observatory to be served.
+      serveObservatoryRequests.add(
+        device.vmService?.callMethodWrapper('_serveObservatory') ??
+          Future<vm_service.Response?>.value(),
+      );
+    }
     try {
       await Future.wait(serveObservatoryRequests);
     } on vm_service.RPCError catch (e) {

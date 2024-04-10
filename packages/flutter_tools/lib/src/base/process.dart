@@ -69,10 +69,13 @@ class _DefaultShutdownHooks implements ShutdownHooks {
     );
     _shutdownHooksRunning = true;
     try {
-      final List<Future<dynamic>> futures = <Future<dynamic>>[
-        for (final ShutdownHook shutdownHook in registeredHooks)
-          if (shutdownHook() case final Future<dynamic> result) result,
-      ];
+      final List<Future<dynamic>> futures = <Future<dynamic>>[];
+      for (final ShutdownHook shutdownHook in registeredHooks) {
+        final FutureOr<dynamic> result = shutdownHook();
+        if (result is Future<dynamic>) {
+          futures.add(result);
+        }
+      }
       await Future.wait<dynamic>(futures);
     } finally {
       _shutdownHooksRunning = false;

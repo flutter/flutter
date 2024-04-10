@@ -811,11 +811,14 @@ class AndroidGradleBuilder implements AndroidBuilder {
       _logger.printError(result.stderr, wrap: false);
       return const <String>[];
     }
-    return <String>[
-      for (final String line in LineSplitter.split(result.stdout))
-        if (_kBuildVariantRegex.firstMatch(line) case final RegExpMatch match)
-          match.namedGroup(_kBuildVariantRegexGroupName)!,
-    ];
+    final List<String> options = <String>[];
+    for (final String line in LineSplitter.split(result.stdout)) {
+      final RegExpMatch? match = _kBuildVariantRegex.firstMatch(line);
+      if (match != null) {
+        options.add(match.namedGroup(_kBuildVariantRegexGroupName)!);
+      }
+    }
+    return options;
   }
 
   @override

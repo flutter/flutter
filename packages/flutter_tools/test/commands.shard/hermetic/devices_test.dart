@@ -836,12 +836,14 @@ class _FakeDeviceManager extends DeviceManager {
 
   @override
   Future<List<Device>> getAllDevices({DeviceDiscoveryFilter? filter}) async {
-    final DeviceConnectionInterface? interface = filter?.deviceConnectionInterface;
-    return <Device>[
-      for (final FakeDeviceJsonData deviceJson in fakeDevices)
-        if (interface == null || deviceJson.dev.connectionInterface == interface)
-          deviceJson.dev,
-    ];
+    final List<Device> devices = <Device>[];
+    for (final FakeDeviceJsonData deviceJson in fakeDevices) {
+      if (filter?.deviceConnectionInterface == null ||
+          deviceJson.dev.connectionInterface == filter?.deviceConnectionInterface) {
+        devices.add(deviceJson.dev);
+      }
+    }
+    return devices;
   }
 
   @override

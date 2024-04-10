@@ -62,14 +62,19 @@ class ProxyValidator extends DoctorValidator {
   }
 
   Future<List<String>> _getLoopbackAddresses() async {
+    final List<String> loopBackAddresses = <String>['localhost'];
+
     final List<NetworkInterface> networkInterfaces =
       await listNetworkInterfaces(includeLinkLocal: true, includeLoopback: true);
 
-    return <String>[
-      'localhost',
-      for (final NetworkInterface networkInterface in networkInterfaces)
-        for (final InternetAddress internetAddress in networkInterface.addresses)
-          if (internetAddress.isLoopback) internetAddress.address,
-    ];
+    for (final NetworkInterface networkInterface in networkInterfaces) {
+      for (final InternetAddress internetAddress in networkInterface.addresses) {
+        if (internetAddress.isLoopback) {
+          loopBackAddresses.add(internetAddress.address);
+        }
+      }
+    }
+
+    return loopBackAddresses;
   }
 }

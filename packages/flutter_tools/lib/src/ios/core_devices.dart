@@ -117,12 +117,15 @@ class IOSCoreDeviceControl {
   Future<List<IOSCoreDevice>> getCoreDevices({
     Duration timeout = const Duration(seconds: _minimumTimeoutInSeconds),
   }) async {
+    final List<IOSCoreDevice> devices = <IOSCoreDevice>[];
+
     final List<Object?> devicesSection = await _listCoreDevices(timeout: timeout);
-    return <IOSCoreDevice>[
-      for (final Object? deviceObject in devicesSection)
-        if (deviceObject is Map<String, Object?>)
-          IOSCoreDevice.fromBetaJson(deviceObject, logger: _logger),
-    ];
+    for (final Object? deviceObject in devicesSection) {
+      if (deviceObject is Map<String, Object?>) {
+        devices.add(IOSCoreDevice.fromBetaJson(deviceObject, logger: _logger));
+      }
+    }
+    return devices;
   }
 
   /// Executes `devicectl` command to get list of apps installed on the device.
@@ -189,12 +192,15 @@ class IOSCoreDeviceControl {
     required String deviceId,
     String? bundleId,
   }) async {
+    final List<IOSCoreDeviceInstalledApp> apps = <IOSCoreDeviceInstalledApp>[];
+
     final List<Object?> appsData = await _listInstalledApps(deviceId: deviceId, bundleId: bundleId);
-    return <IOSCoreDeviceInstalledApp>[
-      for (final Object? appObject in appsData)
-        if (appObject is Map<String, Object?>)
-          IOSCoreDeviceInstalledApp.fromBetaJson(appObject),
-    ];
+    for (final Object? appObject in appsData) {
+      if (appObject is Map<String, Object?>) {
+        apps.add(IOSCoreDeviceInstalledApp.fromBetaJson(appObject));
+      }
+    }
+    return apps;
   }
 
   Future<bool> isAppInstalled({
@@ -395,12 +401,15 @@ class IOSCoreDevice {
     Map<String, Object?> data, {
     required Logger logger,
   }) {
-    final List<_IOSCoreDeviceCapability> capabilitiesList = <_IOSCoreDeviceCapability>[
-      if (data['capabilities'] case final List<Object?> capabilitiesData)
-        for (final Object? capabilityData in capabilitiesData)
-          if (capabilityData != null && capabilityData is Map<String, Object?>)
-            _IOSCoreDeviceCapability.fromBetaJson(capabilityData),
-    ];
+    final List<_IOSCoreDeviceCapability> capabilitiesList = <_IOSCoreDeviceCapability>[];
+    if (data['capabilities'] is List<Object?>) {
+      final List<Object?> capabilitiesData = data['capabilities']! as List<Object?>;
+      for (final Object? capabilityData in capabilitiesData) {
+        if (capabilityData != null && capabilityData is Map<String, Object?>) {
+          capabilitiesList.add(_IOSCoreDeviceCapability.fromBetaJson(capabilityData));
+        }
+      }
+    }
 
     _IOSCoreDeviceConnectionProperties? connectionProperties;
     if (data['connectionProperties'] is Map<String, Object?>) {
@@ -704,17 +713,20 @@ class _IOSCoreDeviceHardwareProperties {
     required Logger logger,
   }) {
     _IOSCoreDeviceCPUType? cpuType;
-    if (data['cpuType'] case final Map<String, Object?> betaJson) {
-      cpuType = _IOSCoreDeviceCPUType.fromBetaJson(betaJson);
+    if (data['cpuType'] is Map<String, Object?>) {
+      cpuType = _IOSCoreDeviceCPUType.fromBetaJson(data['cpuType']! as Map<String, Object?>);
     }
 
     List<_IOSCoreDeviceCPUType>? supportedCPUTypes;
-    if (data['supportedCPUTypes'] case final List<Object?> values) {
-      supportedCPUTypes = <_IOSCoreDeviceCPUType>[
-        for (final Object? cpuTypeData in values)
-          if (cpuTypeData is Map<String, Object?>)
-            _IOSCoreDeviceCPUType.fromBetaJson(cpuTypeData),
-      ];
+    if (data['supportedCPUTypes'] is List<Object?>) {
+      final List<Object?> values = data['supportedCPUTypes']! as List<Object?>;
+      final List<_IOSCoreDeviceCPUType> cpuTypes = <_IOSCoreDeviceCPUType>[];
+      for (final Object? cpuTypeData in values) {
+        if (cpuTypeData is Map<String, Object?>) {
+          cpuTypes.add(_IOSCoreDeviceCPUType.fromBetaJson(cpuTypeData));
+        }
+      }
+      supportedCPUTypes = cpuTypes;
     }
 
     List<int>? supportedDeviceFamilies;

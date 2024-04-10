@@ -101,11 +101,14 @@ class CustomDeviceLogReader extends DeviceLogReader {
   /// [logLines] as done.
   @override
   Future<void> dispose() async {
-    final List<Future<void>> futures = <Future<void>>[
-      for (final StreamSubscription<String> subscription in subscriptions)
-        subscription.cancel(),
-      logLinesController.close(),
-    ];
+    final List<Future<void>> futures = <Future<void>>[];
+
+    for (final StreamSubscription<String> subscription in subscriptions) {
+      futures.add(subscription.cancel());
+    }
+
+    futures.add(logLinesController.close());
+
     await Future.wait(futures);
   }
 

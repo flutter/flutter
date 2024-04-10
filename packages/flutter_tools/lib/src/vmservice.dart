@@ -993,11 +993,14 @@ class FlutterVmService {
       throw VmServiceDisappearedException();
     }
 
-    return <vm_service.IsolateRef>[
-      for (final FlutterView flutterView in flutterViews)
-        if (flutterView.uiIsolate case final vm_service.IsolateRef uiIsolate)
-          uiIsolate,
-    ];
+    final List<vm_service.IsolateRef> refs = <vm_service.IsolateRef>[];
+    for (final FlutterView flutterView in flutterViews) {
+      final vm_service.IsolateRef? uiIsolate = flutterView.uiIsolate;
+      if (uiIsolate != null) {
+        refs.add(uiIsolate);
+      }
+    }
+    return refs;
   }
 
   /// Attempt to retrieve the isolate with id [isolateId], or `null` if it has

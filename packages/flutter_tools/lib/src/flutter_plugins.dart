@@ -309,11 +309,14 @@ public final class GeneratedPluginRegistrant {
 ''';
 
 List<Map<String, Object?>> _extractPlatformMaps(List<Plugin> plugins, String type) {
-  return <Map<String, Object?>>[
-    for (final Plugin plugin in plugins)
-      if (plugin.platforms[type] case final PluginPlatform platformPlugin)
-        platformPlugin.toMap(),
-  ];
+  final List<Map<String, Object?>> pluginConfigs = <Map<String, Object?>>[];
+  for (final Plugin p in plugins) {
+    final PluginPlatform? platformPlugin = p.platforms[type];
+    if (platformPlugin != null) {
+      pluginConfigs.add(platformPlugin.toMap());
+    }
+  }
+  return pluginConfigs;
 }
 
 Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {

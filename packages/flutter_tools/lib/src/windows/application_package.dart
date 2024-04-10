@@ -52,10 +52,12 @@ abstract class WindowsApp extends ApplicationPackage {
       globals.printError('Invalid prebuilt Windows app. Unable to extract from archive.');
       return null;
     }
-    final List<FileSystemEntity> exeFilesFound = <FileSystemEntity>[
-      for (final FileSystemEntity file in tempDir.listSync())
-        if (file.basename.endsWith('.exe')) file,
-    ];
+    final List<FileSystemEntity> exeFilesFound = <FileSystemEntity>[];
+    for (final FileSystemEntity file in tempDir.listSync()) {
+      if (file.basename.endsWith('.exe')) {
+        exeFilesFound.add(file);
+      }
+    }
 
     if (exeFilesFound.isEmpty) {
       globals.printError('Cannot find .exe files in the zip archive.');
