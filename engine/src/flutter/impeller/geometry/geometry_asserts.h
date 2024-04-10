@@ -16,8 +16,41 @@
 #include "impeller/geometry/vector.h"
 
 inline bool NumberNear(double a, double b) {
-  static const double epsilon = 1e-3;
-  return (a > (b - epsilon)) && (a < (b + epsilon));
+  if (a == b) {
+    return true;
+  }
+  if (std::isnan(a) || std::isnan(b)) {
+    return false;
+  }
+
+  // We used to compare based on an absolute difference of 1e-3 which
+  // would allow up to 10 bits of mantissa difference in a float
+  // (leaving 14 bits of accuracy being tested). Some numbers in the tests
+  // will fail with a bit difference of up to 19 (a little over 4 bits) even
+  // though the numbers print out identically using the float ostream output
+  // at the default output precision. Choosing a max "units of least precision"
+  // of 32 allows up to 5 bits of imprecision.
+  static constexpr float kImpellerTestingMaxULP = 32;
+
+  // We also impose a minimum step size so that cases of comparing numbers
+  // very close to 0.0 don't compute a huge number of ULPs due to the ever
+  // increasing precision near 0. This value is approximately the step size
+  // of numbers going less than 1.0f.
+  static constexpr float kMinimumULPStep = (1.0f / (1 << 24));
+
+  auto adjust_step = [](float v) {
+    return (std::abs(v) < kMinimumULPStep) ? std::copysignf(kMinimumULPStep, v)
+                                           : v;
+  };
+
+  float step_ab = adjust_step(a - std::nexttowardf(a, b));
+  float step_ba = adjust_step(b - std::nexttowardf(b, a));
+
+  float ab_ulps = (a - b) / step_ab;
+  float ba_ulps = (b - a) / step_ba;
+  FML_CHECK(ab_ulps >= 0 && ba_ulps >= 0);
+
+  return (std::min(ab_ulps, ba_ulps) < kImpellerTestingMaxULP);
 }
 
 inline ::testing::AssertionResult MatrixNear(impeller::Matrix a,

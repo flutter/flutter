@@ -44,10 +44,10 @@ TEST(ImporterTest, CanParseUnskinnedGLTF) {
   ASSERT_VECTOR3_NEAR(position, Vector3(-0.0100185, -0.522907, 0.133178));
 
   Vector3 normal = ToVector3(vertex.normal());
-  ASSERT_VECTOR3_NEAR(normal, Vector3(0.556997, -0.810833, 0.179733));
+  ASSERT_VECTOR3_NEAR(normal, Vector3(0.556984, -0.810839, 0.179746));
 
   Vector4 tangent = ToVector4(vertex.tangent());
-  ASSERT_VECTOR4_NEAR(tangent, Vector4(0.155901, -0.110485, -0.981574, 1));
+  ASSERT_VECTOR4_NEAR(tangent, Vector4(0.155911, -0.110495, -0.981572, 1));
 
   Vector2 texture_coords = ToVector2(vertex.texture_coords());
   ASSERT_POINT_NEAR(texture_coords, Vector2(0.727937, 0.713817));

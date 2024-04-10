@@ -2895,22 +2895,6 @@ TEST(RectTest, IRectRound) {
   }
 }
 
-// EXPECT_RECT_NEAR will allow a fixed difference between the values that
-// assumes a compatible range of values being tested. Some of the values
-// below are well outside that range and so if the values are a single
-// "bit" off, then they will differ by far more than the fixed allowable
-// difference. The EXPECT_FLOAT_EQ macro will compare the values and
-// fail only if their difference in mantissa is in the last N bits,
-// which is a range agnostic way to compare floats with allowances for
-// bit errors in computations.
-#define EXPECT_RECT_EQ(a, b)                       \
-  do {                                             \
-    EXPECT_FLOAT_EQ(a.GetLeft(), b.GetLeft());     \
-    EXPECT_FLOAT_EQ(a.GetTop(), b.GetTop());       \
-    EXPECT_FLOAT_EQ(a.GetRight(), b.GetRight());   \
-    EXPECT_FLOAT_EQ(a.GetBottom(), b.GetBottom()); \
-  } while (0)
-
 TEST(RectTest, TransformAndClipBounds) {
   {
     // This matrix should clip no corners.
@@ -2961,7 +2945,7 @@ TEST(RectTest, TransformAndClipBounds) {
 
     Rect expect = Rect::MakeLTRB(142.85715f, 142.85715f, 6553600.f, 6553600.f);
     EXPECT_FALSE(src.TransformAndClipBounds(matrix).IsEmpty());
-    EXPECT_RECT_EQ(src.TransformAndClipBounds(matrix), expect);
+    EXPECT_RECT_NEAR(src.TransformAndClipBounds(matrix), expect);
   }
 
   {
@@ -2987,7 +2971,7 @@ TEST(RectTest, TransformAndClipBounds) {
 
     Rect expect = Rect::MakeLTRB(222.2222f, 222.2222f, 5898373.f, 6553600.f);
     EXPECT_FALSE(src.TransformAndClipBounds(matrix).IsEmpty());
-    EXPECT_RECT_EQ(src.TransformAndClipBounds(matrix), expect);
+    EXPECT_RECT_NEAR(src.TransformAndClipBounds(matrix), expect);
   }
 
   {
@@ -3013,7 +2997,7 @@ TEST(RectTest, TransformAndClipBounds) {
 
     Rect expect = Rect::MakeLTRB(499.99988f, 499.99988f, 5898340.f, 4369400.f);
     EXPECT_FALSE(src.TransformAndClipBounds(matrix).IsEmpty());
-    EXPECT_RECT_EQ(src.TransformAndClipBounds(matrix), expect);
+    EXPECT_RECT_NEAR(src.TransformAndClipBounds(matrix), expect);
   }
 
   {
