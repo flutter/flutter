@@ -4617,6 +4617,16 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
+  // For InputDecorator, focused state should take precedence over hovered state.
+  // For instance, the focused state increases border width (2dp) and applies bright
+  // colors (primary color or error color) while the hovered state has the same border
+  // than the non-focused state (1dp) and use a color a little darker than non-focused
+  // state. On desktop, it is also very common that a text field is focused and hovered
+  // because users often rely on mouse selection.
+  // For other widgets, hovered state takes precedence over focused state, because it
+  // is mainly used to determine the overlay color,
+  // see https://github.com/flutter/flutter/pull/125905.
+
   @override
   TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
@@ -4705,19 +4715,19 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
       return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
     if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
-        return textStyle.copyWith(color: _colors.onErrorContainer);
-      }
       if (states.contains(MaterialState.focused)) {
         return textStyle.copyWith(color: _colors.error);
       }
+      if (states.contains(MaterialState.hovered)) {
+        return textStyle.copyWith(color: _colors.onErrorContainer);
+      }
       return textStyle.copyWith(color: _colors.error);
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
     if (states.contains(MaterialState.focused)) {
       return textStyle.copyWith(color: _colors.primary);
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
     return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
@@ -4729,19 +4739,19 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
       return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
     if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
-        return textStyle.copyWith(color: _colors.onErrorContainer);
-      }
       if (states.contains(MaterialState.focused)) {
         return textStyle.copyWith(color: _colors.error);
       }
+      if (states.contains(MaterialState.hovered)) {
+        return textStyle.copyWith(color: _colors.onErrorContainer);
+      }
       return textStyle.copyWith(color: _colors.error);
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
     if (states.contains(MaterialState.focused)) {
       return textStyle.copyWith(color: _colors.primary);
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
     return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });

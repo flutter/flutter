@@ -8,7 +8,6 @@
 library;
 
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -1631,6 +1630,328 @@ void main() {
         find.byType(InputDecorator),
         matchesGoldenFile('m3_input_decorator.outline_icon_label.rtl.png'),
       );
+    });
+  });
+
+  group('Material3 - InputDecoration label', () {
+    group('for filled text field', () {
+      group('when field is enabled', () {
+        testWidgets('label text has correct style', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          // Current input decorator implementation forces line height to 1.0,
+          // this is not compliant with M3 spec.
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor, height: 1.0);
+          expect(getLabelStyle(tester), expectedStyle);
+        });
+      });
+
+      group('when field is disabled', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                enabled: false,
+                labelText: labelText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.onSurface.withOpacity(0.38));
+        });
+      });
+
+      group('when field is hovered', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.onSurfaceVariant);
+        });
+      });
+
+      group('when field is focused', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.primary);
+        });
+
+        testWidgets('label text has correct color when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/146565.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.primary);
+        });
+      });
+
+      group('when field is in error', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.error);
+        });
+
+        testWidgets('label text has correct color when focused', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.error);
+        });
+
+        testWidgets('label text has correct style when hovered', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.onErrorContainer);
+        });
+
+        testWidgets('label text has correct style when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/146565.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.error);
+        });
+      });
+    });
+
+    group('for outlined text field', () {
+      group('when field is enabled', () {
+        testWidgets('label text has correct style', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          // Current input decorator implementation forces line height to 1.0,
+          // this is not compliant with M3 spec.
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor, height: 1.0);
+          expect(getLabelStyle(tester), expectedStyle);
+        });
+      });
+
+      group('when field is disabled', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                enabled: false,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.onSurface.withOpacity(0.38));
+        });
+      });
+
+      group('when field is hovered', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.onSurfaceVariant);
+        });
+      });
+
+      group('when field is focused', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.primary);
+        });
+
+
+        testWidgets('label text has correct color when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/146565.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.primary);
+        });
+      });
+
+      group('when field is in error', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.error);
+        });
+
+        testWidgets('label text has correct color when focused', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.error);
+        });
+
+        testWidgets('label text has correct color when hovered', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.onErrorContainer);
+        });
+
+        testWidgets('label text has correct color when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/146565.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.error);
+        });
+      });
     });
   });
 
@@ -3955,40 +4276,6 @@ void main() {
 
     final ThemeData theme = Theme.of(tester.element(find.byType(TextField)));
     expect(getIconStyle(tester, Icons.close)?.color, theme.colorScheme.error);
-  });
-
-  testWidgets('InputDecoration default floatingLabelStyle resolves hovered/focused states', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: TextField(
-            focusNode: focusNode,
-            decoration: const InputDecoration(
-              labelText: 'label',
-            ),
-          ),
-        ),
-      ),
-    );
-
-    // Focused.
-    focusNode.requestFocus();
-    await tester.pump(kTransitionDuration);
-    final ThemeData theme = Theme.of(tester.element(find.byType(TextField)));
-    expect(getLabelStyle(tester).color, theme.colorScheme.primary);
-
-    // Hovered.
-    final Offset center = tester.getCenter(find.byType(TextField));
-    final TestGesture gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-    );
-    await gesture.addPointer();
-    await gesture.moveTo(center);
-    await tester.pump(kTransitionDuration);
-    expect(getLabelStyle(tester).color, theme.colorScheme.onSurfaceVariant);
   });
 
   testWidgets('FloatingLabelAlignment.toString()', (WidgetTester tester) async {
