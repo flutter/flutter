@@ -7,7 +7,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -48,7 +47,6 @@ void main() {
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         analytics: fakeAnalytics,
       );
     });
@@ -97,7 +95,6 @@ void main() {
             trackWidgetCreation: true,
           )),
           target: 'main.dart',
-          devtoolsHandler: createNoOpHandler,
           nativeAssetsBuilder: FakeHotRunnerNativeAssetsBuilder(buildRunner),
           analytics: fakeAnalytics,
           nativeAssetsYamlFile: 'foo.yaml',

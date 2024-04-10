@@ -17,7 +17,6 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
-import '../resident_runner.dart';
 import '../tester/flutter_tester.dart';
 import '../version.dart';
 import '../web/web_device.dart';
@@ -365,10 +364,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
         if (machineFlag && topLevelResults.command?.name != 'analyze') {
           throwToolExit('The "--machine" flag is only valid with the "--version" flag or the "analyze --suggestions" command.', exitCode: 2);
         }
-
-        final bool shouldPrintDtdUri = topLevelResults[FlutterGlobalOptions.kPrintDtd] as bool? ?? false;
-        DevtoolsLauncher.instance!.printDtdUri = shouldPrintDtdUri;
-
         await super.runCommand(topLevelResults);
       },
     );

@@ -664,11 +664,9 @@ class AppDomain extends Domain {
     String? projectRootPath,
     String? packagesFilePath,
     String? dillOutputPath,
-    bool ipv6 = false,
     String? isolateFilter,
     bool machine = true,
     String? userIdentifier,
-    bool enableDevTools = true,
     required HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
@@ -699,7 +697,6 @@ class AppDomain extends Domain {
         flutterProject: flutterProject,
         target: target,
         debuggingOptions: options,
-        ipv6: ipv6,
         stayResident: true,
         urlTunneller: options.webEnableExposeUrl! ? daemon.daemonDomain.exposeUrl : null,
         machine: machine,
@@ -717,7 +714,6 @@ class AppDomain extends Domain {
         applicationBinary: applicationBinary,
         projectRootPath: projectRootPath,
         dillOutputPath: dillOutputPath,
-        ipv6: ipv6,
         hostIsIde: true,
         machine: machine,
         analytics: globals.analytics,
@@ -729,7 +725,6 @@ class AppDomain extends Domain {
         target: target,
         debuggingOptions: options,
         applicationBinary: applicationBinary,
-        ipv6: ipv6,
         machine: machine,
       );
     }
@@ -743,7 +738,6 @@ class AppDomain extends Domain {
         return runner.run(
           connectionInfoCompleter: connectionInfoCompleter,
           appStartedCompleter: appStartedCompleter,
-          enableDevTools: enableDevTools,
           route: route,
         );
       },
@@ -1008,7 +1002,6 @@ class DeviceDomain extends Domain {
     registerHandler('takeScreenshot', takeScreenshot);
     registerHandler('startDartDevelopmentService', startDartDevelopmentService);
     registerHandler('shutdownDartDevelopmentService', shutdownDartDevelopmentService);
-    registerHandler('setExternalDevToolsUriForDartDevelopmentService', setExternalDevToolsUriForDartDevelopmentService);
     registerHandler('getDiagnostics', getDiagnostics);
     registerHandler('startVMServiceDiscoveryForAttach', startVMServiceDiscoveryForAttach);
     registerHandler('stopVMServiceDiscoveryForAttach', stopVMServiceDiscoveryForAttach);
@@ -1196,7 +1189,6 @@ class DeviceDomain extends Domain {
       route: _getStringArg(args, 'route'),
       platformArgs: castStringKeyedMap(args['platformArgs']) ?? const <String, Object>{},
       prebuiltApplication: _getBoolArg(args, 'prebuiltApplication') ?? false,
-      ipv6: _getBoolArg(args, 'ipv6') ?? false,
       userIdentifier: _getStringArg(args, 'userIdentifier'),
     );
     return <String, Object?>{
@@ -1244,10 +1236,11 @@ class DeviceDomain extends Domain {
   }
 
   /// Starts DDS for the device.
-  Future<String?> startDartDevelopmentService(Map<String, Object?> args) async {
+  Future<Map<String, Object?>> startDartDevelopmentService(Map<String, Object?> args) async {
     final String? deviceId = _getStringArg(args, 'deviceId', required: true);
     final bool? disableServiceAuthCodes = _getBoolArg(args, 'disableServiceAuthCodes');
     final String vmServiceUriStr = _getStringArg(args, 'vmServiceUri', required: true)!;
+    final bool enableDevTools = _getBoolArg(args, 'enableDevTools') ?? false;
 
     final Device? device = await daemon.deviceDomain._getDevice(deviceId);
     if (device == null) {
@@ -1256,11 +1249,15 @@ class DeviceDomain extends Domain {
 
     await device.dds.startDartDevelopmentService(
       Uri.parse(vmServiceUriStr),
-      logger: globals.logger,
       disableServiceAuthCodes: disableServiceAuthCodes,
+      enableDevTools: enableDevTools,
     );
     unawaited(device.dds.done.whenComplete(() => sendEvent('device.dds.done.$deviceId')));
-    return device.dds.uri?.toString();
+    return <String, Object?>{
+      'ddsUri': device.dds.uri?.toString(),
+      'devToolsUri': device.dds.devToolsUri?.toString(),
+      'dtdUri': device.dds.dtdUri?.toString(),
+    };
   }
 
   /// Starts DDS for the device.
@@ -1272,19 +1269,7 @@ class DeviceDomain extends Domain {
       throw DaemonException("device '$deviceId' not found");
     }
 
-    await device.dds.shutdown();
-  }
-
-  Future<void> setExternalDevToolsUriForDartDevelopmentService(Map<String, Object?> args) async {
-    final String? deviceId = _getStringArg(args, 'deviceId', required: true);
-    final String uri = _getStringArg(args, 'uri', required: true)!;
-
-    final Device? device = await daemon.deviceDomain._getDevice(deviceId);
-    if (device == null) {
-      throw DaemonException("device '$deviceId' not found");
-    }
-
-    device.dds.setExternalDevToolsUri(Uri.parse(uri));
+    device.dds.shutdown();
   }
 
   @override

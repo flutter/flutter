@@ -695,17 +695,20 @@ void main() {
           'deviceId': 'device',
           'disableServiceAuthCodes': false,
           'vmServiceUri': 'http://fake_uri/auth_code',
+          'enableDevTools': true,
         },
       }));
       final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream.asBroadcastStream();
       final DaemonMessage startResponse = await broadcastOutput.firstWhere(_notEvent);
       expect(startResponse.data['id'], 0);
       expect(startResponse.data['error'], isNull);
-      final String? ddsUri = startResponse.data['result'] as String?;
+      final Map<String, Object?>? result = startResponse.data['result'] as Map<String, Object?>?;
+      final String? ddsUri = result!['ddsUri'] as String?;
       expect(ddsUri, fakeDdsUri.toString());
       expect(device.dds.startCalled, true);
       expect(device.dds.startDisableServiceAuthCodes, false);
       expect(device.dds.startVMServiceUri, Uri.parse('http://fake_uri/auth_code'));
+      expect(device.dds.enableDevTools, true);
 
       // dds.done event should be sent to the client.
       ddsDoneCompleter.complete();
@@ -1236,6 +1239,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   bool? startDisableServiceAuthCodes;
 
   bool shutdownCalled = false;
+  bool enableDevTools = false;
 
   @override
   late Future<void> done;
@@ -1244,17 +1248,23 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   Uri? uri;
 
   @override
+  Uri? devToolsUri;
+
+  @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
-    required Logger logger,
-    int? hostPort,
+    int? ddsPort,
+    FlutterDevice? device,
     bool? ipv6,
     bool? disableServiceAuthCodes,
+    bool enableDevTools = false,
     bool cacheStartupProfile = false,
+    String? google3WorkspaceRoot,
   }) async {
     startCalled = true;
     startVMServiceUri = vmServiceUri;
     startDisableServiceAuthCodes = disableServiceAuthCodes;
+    this.enableDevTools = enableDevTools;
   }
 
   @override

@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:native_assets_cli/native_assets_cli_internal.dart'
@@ -86,7 +85,6 @@ void main() {
         devices,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         nativeAssetsBuilder: FakeHotRunnerNativeAssetsBuilder(buildRunner),
         analytics: fakeAnalytics,
       );
@@ -153,7 +151,6 @@ void main() {
         devices,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
         target: 'main.dart',
-        devtoolsHandler: createNoOpHandler,
         nativeAssetsBuilder: FakeHotRunnerNativeAssetsBuilder(buildRunner),
         analytics: fakeAnalytics,
       );

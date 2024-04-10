@@ -57,7 +57,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
         _dartExecutable,
         'devtools',
         '--no-launch-browser',
-        if (printDtdUri) '--print-dtd',
+        '--print-dtd',
         if (vmServiceUri != null) '--vm-uri=$vmServiceUri',
         ...?additionalArguments,
       ]);

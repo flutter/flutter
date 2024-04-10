@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_vm_service_discovery_for_attach.dart';
 import 'package:flutter_tools/src/proxied_devices/devices.dart';
 import 'package:flutter_tools/src/proxied_devices/file_transfer.dart';
+import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -334,6 +335,7 @@ void main() {
       expect(message.data['params'], <String, Object?>{'deviceId': 'device-id', 'userIdentifier': 'user-id'});
     });
 
+    
     group('when launching an app with PrebuiltApplicationPackage', () {
       late MemoryFileSystem fileSystem;
       late FakePrebuiltApplicationPackage applicationPackage;
@@ -496,6 +498,7 @@ void main() {
     });
   });
 
+
   group('ProxiedDevices', () {
     testWithoutContext('devices respects the filter passed in', () async {
       bufferLogger = BufferLogger.test();
@@ -622,9 +625,8 @@ void main() {
       final Future<void> startFuture = dds.startDartDevelopmentService(
         Uri.parse('http://127.0.0.1:100/fake'),
         disableServiceAuthCodes: true,
-        hostPort: 150,
+        ddsPort: 150,
         ipv6: false,
-        logger: bufferLogger,
       );
 
       final DaemonMessage startMessage = await broadcastOutput.first;
@@ -679,9 +681,8 @@ void main() {
       final Future<void> startFuture = dds.startDartDevelopmentService(
         Uri.parse('http://127.0.0.1:100/fake'),
         disableServiceAuthCodes: true,
-        hostPort: 150,
+        ddsPort: 150,
         ipv6: false,
-        logger: bufferLogger,
       );
 
       final DaemonMessage startMessage = await broadcastOutput.first;
@@ -693,7 +694,9 @@ void main() {
         'disableServiceAuthCodes': true,
       });
 
-      serverDaemonConnection.sendResponse(startMessage.data['id']!, 'http://127.0.0.1:300/remote');
+      serverDaemonConnection.sendResponse(startMessage.data['id']!, <String, Object?>{
+        'ddsUri': 'http://127.0.0.1:300/remote',
+      });
 
       await startFuture;
       expect(portForwarder.receivedLocalForwardedPort, 100);
@@ -736,9 +739,8 @@ void main() {
       await dds.startDartDevelopmentService(
         Uri.parse('http://127.0.0.1:100/fake'),
         disableServiceAuthCodes: true,
-        hostPort: 150,
+        ddsPort: 150,
         ipv6: false,
-        logger: bufferLogger,
       );
 
       expect(localDds.startCalled, true);
@@ -775,9 +777,8 @@ void main() {
       final Future<void> startFuture = dds.startDartDevelopmentService(
         Uri.parse('http://127.0.0.1:100/fake'),
         disableServiceAuthCodes: true,
-        hostPort: 150,
+        ddsPort: 150,
         ipv6: false,
-        logger: bufferLogger,
       );
 
       expect(localDds.startCalled, false);
@@ -1156,11 +1157,13 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
-    required Logger logger,
-    int? hostPort,
+    FlutterDevice? device,
+    int? ddsPort,
     bool? ipv6,
     bool? disableServiceAuthCodes,
+    bool enableDevTools = false,
     bool cacheStartupProfile = false,
+    String? google3WorkspaceRoot,
   }) async {
     startCalled = true;
     startUri = vmServiceUri;

@@ -26,7 +26,6 @@ import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
@@ -43,6 +42,7 @@ import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart' as test_fakes;
+import 'base/logger_test.dart';
 
 const List<VmServiceExpectation> kAttachLogExpectations =
     <VmServiceExpectation>[
@@ -159,7 +159,6 @@ void main() {
       flutterProject:
           FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
@@ -192,7 +191,6 @@ void main() {
           FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions:
           DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
@@ -212,7 +210,6 @@ void main() {
       flutterProject:
           FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
@@ -226,7 +223,6 @@ void main() {
       flutterProject:
           FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
@@ -359,7 +355,6 @@ void main() {
       flutterProject:
           FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      ipv6: true,
       stayResident: false,
       fileSystem: fileSystem,
       logger: logger,
@@ -386,7 +381,6 @@ void main() {
       flutterProject:
           FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      ipv6: true,
       stayResident: false,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -588,7 +582,6 @@ void main() {
           FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions:
           DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       usage: globals.flutterUsage,
@@ -1009,7 +1002,7 @@ void main() {
   testUsingContext('cleanup of resources is safe to call multiple times',
       () async {
     final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
-    mockDevice.dds = DartDevelopmentService();
+    mockDevice.dds = DartDevelopmentService(logger: FakeLogger());
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
     ]);
@@ -1112,7 +1105,6 @@ void main() {
       flutterProject:
           FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
@@ -1161,7 +1153,6 @@ void main() {
       flutterProject:
           FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      ipv6: true,
       fileSystem: fileSystem,
       logger: logger,
       usage: globals.flutterUsage,
@@ -1203,7 +1194,6 @@ void main() {
       flutterProject:
           FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      ipv6: true,
       stayResident: false,
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
@@ -1407,13 +1397,11 @@ ResidentRunner setUpResidentRunner(
         FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
     debuggingOptions:
         debuggingOptions ?? DebuggingOptions.enabled(BuildInfo.debug),
-    ipv6: true,
     usage: globals.flutterUsage,
     analytics: globals.analytics,
     systemClock: systemClock ?? SystemClock.fixed(DateTime.now()),
     fileSystem: globals.fs,
     logger: logger ?? BufferLogger.test(),
-    devtoolsHandler: createNoOpHandler,
   );
 }
 
@@ -1716,13 +1704,11 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     GetSkSLMethod? getSkSLMethod,
     FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+    required DebuggingOptions debuggingOptions,
     int? hostVmServicePort,
-    int? ddsPort,
-    bool disableServiceAuthCodes = false,
-    bool enableDds = true,
-    bool cacheStartupProfile = false,
-    required bool allowExistingDdsInstance,
     bool? ipv6 = false,
+    bool enableDevTools = false,
+    bool allowExistingDdsInstance = false,
   }) async {}
 
   @override
@@ -1748,6 +1734,9 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> updateReloadStatus(bool wasReloadSuccessful) async {}
+
+  @override
+  Future<void> handleHotRestart() async {}
 }
 
 class FakeShaderCompiler implements DevelopmentShaderCompiler {

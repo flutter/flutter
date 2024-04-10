@@ -13,6 +13,7 @@ import 'tracing.dart';
 import 'vmservice.dart';
 
 const String kFlutterTestOutputsDirEnvName = 'FLUTTER_TEST_OUTPUTS_DIR';
+
 class ColdRunner extends ResidentRunner {
   ColdRunner(
     super.flutterDevices, {
@@ -21,10 +22,8 @@ class ColdRunner extends ResidentRunner {
     this.traceStartup = false,
     this.awaitFirstFrameWhenTracing = true,
     this.applicationBinary,
-    bool super.ipv6 = false,
     super.stayResident,
     super.machine,
-    super.devtoolsHandler,
   }) : super(
           hotMode: false,
         );
@@ -47,7 +46,6 @@ class ColdRunner extends ResidentRunner {
   Future<int> run({
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
-    bool enableDevTools = false,
     String? route,
   }) async {
     try {
@@ -70,7 +68,9 @@ class ColdRunner extends ResidentRunner {
     // Connect to the VM Service.
     if (debuggingEnabled) {
       try {
-        await connectToServiceProtocol(allowExistingDdsInstance: false);
+        await connectToServiceProtocol(
+            allowExistingDdsInstance: false,
+        );
       } on Exception catch (exception) {
         globals.printError(exception.toString());
         appFailedToStart();
@@ -78,18 +78,8 @@ class ColdRunner extends ResidentRunner {
       }
     }
 
-    if (debuggingEnabled) {
-      if (enableDevTools) {
-        // The method below is guaranteed never to return a failing future.
-        unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
-          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-          flutterDevices: flutterDevices,
-          isStartPaused: debuggingOptions.startPaused,
-        ));
-      }
-      if (debuggingOptions.serveObservatory) {
-        await enableObservatory();
-      }
+    if (debuggingEnabled && debuggingOptions.serveObservatory) {
+      await enableObservatory();
     }
 
     if (flutterDevices.first.vmServiceUris != null) {
@@ -115,7 +105,9 @@ class ColdRunner extends ResidentRunner {
       final FlutterDevice device = flutterDevices.first;
       if (device.vmService != null) {
         globals.printStatus('Tracing startup on ${device.device!.name}.');
-        final String outputPath = globals.platform.environment[kFlutterTestOutputsDirEnvName] ?? getBuildDirectory();
+        final String outputPath =
+            globals.platform.environment[kFlutterTestOutputsDirEnvName] ??
+                getBuildDirectory();
         await downloadStartupTrace(
           device.vmService!,
           awaitFirstFrame: awaitFirstFrameWhenTracing,
@@ -142,7 +134,6 @@ class ColdRunner extends ResidentRunner {
     Completer<DebugConnectionInfo>? connectionInfoCompleter,
     Completer<void>? appStartedCompleter,
     bool allowExistingDdsInstance = false,
-    bool enableDevTools = false,
     bool needsFullRestart = true,
   }) async {
     _didAttach = true;
@@ -160,24 +151,15 @@ class ColdRunner extends ResidentRunner {
       await device!.initLogReader();
     }
     for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
+      final List<FlutterView> views =
+          await device!.vmService!.getFlutterViews();
       for (final FlutterView view in views) {
         globals.printTrace('Connected to $view.');
       }
     }
 
-    if (debuggingEnabled) {
-      if (enableDevTools) {
-        // The method below is guaranteed never to return a failing future.
-        unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
-          devToolsServerAddress: debuggingOptions.devToolsServerAddress,
-          flutterDevices: flutterDevices,
-          isStartPaused: debuggingOptions.startPaused,
-        ));
-      }
-      if (debuggingOptions.serveObservatory) {
-        await enableObservatory();
-      }
+    if (debuggingEnabled && debuggingOptions.serveObservatory) {
+      await enableObservatory();
     }
 
     appStartedCompleter?.complete();
@@ -203,12 +185,11 @@ class ColdRunner extends ResidentRunner {
       await flutterDevice!.device!.dispose();
     }
 
-    await residentDevtoolsHandler!.shutdown();
     await stopEchoingDeviceLog();
   }
 
   @override
-  void printHelp({ required bool details }) {
+  void printHelp({required bool details}) {
     globals.printStatus('Flutter run key commands.');
     if (details) {
       printHelpDetails();
@@ -229,7 +210,8 @@ class ColdRunner extends ResidentRunner {
     for (final FlutterDevice? device in flutterDevices) {
       // If we're running in release mode, stop the app using the device logic.
       if (device!.vmService == null) {
-        await device.device!.stopApp(device.package, userIdentifier: device.userIdentifier);
+        await device.device!
+            .stopApp(device.package, userIdentifier: device.userIdentifier);
       }
     }
     await super.preExit();

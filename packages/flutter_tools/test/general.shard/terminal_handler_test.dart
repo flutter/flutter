@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/signals.dart';
@@ -17,7 +18,6 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
@@ -25,6 +25,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/fake_vm_services.dart';
+import 'base/logger_test.dart';
 
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
@@ -829,11 +830,14 @@ void main() {
     testWithoutContext('v - launchDevToolsInBrowser', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[]);
       final FakeResidentRunner runner = terminalHandler.residentRunner as FakeResidentRunner;
-      final FakeResidentDevtoolsHandler devtoolsHandler = runner.residentDevtoolsHandler as FakeResidentDevtoolsHandler;
 
-      expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isFalse);
+      for (final FlutterDevice? device in runner.flutterDevices) {
+        expect(device!.device!.dds.calledLaunchDevToolsInBrowser, isFalse);
+      }
       await terminalHandler.processTerminalInput('v');
-      expect(devtoolsHandler.calledLaunchDevToolsInBrowser, isTrue);
+      for (final FlutterDevice? device in runner.flutterDevices) {
+        expect(device!.device!.dds.calledLaunchDevToolsInBrowser, isTrue);
+      }    
     });
 
     testWithoutContext('w,W - debugDumpApp without service protocol is skipped', () async {
@@ -1307,19 +1311,6 @@ class FakeResidentRunner extends ResidentHandlers {
     }
     return OperationResult(reloadExitCode, '', fatal: fatalReloadError);
   }
-
-  @override
-  ResidentDevtoolsHandler get residentDevtoolsHandler => _residentDevtoolsHandler;
-  final ResidentDevtoolsHandler _residentDevtoolsHandler = FakeResidentDevtoolsHandler();
-}
-
-class FakeResidentDevtoolsHandler extends Fake implements ResidentDevtoolsHandler {
-  bool calledLaunchDevToolsInBrowser = false;
-
-  @override
-  bool launchDevToolsInBrowser({List<FlutterDevice?>? flutterDevices}) {
-    return calledLaunchDevToolsInBrowser = true;
-  }
 }
 
 class FakeDevice extends Fake implements Device {
@@ -1333,13 +1324,15 @@ class FakeDevice extends Fake implements Device {
   String get name => 'Fake Device';
 
   @override
+  DartDevelopmentService dds = DartDevelopmentService(logger: FakeLogger());
+
+  @override
   Future<void> takeScreenshot(File file) async {
     if (!supportsScreenshot) {
       throw StateError('illegal screenshot attempt');
     }
     file.writeAsBytesSync(<int>[1, 2, 3, 4]);
   }
-
 }
 
 TerminalHandler setUpTerminalHandler(List<FakeVmServiceRequest> requests, {
