@@ -220,8 +220,7 @@ void main() {
           stderr: 'failure',
         ),
       ]);
-      device = createDevice(enableVmService: true);
-      
+      device = createDevice(enableVmService: true); 
       originalDdsLauncher = ddsLauncherCallback;
       ddsLauncherCallback = (Uri remoteVmServiceUri, {
         required bool enableAuthCodes,

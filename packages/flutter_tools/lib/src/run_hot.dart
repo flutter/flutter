@@ -256,7 +256,6 @@ class HotRunner extends ResidentRunner {
         .developmentShaderCompiler
         .configureCompiler(device.targetPlatform);
     }
-
     try {
       final List<Uri?> baseUris = await _initDevFS();
       if (connectionInfoCompleter != null) {

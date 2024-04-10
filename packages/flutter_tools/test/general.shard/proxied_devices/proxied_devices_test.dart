@@ -335,7 +335,6 @@ void main() {
       expect(message.data['params'], <String, Object?>{'deviceId': 'device-id', 'userIdentifier': 'user-id'});
     });
 
-    
     group('when launching an app with PrebuiltApplicationPackage', () {
       late MemoryFileSystem fileSystem;
       late FakePrebuiltApplicationPackage applicationPackage;
@@ -497,7 +496,6 @@ void main() {
       });
     });
   });
-
 
   group('ProxiedDevices', () {
     testWithoutContext('devices respects the filter passed in', () async {

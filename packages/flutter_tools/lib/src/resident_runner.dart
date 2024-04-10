@@ -1497,8 +1497,8 @@ abstract class ResidentRunner extends ResidentHandlers {
       if (debuggingOptions.printDtd && dtdUri != null) {
         globals.printStatus('The Dart Tooling Daemon is available at: $dtdUri');
       }
-      final Uri? uri = dds.devToolsUri;
-      if (uri != null) {
+      final Uri? devToolsUri = dds.devToolsUri;
+      if (devToolsUri != null) {
         /// Convert a [URI] with query parameters into a display format instead
         /// of the default URI encoding.
         String urlToDisplayString(Uri uri) {
@@ -1512,7 +1512,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         }
         globals.printStatus(
           'The Flutter DevTools debugger and profiler '
-          'on ${device.device!.name} is available at: ${urlToDisplayString(uri)}',
+          'on ${device.device!.name} is available at: ${urlToDisplayString(devToolsUri)}',
         );
       }
     }

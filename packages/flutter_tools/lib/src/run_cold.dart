@@ -13,7 +13,6 @@ import 'tracing.dart';
 import 'vmservice.dart';
 
 const String kFlutterTestOutputsDirEnvName = 'FLUTTER_TEST_OUTPUTS_DIR';
-
 class ColdRunner extends ResidentRunner {
   ColdRunner(
     super.flutterDevices, {

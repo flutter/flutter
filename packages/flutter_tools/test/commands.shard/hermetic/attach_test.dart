@@ -369,8 +369,6 @@ void main() {
         ),
       });
 
-
-
       testUsingContext('succeeds with iOS device with mDNS wireless device', () async {
         final FakeIOSDevice device = FakeIOSDevice(
           portForwarder: portForwarder,
@@ -443,7 +441,6 @@ void main() {
           analytics: const NoOpAnalytics(),
         ),
       });
-
 
       testUsingContext('succeeds with iOS device with mDNS wireless device with debug-port', () async {
         final FakeIOSDevice device = FakeIOSDevice(
@@ -521,7 +518,6 @@ void main() {
           analytics: const NoOpAnalytics(),
         ),
       });
-
 
       testUsingContext('succeeds with iOS device with mDNS wireless device with debug-url', () async {
         final FakeIOSDevice device = FakeIOSDevice(
@@ -753,7 +749,6 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
         DeviceManager: () => testDeviceManager,
       });
-
 
       testUsingContext('succeeds when ipv6 is specified and debug-port is not on iOS device', () async {
         final FakeIOSDevice device = FakeIOSDevice(
