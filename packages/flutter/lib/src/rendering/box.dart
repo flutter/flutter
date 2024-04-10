@@ -2046,7 +2046,9 @@ abstract class RenderBox extends RenderObject {
     final double? baselineOffset = _computeIntrinsics(_CachedLayoutCalculation.baseline, (constraints, baseline), _computeDryBaseline).offset;
     // This assert makes sure computeDryBaseline always gets called in debug mode,
     // in case the computeDryBaseline implementation invokes debugCannotComputeDryLayout.
-    assert(baselineOffset == computeDryBaseline(constraints, baseline));
+    // This check should be skipped when debugCheckintIntrinsics is true to avoid
+    // slowing down the app significantly.
+    assert(RenderObject.debugCheckingIntrinsics || baselineOffset == computeDryBaseline(constraints, baseline));
     return baselineOffset;
   }
 
@@ -2508,18 +2510,20 @@ abstract class RenderBox extends RenderObject {
           }
         }
 
-        testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', double.infinity);
-        testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', double.infinity);
-        if (constraints.hasBoundedWidth) {
-          testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', constraints.maxHeight);
-        }
-        if (constraints.hasBoundedHeight) {
-          testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', constraints.maxWidth);
+        try {
+          testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', double.infinity);
+          testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', double.infinity);
+          if (constraints.hasBoundedWidth) {
+            testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', constraints.maxHeight);
+          }
+          if (constraints.hasBoundedHeight) {
+            testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', constraints.maxWidth);
+          }
+          // TODO(ianh): Test that values are internally consistent in more ways than the above.
+        } finally {
+          RenderObject.debugCheckingIntrinsics = false;
         }
 
-        // TODO(ianh): Test that values are internally consistent in more ways than the above.
-
-        RenderObject.debugCheckingIntrinsics = false;
         if (failures.isNotEmpty) {
           // TODO(jacobr): consider nesting the failures object so it is collapsible.
           throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -2708,7 +2712,7 @@ abstract class RenderBox extends RenderObject {
   /// having been called in [hitTest] but cannot rely upon [paint] having been
   /// called. For example, a render object might be a child of a [RenderOpacity]
   /// object, which calls [hitTest] on its children when its opacity is zero
-  /// even through it does not [paint] its children.
+  /// even though it does not [paint] its children.
   bool hitTest(BoxHitTestResult result, { required Offset position }) {
     assert(() {
       if (!hasSize) {

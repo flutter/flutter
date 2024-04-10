@@ -1952,6 +1952,7 @@ class _SliderDefaultsM2 extends SliderThemeData {
   SliderComponentShape? get valueIndicatorShape => const RectangularSliderValueIndicatorShape();
 }
 
+// TODO(quncheng): Update M3 defaults to match the latest specs.
 // BEGIN GENERATED TOKEN PROPERTIES - Slider
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and

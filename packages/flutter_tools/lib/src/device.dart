@@ -16,6 +16,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'devfs.dart';
 import 'device_port_forwarder.dart';
+import 'device_vm_service_discovery_for_attach.dart';
 import 'project.dart';
 import 'vmservice.dart';
 import 'web/compile.dart';
@@ -581,23 +582,19 @@ enum DeviceConnectionInterface {
 
 /// Returns the `DeviceConnectionInterface` enum based on its string name.
 DeviceConnectionInterface getDeviceConnectionInterfaceForName(String name) {
-  switch (name) {
-    case 'attached':
-      return DeviceConnectionInterface.attached;
-    case 'wireless':
-      return DeviceConnectionInterface.wireless;
-  }
-  throw Exception('Unsupported DeviceConnectionInterface name "$name"');
+  return switch (name) {
+    'attached' => DeviceConnectionInterface.attached,
+    'wireless' => DeviceConnectionInterface.wireless,
+    _ => throw Exception('Unsupported DeviceConnectionInterface name "$name"'),
+  };
 }
 
 /// Returns a `DeviceConnectionInterface`'s string name.
 String getNameForDeviceConnectionInterface(DeviceConnectionInterface connectionInterface) {
-  switch (connectionInterface) {
-    case DeviceConnectionInterface.attached:
-      return 'attached';
-    case DeviceConnectionInterface.wireless:
-      return 'wireless';
-  }
+  return switch (connectionInterface) {
+    DeviceConnectionInterface.attached => 'attached',
+    DeviceConnectionInterface.wireless => 'wireless',
+  };
 }
 
 /// A device is a physical hardware that can run a Flutter application.
@@ -740,6 +737,35 @@ abstract class Device {
 
   /// Clear the device's logs.
   void clearLogs();
+
+  /// Get the [VMServiceDiscoveryForAttach] instance for this device, which
+  /// discovers, and forwards any necessary ports to the vm service uri of a
+  /// running app on the device.
+  ///
+  /// If `appId` is specified, on supported platforms, the service discovery
+  /// will only return the VM service URI from the given app.
+  ///
+  /// If `fuchsiaModule` is specified, this will only return the VM service uri
+  /// from the specified Fuchsia module.
+  ///
+  /// If `filterDevicePort` is specified, this will only return the VM service
+  /// uri that matches the given port on the device.
+  VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
+    String? appId,
+    String? fuchsiaModule,
+    int? filterDevicePort,
+    int? expectedHostPort,
+    required bool ipv6,
+    required Logger logger,
+  }) =>
+      LogScanningVMServiceDiscoveryForAttach(
+        Future<DeviceLogReader>.value(getLogReader()),
+        portForwarder: portForwarder,
+        devicePort: filterDevicePort,
+        hostPort: expectedHostPort,
+        ipv6: ipv6,
+        logger: logger,
+      );
 
   /// Start an app package on the current device.
   ///

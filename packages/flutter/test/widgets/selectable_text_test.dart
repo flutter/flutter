@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../impeller_test_helpers.dart';
 import '../widgets/clipboard_utils.dart';
@@ -220,7 +221,9 @@ void main() {
     );
   }
 
-  testWidgets('throw if no Overlay widget exists above', (WidgetTester tester) async {
+  testWidgets('throw if no Overlay widget exists above',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,

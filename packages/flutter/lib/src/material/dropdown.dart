@@ -861,7 +861,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// {@tool dartpad}
 /// This sample shows a [DropdownButton] with a large arrow icon,
 /// purple text style, and bold purple underline, whose value is one of "One",
-/// "Two", "Free", or "Four".
+/// "Two", "Three", or "Four".
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/dropdown_button.png)
 ///
@@ -1726,7 +1726,7 @@ class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
   @override
   void didChange(T? value) {
     super.didChange(value);
-    _dropdownButtonFormField.onChanged!(value);
+    _dropdownButtonFormField.onChanged?.call(value);
   }
 
   @override
@@ -1740,6 +1740,6 @@ class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
  @override
   void reset() {
     super.reset();
-    _dropdownButtonFormField.onChanged!(value);
+    _dropdownButtonFormField.onChanged?.call(value);
   }
 }

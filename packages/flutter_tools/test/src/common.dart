@@ -264,7 +264,7 @@ class _NoContext implements AppContext {
 ///
 /// Example use:
 ///
-/// ```
+/// ```dart
 /// void main() {
 ///   var handler = FileExceptionHandler();
 ///   var fs = MemoryFileSystem(opHandle: handler.opHandle);

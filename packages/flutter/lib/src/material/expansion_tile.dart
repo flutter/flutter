@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -232,6 +235,7 @@ class ExpansionTile extends StatefulWidget {
     this.onExpansionChanged,
     this.children = const <Widget>[],
     this.trailing,
+    this.showTrailingIcon = true,
     this.initiallyExpanded = false,
     this.maintainState = false,
     this.tilePadding,
@@ -318,6 +322,9 @@ class ExpansionTile extends StatefulWidget {
   /// Depending on the value of [controlAffinity], the [trailing] widget
   /// may replace the rotating expansion arrow icon.
   final Widget? trailing;
+
+  /// Specifies if the [ExpansionTile] should build a default trailing icon if [trailing] is null.
+  final bool showTrailingIcon;
 
   /// Specifies if the list tile is initially expanded (true) or collapsed (false, the default).
   final bool initiallyExpanded;
@@ -571,6 +578,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
 
   bool _isExpanded = false;
   late ExpansionTileController _tileController;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -597,6 +605,8 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   void dispose() {
     _tileController._state = null;
     _animationController.dispose();
+    _timer?.cancel();
+    _timer = null;
     super.dispose();
   }
 
@@ -621,7 +631,19 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       PageStorage.maybeOf(context)?.writeState(context, _isExpanded);
     });
     widget.onExpansionChanged?.call(_isExpanded);
-    SemanticsService.announce(stateHint, textDirection);
+
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      // TODO(tahatesser): This is a workaround for VoiceOver interrupting
+      // semantic announcements on iOS. https://github.com/flutter/flutter/issues/122101.
+      _timer?.cancel();
+      _timer = Timer(const Duration(seconds: 1), () {
+        SemanticsService.announce(stateHint, textDirection);
+        _timer?.cancel();
+        _timer = null;
+      });
+    } else {
+      SemanticsService.announce(stateHint, textDirection);
+    }
   }
 
   void _handleTap() {
@@ -713,7 +735,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
                 leading: widget.leading ?? _buildLeadingIcon(context),
                 title: widget.title,
                 subtitle: widget.subtitle,
-                trailing: widget.trailing ?? _buildTrailingIcon(context),
+                trailing: widget.showTrailingIcon ? widget.trailing ?? _buildTrailingIcon(context) : null,
                 minTileHeight: widget.minTileHeight,
               ),
             ),
