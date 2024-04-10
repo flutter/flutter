@@ -8,6 +8,7 @@
 #include <optional>
 
 #include "flutter/fml/unique_object.h"
+#include "impeller/base/mask.h"
 #include "impeller/geometry/size.h"
 #include "impeller/toolkit/android/proc_table.h"
 
@@ -26,13 +27,14 @@ enum class HardwareBufferFormat {
   kR8G8B8A8UNormInt,
 };
 
-using HardwareBufferUsage = uint8_t;
-
-enum class HardwareBufferUsageFlags : HardwareBufferUsage {
+enum class HardwareBufferUsageFlags {
+  kNone = 0u,
   kFrameBufferAttachment = 1u << 0u,
   kCompositorOverlay = 1u << 1u,
   kSampledImage = 1u << 2u,
 };
+
+using HardwareBufferUsage = Mask<HardwareBufferUsageFlags>;
 
 //------------------------------------------------------------------------------
 /// @brief      A descriptor use to specify hardware buffer allocations.
@@ -40,7 +42,7 @@ enum class HardwareBufferUsageFlags : HardwareBufferUsage {
 struct HardwareBufferDescriptor {
   HardwareBufferFormat format = HardwareBufferFormat::kR8G8B8A8UNormInt;
   ISize size;
-  HardwareBufferUsage usage = 0u;
+  HardwareBufferUsage usage = HardwareBufferUsageFlags::kNone;
 
   //----------------------------------------------------------------------------
   /// @brief      Create a descriptor of the given size that is suitable for use
@@ -145,5 +147,11 @@ class HardwareBuffer {
 };
 
 }  // namespace impeller::android
+
+namespace impeller {
+
+IMPELLER_ENUM_IS_MASK(android::HardwareBufferUsageFlags);
+
+}  // namespace impeller
 
 #endif  // FLUTTER_IMPELLER_TOOLKIT_ANDROID_HARDWARE_BUFFER_H_
