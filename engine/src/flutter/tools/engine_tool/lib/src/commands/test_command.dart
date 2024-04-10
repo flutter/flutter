@@ -17,13 +17,14 @@ final class TestCommand extends CommandBase {
   TestCommand({
     required super.environment,
     required Map<String, BuilderConfig> configs,
+    super.verbose = false,
   }) {
-    builds = runnableBuilds(environment, configs);
+    builds = runnableBuilds(environment, configs, verbose);
     debugCheckBuilds(builds);
     addConfigOption(
       environment,
       argParser,
-      runnableBuilds(environment, configs),
+      builds,
     );
   }
 

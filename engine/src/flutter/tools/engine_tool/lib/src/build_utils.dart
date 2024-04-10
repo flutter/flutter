@@ -47,9 +47,11 @@ List<Build> filterBuilds(Map<String, BuilderConfig> input, BuildFilter test) {
 }
 
 /// Returns a list of runnable builds.
-List<Build> runnableBuilds(Environment env, Map<String, BuilderConfig> input) {
+List<Build> runnableBuilds(
+    Environment env, Map<String, BuilderConfig> input, bool verbose) {
   return filterBuilds(input, (String configName, Build build) {
-    return build.canRunOn(env.platform);
+    return build.canRunOn(env.platform) &&
+           (verbose || build.name.startsWith(env.platform.operatingSystem));
   });
 }
 
@@ -148,6 +150,7 @@ Future<int> runBuild(Environment environment, Build build,
   void handler(RunnerEvent event) {
     switch (event) {
       case RunnerStart():
+        environment.logger.info('$event: ${event.command.join(' ')}');
         environment.logger.status('$event     ', newline: false);
         spinner = environment.logger.startSpinner();
       case RunnerProgress(done: true):

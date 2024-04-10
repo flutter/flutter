@@ -16,6 +16,8 @@ import 'src/environment.dart';
 import 'src/logger.dart';
 
 void main(List<String> args) async {
+  final bool verbose = args.contains('--verbose') || args.contains('-v');
+
   // Find the engine repo.
   final Engine engine;
   try {
@@ -63,6 +65,7 @@ void main(List<String> args) async {
   final ToolCommandRunner runner = ToolCommandRunner(
     environment: environment,
     configs: configs,
+    verbose: verbose,
   );
 
   try {
