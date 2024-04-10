@@ -607,6 +607,8 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
               );
               currentHighlight = widget.enableSearch ? i : null;
               widget.onSelected?.call(entry.value);
+              _localTextEditingController?.dispose();
+              _localTextEditingController = null;
             }
           : null,
         requestFocusOnHover: false,
@@ -760,9 +762,13 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                     selection: TextSelection.collapsed(offset: entry.label.length),
                   );
                   widget.onSelected?.call(entry.value);
+                      _localTextEditingController?.dispose();
+                      _localTextEditingController = null;
                 }
               } else {
                 widget.onSelected?.call(null);
+                _localTextEditingController?.dispose();
+                _localTextEditingController = null;
               }
               if (!widget.enableSearch) {
                 currentHighlight = null;
