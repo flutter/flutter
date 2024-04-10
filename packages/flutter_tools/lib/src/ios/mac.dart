@@ -161,7 +161,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
-  migration.run();
+  await migration.run();
 
   if (!_checkXcodeVersion()) {
     return XcodeBuildResult(success: false);

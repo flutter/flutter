@@ -31,12 +31,12 @@ void main () {
       mockProject = FakeWindowsProject(flutterWindowFile);
     });
 
-    testWithoutContext('skipped if Flutter window file is missing', () {
+    testWithoutContext('skipped if Flutter window file is missing', () async {
       final ShowWindowMigration migration = ShowWindowMigration(
         mockProject,
         testLogger,
       );
-      migration.migrate();
+      await migration.migrate();
 
       expect(flutterWindowFile.existsSync(), isFalse);
 
@@ -50,7 +50,7 @@ void main () {
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('skipped if nothing to migrate', () {
+    testWithoutContext('skipped if nothing to migrate', () async {
       const String flutterWindowContents = 'Nothing to migrate';
 
       flutterWindowFile.writeAsStringSync(flutterWindowContents);
@@ -60,7 +60,7 @@ void main () {
         mockProject,
         testLogger,
       );
-      migration.migrate();
+      await migration.migrate();
 
       expect(flutterWindowFile.lastModifiedSync(), updatedAt);
       expect(flutterWindowFile.readAsStringSync(), flutterWindowContents);
@@ -68,7 +68,7 @@ void main () {
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('skipped if already migrated', () {
+    testWithoutContext('skipped if already migrated', () async {
       const String flutterWindowContents =
         '  flutter_controller_->engine()->SetNextFrameCallback([&]() {\n'
         '    this->Show();\n'
@@ -88,7 +88,7 @@ void main () {
         mockProject,
         testLogger,
       );
-      migration.migrate();
+      await migration.migrate();
 
       expect(flutterWindowFile.lastModifiedSync(), updatedAt);
       expect(flutterWindowFile.readAsStringSync(), flutterWindowContents);
@@ -96,7 +96,7 @@ void main () {
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('skipped if already migrated (CRLF)', () {
+    testWithoutContext('skipped if already migrated (CRLF)', () async {
       const String flutterWindowContents =
         '  flutter_controller_->engine()->SetNextFrameCallback([&]() {\r\n'
         '    this->Show();\r\n'
@@ -116,7 +116,7 @@ void main () {
         mockProject,
         testLogger,
       );
-      migration.migrate();
+      await migration.migrate();
 
       expect(flutterWindowFile.lastModifiedSync(), updatedAt);
       expect(flutterWindowFile.readAsStringSync(), flutterWindowContents);
@@ -124,7 +124,7 @@ void main () {
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('migrates project to ensure window is shown', () {
+    testWithoutContext('migrates project to ensure window is shown', () async {
       flutterWindowFile.writeAsStringSync(
         '  flutter_controller_->engine()->SetNextFrameCallback([&]() {\n'
         '    this->Show();\n'
@@ -137,7 +137,7 @@ void main () {
         mockProject,
         testLogger,
       );
-      migration.migrate();
+      await migration.migrate();
 
       expect(flutterWindowFile.readAsStringSync(),
         '  flutter_controller_->engine()->SetNextFrameCallback([&]() {\n'
@@ -155,7 +155,7 @@ void main () {
       expect(testLogger.statusText, contains('windows/runner/flutter_window.cpp does not ensure the show window callback is called, updating.'));
     });
 
-    testWithoutContext('migrates project to ensure window is shown (CRLF)', () {
+    testWithoutContext('migrates project to ensure window is shown (CRLF)', () async {
       flutterWindowFile.writeAsStringSync(
         '  flutter_controller_->engine()->SetNextFrameCallback([&]() {\r\n'
         '    this->Show();\r\n'
@@ -168,7 +168,7 @@ void main () {
         mockProject,
         testLogger,
       );
-      migration.migrate();
+      await migration.migrate();
 
       expect(flutterWindowFile.readAsStringSync(),
         '  flutter_controller_->engine()->SetNextFrameCallback([&]() {\r\n'
