@@ -10,7 +10,6 @@ import 'package:path/path.dart' as path;
 
 import '../run_command.dart';
 import '../runner_utils.dart';
-import '../test.dart';
 import '../utils.dart';
 
 /// Executes the test suite for the flutter/packages repo.
