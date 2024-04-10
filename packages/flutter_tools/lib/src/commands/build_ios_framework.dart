@@ -112,19 +112,11 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   late final FlutterProject project = FlutterProject.current();
 
   Future<List<BuildInfo>> getBuildInfos() async {
-    final List<BuildInfo> buildInfos = <BuildInfo>[];
-
-    if (boolArg('debug')) {
-      buildInfos.add(await getBuildInfo(forcedBuildMode: BuildMode.debug));
-    }
-    if (boolArg('profile')) {
-      buildInfos.add(await getBuildInfo(forcedBuildMode: BuildMode.profile));
-    }
-    if (boolArg('release')) {
-      buildInfos.add(await getBuildInfo(forcedBuildMode: BuildMode.release));
-    }
-
-    return buildInfos;
+    return <BuildInfo>[
+      if (boolArg('debug'))   await getBuildInfo(forcedBuildMode: BuildMode.debug),
+      if (boolArg('profile')) await getBuildInfo(forcedBuildMode: BuildMode.profile),
+      if (boolArg('release')) await getBuildInfo(forcedBuildMode: BuildMode.release),
+    ];
   }
 
   @override

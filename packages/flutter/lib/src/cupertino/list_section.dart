@@ -405,21 +405,12 @@ class CupertinoListSection extends StatelessWidget {
       // Insert a short divider between all rows.
       // If it is a `CupertinoListSectionType.base` type, add a long divider
       // to the top and bottom of the rows.
-      final List<Widget> childrenWithDividers = <Widget>[];
-
-      if (type == CupertinoListSectionType.base) {
-        childrenWithDividers.add(longDivider);
-      }
-
-      children!.sublist(0, children!.length - 1).forEach((Widget widget) {
-        childrenWithDividers.add(widget);
-        childrenWithDividers.add(shortDivider);
-      });
-
-      childrenWithDividers.add(children!.last);
-      if (type == CupertinoListSectionType.base) {
-        childrenWithDividers.add(longDivider);
-      }
+      final List<Widget> childrenWithDividers = <Widget>[
+        if (type == CupertinoListSectionType.base) longDivider,
+        for (final Widget widget in children!.sublist(0, children!.length - 1))
+          ...<Widget>[widget, shortDivider],
+        if (type == CupertinoListSectionType.base) longDivider,
+      ];
 
       final BorderRadius childrenGroupBorderRadius = switch (type) {
         CupertinoListSectionType.insetGrouped => _kDefaultInsetGroupedBorderRadius,
@@ -427,14 +418,13 @@ class CupertinoListSection extends StatelessWidget {
       };
 
       decoratedChildrenGroup = DecoratedBox(
-        decoration: decoration ??
-            BoxDecoration(
-              color: CupertinoDynamicColor.resolve(
-                  decoration?.color ??
-                      CupertinoColors.secondarySystemGroupedBackground,
-                  context),
-              borderRadius: childrenGroupBorderRadius,
-            ),
+        decoration: decoration ?? BoxDecoration(
+          color: CupertinoDynamicColor.resolve(
+            decoration?.color ?? CupertinoColors.secondarySystemGroupedBackground,
+            context,
+          ),
+          borderRadius: childrenGroupBorderRadius,
+        ),
         child: Column(children: childrenWithDividers),
       );
 
