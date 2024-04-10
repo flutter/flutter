@@ -224,7 +224,7 @@ Future<void> main(List<String> args) async {
       // All the unit/widget tests run using `flutter test --platform=chrome --wasm --web-renderer=skwasm`
       'web_skwasm_tests': _runWebSkwasmUnitTests,
       // All web integration tests
-      'web_long_running_tests': () => webLongRunningTestsRunner(flutterRoot),
+      'web_long_running_tests': WebLongRunningTestsSuite(flutterRoot).webLongRunningTestsRunner,
       'flutter_plugins': () => flutterPackagesRunner(flutterRoot),
       'skp_generator': skpGeneratorTestsRunner,
       'realm_checker': () => realmCheckerTestRunner(flutterRoot),
