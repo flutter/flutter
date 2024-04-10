@@ -107,8 +107,8 @@ class Response {
   /// Create a list of Strings from [_failureDetails].
   List<String> _failureDetailsAsString() {
     return <String>[
-      if (_failureDetails case final List<Failure> details when details.isNotEmpty)
-        for (final Failure failure in details) failure.toJson(),
+      if (_failureDetails != null)
+        for (final Failure failure in _failureDetails) failure.toJson(),
     ];
   }
 
