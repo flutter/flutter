@@ -59,6 +59,17 @@ class WebTestsSuite {
       'test/cupertino/scaffold_test.dart',
       'test/rendering/platform_view_test.dart',
     ],
+    'skwasm': <String>[
+    // These tests are not compilable on the web due to dependencies on
+    // VM-specific functionality.
+    'test/services/message_codecs_vm_test.dart',
+    'test/examples/sector_layout_test.dart',
+
+    // These tests are broken and need to be fixed.
+    // TODO(jacksongardner): https://github.com/flutter/flutter/issues/71604
+    'test/material/text_field_test.dart',
+    'test/widgets/performance_overlay_test.dart',
+    ],
   };
 
   /// The number of Cirrus jobs that run Web tests in parallel.
