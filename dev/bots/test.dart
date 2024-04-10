@@ -1335,11 +1335,13 @@ Future<void> verifyExist(
   String flutterRoot,
   {@visibleForTesting ProcessManager processManager = const LocalProcessManager()
 }) async {
-  final String cacheDirectory =  path.join(flutterRoot, 'bin', 'cache');
-
+  final List<String> binaryPaths = await findBinaryPaths(
+    path.join(flutterRoot, 'bin', 'cache'),
+    processManager: processManager,
+  );
   final List<String> allExpectedFiles = binariesWithEntitlements(flutterRoot) + binariesWithoutEntitlements(flutterRoot);
   final Set<String> foundFiles = <String>{
-    for (final String binaryPath in await findBinaryPaths(cacheDirectory, processManager: processManager))
+    for (final String binaryPath in binaryPaths)
       if (allExpectedFiles.contains(binaryPath)) binaryPath
       else throw Exception('Found unexpected binary in cache: $binaryPath'),
   };

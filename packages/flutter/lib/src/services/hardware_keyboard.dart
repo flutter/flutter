@@ -626,9 +626,11 @@ class HardwareKeyboard {
 
   List<String> _debugPressedKeysDetails() {
     return <String>[
-      if (_pressedKeys.isEmpty) 'Empty'
-      else for (final PhysicalKeyboardKey physicalKey in _pressedKeys.keys)
-        '$physicalKey: ${_pressedKeys[physicalKey]}',
+      if (_pressedKeys.isEmpty)
+        'Empty'
+      else
+        for (final PhysicalKeyboardKey physicalKey in _pressedKeys.keys)
+          '$physicalKey: ${_pressedKeys[physicalKey]}',
     ];
   }
 

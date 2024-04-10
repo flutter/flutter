@@ -347,11 +347,10 @@ final class _StringListChain {
   /// are read back, they do not affect the timings of the work being
   /// benchmarked.
   List<String> extractElements() {
-    final List<String?> result = <String?>[
+    return <String?>[
       for (final List<String?> slice in _chain) ...slice,
       ..._slice.sublist(0, _pointer),
-    ];
-    return result.cast<String>();
+    ].cast<String>();
   }
 }
 

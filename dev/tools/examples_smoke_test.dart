@@ -127,8 +127,7 @@ Future<File> generateTest(Directory apiDir) async {
     "import 'package:integration_test/integration_test.dart';",
     for (final ExampleInfo info in infoList)
       "import 'package:flutter_api_samples/${info.importPath}' as ${info.importName};"
-  ];
-  imports.sort();
+  ]..sort();
 
   final StringBuffer buffer = StringBuffer();
   buffer.writeln('// Temporary generated file. Do not commit.');

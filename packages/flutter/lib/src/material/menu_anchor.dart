@@ -2128,13 +2128,13 @@ class _LocalizedShortcutLabeler {
       final LogicalKeyboardKey trigger = serialized.trigger!;
       final List<String> modifiers = <String>[
         if (_usesSymbolicModifiers) ...<String>[
-          // macOS/iOS platform convention uses this ordering, with ⌘ always last.
+          // MacOS/iOS platform convention uses this ordering, with ⌘ always last.
           if (serialized.control!) _getModifierLabel(LogicalKeyboardKey.control, localizations),
           if (serialized.alt!)     _getModifierLabel(LogicalKeyboardKey.alt, localizations),
           if (serialized.shift!)   _getModifierLabel(LogicalKeyboardKey.shift, localizations),
           if (serialized.meta!)    _getModifierLabel(LogicalKeyboardKey.meta, localizations),
         ] else ...<String>[
-          // These should be in this order, to match the LogicalKeySet version.
+          // This order matches the LogicalKeySet version.
           if (serialized.alt!)     _getModifierLabel(LogicalKeyboardKey.alt, localizations),
           if (serialized.control!) _getModifierLabel(LogicalKeyboardKey.control, localizations),
           if (serialized.meta!)    _getModifierLabel(LogicalKeyboardKey.meta, localizations),
