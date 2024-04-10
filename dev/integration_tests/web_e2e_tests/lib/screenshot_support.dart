@@ -18,7 +18,7 @@ Future<void> runTestWithScreenshots(List<String> args, {
   int browserWidth = _kScreenshotWidth,
   int browserHeight = _kScreenshotHeight,
 }) async {
-  final String? testOutputDirectory = parseTestDriverArguments(args);
+  final String testOutputDirectory = getTestOutputDirectory(args);
   final WebFlutterDriver driver =
       await FlutterDriver.connect() as WebFlutterDriver;
 
@@ -30,6 +30,6 @@ Future<void> runTestWithScreenshots(List<String> args, {
       // TODO(yjbanov): implement, see https://github.com/flutter/flutter/issues/86120
       return true;
     },
-    testOutputDirectory: testOutputDirectory!,
+    testOutputDirectory: testOutputDirectory,
   );
 }

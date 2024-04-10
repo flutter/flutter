@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:args/args.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
@@ -28,14 +27,16 @@ void restoreFileSystem() {
 /// Tests should write any output files to this directory. Defaults `build`.
 String get defaultTestOutputDirectory => fs.systemTempDirectory.createTempSync('build').path;
 
+
 /// Parses the arguments passed to test driver main function.
 ///
 /// Some flags and options from `flutter drive` are propagated to the test driver
 /// as arguments to its main function.
-String? parseTestDriverArguments(List<String> args) {
-  final ArgParser parser = ArgParser();
-  parser.addOption('reporter', abbr: 'r', allowed: <String>['expanded']);
-  parser.addOption('test-output-directory');
-  final ArgResults argResults = parser.parse(args);
-  return (argResults['test-output-directory'] ?? '') as String;
+String getTestOutputDirectory(List<String> args) {
+  for (final String arg in args){
+    if (arg=='--test-output-directory') {
+      return args[args.indexOf(arg) + 1];
+    }
+  }
+  return defaultTestOutputDirectory;
 }

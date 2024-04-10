@@ -7,7 +7,7 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 Future<void> main(List<String> args) async {
   const String fileName = 'large_image_changer';
-  final String testOutputDirectory = parseTestDriverArguments(args) ?? defaultTestOutputDirectory;
+  final String testOutputDirectory = getTestOutputDirectory(args);
 
   test('Animate for 20 seconds', () async {
     final FlutterDriver driver = await FlutterDriver.connect();

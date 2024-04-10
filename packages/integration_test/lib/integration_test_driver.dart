@@ -71,7 +71,7 @@ Future<void> integrationDriver({
   Duration timeout = const Duration(minutes: 20),
   ResponseDataCallback? responseDataCallback = writeResponseData,
   bool writeResponseOnFailure = false,
-  String? testOutputDirectory,
+  String testOutputDirectory = '',
 }) async {
   final FlutterDriver driver = await FlutterDriver.connect();
   final String jsonResult = await driver.requestData(null, timeout: timeout);
@@ -82,13 +82,13 @@ Future<void> integrationDriver({
   if (response.allTestsPassed) {
     print('All tests passed.');
     if (responseDataCallback != null) {
-      await responseDataCallback(response.data);
+      await responseDataCallback(response.data, testOutputDirectory: testOutputDirectory);
     }
     exit(0);
   } else {
     print('Failure Details:\n${response.formattedFailureDetails}');
     if (responseDataCallback != null && writeResponseOnFailure) {
-      await responseDataCallback(response.data, testOutputDirectory: testOutputDirectory!);
+      await responseDataCallback(response.data, testOutputDirectory: testOutputDirectory);
     }
     exit(1);
   }

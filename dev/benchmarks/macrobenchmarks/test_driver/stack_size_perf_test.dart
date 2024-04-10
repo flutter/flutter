@@ -16,7 +16,7 @@ const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');
 
 void main(List<String> args) {
 
-  final String testOutputDirectory = parseTestDriverArguments(args) ?? defaultTestOutputDirectory;
+  final String testOutputDirectory = getTestOutputDirectory(args);
   test('stack_size', () async {
     late int stackSizeInBytes;
     await runDriverTestForRoute(kStackSizeRouteName, (FlutterDriver driver) async {

@@ -6,7 +6,7 @@ import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 Future<void> main(List<String> args) async {
-  final String testOutputDirectory = parseTestDriverArguments(args) ?? defaultTestOutputDirectory;
+  final String testOutputDirectory = getTestOutputDirectory(args);
 
   //throw FormatException('Expected at least 1 section $args ${argResults["test-output-directory"]}');
 

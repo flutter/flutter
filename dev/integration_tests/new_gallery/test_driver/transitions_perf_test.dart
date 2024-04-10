@@ -225,7 +225,7 @@ Future<void> runDemos(
 
 void main([List<String> args = const <String>[]]) {
 
-  final String testOutputDirectory = parseTestDriverArguments(args) ?? defaultTestOutputDirectory;
+  final String testOutputDirectory = getTestOutputDirectory(args);
   group('Flutter Gallery transitions', () {
     late FlutterDriver driver;
 

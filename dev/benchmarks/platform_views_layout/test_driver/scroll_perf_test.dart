@@ -7,7 +7,7 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main(List<String> args) {
 
-  final String testOutputDirectory = parseTestDriverArguments(args) ?? defaultTestOutputDirectory;
+  final String testOutputDirectory = getTestOutputDirectory(args);
   group('scrolling performance test', () {
     late FlutterDriver driver;
 

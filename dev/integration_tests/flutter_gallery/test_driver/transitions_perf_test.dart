@@ -165,7 +165,7 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
 void main([List<String> args = const <String>[]]) {
   final bool withSemantics = args.contains('--with_semantics');
   final bool hybrid = args.contains('--hybrid');
-  final String testOutputDirectory = parseTestDriverArguments(args) ?? defaultTestOutputDirectory;
+  final String testOutputDirectory = getTestOutputDirectory(args);
   group('flutter gallery transitions', () {
     late FlutterDriver driver;
     setUpAll(() async {
