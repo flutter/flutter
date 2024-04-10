@@ -110,7 +110,7 @@ class ValueListenableBuilder<T> extends StatefulWidget {
   /// ```dart
   /// final ValueListenable<int> count = ValueNotifier<int>(0);
   ///
-  /// ShouldRebuildCallback<int> shouldRebuild = (int? last, int current) {
+  /// bool shouldRebuild(int? last, int current) {
   ///   return current % 2 == 0; // Rebuild only on even count values.
   /// };
   ///
