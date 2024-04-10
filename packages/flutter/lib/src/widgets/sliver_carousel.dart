@@ -6,12 +6,118 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
 import 'scroll_metrics.dart';
 import 'scroll_physics.dart';
 import 'sliver.dart';
+
+class Carousel extends StatefulWidget {
+  Carousel({
+    super.key,
+    required this.itemWeights,
+    this.itemSnap = false,
+    this.clipExtent,
+    this.controller,
+    required List<Widget> children,
+  }) : childrenDelegate = SliverChildBuilderDelegate(
+    (BuildContext context, int index) {
+      print(children.isEmpty);
+      return children.elementAt(index);
+    },
+    childCount: children.length,
+  );
+
+  final double? clipExtent;
+  final bool itemSnap;
+  final List<int> itemWeights;
+  final CarouselController? controller;
+  final SliverChildBuilderDelegate childrenDelegate;
+
+  @override
+  State<Carousel> createState() => _CarouselState();
+}
+
+class _CarouselState extends State<Carousel> {
+
+  late ScrollController _controller;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _initController(widget.itemWeights);
+  }
+
+  // @override
+  // void didUpdateWidget(covariant Carousel oldWidget) {
+  //   super.didUpdateWidget(oldWidget);
+  //   if (widget.itemWeights != oldWidget.itemWeights) {
+  //     _initController(widget.itemWeights);
+  //   }
+  // }
+
+  @override
+  void dispose() {
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
+    super.dispose();
+  }
+
+  void _initController(List<int> weights) {
+    final double fraction = weights.first / weights.sum;
+    print('fraction is: $fraction');
+    _controller = widget.controller ?? CarouselController(viewportFraction: fraction);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ScrollPhysics physics = widget.itemSnap
+      ? const CarouselScrollPhysics()
+      : ScrollConfiguration.of(context).getScrollPhysics(context);
+      print('scroll offset: ${_controller.offset}');
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification notification) {
+        // TODO(qunc): get last reported carousel index
+        // if (notification.depth == 0 && notification is ScrollUpdateNotification) {
+        //   final ScrollMetrics metrics = notification.metrics;
+        //   final int currentPage = metrics.page!.round();
+        //   if (currentPage != _lastReportedPage) {
+        //     _lastReportedPage = currentPage;
+        //     widget.onPageChanged!(currentPage);
+        //   }
+        // }
+        return false;
+      },
+      child: Scrollable(
+        // dragStartBehavior: widget.dragStartBehavior,
+        axisDirection: AxisDirection.right,
+        controller: _controller,
+        physics: physics, // defaults to CarouselScrollPhysics
+        // restorationId: widget.restorationId,
+        // scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
+        viewportBuilder: (BuildContext context, ViewportOffset position) {
+          print('viewport');
+          return Viewport(
+            cacheExtent: 0.0,
+            axisDirection: AxisDirection.right,
+            offset: position,
+            // clipBehavior: widget.clipBehavior,
+            slivers: <Widget>[
+              SliverCarousel(
+                clipExtent: widget.clipExtent ?? 0,
+                childExtentList: widget.itemWeights,
+                delegate: widget.childrenDelegate,
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
 
 class SliverCarousel extends SliverMultiBoxAdaptorWidget {
   const SliverCarousel({
@@ -180,6 +286,7 @@ class RenderSliverCarousel extends RenderSliverMultiBoxAdaptor {
 
   @override
   void performLayout() {
+    print('performLayout');
     final SliverConstraints constraints = this.constraints;
     childManager.didStartLayout();
     childManager.setDidUnderflow(false);
@@ -350,10 +457,15 @@ class CarouselScrollPhysics extends ScrollPhysics {
     Tolerance tolerance,
     double velocity,
   ) {
-    final double itemWidth = position.viewportDimension / (1+4+1) * 1;
-    print(itemWidth);
+    double fraction;
+    if (position is _CarouselItemPosition) {
+      fraction = position.viewportFraction;
+    } else {
+      fraction = 1;
+    }
+    final double itemWidth = position.viewportDimension * fraction;
     double item = position.pixels / itemWidth;
-    print('viewport: ${position.viewportDimension}, position pixels: ${position.pixels}, item width: $itemWidth, $item');
+
     if (velocity < -tolerance.velocity) {
       item -= 0.5;
     } else if (velocity > tolerance.velocity) {
@@ -390,4 +502,111 @@ class CarouselScrollPhysics extends ScrollPhysics {
 
   @override
   bool get allowImplicitScrolling => true;
+}
+
+class CarouselItemMetrics extends FixedScrollMetrics {
+  /// Creates an immutable snapshot of values associated with a [Carousel].
+  CarouselItemMetrics({
+    required super.minScrollExtent,
+    required super.maxScrollExtent,
+    required super.pixels,
+    required super.viewportDimension,
+    required super.axisDirection,
+    required this.viewportFraction, // first item weight / total weight
+    required super.devicePixelRatio,
+  });
+
+  @override
+  CarouselItemMetrics copyWith({
+    double? minScrollExtent,
+    double? maxScrollExtent,
+    double? pixels,
+    double? viewportDimension,
+    AxisDirection? axisDirection,
+    double? viewportFraction,
+    double? devicePixelRatio,
+  }) {
+    return CarouselItemMetrics(
+      minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
+      maxScrollExtent: maxScrollExtent ?? (hasContentDimensions ? this.maxScrollExtent : null),
+      pixels: pixels ?? (hasPixels ? this.pixels : null),
+      viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
+      axisDirection: axisDirection ?? this.axisDirection,
+      viewportFraction: viewportFraction ?? this.viewportFraction,
+      devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
+    );
+  }
+
+  /// The fraction of the viewport that the first item occupies.
+  ///
+  /// Used to compute [item] from the current [pixels].
+  final double viewportFraction;
+}
+
+
+class _CarouselItemPosition extends ScrollPositionWithSingleContext implements CarouselItemMetrics {
+  _CarouselItemPosition({
+    required super.physics,
+    required super.context,
+    // this.initialPage = 0,
+    // bool keepPage = true,
+    double viewportFraction = 1.0,
+    super.oldPosition,
+  }) : assert(viewportFraction > 0.0),
+       _viewportFraction = viewportFraction;
+
+  @override
+  double get viewportFraction => _viewportFraction;
+  double _viewportFraction;
+  set viewportFraction(double value) {
+    if (_viewportFraction == value) {
+      return;
+    }
+    _viewportFraction = value;
+  }
+
+  @override
+  CarouselItemMetrics copyWith({
+    double? minScrollExtent,
+    double? maxScrollExtent,
+    double? pixels,
+    double? viewportDimension,
+    AxisDirection? axisDirection,
+    double? viewportFraction,
+    double? devicePixelRatio,
+  }) {
+    return CarouselItemMetrics(
+      minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
+      maxScrollExtent: maxScrollExtent ?? (hasContentDimensions ? this.maxScrollExtent : null),
+      pixels: pixels ?? (hasPixels ? this.pixels : null),
+      viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
+      axisDirection: axisDirection ?? this.axisDirection,
+      viewportFraction: viewportFraction ?? this.viewportFraction,
+      devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
+    );
+  }
+}
+
+class CarouselController extends ScrollController {
+  /// Creates a carousel controller.
+  CarouselController({
+    // this.initialPage = 0,
+    // this.keepPage = true,
+    this.viewportFraction = 1.0,
+  }) : assert(viewportFraction > 0.0);
+
+  /// The fraction of the viewport that the first carousel item should occupy.
+  final double viewportFraction;
+
+  @override
+  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition) {
+    return _CarouselItemPosition(
+      physics: physics,
+      context: context,
+      // initialPage: initialPage,
+      // keepPage: keepPage,
+      viewportFraction: viewportFraction,
+      oldPosition: oldPosition,
+    );
+  }
 }

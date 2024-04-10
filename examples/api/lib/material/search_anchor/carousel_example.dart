@@ -21,36 +21,27 @@ class _CarouselExampleState extends State<CarouselExample> {
     print('SCREEN WIDTH: ${MediaQuery.of(context).size.width}');
     return MaterialApp(
       home: Scaffold(
-        body: CustomScrollView(
-          scrollDirection: Axis.horizontal,
-          slivers: <Widget>[
-            SliverCarousel(
-              clipExtent: 0, // Clip extent must <= min child extent
-              childExtentList: const <int>[4,1],
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0)),
-                      color:
-                        Colors.primaries[index % Colors.primaries.length],
-                      child: Center(
-                        child: Text(
-                          'Item ${data[index]}',
-                          style: const TextStyle(color: Colors.white, fontSize: 20),
-                          overflow: TextOverflow.clip,
-                          softWrap: false,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-                childCount: data.length,
-              ),
-            ),
-          ]),
+        body: Center(
+          child: Carousel(
+            itemSnap: true,
+            itemWeights: const <int>[3,3,3,2,1],
+            children: List<Card>.generate(data.length, (int index) {
+              return Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0)),
+                color:
+                  Colors.primaries[index % Colors.primaries.length],
+                child: Center(
+                  child: Text(
+                    'Item ${data[index]}',
+                    style: const TextStyle(color: Colors.white, fontSize: 20),
+                    overflow: TextOverflow.clip,
+                    softWrap: false,
+                  ),
+                ),
+              );
+            }).toList()),
+        ),
       ),
     );
   }
