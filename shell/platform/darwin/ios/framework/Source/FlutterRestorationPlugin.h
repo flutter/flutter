@@ -15,7 +15,7 @@
 - (instancetype)initWithChannel:(FlutterMethodChannel*)channel
              restorationEnabled:(BOOL)waitForData NS_DESIGNATED_INITIALIZER;
 
-@property(nonatomic, strong) NSData* restorationData;
+@property(nonatomic, copy) NSData* restorationData;
 - (void)markRestorationComplete;
 - (void)reset;
 @end

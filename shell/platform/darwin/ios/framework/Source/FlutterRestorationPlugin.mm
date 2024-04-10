@@ -9,7 +9,7 @@
 
 #include "flutter/fml/logging.h"
 
-FLUTTER_ASSERT_NOT_ARC
+FLUTTER_ASSERT_ARC
 
 @interface FlutterRestorationPlugin ()
 @property(nonatomic, copy) FlutterResult pendingRequest;
@@ -54,8 +54,7 @@ FLUTTER_ASSERT_NOT_ARC
 
 - (void)setRestorationData:(NSData*)data {
   if (data != _restorationData) {
-    [_restorationData release];
-    _restorationData = [data retain];
+    _restorationData = [data copy];
   }
   _waitForData = NO;
   if (self.pendingRequest != nil) {
@@ -89,12 +88,6 @@ FLUTTER_ASSERT_NOT_ARC
     @"enabled" : @YES,
     @"data" : [FlutterStandardTypedData typedDataWithBytes:self.restorationData]
   };
-}
-
-- (void)dealloc {
-  [_restorationData release];
-  [_pendingRequest release];
-  [super dealloc];
 }
 
 @end
