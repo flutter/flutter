@@ -44,10 +44,10 @@ void main () {
       );
     });
 
-    testWithoutContext('migrators succeed', () {
+    testWithoutContext('migrators succeed', () async {
       final FakeIOSMigrator fakeIOSMigrator = FakeIOSMigrator();
       final ProjectMigration migration = ProjectMigration(<ProjectMigrator>[fakeIOSMigrator]);
-      migration.run();
+      await migration.run();
     });
 
     group('remove framework linking and embedding migration', () {
@@ -901,19 +901,19 @@ platform :ios, '12.0'
         project.xcodeProjectInfoFile = xcodeProjectInfoFile;
       });
 
-      testWithoutContext('skipped if files are missing', () {
+      testWithoutContext('skipped if files are missing', () async {
         final RemoveBitcodeMigration migration = RemoveBitcodeMigration(
           project,
           testLogger,
         );
-        expect(migration.migrate(), isTrue);
+        expect(await migration.migrate(), isTrue);
         expect(xcodeProjectInfoFile.existsSync(), isFalse);
 
         expect(testLogger.traceText, contains('Xcode project not found, skipping removing bitcode migration'));
         expect(testLogger.statusText, isEmpty);
       });
 
-      testWithoutContext('skipped if nothing to upgrade', () {
+      testWithoutContext('skipped if nothing to upgrade', () async {
         const String xcodeProjectInfoFileContents = 'IPHONEOS_DEPLOYMENT_TARGET = 12.0;';
         xcodeProjectInfoFile.writeAsStringSync(xcodeProjectInfoFileContents);
         final DateTime projectLastModified = xcodeProjectInfoFile.lastModifiedSync();
@@ -922,7 +922,7 @@ platform :ios, '12.0'
           project,
           testLogger,
         );
-        expect(migration.migrate(), isTrue);
+        expect(await migration.migrate(), isTrue);
 
         expect(xcodeProjectInfoFile.lastModifiedSync(), projectLastModified);
         expect(xcodeProjectInfoFile.readAsStringSync(), xcodeProjectInfoFileContents);
@@ -930,7 +930,7 @@ platform :ios, '12.0'
         expect(testLogger.statusText, isEmpty);
       });
 
-      testWithoutContext('bitcode build setting is removed', () {
+      testWithoutContext('bitcode build setting is removed', () async {
         xcodeProjectInfoFile.writeAsStringSync('''
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ENABLE_BITCODE = YES;
@@ -943,7 +943,7 @@ platform :ios, '12.0'
           project,
           testLogger,
         );
-        expect(migration.migrate(), isTrue);
+        expect(await migration.migrate(), isTrue);
 
         expect(xcodeProjectInfoFile.readAsStringSync(), '''
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -1446,7 +1446,7 @@ class FakeIOSMigrator extends ProjectMigrator {
     : super(BufferLogger.test());
 
   @override
-  void migrate() {}
+  Future<void> migrate() async {}
 
   @override
   String migrateLine(String line) {
