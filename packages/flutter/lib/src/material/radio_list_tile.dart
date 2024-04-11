@@ -178,7 +178,7 @@ class RadioListTile<T> extends StatelessWidget {
     this.dense,
     this.secondary,
     this.selected = false,
-    this.controlAffinity = ListTileControlAffinity.platform,
+    this.controlAffinity,
     this.autofocus = false,
     this.contentPadding,
     this.shape,
@@ -389,7 +389,7 @@ class RadioListTile<T> extends StatelessWidget {
   final bool selected;
 
   /// Where to place the control relative to the text.
-  final ListTileControlAffinity controlAffinity;
+  final ListTileControlAffinity? controlAffinity;
 
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
@@ -489,11 +489,12 @@ class RadioListTile<T> extends StatelessWidget {
     }
 
     Widget? leading, trailing;
+    final ThemeData theme = Theme.of(context);
+    final ListTileControlAffinity controlAffinity = this.controlAffinity ?? theme.listTileTheme.controlAffinity ?? ListTileControlAffinity.platform;
     (leading, trailing) = switch (controlAffinity) {
       ListTileControlAffinity.leading || ListTileControlAffinity.platform => (control, secondary),
       ListTileControlAffinity.trailing => (secondary, control),
     };
-    final ThemeData theme = Theme.of(context);
     final RadioThemeData radioThemeData = RadioTheme.of(context);
     final Set<MaterialState> states = <MaterialState>{
       if (selected) MaterialState.selected,

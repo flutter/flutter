@@ -669,14 +669,14 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   }
 
   Widget? _buildLeadingIcon(BuildContext context) {
-    if (_effectiveAffinity(widget.controlAffinity) != ListTileControlAffinity.leading) {
+    if (_effectiveAffinity(widget.controlAffinity ?? ListTileTheme.of(context).controlAffinity) != ListTileControlAffinity.leading) {
       return null;
     }
     return _buildIcon(context);
   }
 
   Widget? _buildTrailingIcon(BuildContext context) {
-    if (_effectiveAffinity(widget.controlAffinity) != ListTileControlAffinity.trailing) {
+    if (_effectiveAffinity(widget.controlAffinity ?? ListTileTheme.of(context).controlAffinity) != ListTileControlAffinity.trailing) {
       return null;
     }
     return _buildIcon(context);
