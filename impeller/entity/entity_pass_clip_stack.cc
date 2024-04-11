@@ -15,7 +15,7 @@ EntityPassClipStack::EntityPassClipStack(const Rect& initial_coverage_rect) {
           {
               {ClipCoverageLayer{
                   .coverage = initial_coverage_rect,
-                  .clip_depth = 0,
+                  .clip_height = 0,
               }},
           },
   });
@@ -30,12 +30,12 @@ bool EntityPassClipStack::HasCoverage() const {
 }
 
 void EntityPassClipStack::PushSubpass(std::optional<Rect> subpass_coverage,
-                                      size_t clip_depth) {
+                                      size_t clip_height) {
   subpass_state_.push_back(SubpassState{
       .clip_coverage =
           {
               ClipCoverageLayer{.coverage = subpass_coverage,
-                                .clip_depth = clip_depth},
+                                .clip_height = clip_height},
           },
   });
 }
@@ -52,7 +52,7 @@ EntityPassClipStack::GetClipCoverageLayers() const {
 EntityPassClipStack::ClipStateResult EntityPassClipStack::ApplyClipState(
     Contents::ClipCoverage global_clip_coverage,
     Entity& entity,
-    size_t clip_depth_floor,
+    size_t clip_height_floor,
     Point global_pass_position) {
   ClipStateResult result = {.should_render = false, .clip_did_change = false};
 
@@ -62,13 +62,24 @@ EntityPassClipStack::ClipStateResult EntityPassClipStack::ApplyClipState(
       break;
     case Contents::ClipCoverage::Type::kAppend: {
       auto op = CurrentClipCoverage();
+
+      // Compute the previous clip height.
+      size_t previous_clip_height = 0;
+      if (!subpass_state.clip_coverage.empty()) {
+        previous_clip_height = subpass_state.clip_coverage.back().clip_height;
+      } else {
+        // If there is no clip coverage, then the previous clip height is the
+        // clip height floor.
+        previous_clip_height = clip_height_floor;
+      }
+
       subpass_state.clip_coverage.push_back(
           ClipCoverageLayer{.coverage = global_clip_coverage.coverage,
-                            .clip_depth = entity.GetClipDepth() + 1});
+                            .clip_height = previous_clip_height + 1});
       result.clip_did_change = true;
 
-      FML_DCHECK(subpass_state.clip_coverage.back().clip_depth ==
-                 subpass_state.clip_coverage.front().clip_depth +
+      FML_DCHECK(subpass_state.clip_coverage.back().clip_height ==
+                 subpass_state.clip_coverage.front().clip_height +
                      subpass_state.clip_coverage.size() - 1);
 
       if (!op.has_value()) {
@@ -78,14 +89,17 @@ EntityPassClipStack::ClipStateResult EntityPassClipStack::ApplyClipState(
       }
     } break;
     case Contents::ClipCoverage::Type::kRestore: {
-      if (subpass_state.clip_coverage.back().clip_depth <=
-          entity.GetClipDepth()) {
+      ClipRestoreContents* restore_contents =
+          reinterpret_cast<ClipRestoreContents*>(entity.GetContents().get());
+      size_t restore_height = restore_contents->GetRestoreHeight();
+
+      if (subpass_state.clip_coverage.back().clip_height <= restore_height) {
         // Drop clip restores that will do nothing.
         return result;
       }
 
-      auto restoration_index = entity.GetClipDepth() -
-                               subpass_state.clip_coverage.front().clip_depth;
+      auto restoration_index =
+          restore_height - subpass_state.clip_coverage.front().clip_height;
       FML_DCHECK(restoration_index < subpass_state.clip_coverage.size());
 
       // We only need to restore the area that covers the coverage of the
@@ -122,7 +136,6 @@ EntityPassClipStack::ClipStateResult EntityPassClipStack::ApplyClipState(
   }
 #endif
 
-  entity.SetClipDepth(entity.GetClipDepth() - clip_depth_floor);
   RecordEntity(entity, global_clip_coverage.type,
                subpass_state.clip_coverage.back().coverage);
 
