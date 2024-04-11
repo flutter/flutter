@@ -264,8 +264,8 @@ Entity ApplyBlurStyle(FilterContents::BlurStyle blur_style,
                                    input, input_snapshot,
                                    std::move(blur_entity), geometry);
     case FilterContents::BlurStyle::kSolid: {
-      Entity snapshot_entity = Entity::FromSnapshot(
-          input_snapshot, entity.GetBlendMode(), entity.GetClipDepth());
+      Entity snapshot_entity =
+          Entity::FromSnapshot(input_snapshot, entity.GetBlendMode());
       Entity result;
       Matrix blurred_transform = blur_entity.GetTransform();
       Matrix snapshot_transform = snapshot_entity.GetTransform();
@@ -423,8 +423,8 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
   }
 
   if (scaled_sigma.x < kEhCloseEnough && scaled_sigma.y < kEhCloseEnough) {
-    return Entity::FromSnapshot(input_snapshot.value(), entity.GetBlendMode(),
-                                entity.GetClipDepth());  // No blur to render.
+    return Entity::FromSnapshot(input_snapshot.value(),
+                                entity.GetBlendMode());  // No blur to render.
   }
 
   // In order to avoid shimmering in downsampling step, we should have mips.
@@ -559,7 +559,7 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
                             Matrix::MakeScale(1 / effective_scalar),
                .sampler_descriptor = sampler_desc,
                .opacity = input_snapshot->opacity},
-      entity.GetBlendMode(), entity.GetClipDepth());
+      entity.GetBlendMode());
 
   return ApplyBlurStyle(mask_blur_style_, entity, inputs[0],
                         input_snapshot.value(), std::move(blur_output_entity),

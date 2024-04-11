@@ -114,7 +114,6 @@ bool SolidRRectBlurContents::Render(const ContentContext& renderer,
 
   pass.SetCommandLabel("RRect Shadow");
   pass.SetPipeline(renderer.GetRRectBlurPipeline(opts));
-  pass.SetStencilReference(entity.GetClipDepth());
   pass.SetVertexBuffer(
       vtx_builder.CreateVertexBuffer(renderer.GetTransientsBuffer()));
   VS::BindFrameInfo(pass,

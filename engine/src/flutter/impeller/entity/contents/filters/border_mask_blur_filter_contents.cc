@@ -118,7 +118,6 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
     pass.SetCommandLabel("Border Mask Blur Filter");
     pass.SetPipeline(renderer.GetBorderMaskBlurPipeline(options));
     pass.SetVertexBuffer(vtx_builder.CreateVertexBuffer(host_buffer));
-    pass.SetStencilReference(entity.GetClipDepth());
 
     FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
     VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
@@ -139,7 +138,6 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
 
   Entity sub_entity;
   sub_entity.SetContents(std::move(contents));
-  sub_entity.SetClipDepth(entity.GetClipDepth());
   sub_entity.SetBlendMode(entity.GetBlendMode());
   return sub_entity;
 }

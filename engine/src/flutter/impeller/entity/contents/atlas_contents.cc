@@ -240,7 +240,6 @@ bool AtlasContents::Render(const ContentContext& renderer,
         SPrintF("DrawAtlas Blend (%s)", BlendModeToString(blend_mode_)));
 #endif  // IMPELLER_DEBUG
     pass.SetVertexBuffer(vtx_builder.CreateVertexBuffer(host_buffer));
-    pass.SetStencilReference(entity.GetClipDepth());
     pass.SetPipeline(
         renderer.GetPorterDuffBlendPipeline(OptionsFromPass(pass)));
 
@@ -410,7 +409,6 @@ bool AtlasTextureContents::Render(const ContentContext& renderer,
 
   auto options = OptionsFromPassAndEntity(pass, entity);
   pass.SetPipeline(renderer.GetTexturePipeline(options));
-  pass.SetStencilReference(entity.GetClipDepth());
   pass.SetVertexBuffer(vertex_builder.CreateVertexBuffer(host_buffer));
   VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
   FS::BindTextureSampler(pass, texture,
@@ -498,7 +496,6 @@ bool AtlasColorContents::Render(const ContentContext& renderer,
   auto opts = OptionsFromPassAndEntity(pass, entity);
   opts.blend_mode = BlendMode::kSourceOver;
   pass.SetPipeline(renderer.GetGeometryColorPipeline(opts));
-  pass.SetStencilReference(entity.GetClipDepth());
   pass.SetVertexBuffer(vertex_builder.CreateVertexBuffer(host_buffer));
   VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
   FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));

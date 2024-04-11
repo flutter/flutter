@@ -176,7 +176,6 @@ bool TextureContents::Render(const ContentContext& renderer,
   }
   pass.SetPipeline(pipeline);
 
-  pass.SetStencilReference(entity.GetClipDepth());
   pass.SetVertexBuffer(vertex_builder.CreateVertexBuffer(host_buffer));
   VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
   if (is_external_texture) {

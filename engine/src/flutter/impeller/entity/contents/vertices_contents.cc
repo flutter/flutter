@@ -163,7 +163,6 @@ bool VerticesUVContents::Render(const ContentContext& renderer,
   auto opts = OptionsFromPassAndEntity(pass, entity);
   opts.primitive_type = geometry_result.type;
   pass.SetPipeline(renderer.GetTexturePipeline(opts));
-  pass.SetStencilReference(entity.GetClipDepth());
   pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
 
   VS::FrameInfo frame_info;
@@ -212,7 +211,6 @@ bool VerticesColorContents::Render(const ContentContext& renderer,
   auto opts = OptionsFromPassAndEntity(pass, entity);
   opts.primitive_type = geometry_result.type;
   pass.SetPipeline(renderer.GetGeometryColorPipeline(opts));
-  pass.SetStencilReference(entity.GetClipDepth());
   pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
 
   VS::FrameInfo frame_info;
@@ -294,7 +292,6 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
                                BlendModeToString(blend_mode_)));
 #endif  // IMPELLER_DEBUG
   pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
-  pass.SetStencilReference(entity.GetClipDepth());
 
   auto options = OptionsFromPassAndEntity(pass, entity);
   options.primitive_type = geometry_result.type;

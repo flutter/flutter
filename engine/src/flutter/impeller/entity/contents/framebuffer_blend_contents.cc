@@ -73,7 +73,6 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
 
   pass.SetCommandLabel("Framebuffer Advanced Blend Filter");
   pass.SetVertexBuffer(vtx_builder.CreateVertexBuffer(host_buffer));
-  pass.SetStencilReference(entity.GetClipDepth());
 
   switch (blend_mode_) {
     case BlendMode::kScreen:

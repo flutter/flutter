@@ -13,7 +13,7 @@ namespace impeller {
 
 struct ClipCoverageLayer {
   std::optional<Rect> coverage;
-  size_t clip_depth;
+  size_t clip_height = 0;
 };
 
 /// @brief A class that tracks all clips that have been recorded in the current
@@ -44,7 +44,7 @@ class EntityPassClipStack {
 
   std::optional<Rect> CurrentClipCoverage() const;
 
-  void PushSubpass(std::optional<Rect> subpass_coverage, size_t clip_depth);
+  void PushSubpass(std::optional<Rect> subpass_coverage, size_t clip_height);
 
   void PopSubpass();
 
@@ -54,7 +54,7 @@ class EntityPassClipStack {
   ///         is a clip operation, then the clip state is updated accordingly.
   ClipStateResult ApplyClipState(Contents::ClipCoverage global_clip_coverage,
                                  Entity& entity,
-                                 size_t clip_depth_floor,
+                                 size_t clip_height_floor,
                                  Point global_pass_position);
 
   // Visible for testing.
