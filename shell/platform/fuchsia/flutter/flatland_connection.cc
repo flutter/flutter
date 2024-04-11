@@ -33,6 +33,7 @@ FlatlandConnection::FlatlandConnection(
     FML_LOG(ERROR) << "Flatland disconnected: " << zx_status_get_string(status);
     callback();
   });
+  debug_label_ = debug_label;
   flatland_->SetDebugName(debug_label);
   flatland_.events().OnError =
       fit::bind_member(this, &FlatlandConnection::OnError);
@@ -58,7 +59,10 @@ void FlatlandConnection::Present() {
 // This method is called from the raster thread.
 void FlatlandConnection::DoPresent() {
   TRACE_DURATION("flutter", "FlatlandConnection::DoPresent");
-  TRACE_FLOW_BEGIN("gfx", "Flatland::Present", next_present_trace_id_);
+
+  std::string per_app_tracing_name =
+      "Flatland::PerAppPresent[" + debug_label_ + "]";
+  TRACE_FLOW_BEGIN("gfx", per_app_tracing_name.c_str(), next_present_trace_id_);
   ++next_present_trace_id_;
 
   FML_CHECK(threadsafe_state_.present_credits_ > 0);
