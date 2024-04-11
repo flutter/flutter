@@ -158,9 +158,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-
     expect(find.text('new page'), findsOneWidget);
-
 
     nav.currentState!.maybePop(poppedResult);
     await tester.pumpAndSettle();
