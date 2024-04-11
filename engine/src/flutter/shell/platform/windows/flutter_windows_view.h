@@ -46,8 +46,25 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // Get the view's unique identifier.
   FlutterViewId view_id() const;
 
-  // Creates rendering surface for Flutter engine to draw into.
-  // Should be called before calling FlutterEngineRun using this view.
+  // Whether this view is the implicit view.
+  //
+  // The implicit view is a special view for backwards compatibility.
+  // The engine assumes it can always render to this view, even if the app has
+  // destroyed the window for this view.
+  //
+  // Today, the implicit view is the first view that is created. It is the only
+  // view that can be created before the engine is launched.
+  //
+  // The embedder must ignore presents to this view before it is created and
+  // after it is destroyed.
+  //
+  // See:
+  // https://api.flutter.dev/flutter/dart-ui/PlatformDispatcher/implicitView.html
+  bool IsImplicitView() const;
+
+  // Create a rendering surface for Flutter engine to draw into.
+  //
+  // This is a no-op if using software rasterization.
   void CreateRenderSurface();
 
   // Get the EGL surface that backs the Flutter view.
@@ -72,7 +89,15 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
                                      size_t row_bytes,
                                      size_t height);
 
-  // Send initial bounds to embedder.  Must occur after engine has initialized.
+  // Creates a window metric for this view.
+  //
+  // Used to notify the engine of a view's current size and device pixel ratio.
+  FlutterWindowMetricsEvent CreateWindowMetricsEvent() const;
+
+  // Send initial bounds to embedder. Must occur after engine has initialized.
+  //
+  // This is a no-op if this is not the implicit view. Non-implicit views'
+  // initial window metrics are sent when the view is added to the engine.
   void SendInitialBounds();
 
   // Set the text of the alert, and create it if it does not yet exist.
@@ -286,8 +311,8 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   bool ResizeRenderSurface(size_t width, size_t height);
 
   // Sends a window metrics update to the Flutter engine using current window
-  // dimensions in physical
-  void SendWindowMetrics(size_t width, size_t height, double dpiscale) const;
+  // dimensions in physical pixels.
+  void SendWindowMetrics(size_t width, size_t height, double pixel_ratio) const;
 
   // Reports a mouse movement to Flutter engine.
   void SendPointerMove(double x, double y, PointerState* state);

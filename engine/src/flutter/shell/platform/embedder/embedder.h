@@ -3287,6 +3287,12 @@ typedef FlutterEngineResult (*FlutterEngineSetNextFrameCallbackFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     VoidCallback callback,
     void* user_data);
+typedef FlutterEngineResult (*FlutterEngineAddViewFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterAddViewInfo* info);
+typedef FlutterEngineResult (*FlutterEngineRemoveViewFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterRemoveViewInfo* info);
 
 /// Function-pointer-based versions of the APIs above.
 typedef struct {
@@ -3333,6 +3339,8 @@ typedef struct {
   FlutterEngineNotifyDisplayUpdateFnPtr NotifyDisplayUpdate;
   FlutterEngineScheduleFrameFnPtr ScheduleFrame;
   FlutterEngineSetNextFrameCallbackFnPtr SetNextFrameCallback;
+  FlutterEngineAddViewFnPtr AddView;
+  FlutterEngineRemoveViewFnPtr RemoveView;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------

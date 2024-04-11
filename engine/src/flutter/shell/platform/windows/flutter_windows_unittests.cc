@@ -570,5 +570,65 @@ TEST_F(WindowsTest, GetKeyboardStateHeadless) {
   }
 }
 
+// Verify the embedder can add and remove views.
+TEST_F(WindowsTest, AddRemoveView) {
+  std::mutex mutex;
+  std::string view_ids;
+
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  builder.SetDartEntrypoint("onMetricsChangedSignalViewIds");
+
+  fml::AutoResetWaitableEvent ready_latch;
+  context.AddNativeFunction(
+      "Signal", CREATE_NATIVE_ENTRY(
+                    [&](Dart_NativeArguments args) { ready_latch.Signal(); }));
+
+  context.AddNativeFunction(
+      "SignalStringValue", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+        auto handle = Dart_GetNativeArgument(args, 0);
+        ASSERT_FALSE(Dart_IsError(handle));
+
+        std::scoped_lock lock{mutex};
+        view_ids = tonic::DartConverter<std::string>::FromDart(handle);
+      }));
+
+  // Create the implicit view.
+  ViewControllerPtr first_controller{builder.Run()};
+  ASSERT_NE(first_controller, nullptr);
+
+  ready_latch.Wait();
+
+  // Create a second view.
+  FlutterDesktopEngineRef engine =
+      FlutterDesktopViewControllerGetEngine(first_controller.get());
+  FlutterDesktopViewControllerProperties properties = {};
+  properties.width = 100;
+  properties.height = 100;
+  ViewControllerPtr second_controller{
+      FlutterDesktopEngineCreateViewController(engine, &properties)};
+  ASSERT_NE(second_controller, nullptr);
+
+  // Pump messages for the Windows platform task runner until the view is added.
+  while (true) {
+    PumpMessage();
+    std::scoped_lock lock{mutex};
+    if (view_ids == "View IDs: [0, 1]") {
+      break;
+    }
+  }
+
+  // Delete the second view and pump messages for the Windows platform task
+  // runner until the view is removed.
+  second_controller.reset();
+  while (true) {
+    PumpMessage();
+    std::scoped_lock lock{mutex};
+    if (view_ids == "View IDs: [0]") {
+      break;
+    }
+  }
+}
+
 }  // namespace testing
 }  // namespace flutter

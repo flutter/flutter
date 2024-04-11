@@ -361,3 +361,12 @@ void signalViewIds() {
 
   signalStringValue('View IDs: [${viewIds.join(', ')}]');
 }
+
+@pragma('vm:entry-point')
+void onMetricsChangedSignalViewIds() {
+  ui.PlatformDispatcher.instance.onMetricsChanged = () {
+    signalViewIds();
+  };
+
+  signal();
+}
