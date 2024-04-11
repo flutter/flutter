@@ -438,8 +438,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     _thumbExtent = clampDouble(thumbExtent, newMinLength, _traversableTrackExtent);
   }
 
-  double getThumbExtent() => _thumbExtent;
-
   // - Scrollable Details
 
   ScrollMetrics? _lastMetrics;
@@ -1316,7 +1314,9 @@ class RawScrollbar extends StatefulWidget {
 /// Provides defaults gestures for dragging the scrollbar thumb and tapping on the
 /// scrollbar track.
 class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProviderStateMixin<T> {
+  Offset? _startDragScrollbarAxisOffset;
   Offset? _lastDragUpdateOffset;
+  double? _startDragThumbOffset;
   ScrollController? _cachedController;
   Timer? _fadeoutTimer;
   late AnimationController _fadeoutAnimationController;
@@ -1324,8 +1324,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   final GlobalKey  _scrollbarPainterKey = GlobalKey();
   bool _hoverIsActive = false;
   Drag? _thumbDrag;
-  double? _thumbExtent;
-  double? _thumbOffset;
   ScrollHoldController? _thumbHold;
   final GlobalKey<RawGestureDetectorState> _gestureDetectorKey = GlobalKey<RawGestureDetectorState>();
 
@@ -1594,6 +1592,68 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _thumbHold = null;
   }
 
+  // Given the drag's localPosition (see handleThumbPressUpdate) compute the
+  // scroll position delta in the scroll axis direction. Deal with the complications
+  // arising from scroll metrics changes that have occurred since the last
+  // drag update and the need to prevent overscrolling on some platforms.
+  double? _getPrimaryDelta(Offset localPosition) {
+    assert(_cachedController != null);
+    assert(_startDragScrollbarAxisOffset != null);
+    assert(_lastDragUpdateOffset != null);
+    assert(_startDragThumbOffset != null);
+
+    final ScrollPosition position = _cachedController!.position;
+    late double primaryDeltaFromDragStart;
+    late double primaryDeltaFromLastDragUpdate;
+    switch (position.axisDirection) {
+      case AxisDirection.up:
+        primaryDeltaFromDragStart = _startDragScrollbarAxisOffset!.dy - localPosition.dy;
+        primaryDeltaFromLastDragUpdate = _lastDragUpdateOffset!.dy - localPosition.dy;
+      case AxisDirection.right:
+        primaryDeltaFromDragStart = localPosition.dx -_startDragScrollbarAxisOffset!.dx;
+        primaryDeltaFromLastDragUpdate = localPosition.dx -_lastDragUpdateOffset!.dx;
+      case AxisDirection.down:
+        primaryDeltaFromDragStart = localPosition.dy -_startDragScrollbarAxisOffset!.dy;
+        primaryDeltaFromLastDragUpdate = localPosition.dy -_lastDragUpdateOffset!.dy;
+      case AxisDirection.left:
+        primaryDeltaFromDragStart = _startDragScrollbarAxisOffset!.dx - localPosition.dx;
+        primaryDeltaFromLastDragUpdate = _lastDragUpdateOffset!.dx - localPosition.dx;
+    }
+
+    // Convert primaryDelta, the amount that the scrollbar moved since the last
+    // time when drag started or last updated, into the coordinate space of the scroll
+    // position.
+    double scrollOffsetGlobal = scrollbarPainter.getTrackToScroll(primaryDeltaFromDragStart + _startDragThumbOffset!);
+    if (primaryDeltaFromDragStart > 0 && scrollOffsetGlobal < position.pixels
+        || primaryDeltaFromDragStart < 0 && scrollOffsetGlobal > position.pixels) {
+      // Adjust the position value if the scrolling direction conflicts with
+      // the dragging direction due to scroll metrics shrink.
+      scrollOffsetGlobal = position.pixels + scrollbarPainter.getTrackToScroll(primaryDeltaFromLastDragUpdate);
+    }
+    if (scrollOffsetGlobal != position.pixels) {
+      // Ensure we don't drag into overscroll if the physics do not allow it.
+      final double physicsAdjustment = position.physics.applyBoundaryConditions(position, scrollOffsetGlobal);
+      double newPosition = scrollOffsetGlobal - physicsAdjustment;
+
+      // The physics may allow overscroll when actually *scrolling*, but
+      // dragging on the scrollbar does not always allow us to enter overscroll.
+      switch(ScrollConfiguration.of(context).getPlatform(context)) {
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          newPosition = clampDouble(newPosition, position.minScrollExtent, position.maxScrollExtent);
+        case TargetPlatform.iOS:
+        case TargetPlatform.android:
+          // We can only drag the scrollbar into overscroll on mobile
+          // platforms, and only then if the physics allow it.
+          break;
+      }
+      final bool isReversed = axisDirectionIsReversed(position.axisDirection);
+      return isReversed ? newPosition - position.pixels : position.pixels - newPosition;
+    }
+    return null;
+  }
 
   /// Handler called when a press on the scrollbar thumb has been recognized.
   ///
@@ -1612,7 +1672,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   /// Handler called when a long press gesture has started.
   ///
-  /// Begins the fade out animation and initializes dragging the scrollbar thumb.
+  /// Begins the fade out animation and creates the
   @protected
   @mustCallSuper
   void handleThumbPressStart(Offset localPosition) {
@@ -1635,15 +1695,14 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     assert(_thumbDrag != null);
     assert(_thumbHold == null);
 
+    _startDragScrollbarAxisOffset = localPosition;
     _lastDragUpdateOffset = localPosition;
-    _thumbExtent = scrollbarPainter.getThumbExtent();
-    _thumbOffset = scrollbarPainter.getThumbScrollOffset();
+    _startDragThumbOffset = scrollbarPainter.getThumbScrollOffset();
   }
-
 
   /// Handler called when a currently active long press gesture moves.
   ///
-  /// Updates the position of the child scrollable.
+  /// Updates the position of the child scrollable via the _drag ScrollDragController.
   @protected
   @mustCallSuper
   void handleThumbPressUpdate(Offset localPosition) {
@@ -1659,60 +1718,15 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     if (direction == null) {
       return;
     }
-
-    // _thumbDrag might be null if the drag activity ended and called _disposeDrag.
+    // _thumbDrag might be null if the drag activity ended and called _disposeThumbDrag.
     assert(_thumbHold == null || _thumbDrag == null);
     if (_thumbDrag == null) {
       return;
     }
 
-    double primaryDeltaTrack = switch(direction) {
-      Axis.horizontal => _lastDragUpdateOffset!.dx - localPosition.dx,
-      Axis.vertical => _lastDragUpdateOffset!.dy - localPosition.dy,
-    };
-
-    // Adjust the current drag delta if the scroll metrics changed and
-    // the thumb moved while the drag was underway.
-    final double currentThumbOffset = scrollbarPainter.getThumbScrollOffset()!;
-    if (currentThumbOffset != _thumbOffset!) {
-      if (currentThumbOffset > _thumbOffset!) {
-        primaryDeltaTrack += _thumbOffset! - currentThumbOffset;
-      } else {
-        primaryDeltaTrack += currentThumbOffset - _thumbOffset!;
-      }
-    }
-
-    // Adjust the current drag delta if the thumb changed size while the
-    // drag was underway.
-    if (scrollbarPainter.getThumbExtent() != _thumbExtent!) {
-      //primaryDeltaTrack += scrollbarPainter.getThumbExtent() - _thumbExtent!;
-    }
-
-    double primaryDelta = scrollbarPainter.getTrackToScroll(primaryDeltaTrack);
-
-    // Overscrolling by dragging the scrollbar's thumb is only supported on mobile
-    // platforms. Otherwise we clamp the primaryDelta.
-    final TargetPlatform platform = ScrollConfiguration.of(context).getPlatform(context);
-    switch (platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.android:
-        break;
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        final bool isReversed = axisDirectionIsReversed(position.axisDirection);
-        final double pixels = position.pixels;
-        final double updatedPixels =  isReversed ? pixels + primaryDelta : pixels - primaryDelta;
-        if (updatedPixels < position.minScrollExtent) {
-          primaryDelta = pixels - position.minScrollExtent;
-        }
-        if (updatedPixels > _cachedController!.position.maxScrollExtent) {
-          primaryDelta = pixels - position.maxScrollExtent;
-        }
-        if (primaryDelta == 0) {
-          return;
-        }
+    final double? primaryDelta = _getPrimaryDelta(localPosition);
+    if (primaryDelta == null) {
+      return;
     }
 
     final Offset delta = switch(direction) {
@@ -1727,9 +1741,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       localPosition: localPosition,
     );
     _thumbDrag!.update(scrollDetails); // Triggers updates to the ScrollPosition and ScrollbarPainter
-
-    _thumbOffset = scrollbarPainter.getThumbScrollOffset();
-    _thumbExtent = scrollbarPainter.getThumbExtent();
     _lastDragUpdateOffset = localPosition;
   }
 
@@ -1746,7 +1757,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _cachedController = null;
     _lastDragUpdateOffset = null;
 
-    // _thumbDrag might be null if the drag activity ended and called _disposeDrag.
+    // _thumbDrag might be null if the drag activity ended and called _disposeThumbDrag.
     assert(_thumbHold == null || _thumbDrag == null);
     if (_thumbDrag == null) {
       return;
@@ -1776,8 +1787,11 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
     _thumbDrag?.end(details);
     assert(_thumbDrag == null);
-    _thumbExtent = null;
-    _thumbOffset = null;
+
+    _startDragScrollbarAxisOffset = null;
+    _lastDragUpdateOffset = null;
+    _startDragThumbOffset = null;
+    _cachedController = null;
   }
 
   void _handleTrackTapDown(TapDownDetails details) {
@@ -1921,7 +1935,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       return;
     }
     // _thumbHold might be null if the drag started.
-    // _drag might be null if the drag activity ended and called _disposeDrag.
+    // _thumbDrag might be null if the drag activity ended and called _disposeThumbDrag.
     assert(_thumbHold == null || _thumbDrag == null);
     _thumbHold?.cancel();
     _thumbDrag?.cancel();
