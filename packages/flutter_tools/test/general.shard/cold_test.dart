@@ -94,6 +94,7 @@ void main() {
 
     testUsingContext('with traceStartup, no env variable', () async {
       final FakeDevice device = FakeDevice();
+      final Directory outputDirectory = memoryFileSystem.directory(getBuildDirectory());
       final FakeFlutterDevice flutterDevice = FakeFlutterDevice(device);
       final List<FlutterDevice> devices = <FlutterDevice>[flutterDevice];
       final File applicationBinary = MemoryFileSystem.test().file('binary');
@@ -103,10 +104,11 @@ void main() {
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
         target: 'main.dart',
         traceStartup: true,
+        testOutputDirectory: outputDirectory.path,
       ).run();
 
       expect(result, 0);
-      expect(memoryFileSystem.directory(getBuildDirectory()).childFile('start_up_info.json').existsSync(), true);
+      expect(outputDirectory.childFile('start_up_info.json').existsSync(), true);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -114,7 +116,7 @@ void main() {
     });
 
     testUsingContext('with traceStartup, env variable', () async {
-      //fakePlatform.environment[kFlutterTestOutputsDirEnvName] = 'test_output_dir';
+      fakePlatform.environment[kFlutterTestOutputsDirEnvName] = 'test_output_dir';
       final Directory testOutputDirectory = memoryFileSystem.directory('test_output_dir');
 
       final FakeDevice device = FakeDevice();
@@ -131,7 +133,7 @@ void main() {
       ).run();
 
       expect(result, 0);
-      expect(testOutputDirectory.childFile('start_up_info.json').existsSync(), true);
+      expect(memoryFileSystem.directory('test_output_dir').childFile('start_up_info.json').existsSync(), true);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
