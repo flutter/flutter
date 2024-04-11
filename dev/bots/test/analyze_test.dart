@@ -45,6 +45,7 @@ void main() {
   final String testRootPath = path.join('test', 'analyze-test-input', 'root');
   final String dartName = Platform.isWindows ? 'dart.exe' : 'dart';
   final String dartPath = path.canonicalize(path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', dartName));
+  final String testGenDefaultsPath = path.join('test', 'analyze-gen-defaults');
 
   test('analyze.dart - verifyDeprecations', () async {
     final String result = await capture(() => verifyDeprecations(testRootPath, minimumMatches: 2), shouldHaveErrors: true);
@@ -290,6 +291,26 @@ void main() {
       '$lines\n'
       '║ \n'
       '║ Typically the get* methods should be used to obtain the intrinsics of a RenderBox.\n'
+      '╚═══════════════════════════════════════════════════════════════════════════════\n'
+    );
+  });
+
+  test('analyze.dart - verifyMaterialFilesAreUpToDateWithTemplateFiles', () async {
+    String result = await capture(() => verifyMaterialFilesAreUpToDateWithTemplateFiles(
+      testGenDefaultsPath,
+      dartPath,
+    ), shouldHaveErrors: true);
+    final String lines = <String>[
+        '║ chip.dart is not up-to-date with the token template file.',
+      ]
+      .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
+      .join('\n');
+    const String errorStart = '╔═';
+    result = result.substring(result.indexOf(errorStart));
+    expect(result,
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
+      '$lines\n'
+      '║ See: https://github.com/flutter/flutter/blob/master/dev/tools/gen_defaults to update the token template files.\n'
       '╚═══════════════════════════════════════════════════════════════════════════════\n'
     );
   });

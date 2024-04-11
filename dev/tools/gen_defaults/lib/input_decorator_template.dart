@@ -43,19 +43,19 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
       return ${border('md.comp.filled-text-field.disabled.active-indicator')};
     }
     if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
-        return ${border('md.comp.filled-text-field.error.hover.active-indicator')};
-      }
       if (states.contains(MaterialState.focused)) {
         return ${mergedBorder('md.comp.filled-text-field.error.focus.active-indicator','md.comp.filled-text-field.focus.active-indicator')};
       }
+      if (states.contains(MaterialState.hovered)) {
+        return ${border('md.comp.filled-text-field.error.hover.active-indicator')};
+      }
       return ${border('md.comp.filled-text-field.error.active-indicator')};
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return ${border('md.comp.filled-text-field.hover.active-indicator')};
     }
     if (states.contains(MaterialState.focused)) {
       return ${border('md.comp.filled-text-field.focus.active-indicator')};
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return ${border('md.comp.filled-text-field.hover.active-indicator')};
     }
     return ${border('md.comp.filled-text-field.active-indicator')};
     });
@@ -66,19 +66,19 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
       return ${border('md.comp.outlined-text-field.disabled.outline')};
     }
     if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
-        return ${border('md.comp.outlined-text-field.error.hover.outline')};
-      }
       if (states.contains(MaterialState.focused)) {
         return ${mergedBorder('md.comp.outlined-text-field.error.focus.outline','md.comp.outlined-text-field.focus.outline')};
       }
+      if (states.contains(MaterialState.hovered)) {
+        return ${border('md.comp.outlined-text-field.error.hover.outline')};
+      }
       return ${border('md.comp.outlined-text-field.error.outline')};
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return ${border('md.comp.outlined-text-field.hover.outline')};
     }
     if (states.contains(MaterialState.focused)) {
       return ${border('md.comp.outlined-text-field.focus.outline')};
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return ${border('md.comp.outlined-text-field.hover.outline')};
     }
     return ${border('md.comp.outlined-text-field.outline')};
   });
