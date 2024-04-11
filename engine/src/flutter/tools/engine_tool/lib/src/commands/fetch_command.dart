@@ -11,6 +11,7 @@ final class FetchCommand extends CommandBase {
   /// Constructs the 'fetch' command.
   FetchCommand({
     required super.environment,
+    super.usageLineLength,
   });
 
   @override

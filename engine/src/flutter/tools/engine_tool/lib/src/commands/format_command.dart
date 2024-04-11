@@ -26,6 +26,7 @@ final class FormatCommand extends CommandBase {
   // ignore: public_member_api_docs
   FormatCommand({
     required super.environment,
+    super.usageLineLength,
   }) {
     argParser
       ..addFlag(

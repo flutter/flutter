@@ -16,6 +16,7 @@ final class QueryCommand extends CommandBase {
     required super.environment,
     required this.configs,
     super.verbose = false,
+    super.usageLineLength,
   }) {
     // Add options here that are common to all queries.
     argParser

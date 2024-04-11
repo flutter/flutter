@@ -23,6 +23,7 @@ String testConfig(String osDimension, String osPlatform) => '''
       },
       "gn": ["--gn-arg", "--lto", "--goma", "--no-rbe"],
       "name": "ci/build_name",
+      "description": "This is a very long description that will test that the help message is wrapped correctly at an appropriate number of characters.",
       "ninja": {
         "config": "build_name",
         "targets": ["ninja_target"]

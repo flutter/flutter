@@ -16,7 +16,7 @@ import 'query_command.dart';
 import 'run_command.dart';
 import 'test_command.dart';
 
-const int _usageLineLength = 80;
+const int _usageLineLength = 100;
 
 /// The root command runner.
 final class ToolCommandRunner extends CommandRunner<int> {
@@ -28,13 +28,42 @@ final class ToolCommandRunner extends CommandRunner<int> {
     this.verbose = false,
   }) : super(toolName, toolDescription, usageLineLength: _usageLineLength) {
     final List<Command<int>> commands = <Command<int>>[
-      FetchCommand(environment: environment),
-      FormatCommand(environment: environment),
-      QueryCommand(environment: environment, configs: configs, verbose: verbose),
-      BuildCommand(environment: environment, configs: configs, verbose: verbose),
-      RunCommand(environment: environment, configs: configs, verbose: verbose),
-      LintCommand(environment: environment),
-      TestCommand(environment: environment, configs: configs, verbose: verbose),
+      FetchCommand(
+        environment: environment,
+        usageLineLength: _usageLineLength,
+      ),
+      FormatCommand(
+        environment: environment,
+        usageLineLength: _usageLineLength,
+      ),
+      QueryCommand(
+        environment: environment,
+        configs: configs,
+        verbose: verbose,
+        usageLineLength: _usageLineLength,
+      ),
+      BuildCommand(
+        environment: environment,
+        configs: configs,
+        verbose: verbose,
+        usageLineLength: _usageLineLength,
+      ),
+      RunCommand(
+        environment: environment,
+        configs: configs,
+        verbose: verbose,
+        usageLineLength: _usageLineLength,
+      ),
+      LintCommand(
+        environment: environment,
+        usageLineLength: _usageLineLength,
+      ),
+      TestCommand(
+        environment: environment,
+        configs: configs,
+        verbose: verbose,
+        usageLineLength: _usageLineLength,
+      ),
     ];
     commands.forEach(addCommand);
 
