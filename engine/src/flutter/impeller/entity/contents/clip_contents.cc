@@ -191,6 +191,14 @@ ClipRestoreContents::ClipRestoreContents() = default;
 
 ClipRestoreContents::~ClipRestoreContents() = default;
 
+void ClipRestoreContents::SetRestoreHeight(size_t clip_height) {
+  restore_height_ = clip_height;
+}
+
+size_t ClipRestoreContents::GetRestoreHeight() const {
+  return restore_height_;
+}
+
 void ClipRestoreContents::SetRestoreCoverage(
     std::optional<Rect> restore_coverage) {
   restore_coverage_ = restore_coverage;
@@ -230,7 +238,7 @@ bool ClipRestoreContents::Render(const ContentContext& renderer,
   options.stencil_mode = ContentContextOptions::StencilMode::kLegacyClipRestore;
   options.primitive_type = PrimitiveType::kTriangleStrip;
   pass.SetPipeline(renderer.GetClipPipeline(options));
-  pass.SetStencilReference(entity.GetClipDepth());
+  pass.SetStencilReference(0);
 
   // Create a rect that covers either the given restore area, or the whole
   // render target texture.

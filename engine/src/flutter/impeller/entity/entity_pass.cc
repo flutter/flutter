@@ -549,7 +549,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
     Point global_pass_position,
     uint32_t pass_depth,
     EntityPassClipStack& clip_coverage_stack,
-    size_t clip_depth_floor) const {
+    size_t clip_height_floor) const {
   //--------------------------------------------------------------------------
   /// Setup entity element.
   ///
@@ -591,7 +591,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
               Point(),                       // local_pass_position
               pass_depth,                    // pass_depth
               clip_coverage_stack,           // clip_coverage_stack
-              clip_depth_,                   // clip_depth_floor
+              clip_depth_,                   // clip_height_floor
               nullptr,                       // backdrop_filter_contents
               pass_context.GetRenderPass(pass_depth)  // collapsed_parent_pass
               )) {
@@ -704,7 +704,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
                 global_pass_position,         // local_pass_position
             ++pass_depth,                     // pass_depth
             clip_coverage_stack,              // clip_coverage_stack
-            subpass->clip_depth_,             // clip_depth_floor
+            subpass->clip_depth_,             // clip_height_floor
             subpass_backdrop_filter_contents  // backdrop_filter_contents
             )) {
       // Validation error messages are triggered for all `OnRender()` failure
@@ -770,7 +770,7 @@ static void SetClipScissor(std::optional<Rect> clip_coverage,
 }
 
 bool EntityPass::RenderElement(Entity& element_entity,
-                               size_t clip_depth_floor,
+                               size_t clip_height_floor,
                                InlinePassContext& pass_context,
                                int32_t pass_depth,
                                ContentContext& renderer,
@@ -847,7 +847,7 @@ bool EntityPass::RenderElement(Entity& element_entity,
 
   EntityPassClipStack::ClipStateResult clip_state_result =
       clip_coverage_stack.ApplyClipState(clip_coverage, element_entity,
-                                         clip_depth_floor,
+                                         clip_height_floor,
                                          global_pass_position);
 
   if (clip_state_result.clip_did_change) {
@@ -876,7 +876,7 @@ bool EntityPass::OnRender(
     Point local_pass_position,
     uint32_t pass_depth,
     EntityPassClipStack& clip_coverage_stack,
-    size_t clip_depth_floor,
+    size_t clip_height_floor,
     std::shared_ptr<Contents> backdrop_filter_contents,
     const std::optional<InlinePassContext::RenderPassResult>&
         collapsed_parent_pass) const {
@@ -919,10 +919,10 @@ bool EntityPass::OnRender(
     backdrop_entity.SetContents(std::move(backdrop_filter_contents));
     backdrop_entity.SetTransform(
         Matrix::MakeTranslation(Vector3(-local_pass_position)));
-    backdrop_entity.SetClipDepth(clip_depth_floor);
+    backdrop_entity.SetClipDepth(clip_height_floor);
     backdrop_entity.SetNewClipDepth(std::numeric_limits<uint32_t>::max());
 
-    RenderElement(backdrop_entity, clip_depth_floor, pass_context, pass_depth,
+    RenderElement(backdrop_entity, clip_height_floor, pass_context, pass_depth,
                   renderer, clip_coverage_stack, global_pass_position);
   }
 
@@ -950,7 +950,7 @@ bool EntityPass::OnRender(
                             global_pass_position,  // global_pass_position
                             pass_depth,            // pass_depth
                             clip_coverage_stack,   // clip_coverage_stack
-                            clip_depth_floor);     // clip_depth_floor
+                            clip_height_floor);    // clip_height_floor
 
     switch (result.status) {
       case EntityResult::kSuccess:
@@ -1023,7 +1023,7 @@ bool EntityPass::OnRender(
     //--------------------------------------------------------------------------
     /// Render the Element.
     ///
-    if (!RenderElement(result.entity, clip_depth_floor, pass_context,
+    if (!RenderElement(result.entity, clip_height_floor, pass_context,
                        pass_depth, renderer, clip_coverage_stack,
                        global_pass_position)) {
       // Specific validation logs are handled in `render_element()`.

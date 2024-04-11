@@ -63,6 +63,10 @@ class ClipRestoreContents final : public Contents {
 
   ~ClipRestoreContents();
 
+  void SetRestoreHeight(size_t clip_height);
+
+  size_t GetRestoreHeight() const;
+
   /// @brief  The area on the pass texture where this clip restore will be
   ///         applied. If unset, the entire pass texture will be restored.
   ///
@@ -94,6 +98,7 @@ class ClipRestoreContents final : public Contents {
 
  private:
   std::optional<Rect> restore_coverage_;
+  size_t restore_height_ = 0;
 
   ClipRestoreContents(const ClipRestoreContents&) = delete;
 

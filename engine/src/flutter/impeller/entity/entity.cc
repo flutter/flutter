@@ -19,9 +19,7 @@
 
 namespace impeller {
 
-Entity Entity::FromSnapshot(const Snapshot& snapshot,
-                            BlendMode blend_mode,
-                            uint32_t clip_depth) {
+Entity Entity::FromSnapshot(const Snapshot& snapshot, BlendMode blend_mode) {
   auto texture_rect = Rect::MakeSize(snapshot.texture->GetSize());
 
   auto contents = TextureContents::MakeRect(texture_rect);
@@ -32,7 +30,6 @@ Entity Entity::FromSnapshot(const Snapshot& snapshot,
 
   Entity entity;
   entity.SetBlendMode(blend_mode);
-  entity.SetClipDepth(clip_depth);
   entity.SetTransform(snapshot.transform);
   entity.SetContents(contents);
   return entity;

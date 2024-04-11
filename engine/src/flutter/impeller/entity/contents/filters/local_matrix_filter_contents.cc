@@ -42,8 +42,7 @@ std::optional<Entity> LocalMatrixFilterContents::RenderFilter(
   if (!snapshot.has_value()) {
     return std::nullopt;
   }
-  return Entity::FromSnapshot(snapshot.value(), entity.GetBlendMode(),
-                              entity.GetClipDepth());
+  return Entity::FromSnapshot(snapshot.value(), entity.GetBlendMode());
 }
 
 }  // namespace impeller

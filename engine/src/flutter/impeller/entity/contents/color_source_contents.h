@@ -229,7 +229,6 @@ class ColorSourceContents : public Contents {
       auto restore = ClipRestoreContents();
       restore.SetRestoreCoverage(GetCoverage(entity));
       Entity restore_entity = entity.Clone();
-      restore_entity.SetClipDepth(0);
       return restore.Render(renderer, restore_entity, pass);
     }
     return true;

@@ -32,7 +32,7 @@ struct CanvasStackEntry {
   Matrix transform;
   // |cull_rect| is conservative screen-space bounds of the clipped output area
   std::optional<Rect> cull_rect;
-  size_t clip_depth = 0u;
+  size_t clip_height = 0u;
   // The number of clips tracked for this canvas stack entry.
   size_t num_clips = 0u;
   Entity::RenderingMode rendering_mode = Entity::RenderingMode::kDirect;
@@ -192,7 +192,7 @@ class Canvas {
 
   EntityPass& GetCurrentPass();
 
-  size_t GetClipDepth() const;
+  size_t GetClipHeight() const;
 
   void AddEntityToCurrentPass(Entity entity);
 

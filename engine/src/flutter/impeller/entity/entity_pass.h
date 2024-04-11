@@ -238,7 +238,7 @@ class EntityPass {
   };
 
   bool RenderElement(Entity& element_entity,
-                     size_t clip_depth_floor,
+                     size_t clip_height_floor,
                      InlinePassContext& pass_context,
                      int32_t pass_depth,
                      ContentContext& renderer,
@@ -253,7 +253,7 @@ class EntityPass {
                                    Point global_pass_position,
                                    uint32_t pass_depth,
                                    EntityPassClipStack& clip_coverage_stack,
-                                   size_t clip_depth_floor) const;
+                                   size_t clip_height_floor) const;
 
   //----------------------------------------------------------------------------
   /// @brief     OnRender is the internal command recording routine for
@@ -293,7 +293,7 @@ class EntityPass {
   ///                                      Used to cull Elements that we
   ///                                      know won't result in a visible
   ///                                      change.
-  /// @param[in]  clip_depth_floor         The clip depth that a value of
+  /// @param[in]  clip_height_floor         The clip depth that a value of
   ///                                      zero corresponds to in the given
   ///                                      `pass_target` clip buffer.
   ///                                      When new `pass_target`s are created
@@ -320,7 +320,7 @@ class EntityPass {
                 Point local_pass_position,
                 uint32_t pass_depth,
                 EntityPassClipStack& clip_coverage_stack,
-                size_t clip_depth_floor = 0,
+                size_t clip_height_floor = 0,
                 std::shared_ptr<Contents> backdrop_filter_contents = nullptr,
                 const std::optional<InlinePassContext::RenderPassResult>&
                     collapsed_parent_pass = std::nullopt) const;
