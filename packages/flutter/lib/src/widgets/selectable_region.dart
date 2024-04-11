@@ -90,6 +90,10 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// [SelectionContainer.maybeOf] if they want to participate in the
 /// selection.
 ///
+/// A [SelectableRegion] will defer to a [SelectionContainer] above it in the
+/// widget tree if one exists. This allows nested [SelectableRegion]s to
+/// coordinate their selection behavior.
+///
 /// An example selection tree will look like:
 ///
 /// {@tool snippet}
@@ -216,6 +220,7 @@ class SelectableRegion extends StatefulWidget {
     required this.child,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.onSelectionChanged,
+    this.copyInterceptor = CopyInterceptor.newline,
   });
 
   /// The configuration for the magnifier used with selections in this region.
@@ -247,6 +252,14 @@ class SelectableRegion extends StatefulWidget {
 
   /// Called when the selected content changes.
   final ValueChanged<SelectedContent?>? onSelectionChanged;
+
+  /// {@template flutter.widgets.SelectableRegion.copyInterceptor}
+  /// The [CopyInterceptor] to use when copying the selected text.
+  ///
+  /// Defaults to [CopyInterceptor.newline], which is the desired behavior in
+  /// most cases.
+  /// {@endtemplate}
+  final CopyInterceptor copyInterceptor;
 
   /// Returns the [ContextMenuButtonItem]s representing the buttons in this
   /// platform's default selection menu.
@@ -344,7 +357,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   final LayerLink _startHandleLayerLink = LayerLink();
   final LayerLink _endHandleLayerLink = LayerLink();
   final LayerLink _toolbarLayerLink = LayerLink();
-  final _SelectableRegionContainerDelegate _selectionDelegate = _SelectableRegionContainerDelegate();
+  late final _SelectableRegionContainerDelegate _selectionDelegate = _SelectableRegionContainerDelegate(copyInterceptor: widget.copyInterceptor);
   // there should only ever be one selectable, which is the SelectionContainer.
   Selectable? _selectable;
 
@@ -1482,11 +1495,15 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
+    final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     Widget result = SelectionContainer(
-      registrar: this,
+      registrar: registrar ?? this,
       delegate: _selectionDelegate,
       child: widget.child,
     );
+    if (registrar != null) {
+      return result;
+    }
     if (kIsWeb) {
       result = PlatformSelectableRegionContextMenu(
         child: result,
@@ -1594,6 +1611,8 @@ class _DirectionallyExtendCaretSelectionAction<T extends DirectionalCaretMovemen
 }
 
 class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
+  _SelectableRegionContainerDelegate({super.copyInterceptor});
+
   final Set<Selectable> _hasReceivedStartEvent = <Selectable>{};
   final Set<Selectable> _hasReceivedEndEvent = <Selectable>{};
 
@@ -1771,11 +1790,17 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
 /// [Selectable]s that currently contain the selection edges.
 abstract class MultiSelectableSelectionContainerDelegate extends SelectionContainerDelegate with ChangeNotifier {
   /// Creates an instance of [MultiSelectableSelectionContainerDelegate].
-  MultiSelectableSelectionContainerDelegate() {
+  MultiSelectableSelectionContainerDelegate({
+     this.copyInterceptor = CopyInterceptor.newline,
+  }) {
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
+
+  /// The separator used to separate the text of each selectable in
+  /// [selectables].
+  final CopyInterceptor copyInterceptor;
 
   /// Gets the list of [Selectable]s this delegate is managing.
   List<Selectable> selectables = <Selectable>[];
@@ -2223,13 +2248,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     if (selections.isEmpty) {
       return null;
     }
-    final StringBuffer buffer = StringBuffer();
-    for (final SelectedContent selection in selections) {
-      buffer.write(selection.plainText);
-    }
-    return SelectedContent(
-      plainText: buffer.toString(),
-    );
+    return SelectedContent(plainText: copyInterceptor.intercept(selections));
   }
 
   // Clears the selection on all selectables not in the range of

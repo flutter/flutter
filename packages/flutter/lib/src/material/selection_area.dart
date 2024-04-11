@@ -4,6 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 import 'adaptive_text_selection_toolbar.dart';
 import 'debug.dart';
@@ -47,6 +48,7 @@ class SelectionArea extends StatefulWidget {
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.magnifierConfiguration,
     this.onSelectionChanged,
+    this.copyInterceptor = CopyInterceptor.newline,
     required this.child,
   });
 
@@ -86,6 +88,9 @@ class SelectionArea extends StatefulWidget {
 
   /// Called when the selected content changes.
   final ValueChanged<SelectedContent?>? onSelectionChanged;
+
+  /// {@macro flutter.widgets.SelectableRegion.copyInterceptor}
+  final CopyInterceptor copyInterceptor;
 
   /// The child widget this selection area applies to.
   ///
@@ -127,6 +132,7 @@ class _SelectionAreaState extends State<SelectionArea> {
       contextMenuBuilder: widget.contextMenuBuilder,
       magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
       onSelectionChanged: widget.onSelectionChanged,
+      copyInterceptor: widget.copyInterceptor,
       child: widget.child,
     );
   }
