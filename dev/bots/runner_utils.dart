@@ -2,11 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(sigmund): includeLocalEngineEnv should default to true. Currently we
-// only enable it on flutter-web test because some test suites do not work
-// properly when overriding the local engine (for example, because some platform
-// dependent targets are only built on some engines).
-// See https://github.com/flutter/flutter/issues/72368
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
@@ -59,6 +54,11 @@ String get shuffleSeed {
   return _shuffleSeed!;
 }
 
+// TODO(sigmund): includeLocalEngineEnv should default to true. Currently we
+// only enable it on flutter-web test because some test suites do not work
+// properly when overriding the local engine (for example, because some platform
+// dependent targets are only built on some engines).
+// See https://github.com/flutter/flutter/issues/72368
 Future<void> runDartTest(String workingDirectory, {
   List<String>? testPaths,
   bool enableFlutterToolAsserts = true,
