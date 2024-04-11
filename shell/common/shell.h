@@ -133,8 +133,6 @@ class Shell final : public PlatformView::Delegate,
       const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
       impeller::RuntimeStageBackend runtime_stage_type)>
       EngineCreateCallback;
-  using AddViewCallback = std::function<void(bool added)>;
-  using RemoveViewCallback = std::function<void(bool removed)>;
 
   //----------------------------------------------------------------------------
   /// @brief      Creates a shell instance using the provided settings. The
@@ -303,43 +301,6 @@ class Shell final : public PlatformView::Delegate,
   ///             not change for the life-cycle of the shell.
   ///
   bool IsSetup() const;
-
-  /// @brief  Allocates resources for a new non-implicit view.
-  ///
-  ///         This method returns immediately and does not wait for the task on
-  ///         the UI thread to finish. This is safe because operations are
-  ///         either initiated from the UI thread (such as rendering), or are
-  ///         sent as posted tasks that are queued. In either case, it's ok for
-  ///         the engine to have views that the Dart VM doesn't.
-  ///
-  ///         The implicit view should never be added with this function.
-  ///         Instead, it is added internally on Shell initialization. Trying to
-  ///         add `kFlutterImplicitViewId` triggers an assertion.
-  ///
-  /// @param[in]  view_id           The view ID of the new view.
-  /// @param[in]  viewport_metrics  The initial viewport metrics for the view.
-  /// @param[in]  callback          The callback that's invoked once the engine
-  ///                               has attempted to add the view.
-  ///
-  void AddView(int64_t view_id,
-               const ViewportMetrics& viewport_metrics,
-               AddViewCallback callback);
-
-  /// @brief  Deallocates resources for a non-implicit view.
-  ///
-  ///         This method returns immediately and does not wait for the task on
-  ///         the UI thread to finish. This means that the Dart VM might still
-  ///         send messages regarding this view ID for a short while, even
-  ///         though this view ID is already invalid.
-  ///
-  ///         The implicit view should never be removed. Trying to remove
-  ///         `kFlutterImplicitViewId` triggers an assertion.
-  ///
-  /// @param[in]  view_id     The view ID of the view to be removed.
-  /// @param[in]  callback    The callback that's invoked once the engine has
-  ///                         attempted to remove the view.
-  ///
-  void RemoveView(int64_t view_id, RemoveViewCallback callback);
 
   //----------------------------------------------------------------------------
   /// @brief      Captures a screenshot and optionally Base64 encodes the data
@@ -599,6 +560,15 @@ class Shell final : public PlatformView::Delegate,
 
   // |PlatformView::Delegate|
   void OnPlatformViewScheduleFrame() override;
+
+  // |PlatformView::Delegate|
+  void OnPlatformViewAddView(int64_t view_id,
+                             const ViewportMetrics& viewport_metrics,
+                             AddViewCallback callback) override;
+
+  // |PlatformView::Delegate|
+  void OnPlatformViewRemoveView(int64_t view_id,
+                                RemoveViewCallback callback) override;
 
   // |PlatformView::Delegate|
   void OnPlatformViewSetViewportMetrics(

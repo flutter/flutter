@@ -88,6 +88,13 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
   // |flutter::PlatformView::Delegate|
   void OnPlatformViewScheduleFrame() {}
   // |flutter::PlatformView::Delegate|
+  void OnPlatformViewAddView(int64_t view_id,
+                             const flutter::ViewportMetrics& viewport_metrics,
+                             AddViewCallback callback) override {}
+  // |flutter::PlatformView::Delegate|
+  void OnPlatformViewRemoveView(int64_t view_id,
+                                RemoveViewCallback callback) override {}
+  // |flutter::PlatformView::Delegate|
   void OnPlatformViewSetNextFrameCallback(const fml::closure& closure) {}
   // |flutter::PlatformView::Delegate|
   void OnPlatformViewSetViewportMetrics(

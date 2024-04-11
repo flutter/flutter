@@ -79,6 +79,18 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   MOCK_METHOD(void, OnPlatformViewScheduleFrame, (), (override));
 
   MOCK_METHOD(void,
+              OnPlatformViewAddView,
+              (int64_t view_id,
+               const ViewportMetrics& viewport_metrics,
+               AddViewCallback callback),
+              (override));
+
+  MOCK_METHOD(void,
+              OnPlatformViewRemoveView,
+              (int64_t view_id, RemoveViewCallback callback),
+              (override));
+
+  MOCK_METHOD(void,
               OnPlatformViewSetNextFrameCallback,
               (const fml::closure& closure),
               (override));
@@ -4505,8 +4517,8 @@ TEST_F(ShellTest, ShellCanAddViewOrRemoveView) {
   ASSERT_EQ(viewIds[0], 0ll);
 
   PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell] {
-    shell->AddView(2, ViewportMetrics{},
-                   [](bool added) { EXPECT_TRUE(added); });
+    shell->GetPlatformView()->AddView(2, ViewportMetrics{},
+                                      [](bool added) { EXPECT_TRUE(added); });
   });
   reportLatch.Wait();
   ASSERT_TRUE(hasImplicitView);
@@ -4514,7 +4526,8 @@ TEST_F(ShellTest, ShellCanAddViewOrRemoveView) {
   ASSERT_EQ(viewIds[1], 2ll);
 
   PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell] {
-    shell->RemoveView(2, [](bool removed) { ASSERT_TRUE(removed); });
+    shell->GetPlatformView()->RemoveView(
+        2, [](bool removed) { ASSERT_TRUE(removed); });
   });
   reportLatch.Wait();
   ASSERT_TRUE(hasImplicitView);
@@ -4522,8 +4535,8 @@ TEST_F(ShellTest, ShellCanAddViewOrRemoveView) {
   ASSERT_EQ(viewIds[0], 0ll);
 
   PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell] {
-    shell->AddView(4, ViewportMetrics{},
-                   [](bool added) { EXPECT_TRUE(added); });
+    shell->GetPlatformView()->AddView(4, ViewportMetrics{},
+                                      [](bool added) { EXPECT_TRUE(added); });
   });
   reportLatch.Wait();
   ASSERT_TRUE(hasImplicitView);
@@ -4570,13 +4583,13 @@ TEST_F(ShellTest, ShellCannotAddDuplicateViewId) {
 
   // Add view 123.
   fml::AutoResetWaitableEvent add_latch;
-  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(),
-           [&shell, &add_latch] {
-             shell->AddView(123, ViewportMetrics{}, [&](bool added) {
-               EXPECT_TRUE(added);
-               add_latch.Signal();
-             });
-           });
+  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell,
+                                                             &add_latch] {
+    shell->GetPlatformView()->AddView(123, ViewportMetrics{}, [&](bool added) {
+      EXPECT_TRUE(added);
+      add_latch.Signal();
+    });
+  });
 
   add_latch.Wait();
 
@@ -4586,13 +4599,13 @@ TEST_F(ShellTest, ShellCannotAddDuplicateViewId) {
   ASSERT_EQ(view_ids[1], 123);
 
   // Attempt to add duplicate view ID 123. This should fail.
-  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(),
-           [&shell, &add_latch] {
-             shell->AddView(123, ViewportMetrics{}, [&](bool added) {
-               EXPECT_FALSE(added);
-               add_latch.Signal();
-             });
-           });
+  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell,
+                                                             &add_latch] {
+    shell->GetPlatformView()->AddView(123, ViewportMetrics{}, [&](bool added) {
+      EXPECT_FALSE(added);
+      add_latch.Signal();
+    });
+  });
 
   add_latch.Wait();
 
@@ -4638,7 +4651,7 @@ TEST_F(ShellTest, ShellCannotRemoveNonexistentId) {
   fml::AutoResetWaitableEvent remove_latch;
   PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(),
            [&shell, &remove_latch] {
-             shell->RemoveView(123, [&](bool removed) {
+             shell->GetPlatformView()->RemoveView(123, [&](bool removed) {
                EXPECT_FALSE(removed);
                remove_latch.Signal();
              });
@@ -4690,8 +4703,8 @@ TEST_F(ShellTest, ShellFlushesPlatformStatesByMain) {
     // The construtor for ViewportMetrics{_, width, _, _, _} (only the 2nd
     // argument matters in this test).
     platform_view->SetViewportMetrics(0, ViewportMetrics{1, 10, 1, 0, 0});
-    shell->AddView(1, ViewportMetrics{1, 30, 1, 0, 0},
-                   [](bool added) { ASSERT_TRUE(added); });
+    shell->GetPlatformView()->AddView(1, ViewportMetrics{1, 30, 1, 0, 0},
+                                      [](bool added) { ASSERT_TRUE(added); });
     platform_view->SetViewportMetrics(0, ViewportMetrics{1, 20, 1, 0, 0});
   });
 
@@ -4743,9 +4756,10 @@ TEST_F(ShellTest, CanRemoveViewBeforeLaunchingIsolate) {
     // A view can be added and removed all before the isolate launches.
     // The pending add view operation is cancelled, the view is never
     // added to the Dart isolate.
-    shell->AddView(123, ViewportMetrics{1, 30, 1, 0, 0},
-                   [](bool added) { ASSERT_FALSE(added); });
-    shell->RemoveView(123, [](bool removed) { ASSERT_FALSE(removed); });
+    shell->GetPlatformView()->AddView(123, ViewportMetrics{1, 30, 1, 0, 0},
+                                      [](bool added) { ASSERT_FALSE(added); });
+    shell->GetPlatformView()->RemoveView(
+        123, [](bool removed) { ASSERT_FALSE(removed); });
   });
 
   bool first_report = true;
@@ -4791,15 +4805,15 @@ TEST_F(ShellTest, IgnoresBadAddViewsBeforeLaunchingIsolate) {
     auto platform_view = shell->GetPlatformView();
 
     // Add the same view twice. The second time should fail.
-    shell->AddView(123, ViewportMetrics{1, 100, 1, 0, 0},
-                   [](bool added) { ASSERT_TRUE(added); });
+    shell->GetPlatformView()->AddView(123, ViewportMetrics{1, 100, 1, 0, 0},
+                                      [](bool added) { ASSERT_TRUE(added); });
 
-    shell->AddView(123, ViewportMetrics{1, 200, 1, 0, 0},
-                   [](bool added) { ASSERT_FALSE(added); });
+    shell->GetPlatformView()->AddView(123, ViewportMetrics{1, 200, 1, 0, 0},
+                                      [](bool added) { ASSERT_FALSE(added); });
 
     // Add another view. Previous failures should not affect this.
-    shell->AddView(456, ViewportMetrics{1, 300, 1, 0, 0},
-                   [](bool added) { ASSERT_TRUE(added); });
+    shell->GetPlatformView()->AddView(456, ViewportMetrics{1, 300, 1, 0, 0},
+                                      [](bool added) { ASSERT_TRUE(added); });
   });
 
   bool first_report = true;
