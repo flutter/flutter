@@ -212,6 +212,8 @@ void main() {
 }
 
 class TestContainerDelegate extends MultiSelectableSelectionContainerDelegate {
+  TestContainerDelegate(): super(copyInterceptor: CopyInterceptor.none);
+
   @override
   SelectionResult dispatchSelectionEventToChild(Selectable selectable, SelectionEvent event) {
     throw UnimplementedError();
