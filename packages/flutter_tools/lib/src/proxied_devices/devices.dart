@@ -603,11 +603,18 @@ class ProxiedPortForwarder extends DevicePortForwarder {
         'port': devicePort,
       }));
       final Stream<List<int>> dataStream = connection.listenToEvent('proxy.data.$id').asyncExpand((DaemonEventData event) => event.binary);
-      dataStream.listen(socket.add);
+      final StreamSubscription<List<int>> subscription = dataStream.listen(socket.add);
       final Future<DaemonEventData> disconnectFuture = connection.listenToEvent('proxy.disconnected.$id').first;
+
+      bool socketDoneCalled = false;
+
       unawaited(disconnectFuture.then<void>((_) async {
           try {
-            await socket.close();
+            if (socketDoneCalled) {
+              await subscription.cancel();
+            } else {
+              await (subscription.cancel(), socket.close()).wait;
+            }
           } on Exception {
             // ignore
           }
@@ -640,6 +647,8 @@ class ProxiedPortForwarder extends DevicePortForwarder {
         // Do nothing here. Everything will be handled in the `then` block below.
         return false;
       }).whenComplete(() {
+        socketDoneCalled = true;
+        unawaited(subscription.cancel());
         // Send a proxy disconnect event just in case.
         unawaited(connection.sendRequest('proxy.disconnect', <String, Object>{
           'id': id,
