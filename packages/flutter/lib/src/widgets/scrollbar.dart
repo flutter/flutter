@@ -2177,38 +2177,6 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 }
 
-// TBD: merge _TrackTapGestureRecognizer with _isThumbEvent
-
-// A tap gesture detector that only responds to events on the scrollbar's
-// track and ignores everything else, including the thumb.
-class _TrackTapGestureRecognizer extends TapGestureRecognizer {
-  _TrackTapGestureRecognizer({
-    required super.debugOwner,
-    required GlobalKey customPaintKey,
-  }) : _customPaintKey = customPaintKey;
-
-  final GlobalKey _customPaintKey;
-
-  @override
-  bool isPointerAllowed(PointerDownEvent event) {
-    if (!_hitTestInteractive(_customPaintKey, event.position, event.kind)) {
-      return false;
-    }
-    return super.isPointerAllowed(event);
-  }
-
-  bool _hitTestInteractive(GlobalKey customPaintKey, Offset offset, PointerDeviceKind kind) {
-    if (customPaintKey.currentContext == null) {
-      return false;
-    }
-    final CustomPaint customPaint = customPaintKey.currentContext!.widget as CustomPaint;
-    final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
-    final Offset localOffset = _getLocalOffset(customPaintKey, offset);
-    // We only receive track taps that are not on the thumb.
-    return painter.hitTestInteractive(localOffset, kind) && !painter.hitTestOnlyThumbInteractive(localOffset, kind);
-  }
-}
-
 Offset _getLocalOffset(GlobalKey scrollbarPainterKey, Offset position) {
   final RenderBox renderBox = scrollbarPainterKey.currentContext!.findRenderObject()! as RenderBox;
   return renderBox.globalToLocal(position);
@@ -2224,12 +2192,36 @@ bool _isThumbEvent(GlobalKey customPaintKey, PointerEvent event) {
   return painter.hitTestOnlyThumbInteractive(localOffset, event.kind);
 }
 
+bool _isTrackEvent(GlobalKey customPaintKey, PointerEvent event) {
+  if (customPaintKey.currentContext == null) {
+    return false;
+  }
+  final CustomPaint customPaint = customPaintKey.currentContext!.widget as CustomPaint;
+  final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
+  final Offset localOffset = _getLocalOffset(customPaintKey, event.position);
+  final PointerDeviceKind kind = event.kind;
+  return painter.hitTestInteractive(localOffset, kind) && !painter.hitTestOnlyThumbInteractive(localOffset, kind);
+}
+
+class _TrackTapGestureRecognizer extends TapGestureRecognizer {
+  _TrackTapGestureRecognizer({
+    required super.debugOwner,
+    required GlobalKey customPaintKey,
+  }) : _customPaintKey = customPaintKey;
+
+  final GlobalKey _customPaintKey;
+
+  @override
+  bool isPointerAllowed(PointerDownEvent event) {
+    return _isTrackEvent(_customPaintKey, event) && super.isPointerAllowed(event);
+  }
+}
+
 class _VerticalThumbDragGestureRecognizer extends VerticalDragGestureRecognizer {
   _VerticalThumbDragGestureRecognizer({
     required Object super.debugOwner,
     required GlobalKey customPaintKey,
   }) : _customPaintKey = customPaintKey;
-
 
   final GlobalKey _customPaintKey;
 
