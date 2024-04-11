@@ -2415,6 +2415,8 @@ typedef RouteTransitionsBuilder = Widget Function(BuildContext context, Animatio
 ///
 /// Accepts a didPop boolean indicating whether or not back navigation
 /// succeeded.
+///
+/// The `result` contains the pop result.
 typedef PopInvokedCallback<T> = void Function(bool didPop, T? result);
 
 /// Allows listening to and preventing pops.

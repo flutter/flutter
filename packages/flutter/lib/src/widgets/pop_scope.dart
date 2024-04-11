@@ -46,6 +46,13 @@ import 'routes.dart';
 /// ** See code in examples/api/lib/widgets/pop_scope/pop_scope.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample demonstrates showing how to use PopScope to wrap widget that
+/// may pop the page with a result.
+///
+/// ** See code in examples/api/lib/widgets/pop_scope/pop_scope.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [NavigatorPopHandler], which is a less verbose way to handle system back
@@ -82,6 +89,8 @@ class PopScope<T> extends StatefulWidget {
   /// [canPop] is set to false on a [PopScope]. The `didPop` parameter
   /// indicates whether or not the back navigation actually happened
   /// successfully.
+  ///
+  /// The `result` contains the pop result.
   ///
   /// See also:
   ///
