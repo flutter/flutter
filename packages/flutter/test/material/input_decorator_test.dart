@@ -1533,15 +1533,68 @@ void main() {
 
       // Fill is the border's outer path, a rounded rectangle.
       expect(box, paints
-      ..drrect(
-        style: PaintingStyle.fill,
-        inner: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 47.5,
-            bottomRight: const Radius.elliptical(12.0, 11.5),
-            bottomLeft: const Radius.elliptical(12.0, 11.5)),
-        outer: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 48.5,
-            bottomRight: const Radius.elliptical(12.0, 12.5),
-            bottomLeft: const Radius.elliptical(12.0, 12.5)),
+        ..drrect(
+          style: PaintingStyle.fill,
+          inner: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 47.0,
+              bottomRight: const Radius.elliptical(12.0, 11.0),
+              bottomLeft: const Radius.elliptical(12.0, 11.0)),
+          outer: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 48.0,
+              bottomRight: const Radius.elliptical(12.0, 12.0),
+              bottomLeft: const Radius.elliptical(12.0, 12.0)),
       ));
+    });
+
+    testWidgets('UnderlineInputBorder clips top border to prevent anti-aliasing glitches', (WidgetTester tester) async {
+      const Rect canvasRect = Rect.fromLTWH(0, 0, 100, 100);
+      const UnderlineInputBorder border = UnderlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12.0)),
+      );
+      expect(
+        (Canvas canvas) => border.paint(canvas, canvasRect),
+        paints
+          ..drrect(
+            outer: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 100.0,
+                bottomRight: const Radius.elliptical(12.0, 12.0),
+                bottomLeft: const Radius.elliptical(12.0, 12.0)),
+            inner: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 99.0,
+                bottomRight: const Radius.elliptical(12.0, 11.0),
+                bottomLeft: const Radius.elliptical(12.0, 11.0)),
+          ),
+      );
+
+      const UnderlineInputBorder border2 = UnderlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(60.0)),
+      );
+      expect(
+        (Canvas canvas) => border2.paint(canvas, canvasRect),
+        paints
+          ..drrect(
+            outer: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 100.0,
+                bottomRight: const Radius.elliptical(50.0, 50.0),
+                bottomLeft: const Radius.elliptical(50.0, 50.0)),
+            inner: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 99.0,
+                bottomRight: const Radius.elliptical(50.0, 49.0),
+                bottomLeft: const Radius.elliptical(50.0, 49.0)),
+          ),
+        reason: 'clamp is expected',
+      );
+    });
+
+    testWidgets('UnderlineInputBorder draws bottom border inside container bounds', (WidgetTester tester) async {
+      const Rect canvasRect = Rect.fromLTWH(0, 0, 100, 100);
+      const double borderWidth = 2.0;
+      const UnderlineInputBorder border = UnderlineInputBorder(
+        borderSide: BorderSide(width: borderWidth),
+      );
+      expect(
+        (Canvas canvas) => border.paint(canvas, canvasRect),
+        paints
+          ..line(
+            p1: Offset(0, canvasRect.height - borderWidth / 2),
+            p2: Offset(100, canvasRect.height - borderWidth / 2),
+            strokeWidth: borderWidth,
+          ),
+      );
     });
 
     testWidgets('InputDecorator OutlineBorder focused label with icon', (WidgetTester tester) async {
@@ -4880,42 +4933,6 @@ void main() {
 
       expect(decoration.isCollapsed, true);
     });
-  });
-
-  testWidgets('UnderlineInputBorder clips top border to prevent anti-aliasing glitches', (WidgetTester tester) async {
-    const Rect canvasRect = Rect.fromLTWH(0, 0, 100, 100);
-    const UnderlineInputBorder border = UnderlineInputBorder(
-      borderRadius: BorderRadius.all(Radius.circular(12.0)),
-    );
-    expect(
-      (Canvas canvas) => border.paint(canvas, canvasRect),
-      paints
-        ..drrect(
-          outer: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 100.5,
-                bottomRight: const Radius.elliptical(12.0, 12.5),
-                bottomLeft: const Radius.elliptical(12.0, 12.5)),
-          inner: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 99.5,
-                bottomRight: const Radius.elliptical(12.0, 11.5),
-                bottomLeft: const Radius.elliptical(12.0, 11.5)),
-        ),
-    );
-
-    const UnderlineInputBorder border2 = UnderlineInputBorder(
-      borderRadius: BorderRadius.all(Radius.circular(60.0)),
-    );
-    expect(
-      (Canvas canvas) => border2.paint(canvas, canvasRect),
-      paints
-        ..drrect(
-          outer: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 100.5,
-                bottomRight: const Radius.elliptical(50.0, 50.5),
-                bottomLeft: const Radius.elliptical(50.0, 50.5)),
-          inner: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 99.5,
-                bottomRight: const Radius.elliptical(50.0, 49.5),
-                bottomLeft: const Radius.elliptical(50.0, 49.5)),
-        ),
-      reason: 'clamp is expected',
-    );
   });
 
   testWidgets('Ensure the height of labelStyle remains unchanged when TextField is focused', (WidgetTester tester) async {
@@ -9403,12 +9420,12 @@ void main() {
       expect(box, paints
       ..drrect(
         style: PaintingStyle.fill,
-        inner: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 47.5,
-            bottomRight: const Radius.elliptical(12.0, 11.5),
-            bottomLeft: const Radius.elliptical(12.0, 11.5)),
-        outer: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 48.5,
-            bottomRight: const Radius.elliptical(12.0, 12.5),
-            bottomLeft: const Radius.elliptical(12.0, 12.5)),
+        inner: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 47.0,
+            bottomRight: const Radius.elliptical(12.0, 11.0),
+            bottomLeft: const Radius.elliptical(12.0, 11.0)),
+        outer: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 48.0,
+            bottomRight: const Radius.elliptical(12.0, 12.0),
+            bottomLeft: const Radius.elliptical(12.0, 12.0)),
       ));
     });
 
