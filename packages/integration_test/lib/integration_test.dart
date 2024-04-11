@@ -326,7 +326,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   ///
   /// Future<void> main() {
   ///   return integrationDriver(
-  ///     responseDataCallback: (Map<String, dynamic>? data) async {
+  ///     responseDataCallback: (Map<String, dynamic>? data, {String? destinationDirectory}) async {
   ///       if (data != null) {
   ///         for (final MapEntry<String, dynamic> entry in data.entries) {
   ///           print('Writing ${entry.key} to the disk.');
