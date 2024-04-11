@@ -213,6 +213,7 @@ executable("flutter_linux_unittests") {
     "fl_pixel_buffer_texture_test.cc",
     "fl_platform_plugin_test.cc",
     "fl_plugin_registrar_test.cc",
+    "fl_renderer_test.cc",
     "fl_scrolling_manager_test.cc",
     "fl_settings_plugin_test.cc",
     "fl_settings_portal_test.cc",
