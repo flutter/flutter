@@ -2583,8 +2583,19 @@ FlutterEngineResult FlutterEngineRunInitialized(
 /// @brief      Adds a view.
 ///
 ///             This is an asynchronous operation. The view should not be used
-///             until the |add_view_callback| is invoked with an `added` of
-///             `true`.
+///             until the |info.add_view_callback| is invoked with an |added|
+///             value of true. The embedder should prepare resources in advance
+///             but be ready to clean up on failure.
+///
+///             A frame is scheduled if the operation succeeds.
+///
+///             The callback is invoked on a thread managed by the engine. The
+///             embedder should re-thread if needed.
+///
+///             Attempting to add the implicit view will fail and will return
+///             kInvalidArguments. Attempting to add a view with an already
+///             existing view ID will fail, and |info.add_view_callback| will be
+///             invoked with an |added| value of false.
 ///
 /// @param[in]  engine  A running engine instance.
 /// @param[in]  info    The add view arguments. This can be deallocated
@@ -2602,8 +2613,16 @@ FlutterEngineResult FlutterEngineAddView(FLUTTER_API_SYMBOL(FlutterEngine)
 /// @brief      Removes a view.
 ///
 ///             This is an asynchronous operation. The view's resources must not
-///             be cleaned up until the |remove_view_callback| is invoked with
-///             a |removed| value of `true`.
+///             be cleaned up until |info.remove_view_callback| is invoked with
+///             a |removed| value of true.
+///
+///             The callback is invoked on a thread managed by the engine. The
+///             embedder should re-thread if needed.
+///
+///             Attempting to remove the implicit view will fail and will return
+///             kInvalidArguments. Attempting to remove a view with a
+///             non-existent view ID will fail, and |info.remove_view_callback|
+///             will be invoked with a |removed| value of false.
 ///
 /// @param[in]  engine  A running engine instance.
 /// @param[in]  info    The remove view arguments. This can be deallocated

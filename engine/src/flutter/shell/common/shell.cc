@@ -2114,9 +2114,9 @@ bool Shell::OnServiceProtocolReloadAssetFonts(
   return true;
 }
 
-void Shell::AddView(int64_t view_id,
-                    const ViewportMetrics& viewport_metrics,
-                    AddViewCallback callback) {
+void Shell::OnPlatformViewAddView(int64_t view_id,
+                                  const ViewportMetrics& viewport_metrics,
+                                  AddViewCallback callback) {
   TRACE_EVENT0("flutter", "Shell::AddView");
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
@@ -2135,7 +2135,8 @@ void Shell::AddView(int64_t view_id,
   });
 }
 
-void Shell::RemoveView(int64_t view_id, RemoveViewCallback callback) {
+void Shell::OnPlatformViewRemoveView(int64_t view_id,
+                                     RemoveViewCallback callback) {
   TRACE_EVENT0("flutter", "Shell::RemoveView");
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());

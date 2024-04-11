@@ -87,6 +87,17 @@ void PlatformView::ScheduleFrame() {
   delegate_.OnPlatformViewScheduleFrame();
 }
 
+void PlatformView::AddView(int64_t view_id,
+                           const ViewportMetrics& viewport_metrics,
+                           AddViewCallback callback) {
+  delegate_.OnPlatformViewAddView(view_id, viewport_metrics,
+                                  std::move(callback));
+}
+
+void PlatformView::RemoveView(int64_t view_id, RemoveViewCallback callback) {
+  delegate_.OnPlatformViewRemoveView(view_id, std::move(callback));
+}
+
 sk_sp<GrDirectContext> PlatformView::CreateResourceContext() const {
   FML_DLOG(WARNING) << "This platform does not set up the resource "
                        "context on the IO thread for async texture uploads.";
