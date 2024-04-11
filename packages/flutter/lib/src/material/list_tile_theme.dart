@@ -128,7 +128,7 @@ class ListTileThemeData with Diagnosticable {
   /// If specified, overrides the default value of [ListTile.titleAlignment].
   final ListTileTitleAlignment? titleAlignment;
 
-  ///
+  /// If specified, overrides the default value of [ListTile.controlAffinity].
   final ListTileControlAffinity? controlAffinity;
 
   /// Creates a copy of this object with the given fields replaced with the
