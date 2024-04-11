@@ -237,10 +237,14 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
   WebRendererMode get webRenderer {
     final String? webRendererString = stringArg('web-renderer');
-    if (webRendererString == null) {
-      return useWasm ? WebRendererMode.skwasm : WebRendererMode.auto;
+    final WebRendererMode mode = webRendererString != null
+      ? WebRendererMode.values.byName(webRendererString)
+      : WebRendererMode.auto;
+    if (mode == WebRendererMode.auto && useWasm) {
+      // Wasm defaults to skwasm
+      return WebRendererMode.skwasm;
     }
-    return WebRendererMode.values.byName(webRendererString);
+    return mode;
   }
 
   /// Create a debugging options instance for the current `run` or `drive` invocation.
