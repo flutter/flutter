@@ -362,21 +362,38 @@ void FlutterWindowsView::OnResetImeComposing() {
 // Sends new size  information to FlutterEngine.
 void FlutterWindowsView::SendWindowMetrics(size_t width,
                                            size_t height,
-                                           double dpiScale) const {
+                                           double pixel_ratio) const {
   FlutterWindowMetricsEvent event = {};
   event.struct_size = sizeof(event);
   event.width = width;
   event.height = height;
-  event.pixel_ratio = dpiScale;
+  event.pixel_ratio = pixel_ratio;
   event.view_id = view_id_;
   engine_->SendWindowMetricsEvent(event);
 }
 
-void FlutterWindowsView::SendInitialBounds() {
+FlutterWindowMetricsEvent FlutterWindowsView::CreateWindowMetricsEvent() const {
   PhysicalWindowBounds bounds = binding_handler_->GetPhysicalWindowBounds();
+  double pixel_ratio = binding_handler_->GetDpiScale();
 
-  SendWindowMetrics(bounds.width, bounds.height,
-                    binding_handler_->GetDpiScale());
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = bounds.width;
+  event.height = bounds.height;
+  event.pixel_ratio = pixel_ratio;
+  event.view_id = view_id_;
+
+  return event;
+}
+
+void FlutterWindowsView::SendInitialBounds() {
+  // Non-implicit views' initial window metrics are sent when the view is added
+  // to the engine.
+  if (!IsImplicitView()) {
+    return;
+  }
+
+  engine_->SendWindowMetricsEvent(CreateWindowMetricsEvent());
 }
 
 FlutterWindowsView::PointerState* FlutterWindowsView::GetOrCreatePointerState(
@@ -671,6 +688,10 @@ bool FlutterWindowsView::PresentSoftwareBitmap(const void* allocation,
 
 FlutterViewId FlutterWindowsView::view_id() const {
   return view_id_;
+}
+
+bool FlutterWindowsView::IsImplicitView() const {
+  return view_id_ == kImplicitViewId;
 }
 
 void FlutterWindowsView::CreateRenderSurface() {
