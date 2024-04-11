@@ -112,8 +112,7 @@ class _PopScopeWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopScope<FormData>(
       canPop: false,
-      // We need result here because we don't know what `_PageTwoBody` pop the
-      // page with
+      // The result contains pop result in `_PageTwo`.
       onPopInvoked: (bool didPop, FormData? result) async {
         if (didPop) {
           return;
@@ -185,8 +184,6 @@ class _PageTwoBodyState extends State<_PageTwoBody> {
                 ],
               ),
             ),
-            // If this type is `Object?`, then it crashes because it doesn't
-            // match the type of the MaterialPageRoute.
             TextButton(
               onPressed: () async {
                 Navigator.maybePop(context, _formData);
