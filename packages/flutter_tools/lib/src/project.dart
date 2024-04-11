@@ -269,10 +269,13 @@ class FlutterProject {
   bool get hasExampleApp => _exampleDirectory(directory).existsSync();
 
   /// True if this project doesn't have Swift Package Manager disabled in the
-  /// pubspec, has either an iOS or macOS platform implementation, Xcode is 15
-  /// or greater, and the Swift Package Manager feature is enabled.
+  /// pubspec, has either an iOS or macOS platform implementation, is not a
+  /// module project, Xcode is 15 or greater, and the Swift Package Manager
+  /// feature is enabled.
   bool get usesSwiftPackageManager {
-    if (!manifest.disabledSwiftPackageManager && (ios.existsSync() || macos.existsSync())) {
+    if (!manifest.disabledSwiftPackageManager &&
+        (ios.existsSync() || macos.existsSync()) &&
+        !isModule) {
       final Xcode? xcode = globals.xcode;
       final Version? xcodeVersion = xcode?.currentVersion;
       if (xcodeVersion == null || xcodeVersion.major < 15) {

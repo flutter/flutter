@@ -446,6 +446,18 @@ void main() {
         FeatureFlags: () => TestFeatureFlags(),
         XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
       });
+
+      testUsingContext('is false when project is a module', () async {
+        final MemoryFileSystem fs = MemoryFileSystem.test();
+        final Directory projectDirectory = fs.directory('path');
+        projectDirectory.childDirectory('ios').createSync(recursive: true);
+        final FlutterManifest manifest = FakeFlutterManifest(isModule: true);
+        final FlutterProject project = FlutterProject(projectDirectory, manifest, manifest);
+        expect(project.usesSwiftPackageManager, isFalse);
+      }, overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+      });
     });
 
     group('java gradle agp compatibility', () {

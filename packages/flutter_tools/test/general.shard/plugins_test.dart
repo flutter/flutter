@@ -649,6 +649,43 @@ dependencies:
         FlutterVersion: () => flutterVersion,
       });
 
+      testUsingContext(
+          '.flutter-plugins-dependencies contains swift_package_manager_enabled false when project is using Swift Package Manager but forceCocoaPodsOnly is true',
+          () async {
+        createPlugin(
+          name: 'plugin-a',
+          platforms: const <String, _PluginPlatformInfo>{
+            // Native-only; should include native build.
+            'android': _PluginPlatformInfo(pluginClass: 'Foo', androidPackage: 'bar.foo'),
+            // Hybrid native and Dart; should include native build.
+            'ios': _PluginPlatformInfo(pluginClass: 'Foo', dartPluginClass: 'Bar', sharedDarwinSource: true),
+            // Web; should not have the native build key at all since it doesn't apply.
+            'web': _PluginPlatformInfo(pluginClass: 'Foo', fileName: 'lib/foo.dart'),
+            // Dart-only; should not include native build.
+            'windows': _PluginPlatformInfo(dartPluginClass: 'Foo'),
+          });
+        iosProject.testExists = true;
+
+        final DateTime dateCreated = DateTime(1970);
+        systemClock.currentTime = dateCreated;
+
+        flutterProject.usesSwiftPackageManager = true;
+
+        await refreshPluginsList(flutterProject, forceCocoaPodsOnly: true);
+
+        expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
+        final String pluginsString = flutterProject.flutterPluginsDependenciesFile
+            .readAsStringSync();
+        final Map<String, dynamic> jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
+
+        expect(jsonContent['swift_package_manager_enabled'], false);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        SystemClock: () => systemClock,
+        FlutterVersion: () => flutterVersion,
+      });
+
       testUsingContext('Changes to the plugin list invalidates the Cocoapod lockfiles', () async {
         simulatePodInstallRun(iosProject);
         simulatePodInstallRun(macosProject);
@@ -1925,7 +1962,7 @@ class FakeDarwinDependencyManagement extends Fake implements DarwinDependencyMan
   List<SupportedPlatform> setupPlatforms = <SupportedPlatform>[];
 
   @override
-  Future<void> setup({
+  Future<void> setUp({
     required SupportedPlatform platform,
   }) async {
     setupPlatforms.add(platform);

@@ -14,19 +14,42 @@ import '../project.dart';
 Future<void> processPodsIfNeeded(
   XcodeBasedProject xcodeProject,
   String buildDirectory,
-  BuildMode buildMode) async {
+  BuildMode buildMode, {
+  bool forceCocoaPodsOnly = false,
+}) async {
   final FlutterProject project = xcodeProject.parent;
 
   // When using Swift Package Manager, the Podfile may not exist so if there
   // isn't a Podfile, skip processing pods.
-  if (project.usesSwiftPackageManager && !xcodeProject.podfile.existsSync()) {
+  if (project.usesSwiftPackageManager && !xcodeProject.podfile.existsSync() && !forceCocoaPodsOnly) {
     return;
   }
   // Ensure that the plugin list is up to date, since hasPlugins relies on it.
-  await refreshPluginsList(project, macOSPlatform: project.macos.existsSync());
-  if (!(hasPlugins(project) || (project.isModule && xcodeProject.podfile.existsSync()))) {
+  await refreshPluginsList(
+    project,
+    macOSPlatform: project.macos.existsSync(),
+    forceCocoaPodsOnly: forceCocoaPodsOnly,
+  );
+
+  // If there are no plugins and if the project is a not module with an existing
+  // podfile, skip processing pods
+  if (!hasPlugins(project) && !(project.isModule && xcodeProject.podfile.existsSync())) {
     return;
   }
+
+  // If forcing the use of only CocoaPods, but the project is using Swift
+  // Package Manager, print a warning that CocoaPods will be used.
+  if (forceCocoaPodsOnly && project.usesSwiftPackageManager) {
+    globals.logger.printWarning(
+        'Swift Package Manager does not yet support this command. '
+        'CocoaPods will be used instead.');
+
+    // If CocoaPods has been deintegrated, add it back.
+    if (!xcodeProject.podfile.existsSync()) {
+      await globals.cocoaPods?.setupPodfile(xcodeProject);
+    }
+  }
+
   // If the Xcode project, Podfile, or generated xcconfig have changed since
   // last run, pods should be updated.
   final Fingerprinter fingerprinter = Fingerprinter(

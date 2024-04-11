@@ -41,6 +41,7 @@ void main() {
             workingDirectoryPath,
             iosLanguage: iosLanguage,
             platform: platformName,
+            options: <String>['--platforms=$platformName'],
           );
           _addDependency(
             appDirectoryPath: appDirectoryPath,
@@ -103,6 +104,7 @@ void main() {
             iosLanguage: iosLanguage,
             platform: platformName,
             usesSwiftPackageManager: true,
+            options: <String>['--platforms=$platformName'],
           );
           _addDependency(appDirectoryPath: appDirectoryPath, plugin: integrationTestPlugin);
           await _buildApp(
@@ -244,7 +246,175 @@ void main() {
         }
       }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
     }
+
+    test('Build $platformName-framework with non-module app uses CocoaPods', () async {
+      final Directory workingDirectory = fileSystem.systemTempDirectory
+          .createTempSync('swift_package_manager_build_framework.');
+      final String workingDirectoryPath = workingDirectory.path;
+      try {
+        // Create and build an app using the Swift Package Manager version of
+        // integration_test.
+        await _enableSwiftPackageManager(flutterBin, workingDirectoryPath);
+
+        final String appDirectoryPath = await _createApp(
+          flutterBin,
+          workingDirectoryPath,
+          iosLanguage: 'swift',
+          platform: platformName,
+          usesSwiftPackageManager: true,
+          options: <String>['--platforms=$platformName'],
+        );
+        _addDependency(appDirectoryPath: appDirectoryPath, plugin: integrationTestPlugin);
+
+        await _buildApp(
+          flutterBin,
+          appDirectoryPath,
+          options: <String>[platformName, '--config-only', '-v'],
+          expectedLines: <String>[
+            'Adding Swift Package Manager integration...'
+          ]
+        );
+
+        expect(
+          fileSystem
+              .directory(appDirectoryPath)
+              .childDirectory(platformName)
+              .childFile('Podfile')
+              .existsSync(),
+          isFalse,
+        );
+        expect(
+          fileSystem
+              .directory(appDirectoryPath)
+              .childDirectory(platformName)
+              .childDirectory('Flutter')
+              .childDirectory('ephemeral')
+              .childDirectory('Packages')
+              .childDirectory('FlutterGeneratedPluginSwiftPackage')
+              .existsSync(),
+          isTrue,
+        );
+
+        // Create and build framework using the CocoaPods version of
+        // integration_test even though Swift Package Manager is enabled.
+        await _buildApp(
+          flutterBin,
+          appDirectoryPath,
+          options: <String>[
+            '$platformName-framework',
+            '--no-debug',
+            '--no-profile',
+            '-v',
+          ],
+          expectedLines: <String>[
+            'Swift Package Manager does not yet support this command. CocoaPods will be used instead.'
+          ]
+        );
+
+        expect(
+          fileSystem
+              .directory(appDirectoryPath)
+              .childDirectory('build')
+              .childDirectory(platformName)
+              .childDirectory('framework')
+              .childDirectory('Release')
+              .childDirectory('${integrationTestPlugin.pluginName}.xcframework')
+              .existsSync(),
+          isTrue,
+        );
+      } finally {
+        await _disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+        ErrorHandlingFileSystem.deleteIfExists(
+          workingDirectory,
+          recursive: true,
+        );
+      }
+    }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
   }
+
+  test('Build ios-framework with module app uses CocoaPods', () async {
+    final Directory workingDirectory = fileSystem.systemTempDirectory
+        .createTempSync('swift_package_manager_build_framework_module.');
+    final String workingDirectoryPath = workingDirectory.path;
+    try {
+      // Create and build module and framework using the CocoaPods version of
+      // integration_test even though Swift Package Manager is enabled.
+      await _enableSwiftPackageManager(flutterBin, workingDirectoryPath);
+
+      final String appDirectoryPath = await _createApp(
+        flutterBin,
+        workingDirectoryPath,
+        iosLanguage: 'swift',
+        platform: 'ios',
+        usesSwiftPackageManager: true,
+        options: <String>['--template=module'],
+      );
+      final _Plugin integrationTestPlugin = _integrationTestPlugin('ios');
+      _addDependency(appDirectoryPath: appDirectoryPath, plugin: integrationTestPlugin);
+
+      await _buildApp(
+        flutterBin,
+        appDirectoryPath,
+        options: <String>['ios', '--config-only', '-v'],
+        unexpectedLines: <String>[
+          'Adding Swift Package Manager integration...'
+        ]
+      );
+
+      expect(
+        fileSystem
+            .directory(appDirectoryPath)
+            .childDirectory('.ios')
+            .childFile('Podfile')
+            .existsSync(),
+        isTrue,
+      );
+      expect(
+        fileSystem
+            .directory(appDirectoryPath)
+            .childDirectory('.ios')
+            .childDirectory('Flutter')
+            .childDirectory('ephemeral')
+            .childDirectory('Packages')
+            .childDirectory('FlutterGeneratedPluginSwiftPackage')
+            .existsSync(),
+        isFalse,
+      );
+
+      await _buildApp(
+        flutterBin,
+        appDirectoryPath,
+        options: <String>[
+          'ios-framework',
+          '--no-debug',
+          '--no-profile',
+          '-v',
+        ],
+        unexpectedLines: <String>[
+          'Adding Swift Package Manager integration...',
+          'Swift Package Manager does not yet support this command. CocoaPods will be used instead.'
+        ]
+      );
+
+      expect(
+        fileSystem
+            .directory(appDirectoryPath)
+            .childDirectory('build')
+            .childDirectory('ios')
+            .childDirectory('framework')
+            .childDirectory('Release')
+            .childDirectory('${integrationTestPlugin.pluginName}.xcframework')
+            .existsSync(),
+        isTrue,
+      );
+    } finally {
+      await _disableSwiftPackageManager(flutterBin, workingDirectoryPath);
+      ErrorHandlingFileSystem.deleteIfExists(
+        workingDirectory,
+        recursive: true,
+      );
+    }
+  }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
 }
 
 Future<void> _enableSwiftPackageManager(
@@ -300,6 +470,7 @@ Future<String> _createApp(
   String workingDirectory, {
   required String platform,
   required String iosLanguage,
+  required List<String> options,
   bool usesSwiftPackageManager = false,
 }) async {
   final String appTemplateType = usesSwiftPackageManager ? 'spm' : 'default';
@@ -312,9 +483,9 @@ Future<String> _createApp(
       'create',
       '--org',
       'io.flutter.devicelab',
-      '--platforms=$platform',
       '-i',
       iosLanguage,
+      ...options,
       appName,
     ],
     workingDirectory: workingDirectory,
@@ -343,19 +514,22 @@ Future<void> _buildApp(
 }) async {
   final List<Pattern> remainingExpectedLines = expectedLines ?? <Pattern>[];
   final List<String> unexpectedLinesFound = <String>[];
+  final List<String> command = <String>[
+    flutterBin,
+    ...getLocalEngineArguments(),
+    'build',
+    ...options,
+  ];
 
   final ProcessResult result = await processManager.run(
-    <String>[
-      flutterBin,
-      ...getLocalEngineArguments(),
-      'build',
-      ...options,
-    ],
+    command,
     workingDirectory: workingDirectory,
   );
 
   final List<String> stdout = LineSplitter.split(result.stdout.toString()).toList();
-  for (final String line in stdout) {
+  final List<String> stderr = LineSplitter.split(result.stderr.toString()).toList();
+  final List<String> output = stdout + stderr;
+  for (final String line in output) {
     // Remove "[   +3 ms] " prefix
     String trimmedLine = line.trim();
     if (trimmedLine.startsWith('[')) {
@@ -375,21 +549,21 @@ Future<void> _buildApp(
   expect(
     result.exitCode,
     0,
-    reason: 'Failed to build app: \n'
+    reason: 'Failed to build app for "${command.join(' ')}":\n'
         'stdout: \n${result.stdout}\n'
         'stderr: \n${result.stderr}\n',
   );
   expect(
     remainingExpectedLines,
     isEmpty,
-    reason: 'Did not find expected lines.\n'
+    reason: 'Did not find expected lines for "${command.join(' ')}":\n'
         'stdout: \n${result.stdout}\n'
         'stderr: \n${result.stderr}\n',
   );
   expect(
     unexpectedLinesFound,
     isEmpty,
-    reason: 'Found unexpected lines.\n'
+    reason: 'Found unexpected lines for "${command.join(' ')}":\n'
         'stdout: \n${result.stdout}\n'
         'stderr: \n${result.stderr}\n',
   );
