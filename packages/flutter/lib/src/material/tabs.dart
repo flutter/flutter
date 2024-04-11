@@ -2441,7 +2441,7 @@ class _TabsPrimaryDefaultsM3 extends TabBarTheme {
   static double indicatorWeight(TabBarIndicatorSize indicatorSize) {
     return switch (indicatorSize) {
       TabBarIndicatorSize.label => 3.0,
-      TabBarIndicatorSize.tab => 2.0,
+      TabBarIndicatorSize.tab   => 2.0,
     };
   }
 
