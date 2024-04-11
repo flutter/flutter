@@ -2960,6 +2960,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
 
   /// Compares two text positions.
   ///
+  // ignore: unintended_html_in_doc_comment
   /// Returns 1 if `position` < `otherPosition`, -1 if `position` > `otherPosition`,
   /// or 0 if they are equal.
   static int _compareTextPositions(TextPosition position, TextPosition otherPosition) {

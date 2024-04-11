@@ -1141,7 +1141,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// individual tab widgets.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// If [mouseCursor] is a `MaterialStateProperty<MouseCursor>`,
   /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
   ///
   ///  * [MaterialState.selected].
@@ -1153,7 +1153,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// See also:
   ///
   ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor]
-  ///    that is also a [MaterialStateProperty<MouseCursor>].
+  ///    that is also a `MaterialStateProperty<MouseCursor>`.
   final MouseCursor? mouseCursor;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.

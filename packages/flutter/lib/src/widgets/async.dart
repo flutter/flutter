@@ -276,7 +276,7 @@ class AsyncSnapshot<T> {
   ///
   /// This can be false even when the asynchronous computation has completed
   /// successfully, if the computation did not return a non-null value. For
-  /// example, a [Future<void>] will complete with the null value even if it
+  /// example, a `Future<void>` will complete with the null value even if it
   /// completes successfully.
   bool get hasData => data != null;
 

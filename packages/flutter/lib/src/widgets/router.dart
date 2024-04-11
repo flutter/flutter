@@ -921,7 +921,7 @@ class _CallbackHookProvider<T> {
 /// it calls [takePriority] on its [BackButtonDispatcher] (or
 /// [ChildBackButtonDispatcher]) instance.
 ///
-/// The class takes a single callback, which must return a [Future<bool>]. The
+/// The class takes a single callback, which must return a `Future<bool>`. The
 /// callback's semantics match [WidgetsBindingObserver.didPopRoute]'s, namely,
 /// the callback should return a future that completes to true if it can handle
 /// the pop request, and a future that completes to false otherwise.

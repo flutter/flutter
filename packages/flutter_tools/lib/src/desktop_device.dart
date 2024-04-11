@@ -215,6 +215,7 @@ abstract class DesktopDevice extends Device {
   ///
   /// The format of the environment variables is:
   ///   * FLUTTER_ENGINE_SWITCHES to the number of switches.
+  // ignore: unintended_html_in_doc_comment
   ///   * FLUTTER_ENGINE_SWITCH_<N> (indexing from 1) to the individual switches.
   Map<String, String> _computeEnvironment(DebuggingOptions debuggingOptions, bool traceStartup, String? route) {
     int flags = 0;

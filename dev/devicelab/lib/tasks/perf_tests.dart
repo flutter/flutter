@@ -784,8 +784,8 @@ Map<String, dynamic> _average(List<Map<String, dynamic>> results, int iterations
 
 /// Opens the file at testDirectory + 'ios/Runner/Info.plist'
 /// and adds the following entry to the application.
-/// <FTLDisablePartialRepaint/>
-/// <true/>
+/// `<FTLDisablePartialRepaint/>`
+/// `<true/>`
 void _disablePartialRepaint(String testDirectory) {
   final String manifestPath = path.join(
       testDirectory, 'ios', 'Runner', 'Info.plist');

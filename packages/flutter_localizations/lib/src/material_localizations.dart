@@ -49,7 +49,7 @@ import 'widgets_localizations.dart';
 ///
 /// To create a translation that's similar to an existing language's translation
 /// but has slightly different strings, subclass the relevant translation
-/// directly and then create a [LocalizationsDelegate<MaterialLocalizations>]
+/// directly and then create a `LocalizationsDelegate<MaterialLocalizations>`
 /// subclass to define how to load it.
 ///
 /// Avoid subclassing an unrelated language (for example, subclassing

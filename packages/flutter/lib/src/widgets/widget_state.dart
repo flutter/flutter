@@ -28,16 +28,16 @@ import 'package:flutter/services.dart';
 ///    `WidgetStateProperty<Color>`.
 ///  * [WidgetStateMouseCursor], a [MouseCursor] that implements
 ///    `WidgetStateProperty` which is used in APIs that need to accept either
-///    a [MouseCursor] or a [WidgetStateProperty<MouseCursor>].
+///    a [MouseCursor] or a `WidgetStateProperty<MouseCursor>`.
 ///  * [WidgetStateOutlinedBorder], an [OutlinedBorder] that implements
 ///    `WidgetStateProperty` which is used in APIs that need to accept either
-///    an [OutlinedBorder] or a [WidgetStateProperty<OutlinedBorder>].
+///    an [OutlinedBorder] or a `WidgetStateProperty<OutlinedBorder>`.
 ///  * [WidgetStateBorderSide], a [BorderSide] that implements
 ///    `WidgetStateProperty` which is used in APIs that need to accept either
-///    a [BorderSide] or a [WidgetStateProperty<BorderSide>].
+///    a [BorderSide] or a `WidgetStateProperty<BorderSide>`.
 ///  * [WidgetStateTextStyle], a [TextStyle] that implements
 ///    `WidgetStateProperty` which is used in APIs that need to accept either
-///    a [TextStyle] or a [WidgetStateProperty<TextStyle>].
+///    a [TextStyle] or a `WidgetStateProperty<TextStyle>`.
 /// {@endtemplate}
 enum WidgetState {
   /// The state when the user drags their mouse cursor over the given widget.
@@ -99,7 +99,7 @@ typedef WidgetPropertyResolver<T> = T Function(Set<WidgetState> states);
 /// Defines a [Color] that is also a [WidgetStateProperty].
 ///
 /// This class exists to enable widgets with [Color] valued properties
-/// to also accept [WidgetStateProperty<Color>] values. A widget
+/// to also accept `WidgetStateProperty<Color>` values. A widget
 /// state color property represents a color which depends on
 /// a widget's "interactive state". This state is represented as a
 /// [Set] of [WidgetState]s, like [WidgetState.pressed],
@@ -114,7 +114,7 @@ typedef WidgetPropertyResolver<T> = T Function(Set<WidgetState> states);
 ///      will be used to resolve the color in the given states.
 ///
 /// If a [WidgetStateColor] is used for a property or a parameter that doesn't
-/// support resolving [WidgetStateProperty<Color>]s, then its default color
+/// support resolving `WidgetStateProperty<Color>`s, then its default color
 /// value will be used for all states.
 ///
 /// To define a `const` [WidgetStateColor], you'll need to extend
@@ -152,7 +152,7 @@ abstract class WidgetStateColor extends Color implements WidgetStateProperty<Col
   /// const constructors so that they can be used in const expressions.
   const WidgetStateColor(super.defaultValue);
 
-  /// Creates a [WidgetStateColor] from a [WidgetPropertyResolver<Color>]
+  /// Creates a [WidgetStateColor] from a `WidgetPropertyResolver<Color>`
   /// callback function.
   ///
   /// If used as a regular color, the color resolved in the default state (the
@@ -310,7 +310,7 @@ abstract class WidgetStateBorderSide extends BorderSide implements WidgetStatePr
   const WidgetStateBorderSide();
 
   /// Creates a [WidgetStateBorderSide] from a
-  /// [WidgetPropertyResolver<BorderSide?>] callback function.
+  /// `WidgetPropertyResolver<BorderSide?>` callback function.
   ///
   /// If used as a regular [BorderSide], the border resolved in the default state
   /// (the empty set of states) will be used.
@@ -402,7 +402,7 @@ abstract class WidgetStateOutlinedBorder extends OutlinedBorder implements Widge
 /// Defines a [TextStyle] that is also a [WidgetStateProperty].
 ///
 /// This class exists to enable widgets with [TextStyle] valued properties
-/// to also accept [WidgetStateProperty<TextStyle>] values. A widget
+/// to also accept `WidgetStateProperty<TextStyle>` values. A widget
 /// state text style property represents a text style which depends on
 /// a widget's "interactive state". This state is represented as a
 /// [Set] of [WidgetState]s, like [WidgetState.pressed],
@@ -417,7 +417,7 @@ abstract class WidgetStateOutlinedBorder extends OutlinedBorder implements Widge
 ///      will be used to resolve the color in the given states.
 ///
 /// If a [WidgetStateTextStyle] is used for a property or a parameter that doesn't
-/// support resolving [WidgetStateProperty<TextStyle>]s, then its default color
+/// support resolving `WidgetStateProperty<TextStyle>`s, then its default color
 /// value will be used for all states.
 ///
 /// To define a `const` [WidgetStateTextStyle], you'll need to extend
@@ -433,7 +433,7 @@ abstract class WidgetStateTextStyle extends TextStyle implements WidgetStateProp
   /// const constructors so that they can be used in const expressions.
   const WidgetStateTextStyle();
 
-  /// Creates a [WidgetStateTextStyle] from a [WidgetPropertyResolver<TextStyle>]
+  /// Creates a [WidgetStateTextStyle] from a `WidgetPropertyResolver<TextStyle>`
   /// callback function.
   ///
   /// If used as a regular text style, the style resolved in the default state (the
@@ -494,7 +494,7 @@ abstract class WidgetStateProperty<T> {
   ///
   /// This is useful for widgets that have parameters which can optionally be a
   /// [WidgetStateProperty]. For example, [InkWell.mouseCursor] can be a
-  /// [MouseCursor] or a [WidgetStateProperty<MouseCursor>].
+  /// [MouseCursor] or a `WidgetStateProperty<MouseCursor>`.
   static T resolveAs<T>(T value, Set<WidgetState> states) {
     if (value is WidgetStateProperty<T>) {
       final WidgetStateProperty<T> property = value;

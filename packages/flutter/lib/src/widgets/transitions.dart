@@ -684,7 +684,7 @@ class SliverFadeTransition extends SingleChildRenderObjectWidget {
 
 /// An interpolation between two relative rects.
 ///
-/// This class specializes the interpolation of [Tween<RelativeRect>] to
+/// This class specializes the interpolation of `Tween<RelativeRect>` to
 /// use [RelativeRect.lerp].
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
@@ -701,7 +701,7 @@ class RelativeRectTween extends Tween<RelativeRect> {
 }
 
 /// Animated version of [Positioned] which takes a specific
-/// [Animation<RelativeRect>] to transition the child's position from a start
+/// `Animation<RelativeRect>` to transition the child's position from a start
 /// position to an end position over the lifetime of the animation.
 ///
 /// Only works if it's the child of a [Stack].

@@ -145,7 +145,7 @@ class _NotificationElement<T extends Notification> extends ProxyElement with Not
 /// Useful if, for instance, you're trying to align multiple descendants.
 ///
 /// To listen for notifications in a subtree, use a
-/// [NotificationListener<LayoutChangedNotification>].
+/// `NotificationListener<LayoutChangedNotification>`.
 ///
 /// To send a notification, call [dispatch] on the notification you wish to
 /// send. The notification will be delivered to any [NotificationListener]

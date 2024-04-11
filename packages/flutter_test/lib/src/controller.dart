@@ -156,10 +156,10 @@ class SemanticsController {
   ///
   /// * [containsSemantics] and [matchesSemantics], which can be used to match
   ///   against a single node in the traversal.
-  /// * [containsAllInOrder], which can be given an [Iterable<Matcher>] to fuzzy
+  /// * [containsAllInOrder], which can be given an `Iterable<Matcher>` to fuzzy
   ///   match the order allowing extra nodes before after and between matching
   ///   parts of the traversal.
-  /// * [orderedEquals], which can be given an [Iterable<Matcher>] to exactly
+  /// * [orderedEquals], which can be given an `Iterable<Matcher>` to exactly
   ///   match the order of the traversal.
   Iterable<SemanticsNode> simulatedAccessibilityTraversal({
     @Deprecated(

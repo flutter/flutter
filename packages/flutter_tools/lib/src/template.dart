@@ -66,10 +66,10 @@ TemplatePathProvider get templatePathProvider => context.get<TemplatePathProvide
 /// and are only included when the --implementation-tests flag is enabled.
 ///
 /// Folders with platform/language-specific content must be named
-/// '<platform>-<language>.tmpl'.
+/// `<platform>-<language>.tmpl`.
 ///
-/// Files in the destination will contain none of the '.tmpl', '.copy.tmpl',
-/// 'img.tmpl', or '-<language>.tmpl' extensions.
+/// Files in the destination will contain none of the `.tmpl`, `.copy.tmpl`,
+/// `img.tmpl`, or `-<language>.tmpl` extensions.
 class Template {
   factory Template(Directory templateSource, Directory? imageSourceDir, {
     required FileSystem fileSystem,

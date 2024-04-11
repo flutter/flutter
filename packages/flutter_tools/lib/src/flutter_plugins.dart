@@ -1265,7 +1265,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
 /// The new entrypoint wraps [currentMainUri], adds the [_PluginRegistrant] class,
 /// and writes the file to [newMainDart].
 ///
-/// [mainFile] is the main entrypoint file. e.g. /<app>/lib/main.dart.
+/// [mainFile] is the main entrypoint file. e.g. `/<app>/lib/main.dart`.
 ///
 /// A successful run will create a new generate_main.dart file or update the existing file.
 /// Throws [ToolExit] if unable to generate the file.

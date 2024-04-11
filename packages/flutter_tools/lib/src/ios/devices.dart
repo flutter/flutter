@@ -1097,7 +1097,7 @@ class IOSDevice extends Device {
 /// Decodes a vis-encoded syslog string to a UTF-8 representation.
 ///
 /// Apple's syslog logs are encoded in 7-bit form. Input bytes are encoded as follows:
-/// 1. 0x00 to 0x19: non-printing range. Some ignored, some encoded as <...>.
+/// 1. 0x00 to 0x19: non-printing range. Some ignored, some encoded as &lt;...&gt;.
 /// 2. 0x20 to 0x7f: as-is, with the exception of 0x5c (backslash).
 /// 3. 0x5c (backslash): octal representation \134.
 /// 4. 0x80 to 0x9f: \M^x (using control-character notation for range 0x00 to 0x40).

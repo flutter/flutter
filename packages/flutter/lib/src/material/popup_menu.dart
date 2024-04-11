@@ -286,7 +286,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// If [mouseCursor] is a `MaterialStateProperty<MouseCursor>`,
   /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
   ///
   ///  * [MaterialState.hovered].

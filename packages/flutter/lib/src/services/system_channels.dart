@@ -273,7 +273,7 @@ abstract final class SystemChannels {
   /// [OptionalMethodChannel.invokeMethod]):
   ///
   ///  * `SpellCheck.initiateSpellCheck`: Sends request for specified text to be
-  ///     spell checked and returns the result, either a [List<SuggestionSpan>]
+  ///     spell checked and returns the result, either a `List<SuggestionSpan>`
   ///     representing the spell check results of the text or null if the request
   ///     was canceled. The arguments are the [String] to be spell checked
   ///     and the [Locale] for the text to be spell checked with.

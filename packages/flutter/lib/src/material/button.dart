@@ -107,7 +107,7 @@ class RawMaterialButton extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// button.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// If [mouseCursor] is a `MaterialStateProperty<MouseCursor>`,
   /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
   ///
   ///  * [MaterialState.pressed].
@@ -122,7 +122,7 @@ class RawMaterialButton extends StatefulWidget {
   /// Defines the default text style, with [Material.textStyle], for the
   /// button's [child].
   ///
-  /// If [TextStyle.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
+  /// If [TextStyle.color] is a `MaterialStateProperty<Color>`, [MaterialStateProperty.resolve]
   /// is used for the following [MaterialState]s:
   ///
   ///  * [MaterialState.pressed].
@@ -245,7 +245,7 @@ class RawMaterialButton extends StatefulWidget {
   /// The button's highlight and splash are clipped to this shape. If the
   /// button has an elevation, then its drop shadow is defined by this shape.
   ///
-  /// If [shape] is a [MaterialStateProperty<ShapeBorder>], [MaterialStateProperty.resolve]
+  /// If [shape] is a `MaterialStateProperty<ShapeBorder>`, [MaterialStateProperty.resolve]
   /// is used for the following [MaterialState]s:
   ///
   /// * [MaterialState.pressed].

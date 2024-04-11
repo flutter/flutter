@@ -477,7 +477,7 @@ class Slider extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// If [mouseCursor] is a `MaterialStateProperty<MouseCursor>`,
   /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
   ///
   ///  * [MaterialState.dragged].
@@ -492,7 +492,7 @@ class Slider extends StatefulWidget {
   /// See also:
   ///
   ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor]
-  ///    that is also a [MaterialStateProperty<MouseCursor>].
+  ///    that is also a `MaterialStateProperty<MouseCursor>`.
   final MouseCursor? mouseCursor;
 
   /// The callback used to create a semantic value from a slider value.

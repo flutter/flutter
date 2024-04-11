@@ -1102,7 +1102,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
 
 /// Makes its child partially transparent, driven from an [Animation].
 ///
-/// This is a variant of [RenderOpacity] that uses an [Animation<double>] rather
+/// This is a variant of [RenderOpacity] that uses an `Animation<double>` rather
 /// than a [double] to control the opacity.
 class RenderAnimatedOpacity extends RenderProxyBox with RenderAnimatedOpacityMixin<RenderBox> {
   /// Creates a partially transparent render object.
@@ -1278,10 +1278,10 @@ class RenderBackdropFilter extends RenderProxyBox {
 ///
 /// See also:
 ///
-///  * [ClipRect], which can be customized with a [CustomClipper<Rect>].
-///  * [ClipRRect], which can be customized with a [CustomClipper<RRect>].
-///  * [ClipOval], which can be customized with a [CustomClipper<Rect>].
-///  * [ClipPath], which can be customized with a [CustomClipper<Path>].
+///  * [ClipRect], which can be customized with a `CustomClipper<Rect>`.
+///  * [ClipRRect], which can be customized with a `CustomClipper<RRect>`.
+///  * [ClipOval], which can be customized with a `CustomClipper<Rect>`.
+///  * [ClipPath], which can be customized with a `CustomClipper<Path>`.
 ///  * [ShapeBorderClipper], for specifying a clip path using a [ShapeBorder].
 abstract class CustomClipper<T> extends Listenable {
   /// Creates a custom clipper.

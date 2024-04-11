@@ -321,14 +321,14 @@ class DaemonConnection {
   /// There are three kinds of data: Request, Response, Event.
   ///
   /// Request:
-  /// {"id": <Object>. "method": <String>, "params": <optional, Object?>}
+  /// `{"id": <Object>. "method": <String>, "params": <optional, Object?>}`
   ///
   /// Response:
-  /// {"id": <Object>. "result": <optional, Object?>} for a successful response.
-  /// {"id": <Object>. "error": <Object>, "stackTrace": <String>} for an error response.
+  /// `{"id": <Object>. "result": <optional, Object?>}` for a successful response.
+  /// `{"id": <Object>. "error": <Object>, "stackTrace": <String>}` for an error response.
   ///
   /// Event:
-  /// {"event": <String>. "params": <optional, Object?>}
+  /// `{"event": <String>. "params": <optional, Object?>}`
   void _handleMessage(DaemonMessage message) {
     final Map<String, Object?> data = message.data;
     if (data['id'] != null) {

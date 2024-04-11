@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 
-/// Builds a [Widget] when given a concrete value of a [ValueListenable<T>].
+/// Builds a [Widget] when given a concrete value of a `ValueListenable<T>`.
 ///
 /// If the `child` parameter provided to the [ValueListenableBuilder] is not
 /// null, the same `child` widget is passed back to this [ValueWidgetBuilder]
@@ -20,7 +20,7 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 
 /// A widget whose content stays synced with a [ValueListenable].
 ///
-/// Given a [ValueListenable<T>] and a [builder] which builds widgets from
+/// Given a `ValueListenable<T>` and a [builder] which builds widgets from
 /// concrete values of `T`, this class will automatically register itself as a
 /// listener of the [ValueListenable] and call the [builder] with updated values
 /// when the value changes.

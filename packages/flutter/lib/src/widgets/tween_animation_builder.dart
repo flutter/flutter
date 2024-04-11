@@ -15,7 +15,7 @@ import 'value_listenable_builder.dart';
 ///
 /// The type of the animated property ([Color], [Rect], [double], etc.) is
 /// defined via the type of the provided [tween] (e.g. [ColorTween],
-/// [RectTween], [Tween<double>], etc.).
+/// [RectTween], `Tween<double>`, etc.).
 ///
 /// The [tween] also defines the target value for the animation: When the widget
 /// first builds, it animates from [Tween.begin] to [Tween.end]. A new animation
@@ -124,7 +124,7 @@ class TweenAnimationBuilder<T extends Object?> extends ImplicitlyAnimatedWidget 
   /// first time.
   ///
   /// Any (subclass of) [Tween] is accepted as an argument. For example, to
-  /// animate the height or width of a [Widget], use a [Tween<double>], or
+  /// animate the height or width of a [Widget], use a `Tween<double>`, or
   /// check out the [ColorTween] to animate the color property of a [Widget].
   ///
   /// Any [Tween] provided must have a non-null [Tween.end] value.

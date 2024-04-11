@@ -1258,7 +1258,7 @@ const TraversalEdgeBehavior kDefaultRouteTraversalEdgeBehavior = TraversalEdgeBe
 /// The app's home page route is named '/' by default.
 ///
 /// The [MaterialApp] can be created
-/// with a [Map<String, WidgetBuilder>] which maps from a route's name to
+/// with a `Map<String, WidgetBuilder>` which maps from a route's name to
 /// a builder function that will create it. The [MaterialApp] uses this
 /// map to create a value for its navigator's [onGenerateRoute] callback.
 ///

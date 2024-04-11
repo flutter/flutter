@@ -1173,7 +1173,7 @@ String _getLocalArtifactVersion(String pomPath, FileSystem fileSystem) {
 }
 
 /// Returns the local Maven repository for a local engine build.
-/// For example, if the engine is built locally at <home>/engine/src/out/android_release_unopt
+/// For example, if the engine is built locally at `<home>/engine/src/out/android_release_unopt`
 /// This method generates symlinks in the temp directory to the engine artifacts
 /// following the convention specified on https://maven.apache.org/pom.html#Repositories
 Directory _getLocalEngineRepo({

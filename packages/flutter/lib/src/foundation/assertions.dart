@@ -246,7 +246,7 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
 /// [ErrorSummary] or [ErrorHint] is appropriate.
 ///
 /// In debug builds, values interpolated into the `message` are
-/// expanded and placed into [value], which is of type [List<Object>].
+/// expanded and placed into [value], which is of type `List<Object>`.
 /// This allows IDEs to examine values interpolated into error messages.
 ///
 /// See also:
@@ -286,7 +286,7 @@ class ErrorDescription extends _ErrorDiagnostic {
 /// multiple summaries.
 ///
 /// In debug builds, values interpolated into the `message` are
-/// expanded and placed into [value], which is of type [List<Object>].
+/// expanded and placed into [value], which is of type `List<Object>`.
 /// This allows IDEs to examine values interpolated into error messages.
 ///
 /// See also:
@@ -321,7 +321,7 @@ class ErrorSummary extends _ErrorDiagnostic {
 /// [ErrorDescription] not a hint.
 ///
 /// In debug builds, values interpolated into the `message` are
-/// expanded and placed into [value], which is of type [List<Object>].
+/// expanded and placed into [value], which is of type `List<Object>`.
 /// This allows IDEs to examine values interpolated into error messages.
 ///
 /// See also:
@@ -805,7 +805,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// debug builds, values interpolated into the `message` arguments of those
   /// classes' constructors are expanded and placed into the
   /// [DiagnosticsProperty.value] property of those objects (which is of type
-  /// [List<Object>]). This allows IDEs to examine values interpolated into
+  /// `List<Object>`). This allows IDEs to examine values interpolated into
   /// error messages.
   ///
   /// Alternatively, to include a specific [Diagnosticable] object into the

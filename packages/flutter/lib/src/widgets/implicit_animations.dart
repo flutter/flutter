@@ -27,7 +27,7 @@ import 'transitions.dart';
 
 /// An interpolation between two [BoxConstraints].
 ///
-/// This class specializes the interpolation of [Tween<BoxConstraints>] to use
+/// This class specializes the interpolation of `Tween<BoxConstraints>` to use
 /// [BoxConstraints.lerp].
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
@@ -45,7 +45,7 @@ class BoxConstraintsTween extends Tween<BoxConstraints> {
 
 /// An interpolation between two [Decoration]s.
 ///
-/// This class specializes the interpolation of [Tween<BoxConstraints>] to use
+/// This class specializes the interpolation of `Tween<BoxConstraints>` to use
 /// [Decoration.lerp].
 ///
 /// For [ShapeDecoration]s which know how to [ShapeDecoration.lerpTo] or
@@ -76,7 +76,7 @@ class DecorationTween extends Tween<Decoration> {
 
 /// An interpolation between two [EdgeInsets]s.
 ///
-/// This class specializes the interpolation of [Tween<EdgeInsets>] to use
+/// This class specializes the interpolation of `Tween<EdgeInsets>` to use
 /// [EdgeInsets.lerp].
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
@@ -99,7 +99,7 @@ class EdgeInsetsTween extends Tween<EdgeInsets> {
 
 /// An interpolation between two [EdgeInsetsGeometry]s.
 ///
-/// This class specializes the interpolation of [Tween<EdgeInsetsGeometry>] to
+/// This class specializes the interpolation of `Tween<EdgeInsetsGeometry>` to
 /// use [EdgeInsetsGeometry.lerp].
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
@@ -121,7 +121,7 @@ class EdgeInsetsGeometryTween extends Tween<EdgeInsetsGeometry> {
 
 /// An interpolation between two [BorderRadius]s.
 ///
-/// This class specializes the interpolation of [Tween<BorderRadius>] to use
+/// This class specializes the interpolation of `Tween<BorderRadius>` to use
 /// [BorderRadius.lerp].
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
@@ -139,7 +139,7 @@ class BorderRadiusTween extends Tween<BorderRadius?> {
 
 /// An interpolation between two [Border]s.
 ///
-/// This class specializes the interpolation of [Tween<Border>] to use
+/// This class specializes the interpolation of `Tween<Border>` to use
 /// [Border.lerp].
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
@@ -157,7 +157,7 @@ class BorderTween extends Tween<Border?> {
 
 /// An interpolation between two [Matrix4]s.
 ///
-/// This class specializes the interpolation of [Tween<Matrix4>] to be
+/// This class specializes the interpolation of `Tween<Matrix4>` to be
 /// appropriate for transformation matrices.
 ///
 /// Currently this class works only for translations.
@@ -195,7 +195,7 @@ class Matrix4Tween extends Tween<Matrix4> {
 
 /// An interpolation between two [TextStyle]s.
 ///
-/// This class specializes the interpolation of [Tween<TextStyle>] to use
+/// This class specializes the interpolation of `Tween<TextStyle>` to use
 /// [TextStyle.lerp].
 ///
 /// This will not work well if the styles don't set the same fields.

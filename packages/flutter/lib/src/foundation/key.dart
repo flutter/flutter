@@ -22,7 +22,7 @@ import 'diagnostics.dart';
 ///  * [Widget.key], which discusses how widgets use keys.
 @immutable
 abstract class Key {
-  /// Construct a [ValueKey<String>] with the given [String].
+  /// Construct a `ValueKey<String>` with the given [String].
   ///
   /// This is the simplest way to create keys.
   const factory Key(String value) = ValueKey<String>;
@@ -68,7 +68,7 @@ class UniqueKey extends LocalKey {
 
 /// A key that uses a value of a particular type to identify itself.
 ///
-/// A [ValueKey<T>] is equal to another [ValueKey<T>] if, and only if, their
+/// A `ValueKey<T>` is equal to another `ValueKey<T>` if, and only if, their
 /// values are [operator==].
 ///
 /// This class can be subclassed to create value keys that will not be equal to

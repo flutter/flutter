@@ -478,7 +478,7 @@ class Switch extends StatelessWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
+  /// If [mouseCursor] is a `MaterialStateProperty<MouseCursor>`,
   /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
   ///
   ///  * [MaterialState.selected].
@@ -494,7 +494,7 @@ class Switch extends StatelessWidget {
   ///
   ///  * [MaterialStateMouseCursor], a [MouseCursor] that implements
   ///    `MaterialStateProperty` which is used in APIs that need to accept
-  ///    either a [MouseCursor] or a [MaterialStateProperty<MouseCursor>].
+  ///    either a [MouseCursor] or a `MaterialStateProperty<MouseCursor>`.
   final MouseCursor? mouseCursor;
 
   /// The color for the button's [Material] when it has the input focus.

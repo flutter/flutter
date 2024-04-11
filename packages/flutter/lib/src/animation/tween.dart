@@ -21,7 +21,7 @@ export 'curves.dart' show Curve;
 /// from a callback.
 typedef AnimatableCallback<T> = T Function(double value);
 
-/// An object that can produce a value of type `T` given an [Animation<double>]
+/// An object that can produce a value of type `T` given an `Animation<double>`
 /// as input.
 ///
 /// Typically, the values of the input animation are nominally in the range 0.0
@@ -158,7 +158,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// {@tool snippet}
 ///
 /// Suppose `_controller` is an [AnimationController], and we want to create an
-/// [Animation<Offset>] that is controlled by that controller, and save it in
+/// `Animation<Offset>` that is controlled by that controller, and save it in
 /// `_animation`. Here are two possible ways of expressing this:
 ///
 /// ```dart
@@ -184,7 +184,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// lifetime of the `_controller`'s animation, returns a value
 /// (`_animation.value`) that depicts a point along the line between the two
 /// offsets above. If we used a [MaterialPointArcTween] instead of a
-/// [Tween<Offset>] in the code above, the points would follow a pleasing curve
+/// `Tween<Offset>` in the code above, the points would follow a pleasing curve
 /// instead of a straight line, with no other changes necessary.
 ///
 /// ## Performance optimizations
@@ -210,8 +210,8 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// [Color.lerp] to implement the [ColorTween.lerp] method.
 ///
 /// Types that define `+` and `-` operators to combine values (`T + T → T` and
-/// `T - T → T`) and an `*` operator to scale by multiplying with a double (`T *
-/// double → T`) can be directly used with `Tween<T>`.
+/// `T - T → T`) and an `*` operator to scale by multiplying with a double (
+/// `T * double → T`) can be directly used with `Tween<T>`.
 ///
 /// This does not extend to any type with `+`, `-`, and `*` operators. In
 /// particular, [int] does not satisfy this precise contract (`int * double`
@@ -385,7 +385,7 @@ class ReverseTween<T extends Object?> extends Tween<T> {
 
 /// An interpolation between two colors.
 ///
-/// This class specializes the interpolation of [Tween<Color>] to use
+/// This class specializes the interpolation of `Tween<Color>` to use
 /// [Color.lerp].
 ///
 /// The values can be null, representing no color (which is distinct to
@@ -411,7 +411,7 @@ class ColorTween extends Tween<Color?> {
 
 /// An interpolation between two sizes.
 ///
-/// This class specializes the interpolation of [Tween<Size>] to use
+/// This class specializes the interpolation of `Tween<Size>` to use
 /// [Size.lerp].
 ///
 /// The values can be null, representing [Size.zero].
@@ -431,7 +431,7 @@ class SizeTween extends Tween<Size?> {
 
 /// An interpolation between two rectangles.
 ///
-/// This class specializes the interpolation of [Tween<Rect>] to use
+/// This class specializes the interpolation of `Tween<Rect>` to use
 /// [Rect.lerp].
 ///
 /// The values can be null, representing a zero-sized rectangle at the
@@ -452,13 +452,13 @@ class RectTween extends Tween<Rect?> {
 
 /// An interpolation between two integers that rounds.
 ///
-/// This class specializes the interpolation of [Tween<int>] to be
+/// This class specializes the interpolation of `Tween<int>` to be
 /// appropriate for integers by interpolating between the given begin
 /// and end values and then rounding the result to the nearest
 /// integer.
 ///
 /// This is the closest approximation to a linear tween that is possible with an
-/// integer. Compare to [StepTween] and [Tween<double>].
+/// integer. Compare to [StepTween] and `Tween<double>`.
 ///
 /// The [begin] and [end] values must be set to non-null values before
 /// calling [lerp] or [transform].
@@ -480,7 +480,7 @@ class IntTween extends Tween<int> {
 
 /// An interpolation between two integers that floors.
 ///
-/// This class specializes the interpolation of [Tween<int>] to be
+/// This class specializes the interpolation of `Tween<int>` to be
 /// appropriate for integers by interpolating between the given begin
 /// and end values and then using [double.floor] to return the current
 /// integer component, dropping the fractional component.

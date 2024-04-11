@@ -741,10 +741,11 @@ final TextTreeConfiguration errorPropertyTextConfiguration = TextTreeConfigurati
 /// Render a node on multiple lines omitting children.
 ///
 /// Example:
-/// `<name>: <description>
-///   <property1>
-///   <property2>
-///   <propertyN>`
+///
+///    <name>: <description>
+///      <property1>
+///      <property2>
+///      <propertyN>
 ///
 /// See also:
 ///
@@ -1539,7 +1540,7 @@ abstract class DiagnosticsNode {
   /// Properties of this [DiagnosticsNode].
   ///
   /// Properties and children are kept distinct even though they are both
-  /// [List<DiagnosticsNode>] because they should be grouped differently.
+  /// `List<DiagnosticsNode>` because they should be grouped differently.
   List<DiagnosticsNode> getProperties();
 
   /// Children of this [DiagnosticsNode].
@@ -2028,7 +2029,7 @@ class PercentProperty extends DoubleProperty {
 /// Property where the description is either [ifTrue] or [ifFalse] depending on
 /// whether [value] is true or false.
 ///
-/// Using [FlagProperty] instead of [DiagnosticsProperty<bool>] can make
+/// Using [FlagProperty] instead of `DiagnosticsProperty<bool>` can make
 /// diagnostics display more polished. For example, given a property named
 /// `visible` that is typically true, the following code will return 'hidden'
 /// when `visible` is false and nothing when visible is true, in contrast to
@@ -2046,7 +2047,7 @@ class PercentProperty extends DoubleProperty {
 /// {@end-tool}
 /// {@tool snippet}
 ///
-/// [FlagProperty] should also be used instead of [DiagnosticsProperty<bool>]
+/// [FlagProperty] should also be used instead of `DiagnosticsProperty<bool>`
 /// if showing the bool value would not clearly indicate the meaning of the
 /// property value.
 ///
@@ -3356,7 +3357,7 @@ abstract class DiagnosticableTree with Diagnosticable {
   ///
   /// The list must not contain any null entries. If there are explicit null
   /// children to report, consider [DiagnosticsNode.message] or
-  /// [DiagnosticsProperty<Object>] as possible [DiagnosticsNode] objects to
+  /// `DiagnosticsProperty<Object>` as possible [DiagnosticsNode] objects to
   /// provide.
   ///
   /// Used by [toStringDeep], [toDiagnosticsNode] and [toStringShallow].

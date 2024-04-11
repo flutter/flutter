@@ -31,7 +31,7 @@ export 'package:flutter/services.dart' show SmartDashesType, SmartQuotesType;
 /// ** See code in examples/api/lib/cupertino/search_field/cupertino_search_field.0.dart **
 /// {@end-tool}
 ///
-/// It is recommended to pass a [ValueChanged<String>] to both [onChanged] and
+/// It is recommended to pass a `ValueChanged<String>` to both [onChanged] and
 /// [onSubmitted] parameters in order to be notified once the value of the
 /// field changes or is submitted by the keyboard:
 ///
@@ -53,10 +53,10 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// in a [TextEditingController] with an initial value to the [controller]
   /// parameter.
   ///
-  /// The [onChanged] parameter takes a [ValueChanged<String>] which is invoked
+  /// The [onChanged] parameter takes a `ValueChanged<String>` which is invoked
   /// upon a change in the text field's value.
   ///
-  /// The [onSubmitted] parameter takes a [ValueChanged<String>] which is
+  /// The [onSubmitted] parameter takes a `ValueChanged<String>` which is
   /// invoked when the keyboard submits.
   ///
   /// To provide a hint placeholder text that appears when the text entry is

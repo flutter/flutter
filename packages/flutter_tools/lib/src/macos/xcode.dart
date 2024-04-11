@@ -29,9 +29,11 @@ Version get xcodeRecommendedVersion => Version(15, null, null);
 /// SDK name passed to `xcrun --sdk`. Corresponds to undocumented Xcode
 /// SUPPORTED_PLATFORMS values.
 ///
+/// ```none
 /// Usage: xcrun [options] <tool name> ... arguments ...
 /// ...
 /// --sdk <sdk name>            find the tool for the given SDK name.
+/// ```
 String getSDKNameForIOSEnvironmentType(EnvironmentType environmentType) {
   return (environmentType == EnvironmentType.simulator)
       ? 'iphonesimulator'

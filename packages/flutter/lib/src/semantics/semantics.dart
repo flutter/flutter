@@ -1585,8 +1585,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// This handler is invoked when the user wants to replace the current text in
   /// the text field with a new text.
   ///
-  /// Voice access users can trigger this handler by speaking "type <text>" to
-  /// their Android devices.
+  /// Voice access users can trigger this handler by speaking
+  /// "type &lt;text&gt;" to their Android devices.
   final SetTextHandler? onSetText;
 
   /// The handler for [SemanticsAction.didGainAccessibilityFocus].
@@ -4002,8 +4002,8 @@ class SemanticsConfiguration {
   /// This handler is invoked when the user wants to replace the current text in
   /// the text field with a new text.
   ///
-  /// Voice access users can trigger this handler by speaking "type <text>" to
-  /// their Android devices.
+  /// Voice access users can trigger this handler by speaking
+  /// "type &lt;text&gt;" to their Android devices.
   SetTextHandler? get onSetText => _onSetText;
   SetTextHandler? _onSetText;
   set onSetText(SetTextHandler? value) {

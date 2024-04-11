@@ -879,7 +879,7 @@ abstract class BoxScrollView extends ScrollView {
 ///
 /// There are four options for constructing a [ListView]:
 ///
-///  1. The default constructor takes an explicit [List<Widget>] of children. This
+///  1. The default constructor takes an explicit `List<Widget>` of children. This
 ///     constructor is appropriate for list views with a small number of
 ///     children because constructing the [List] requires doing work for every
 ///     child that could possibly be displayed in the list view instead of just
@@ -909,7 +909,7 @@ abstract class BoxScrollView extends ScrollView {
 ///
 /// {@tool snippet}
 /// This example uses the default constructor for [ListView] which takes an
-/// explicit [List<Widget>] of children. This [ListView]'s children are made up
+/// explicit `List<Widget>` of children. This [ListView]'s children are made up
 /// of [Container]s with [Text].
 ///
 /// ![A ListView of 3 amber colored containers with sample text.](https://flutter.github.io/assets-for-api-docs/assets/widgets/list_view.png)

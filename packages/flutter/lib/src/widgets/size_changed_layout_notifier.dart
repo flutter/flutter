@@ -40,7 +40,7 @@ class SizeChangedLayoutNotification extends LayoutChangedNotification {
 /// change in that case, it's just established).
 ///
 /// To listen for the notification dispatched by this widget, use a
-/// [NotificationListener<SizeChangedLayoutNotification>].
+/// `NotificationListener<SizeChangedLayoutNotification>`.
 ///
 /// The [Material] class listens for [LayoutChangedNotification]s, including
 /// [SizeChangedLayoutNotification]s, to repaint [InkResponse] and [InkWell] ink

@@ -3444,6 +3444,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
   late int _depth;
 
+  // ignore: unintended_html_in_doc_comment
   /// Returns result < 0 when [a] < [b], result == 0 when [a] == [b], result > 0
   /// when [a] > [b].
   static int _sort(Element a, Element b) {
@@ -3883,7 +3884,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// argument of [updateChild] is retrieved from that list using the index that
   /// the currently processed `child` corresponds to in the `newWidgets` list
   /// (`newWidgets` and `slots` must have the same length). If `slots` is null,
-  /// an [IndexedSlot<Element>] is used as the value for the `newSlot` argument.
+  /// an `IndexedSlot<Element>` is used as the value for the `newSlot` argument.
   /// In that case, [IndexedSlot.index] is set to the index that the currently
   /// processed `child` corresponds to in the `newWidgets` list and
   /// [IndexedSlot.value] is set to the [Element] of the previous widget in that
@@ -3907,7 +3908,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// has changed and its [RenderObject] needs to move to come before e2's
   /// [RenderObject]. In order to trigger this move, a new [slot] value needs to
   /// be assigned to its [Element] whenever its index in its
-  /// parent's child list changes. Using an [IndexedSlot<Element>] achieves
+  /// parent's child list changes. Using an `IndexedSlot<Element>` achieves
   /// exactly that and also ensures that the underlying parent [RenderObject]
   /// knows where a child needs to move to in a linked list by providing its new
   /// previous sibling.
@@ -6804,7 +6805,7 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
 ///
 /// This element subclass can be used for [RenderObjectWidget]s whose
 /// [RenderObject]s use the [ContainerRenderObjectMixin] mixin with a parent data
-/// type that implements [ContainerParentDataMixin<RenderObject>]. Such widgets
+/// type that implements `ContainerParentDataMixin<RenderObject>`. Such widgets
 /// are expected to inherit from [MultiChildRenderObjectWidget].
 ///
 /// See also:
@@ -7070,7 +7071,7 @@ class IndexedSlot<T extends Element?> {
   int get hashCode => Object.hash(index, value);
 }
 
-/// Used as a placeholder in [List<Element>] objects when the actual
+/// Used as a placeholder in `List<Element>` objects when the actual
 /// elements are not yet determined.
 class _NullElement extends Element {
   _NullElement() : super(const _NullWidget());

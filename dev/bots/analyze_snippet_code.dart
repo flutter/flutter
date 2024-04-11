@@ -381,7 +381,7 @@ class _SnippetChecker {
   /// The optional `dartUiLocation` argument indicates the location of the
   /// `dart:ui` code to be analyzed along with the framework code. If not
   /// supplied, the default location of the `dart:ui` code in the Flutter
-  /// repository is used (i.e. "<flutter repo>/bin/cache/pkg/sky_engine/lib/ui").
+  /// repository is used (i.e. `<flutter repo>/bin/cache/pkg/sky_engine/lib/ui`).
   _SnippetChecker(
     this._flutterPackages, {
     String? tempDirectory,

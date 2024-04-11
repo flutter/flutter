@@ -329,7 +329,7 @@ class AnimationController extends Animation<double>
   /// [AnimationController.unbounded] constructor.
   final AnimationBehavior animationBehavior;
 
-  /// Returns an [Animation<double>] for this animation controller, so that a
+  /// Returns an `Animation<double>` for this animation controller, so that a
   /// pointer to this object can be passed around without allowing users of that
   /// pointer to mutate the [AnimationController] state.
   Animation<double> get view => this;

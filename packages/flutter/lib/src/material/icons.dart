@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/widgets.dart';
 
 // ignore_for_file: non_constant_identifier_names
+// ignore_for_file: unintended_html_in_doc_comment
 
 /// A set of platform-adaptive Material Design icons.
 ///

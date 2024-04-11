@@ -64,7 +64,7 @@ class PerformanceOverlay extends LeafRenderObjectWidget {
   /// 0 disables all capture.
   ///
   /// Captured traces are placed on your device in the application documents
-  /// directory in this form "trace_<collection_time>.skp". These can
+  /// directory in this form "trace_&lt;collection_time&gt;.skp". These can
   /// be viewed in the Skia debugger.
   ///
   /// Notes:

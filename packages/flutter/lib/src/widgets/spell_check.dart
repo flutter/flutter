@@ -12,7 +12,7 @@ import 'editable_text.dart' show EditableTextContextMenuBuilder;
 /// Controls how spell check is performed for text input.
 ///
 /// This configuration determines the [SpellCheckService] used to fetch the
-/// [List<SuggestionSpan>] spell check results and the [TextStyle] used to
+/// `List<SuggestionSpan>` spell check results and the [TextStyle] used to
 /// mark misspelled words within text input.
 @immutable
 class SpellCheckConfiguration {

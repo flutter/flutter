@@ -11,7 +11,7 @@ import 'system_channels.dart';
 /// replacements for this range.
 ///
 /// For example, one [SuggestionSpan] of the
-/// [List<SuggestionSpan>] suggestions of the [SpellCheckResults] corresponding
+/// `List<SuggestionSpan>` suggestions of the [SpellCheckResults] corresponding
 /// to "Hello, wrold!" may be:
 /// ```dart
 /// SuggestionSpan suggestionSpan =

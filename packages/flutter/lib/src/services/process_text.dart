@@ -61,8 +61,9 @@ abstract class ProcessTextService {
 /// and send requests to activate these text actions.
 ///
 /// This is currently only supported on Android and it requires adding the
-/// following '<queries>' element to the Android manifest file:
+/// following `<queries>` element to the Android manifest file:
 ///
+/// ```xml
 /// <manifest ...>
 ///     <application ...>
 ///       ...
@@ -79,11 +80,12 @@ abstract class ProcessTextService {
 ///         </intent>
 ///     </queries>
 /// </manifest>
+/// ```
 ///
-/// The '<queries>' element is part of the Android manifest file generated when
+/// The `<queries>` element is part of the Android manifest file generated when
 /// running the 'flutter create' command.
 ///
-/// If the '<queries>' element is not found, `queryTextActions()` will return an
+/// If the `<queries>` element is not found, `queryTextActions()` will return an
 /// empty list of `ProcessTextAction`.
 ///
 /// See also:

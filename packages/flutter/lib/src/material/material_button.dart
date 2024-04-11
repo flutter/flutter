@@ -132,7 +132,7 @@ class MaterialButton extends StatelessWidget {
   /// The default text color depends on the button theme's text theme,
   /// [ButtonThemeData.textTheme].
   ///
-  /// If [textColor] is a [MaterialStateProperty<Color>], [disabledTextColor]
+  /// If [textColor] is a `MaterialStateProperty<Color>`, [disabledTextColor]
   /// will be ignored.
   ///
   /// See also:
@@ -150,7 +150,7 @@ class MaterialButton extends StatelessWidget {
   /// The default value is the theme's disabled color,
   /// [ThemeData.disabledColor].
   ///
-  /// If [textColor] is a [MaterialStateProperty<Color>], [disabledTextColor]
+  /// If [textColor] is a `MaterialStateProperty<Color>`, [disabledTextColor]
   /// will be ignored.
   ///
   /// See also:

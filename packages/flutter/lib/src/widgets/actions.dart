@@ -724,7 +724,7 @@ class Actions extends StatefulWidget {
   final ActionDispatcher? dispatcher;
 
   /// {@template flutter.widgets.actions.actions}
-  /// A map of [Intent] keys to [Action<Intent>] objects that defines which
+  /// A map of [Intent] keys to `Action<Intent>` objects that defines which
   /// actions this widget knows about.
   ///
   /// For performance reasons, it is recommended that a pre-built map is

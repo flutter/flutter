@@ -14,7 +14,7 @@ const double _kOnAxisDelta = 2.0;
 
 /// A [Tween] that interpolates an [Offset] along a circular arc.
 ///
-/// This class specializes the interpolation of [Tween<Offset>] so that instead
+/// This class specializes the interpolation of `Tween<Offset>` so that instead
 /// of a straight line, the intermediate points follow the arc of a circle in a
 /// manner consistent with Material Design principles.
 ///
@@ -227,7 +227,7 @@ T _maxBy<T>(Iterable<T> input, _KeyFunc<T> keyFunc) {
 /// A [Tween] that interpolates a [Rect] by having its opposite corners follow
 /// circular arcs.
 ///
-/// This class specializes the interpolation of [Tween<Rect>] so that instead of
+/// This class specializes the interpolation of `Tween<Rect>` so that instead of
 /// growing or shrinking linearly, opposite corners of the rectangle follow arcs
 /// in a manner consistent with Material Design principles.
 ///

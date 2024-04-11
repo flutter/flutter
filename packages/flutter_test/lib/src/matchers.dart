@@ -426,7 +426,7 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 // late Future<ByteData> someFont;
 // late WidgetTester tester;
 
-/// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches the
+/// Asserts that a [Finder], `Future<ui.Image>`, or [ui.Image] matches the
 /// golden image file identified by [key], with an optional [version] number.
 ///
 /// For the case of a [Finder], the [Finder] must match exactly one widget and
@@ -554,7 +554,7 @@ AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
   throw ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
 }
 
-/// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches a
+/// Asserts that a [Finder], `Future<ui.Image>`, or [ui.Image] matches a
 /// reference image identified by [image].
 ///
 /// For the case of a [Finder], the [Finder] must match exactly one widget and
@@ -1406,17 +1406,17 @@ class _HasGoodToStringDeep extends Matcher {
 /// sets of value for which a metric space is defined.
 typedef DistanceFunction<T> = num Function(T a, T b);
 
-/// The type of a union of instances of [DistanceFunction<T>] for various types
+/// The type of a union of instances of `DistanceFunction<T>` for various types
 /// T.
 ///
-/// This type is used to describe a collection of [DistanceFunction<T>]
+/// This type is used to describe a collection of `DistanceFunction<T>`
 /// functions which have (potentially) unrelated argument types. Since the
 /// argument types of the functions may be unrelated, their type is declared as
 /// `Never`, which is the bottom type in dart to which all other types can be
 /// assigned to.
 ///
 /// Calling an instance of this type must either be done dynamically, or by
-/// first casting it to a [DistanceFunction<T>] for some concrete T.
+/// first casting it to a `DistanceFunction<T>` for some concrete T.
 typedef AnyDistanceFunction = num Function(Never a, Never b);
 
 const Map<Type, AnyDistanceFunction> _kStandardDistanceFunctions = <Type, AnyDistanceFunction>{

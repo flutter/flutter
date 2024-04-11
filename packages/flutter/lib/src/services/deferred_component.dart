@@ -33,7 +33,7 @@ abstract final class DeferredComponent {
   /// Requests that an assets-only deferred component identified by the [componentName]
   /// be downloaded and installed.
   ///
-  /// This method returns a Future<void> that will complete when the feature is
+  /// This method returns a `Future<void>` that will complete when the feature is
   /// installed and any assets are ready to be used. When an error occurs, the
   /// future will complete with an error.
   ///

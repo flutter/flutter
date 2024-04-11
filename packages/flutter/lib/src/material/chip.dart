@@ -83,7 +83,7 @@ abstract interface class ChipAttributes {
   /// This only has an effect on widgets that respect the [DefaultTextStyle],
   /// such as [Text].
   ///
-  /// If [TextStyle.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
+  /// If [TextStyle.color] is a `MaterialStateProperty<Color>`, [MaterialStateProperty.resolve]
   /// is used for the following [MaterialState]s:
   ///
   ///  * [MaterialState.disabled].

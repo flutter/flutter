@@ -514,7 +514,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   /// been started interactively. If this method is called while the refresh
   /// callback is running, it quietly does nothing.
   ///
-  /// Creating the [RefreshIndicator] with a [GlobalKey<RefreshIndicatorState>]
+  /// Creating the [RefreshIndicator] with a `GlobalKey<RefreshIndicatorState>`
   /// makes it possible to refer to the [RefreshIndicatorState].
   ///
   /// The future returned from this method completes when the

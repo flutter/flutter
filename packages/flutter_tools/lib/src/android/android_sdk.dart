@@ -346,7 +346,7 @@ class AndroidSdk {
   /// 3. If the environment variable `ANDROID_NDK_PATH` is defined, use that.
   /// 4. If the environment variable `ANDROID_NDK_ROOT` is defined, use that.
   /// 5. Look for the default install location inside the Android SDK:
-  ///    [directory]/ndk/\<version\>/. If multiple versions exist, use the
+  ///    [directory]/ndk/\&lt;version\&gt;/. If multiple versions exist, use the
   ///    newest.
   String? getNdkBinaryPath(
     String binaryName, {

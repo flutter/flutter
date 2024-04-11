@@ -7,7 +7,7 @@ import 'package:flutter/painting.dart';
 
 /// An interpolation between two fractional offsets.
 ///
-/// This class specializes the interpolation of [Tween<FractionalOffset>] to be
+/// This class specializes the interpolation of `Tween<FractionalOffset>` to be
 /// appropriate for fractional offsets.
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
@@ -29,7 +29,7 @@ class FractionalOffsetTween extends Tween<FractionalOffset?> {
 
 /// An interpolation between two alignments.
 ///
-/// This class specializes the interpolation of [Tween<Alignment>] to be
+/// This class specializes the interpolation of `Tween<Alignment>` to be
 /// appropriate for alignments.
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
@@ -52,7 +52,7 @@ class AlignmentTween extends Tween<Alignment> {
 
 /// An interpolation between two [AlignmentGeometry].
 ///
-/// This class specializes the interpolation of [Tween<AlignmentGeometry>]
+/// This class specializes the interpolation of `Tween<AlignmentGeometry>`
 /// to be appropriate for alignments.
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.

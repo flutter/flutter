@@ -190,7 +190,7 @@ class Hero extends StatefulWidget {
   /// route to the destination route.
   ///
   /// A hero flight begins with the destination hero's [child] aligned with the
-  /// starting hero's child. The [Tween<Rect>] returned by this callback is used
+  /// starting hero's child. The `Tween<Rect>` returned by this callback is used
   /// to compute the hero's bounds as the flight animation's value goes from 0.0
   /// to 1.0.
   ///
@@ -795,7 +795,7 @@ class HeroController extends NavigatorObserver {
   /// Creates a hero controller with the given [RectTween] constructor if any.
   ///
   /// The [createRectTween] argument is optional. If null, the controller uses a
-  /// linear [Tween<Rect>].
+  /// linear `Tween<Rect>`.
   HeroController({ this.createRectTween }) {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435

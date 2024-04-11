@@ -545,8 +545,8 @@ class MaterialApp extends StatefulWidget {
   /// Delegates that produce [WidgetsLocalizations] and [MaterialLocalizations]
   /// are included automatically. Apps can provide their own versions of these
   /// localizations by creating implementations of
-  /// [LocalizationsDelegate<WidgetsLocalizations>] or
-  /// [LocalizationsDelegate<MaterialLocalizations>] whose load methods return
+  /// `LocalizationsDelegate<WidgetsLocalizations>` or
+  /// `LocalizationsDelegate<MaterialLocalizations>` whose load methods return
   /// custom versions of [WidgetsLocalizations] or [MaterialLocalizations].
   ///
   /// For example: to add support to [MaterialLocalizations] for a locale it

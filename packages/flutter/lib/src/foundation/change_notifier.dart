@@ -78,7 +78,7 @@ abstract class Listenable {
 
 /// An interface for subclasses of [Listenable] that expose a [value].
 ///
-/// This interface is implemented by [ValueNotifier<T>] and [Animation<T>], and
+/// This interface is implemented by `ValueNotifier<T>` and `Animation<T>`, and
 /// allows other APIs to accept either of those implementations interchangeably.
 ///
 /// See also:

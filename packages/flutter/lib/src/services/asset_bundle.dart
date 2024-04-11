@@ -59,7 +59,7 @@ abstract class AssetBundle {
   /// The returned [ByteData] can be converted to a [Uint8List] (a list of bytes)
   /// using [Uint8List.sublistView]. Lists of bytes can be used with APIs that
   /// accept [Uint8List] objects, such as [decodeImageFromList], as well as any
-  /// API that accepts a [List<int>], such as [File.writeAsBytes] or
+  /// API that accepts a `List<int>`, such as [File.writeAsBytes] or
   /// [Utf8Codec.decode] (accessible via [utf8]).
   Future<ByteData> load(String key);
 

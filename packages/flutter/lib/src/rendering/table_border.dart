@@ -126,7 +126,7 @@ class TableBorder {
   /// equivalent to `this`), and other values meaning that the object should be
   /// multiplied by `t`. Negative values are treated like zero.
   ///
-  /// Values for `t` are usually obtained from an [Animation<double>], such as
+  /// Values for `t` are usually obtained from an `Animation<double>`, such as
   /// an [AnimationController].
   ///
   /// See also:

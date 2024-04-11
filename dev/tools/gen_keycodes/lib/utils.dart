@@ -162,12 +162,12 @@ void zipStrict<T1, T2>(Iterable<T1> list1, Iterable<T2> list2, void Function(T1,
   }
 }
 
-/// Read a Map<String, String> out of its string representation in JSON.
+/// Read a `Map<String, String>` out of its string representation in JSON.
 Map<String, String> parseMapOfString(String jsonString) {
   return (json.decode(jsonString) as Map<String, dynamic>).cast<String, String>();
 }
 
-/// Read a Map<String, List<String>> out of its string representation in JSON.
+/// Read a `Map<String, List<String>>` out of its string representation in JSON.
 Map<String, List<String>> parseMapOfListOfString(String jsonString) {
   final Map<String, List<dynamic>> dynamicMap = (json.decode(jsonString) as Map<String, dynamic>).cast<String, List<dynamic>>();
   return dynamicMap.map<String, List<String>>((String key, List<dynamic> value) {

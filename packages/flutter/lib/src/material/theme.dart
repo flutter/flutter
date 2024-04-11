@@ -166,7 +166,7 @@ class _InheritedTheme extends InheritedTheme {
 
 /// An interpolation between two [ThemeData]s.
 ///
-/// This class specializes the interpolation of [Tween<ThemeData>] to call the
+/// This class specializes the interpolation of `Tween<ThemeData>` to call the
 /// [ThemeData.lerp] method.
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
