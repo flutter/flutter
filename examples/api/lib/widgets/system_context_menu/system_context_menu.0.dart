@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// Flutter code sample for [SystemContextMenu].
@@ -35,8 +34,7 @@ class SystemContextMenuBasicExample extends StatelessWidget {
     return TextField(
       contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
         // If supported, show the system context menu.
-        if (defaultTargetPlatform == TargetPlatform.iOS
-          && (MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false)) {
+        if (SystemContextMenu.isSupported(context)) {
           return SystemContextMenu.editableText(
             editableTextState: editableTextState,
           );

@@ -12,19 +12,21 @@ import 'framework.dart';
 import 'media_query.dart';
 import 'text_selection_toolbar_anchors.dart';
 
-// TODO(justinmc): Enforce that this must be tied to a text input connection?
 /// Displays the system context menu on top of the Flutter view.
 ///
 /// Currently, only supports iOS and displays nothing on other platforms.
 ///
 /// The context menu is the menu that appears, for example, when doing text
 /// selection. Flutter typically draws this menu itself, but this class deals
-/// with the platform-rendered context menu.
+/// with the platform-rendered context menu instead.
 ///
 /// There can only be one system context menu visible at a time. Building this
 /// widget when the system context menu is already visible will hide the old one
 /// and display this one. A system context menu that is hidden is informed via
 /// [onSystemHide].
+///
+/// To check if the current device supports showing the system context menu,
+/// call [isSupported].
 ///
 /// {@tool dartpad}
 /// This example shows how to create a [TextField] that uses the system context
@@ -85,18 +87,20 @@ class SystemContextMenu extends StatefulWidget {
   /// to be hidden.
   final VoidCallback? onSystemHide;
 
+  /// Whether the current device supports showing the system context menu.
+  ///
+  /// Currently, this is only supported on newer versions of iOS.
+  static bool isSupported(BuildContext context) {
+    return defaultTargetPlatform == TargetPlatform.iOS
+        && (MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false);
+  }
+
   @override
   State<SystemContextMenu> createState() => _SystemContextMenuState();
 }
 
 class _SystemContextMenuState extends State<SystemContextMenu> {
   late final SystemContextMenuController _systemContextMenuController;
-
-  /// Whether showing the system context menu is supported by the platform.
-  bool get _isSupported {
-    return defaultTargetPlatform == TargetPlatform.iOS
-        && (MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false);
-  }
 
   @override
   void initState() {
@@ -123,7 +127,7 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
 
   @override
   Widget build(BuildContext context) {
-    assert(_isSupported);
+    assert(SystemContextMenu.isSupported(context));
     return const SizedBox.shrink();
   }
 }

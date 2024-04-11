@@ -1929,9 +1929,6 @@ class TextInput {
         ));
       case 'TextInputClient.onConnectionClosed':
         _currentConnection!._client.connectionClosed();
-      // TODO(justinmc): Should this be separate from TextInput? Currently, these
-      // context menus must be part of an input field, but in the long term,
-      // maybe not.
       // Called when the system dismisses the system context menu, such as when
       // the user taps outside the menu. Not called when Flutter shows a new
       // system context menu while an old one is still visible.
