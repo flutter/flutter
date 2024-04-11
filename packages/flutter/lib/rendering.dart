@@ -33,6 +33,7 @@ export 'package:vector_math/vector_math_64.dart' show Matrix4;
 export 'src/rendering/animated_size.dart';
 export 'src/rendering/binding.dart';
 export 'src/rendering/box.dart';
+export 'src/rendering/copy_interceptor.dart';
 export 'src/rendering/custom_layout.dart';
 export 'src/rendering/custom_paint.dart';
 export 'src/rendering/debug.dart';
