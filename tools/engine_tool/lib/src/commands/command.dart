@@ -16,13 +16,17 @@ abstract base class CommandBase extends Command<int> {
   CommandBase({
     required this.environment,
     this.verbose = false,
-  });
+    int? usageLineLength,
+  }) : argParser = ArgParser(usageLineLength: usageLineLength);
 
   /// The host system environment.
   final Environment environment;
 
   /// Whether verbose logging is enabled.
   final bool verbose;
+
+  @override
+  final ArgParser argParser;
 }
 
 /// Adds the -c (--config) option to the parser.
