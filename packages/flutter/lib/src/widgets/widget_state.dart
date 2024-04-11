@@ -424,7 +424,7 @@ class _WidgetStateBorderSide extends WidgetStateBorderSide {
 ///  * [ShapeBorder] the base class for shape outlines.
 ///  * [MaterialStateOutlinedBorder], the Material specific version of
 ///    `WidgetStateOutlinedBorder`.
-abstract class WidgetStateOutlinedBorder extends OutlinedBorder implements WidgetStateProperty<OutlinedBorder?> {
+abstract class WidgetStateOutlinedBorder extends LinearBorder implements WidgetStateProperty<OutlinedBorder?> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const WidgetStateOutlinedBorder();
@@ -434,6 +434,32 @@ abstract class WidgetStateOutlinedBorder extends OutlinedBorder implements Widge
   /// or theme.
   @override
   OutlinedBorder? resolve(Set<WidgetState> states);
+
+  /// Creates a [WidgetStateOutlinedBorder] from a [WidgetPropertyResolver<OutlinedBorder?>]
+  /// callback function.
+  ///
+  /// If used as a regular [OutlinedBorder], the border resolved in the default state (the
+  /// empty set of states) will be used.
+  static WidgetStateOutlinedBorder resolveWith(WidgetPropertyResolver<OutlinedBorder?> callback) =>
+      _WidgetStateOutlinedBorder(callback);
+}
+
+/// A [WidgetStateOutlinedBorder] created from a [WidgetPropertyResolver<OutlinedBorder>]
+/// callback alone.
+///
+/// If used as a regular [OutlinedBorder], the shape resolved in the default state will
+/// be used.
+///
+/// Used by [MaterialStateOutlinedBorder.resolveWith].
+class _WidgetStateOutlinedBorder extends WidgetStateOutlinedBorder {
+  const _WidgetStateOutlinedBorder(this._resolve);
+
+  final WidgetPropertyResolver<OutlinedBorder?> _resolve;
+
+  @override
+  OutlinedBorder? resolve(Set<WidgetState> states) {
+    return _resolve(states);
+  }
 }
 
 /// Defines a [TextStyle] that is also a [WidgetStateProperty].
