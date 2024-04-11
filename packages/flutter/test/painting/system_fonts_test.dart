@@ -190,9 +190,7 @@ void main() {
     expect(element.dirty, isTrue);
   }, skip: isBrowser);  // TODO(yjbanov): cupertino does not work on the Web yet: https://github.com/flutter/flutter/issues/41920
 
-  testWidgets('RangeSlider relayout upon system fonts changes',
-  experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
-  (WidgetTester tester) async {
+  testWidgets('RangeSlider relayout upon system fonts changes more than once', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
