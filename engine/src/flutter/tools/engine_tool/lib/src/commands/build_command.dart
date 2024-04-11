@@ -16,6 +16,7 @@ final class BuildCommand extends CommandBase {
     required super.environment,
     required Map<String, BuilderConfig> configs,
     super.verbose = false,
+    super.usageLineLength,
   }) {
     builds = runnableBuilds(environment, configs, verbose);
     debugCheckBuilds(builds);

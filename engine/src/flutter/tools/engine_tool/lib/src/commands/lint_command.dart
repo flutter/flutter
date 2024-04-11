@@ -41,6 +41,7 @@ final class LintCommand extends CommandBase {
   /// Constructs the 'lint' command.
   LintCommand({
     required super.environment,
+    super.usageLineLength,
   }) {
     final String engineFlutterPath = environment.engine.flutterDir.path;
     _linters[Linter.dart] = _LinterDescription(

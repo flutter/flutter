@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert' as convert;
 
 import 'package:engine_build_configs/engine_build_configs.dart';
@@ -405,6 +406,38 @@ void main() {
       );
     } finally {
       testEnv.cleanup();
+    }
+  });
+
+  test('et help build line length is not too big', () async {
+    final List<String> prints = <String>[];
+    await runZoned(
+      () async {
+        final TestEnvironment testEnv = TestEnvironment.withTestEngine(
+          cannedProcesses: cannedProcesses,
+        );
+        try {
+          final ToolCommandRunner runner = ToolCommandRunner(
+            environment: testEnv.environment,
+            configs: configs,
+            verbose: true,
+          );
+          final int result = await runner.run(<String>[
+            'help', 'build',
+          ]);
+          expect(result, equals(0));
+        } finally {
+          testEnv.cleanup();
+        }
+      },
+      zoneSpecification: ZoneSpecification(
+        print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+          prints.addAll(line.split('\n'));
+        },
+      ),
+    );
+    for (final String line in prints) {
+      expect(line.length, lessThanOrEqualTo(100));
     }
   });
 }
