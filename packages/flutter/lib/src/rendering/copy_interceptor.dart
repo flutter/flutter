@@ -19,6 +19,9 @@ abstract class CopyInterceptor {
   /// Creates a [CopyInterceptor] that uses the given [intercept] callback.
   const factory CopyInterceptor.inline(CopyInterceptorCallback intercept) = _InlineCopyInterceptor;
 
+  /// A [CopyInterceptor] that joins selections with an empty string.
+  static const CopyInterceptor none = CopyInterceptor.separator('');
+
   /// A [CopyInterceptor] that joins selections with a newline character.
   static const CopyInterceptor newline = CopyInterceptor.separator('\n');
 

@@ -2039,7 +2039,7 @@ void main() {
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
 
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-      expect(clipboardData['text'], 'w are you?Good, and you?Fine, ');
+      expect(clipboardData['text'], 'w are you?\nGood, and you?\nFine, ');
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
 
     testWidgets('can copy a selection and insert separator', (WidgetTester tester) async {
@@ -2300,7 +2300,7 @@ void main() {
       // Send a keyboard copy..
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-      expect(clipboardData['text'], 'w are you?Good, and you?Fine');
+      expect(clipboardData['text'], 'w are you?\nGood, and you?\nFine');
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }),
       skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
@@ -2347,7 +2347,7 @@ void main() {
       // keyboard copy.
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-      expect(clipboardData['text'], 'How are you?Good, and you?Fine,');
+      expect(clipboardData['text'], 'How are you?\nGood, and you?\nFine,');
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }),
       skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
@@ -2636,7 +2636,7 @@ void main() {
         // Send a keyboard copy..
         await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
         final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-        expect(clipboardData['text'], 'w are you?Fine');
+        expect(clipboardData['text'], 'w are you?\nFine');
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }),
       skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
@@ -2679,7 +2679,7 @@ void main() {
         // Send a keyboard copy..
         await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, meta: true));
         final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-        expect(clipboardData['text'], 'w are you?Fine');
+        expect(clipboardData['text'], 'w are you?\nFine');
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
       skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
@@ -4142,7 +4142,7 @@ void main() {
     expect(paragraph2.selections[0].start, 0);
     expect(paragraph2.selections[0].end, 8);
     expect(content, isNotNull);
-    expect(content!.plainText, 'w are you?Good, an');
+    expect(content!.plainText, 'w are you?\nGood, an');
 
     await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true));
     await tester.pump();
@@ -4156,7 +4156,7 @@ void main() {
     expect(paragraph3.selections[0].start, 0);
     expect(paragraph3.selections[0].end, 9);
     expect(content, isNotNull);
-    expect(content!.plainText, 'w are you?Good, and you?Fine, tha');
+    expect(content!.plainText, 'w are you?\nGood, and you?\nFine, tha');
 
     await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true));
     await tester.pump();
@@ -4170,7 +4170,7 @@ void main() {
     expect(paragraph3.selections[0].start, 0);
     expect(paragraph3.selections[0].end, 16);
     expect(content, isNotNull);
-    expect(content!.plainText, 'w are you?Good, and you?Fine, thank you.');
+    expect(content!.plainText, 'w are you?\nGood, and you?\nFine, thank you.');
 
     await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true));
     await tester.pump();
@@ -4182,7 +4182,7 @@ void main() {
     expect(paragraph2.selections[0].end, 8);
     expect(paragraph3.selections.length, 1);
     expect(content, isNotNull);
-    expect(content!.plainText, 'w are you?Good, an');
+    expect(content!.plainText, 'w are you?\nGood, an');
 
     await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true));
     await tester.pump();
@@ -4266,6 +4266,7 @@ void main() {
         home: SelectableRegion(
           focusNode: focusNode,
           selectionControls: materialTextSelectionControls,
+          copyInterceptor: CopyInterceptor.none,
           child: Scaffold(
             body: Center(
               child: Text.rich(
