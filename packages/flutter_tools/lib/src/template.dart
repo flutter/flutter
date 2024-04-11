@@ -191,6 +191,7 @@ class Template {
     Map<String, Object?> context, {
     bool overwriteExisting = true,
     bool printStatusWhenWriting = true,
+    List<String> excludedPaths = const <String>[],
   }) {
     try {
       destination.createSync(recursive: true);
@@ -285,6 +286,10 @@ class Template {
       }
 
       if (!implementationTests && absoluteSourcePath.contains(testTemplateExtension)) {
+        return;
+      }
+
+      if (excludedPaths.contains(relativeDestinationPath)) {
         return;
       }
 

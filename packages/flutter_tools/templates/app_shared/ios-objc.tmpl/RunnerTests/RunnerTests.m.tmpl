@@ -3,6 +3,10 @@
 #import <XCTest/XCTest.h>
 {{#withPlatformChannelPluginHook}}
 
+{{#withSwiftPackageManager}}
+// If your plugin is Swift Package Manager compatible and has been explicitly set to "type: .dynamic", you will need to add your plugin as a dependency of RunnerTests.
+{{/withSwiftPackageManager}}
+
 @import {{pluginProjectName}};
 
 // This demonstrates a simple unit test of the Objective-C portion of this plugin's implementation.

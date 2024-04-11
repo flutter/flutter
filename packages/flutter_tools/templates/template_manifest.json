@@ -364,6 +364,16 @@
         "templates/xcode/ios/custom_application_bundle/Runner.xcodeproj.tmpl/project.xcworkspace/contents.xcworkspacedata",
         "templates/xcode/ios/custom_application_bundle/Runner.xcodeproj.tmpl/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
         "templates/xcode/ios/custom_application_bundle/Runner.xcodeproj.tmpl/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings",
-        "templates/xcode/ios/custom_application_bundle/Runner.xcodeproj.tmpl/xcshareddata/xcschemes/Runner.xcscheme.tmpl"
+        "templates/xcode/ios/custom_application_bundle/Runner.xcodeproj.tmpl/xcshareddata/xcschemes/Runner.xcscheme.tmpl",
+
+        "templates/plugin_swift_package_manager/ios-objc.tmpl/projectName.tmpl/Sources/projectName.tmpl/include/projectName.tmpl/pluginClass.h.tmpl",
+        "templates/plugin_swift_package_manager/ios-objc.tmpl/projectName.tmpl/Sources/projectName.tmpl/pluginClass.m.tmpl",
+        "templates/plugin_swift_package_manager/ios-objc.tmpl/projectName.tmpl/Package.swift.tmpl",
+        "templates/plugin_swift_package_manager/ios-swift.tmpl/projectName.tmpl/Sources/projectName.tmpl/pluginClass.swift.tmpl",
+        "templates/plugin_swift_package_manager/ios-swift.tmpl/projectName.tmpl/Package.swift.tmpl",
+        "templates/plugin_swift_package_manager/ios.tmpl/projectName.tmpl/Sources/projectName.tmpl/Resources/.gitkeep",
+        "templates/plugin_swift_package_manager/macos.tmpl/projectName.tmpl/Sources/projectName.tmpl/Resources/.gitkeep",
+        "templates/plugin_swift_package_manager/macos.tmpl/projectName.tmpl/Sources/projectName.tmpl/pluginClass.swift.tmpl",
+        "templates/plugin_swift_package_manager/macos.tmpl/projectName.tmpl/Package.swift.tmpl"
     ]
 }

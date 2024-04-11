@@ -351,6 +351,7 @@ abstract class CreateBase extends FlutterCommand {
     String? kotlinVersion,
     String? gradleVersion,
     bool withPlatformChannelPluginHook = false,
+    bool withSwiftPackageManager = false,
     bool withFfiPluginHook = false,
     bool withFfiPackage = false,
     bool withEmptyMain = false,
@@ -404,6 +405,7 @@ abstract class CreateBase extends FlutterCommand {
       'withFfiPackage': withFfiPackage,
       'withFfiPluginHook': withFfiPluginHook,
       'withPlatformChannelPluginHook': withPlatformChannelPluginHook,
+      'withSwiftPackageManager': withSwiftPackageManager,
       'withPluginHook': withFfiPluginHook || withFfiPackage || withPlatformChannelPluginHook,
       'withEmptyMain': withEmptyMain,
       'androidLanguage': androidLanguage,
@@ -471,6 +473,7 @@ abstract class CreateBase extends FlutterCommand {
     Map<String, Object?> context, {
     bool overwrite = false,
     bool printStatusWhenWriting = true,
+    List<String> excludedPaths = const <String>[],
   }) async {
     final Template template = await Template.merged(
       names,
@@ -485,6 +488,7 @@ abstract class CreateBase extends FlutterCommand {
       context,
       overwriteExisting: overwrite,
       printStatusWhenWriting: printStatusWhenWriting,
+      excludedPaths: excludedPaths,
     );
   }
 

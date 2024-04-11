@@ -324,6 +324,7 @@ class CreateCommand extends CreateBase {
       projectDescription: stringArg('description'),
       flutterRoot: flutterRoot,
       withPlatformChannelPluginHook: generateMethodChannelsPlugin,
+      withSwiftPackageManager: featureFlags.isSwiftPackageManagerEnabled,
       withFfiPluginHook: generateFfiPlugin,
       withFfiPackage: generateFfiPackage,
       withEmptyMain: emptyArgument,
@@ -603,12 +604,31 @@ Your $application code is in $relativeAppMain.
         ? stringArg('description')
         : 'A new Flutter plugin project.';
     templateContext['description'] = description;
+
+    final String? projectName = templateContext['projectName'] as String?;
+    final List<String> templates = <String>['plugin', 'plugin_shared'];
+    final List<String> excluded = <String>[];
+    if ((templateContext['ios'] == true || templateContext['macos'] == true) && featureFlags.isSwiftPackageManagerEnabled) {
+      templates.add('plugin_swift_package_manager');
+      templateContext['swiftLibraryName'] = projectName?.replaceAll('_', '-');
+
+      // Exclude CocoaPod files from "plugin" template
+      excluded.addAll(<String>[
+        'ios-objc.tmpl/Classes/pluginClass.h.tmpl',
+        'ios-objc.tmpl/Classes/pluginClass.m.tmpl',
+        'ios-swift.tmpl/Classes/pluginClass.swift.tmpl',
+        'ios.tmpl/Assets/.gitkeep',
+        'macos.tmpl/Classes/pluginClass.swift.tmpl',
+      ]);
+    }
+
     generatedCount += await renderMerged(
-      <String>['plugin', 'plugin_shared'],
+      templates,
       directory,
       templateContext,
       overwrite: overwrite,
       printStatusWhenWriting: printStatusWhenWriting,
+      excludedPaths: excluded,
     );
 
     final FlutterProject project = FlutterProject.fromDirectory(directory);
@@ -618,7 +638,6 @@ Your $application code is in $relativeAppMain.
         project: project, requireAndroidSdk: false);
     }
 
-    final String? projectName = templateContext['projectName'] as String?;
     final String organization = templateContext['organization']! as String; // Required to make the context.
     final String? androidPluginIdentifier = templateContext['androidIdentifier'] as String?;
     final String exampleProjectName = '${projectName}_example';
