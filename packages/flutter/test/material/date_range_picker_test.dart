@@ -135,18 +135,18 @@ void main() {
         find.widgetWithIcon(IconButton, Icons.edit_outlined),
       );
       expect(saveButtonBottomLeft.dx, moreOrLessEquals(711.6, epsilon: 1e-5));
-      if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
         expect(saveButtonBottomLeft.dy, helpTextTopLeft.dy);
       }
       expect(entryButtonBottomLeft.dx, saveButtonBottomLeft.dx - 48.0);
-      if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
         expect(entryButtonBottomLeft.dy, helpTextTopLeft.dy);
       }
 
       // Test help text position.
       final Offset helpTextBottomLeft = tester.getBottomLeft(helpText);
       expect(helpTextBottomLeft.dx, 72.0);
-      if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
         expect(helpTextBottomLeft.dy, closeButtonBottomRight.dy + 20.0);
       }
 
