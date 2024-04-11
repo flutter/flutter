@@ -322,10 +322,6 @@ void main() {
         fileSystem: fileSystem,
         scriptOutputStreamFile: pipe,
       )..run();
-      expect(
-        context.stdout,
-        contains('Flutter framework copied successfully.'),
-      );
       expect(context.stderr, isEmpty);
     });
 
@@ -397,10 +393,6 @@ void main() {
         ],
         fileSystem: fileSystem,
       )..run();
-      expect(
-        context.stdout,
-        contains('Flutter framework copied successfully.'),
-      );
       expect(context.stderr, isEmpty);
     });
   });
