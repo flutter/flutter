@@ -9,10 +9,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button_style.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
-import 'icon_button.dart';
 import 'icon_button_theme.dart';
 import 'input_border.dart';
 import 'material.dart';
@@ -2245,9 +2245,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
               ),
               child: IconButtonTheme(
                 data: IconButtonThemeData(
-                  style: IconButton.styleFrom(
-                    foregroundColor: _getPrefixIconColor(inputDecorationTheme, iconButtonTheme, defaults),
-                    iconSize: iconSize,
+                  style: ButtonStyle(
+                    foregroundColor: WidgetStatePropertyAll<Color>(
+                      _getPrefixIconColor(inputDecorationTheme, iconButtonTheme, defaults),
+                    ),
+                    iconSize: WidgetStatePropertyAll<double>(iconSize),
                   ).merge(iconButtonTheme.style),
                 ),
                 child: Semantics(
@@ -2280,9 +2282,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                 ),
                 child: IconButtonTheme(
                   data: IconButtonThemeData(
-                    style: IconButton.styleFrom(
-                      foregroundColor: _getSuffixIconColor(inputDecorationTheme, iconButtonTheme, defaults),
-                      iconSize: iconSize,
+                    style: ButtonStyle(
+                      foregroundColor: WidgetStatePropertyAll<Color>(
+                        _getSuffixIconColor(inputDecorationTheme, iconButtonTheme, defaults),
+                      ),
+                      iconSize: WidgetStatePropertyAll<double>(iconSize),
                     ).merge(iconButtonTheme.style),
                   ),
                   child: Semantics(
