@@ -105,6 +105,7 @@ class FlatlandConnection final {
   std::vector<zx::event> acquire_fences_;
   std::vector<zx::event> current_present_release_fences_;
   std::vector<zx::event> previous_present_release_fences_;
+  std::string debug_label_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlatlandConnection);
 };
