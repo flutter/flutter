@@ -195,7 +195,6 @@ Future<void> main(List<String> args) async {
   reportSuccessAndExit('${bold}Test successful.$reset');
 }
 
-
 /// Verify the Flutter Engine is the revision in
 /// bin/cache/internal/engine.version.
 Future<void> _validateEngineHash() async {
