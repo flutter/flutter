@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../base/error_handling_io.dart';
 import '../base/fingerprint.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -27,6 +28,7 @@ Future<void> processPodsIfNeeded(
   // Ensure that the plugin list is up to date, since hasPlugins relies on it.
   await refreshPluginsList(
     project,
+    iosPlatform: project.ios.existsSync(),
     macOSPlatform: project.macos.existsSync(),
     forceCocoaPodsOnly: forceCocoaPodsOnly,
   );
@@ -48,10 +50,15 @@ Future<void> processPodsIfNeeded(
     if (!xcodeProject.podfile.existsSync()) {
       await globals.cocoaPods?.setupPodfile(xcodeProject);
     }
+
+    // Delete Swift Package Manager manifest to invalidate fingerprinter
+    ErrorHandlingFileSystem.deleteIfExists(
+      xcodeProject.flutterPluginSwiftPackageManifest,
+    );
   }
 
-  // If the Xcode project, Podfile, or generated xcconfig have changed since
-  // last run, pods should be updated.
+  // If the Xcode project, Podfile, generated plugin Swift Package, or podhelper
+  // have changed since last run, pods should be updated.
   final Fingerprinter fingerprinter = Fingerprinter(
     fingerprintPath: globals.fs.path.join(buildDirectory, 'pod_inputs.fingerprint'),
     paths: <String>[

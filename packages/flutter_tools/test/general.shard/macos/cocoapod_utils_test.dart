@@ -199,6 +199,7 @@ void main() {
             'plugin_two'
           ]);
           flutterProject.usesSwiftPackageManager = true;
+          flutterProject.ios.flutterPluginSwiftPackageManifest.createSync(recursive: true);
 
           await processPodsIfNeeded(
             flutterProject.ios,
@@ -212,6 +213,10 @@ void main() {
             logger.warningText,
             'Swift Package Manager does not yet support this command. '
             'CocoaPods will be used instead.\n');
+          expect(
+            flutterProject.ios.flutterPluginSwiftPackageManifest.existsSync(),
+            isFalse,
+          );
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
@@ -347,6 +352,7 @@ void main() {
             'plugin_two'
           ]);
           flutterProject.usesSwiftPackageManager = true;
+          flutterProject.macos.flutterPluginSwiftPackageManifest.createSync(recursive: true);
 
           await processPodsIfNeeded(
             flutterProject.macos,
@@ -360,6 +366,10 @@ void main() {
             logger.warningText,
             'Swift Package Manager does not yet support this command. '
             'CocoaPods will be used instead.\n');
+          expect(
+            flutterProject.macos.flutterPluginSwiftPackageManifest.existsSync(),
+            isFalse,
+          );
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
