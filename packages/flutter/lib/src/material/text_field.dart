@@ -836,22 +836,9 @@ class TextField extends StatefulWidget {
   final UndoHistoryController? undoController;
 
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
-    // TODO(justinmc): Don't forget CupertinoTextField. Anything else like TextFormField?
-    if (defaultTargetPlatform == TargetPlatform.iOS &&
-        (MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false)) {
-      return SystemContextMenu.editableText(
-        editableTextState: editableTextState,
-      );
-    }
     return AdaptiveTextSelectionToolbar.editableText(
       editableTextState: editableTextState,
     );
-    /*
-    // TODO(justinmc): Replace the above with this, because it should be "flagged off" by default.
-    return AdaptiveTextSelectionToolbar.editableText(
-      editableTextState: editableTextState,
-    );
-    */
   }
 
   /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}

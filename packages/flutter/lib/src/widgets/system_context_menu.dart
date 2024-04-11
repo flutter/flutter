@@ -26,6 +26,14 @@ import 'text_selection_toolbar_anchors.dart';
 /// and display this one. A system context menu that is hidden is informed via
 /// [onSystemHide].
 ///
+/// {@tool dartpad}
+/// This example shows how to create a [TextField] that uses the system context
+/// menu where supported and does not show a system notification when the user
+/// presses the "Paste" button.
+///
+/// ** See code in examples/api/lib/widgets/system_context_menu.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [SystemContextMenuController], which directly controls the hiding and
