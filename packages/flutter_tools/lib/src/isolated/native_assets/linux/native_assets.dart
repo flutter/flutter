@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    hide BuildMode;
+import 'package:native_assets_builder/native_assets_builder.dart'
+    hide NativeAssetsBuildRunner;
+import 'package:native_assets_cli/native_assets_cli_internal.dart';
 
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
@@ -27,11 +28,11 @@ Future<Uri?> dryRunNativeAssetsLinux({
     projectUri: projectUri,
     flutterTester: flutterTester,
     fileSystem: fileSystem,
-    os: OS.linux,
+    os: OSImpl.linux,
   );
 }
 
-Future<Iterable<Asset>> dryRunNativeAssetsLinuxInternal(
+Future<Iterable<KernelAsset>> dryRunNativeAssetsLinuxInternal(
   FileSystem fileSystem,
   Uri projectUri,
   bool flutterTester,
@@ -42,7 +43,7 @@ Future<Iterable<Asset>> dryRunNativeAssetsLinuxInternal(
     projectUri,
     flutterTester,
     buildRunner,
-    OS.linux,
+    OSImpl.linux,
   );
 }
 
@@ -69,7 +70,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsLinux({
 /// Flutter expects `clang++` to be on the path on Linux hosts.
 ///
 /// Search for the accompanying `clang`, `ar`, and `ld`.
-Future<CCompilerConfig> cCompilerConfigLinux() async {
+Future<CCompilerConfigImpl> cCompilerConfigLinux() async {
   const String kClangPlusPlusBinary = 'clang++';
   const String kClangBinary = 'clang';
   const String kArBinary = 'llvm-ar';
@@ -91,9 +92,9 @@ Future<CCompilerConfig> cCompilerConfigLinux() async {
     }
     binaryPaths[binary] = binaryFile.uri;
   }
-  return CCompilerConfig(
-    ar: binaryPaths[kArBinary],
-    cc: binaryPaths[kClangBinary],
-    ld: binaryPaths[kLdBinary],
+  return CCompilerConfigImpl(
+    archiver: binaryPaths[kArBinary],
+    compiler: binaryPaths[kClangBinary],
+    linker: binaryPaths[kLdBinary],
   );
 }

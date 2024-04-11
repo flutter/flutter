@@ -144,6 +144,7 @@ Widget chipWithOptionalDeleteButton({
   TextDirection textDirection = TextDirection.ltr,
   String? chipTooltip,
   String? deleteButtonTooltipMessage,
+  double? size,
   VoidCallback? onPressed = doNothing,
   ThemeData? themeData,
 }) {
@@ -156,7 +157,11 @@ Widget chipWithOptionalDeleteButton({
           tooltip: chipTooltip,
           onPressed: onPressed,
           onDeleted: deletable ? doNothing : null,
-          deleteIcon: Icon(Icons.close, key: deleteButtonKey),
+          deleteIcon: Icon(
+            key: deleteButtonKey,
+            size: size,
+            Icons.close,
+          ),
           deleteButtonTooltipMessage: deleteButtonTooltipMessage,
           label: Text(
             deletable
@@ -657,7 +662,7 @@ void main() {
     expect(tester.getSize(find.byType(Text)).width, closeTo(40.4, 0.01));
     expect(tester.getSize(find.byType(Text)).height, equals(14.0));
     expect(tester.getSize(find.byType(Chip)), const Size(800.0, 48.0));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Material2 - Chip responds to materialTapTargetSize', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -703,7 +708,7 @@ void main() {
     expect(tester.getSize(find.byType(Chip).first).height, equals(48.0));
     expect(tester.getSize(find.byType(Chip).last).width, closeTo(48.1, 0.01));
     expect(tester.getSize(find.byType(Chip).last).height, equals(38.0));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Delete button tap target is the right proportion of the chip', (WidgetTester tester) async {
     final UniqueKey deleteKey = UniqueKey();
@@ -957,7 +962,7 @@ void main() {
     expect(tester.getSize(find.byType(Chip).first).height, equals(78.0));
     expect(tester.getSize(find.byType(Chip).last).width, closeTo(138.59, 0.01));
     expect(tester.getSize(find.byType(Chip).last).height, equals(48.0));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Material2 - Labels can be non-text widgets', (WidgetTester tester) async {
     final Key keyA = GlobalKey();
@@ -1012,7 +1017,7 @@ void main() {
     expect(tester.getSize(find.byType(Chip).first).width, moreOrLessEquals(138.5, epsilon: 0.1));
     expect(tester.getSize(find.byType(Chip).first).height, equals(48.0));
     expect(tester.getSize(find.byType(Chip).last), const Size(60.0, 48.0));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Avatars can be non-circle avatar widgets', (WidgetTester tester) async {
     final Key keyA = GlobalKey();
@@ -1376,7 +1381,7 @@ void main() {
     expect(tester.getSize(find.byType(RawChip)).height, equals(48.0));
     expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(17.0, 14.0)));
     expect(find.byKey(avatarKey), findsNothing);
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Material2 - Delete button drawer works as expected on RawChip', (WidgetTester tester) async {
     const Key labelKey = Key('label');
@@ -1623,7 +1628,7 @@ void main() {
     expect(tester.getSize(find.byType(RawChip)).height, equals(48.0));
     expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(17.0, 14.0)));
     expect(find.byKey(deleteButtonKey), findsNothing);
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Delete button takes up at most half of the chip', (WidgetTester tester) async {
     final UniqueKey chipKey = UniqueKey();
@@ -1852,6 +1857,7 @@ void main() {
         labelKey: labelKey,
         deleteButtonKey: deleteButtonKey,
         deletable: true,
+        size: 18.0,
       ),
     );
 
@@ -1957,6 +1963,7 @@ void main() {
         onPressed: null,
         deleteButtonKey: deleteButtonKey,
         deletable: true,
+        size: 18.0,
       ),
     );
 
@@ -2276,7 +2283,7 @@ void main() {
     // Simulate a tap on the label to select the chip.
     await tester.tap(find.byKey(labelKey));
     expect(selected, equals(true));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(kIsWeb && isCanvasKit ? 3 : 1));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(kIsWeb && isSkiaWeb ? 3 : 1));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     expect(getSelectProgress(tester), moreOrLessEquals(0.002, epsilon: 0.01));
@@ -2295,7 +2302,7 @@ void main() {
     // Simulate another tap on the label to deselect the chip.
     await tester.tap(find.byKey(labelKey));
     expect(selected, equals(false));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(kIsWeb && isCanvasKit ? 3 : 1));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(kIsWeb && isSkiaWeb ? 3 : 1));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 20));
     expect(getSelectProgress(tester), moreOrLessEquals(0.875, epsilon: 0.01));
@@ -2309,7 +2316,7 @@ void main() {
     expect(getSelectProgress(tester), equals(0.0));
     expect(getAvatarDrawerProgress(tester), equals(1.0));
     expect(getDeleteDrawerProgress(tester), equals(0.0));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Material2 - Selection without avatar works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
@@ -2428,7 +2435,7 @@ void main() {
     // Simulate a tap on the label to select the chip.
     await tester.tap(find.byKey(labelKey));
     expect(selected, equals(true));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(kIsWeb && isCanvasKit ? 3 : 1));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(kIsWeb && isSkiaWeb ? 3 : 1));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     expect(getSelectProgress(tester), moreOrLessEquals(0.002, epsilon: 0.01));
@@ -2448,7 +2455,7 @@ void main() {
     // Simulate another tap on the label to deselect the chip.
     await tester.tap(find.byKey(labelKey));
     expect(selected, equals(false));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(kIsWeb && isCanvasKit ? 3 : 1));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(kIsWeb && isSkiaWeb ? 3 : 1));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 20));
     expect(getSelectProgress(tester), moreOrLessEquals(0.875, epsilon: 0.01));
@@ -2462,7 +2469,7 @@ void main() {
     expect(getSelectProgress(tester), equals(0.0));
     expect(getAvatarDrawerProgress(tester), equals(0.0));
     expect(getDeleteDrawerProgress(tester), equals(0.0));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Material2 - Activation works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
@@ -2562,7 +2569,7 @@ void main() {
 
     await tester.tap(find.byKey(labelKey));
     expect(selected, equals(true));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(kIsWeb && isCanvasKit ? 3 : 1));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(kIsWeb && isSkiaWeb ? 3 : 1));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     expect(getSelectProgress(tester), moreOrLessEquals(0.002, epsilon: 0.01));
@@ -2577,7 +2584,7 @@ void main() {
     expect(getAvatarDrawerProgress(tester), equals(1.0));
     expect(getDeleteDrawerProgress(tester), equals(0.0));
     await tester.pumpAndSettle();
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Chip uses ThemeData chip theme if present', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(chipTheme: const ChipThemeData(backgroundColor: Color(0xffff0000)));
@@ -2748,7 +2755,7 @@ void main() {
 
     expect(tester.getSize(find.byKey(key2)).width, moreOrLessEquals(90.4, epsilon: 0.1));
     expect(tester.getSize(find.byKey(key2)).height, equals(38.0));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData(
@@ -4649,7 +4656,7 @@ void main() {
     box = tester.getRect(find.byKey(key));
     expect(box.size.width, moreOrLessEquals(130.4, epsilon: 0.1));
     expect(box.size.height, equals(24.0 + 16.0));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Chip delete button tooltip is disabled if deleteButtonTooltipMessage is empty', (WidgetTester tester) async {
     final UniqueKey deleteButtonKey = UniqueKey();
@@ -5088,7 +5095,7 @@ void main() {
                       });
                     },
                     child: Text('${isEnabled ? 'Disable' : 'Enable'} Chip'),
-                  )
+                  ),
                 ],
               );
             },
@@ -5119,12 +5126,12 @@ void main() {
           isEnabled: false,
           label: const Text('Label'),
           onDeleted: () { },
-        )
+        ),
       ),
     );
 
     // Delete button should be visible.
-    expectLater(find.byType(RawChip), matchesGoldenFile('raw_chip.disabled.delete_button.png'));
+    await expectLater(find.byType(RawChip), matchesGoldenFile('raw_chip.disabled.delete_button.png'));
   });
 
   testWidgets('Delete button tooltip is not shown on disabled RawChip', (WidgetTester tester) async {
@@ -5134,7 +5141,7 @@ void main() {
           isEnabled: enabled,
           label: const Text('Label'),
           onDeleted: () { },
-        )
+        ),
       );
     }
 
@@ -5155,6 +5162,290 @@ void main() {
 
     // Delete button tooltip should not be visible.
     expect(findTooltipContainer('Delete'), findsNothing);
+  });
+
+  testWidgets('Chip avatar layout constraints can be customized', (WidgetTester tester) async {
+    const double border = 1.0;
+    const double iconSize = 18.0;
+    const double labelPadding = 8.0;
+    const double padding = 8.0;
+    const Size labelSize = Size(100, 100);
+
+    Widget buildChip({BoxConstraints? avatarBoxConstraints}) {
+      return wrapForChip(
+        child: Center(
+          child: Chip(
+            avatarBoxConstraints: avatarBoxConstraints,
+            avatar: const Icon(Icons.favorite),
+            label: Container(
+              width: labelSize.width,
+              height: labelSize.width,
+              color: const Color(0xFFFF0000),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default avatar layout constraints.
+    await tester.pumpWidget(buildChip());
+
+    expect(tester.getSize(find.byType(Chip)).width, equals(234.0));
+    expect(tester.getSize(find.byType(Chip)).height, equals(118.0));
+
+    // Calculate the distance between avatar and chip edges.
+    Offset chipTopLeft = tester.getTopLeft(find.byWidget(getMaterial(tester)));
+    final Offset avatarCenter = tester.getCenter(find.byIcon(Icons.favorite));
+    expect(chipTopLeft.dx, avatarCenter.dx - (labelSize.width / 2) - padding - border);
+    expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between avatar and label.
+    Offset labelTopLeft = tester.getTopLeft(find.byType(Container));
+    expect(labelTopLeft.dx, avatarCenter.dx + (labelSize.width / 2) + labelPadding);
+
+    // Test custom avatar layout constraints.
+    await tester.pumpWidget(buildChip(avatarBoxConstraints: const BoxConstraints.tightForFinite()));
+    await tester.pump();
+
+    expect(tester.getSize(find.byType(Chip)).width, equals(152.0));
+    expect(tester.getSize(find.byType(Chip)).height, equals(118.0));
+
+    // Calculate the distance between avatar and chip edges.
+    chipTopLeft = tester.getTopLeft(find.byWidget(getMaterial(tester)));
+    expect(chipTopLeft.dx, avatarCenter.dx - (iconSize / 2) - padding - border);
+    expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between avatar and label.
+    labelTopLeft = tester.getTopLeft(find.byType(Container));
+    expect(labelTopLeft.dx, avatarCenter.dx + (iconSize / 2) + labelPadding);
+  });
+
+  testWidgets('RawChip avatar layout constraints can be customized', (WidgetTester tester) async {
+    const double border = 1.0;
+    const double iconSize = 18.0;
+    const double labelPadding = 8.0;
+    const double padding = 8.0;
+    const Size labelSize = Size(100, 100);
+
+    Widget buildChip({BoxConstraints? avatarBoxConstraints}) {
+      return wrapForChip(
+        child: Center(
+          child: RawChip(
+            avatarBoxConstraints: avatarBoxConstraints,
+            avatar: const Icon(Icons.favorite),
+            label: Container(
+              width: labelSize.width,
+              height: labelSize.width,
+              color: const Color(0xFFFF0000),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default avatar layout constraints.
+    await tester.pumpWidget(buildChip());
+
+    expect(tester.getSize(find.byType(RawChip)).width, equals(234.0));
+    expect(tester.getSize(find.byType(RawChip)).height, equals(118.0));
+
+    // Calculate the distance between avatar and chip edges.
+    Offset chipTopLeft = tester.getTopLeft(find.byWidget(getMaterial(tester)));
+    final Offset avatarCenter = tester.getCenter(find.byIcon(Icons.favorite));
+    expect(chipTopLeft.dx, avatarCenter.dx - (labelSize.width / 2) - padding - border);
+    expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between avatar and label.
+    Offset labelTopLeft = tester.getTopLeft(find.byType(Container));
+    expect(labelTopLeft.dx, avatarCenter.dx + (labelSize.width / 2) + labelPadding);
+
+    // Test custom avatar layout constraints.
+    await tester.pumpWidget(buildChip(avatarBoxConstraints: const BoxConstraints.tightForFinite()));
+    await tester.pump();
+
+    expect(tester.getSize(find.byType(RawChip)).width, equals(152.0));
+    expect(tester.getSize(find.byType(RawChip)).height, equals(118.0));
+
+    // Calculate the distance between avatar and chip edges.
+    chipTopLeft = tester.getTopLeft(find.byWidget(getMaterial(tester)));
+    expect(chipTopLeft.dx, avatarCenter.dx - (iconSize / 2) - padding - border);
+    expect(chipTopLeft.dy, avatarCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between avatar and label.
+    labelTopLeft = tester.getTopLeft(find.byType(Container));
+    expect(labelTopLeft.dx, avatarCenter.dx + (iconSize / 2) + labelPadding);
+  });
+
+  testWidgets('Chip delete icon layout constraints can be customized', (WidgetTester tester) async {
+    const double border = 1.0;
+    const double iconSize = 18.0;
+    const double labelPadding = 8.0;
+    const double padding = 8.0;
+    const Size labelSize = Size(100, 100);
+
+    Widget buildChip({BoxConstraints? deleteIconBoxConstraints}) {
+      return wrapForChip(
+        child: Center(
+          child: Chip(
+            deleteIconBoxConstraints: deleteIconBoxConstraints,
+            onDeleted: () { },
+            label: Container(
+              width: labelSize.width,
+              height: labelSize.width,
+              color: const Color(0xFFFF0000),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default delete icon layout constraints.
+    await tester.pumpWidget(buildChip());
+
+    expect(tester.getSize(find.byType(Chip)).width, equals(234.0));
+    expect(tester.getSize(find.byType(Chip)).height, equals(118.0));
+
+    // Calculate the distance between delete icon and chip edges.
+    Offset chipTopRight = tester.getTopRight(find.byWidget(getMaterial(tester)));
+    final Offset deleteIconCenter = tester.getCenter(find.byIcon(Icons.cancel));
+    expect(chipTopRight.dx, deleteIconCenter.dx + (labelSize.width / 2) + padding + border);
+    expect(chipTopRight.dy, deleteIconCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between delete icon and label.
+    Offset labelTopRight = tester.getTopRight(find.byType(Container));
+    expect(labelTopRight.dx, deleteIconCenter.dx - (labelSize.width / 2) - labelPadding);
+
+    // Test custom avatar layout constraints.
+    await tester.pumpWidget(buildChip(
+      deleteIconBoxConstraints: const BoxConstraints.tightForFinite(),
+    ));
+    await tester.pump();
+
+    expect(tester.getSize(find.byType(Chip)).width, equals(152.0));
+    expect(tester.getSize(find.byType(Chip)).height, equals(118.0));
+
+    // Calculate the distance between delete icon and chip edges.
+    chipTopRight = tester.getTopRight(find.byWidget(getMaterial(tester)));
+    expect(chipTopRight.dx, deleteIconCenter.dx + (iconSize / 2) + padding + border);
+    expect(chipTopRight.dy, deleteIconCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between delete icon and label.
+    labelTopRight = tester.getTopRight(find.byType(Container));
+    expect(labelTopRight.dx, deleteIconCenter.dx - (iconSize / 2) - labelPadding);
+  });
+
+  testWidgets('RawChip delete icon layout constraints can be customized', (WidgetTester tester) async {
+    const double border = 1.0;
+    const double iconSize = 18.0;
+    const double labelPadding = 8.0;
+    const double padding = 8.0;
+    const Size labelSize = Size(100, 100);
+
+    Widget buildChip({BoxConstraints? deleteIconBoxConstraints}) {
+      return wrapForChip(
+        child: Center(
+          child: RawChip(
+            deleteIconBoxConstraints: deleteIconBoxConstraints,
+            onDeleted: () { },
+            label: Container(
+              width: labelSize.width,
+              height: labelSize.width,
+              color: const Color(0xFFFF0000),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test default delete icon layout constraints.
+    await tester.pumpWidget(buildChip());
+
+    expect(tester.getSize(find.byType(RawChip)).width, equals(234.0));
+    expect(tester.getSize(find.byType(RawChip)).height, equals(118.0));
+
+    // Calculate the distance between delete icon and chip edges.
+    Offset chipTopRight = tester.getTopRight(find.byWidget(getMaterial(tester)));
+    final Offset deleteIconCenter = tester.getCenter(find.byIcon(Icons.cancel));
+    expect(chipTopRight.dx, deleteIconCenter.dx + (labelSize.width / 2) + padding + border);
+    expect(chipTopRight.dy, deleteIconCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between delete icon and label.
+    Offset labelTopRight = tester.getTopRight(find.byType(Container));
+    expect(labelTopRight.dx, deleteIconCenter.dx - (labelSize.width / 2) - labelPadding);
+
+    // Test custom avatar layout constraints.
+    await tester.pumpWidget(buildChip(
+      deleteIconBoxConstraints: const BoxConstraints.tightForFinite(),
+    ));
+    await tester.pump();
+
+    expect(tester.getSize(find.byType(RawChip)).width, equals(152.0));
+    expect(tester.getSize(find.byType(RawChip )).height, equals(118.0));
+
+    // Calculate the distance between delete icon and chip edges.
+    chipTopRight = tester.getTopRight(find.byWidget(getMaterial(tester)));
+    expect(chipTopRight.dx, deleteIconCenter.dx + (iconSize / 2) + padding + border);
+    expect(chipTopRight.dy, deleteIconCenter.dy - (labelSize.width / 2) - padding - border);
+
+    // Calculate the distance between delete icon and label.
+    labelTopRight = tester.getTopRight(find.byType(Container));
+    expect(labelTopRight.dx, deleteIconCenter.dx - (iconSize / 2) - labelPadding);
+  });
+
+  testWidgets('Default delete button InkWell shape', (WidgetTester tester) async {
+    await tester.pumpWidget(wrapForChip(
+      child: Center(
+        child: RawChip(
+          onDeleted: () { },
+          label: const Text('RawChip'),
+        ),
+      ),
+    ));
+
+    final InkWell deleteButtonInkWell = tester.widget<InkWell>(find.ancestor(
+      of: find.byIcon(Icons.cancel),
+      matching: find.byType(InkWell).last,
+    ));
+    expect(deleteButtonInkWell.customBorder, const CircleBorder());
+  });
+
+  testWidgets('Default delete button overlay', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    await tester.pumpWidget(wrapForChip(
+      child: Center(
+        child: RawChip(
+          onDeleted: () { },
+          label: const Text('RawChip'),
+        ),
+      ),
+      theme: theme,
+    ));
+
+    RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, isNot(paints..rect(color: theme.hoverColor)));
+    expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 0));
+
+    // Hover over the delete icon.
+    final Offset centerOfDeleteButton = tester.getCenter(find.byType(Icon));
+    final TestGesture hoverGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await hoverGesture.moveTo(centerOfDeleteButton);
+    addTearDown(hoverGesture.removePointer);
+    await tester.pumpAndSettle();
+
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(color: theme.hoverColor));
+    expect(inkFeatures, paintsExactlyCountTimes(#clipPath, 1));
+
+    const Rect expectedClipRect = Rect.fromLTRB(124.7, 10.0, 142.7, 28.0);
+    final Path expectedClipPath = Path()..addRect(expectedClipRect);
+    expect(
+      inkFeatures,
+      paints..clipPath(pathMatcher: coversSameAreaAs(
+        expectedClipPath,
+        areaToCompare: expectedClipRect.inflate(48.0),
+        sampleSize: 100,
+      )),
+    );
   });
 
   group('Material 2', () {
@@ -5392,6 +5683,27 @@ void main() {
       expect(materialBox, paints..rrect(color: customTheme.disabledColor));
       expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
     });
+  });
+
+  testWidgets('Chip Baseline location', (WidgetTester tester) async {
+    const Text text = Text('A', style: TextStyle(fontSize: 10.0, height: 1.0));
+    await tester.pumpWidget(wrapForChip(child: const Align(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
+        children: <Widget>[
+          text,
+          RawChip(label: text)
+        ],
+      ),
+    )));
+
+    expect(find.text('A'), findsNWidgets(2));
+    // Baseline aligning text.
+    expect(
+      tester.getTopLeft(find.text('A').first).dy,
+      tester.getTopLeft(find.text('A').last).dy,
+    );
   });
 }
 

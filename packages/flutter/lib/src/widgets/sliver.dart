@@ -937,15 +937,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     );
   }
 
-  /// The best available estimate of [childCount], or null if no estimate is available.
-  ///
-  /// This differs from [childCount] in that [childCount] never returns null (and must
-  /// not be accessed if the child count is not yet available, meaning the [createChild]
-  /// method has not been provided an index that does not create a child).
-  ///
-  /// See also:
-  ///
-  ///  * [SliverChildDelegate.estimatedChildCount], to which this getter defers.
+  @override
   int? get estimatedChildCount => (widget as SliverMultiBoxAdaptorWidget).delegate.estimatedChildCount;
 
   @override
@@ -1063,13 +1055,10 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   void debugVisitOnstageChildren(ElementVisitor visitor) {
     _childElements.values.cast<Element>().where((Element child) {
       final SliverMultiBoxAdaptorParentData parentData = child.renderObject!.parentData! as SliverMultiBoxAdaptorParentData;
-      final double itemExtent;
-      switch (renderObject.constraints.axis) {
-        case Axis.horizontal:
-          itemExtent = child.renderObject!.paintBounds.width;
-        case Axis.vertical:
-          itemExtent = child.renderObject!.paintBounds.height;
-      }
+      final double itemExtent = switch (renderObject.constraints.axis) {
+        Axis.horizontal => child.renderObject!.paintBounds.width,
+        Axis.vertical   => child.renderObject!.paintBounds.height,
+      };
 
       return parentData.layoutOffset != null &&
           parentData.layoutOffset! < renderObject.constraints.scrollOffset + renderObject.constraints.remainingPaintExtent &&

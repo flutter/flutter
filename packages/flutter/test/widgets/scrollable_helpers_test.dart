@@ -154,7 +154,6 @@ void main() {
       tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
     );
-  // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
@@ -227,7 +226,6 @@ void main() {
       tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)),
     );
-  // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
@@ -289,7 +287,6 @@ void main() {
       tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 0.0, 50.0, 600.0)),
     );
-  // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Horizontal scrollables are scrolled the correct direction in RTL locales.', (WidgetTester tester) async {
@@ -354,7 +351,6 @@ void main() {
       tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.0)),
     );
-  // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Reversed vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
@@ -431,7 +427,6 @@ void main() {
       tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 550.0, 800.0, 600.0)),
     );
-  // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Reversed horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
@@ -493,7 +488,6 @@ void main() {
       await tester.sendKeyUpEvent(modifierKey);
     }
     await tester.pumpAndSettle();
-  // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Custom scrollables with a center sliver are scrolled when activated via keyboard.', (WidgetTester tester) async {
@@ -566,7 +560,6 @@ void main() {
       tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)),
       equals(const Rect.fromLTRB(0.0, 100.0, 800.0, 200.0)),
     );
-  // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Can scroll using intents only', (WidgetTester tester) async {

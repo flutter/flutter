@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:ffi' show Abi;
 import 'dart:io' as io;
 
 import 'package:crypto/crypto.dart';
@@ -21,6 +22,9 @@ const String _kGoldctlKey = 'GOLDCTL';
 const String _kTestBrowserKey = 'FLUTTER_TEST_BROWSER';
 const String _kWebRendererKey = 'FLUTTER_WEB_RENDERER';
 const String _kImpellerKey = 'FLUTTER_TEST_IMPELLER';
+
+/// Signature of callbacks used to inject [print] replacements.
+typedef LogCallback = void Function(String);
 
 /// Exception thrown when an error is returned from the [SkiaClient].
 class SkiaException implements Exception {
@@ -49,8 +53,11 @@ class SkiaGoldClient {
     this.fs = const LocalFileSystem(),
     this.process = const LocalProcessManager(),
     this.platform = const LocalPlatform(),
+    Abi? abi,
     io.HttpClient? httpClient,
-  }) : httpClient = httpClient ?? io.HttpClient();
+    required this.log,
+  }) : httpClient = httpClient ?? io.HttpClient(),
+       abi = abi ?? Abi.current();
 
   /// The file system to use for storing the local clone of the repository.
   ///
@@ -74,6 +81,11 @@ class SkiaGoldClient {
   /// A client for making Http requests to the Flutter Gold dashboard.
   final io.HttpClient httpClient;
 
+  /// The ABI of the current host platform.
+  ///
+  /// If not overridden for testing, defaults to [Abi.current];
+  final Abi abi;
+
   /// The local [Directory] within the [comparisonRoot] for the current test
   /// context. In this directory, the client will create image and JSON files
   /// for the goldctl tool to use.
@@ -81,6 +93,9 @@ class SkiaGoldClient {
   /// This is informed by the [FlutterGoldenFileComparator] [basedir]. It cannot
   /// be null.
   final Directory workDirectory;
+
+  /// The logging function to use when reporting messages to the console.
+  final LogCallback log;
 
   /// The local [Directory] where the Flutter repository is hosted.
   ///
@@ -372,7 +387,7 @@ class SkiaGoldClient {
   // differences are very small (typically not noticeable to human eye).
   List<String> _getPixelMatchingArguments() {
     // Only use fuzzy pixel matching in the HTML renderer.
-    if (!_isBrowserTest || _isBrowserCanvasKitTest) {
+    if (!_isBrowserTest || _isBrowserSkiaTest) {
       return const <String>[];
     }
 
@@ -428,10 +443,7 @@ class SkiaGoldClient {
         }
         expectation = jsonResponse['digest'] as String?;
       } on FormatException catch (error) {
-        // Ideally we'd use something like package:test's printOnError, but best reliability
-        // in getting logs on CI for now we're just using print.
-        // See also: https://github.com/flutter/flutter/issues/91285
-        print( // ignore: avoid_print
+        log(
           'Formatting error detected requesting expectations from Flutter Gold.\n'
           'error: $error\n'
           'url: $requestForExpectations\n'
@@ -487,8 +499,10 @@ class SkiaGoldClient {
   /// image was rendered on, and for web tests, the browser the image was
   /// rendered on.
   String _getKeysJSON() {
+    final String? webRenderer = _webRendererValue;
     final Map<String, dynamic> keys = <String, dynamic>{
       'Platform' : platform.operatingSystem,
+      'Abi': abi.toString(),
       'CI' : 'luci',
       if (_isImpeller)
         'impeller': 'swiftshader',
@@ -496,8 +510,8 @@ class SkiaGoldClient {
     if (_isBrowserTest) {
       keys['Browser'] = _browserKey;
       keys['Platform'] = '${keys['Platform']}-browser';
-      if (_isBrowserCanvasKitTest) {
-        keys['WebRenderer'] = 'canvaskit';
+      if (webRenderer != null) {
+        keys['WebRenderer'] = webRenderer;
       }
     }
     return json.encode(keys);
@@ -543,8 +557,15 @@ class SkiaGoldClient {
     return platform.environment[_kTestBrowserKey] != null;
   }
 
-  bool get _isBrowserCanvasKitTest {
-    return _isBrowserTest && platform.environment[_kWebRendererKey] == 'canvaskit';
+  bool get _isBrowserSkiaTest {
+    return _isBrowserTest && switch (platform.environment[_kWebRendererKey]) {
+      'canvaskit' || 'skwasm' => true,
+      _ => false,
+    };
+  }
+
+  String? get _webRendererValue {
+    return _isBrowserSkiaTest ? platform.environment[_kWebRendererKey] : null;
   }
 
   bool get _isImpeller {
@@ -560,13 +581,15 @@ class SkiaGoldClient {
   /// the latest positive digest on Flutter Gold with a hex-encoded md5 hash of
   /// the image keys.
   String getTraceID(String testName) {
+    final String? webRenderer = _webRendererValue;
     final Map<String, Object?> keys = <String, Object?>{
       if (_isBrowserTest)
         'Browser' : _browserKey,
-      if (_isBrowserCanvasKitTest)
-        'WebRenderer' : 'canvaskit',
+      if (webRenderer != null)
+        'WebRenderer' : webRenderer,
       'CI' : 'luci',
       'Platform' : platform.operatingSystem,
+      'Abi': abi.toString(),
       'name' : testName,
       'source_type' : 'flutter',
       if (_isImpeller)

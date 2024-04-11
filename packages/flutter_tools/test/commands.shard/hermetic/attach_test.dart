@@ -22,6 +22,7 @@ import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
+import 'package:flutter_tools/src/device_vm_service_discovery_for_attach.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
@@ -157,7 +158,7 @@ void main() {
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
-          analytics: NoOpAnalytics(),
+          analytics: const NoOpAnalytics(),
         ),
       });
 
@@ -204,8 +205,8 @@ void main() {
           processInfo: processInfo,
           fileSystem: testFileSystem,
         )).run(<String>['attach']);
+        await completer.future;
         await Future.wait<void>(<Future<void>>[
-          completer.future,
           fakeLogReader.dispose(),
           loggerSubscription.cancel(),
         ]);
@@ -221,7 +222,7 @@ void main() {
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
-          analytics: NoOpAnalytics(),
+          analytics: const NoOpAnalytics(),
         ),
         Signals: () => FakeSignals(),
       });
@@ -275,8 +276,8 @@ void main() {
           processInfo: processInfo,
           fileSystem: testFileSystem,
         )).run(<String>['attach', '--local-engine-src-path=$localEngineSrc', '--local-engine=$localEngineDir', '--local-engine-host=$localEngineDir']);
+        await completer.future;
         await Future.wait<void>(<Future<void>>[
-          completer.future,
           fakeLogReader.dispose(),
           loggerSubscription.cancel(),
         ]);
@@ -291,7 +292,7 @@ void main() {
           preliminaryMDnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: logger,
           flutterUsage: TestUsage(),
-          analytics: NoOpAnalytics(),
+          analytics: const NoOpAnalytics(),
         ),
         ProcessManager: () => FakeProcessManager.empty(),
       });
@@ -331,12 +332,15 @@ void main() {
         )).run(<String>['attach']);
         await fakeLogReader.dispose();
 
-        expect(portForwarder.devicePort, devicePort);
-        expect(portForwarder.hostPort, hostPort);
-        expect(hotRunnerFactory.devices, hasLength(1));
+        // Listen to the URI before checking port forwarder. Port forwarding
+        // is done as a side effect when generating the uri.
         final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
         final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
         expect(vmServiceUri.toString(), 'http://127.0.0.1:$hostPort/xyz/');
+
+        expect(portForwarder.devicePort, devicePort);
+        expect(portForwarder.hostPort, hostPort);
+        expect(hotRunnerFactory.devices, hasLength(1));
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -361,7 +365,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
-          analytics: NoOpAnalytics(),
+          analytics: const NoOpAnalytics(),
         ),
       });
 
@@ -396,13 +400,15 @@ void main() {
         )).run(<String>['attach']);
         await fakeLogReader.dispose();
 
-        expect(portForwarder.devicePort, null);
-        expect(portForwarder.hostPort, hostPort);
-        expect(hotRunnerFactory.devices, hasLength(1));
-
+        // Listen to the URI before checking port forwarder. Port forwarding
+        // is done as a side effect when generating the uri.
         final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
         final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
         expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
+
+        expect(portForwarder.devicePort, null);
+        expect(portForwarder.hostPort, hostPort);
+        expect(hotRunnerFactory.devices, hasLength(1));
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -432,7 +438,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
-          analytics: NoOpAnalytics(),
+          analytics: const NoOpAnalytics(),
         ),
       });
 
@@ -467,13 +473,15 @@ void main() {
         )).run(<String>['attach', '--debug-port', '123']);
         await fakeLogReader.dispose();
 
-        expect(portForwarder.devicePort, null);
-        expect(portForwarder.hostPort, hostPort);
-        expect(hotRunnerFactory.devices, hasLength(1));
-
+        // Listen to the URI before checking port forwarder. Port forwarding
+        // is done as a side effect when generating the uri.
         final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
         final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
         expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
+
+        expect(portForwarder.devicePort, null);
+        expect(portForwarder.hostPort, hostPort);
+        expect(hotRunnerFactory.devices, hasLength(1));
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -507,7 +515,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
-          analytics: NoOpAnalytics(),
+          analytics: const NoOpAnalytics(),
         ),
       });
 
@@ -542,13 +550,15 @@ void main() {
         )).run(<String>['attach', '--debug-url', 'https://0.0.0.0:123']);
         await fakeLogReader.dispose();
 
-        expect(portForwarder.devicePort, null);
-        expect(portForwarder.hostPort, hostPort);
-        expect(hotRunnerFactory.devices, hasLength(1));
-
+        // Listen to the URI before checking port forwarder. Port forwarding
+        // is done as a side effect when generating the uri.
         final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
         final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
         expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
+
+        expect(portForwarder.devicePort, null);
+        expect(portForwarder.hostPort, hostPort);
+        expect(hotRunnerFactory.devices, hasLength(1));
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -582,7 +592,7 @@ void main() {
           ),
           logger: logger,
           flutterUsage: TestUsage(),
-          analytics: NoOpAnalytics(),
+          analytics: const NoOpAnalytics(),
         ),
       });
 
@@ -1464,6 +1474,24 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   @override
   bool get ephemeral => true;
+
+  @override
+  VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
+    String? appId,
+    String? fuchsiaModule,
+    int? filterDevicePort,
+    int? expectedHostPort,
+    required bool ipv6,
+    required Logger logger,
+  }) =>
+      LogScanningVMServiceDiscoveryForAttach(
+        Future<DeviceLogReader>.value(getLogReader()),
+        portForwarder: portForwarder,
+        devicePort: filterDevicePort,
+        hostPort: expectedHostPort,
+        ipv6: ipv6,
+        logger: logger,
+      );
 }
 
 class FakeIOSDevice extends Fake implements IOSDevice {
@@ -1527,6 +1555,43 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
   @override
   bool get ephemeral => true;
+
+  @override
+  VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
+    String? appId,
+    String? fuchsiaModule,
+    int? filterDevicePort,
+    int? expectedHostPort,
+    required bool ipv6,
+    required Logger logger,
+  }) {
+    final bool compatibleWithProtocolDiscovery = majorSdkVersion < IOSDeviceLogReader.minimumUniversalLoggingSdkVersion &&
+          !isWirelesslyConnected;
+    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
+      device: this,
+      appId: appId,
+      deviceVmservicePort: filterDevicePort,
+      hostVmservicePort: expectedHostPort,
+      usesIpv6: ipv6,
+      useDeviceIPAsHost: isWirelesslyConnected,
+    );
+
+    if (compatibleWithProtocolDiscovery) {
+      return DelegateVMServiceDiscoveryForAttach(<VMServiceDiscoveryForAttach>[
+        mdnsVMServiceDiscoveryForAttach,
+        LogScanningVMServiceDiscoveryForAttach(
+          Future<DeviceLogReader>.value(getLogReader()),
+          portForwarder: portForwarder,
+          devicePort: filterDevicePort,
+          hostPort: expectedHostPort,
+          ipv6: ipv6,
+          logger: logger,
+        ),
+      ]);
+    } else {
+      return mdnsVMServiceDiscoveryForAttach;
+    }
+  }
 }
 
 class FakeMDnsClient extends Fake implements MDnsClient {

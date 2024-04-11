@@ -146,5 +146,6 @@
   "lookUpButtonLabel": "Buscador visual",
   "searchWebButtonLabel": "Buscar en la Web",
   "shareButtonLabel": "Compartir...",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

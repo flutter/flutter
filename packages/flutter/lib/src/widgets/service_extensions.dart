@@ -123,11 +123,11 @@ enum WidgetInspectorServiceExtensions {
   structuredErrors,
 
   /// Name of service extension that, when called, will change the value of
-  /// [WidgetsApp.debugShowWidgetInspectorOverride], which controls whether the
+  /// [WidgetsBinding.debugShowWidgetInspectorOverride], which controls whether the
   /// on-device widget inspector is visible.
   ///
   /// See also:
-  /// * [WidgetsApp.debugShowWidgetInspectorOverride], which is the flag that
+  /// * [WidgetsBinding.debugShowWidgetInspectorOverride], which is the flag that
   ///   this service extension exposes.
   /// * [WidgetInspectorService.initServiceExtensions], where the service
   ///   extension is registered.

@@ -23,25 +23,11 @@ enum RemoteName {
 }
 
 class Remote {
-  const Remote({
-    required RemoteName name,
-    required this.url,
-  })  : _name = name,
-        assert(url != '');
+  const Remote({required RemoteName name, required this.url})
+      : _name = name, assert(url != '');
 
-  factory Remote.mirror(String url) {
-    return Remote(
-      name: RemoteName.mirror,
-      url: url,
-    );
-  }
-
-  factory Remote.upstream(String url) {
-    return Remote(
-      name: RemoteName.upstream,
-      url: url,
-    );
-  }
+  const Remote.mirror(String url) : this(name: RemoteName.mirror, url: url);
+  const Remote.upstream(String url) : this(name: RemoteName.upstream, url: url);
 
   final RemoteName _name;
 

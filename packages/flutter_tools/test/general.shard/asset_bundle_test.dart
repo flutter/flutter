@@ -428,6 +428,73 @@ flutter:
         ),
       );
     });
+
+    testWithoutContext("AssetBundleEntry::content::isModified is true when an asset's transformers change in between builds", () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+
+      fileSystem.file('my-asset.txt').createSync();
+
+      final BufferLogger logger = BufferLogger.test();
+      final FakePlatform platform = FakePlatform();
+      fileSystem.file('.packages').createSync();
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - path: my-asset.txt
+      transformers:
+        - package: my-transformer-one
+''');
+      final ManifestAssetBundle bundle = ManifestAssetBundle(
+        logger: logger,
+        fileSystem: fileSystem,
+        platform: platform,
+        flutterRoot: Cache.defaultFlutterRoot(
+          platform: platform,
+          fileSystem: fileSystem,
+          userMessages: UserMessages(),
+        ),
+      );
+
+      await bundle.build(
+        packagesPath: '.packages',
+        flutterProject: FlutterProject.fromDirectoryTest(
+          fileSystem.currentDirectory,
+        ),
+      );
+
+      expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
+
+      await bundle.build(
+        packagesPath: '.packages',
+        flutterProject: FlutterProject.fromDirectoryTest(
+          fileSystem.currentDirectory,
+        ),
+      );
+
+      expect(bundle.entries['my-asset.txt']!.content.isModified, isFalse);
+
+      fileSystem.file('pubspec.yaml').writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - path: my-asset.txt
+      transformers:
+        - package: my-transformer-one
+        - package: my-transformer-two
+''');
+
+      await bundle.build(
+        packagesPath: '.packages',
+        flutterProject: FlutterProject.fromDirectoryTest(
+          fileSystem.currentDirectory,
+        ),
+      );
+
+      expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
+    });
   });
 
   group('AssetBundle.build (web builds)', () {
@@ -537,9 +604,13 @@ flutter:
     await writeBundle(
       directory,
       const <String, AssetBundleEntry>{},
-      loggerOverride: testLogger,
       targetPlatform: TargetPlatform.android,
       impellerStatus: ImpellerStatus.disabled,
+      processManager: globals.processManager,
+      fileSystem: globals.fs,
+      artifacts: globals.artifacts!,
+      logger: testLogger,
+      projectDir: globals.fs.currentDirectory
     );
 
     expect(testLogger.warningText, contains('Expected Error Text'));
@@ -659,9 +730,13 @@ flutter:
       await writeBundle(
         output,
         bundle.entries,
-        loggerOverride: testLogger,
         targetPlatform: TargetPlatform.android,
         impellerStatus: ImpellerStatus.disabled,
+        processManager: globals.processManager,
+        fileSystem: globals.fs,
+        artifacts: globals.artifacts!,
+        logger: testLogger,
+        projectDir: globals.fs.currentDirectory,
       );
 
     }, overrides: <Type, Generator>{
@@ -707,9 +782,13 @@ flutter:
       await writeBundle(
         output,
         bundle.entries,
-        loggerOverride: testLogger,
         targetPlatform: TargetPlatform.web_javascript,
         impellerStatus: ImpellerStatus.disabled,
+        processManager: globals.processManager,
+        fileSystem: globals.fs,
+        artifacts: globals.artifacts!,
+        logger: testLogger,
+        projectDir: globals.fs.currentDirectory,
       );
 
     }, overrides: <Type, Generator>{
@@ -790,9 +869,13 @@ flutter:
       await writeBundle(
         output,
         bundle.entries,
-        loggerOverride: testLogger,
         targetPlatform: TargetPlatform.web_javascript,
         impellerStatus: ImpellerStatus.disabled,
+        processManager: globals.processManager,
+        fileSystem: globals.fs,
+        artifacts: globals.artifacts!,
+        logger: testLogger,
+        projectDir: globals.fs.currentDirectory,
       );
       expect((globals.processManager as FakeProcessManager).hasRemainingExpectations, false);
     }, overrides: <Type, Generator>{

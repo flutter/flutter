@@ -23,6 +23,7 @@
 #     * SliverAppBar: fix_sliver_app_bar.yaml
 #     * TextTheme: fix_text_theme.yaml
 #     * ThemeData: fix_theme_data.yaml
+#     * WidgetState: fix_widget_state.yaml
 version: 1
 transforms:
   # Changes made in https://github.com/flutter/flutter/pull/15303
@@ -865,6 +866,7 @@ transforms:
   # Changes made in https://github.com/flutter/flutter/pull/111706
   - title: "Migrate to 'trackVisibility'"
     date: 2022-09-15
+    bulkApply: false
     element:
       uris: [ 'material.dart' ]
       field: 'showTrackOnHover'
@@ -876,6 +878,7 @@ transforms:
   # Changes made in https://github.com/flutter/flutter/pull/111706
   - title: "Migrate to 'thumbVisibility'"
     date: 2022-09-15
+    bulkApply: false
     element:
       uris: [ 'material.dart' ]
       constructor: ''
@@ -888,6 +891,7 @@ transforms:
   # Changes made in https://github.com/flutter/flutter/pull/111706
   - title: "Migrate to 'trackVisibility'"
     date: 2022-09-15
+    bulkApply: false
     element:
       uris: [ 'material.dart' ]
       method: 'copyWith'

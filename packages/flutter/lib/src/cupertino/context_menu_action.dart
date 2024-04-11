@@ -89,6 +89,7 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
   TextStyle get _textStyle {
     if (widget.isDefaultAction) {
       return _kActionSheetActionStyle.copyWith(
+        color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
         fontWeight: FontWeight.w600,
       );
     }

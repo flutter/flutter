@@ -381,7 +381,7 @@ class ButtonThemeData with Diagnosticable {
   /// minimum size, internal padding, and shape.
   ///
   /// Despite the name, this property is not the [TextTheme] whose
-  /// [TextTheme.button] is used as the button text's [TextStyle].
+  /// [TextTheme.labelLarge] is used as the button text's [TextStyle].
   ButtonTextTheme getTextTheme(MaterialButton button) => button.textTheme ?? textTheme;
 
   /// The foreground color of the [button]'s text and icon when
@@ -617,21 +617,11 @@ class ButtonThemeData with Diagnosticable {
   /// [getTextTheme] is [ButtonTextTheme.primary], 16.0 on the left and right
   /// otherwise.
   EdgeInsetsGeometry getPadding(MaterialButton button) {
-    if (button.padding != null) {
-      return button.padding!;
-    }
-
-    if (_padding != null) {
-      return _padding;
-    }
-
-    switch (getTextTheme(button)) {
-      case ButtonTextTheme.normal:
-      case ButtonTextTheme.accent:
-        return const EdgeInsets.symmetric(horizontal: 16.0);
-      case ButtonTextTheme.primary:
-        return const EdgeInsets.symmetric(horizontal: 24.0);
-    }
+    return button.padding ?? _padding ?? switch (getTextTheme(button)) {
+      ButtonTextTheme.normal  => const EdgeInsets.symmetric(horizontal: 16.0),
+      ButtonTextTheme.accent  => const EdgeInsets.symmetric(horizontal: 16.0),
+      ButtonTextTheme.primary => const EdgeInsets.symmetric(horizontal: 24.0),
+    };
   }
 
   /// The shape of the [button]'s [Material].

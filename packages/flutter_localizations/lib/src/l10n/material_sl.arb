@@ -151,5 +151,6 @@
   "lookUpButtonLabel": "Pogled gor",
   "searchWebButtonLabel": "Iskanje v spletu",
   "shareButtonLabel": "Deli …",
-  "clearButtonTooltip": "Clear text"
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:unified_analytics/unified_analytics.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
@@ -24,7 +23,6 @@ import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
 import 'platform_plugins.dart';
 import 'project_validator_result.dart';
-import 'reporting/reporting.dart';
 import 'template.dart';
 import 'xcode_project.dart';
 
@@ -463,7 +461,7 @@ class AndroidProject extends FlutterProjectPlatform {
   /// Pattern used to find the assignment of the "group" property in Gradle.
   /// Expected example: `group "dev.flutter.plugin"`
   /// Regex is used in both Groovy and Kotlin Gradle files.
-  static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'"](.*)[\'"]\\s*\$');
+  static final RegExp _groupPattern = RegExp('^\\s*group\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
 
   /// The Gradle root directory of the Android host app. This is the directory
   /// containing the `app/` subdirectory and the `settings.gradle` file that
@@ -538,7 +536,7 @@ class AndroidProject extends FlutterProjectPlatform {
 
         // This case allows for flutter run/build to work for modules. It does
         // not guarantee the Flutter Gradle Plugin is applied.
-        final bool managed = line.contains("def flutterPluginVersion = 'managed'");
+        final bool managed = line.contains(RegExp('def flutterPluginVersion = [\'"]managed[\'"]'));
         if (fileBasedApply || declarativeApply || managed) {
           return true;
         }
@@ -806,47 +804,23 @@ $javaGradleCompatUrl
     if (result.version != AndroidEmbeddingVersion.v1) {
       return;
     }
-    globals.printStatus(
-'''
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Warning
-──────────────────────────────────────────────────────────────────────────────
-Your Flutter application is created using an older version of the Android
-embedding. It is being deprecated in favor of Android embedding v2. To migrate
-your project, follow the steps at:
-
-https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-The detected reason was:
-
-  ${result.reason}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-''');
-    if (deprecationBehavior == DeprecationBehavior.ignore) {
-      BuildEvent('deprecated-v1-android-embedding-ignored', type: 'gradle', flutterUsage: globals.flutterUsage).send();
-      globals.analytics.send(
-        Event.flutterBuildInfo(
-        label: 'deprecated-v1-android-embedding-ignored',
-        buildType: 'gradle',
-      ));
-
-    } else { // DeprecationBehavior.exit
-      globals.analytics.send(
-        Event.flutterBuildInfo(
-        label: 'deprecated-v1-android-embedding-failed',
-        buildType: 'gradle',
-      ));
-
-      throwToolExit(
-        'Build failed due to use of deprecated Android v1 embedding.',
-        exitCode: 1,
-      );
-    }
+    // The v1 android embedding has been deleted.
+    throwToolExit(
+      'Build failed due to use of deleted Android v1 embedding.',
+      exitCode: 1,
+    );
   }
 
   AndroidEmbeddingVersion getEmbeddingVersion() {
-    return computeEmbeddingVersion().version;
+    final AndroidEmbeddingVersion androidEmbeddingVersion = computeEmbeddingVersion().version;
+    if (androidEmbeddingVersion == AndroidEmbeddingVersion.v1) {
+      throwToolExit(
+        'Build failed due to use of deleted Android v1 embedding.',
+        exitCode: 1,
+      );
+    }
+
+    return androidEmbeddingVersion;
   }
 
   AndroidEmbeddingVersionResult computeEmbeddingVersion() {

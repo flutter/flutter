@@ -450,6 +450,9 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Kies jaar';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -941,6 +944,9 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'ዓመት ይምረጡ';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -1436,6 +1442,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'اختيار العام';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => r'تم اختيار $selectedRowCount عنصر';
 
   @override
@@ -1927,6 +1936,9 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'বছৰ বাছনি কৰক';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -2422,6 +2434,9 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'İl seçin';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -2913,6 +2928,9 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Выберыце год';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'Выбрана $selectedRowCount элементы';
@@ -3408,6 +3426,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Избиране на година';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -3899,6 +3920,9 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'বছর বেছে নিন';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -4394,6 +4418,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Odaberite godinu';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => r'Odabrane su $selectedRowCount stavke';
 
   @override
@@ -4885,6 +4912,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Selecciona un any';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -5380,6 +5410,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Vyberte rok';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => r'Jsou vybrány $selectedRowCount položky';
 
   @override
@@ -5871,6 +5904,9 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Dewiswch flwyddyn';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r"Mae $selectedRowCount eitem wedi'u dewis";
@@ -6366,6 +6402,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Vælg år';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -6857,6 +6896,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Jahr auswählen';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -7416,6 +7458,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Επιλογή έτους';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -7907,6 +7952,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Select year';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -9218,6 +9266,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Seleccionar año';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -13576,6 +13627,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Valige aasta';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -14069,6 +14123,9 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Hautatu urtea';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -14199,7 +14256,7 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'برش';
 
   @override
-  String get dateHelpText => 'روز/ماه/سال';
+  String get dateHelpText => 'رر/م‌م/س‌س‌س‌س';
 
   @override
   String get dateInputLabel => 'تاریخ را وارد کنید';
@@ -14560,6 +14617,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'انتخاب سال';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -15055,6 +15115,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Valitse vuosi';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -15546,6 +15609,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Pumili ng taon';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -16041,6 +16107,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Sélectionner une année';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -16163,9 +16232,6 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
 
   @override
   String get keyboardKeyInsert => 'Insér.';
-
-  @override
-  String get keyboardKeyEscape => 'Échapp.';
 
   @override
   String get keyboardKeyEject => 'Éject.';
@@ -16694,6 +16760,9 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Seleccionar ano';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -17185,6 +17254,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Jahr auswählen';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -17680,6 +17752,9 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'વર્ષ પસંદ કરો';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -18171,6 +18246,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'בחירת שנה';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -18666,6 +18744,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'साल चुनें';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -19157,6 +19238,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Odaberite godinu';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'Odabrane su $selectedRowCount stavke';
@@ -19652,6 +19736,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Válassza ki az évet';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -20143,6 +20230,9 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Ընտրել տարին';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'Ընտրված է $selectedRowCount օբյեկտ';
@@ -20638,6 +20728,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Pilih tahun';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -21129,6 +21222,9 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Velja ár';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -21624,6 +21720,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Seleziona anno';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -22115,6 +22214,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => '年を選択';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -22610,6 +22712,9 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'აირჩიეთ წელი';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -23101,6 +23206,9 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Жылды таңдау';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -23596,6 +23704,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'ជ្រើសរើសឆ្នាំ';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -24087,6 +24198,9 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => '\u{cb5}\u{cb0}\u{ccd}\u{cb7}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -24582,6 +24696,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => '연도 선택';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -25073,6 +25190,9 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Жылды тандоо';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -25568,6 +25688,9 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'ເລືອກ​ປີ';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -26059,6 +26182,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Pasirinkite metus';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'Pasirinkti $selectedRowCount elementai';
@@ -26554,6 +26680,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Atlasiet gadu';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -27045,6 +27174,9 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Изберете година';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -27540,6 +27672,9 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'വർഷം തിരഞ്ഞെടുക്കുക';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -28031,6 +28166,9 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Жил сонгох';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -28526,6 +28664,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'वर्ष निवडा';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -29017,6 +29158,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Pilih tahun';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -29512,6 +29656,9 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'ခုနှစ် ရွေးရန်';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -30003,6 +30150,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Velg året';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -30498,6 +30648,9 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'वर्ष छान्नुहोस्';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -30989,6 +31142,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Jaar selecteren';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -31484,6 +31640,9 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Velg året';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -31977,6 +32136,9 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'ବର୍ଷ ଚୟନ କରନ୍ତୁ';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -32062,7 +32224,7 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'$applicationName ਬਾਰੇ';
 
   @override
-  String get alertDialogLabel => 'ਸੁਚੇਤਨਾ';
+  String get alertDialogLabel => 'ਅਲਰਟ';
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
@@ -32468,6 +32630,9 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'ਸਾਲ ਚੁਣੋ';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -32963,6 +33128,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Wybierz rok';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => r'$selectedRowCount wybrane elementy';
 
   @override
@@ -33454,6 +33622,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Select year';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -33949,6 +34120,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Selecione o ano';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -34118,13 +34292,13 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
   String get dateOutOfRangeLabel => 'Fora do intervalo.';
 
   @override
-  String get dateRangeEndDateSemanticLabelRaw => r'Data de conclusão: $fullDate';
+  String get dateRangeEndDateSemanticLabelRaw => r'Data de fim: $fullDate';
 
   @override
   String get dateRangeStartDateSemanticLabelRaw => r'Data de início: $fullDate';
 
   @override
-  String get dateRangeEndLabel => 'Data de conclusão';
+  String get dateRangeEndLabel => 'Data de fim';
 
   @override
   String get inputDateModeButtonLabel => 'Mude para a introdução';
@@ -34620,6 +34794,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Selectați anul';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => r'$selectedRowCount articole selectate';
 
   @override
@@ -35111,6 +35288,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Выберите год';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'Выбрано $selectedRowCount объекта';
@@ -35606,6 +35786,9 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'වර්ෂය තෝරන්න';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -36097,6 +36280,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Vyberte rok';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'$selectedRowCount vybraté položky';
@@ -36592,6 +36778,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Izberite leto';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => r'Izbrani so $selectedRowCount elementi';
 
   @override
@@ -37085,6 +37274,9 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Zgjidh vitin';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -37576,6 +37768,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Изаберите годину';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'Изабране су $selectedRowCount ставке';
@@ -38418,6 +38613,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Välj år';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -38909,6 +39107,9 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Chagua mwaka';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -39404,6 +39605,9 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'ஆண்டைத் தேர்ந்தெடுக்கவும்';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -39895,6 +40099,9 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'సంవత్సరాన్ని ఎంచుకోండి';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -40390,6 +40597,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'เลือกปี';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -40881,6 +41091,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Pumili ng taon';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -41376,6 +41589,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Yılı seçin';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -41867,6 +42083,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Виберіть рік';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => r'Вибрано $selectedRowCount елементи';
@@ -42362,6 +42581,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'سال منتخب کریں';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -42853,6 +43075,9 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Yilni tanlang';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -43348,6 +43573,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get selectYearSemanticsLabel => 'Chọn năm';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String? get selectedRowCountTitleFew => null;
 
   @override
@@ -43832,13 +44060,16 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get searchFieldLabel => '搜索';
 
   @override
-  String get searchWebButtonLabel => '在网络上搜索';
+  String get searchWebButtonLabel => '搜索';
 
   @override
   String get selectAllButtonLabel => '全选';
 
   @override
   String get selectYearSemanticsLabel => '选择年份';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
@@ -43859,7 +44090,7 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
-  String get shareButtonLabel => '分享…';
+  String get shareButtonLabel => '共享…';
 
   @override
   String get showAccountsLabel => '显示账号';
@@ -44242,7 +44473,7 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
   String get searchFieldLabel => '搜尋';
 
   @override
-  String get searchWebButtonLabel => '搜尋網頁';
+  String get searchWebButtonLabel => '搜尋';
 
   @override
   String get selectAllButtonLabel => '全部選取';
@@ -44255,6 +44486,9 @@ class MaterialLocalizationZhHant extends MaterialLocalizationZh {
 
   @override
   String get selectedRowCountTitleOther => r'已選取 $selectedRowCount 個項目';
+
+  @override
+  String get shareButtonLabel => '分享…';
 
   @override
   String get showAccountsLabel => '顯示帳戶';
@@ -44329,9 +44563,6 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
     required super.decimalFormat,
     required super.twoDigitZeroPaddedFormat,
   });
-
-  @override
-  String get searchWebButtonLabel => '在網路上搜尋';
 
   @override
   String get scanTextButtonLabel => '掃描文字';
@@ -44873,6 +45104,9 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 
   @override
   String get selectYearSemanticsLabel => 'Khetha unyaka';
+
+  @override
+  String get selectedDateLabel => 'Selected';
 
   @override
   String? get selectedRowCountTitleFew => null;
