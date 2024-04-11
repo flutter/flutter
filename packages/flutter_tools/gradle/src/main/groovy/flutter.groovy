@@ -53,7 +53,7 @@ class FlutterExtension {
      *
      * See https://developer.android.com/guide/topics/manifest/uses-sdk-element.
      */
-    public final int targetSdkVersion = 33
+    public final int targetSdkVersion = 34
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
@@ -78,7 +78,7 @@ class FlutterExtension {
     public String flutterVersionName = null
 
     /** Returns flutterVersionCode as an integer with error handling. */
-    public Integer versionCode() {
+    public Integer getVersionCode() {
         if (flutterVersionCode == null) {
             throw new GradleException("flutterVersionCode must not be null.")
         }
@@ -91,7 +91,7 @@ class FlutterExtension {
     }
 
     /** Returns flutterVersionName with error handling. */
-    public String versionName() {
+    public String getVersionName() {
         if (flutterVersionName == null) {
             throw new GradleException("flutterVersionName must not be null.")
         }

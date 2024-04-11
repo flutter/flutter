@@ -277,38 +277,6 @@ String? _readFileContent(File file) {
   return file.existsSync() ? file.readAsStringSync() : null;
 }
 
-const String _androidPluginRegistryTemplateOldEmbedding = '''
-package io.flutter.plugins;
-
-import io.flutter.plugin.common.PluginRegistry;
-{{#methodChannelPlugins}}
-import {{package}}.{{class}};
-{{/methodChannelPlugins}}
-
-/**
- * Generated file. Do not edit.
- */
-public final class GeneratedPluginRegistrant {
-  public static void registerWith(PluginRegistry registry) {
-    if (alreadyRegisteredWith(registry)) {
-      return;
-    }
-{{#methodChannelPlugins}}
-    {{class}}.registerWith(registry.registrarFor("{{package}}.{{class}}"));
-{{/methodChannelPlugins}}
-  }
-
-  private static boolean alreadyRegisteredWith(PluginRegistry registry) {
-    final String key = GeneratedPluginRegistrant.class.getCanonicalName();
-    if (registry.hasPlugin(key)) {
-      return true;
-    }
-    registry.registrarFor(key);
-    return false;
-  }
-}
-''';
-
 const String _androidPluginRegistryTemplateNewEmbedding = '''
 package io.flutter.plugins;
 
@@ -317,9 +285,6 @@ import androidx.annotation.NonNull;
 import io.flutter.Log;
 
 import io.flutter.embedding.engine.FlutterEngine;
-{{#needsShim}}
-import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry;
-{{/needsShim}}
 
 /**
  * Generated file. Do not edit.
@@ -330,9 +295,6 @@ import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry;
 public final class GeneratedPluginRegistrant {
   private static final String TAG = "GeneratedPluginRegistrant";
   public static void registerWith(@NonNull FlutterEngine flutterEngine) {
-{{#needsShim}}
-    ShimPluginRegistry shimPluginRegistry = new ShimPluginRegistry(flutterEngine);
-{{/needsShim}}
 {{#methodChannelPlugins}}
   {{#supportsEmbeddingV2}}
     try {
@@ -340,15 +302,6 @@ public final class GeneratedPluginRegistrant {
     } catch (Exception e) {
       Log.e(TAG, "Error registering plugin {{name}}, {{package}}.{{class}}", e);
     }
-  {{/supportsEmbeddingV2}}
-  {{^supportsEmbeddingV2}}
-    {{#supportsEmbeddingV1}}
-    try {
-      {{package}}.{{class}}.registerWith(shimPluginRegistry.registrarFor("{{package}}.{{class}}"));
-    } catch (Exception e) {
-      Log.e(TAG, "Error registering plugin {{name}}, {{package}}.{{class}}", e);
-    }
-    {{/supportsEmbeddingV1}}
   {{/supportsEmbeddingV2}}
 {{/methodChannelPlugins}}
   }
@@ -364,12 +317,6 @@ List<Map<String, Object?>> _extractPlatformMaps(List<Plugin> plugins, String typ
     }
   }
   return pluginConfigs;
-}
-
-/// Returns the version of the Android embedding that the current
-/// [project] is using.
-AndroidEmbeddingVersion _getAndroidEmbeddingVersion(FlutterProject project) {
-  return project.android.getEmbeddingVersion();
 }
 
 Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
@@ -393,65 +340,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
     'plugins',
     'GeneratedPluginRegistrant.java',
   );
-  String templateContent;
-  final AndroidEmbeddingVersion appEmbeddingVersion = _getAndroidEmbeddingVersion(project);
-  switch (appEmbeddingVersion) {
-    case AndroidEmbeddingVersion.v2:
-      templateContext['needsShim'] = false;
-      // If a plugin is using an embedding version older than 2.0 and the app is using 2.0,
-      // then add shim for the old plugins.
-
-      final List<String> pluginsUsingV1 = <String>[];
-      for (final Map<String, Object?> plugin in androidPlugins) {
-        final bool supportsEmbeddingV1 = (plugin['supportsEmbeddingV1'] as bool?) ?? false;
-        final bool supportsEmbeddingV2 = (plugin['supportsEmbeddingV2'] as bool?) ?? false;
-        if (supportsEmbeddingV1 && !supportsEmbeddingV2) {
-          templateContext['needsShim'] = true;
-          if (plugin['name'] != null) {
-            pluginsUsingV1.add(plugin['name']! as String);
-          }
-        }
-      }
-      if (pluginsUsingV1.length > 1) {
-        globals.printWarning(
-          'The plugins `${pluginsUsingV1.join(', ')}` use a deprecated version of the Android embedding.\n'
-          'To avoid unexpected runtime failures, or future build failures, try to see if these plugins '
-          'support the Android V2 embedding. Otherwise, consider removing them since a future release '
-          'of Flutter will remove these deprecated APIs.\n'
-          'If you are plugin author, take a look at the docs for migrating the plugin to the V2 embedding: '
-          'https://flutter.dev/go/android-plugin-migration.'
-        );
-      } else if (pluginsUsingV1.isNotEmpty) {
-        globals.printWarning(
-          'The plugin `${pluginsUsingV1.first}` uses a deprecated version of the Android embedding.\n'
-          'To avoid unexpected runtime failures, or future build failures, try to see if this plugin '
-          'supports the Android V2 embedding. Otherwise, consider removing it since a future release '
-          'of Flutter will remove these deprecated APIs.\n'
-          'If you are plugin author, take a look at the docs for migrating the plugin to the V2 embedding: '
-          'https://flutter.dev/go/android-plugin-migration.'
-        );
-      }
-      templateContent = _androidPluginRegistryTemplateNewEmbedding;
-    case AndroidEmbeddingVersion.v1:
-      globals.printWarning(
-        'This app is using a deprecated version of the Android embedding.\n'
-        'To avoid unexpected runtime failures, or future build failures, try to migrate this '
-        'app to the V2 embedding.\n'
-        'Take a look at the docs for migrating an app: https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects'
-      );
-      for (final Map<String, Object?> plugin in androidPlugins) {
-        final bool supportsEmbeddingV1 = (plugin['supportsEmbeddingV1'] as bool?) ?? false;
-        final bool supportsEmbeddingV2 = (plugin['supportsEmbeddingV2'] as bool?) ?? false;
-        if (!supportsEmbeddingV1 && supportsEmbeddingV2) {
-          throwToolExit(
-            'The plugin `${plugin['name']}` requires your app to be migrated to '
-            'the Android embedding v2. Follow the steps on the migration doc above '
-            'and re-run this command.'
-          );
-        }
-      }
-      templateContent = _androidPluginRegistryTemplateOldEmbedding;
-  }
+  const String templateContent = _androidPluginRegistryTemplateNewEmbedding;
   globals.printTrace('Generating $registryPath');
   await _renderTemplateToFile(
     templateContent,
@@ -1238,12 +1127,9 @@ bool hasPlugins(FlutterProject project) {
 ///  For more details, https://flutter.dev/go/federated-plugins.
 // TODO(stuartmorgan): Expand implementation to apply to all implementations,
 //  not just Dart-only, per the federated plugin spec.
-// TODO(gustl22): The flag [throwOnPluginPubspecError] is currently only used
-//  for testing dart plugins as the logic is not working correctly.
 List<PluginInterfaceResolution> resolvePlatformImplementation(
-  List<Plugin> plugins, {
-  bool throwOnPluginPubspecError = true,
-}) {
+  List<Plugin> plugins
+) {
   const Iterable<String> platformKeys = <String>[
     AndroidPlugin.kConfigKey,
     IOSPlugin.kConfigKey,
@@ -1251,60 +1137,30 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
     MacOSPlugin.kConfigKey,
     WindowsPlugin.kConfigKey,
   ];
-  final Map<String, List<PluginInterfaceResolution>> possibleResolutions =
-      <String, List<PluginInterfaceResolution>>{};
-  final Map<String, String> defaultImplementations = <String, String>{};
-  // Generates a key for the maps above.
-  String getResolutionKey({required String platform, required String packageName}) {
-    return '$packageName:$platform';
-  }
+  final List<PluginInterfaceResolution> finalResolution = <PluginInterfaceResolution>[];
+  bool hasResolutionError = false;
 
-  bool hasPubspecError = false;
   for (final String platformKey in platformKeys) {
+    // Key: the plugin name
+    final Map<String, List<Plugin>> possibleResolutions = <String, List<Plugin>>{};
+    final Map<String, String> defaultImplementations = <String, String>{};
+
     for (final Plugin plugin in plugins) {
-      if (plugin.platforms[platformKey] == null &&
-          plugin.defaultPackagePlatforms[platformKey] == null) {
+      final String? defaultImplementation = plugin.defaultPackagePlatforms[platformKey];
+      if (plugin.platforms[platformKey] == null && defaultImplementation == null) {
         // The plugin doesn't implement this platform.
         continue;
       }
       String? implementsPackage = plugin.implementsPackage;
       if (implementsPackage == null || implementsPackage.isEmpty) {
-        final String? defaultImplementation =
-            plugin.defaultPackagePlatforms[platformKey];
         final bool hasInlineDartImplementation =
             plugin.pluginDartClassPlatforms[platformKey] != null;
         if (defaultImplementation == null && !hasInlineDartImplementation) {
-          if (throwOnPluginPubspecError) {
-            globals.printError(
-              "Plugin `${plugin.name}` doesn't implement a plugin interface, nor does "
-              'it specify an implementation in pubspec.yaml.\n\n'
-              'To set an inline implementation, use:\n'
-              'flutter:\n'
-              '  plugin:\n'
-              '    platforms:\n'
-              '      $platformKey:\n'
-              '        $kDartPluginClass: <plugin-class>\n'
-              '\n'
-              'To set a default implementation, use:\n'
-              'flutter:\n'
-              '  plugin:\n'
-              '    platforms:\n'
-              '      $platformKey:\n'
-              '        $kDefaultPackage: <plugin-implementation>\n'
-              '\n'
-              'To implement an interface, use:\n'
-              'flutter:\n'
-              '  plugin:\n'
-              '    implements: <plugin-interface>'
-              '\n',
-            );
-          }
-          hasPubspecError = true;
+          // Skip native inline PluginPlatform implementation
           continue;
         }
-        final String defaultImplementationKey = getResolutionKey(platform: platformKey, packageName: plugin.name);
         if (defaultImplementation != null) {
-          defaultImplementations[defaultImplementationKey] = defaultImplementation;
+          defaultImplementations[plugin.name] = defaultImplementation;
           continue;
         } else {
           // An app-facing package (i.e., one with no 'implements') with an
@@ -1324,7 +1180,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
             minFlutterVersion.compareTo(semver.Version(2, 11, 0)) >= 0;
           if (!isDesktop || hasMinVersionForImplementsRequirement) {
             implementsPackage = plugin.name;
-            defaultImplementations[defaultImplementationKey] = plugin.name;
+            defaultImplementations[plugin.name] = plugin.name;
           } else {
             // If it doesn't meet any of the conditions, it isn't eligible for
             // auto-registration.
@@ -1340,66 +1196,63 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
 
       // If it hasn't been skipped, it's a candidate for auto-registration, so
       // add it as a possible resolution.
-      final String resolutionKey = getResolutionKey(platform: platformKey, packageName: implementsPackage);
-      possibleResolutions.putIfAbsent(resolutionKey, () => <PluginInterfaceResolution>[]);
-      possibleResolutions[resolutionKey]!.add(PluginInterfaceResolution(
-        plugin: plugin,
-        platform: platformKey,
-      ));
+      possibleResolutions.putIfAbsent(implementsPackage, () => <Plugin>[]);
+      possibleResolutions[implementsPackage]!.add(plugin);
     }
-  }
-  if (hasPubspecError && throwOnPluginPubspecError) {
-    throwToolExit('Please resolve the pubspec errors');
-  }
 
-  // Now resolve all the possible resolutions to a single option for each
-  // plugin, or throw if that's not possible.
-  bool hasResolutionError = false;
-  final List<PluginInterfaceResolution> finalResolution = <PluginInterfaceResolution>[];
-  for (final MapEntry<String, List<PluginInterfaceResolution>> entry in possibleResolutions.entries) {
-    final List<PluginInterfaceResolution> candidates = entry.value;
-    // If there's only one candidate, use it.
-    if (candidates.length == 1) {
-      finalResolution.add(candidates.first);
-      continue;
-    }
-    // Next, try direct dependencies of the resolving application.
-    final Iterable<PluginInterfaceResolution> directDependencies = candidates.where((PluginInterfaceResolution r) {
-      return r.plugin.isDirectDependency;
-    });
-    if (directDependencies.isNotEmpty) {
-      if (directDependencies.length > 1) {
+    final List<Plugin> pluginResolution = <Plugin>[];
+
+    // Resolve all the possible resolutions to a single option for each plugin, or throw if that's not possible.
+    for (final MapEntry<String, List<Plugin>> entry in possibleResolutions.entries) {
+      final List<Plugin> candidates = entry.value;
+      // If there's only one candidate, use it.
+      if (candidates.length == 1) {
+        pluginResolution.add(candidates.first);
+        continue;
+      }
+      // Next, try direct dependencies of the resolving application.
+      final Iterable<Plugin> directDependencies = candidates.where((Plugin plugin) {
+        return plugin.isDirectDependency;
+      });
+      if (directDependencies.isNotEmpty) {
+        if (directDependencies.length > 1) {
+          globals.printError(
+              'Plugin ${entry.key}:$platformKey has conflicting direct dependency implementations:\n'
+                  '${directDependencies.map((Plugin plugin) => '  ${plugin.name}\n').join()}'
+                  'To fix this issue, remove all but one of these dependencies from pubspec.yaml.\n'
+          );
+          hasResolutionError = true;
+        } else {
+          pluginResolution.add(directDependencies.first);
+        }
+        continue;
+      }
+      // Next, defer to the default implementation if there is one.
+      final String? defaultPackageName = defaultImplementations[entry.key];
+      if (defaultPackageName != null) {
+        final int defaultIndex = candidates
+            .indexWhere((Plugin plugin) => plugin.name == defaultPackageName);
+        if (defaultIndex != -1) {
+          pluginResolution.add(candidates[defaultIndex]);
+          continue;
+        }
+      }
+      // Otherwise, require an explicit choice.
+      if (candidates.length > 1) {
         globals.printError(
-          'Plugin ${entry.key} has conflicting direct dependency implementations:\n'
-          '${directDependencies.map((PluginInterfaceResolution r) => '  ${r.plugin.name}\n').join()}'
-          'To fix this issue, remove all but one of these dependencies from pubspec.yaml.\n'
+            'Plugin ${entry.key}:$platformKey has multiple possible implementations:\n'
+                '${candidates.map((Plugin plugin) => '  ${plugin.name}\n').join()}'
+                'To fix this issue, add one of these dependencies to pubspec.yaml.\n'
         );
         hasResolutionError = true;
-      } else {
-        finalResolution.add(directDependencies.first);
-      }
-      continue;
-    }
-    // Next, defer to the default implementation if there is one.
-    final String? defaultPackageName = defaultImplementations[entry.key];
-    if (defaultPackageName != null) {
-      final int defaultIndex = candidates
-          .indexWhere((PluginInterfaceResolution r) => r.plugin.name == defaultPackageName);
-      if (defaultIndex != -1) {
-        finalResolution.add(candidates[defaultIndex]);
         continue;
       }
     }
-    // Otherwise, require an explicit choice.
-    if (candidates.length > 1) {
-      globals.printError(
-        'Plugin ${entry.key} has multiple possible implementations:\n'
-        '${candidates.map((PluginInterfaceResolution r) => '  ${r.plugin.name}\n').join()}'
-        'To fix this issue, add one of these dependencies to pubspec.yaml.\n'
-      );
-      hasResolutionError = true;
-      continue;
-    }
+
+    finalResolution.addAll(
+      pluginResolution.map((Plugin plugin) =>
+          PluginInterfaceResolution(plugin: plugin, platform: platformKey)),
+    );
   }
   if (hasResolutionError) {
     throwToolExit('Please resolve the plugin implementation selection errors');
@@ -1417,21 +1270,16 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
 /// A successful run will create a new generate_main.dart file or update the existing file.
 /// Throws [ToolExit] if unable to generate the file.
 ///
-/// This method also validates each plugin's pubspec.yaml, but errors are only
-/// reported if [throwOnPluginPubspecError] is [true].
-///
 /// For more details, see https://flutter.dev/go/federated-plugins.
 Future<void> generateMainDartWithPluginRegistrant(
   FlutterProject rootProject,
   PackageConfig packageConfig,
   String currentMainUri,
-  File mainFile, {
-  bool throwOnPluginPubspecError = false,
-}) async {
+  File mainFile,
+) async {
   final List<Plugin> plugins = await findPlugins(rootProject);
   final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
     plugins,
-    throwOnPluginPubspecError: throwOnPluginPubspecError,
   );
   final LanguageVersion entrypointVersion = determineLanguageVersion(
     mainFile,

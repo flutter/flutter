@@ -198,3 +198,53 @@ $initScript
 </body>
 </html>
 ''';
+
+/// index.html using flutter bootstrap script
+const String indexHtmlWithFlutterBootstrapScriptTag = '''
+<!DOCTYPE HTML>
+<!-- Copyright 2014 The Flutter Authors. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file. -->
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+
+  <title>Web Test</title>
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Web Test">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
+''';
+
+/// index.html using flutter bootstrap script
+const String indexHtmlWithInlinedFlutterBootstrapScript = '''
+<!DOCTYPE HTML>
+<!-- Copyright 2014 The Flutter Authors. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file. -->
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+
+  <title>Web Test</title>
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Web Test">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <script>
+    {{flutter_bootstrap_js}}
+  </script>
+</body>
+</html>
+''';

@@ -30,6 +30,17 @@ import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
+const String minimalV2EmbeddingManifest = r'''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application
+        android:name="${applicationName}">
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+    </application>
+</manifest>
+''';
+
 void main() {
   group('gradle build', () {
     late BufferLogger logger;
@@ -70,7 +81,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
-          '-Pbase-application-name=io.flutter.app.FlutterApplication',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -94,10 +105,15 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
 
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      project.android.appManifestFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync(minimalV2EmbeddingManifest);
+
       bool handlerCalled = false;
       await expectLater(() async {
        await builder.buildGradleApp(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          project: project,
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -184,7 +200,7 @@ void main() {
           '-Pverbose=true',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
-          '-Pbase-application-name=io.flutter.app.FlutterApplication',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -213,8 +229,13 @@ void main() {
         .childFile('app-release.apk')
         .createSync(recursive: true);
 
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      project.android.appManifestFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync(minimalV2EmbeddingManifest);
+
       await builder.buildGradleApp(
-        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        project: project,
         androidBuildInfo: const AndroidBuildInfo(
           BuildInfo(
             BuildMode.release,
@@ -252,7 +273,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
-          '-Pbase-application-name=io.flutter.app.FlutterApplication',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -283,11 +304,16 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
 
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      project.android.appManifestFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync(minimalV2EmbeddingManifest);
+
       int testFnCalled = 0;
       await expectLater(() async {
        await builder.buildGradleApp(
           maxRetries: maxRetries,
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          project: project,
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -366,7 +392,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
-          '-Pbase-application-name=io.flutter.app.FlutterApplication',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -390,10 +416,15 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
 
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      project.android.appManifestFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync(minimalV2EmbeddingManifest);
+
       bool handlerCalled = false;
       await expectLater(() async {
        await builder.buildGradleApp(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          project: project,
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -469,7 +500,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
-          '-Pbase-application-name=io.flutter.app.FlutterApplication',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -495,9 +526,14 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
 
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      project.android.appManifestFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync(minimalV2EmbeddingManifest);
+
       await expectLater(() async {
         await builder.buildGradleApp(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          project: project,
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -535,7 +571,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
-          '-Pbase-application-name=io.flutter.app.FlutterApplication',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -550,7 +586,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
-          '-Pbase-application-name=io.flutter.app.FlutterApplication',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -579,8 +615,13 @@ void main() {
         .childFile('app-release.apk')
         .createSync(recursive: true);
 
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      project.android.appManifestFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync(minimalV2EmbeddingManifest);
+
       await builder.buildGradleApp(
-        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        project: project,
         androidBuildInfo: const AndroidBuildInfo(
           BuildInfo(
             BuildMode.release,
@@ -643,7 +684,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm64',
           '-Ptarget=lib/main.dart',
-          '-Pbase-application-name=io.flutter.app.FlutterApplication',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -696,8 +737,13 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('{}');
 
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      project.android.appManifestFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync(minimalV2EmbeddingManifest);
+
       await builder.buildGradleApp(
-        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        project: project,
         androidBuildInfo: const AndroidBuildInfo(
           BuildInfo(
             BuildMode.release,
@@ -742,7 +788,7 @@ void main() {
           '-q',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
-          '-Pbase-application-name=io.flutter.app.FlutterApplication',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -770,8 +816,13 @@ void main() {
         .childFile('app-release.apk')
         .createSync(recursive: true);
 
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      project.android.appManifestFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync(minimalV2EmbeddingManifest);
+
       await builder.buildGradleApp(
-        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        project: project,
         androidBuildInfo: const AndroidBuildInfo(
           BuildInfo(
             BuildMode.release,
@@ -1194,7 +1245,7 @@ Gradle Crashed
           '-Plocal-engine-host-out=out/host_release',
           '-Ptarget-platform=android-arm',
           '-Ptarget=lib/main.dart',
-          '-Pbase-application-name=io.flutter.app.FlutterApplication',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -1230,10 +1281,14 @@ Gradle Crashed
         .childFile('build.gradle')
         ..createSync(recursive: true)
         ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      project.android.appManifestFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync(minimalV2EmbeddingManifest);
 
       await expectLater(() async {
         await builder.buildGradleApp(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          project: project,
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -1275,7 +1330,7 @@ Gradle Crashed
           '-Plocal-engine-host-out=out/host_release',
           '-Ptarget-platform=android-arm64',
           '-Ptarget=lib/main.dart',
-          '-Pbase-application-name=io.flutter.app.FlutterApplication',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -1311,10 +1366,14 @@ Gradle Crashed
           .childFile('build.gradle')
         ..createSync(recursive: true)
         ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      project.android.appManifestFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync(minimalV2EmbeddingManifest);
 
       await expectLater(() async {
         await builder.buildGradleApp(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          project: project,
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -1356,7 +1415,7 @@ Gradle Crashed
           '-Plocal-engine-host-out=out/host_release',
           '-Ptarget-platform=android-x86',
           '-Ptarget=lib/main.dart',
-          '-Pbase-application-name=io.flutter.app.FlutterApplication',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -1392,10 +1451,14 @@ Gradle Crashed
           .childFile('build.gradle')
         ..createSync(recursive: true)
         ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      project.android.appManifestFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync(minimalV2EmbeddingManifest);
 
       await expectLater(() async {
         await builder.buildGradleApp(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          project: project,
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -1437,7 +1500,7 @@ Gradle Crashed
           '-Plocal-engine-host-out=out/host_release',
           '-Ptarget-platform=android-x64',
           '-Ptarget=lib/main.dart',
-          '-Pbase-application-name=io.flutter.app.FlutterApplication',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -1474,10 +1537,14 @@ Gradle Crashed
           .childFile('build.gradle')
         ..createSync(recursive: true)
         ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      project.android.appManifestFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync(minimalV2EmbeddingManifest);
 
       await expectLater(() async {
         await builder.buildGradleApp(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          project: project,
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,
@@ -1516,7 +1583,7 @@ Gradle Crashed
           '--no-daemon',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           '-Ptarget=lib/main.dart',
-          '-Pbase-application-name=io.flutter.app.FlutterApplication',
+          '-Pbase-application-name=android.app.Application',
           '-Pdart-obfuscation=false',
           '-Ptrack-widget-creation=false',
           '-Ptree-shake-icons=false',
@@ -1535,10 +1602,14 @@ Gradle Crashed
           .childFile('build.gradle')
         ..createSync(recursive: true)
         ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      project.android.appManifestFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync(minimalV2EmbeddingManifest);
 
       await expectLater(() async {
         await builder.buildGradleApp(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          project: project,
           androidBuildInfo: const AndroidBuildInfo(
             BuildInfo(
               BuildMode.release,

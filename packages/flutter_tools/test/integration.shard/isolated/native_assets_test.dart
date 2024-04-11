@@ -147,12 +147,13 @@ void main() {
           // shadow the exception we would have gotten.
           expect(stdout, isNot(contains('EXCEPTION CAUGHT BY WIDGETS LIBRARY')));
 
-          if (device == 'macos') {
-            expectDylibIsBundledMacOS(exampleDirectory, buildMode);
-          } else if (device == 'linux') {
-            expectDylibIsBundledLinux(exampleDirectory, buildMode);
-          } else if (device == 'windows') {
-            expectDylibIsBundledWindows(exampleDirectory, buildMode);
+          switch (device) {
+            case 'macos':
+              expectDylibIsBundledMacOS(exampleDirectory, buildMode);
+            case 'linux':
+              expectDylibIsBundledLinux(exampleDirectory, buildMode);
+            case 'windows':
+              expectDylibIsBundledWindows(exampleDirectory, buildMode);
           }
           if (device == hostOs) {
             expectCCompilerIsConfigured(exampleDirectory);
@@ -203,16 +204,17 @@ void main() {
             throw Exception('flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
           }
 
-          if (buildSubcommand == 'macos') {
-            expectDylibIsBundledMacOS(exampleDirectory, buildMode);
-          } else if (buildSubcommand == 'ios') {
-            expectDylibIsBundledIos(exampleDirectory, buildMode);
-          } else if (buildSubcommand == 'linux') {
-            expectDylibIsBundledLinux(exampleDirectory, buildMode);
-          } else if (buildSubcommand == 'windows') {
-            expectDylibIsBundledWindows(exampleDirectory, buildMode);
-          } else if (buildSubcommand == 'apk') {
-            expectDylibIsBundledAndroid(exampleDirectory, buildMode);
+          switch (buildSubcommand) {
+            case 'macos':
+              expectDylibIsBundledMacOS(exampleDirectory, buildMode);
+            case 'ios':
+              expectDylibIsBundledIos(exampleDirectory, buildMode);
+            case 'linux':
+              expectDylibIsBundledLinux(exampleDirectory, buildMode);
+            case 'windows':
+              expectDylibIsBundledWindows(exampleDirectory, buildMode);
+            case 'apk':
+              expectDylibIsBundledAndroid(exampleDirectory, buildMode);
           }
           expectCCompilerIsConfigured(exampleDirectory);
         });
@@ -225,16 +227,17 @@ void main() {
     testWithoutContext('flutter build $buildSubcommand error on static libraries', () async {
       await inTempDir((Directory tempDirectory) async {
         final Directory packageDirectory = await createTestProject(packageName, tempDirectory);
-        final File buildDotDart = packageDirectory.childFile('build.dart');
+        final File buildDotDart =
+            packageDirectory.childDirectory('hook').childFile('build.dart');
         final String buildDotDartContents = await buildDotDart.readAsString();
         // Overrides the build to output static libraries.
         final String buildDotDartContentsNew = buildDotDartContents.replaceFirst(
-          'final buildConfig = await BuildConfig.fromArgs(args);',
+          'await build(args, (config, output) async {',
           '''
-  final buildConfig = await BuildConfig.fromArgs([
-    '-D${LinkModePreference.configKey}=${LinkModePreference.static}',
+  await build([
+    '-D${LinkModePreferenceImpl.configKey}=${LinkModePreferenceImpl.static}',
     ...args,
-  ]);
+  ], (config, output) async {
 ''',
         );
         expect(buildDotDartContentsNew, isNot(buildDotDartContents));
@@ -305,7 +308,7 @@ void expectDylibIsBundledMacOS(Directory appDirectory, String buildMode) {
   //       Resources/
   //         Info.plist
   //     Current  -> A
-  final String frameworkName = packageName.substring(0, 15);
+  const String frameworkName = packageName;
   final Directory frameworkDir =
       frameworksFolder.childDirectory('$frameworkName.framework');
   final Directory versionsDir = frameworkDir.childDirectory('Versions');
@@ -330,7 +333,7 @@ void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
   expect(appBundle, exists);
   final Directory frameworksFolder = appBundle.childDirectory('Frameworks');
   expect(frameworksFolder, exists);
-  final String frameworkName = packageName.substring(0, 15);
+  const String frameworkName = packageName;
   final File dylib = frameworksFolder
       .childDirectory('$frameworkName.framework')
       .childFile(frameworkName);
@@ -342,7 +345,7 @@ void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
 /// Sample path: build/linux/x64/release/bundle/lib/libmy_package.so
 void expectDylibIsBundledLinux(Directory appDirectory, String buildMode) {
   // Linux does not support cross compilation, so always only check current architecture.
-  final String architecture = Architecture.current.dartPlatform;
+  final String architecture = ArchitectureImpl.current.dartPlatform;
   final Directory appBundle = appDirectory
       .childDirectory('build')
       .childDirectory(hostOs)
@@ -352,7 +355,8 @@ void expectDylibIsBundledLinux(Directory appDirectory, String buildMode) {
   expect(appBundle, exists);
   final Directory dylibsFolder = appBundle.childDirectory('lib');
   expect(dylibsFolder, exists);
-  final File dylib = dylibsFolder.childFile(OS.linux.dylibFileName(packageName));
+  final File dylib =
+      dylibsFolder.childFile(OSImpl.linux.dylibFileName(packageName));
   expect(dylib, exists);
 }
 
@@ -361,7 +365,7 @@ void expectDylibIsBundledLinux(Directory appDirectory, String buildMode) {
 /// Sample path: build\windows\x64\runner\Debug\my_package_example.exe
 void expectDylibIsBundledWindows(Directory appDirectory, String buildMode) {
   // Linux does not support cross compilation, so always only check current architecture.
-  final String architecture = Architecture.current.dartPlatform;
+  final String architecture = ArchitectureImpl.current.dartPlatform;
   final Directory appBundle = appDirectory
       .childDirectory('build')
       .childDirectory(hostOs)
@@ -369,7 +373,8 @@ void expectDylibIsBundledWindows(Directory appDirectory, String buildMode) {
       .childDirectory('runner')
       .childDirectory(buildMode.upperCaseFirst());
   expect(appBundle, exists);
-  final File dylib = appBundle.childFile(OS.windows.dylibFileName(packageName));
+  final File dylib =
+      appBundle.childFile(OSImpl.windows.dylibFileName(packageName));
   expect(dylib, exists);
 }
 
@@ -399,7 +404,8 @@ void expectDylibIsBundledAndroid(Directory appDirectory, String buildMode) {
     if (buildMode != 'debug') {
       expect(archDir.childFile('libapp.so'), exists);
     }
-    final File dylib = archDir.childFile(OS.android.dylibFileName(packageName));
+    final File dylib =
+        archDir.childFile(OSImpl.android.dylibFileName(packageName));
     expect(dylib, exists);
   }
 }
@@ -409,7 +415,7 @@ void expectDylibIsBundledAndroid(Directory appDirectory, String buildMode) {
 void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode, String os) {
   final Directory frameworksFolder = appDirectory.childDirectory('build/$os/framework/${buildMode.upperCaseFirst()}');
   expect(frameworksFolder, exists);
-  final String frameworkName = packageName.substring(0, 15);
+  const String frameworkName = packageName;
   final File dylib = frameworksFolder
       .childDirectory('$frameworkName.framework')
       .childFile(frameworkName);
@@ -422,14 +428,14 @@ void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode
 void expectCCompilerIsConfigured(Directory appDirectory) {
   final Directory nativeAssetsBuilderDir = appDirectory.childDirectory('.dart_tool/native_assets_builder/');
   for (final Directory subDir in nativeAssetsBuilderDir.listSync().whereType<Directory>()) {
-    final File config = subDir.childFile('config.yaml');
+    final File config = subDir.childFile('config.json');
     expect(config, exists);
     final String contents = config.readAsStringSync();
     // Dry run does not pass compiler info.
-    if (contents.contains('dry_run: true')) {
+    if (contents.contains('"dry_run": true')) {
       continue;
     }
-    expect(contents, contains('cc: '));
+    expect(contents, contains('"cc": '));
   }
 }
 

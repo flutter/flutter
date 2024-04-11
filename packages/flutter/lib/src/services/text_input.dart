@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'dart:ui' show
+  FlutterView,
   FontWeight,
   Offset,
   Rect,
@@ -464,6 +465,7 @@ class TextInputConfiguration {
   /// All arguments have default values, except [actionLabel]. Only
   /// [actionLabel] may be null.
   const TextInputConfiguration({
+    this.viewId,
     this.inputType = TextInputType.text,
     this.readOnly = false,
     this.obscureText = false,
@@ -482,6 +484,14 @@ class TextInputConfiguration {
     this.enableDeltaModel = false,
   }) : smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled);
+
+  /// The ID of the view that the text input belongs to.
+  ///
+  /// See also:
+  ///
+  /// * [FlutterView], which is the view that the ID points to.
+  /// * [View], which is a widget that wraps a [FlutterView].
+  final int? viewId;
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -626,6 +636,7 @@ class TextInputConfiguration {
   /// Creates a copy of this [TextInputConfiguration] with the given fields
   /// replaced with new values.
   TextInputConfiguration copyWith({
+    int? viewId,
     TextInputType? inputType,
     bool? readOnly,
     bool? obscureText,
@@ -644,6 +655,7 @@ class TextInputConfiguration {
     bool? enableDeltaModel,
   }) {
     return TextInputConfiguration(
+      viewId: viewId ?? this.viewId,
       inputType: inputType ?? this.inputType,
       readOnly: readOnly ?? this.readOnly,
       obscureText: obscureText ?? this.obscureText,
@@ -691,6 +703,7 @@ class TextInputConfiguration {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic>? autofill = autofillConfiguration.toJson();
     return <String, dynamic>{
+      'viewId': viewId,
       'inputType': inputType.toJson(),
       'readOnly': readOnly,
       'obscureText': obscureText,
@@ -1795,29 +1808,30 @@ class TextInput {
 
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
     final String method = methodCall.method;
-    if (method == 'TextInputClient.focusElement') {
-      final List<dynamic> args = methodCall.arguments as List<dynamic>;
-      _scribbleClients[args[0]]?.onScribbleFocus(Offset((args[1] as num).toDouble(), (args[2] as num).toDouble()));
-      return;
-    } else if (method == 'TextInputClient.requestElementsInRect') {
-      final List<double> args = (methodCall.arguments as List<dynamic>).cast<num>().map<double>((num value) => value.toDouble()).toList();
-      return _scribbleClients.keys.where((String elementIdentifier) {
-        final Rect rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
-        if (!(_scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false)) {
-          return false;
-        }
-        final Rect bounds = _scribbleClients[elementIdentifier]?.bounds ?? Rect.zero;
-        return !(bounds == Rect.zero || bounds.hasNaN || bounds.isInfinite);
-      }).map((String elementIdentifier) {
-        final Rect bounds = _scribbleClients[elementIdentifier]!.bounds;
-        return <dynamic>[elementIdentifier, ...<dynamic>[bounds.left, bounds.top, bounds.width, bounds.height]];
-      }).toList();
-    } else if (method == 'TextInputClient.scribbleInteractionBegan') {
-      _scribbleInProgress = true;
-      return;
-    } else if (method == 'TextInputClient.scribbleInteractionFinished') {
-      _scribbleInProgress = false;
-      return;
+    switch (methodCall.method) {
+      case 'TextInputClient.focusElement':
+        final List<dynamic> args = methodCall.arguments as List<dynamic>;
+        _scribbleClients[args[0]]?.onScribbleFocus(Offset((args[1] as num).toDouble(), (args[2] as num).toDouble()));
+        return;
+      case 'TextInputClient.requestElementsInRect':
+        final List<double> args = (methodCall.arguments as List<dynamic>).cast<num>().map<double>((num value) => value.toDouble()).toList();
+        return _scribbleClients.keys.where((String elementIdentifier) {
+          final Rect rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
+          if (!(_scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false)) {
+            return false;
+          }
+          final Rect bounds = _scribbleClients[elementIdentifier]?.bounds ?? Rect.zero;
+          return !(bounds == Rect.zero || bounds.hasNaN || bounds.isInfinite);
+        }).map((String elementIdentifier) {
+          final Rect bounds = _scribbleClients[elementIdentifier]!.bounds;
+          return <dynamic>[elementIdentifier, ...<dynamic>[bounds.left, bounds.top, bounds.width, bounds.height]];
+        }).toList();
+      case 'TextInputClient.scribbleInteractionBegan':
+        _scribbleInProgress = true;
+        return;
+      case 'TextInputClient.scribbleInteractionFinished':
+        _scribbleInProgress = false;
+        return;
     }
     if (_currentConnection == null) {
       return;

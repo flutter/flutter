@@ -905,7 +905,7 @@ void main() {
     // Test the delete button icon.
     expect(tester.getSize(find.byIcon(Icons.clear)), const Size(18.0, 18.0));
     expect(getIconData(tester).color, theme.colorScheme.onSurfaceVariant);
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Material2 - FilterChip supports delete button', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: false);
@@ -1059,7 +1059,7 @@ void main() {
     );
 
     // Delete button should be visible.
-    expectLater(find.byType(RawChip), matchesGoldenFile('filter_chip.disabled.delete_button.png'));
+    await expectLater(find.byType(RawChip), matchesGoldenFile('filter_chip.disabled.delete_button.png'));
   });
 
   testWidgets('Delete button tooltip is not shown on disabled FilterChip', (WidgetTester tester) async {

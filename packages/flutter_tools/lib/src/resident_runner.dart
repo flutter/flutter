@@ -120,18 +120,22 @@ class FlutterDevice {
       // TODO(zanderso): consistently provide these flags across platforms.
       final String platformDillName;
       final List<String> extraFrontEndOptions = List<String>.of(buildInfo.extraFrontEndOptions);
-      if (buildInfo.nullSafetyMode == NullSafetyMode.unsound) {
-        platformDillName = 'ddc_outline.dill';
-        if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
-          extraFrontEndOptions.add('--no-sound-null-safety');
-        }
-      } else if (buildInfo.nullSafetyMode == NullSafetyMode.sound) {
-        platformDillName = 'ddc_outline_sound.dill';
-        if (!extraFrontEndOptions.contains('--sound-null-safety')) {
-          extraFrontEndOptions.add('--sound-null-safety');
-        }
-      } else {
-        throw StateError('Expected buildInfo.nullSafetyMode to be one of unsound or sound, got ${buildInfo.nullSafetyMode}');
+      switch (buildInfo.nullSafetyMode) {
+        case NullSafetyMode.unsound:
+          platformDillName = 'ddc_outline.dill';
+          if (!extraFrontEndOptions.contains('--no-sound-null-safety')) {
+            extraFrontEndOptions.add('--no-sound-null-safety');
+          }
+        case NullSafetyMode.sound:
+          platformDillName = 'ddc_outline_sound.dill';
+          if (!extraFrontEndOptions.contains('--sound-null-safety')) {
+            extraFrontEndOptions.add('--sound-null-safety');
+          }
+        case NullSafetyMode.autodetect:
+          throw StateError(
+            'Expected buildInfo.nullSafetyMode to be one of unsound or sound, '
+            'got NullSafetyMode.autodetect',
+          );
       }
 
       final String platformDillPath = globals.fs.path.join(
@@ -385,6 +389,8 @@ class FlutterDevice {
       osUtils: globals.os,
       fileSystem: globals.fs,
       logger: globals.logger,
+      processManager: globals.processManager,
+      artifacts: globals.artifacts!,
     );
     return devFS!.create();
   }
@@ -556,7 +562,6 @@ class FlutterDevice {
     required Uri mainUri,
     String? target,
     AssetBundle? bundle,
-    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool bundleDirty = false,
     bool fullRestart = false,
@@ -574,7 +579,6 @@ class FlutterDevice {
         mainUri: mainUri,
         target: target,
         bundle: bundle,
-        firstBuildTime: firstBuildTime,
         bundleFirstUpload: bundleFirstUpload,
         generator: generator!,
         fullRestart: fullRestart,
@@ -593,7 +597,7 @@ class FlutterDevice {
       return UpdateFSReport();
     }
     devFSStatus.stop();
-    globals.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
+    globals.printTrace('Synced ${getSizeAsPlatformMB(report.syncedBytes)}.');
     return report;
   }
 
@@ -1522,6 +1526,12 @@ abstract class ResidentRunner extends ResidentHandlers {
         );
       }
       if (includeDevtools) {
+        if (_residentDevtoolsHandler!.printDtdUri) {
+          final Uri? dtdUri = residentDevtoolsHandler!.dtdUri;
+          if (dtdUri != null) {
+            globals.printStatus('The Dart Tooling Daemon is available at: $dtdUri\n');
+          }
+        }
         final Uri? uri = devToolsServerAddress!.uri?.replace(
           queryParameters: <String, dynamic>{'uri': '${device.vmService!.httpAddress}'},
         );
@@ -1939,6 +1949,26 @@ abstract class DevtoolsLauncher {
     } else {
       _readyCompleter = Completer<void>();
     }
+  }
+
+  /// The Dart Tooling Daemon (DTD) URI for the DTD instance being hosted by
+  /// DevTools server.
+  ///
+  /// This will be null if the DevTools server is not served through Flutter
+  /// tools (e.g. if it is served from an IDE).
+  Uri? get dtdUri => _dtdUri;
+  Uri? _dtdUri;
+  @protected
+  set dtdUri(Uri? value) => _dtdUri = value;
+
+  /// Whether to print the Dart Tooling Daemon URI.
+  ///
+  /// This will always return false when there is not a DTD instance being
+  /// served from the DevTools server.
+  bool get printDtdUri => _printDtdUri ?? false;
+  bool? _printDtdUri;
+  set printDtdUri(bool value) {
+    _printDtdUri = value;
   }
 
   /// The URL of the current DevTools server.

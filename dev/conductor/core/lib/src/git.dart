@@ -93,7 +93,7 @@ enum GitExceptionType {
   ///
   /// Example output:
   ///
-  /// ```
+  /// ```none
   /// To github.com:user/engine.git
   ///
   ///  ! [rejected]            HEAD -> cherrypicks-flutter-2.8-candidate.3 (non-fast-forward)
