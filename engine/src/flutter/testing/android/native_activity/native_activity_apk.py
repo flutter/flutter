@@ -110,6 +110,10 @@ def main():
   ]
   run_command_checked(apksigner_command, env=env)
 
+  # Remove the intermediates so the out directory isn't full of large files.
+  os.remove(unaligned_apk_path)
+  os.remove(unsigned_apk_path)
+
   return 0
 
 
