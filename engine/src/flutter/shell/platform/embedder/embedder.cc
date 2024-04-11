@@ -2229,7 +2229,7 @@ FlutterEngineResult FlutterEngineAddView(FLUTTER_API_SYMBOL(FlutterEngine)
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
   }
 
-  flutter::Shell::AddViewCallback callback =
+  flutter::PlatformView::AddViewCallback callback =
       [c_callback = info->add_view_callback,
        user_data = info->user_data](bool added) {
         FlutterAddViewResult result = {};
@@ -2239,7 +2239,8 @@ FlutterEngineResult FlutterEngineAddView(FLUTTER_API_SYMBOL(FlutterEngine)
         c_callback(&result);
       };
 
-  embedder_engine->GetShell().AddView(view_id, metrics, callback);
+  embedder_engine->GetShell().GetPlatformView()->AddView(view_id, metrics,
+                                                         callback);
   return kSuccess;
 }
 
@@ -2271,7 +2272,7 @@ FlutterEngineResult FlutterEngineRemoveView(FLUTTER_API_SYMBOL(FlutterEngine)
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
   }
 
-  flutter::Shell::RemoveViewCallback callback =
+  flutter::PlatformView::RemoveViewCallback callback =
       [c_callback = info->remove_view_callback,
        user_data = info->user_data](bool removed) {
         FlutterRemoveViewResult result = {};
@@ -2281,7 +2282,8 @@ FlutterEngineResult FlutterEngineRemoveView(FLUTTER_API_SYMBOL(FlutterEngine)
         c_callback(&result);
       };
 
-  embedder_engine->GetShell().RemoveView(info->view_id, callback);
+  embedder_engine->GetShell().GetPlatformView()->RemoveView(info->view_id,
+                                                            callback);
   return kSuccess;
 }
 
