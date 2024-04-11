@@ -213,27 +213,29 @@ class ListTileThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode => Object.hash(
-    dense,
-    shape,
-    style,
-    selectedColor,
-    iconColor,
-    textColor,
-    titleTextStyle,
-    subtitleTextStyle,
-    leadingAndTrailingTextStyle,
-    contentPadding,
-    tileColor,
-    selectedTileColor,
-    horizontalTitleGap,
-    minVerticalPadding,
-    minLeadingWidth,
-    minTileHeight,
-    enableFeedback,
-    mouseCursor,
-    visualDensity,
-    titleAlignment,
+  int get hashCode => Object.hashAll(
+    <Object?>[
+      dense,
+      shape,
+      style,
+      selectedColor,
+      iconColor,
+      textColor,
+      titleTextStyle,
+      subtitleTextStyle,
+      leadingAndTrailingTextStyle,
+      contentPadding,
+      tileColor,
+      selectedTileColor,
+      horizontalTitleGap,
+      minVerticalPadding,
+      minLeadingWidth,
+      minTileHeight,
+      enableFeedback,
+      mouseCursor,
+      visualDensity,
+      titleAlignment,
+    ],
   );
 
   @override
