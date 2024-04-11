@@ -474,6 +474,7 @@ class Text extends StatelessWidget {
     this.textHeightBehavior,
     this.selectionColor,
   }) : textSpan = null,
+       copyInterceptor = CopyInterceptor.none,
        assert(
          textScaler == null || textScaleFactor == null,
          'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
@@ -509,6 +510,7 @@ class Text extends StatelessWidget {
     this.textWidthBasis,
     this.textHeightBehavior,
     this.selectionColor,
+    this.copyInterceptor = CopyInterceptor.space,
   }) : data = null,
        assert(
          textScaler == null || textScaleFactor == null,
@@ -639,6 +641,9 @@ class Text extends StatelessWidget {
   /// (semi-transparent grey).
   final Color? selectionColor;
 
+  /// The [CopyInterceptor] to use for handling copy requests.
+  final CopyInterceptor copyInterceptor;
+
   @override
   Widget build(BuildContext context) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
@@ -677,6 +682,7 @@ class Text extends StatelessWidget {
             text: data,
             children: textSpan != null ? <InlineSpan>[textSpan!] : null,
           ),
+          copyInterceptor: copyInterceptor,
         ),
       );
     } else {
@@ -748,6 +754,7 @@ class _SelectableTextContainer extends StatefulWidget {
     required this.textWidthBasis,
     this.textHeightBehavior,
     required this.selectionColor,
+    required this.copyInterceptor,
   });
 
   final InlineSpan text;
@@ -762,6 +769,7 @@ class _SelectableTextContainer extends StatefulWidget {
   final TextWidthBasis textWidthBasis;
   final ui.TextHeightBehavior? textHeightBehavior;
   final Color selectionColor;
+  final CopyInterceptor copyInterceptor;
 
   @override
   State<_SelectableTextContainer> createState() => _SelectableTextContainerState();
@@ -774,7 +782,7 @@ class _SelectableTextContainerState extends State<_SelectableTextContainer> {
   @override
   void initState() {
     super.initState();
-    _selectionDelegate = _SelectableTextContainerDelegate(_textKey);
+    _selectionDelegate = _SelectableTextContainerDelegate(textKey: _textKey, copyInterceptor: widget.copyInterceptor);
   }
 
   @override
@@ -867,9 +875,10 @@ class _RichText extends StatelessWidget {
 const double _kSelectableVerticalComparingThreshold = 3.0;
 
 class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainerDelegate {
-  _SelectableTextContainerDelegate(
-    GlobalKey textKey,
-  ) : _textKey = textKey;
+  _SelectableTextContainerDelegate({
+    required GlobalKey textKey,
+    required super.copyInterceptor,
+  }) : _textKey = textKey;
 
   final GlobalKey _textKey;
   RenderParagraph get paragraph => _textKey.currentContext!.findRenderObject()! as RenderParagraph;

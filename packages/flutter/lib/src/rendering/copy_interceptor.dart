@@ -25,6 +25,9 @@ abstract class CopyInterceptor {
   /// A [CopyInterceptor] that joins selections with a newline character.
   static const CopyInterceptor newline = CopyInterceptor.separator('\n');
 
+  /// A [CopyInterceptor] that joins selections with a space character.
+  static const CopyInterceptor space = CopyInterceptor.separator(' ');
+
   /// Convert the given [selections] to a single string.
   String intercept(List<SelectedContent> selections);
 }

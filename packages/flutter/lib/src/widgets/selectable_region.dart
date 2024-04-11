@@ -1611,7 +1611,7 @@ class _DirectionallyExtendCaretSelectionAction<T extends DirectionalCaretMovemen
 }
 
 class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
-  _SelectableRegionContainerDelegate({super.copyInterceptor});
+  _SelectableRegionContainerDelegate({required super.copyInterceptor});
 
   final Set<Selectable> _hasReceivedStartEvent = <Selectable>{};
   final Set<Selectable> _hasReceivedEndEvent = <Selectable>{};
@@ -1791,15 +1791,14 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
 abstract class MultiSelectableSelectionContainerDelegate extends SelectionContainerDelegate with ChangeNotifier {
   /// Creates an instance of [MultiSelectableSelectionContainerDelegate].
   MultiSelectableSelectionContainerDelegate({
-     this.copyInterceptor = CopyInterceptor.newline,
+     required this.copyInterceptor
   }) {
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 
-  /// The separator used to separate the text of each selectable in
-  /// [selectables].
+  /// The [CopyInterceptor] to use for handling copy requests.
   final CopyInterceptor copyInterceptor;
 
   /// Gets the list of [Selectable]s this delegate is managing.

@@ -116,6 +116,7 @@ class Scrollable extends StatefulWidget {
     this.restorationId,
     this.scrollBehavior,
     this.clipBehavior = Clip.hardEdge,
+    this.copyInterceptor,
   }) : assert(semanticChildCount == null || semanticChildCount >= 0);
 
   /// {@template flutter.widgets.Scrollable.axisDirection}
@@ -297,6 +298,11 @@ class Scrollable extends StatefulWidget {
   /// clipping of the [Scrollable]. This reflects the same [Clip] that is provided
   /// to [ScrollView.clipBehavior] and is supplied to the [Viewport].
   final Clip clipBehavior;
+
+  /// The [CopyInterceptor] to use for handling copy requests.
+  ///
+  /// The default is dependent on the [axis].
+  final CopyInterceptor? copyInterceptor;
 
   /// The axis along which the scroll view scrolls.
   ///
@@ -1007,6 +1013,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
         state: this,
         position: position,
         registrar: registrar,
+        copyInterceptor: widget.copyInterceptor ?? (widget.axis == Axis.vertical ? CopyInterceptor.newline : CopyInterceptor.space),
         child: result,
       );
     }
@@ -1053,13 +1060,15 @@ class _ScrollableSelectionHandler extends StatefulWidget {
     required this.state,
     required this.position,
     required this.registrar,
+    required this.copyInterceptor,
     required this.child,
   });
 
   final ScrollableState state;
   final ScrollPosition position;
-  final Widget child;
   final SelectionRegistrar registrar;
+  final CopyInterceptor copyInterceptor;
+  final Widget child;
 
   @override
   _ScrollableSelectionHandlerState createState() => _ScrollableSelectionHandlerState();
@@ -1074,6 +1083,7 @@ class _ScrollableSelectionHandlerState extends State<_ScrollableSelectionHandler
     _selectionDelegate = _ScrollableSelectionContainerDelegate(
       state: widget.state,
       position: widget.position,
+      copyInterceptor: widget.copyInterceptor,
     );
   }
 
@@ -1111,7 +1121,8 @@ class _ScrollableSelectionHandlerState extends State<_ScrollableSelectionHandler
 class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
   _ScrollableSelectionContainerDelegate({
     required this.state,
-    required ScrollPosition position
+    required ScrollPosition position,
+    required super.copyInterceptor,
   }) : _position = position,
        _autoScroller = EdgeDraggingAutoScroller(state, velocityScalar: _kDefaultSelectToScrollVelocityScalar) {
     _position.addListener(_scheduleLayoutChange);

@@ -2087,7 +2087,7 @@ void main() {
                 SelectableRegion(
                   focusNode: FocusNode(),
                   selectionControls: materialTextSelectionControls,
-                  copyInterceptor: const CopyInterceptor.separator(' '),
+                  copyInterceptor: CopyInterceptor.space,
                   child: const Column(
                     children: <Widget>[
                       Text('Good, and you?'),
@@ -2300,7 +2300,7 @@ void main() {
       // Send a keyboard copy..
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-      expect(clipboardData['text'], 'w are you?\nGood, and you?\nFine');
+      expect(clipboardData['text'], 'w are you? Good, and you? Fine');
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }),
       skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
@@ -2347,7 +2347,7 @@ void main() {
       // keyboard copy.
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-      expect(clipboardData['text'], 'How are you?\nGood, and you?\nFine,');
+      expect(clipboardData['text'], 'How are you? Good, and you? Fine,');
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }),
       skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
@@ -2636,7 +2636,7 @@ void main() {
         // Send a keyboard copy..
         await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
         final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-        expect(clipboardData['text'], 'w are you?\nFine');
+        expect(clipboardData['text'], 'w are you? Fine');
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }),
       skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
@@ -2679,7 +2679,7 @@ void main() {
         // Send a keyboard copy..
         await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, meta: true));
         final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-        expect(clipboardData['text'], 'w are you?\nFine');
+        expect(clipboardData['text'], 'w are you? Fine');
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
       skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
@@ -4182,7 +4182,7 @@ void main() {
     expect(paragraph2.selections[0].end, 8);
     expect(paragraph3.selections.length, 1);
     expect(content, isNotNull);
-    expect(content!.plainText, 'w are you?\nGood, an');
+    expect(content!.plainText, 'w are you?\nGood, an\n');
 
     await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true));
     await tester.pump();
@@ -4192,7 +4192,7 @@ void main() {
     expect(paragraph2.selections.length, 1);
     expect(paragraph3.selections.length, 1);
     expect(content, isNotNull);
-    expect(content!.plainText, 'w are');
+    expect(content!.plainText, 'w are\n\n');
 
     await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true));
     await tester.pump();
@@ -4202,7 +4202,7 @@ void main() {
     expect(paragraph2.selections.length, 1);
     expect(paragraph3.selections.length, 1);
     expect(content, isNotNull);
-    expect(content!.plainText, 'Ho');
+    expect(content!.plainText, 'Ho\n\n');
   });
 
   group('BrowserContextMenu', () {
@@ -4281,6 +4281,7 @@ void main() {
                   ],
                 ),
                 key: outerText,
+                copyInterceptor: CopyInterceptor.none,
               ),
             ),
           ),
