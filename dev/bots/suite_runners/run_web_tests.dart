@@ -129,18 +129,18 @@ class WebTestsSuite {
           renderer: 'canvaskit',
           expectWriteResponseFile: true,
           expectResponseFileContent: '''
-  {
-    "screenshots": [
-      {
-        "screenshotName": "platform_name",
-        "bytes": []
-      },
-      {
-        "screenshotName": "platform_name_2",
-        "bytes": []
-      }
-    ]
-  }''',
+{
+  "screenshots": [
+    {
+      "screenshotName": "platform_name",
+      "bytes": []
+    },
+    {
+      "screenshotName": "platform_name_2",
+      "bytes": []
+    }
+  ]
+}''',
         ),
       ],
 
