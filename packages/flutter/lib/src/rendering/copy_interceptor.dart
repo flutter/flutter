@@ -4,7 +4,6 @@
 
 import 'selection.dart';
 
-
 /// Typedef for the inline intercept callback.
 typedef CopyInterceptorCallback = String Function(List<SelectedContent> selections);
 
