@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -20,11 +18,8 @@ import 'text.dart';
 import 'ticker_provider.dart';
 
 // TODO(Piinks): still to cover
-//  * Clip layers for animations
-//  * Breadth/depth traversal - parent data
-//  * Semantics
+//  * Clip layers for animations - bug
 //  * Example code
-//  * pipe through indentation as an enhanced enum, remove from row builder, implement in render object
 //  * Tests
 
 /// A data structure for configuring children of a [SliverTree].
@@ -37,19 +32,22 @@ import 'ticker_provider.dart';
 class SliverTreeNode<T> {
   /// Creates a [SliverTreeNode] instance for use in a [SliverTree].
   SliverTreeNode(
-    this.content, {
+    T content, {
     List<SliverTreeNode<T>>? children,
     bool expanded = false,
   }) : _expanded = children != null && children.isNotEmpty && expanded,
-       children = children ?? <SliverTreeNode<T>>[];
+       _content = content,
+       _children = children ?? <SliverTreeNode<T>>[];
 
   /// The subject matter of the node.
   ///
   /// Must correspond with the type of [SliverTree].
-  final T content;
+  T get content => _content;
+  final T _content;
 
   /// Other [SliverTreeNode]s this this node will be [parent] to.
-  final List<SliverTreeNode<T>> children;
+  List<SliverTreeNode<T>> get children => _children;
+  final List<SliverTreeNode<T>> _children;
 
   /// Whether or not this node is expanded in the tree.
   ///
@@ -344,8 +342,10 @@ class TreeController {
   }
 }
 
-/// A sliver for lazily displaying [SliverTreeNode]s that expand and collapse in a
-/// vertically scrolling [Viewport].
+int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
+
+/// A sliver for lazily displaying [SliverTreeNode]s that expand and collapse in
+/// a vertically scrolling [Viewport].
 class SliverTree<T> extends StatefulWidget {
   /// Creates an instance of a SliverTree.
   // TODO(Piinks): Add semantic info to constructor (see build in state)
@@ -359,8 +359,12 @@ class SliverTree<T> extends StatefulWidget {
     this.addAutomaticKeepAlives = true,
     this.addRepaintBoundaries = true,
     this.addSemanticIndexes = true,
+    this.semanticIndexCallback = _kDefaultSemanticIndexCallback,
+    this.semanticIndexOffset = 0,
     this.findChildIndexCallback,
     this.animationStyle,
+    this.traversalOrder = SliverTreeTraversalOrder.depthFirst,
+    this.indentation = SliverTreeIndentationType.standard,
   });
 
   /// The list of [SliverTreeNode]s that may be displayed in the [SliverTree].
@@ -408,6 +412,12 @@ class SliverTree<T> extends StatefulWidget {
   /// {@macro flutter.widgets.SliverChildBuilderDelegate.addSemanticIndexes}
   final bool addSemanticIndexes;
 
+  /// {@macro flutter.widgets.SliverChildBuilderDelegate.semanticIndexCallback}
+  final SemanticIndexCallback semanticIndexCallback;
+
+  /// {@macro flutter.widgets.SliverChildBuilderDelegate.semanticIndexOffset}
+  final int semanticIndexOffset;
+
   /// {@macro flutter.widgets.SliverChildBuilderDelegate.findChildIndexCallback}
   final int? Function(Key)? findChildIndexCallback;
 
@@ -430,6 +440,28 @@ class SliverTree<T> extends StatefulWidget {
   /// A default [Duration] of 150 milliseconds, which is used in the tree's
   /// expanding and collapsing node animation.
   static const Duration defaultAnimationDuration = Duration(milliseconds: 150);
+
+  /// The order in which [SliverTreeNode]s are visited.
+  ///
+  /// Defaults to [SliverTreeTraversalOrder.depthFirst].
+  final SliverTreeTraversalOrder traversalOrder;
+
+  /// The number of pixels children will be offset by in the cross axis based on
+  /// their [SliverTreeNode.depth].
+  ///
+  // TODO(Piinks): template this and add sample code
+  /// By default, the indentation is handled by [RenderSliverTree]. Child nodes
+  /// are offset by the indentation specified by
+  /// [SliverTreeIndentationType.value] in the cross axis of the viewport. This
+  /// means the space allotted to the indentation will not be part of the space
+  /// made available to the Widget returned by [SliverTree.treeRowBuilder].
+  ///
+  /// Alternatively, the indentation can be implemented in
+  /// [SliverTree.treeRowBuilder], with the depth of the given tree row accessed
+  /// by [SliverTreeNode.depth]. This allows for more customization in building
+  /// tree rows, such as filling the indented area with decorations or ink
+  /// effects.
+  final SliverTreeIndentationType indentation;
 
   /// A wrapper method for triggering the expansion or collapse of a [SliverTreeNode].
   ///
@@ -480,17 +512,17 @@ class SliverTree<T> extends StatefulWidget {
       padding: const EdgeInsets.all(8.0),
       child: Row(children: <Widget>[
         // Indent
-        SizedBox.square(dimension: node.depth! * 10.0),
+        // SizedBox.square(dimension: node.depth! * 10.0),
         // Icon for parent nodes
-        toggleNodeWith(
+        SliverTree.toggleNodeWith(
           node: node,
           child: SizedBox.square(
-            dimension: 34.0,
+            dimension: 30.0,
             child: node.children.isNotEmpty
                 ? AnimatedRotation(
                     turns: node.isExpanded ? 0.25 : 0.0,
-                    duration: animationStyle?.duration ?? defaultAnimationDuration,
-                    curve: animationStyle?.curve ?? defaultAnimationCurve,
+                    duration: animationStyle?.duration ?? SliverTree.defaultAnimationDuration,
+                    curve: animationStyle?.curve ?? SliverTree.defaultAnimationCurve,
                     child: const Icon(IconData(0x25BA), size: 15),
                   )
                 : null,
@@ -614,11 +646,13 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
           child = RepaintBoundary(child: child);
         }
         if (widget.addSemanticIndexes) {
-          // TODO(Piinks): see todo on constructor
-          // final int? semanticIndex = widget.semanticIndexCallback(child, index);
-          // if (semanticIndex != null) {
-            child = IndexedSemantics(index: index/*semanticIndex + semanticIndexOffset*/, child: child);
-          // }
+          final int? semanticIndex = widget.semanticIndexCallback(child, index);
+          if (semanticIndex != null) {
+            child = IndexedSemantics(
+              index: semanticIndex + widget.semanticIndexOffset,
+              child: child,
+            );
+          }
         }
 
         return _TreeNodeParentDataWidget(
@@ -631,6 +665,8 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
       },
       addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
       findChildIndexCallback: widget.findChildIndexCallback,
+      traversalOrder: widget.traversalOrder,
+      indentation: widget.indentation.value,
     );
   }
 
@@ -772,17 +808,7 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
   }
 }
 
-// Used to pass information down to _RenderSliverTree.
-// The depth is used for breadth first traversal, where as depth first traversal
-// follows the indexed order. The animationValue is used to compute the offset
-// of children that are currently coming into or out of view.
-class _TreeNodeParentData extends SliverMultiBoxAdaptorParentData {
-  // The depth of the node, used by the render object to traverse nodes in a
-  // depth or breadth order.
-  int depth = 0;
-}
-
-class _TreeNodeParentDataWidget extends ParentDataWidget<_TreeNodeParentData> {
+class _TreeNodeParentDataWidget extends ParentDataWidget<TreeNodeParentData> {
   const _TreeNodeParentDataWidget({
     required this.depth,
     required super.child,
@@ -792,7 +818,7 @@ class _TreeNodeParentDataWidget extends ParentDataWidget<_TreeNodeParentData> {
 
   @override
   void applyParentData(RenderObject renderObject) {
-    final _TreeNodeParentData parentData = renderObject.parentData! as _TreeNodeParentData;
+    final TreeNodeParentData parentData = renderObject.parentData! as TreeNodeParentData;
     bool needsLayout = false;
 
     if (parentData.depth != depth) {
@@ -821,6 +847,8 @@ class _SliverTree extends SliverVariedExtentList {
     required NullableIndexedWidgetBuilder itemBuilder,
     required super.itemExtentBuilder,
     required this.activeAnimations,
+    this.traversalOrder = SliverTreeTraversalOrder.depthFirst,
+    required this.indentation,
     ChildIndexGetter? findChildIndexCallback,
     int? itemCount,
     bool addAutomaticKeepAlives = true,
@@ -834,6 +862,8 @@ class _SliverTree extends SliverVariedExtentList {
   ));
 
   final Map<UniqueKey, SliverTreeNodesAnimation> activeAnimations;
+  final SliverTreeTraversalOrder traversalOrder;
+  final double indentation;
 
   @override
   RenderSliverTree createRenderObject(BuildContext context) {
@@ -841,6 +871,8 @@ class _SliverTree extends SliverVariedExtentList {
     return RenderSliverTree(
       itemExtentBuilder: itemExtentBuilder,
       activeAnimations: activeAnimations,
+      traversalOrder: traversalOrder,
+      indentation: indentation,
       childManager: element,
     );
   }
@@ -849,297 +881,8 @@ class _SliverTree extends SliverVariedExtentList {
   void updateRenderObject(BuildContext context, RenderSliverTree renderObject) {
     renderObject
       ..itemExtentBuilder = itemExtentBuilder
-      ..activeAnimations = activeAnimations;
+      ..activeAnimations = activeAnimations
+      ..traversalOrder = traversalOrder
+      ..indentation = indentation;
   }
-}
-
-/// Represents the animation of the children of a parent [SliverTreeNode] that
-/// are animating into or out of view.
-///
-/// The [fromIndex] and [toIndex] are inclusive of the children following the
-/// parent, with the [value] representing the status of the current animation.
-///
-/// Provided to [RenderSliverTree] by [SliverTree] to properly offset animating
-/// children.
-typedef SliverTreeNodesAnimation = ({
-  int fromIndex,
-  int toIndex,
-  double value,
-});
-
-// This will likely need to move to the same file as RenderSliverMultiBoxAdaptor
-// to access private API around keep alives and visiting children in depth and breadth first traversal order
-
-/// A sliver that places multiple [SliverTreeNode]s in a linear array along the
-/// main access, while staggering nodes that are animating into and out of view.
-///
-/// The extent of each child node is determined by the [itemExtentBuilder].
-///
-/// See also:
-///
-///   * [SliverTree], the widget that creates and manages this render object.
-class RenderSliverTree extends RenderSliverVariedExtentList {
-  /// Creates the render object that lays out the [SliverTreeNode]s of a
-  /// [SliverTree].
-  RenderSliverTree({
-    required super.childManager,
-    required super.itemExtentBuilder,
-    required Map<UniqueKey, SliverTreeNodesAnimation> activeAnimations,
-  }) : _activeAnimations = activeAnimations;
-
-  // TODO(Piinks): There are some opportunities to cache even further as far as
-  // extents and layout offsets when using itemExtentBuilder from the super
-  // class as we do here. I want to yak shave that in a separate change.
-
-  /// The currently active [SliverTreeNode] animations.
-  ///
-  /// Since the index of animating nodes can change at any time, the unique key
-  /// is used to track an animation of nodes across frames.
-  Map<UniqueKey, SliverTreeNodesAnimation> get activeAnimations => _activeAnimations;
-  Map<UniqueKey, SliverTreeNodesAnimation> _activeAnimations;
-  set activeAnimations(Map<UniqueKey, SliverTreeNodesAnimation> value) {
-    if (_activeAnimations == value) {
-      return;
-    }
-    _activeAnimations = value;
-    markNeedsLayout();
-  }
-
-  // Maps the index of parents to the animation key of their children.
-  final Map<int, UniqueKey> _animationLeadingIndices = <int, UniqueKey>{};
-  // Maps ths key of child node animations to the fixed distance they are
-  // traversing during the animation. Determined at the start of the animation.
-  final Map<UniqueKey, double> _animationOffsets = <UniqueKey, double>{};
-  void _updateAnimationCache() {
-    _animationLeadingIndices.clear();
-    _activeAnimations.forEach((UniqueKey key, SliverTreeNodesAnimation animation) {
-      _animationLeadingIndices[animation.fromIndex - 1] = key;
-    });
-    // Remove any stored offsets or clip layers that are no longer actively
-    // animating.
-    _animationOffsets.removeWhere((UniqueKey key, _) => !_activeAnimations.keys.contains(key));
-    _clipHandles.removeWhere((UniqueKey key, LayerHandle<ClipRectLayer> handle) {
-      if (!_activeAnimations.keys.contains(key)) {
-        handle.layer = null;
-        return true;
-      }
-      return false;
-    });
-  }
-
-  @override
-  void setupParentData(RenderBox child) {
-    if (child.parentData is! _TreeNodeParentData) {
-      child.parentData = _TreeNodeParentData();
-    }
-  }
-
-  @override
-  void dispose() {
-    _clipHandles.removeWhere((UniqueKey key, LayerHandle<ClipRectLayer> handle) {
-      handle.layer = null;
-      return true;
-    });
-    super.dispose();
-  }
-
-  // TODO(Piinks): This should be made a public getter on the super class.
-  // Multiple subclasses are making use of it now, yak shave that refactor
-  // separately.
-  late SliverLayoutDimensions _currentLayoutDimensions;
-
-  @override
-  void performLayout() {
-    _updateAnimationCache();
-    _currentLayoutDimensions = SliverLayoutDimensions(
-        scrollOffset: constraints.scrollOffset,
-        precedingScrollExtent: constraints.precedingScrollExtent,
-        viewportMainAxisExtent: constraints.viewportMainAxisExtent,
-        crossAxisExtent: constraints.crossAxisExtent
-    );
-    super.performLayout();
-  }
-
-  @override
-  int getMinChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
-    // itemExtent is deprecated in the super class, we ignore it because we use
-    // the builder anyways.
-    return _getChildIndexForScrollOffset(scrollOffset);
-  }
-
-  @override
-  int getMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
-    // itemExtent is deprecated in the super class, we ignore it because we use
-    // the builder anyways.
-    return _getChildIndexForScrollOffset(scrollOffset);
-  }
-
-  int _getChildIndexForScrollOffset(double scrollOffset) {
-    if (scrollOffset == 0.0) {
-      return 0;
-    }
-    double position = 0.0;
-    int index = 0;
-    double totalAnimationOffset = 0.0;
-    double? itemExtent;
-    final int? childCount = childManager.estimatedChildCount;
-    while (position < scrollOffset) {
-      if (childCount != null && index > childCount - 1) {
-        break;
-      }
-
-      itemExtent = itemExtentBuilder(index, _currentLayoutDimensions);
-      if (itemExtent == null) {
-        break;
-      }
-      if (_animationLeadingIndices.keys.contains(index)) {
-        final UniqueKey animationKey = _animationLeadingIndices[index]!;
-        if (_animationOffsets[animationKey] == null) {
-          // We have not computed the distance this block is traversing over the
-          // lifetime of the animation.
-          _computeAnimationOffsetFor(animationKey, position);
-        }
-        // We add the offset accounting for the animation value.
-        totalAnimationOffset += _animationOffsets[animationKey]! * (1 - _activeAnimations[animationKey]!.value);
-      }
-      position += itemExtent - totalAnimationOffset;
-      // Reset the animation offset so we do not count it multiple times.
-      // totalAnimationOffset = 0.0;
-      ++index;
-    }
-    return index - 1;
-  }
-
-  void _computeAnimationOffsetFor(UniqueKey key, double position) {
-    assert(_activeAnimations[key] != null);
-    final double targetPosition = constraints.scrollOffset + constraints.remainingCacheExtent;
-    double currentPosition = position;
-    final int startingIndex = _activeAnimations[key]!.fromIndex;
-    final int lastIndex = _activeAnimations[key]!.toIndex;
-    int currentIndex = startingIndex;
-    double totalAnimatingOffset = 0.0;
-    // We animate only a portion of children that would be visible/in the cache
-    // extent, unless all children would fit on the screen.
-    while (currentIndex <= lastIndex && currentPosition < targetPosition) {
-      final double itemExtent = itemExtentBuilder(currentIndex, _currentLayoutDimensions)!;
-      totalAnimatingOffset += itemExtent;
-      currentPosition += itemExtent;
-      currentIndex++;
-    }
-    // For the life of this animation, which affects all children following
-    // startingIndex (regardless of if they are a child of the triggering
-    // parent), they will be offset by totalAnimatingOffset * the
-    // animation value. This is because even though more children can be
-    // scrolled into view, the same distance must be maintained for a smooth
-    // animation.
-    _animationOffsets[key] = totalAnimatingOffset;
-  }
-
-  @override
-  double indexToLayoutOffset(double itemExtent, int index) {
-    // itemExtent is deprecated in the super class, we ignore it because we use
-    // the builder anyways.
-    double position = 0.0;
-    int currentIndex = 0;
-    double totalAnimationOffset = 0.0;
-    double? itemExtent;
-    final int? childCount = childManager.estimatedChildCount;
-    while (currentIndex < index) {
-      if (childCount != null && currentIndex > childCount - 1) {
-        break;
-      }
-
-      itemExtent = itemExtentBuilder(currentIndex, _currentLayoutDimensions);
-      if (itemExtent == null) {
-        break;
-      }
-      if (_animationLeadingIndices.keys.contains(currentIndex)) {
-        final UniqueKey animationKey = _animationLeadingIndices[currentIndex]!;
-        assert(_animationOffsets[animationKey] != null);
-        // We add the offset accounting for the animation value.
-        totalAnimationOffset += _animationOffsets[animationKey]! * (1 - _activeAnimations[animationKey]!.value);
-      }
-      position += itemExtent;
-      currentIndex++;
-    }
-    return position - totalAnimationOffset;
-  }
-
-  final Map<UniqueKey, LayerHandle<ClipRectLayer>> _clipHandles = <UniqueKey, LayerHandle<ClipRectLayer>>{};
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (_animationLeadingIndices.isEmpty || firstChild == null) {
-      super.paint(context, offset);
-      return;
-    }
-    // Account for clip layers needed for animating segments.
-    int leadingIndex = indexOf(firstChild!);
-    final List<int> animationIndices = _animationLeadingIndices.keys.toList()..sort();
-    final List<({int leadingIndex, int trailingIndex})> paintSegments = <({int leadingIndex, int trailingIndex})>[];
-    while (animationIndices.isNotEmpty) {
-      final int trailingIndex = animationIndices.removeAt(0);
-      paintSegments.add((leadingIndex: leadingIndex, trailingIndex: trailingIndex));
-      leadingIndex = trailingIndex + 1;
-    }
-    paintSegments.add((leadingIndex: leadingIndex, trailingIndex: indexOf(lastChild!)));
-
-    RenderBox? nextChild = firstChild;
-    void paintUpTo(int index, RenderBox? child) {
-      while (child != null && indexOf(child) <= index) {
-        print(indexOf(child));
-        final double mainAxisDelta = childMainAxisPosition(child);
-        final Offset childOffset = Offset(
-          0.0, //TODO(Piinks): Re-implement indent in cross axis position
-          (child.parentData! as _TreeNodeParentData).layoutOffset!,
-        );
-
-        // If the child's visible interval (mainAxisDelta, mainAxisDelta + paintExtentOf(child))
-        // does not intersect the paint extent interval (0, constraints.remainingPaintExtent), it's hidden.
-        if (mainAxisDelta < constraints.remainingPaintExtent && mainAxisDelta + paintExtentOf(child) > 0) {
-          context.paintChild(child, childOffset);
-        }
-        child = childAfter(child);
-      }
-      nextChild = child;
-    }
-    // Paint, clipping for all but the first segment.
-    paintUpTo(paintSegments.removeAt(0).trailingIndex, nextChild);
-    // Paint the rest with clip layers.
-    while (paintSegments.isNotEmpty) {
-      final ({int leadingIndex, int trailingIndex}) segment = paintSegments.removeAt(0);
-      // final ({int leadingIndex, int trailingIndex}) segment = paintSegments.removeLast();
-
-      // Rect is calculated by the trailing edge of the parent (preceding
-      // leadingIndex), and the trailing edge of the trailing index. We cannot
-      // rely on the leading edge of the leading index, because it is currently moving.
-      final int parentIndex = math.max(segment.leadingIndex - 1, 0);
-      final double leadingOffset = indexToLayoutOffset( 0.0, parentIndex)
-        + (parentIndex == 0 ? 0.0 : itemExtentBuilder(parentIndex, _currentLayoutDimensions)!);
-      final double trailingOffset = indexToLayoutOffset(0.0, segment.trailingIndex)
-        + itemExtentBuilder(segment.trailingIndex, _currentLayoutDimensions)!;
-      final Rect rect = Rect.fromPoints(
-        Offset(0.0, leadingOffset),
-        Offset(constraints.crossAxisExtent, trailingOffset),
-      );
-      print(rect);
-      // We use the same animation key to keep track of the clip layer, unless
-      // this is the odd man out segment.
-      final UniqueKey key = _animationLeadingIndices[parentIndex]!;
-      _clipHandles[key] ??=  LayerHandle<ClipRectLayer>();
-      _clipHandles[key]!.layer = context.pushClipRect(
-        needsCompositing,
-        offset,
-        rect,
-        (PaintingContext context, Offset offset) {
-          paintUpTo(segment.trailingIndex, nextChild);
-        },
-        oldLayer: _clipHandles[key]!.layer,
-      );
-    }
-  }
-
-  // visit children methods - depth versus breadth traversal
-
-  // Don't forget keep alives
 }
