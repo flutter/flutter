@@ -30,7 +30,7 @@ jobs:
           cd flutter
           touch empty.json
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@70a41aba780001da0a30141984ae2a0c95d8704e
+        uses: peter-evans/create-pull-request@c55203cfde3e5c11a452d352b4393e68b85b4533
         with:
           path: flutter
           commit-message: blah
