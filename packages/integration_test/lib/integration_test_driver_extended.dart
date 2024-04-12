@@ -88,7 +88,6 @@ Future<void> integrationDriver({
   ResponseDataCallback? responseDataCallback = writeResponseData,
   bool writeResponseOnFailure = false,
   String testOutputDirectory = '',
-  String testOutputFilename = '',
 }) async {
   driver ??= await FlutterDriver.connect();
   // Test states that it's waiting on web driver commands.
@@ -176,13 +175,13 @@ Future<void> integrationDriver({
   if (response.allTestsPassed) {
     print('All tests passed.');
     if (responseDataCallback != null) {
-      await responseDataCallback(response.data, testOutputFilename: testOutputFilename, testOutputDirectory: testOutputDirectory);
+      await responseDataCallback(response.data, testOutputDirectory: testOutputDirectory);
     }
     exit(0);
   } else {
     print('Failure Details:\n${response.formattedFailureDetails}');
     if (responseDataCallback != null && writeResponseOnFailure) {
-      await responseDataCallback(response.data, testOutputFilename: testOutputFilename, testOutputDirectory: testOutputDirectory);
+      await responseDataCallback(response.data, testOutputDirectory: testOutputDirectory);
     }
     exit(1);
   }
