@@ -519,7 +519,7 @@ class SliverTree<T> extends StatefulWidget {
                     turns: node.isExpanded ? 0.25 : 0.0,
                     duration: animationStyle?.duration ?? SliverTree.defaultAnimationDuration,
                     curve: animationStyle?.curve ?? SliverTree.defaultAnimationCurve,
-                    child: const Icon(IconData(0x25BA), size: 15),
+                    child: const Icon(IconData(0x25BA), size: 14),
                   )
                 : null,
           ),
