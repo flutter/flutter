@@ -1637,7 +1637,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
       // The physics may allow overscroll when actually *scrolling*, but
       // dragging on the scrollbar does not always allow us to enter overscroll.
-      switch(ScrollConfiguration.of(context).getPlatform(context)) {
+      switch (ScrollConfiguration.of(context).getPlatform(context)) {
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
@@ -1729,7 +1729,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       return;
     }
 
-    final Offset delta = switch(direction) {
+    final Offset delta = switch (direction) {
       Axis.horizontal => Offset(primaryDelta, 0),
       Axis.vertical => Offset(0, primaryDelta),
     };
@@ -1741,6 +1741,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       localPosition: localPosition,
     );
     _thumbDrag!.update(scrollDetails); // Triggers updates to the ScrollPosition and ScrollbarPainter
+
     _lastDragUpdateOffset = localPosition;
   }
 
@@ -1769,7 +1770,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     final (Velocity adjustedVelocity, double primaryVelocity) = switch (platform) {
       TargetPlatform.iOS || TargetPlatform.android => (
         -velocity,
-        switch(direction) {
+        switch (direction) {
           Axis.horizontal => -velocity.pixelsPerSecond.dx,
           Axis.vertical => -velocity.pixelsPerSecond.dy,
         },
@@ -1959,15 +1960,15 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
       return gestures;
     }
     _cachedController = _effectiveScrollController;
-
     if (getScrollbarDirection() == Axis.horizontal) {
-      GestureRecognizerFactoryWithHandlers<_HorizontalThumbDragGestureRecognizer>(
-        () => _HorizontalThumbDragGestureRecognizer(
-          debugOwner: this,
-          customPaintKey: _scrollbarPainterKey,
-        ),
-        _initThumbDragGestureRecognizer,
-      );
+      gestures[_HorizontalThumbDragGestureRecognizer] =
+        GestureRecognizerFactoryWithHandlers<_HorizontalThumbDragGestureRecognizer>(
+          () => _HorizontalThumbDragGestureRecognizer(
+            debugOwner: this,
+            customPaintKey: _scrollbarPainterKey,
+          ),
+          _initThumbDragGestureRecognizer,
+        );
     } else {
       gestures[_VerticalThumbDragGestureRecognizer] =
         GestureRecognizerFactoryWithHandlers<_VerticalThumbDragGestureRecognizer>(
@@ -2200,6 +2201,7 @@ bool _isThumbEvent(GlobalKey customPaintKey, PointerEvent event) {
   if (customPaintKey.currentContext == null) {
     return false;
   }
+
   final CustomPaint customPaint = customPaintKey.currentContext!.widget as CustomPaint;
   final ScrollbarPainter painter = customPaint.foregroundPainter! as ScrollbarPainter;
   final Offset localOffset = _getLocalOffset(customPaintKey, event.position);
