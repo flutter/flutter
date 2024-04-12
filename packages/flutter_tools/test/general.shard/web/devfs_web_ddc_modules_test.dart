@@ -137,6 +137,7 @@ void main() {
             flutterRoot: null, // ignore: avoid_redundant_argument_values
             platform: FakePlatform(),
             webBuildDirectory: null, // ignore: avoid_redundant_argument_values
+            needsCoopCoep: false,
           );
         },
         overrides: <Type, Generator>{

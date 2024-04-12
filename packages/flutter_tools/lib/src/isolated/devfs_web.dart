@@ -247,6 +247,7 @@ class WebAssetServer implements AssetReader {
         flutterRoot: Cache.flutterRoot,
         webBuildDirectory: getWebBuildDirectory(),
         basePath: server.basePath,
+        needsCoopCoep: webRenderer == WebRendererMode.skwasm,
       );
       runZonedGuarded(() {
         shelf.serveRequests(httpServer!, releaseAssetServer.handle);
@@ -1112,11 +1113,13 @@ class ReleaseAssetServer {
     required String? webBuildDirectory,
     required String? flutterRoot,
     required Platform platform,
+    required bool needsCoopCoep,
     this.basePath = '',
   })  : _fileSystem = fileSystem,
         _platform = platform,
         _flutterRoot = flutterRoot,
         _webBuildDirectory = webBuildDirectory,
+        _needsCoopCoep = needsCoopCoep,
         _fileSystemUtils =
             FileSystemUtils(fileSystem: fileSystem, platform: platform);
 
@@ -1126,6 +1129,7 @@ class ReleaseAssetServer {
   final FileSystem _fileSystem;
   final FileSystemUtils _fileSystemUtils;
   final Platform _platform;
+  final bool _needsCoopCoep;
 
   /// The base path to serve from.
   ///
@@ -1178,7 +1182,7 @@ class ReleaseAssetServer {
               'application/octet-stream';
       return shelf.Response.ok(bytes, headers: <String, String>{
         'Content-Type': mimeType,
-        if (file.basename == 'index.html') ...<String, String>{
+        if (_needsCoopCoep && file.basename == 'index.html') ...<String, String>{
           'Cross-Origin-Opener-Policy': 'same-origin',
           'Cross-Origin-Embedder-Policy': 'require-corp',
         }
@@ -1190,8 +1194,10 @@ class ReleaseAssetServer {
     return shelf.Response.ok(file.readAsBytesSync(),
       headers: <String, String>{
         'Content-Type': 'text/html',
-        'Cross-Origin-Opener-Policy': 'same-origin',
-        'Cross-Origin-Embedder-Policy': 'require-corp',
+        if (_needsCoopCoep) ...<String, String>{
+          'Cross-Origin-Opener-Policy': 'same-origin',
+          'Cross-Origin-Embedder-Policy': 'require-corp',
+        },
       });
   }
 }

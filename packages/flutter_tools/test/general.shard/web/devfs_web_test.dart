@@ -76,6 +76,7 @@ void main() {
         flutterRoot: null,
         platform: FakePlatform(),
         webBuildDirectory: null,
+        needsCoopCoep: false,
       );
     }, overrides: <Type, Generator>{
       Logger: () => logger,
