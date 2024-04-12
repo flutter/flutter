@@ -21,6 +21,8 @@ void main() {
 
     final String complexLayoutPath = p.join(flutterDirectory.path, 'dev', 'benchmarks', 'complex_layout');
 
+    final String outputPath = Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? p.join(complexLayoutPath, 'build');
+
     await inDirectory(complexLayoutPath, () async {
       await flutter('drive', options: <String>[
         '--no-android-gradle-daemon',
@@ -31,10 +33,11 @@ void main() {
         p.join(complexLayoutPath, 'test_driver', 'semantics_perf.dart'),
         '-d',
         deviceId,
+        '--test-output-directory',
+        outputPath
       ]);
     });
 
-    final String outputPath = Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? p.join(complexLayoutPath, 'build');
     final String dataPath = p.join(outputPath, 'complex_layout_semantics_perf.json');
     return TaskResult.successFromFile(file(dataPath), benchmarkScoreKeys: <String>[
       'initialSemanticsTreeCreation',
