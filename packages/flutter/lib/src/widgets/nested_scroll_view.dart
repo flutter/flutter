@@ -629,7 +629,9 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   bool? get preferredBallisticIgnorePointer => null;
 
   @override
-  bool get outOfRange => false;
+  bool get outOfRange {
+    return (_outerPosition?.outOfRange ?? false) || _innerPositions.any((_NestedScrollPosition position) => position.outOfRange);
+  }
 
   _NestedScrollPosition? get _outerPosition {
     if (!_outerController.hasClients) {
