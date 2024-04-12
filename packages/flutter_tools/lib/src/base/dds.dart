@@ -62,13 +62,13 @@ Future<DartDevelopmentServiceInstance> defaultStartDartDevelopmentService(
         case {
           'state': 'started',
           'ddsUri': final String ddsUriStr,
-          'devToolsUri': final String? devToolsUriStr,
-          'dtd': final Map<String, Object?>? dtdInfo,
         }) {
       final Uri ddsUri = Uri.parse(ddsUriStr);
+      final String? devToolsUriStr = result['devToolsUri'] as String?;
       final Uri? devToolsUri =
           devToolsUriStr == null ? null : Uri.parse(devToolsUriStr);
-      final String? dtdUriStr = dtdInfo?['uri'] as String?;
+      final String? dtdUriStr =
+          (result['dtd'] as Map<String, Object?>?)?['uri'] as String?;
       final Uri? dtdUri = dtdUriStr == null ? null : Uri.parse(dtdUriStr);
 
       completer.complete((
@@ -80,13 +80,14 @@ Future<DartDevelopmentServiceInstance> defaultStartDartDevelopmentService(
     } else if (result
         case {
           'state': 'error',
-          'error': final String? error,
-          'ddsExceptionDetails': final Map<String, Object?>? exceptionDetails,
+          'error': final String error,
         }) {
+      final Map<String, Object?>? exceptionDetails =
+          result['ddsExceptionDetails'] as Map<String, Object?>?;
       completer.completeError(
         exceptionDetails != null
             ? DartDevelopmentServiceException.fromJson(exceptionDetails)
-            : StateError(error ?? event),
+            : StateError(error),
       );
     } else {
       throw StateError('Unexpected result from DDS: $result');

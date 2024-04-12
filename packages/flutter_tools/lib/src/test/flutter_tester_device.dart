@@ -175,9 +175,6 @@ class FlutterTesterTestDevice extends TestDevice {
           await _ddsLauncher.startDartDevelopmentServiceFromDebuggingOptions(
             detectedUri,
             debuggingOptions: debuggingOptions,
-            // TODO(bkonyi):
-            /*ipv6: host!.type == io.InternetAddressType.IPv6, 
-            enableDevTools: debuggingOptions.startPaused && !machine!,*/
           );
           forwardingUri = _ddsLauncher.uri;
           devToolsUri = _ddsLauncher.devToolsUri;
