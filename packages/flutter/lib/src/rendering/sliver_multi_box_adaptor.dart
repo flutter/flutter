@@ -1118,7 +1118,12 @@ class RenderSliverTree extends RenderSliverVariedExtentList {
     }
 
     RenderBox? nextChild = firstChild;
-    void paintUpTo(int index, RenderBox? child) {
+    void paintUpTo(
+      int index,
+      RenderBox? child,
+      PaintingContext context,
+      Offset offset,
+    ) {
       while (child != null && indexOf(child) <= index) {
         final double mainAxisDelta = childMainAxisPosition(child);
         final TreeNodeParentData parentData = child.parentData! as TreeNodeParentData;
@@ -1138,7 +1143,7 @@ class RenderSliverTree extends RenderSliverVariedExtentList {
     }
     if (_animationLeadingIndices.isEmpty) {
       // There are no animations running.
-      paintUpTo(indexOf(lastChild!), firstChild);
+      paintUpTo(indexOf(lastChild!), firstChild, context, offset);
       return;
     }
 
@@ -1155,11 +1160,10 @@ class RenderSliverTree extends RenderSliverVariedExtentList {
     paintSegments.add((leadingIndex: leadingIndex, trailingIndex: indexOf(lastChild!)));
 
     // Paint, clipping for all but the first segment.
-    paintUpTo(paintSegments.removeAt(0).trailingIndex, nextChild);
+    paintUpTo(paintSegments.removeAt(0).trailingIndex, nextChild, context, offset);
     // Paint the rest with clip layers.
     while (paintSegments.isNotEmpty) {
       final ({int leadingIndex, int trailingIndex}) segment = paintSegments.removeAt(0);
-      // final ({int leadingIndex, int trailingIndex}) segment = paintSegments.removeLast();
 
       // Rect is calculated by the trailing edge of the parent (preceding
       // leadingIndex), and the trailing edge of the trailing index. We cannot
@@ -1182,7 +1186,7 @@ class RenderSliverTree extends RenderSliverVariedExtentList {
         offset,
         rect,
         (PaintingContext context, Offset offset) {
-          paintUpTo(segment.trailingIndex, nextChild);
+          paintUpTo(segment.trailingIndex, nextChild, context, offset);
         },
         oldLayer: _clipHandles[key]!.layer,
       );
