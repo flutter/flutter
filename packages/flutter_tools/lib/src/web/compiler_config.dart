@@ -22,7 +22,7 @@ sealed class WebCompilerConfig {
 
   /// The compiler optimization level.
   ///
-  /// Valid values are O1 (lowest, profile default) to O4 (highest, release default).
+  /// Valid values are O0 (lowest, debug default) to O4 (highest, release default).
   final int optimizationLevel;
 
   /// Returns which target this compiler outputs (js or wasm)

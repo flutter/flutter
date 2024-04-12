@@ -1348,6 +1348,24 @@ dev_dependencies:
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
     });
+
+    testUsingContext('Web renderer defaults to Skwasm when using wasm', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--platform=chrome',
+        '--wasm',
+      ]);
+      expect(testRunner.lastDebuggingOptionsValue.webRenderer, WebRendererMode.skwasm);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
   });
 }
 

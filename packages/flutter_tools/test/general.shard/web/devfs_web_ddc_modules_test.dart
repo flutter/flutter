@@ -137,6 +137,7 @@ void main() {
             flutterRoot: null, // ignore: avoid_redundant_argument_values
             platform: FakePlatform(),
             webBuildDirectory: null, // ignore: avoid_redundant_argument_values
+            needsCoopCoep: false,
           );
         },
         overrides: <Type, Generator>{
@@ -927,6 +928,7 @@ void main() {
               nullSafetyMode: NullSafetyMode.unsound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.html,
+              isWasm: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1063,6 +1065,7 @@ void main() {
               nullSafetyMode: NullSafetyMode.sound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.html,
+              isWasm: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1199,6 +1202,7 @@ void main() {
                 nullSafetyMode: NullSafetyMode.sound,
                 ddcModuleSystem: usesDdcModuleSystem,
                 webRenderer: WebRendererMode.canvaskit,
+                isWasm: false,
                 rootDirectory: globals.fs.currentDirectory,
               );
               webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1272,6 +1276,7 @@ void main() {
               nullSafetyMode: NullSafetyMode.sound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
+              isWasm: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1321,6 +1326,7 @@ void main() {
               nullSafetyMode: NullSafetyMode.sound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
+              isWasm: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1372,6 +1378,7 @@ void main() {
               nullSafetyMode: NullSafetyMode.sound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.auto,
+              isWasm: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1425,6 +1432,7 @@ void main() {
               nullSafetyMode: NullSafetyMode.unsound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
+              isWasm: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1463,6 +1471,7 @@ void main() {
         const <String, String>{},
         NullSafetyMode.unsound,
         webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
         testMode: true);
 
     expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
@@ -1496,6 +1505,7 @@ void main() {
         },
         NullSafetyMode.unsound,
         webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
         testMode: true);
 
     expect(webAssetServer.defaultResponseHeaders[extraHeaderKey],
@@ -1596,6 +1606,7 @@ void main() {
               nullSafetyMode: NullSafetyMode.unsound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
+              isWasm: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);

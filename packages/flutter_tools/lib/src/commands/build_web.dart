@@ -64,7 +64,7 @@ class BuildWebCommand extends BuildSubCommand {
       help:
           'Sets the optimization level used for Dart compilation to JavaScript/Wasm.',
       defaultsTo: '${WebCompilerConfig.kDefaultOptimizationLevel}',
-      allowed: const <String>['1', '2', '3', '4'],
+      allowed: const <String>['0', '1', '2', '3', '4'],
     );
 
     //

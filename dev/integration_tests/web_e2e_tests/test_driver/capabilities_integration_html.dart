@@ -8,8 +8,10 @@ import 'package:integration_test/integration_test.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('isCanvasKit returns false in HTML mode', (WidgetTester tester) async {
+  testWidgets('capabilities are set properly in HTML mode', (WidgetTester tester) async {
     await tester.pumpAndSettle();
     expect(isCanvasKit, false);
+    expect(isSkwasm, false);
+    expect(isSkiaWeb, false);
   });
 }
