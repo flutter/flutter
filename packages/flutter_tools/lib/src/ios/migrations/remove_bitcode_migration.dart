@@ -16,7 +16,7 @@ class RemoveBitcodeMigration extends ProjectMigrator {
   final File _xcodeProjectInfoFile;
 
   @override
-  bool migrate() {
+  Future<bool> migrate() async {
     if (_xcodeProjectInfoFile.existsSync()) {
       processFileLines(_xcodeProjectInfoFile);
     } else {

@@ -1320,7 +1320,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   ScrollController? _cachedController;
   Timer? _fadeoutTimer;
   late AnimationController _fadeoutAnimationController;
-  late Animation<double> _fadeoutOpacityAnimation;
+  late CurvedAnimation _fadeoutOpacityAnimation;
   final GlobalKey  _scrollbarPainterKey = GlobalKey();
   bool _hoverIsActive = false;
   bool _thumbDragging = false;
@@ -2006,6 +2006,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     _fadeoutAnimationController.dispose();
     _fadeoutTimer?.cancel();
     scrollbarPainter.dispose();
+    _fadeoutOpacityAnimation.dispose();
     super.dispose();
   }
 
