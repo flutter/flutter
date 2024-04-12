@@ -1175,6 +1175,9 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 
   @override
   Future<void> shutdown() async => shutdownCalled = true;
+
+  @override
+  Future<void> invokeServiceExtensions(FlutterDevice? device) async {}
 }
 
 class FakePrebuiltApplicationPackage extends Fake implements PrebuiltApplicationPackage {

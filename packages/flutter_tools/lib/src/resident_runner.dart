@@ -344,7 +344,7 @@ class FlutterDevice {
       globals.printTrace('Successfully connected to service protocol: $vmServiceUri');
 
       vmService = service;
-      if (debuggingOptions.enableDds) {
+      if (debuggingOptions.enableDds && !existingDds) {
         // Don't await this as service extensions won't return if the target
         // isolate is paused on start.
         unawaited(device!.dds.invokeServiceExtensions(this));
