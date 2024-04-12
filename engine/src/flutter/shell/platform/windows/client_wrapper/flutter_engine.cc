@@ -50,7 +50,7 @@ bool FlutterEngine::Run(const char* entry_point) {
     std::cerr << "Cannot run an engine that failed creation." << std::endl;
     return false;
   }
-  if (has_been_run_) {
+  if (run_succeeded_) {
     std::cerr << "Cannot run an engine more than once." << std::endl;
     return false;
   }
@@ -58,7 +58,7 @@ bool FlutterEngine::Run(const char* entry_point) {
   if (!run_succeeded) {
     std::cerr << "Failed to start engine." << std::endl;
   }
-  has_been_run_ = true;
+  run_succeeded_ = true;
   return run_succeeded;
 }
 

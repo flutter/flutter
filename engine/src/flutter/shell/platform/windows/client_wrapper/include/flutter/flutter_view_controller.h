@@ -27,10 +27,10 @@ class FlutterViewController {
   // Creates a FlutterView that can be parented into a Windows View hierarchy
   // either using HWNDs.
   //
+  // This also creates a new FlutterEngine.
+  //
   // |dart_project| will be used to configure the engine backing this view.
-  explicit FlutterViewController(int width,
-                                 int height,
-                                 const DartProject& project);
+  FlutterViewController(int width, int height, const DartProject& project);
 
   virtual ~FlutterViewController();
 
@@ -65,7 +65,7 @@ class FlutterViewController {
   FlutterDesktopViewControllerRef controller_ = nullptr;
 
   // The backing engine
-  std::unique_ptr<FlutterEngine> engine_;
+  std::shared_ptr<FlutterEngine> engine_;
 
   // The owned FlutterView.
   std::unique_ptr<FlutterView> view_;
