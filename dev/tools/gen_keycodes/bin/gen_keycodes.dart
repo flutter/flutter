@@ -26,14 +26,14 @@ import 'package:path/path.dart' as path;
 /// Get contents of the file that contains the physical key mapping in Chromium
 /// source.
 Future<String> getChromiumCodes() async {
-  final Uri keyCodesUri = Uri.parse('https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/master/ui/events/keycodes/dom/dom_code_data.inc?format=TEXT');
+  final Uri keyCodesUri = Uri.parse('https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/main/ui/events/keycodes/dom/dom_code_data.inc?format=TEXT');
   return utf8.decode(base64.decode(await http.read(keyCodesUri)));
 }
 
 /// Get contents of the file that contains the logical key mapping in Chromium
 /// source.
 Future<String> getChromiumKeys() async {
-  final Uri keyCodesUri = Uri.parse('https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/master/ui/events/keycodes/dom/dom_key_data.inc?format=TEXT');
+  final Uri keyCodesUri = Uri.parse('https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/main/ui/events/keycodes/dom/dom_key_data.inc?format=TEXT');
   return utf8.decode(base64.decode(await http.read(keyCodesUri)));
 }
 
