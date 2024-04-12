@@ -829,7 +829,6 @@ class ProxiedDartDevelopmentService with DartDevelopmentServiceLocalOperationsMi
       return;
     }
 
-    // TODO(bkonyi): handle devToolsServerAddress for remote case
     final Uri remoteVMServiceUri = vmServiceUri.replace(port: remoteVMServicePort);
 
     String? remoteUriStr;
