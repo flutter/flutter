@@ -5,12 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTEREMBEDDERKEYRESPONDER_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTEREMBEDDERKEYRESPONDER_H_
 
-#import <Foundation/NSObject.h>
-#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
 
-#include "fml/memory/weak_ptr.h"
-
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyPrimaryResponder.h"
 #import "flutter/shell/platform/embedder/embedder.h"
 
