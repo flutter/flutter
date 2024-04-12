@@ -10,7 +10,6 @@ import 'package:path/path.dart' as path;
 
 import '../browser.dart';
 import '../run_command.dart';
-import '../runner_utils.dart';
 import '../service_worker_test.dart';
 import '../utils.dart';
 
