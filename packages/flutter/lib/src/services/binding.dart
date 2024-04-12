@@ -366,7 +366,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
       // Called when the system dismisses the system context menu, such as when
       // the user taps outside the menu. Not called when Flutter shows a new
       // system context menu while an old one is still visible.
-      case 'System.onDismissSystemContextMenu':
+      case 'ContextMenu.onDismissSystemContextMenu':
         for (final SystemContextMenuClient client in _systemContextMenuClients) {
           client.handleSystemHide();
         }
