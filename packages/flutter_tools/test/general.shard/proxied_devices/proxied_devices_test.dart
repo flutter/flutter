@@ -231,6 +231,28 @@ void main() {
         // Wait the event queue and make sure that it doesn't crash.
         await pumpEventQueue();
       });
+
+      testWithoutContext('should not forward new data to socket after disconnection', () async {
+        // Data will be forwarded before disconnection
+        serverDaemonConnection.sendEvent('proxy.data.$id', null, <int>[1, 2, 3]);
+        await pumpEventQueue();
+        expect(fakeSocket.addedData, <List<int>>[<int>[1, 2, 3]]);
+
+        // It will try to disconnect the remote port when socket is done.
+        fakeSocket.doneCompleter.complete(true);
+        final DaemonMessage message = await broadcastOutput.first;
+
+        expect(message.data['id'], isNotNull);
+        expect(message.data['method'], 'proxy.disconnect');
+        expect(message.data['params'], <String, Object?>{
+          'id': 'random_id',
+        });
+        await pumpEventQueue();
+
+        serverDaemonConnection.sendEvent('proxy.data.$id', null, <int>[4, 5, 6]);
+        await pumpEventQueue();
+        expect(fakeSocket.addedData, <List<int>>[<int>[1, 2, 3]]);
+      });
     });
 
     testWithoutContext('disposes multiple sockets correctly', () async {
