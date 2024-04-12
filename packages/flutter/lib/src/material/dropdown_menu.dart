@@ -438,7 +438,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   @override
   void initState() {
     super.initState();
-    if(widget.controller != null) {
+    if (widget.controller != null) {
       _localTextEditingController = widget.controller;
     } else {
       _localTextEditingController = TextEditingController();
@@ -460,7 +460,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
   @override
   void dispose() {
-   if(widget.controller == null) {
+   if (widget.controller == null) {
     _localTextEditingController?.dispose();
     _localTextEditingController = null;
    }
