@@ -385,11 +385,13 @@ TaskFunction createStackSizeTest() {
 }
 
 TaskFunction createFullscreenTextfieldPerfTest() {
+  final String outputDirectory = const LocalFileSystem().systemTempDirectory.createTempSync('build').path;
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
     'fullscreen_textfield_perf',
     testDriver: 'test_driver/fullscreen_textfield_perf_test.dart',
+    testOuputDirectory: outputDirectory,
   ).run;
 }
 
