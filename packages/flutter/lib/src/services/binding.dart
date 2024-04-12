@@ -614,3 +614,21 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
     }
   }
 }
+
+/// An interface to receive calls related to the system context menu from the
+/// engine.
+///
+/// Currently this is only supported on iOS.
+///
+/// See also:
+///  * [SystemContextMenuController], which uses this to provide a fully
+///    featured way to control the system context menu.
+///  * [MediaQuery.maybeSupportsShowingSystemContextMenu], which indicates
+///    whether the system context menu is supported.
+mixin SystemContextMenuClient {
+  /// Handles the system hiding a context menu.
+  ///
+  /// This is called for all instances of [SystemContextMenuController], so it's
+  /// not guaranteed that this instance was the one that was hidden.
+  void handleSystemHide();
+}

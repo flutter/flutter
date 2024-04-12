@@ -16,7 +16,7 @@ class SystemContextMenuExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('RawAutocomplete Basic'),
+          title: const Text('SystemContextMenu Basic Example'),
         ),
         body: const Center(
           child: SystemContextMenuBasicExample(),
