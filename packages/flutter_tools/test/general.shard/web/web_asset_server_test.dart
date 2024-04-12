@@ -136,4 +136,44 @@ void main() {
 
     expect(response.statusCode, HttpStatus.ok);
   });
+
+  testWithoutContext('release asset server serves html content with COOP/COEP headers when specified', () async {
+    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base,
+      fileSystem: fileSystem,
+      platform: platform,
+      flutterRoot: '/flutter',
+      webBuildDirectory: 'build/web',
+      needsCoopCoep: true,
+    );
+    fileSystem.file('build/web/index.html')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('<html></html>');
+    final Response response = await assetServer
+      .handle(Request('GET', Uri.parse('http://localhost:8080/index.html')));
+
+    expect(response.statusCode, HttpStatus.ok);
+    final Map<String, String> headers = response.headers;
+    expect(headers['Cross-Origin-Opener-Policy'], 'same-origin');
+    expect(headers['Cross-Origin-Embedder-Policy'], 'require-corp');
+  });
+
+  testWithoutContext('release asset server serves html content without COOP/COEP headers when specified', () async {
+    final ReleaseAssetServer assetServer = ReleaseAssetServer(Uri.base,
+      fileSystem: fileSystem,
+      platform: platform,
+      flutterRoot: '/flutter',
+      webBuildDirectory: 'build/web',
+      needsCoopCoep: false,
+    );
+    fileSystem.file('build/web/index.html')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('<html></html>');
+    final Response response = await assetServer
+      .handle(Request('GET', Uri.parse('http://localhost:8080/index.html')));
+
+    expect(response.statusCode, HttpStatus.ok);
+    final Map<String, String> headers = response.headers;
+    expect(headers.containsKey('Cross-Origin-Opener-Policy'), false);
+    expect(headers.containsKey('Cross-Origin-Embedder-Policy'), false);
+  });
 }
