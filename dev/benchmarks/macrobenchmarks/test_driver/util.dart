@@ -42,6 +42,7 @@ void macroPerfTest(
   Duration duration = const Duration(seconds: 3),
   Future<void> Function(FlutterDriver driver)? driverOps,
   Future<void> Function(FlutterDriver driver)? setupOps,
+  String? testOutputDirectory,
 }) {
   test(testName, () async {
     late Timeline timeline;
@@ -67,6 +68,6 @@ void macroPerfTest(
     expect(timeline, isNotNull);
 
     final TimelineSummary summary = TimelineSummary.summarize(timeline);
-    await summary.writeTimelineToFile(testName, pretty: true);
+    await summary.writeTimelineToFile(testName, pretty: true, destinationDirectory: testOutputDirectory);
   }, timeout: Timeout.none);
 }
