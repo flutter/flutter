@@ -725,3 +725,9 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
     closed = true;
   }
 }
+
+/// A fake [Logger] that throws the [Invocation] for any method call.
+class FakeLogger implements Logger {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw invocation; // ignore: only_throw_errors
+}

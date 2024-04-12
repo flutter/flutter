@@ -25,7 +25,6 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
-import '../base/logger_test.dart';
 
 final Platform macosPlatform = FakePlatform(
   operatingSystem: 'macos',

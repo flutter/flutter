@@ -1241,16 +1241,23 @@ class DeviceDomain extends Domain {
     final bool? disableServiceAuthCodes = _getBoolArg(args, 'disableServiceAuthCodes');
     final String vmServiceUriStr = _getStringArg(args, 'vmServiceUri', required: true)!;
     final bool enableDevTools = _getBoolArg(args, 'enableDevTools') ?? false;
+    final String? devToolsServerAddressStr = _getStringArg(args, 'devToolsServerAddress');
 
     final Device? device = await daemon.deviceDomain._getDevice(deviceId);
     if (device == null) {
       throw DaemonException("device '$deviceId' not found");
     }
 
+    Uri? devToolsServerAddress;
+    if (devToolsServerAddressStr != null) {
+      devToolsServerAddress = Uri.parse(devToolsServerAddressStr);
+    }
+
     await device.dds.startDartDevelopmentService(
       Uri.parse(vmServiceUriStr),
       disableServiceAuthCodes: disableServiceAuthCodes,
       enableDevTools: enableDevTools,
+      devToolsServerAddress: devToolsServerAddress,
     );
     unawaited(device.dds.done.whenComplete(() => sendEvent('device.dds.done.$deviceId')));
     return <String, Object?>{

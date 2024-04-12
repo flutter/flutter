@@ -1408,6 +1408,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
     bool enableDevTools = false,
     bool cacheStartupProfile = false,
     String? google3WorkspaceRoot,
+    Uri? devToolsServerAddress,
   }) async {}
 
   @override

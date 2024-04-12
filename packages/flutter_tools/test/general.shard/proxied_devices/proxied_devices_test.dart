@@ -634,9 +634,12 @@ void main() {
         'deviceId': 'test_id',
         'vmServiceUri': 'http://127.0.0.1:200/fake',
         'disableServiceAuthCodes': true,
+        'enableDevTools': false,
       });
 
-      serverDaemonConnection.sendResponse(startMessage.data['id']!, 'http://127.0.0.1:300/remote');
+      serverDaemonConnection.sendResponse( startMessage.data['id']!, const <String, Object?>{
+        'ddsUri': 'http://127.0.0.1:300/remote',
+      });
 
       await startFuture;
       expect(portForwarder.receivedLocalForwardedPort, 100);
@@ -690,6 +693,7 @@ void main() {
         'deviceId': 'test_id',
         'vmServiceUri': 'http://127.0.0.1:200/fake',
         'disableServiceAuthCodes': true,
+        'enableDevTools': false,
       });
 
       serverDaemonConnection.sendResponse(startMessage.data['id']!, <String, Object?>{
@@ -787,6 +791,7 @@ void main() {
         'deviceId': 'test_id',
         'vmServiceUri': 'http://127.0.0.1:200/fake',
         'disableServiceAuthCodes': true,
+        'enableDevTools': false,
       });
 
       serverDaemonConnection.sendErrorResponse(startMessage.data['id']!, 'command not understood: device.startDartDevelopmentService', StackTrace.current);
@@ -1162,6 +1167,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
     bool enableDevTools = false,
     bool cacheStartupProfile = false,
     String? google3WorkspaceRoot,
+    Uri? devToolsServerAddress,
   }) async {
     startCalled = true;
     startUri = vmServiceUri;

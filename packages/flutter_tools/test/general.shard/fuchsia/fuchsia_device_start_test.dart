@@ -28,7 +28,6 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../base/logger_test.dart';
 
 void main() {
   group('Fuchsia app start and stop: ', () {

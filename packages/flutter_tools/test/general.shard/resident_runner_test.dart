@@ -1932,6 +1932,7 @@ flutter:
                             bool ipv6 = false, Uri? serviceUri,
                             List<String> cachedUserTags = const <String>[],
                             String? google3WorkspaceRoot,
+                            Uri? devToolsServerAddress,
                           }) {
       throw DartDevelopmentServiceException.existingDdsInstance(
         'Existing DDS at http://localhost/existingDdsInMessage.',
@@ -1977,6 +1978,7 @@ flutter:
                             bool ipv6 = false, Uri? serviceUri,
                             List<String> cachedUserTags = const <String>[],
                             String? google3WorkspaceRoot,
+                            Uri? devToolsServerAddress,
                           }) async {
       expect(uri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isFalse);
@@ -2023,6 +2025,7 @@ flutter:
       Uri? serviceUri,
       List<String> cachedUserTags = const <String>[],
       String? google3WorkspaceRoot,
+      Uri? devToolsServerAddress,
     }) {
       expect(uri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isTrue);
@@ -2078,7 +2081,7 @@ flutter:
     expect(nextPlatform('fuchsia'), 'android');
     expect(() => nextPlatform('unknown'), throwsAssertionError);
   });
-  
+
   testUsingContext('HotRunner sets asset directory when first evict assets', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,

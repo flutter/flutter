@@ -798,6 +798,7 @@ class ProxiedDartDevelopmentService with DartDevelopmentServiceLocalOperationsMi
     bool enableDevTools = false,
     bool cacheStartupProfile = false,
     String? google3WorkspaceRoot,
+    Uri? devToolsServerAddress,
   }) async {
     // Locate the original VM service port on the remote daemon.
     // A proxied device has two PortForwarder. Check both to determine which
@@ -806,23 +807,29 @@ class ProxiedDartDevelopmentService with DartDevelopmentServiceLocalOperationsMi
         _proxiedPortForwarder.originalRemotePort(vmServiceUri.port) ??
         _devicePortForwarder.originalRemotePort(vmServiceUri.port);
 
-    if (remoteVMServicePort == null) {
-      _logger.printTrace('VM service port is not a forwarded port. Start DDS locally.');
+    Future<void> startLocalDds() async {
       _ddsStartedLocally = true;
       await _localDds.startDartDevelopmentService(
         vmServiceUri,
-        device: device,
         ddsPort: ddsPort,
         ipv6: ipv6,
         disableServiceAuthCodes: disableServiceAuthCodes,
         cacheStartupProfile: cacheStartupProfile,
         enableDevTools: enableDevTools,
         google3WorkspaceRoot: google3WorkspaceRoot,
+        devToolsServerAddress: devToolsServerAddress,
       );
+      unawaited(_localDds.invokeServiceExtensions(device));
       unawaited(_localDds.done.then(_completer.complete));
+    }
+
+    if (remoteVMServicePort == null) {
+      _logger.printTrace('VM service port is not a forwarded port. Start DDS locally.');
+      await startLocalDds();
       return;
     }
 
+    // TODO(bkonyi): handle devToolsServerAddress for remote case
     final Uri remoteVMServiceUri = vmServiceUri.replace(port: remoteVMServicePort);
 
     String? remoteUriStr;
@@ -844,6 +851,7 @@ class ProxiedDartDevelopmentService with DartDevelopmentServiceLocalOperationsMi
           'vmServiceUri': remoteVMServiceUri.toString(),
           'disableServiceAuthCodes': disableServiceAuthCodes,
           'enableDevTools': enableDevTools,
+          if (devToolsServerAddress != null) 'devToolsServerAddress': devToolsServerAddress.toString(),
         }
       ));
       remoteUriStr = response['ddsUri'] as String?;
@@ -865,17 +873,7 @@ class ProxiedDartDevelopmentService with DartDevelopmentServiceLocalOperationsMi
 
     if (remoteUriStr == null) {
       _logger.printTrace('Remote daemon cannot start DDS. Start a local DDS instead.');
-      _ddsStartedLocally = true;
-      await _localDds.startDartDevelopmentService(
-        vmServiceUri,
-        ddsPort: ddsPort,
-        ipv6: ipv6,
-        disableServiceAuthCodes: disableServiceAuthCodes,
-        cacheStartupProfile: cacheStartupProfile,
-        enableDevTools: enableDevTools,
-        google3WorkspaceRoot: google3WorkspaceRoot,
-      );
-      unawaited(_localDds.done.then(_completer.complete));
+      await startLocalDds();
       return;
     }
 

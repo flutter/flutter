@@ -31,6 +31,7 @@ Future<DartDevelopmentServiceInstance> defaultStartDartDevelopmentService(
   required List<String> cachedUserTags,
   Uri? serviceUri,
   String? google3WorkspaceRoot,
+  Uri? devToolsServerAddress,
 }) async {
   final String exe = const p.LocalPlatform().resolvedExecutable;
   final io.Process process = await io.Process.start(
@@ -44,9 +45,11 @@ Future<DartDevelopmentServiceInstance> defaultStartDartDevelopmentService(
       ],
       if (!enableAuthCodes) '--disable-service-auth-codes',
       if (enableDevTools) '--serve-devtools',
-      if (google3WorkspaceRoot != null) '--google3-workspace-root=$google3WorkspaceRoot',
-      for (final String tag in cachedUserTags)
-        '--cached-user-tags=$tag',
+      if (google3WorkspaceRoot != null)
+        '--google3-workspace-root=$google3WorkspaceRoot',
+      if (devToolsServerAddress != null)
+        '--devtools-server-address=$devToolsServerAddress',
+      for (final String tag in cachedUserTags) '--cached-user-tags=$tag',
     ],
   );
   final Completer<DartDevelopmentServiceInstance> completer =
@@ -101,6 +104,7 @@ typedef DDSLauncherCallback = Future<DartDevelopmentServiceInstance> Function(
   required List<String> cachedUserTags,
   Uri? serviceUri,
   String? google3WorkspaceRoot,
+  Uri? devToolsServerAddress,
 });
 
 // TODO(fujino): This should be direct injected, rather than mutable global state.
@@ -111,11 +115,9 @@ class DartDevelopmentServiceException implements Exception {
   factory DartDevelopmentServiceException.fromJson(Map<String, Object?> json) {
     if (json
         case {
-          'ddsExceptionDetails': {
-            'error_code': final int errorCode,
-            'message': final String message,
-            'uri': final String? uri
-          }
+          'error_code': final int errorCode,
+          'message': final String message,
+          'uri': final String? uri
         }) {
       return switch (errorCode) {
         existingDdsInstanceError =>
@@ -201,6 +203,7 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
 
   DartDevelopmentServiceInstance? _ddsInstance;
 
+  @override
   Uri? get uri => _ddsInstance?.serviceUri ?? _existingDdsUri;
   Uri? _existingDdsUri;
 
@@ -208,9 +211,6 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
   Uri? get devToolsUri => _ddsInstance?.devToolsUri;
 
   Uri? get dtdUri => _ddsInstance?.dtdUri;
-
-  @override
-  FlutterDevice? _device;
 
   Future<void> get done => _completer.future;
   final Completer<void> _completer = Completer<void>();
@@ -221,16 +221,15 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
-    FlutterDevice? device,
     int? ddsPort,
     bool? disableServiceAuthCodes,
     bool? ipv6,
     bool enableDevTools = true,
     bool cacheStartupProfile = false,
     String? google3WorkspaceRoot,
+    Uri? devToolsServerAddress,
   }) async {
     assert(_ddsInstance == null);
-    _device = device;
     final Uri ddsUri = Uri(
       scheme: 'http',
       host: ((ipv6 ?? false)
@@ -261,6 +260,7 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
             ? const <String>['AppStartUp']
             : const <String>[],
         google3WorkspaceRoot: google3WorkspaceRoot,
+        devToolsServerAddress: devToolsServerAddress,
       );
       final io.Process? process = _ddsInstance?.process;
 
@@ -269,8 +269,6 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
       if (process != null) {
         unawaited(process.exitCode.whenComplete(completeFuture));
       }
-
-      await invokeServiceExtensions(device);
     } on DartDevelopmentServiceException catch (e) {
       _logger.printTrace('Warning: Failed to start DDS: ${e.message}');
       if (e is ExistingDartDevelopmentServiceException) {
@@ -293,9 +291,9 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
 }
 
 mixin DartDevelopmentServiceLocalOperationsMixin {
+  Uri? get uri;
   Uri? get devToolsUri;
   Logger get _logger;
-  FlutterDevice? get _device;
 
   @visibleForTesting
   bool get calledLaunchDevToolsInBrowser => _calledLaunchDevToolsInBrowser;
@@ -303,39 +301,38 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
 
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
-    FlutterDevice? device,
     int? ddsPort,
     bool? disableServiceAuthCodes,
     bool? ipv6,
     bool enableDevTools = true,
     bool cacheStartupProfile = false,
     String? google3WorkspaceRoot,
+    Uri? devToolsServerAddress,
   });
 
   Future<void> startDartDevelopmentServiceFromDebuggingOptions(
     Uri vmServiceUri, {
     required DebuggingOptions debuggingOptions,
-    FlutterDevice? device,
   }) =>
       startDartDevelopmentService(
         vmServiceUri,
-        device: device,
         ddsPort: debuggingOptions.ddsPort,
         disableServiceAuthCodes: debuggingOptions.disableServiceAuthCodes,
         ipv6: debuggingOptions.ipv6,
         enableDevTools: debuggingOptions.enableDevTools,
         cacheStartupProfile: debuggingOptions.cacheStartupProfile,
         google3WorkspaceRoot: debuggingOptions.google3WorkspaceRoot,
+        devToolsServerAddress: debuggingOptions.devToolsServerAddress,
       );
 
-  bool launchDevToolsInBrowser() {
+  bool launchDevToolsInBrowser(FlutterDevice device) {
     _calledLaunchDevToolsInBrowser = true;
     if (devToolsUri == null) {
       return false;
     }
     assert(devToolsUri != null);
     _logger.printStatus(
-        'Launching Flutter DevTools for ${_device!.device!.name} at $devToolsUri');
+        'Launching Flutter DevTools for ${device.device!.name} at $devToolsUri');
     unawaited(Chrome.start(<String>[devToolsUri!.toString()]));
     return true;
   }
@@ -345,28 +342,51 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
 
   Future<void> invokeServiceExtensions(FlutterDevice? device) async {
     await Future.wait(<Future<void>>[
-      _maybeCallDevToolsUriServiceExtension(device),
+      maybeCallDevToolsUriServiceExtension(
+        device: device,
+        uri: devToolsUri,
+      ),
       _callConnectedVmServiceUriExtension(device),
     ]);
   }
 
-  Future<void> _maybeCallDevToolsUriServiceExtension(
-    FlutterDevice? device,
+  /// Returns null if the service extension cannot be found on the device.
+  Future<bool> _waitForExtensionsForDevice(
+    FlutterDevice flutterDevice,
+    String extension,
   ) async {
-    if (devToolsUri != null && device?.vmService != null) {
-      await _callDevToolsUriExtension(device!);
+    try {
+      await flutterDevice.vmService?.findExtensionIsolate(
+        extension,
+      );
+      return true;
+    } on VmServiceDisappearedException {
+      _logger.printTrace(
+        'The VM Service for ${flutterDevice.device} disappeared while trying to'
+        ' find the $extension service extension. Skipping subsequent DevTools '
+        'setup for this device.',
+      );
+      return false;
+    }
+  }
+
+  Future<void> maybeCallDevToolsUriServiceExtension(
+      {required FlutterDevice? device, required Uri? uri}) async {
+    if (uri != null && device?.vmService != null) {
+      await _callDevToolsUriExtension(device!, uri);
     }
   }
 
   Future<void> _callDevToolsUriExtension(
     FlutterDevice device,
+    Uri uri,
   ) async {
     try {
       await _invokeRpcOnFirstView(
         'ext.flutter.activeDevToolsServerAddress',
         device: device,
         params: <String, dynamic>{
-          'value': devToolsUri.toString(),
+          'value': uri.toString(),
         },
       );
     } on Exception catch (e) {
@@ -379,13 +399,7 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
 
   Future<void> _callConnectedVmServiceUriExtension(
       FlutterDevice? device) async {
-    if (device == null) {
-      return;
-    }
-    // TODO(bkonyi): can this just be set from the local DDS URI?
-    final Uri? uri =
-        device.vmService!.httpAddress ?? device.vmService!.wsAddress;
-    if (uri == null) {
+    if (device == null || uri == null) {
       return;
     }
     try {
@@ -410,6 +424,9 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
     required FlutterDevice device,
     required Map<String, dynamic> params,
   }) async {
+    if (!(await _waitForExtensionsForDevice(device, method))) {
+      return;
+    }
     if (device.targetPlatform == TargetPlatform.web_javascript) {
       await device.vmService!.callMethodWrapper(
         method,

@@ -554,6 +554,7 @@ class FakeDartDevelopmentService extends Fake
     bool enableDevTools = false,
     bool cacheStartupProfile = false,
     String? google3WorkspaceRoot,
+    Uri? devToolsServerAddress,
   }) async {
     started = true;
   }

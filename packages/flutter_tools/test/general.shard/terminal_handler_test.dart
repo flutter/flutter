@@ -25,7 +25,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
 import '../src/fake_vm_services.dart';
-import 'base/logger_test.dart';
+import '../src/fakes.dart';
 
 final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
   id: '1',
@@ -837,7 +837,7 @@ void main() {
       await terminalHandler.processTerminalInput('v');
       for (final FlutterDevice? device in runner.flutterDevices) {
         expect(device!.device!.dds.calledLaunchDevToolsInBrowser, isTrue);
-      }    
+      }
     });
 
     testWithoutContext('w,W - debugDumpApp without service protocol is skipped', () async {

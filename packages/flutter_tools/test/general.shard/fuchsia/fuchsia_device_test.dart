@@ -35,7 +35,6 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_vm_services.dart';
 import '../../src/fakes.dart';
-import '../base/logger_test.dart';
 
 final vm_service.Isolate fakeIsolate = vm_service.Isolate(
   id: '1',
@@ -1056,6 +1055,7 @@ class FakeDartDevelopmentService extends Fake
     bool cacheStartupProfile = false,
     bool enableDevTools = false,
     String? google3WorkspaceRoot,
+    Uri? devToolsServerAddress,
   }) async {}
 
   @override

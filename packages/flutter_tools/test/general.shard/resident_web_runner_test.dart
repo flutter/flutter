@@ -42,7 +42,6 @@ import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart' as test_fakes;
-import 'base/logger_test.dart';
 
 const List<VmServiceExpectation> kAttachLogExpectations =
     <VmServiceExpectation>[
@@ -1002,7 +1001,7 @@ void main() {
   testUsingContext('cleanup of resources is safe to call multiple times',
       () async {
     final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
-    mockDevice.dds = DartDevelopmentService(logger: FakeLogger());
+    mockDevice.dds = DartDevelopmentService(logger: test_fakes.FakeLogger());
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       ...kAttachExpectations,
     ]);

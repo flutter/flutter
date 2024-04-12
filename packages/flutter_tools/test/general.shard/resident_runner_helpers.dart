@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:dds/dds.dart' as dds;
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/dds.dart';
@@ -160,21 +159,28 @@ const DartDevelopmentServiceInstance fakeDartDevelopmentServiceInstance = (
 
 final Uri testUri = Uri.parse('foo://bar');
 
-// This implements [dds.DartDevelopmentService], not the [DartDevelopmentService]
-// interface from package:flutter_tools.
-class FakeDartDevelopmentService extends Fake implements dds.DartDevelopmentService {
+class FakeDartDevelopmentService extends Fake with DartDevelopmentServiceLocalOperationsMixin implements DartDevelopmentService {
   @override
   Future<void> get done => Future<void>.value();
 
   @override
   Uri? get uri => null;
+
+  @override
+  Uri? get devToolsUri => null;
+
+  @override
+  Uri? get dtdUri => null;
+
+  @override
+  Future<void> handleHotRestart(FlutterDevice? device) async {}
 }
 
-class FakeDartDevelopmentServiceException implements dds.DartDevelopmentServiceException {
+class FakeDartDevelopmentServiceException implements DartDevelopmentServiceException {
   FakeDartDevelopmentServiceException({this.message = defaultMessage});
 
   @override
-  final int errorCode = dds.DartDevelopmentServiceException.existingDdsInstanceError;
+  final int errorCode = DartDevelopmentServiceException.existingDdsInstanceError;
 
   @override
   final String message;
@@ -301,6 +307,9 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> updateReloadStatus(bool wasReloadSuccessful) async { }
+
+  @override
+  Future<void> handleHotRestart() async {}
 }
 
 class FakeDelegateFlutterDevice extends FlutterDevice {
@@ -430,7 +439,7 @@ class FakeDevice extends Fake implements Device {
   String get name => 'FakeDevice';
 
   @override
-  late DartDevelopmentService dds;
+  late DartDevelopmentService dds = FakeDartDevelopmentService();
 
   @override
   Future<void> dispose() async {

@@ -220,7 +220,7 @@ void main() {
           stderr: 'failure',
         ),
       ]);
-      device = createDevice(enableVmService: true); 
+      device = createDevice(enableVmService: true);
       originalDdsLauncher = ddsLauncherCallback;
       ddsLauncherCallback = (Uri remoteVmServiceUri, {
         required bool enableAuthCodes,
@@ -229,6 +229,7 @@ void main() {
         required List<String> cachedUserTags,
         Uri? serviceUri,
         String? google3WorkspaceRoot,
+        Uri? devToolsServerAddress,
       }) async {
         return (process: null, serviceUri: Uri.parse('http://localhost:1234'), devToolsUri: null, dtdUri: null);
       };
