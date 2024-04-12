@@ -11,6 +11,9 @@ import 'utils.dart';
 
 export 'tolerance.dart' show Tolerance;
 
+// Examples can assume:
+// late AnimationController _controller;
+
 /// Structure that describes a spring's constants.
 ///
 /// Used to configure a [SpringSimulation].
@@ -103,7 +106,7 @@ enum SpringType {
 /// ```dart
 /// void _startSpringMotion() {
 ///   _controller.animateWith(SpringSimulation(
-///     SpringDescription(
+///     const SpringDescription(
 ///       mass: 1.0,
 ///       stiffness: 300.0,
 ///       damping: 15.0,
