@@ -994,6 +994,7 @@ class DebuggingOptions {
     this.webHeaders = const <String, String>{},
     this.webLaunchUrl,
     this.webRenderer = WebRendererMode.auto,
+    this.webUseWasm = false,
     this.vmserviceOutFile,
     this.fastStart = false,
     this.nullAssertions = false,
@@ -1028,6 +1029,7 @@ class DebuggingOptions {
       this.webLaunchUrl,
       this.webHeaders = const <String, String>{},
       this.webRenderer = WebRendererMode.auto,
+      this.webUseWasm = false,
       this.cacheSkSL = false,
       this.traceAllowlist,
       this.enableImpeller = ImpellerStatus.platformDefault,
@@ -1112,6 +1114,7 @@ class DebuggingOptions {
     required this.webHeaders,
     required this.webLaunchUrl,
     required this.webRenderer,
+    required this.webUseWasm,
     required this.vmserviceOutFile,
     required this.fastStart,
     required this.nullAssertions,
@@ -1206,6 +1209,9 @@ class DebuggingOptions {
 
   /// Which web renderer to use for the debugging session
   final WebRendererMode webRenderer;
+
+  /// Whether to compile to webassembly
+  final bool webUseWasm;
 
   /// A file where the VM Service URL should be written after the application is started.
   final String? vmserviceOutFile;
@@ -1315,6 +1321,7 @@ class DebuggingOptions {
     'webLaunchUrl': webLaunchUrl,
     'webHeaders': webHeaders,
     'webRenderer': webRenderer.name,
+    'webUseWasm': webUseWasm,
     'vmserviceOutFile': vmserviceOutFile,
     'fastStart': fastStart,
     'nullAssertions': nullAssertions,
@@ -1375,6 +1382,7 @@ class DebuggingOptions {
       webHeaders: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
       webLaunchUrl: json['webLaunchUrl'] as String?,
       webRenderer: WebRendererMode.values.byName(json['webRenderer']! as String),
+      webUseWasm: json['webUseWasm']! as bool,
       vmserviceOutFile: json['vmserviceOutFile'] as String?,
       fastStart: json['fastStart']! as bool,
       nullAssertions: json['nullAssertions']! as bool,

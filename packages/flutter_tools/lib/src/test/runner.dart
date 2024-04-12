@@ -51,7 +51,6 @@ abstract class FlutterTestRunner {
     String? icudtlPath,
     Directory? coverageDirectory,
     bool web = false,
-    bool useWasm = false,
     String? randomSeed,
     String? reporter,
     String? fileReporter,
@@ -116,7 +115,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
     String? icudtlPath,
     Directory? coverageDirectory,
     bool web = false,
-    bool useWasm = false,
     String? randomSeed,
     String? reporter,
     String? fileReporter,
@@ -186,7 +184,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         testFiles: testFiles.map((Uri uri) => uri.toFilePath()).toList(),
         buildInfo: debuggingOptions.buildInfo,
         webRenderer: debuggingOptions.webRenderer,
-        useWasm: useWasm,
+        useWasm: debuggingOptions.webUseWasm,
       );
       testArgs
         ..add('--platform=chrome')
@@ -219,7 +217,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
             ),
             testTimeRecorder: testTimeRecorder,
             webRenderer: debuggingOptions.webRenderer,
-            useWasm: useWasm,
+            useWasm: debuggingOptions.webUseWasm,
           );
         },
       );

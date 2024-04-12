@@ -127,9 +127,9 @@ class ResidentWebRunner extends ResidentRunner {
   // and platform initialization.
   Directory? _generatedEntrypointDirectory;
 
-  // Only the debug builds of the web support the service protocol.
+  // Only non-wasm debug builds of the web support the service protocol.
   @override
-  bool get supportsServiceProtocol => isRunningDebug && deviceIsDebuggable;
+  bool get supportsServiceProtocol => !debuggingOptions.webUseWasm && isRunningDebug && deviceIsDebuggable;
 
   @override
   bool get debuggingEnabled => isRunningDebug && deviceIsDebuggable;
@@ -302,13 +302,14 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
           ddcModuleSystem: debuggingOptions.buildInfo.ddcModuleFormat == DdcModuleFormat.ddc,
           webRenderer: debuggingOptions.webRenderer,
+          isWasm: debuggingOptions.webUseWasm,
           rootDirectory: fileSystem.directory(projectRootPath),
         );
         Uri url = await device!.devFS!.create();
         if (debuggingOptions.tlsCertKeyPath != null && debuggingOptions.tlsCertPath != null) {
           url = url.replace(scheme: 'https');
         }
-        if (debuggingOptions.buildInfo.isDebug) {
+        if (debuggingOptions.buildInfo.isDebug && !debuggingOptions.webUseWasm) {
           await runSourceGenerators();
           final UpdateFSReport report = await _updateDevFS(fullRestart: true);
           if (!report.success) {
@@ -333,12 +334,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             target,
             debuggingOptions.buildInfo,
             ServiceWorkerStrategy.none,
-            compilerConfigs: <WebCompilerConfig>[
-              JsCompilerConfig.run(
-                nativeNullAssertions: debuggingOptions.nativeNullAssertions,
-                renderer: debuggingOptions.webRenderer,
-              )
-            ]
+            compilerConfigs: <WebCompilerConfig>[_compilerConfig],
           );
         }
         await device!.device!.startApp(
@@ -376,6 +372,17 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     }
   }
 
+  WebCompilerConfig get _compilerConfig => (debuggingOptions.webUseWasm)
+    ? WasmCompilerConfig(
+        optimizationLevel: 0,
+        stripWasm: false,
+        renderer: debuggingOptions.webRenderer
+      )
+    : JsCompilerConfig.run(
+        nativeNullAssertions: debuggingOptions.nativeNullAssertions,
+        renderer: debuggingOptions.webRenderer,
+      );
+
   @override
   Future<OperationResult> restart({
     bool fullRestart = false,
@@ -389,7 +396,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       progressId: 'hot.restart',
     );
 
-    if (debuggingOptions.buildInfo.isDebug) {
+    if (debuggingOptions.buildInfo.isDebug && !debuggingOptions.webUseWasm) {
       await runSourceGenerators();
       // Full restart is always false for web, since the extra recompile is wasteful.
       final UpdateFSReport report = await _updateDevFS();
@@ -416,12 +423,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           target,
           debuggingOptions.buildInfo,
           ServiceWorkerStrategy.none,
-          compilerConfigs: <WebCompilerConfig>[
-            JsCompilerConfig.run(
-              nativeNullAssertions: debuggingOptions.nativeNullAssertions,
-              renderer: debuggingOptions.webRenderer,
-            )
-          ],
+          compilerConfigs: <WebCompilerConfig>[_compilerConfig],
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
