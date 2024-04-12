@@ -124,7 +124,7 @@ dart_library("args") {
   package_root = "$dart_src/third_party/pkg/args"
   package_name = "args"
 
-  pubspec = "$package_root/pubspec.yaml"
+  language_version = "2.17"
 
   deps = []
 
