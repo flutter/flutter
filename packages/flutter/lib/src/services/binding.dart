@@ -362,8 +362,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
 
   Future<dynamic> _handlePlatformMessage(MethodCall methodCall) async {
     final String method = methodCall.method;
-    assert(method == 'SystemChrome.systemUIChange' || method == 'System.requestAppExit');
     switch (method) {
+      // Called when the system dismisses the system context menu, such as when
+      // the user taps outside the menu. Not called when Flutter shows a new
+      // system context menu while an old one is still visible.
+      case 'System.onDismissSystemContextMenu':
+        for (final SystemContextMenuClient client in _systemContextMenuClients) {
+          client.handleSystemHide();
+        }
       case 'SystemChrome.systemUIChange':
         final List<dynamic> args = methodCall.arguments as List<dynamic>;
         if (_systemUiChangeCallback != null) {
@@ -371,6 +377,8 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
         }
       case 'System.requestAppExit':
         return <String, dynamic>{'response': (await handleRequestAppExit()).name};
+      default:
+        throw AssertionError('Method "$method" not handled.');
     }
   }
 
@@ -514,6 +522,19 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   @protected
   Future<void> initializationComplete() async {
     await SystemChannels.platform.invokeMethod('System.initializationComplete');
+  }
+
+  final Set<SystemContextMenuClient> _systemContextMenuClients = <SystemContextMenuClient>{};
+
+  /// Registers a [SystemContextMenuClient] that will receive system context
+  /// menu calls from the engine.
+  static void registerSystemContextMenuClient(SystemContextMenuClient client) {
+    instance._systemContextMenuClients.add(client);
+  }
+
+  /// Unregisters a [SystemContextMenuClient] so that it is no longer called.
+  static void unregisterSystemContextMenuClient(SystemContextMenuClient client) {
+    instance._systemContextMenuClients.remove(client);
   }
 }
 

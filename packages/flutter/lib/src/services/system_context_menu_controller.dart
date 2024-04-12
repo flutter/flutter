@@ -2,12 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
-
-import 'system_channels.dart';
-import 'text_input.dart';
+import 'package:flutter/services.dart';
 
 /// Allows access to the system context menu.
 ///
@@ -34,7 +30,7 @@ class SystemContextMenuController with SystemContextMenuClient {
   SystemContextMenuController({
     this.onSystemHide,
   }) {
-    TextInput.registerSystemContextMenuClient(this);
+    ServicesBinding.registerSystemContextMenuClient(this);
   }
 
   /// Called when the system has hidden the context menu.
@@ -146,11 +142,16 @@ class SystemContextMenuController with SystemContextMenuClient {
     );
   }
 
+  @override
+  String toString() {
+    return 'SystemContextMenuController(onSystemHide=$onSystemHide, _hiddenBySystem=$_hiddenBySystem, _isVisible=$_isVisible, _isDiposed=$_isDisposed)';
+  }
+
   /// Used to release resources when this instance will never be used again.
   void dispose() {
     assert(!_isDisposed);
     hide();
-    TextInput.unregisterSystemContextMenuClient(this);
+    ServicesBinding.unregisterSystemContextMenuClient(this);
     _isDisposed = true;
   }
 }

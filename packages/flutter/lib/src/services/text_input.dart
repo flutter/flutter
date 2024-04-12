@@ -1808,7 +1808,7 @@ class TextInput {
 
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
     final String method = methodCall.method;
-    switch (methodCall.method) {
+    switch (method) {
       case 'TextInputClient.focusElement':
         final List<dynamic> args = methodCall.arguments as List<dynamic>;
         _scribbleClients[args[0]]?.onScribbleFocus(Offset((args[1] as num).toDouble(), (args[2] as num).toDouble()));
@@ -1929,13 +1929,6 @@ class TextInput {
         ));
       case 'TextInputClient.onConnectionClosed':
         _currentConnection!._client.connectionClosed();
-      // Called when the system dismisses the system context menu, such as when
-      // the user taps outside the menu. Not called when Flutter shows a new
-      // system context menu while an old one is still visible.
-      case 'TextInputClient.onDismissSystemContextMenu':
-        for (final SystemContextMenuClient client in _systemContextMenuClients) {
-          client.handleSystemHide();
-        }
       case 'TextInputClient.showAutocorrectionPromptRect':
         _currentConnection!._client.showAutocorrectionPromptRect(args[1] as int, args[2] as int);
       case 'TextInputClient.showToolbar':
@@ -2142,19 +2135,6 @@ class TextInput {
   /// Unregisters a [ScribbleClient] with [elementIdentifier].
   static void unregisterScribbleElement(String elementIdentifier) {
     TextInput._instance._scribbleClients.remove(elementIdentifier);
-  }
-
-  final Set<SystemContextMenuClient> _systemContextMenuClients = <SystemContextMenuClient>{};
-
-  /// Registers a [SystemContextMenuClient] that will receive system context
-  /// menu calls from the engine.
-  static void registerSystemContextMenuClient(SystemContextMenuClient client) {
-    TextInput._instance._systemContextMenuClients.add(client);
-  }
-
-  /// Unregisters a [SystemContextMenuClient] so that it is no longer called.
-  static void unregisterSystemContextMenuClient(SystemContextMenuClient client) {
-    TextInput._instance._systemContextMenuClients.remove(client);
   }
 }
 
