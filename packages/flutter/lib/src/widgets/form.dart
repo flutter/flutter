@@ -680,7 +680,7 @@ enum AutovalidateMode {
   /// interaction.
   onUserInteraction,
 
-  /// If you want validate all fields of a [Form] after the user has interacted
+  /// In order to validate all fields of a [Form] after the first time the user interacts
   /// with one, use [always] instead.
   onUnfocus,
 }
