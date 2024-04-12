@@ -11,6 +11,9 @@
 
 #import "KeyCodeMap_Internal.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+
+FLUTTER_ASSERT_ARC
 
 namespace {
 
@@ -165,7 +168,7 @@ static uint64_t GetLogicalKeyForEvent(FlutterUIPressProxy* press, NSNumber* mayb
   const char* characters =
       getEventCharacters(press.key.charactersIgnoringModifiers, press.key.keyCode);
   NSString* keyLabel =
-      characters == nullptr ? nil : [[[NSString alloc] initWithUTF8String:characters] autorelease];
+      characters == nullptr ? nil : [[NSString alloc] initWithUTF8String:characters];
   NSUInteger keyLabelLength = [keyLabel length];
   // If this key is printable, generate the logical key from its Unicode
   // value. Control keys such as ESC, CTRL, and SHIFT are not printable. HOME,
@@ -252,7 +255,7 @@ void HandleResponse(bool handled, void* user_data);
  */
 @interface FlutterKeyPendingResponse : NSObject
 
-@property(readonly) FlutterEmbedderKeyResponder* responder;
+@property(readonly, weak) FlutterEmbedderKeyResponder* responder;
 
 @property(nonatomic) uint64_t responseId;
 
@@ -302,7 +305,7 @@ void HandleResponse(bool handled, void* user_data);
  * Only set in debug mode. Nil in release mode, or if the callback has not been
  * handled.
  */
-@property(readonly) NSString* debugHandleSource;
+@property(readonly, copy) NSString* debugHandleSource;
 @end
 
 @implementation FlutterKeyCallbackGuard {
@@ -317,11 +320,6 @@ void HandleResponse(bool handled, void* user_data);
     _handled = FALSE;
   }
   return self;
-}
-
-- (void)dealloc {
-  [_callback release];
-  [super dealloc];
 }
 
 - (void)pendTo:(nonnull NSMutableDictionary<NSNumber*, FlutterAsyncKeyCallback>*)pendingResponses
@@ -364,7 +362,7 @@ void HandleResponse(bool handled, void* user_data);
  * The keys of the dictionary are physical keys, while the values are the logical keys
  * of the key down event.
  */
-@property(nonatomic, retain, readonly) NSMutableDictionary<NSNumber*, NSNumber*>* pressingRecords;
+@property(nonatomic, copy, readonly) NSMutableDictionary<NSNumber*, NSNumber*>* pressingRecords;
 
 /**
  * A constant mask for NSEvent.modifierFlags that Flutter synchronizes with.
@@ -403,7 +401,7 @@ void HandleResponse(bool handled, void* user_data);
  * Its values are |responseId|s, and keys are the callback that was received
  * along with the event.
  */
-@property(nonatomic, retain, readonly)
+@property(nonatomic, copy, readonly)
     NSMutableDictionary<NSNumber*, FlutterAsyncKeyCallback>* pendingResponses;
 
 /**
@@ -502,13 +500,6 @@ void HandleResponse(bool handled, void* user_data);
   return self;
 }
 
-- (void)dealloc {
-  [_sendEvent release];
-  [_pressingRecords release];
-  [_pendingResponses release];
-  [super dealloc];
-}
-
 - (void)handlePress:(nonnull FlutterUIPressProxy*)press
            callback:(FlutterAsyncKeyCallback)callback API_AVAILABLE(ios(13.4)) {
   if (@available(iOS 13.4, *)) {
@@ -522,11 +513,11 @@ void HandleResponse(bool handled, void* user_data);
   FlutterKeyCallbackGuard* guardedCallback = nil;
   switch (press.phase) {
     case UIPressPhaseBegan:
-      guardedCallback = [[[FlutterKeyCallbackGuard alloc] initWithCallback:callback] autorelease];
+      guardedCallback = [[FlutterKeyCallbackGuard alloc] initWithCallback:callback];
       [self handlePressBegin:press callback:guardedCallback];
       break;
     case UIPressPhaseEnded:
-      guardedCallback = [[[FlutterKeyCallbackGuard alloc] initWithCallback:callback] autorelease];
+      guardedCallback = [[FlutterKeyCallbackGuard alloc] initWithCallback:callback];
       [self handlePressEnd:press callback:guardedCallback];
       break;
     case UIPressPhaseChanged:
@@ -632,9 +623,9 @@ void HandleResponse(bool handled, void* user_data);
   _responseId += 1;
   uint64_t responseId = _responseId;
   FlutterKeyPendingResponse* pending =
-      [[[FlutterKeyPendingResponse alloc] initWithHandler:self responseId:responseId] autorelease];
+      [[FlutterKeyPendingResponse alloc] initWithHandler:self responseId:responseId];
   [callback pendTo:_pendingResponses withId:responseId];
-  _sendEvent(event, HandleResponse, pending);
+  _sendEvent(event, HandleResponse, (__bridge_retained void* _Nullable)pending);
 }
 
 - (void)sendEmptyEvent {
@@ -883,7 +874,7 @@ void HandleResponse(bool handled, void* user_data);
 
 namespace {
 void HandleResponse(bool handled, void* user_data) {
-  FlutterKeyPendingResponse* pending = reinterpret_cast<FlutterKeyPendingResponse*>(user_data);
+  FlutterKeyPendingResponse* pending = (__bridge_transfer FlutterKeyPendingResponse*)user_data;
   [pending.responder handleResponse:handled forId:pending.responseId];
 }
 }  // namespace

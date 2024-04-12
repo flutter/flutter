@@ -27,18 +27,13 @@ FLUTTER_ASSERT_ARC;
 @interface TestKeyEvent : NSObject
 @property(nonatomic) FlutterKeyEvent* data;
 @property(nonatomic) FlutterKeyEventCallback callback;
-@property(nonatomic) void* _Nullable userData;
-- (nonnull instancetype)initWithEvent:(const FlutterKeyEvent*)event
-                             callback:(nullable FlutterKeyEventCallback)callback
-                             userData:(void* _Nullable)userData;
-- (BOOL)hasCallback;
-- (void)respond:(BOOL)handled;
+@property(nonatomic, nullable) void* userData;
 @end
 
 @implementation TestKeyEvent
 - (instancetype)initWithEvent:(const FlutterKeyEvent*)event
                      callback:(nullable FlutterKeyEventCallback)callback
-                     userData:(void* _Nullable)userData {
+                     userData:(nullable void*)userData {
   self = [super init];
   _data = new FlutterKeyEvent(*event);
   if (event->character != nullptr) {
