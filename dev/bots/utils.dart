@@ -301,8 +301,10 @@ String locationInFile(ResolvedUnitResult unit, AstNode node, String workingDirec
   return '${path.relative(path.relative(unit.path, from: workingDirectory))}:${unit.lineInfo.getLocation(node.offset).lineNumber}';
 }
 
+// The seed used to shuffle tests. If not passed with
+// --test-randomize-ordering-seed=<seed> on the command line, it will be set the
+// first time it is accessed. Pass zero to turn off shuffling.
 String? _shuffleSeed;
-
 String get shuffleSeed {
   if (_shuffleSeed == null) {
     // Attempt to load from the command-line argument
