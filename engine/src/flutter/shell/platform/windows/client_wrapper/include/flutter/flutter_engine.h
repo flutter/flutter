@@ -95,7 +95,7 @@ class FlutterEngine : public PluginRegistry {
                                                       LPARAM lparam);
 
  private:
-  // For access to RelinquishEngine.
+  // For access to the engine handle.
   friend class FlutterViewController;
 
   // Gives up ownership of |engine_|, but keeps a weak reference to it.
@@ -113,10 +113,11 @@ class FlutterEngine : public PluginRegistry {
   // Whether or not this wrapper owns |engine_|.
   bool owns_engine_ = true;
 
-  // Whether the engine has been run. This will be true if Run has been called,
-  // or if RelinquishEngine has been called (since the view controller will
-  // run the engine if it hasn't already been run).
-  bool has_been_run_ = false;
+  // Whether |Run| has been called successfully.
+  //
+  // This is used to improve error messages. This can be false while the engine
+  // is running if the engine was started by creating a view.
+  bool run_succeeded_ = false;
 
   // The callback to execute once the next frame is drawn.
   std::function<void()> next_frame_callback_ = nullptr;
