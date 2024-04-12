@@ -20,7 +20,8 @@ class Carousel extends StatefulWidget {
     this.itemSnap = false,
     this.clipExtent,
     this.controller,
-    this.backgroundChildren,
+    this.scrollDirection = Axis.horizontal,
+    this.reverse = false,
     required this.childWeights,
     required this.children,
   });
@@ -28,7 +29,8 @@ class Carousel extends StatefulWidget {
   final double? clipExtent;
   final bool itemSnap;
   final CarouselController? controller;
-  final List<Widget>? backgroundChildren;
+  final Axis scrollDirection;
+  final bool reverse;
   final List<int> childWeights;
   final List<Widget> children;
 
@@ -64,12 +66,24 @@ class _CarouselState extends State<Carousel> {
 
   void _initController(List<int> weights) {
     final double fraction = weights.first / weights.sum;
-    print('fraction is: $fraction');
     _controller = widget.controller ?? CarouselController(viewportFraction: fraction);
+  }
+
+  AxisDirection _getDirection(BuildContext context) {
+    switch (widget.scrollDirection) {
+      case Axis.horizontal:
+        assert(debugCheckHasDirectionality(context));
+        final TextDirection textDirection = Directionality.of(context);
+        final AxisDirection axisDirection = textDirectionToAxisDirection(textDirection);
+        return widget.reverse ? flipAxisDirection(axisDirection) : axisDirection;
+      case Axis.vertical:
+        return widget.reverse ? AxisDirection.up : AxisDirection.down;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final AxisDirection axisDirection = _getDirection(context);
     final ScrollPhysics physics = widget.itemSnap
       ? const CarouselScrollPhysics()
       : ScrollConfiguration.of(context).getScrollPhysics(context);
@@ -88,16 +102,15 @@ class _CarouselState extends State<Carousel> {
       },
       child: Scrollable(
         // dragStartBehavior: widget.dragStartBehavior,
-        axisDirection: AxisDirection.right,
+        axisDirection: axisDirection,
         controller: _controller,
         physics: physics, // defaults to CarouselScrollPhysics
         // restorationId: widget.restorationId,
         // scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
         viewportBuilder: (BuildContext context, ViewportOffset position) {
-          print('controller offset: ${_controller.offset}');
           return Viewport(
             cacheExtent: 0.0,
-            axisDirection: AxisDirection.right,
+            axisDirection: axisDirection,
             offset: position,
             // clipBehavior: widget.clipBehavior,
             slivers: <Widget>[
@@ -106,10 +119,7 @@ class _CarouselState extends State<Carousel> {
                 childExtentList: widget.childWeights,
                 delegate: SliverChildBuilderDelegate(
                   (BuildContext context, int index) {
-                    return _CarouselItemStack(
-                      background: widget.backgroundChildren?.elementAt(index),
-                      foreground: widget.children.elementAt(index)
-                    );
+                    return widget.children.elementAt(index);
                   },
                   childCount: widget.children.length,
                 ),
@@ -118,34 +128,6 @@ class _CarouselState extends State<Carousel> {
           );
         },
       ),
-    );
-  }
-}
-
-class _CarouselItemStack extends StatefulWidget {
-  const _CarouselItemStack({
-    this.background,
-    required this.foreground,
-  });
-
-  final Widget? background;
-  final Widget foreground;
-
-  @override
-  State<_CarouselItemStack> createState() => __CarouselItemStackState();
-}
-
-class __CarouselItemStackState extends State<_CarouselItemStack> {
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      alignment: AlignmentDirectional.center,
-      children: [
-        if (widget.background != null) Positioned.fill(
-          child: widget.background!
-        ),
-        widget.foreground,
-      ],
     );
   }
 }
@@ -282,7 +264,7 @@ class RenderSliverCarousel extends RenderSliverMultiBoxAdaptor {
   double indexToLayoutOffset(int index) {
     if (_firstVisibleItemIndex == index && firstChildExtent - _gapBetweenCurrentAndPrev > clipExtent) { // pinned
       return constraints.scrollOffset;
-    } else if (_firstVisibleItemIndex == index) { // do not pin
+    } else if (_firstVisibleItemIndex == index) { // stop pinning
       return constraints.scrollOffset - _gapBetweenCurrentAndPrev;
     } else if (index > _firstVisibleItemIndex) {
       double visibleItemsTotalExtent = _firstVisibleItemExtent;
@@ -317,7 +299,6 @@ class RenderSliverCarousel extends RenderSliverMultiBoxAdaptor {
 
   @override
   void performLayout() {
-    print('performLayout');
     final SliverConstraints constraints = this.constraints;
     childManager.didStartLayout();
     childManager.setDidUnderflow(false);
@@ -330,7 +311,6 @@ class RenderSliverCarousel extends RenderSliverMultiBoxAdaptor {
     final int firstIndex = getMinChildIndexForScrollOffset();
     final int? targetLastIndex = targetEndScrollOffset.isFinite ?
         getMaxChildIndexForScrollOffset() : null;
-
     if (firstChild != null) {
       final int leadingGarbage = calculateLeadingGarbage(firstIndex: firstIndex);
       final int trailingGarbage = targetLastIndex != null ? calculateTrailingGarbage(lastIndex: targetLastIndex) : 0;
@@ -623,7 +603,7 @@ class CarouselController extends ScrollController {
   CarouselController({
     // this.initialPage = 0,
     // this.keepPage = true,
-    this.viewportFraction = 1.0,
+    required this.viewportFraction,
   }) : assert(viewportFraction > 0.0);
 
   /// The fraction of the viewport that the first carousel item should occupy.

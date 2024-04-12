@@ -39,13 +39,7 @@ class _CarouselExampleState extends State<CarouselExample> {
         body: Center(
           child: Carousel(
             itemSnap: true,
-            childWeights: const <int>[3,3,3,2,1],
-            // backgroundChildren: List<Widget>.generate(data.length, (int index) {
-            //   return Image(
-            //     fit: BoxFit.cover,
-            //     image: images[index % images.length],
-            //   );
-            // }),
+            childWeights: const <int>[1,5,1],
             children: List<Card>.generate(data.length, (int index) {
               return Card.outlined(
                 clipBehavior: Clip.antiAlias,
@@ -58,7 +52,7 @@ class _CarouselExampleState extends State<CarouselExample> {
                 ),
                 color: Colors.transparent,
                 child: Stack(
-                  children: [
+                  children: <Widget>[
                     Positioned.fill(
                       child: Image(
                         fit: BoxFit.cover,
