@@ -346,9 +346,16 @@ int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
 
 /// A sliver for lazily displaying [SliverTreeNode]s that expand and collapse in
 /// a vertically scrolling [Viewport].
+///
+/// The rows of the tree are laid our on demand, using
+/// [SliverTree.treeRowBuilder]. This will only be called for the nodes that are
+/// visible, or within the [Viewport.cacheExtent.]
+///
+/// Only [Viewport]s that scroll with and axis direction of [AxisDirection.down]
+/// can use SliverTree.
 class SliverTree<T> extends StatefulWidget {
-  /// Creates an instance of a SliverTree.
-  // TODO(Piinks): Add semantic info to constructor (see build in state)
+  /// Creates an instance of a [SliverTree] for displaying [SliverTreeNode]s
+  /// that animate expanding and collapsing of nodes.
   const SliverTree({
     super.key,
     required this.tree,
@@ -449,18 +456,7 @@ class SliverTree<T> extends StatefulWidget {
   /// The number of pixels children will be offset by in the cross axis based on
   /// their [SliverTreeNode.depth].
   ///
-  // TODO(Piinks): template this and add sample code
-  /// By default, the indentation is handled by [RenderSliverTree]. Child nodes
-  /// are offset by the indentation specified by
-  /// [SliverTreeIndentationType.value] in the cross axis of the viewport. This
-  /// means the space allotted to the indentation will not be part of the space
-  /// made available to the Widget returned by [SliverTree.treeRowBuilder].
-  ///
-  /// Alternatively, the indentation can be implemented in
-  /// [SliverTree.treeRowBuilder], with the depth of the given tree row accessed
-  /// by [SliverTreeNode.depth]. This allows for more customization in building
-  /// tree rows, such as filling the indented area with decorations or ink
-  /// effects.
+  /// {@macro flutter.rendering.SliverTreeIndentationType}
   final SliverTreeIndentationType indentation;
 
   /// A wrapper method for triggering the expansion or collapse of a [SliverTreeNode].

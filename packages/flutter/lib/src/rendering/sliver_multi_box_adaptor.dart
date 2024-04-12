@@ -814,16 +814,19 @@ enum SliverTreeTraversalOrder {
 /// The style of indentation for [SliverTreeNode]s in a [SliverTree], as handled
 /// by [RenderSliverTree].
 ///
+/// {@template flutter.rendering.SliverTreeIndentationType}
 /// By default, the indentation is handled by [RenderSliverTree]. Child nodes
-/// are offset by the indentation specified by [value] in the cross axis of the
-/// viewport. This means the space allotted to the indentation will not be part
-/// of the space made available to the Widget returned by
-/// [SliverTree.treeRowBuilder].
+/// are offset by the indentation specified by
+/// [SliverTreeIndentationType.value] in the cross axis of the viewport. This
+/// means the space allotted to the indentation will not be part of the space
+/// made available to the Widget returned by [SliverTree.treeRowBuilder].
 ///
 /// Alternatively, the indentation can be implemented in
 /// [SliverTree.treeRowBuilder], with the depth of the given tree row accessed
 /// by [SliverTreeNode.depth]. This allows for more customization in building
-/// tree rows, such as filling the indented area with decorations or ink effects.
+/// tree rows, such as filling the indented area with decorations or ink
+/// effects.
+/// {@endtemplate}
 class SliverTreeIndentationType {
   const SliverTreeIndentationType._internal(double value) : _value = value;
 
