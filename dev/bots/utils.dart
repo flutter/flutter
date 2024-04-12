@@ -306,17 +306,17 @@ String locationInFile(ResolvedUnitResult unit, AstNode node, String workingDirec
 // first time it is accessed. Pass zero to turn off shuffling.
 String? _shuffleSeed;
 String get shuffleSeed {
-  if (_shuffleSeed == null) {
-    // Attempt to load from the command-line argument
-    final String? seedArg = Platform.environment['--test-randomize-ordering-seed'];
-    if (seedArg != null) {
-      _shuffleSeed = seedArg;
-    } else {
-      // Fallback to the original time-based seed generation
-      final DateTime seedTime = DateTime.now().toUtc().subtract(const Duration(hours: 7));
-      _shuffleSeed = '${seedTime.year * 10000 + seedTime.month * 100 + seedTime.day}';
-    }
+  if (_shuffleSeed != null) {
+    return _shuffleSeed!;
   }
+  // Attempt to load from the command-line argument
+  final String? seedArg = Platform.environment['--test-randomize-ordering-seed'];
+  if (seedArg != null) {
+    return seedArg;
+  }
+  // Fallback to the original time-based seed generation
+  final DateTime seedTime = DateTime.now().toUtc().subtract(const Duration(hours: 7));
+  _shuffleSeed = '${seedTime.year * 10000 + seedTime.month * 100 + seedTime.day}';
   return _shuffleSeed!;
 }
 
