@@ -1251,7 +1251,6 @@ void main() {
     expect(find.text(errorText('bar')!), findsOneWidget);
   });
 
-
   testWidgets('FocusNode should move to next field when TextInputAction.next is received', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     final FocusNode focusNode1 = FocusNode();
