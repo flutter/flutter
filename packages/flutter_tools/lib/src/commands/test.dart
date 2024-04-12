@@ -330,17 +330,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     return super.verifyThenRunCommand(commandPath);
   }
 
-  WebRendererMode get webRenderer {
-    final String? webRendererString = stringArg('web-renderer');
-    final WebRendererMode mode = webRendererString != null
-      ? WebRendererMode.values.byName(webRendererString)
-      : WebRendererMode.auto;
-    if (mode == WebRendererMode.auto && useWasm) {
-      // Wasm defaults to skwasm
-      return WebRendererMode.skwasm;
-    }
-    return mode;
-  }
+  WebRendererMode get webRenderer => WebRendererMode.fromCliOption(
+    stringArg(FlutterOptions.kWebRendererFlag),
+    useWasm: useWasm
+  );
 
   @override
   Future<FlutterCommandResult> runCommand() async {
