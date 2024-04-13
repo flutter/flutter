@@ -609,7 +609,9 @@ class BallisticScrollActivity extends ScrollActivity {
   bool applyMoveTo(double value) {
     if (delegate.outOfRange) {
       shouldIgnorePointer = false;
-      (delegate as ScrollPosition).updateIgnorePointer();
+      if (delegate is ScrollPosition) {
+        (delegate as ScrollPosition).updateIgnorePointer();
+      }
     }
     return delegate.setPixels(value).abs() < precisionErrorTolerance;
   }
