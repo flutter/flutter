@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -648,7 +649,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
     Form.maybeOf(context)?._register(this);
 
-    if (Form.maybeOf(context)?.widget.autovalidateMode == AutovalidateMode.onUnfocus|| widget.autovalidateMode == AutovalidateMode.onUnfocus) {
+    if (Form.maybeOf(context)?.widget.autovalidateMode == AutovalidateMode.onUnfocus && !_isAlwaysAutoValidateMode || widget.autovalidateMode == AutovalidateMode.onUnfocus) {
       return Focus(
         canRequestFocus: false,
         skipTraversal: true,
@@ -666,6 +667,10 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
     return widget.builder(this);
   }
+
+  FormFieldState<dynamic>? get _formFieldState => Form.maybeOf(context)?._fields.firstWhereOrNull((FormFieldState<dynamic> field) => field == this);
+
+  bool get _isAlwaysAutoValidateMode => _formFieldState?.widget.autovalidateMode == AutovalidateMode.always;
 }
 
 /// Used to configure the auto validation of [FormField] and [Form] widgets.

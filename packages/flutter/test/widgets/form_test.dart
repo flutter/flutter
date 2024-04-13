@@ -1180,6 +1180,10 @@ void main() {
     await tester.tap(find.byType(TextFormField).last);
     await tester.pumpAndSettle();
 
+    // Verify that the error text is displayed for the first TextFormField.
+    expect(find.text(errorText('foo')!), findsOneWidget);
+    expect(find.text(errorText('bar')!), findsNothing);
+
     // Tap on the first TextFormField to trigger validation.
     await tester.tap(find.byType(TextFormField).first);
     await tester.pumpAndSettle();
