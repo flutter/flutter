@@ -1320,6 +1320,9 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   // The animations applied to the Floating Action Button when it is entering or exiting.
   // Controls the previous widget.child as it exits.
   late AnimationController _previousController;
+  CurvedAnimation? _previousExitScaleAnimation;
+  CurvedAnimation? _previousExitRotationCurvedAnimation;
+  CurvedAnimation? _currentEntranceScaleAnimation;
   late Animation<double> _previousScaleAnimation;
   late TrainHoppingAnimation _previousRotationAnimation;
   // The animations to run, considering the widget's fabMoveAnimation and the current/previous entrance/exit animations.
@@ -1352,6 +1355,9 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   @override
   void dispose() {
     _previousController.dispose();
+    _previousExitScaleAnimation?.dispose();
+    _previousExitRotationCurvedAnimation?.dispose();
+    _currentEntranceScaleAnimation?.dispose();
     _disposeAnimations();
     super.dispose();
   }
@@ -1402,19 +1408,24 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   }
 
   void _updateAnimations() {
+    _previousExitScaleAnimation?.dispose();
     // Get the animations for exit and entrance.
-    final CurvedAnimation previousExitScaleAnimation = CurvedAnimation(
+    _previousExitScaleAnimation = CurvedAnimation(
       parent: _previousController,
       curve: Curves.easeIn,
     );
-    final Animation<double> previousExitRotationAnimation = Tween<double>(begin: 1.0, end: 1.0).animate(
-      CurvedAnimation(
+    _previousExitRotationCurvedAnimation?.dispose();
+    _previousExitRotationCurvedAnimation = CurvedAnimation(
         parent: _previousController,
         curve: Curves.easeIn,
-      ),
+      );
+
+    final Animation<double> previousExitRotationAnimation = Tween<double>(begin: 1.0, end: 1.0).animate(
+      _previousExitRotationCurvedAnimation!
     );
 
-    final CurvedAnimation currentEntranceScaleAnimation = CurvedAnimation(
+    _currentEntranceScaleAnimation?.dispose();
+    _currentEntranceScaleAnimation = CurvedAnimation(
       parent: widget.currentController,
       curve: Curves.easeIn,
     );
@@ -1425,8 +1436,8 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     final Animation<double> moveRotationAnimation = widget.fabMotionAnimator.getRotationAnimation(parent: widget.fabMoveAnimation);
 
     // Aggregate the animations.
-    _previousScaleAnimation = AnimationMin<double>(moveScaleAnimation, previousExitScaleAnimation);
-    _currentScaleAnimation = AnimationMin<double>(moveScaleAnimation, currentEntranceScaleAnimation);
+    _previousScaleAnimation = AnimationMin<double>(moveScaleAnimation, _previousExitScaleAnimation!);
+    _currentScaleAnimation = AnimationMin<double>(moveScaleAnimation, _currentEntranceScaleAnimation!);
     _extendedCurrentScaleAnimation = _currentScaleAnimation.drive(CurveTween(curve: const Interval(0.0, 0.1)));
 
     _previousRotationAnimation = TrainHoppingAnimation(previousExitRotationAnimation, moveRotationAnimation);

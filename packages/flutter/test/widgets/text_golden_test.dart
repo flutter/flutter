@@ -10,6 +10,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgets('Centered text', (WidgetTester tester) async {
@@ -188,27 +189,32 @@ void main() {
     );
   });
 
-  testWidgets('Text Fade', (WidgetTester tester) async {
-    await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(useMaterial3: false),
-          home: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: RepaintBoundary(
-              child: Center(
-                child: Container(
-                  width: 200.0,
-                  height: 200.0,
-                  color: Colors.green,
-                  child: Center(
-                    child: Container(
-                      width: 100.0,
-                      color: Colors.blue,
-                      child: const Text(
-                        'Pp PPp PPPp PPPPp PPPPpp PPPPppp PPPPppppp ',
-                        style: TextStyle(color: Colors.black),
-                        maxLines: 3,
-                        overflow: TextOverflow.fade,
+  testWidgets(
+    'Text Fade',
+    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
+    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(useMaterial3: false),
+            home: Scaffold(
+              backgroundColor: Colors.transparent,
+              body: RepaintBoundary(
+                child: Center(
+                  child: Container(
+                    width: 200.0,
+                    height: 200.0,
+                    color: Colors.green,
+                    child: Center(
+                      child: Container(
+                        width: 100.0,
+                        color: Colors.blue,
+                        child: const Text(
+                          'Pp PPp PPPp PPPPp PPPPpp PPPPppp PPPPppppp ',
+                          style: TextStyle(color: Colors.black),
+                          maxLines: 3,
+                          overflow: TextOverflow.fade,
+                        ),
                       ),
                     ),
                   ),
@@ -216,14 +222,14 @@ void main() {
               ),
             ),
           ),
-        ),
-    );
+      );
 
-    await expectLater(
-      find.byType(RepaintBoundary).first,
-      matchesGoldenFile('text_golden.Fade.png'),
-    );
-  });
+      await expectLater(
+        find.byType(RepaintBoundary).first,
+        matchesGoldenFile('text_golden.Fade.png'),
+      );
+    },
+  );
 
   testWidgets('Default Strut text', (WidgetTester tester) async {
     await tester.pumpWidget(
