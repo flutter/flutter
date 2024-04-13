@@ -8,12 +8,12 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/widgets/scroll_position.dart';
 
 import 'basic.dart';
 import 'framework.dart';
 import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
+import 'scroll_position.dart';
 
 /// A backend for a [ScrollActivity].
 ///
