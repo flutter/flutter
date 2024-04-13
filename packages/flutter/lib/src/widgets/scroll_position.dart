@@ -366,15 +366,20 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
         notifyListeners();
         didUpdateScrollPositionBy(pixels - oldPixels);
       }
-      if (activity != null) {
-        context.setIgnorePointer(activity!.shouldIgnorePointer);
-      }
       if (overscroll.abs() > precisionErrorTolerance) {
         didOverscrollBy(overscroll);
         return overscroll;
       }
     }
     return 0.0;
+  }
+
+  /// Update ignorePointer for the current context from the currently running activity
+  /// without restarting it.
+  void updateIgnorePointer() {
+    if (activity != null) {
+      context.setIgnorePointer(activity!.shouldIgnorePointer);
+    }
   }
 
   /// Change the value of [pixels] to the new value, without notifying any

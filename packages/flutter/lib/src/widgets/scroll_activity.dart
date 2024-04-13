@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/widgets/scroll_position.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -608,6 +609,7 @@ class BallisticScrollActivity extends ScrollActivity {
   bool applyMoveTo(double value) {
     if (delegate.outOfRange) {
       shouldIgnorePointer = false;
+      (delegate as ScrollPosition).updateIgnorePointer();
     }
     return delegate.setPixels(value).abs() < precisionErrorTolerance;
   }
