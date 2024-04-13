@@ -7,7 +7,8 @@ import 'package:macrobenchmarks/common.dart';
 
 import 'util.dart';
 
-void main() {
+void main(List<String> args) {
+  final String testOutputDirectory = getTestOutputDirectory(args);
   macroPerfTest(
     'textfield_perf',
     kTextRouteName,
@@ -18,5 +19,6 @@ void main() {
       // Caret should be cached, so repeated blinking should not require recompute.
       await Future<void>.delayed(const Duration(milliseconds: 5000));
     },
+    testOutputDirectory: testOutputDirectory,
   );
 }

@@ -7,7 +7,8 @@ import 'package:macrobenchmarks/common.dart';
 
 import 'util.dart';
 
-void main() {
+void main(List<String> args) {
+  final String testOutputDirectory = getTestOutputDirectory(args);
   macroPerfTest(
     'picture_cache_perf',
     kPictureCacheRouteName,
@@ -26,5 +27,6 @@ void main() {
         await scrollOnce(300.0);
       }
     },
+    testOutputDirectory: testOutputDirectory,
   );
 }

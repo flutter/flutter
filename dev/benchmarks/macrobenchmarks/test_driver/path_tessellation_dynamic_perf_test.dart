@@ -7,7 +7,8 @@ import 'package:macrobenchmarks/common.dart';
 
 import 'util.dart';
 
-void main() {
+void main(List<String> args) {
+  final String testOutputDirectory = getTestOutputDirectory(args);
   macroPerfTest(
     'tessellation_perf_dynamic',
     kPathTessellationRouteName,
@@ -19,5 +20,6 @@ void main() {
       await driver.tap(animateButton);
       await Future<void>.delayed(const Duration(seconds: 1));
     },
+    testOutputDirectory: testOutputDirectory,
   );
 }

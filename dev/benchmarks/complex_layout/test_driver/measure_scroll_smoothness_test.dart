@@ -14,6 +14,7 @@ Future<void> main(List<String> args) async {
       await driver.writeResponseData(
         data,
         testOutputFilename: 'scroll_smoothness_test',
+        testOutputDirectory: testOutputDirectory,
       );
     },
     testOutputDirectory: testOutputDirectory,

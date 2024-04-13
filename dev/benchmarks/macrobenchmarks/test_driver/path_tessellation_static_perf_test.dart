@@ -7,7 +7,8 @@ import 'package:macrobenchmarks/common.dart';
 
 import 'util.dart';
 
-void main() {
+void main(List<String> args) {
+  final String testOutputDirectory = getTestOutputDirectory(args);
   macroPerfTest(
     'tessellation_perf_static',
     kPathTessellationRouteName,
@@ -27,5 +28,6 @@ void main() {
         await scrollOnce(600.0);
       }
     },
+    testOutputDirectory: testOutputDirectory,
   );
 }
