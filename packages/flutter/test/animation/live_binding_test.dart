@@ -79,7 +79,7 @@ void main() {
   }, skip: true); // Typically skip: isBrowser https://github.com/flutter/flutter/issues/42767
 
   testWidgets('Should show event indicator for pointer events with setSurfaceSize',
-  // // TODO(polina-c): root layer is leaking, https://github.com/flutter/flutter/issues/146742 [leaks-to-clean]
+  // TODO(polina-c): root layer is leaking, https://github.com/flutter/flutter/issues/146742 [leaks-to-clean]
   experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
