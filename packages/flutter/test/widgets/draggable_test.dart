@@ -3432,10 +3432,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/92083
-  testWidgets('feedback respect the MouseRegion cursor configure',
-  // TODO(polina-c): fix the leaking ImmediateMultiDragGestureRecognizer https://github.com/flutter/flutter/pull/144396 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('feedback respect the MouseRegion cursor configure', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Column(
@@ -3461,6 +3458,7 @@ void main() {
     await tester.pump();
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.grabbing);
+    gesture.up();
   });
 
   testWidgets('configurable feedback ignore pointer behavior', (WidgetTester tester) async {
