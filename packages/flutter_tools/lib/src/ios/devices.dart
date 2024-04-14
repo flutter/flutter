@@ -22,6 +22,7 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
+import '../device_vm_service_discovery_for_attach.dart';
 import '../globals.dart' as globals;
 import '../macos/xcdevice.dart';
 import '../mdns_discovery.dart';
@@ -1025,6 +1026,43 @@ class IOSDevice extends Device {
 
   @override
   void clearLogs() { }
+
+  @override
+  VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
+    String? appId,
+    String? fuchsiaModule,
+    int? filterDevicePort,
+    int? expectedHostPort,
+    required bool ipv6,
+    required Logger logger,
+  }) {
+    final bool compatibleWithProtocolDiscovery = majorSdkVersion < IOSDeviceLogReader.minimumUniversalLoggingSdkVersion &&
+          !isWirelesslyConnected;
+    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
+      device: this,
+      appId: appId,
+      deviceVmservicePort: filterDevicePort,
+      hostVmservicePort: expectedHostPort,
+      usesIpv6: ipv6,
+      useDeviceIPAsHost: isWirelesslyConnected,
+    );
+
+    if (compatibleWithProtocolDiscovery) {
+      return DelegateVMServiceDiscoveryForAttach(<VMServiceDiscoveryForAttach>[
+        mdnsVMServiceDiscoveryForAttach,
+        super.getVMServiceDiscoveryForAttach(
+          appId: appId,
+          fuchsiaModule: fuchsiaModule,
+          filterDevicePort: filterDevicePort,
+          expectedHostPort: expectedHostPort,
+          ipv6: ipv6,
+          logger: logger,
+        ),
+      ]);
+    } else {
+      return mdnsVMServiceDiscoveryForAttach;
+    }
+  }
 
   @override
   bool get supportsScreenshot {

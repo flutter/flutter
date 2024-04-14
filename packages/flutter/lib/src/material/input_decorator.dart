@@ -9,10 +9,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button_style.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
-import 'icon_button.dart';
 import 'icon_button_theme.dart';
 import 'input_border.dart';
 import 'material.dart';
@@ -1451,7 +1451,9 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       final bool isOutlineBorder = decoration.border.isOutline;
       // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
       // Center the scaled label relative to the border.
-      final double floatingY = isOutlineBorder ? (-labelHeight * _kFinalLabelScale) / 2.0 + borderWeight / 2.0 : contentPadding.top;
+      final double outlinedFloatingY = (-labelHeight * _kFinalLabelScale) / 2.0 + borderWeight / 2.0;
+      final Offset densityOffset = decoration.visualDensity.baseSizeAdjustment;
+      final double floatingY = isOutlineBorder ? outlinedFloatingY : contentPadding.top + densityOffset.dy / 2;
       final double scale = lerpDouble(1.0, _kFinalLabelScale, t)!;
       final double centeredFloatX = _boxParentData(container!).offset.dx +
           _boxSize(container).width / 2.0 - floatWidth / 2.0;
@@ -2243,9 +2245,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
               ),
               child: IconButtonTheme(
                 data: IconButtonThemeData(
-                  style: IconButton.styleFrom(
-                    foregroundColor: _getPrefixIconColor(inputDecorationTheme, iconButtonTheme, defaults),
-                    iconSize: iconSize,
+                  style: ButtonStyle(
+                    foregroundColor: WidgetStatePropertyAll<Color>(
+                      _getPrefixIconColor(inputDecorationTheme, iconButtonTheme, defaults),
+                    ),
+                    iconSize: WidgetStatePropertyAll<double>(iconSize),
                   ).merge(iconButtonTheme.style),
                 ),
                 child: Semantics(
@@ -2278,9 +2282,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                 ),
                 child: IconButtonTheme(
                   data: IconButtonThemeData(
-                    style: IconButton.styleFrom(
-                      foregroundColor: _getSuffixIconColor(inputDecorationTheme, iconButtonTheme, defaults),
-                      iconSize: iconSize,
+                    style: ButtonStyle(
+                      foregroundColor: WidgetStatePropertyAll<Color>(
+                        _getSuffixIconColor(inputDecorationTheme, iconButtonTheme, defaults),
+                      ),
+                      iconSize: WidgetStatePropertyAll<double>(iconSize),
                     ).merge(iconButtonTheme.style),
                   ),
                   child: Semantics(
@@ -4611,6 +4617,16 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
   late final ColorScheme _colors = Theme.of(context).colorScheme;
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
+  // For InputDecorator, focused state should take precedence over hovered state.
+  // For instance, the focused state increases border width (2dp) and applies bright
+  // colors (primary color or error color) while the hovered state has the same border
+  // than the non-focused state (1dp) and uses a color a little darker than non-focused
+  // state. On desktop, it is also very common that a text field is focused and hovered
+  // because users often rely on mouse selection.
+  // For other widgets, hovered state takes precedence over focused state, because it
+  // is mainly used to determine the overlay color,
+  // see https://github.com/flutter/flutter/pull/125905.
+
   @override
   TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
@@ -4699,19 +4715,19 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
       return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
     if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
-        return textStyle.copyWith(color: _colors.onErrorContainer);
-      }
       if (states.contains(MaterialState.focused)) {
         return textStyle.copyWith(color: _colors.error);
       }
+      if (states.contains(MaterialState.hovered)) {
+        return textStyle.copyWith(color: _colors.onErrorContainer);
+      }
       return textStyle.copyWith(color: _colors.error);
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
     if (states.contains(MaterialState.focused)) {
       return textStyle.copyWith(color: _colors.primary);
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
     return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
@@ -4723,19 +4739,19 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
       return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
     if (states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
-        return textStyle.copyWith(color: _colors.onErrorContainer);
-      }
       if (states.contains(MaterialState.focused)) {
         return textStyle.copyWith(color: _colors.error);
       }
+      if (states.contains(MaterialState.hovered)) {
+        return textStyle.copyWith(color: _colors.onErrorContainer);
+      }
       return textStyle.copyWith(color: _colors.error);
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
     if (states.contains(MaterialState.focused)) {
       return textStyle.copyWith(color: _colors.primary);
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
     return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });

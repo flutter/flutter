@@ -292,6 +292,10 @@ TextStyle? getIconStyle(WidgetTester tester, IconData icon) {
   return iconRichText.text.style;
 }
 
+RenderObject getOverlayColor(WidgetTester tester) {
+  return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+}
+
 void main() {
   // TODO(bleroux): migrate all M2 tests to M3.
   // See https://github.com/flutter/flutter/issues/139076
@@ -1630,6 +1634,328 @@ void main() {
     });
   });
 
+  group('Material3 - InputDecoration label', () {
+    group('for filled text field', () {
+      group('when field is enabled', () {
+        testWidgets('label text has correct style', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          // Current input decorator implementation forces line height to 1.0,
+          // this is not compliant with M3 spec.
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor, height: 1.0);
+          expect(getLabelStyle(tester), expectedStyle);
+        });
+      });
+
+      group('when field is disabled', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                enabled: false,
+                labelText: labelText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.onSurface.withOpacity(0.38));
+        });
+      });
+
+      group('when field is hovered', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.onSurfaceVariant);
+        });
+      });
+
+      group('when field is focused', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.primary);
+        });
+
+        testWidgets('label text has correct color when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/146565.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.primary);
+        });
+      });
+
+      group('when field is in error', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.error);
+        });
+
+        testWidgets('label text has correct color when focused', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.error);
+        });
+
+        testWidgets('label text has correct style when hovered', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.onErrorContainer);
+        });
+
+        testWidgets('label text has correct style when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/146565.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.error);
+        });
+      });
+    });
+
+    group('for outlined text field', () {
+      group('when field is enabled', () {
+        testWidgets('label text has correct style', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          // Current input decorator implementation forces line height to 1.0,
+          // this is not compliant with M3 spec.
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor, height: 1.0);
+          expect(getLabelStyle(tester), expectedStyle);
+        });
+      });
+
+      group('when field is disabled', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                enabled: false,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.onSurface.withOpacity(0.38));
+        });
+      });
+
+      group('when field is hovered', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.onSurfaceVariant);
+        });
+      });
+
+      group('when field is focused', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.primary);
+        });
+
+
+        testWidgets('label text has correct color when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/146565.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.primary);
+        });
+      });
+
+      group('when field is in error', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.error);
+        });
+
+        testWidgets('label text has correct color when focused', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.error);
+        });
+
+        testWidgets('label text has correct color when hovered', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.onErrorContainer);
+        });
+
+        testWidgets('label text has correct color when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/146565.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.error);
+        });
+      });
+    });
+  });
+
   group('Material3 - InputDecoration labelText layout', () {
     testWidgets('The label appears above input', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1900,6 +2226,154 @@ void main() {
       // floatingLabelHeight = 12 (font size 16dps * 0.75 = 12)
       // labelY = -floatingLabelHeight/2 + borderWidth/2
       expect(getLabelRect(tester).top, -4.0);
+    });
+
+    testWidgets('InputDecorator respects reduced theme visualDensity', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          visualDensity: VisualDensity.compact,
+          decoration: const InputDecoration(
+            labelText: labelText,
+            hintText: hintText,
+          ),
+        ),
+      );
+
+      // Overall height for this InputDecorator is 48dp:
+      //    4 - top padding (8 minus 4 due to reduced visual density)
+      //   12 - floating label (font size = 16 * 0.75, line height is forced to 1.0)
+      //    4 - gap between label and input (this is not part of the M3 spec)
+      //   24 - input text (font size = 16, line height = 1.5)
+      //    4 - bottom padding (8 minus 4 due to reduced visual density)
+      expect(getDecoratorRect(tester).size, const Size(800.0, 48.0));
+
+      // The decorator is empty, label is not floating and is vertically centered.
+      expect(getLabelRect(tester).top, 16.0);
+      expect(getLabelRect(tester).bottom, 32.0);
+      expect(getHintOpacity(tester), 0.0);
+      expect(getBorderBottom(tester), 48.0);
+      expect(getBorderWeight(tester), 1.0);
+
+      // When the decorator is focused, label moves upwards, hint is visible (opacity 1.0).
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          isFocused: true,
+          visualDensity: VisualDensity.compact,
+          decoration: const InputDecoration(
+            labelText: labelText,
+            hintText: hintText,
+          ),
+        ),
+      );
+      await tester.pump(kTransitionDuration);
+
+      // The decorator is empty and focused, label and hint are visible.
+      expect(getDecoratorRect(tester).size, const Size(800.0, 48.0));
+      expect(getLabelRect(tester).top, 4.0);
+      expect(getLabelRect(tester).bottom, 16.0);
+      expect(getHintRect(tester).top, 20.0);
+      expect(getHintRect(tester).bottom, 44.0);
+      expect(getHintOpacity(tester), 1.0);
+      expect(getBorderBottom(tester), 48.0);
+      expect(getBorderWeight(tester), 2.0);
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isFocused: true,
+          visualDensity: VisualDensity.compact,
+          decoration: const InputDecoration(
+            labelText: labelText,
+            hintText: hintText,
+          ),
+        ),
+      );
+      await tester.pump(kTransitionDuration);
+
+      // The decorator is focused and not empty, label and input are visible.
+      expect(getDecoratorRect(tester).size, const Size(800.0, 48.0));
+      expect(getLabelRect(tester).top, 4.0);
+      expect(getLabelRect(tester).bottom, 16.0);
+      expect(getInputRect(tester).top, 20.0);
+      expect(getInputRect(tester).bottom, 44.0);
+      expect(getHintOpacity(tester), 0.0);
+      expect(getBorderBottom(tester), 48.0);
+      expect(getBorderWeight(tester), 2.0);
+    });
+
+    testWidgets('InputDecorator respects increased theme visualDensity', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          visualDensity: const VisualDensity(horizontal: 2.0, vertical: 2.0),
+          decoration: const InputDecoration(
+            labelText: labelText,
+            hintText: hintText,
+          ),
+        ),
+      );
+
+      // Overall height for this InputDecorator is 64dp:
+      //   12 - top padding (8 plus 4 due to increased visual density)
+      //   12 - floating label (font size = 16 * 0.75, line height is forced to 1.0)
+      //    4 - gap between label and input (this is not part of the M3 spec)
+      //   24 - input text (font size = 16, line height = 1.5)
+      //   12 - bottom padding (8 plus 4 due to increased visual density)
+      expect(getDecoratorRect(tester).size, const Size(800.0, 64.0));
+
+      // The decorator is empty, label is not floating and is vertically centered.
+      expect(getLabelRect(tester).top, 24.0);
+      expect(getLabelRect(tester).bottom, 40.0);
+      expect(getHintOpacity(tester), 0.0);
+      expect(getBorderBottom(tester), 64.0);
+      expect(getBorderWeight(tester), 1.0);
+
+      // When the decorator is focused, label moves upwards, hint is visible (opacity 1.0).
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          isFocused: true,
+          visualDensity: const VisualDensity(horizontal: 2.0, vertical: 2.0),
+          decoration: const InputDecoration(
+            labelText: labelText,
+            hintText: hintText,
+          ),
+        ),
+      );
+      await tester.pump(kTransitionDuration);
+
+      // The decorator is empty and focused, label and hint are visible.
+      expect(getDecoratorRect(tester).size, const Size(800.0, 64.0));
+      expect(getLabelRect(tester).top, 12.0);
+      expect(getLabelRect(tester).bottom, 24.0);
+      expect(getHintRect(tester).top, 28.0);
+      expect(getHintRect(tester).bottom, 52.0);
+      expect(getHintOpacity(tester), 1.0);
+      expect(getBorderBottom(tester), 64.0);
+      expect(getBorderWeight(tester), 2.0);
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isFocused: true,
+          visualDensity: const VisualDensity(horizontal: 2.0, vertical: 2.0),
+          decoration: const InputDecoration(
+            labelText: labelText,
+            hintText: hintText,
+          ),
+        ),
+      );
+      await tester.pump(kTransitionDuration);
+
+      // The decorator is focused and not empty, label and input are visible.
+      expect(getDecoratorRect(tester).size, const Size(800.0, 64.0));
+      expect(getLabelRect(tester).top, 12.0);
+      expect(getLabelRect(tester).bottom, 24.0);
+      expect(getInputRect(tester).top, 28.0);
+      expect(getInputRect(tester).bottom, 52.0);
+      expect(getHintOpacity(tester), 0.0);
+      expect(getBorderBottom(tester), 64.0);
+      expect(getBorderWeight(tester), 2.0);
     });
   });
 
@@ -3805,40 +4279,6 @@ void main() {
     expect(getIconStyle(tester, Icons.close)?.color, theme.colorScheme.error);
   });
 
-  testWidgets('InputDecoration default floatingLabelStyle resolves hovered/focused states', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: TextField(
-            focusNode: focusNode,
-            decoration: const InputDecoration(
-              labelText: 'label',
-            ),
-          ),
-        ),
-      ),
-    );
-
-    // Focused.
-    focusNode.requestFocus();
-    await tester.pump(kTransitionDuration);
-    final ThemeData theme = Theme.of(tester.element(find.byType(TextField)));
-    expect(getLabelStyle(tester).color, theme.colorScheme.primary);
-
-    // Hovered.
-    final Offset center = tester.getCenter(find.byType(TextField));
-    final TestGesture gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-    );
-    await gesture.addPointer();
-    await gesture.moveTo(center);
-    await tester.pump(kTransitionDuration);
-    expect(getLabelStyle(tester).color, theme.colorScheme.onSurfaceVariant);
-  });
-
   testWidgets('FloatingLabelAlignment.toString()', (WidgetTester tester) async {
     expect(FloatingLabelAlignment.start.toString(), 'FloatingLabelAlignment.start');
     expect(FloatingLabelAlignment.center.toString(), 'FloatingLabelAlignment.center');
@@ -4930,18 +5370,23 @@ void main() {
     expect(merged.constraints, overrideTheme.constraints);
   });
 
-  testWidgets('Prefix and suffix IconButtons inherit IconButtonTheme', (WidgetTester tester) async {
+  testWidgets('Prefix IconButton inherits IconButtonTheme', (WidgetTester tester) async {
     const IconData prefixIcon = Icons.person;
-    const IconData suffixIcon = Icons.search;
     const Color backgroundColor = Color(0xffff0000);
     const Color foregroundColor = Color(0xff00ff00);
-    final OutlinedBorder shape =RoundedRectangleBorder(
+    const Color overlayColor = Color(0xff0000ff);
+    const Color shadowColor = Color(0xff0ff0ff);
+    const double elevation = 4.0;
+    final RoundedRectangleBorder shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(10.0),
     );
-    final ButtonStyle iconButtonStyle = IconButton.styleFrom(
-      backgroundColor: backgroundColor,
-      foregroundColor: foregroundColor,
-      shape: shape,
+    final ButtonStyle iconButtonStyle = ButtonStyle(
+      backgroundColor: const MaterialStatePropertyAll<Color>(backgroundColor),
+      foregroundColor: const MaterialStatePropertyAll<Color>(foregroundColor),
+      overlayColor: const MaterialStatePropertyAll<Color>(overlayColor),
+      shadowColor: const MaterialStatePropertyAll<Color>(shadowColor),
+      elevation: const MaterialStatePropertyAll<double>(elevation),
+      shape: MaterialStatePropertyAll<OutlinedBorder>(shape),
     );
 
     await tester.pumpWidget(
@@ -4953,6 +5398,57 @@ void main() {
               onPressed: () {},
               icon: const Icon(prefixIcon),
             ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder iconMaterial = find.descendant(
+      of: find.widgetWithIcon(IconButton, prefixIcon),
+      matching: find.byType(Material),
+    );
+    final Material material = tester.widget<Material>(iconMaterial);
+    expect(material.color, backgroundColor);
+    expect(material.shadowColor, shadowColor);
+    expect(material.elevation, elevation);
+    expect(material.shape, shape);
+
+    expect(getIconStyle(tester, prefixIcon)?.color, foregroundColor);
+
+    final Offset center = tester.getCenter(find.byIcon(prefixIcon));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor));
+  });
+
+  testWidgets('Suffix IconButton inherits IconButtonTheme', (WidgetTester tester) async {
+    const IconData suffixIcon = Icons.delete;
+    const Color backgroundColor = Color(0xffff0000);
+    const Color foregroundColor = Color(0xff00ff00);
+    const Color overlayColor = Color(0xff0000ff);
+    const Color shadowColor = Color(0xff0ff0ff);
+    const double elevation = 4.0;
+    final RoundedRectangleBorder shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(10.0),
+    );
+    final ButtonStyle iconButtonStyle = ButtonStyle(
+      backgroundColor: const MaterialStatePropertyAll<Color>(backgroundColor),
+      foregroundColor: const MaterialStatePropertyAll<Color>(foregroundColor),
+      overlayColor: const MaterialStatePropertyAll<Color>(overlayColor),
+      shadowColor: const MaterialStatePropertyAll<Color>(shadowColor),
+      elevation: const MaterialStatePropertyAll<double>(elevation),
+      shape: MaterialStatePropertyAll<OutlinedBorder>(shape),
+    );
+
+    await tester.pumpWidget(
+      IconButtonTheme(
+        data: IconButtonThemeData(style: iconButtonStyle),
+        child: buildInputDecorator(
+          decoration: InputDecoration(
             suffixIcon: IconButton(
               onPressed: () {},
               icon: const Icon(suffixIcon),
@@ -4962,23 +5458,26 @@ void main() {
       ),
     );
 
-    final Finder prefixIconMaterial = find.descendant(
-      of: find.widgetWithIcon(IconButton, prefixIcon),
-      matching: find.byType(Material),
-    );
-    Material material = tester.widget<Material>(prefixIconMaterial);
-    expect(material.color, backgroundColor);
-    expect(material.shape, iconButtonStyle.shape?.resolve(<WidgetState>{}));
-    final Finder suffixIconMaterial = find.descendant(
+    final Finder iconMaterial = find.descendant(
       of: find.widgetWithIcon(IconButton, suffixIcon),
       matching: find.byType(Material),
     );
-    material = tester.widget<Material>(suffixIconMaterial);
+    final Material material = tester.widget<Material>(iconMaterial);
     expect(material.color, backgroundColor);
+    expect(material.shadowColor, shadowColor);
+    expect(material.elevation, elevation);
     expect(material.shape, shape);
 
-    expect(getIconStyle(tester, prefixIcon)?.color, foregroundColor);
     expect(getIconStyle(tester, suffixIcon)?.color, foregroundColor);
+
+    final Offset center = tester.getCenter(find.byIcon(suffixIcon));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(getOverlayColor(tester), paints..rect(color: overlayColor));
   });
 
   testWidgets('Prefix IconButton color respects IconButtonTheme foreground color states', (WidgetTester tester) async {
@@ -7216,8 +7715,8 @@ void main() {
       expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
       expect(tester.getTopLeft(find.text('text')).dy, 24.0);
       expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
-      expect(tester.getTopLeft(find.text('label')).dy, 12.0);
-      expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
+      expect(tester.getTopLeft(find.text('label')).dy, 8.0);
+      expect(tester.getBottomLeft(find.text('label')).dy, 20.0);
       expect(tester.getTopLeft(find.text('hint')).dy, 24.0);
       expect(tester.getBottomLeft(find.text('hint')).dy, 40.0);
       expect(getOpacity(tester, 'hint'), 1.0);
@@ -7250,8 +7749,8 @@ void main() {
       expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
       expect(tester.getTopLeft(find.text('text')).dy, 24.0);
       expect(tester.getBottomLeft(find.text('text')).dy,40.0);
-      expect(tester.getTopLeft(find.text('label')).dy, 12.0);
-      expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
+      expect(tester.getTopLeft(find.text('label')).dy, 8.0);
+      expect(tester.getBottomLeft(find.text('label')).dy, 20.0);
       expect(tester.getTopLeft(find.text('hint')).dy, 24.0);
       expect(tester.getBottomLeft(find.text('hint')).dy,40.0);
       expect(getOpacity(tester, 'hint'), 0.0);
@@ -7310,8 +7809,8 @@ void main() {
       expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 64.0));
       expect(tester.getTopLeft(find.text('text')).dy, 32.0);
       expect(tester.getBottomLeft(find.text('text')).dy, 48.0);
-      expect(tester.getTopLeft(find.text('label')).dy, 12.0);
-      expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
+      expect(tester.getTopLeft(find.text('label')).dy, 16.0);
+      expect(tester.getBottomLeft(find.text('label')).dy, 28.0);
       expect(tester.getTopLeft(find.text('hint')).dy, 32.0);
       expect(tester.getBottomLeft(find.text('hint')).dy, 48.0);
       expect(getOpacity(tester, 'hint'), 1.0);
@@ -7344,8 +7843,8 @@ void main() {
       expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 64.0));
       expect(tester.getTopLeft(find.text('text')).dy, 32.0);
       expect(tester.getBottomLeft(find.text('text')).dy, 48.0);
-      expect(tester.getTopLeft(find.text('label')).dy, 12.0);
-      expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
+      expect(tester.getTopLeft(find.text('label')).dy, 16.0);
+      expect(tester.getBottomLeft(find.text('label')).dy, 28.0);
       expect(tester.getTopLeft(find.text('hint')).dy, 32.0);
       expect(tester.getBottomLeft(find.text('hint')).dy, 48.0);
       expect(getOpacity(tester, 'hint'), 0.0);
