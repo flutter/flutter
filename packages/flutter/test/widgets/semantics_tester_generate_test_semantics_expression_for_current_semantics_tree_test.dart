@@ -53,10 +53,7 @@ void _tests() {
   // also update this code to reflect the new output.
   //
   // This test is flexible w.r.t. leading and trailing whitespace.
-  testWidgets('generates code',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('generates code', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await pumpTestWidget(tester);
     final String code = semantics
