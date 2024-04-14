@@ -37,40 +37,33 @@ class _CarouselExampleState extends State<CarouselExample> {
     return MaterialApp(
       home: Scaffold(
         body: Center(
-          child: Carousel(
-            itemSnap: true,
-            childWeights: const <int>[1,5,1],
-            children: List<Card>.generate(data.length, (int index) {
-              return Card.outlined(
-                clipBehavior: Clip.antiAlias,
-                shape: RoundedRectangleBorder(
-                  // side: BorderSide(
-                  //   width: 5,
-                  //   color: Colors.primaries[index % Colors.primaries.length].withOpacity(0.5),
-                  // ),
-                  borderRadius: BorderRadius.circular(20.0)
-                ),
-                color: Colors.transparent,
-                child: Stack(
-                  children: <Widget>[
-                    Positioned.fill(
-                      child: Image(
-                        fit: BoxFit.cover,
-                        image: images[index % images.length],
+          child: ConstrainedBox(
+            constraints: BoxConstraints.tightFor(height: 200),
+            child: Carousel(
+              itemSnap: true,
+              childWeights: const <int>[1,5,1],
+              children: List<Widget>.generate(data.length, (int index) {
+                return Card.outlined(
+                  clipBehavior: Clip.antiAlias,
+                  shape: RoundedRectangleBorder(
+                    // side: BorderSide(
+                    //   width: 5,
+                    //   color: Colors.primaries[index % Colors.primaries.length].withOpacity(0.5),
+                    // ),
+                    borderRadius: BorderRadius.circular(20.0)
+                  ),
+                  color: Colors.primaries[index % Colors.primaries.length].withOpacity(0.5),
+                  child: Center(
+                        child: Text(
+                          'Item ${data[index]}',
+                          style: const TextStyle(color: Colors.white, fontSize: 20),
+                          overflow: TextOverflow.clip,
+                          softWrap: false,
+                        ),
                       ),
-                    ),
-                    Center(
-                      child: Text(
-                        'Item ${data[index]}',
-                        style: const TextStyle(color: Colors.white, fontSize: 20),
-                        overflow: TextOverflow.clip,
-                        softWrap: false,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }).toList()),
+                );
+              }).toList()),
+          ),
         ),
       ),
     );
