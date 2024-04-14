@@ -346,8 +346,7 @@ void main() {
   });
 
   testWidgets('correctly switches between view configurations',
-  // TODO(polina-c): clean up leaks, https://github.com/flutter/flutter/issues/134787 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // Leaking by design as contains deprecated items.
   (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapWithView: false,
