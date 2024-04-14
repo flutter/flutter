@@ -156,14 +156,11 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
 
 /// Extract the [Target] from a [DarwinArch].
 Target _getNativeTarget(DarwinArch darwinArch) {
-  switch (darwinArch) {
-    case DarwinArch.arm64:
-      return Target.macOSArm64;
-    case DarwinArch.x86_64:
-      return Target.macOSX64;
-    case DarwinArch.armv7:
-      throw Exception('Unknown DarwinArch: $darwinArch.');
-  }
+  return switch (darwinArch) {
+    DarwinArch.arm64  => Target.macOSArm64,
+    DarwinArch.x86_64 => Target.macOSX64,
+    DarwinArch.armv7  => throw Exception('Unknown DarwinArch: $darwinArch.'),
+  };
 }
 
 Map<KernelAssetPath, List<AssetImpl>> _fatAssetTargetLocations(

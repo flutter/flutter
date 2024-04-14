@@ -32,6 +32,7 @@ Future<void> webLongRunningTestsRunner(String flutterRoot) async {
         target: path.join('test_driver', 'failure.dart'),
         buildMode: buildMode,
         renderer: 'canvaskit',
+        wasm: false,
         // This test intentionally fails and prints stack traces in the browser
         // logs. To avoid confusion, silence browser output.
         silenceBrowserOutput: true,
@@ -42,6 +43,17 @@ Future<void> webLongRunningTestsRunner(String flutterRoot) async {
         driver: path.join('test_driver', 'integration_test.dart'),
         buildMode: buildMode,
         renderer: 'canvaskit',
+        wasm: false,
+        expectWriteResponseFile: true,
+        expectResponseFileContent: 'null',
+      ),
+      () => _runFlutterDriverWebTest(
+        testAppDirectory: path.join('packages', 'integration_test', 'example'),
+        target: path.join('integration_test', 'example_test.dart'),
+        driver: path.join('test_driver', 'integration_test.dart'),
+        buildMode: buildMode,
+        renderer: 'skwasm',
+        wasm: true,
         expectWriteResponseFile: true,
         expectResponseFileContent: 'null',
       ),
@@ -51,6 +63,7 @@ Future<void> webLongRunningTestsRunner(String flutterRoot) async {
         driver: path.join('test_driver', 'extended_integration_test.dart'),
         buildMode: buildMode,
         renderer: 'canvaskit',
+        wasm: false,
         expectWriteResponseFile: true,
         expectResponseFileContent: '''
 {
@@ -97,6 +110,7 @@ Future<void> webLongRunningTestsRunner(String flutterRoot) async {
     () => _runWebE2eTest('capabilities_integration_canvaskit', buildMode: 'debug', renderer: 'auto'),
     () => _runWebE2eTest('capabilities_integration_canvaskit', buildMode: 'profile', renderer: 'canvaskit'),
     () => _runWebE2eTest('capabilities_integration_html', buildMode: 'release', renderer: 'html'),
+    () => _runWebE2eTest('capabilities_integration_skwasm', buildMode: 'release', renderer: 'skwasm', wasm: true),
 
     // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
     // CacheWidth and CacheHeight are only currently supported in CanvasKit mode, so we don't run the test in HTML mode.
@@ -110,6 +124,7 @@ Future<void> webLongRunningTestsRunner(String flutterRoot) async {
       target: 'test_driver/smoke_web_engine.dart',
       buildMode: 'profile',
       renderer: 'auto',
+      wasm: false,
     ),
     () => _runGalleryE2eWebTest('debug'),
     () => _runGalleryE2eWebTest('debug', canvasKit: true),
@@ -192,12 +207,14 @@ Future<void> _runWebE2eTest(
   String name, {
   required String buildMode,
   required String renderer,
+  bool wasm = false,
 }) async {
   await _runFlutterDriverWebTest(
     target: path.join('test_driver', '$name.dart'),
     buildMode: buildMode,
     renderer: renderer,
     testAppDirectory: path.join(flutterRoot, 'dev', 'integration_tests', 'web_e2e_tests'),
+    wasm: wasm,
   );
 }
 
@@ -206,6 +223,7 @@ Future<void> _runFlutterDriverWebTest({
   required String buildMode,
   required String renderer,
   required String testAppDirectory,
+  required bool wasm,
   String? driver,
   bool expectFailure = false,
   bool silenceBrowserOutput = false,
@@ -235,6 +253,7 @@ Future<void> _runFlutterDriverWebTest({
       'web-server',
       '--$buildMode',
       '--web-renderer=$renderer',
+      if (wasm) '--wasm',
     ],
     expectNonZeroExit: expectFailure,
     workingDirectory: testAppDirectory,

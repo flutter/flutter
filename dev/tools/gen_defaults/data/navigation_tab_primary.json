@@ -1,5 +1,5 @@
 {
-  "version": "v0_206",
+  "version": "v2_3_5",
 
   "md.comp.primary-navigation-tab.active.focus.state-layer.color": "primary",
   "md.comp.primary-navigation-tab.active.focus.state-layer.opacity": "md.sys.state.focus.state-layer-opacity",

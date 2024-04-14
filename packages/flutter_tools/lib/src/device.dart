@@ -16,6 +16,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'devfs.dart';
 import 'device_port_forwarder.dart';
+import 'device_vm_service_discovery_for_attach.dart';
 import 'project.dart';
 import 'vmservice.dart';
 import 'web/compile.dart';
@@ -581,23 +582,19 @@ enum DeviceConnectionInterface {
 
 /// Returns the `DeviceConnectionInterface` enum based on its string name.
 DeviceConnectionInterface getDeviceConnectionInterfaceForName(String name) {
-  switch (name) {
-    case 'attached':
-      return DeviceConnectionInterface.attached;
-    case 'wireless':
-      return DeviceConnectionInterface.wireless;
-  }
-  throw Exception('Unsupported DeviceConnectionInterface name "$name"');
+  return switch (name) {
+    'attached' => DeviceConnectionInterface.attached,
+    'wireless' => DeviceConnectionInterface.wireless,
+    _ => throw Exception('Unsupported DeviceConnectionInterface name "$name"'),
+  };
 }
 
 /// Returns a `DeviceConnectionInterface`'s string name.
 String getNameForDeviceConnectionInterface(DeviceConnectionInterface connectionInterface) {
-  switch (connectionInterface) {
-    case DeviceConnectionInterface.attached:
-      return 'attached';
-    case DeviceConnectionInterface.wireless:
-      return 'wireless';
-  }
+  return switch (connectionInterface) {
+    DeviceConnectionInterface.attached => 'attached',
+    DeviceConnectionInterface.wireless => 'wireless',
+  };
 }
 
 /// A device is a physical hardware that can run a Flutter application.
@@ -740,6 +737,35 @@ abstract class Device {
 
   /// Clear the device's logs.
   void clearLogs();
+
+  /// Get the [VMServiceDiscoveryForAttach] instance for this device, which
+  /// discovers, and forwards any necessary ports to the vm service uri of a
+  /// running app on the device.
+  ///
+  /// If `appId` is specified, on supported platforms, the service discovery
+  /// will only return the VM service URI from the given app.
+  ///
+  /// If `fuchsiaModule` is specified, this will only return the VM service uri
+  /// from the specified Fuchsia module.
+  ///
+  /// If `filterDevicePort` is specified, this will only return the VM service
+  /// uri that matches the given port on the device.
+  VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
+    String? appId,
+    String? fuchsiaModule,
+    int? filterDevicePort,
+    int? expectedHostPort,
+    required bool ipv6,
+    required Logger logger,
+  }) =>
+      LogScanningVMServiceDiscoveryForAttach(
+        Future<DeviceLogReader>.value(getLogReader()),
+        portForwarder: portForwarder,
+        devicePort: filterDevicePort,
+        hostPort: expectedHostPort,
+        ipv6: ipv6,
+        logger: logger,
+      );
 
   /// Start an app package on the current device.
   ///
@@ -968,6 +994,7 @@ class DebuggingOptions {
     this.webHeaders = const <String, String>{},
     this.webLaunchUrl,
     this.webRenderer = WebRendererMode.auto,
+    this.webUseWasm = false,
     this.vmserviceOutFile,
     this.fastStart = false,
     this.nullAssertions = false,
@@ -998,6 +1025,7 @@ class DebuggingOptions {
       this.webLaunchUrl,
       this.webHeaders = const <String, String>{},
       this.webRenderer = WebRendererMode.auto,
+      this.webUseWasm = false,
       this.cacheSkSL = false,
       this.traceAllowlist,
       this.enableImpeller = ImpellerStatus.platformDefault,
@@ -1078,6 +1106,7 @@ class DebuggingOptions {
     required this.webHeaders,
     required this.webLaunchUrl,
     required this.webRenderer,
+    required this.webUseWasm,
     required this.vmserviceOutFile,
     required this.fastStart,
     required this.nullAssertions,
@@ -1164,6 +1193,9 @@ class DebuggingOptions {
 
   /// Which web renderer to use for the debugging session
   final WebRendererMode webRenderer;
+
+  /// Whether to compile to webassembly
+  final bool webUseWasm;
 
   /// A file where the VM Service URL should be written after the application is started.
   final String? vmserviceOutFile;
@@ -1274,6 +1306,7 @@ class DebuggingOptions {
     'webLaunchUrl': webLaunchUrl,
     'webHeaders': webHeaders,
     'webRenderer': webRenderer.name,
+    'webUseWasm': webUseWasm,
     'vmserviceOutFile': vmserviceOutFile,
     'fastStart': fastStart,
     'nullAssertions': nullAssertions,
@@ -1330,6 +1363,7 @@ class DebuggingOptions {
       webHeaders: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
       webLaunchUrl: json['webLaunchUrl'] as String?,
       webRenderer: WebRendererMode.values.byName(json['webRenderer']! as String),
+      webUseWasm: json['webUseWasm']! as bool,
       vmserviceOutFile: json['vmserviceOutFile'] as String?,
       fastStart: json['fastStart']! as bool,
       nullAssertions: json['nullAssertions']! as bool,

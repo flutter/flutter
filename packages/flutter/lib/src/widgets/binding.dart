@@ -1412,8 +1412,6 @@ void runApp(Widget app) {
 /// calling [runWidget] with a [ViewCollection] that does not specify any
 /// [ViewCollection.views].
 ///
-/// ## Dismissing Flutter UI via platform native methods
-///
 /// {@macro flutter.widgets.runApp.dismissal}
 ///
 /// To release resources more eagerly, establish a [platform channel](https://flutter.dev/platform-channels/)
