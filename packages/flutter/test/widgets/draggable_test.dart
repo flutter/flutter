@@ -13,6 +13,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
@@ -3547,6 +3548,33 @@ void main() {
     final Offset appTopLeft = tester.getTopLeft(find.byType(MaterialApp));
     expect(tester.getTopLeft(find.text('Source')), appTopLeft);
     expect(tester.getTopLeft(find.text('Feedback')), secondLocation);
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('Drag and drop - childDragAnchorStrategy works in scaled MaterialApp', (WidgetTester tester) async {
+    final Key sourceKey = UniqueKey();
+    final Key feedbackKey = UniqueKey();
+    await tester.pumpWidget(Transform.scale(
+      scale: 0.5,
+      child:  MaterialApp(
+        home: Scaffold(
+          body: Draggable<int>(
+            data: 42,
+            feedback: Text('Text', key: feedbackKey),
+            child: Text('Text', key: sourceKey),
+          ),
+        ),
+      ),
+    ));
+    final Finder source = find.byKey(sourceKey);
+    final Finder feedback = find.byKey(feedbackKey);
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(source));
+    await tester.pump();
+    expect(tester.getTopLeft(source), tester.getTopLeft(feedback));
 
     // Finish gesture to release resources.
     await gesture.up();
