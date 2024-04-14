@@ -831,8 +831,6 @@ void main() {
 
   testWidgets('A controller can control more than one CupertinoTabScaffold, '
     'removal of listeners does not break the controller',
-  // TODO(polina-c): dispose TabController, https://github.com/flutter/flutter/issues/144910 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
     (WidgetTester tester) async {
       final List<int> tabsPainted0 = <int>[];
       final List<int> tabsPainted1 = <int>[];
