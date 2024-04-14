@@ -330,6 +330,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     return super.verifyThenRunCommand(commandPath);
   }
 
+  WebRendererMode get webRenderer => WebRendererMode.fromCliOption(
+    stringArg(FlutterOptions.kWebRendererFlag),
+    useWasm: useWasm
+  );
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (!globals.fs.isFileSync('pubspec.yaml')) {
@@ -388,10 +393,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    final String? webRendererString = stringArg('web-renderer');
-    final WebRendererMode webRenderer = (webRendererString != null)
-        ? WebRendererMode.values.byName(webRendererString)
-        : WebRendererMode.auto;
     final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
       buildInfo,
       startPaused: startPaused,
@@ -405,6 +406,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
       debugLogsDirectoryPath: debugLogsDirectoryPath,
       webRenderer: webRenderer,
+      webUseWasm: useWasm,
     );
 
     String? testAssetDirectory;
@@ -511,6 +513,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       throwToolExit('--wasm is only supported on the web platform');
     }
 
+    if (webRenderer == WebRendererMode.skwasm && !useWasm) {
+      throwToolExit('Skwasm renderer requires --wasm');
+    }
+
     Device? integrationTestDevice;
     if (_isIntegrationTest) {
       integrationTestDevice = await findTargetDevice();
@@ -589,7 +595,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         testAssetDirectory: testAssetDirectory,
         flutterProject: flutterProject,
         web: isWeb,
-        useWasm: useWasm,
         randomSeed: stringArg('test-randomize-ordering-seed'),
         reporter: stringArg('reporter'),
         fileReporter: stringArg('file-reporter'),

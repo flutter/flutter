@@ -25,7 +25,7 @@ class CocoaPodsScriptReadlink extends ProjectMigrator {
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
 
   @override
-  void migrate() {
+  Future<void> migrate() async {
     if (!_podRunnerFrameworksScript.existsSync()) {
       logger.printTrace('CocoaPods Pods-Runner-frameworks.sh script not found, skipping "readlink -f" workaround.');
       return;
