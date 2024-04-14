@@ -844,6 +844,7 @@ class AnimationController extends Animation<double>
 
   void _tick(Duration elapsed) {
     if (_ticker == null) {
+      // Do not process tick if animation was disposed.
       return;
     }
     _lastElapsedDuration = elapsed;

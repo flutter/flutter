@@ -195,10 +195,6 @@ class TabController extends ChangeNotifier {
   final int length;
 
   void _changeIndex(int value, { Duration? duration, Curve? curve }) {
-    if (_animationController == null) {
-      return;
-    }
-
     assert(value >= 0 && (value < length || length == 0));
     assert(duration != null || curve == null);
     assert(_indexIsChangingCount >= 0);
