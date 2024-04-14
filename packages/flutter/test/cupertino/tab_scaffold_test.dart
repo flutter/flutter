@@ -1275,10 +1275,7 @@ void main() {
           .setMockMethodCallHandler(SystemChannels.platform, null);
     });
 
-    testWidgets('System back navigation inside of tabs',
-    // TODO(polina-c): dispose TabController, https://github.com/flutter/flutter/issues/144910
-    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-    (WidgetTester tester) async {
+    testWidgets('System back navigation inside of tabs', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           home: MediaQuery(
