@@ -2541,10 +2541,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/6128.
-  testWidgets('Draggable plays nice with onTap',
-  // TODO(polina-c): fix the leaking ImmediateMultiDragGestureRecognizer https://github.com/flutter/flutter/pull/144396 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('Draggable plays nice with onTap', (WidgetTester tester) async {
     late final OverlayEntry entry;
     addTearDown(() => entry..remove()..dispose());
 
@@ -2578,6 +2575,7 @@ void main() {
 
     await firstGesture.moveBy(const Offset(100.0, 0.0));
     await secondGesture.up();
+    await firstGesture.up();
   });
 
   testWidgets('DragTarget does not set state when remove from the tree', (WidgetTester tester) async {
