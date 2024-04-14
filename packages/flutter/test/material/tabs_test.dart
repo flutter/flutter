@@ -119,9 +119,6 @@ Widget buildLeftRightApp({required List<String> tabs, required String value, boo
 }
 
 void main() {
-  // TODO(polina-c): dispose TabController, https://github.com/flutter/flutter/issues/144910 [leaks-to-clean]
-  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
-
   setUp(() {
     debugResetSemanticsIdCounter();
   });
