@@ -845,8 +845,8 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   @override
   void visitChildren(ElementVisitor visitor) {
     slotToChild.values.forEach(visitor);
-    for (final Element child in _children) {
-      if (!_forgottenChildren.contains(child)) {
+    for (final Object child in _children) {
+      if (child is Element && !_forgottenChildren.contains(child)) {
         visitor(child);
       }
     }
@@ -887,13 +887,12 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     _mountChild(toolbarItems.nextButton, _CupertinoTextSelectionToolbarItemsSlot.nextButton);
 
     // Mount list children.
-    _children = List<Element>.filled(toolbarItems.children.length, _NullElement.instance);
     Element? previousChild;
-    for (int i = 0; i < _children.length; i += 1) {
-      final Element newChild = inflateWidget(toolbarItems.children[i], IndexedSlot<Element?>(i, previousChild));
-      _children[i] = newChild;
-      previousChild = newChild;
-    }
+    _children = List<Element>.generate(toolbarItems.children.length, (int i) {
+      final Element result = inflateWidget(toolbarItems.children[i], IndexedSlot<Element?>(i, previousChild));
+      previousChild = result;
+      return result;
+    }, growable: false);
   }
 
   @override
@@ -906,7 +905,8 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     }
     // Visit list children.
     _children
-        .where((Element child) => !_forgottenChildren.contains(child) && _shouldPaint(child))
+        .where((Object child) => child is Element && !_forgottenChildren.contains(child) && _shouldPaint(child))
+        .map((Object child) => child as Element)
         .forEach(visitor);
   }
 
@@ -1274,18 +1274,4 @@ enum _CupertinoTextSelectionToolbarItemsSlot {
   nextButton,
 }
 
-class _NullElement extends Element {
-  _NullElement() : super(const _NullWidget());
-
-  static _NullElement instance = _NullElement();
-
-  @override
-  bool get debugDoingBuild => throw UnimplementedError();
-}
-
-class _NullWidget extends Widget {
-  const _NullWidget();
-
-  @override
-  Element createElement() => throw UnimplementedError();
-}
+class _NullElement {}
