@@ -59,7 +59,7 @@
     CAMetalLayer* layer = (CAMetalLayer*)self.layer;
 #pragma clang diagnostic pop
     layer.pixelFormat = pixelFormat;
-    if (pixelFormat == MTLPixelFormatRGBA16Float || pixelFormat == MTLPixelFormatBGRA10_XR) {
+    if (pixelFormat == MTLPixelFormatRGBA16Float) {
       self->_colorSpaceRef = fml::CFRef(CGColorSpaceCreateWithName(kCGColorSpaceExtendedSRGB));
       layer.colorspace = self->_colorSpaceRef;
     }

@@ -128,16 +128,6 @@ void GoldenPlaygroundTest::TearDown() {
   ASSERT_FALSE(dlopen("/usr/local/lib/libMoltenVK.dylib", RTLD_NOLOAD));
 }
 
-namespace {
-bool DoesSupportWideGamutTests() {
-#ifdef __arm64__
-  return true;
-#else
-  return false;
-#endif
-}
-}  // namespace
-
 void GoldenPlaygroundTest::SetUp() {
   std::filesystem::path testing_assets_path =
       flutter::testing::GetTestingAssetsPath();
@@ -152,17 +142,10 @@ void GoldenPlaygroundTest::SetUp() {
   bool enable_wide_gamut = test_name.find("WideGamut_") != std::string::npos;
   switch (GetParam()) {
     case PlaygroundBackend::kMetal:
-      if (!DoesSupportWideGamutTests()) {
-        GTEST_SKIP_(
-            "This metal device doesn't support wide gamut golden tests.");
-      }
       pimpl_->screenshotter =
           std::make_unique<testing::MetalScreenshotter>(enable_wide_gamut);
       break;
     case PlaygroundBackend::kVulkan: {
-      if (enable_wide_gamut) {
-        GTEST_SKIP_("Vulkan doesn't support wide gamut golden tests.");
-      }
       const std::unique_ptr<PlaygroundImpl>& playground =
           GetSharedVulkanPlayground(/*enable_validations=*/true);
       pimpl_->screenshotter =
@@ -170,9 +153,6 @@ void GoldenPlaygroundTest::SetUp() {
       break;
     }
     case PlaygroundBackend::kOpenGLES: {
-      if (enable_wide_gamut) {
-        GTEST_SKIP_("OpenGLES doesn't support wide gamut golden tests.");
-      }
       FML_CHECK(::glfwInit() == GLFW_TRUE);
       PlaygroundSwitches playground_switches;
       playground_switches.use_angle = true;
