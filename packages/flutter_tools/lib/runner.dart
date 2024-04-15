@@ -123,7 +123,8 @@ Future<int> run(
         // logged to a local log file
         // TODO(eliasyishak): remove once GA3 sunset, https://github.com/flutter/flutter/issues/128251
         if (!globals.analytics.telemetryEnabled &&
-            globals.flutterUsage.enabled) {
+            globals.flutterUsage.enabled &&
+            !await globals.isRunningOnBot) {
           AnalyticsConfigEvent(enabled: false).send();
           await globals.flutterUsage.ensureAnalyticsSent();
           globals.flutterUsage.enabled = false;
