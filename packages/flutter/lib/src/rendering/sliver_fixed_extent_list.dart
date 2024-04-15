@@ -279,8 +279,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     assert((itemExtent != null && itemExtentBuilder == null) ||
         (itemExtent == null && itemExtentBuilder != null));
     assert(itemExtentBuilder != null || (itemExtent!.isFinite && itemExtent! >= 0));
-    final SliverConstraints constraints = this.constraints;
 
+    final SliverConstraints constraints = this.constraints;
     childManager.didStartLayout();
     childManager.setDidUnderflow(false);
 
