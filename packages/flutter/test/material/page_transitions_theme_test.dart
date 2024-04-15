@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/foundation/platform.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -500,7 +501,16 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('push'), findsNothing);
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        expect(find.text('push'), findsOneWidget);
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+        expect(find.text('push'), findsNothing);
+    }
     expect(find.text('page b'), findsOneWidget);
 
     // Commit the system back gesture.
@@ -518,5 +528,224 @@ void main() {
 
     expect(find.text('push'), findsOneWidget);
     expect(find.text('page b'), findsNothing);
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('predictive back is the default on Android', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: TextButton(
+          child: const Text('push'),
+          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+        ),
+      ),
+    };
+    await tester.pumpWidget(
+      MaterialApp(
+        routes: routes,
+      ),
+    );
+
+    final ThemeData themeData = Theme.of(tester.element(find.text('push')));
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        expect(themeData.pageTransitionsTheme.builders[defaultTargetPlatform], isA<PredictiveBackPageTransitionsBuilder>());
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+        expect(themeData.pageTransitionsTheme.builders[defaultTargetPlatform], isNot(isA<PredictiveBackPageTransitionsBuilder>()));
+    }
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('predictive back falls back to ZoomPageTransitionBuilder', (WidgetTester tester) async {
+    Finder findPredictiveBackPageTransition() {
+      return find.descendant(
+        of: find.byType(PrimaryScrollController),
+        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PredictiveBackPageTransition'),
+      );
+    }
+    Finder findFallbackPageTransition() {
+      return find.descendant(
+        of: find.byType(PrimaryScrollController),
+        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_ZoomPageTransition'),
+      );
+    }
+
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: TextButton(
+          child: const Text('push'),
+          onPressed: () { Navigator.of(context).pushNamed('/b'); },
+        ),
+      ),
+      '/b': (BuildContext context) => const Text('page b'),
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        routes: routes,
+        theme: ThemeData(
+          pageTransitionsTheme: const PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
+              TargetPlatform.iOS: PredictiveBackPageTransitionsBuilder(),
+              TargetPlatform.macOS: PredictiveBackPageTransitionsBuilder(),
+              TargetPlatform.windows: PredictiveBackPageTransitionsBuilder(),
+              TargetPlatform.linux: PredictiveBackPageTransitionsBuilder(),
+              TargetPlatform.fuchsia: PredictiveBackPageTransitionsBuilder(),
+            },
+          ),
+        ),
+      ),
+    );
+
+    final ThemeData themeData = Theme.of(tester.element(find.text('push')));
+    expect(themeData.pageTransitionsTheme.builders[defaultTargetPlatform], isA<PredictiveBackPageTransitionsBuilder>());
+
+    expect(find.text('push'), findsOneWidget);
+    expect(find.text('page b'), findsNothing);
+
+    await tester.tap(find.text('push'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('push'), findsNothing);
+    expect(find.text('page b'), findsOneWidget);
+
+    // Only Android sends system back gestures.
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall(
+          'startBackGesture',
+          <String, dynamic>{
+            'touchOffset': <double>[5.0, 300.0],
+            'progress': 0.0,
+            'swipeEdge': 0, // left
+          },
+        ),
+      );
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        startMessage,
+        (ByteData? _) {},
+      );
+      await tester.pump();
+    }
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        expect(findPredictiveBackPageTransition(), findsOneWidget);
+        expect(findFallbackPageTransition(), findsNothing);
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+        expect(findPredictiveBackPageTransition(), findsNothing);
+        expect(findFallbackPageTransition(), findsOneWidget);
+    }
+
+    expect(find.text('push'), findsNothing);
+    expect(find.text('page b'), findsOneWidget);
+
+    // Drag the system back gesture far enough to commit.
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      final ByteData updateMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall(
+          'updateBackGestureProgress',
+          <String, dynamic>{
+            'x': 100.0,
+            'y': 300.0,
+            'progress': 0.35,
+            'swipeEdge': 0, // left
+          },
+        ),
+      );
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        updateMessage,
+        (ByteData? _) {},
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('push'), findsOneWidget);
+    } else {
+      expect(find.text('push'), findsNothing);
+    }
+
+    expect(find.text('page b'), findsOneWidget);
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        expect(findPredictiveBackPageTransition(), findsNWidgets(2));
+        expect(findFallbackPageTransition(), findsNothing);
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+        expect(findPredictiveBackPageTransition(), findsNothing);
+        expect(findFallbackPageTransition(), findsOneWidget);
+    }
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      // Commit the system back gesture on Android.
+      final ByteData commitMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall(
+          'commitBackGesture',
+        ),
+      );
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        commitMessage,
+        (ByteData? _) {},
+      );
+    } else {
+      // On other platforms, send a one-off system pop.
+      final ByteData popMessage = const JSONMethodCodec().encodeMethodCall(
+        const MethodCall(
+          'popRoute',
+        ),
+      );
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/navigation',
+        popMessage,
+        (ByteData? _) {},
+      );
+    }
+    await tester.pump();
+
+    expect(find.text('push'), findsOneWidget);
+    expect(find.text('page b'), findsOneWidget);
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        expect(findPredictiveBackPageTransition(), findsNWidgets(2));
+        expect(findFallbackPageTransition(), findsNothing);
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+        expect(findPredictiveBackPageTransition(), findsNothing);
+        expect(findFallbackPageTransition(), findsNWidgets(2));
+    }
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('push'), findsOneWidget);
+    expect(find.text('page b'), findsNothing);
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        expect(findPredictiveBackPageTransition(), findsNothing);
+        expect(findFallbackPageTransition(), findsOneWidget);
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+        expect(findPredictiveBackPageTransition(), findsNothing);
+        expect(findFallbackPageTransition(), findsOneWidget);
+    }
   }, variant: TargetPlatformVariant.all());
 }
