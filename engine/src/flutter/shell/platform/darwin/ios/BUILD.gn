@@ -61,6 +61,8 @@ source_set("flutter_framework_source_arc") {
   sources = [
     "framework/Source/FlutterCallbackCache.mm",
     "framework/Source/FlutterCallbackCache_Internal.h",
+    "framework/Source/FlutterDartVMServicePublisher.h",
+    "framework/Source/FlutterDartVMServicePublisher.mm",
     "framework/Source/FlutterEmbedderKeyResponder.h",
     "framework/Source/FlutterEmbedderKeyResponder.mm",
     "framework/Source/FlutterKeyPrimaryResponder.h",
@@ -89,6 +91,7 @@ source_set("flutter_framework_source_arc") {
 
   deps += [
     "//flutter/lib/ui",
+    "//flutter/runtime",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
   ]
 }
@@ -109,8 +112,6 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterChannelKeyResponder.mm",
     "framework/Source/FlutterDartProject.mm",
     "framework/Source/FlutterDartProject_Internal.h",
-    "framework/Source/FlutterDartVMServicePublisher.h",
-    "framework/Source/FlutterDartVMServicePublisher.mm",
     "framework/Source/FlutterEngine.mm",
     "framework/Source/FlutterEngineGroup.mm",
     "framework/Source/FlutterEngine_Internal.h",
