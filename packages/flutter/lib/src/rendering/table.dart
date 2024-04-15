@@ -1260,19 +1260,13 @@ class RenderTable extends RenderBox {
       return <DiagnosticsNode>[DiagnosticsNode.message('table is empty')];
     }
 
-    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
-    for (int y = 0; y < rows; y += 1) {
-      for (int x = 0; x < columns; x += 1) {
-        final int xy = x + y * columns;
-        final RenderBox? child = _children[xy];
-        final String name = 'child ($x, $y)';
-        if (child != null) {
-          children.add(child.toDiagnosticsNode(name: name));
-        } else {
-          children.add(DiagnosticsProperty<Object>(name, null, ifNull: 'is null', showSeparator: false));
-        }
-      }
-    }
-    return children;
+    return <DiagnosticsNode>[
+      for (int y = 0; y < rows; y += 1)
+        for (int x = 0; x < columns; x += 1)
+          if (_children[x + y * columns] case final RenderBox child)
+            child.toDiagnosticsNode(name: 'child ($x, $y)')
+          else
+            DiagnosticsProperty<Object>('child ($x, $y)', null, ifNull: 'is null', showSeparator: false),
+    ];
   }
 }

@@ -625,14 +625,13 @@ class HardwareKeyboard {
   }
 
   List<String> _debugPressedKeysDetails() {
-    if (_pressedKeys.isEmpty) {
-      return <String>['Empty'];
-    }
-    final List<String> details = <String>[];
-    for (final PhysicalKeyboardKey physicalKey in _pressedKeys.keys) {
-      details.add('$physicalKey: ${_pressedKeys[physicalKey]}');
-    }
-    return details;
+    return <String>[
+      if (_pressedKeys.isEmpty)
+        'Empty'
+      else
+        for (final PhysicalKeyboardKey physicalKey in _pressedKeys.keys)
+          '$physicalKey: ${_pressedKeys[physicalKey]}',
+    ];
   }
 
   /// Process a new [KeyEvent] by recording the state changes and dispatching

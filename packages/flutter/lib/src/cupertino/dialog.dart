@@ -1485,22 +1485,15 @@ class _CupertinoAlertActionSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    final List<Widget> interactiveButtons = <Widget>[];
-    for (int i = 0; i < children.length; i += 1) {
-      interactiveButtons.add(
-        _PressableActionButton(
-          child: children[i],
-        ),
-      );
-    }
-
     return CupertinoScrollbar(
       controller: scrollController,
       child: SingleChildScrollView(
         controller: scrollController,
         child: _CupertinoDialogActionsRenderWidget(
-          actionButtons: interactiveButtons,
+          actionButtons: <Widget>[
+            for (final Widget child in children)
+              _PressableActionButton(child: child),
+          ],
           dividerThickness: _kDividerThickness,
           hasCancelButton: hasCancelButton,
           isActionSheet: isActionSheet,

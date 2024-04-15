@@ -388,15 +388,10 @@ bool testIsSuperset(Map<String, String> newCodepoints, Map<String, String> oldCo
 @visibleForTesting
 bool testIsStable(Map<String, String> newCodepoints, Map<String, String> oldCodepoints) {
   final int oldCodepointsCount = oldCodepoints.length;
-  final List<String> unstable = <String>[];
-
-  oldCodepoints.forEach((String key, String value) {
-    if (newCodepoints.containsKey(key)) {
-      if (value != newCodepoints[key]) {
-        unstable.add(key);
-      }
-    }
-  });
+  final List<String> unstable = <String>[
+    for (final MapEntry<String, String>(:String key, :String value) in oldCodepoints.entries)
+      if (newCodepoints.containsKey(key) && value != newCodepoints[key]) key,
+  ];
 
   if (unstable.isNotEmpty) {
     stderr.writeln('❌ out of $oldCodepointsCount existing codepoints, ${unstable.length} were unstable: $unstable');

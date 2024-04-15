@@ -6686,16 +6686,11 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final List<String> listeners = <String>[];
-    if (onEnter != null) {
-      listeners.add('enter');
-    }
-    if (onExit != null) {
-      listeners.add('exit');
-    }
-    if (onHover != null) {
-      listeners.add('hover');
-    }
+    final List<String> listeners = <String>[
+      if (onEnter != null) 'enter',
+      if (onExit != null) 'exit',
+      if (onHover != null) 'hover',
+    ];
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
     properties.add(DiagnosticsProperty<MouseCursor>('cursor', cursor, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
@@ -7573,12 +7568,10 @@ class KeyedSubtree extends StatelessWidget {
       return items;
     }
 
-    final List<Widget> itemsWithUniqueKeys = <Widget>[];
-    int itemIndex = baseIndex;
-    for (final Widget item in items) {
-      itemsWithUniqueKeys.add(KeyedSubtree.wrap(item, itemIndex));
-      itemIndex += 1;
-    }
+    final List<Widget> itemsWithUniqueKeys = <Widget>[
+      for (final (int i, Widget item) in items.indexed)
+        KeyedSubtree.wrap(item, baseIndex + i),
+    ];
 
     assert(!debugItemsHaveDuplicateKeys(itemsWithUniqueKeys));
     return itemsWithUniqueKeys;

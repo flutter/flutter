@@ -2213,13 +2213,10 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// Copies the selected contents of all [Selectable]s.
   @override
   SelectedContent? getSelectedContent() {
-    final List<SelectedContent> selections = <SelectedContent>[];
-    for (final Selectable selectable in selectables) {
-      final SelectedContent? data = selectable.getSelectedContent();
-      if (data != null) {
-        selections.add(data);
-      }
-    }
+    final List<SelectedContent> selections = <SelectedContent>[
+      for (final Selectable selectable in selectables)
+        if (selectable.getSelectedContent() case final SelectedContent data) data,
+    ];
     if (selections.isEmpty) {
       return null;
     }

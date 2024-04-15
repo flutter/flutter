@@ -3194,14 +3194,11 @@ class BuildOwner {
                   keyStringCount[key] = 1;
                 }
               }
-              final List<String> keyLabels = <String>[];
-              keyStringCount.forEach((String key, int count) {
-                if (count == 1) {
-                  keyLabels.add(key);
-                } else {
-                  keyLabels.add('$key ($count different affected keys had this toString representation)');
-                }
-              });
+              final List<String> keyLabels = <String>[
+                for (final MapEntry<String, int>(:String key, value: int count) in keyStringCount.entries)
+                  if (count == 1) key
+                  else '$key ($count different affected keys had this toString representation)',
+              ];
               final Iterable<Element> elements = _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans!.keys;
               final Map<String, int> elementStringCount = HashMap<String, int>();
               for (final String element in elements.map<String>((Element element) => element.toString())) {
@@ -3211,14 +3208,11 @@ class BuildOwner {
                   elementStringCount[element] = 1;
                 }
               }
-              final List<String> elementLabels = <String>[];
-              elementStringCount.forEach((String element, int count) {
-                if (count == 1) {
-                  elementLabels.add(element);
-                } else {
-                  elementLabels.add('$element ($count different affected elements had this toString representation)');
-                }
-              });
+              final List<String> elementLabels = <String>[
+                for (final MapEntry<String, int>(key: String element, value: int count) in elementStringCount.entries)
+                  if (count == 1) element
+                  else '$element ($count different affected elements had this toString representation)',
+              ];
               assert(keyLabels.isNotEmpty);
               final String the = keys.length == 1 ? ' the' : '';
               final String s = keys.length == 1 ? '' : 's';

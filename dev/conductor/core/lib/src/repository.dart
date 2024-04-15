@@ -183,15 +183,11 @@ abstract class Repository {
       workingDirectory: (await checkoutDirectory).path,
     );
 
-    final List<String> remoteBranches = <String>[];
-    for (final String line in output.split('\n')) {
-      final RegExpMatch? match = _lsRemotePattern.firstMatch(line);
-      if (match != null) {
-        remoteBranches.add(match.group(1)!);
-      }
-    }
-
-    return remoteBranches;
+    return <String>[
+      for (final String line in output.split('\n'))
+        if (_lsRemotePattern.firstMatch(line) case final RegExpMatch match)
+          match.group(1)!,
+    ];
   }
 
   /// Ensure the repository is cloned to disk and initialized with proper state.

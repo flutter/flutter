@@ -110,12 +110,10 @@ class NextContext extends Context {
           break;
         }
 
-        final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[];
-        for (final pb.Cherrypick cherrypick in state.engine.cherrypicks) {
-          if (!finishedStates.contains(cherrypick.state)) {
-            unappliedCherrypicks.add(cherrypick);
-          }
-        }
+        final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[
+          for (final pb.Cherrypick cherrypick in state.engine.cherrypicks)
+            if (!finishedStates.contains(cherrypick.state)) cherrypick,
+        ];
 
         if (unappliedCherrypicks.isEmpty) {
           stdio.printStatus('All engine cherrypicks have been auto-applied by the conductor.\n');
@@ -206,12 +204,10 @@ class NextContext extends Context {
           );
         }
 
-        final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[];
-        for (final pb.Cherrypick cherrypick in state.framework.cherrypicks) {
-          if (!finishedStates.contains(cherrypick.state)) {
-            unappliedCherrypicks.add(cherrypick);
-          }
-        }
+        final List<pb.Cherrypick> unappliedCherrypicks = <pb.Cherrypick>[
+          for (final pb.Cherrypick cherrypick in state.framework.cherrypicks)
+            if (!finishedStates.contains(cherrypick.state)) cherrypick,
+        ];
 
         if (state.framework.cherrypicks.isEmpty) {
           stdio.printStatus(

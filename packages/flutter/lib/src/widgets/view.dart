@@ -699,17 +699,14 @@ class _MultiChildComponentElement extends Element {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
-    if (_childElement != null) {
-      children.add(_childElement!.toDiagnosticsNode());
-    }
-    for (int i = 0; i < _viewElements.length; i++) {
-      children.add(_viewElements[i].toDiagnosticsNode(
-        name: 'view ${i + 1}',
-        style: DiagnosticsTreeStyle.offstage,
-      ));
-    }
-    return children;
+    return <DiagnosticsNode>[
+      if (_childElement != null) _childElement!.toDiagnosticsNode(),
+      for (int i = 0; i < _viewElements.length; i++)
+        _viewElements[i].toDiagnosticsNode(
+          name: 'view ${i + 1}',
+          style: DiagnosticsTreeStyle.offstage,
+        ),
+    ];
   }
 }
 

@@ -2035,15 +2035,11 @@ class _HighlightModeManager {
     // Check to see if any of the early handlers handle the key. If so, then
     // return early.
     if (_earlyKeyEventHandlers.isNotEmpty) {
-      final List<KeyEventResult> results = <KeyEventResult>[];
-      // Copy the list before iteration to prevent problems if the list gets
-      // modified during iteration.
-      final List<OnKeyEventCallback> iterationList = _earlyKeyEventHandlers.toList();
-      for (final OnKeyEventCallback callback in iterationList) {
-        for (final KeyEvent event in message.events) {
-          results.add(callback(event));
-        }
-      }
+      final List<KeyEventResult> results = <KeyEventResult>[
+        // Make a copy to prevent problems if the list is modified during iteration.
+        for (final OnKeyEventCallback callback in _earlyKeyEventHandlers.toList())
+          for (final KeyEvent event in message.events) callback(event),
+      ];
       final KeyEventResult result = combineKeyEventResults(results);
       switch (result) {
         case KeyEventResult.ignored:
@@ -2067,15 +2063,13 @@ class _HighlightModeManager {
       FocusManager.instance.primaryFocus!,
       ...FocusManager.instance.primaryFocus!.ancestors,
     ]) {
-      final List<KeyEventResult> results = <KeyEventResult>[];
-      if (node.onKeyEvent != null) {
-        for (final KeyEvent event in message.events) {
-          results.add(node.onKeyEvent!(node, event));
-        }
-      }
-      if (node.onKey != null && message.rawEvent != null) {
-        results.add(node.onKey!(node, message.rawEvent!));
-      }
+      final List<KeyEventResult> results = <KeyEventResult>[
+        if (node.onKeyEvent != null)
+          for (final KeyEvent event in message.events)
+            node.onKeyEvent!(node, event),
+        if (node.onKey != null && message.rawEvent != null)
+          node.onKey!(node, message.rawEvent!),
+      ];
       final KeyEventResult result = combineKeyEventResults(results);
       switch (result) {
         case KeyEventResult.ignored:
@@ -2095,15 +2089,11 @@ class _HighlightModeManager {
 
     // Check to see if any late key event handlers want to handle the event.
     if (!handled && _lateKeyEventHandlers.isNotEmpty) {
-      final List<KeyEventResult> results = <KeyEventResult>[];
-      // Copy the list before iteration to prevent problems if the list gets
-      // modified during iteration.
-      final List<OnKeyEventCallback> iterationList = _lateKeyEventHandlers.toList();
-      for (final OnKeyEventCallback callback in iterationList) {
-        for (final KeyEvent event in message.events) {
-          results.add(callback(event));
-        }
-      }
+      final List<KeyEventResult> results = <KeyEventResult>[
+        // Make a copy to prevent problems if the list is modified during iteration.
+        for (final OnKeyEventCallback callback in _lateKeyEventHandlers.toList())
+          for (final KeyEvent event in message.events) callback(event),
+      ];
       final KeyEventResult result = combineKeyEventResults(results);
       switch (result) {
         case KeyEventResult.ignored:

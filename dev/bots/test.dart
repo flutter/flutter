@@ -913,18 +913,14 @@ Future<void> _runFrameworkTests() async {
         final Uint8List libappBytes = libapp.content as Uint8List; // bytes decompressed here
         final String libappStrings = utf8.decode(libappBytes, allowMalformed: true);
         await runCommand(flutter, <String>['clean'], workingDirectory: tracingDirectory);
-        final List<String> results = <String>[];
-        for (final String pattern in allowed) {
-          if (!libappStrings.contains(pattern)) {
-            results.add('When building with --$modeArgument, expected to find "$pattern" in libapp.so but could not find it.');
-          }
-        }
-        for (final String pattern in disallowed) {
-          if (libappStrings.contains(pattern)) {
-            results.add('When building with --$modeArgument, expected to not find "$pattern" in libapp.so but did find it.');
-          }
-        }
-        return results;
+        return <String>[
+          for (final String pattern in allowed)
+            if (!libappStrings.contains(pattern))
+              'When building with --$modeArgument, expected to find "$pattern" in libapp.so but could not find it.',
+          for (final String pattern in disallowed)
+            if (libappStrings.contains(pattern))
+              'When building with --$modeArgument, expected to not find "$pattern" in libapp.so but did find it.',
+        ];
       } catch (error, stackTrace) {
         return <String>[
           error.toString(),
@@ -1332,11 +1328,9 @@ Future<void> _runDartTest(String workingDirectory, {
 
   if (collectMetrics) {
     try {
-      final List<String> testList = <String>[];
-      final Map<int, TestSpecs> allTestSpecs = test.allTestSpecs;
-      for (final TestSpecs testSpecs in allTestSpecs.values) {
-        testList.add(testSpecs.toJson());
-      }
+      final List<String> testList = <String>[
+        for (final TestSpecs testSpecs in test.allTestSpecs.values) testSpecs.toJson(),
+      ];
       if (testList.isNotEmpty) {
         final String testJson = json.encode(testList);
         final File testResults = fileSystem.file(
