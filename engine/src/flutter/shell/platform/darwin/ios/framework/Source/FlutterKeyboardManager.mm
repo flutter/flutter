@@ -3,8 +3,11 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardManager.h"
+
 #include "flutter/fml/platform/darwin/message_loop_darwin.h"
-#include "flutter/fml/platform/darwin/weak_nsobject.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+
+FLUTTER_ASSERT_ARC
 
 static constexpr CFTimeInterval kDistantFuture = 1.0e10;
 
@@ -13,13 +16,13 @@ static constexpr CFTimeInterval kDistantFuture = 1.0e10;
 /**
  * The primary responders added by addPrimaryResponder.
  */
-@property(nonatomic, retain, readonly)
+@property(nonatomic, copy, readonly)
     NSMutableArray<id<FlutterKeyPrimaryResponder>>* primaryResponders;
 
 /**
  * The secondary responders added by addSecondaryResponder.
  */
-@property(nonatomic, retain, readonly)
+@property(nonatomic, copy, readonly)
     NSMutableArray<id<FlutterKeySecondaryResponder>>* secondaryResponders;
 
 - (void)dispatchToSecondaryResponders:(nonnull FlutterUIPressProxy*)press
@@ -28,16 +31,13 @@ static constexpr CFTimeInterval kDistantFuture = 1.0e10;
 
 @end
 
-@implementation FlutterKeyboardManager {
-  std::unique_ptr<fml::WeakNSObjectFactory<FlutterKeyboardManager>> _weakFactory;
-}
+@implementation FlutterKeyboardManager
 
 - (nonnull instancetype)init {
   self = [super init];
   if (self != nil) {
     _primaryResponders = [[NSMutableArray alloc] init];
     _secondaryResponders = [[NSMutableArray alloc] init];
-    _weakFactory = std::make_unique<fml::WeakNSObjectFactory<FlutterKeyboardManager>>(self);
   }
   return self;
 }
@@ -48,24 +48,6 @@ static constexpr CFTimeInterval kDistantFuture = 1.0e10;
 
 - (void)addSecondaryResponder:(nonnull id<FlutterKeySecondaryResponder>)responder {
   [_secondaryResponders addObject:responder];
-}
-
-- (void)dealloc {
-  // It will be destroyed and invalidate its weak pointers
-  // before any other members are destroyed.
-  _weakFactory.reset();
-
-  [_primaryResponders removeAllObjects];
-  [_secondaryResponders removeAllObjects];
-  [_primaryResponders release];
-  [_secondaryResponders release];
-  _primaryResponders = nil;
-  _secondaryResponders = nil;
-  [super dealloc];
-}
-
-- (fml::WeakNSObject<FlutterKeyboardManager>)getWeakNSObject {
-  return _weakFactory->GetWeakNSObject();
 }
 
 - (void)handlePress:(nonnull FlutterUIPressProxy*)press
@@ -89,7 +71,7 @@ static constexpr CFTimeInterval kDistantFuture = 1.0e10;
       // encounter.
       NSAssert([_primaryResponders count] >= 0, @"At least one primary responder must be added.");
 
-      __block auto weakSelf = [self getWeakNSObject];
+      __block __weak __typeof(self) weakSelf = self;
       __block NSUInteger unreplied = [self.primaryResponders count];
       __block BOOL anyHandled = false;
       FlutterAsyncKeyCallback replyCallback = ^(BOOL handled) {
@@ -98,7 +80,7 @@ static constexpr CFTimeInterval kDistantFuture = 1.0e10;
         anyHandled = anyHandled || handled;
         if (unreplied == 0) {
           if (!anyHandled && weakSelf) {
-            [weakSelf.get() dispatchToSecondaryResponders:press complete:completeCallback];
+            [weakSelf dispatchToSecondaryResponders:press complete:completeCallback];
           } else {
             completeCallback(true, press);
           }
