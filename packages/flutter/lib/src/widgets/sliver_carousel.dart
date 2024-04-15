@@ -8,11 +8,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import 'framework.dart';
-import 'scroll_metrics.dart';
-import 'scroll_physics.dart';
-import 'sliver.dart';
-
 class Carousel extends StatefulWidget {
   Carousel({
     super.key,
@@ -122,16 +117,6 @@ class _CarouselState extends State<Carousel> {
                   childExtentList: widget.childWeights,
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
-                      // if (index == 0) {
-                      //   return IgnorePointer(
-                      //     child: widget.children.elementAt(index)
-                      //   );
-                      // }
-                      // if (index >= widget.children.length) {
-                      //   return IgnorePointer(
-                      //     child: widget.children.elementAt(widget.children.length - 1),
-                      //   );
-                      // }
                       return widget.children.elementAt(index);
                     },
                     childCount: widget.children.length,
@@ -169,8 +154,8 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
   _RenderSliverFractionalPadding({
     double viewportFraction = 0,
   }) : assert(viewportFraction <= 0.5),
-      assert(viewportFraction >= 0),
-      _viewportFraction = viewportFraction;
+       assert(viewportFraction >= 0),
+       _viewportFraction = viewportFraction;
 
   SliverConstraints? _lastResolvedConstraints;
 
@@ -194,7 +179,6 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
   }
 
   void _resolve() {
-    // print('_resolve $resolvedPadding');
     if (_resolvedPadding != null && _lastResolvedConstraints == constraints) {
       return;
     }
@@ -210,7 +194,6 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 
   @override
   void performLayout() {
-    print('空白sliver: ${constraints.scrollOffset}');
     _resolve();
     super.performLayout();
   }
@@ -290,17 +273,34 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
 
   double _buildItemExtent(int index, SliverLayoutDimensions currentLayoutDimensions) {
     double extent;
+print(constraints.overlap);
+    if (constraints.overlap < 0) {
+      if (index < childExtentList.length - 2) {
+        final int currWeight = childExtentList.elementAt(index + 1);
+        extent = extentUnit * currWeight; // initial extent
+        double progress = constraints.overlap.abs() / firstChildExtent;
+        final int prevWeight = childExtentList.elementAt(index + 2);
+        final double finalIncrease = (prevWeight - currWeight) / childExtentList.max;
+        extent = extent + finalIncrease * progress * maxChildExtent;
+      }
+      else {
+        extent = math.max(extentUnit * childExtentList.last - constraints.overlap.abs(), 0);
+      }
+      return extent;
+    }
+
+
     if (_firstVisibleItemIndex == index) {
       if (_firstVisibleItemIndex == -1) {
         // print('SHOULD NOT BE CALLED BECAUSE FIRST VISIBLE INDEX IS -1');
       }
       extent = math.max(_distanceToLeadingEdge, clipExtent);
-    } else if (index > _firstVisibleItemIndex
+    }
+    else if (index > _firstVisibleItemIndex
       // In this if statement, children are visible items except the first one.
       && index - _firstVisibleItemIndex + 1 <= childExtentList.length
     ) {
       assert(index - _firstVisibleItemIndex < childExtentList.length);
-// print('SHOULD PRINT ALL VISIBLE INDEX: $index');
       final int currWeight = childExtentList.elementAt(index - _firstVisibleItemIndex);
       extent = extentUnit * currWeight; // initial extent
       double progress = _gapBetweenCurrentAndPrev / firstChildExtent;
@@ -378,6 +378,15 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
     } else if (index > _firstVisibleItemIndex) {
       // print('====================\nflutter: ========\n');
       // print('index -----> $index, first visible index: $_firstVisibleItemIndex');
+
+      if (constraints.overlap < 0) {
+        double visibleItemsTotalExtent = 0;
+        for (int i = _firstVisibleItemIndex + 1; i < index; i++) {
+          visibleItemsTotalExtent += _buildItemExtent(i, currentLayoutDimensions);
+        }
+        return constraints.scrollOffset + visibleItemsTotalExtent - firstChildExtent + firstChildExtent + (childExtentList.elementAt(1) - childExtentList.first) * constraints.overlap.abs();
+      }
+
       double visibleItemsTotalExtent = _firstVisibleItemIndex == -1 ? 0 : _distanceToLeadingEdge;
       for (int i = _firstVisibleItemIndex + 1; i < index; i++) {
         visibleItemsTotalExtent += _buildItemExtent(i, currentLayoutDimensions);
@@ -421,7 +430,9 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
         // print('//////////////// visibleItemTotalExtent: $visibleItemsTotalExtent $i');
 
         if (visibleItemsTotalExtent >= constraints.viewportMainAxisExtent) {
-          // print('///////////////// max child index: $i');
+          if (i < 0) {
+            print('///////////////// max child index: $i');
+          }
           return i;
         }
       }
