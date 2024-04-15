@@ -62,6 +62,9 @@ public class FlutterRenderer implements TextureRegistry {
    */
   @VisibleForTesting public static boolean debugForceSurfaceProducerGlTextures = false;
 
+  /** Whether to disable clearing of the Surface used to render platform views. */
+  @VisibleForTesting public static boolean debugDisableSurfaceClear = false;
+
   private static final String TAG = "FlutterRenderer";
 
   @NonNull private final FlutterJNI flutterJNI;

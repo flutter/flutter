@@ -24,6 +24,7 @@ public class TestRunner extends AndroidJUnitRunner {
             "--impeller-backend=" + arguments.getString("impeller-backend", "vulkan")
           };
     }
+    FlutterRenderer.debugDisableSurfaceClear = true;
     if ("true".equals(arguments.getString("force-surface-producer-surface-texture"))) {
       // Set a test flag to force the SurfaceProducer to use SurfaceTexture.
       FlutterRenderer.debugForceSurfaceProducerGlTextures = true;
