@@ -118,6 +118,8 @@ Future<void> main(List<String> args) async {
       } else if (arg.startsWith('--local-engine-src-path=')) {
         localEngineEnv['FLUTTER_LOCAL_ENGINE_SRC_PATH'] = arg.substring('--local-engine-src-path='.length);
         flutterTestArgs.add(arg);
+      } else if (arg.startsWith('--test-randomize-ordering-seed=')) {
+        shuffleSeed = arg.substring('--test-randomize-ordering-seed='.length);
       } else if (arg.startsWith('--verbose')) {
         print = (Object? message) {
           system.print(message);

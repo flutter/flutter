@@ -305,6 +305,11 @@ String locationInFile(ResolvedUnitResult unit, AstNode node, String workingDirec
 // --test-randomize-ordering-seed=<seed> on the command line, it will be set the
 // first time it is accessed. Pass zero to turn off shuffling.
 String? _shuffleSeed;
+
+set shuffleSeed(String? newSeed) {
+  _shuffleSeed = newSeed;
+}
+
 String get shuffleSeed {
   if (_shuffleSeed != null) {
     return _shuffleSeed!;
