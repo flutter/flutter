@@ -122,7 +122,11 @@ static void PrintWideGamutWarningOnce() {
       CGColorSpaceRef srgb = CGColorSpaceCreateWithName(kCGColorSpaceExtendedSRGB);
       layer.colorspace = srgb;
       CFRelease(srgb);
-      layer.pixelFormat = MTLPixelFormatBGRA10_XR;
+      // MTLPixelFormatRGBA16Float was chosen since it is compatible with
+      // impeller's offscreen buffers which need to have transparency.  Also,
+      // F16 was chosen over BGRA10_XR since Skia does not support decoding
+      // BGRA10_XR.
+      layer.pixelFormat = MTLPixelFormatRGBA16Float;
     } else if (_isWideGamutEnabled && !isWideGamutSupported) {
       PrintWideGamutWarningOnce();
     }
