@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Th constant below is in its own library so that the test exemption bot knows
+// The constant below is in its own library so that the test exemption bot knows
 // that changing a pin does not require a new test. These pins are already
 // tested as part of the analysis shard.
 
