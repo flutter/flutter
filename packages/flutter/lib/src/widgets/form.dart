@@ -685,6 +685,8 @@ enum AutovalidateMode {
   /// interaction.
   onUserInteraction,
 
+  /// /// Used to auto-validate [Form] and [FormField] only after the field has
+  /// lost focus.
   /// In order to validate all fields of a [Form] after the first time the user interacts
   /// with one, use [always] instead.
   onUnfocus,
