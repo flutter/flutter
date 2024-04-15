@@ -193,19 +193,19 @@ class UserMessages {
   String cocoaPodsMissing(String consequence, String installInstructions) =>
       'CocoaPods not installed.\n'
       '$consequence\n'
-      'To install $installInstructions';
+      'For installation instructions, $installInstructions';
   String cocoaPodsUnknownVersion(String consequence, String upgradeInstructions) =>
       'Unknown CocoaPods version installed.\n'
       '$consequence\n'
-      'To upgrade $upgradeInstructions';
+      'To update CocoaPods, $upgradeInstructions';
   String cocoaPodsOutdated(String currentVersion, String recVersion, String consequence, String upgradeInstructions) =>
       'CocoaPods $currentVersion out of date ($recVersion is recommended).\n'
       '$consequence\n'
-      'To upgrade $upgradeInstructions';
+      'To update CocoaPods, $upgradeInstructions';
   String cocoaPodsBrokenInstall(String consequence, String reinstallInstructions) =>
       'CocoaPods installed but not working.\n'
       '$consequence\n'
-      'To re-install $reinstallInstructions';
+      'For re-installation instructions, $reinstallInstructions';
 
   // Messages used in VisualStudioValidator
   String visualStudioVersion(String name, String version) => '$name version $version';
