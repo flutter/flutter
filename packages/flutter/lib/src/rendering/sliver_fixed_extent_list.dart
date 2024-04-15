@@ -280,7 +280,6 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         (itemExtent == null && itemExtentBuilder != null));
     assert(itemExtentBuilder != null || (itemExtent!.isFinite && itemExtent! >= 0));
     final SliverConstraints constraints = this.constraints;
-    print('carousel scrolloffset: ${constraints.scrollOffset}');
 
     childManager.didStartLayout();
     childManager.setDidUnderflow(false);
@@ -303,8 +302,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     final int firstIndex = getMinChildIndexForScrollOffset(scrollOffset, deprecatedExtraItemExtent);
     final int? targetLastIndex = targetEndScrollOffset.isFinite ?
         getMaxChildIndexForScrollOffset(targetEndScrollOffset, deprecatedExtraItemExtent) : null;
-// print('first index: $firstIndex');
-// print('target last index: $targetLastIndex');
+
     if (firstChild != null) {
       final int leadingGarbage = calculateLeadingGarbage(firstIndex: firstIndex);
       final int trailingGarbage = targetLastIndex != null ? calculateTrailingGarbage(lastIndex: targetLastIndex) : 0;
@@ -333,7 +331,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     }
 
     RenderBox? trailingChildWithLayout;
-print('first child: ${indexOf(firstChild!)}');
+
     for (int index = indexOf(firstChild!) - 1; index >= firstIndex; --index) {
       final RenderBox? child = insertAndLayoutLeadingChild(_getChildConstraints(index));
       if (child == null) {
