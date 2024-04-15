@@ -1730,7 +1730,6 @@ targets:
       - .ci.yaml
 
   - name: Linux web_skwasm_tests_0
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1753,7 +1752,6 @@ targets:
       - .ci.yaml
 
   - name: Linux web_skwasm_tests_1
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1776,7 +1774,6 @@ targets:
       - .ci.yaml
 
   - name: Linux web_skwasm_tests_2
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1799,7 +1796,6 @@ targets:
       - .ci.yaml
 
   - name: Linux web_skwasm_tests_3
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1822,7 +1818,6 @@ targets:
       - .ci.yaml
 
   - name: Linux web_skwasm_tests_4
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1845,7 +1840,6 @@ targets:
       - .ci.yaml
 
   - name: Linux web_skwasm_tests_5
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1868,7 +1862,6 @@ targets:
       - .ci.yaml
 
   - name: Linux web_skwasm_tests_6
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1891,7 +1884,6 @@ targets:
       - .ci.yaml
 
   - name: Linux web_skwasm_tests_7_last
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -2249,7 +2241,7 @@ targets:
       task_name: complex_layout_scroll_perf_impeller__timeline_summary
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:11"}
+          {"dependency": "open_jdk", "version": "version:17"}
         ]
 
   - name: Linux_pixel_7pro complex_layout_scroll_perf_impeller_gles__timeline_summary
@@ -2262,7 +2254,7 @@ targets:
       task_name: complex_layout_scroll_perf_impeller_gles__timeline_summary
       dependencies: >-
         [
-          {"dependency": "open_jdk", "version": "version:11"}
+          {"dependency": "open_jdk", "version": "version:17"}
         ]
 
   # linux motog4 benchmark

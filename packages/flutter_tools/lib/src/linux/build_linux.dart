@@ -53,7 +53,7 @@ Future<void> buildLinux(
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
-  migration.run();
+  await migration.run();
 
   // Build the environment that needs to be set for the re-entrant flutter build
   // step.
