@@ -132,11 +132,8 @@ TEST_P(AiksTest, PaintBlendModeIsRespected) {
 
 // Bug: https://github.com/flutter/flutter/issues/142549
 TEST_P(AiksTest, BlendModePlusAlphaWideGamut) {
-  if (GetParam() != PlaygroundBackend::kMetal) {
-    GTEST_SKIP_("This backend doesn't yet support wide gamut.");
-  }
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
-            PixelFormat::kR16G16B16A16Float);
+            PixelFormat::kB10G10R10A10XR);
   auto texture = CreateTextureForFixture("airplane.jpg",
                                          /*enable_mipmapping=*/true);
 
@@ -158,11 +155,8 @@ TEST_P(AiksTest, BlendModePlusAlphaWideGamut) {
 
 // Bug: https://github.com/flutter/flutter/issues/142549
 TEST_P(AiksTest, BlendModePlusAlphaColorFilterWideGamut) {
-  if (GetParam() != PlaygroundBackend::kMetal) {
-    GTEST_SKIP_("This backend doesn't yet support wide gamut.");
-  }
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
-            PixelFormat::kR16G16B16A16Float);
+            PixelFormat::kB10G10R10A10XR);
   auto texture = CreateTextureForFixture("airplane.jpg",
                                          /*enable_mipmapping=*/true);
 

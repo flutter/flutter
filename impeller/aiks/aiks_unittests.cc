@@ -938,17 +938,14 @@ TEST_P(AiksTest, CanDrawPaintMultipleTimes) {
 }
 
 // This makes sure the WideGamut named tests use 16bit float pixel format.
-TEST_P(AiksTest, F16WideGamut) {
-  if (GetParam() != PlaygroundBackend::kMetal) {
-    GTEST_SKIP_("This backend doesn't yet support wide gamut.");
-  }
+TEST_P(AiksTest, FormatWideGamut) {
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
-            PixelFormat::kR16G16B16A16Float);
-  EXPECT_FALSE(IsAlphaClampedToOne(
+            PixelFormat::kB10G10R10A10XR);
+  EXPECT_TRUE(IsAlphaClampedToOne(
       GetContext()->GetCapabilities()->GetDefaultColorFormat()));
 }
 
-TEST_P(AiksTest, NotF16) {
+TEST_P(AiksTest, FormatSRGB) {
   EXPECT_TRUE(IsAlphaClampedToOne(
       GetContext()->GetCapabilities()->GetDefaultColorFormat()));
 }
@@ -3107,12 +3104,8 @@ TEST_P(AiksTest, MipmapGenerationWorksCorrectly) {
 }
 
 TEST_P(AiksTest, DrawAtlasPlusWideGamut) {
-  if (GetParam() != PlaygroundBackend::kMetal) {
-    GTEST_SKIP_("This backend doesn't yet support wide gamut.");
-  }
-
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
-            PixelFormat::kR16G16B16A16Float);
+            PixelFormat::kB10G10R10A10XR);
 
   // Draws the image as four squares stiched together.
   auto atlas =
