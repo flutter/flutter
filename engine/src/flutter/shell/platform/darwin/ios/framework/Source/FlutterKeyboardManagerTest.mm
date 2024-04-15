@@ -23,43 +23,6 @@ class PointerDataPacket {};
 
 using namespace flutter::testing;
 
-/// Sometimes we have to use a custom mock to avoid retain cycles in ocmock.
-@interface FlutterEnginePartialMock : FlutterEngine
-@property(nonatomic, strong) FlutterBasicMessageChannel* lifecycleChannel;
-@property(nonatomic, weak) FlutterViewController* viewController;
-@property(nonatomic, assign) BOOL didCallNotifyLowMemory;
-@end
-
-@interface FlutterEngine ()
-- (BOOL)createShell:(NSString*)entrypoint
-         libraryURI:(NSString*)libraryURI
-       initialRoute:(NSString*)initialRoute;
-- (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet;
-@end
-
-@interface FlutterEngine (TestLowMemory)
-- (void)notifyLowMemory;
-@end
-
-extern NSNotificationName const FlutterViewControllerWillDealloc;
-
-/// A simple mock class for FlutterEngine.
-///
-/// OCMockClass can't be used for FlutterEngine sometimes because OCMock retains arguments to
-/// invocations and since the init for FlutterViewController calls a method on the
-/// FlutterEngine it creates a retain cycle that stops us from testing behaviors related to
-/// deleting FlutterViewControllers.
-@interface MockEngine : NSObject
-@end
-
-@interface FlutterKeyboardManagerUnittestsObjC : NSObject
-- (bool)nextResponderShouldThrowOnPressesEnded;
-- (bool)singlePrimaryResponder;
-- (bool)doublePrimaryResponder;
-- (bool)singleSecondaryResponder;
-- (bool)emptyNextResponder;
-@end
-
 namespace {
 
 typedef void (^KeyCallbackSetter)(FlutterUIPressProxy* press, FlutterAsyncKeyCallback callback)
@@ -68,52 +31,28 @@ typedef BOOL (^BoolGetter)();
 
 }  // namespace
 
+// These tests were designed to run on iOS 13.4 or later.
+API_AVAILABLE(ios(13.4))
 @interface FlutterKeyboardManagerTest : XCTestCase
-@property(nonatomic, strong) id mockEngine;
-- (FlutterViewController*)mockOwnerWithPressesBeginOnlyNext API_AVAILABLE(ios(13.4));
 @end
 
 @implementation FlutterKeyboardManagerTest
 
-- (void)setUp {
-  // All of these tests were designed to run on iOS 13.4 or later.
-  if (@available(iOS 13.4, *)) {
-  } else {
-    XCTSkip(@"Required API not present for test.");
-  }
-
-  [super setUp];
-  self.mockEngine = OCMClassMock([FlutterEngine class]);
-}
-
-- (void)tearDown {
-  // We stop mocking here to avoid retain cycles that stop
-  // FlutterViewControllers from deallocing.
-  [self.mockEngine stopMocking];
-  self.mockEngine = nil;
-  [super tearDown];
-}
-
-- (id)checkKeyDownEvent:(UIKeyboardHIDUsage)keyCode API_AVAILABLE(ios(13.4)) {
-  return [OCMArg checkWithBlock:^BOOL(id value) {
-    if (![value isKindOfClass:[FlutterUIPressProxy class]]) {
-      return NO;
-    }
-    FlutterUIPressProxy* press = value;
-    return press.key.keyCode == keyCode;
-  }];
-}
-
-- (id<FlutterKeyPrimaryResponder>)mockPrimaryResponder:(KeyCallbackSetter)callbackSetter
-    API_AVAILABLE(ios(13.4)) {
+- (id<FlutterKeyPrimaryResponder>)mockPrimaryResponder:(KeyCallbackSetter)callbackSetter {
   id<FlutterKeyPrimaryResponder> mock =
       OCMStrictProtocolMock(@protocol(FlutterKeyPrimaryResponder));
   OCMStub([mock handlePress:[OCMArg any] callback:[OCMArg any]])
       .andDo((^(NSInvocation* invocation) {
-        FlutterUIPressProxy* press;
-        FlutterAsyncKeyCallback callback;
-        [invocation getArgument:&press atIndex:2];
-        [invocation getArgument:&callback atIndex:3];
+        __unsafe_unretained FlutterUIPressProxy* pressUnsafe;
+        __unsafe_unretained FlutterAsyncKeyCallback callbackUnsafe;
+
+        [invocation getArgument:&pressUnsafe atIndex:2];
+        [invocation getArgument:&callbackUnsafe atIndex:3];
+
+        // Retain the unretained parameters so they can
+        // be run in the perform block when this invocation goes out of scope.
+        FlutterUIPressProxy* press = pressUnsafe;
+        FlutterAsyncKeyCallback callback = callbackUnsafe;
         CFRunLoopPerformBlock(CFRunLoopGetCurrent(),
                               fml::MessageLoopDarwin::kMessageLoopCFRunLoopMode, ^() {
                                 callbackSetter(press, callback);
@@ -122,8 +61,7 @@ typedef BOOL (^BoolGetter)();
   return mock;
 }
 
-- (id<FlutterKeySecondaryResponder>)mockSecondaryResponder:(BoolGetter)resultGetter
-    API_AVAILABLE(ios(13.4)) {
+- (id<FlutterKeySecondaryResponder>)mockSecondaryResponder:(BoolGetter)resultGetter {
   id<FlutterKeySecondaryResponder> mock =
       OCMStrictProtocolMock(@protocol(FlutterKeySecondaryResponder));
   OCMStub([mock handlePress:[OCMArg any]]).andDo((^(NSInvocation* invocation) {
@@ -133,32 +71,27 @@ typedef BOOL (^BoolGetter)();
   return mock;
 }
 
-- (FlutterViewController*)mockOwnerWithPressesBeginOnlyNext API_AVAILABLE(ios(13.4)) {
+- (void)testNextResponderShouldThrowOnPressesEnded {
   // The nextResponder is a strict mock and hasn't stubbed pressesEnded.
   // An error will be thrown on pressesEnded.
   UIResponder* nextResponder = OCMStrictClassMock([UIResponder class]);
-  OCMStub([nextResponder pressesBegan:[OCMArg any] withEvent:[OCMArg any]]).andDo(nil);
+  OCMStub([nextResponder pressesBegan:OCMOCK_ANY withEvent:OCMOCK_ANY]);
 
-  FlutterViewController* viewController =
-      [[FlutterViewController alloc] initWithEngine:self.mockEngine nibName:nil bundle:nil];
+  id mockEngine = OCMClassMock([FlutterEngine class]);
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:mockEngine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
   FlutterViewController* owner = OCMPartialMock(viewController);
   OCMStub([owner nextResponder]).andReturn(nextResponder);
-  return owner;
+
+  XCTAssertThrowsSpecificNamed([owner.nextResponder pressesEnded:[[NSSet alloc] init]
+                                                       withEvent:[[UIPressesEvent alloc] init]],
+                               NSException, NSInternalInconsistencyException);
+
+  [mockEngine stopMocking];
 }
 
-// Verify that the nextResponder returned from mockOwnerWithPressesBeginOnlyNext()
-// throws exception when pressesEnded is called.
-- (bool)testNextResponderShouldThrowOnPressesEnded API_AVAILABLE(ios(13.4)) {
-  FlutterViewController* owner = [self mockOwnerWithPressesBeginOnlyNext];
-  @try {
-    [owner.nextResponder pressesEnded:[NSSet init] withEvent:[[UIPressesEvent alloc] init]];
-    return false;
-  } @catch (...) {
-    return true;
-  }
-}
-
-- (void)testSinglePrimaryResponder API_AVAILABLE(ios(13.4)) {
+- (void)testSinglePrimaryResponder {
   FlutterKeyboardManager* manager = [[FlutterKeyboardManager alloc] init];
   __block BOOL primaryResponse = FALSE;
   __block int callbackCount = 0;
@@ -190,7 +123,7 @@ typedef BOOL (^BoolGetter)();
   XCTAssertFalse(completeHandled);
 }
 
-- (void)testDoublePrimaryResponder API_AVAILABLE(ios(13.4)) {
+- (void)testDoublePrimaryResponder {
   FlutterKeyboardManager* manager = [[FlutterKeyboardManager alloc] init];
 
   __block BOOL callback1Response = FALSE;
@@ -253,7 +186,7 @@ typedef BOOL (^BoolGetter)();
   XCTAssertFalse(somethingWasHandled);
 }
 
-- (void)testSingleSecondaryResponder API_AVAILABLE(ios(13.4)) {
+- (void)testSingleSecondaryResponder {
   FlutterKeyboardManager* manager = [[FlutterKeyboardManager alloc] init];
 
   __block BOOL primaryResponse = FALSE;
@@ -308,7 +241,7 @@ typedef BOOL (^BoolGetter)();
   XCTAssertFalse(completeHandled);
 }
 
-- (void)testEventsProcessedSequentially API_AVAILABLE(ios(13.4)) {
+- (void)testEventsProcessedSequentially {
   constexpr UIKeyboardHIDUsage keyId1 = (UIKeyboardHIDUsage)0x50;
   constexpr UIKeyboardHIDUsage keyId2 = (UIKeyboardHIDUsage)0x51;
   FlutterUIPressProxy* event1 = keyDownEvent(keyId1);

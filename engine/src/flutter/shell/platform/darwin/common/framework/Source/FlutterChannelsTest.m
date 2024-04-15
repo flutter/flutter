@@ -168,7 +168,7 @@ FLUTTER_ASSERT_ARC
   [binaryMessenger stopMocking];
 }
 
-- (bool)testSetWarnsOnOverflow {
+- (void)testSetWarnsOnOverflow {
   NSString* channelName = @"flutter/test";
   id binaryMessenger = OCMStrictProtocolMock(@protocol(FlutterBinaryMessenger));
   id codec = OCMProtocolMock(@protocol(FlutterMethodCodec));
