@@ -343,26 +343,21 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       }
       final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = indexToLayoutOffset(deprecatedExtraItemExtent, index);
-      // print('parent data ${childParentData.layoutOffset}');
       assert(childParentData.index == index);
       trailingChildWithLayout ??= child;
     }
 
     if (trailingChildWithLayout == null) {
       firstChild!.layout(_getChildConstraints(indexOf(firstChild!)));
-      // print('index of first child: ${indexOf(firstChild!)}');
       final SliverMultiBoxAdaptorParentData childParentData = firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = indexToLayoutOffset(deprecatedExtraItemExtent, firstIndex);
-      // print('layoutoffset of first child: ${childParentData.layoutOffset}');
       trailingChildWithLayout = firstChild;
     }
 
     double estimatedMaxScrollOffset = double.infinity;
     for (int index = indexOf(trailingChildWithLayout!) + 1; targetLastIndex == null || index <= targetLastIndex; ++index) {
       RenderBox? child = childAfter(trailingChildWithLayout!);
-      // print('index of trailingChildWithLayout: ${indexOf(trailingChildWithLayout)}');
       if (child == null || indexOf(child) != index) {
-        // print('child == null || indexOf(child) != index: $index, get constraints: ${_getChildConstraints(index).maxWidth}');
         child = insertAndLayoutChild(_getChildConstraints(index), after: trailingChildWithLayout);
         if (child == null) {
           // We have run out of children.
@@ -431,7 +426,6 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     }
     childManager.didFinishLayout();
   }
-
 }
 
 /// A sliver that places multiple box children with the same main axis extent in
