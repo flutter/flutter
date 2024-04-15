@@ -26,6 +26,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import io.flutter.embedding.android.AndroidTouchProcessor;
+import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.util.ViewUtils;
 
 /**
@@ -63,7 +64,7 @@ public class PlatformViewWrapper extends FrameLayout {
     this.renderTarget = renderTarget;
 
     Surface surface = renderTarget.getSurface();
-    if (surface != null) {
+    if (surface != null && !FlutterRenderer.debugDisableSurfaceClear) {
       final Canvas canvas = surface.lockHardwareCanvas();
       try {
         canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
