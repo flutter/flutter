@@ -576,11 +576,12 @@ def to_gn_args(args):
   if get_host_os() == 'mac' and not args.force_mac_arm64:
     gn_args['host_cpu'] = 'x64'
 
-  if gn_args['target_os'] == 'ios':
-    gn_args['use_ios_simulator'] = args.simulator
-    gn_args.update(setup_apple_sdks())
-  elif get_host_os() == 'mac':
-    gn_args['use_ios_simulator'] = False
+  if gn_args['target_os'] == 'ios' or get_host_os() == 'mac':
+    if gn_args['target_os'] == 'ios':
+      gn_args['use_ios_simulator'] = args.simulator
+    else:
+      gn_args['use_ios_simulator'] = False
+    gn_args['ios_use_simulator'] = gn_args['use_ios_simulator']
     gn_args.update(setup_apple_sdks())
 
   if args.dart_debug:
