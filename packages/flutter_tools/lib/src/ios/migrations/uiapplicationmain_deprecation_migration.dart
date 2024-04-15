@@ -27,23 +27,25 @@ class UIApplicationMainDeprecationMigration extends ProjectMigrator {
   final File _appDelegateSwift;
 
   @override
-  Future<bool> migrate() async {
+  Future<void> migrate() async {
     // Skip this migration if the project uses Objective-C.
     if (!_appDelegateSwift.existsSync()) {
-      return true;
+      logger.printTrace(
+        'ios/Runner/AppDelegate.swift not found, skipping @main migration.',
+      );
+      return;
     }
 
     // Migrate the ios/Runner/AppDelegate.swift file.
     final String original = _appDelegateSwift.readAsStringSync();
     final String migrated = original.replaceFirst(_appDelegateFileBefore, _appDelegateFileAfter);
     if (original == migrated) {
-      return true;
+      return;
     }
 
     logger.printWarning(
       'ios/Runner/AppDelegate.swift uses the deprecated @UIApplicationMain attribute, updating.',
     );
     _appDelegateSwift.writeAsStringSync(migrated);
-    return true;
   }
 }
