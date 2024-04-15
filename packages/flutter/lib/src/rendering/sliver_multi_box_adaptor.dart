@@ -779,11 +779,10 @@ typedef SliverTreeNodesAnimation = ({
   double value,
 });
 
-/// Used to pass information down to RenderSliverTree.
+/// Used to pass information down to [RenderSliverTree].
 ///
 /// The depth is used for breadth first traversal, where as depth first traversal
-/// follows the indexed order. The animationValue is used to compute the offset
-// /of children that are currently coming into or out of view.
+/// follows the indexed order.
 class TreeNodeParentData extends SliverMultiBoxAdaptorParentData {
   /// The depth of the node, used by [RenderSliverTree] to traverse nodes in the
   /// designated [SliverTreeTraversalOrder].
@@ -931,7 +930,7 @@ class RenderSliverTree extends RenderSliverVariedExtentList {
 
   // Maps the index of parents to the animation key of their children.
   final Map<int, UniqueKey> _animationLeadingIndices = <int, UniqueKey>{};
-  // Maps ths key of child node animations to the fixed distance they are
+  // Maps the key of child node animations to the fixed distance they are
   // traversing during the animation. Determined at the start of the animation.
   final Map<UniqueKey, double> _animationOffsets = <UniqueKey, double>{};
   void _updateAnimationCache() {
@@ -974,6 +973,11 @@ class RenderSliverTree extends RenderSliverVariedExtentList {
 
   @override
   void performLayout() {
+    assert(
+      constraints.axisDirection == AxisDirection.down,
+      'SliverTree is only supported in Viewports with and AxisDirection.down. '
+      'The current axis direction is: ${constraints.axisDirection}.',
+    );
     _updateAnimationCache();
     _currentLayoutDimensions = SliverLayoutDimensions(
         scrollOffset: constraints.scrollOffset,

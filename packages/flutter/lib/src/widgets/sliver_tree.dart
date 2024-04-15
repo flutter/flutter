@@ -18,7 +18,6 @@ import 'text.dart';
 import 'ticker_provider.dart';
 
 // TODO(Piinks): still to cover
-//  * Clip layers for animations - bug
 //  * Example code
 //  * Tests
 
@@ -51,7 +50,7 @@ class SliverTreeNode<T> {
 
   /// Whether or not this node is expanded in the tree.
   ///
-  /// Cannot be expanded is there are no children.
+  /// Cannot be expanded if there are no children.
   bool get isExpanded => _expanded;
   bool _expanded;
 
@@ -310,9 +309,7 @@ class TreeController {
       ),
       ErrorHint(
         'There are several ways to avoid this problem. The simplest is to use '
-        'a Builder to get a context that is "under" the SliverTree. For an '
-        'example of this, please see the documentation for TreeController.of():\n'
-        '  https://api.flutter.dev/flutter/material/TreeController/of.html',
+        'a Builder to get a context that is "under" the SliverTree.',
       ),
       ErrorHint(
         'A more efficient solution is to split your build function into '
@@ -462,7 +459,7 @@ class SliverTree<T> extends StatefulWidget {
   /// A wrapper method for triggering the expansion or collapse of a [SliverTreeNode].
   ///
   /// Use as part of [SliverTree.defaultTreeRowBuilder] to wrap the leading icon
-  /// of parent [TreeNodes] such that tapping on it triggers the animation.
+  /// of parent [TreeNode]s such that tapping on it triggers the animation.
   ///
   /// If defining your own [SliverTree.treeRowBuilder], this method can be used
   /// to wrap any part, or all, of the returned widget in order to trigger the
@@ -846,7 +843,7 @@ class _SliverTree extends SliverVariedExtentList {
     this.traversalOrder = SliverTreeTraversalOrder.depthFirst,
     required this.indentation,
     ChildIndexGetter? findChildIndexCallback,
-    int? itemCount,
+    required int itemCount,
     bool addAutomaticKeepAlives = true,
   }) : super(delegate: SliverChildBuilderDelegate(
     itemBuilder,
