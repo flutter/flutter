@@ -1178,11 +1178,11 @@ class _RenderCupertinoDialog extends RenderBox {
   // for buttons to just over 1 button's height to make room for the content
   // section.
   _AlertDialogSizes performRegularLayout({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
-    final bool hasDivider = contentSection!.getMaxIntrinsicHeight(computeMaxIntrinsicWidth(0)) > 0.0
-        && actionsSection!.getMaxIntrinsicHeight(computeMaxIntrinsicWidth(0)) > 0.0;
+    final bool hasDivider = contentSection!.getMaxIntrinsicHeight(getMaxIntrinsicWidth(0)) > 0.0
+        && actionsSection!.getMaxIntrinsicHeight(getMaxIntrinsicWidth(0)) > 0.0;
     final double dividerThickness = hasDivider ? _dividerThickness : 0.0;
 
-    final double minActionsHeight = actionsSection!.getMinIntrinsicHeight(computeMaxIntrinsicWidth(0));
+    final double minActionsHeight = actionsSection!.getMinIntrinsicHeight(getMaxIntrinsicWidth(0));
 
     final Size contentSize = layoutChild(
       contentSection!,
@@ -1485,22 +1485,15 @@ class _CupertinoAlertActionSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    final List<Widget> interactiveButtons = <Widget>[];
-    for (int i = 0; i < children.length; i += 1) {
-      interactiveButtons.add(
-        _PressableActionButton(
-          child: children[i],
-        ),
-      );
-    }
-
     return CupertinoScrollbar(
       controller: scrollController,
       child: SingleChildScrollView(
         controller: scrollController,
         child: _CupertinoDialogActionsRenderWidget(
-          actionButtons: interactiveButtons,
+          actionButtons: <Widget>[
+            for (final Widget child in children)
+              _PressableActionButton(child: child),
+          ],
           dividerThickness: _kDividerThickness,
           hasCancelButton: hasCancelButton,
           isActionSheet: isActionSheet,
@@ -2017,7 +2010,7 @@ class _RenderCupertinoDialogActions extends RenderBox
       return 0.0;
     } else if (isActionSheet) {
       if (childCount == 1) {
-        return firstChild!.computeMaxIntrinsicHeight(width) + dividerThickness;
+        return firstChild!.getMaxIntrinsicHeight(width) + dividerThickness;
       }
       if (hasCancelButton && childCount < 4) {
         return _computeMinIntrinsicHeightWithCancel(width);
@@ -2089,7 +2082,7 @@ class _RenderCupertinoDialogActions extends RenderBox
       return 0.0;
     } else if (isActionSheet) {
       if (childCount == 1) {
-        return firstChild!.computeMaxIntrinsicHeight(width) + dividerThickness;
+        return firstChild!.getMaxIntrinsicHeight(width) + dividerThickness;
       }
       return _computeMaxIntrinsicHeightStacked(width);
     } else if (childCount == 1) {
@@ -2243,7 +2236,7 @@ class _RenderCupertinoDialogActions extends RenderBox
 
       // Our height is the accumulated height of all buttons and dividers.
       return constraints.constrain(
-        Size(computeMaxIntrinsicWidth(0), verticalOffset),
+        Size(getMaxIntrinsicWidth(0), verticalOffset),
       );
     }
   }

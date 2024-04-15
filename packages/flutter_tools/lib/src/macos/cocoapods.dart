@@ -25,7 +25,7 @@ import '../reporting/reporting.dart';
 import '../xcode_project.dart';
 
 const String noCocoaPodsConsequence = '''
-  CocoaPods is used to retrieve the iOS and macOS platform side's plugin code that responds to your plugin usage on the Dart side.
+  CocoaPods is a package manager for iOS or macOS platform code.
   Without CocoaPods, plugins will not work on iOS or macOS.
   For more info, see https://flutter.dev/platform-plugins''';
 
@@ -47,9 +47,9 @@ const String outOfDatePluginsPodfileConsequence = '''
   See https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms for details.
   If you have local Podfile edits you would like to keep, see https://github.com/flutter/flutter/issues/45197 for instructions.''';
 
-const String cocoaPodsInstallInstructions = 'see https://guides.cocoapods.org/using/getting-started.html#installation for instructions.';
+const String cocoaPodsInstallInstructions = 'see https://guides.cocoapods.org/using/getting-started.html#installation';
 
-const String cocoaPodsUpdateInstructions = 'see https://guides.cocoapods.org/using/getting-started.html#updating-cocoapods for instructions.';
+const String cocoaPodsUpdateInstructions = 'see https://guides.cocoapods.org/using/getting-started.html#updating-cocoapods';
 
 const String podfileIosMigrationInstructions = '''
   rm ios/Podfile''';
@@ -185,7 +185,7 @@ class CocoaPods {
           _logger,
         ),
       ]);
-      postPodMigration.run();
+      await postPodMigration.run();
 
       podsProcessed = true;
     }
@@ -200,7 +200,7 @@ class CocoaPods {
         _logger.printWarning(
           'Warning: CocoaPods not installed. Skipping pod install.\n'
           '$noCocoaPodsConsequence\n'
-          'To install $cocoaPodsInstallInstructions\n',
+          'For installation instructions, $cocoaPodsInstallInstructions\n',
           emphasis: true,
         );
         return false;
@@ -208,7 +208,7 @@ class CocoaPods {
         _logger.printWarning(
           'Warning: CocoaPods is installed but broken. Skipping pod install.\n'
           '$brokenCocoaPodsConsequence\n'
-          'To re-install $cocoaPodsInstallInstructions\n',
+          'For re-installation instructions, $cocoaPodsInstallInstructions\n',
           emphasis: true,
         );
         return false;
@@ -216,14 +216,14 @@ class CocoaPods {
         _logger.printWarning(
           'Warning: Unknown CocoaPods version installed.\n'
           '$unknownCocoaPodsConsequence\n'
-          'To upgrade $cocoaPodsInstallInstructions\n',
+          'To update CocoaPods, $cocoaPodsUpdateInstructions\n',
           emphasis: true,
         );
       case CocoaPodsStatus.belowMinimumVersion:
         _logger.printWarning(
           'Warning: CocoaPods minimum required version $cocoaPodsMinimumVersion or greater not installed. Skipping pod install.\n'
           '$noCocoaPodsConsequence\n'
-          'To upgrade $cocoaPodsInstallInstructions\n',
+          'To update CocoaPods, $cocoaPodsUpdateInstructions\n',
           emphasis: true,
         );
         return false;
@@ -231,7 +231,7 @@ class CocoaPods {
         _logger.printWarning(
           'Warning: CocoaPods recommended version $cocoaPodsRecommendedVersion or greater not installed.\n'
           'Pods handling may fail on some projects involving plugins.\n'
-          'To upgrade $cocoaPodsInstallInstructions\n',
+          'To update CocoaPods, $cocoaPodsUpdateInstructions\n',
           emphasis: true,
         );
       case CocoaPodsStatus.recommended:

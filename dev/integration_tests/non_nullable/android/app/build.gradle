@@ -27,6 +27,7 @@ if (flutterVersionName == null) {
 }
 
 android {
+    namespace = "com.example.non_nullable"
     compileSdk flutter.compileSdkVersion
 
     compileOptions {

@@ -160,6 +160,11 @@ class _RenderMenuItem extends RenderShiftedBox {
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    return child?.getDryBaseline(constraints, baseline);
+  }
+
+  @override
   void performLayout() {
     if (child == null) {
       size = Size.zero;
@@ -1150,6 +1155,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.clipBehavior = Clip.none,
     this.useRootNavigator = false,
     this.popUpAnimationStyle,
+    this.routeSettings,
     this.style,
   }) : assert(
          !(child != null && icon != null),
@@ -1345,6 +1351,11 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// If this is null, then the default animation will be used.
   final AnimationStyle? popUpAnimationStyle;
 
+  /// Optional route settings for the menu.
+  ///
+  /// See [RouteSettings] for details.
+  final RouteSettings? routeSettings;
+
   /// Customizes this icon button's appearance.
   ///
   /// The [style] is only used for Material 3 [IconButton]s. If [ThemeData.useMaterial3]
@@ -1412,6 +1423,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         clipBehavior: widget.clipBehavior,
         useRootNavigator: widget.useRootNavigator,
         popUpAnimationStyle: widget.popUpAnimationStyle,
+        routeSettings: widget.routeSettings,
       )
       .then<void>((T? newValue) {
         if (!mounted) {
@@ -1500,7 +1512,7 @@ class _PopupMenuDefaultsM2 extends PopupMenuThemeData {
   late final TextTheme _textTheme = _theme.textTheme;
 
   @override
-  TextStyle? get textStyle => _textTheme.subtitle1;
+  TextStyle? get textStyle => _textTheme.titleMedium;
 
   static EdgeInsets menuHorizontalPadding = const EdgeInsets.symmetric(horizontal: 16.0);
 }
@@ -1523,6 +1535,7 @@ class _PopupMenuDefaultsM3 extends PopupMenuThemeData {
 
   @override MaterialStateProperty<TextStyle?>? get labelTextStyle {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    // TODO(quncheng): Update this hard-coded value to use the latest tokens.
     final TextStyle style = _textTheme.labelLarge!;
       if (states.contains(MaterialState.disabled)) {
         return style.apply(color: _colors.onSurface.withOpacity(0.38));

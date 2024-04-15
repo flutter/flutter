@@ -414,6 +414,8 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     super.ignoringFeedbackPointer,
     this.delay = kLongPressTimeout,
     super.allowedButtonsFilter,
+    super.hitTestBehavior,
+    super.rootOverlay,
   });
 
   /// Whether haptic feedback should be triggered on drag start.
@@ -909,17 +911,12 @@ class _DragAvatar<T extends Object> extends Drag {
   Iterable<_DragTargetState<Object>> _getDragTargets(Iterable<HitTestEntry> path) {
     // Look for the RenderBoxes that corresponds to the hit target (the hit target
     // widgets build RenderMetaData boxes for us for this purpose).
-    final List<_DragTargetState<Object>> targets = <_DragTargetState<Object>>[];
-    for (final HitTestEntry entry in path) {
-      final HitTestTarget target = entry.target;
-      if (target is RenderMetaData) {
-        final dynamic metaData = target.metaData;
-        if (metaData is _DragTargetState && metaData.isExpectedDataType(data, T)) {
-          targets.add(metaData);
-        }
-      }
-    }
-    return targets;
+    return <_DragTargetState<Object>>[
+      for (final HitTestEntry entry in path)
+        if (entry.target case final RenderMetaData target)
+          if (target.metaData case final _DragTargetState<Object> metaData)
+            if (metaData.isExpectedDataType(data, T)) metaData,
+    ];
   }
 
   void _leaveAllEntered() {

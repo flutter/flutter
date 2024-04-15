@@ -1274,7 +1274,7 @@ void main() {
   });
 
   testWidgets('Material2 - ToggleButtons text baseline alignment', (WidgetTester tester) async {
-    // The point size of the fonts must be a multiple of 4 until
+    // The font size must be a multiple of 4 until
     // https://github.com/flutter/flutter/issues/122066 is resolved.
     await tester.pumpWidget(
       boilerplate(
@@ -1370,7 +1370,7 @@ void main() {
     expect(firstToggleButtonDy, secondToggleButtonDy);
     expect(firstToggleButtonDy, closeTo(elevatedButtonDy - 1.7, 0.1));
     expect(firstToggleButtonDy, closeTo(textDy - 9.7, 0.1));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Directionality test', (WidgetTester tester) async {
     await tester.pumpWidget(

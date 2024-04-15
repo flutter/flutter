@@ -764,7 +764,8 @@ void main() {
     ]);
   });
 
-  testGesture('Horizontal drag with multiple pointers - averageBoundaryPointers', (GestureTester tester) {
+  testGesture('Horizontal drag with multiple pointers - averageBoundaryPointers',
+  (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag =
     HorizontalDragGestureRecognizer()
       ..multitouchDragStrategy = MultitouchDragStrategy.averageBoundaryPointers;
@@ -899,6 +900,8 @@ void main() {
     // Tear down 'currentSystemFrameTimeStamp'
     SchedulerBinding.instance.handleBeginFrame(Duration.zero);
     SchedulerBinding.instance.handleDrawFrame();
+    // Dispose gesture
+    drag.dispose();
 
     expect(log, <String>[
       '-a',
@@ -924,7 +927,8 @@ void main() {
     ]);
   });
 
-  testGesture('Vertical drag with multiple pointers - averageBoundaryPointers', (GestureTester tester) {
+  testGesture('Vertical drag with multiple pointers - averageBoundaryPointers',
+  (GestureTester tester) {
     final VerticalDragGestureRecognizer drag =
     VerticalDragGestureRecognizer()
       ..multitouchDragStrategy = MultitouchDragStrategy.averageBoundaryPointers;
@@ -1059,6 +1063,8 @@ void main() {
     // Tear down 'currentSystemFrameTimeStamp'
     SchedulerBinding.instance.handleBeginFrame(Duration.zero);
     SchedulerBinding.instance.handleDrawFrame();
+     // Dispose gesture
+    drag.dispose();
 
     expect(log, <String>[
       '-a',
@@ -1084,7 +1090,8 @@ void main() {
     ]);
   });
 
-  testGesture('Pan drag with multiple pointers - averageBoundaryPointers', (GestureTester tester) {
+  testGesture('Pan drag with multiple pointers - averageBoundaryPointers',
+  (GestureTester tester) {
     final PanGestureRecognizer drag =
     PanGestureRecognizer()
       ..multitouchDragStrategy = MultitouchDragStrategy.averageBoundaryPointers;
@@ -1240,6 +1247,9 @@ void main() {
     // Tear down 'currentSystemFrameTimeStamp'
     SchedulerBinding.instance.handleBeginFrame(Duration.zero);
     SchedulerBinding.instance.handleDrawFrame();
+
+    // Dispose gesture
+    drag.dispose();
 
     expect(log, <String>[
       '-a',
