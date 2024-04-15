@@ -803,18 +803,14 @@ Future<void> _runFrameworkTests() async {
         final Uint8List libappBytes = libapp.content as Uint8List; // bytes decompressed here
         final String libappStrings = utf8.decode(libappBytes, allowMalformed: true);
         await runCommand(flutter, <String>['clean'], workingDirectory: tracingDirectory);
-        final List<String> results = <String>[];
-        for (final String pattern in allowed) {
-          if (!libappStrings.contains(pattern)) {
-            results.add('When building with --$modeArgument, expected to find "$pattern" in libapp.so but could not find it.');
-          }
-        }
-        for (final String pattern in disallowed) {
-          if (libappStrings.contains(pattern)) {
-            results.add('When building with --$modeArgument, expected to not find "$pattern" in libapp.so but did find it.');
-          }
-        }
-        return results;
+        return <String>[
+          for (final String pattern in allowed)
+            if (!libappStrings.contains(pattern))
+              'When building with --$modeArgument, expected to find "$pattern" in libapp.so but could not find it.',
+          for (final String pattern in disallowed)
+            if (libappStrings.contains(pattern))
+              'When building with --$modeArgument, expected to not find "$pattern" in libapp.so but did find it.',
+        ];
       } catch (error, stackTrace) {
         return <String>[
           error.toString(),
@@ -1016,6 +1012,18 @@ Future<void> _runFrameworkCoverage() async {
   }
 }
 
+
+/// This will force the next run of the Flutter tool (if it uses the provided
+/// environment) to have asserts enabled, by setting an environment variable.
+void adjustEnvironmentToEnableFlutterAsserts(Map<String, String> environment) {
+  // If an existing env variable exists append to it, but only if
+  // it doesn't appear to already include enable-asserts.
+  String toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
+  if (!toolsArgs.contains('--enable-asserts')) {
+    toolsArgs += ' --enable-asserts';
+  }
+  environment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
+}
 
 /// Checks the given file's contents to determine if they match the allowed
 /// pattern for version strings.
