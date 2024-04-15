@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -668,9 +667,10 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     return widget.builder(this);
   }
 
-  FormFieldState<dynamic>? get _formFieldState => Form.maybeOf(context)?._fields.firstWhereOrNull((FormFieldState<dynamic> field) => field == this);
-
-  bool get _isAlwaysAutoValidateMode => _formFieldState?.widget.autovalidateMode == AutovalidateMode.always;
+  // Returns true if the form field is in a mode where it should always auto validate.
+  // This is used to determine if the form field should listen to focus changes to
+  // trigger validation.
+  bool get _isAlwaysAutoValidateMode => widget.autovalidateMode == AutovalidateMode.always;
 }
 
 /// Used to configure the auto validation of [FormField] and [Form] widgets.
