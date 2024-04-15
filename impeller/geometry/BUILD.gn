@@ -43,6 +43,8 @@ impeller_component("geometry") {
     "type_traits.h",
     "vector.cc",
     "vector.h",
+    "wangs_formula.cc",
+    "wangs_formula.h",
   ]
 
   deps = [

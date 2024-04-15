@@ -77,7 +77,7 @@ class ComputeTessellator {
   Cap stroke_cap_ = Cap::kButt;
   Join stroke_join_ = Join::kMiter;
   Scalar miter_limit_ = 4.0f;
-  Scalar cubic_accuracy_ = kDefaultCurveTolerance;
+  Scalar cubic_accuracy_ = .1f;
   Scalar quad_tolerance_ = .1f;
 
   ComputeTessellator(const ComputeTessellator&) = delete;
