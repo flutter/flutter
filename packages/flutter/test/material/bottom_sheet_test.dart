@@ -1284,38 +1284,37 @@ void main() {
   });
 
   testWidgets('showModalBottomSheet does not use root Navigator by default',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-    (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: Navigator(onGenerateRoute: (RouteSettings settings) => MaterialPageRoute<void>(builder: (_) {
-            return const _TestPage();
-          })),
-          bottomNavigationBar: BottomNavigationBar(
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.ac_unit),
-                label: 'Item 1',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.style),
-                label: 'Item 2',
-              ),
-            ],
-          ),
+  // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
+  experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
+  (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Navigator(onGenerateRoute: (RouteSettings settings) => MaterialPageRoute<void>(builder: (_) {
+          return const _TestPage();
+        })),
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.ac_unit),
+              label: 'Item 1',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.style),
+              label: 'Item 2',
+            ),
+          ],
         ),
-      ));
+      ),
+    ));
 
-      await tester.tap(find.text('Show bottom sheet'));
-      await tester.pumpAndSettle();
+    await tester.tap(find.text('Show bottom sheet'));
+    await tester.pumpAndSettle();
 
-      // Bottom sheet is displayed in correct position within the inner navigator
-      // and above the BottomNavigationBar.
-      final double tabBarHeight = tester.getSize(find.byType(BottomNavigationBar)).height;
-      expect(tester.getBottomLeft(find.byType(BottomSheet)).dy, 600 - tabBarHeight);
-    },
-  );
+    // Bottom sheet is displayed in correct position within the inner navigator
+    // and above the BottomNavigationBar.
+    final double tabBarHeight = tester.getSize(find.byType(BottomNavigationBar)).height;
+    expect(tester.getBottomLeft(find.byType(BottomSheet)).dy, 600 - tabBarHeight);
+  });
 
   testWidgets('showModalBottomSheet uses root Navigator when specified', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
