@@ -1224,14 +1224,14 @@ Future<void> verifyGitHubLinks(String workingDirectory) async {
   // Repos whose default branch is still 'master'
   const Set<String> repoExceptions = <String>{
     'clojure/clojure',
-    'dart-lang/test', // https://github.com/dart-lang/test/issues/2209
+    'dart-lang/test', // TODO(plg): remove when https://github.com/dart-lang/test/issues/2209 is closed
     'eseidelGoogle/bezier_perf',
-    'flutter/devtools', // https://github.com/flutter/devtools/issues/7551
-    'flutter/flutter_gallery_assets', // https://github.com/flutter/flutter/issues/121564
-    'flutter/flutter-intellij', // https://github.com/flutter/flutter-intellij/issues/7342
-    'flutter/platform_tests', // https://github.com/flutter/flutter/issues/121564
+    'flutter/devtools', // TODO(plg): remove when https://github.com/flutter/devtools/issues/7551 is closed
+    'flutter/flutter_gallery_assets', // TODO(plg): remove when subtask in https://github.com/flutter/flutter/issues/121564 is complete
+    'flutter/flutter-intellij', // TODO(plg): remove when https://github.com/flutter/flutter-intellij/issues/7342 is closed
+    'flutter/platform_tests', // TODO(plg): remove when subtask in https://github.com/flutter/flutter/issues/121564 is complete
     'glfw/glfw',
-    'material-components/material-components-android', // https://github.com/material-components/material-components-android/issues/4144
+    'material-components/material-components-android', // TODO(plg): remove when https://github.com/material-components/material-components-android/issues/4144 is closed
     'torvalds/linux',
     'tpn/winsdk-10',
   };
