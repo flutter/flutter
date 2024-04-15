@@ -6,6 +6,8 @@
 
 #include <cmath>
 
+#include "impeller/geometry/wangs_formula.h"
+
 namespace impeller {
 
 /*
@@ -98,11 +100,6 @@ Point QuadraticPathComponent::SolveDerivative(Scalar time) const {
   };
 }
 
-static Scalar ApproximateParabolaIntegral(Scalar x) {
-  constexpr Scalar d = 0.67;
-  return x / (1.0 - d + sqrt(sqrt(pow(d, 4) + 0.25 * x * x)));
-}
-
 void QuadraticPathComponent::AppendPolylinePoints(
     Scalar scale_factor,
     std::vector<Point>& points) const {
@@ -114,42 +111,10 @@ void QuadraticPathComponent::AppendPolylinePoints(
 void QuadraticPathComponent::ToLinearPathComponents(
     Scalar scale_factor,
     const PointProc& proc) const {
-  auto tolerance = kDefaultCurveTolerance / scale_factor;
-  auto sqrt_tolerance = sqrt(tolerance);
-
-  auto d01 = cp - p1;
-  auto d12 = p2 - cp;
-  auto dd = d01 - d12;
-  auto cross = (p2 - p1).Cross(dd);
-  auto x0 = d01.Dot(dd) * 1 / cross;
-  auto x2 = d12.Dot(dd) * 1 / cross;
-  auto scale = std::abs(cross / (hypot(dd.x, dd.y) * (x2 - x0)));
-
-  auto a0 = ApproximateParabolaIntegral(x0);
-  auto a2 = ApproximateParabolaIntegral(x2);
-  Scalar val = 0.f;
-  if (std::isfinite(scale)) {
-    auto da = std::abs(a2 - a0);
-    auto sqrt_scale = sqrt(scale);
-    if ((x0 < 0 && x2 < 0) || (x0 >= 0 && x2 >= 0)) {
-      val = da * sqrt_scale;
-    } else {
-      // cusp case
-      auto xmin = sqrt_tolerance / sqrt_scale;
-      val = sqrt_tolerance * da / ApproximateParabolaIntegral(xmin);
-    }
-  }
-  auto u0 = ApproximateParabolaIntegral(a0);
-  auto u2 = ApproximateParabolaIntegral(a2);
-  auto uscale = 1 / (u2 - u0);
-
-  auto line_count = std::max(1., ceil(0.5 * val / sqrt_tolerance));
-  auto step = 1 / line_count;
+  Scalar line_count =
+      std::ceilf(ComputeQuadradicSubdivisions(scale_factor, *this));
   for (size_t i = 1; i < line_count; i += 1) {
-    auto u = i * step;
-    auto a = a0 + (a2 - a0) * u;
-    auto t = (ApproximateParabolaIntegral(a) - u0) * uscale;
-    proc(Solve(t));
+    proc(Solve(i / line_count));
   }
   proc(p2);
 }
@@ -217,33 +182,11 @@ CubicPathComponent CubicPathComponent::Subsegment(Scalar t0, Scalar t1) const {
 
 void CubicPathComponent::ToLinearPathComponents(Scalar scale,
                                                 const PointProc& proc) const {
-  constexpr Scalar accuracy = 0.1;
-  // The maximum error, as a vector from the cubic to the best approximating
-  // quadratic, is proportional to the third derivative, which is constant
-  // across the segment. Thus, the error scales down as the third power of
-  // the number of subdivisions. Our strategy then is to subdivide `t` evenly.
-  //
-  // This is an overestimate of the error because only the component
-  // perpendicular to the first derivative is important. But the simplicity is
-  // appealing.
-
-  // This magic number is the square of 36 / sqrt(3).
-  // See: http://caffeineowl.com/graphics/2d/vectorial/cubic2quad01.html
-  auto max_hypot2 = 432.0 * accuracy * accuracy;
-  auto p1x2 = 3.0 * cp1 - p1;
-  auto p2x2 = 3.0 * cp2 - p2;
-  auto p = p2x2 - p1x2;
-  auto err = p.Dot(p);
-  auto quad_count = std::max(1., ceil(pow(err / max_hypot2, 1. / 6.0)));
-  for (size_t i = 0; i < quad_count; i++) {
-    auto t0 = i / quad_count;
-    auto t1 = (i + 1) / quad_count;
-    auto seg = Subsegment(t0, t1);
-    auto p1x2 = 3.0 * seg.cp1 - seg.p1;
-    auto p2x2 = 3.0 * seg.cp2 - seg.p2;
-    QuadraticPathComponent(seg.p1, ((p1x2 + p2x2) / 4.0), seg.p2)
-        .ToLinearPathComponents(scale, proc);
+  Scalar line_count = std::ceilf(ComputeCubicSubdivisions(scale, *this));
+  for (size_t i = 1; i < line_count; i++) {
+    proc(Solve(i / line_count));
   }
+  proc(p2);
 }
 
 static inline bool NearEqual(Scalar a, Scalar b, Scalar epsilon) {

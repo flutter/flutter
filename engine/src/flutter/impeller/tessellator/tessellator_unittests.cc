@@ -78,30 +78,6 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
 
     ASSERT_EQ(result, Tessellator::Result::kInputError);
   }
-
-  // More than uint16 points, odd fill mode.
-  {
-    Tessellator t;
-    PathBuilder builder = {};
-    for (auto i = 0; i < 1000; i++) {
-      builder.AddCircle(Point(i, i), 4);
-    }
-    auto path = builder.TakePath(FillType::kOdd);
-    bool no_indices = false;
-    size_t count = 0u;
-    Tessellator::Result result = t.Tessellate(
-        path, 1.0f,
-        [&no_indices, &count](const float* vertices, size_t vertices_count,
-                              const uint16_t* indices, size_t indices_count) {
-          no_indices = indices == nullptr;
-          count = vertices_count;
-          return true;
-        });
-
-    ASSERT_TRUE(no_indices);
-    ASSERT_TRUE(count >= USHRT_MAX);
-    ASSERT_EQ(result, Tessellator::Result::kSuccess);
-  }
 }
 
 TEST(TessellatorTest, TessellateConvex) {

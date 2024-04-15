@@ -16,16 +16,6 @@
 
 namespace impeller {
 
-// The default tolerance value for QuadraticCurveComponent::AppendPolylinePoints
-// and CubicCurveComponent::AppendPolylinePoints. It also impacts the number of
-// quadratics created when flattening a cubic curve to a polyline.
-//
-// Smaller numbers mean more points. This number seems suitable for particularly
-// curvy curves at scales close to 1.0. As the scale increases, this number
-// should be divided by Matrix::GetMaxBasisLength to avoid generating too few
-// points for the given scale.
-static constexpr Scalar kDefaultCurveTolerance = .1f;
-
 struct LinearPathComponent {
   Point p1;
   Point p2;
@@ -67,16 +57,6 @@ struct QuadraticPathComponent {
 
   Point SolveDerivative(Scalar time) const;
 
-  // Uses the algorithm described by Raph Levien in
-  // https://raphlinus.github.io/graphics/curves/2019/12/23/flatten-quadbez.html.
-  //
-  // The algorithm has several benefits:
-  // - It does not require elevation to cubics for processing.
-  // - It generates fewer and more accurate points than recursive subdivision.
-  // - Each turn of the core iteration loop has no dependencies on other turns,
-  //   making it trivially parallelizable.
-  //
-  // See also the implementation in kurbo: https://github.com/linebender/kurbo.
   void AppendPolylinePoints(Scalar scale_factor,
                             std::vector<Point>& points) const;
 
@@ -121,11 +101,6 @@ struct CubicPathComponent {
 
   Point SolveDerivative(Scalar time) const;
 
-  // This method approximates the cubic component with quadratics, and then
-  // generates a polyline from those quadratics.
-  //
-  // See the note on QuadraticPathComponent::AppendPolylinePoints for
-  // references.
   void AppendPolylinePoints(Scalar scale, std::vector<Point>& points) const;
 
   std::vector<Point> Extrema() const;
