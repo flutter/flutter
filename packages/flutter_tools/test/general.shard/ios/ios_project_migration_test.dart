@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/ios/migrations/project_base_configuration_migr
 import 'package:flutter_tools/src/ios/migrations/project_build_location_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/remove_bitcode_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/remove_framework_link_and_embedding_migration.dart';
+import 'package:flutter_tools/src/ios/migrations/uiapplicationmain_deprecation_migration.dart';
 import 'package:flutter_tools/src/ios/migrations/xcode_build_system_migration.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/migrations/cocoapods_script_symlink.dart';
@@ -906,7 +907,7 @@ platform :ios, '12.0'
           project,
           testLogger,
         );
-        expect(await migration.migrate(), isTrue);
+        await migration.migrate();
         expect(xcodeProjectInfoFile.existsSync(), isFalse);
 
         expect(testLogger.traceText, contains('Xcode project not found, skipping removing bitcode migration'));
@@ -922,7 +923,7 @@ platform :ios, '12.0'
           project,
           testLogger,
         );
-        expect(await migration.migrate(), isTrue);
+        await migration.migrate();
 
         expect(xcodeProjectInfoFile.lastModifiedSync(), projectLastModified);
         expect(xcodeProjectInfoFile.readAsStringSync(), xcodeProjectInfoFileContents);
@@ -943,7 +944,7 @@ platform :ios, '12.0'
           project,
           testLogger,
         );
-        expect(await migration.migrate(), isTrue);
+        await migration.migrate();
 
         expect(xcodeProjectInfoFile.readAsStringSync(), '''
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -1408,6 +1409,104 @@ LD_RUNPATH_SEARCH_PATHS = $(inherited) /usr/lib/swift '@executable_path/../Frame
       expect(testLogger.statusText, contains('Adding input path to Thin Binary build phase.'));
     });
   });
+
+  group('migrate @UIApplicationMain attribute to @main', () {
+    late MemoryFileSystem memoryFileSystem;
+    late BufferLogger testLogger;
+    late FakeIosProject project;
+    late File appDelegateFile;
+
+    setUp(() {
+      memoryFileSystem = MemoryFileSystem();
+      testLogger = BufferLogger.test();
+      project = FakeIosProject();
+      appDelegateFile = memoryFileSystem.file('AppDelegate.swift');
+      project.appDelegateSwift = appDelegateFile;
+    });
+
+    testWithoutContext('skipped if files are missing', () async {
+      final UIApplicationMainDeprecationMigration migration = UIApplicationMainDeprecationMigration(
+        project,
+        testLogger,
+      );
+      await migration.migrate();
+      expect(appDelegateFile.existsSync(), isFalse);
+
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('skipped if nothing to upgrade', () async {
+      const String appDelegateContents = '''
+import Flutter
+import UIKit
+
+@main
+@objc class AppDelegate: FlutterAppDelegate {
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+  ) -> Bool {
+    GeneratedPluginRegistrant.register(with: self)
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+}
+''';
+      appDelegateFile.writeAsStringSync(appDelegateContents);
+      final DateTime lastModified = appDelegateFile.lastModifiedSync();
+
+      final UIApplicationMainDeprecationMigration migration = UIApplicationMainDeprecationMigration(
+        project,
+        testLogger,
+      );
+      await migration.migrate();
+
+      expect(appDelegateFile.lastModifiedSync(), lastModified);
+      expect(appDelegateFile.readAsStringSync(), appDelegateContents);
+
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('updates AppDelegate.swift', () async {
+      appDelegateFile.writeAsStringSync('''
+import Flutter
+import UIKit
+
+@UIApplicationMain
+@objc class AppDelegate: FlutterAppDelegate {
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+  ) -> Bool {
+    GeneratedPluginRegistrant.register(with: self)
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+}
+''');
+
+      final UIApplicationMainDeprecationMigration migration = UIApplicationMainDeprecationMigration(
+        project,
+        testLogger,
+      );
+      await migration.migrate();
+
+      expect(appDelegateFile.readAsStringSync(), '''
+import Flutter
+import UIKit
+
+@main
+@objc class AppDelegate: FlutterAppDelegate {
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+  ) -> Bool {
+    GeneratedPluginRegistrant.register(with: self)
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+}
+''');
+      expect(testLogger.warningText, contains('uses the deprecated @UIApplicationMain attribute, updating'));
+    });
+  });
 }
 
 class FakeIosProject extends Fake implements IosProject {
@@ -1439,6 +1538,9 @@ class FakeIosProject extends Fake implements IosProject {
 
   @override
   Directory podRunnerTargetSupportFiles = MemoryFileSystem.test().directory('Pods-Runner');
+
+  @override
+  File appDelegateSwift = MemoryFileSystem.test().file('AppDelegate.swift');
 }
 
 class FakeIOSMigrator extends ProjectMigrator {
