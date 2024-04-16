@@ -14,7 +14,8 @@ import 'text_selection_toolbar_anchors.dart';
 
 /// Displays the system context menu on top of the Flutter view.
 ///
-/// Currently, only supports iOS and displays nothing on other platforms.
+/// Currently, only supports iOS 16.0 and above and displays nothing on other
+/// platforms.
 ///
 /// The context menu is the menu that appears, for example, when doing text
 /// selection. Flutter typically draws this menu itself, but this class deals
