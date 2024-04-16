@@ -163,7 +163,6 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
     if (previousRoute is ModalRoute<T> && navigator != null) {
       previousRoute.navigator!.delegateTransitionBuilder = delegatedTransition;
-      // navigator!.delegateTransitionBuilder = previousRoute.delegatedTransition;
     }
     return previousRoute is ModalRoute || previousRoute is CupertinoRouteTransitionMixin && !previousRoute.fullscreenDialog;
   }
