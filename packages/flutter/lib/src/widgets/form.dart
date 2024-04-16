@@ -648,7 +648,8 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
     Form.maybeOf(context)?._register(this);
 
-    if (Form.maybeOf(context)?.widget.autovalidateMode == AutovalidateMode.onUnfocus && !_isAlwaysAutoValidateMode || widget.autovalidateMode == AutovalidateMode.onUnfocus) {
+    if (Form.maybeOf(context)?.widget.autovalidateMode == AutovalidateMode.onUnfocus && widget.autovalidateMode != AutovalidateMode.always ||
+        widget.autovalidateMode == AutovalidateMode.onUnfocus) {
       return Focus(
         canRequestFocus: false,
         skipTraversal: true,
@@ -667,10 +668,6 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     return widget.builder(this);
   }
 
-  // Returns true if the form field is in a mode where it should always auto validate.
-  // This is used to determine if the form field should listen to focus changes to
-  // trigger validation.
-  bool get _isAlwaysAutoValidateMode => widget.autovalidateMode == AutovalidateMode.always;
 }
 
 /// Used to configure the auto validation of [FormField] and [Form] widgets.
