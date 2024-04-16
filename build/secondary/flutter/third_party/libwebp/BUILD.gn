@@ -53,7 +53,7 @@ source_set("libwebp") {
   deps = [ ":libwebp_sse41" ]
 
   if (is_android) {
-    deps += [ "//third_party/cpu-features" ]
+    deps += [ "//third_party/cpu_features:ndk_compat" ]
   }
 
   configs += [ ":libwebp_defines" ]

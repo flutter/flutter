@@ -1,4 +1,4 @@
-Signature: be8ce23f4fb161952d9fa6424a6bf111
+Signature: 5446d10c4b2c8969c53ee1b3d6358bad
 
 ====================================================================================================
 LIBRARY: libcxx
@@ -1952,11 +1952,12 @@ FILE: ../../../third_party/zlib/trees.c
 FILE: ../../../third_party/zlib/uncompr.c
 FILE: ../../../third_party/zlib/zconf.h
 FILE: ../../../third_party/zlib/zconf.h.cmakein
+FILE: ../../../third_party/zlib/zconf.h.in
 FILE: ../../../third_party/zlib/zlib.h
 FILE: ../../../third_party/zlib/zutil.c
 FILE: ../../../third_party/zlib/zutil.h
 ----------------------------------------------------------------------------------------------------
-Copyright (C) 1995-2022 Jean-loup Gailly and Mark Adler
+Copyright (C) 1995-2023 Jean-loup Gailly and Mark Adler
 
 This software is provided 'as-is', without any express or implied
 warranty.  In no event will the authors be held liable for any damages
@@ -2421,6 +2422,11 @@ FILE: ../../../third_party/zlib/patches/0008-minizip-zip-unzip-tools.patch
 FILE: ../../../third_party/zlib/patches/0009-infcover-oob.patch
 FILE: ../../../third_party/zlib/patches/0010-cmake-enable-simd.patch
 FILE: ../../../third_party/zlib/patches/0011-avx512.patch
+FILE: ../../../third_party/zlib/patches/0012-lfs-open64.patch
+FILE: ../../../third_party/zlib/patches/0013-cpu-feature-detection-for-arm.patch
+FILE: ../../../third_party/zlib/patches/0014-minizip-unzip-with-incorrect-size.patch
+FILE: ../../../third_party/zlib/patches/0015-minizip-unzip-enable-decryption.patch
+FILE: ../../../third_party/zlib/patches/0016-minizip-parse-unicode-path-extra-field.patch
 FILE: ../../../third_party/zlib/trees.h
 FILE: ../../../third_party/zlib/zlib.map
 FILE: ../../../third_party/zlib/zlib.pc.cmakein
