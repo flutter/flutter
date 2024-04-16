@@ -25,8 +25,6 @@ class IOSContextMetalImpeller final : public IOSContext {
 
   ~IOSContextMetalImpeller();
 
-  fml::scoped_nsobject<FlutterDarwinContextMetalSkia> GetDarwinContext() const;
-
   IOSRenderingBackend GetBackend() const override;
 
   // |IOSContext|

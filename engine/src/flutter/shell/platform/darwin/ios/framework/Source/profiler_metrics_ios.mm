@@ -6,7 +6,10 @@
 
 #import <Foundation/Foundation.h>
 
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/IOKit.h"
+
+FLUTTER_ASSERT_ARC
 
 namespace {
 
