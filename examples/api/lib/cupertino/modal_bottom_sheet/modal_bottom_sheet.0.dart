@@ -71,11 +71,11 @@ class MyHomePage extends StatelessWidget {
                   MBSPageRoute(
                     context: context,
                     pageBuilder: (BuildContext buildContext) {
-                      return  const MyHomePage(title: "MBS Transition");
+                      return  const MyHomePage(title: 'MBS Transition');
                     },
                   ),
                 );},
-                child: const Text("Modal Bottom Sheet"),
+                child: const Text('Modal Bottom Sheet'),
               ),
               if (MBSNavigator.of(context) != null)
                 TextButton(
