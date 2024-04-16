@@ -109,19 +109,10 @@ class _CarouselState extends State<Carousel> {
             offset: position,
             // clipBehavior: widget.clipBehavior,
             slivers: <Widget>[
-              _SliverFractionalPadding(
-                viewportFraction: widget.childWeights.first / widget.childWeights.sum,
-                sliver: SliverCarousel(
-                  paddingFraction: widget.childWeights.first / widget.childWeights.sum,
-                  clipExtent: widget.clipExtent ?? 0,
-                  childExtentList: widget.childWeights,
-                  delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) {
-                      return widget.children.elementAt(index);
-                    },
-                    childCount: widget.children.length,
-                  ),
-                ),
+              SliverCarousel(
+                clipExtent: widget.clipExtent,
+                childWeights: widget.childWeights,
+                children: widget.children,
               ),
             ],
           );
@@ -131,22 +122,54 @@ class _CarouselState extends State<Carousel> {
   }
 }
 
-class _SliverFractionalPadding extends SingleChildRenderObjectWidget {
-  const _SliverFractionalPadding({
-    this.viewportFraction = 0,
-    Widget? sliver,
-  }) : assert(viewportFraction >= 0),
-      assert(viewportFraction <= 0.5),
-      super(child: sliver);
+class SliverCarousel extends StatelessWidget {
+  const SliverCarousel({
+    super.key,
+    this.clipExtent = 0.0,
+    required this.childWeights,
+    required this.children,
+  });
 
-  final double viewportFraction;
+  final double? clipExtent;
+  final List<int> childWeights;
+  final List<Widget> children;
 
   @override
-  RenderObject createRenderObject(BuildContext context) => _RenderSliverFractionalPadding(viewportFraction: viewportFraction);
+  Widget build(BuildContext context) {
+    final double paddingFraction = childWeights.first / childWeights.sum;
+    return _SliverFractionalPadding(
+      paddingFraction: paddingFraction,
+      sliver: _SliverCarousel(
+        paddingFraction: paddingFraction,
+        clipExtent: clipExtent ?? 0.0,
+        childExtentList: childWeights,
+        delegate: SliverChildBuilderDelegate(
+          (BuildContext context, int index) {
+            return children.elementAt(index);
+          },
+          childCount: children.length,
+        ),
+      ),
+    );
+  }
+}
+
+class _SliverFractionalPadding extends SingleChildRenderObjectWidget {
+  const _SliverFractionalPadding({
+    this.paddingFraction = 0,
+    Widget? sliver,
+  }) : assert(paddingFraction >= 0),
+      assert(paddingFraction <= 0.5),
+      super(child: sliver);
+
+  final double paddingFraction;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderSliverFractionalPadding(viewportFraction: paddingFraction);
 
   @override
   void updateRenderObject(BuildContext context, _RenderSliverFractionalPadding renderObject) {
-    renderObject.viewportFraction = viewportFraction;
+    renderObject.viewportFraction = paddingFraction;
   }
 }
 
@@ -200,8 +223,8 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 }
 
 
-class SliverCarousel extends SliverMultiBoxAdaptorWidget {
-  const SliverCarousel({
+class _SliverCarousel extends SliverMultiBoxAdaptorWidget {
+  const _SliverCarousel({
     super.key,
     required super.delegate,
     required this.paddingFraction,
@@ -271,29 +294,30 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
     markNeedsLayout();
   }
 
+  double _handleOverscroll(int index) {
+    double extent;
+    if (index < childExtentList.length - 2) {
+      final int currWeight = childExtentList.elementAt(index + 1);
+      extent = extentUnit * currWeight; // initial extent
+      double progress = constraints.overlap.abs() / firstChildExtent;
+      final int prevWeight = childExtentList.elementAt(index + 2);
+      final double finalIncrease = (prevWeight - currWeight) / childExtentList.max;
+      extent = extent + finalIncrease * progress * maxChildExtent;
+    }
+    else {
+      extent = extentUnit * childExtentList.last - constraints.overlap.abs();
+    }
+    return math.max(extent, 0);
+  }
+
   double _buildItemExtent(int index, SliverLayoutDimensions currentLayoutDimensions) {
     double extent;
-print(constraints.overlap);
+
     if (constraints.overlap < 0) {
-      if (index < childExtentList.length - 2) {
-        final int currWeight = childExtentList.elementAt(index + 1);
-        extent = extentUnit * currWeight; // initial extent
-        double progress = constraints.overlap.abs() / firstChildExtent;
-        final int prevWeight = childExtentList.elementAt(index + 2);
-        final double finalIncrease = (prevWeight - currWeight) / childExtentList.max;
-        extent = extent + finalIncrease * progress * maxChildExtent;
-      }
-      else {
-        extent = math.max(extentUnit * childExtentList.last - constraints.overlap.abs(), 0);
-      }
-      return extent;
+      return _handleOverscroll(index);
     }
 
-
-    if (_firstVisibleItemIndex == index) {
-      if (_firstVisibleItemIndex == -1) {
-        // print('SHOULD NOT BE CALLED BECAUSE FIRST VISIBLE INDEX IS -1');
-      }
+    if (index == _firstVisibleItemIndex) {
       extent = math.max(_distanceToLeadingEdge, clipExtent);
     }
     else if (index > _firstVisibleItemIndex
@@ -303,7 +327,7 @@ print(constraints.overlap);
       assert(index - _firstVisibleItemIndex < childExtentList.length);
       final int currWeight = childExtentList.elementAt(index - _firstVisibleItemIndex);
       extent = extentUnit * currWeight; // initial extent
-      double progress = _gapBetweenCurrentAndPrev / firstChildExtent;
+      final double progress = _gapBetweenCurrentAndPrev / firstChildExtent;
 
       assert(index - _firstVisibleItemIndex - 1 < childExtentList.length, '$index');
       final int prevWeight = childExtentList.elementAt(index - _firstVisibleItemIndex - 1);
@@ -356,10 +380,7 @@ print(constraints.overlap);
     // when scroll offset is 400, and first child extent is 133.33333333333334, mod result is 133.33333333333331 which is supposed to be almost 0.
     // return constraints.scrollOffset % firstChildExtent;
   }
-  double get _distanceToLeadingEdge {
-    // print('**************** ${firstChildExtent - _gapBetweenCurrentAndPrev} ****************');
-    return firstChildExtent - _gapBetweenCurrentAndPrev;
-  }
+  double get _distanceToLeadingEdge => firstChildExtent - _gapBetweenCurrentAndPrev;
 
   /// The layout offset for the child with the given index.
   @override
@@ -371,14 +392,12 @@ print(constraints.overlap);
     double itemExtent,
     int index,
   ) {
-    if (_firstVisibleItemIndex == index && firstChildExtent - _gapBetweenCurrentAndPrev > clipExtent) { // pinned
+    if (index == _firstVisibleItemIndex) {
+      if (_distanceToLeadingEdge <= clipExtent) {
+        return constraints.scrollOffset - clipExtent + _distanceToLeadingEdge;
+      }
       return constraints.scrollOffset;
-    } else if (_firstVisibleItemIndex == index) { // stop pinning
-      return constraints.scrollOffset - _gapBetweenCurrentAndPrev;
     } else if (index > _firstVisibleItemIndex) {
-      // print('====================\nflutter: ========\n');
-      // print('index -----> $index, first visible index: $_firstVisibleItemIndex');
-
       if (constraints.overlap < 0) {
         double visibleItemsTotalExtent = 0;
         for (int i = _firstVisibleItemIndex + 1; i < index; i++) {
@@ -391,9 +410,6 @@ print(constraints.overlap);
       for (int i = _firstVisibleItemIndex + 1; i < index; i++) {
         visibleItemsTotalExtent += _buildItemExtent(i, currentLayoutDimensions);
       }
-      // print('$index, visible items total extent: $visibleItemsTotalExtent');
-      // print('return ${constraints.scrollOffset + visibleItemsTotalExtent}');
-      // print('\nflutter: ========\nflutter: ====================\n');
       return constraints.scrollOffset + visibleItemsTotalExtent;
     }
     return firstChildExtent * index;
@@ -427,12 +443,7 @@ print(constraints.overlap);
       double visibleItemsTotalExtent = _distanceToLeadingEdge;
       for (int i = _firstVisibleItemIndex + 1; i < childCount; i++) {
         visibleItemsTotalExtent += _buildItemExtent(i, currentLayoutDimensions);
-        // print('//////////////// visibleItemTotalExtent: $visibleItemsTotalExtent $i');
-
         if (visibleItemsTotalExtent >= constraints.viewportMainAxisExtent) {
-          if (i < 0) {
-            print('///////////////// max child index: $i');
-          }
           return i;
         }
       }
@@ -450,7 +461,6 @@ print(constraints.overlap);
     )
     double itemExtent,
   ) {
-    // print(childManager.childCount * maxChildExtent);
     return childManager.childCount * maxChildExtent;
   }
 

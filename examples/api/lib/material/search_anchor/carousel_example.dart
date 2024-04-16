@@ -40,7 +40,7 @@ class _CarouselExampleState extends State<CarouselExample> {
           child: ConstrainedBox(
             constraints: BoxConstraints.tightFor(height: 200),
             child: Carousel(
-              // clipExtent: 20,
+              clipExtent: 80,
               // itemSnap: true,
               childWeights: const <int>[1,8,1],
               children: List<Widget>.generate(data.length, (int index) {
