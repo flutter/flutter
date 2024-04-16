@@ -38,7 +38,7 @@ class MainWidgetState extends State<MainWidget> {
           label: Text(
             '5',
             semanticsLabel: '5 new messages',
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: Colors.white, fontSize: 5),
           ),
           backgroundColor: Colors.green,
           child: Icon(Icons.mail, semanticLabel: 'Messages'),

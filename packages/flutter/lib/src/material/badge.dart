@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -161,27 +163,39 @@ class Badge extends StatelessWidget {
 
     final BadgeThemeData badgeTheme = BadgeTheme.of(context);
     final BadgeThemeData defaults = _BadgeDefaultsM3(context);
-    final double effectiveSmallSize = smallSize ?? badgeTheme.smallSize ?? defaults.smallSize!;
-    final double effectiveLargeSize = largeSize ?? badgeTheme.largeSize ?? defaults.largeSize!;
-
-    final Widget badge = DefaultTextStyle(
-      style: (textStyle ?? badgeTheme.textStyle ?? defaults.textStyle!).copyWith(
-        color: textColor ?? badgeTheme.textColor ?? defaults.textColor!,
-      ),
-      child: IntrinsicWidth(
-        child: Container(
-          height: label == null ? effectiveSmallSize : effectiveLargeSize,
-          clipBehavior: Clip.antiAlias,
-          decoration: ShapeDecoration(
-            color: backgroundColor ?? badgeTheme.backgroundColor ?? defaults.backgroundColor!,
-            shape: const StadiumBorder(),
-          ),
-          padding: label == null ? null : (padding ?? badgeTheme.padding ?? defaults.padding!),
-          alignment: label == null ? null : Alignment.center,
-          child: label ?? SizedBox(width: effectiveSmallSize, height: effectiveSmallSize),
-        ),
-      ),
+    final Decoration effectiveDecoration = ShapeDecoration(
+      color: backgroundColor ?? badgeTheme.backgroundColor ?? defaults.backgroundColor!,
+      shape: const StadiumBorder(),
     );
+    final double effectiveWidthOffset;
+    final Widget badge;
+    final bool hasLabel = label != null;
+    if (hasLabel) {
+      final double minSize = effectiveWidthOffset = largeSize ?? badgeTheme.largeSize ?? defaults.largeSize!;
+      badge = DefaultTextStyle(
+        style: (textStyle ?? badgeTheme.textStyle ?? defaults.textStyle!).copyWith(
+          color: textColor ?? badgeTheme.textColor ?? defaults.textColor!,
+        ),
+        child: _IntrinsicHorizontalStadium(
+          minSize: minSize,
+          child: Container(
+            clipBehavior: Clip.antiAlias,
+            decoration: effectiveDecoration,
+            padding: padding ?? badgeTheme.padding ?? defaults.padding!,
+            alignment: Alignment.center,
+            child: label,
+          ),
+        ),
+      );
+    } else {
+      final double effectiveSmallSize = effectiveWidthOffset = smallSize ?? badgeTheme.smallSize ?? defaults.smallSize!;
+      badge = Container(
+        width: effectiveSmallSize,
+        height: effectiveSmallSize,
+        clipBehavior: Clip.antiAlias,
+        decoration: effectiveDecoration,
+      );
+    }
 
     if (child == null) {
       return badge;
@@ -189,7 +203,7 @@ class Badge extends StatelessWidget {
 
     final AlignmentGeometry effectiveAlignment = alignment ?? badgeTheme.alignment ?? defaults.alignment!;
     final TextDirection textDirection = Directionality.of(context);
-    final Offset defaultOffset = textDirection == TextDirection.ltr ? const Offset(4, -4) : const Offset(-4, -4);
+    final Offset defaultOffset = textDirection == TextDirection.ltr ? const Offset(4, 4) : const Offset(-4, 4);
     final Offset effectiveOffset = offset ?? badgeTheme.offset ?? defaultOffset;
 
     return
@@ -200,7 +214,9 @@ class Badge extends StatelessWidget {
           Positioned.fill(
             child: _Badge(
               alignment: effectiveAlignment,
-              offset: label == null ? Offset.zero : effectiveOffset,
+              offset: hasLabel ? effectiveOffset : Offset.zero,
+              hasLabel: hasLabel,
+              widthOffset: effectiveWidthOffset,
               textDirection: textDirection,
               child: badge,
             ),
@@ -214,18 +230,24 @@ class _Badge extends SingleChildRenderObjectWidget {
   const _Badge({
     required this.alignment,
     required this.offset,
+    required this.widthOffset,
     required this.textDirection,
+    required this.hasLabel,
     super.child, // the badge
   });
 
   final AlignmentGeometry alignment;
   final Offset offset;
+  final double widthOffset;
   final TextDirection textDirection;
+  final bool hasLabel;
 
   @override
   _RenderBadge createRenderObject(BuildContext context) {
     return _RenderBadge(
       alignment: alignment,
+      widthOffset: widthOffset,
+      hasLabel: hasLabel,
       offset: offset,
       textDirection: Directionality.maybeOf(context),
     );
@@ -236,6 +258,8 @@ class _Badge extends SingleChildRenderObjectWidget {
     renderObject
       ..alignment = alignment
       ..offset = offset
+      ..widthOffset = widthOffset
+      ..hasLabel = hasLabel
       ..textDirection = Directionality.maybeOf(context);
   }
 
@@ -252,7 +276,11 @@ class _RenderBadge extends RenderAligningShiftedBox {
     super.textDirection,
     super.alignment,
     required Offset offset,
-  }) : _offset = offset;
+    required bool hasLabel,
+    required double widthOffset,
+  }) : _offset = offset,
+       _hasLabel = hasLabel,
+       _widthOffset = widthOffset;
 
   Offset get offset => _offset;
   Offset _offset;
@@ -261,6 +289,26 @@ class _RenderBadge extends RenderAligningShiftedBox {
       return;
     }
     _offset = value;
+    markNeedsLayout();
+  }
+
+  bool get hasLabel => _hasLabel;
+  bool _hasLabel;
+  set hasLabel(bool value) {
+    if (_hasLabel == value) {
+      return;
+    }
+    _hasLabel = value;
+    markNeedsLayout();
+  }
+
+  double get widthOffset => _widthOffset;
+  double _widthOffset;
+  set widthOffset(double value) {
+    if (_widthOffset == value) {
+      return;
+    }
+    _widthOffset = value;
     markNeedsLayout();
   }
 
@@ -275,7 +323,104 @@ class _RenderBadge extends RenderAligningShiftedBox {
     final double badgeSize = child!.size.height;
     final Alignment resolvedAlignment = alignment.resolve(textDirection);
     final BoxParentData childParentData = child!.parentData! as BoxParentData;
-    childParentData.offset = offset + resolvedAlignment.alongOffset(Offset(size.width - badgeSize, size.height - badgeSize));
+    Offset badgeLocation = offset + resolvedAlignment.alongOffset(Offset(size.width - widthOffset, size.height));
+    if (hasLabel) {
+      // Adjust for label height.
+      badgeLocation = badgeLocation - Offset(0, badgeSize / 2);
+    }
+    childParentData.offset = badgeLocation;
+  }
+}
+
+/// A widget to grab smallest horizontal stadium rect to fit the child's
+/// intrinsic size.
+///
+/// A horizontal stadium means and rect that width >= height.
+///
+/// Uses [minSize] to set the min size of width and height.
+class _IntrinsicHorizontalStadium extends SingleChildRenderObjectWidget {
+  const _IntrinsicHorizontalStadium({super.child, required this.minSize});
+  final double minSize;
+
+  @override
+  _RenderIntrinsicHorizontalStadium createRenderObject(BuildContext context) {
+    return _RenderIntrinsicHorizontalStadium(minSize: minSize);
+  }
+}
+
+class _RenderIntrinsicHorizontalStadium extends RenderProxyBox {
+  _RenderIntrinsicHorizontalStadium({
+    RenderBox? child,
+    required double minSize,
+  }) : _minSize = minSize,
+       super(child);
+
+  double get minSize => _minSize;
+  double _minSize;
+  set minSize(double value) {
+    if (_minSize == value) {
+      return;
+    }
+    _minSize = value;
+    markNeedsLayout();
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    return getMaxIntrinsicWidth(height);
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    return math.max(getMaxIntrinsicHeight(double.infinity), super.computeMaxIntrinsicWidth(height));
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    return getMaxIntrinsicHeight(width);
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    return math.max(minSize, super.computeMaxIntrinsicHeight(width));
+  }
+
+  BoxConstraints _childConstraints(RenderBox child, BoxConstraints constraints) {
+    final double childHeight = math.max(minSize, child.getMaxIntrinsicHeight(constraints.maxWidth));
+    final double childWidth = child.getMaxIntrinsicWidth(constraints.maxHeight);
+    return constraints.tighten(width: math.max(childWidth, childHeight), height: childHeight);
+  }
+
+  Size _computeSize({required ChildLayouter layoutChild, required BoxConstraints constraints}) {
+    final RenderBox child = this.child!;
+    final Size childSize = layoutChild(child, _childConstraints(child, constraints));
+    if (childSize.height > childSize.width) {
+      return Size(childSize.height, childSize.height);
+    }
+    return childSize;
+  }
+
+  @override
+  @protected
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    return _computeSize(
+      layoutChild: ChildLayoutHelper.dryLayoutChild,
+      constraints: constraints,
+    );
+  }
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox child = this.child!;
+    return child.getDryBaseline(_childConstraints(child, constraints), baseline);
+  }
+
+  @override
+  void performLayout() {
+    size = _computeSize(
+      layoutChild: ChildLayoutHelper.layoutChild,
+      constraints: constraints,
+    );
   }
 }
 
