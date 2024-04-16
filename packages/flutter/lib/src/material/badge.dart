@@ -332,10 +332,10 @@ class _RenderBadge extends RenderAligningShiftedBox {
   }
 }
 
-/// A widget to grab smallest horizontal stadium rect to fit the child's
-/// intrinsic size.
+/// A widget size itself to the smallest horizontal stadium rect that can still
+/// fit the child's intrinsic size.
 ///
-/// A horizontal stadium means and rect that width >= height.
+/// A horizontal stadium means a rect that has width >= height.
 ///
 /// Uses [minSize] to set the min size of width and height.
 class _IntrinsicHorizontalStadium extends SingleChildRenderObjectWidget {
