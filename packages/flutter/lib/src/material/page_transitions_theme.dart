@@ -655,11 +655,6 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Android P.
   const OpenUpwardsPageTransitionsBuilder();
 
-  /// Delegate animation
-  static Widget delegateTransition(BuildContext context, Widget? child, Animation<double> secondaryAnimation) {
-    return _OpenUpwardsPageTransition.delegateTransition(context, child, secondaryAnimation);
-  }
-
   @override
   Widget buildTransitions<T>(
     PageRoute<T>? route,
