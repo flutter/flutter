@@ -1,4 +1,4 @@
-Signature: b68611073fbe5274d2dd5a7771536ab7
+Signature: 8b5044d663ffa55c32a4f93879f33dba
 
 ====================================================================================================
 LIBRARY: etc1
@@ -4035,7 +4035,6 @@ ORIGIN: ../../../flutter/third_party/skia/src/sksl/ir/SkSLVarDeclarations.h + ..
 ORIGIN: ../../../flutter/third_party/skia/src/sksl/ir/SkSLVariable.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sksl/ir/SkSLVariableReference.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/utils/SkMultiPictureDocument.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/utils/SkMultiPictureDocument.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/utils/SkMultiPictureDocumentPriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/utils/SkOSPath.h + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
@@ -4339,7 +4338,6 @@ FILE: ../../../flutter/third_party/skia/src/sksl/ir/SkSLVarDeclarations.h
 FILE: ../../../flutter/third_party/skia/src/sksl/ir/SkSLVariable.h
 FILE: ../../../flutter/third_party/skia/src/sksl/ir/SkSLVariableReference.h
 FILE: ../../../flutter/third_party/skia/src/utils/SkMultiPictureDocument.cpp
-FILE: ../../../flutter/third_party/skia/src/utils/SkMultiPictureDocument.h
 FILE: ../../../flutter/third_party/skia/src/utils/SkMultiPictureDocumentPriv.h
 FILE: ../../../flutter/third_party/skia/src/utils/SkOSPath.h
 ----------------------------------------------------------------------------------------------------
