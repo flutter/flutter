@@ -38,6 +38,7 @@
 #include "impeller/renderer/render_target.h"
 #include "impeller/renderer/renderer.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
+#include "impeller/tessellator/tessellator.h"
 #include "third_party/imgui/imgui.h"
 
 // TODO(zanderso): https://github.com/flutter/flutter/issues/127701
@@ -391,15 +392,25 @@ TEST_P(RendererTest, CanRenderInstanced) {
   using FS = InstancedDrawFragmentShader;
 
   VertexBufferBuilder<VS::PerVertexData> builder;
-  builder.AddVertices({
-      VS::PerVertexData{.vtx = Point{10, 10}},
-      VS::PerVertexData{.vtx = Point{110, 10}},
-      VS::PerVertexData{.vtx = Point{10, 110}},
 
-      VS::PerVertexData{.vtx = Point{110, 10}},
-      VS::PerVertexData{.vtx = Point{10, 110}},
-      VS::PerVertexData{.vtx = Point{110, 100}},
-  });
+  ASSERT_EQ(Tessellator::Result::kSuccess,
+            Tessellator{}.Tessellate(
+                PathBuilder{}
+                    .AddRect(Rect::MakeXYWH(10, 10, 100, 100))
+                    .TakePath(FillType::kOdd),
+                1.0f,
+                [&builder](const float* vertices, size_t vertices_count,
+                           const uint16_t* indices, size_t indices_count) {
+                  for (auto i = 0u; i < vertices_count * 2; i += 2) {
+                    VS::PerVertexData data;
+                    data.vtx = {vertices[i], vertices[i + 1]};
+                    builder.AppendVertex(data);
+                  }
+                  for (auto i = 0u; i < indices_count; i++) {
+                    builder.AppendIndex(indices[i]);
+                  }
+                  return true;
+                }));
 
   ASSERT_NE(GetContext(), nullptr);
   auto pipeline =

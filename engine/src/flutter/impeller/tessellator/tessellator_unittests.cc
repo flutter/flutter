@@ -13,37 +13,96 @@
 namespace impeller {
 namespace testing {
 
+TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
+  // Zero points.
+  {
+    Tessellator t;
+    auto path = PathBuilder{}.TakePath(FillType::kOdd);
+    Tessellator::Result result = t.Tessellate(
+        path, 1.0f,
+        [](const float* vertices, size_t vertices_count,
+           const uint16_t* indices, size_t indices_count) { return true; });
+
+    ASSERT_EQ(result, Tessellator::Result::kInputError);
+  }
+
+  // One point.
+  {
+    Tessellator t;
+    auto path = PathBuilder{}.LineTo({0, 0}).TakePath(FillType::kOdd);
+    Tessellator::Result result = t.Tessellate(
+        path, 1.0f,
+        [](const float* vertices, size_t vertices_count,
+           const uint16_t* indices, size_t indices_count) { return true; });
+
+    ASSERT_EQ(result, Tessellator::Result::kSuccess);
+  }
+
+  // Two points.
+  {
+    Tessellator t;
+    auto path = PathBuilder{}.AddLine({0, 0}, {0, 1}).TakePath(FillType::kOdd);
+    Tessellator::Result result = t.Tessellate(
+        path, 1.0f,
+        [](const float* vertices, size_t vertices_count,
+           const uint16_t* indices, size_t indices_count) { return true; });
+
+    ASSERT_EQ(result, Tessellator::Result::kSuccess);
+  }
+
+  // Many points.
+  {
+    Tessellator t;
+    PathBuilder builder;
+    for (int i = 0; i < 1000; i++) {
+      auto coord = i * 1.0f;
+      builder.AddLine({coord, coord}, {coord + 1, coord + 1});
+    }
+    auto path = builder.TakePath(FillType::kOdd);
+    Tessellator::Result result = t.Tessellate(
+        path, 1.0f,
+        [](const float* vertices, size_t vertices_count,
+           const uint16_t* indices, size_t indices_count) { return true; });
+
+    ASSERT_EQ(result, Tessellator::Result::kSuccess);
+  }
+
+  // Closure fails.
+  {
+    Tessellator t;
+    auto path = PathBuilder{}.AddLine({0, 0}, {0, 1}).TakePath(FillType::kOdd);
+    Tessellator::Result result = t.Tessellate(
+        path, 1.0f,
+        [](const float* vertices, size_t vertices_count,
+           const uint16_t* indices, size_t indices_count) { return false; });
+
+    ASSERT_EQ(result, Tessellator::Result::kInputError);
+  }
+}
+
 TEST(TessellatorTest, TessellateConvex) {
   {
     Tessellator t;
-    std::vector<Point> points;
-    std::vector<uint16_t> indices;
     // Sanity check simple rectangle.
-    t.TessellateConvexInternal(
-        PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 10, 10)).TakePath(), points,
-        indices, 1.0);
+    auto pts = t.TessellateConvex(
+        PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 10, 10)).TakePath(), 1.0);
 
-    std::vector<Point> expected = {{10, 0}, {10, 10}, {0, 10}, {0, 0}};
-    std::vector<uint16_t> expected_indices = {0, 1, 3, 2};
-    EXPECT_EQ(points, expected);
-    EXPECT_EQ(indices, expected_indices);
+    std::vector<Point> expected = {{0, 0}, {10, 0}, {0, 10}, {10, 10}};
+    EXPECT_EQ(pts, expected);
   }
 
   {
     Tessellator t;
-    std::vector<Point> points;
-    std::vector<uint16_t> indices;
-    t.TessellateConvexInternal(PathBuilder{}
-                                   .AddRect(Rect::MakeLTRB(0, 0, 10, 10))
-                                   .AddRect(Rect::MakeLTRB(20, 20, 30, 30))
-                                   .TakePath(),
-                               points, indices, 1.0);
+    auto pts = t.TessellateConvex(PathBuilder{}
+                                      .AddRect(Rect::MakeLTRB(0, 0, 10, 10))
+                                      .AddRect(Rect::MakeLTRB(20, 20, 30, 30))
+                                      .TakePath(),
+                                  1.0);
 
-    std::vector<Point> expected = {{10, 0},  {10, 10}, {0, 10},  {0, 0},
-                                   {30, 20}, {30, 30}, {20, 30}, {20, 20}};
-    std::vector<uint16_t> expected_indices = {0, 1, 3, 2, 2, 4, 4, 5, 7, 6};
-    EXPECT_EQ(points, expected);
-    EXPECT_EQ(indices, expected_indices);
+    std::vector<Point> expected = {{0, 0},   {10, 0},  {0, 10},  {10, 10},
+                                   {10, 10}, {20, 20}, {20, 20}, {30, 20},
+                                   {20, 30}, {30, 30}};
+    EXPECT_EQ(pts, expected);
   }
 }
 
@@ -415,10 +474,7 @@ TEST(TessellatorTest, EarlyReturnEmptyConvexShape) {
   builder.MoveTo({0, 0});
   builder.MoveTo({10, 10}, /*relative=*/true);
 
-  std::vector<Point> points;
-  std::vector<uint16_t> indices;
-  tessellator->TessellateConvexInternal(builder.TakePath(), points, indices,
-                                        3.0);
+  auto points = tessellator->TessellateConvex(builder.TakePath(), 3.0);
 
   EXPECT_TRUE(points.empty());
 }
