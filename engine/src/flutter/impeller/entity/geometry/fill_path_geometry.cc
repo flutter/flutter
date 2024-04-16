@@ -36,15 +36,8 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
     };
   }
 
-  VertexBuffer vertex_buffer;
-
-  auto points = renderer.GetTessellator()->TessellateConvex(
-      path_, entity.GetTransform().GetMaxBasisLength());
-
-  vertex_buffer.vertex_buffer = host_buffer.Emplace(
-      points.data(), points.size() * sizeof(Point), alignof(Point));
-  vertex_buffer.index_buffer = {}, vertex_buffer.vertex_count = points.size();
-  vertex_buffer.index_type = IndexType::kNone;
+  VertexBuffer vertex_buffer = renderer.GetTessellator()->TessellateConvex(
+      path_, host_buffer, entity.GetTransform().GetMaxBasisLength());
 
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,
@@ -61,8 +54,6 @@ GeometryResult FillPathGeometry::GetPositionUVBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) const {
-  using VS = TextureFillVertexShader;
-
   const auto& bounding_box = path_.GetBoundingBox();
   if (bounding_box.has_value() && bounding_box->IsEmpty()) {
     return GeometryResult{
@@ -80,22 +71,13 @@ GeometryResult FillPathGeometry::GetPositionUVBuffer(
   auto uv_transform =
       texture_coverage.GetNormalizingTransform() * effect_transform;
 
-  auto points = renderer.GetTessellator()->TessellateConvex(
-      path_, entity.GetTransform().GetMaxBasisLength());
-
-  VertexBufferBuilder<VS::PerVertexData> vertex_builder;
-  vertex_builder.Reserve(points.size());
-  for (auto i = 0u; i < points.size(); i++) {
-    VS::PerVertexData data;
-    data.position = points[i];
-    data.texture_coords = uv_transform * points[i];
-    vertex_builder.AppendVertex(data);
-  }
+  VertexBuffer vertex_buffer = renderer.GetTessellator()->TessellateConvex(
+      path_, renderer.GetTransientsBuffer(),
+      entity.GetTransform().GetMaxBasisLength(), uv_transform);
 
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,
-      .vertex_buffer =
-          vertex_builder.CreateVertexBuffer(renderer.GetTransientsBuffer()),
+      .vertex_buffer = vertex_buffer,
       .transform = entity.GetShaderTransform(pass),
       .mode = GetResultMode(),
   };
