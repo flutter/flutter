@@ -167,6 +167,9 @@ class TabController extends ChangeNotifier {
     return result;
   }
 
+  /// If false, it means the ownership of [_animationController] is transferred to another TabController
+  /// by the method [_copyWithAndDispose], so the controller is in use and should not be disposed
+  /// by this class.
   bool _disposeAnimationController = true;
 
   /// An animation whose value represents the current position of the [TabBar]'s
