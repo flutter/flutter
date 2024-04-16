@@ -107,7 +107,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
     if (previousRoute is ModalRoute<T> && navigator != null) {
-      navigator!.delegateTransitionBuilder = previousRoute.delegatedTransition;
+      previousRoute.navigator!.delegateTransitionBuilder = delegatedTransition;
     }
     return previousRoute is PageRoute;
   }
