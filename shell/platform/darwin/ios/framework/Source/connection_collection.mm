@@ -4,6 +4,10 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/connection_collection.h"
 
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+
+FLUTTER_ASSERT_ARC
+
 namespace flutter {
 ConnectionCollection::Connection ConnectionCollection::AquireConnection(const std::string& name) {
   Connection nextConnection = ++counter_;

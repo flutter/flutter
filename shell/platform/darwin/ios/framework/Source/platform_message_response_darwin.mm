@@ -4,6 +4,10 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h"
 
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+
+FLUTTER_ASSERT_ARC
+
 namespace flutter {
 
 PlatformMessageResponseDarwin::PlatformMessageResponseDarwin(

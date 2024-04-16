@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterUIPressProxy.h"
+
 #import <UIKit/UIKit.h>
 
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterUIPressProxy.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+
+FLUTTER_ASSERT_ARC
 
 @interface FlutterUIPressProxy ()
 @property(nonatomic, readonly) UIPress* press;
