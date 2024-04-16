@@ -12,16 +12,18 @@
 
 #include "flutter/fml/logging.h"
 
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterMetalLayer.h"
+
+FLUTTER_ASSERT_ARC
 
 namespace flutter {
 
 bool ShouldUseMetalRenderer() {
   bool ios_version_supports_metal = false;
   if (@available(iOS METAL_IOS_VERSION_BASELINE, *)) {
-    auto device = MTLCreateSystemDefaultDevice();
+    id<MTLDevice> device = MTLCreateSystemDefaultDevice();
     ios_version_supports_metal = [device supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily1_v3];
-    [device release];
   }
   return ios_version_supports_metal;
 }
