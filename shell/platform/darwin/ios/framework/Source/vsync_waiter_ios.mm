@@ -15,6 +15,10 @@
 #include "flutter/fml/memory/task_runner_checker.h"
 #include "flutter/fml/trace_event.h"
 
+@interface VSyncClient ()
+@property(nonatomic, assign, readonly) double refreshRate;
+@end
+
 // When calculating refresh rate diffrence, anything within 0.1 fps is ignored.
 const static double kRefreshRateDiffToIgnore = 0.1;
 
@@ -27,42 +31,36 @@ VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners)
     const fml::TimePoint target_time = recorder->GetVsyncTargetTime();
     FireCallback(start_time, target_time, true);
   };
-  client_ =
-      fml::scoped_nsobject{[[VSyncClient alloc] initWithTaskRunner:task_runners_.GetUITaskRunner()
-                                                          callback:callback]};
-  max_refresh_rate_ = [DisplayLinkManager displayRefreshRate];
+  client_ = [[VSyncClient alloc] initWithTaskRunner:task_runners_.GetUITaskRunner()
+                                           callback:callback];
+  max_refresh_rate_ = DisplayLinkManager.displayRefreshRate;
 }
 
 VsyncWaiterIOS::~VsyncWaiterIOS() {
   // This way, we will get no more callbacks from the display link that holds a weak (non-nilling)
   // reference to this C++ object.
-  [client_.get() invalidate];
+  [client_ invalidate];
 }
 
 void VsyncWaiterIOS::AwaitVSync() {
-  double new_max_refresh_rate = [DisplayLinkManager displayRefreshRate];
+  double new_max_refresh_rate = DisplayLinkManager.displayRefreshRate;
   if (fabs(new_max_refresh_rate - max_refresh_rate_) > kRefreshRateDiffToIgnore) {
     max_refresh_rate_ = new_max_refresh_rate;
-    [client_.get() setMaxRefreshRate:max_refresh_rate_];
+    [client_ setMaxRefreshRate:max_refresh_rate_];
   }
-  [client_.get() await];
+  [client_ await];
 }
 
 // |VariableRefreshRateReporter|
 double VsyncWaiterIOS::GetRefreshRate() const {
-  return [client_.get() getRefreshRate];
-}
-
-fml::scoped_nsobject<VSyncClient> VsyncWaiterIOS::GetVsyncClient() const {
-  return client_;
+  return client_.refreshRate;
 }
 
 }  // namespace flutter
 
 @implementation VSyncClient {
-  flutter::VsyncWaiter::Callback callback_;
-  fml::scoped_nsobject<CADisplayLink> display_link_;
-  double current_refresh_rate_;
+  flutter::VsyncWaiter::Callback _callback;
+  CADisplayLink* _displayLink;
 }
 
 - (instancetype)initWithTaskRunner:(fml::RefPtr<fml::TaskRunner>)task_runner
@@ -70,20 +68,18 @@ fml::scoped_nsobject<VSyncClient> VsyncWaiterIOS::GetVsyncClient() const {
   self = [super init];
 
   if (self) {
-    current_refresh_rate_ = [DisplayLinkManager displayRefreshRate];
+    _refreshRate = DisplayLinkManager.displayRefreshRate;
     _allowPauseAfterVsync = YES;
-    callback_ = std::move(callback);
-    display_link_ = fml::scoped_nsobject<CADisplayLink> {
-      [[CADisplayLink displayLinkWithTarget:self selector:@selector(onDisplayLink:)] retain]
-    };
-    display_link_.get().paused = YES;
+    _callback = std::move(callback);
+    _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(onDisplayLink:)];
+    _displayLink.paused = YES;
 
-    [self setMaxRefreshRate:[DisplayLinkManager displayRefreshRate]];
+    [self setMaxRefreshRate:DisplayLinkManager.displayRefreshRate];
 
-    task_runner->PostTask([client = [self retain]]() {
-      [client->display_link_.get() addToRunLoop:[NSRunLoop currentRunLoop]
-                                        forMode:NSRunLoopCommonModes];
-      [client release];
+    // Strongly retain the the captured link until it is added to the runloop.
+    CADisplayLink* localDisplayLink = _displayLink;
+    task_runner->PostTask([localDisplayLink]() {
+      [localDisplayLink addToRunLoop:NSRunLoop.currentRunLoop forMode:NSRunLoopCommonModes];
     });
   }
 
@@ -97,19 +93,19 @@ fml::scoped_nsobject<VSyncClient> VsyncWaiterIOS::GetVsyncClient() const {
   double maxFrameRate = fmax(refreshRate, 60);
   double minFrameRate = fmax(maxFrameRate / 2, 60);
   if (@available(iOS 15.0, *)) {
-    display_link_.get().preferredFrameRateRange =
+    _displayLink.preferredFrameRateRange =
         CAFrameRateRangeMake(minFrameRate, maxFrameRate, maxFrameRate);
   } else {
-    display_link_.get().preferredFramesPerSecond = maxFrameRate;
+    _displayLink.preferredFramesPerSecond = maxFrameRate;
   }
 }
 
 - (void)await {
-  display_link_.get().paused = NO;
+  _displayLink.paused = NO;
 }
 
 - (void)pause {
-  display_link_.get().paused = YES;
+  _displayLink.paused = YES;
 }
 
 - (void)onDisplayLink:(CADisplayLink*)link {
@@ -126,31 +122,22 @@ fml::scoped_nsobject<VSyncClient> VsyncWaiterIOS::GetVsyncClient() const {
   std::unique_ptr<flutter::FrameTimingsRecorder> recorder =
       std::make_unique<flutter::FrameTimingsRecorder>();
 
-  current_refresh_rate_ = round(1 / (frame_target_time - frame_start_time).ToSecondsF());
+  _refreshRate = round(1 / (frame_target_time - frame_start_time).ToSecondsF());
 
   recorder->RecordVsync(frame_start_time, frame_target_time);
   if (_allowPauseAfterVsync) {
-    display_link_.get().paused = YES;
+    link.paused = YES;
   }
-  callback_(std::move(recorder));
+  _callback(std::move(recorder));
 }
 
 - (void)invalidate {
-  [display_link_.get() invalidate];
-}
-
-- (void)dealloc {
-  [self invalidate];
-
-  [super dealloc];
-}
-
-- (double)getRefreshRate {
-  return current_refresh_rate_;
+  [_displayLink invalidate];
+  _displayLink = nil;  // Break retain cycle.
 }
 
 - (CADisplayLink*)getDisplayLink {
-  return display_link_.get();
+  return _displayLink;
 }
 
 @end
@@ -158,12 +145,10 @@ fml::scoped_nsobject<VSyncClient> VsyncWaiterIOS::GetVsyncClient() const {
 @implementation DisplayLinkManager
 
 + (double)displayRefreshRate {
-  fml::scoped_nsobject<CADisplayLink> display_link = fml::scoped_nsobject<CADisplayLink> {
-    [[CADisplayLink displayLinkWithTarget:[[[DisplayLinkManager alloc] init] autorelease]
-                                 selector:@selector(onDisplayLink:)] retain]
-  };
-  display_link.get().paused = YES;
-  auto preferredFPS = display_link.get().preferredFramesPerSecond;
+  CADisplayLink* displayLink = [CADisplayLink displayLinkWithTarget:[[[self class] alloc] init]
+                                                           selector:@selector(onDisplayLink:)];
+  displayLink.paused = YES;
+  auto preferredFPS = displayLink.preferredFramesPerSecond;
 
   // From Docs:
   // The default value for preferredFramesPerSecond is 0. When this value is 0, the preferred
@@ -174,7 +159,7 @@ fml::scoped_nsobject<VSyncClient> VsyncWaiterIOS::GetVsyncClient() const {
     return preferredFPS;
   }
 
-  return [UIScreen mainScreen].maximumFramesPerSecond;
+  return UIScreen.mainScreen.maximumFramesPerSecond;
 }
 
 - (void)onDisplayLink:(CADisplayLink*)link {
@@ -182,7 +167,7 @@ fml::scoped_nsobject<VSyncClient> VsyncWaiterIOS::GetVsyncClient() const {
 }
 
 + (BOOL)maxRefreshRateEnabledOnIPhone {
-  return [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CADisableMinimumFrameDurationOnPhone"]
+  return [[NSBundle.mainBundle objectForInfoDictionaryKey:@"CADisableMinimumFrameDurationOnPhone"]
       boolValue];
 }
 

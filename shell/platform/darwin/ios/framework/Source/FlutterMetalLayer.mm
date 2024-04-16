@@ -176,7 +176,7 @@ extern CFTimeInterval display_link_target;
     _availableTextures = [[NSMutableSet alloc] init];
 
     _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(onDisplayLink:)];
-    [self setMaxRefreshRate:[DisplayLinkManager displayRefreshRate] forceMax:NO];
+    [self setMaxRefreshRate:DisplayLinkManager.displayRefreshRate forceMax:NO];
     [_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didEnterBackground:)
@@ -214,7 +214,7 @@ extern CFTimeInterval display_link_target;
   if (_displayLinkPauseCountdown == 3) {
     _displayLink.paused = YES;
     if (_displayLinkForcedMaxRate) {
-      [self setMaxRefreshRate:[DisplayLinkManager displayRefreshRate] forceMax:NO];
+      [self setMaxRefreshRate:DisplayLinkManager.displayRefreshRate forceMax:NO];
       _displayLinkForcedMaxRate = NO;
     }
   } else {
@@ -395,7 +395,7 @@ extern CFTimeInterval display_link_target;
     _didSetContentsDuringThisDisplayLinkPeriod = YES;
   } else if (!_displayLinkForcedMaxRate) {
     _displayLinkForcedMaxRate = YES;
-    [self setMaxRefreshRate:[DisplayLinkManager displayRefreshRate] forceMax:YES];
+    [self setMaxRefreshRate:DisplayLinkManager.displayRefreshRate forceMax:YES];
   }
 }
 
