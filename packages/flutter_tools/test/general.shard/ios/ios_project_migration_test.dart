@@ -907,7 +907,7 @@ platform :ios, '12.0'
           project,
           testLogger,
         );
-        expect(await migration.migrate(), isTrue);
+        await migration.migrate();
         expect(xcodeProjectInfoFile.existsSync(), isFalse);
 
         expect(testLogger.traceText, contains('Xcode project not found, skipping removing bitcode migration'));
@@ -923,7 +923,7 @@ platform :ios, '12.0'
           project,
           testLogger,
         );
-        expect(await migration.migrate(), isTrue);
+        await migration.migrate();
 
         expect(xcodeProjectInfoFile.lastModifiedSync(), projectLastModified);
         expect(xcodeProjectInfoFile.readAsStringSync(), xcodeProjectInfoFileContents);
@@ -944,7 +944,7 @@ platform :ios, '12.0'
           project,
           testLogger,
         );
-        expect(await migration.migrate(), isTrue);
+        await migration.migrate();
 
         expect(xcodeProjectInfoFile.readAsStringSync(), '''
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -1429,7 +1429,7 @@ LD_RUNPATH_SEARCH_PATHS = $(inherited) /usr/lib/swift '@executable_path/../Frame
         project,
         testLogger,
       );
-      expect(await migration.migrate(), isTrue);
+      await migration.migrate();
       expect(appDelegateFile.existsSync(), isFalse);
 
       expect(testLogger.statusText, isEmpty);
@@ -1458,7 +1458,7 @@ import UIKit
         project,
         testLogger,
       );
-      expect(await migration.migrate(), isTrue);
+      await migration.migrate();
 
       expect(appDelegateFile.lastModifiedSync(), lastModified);
       expect(appDelegateFile.readAsStringSync(), appDelegateContents);
@@ -1487,7 +1487,7 @@ import UIKit
         project,
         testLogger,
       );
-      expect(await migration.migrate(), isTrue);
+      await migration.migrate();
 
       expect(appDelegateFile.readAsStringSync(), '''
 import Flutter
