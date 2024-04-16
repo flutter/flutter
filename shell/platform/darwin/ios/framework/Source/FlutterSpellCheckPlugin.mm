@@ -8,25 +8,39 @@
 #import <UIKit/UIKit.h>
 
 #import "flutter/fml/logging.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
+
+FLUTTER_ASSERT_ARC
 
 // Method Channel name to start spell check.
 static NSString* const kInitiateSpellCheck = @"SpellCheck.initiateSpellCheck";
 
+@interface FlutterSpellCheckResult : NSObject
+
+@property(nonatomic, copy, readonly) NSArray<NSString*>* suggestions;
+@property(nonatomic, assign, readonly) NSRange misspelledRange;
+
+- (instancetype)init NS_UNAVAILABLE;
++ (instancetype)new NS_UNAVAILABLE;
+- (instancetype)initWithMisspelledRange:(NSRange)range
+                            suggestions:(NSArray<NSString*>*)suggestions NS_DESIGNATED_INITIALIZER;
+- (NSDictionary<NSString*, NSObject*>*)toDictionary;
+
+@end
+
 @interface FlutterSpellCheckPlugin ()
 
-@property(nonatomic, retain) UITextChecker* textChecker;
+@property(nonatomic) UITextChecker* textChecker;
 
 @end
 
 @implementation FlutterSpellCheckPlugin
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
-  if (!_textChecker) {
+  if (!self.textChecker) {
     // UITextChecker is an expensive object to initiate, see:
     // https://github.com/flutter/flutter/issues/104454. Lazily initialate the UITextChecker object
     // until at first method channel call. We avoid using lazy getter for testing.
-    _textChecker = [[UITextChecker alloc] init];
+    self.textChecker = [[UITextChecker alloc] init];
   }
   NSString* method = call.method;
   NSArray* args = call.arguments;
@@ -88,13 +102,13 @@ static NSString* const kInitiateSpellCheck = @"SpellCheck.initiateSpellCheck";
     }
   } while (nextSpellSuggestion != nil && nextOffset < text.length);
 
-  NSMutableArray* methodChannelResult = [[[NSMutableArray alloc] init] autorelease];
+  NSMutableArray* methodChannelResult =
+      [[NSMutableArray alloc] initWithCapacity:allSpellSuggestions.count];
 
   for (FlutterSpellCheckResult* result in allSpellSuggestions) {
     [methodChannelResult addObject:[result toDictionary]];
   }
 
-  [allSpellSuggestions release];
   return methodChannelResult;
 }
 
@@ -121,19 +135,8 @@ static NSString* const kInitiateSpellCheck = @"SpellCheck.initiateSpellCheck";
   NSArray<NSString*>* suggestions = [self.textChecker guessesForWordRange:misspelledRange
                                                                  inString:text
                                                                  language:language];
-  FlutterSpellCheckResult* result =
-      [[[FlutterSpellCheckResult alloc] initWithMisspelledRange:misspelledRange
-                                                    suggestions:suggestions] autorelease];
-  return result;
-}
-
-- (UITextChecker*)textChecker {
-  return _textChecker;
-}
-
-- (void)dealloc {
-  [_textChecker release];
-  [super dealloc];
+  return [[FlutterSpellCheckResult alloc] initWithMisspelledRange:misspelledRange
+                                                      suggestions:suggestions];
 }
 
 @end
@@ -151,18 +154,14 @@ static NSString* const kInitiateSpellCheck = @"SpellCheck.initiateSpellCheck";
 }
 
 - (NSDictionary<NSString*, NSObject*>*)toDictionary {
-  NSMutableDictionary* result = [[[NSMutableDictionary alloc] initWithCapacity:3] autorelease];
-  result[@"startIndex"] = @(_misspelledRange.location);
-  // The end index represents the next index after the last character of a misspelled word to match
-  // the behavior of Dart's TextRange: https://api.flutter.dev/flutter/dart-ui/TextRange/end.html
-  result[@"endIndex"] = @(_misspelledRange.location + _misspelledRange.length);
-  result[@"suggestions"] = _suggestions;
-  return result;
-}
-
-- (void)dealloc {
-  [_suggestions release];
-  [super dealloc];
+  return @{
+    @"startIndex" : @(_misspelledRange.location),
+    // The end index represents the next index after the last character of a misspelled word to
+    // match the behavior of Dart's TextRange:
+    // https://api.flutter.dev/flutter/dart-ui/TextRange/end.html
+    @"endIndex" : @(_misspelledRange.location + _misspelledRange.length),
+    @"suggestions" : _suggestions,
+  };
 }
 
 @end

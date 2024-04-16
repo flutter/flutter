@@ -4,15 +4,11 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterChannelKeyResponder.h"
 
-#import <objc/message.h>
-#include <sys/types.h>
-#include "fml/memory/weak_ptr.h"
-
-#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterUIPressProxy.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/KeyCodeMap_Internal.h"
+
+FLUTTER_ASSERT_ARC
 
 namespace {
 // An enumeration of the modifier values that the framework expects. These are
@@ -139,7 +135,7 @@ static NSString* getEventCharacters(NSString* characters, UIKeyboardHIDUsage key
   NSString* characters = getEventCharacters(press.key.characters, press.key.keyCode);
   NSString* charactersIgnoringModifiers =
       getEventCharacters(press.key.charactersIgnoringModifiers, press.key.keyCode);
-  NSMutableDictionary* keyMessage = [[@{
+  NSDictionary* keyMessage = @{
     @"keymap" : @"ios",
     @"type" : type,
     @"keyCode" : @(press.key.keyCode),
@@ -148,7 +144,7 @@ static NSString* getEventCharacters(NSString* characters, UIKeyboardHIDUsage key
     @"charactersIgnoringModifiers" : charactersIgnoringModifiers == nil
         ? @""
         : charactersIgnoringModifiers,
-  } mutableCopy] autorelease];
+  };
   [self.channel sendMessage:keyMessage
                       reply:^(id reply) {
                         bool handled = reply ? [[reply valueForKey:@"handled"] boolValue] : true;
