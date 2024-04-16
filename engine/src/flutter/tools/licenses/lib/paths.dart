@@ -102,7 +102,9 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/inja/third_party/amalgamate', // only used at build time
   r'flutter/third_party/inja/third_party/include/doctest', // seems to be a unit test library
   r'flutter/third_party/json/docs',
+  r'flutter/third_party/libpng/ci', // not linked in
   r'flutter/third_party/libpng/contrib', // not linked in
+  r'flutter/third_party/libpng/loongarch', // not linked in
   r'flutter/third_party/libpng/mips', // not linked in
   r'flutter/third_party/libpng/powerpc', // not linked in
   r'flutter/third_party/libpng/projects', // not linked in

@@ -50,7 +50,7 @@ vars = {
   # https://chrome-infra-packages.appspot.com/p/fuchsia/third_party/goma/client
   'goma_version': ' git_revision:41b3bcb64014144a844153fd5588c36411fffb56',
 
-  'reclient_version': 'git_revision:f61c232b70bc425f0b562480312b114c444d460d',
+  'reclient_version': 'git_revision:2c9285bdffcfd1b21afb028d57494ff78761af81',
 
   'gcloud_version': 'version:2@444.0.0.chromium.3',
 
@@ -656,7 +656,7 @@ deps = {
    Var('flutter_git') + '/third_party/libjpeg-turbo' + '@' + '0fb821f3b2e570b2783a94ccd9a2fb1f4916ae9f',
 
   'src/flutter/third_party/libpng':
-   Var('flutter_git') + '/third_party/libpng' + '@' + '9187b6e12756317f6d44fc669ac11dfc262bd192',
+   Var('flutter_git') + '/third_party/libpng' + '@' + 'de36b892e921c684ef718fec24739ae9bb49c977',
 
   'src/flutter/third_party/libwebp':
    Var('chromium_git') + '/webm/libwebp.git' + '@' + 'ca332209cb5567c9b249c86788cb2dbf8847e760', # 1.3.2
@@ -665,7 +665,10 @@ deps = {
    Var('skia_git') + '/external/github.com/google/wuffs-mirror-release-c.git' + '@' + '600cd96cf47788ee3a74b40a6028b035c9fd6a61',
 
   'src/third_party/zlib':
-   Var('chromium_git') + '/chromium/src/third_party/zlib.git' + '@' + '14dd4c4455602c9b71a1a89b5cafd1f4030d2e3f',
+   Var('chromium_git') + '/chromium/src/third_party/zlib.git' + '@' + '7d77fb7fd66d8a5640618ad32c71fdeb7d3e02df',
+
+  'src/flutter/third_party/cpu_features/src':
+   Var('chromium_git') + '/external/github.com/google/cpu_features.git' + '@' + '936b9ab5515dead115606559502e3864958f7f6e',
 
   'src/flutter/third_party/inja':
    Var('flutter_git') + '/third_party/inja' + '@' + '88bd6112575a80d004e551c98cf956f88ff4d445',
