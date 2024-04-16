@@ -93,6 +93,7 @@ class BlendFilterContents : public ColorFilterContents {
       ColorFilterContents::AbsorbOpacity absorb_opacity) const;
 
   BlendMode blend_mode_ = BlendMode::kSourceOver;
+  AdvancedBlendProc advanced_blend_proc_;
   std::optional<Color> foreground_color_;
 
   BlendFilterContents(const BlendFilterContents&) = delete;

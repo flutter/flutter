@@ -941,13 +941,14 @@ TEST_P(AiksTest, CanDrawPaintMultipleTimes) {
 TEST_P(AiksTest, FormatWideGamut) {
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
             PixelFormat::kB10G10R10A10XR);
-  EXPECT_TRUE(IsAlphaClampedToOne(
-      GetContext()->GetCapabilities()->GetDefaultColorFormat()));
 }
 
 TEST_P(AiksTest, FormatSRGB) {
-  EXPECT_TRUE(IsAlphaClampedToOne(
-      GetContext()->GetCapabilities()->GetDefaultColorFormat()));
+  PixelFormat pixel_format =
+      GetContext()->GetCapabilities()->GetDefaultColorFormat();
+  EXPECT_TRUE(pixel_format == PixelFormat::kR8G8B8A8UNormInt ||
+              pixel_format == PixelFormat::kB8G8R8A8UNormInt)
+      << "pixel format: " << PixelFormatToString(pixel_format);
 }
 
 TEST_P(AiksTest, TransformMultipliesCorrectly) {

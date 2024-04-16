@@ -1480,7 +1480,6 @@ const std::map<BlendMode, Color> ColorBlendTestData::kExpectedResults[sizeof(
         {BlendMode::kHue, {0.617208, 0.655639, 0.724659, 0.9375}},
         {BlendMode::kSaturation, {0.617208, 0.655639, 0.724659, 0.9375}},
         {BlendMode::kColor, {0.617208, 0.655639, 0.724659, 0.9375}},
-        {BlendMode::kPlusAdvanced, {1, 1, 1, 1}},
         {BlendMode::kLuminosity, {0.878431, 0.916863, 0.985882, 0.9375}},
     },
     {
@@ -1512,7 +1511,6 @@ const std::map<BlendMode, Color> ColorBlendTestData::kExpectedResults[sizeof(
         {BlendMode::kHue, {0.266235, 0.748588, 0.373686, 0.9375}},
         {BlendMode::kSaturation, {0.339345, 0.629787, 0.811502, 0.9375}},
         {BlendMode::kColor, {0.241247, 0.765953, 0.348698, 0.9375}},
-        {BlendMode::kPlusAdvanced, {0.441176, 1, 0.844118, 1}},
         {BlendMode::kLuminosity, {0.346988, 0.622282, 0.776792, 0.9375}},
     },
     {
@@ -1544,7 +1542,6 @@ const std::map<BlendMode, Color> ColorBlendTestData::kExpectedResults[sizeof(
         {BlendMode::kHue, {0.417208, 0.455639, 0.524659, 0.9375}},
         {BlendMode::kSaturation, {0.417208, 0.455639, 0.524659, 0.9375}},
         {BlendMode::kColor, {0.417208, 0.455639, 0.524659, 0.9375}},
-        {BlendMode::kPlusAdvanced, {0.294118, 0.438235, 0.697059, 1}},
         {BlendMode::kLuminosity, {0.0784314, 0.116863, 0.185882, 0.9375}},
     },
 };
