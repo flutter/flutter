@@ -1051,8 +1051,6 @@ class RenderSliverTree extends RenderSliverVariedExtentList {
         totalAnimationOffset += _animationOffsets[animationKey]! * (1 - _activeAnimations[animationKey]!.value);
       }
       position += itemExtent - totalAnimationOffset;
-      // Reset the animation offset so we do not count it multiple times.
-      // totalAnimationOffset = 0.0;
       ++index;
     }
     return index - 1;
@@ -1124,10 +1122,11 @@ class RenderSliverTree extends RenderSliverVariedExtentList {
     RenderBox? nextChild = firstChild;
     void paintUpTo(
       int index,
-      RenderBox? child,
+      RenderBox? startWith,
       PaintingContext context,
       Offset offset,
     ) {
+      RenderBox? child = startWith;
       while (child != null && indexOf(child) <= index) {
         final double mainAxisDelta = childMainAxisPosition(child);
         final TreeNodeParentData parentData = child.parentData! as TreeNodeParentData;
@@ -1173,7 +1172,7 @@ class RenderSliverTree extends RenderSliverVariedExtentList {
       // leadingIndex), and the trailing edge of the trailing index. We cannot
       // rely on the leading edge of the leading index, because it is currently moving.
       final int parentIndex = math.max(segment.leadingIndex - 1, 0);
-      final double leadingOffset = indexToLayoutOffset( 0.0, parentIndex)
+      final double leadingOffset = indexToLayoutOffset(0.0, parentIndex)
         + (parentIndex == 0 ? 0.0 : itemExtentBuilder(parentIndex, _currentLayoutDimensions)!);
       final double trailingOffset = indexToLayoutOffset(0.0, segment.trailingIndex)
         + itemExtentBuilder(segment.trailingIndex, _currentLayoutDimensions)!;

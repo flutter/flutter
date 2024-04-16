@@ -14,11 +14,5 @@
     "githubPullRequests.ignoredPullRequestBranches": [
         "master"
     ],
-    "files.trimTrailingWhitespace": true,
-    "cSpell.words": [
-        "Alives",
-        "dartpad",
-        "Piinks",
-        "vsync"
-    ]
+    "files.trimTrailingWhitespace": true
 }
