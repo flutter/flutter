@@ -1,7 +1,3 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -52,16 +48,7 @@ class MyHomePage extends StatelessWidget {
                   Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) {
-                      return  Theme(
-                        data: ThemeData(
-                          pageTransitionsTheme: const PageTransitionsTheme(
-                            builders: <TargetPlatform, PageTransitionsBuilder>{
-                              TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
-                            },
-                          )
-                        ),
-                        child: const MyHomePage(title: "Zoom Transition")
-                      );
+                      return  const MyHomePage(title: "Zoom Transition");
                     },
                   ),
                 );},
@@ -72,16 +59,7 @@ class MyHomePage extends StatelessWidget {
                   Navigator.of(context).push(
                   CupertinoPageRoute(
                     builder: (context) {
-                      return  Theme(
-                        data: ThemeData(
-                          pageTransitionsTheme: const PageTransitionsTheme(
-                            builders: <TargetPlatform, PageTransitionsBuilder>{
-                              TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
-                            },
-                          )
-                        ),
-                        child: const MyHomePage(title: "Cupertino Transition")
-                      );
+                      return  const MyHomePage(title: "Cupertino Transition");
                     }
                   ),
                 );},
