@@ -339,9 +339,6 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
       case BlendMode::kColor:
         pass.SetPipeline(renderer.GetBlendColorPipeline(options));
         break;
-      case BlendMode::kPlusAdvanced:
-        pass.SetPipeline(renderer.GetBlendPlusAdvancedPipeline(options));
-        break;
       case BlendMode::kLuminosity:
         pass.SetPipeline(renderer.GetBlendLuminosityPipeline(options));
         break;
@@ -665,7 +662,7 @@ static std::optional<Entity> PipelineBlend(
 
 #define BLEND_CASE(mode)                                                      \
   case BlendMode::k##mode:                                                    \
-    return                                                                    \
+    advanced_blend_proc_ =                                                    \
         [](const FilterInput::Vector& inputs, const ContentContext& renderer, \
            const Entity& entity, const Rect& coverage, BlendMode blend_mode,  \
            std::optional<Color> fg_color,                                     \
@@ -678,32 +675,6 @@ static std::optional<Entity> PipelineBlend(
         };                                                                    \
     break;
 
-namespace {
-BlendFilterContents::AdvancedBlendProc GetAdvancedBlendProc(
-    BlendMode blend_mode) {
-  switch (blend_mode) {
-    BLEND_CASE(Screen)
-    BLEND_CASE(Overlay)
-    BLEND_CASE(Darken)
-    BLEND_CASE(Lighten)
-    BLEND_CASE(ColorDodge)
-    BLEND_CASE(ColorBurn)
-    BLEND_CASE(HardLight)
-    BLEND_CASE(SoftLight)
-    BLEND_CASE(Difference)
-    BLEND_CASE(Exclusion)
-    BLEND_CASE(Multiply)
-    BLEND_CASE(Hue)
-    BLEND_CASE(Saturation)
-    BLEND_CASE(Color)
-    BLEND_CASE(PlusAdvanced)
-    BLEND_CASE(Luminosity)
-    default:
-      FML_UNREACHABLE();
-  }
-}
-}  // namespace
-
 void BlendFilterContents::SetBlendMode(BlendMode blend_mode) {
   if (blend_mode > Entity::kLastAdvancedBlendMode) {
     VALIDATION_LOG << "Invalid blend mode " << static_cast<int>(blend_mode)
@@ -711,6 +682,28 @@ void BlendFilterContents::SetBlendMode(BlendMode blend_mode) {
   }
 
   blend_mode_ = blend_mode;
+
+  if (blend_mode > Entity::kLastPipelineBlendMode) {
+    switch (blend_mode) {
+      BLEND_CASE(Screen)
+      BLEND_CASE(Overlay)
+      BLEND_CASE(Darken)
+      BLEND_CASE(Lighten)
+      BLEND_CASE(ColorDodge)
+      BLEND_CASE(ColorBurn)
+      BLEND_CASE(HardLight)
+      BLEND_CASE(SoftLight)
+      BLEND_CASE(Difference)
+      BLEND_CASE(Exclusion)
+      BLEND_CASE(Multiply)
+      BLEND_CASE(Hue)
+      BLEND_CASE(Saturation)
+      BLEND_CASE(Color)
+      BLEND_CASE(Luminosity)
+      default:
+        FML_UNREACHABLE();
+    }
+  }
 }
 
 void BlendFilterContents::SetForegroundColor(std::optional<Color> color) {
@@ -734,35 +727,27 @@ std::optional<Entity> BlendFilterContents::RenderFilter(
                          std::nullopt, GetAbsorbOpacity(), GetAlpha());
   }
 
-  BlendMode blend_mode = blend_mode_;
-  if (blend_mode == BlendMode::kPlus &&
-      !IsAlphaClampedToOne(
-          renderer.GetContext()->GetCapabilities()->GetDefaultColorFormat())) {
-    blend_mode = BlendMode::kPlusAdvanced;
-  }
-
-  if (blend_mode <= Entity::kLastPipelineBlendMode) {
+  if (blend_mode_ <= Entity::kLastPipelineBlendMode) {
     if (inputs.size() == 1 && foreground_color_.has_value() &&
         GetAbsorbOpacity() == ColorFilterContents::AbsorbOpacity::kYes) {
       return CreateForegroundPorterDuffBlend(
           inputs[0], renderer, entity, coverage, foreground_color_.value(),
           blend_mode_, GetAlpha(), GetAbsorbOpacity());
     }
-    return PipelineBlend(inputs, renderer, entity, coverage, blend_mode,
+    return PipelineBlend(inputs, renderer, entity, coverage, blend_mode_,
                          foreground_color_, GetAbsorbOpacity(), GetAlpha());
   }
 
-  if (blend_mode <= Entity::kLastAdvancedBlendMode) {
+  if (blend_mode_ <= Entity::kLastAdvancedBlendMode) {
     if (inputs.size() == 1 && foreground_color_.has_value() &&
         GetAbsorbOpacity() == ColorFilterContents::AbsorbOpacity::kYes) {
       return CreateForegroundAdvancedBlend(
           inputs[0], renderer, entity, coverage, foreground_color_.value(),
-          blend_mode, GetAlpha(), GetAbsorbOpacity());
+          blend_mode_, GetAlpha(), GetAbsorbOpacity());
     }
-    AdvancedBlendProc advanced_blend_proc = GetAdvancedBlendProc(blend_mode);
-    return advanced_blend_proc(inputs, renderer, entity, coverage, blend_mode,
-                               foreground_color_, GetAbsorbOpacity(),
-                               GetAlpha());
+    return advanced_blend_proc_(inputs, renderer, entity, coverage, blend_mode_,
+                                foreground_color_, GetAbsorbOpacity(),
+                                GetAlpha());
   }
 
   FML_UNREACHABLE();

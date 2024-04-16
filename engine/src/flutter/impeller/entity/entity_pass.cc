@@ -967,13 +967,6 @@ bool EntityPass::OnRender(
     /// Setup advanced blends.
     ///
 
-    if (result.entity.GetBlendMode() == BlendMode::kPlus &&
-        !IsAlphaClampedToOne(pass_context.GetPassTarget()
-                                 .GetRenderTarget()
-                                 .GetRenderTargetPixelFormat())) {
-      result.entity.SetBlendMode(BlendMode::kPlusAdvanced);
-    }
-
     if (result.entity.GetBlendMode() > Entity::kLastPipelineBlendMode) {
       if (renderer.GetDeviceCapabilities().SupportsFramebufferFetch()) {
         auto src_contents = result.entity.GetContents();

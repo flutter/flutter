@@ -20,7 +20,6 @@
 // kHue,
 // kSaturation,
 // kColor,
-// kPlusAdvanced,
 // kLuminosity,
 // Note, this isn't a switch as GLSL ES 1.0 does not support them.
 f16vec3 AdvancedBlend(f16vec3 dst, f16vec3 src, int blend_type) {
@@ -66,9 +65,7 @@ f16vec3 AdvancedBlend(f16vec3 dst, f16vec3 src, int blend_type) {
   if (blend_type == 13) {
     return IPBlendColor(dst, src);
   }
-  // 14 is `PlusAdvanced`, it's handled in advanced_blend.frag and
-  // framebuffer_blend.frag.
-  if (blend_type == 15) {
+  if (blend_type == 14) {
     return IPBlendLuminosity(dst, src);
   }
   return f16vec3(0.0hf);

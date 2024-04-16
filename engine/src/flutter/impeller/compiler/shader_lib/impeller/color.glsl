@@ -46,12 +46,4 @@ f16vec4 IPHalfPremultiply(f16vec4 color) {
   return f16vec4(color.rgb * color.a, color.a);
 }
 
-/// Performs the plus blend on `src` and `dst` which are premultiplied colors.
-//`max` determines the values the results are clamped to.
-f16vec4 IPHalfPlusBlend(f16vec4 src, f16vec4 dst) {
-  float16_t min = 0.0hf;
-  float16_t max = 1.0hf;
-  return clamp(dst + src, min, max);
-}
-
 #endif

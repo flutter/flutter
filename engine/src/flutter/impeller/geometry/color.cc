@@ -276,8 +276,6 @@ Color Color::Blend(Color src, BlendMode blend_mode) const {
       return (src.Premultiply() * (1 - dst.alpha) +
               dst.Premultiply() * (1 - src.alpha))
           .Unpremultiply();
-    case BlendMode::kPlusAdvanced:
-      [[fallthrough]];
     case BlendMode::kPlus:
       // r = min(s + d, 1)
       return (Min(src.Premultiply() + dst.Premultiply(), 1)).Unpremultiply();
