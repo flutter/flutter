@@ -1522,7 +1522,7 @@ abstract class RenderBox extends RenderObject {
     assert(RenderObject.debugCheckingIntrinsics || !debugDoingThisResize); // performResize should not depend on anything except the incoming constraints
     bool shouldCache = true;
     assert(() {
-      // we don't want the checked-mode intrinsic tests to affect
+      // we don't want the debug-mode intrinsic tests to affect
       // who gets marked dirty, etc.
       shouldCache = !RenderObject.debugCheckingIntrinsics;
       return true;
