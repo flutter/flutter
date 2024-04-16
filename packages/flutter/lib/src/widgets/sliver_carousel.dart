@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 class Carousel extends StatefulWidget {
   Carousel({
@@ -16,7 +17,8 @@ class Carousel extends StatefulWidget {
     this.controller,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
-    required this.childWeights,
+    this.layout = CarouselLayout.uncontained,
+    this.childWeights,
     required this.children,
   });
 
@@ -25,7 +27,8 @@ class Carousel extends StatefulWidget {
   final CarouselController? controller;
   final Axis scrollDirection;
   final bool reverse;
-  final List<int> childWeights;
+  final CarouselLayout layout;
+  final List<int>? childWeights;
   final List<Widget> children;
 
   @override
@@ -39,7 +42,7 @@ class _CarouselState extends State<Carousel> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _initController(widget.childWeights);
+    _initController(widget.childWeights ?? getChildWeights());
   }
 
   // @override
@@ -73,6 +76,15 @@ class _CarouselState extends State<Carousel> {
       case Axis.vertical:
         return widget.reverse ? AxisDirection.up : AxisDirection.down;
     }
+  }
+
+  List<int> getChildWeights() {
+    return switch (widget.layout) {
+      CarouselLayout.uncontained => <int>[1,1,1],
+      CarouselLayout.multiBrowse => <int>[3,2,1],
+      CarouselLayout.hero => <int>[6,1],
+      CarouselLayout.centeredHero => <int>[1,6,1],
+    };
   }
 
   @override
@@ -111,7 +123,7 @@ class _CarouselState extends State<Carousel> {
             slivers: <Widget>[
               SliverCarousel(
                 clipExtent: widget.clipExtent,
-                childWeights: widget.childWeights,
+                childWeights: widget.childWeights ?? getChildWeights(),
                 children: widget.children,
               ),
             ],
@@ -136,11 +148,32 @@ class SliverCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double paddingFraction = childWeights.first / childWeights.sum;
+    final int maxWeight = childWeights.max;
+    double leftPaddingFraction = 0;
+    for (final int weight in childWeights) {
+      if (weight < maxWeight) {
+        leftPaddingFraction += weight;
+      } else {
+        leftPaddingFraction = leftPaddingFraction / childWeights.sum;
+        break;
+      }
+    }
+
+    double rightPaddingFraction = 0;
+    for (final int weight in childWeights.reversed) {
+      if (weight < maxWeight) {
+        rightPaddingFraction += weight;
+      } else {
+        rightPaddingFraction = rightPaddingFraction / childWeights.sum;
+        break;
+      }
+    }
+    print(leftPaddingFraction);
     return _SliverFractionalPadding(
-      paddingFraction: paddingFraction,
+      leftPaddingFraction: childWeights.first == childWeights.max ? 0.0 : leftPaddingFraction,
+      rightPaddingFraction: childWeights.last == childWeights.max ? 0.0 : rightPaddingFraction,
       sliver: _SliverCarousel(
-        paddingFraction: paddingFraction,
+        paddingFraction: leftPaddingFraction,
         clipExtent: clipExtent ?? 0.0,
         childExtentList: childWeights,
         delegate: SliverChildBuilderDelegate(
@@ -156,39 +189,61 @@ class SliverCarousel extends StatelessWidget {
 
 class _SliverFractionalPadding extends SingleChildRenderObjectWidget {
   const _SliverFractionalPadding({
-    this.paddingFraction = 0,
+    this.leftPaddingFraction = 0,
+    this.rightPaddingFraction = 0,
     Widget? sliver,
-  }) : assert(paddingFraction >= 0),
-      assert(paddingFraction <= 0.5),
+  }) : assert(leftPaddingFraction >= 0),
+      assert(rightPaddingFraction >= 0),
+      assert(leftPaddingFraction <= 0.5),
+      assert(rightPaddingFraction <= 0.5),
       super(child: sliver);
 
-  final double paddingFraction;
+  final double leftPaddingFraction;
+  final double rightPaddingFraction;
 
   @override
-  RenderObject createRenderObject(BuildContext context) => _RenderSliverFractionalPadding(viewportFraction: paddingFraction);
+  RenderObject createRenderObject(BuildContext context) => _RenderSliverFractionalPadding(
+    leftPaddingFraction: leftPaddingFraction,
+    rightPaddingFraction: rightPaddingFraction,
+  );
 
   @override
   void updateRenderObject(BuildContext context, _RenderSliverFractionalPadding renderObject) {
-    renderObject.viewportFraction = paddingFraction;
+    renderObject.leftPaddingFraction = leftPaddingFraction;
+    renderObject.rightPaddingFraction = rightPaddingFraction;
   }
 }
 
 class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
   _RenderSliverFractionalPadding({
-    double viewportFraction = 0,
-  }) : assert(viewportFraction <= 0.5),
-       assert(viewportFraction >= 0),
-       _viewportFraction = viewportFraction;
+    double leftPaddingFraction = 0,
+    double rightPaddingFraction = 0,
+  }) : assert(leftPaddingFraction <= 0.5),
+       assert(leftPaddingFraction >= 0),
+       assert(rightPaddingFraction <= 0.5),
+       assert(rightPaddingFraction >= 0),
+       _leftPaddingFraction = leftPaddingFraction,
+       _rightPaddingFraction = rightPaddingFraction;
 
   SliverConstraints? _lastResolvedConstraints;
 
-  double get viewportFraction => _viewportFraction;
-  double _viewportFraction;
-  set viewportFraction(double newValue) {
-    if (_viewportFraction == newValue) {
+  double get leftPaddingFraction => _leftPaddingFraction;
+  double _leftPaddingFraction;
+  set leftPaddingFraction(double newValue) {
+    if (_leftPaddingFraction == newValue) {
       return;
     }
-    _viewportFraction = newValue;
+    _leftPaddingFraction = newValue;
+    _markNeedsResolution();
+  }
+
+  double get rightPaddingFraction => _rightPaddingFraction;
+  double _rightPaddingFraction;
+  set rightPaddingFraction(double newValue) {
+    if (_rightPaddingFraction == newValue) {
+      return;
+    }
+    _rightPaddingFraction = newValue;
     _markNeedsResolution();
   }
 
@@ -206,11 +261,12 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
       return;
     }
 
-    final double paddingValue = constraints.viewportMainAxisExtent * viewportFraction;
+    final double leftPadding = constraints.viewportMainAxisExtent * leftPaddingFraction;
+    final double rightPadding = constraints.viewportMainAxisExtent * rightPaddingFraction;
     _lastResolvedConstraints = constraints;
     _resolvedPadding = switch (constraints.axis) {
-      Axis.horizontal => EdgeInsets.symmetric(horizontal: paddingValue),
-      Axis.vertical   => EdgeInsets.symmetric(vertical: paddingValue),
+      Axis.horizontal => EdgeInsets.only(left: leftPadding, right: rightPadding),
+      Axis.vertical   => EdgeInsets.only(left: leftPadding, right: rightPadding),
     };
     return;
   }
@@ -299,7 +355,7 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
     if (index < childExtentList.length - 2) {
       final int currWeight = childExtentList.elementAt(index + 1);
       extent = extentUnit * currWeight; // initial extent
-      double progress = constraints.overlap.abs() / firstChildExtent;
+      final double progress = constraints.overlap.abs() / firstChildExtent;
       final int prevWeight = childExtentList.elementAt(index + 2);
       final double finalIncrease = (prevWeight - currWeight) / childExtentList.max;
       extent = extent + finalIncrease * progress * maxChildExtent;
@@ -313,7 +369,7 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
   double _buildItemExtent(int index, SliverLayoutDimensions currentLayoutDimensions) {
     double extent;
 
-    if (constraints.overlap < 0) {
+    if (constraints.overlap < 0 && paddingFraction != 0) {
       return _handleOverscroll(index);
     }
 
@@ -345,12 +401,10 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
     else {
       extent = math.max(minChildExtent, clipExtent);
     }
-// print(constraints.remainingPaintExtent);
     return extent;
   }
 
   double get paddingValue {
-    // print('padding value: ${constraints.viewportMainAxisExtent * paddingFraction}');
     return constraints.viewportMainAxisExtent * paddingFraction;
   }
   double get extentUnit => constraints.viewportMainAxisExtent / (childExtentList.reduce((int total, int extent) => total + extent));
@@ -359,11 +413,6 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
     return childExtentList.first * extentUnit;
   }
   double get maxChildExtent => childExtentList.max * extentUnit;
-  double get mediumChildExtent {
-    final List<int> sortedList = List<int>.from(childExtentList);
-    sortedList.sort();
-    return sortedList.elementAt(1) * extentUnit;
-  }
   double get minChildExtent => childExtentList.min * extentUnit;
 
   int get _firstVisibleItemIndex {
@@ -398,7 +447,7 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
       }
       return constraints.scrollOffset;
     } else if (index > _firstVisibleItemIndex) {
-      if (constraints.overlap < 0) {
+      if (constraints.overlap < 0 && paddingFraction != 0) {
         double visibleItemsTotalExtent = 0;
         for (int i = _firstVisibleItemIndex + 1; i < index; i++) {
           visibleItemsTotalExtent += _buildItemExtent(i, currentLayoutDimensions);

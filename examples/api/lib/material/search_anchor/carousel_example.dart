@@ -38,19 +38,17 @@ class _CarouselExampleState extends State<CarouselExample> {
       home: Scaffold(
         body: Center(
           child: ConstrainedBox(
-            constraints: BoxConstraints.tightFor(height: 200),
+            constraints: const BoxConstraints.tightFor(height: 200),
+            // constraints: BoxConstraints.tight(Size(200, 200)),
             child: Carousel(
-              clipExtent: 80,
-              // itemSnap: true,
-              childWeights: const <int>[1,8,1],
+              // clipExtent: 20,
+              itemSnap: true,
+              // layout: CarouselLayout.multiBrowse,
+              // childWeights: const <int>[1,5,1], // [3,3,3,2,1], [1,5,1], [1,1,1], [5,1]
               children: List<Widget>.generate(data.length, (int index) {
                 return Card.outlined(
                   clipBehavior: Clip.antiAlias,
                   shape: RoundedRectangleBorder(
-                    // side: BorderSide(
-                    //   width: 5,
-                    //   color: Colors.primaries[index % Colors.primaries.length].withOpacity(0.5),
-                    // ),
                     borderRadius: BorderRadius.circular(20.0)
                   ),
                   color: Colors.primaries[index % Colors.primaries.length].withOpacity(0.5),
