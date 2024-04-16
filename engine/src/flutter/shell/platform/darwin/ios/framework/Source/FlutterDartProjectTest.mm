@@ -263,6 +263,20 @@ FLUTTER_ASSERT_ARC
   [mockMainBundle stopMocking];
 }
 
+- (void)testEnableDartAssertsCommandLineArgument {
+  id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableDartAsserts"]).andReturn(@"YES");
+  id mockProcessInfo = OCMPartialMock([NSProcessInfo processInfo]);
+  NSArray* arguments = @[ @"process_name" ];
+  OCMStub([mockProcessInfo arguments]).andReturn(arguments);
+
+  auto settings = FLTDefaultSettingsForBundle(nil, mockProcessInfo);
+
+  XCTAssertEqual(settings.dart_flags.size(), 1u);
+  XCTAssertEqual(settings.dart_flags[0], "--enable-asserts");
+  [mockMainBundle stopMocking];
+}
+
 - (void)testDisableImpellerSettingIsCorrectlyOverriddenByCommandLine {
   id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
   OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableImpeller"]).andReturn(@"YES");
