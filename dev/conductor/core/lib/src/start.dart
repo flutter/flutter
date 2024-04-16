@@ -218,26 +218,14 @@ class StartContext extends Context {
         engine = EngineRepository(
           checkouts,
           initialRef: 'upstream/$candidateBranch',
-          upstreamRemote: Remote(
-            name: RemoteName.upstream,
-            url: engineUpstream,
-          ),
-          mirrorRemote: Remote(
-            name: RemoteName.mirror,
-            url: engineMirror,
-          ),
+          upstreamRemote: Remote.upstream(engineUpstream),
+          mirrorRemote: Remote.mirror(engineMirror),
         ),
         framework = FrameworkRepository(
           checkouts,
           initialRef: 'upstream/$candidateBranch',
-          upstreamRemote: Remote(
-            name: RemoteName.upstream,
-            url: frameworkUpstream,
-          ),
-          mirrorRemote: Remote(
-            name: RemoteName.mirror,
-            url: frameworkMirror,
-          ),
+          upstreamRemote: Remote.upstream(frameworkUpstream),
+          mirrorRemote: Remote.mirror(frameworkMirror),
         );
 
   final String candidateBranch;

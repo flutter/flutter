@@ -520,8 +520,7 @@ class FrameworkRepository extends Repository {
   FrameworkRepository(
     this.checkouts, {
     super.name = 'framework',
-    super.upstreamRemote = const Remote(
-        name: RemoteName.upstream, url: FrameworkRepository.defaultUpstream),
+    super.upstreamRemote = const Remote.upstream(FrameworkRepository.defaultUpstream),
     super.localUpstream,
     super.previousCheckoutLocation,
     String super.initialRef = FrameworkRepository.defaultBranch,
@@ -553,10 +552,7 @@ class FrameworkRepository extends Repository {
     return FrameworkRepository(
       checkouts,
       name: name,
-      upstreamRemote: Remote(
-        name: RemoteName.upstream,
-        url: 'file://$upstreamPath/',
-      ),
+      upstreamRemote: Remote.upstream('file://$upstreamPath/'),
       previousCheckoutLocation: previousCheckoutLocation,
       initialRef: initialRef,
     );
@@ -581,9 +577,7 @@ class FrameworkRepository extends Repository {
     return FrameworkRepository(
       checkouts,
       name: cloneName,
-      upstreamRemote: Remote(
-          name: RemoteName.upstream,
-          url: 'file://${(await checkoutDirectory).path}/'),
+      upstreamRemote: Remote.upstream('file://${(await checkoutDirectory).path}/'),
     );
   }
 
@@ -737,10 +731,7 @@ class HostFrameworkRepository extends FrameworkRepository {
   }) : super(
           checkouts,
           name: name,
-          upstreamRemote: Remote(
-            name: RemoteName.upstream,
-            url: 'file://$upstreamPath/',
-          ),
+          upstreamRemote: Remote.upstream('file://$upstreamPath/'),
           localUpstream: false,
         ) {
     _checkoutDirectory = checkouts.fileSystem.directory(upstreamPath);
@@ -795,8 +786,7 @@ class EngineRepository extends Repository {
     this.checkouts, {
     super.name = 'engine',
     String super.initialRef = EngineRepository.defaultBranch,
-    super.upstreamRemote = const Remote(
-        name: RemoteName.upstream, url: EngineRepository.defaultUpstream),
+    super.upstreamRemote = const Remote.upstream(EngineRepository.defaultUpstream),
     super.localUpstream,
     super.previousCheckoutLocation,
     super.mirrorRemote,
@@ -847,9 +837,7 @@ class EngineRepository extends Repository {
     return EngineRepository(
       checkouts,
       name: cloneName,
-      upstreamRemote: Remote(
-          name: RemoteName.upstream,
-          url: 'file://${(await checkoutDirectory).path}/'),
+      upstreamRemote: Remote.upstream('file://${(await checkoutDirectory).path}/'),
     );
   }
 }
