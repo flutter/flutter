@@ -188,21 +188,42 @@ macOS Desktop. This flag can be specified to `flutter run`.
 If the application needs to be launched with Impeller enabled without using the
 Flutter tool, follow the platform specific steps below.
 
-### iOS and macOS Desktop
+### iOS
 
-To your `Info.plist` file, add under the top-level `<dict>` tag:
+Flutter enables Impeller by **default** on iOS.
+
+> [!CAUTION]
+> The ability to disable Impeller is going to go away in a future release. Please [file
+> an issue](https://github.com/flutter/flutter/issues/new/choose) if you need to do this
+> in your application. A warning will be displayed on application launch if you opt-out.
+
+To **disable** Impeller on iOS, update your `Info.plist` file to add the following
+under the top-level `<dict>` tag:
+
 ```
   <key>FLTEnableImpeller</key>
-  <true/>
+  <false/>
 ```
 
 ### Android
+
+Impeller is in preview on Android.
 
 To your `AndroidManifest.xml` file, add under the `<application>` tag:
 ```
   <meta-data
     android:name="io.flutter.embedding.android.EnableImpeller"
     android:value="true" />
+```
+
+### macOS Desktop
+
+Impeller is in preview on macOS Desktop.
+
+To your `Info.plist` file, add under the top-level `<dict>` tag:
+```
+  <key>FLTEnableImpeller</key>
+  <true/>
 ```
 
 ## Documentation, References, and Additional Reading
