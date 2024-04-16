@@ -883,6 +883,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     for (final _Circle circle in _circles) {
       circle.dispose();
     }
+    for (final CurvedAnimation animation in _animations) {
+      animation.dispose();
+    }
     super.dispose();
   }
 
