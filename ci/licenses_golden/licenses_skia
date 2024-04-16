@@ -1,4 +1,4 @@
-Signature: 8b5044d663ffa55c32a4f93879f33dba
+Signature: 0b2cd324f95068be415d062937c308c0
 
 ====================================================================================================
 LIBRARY: etc1
@@ -397,14 +397,6 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
-FILE: ../../../flutter/third_party/skia/relnotes/CacheBudget.md
-FILE: ../../../flutter/third_party/skia/relnotes/GraphiteContextMaxTextureSize.md
-FILE: ../../../flutter/third_party/skia/relnotes/MTLBinaryArchive.md
-FILE: ../../../flutter/third_party/skia/relnotes/MinifyBraces.md
-FILE: ../../../flutter/third_party/skia/relnotes/SkBitmap_setColorSpace.md
-FILE: ../../../flutter/third_party/skia/relnotes/draw_looper.md
-FILE: ../../../flutter/third_party/skia/relnotes/metal_backendsurface.md
-FILE: ../../../flutter/third_party/skia/relnotes/shaping_behavior.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
