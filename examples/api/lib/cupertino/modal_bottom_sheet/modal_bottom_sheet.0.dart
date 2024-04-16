@@ -47,23 +47,23 @@ class MyHomePage extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) {
-                      return  const MyHomePage(title: "Zoom Transition");
+                    builder: (BuildContext context) {
+                      return  const MyHomePage(title: 'Zoom Transition');
                     },
                   ),
                 );},
-                child: const Text("Zoom Transition"),
+                child: const Text('Zoom Transition'),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.of(context).push(
                   CupertinoPageRoute(
-                    builder: (context) {
-                      return  const MyHomePage(title: "Cupertino Transition");
+                    builder: (BuildContext context) {
+                      return  const MyHomePage(title: 'Cupertino Transition');
                     }
                   ),
                 );},
-                child: const Text("Cupertino Transition"),
+                child: const Text('Cupertino Transition'),
               ),
               TextButton(
                 onPressed: () {
@@ -82,7 +82,7 @@ class MyHomePage extends StatelessWidget {
                   onPressed: () {
                     (Navigator.of(context).widget as MBSNavigator).popMBS();
                   },
-                  child: const Text("Pop Bottom Sheet")
+                  child: const Text('Pop Bottom Sheet')
                 ),
             ],
           ),
@@ -99,12 +99,12 @@ final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
 
 final Animatable<Offset> _kFullBottomUpTween = Tween<Offset>(
   begin: const Offset(0.0, 1.0),
-  end: const Offset(0.0, 0.0),
+  end: Offset.zero,
 );
 
 // Offset from offscreen below to stopping below the top of the screen.
 final Animatable<Offset> _kMidUpTween = Tween<Offset>(
-  begin: const Offset(0.0, 0),
+  begin: Offset.zero,
   end: const Offset(0.0, -0.05),
 );
 
@@ -243,7 +243,6 @@ mixin MBSRouteTransitionMixin<T> on PageRoute<T> {
   Widget buildContent(BuildContext context);
 
   @override
-  // A relatively rigorous eyeball estimation.
   Duration get transitionDuration => const Duration(milliseconds: 500);
 
 
@@ -267,20 +266,6 @@ mixin MBSRouteTransitionMixin<T> on PageRoute<T> {
     );
   }
 
-  /// Returns a [CupertinoFullscreenDialogTransition] if [route] is a full
-  /// screen dialog, otherwise a [CupertinoPageTransition] is returned.
-  ///
-  /// Used by [CupertinoPageRoute.buildTransitions].
-  ///
-  /// This method can be applied to any [PageRoute], not just
-  /// [CupertinoPageRoute]. It's typically used to provide a Cupertino style
-  /// horizontal transition for material widgets when the target platform
-  /// is [TargetPlatform.iOS].
-  ///
-  /// See also:
-  ///
-  ///  * [CupertinoPageTransitionsBuilder], which uses this method to define a
-  ///    [PageTransitionsBuilder] for the [PageTransitionsTheme].
   static Widget buildPageTransitions<T>(
     ModalRoute<T> route,
     BuildContext context,
@@ -325,7 +310,6 @@ class MBSNavigator extends Navigator {
 
   void popMBS() {
     Navigator.of(parentNavigatorContext).pop();
-    // Navigator.of(parentNavigatorContext).delegateTransitionBuilder = null;
   }
 
   static NavigatorState? of(
