@@ -127,4 +127,20 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   XCTAssertTrue(link.isPaused);
 }
 
+- (void)testReleasesLinkOnInvalidation {
+  __weak CADisplayLink* weakLink;
+  @autoreleasepool {
+    auto thread_task_runner = CreateNewThread("VsyncWaiterIosTest");
+    VSyncClient* vsyncClient = [[VSyncClient alloc]
+        initWithTaskRunner:thread_task_runner
+                  callback:[](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {}];
+
+    weakLink = [vsyncClient getDisplayLink];
+    XCTAssertNotNil(weakLink);
+    [vsyncClient invalidate];
+  }
+  // VSyncClient has released the CADisplayLink.
+  XCTAssertNil(weakLink);
+}
+
 @end

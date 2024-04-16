@@ -82,6 +82,8 @@ source_set("flutter_framework_source_arc") {
     "framework/Source/KeyCodeMap_Internal.h",
     "framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h",
     "framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.mm",
+    "framework/Source/vsync_waiter_ios.h",
+    "framework/Source/vsync_waiter_ios.mm",
   ]
 
   frameworks = [
@@ -90,8 +92,10 @@ source_set("flutter_framework_source_arc") {
   ]
 
   deps += [
+    "//flutter/common:common",
     "//flutter/lib/ui",
     "//flutter/runtime",
+    "//flutter/shell/common",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
   ]
 }
@@ -149,8 +153,6 @@ source_set("flutter_framework_source") {
     "framework/Source/platform_message_response_darwin.mm",
     "framework/Source/profiler_metrics_ios.h",
     "framework/Source/profiler_metrics_ios.mm",
-    "framework/Source/vsync_waiter_ios.h",
-    "framework/Source/vsync_waiter_ios.mm",
     "ios_context.h",
     "ios_context.mm",
     "ios_context_metal_impeller.h",
