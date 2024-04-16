@@ -13,7 +13,6 @@ import 'icon_data.dart';
 import 'implicit_animations.dart';
 import 'scroll_delegate.dart';
 import 'sliver.dart';
-import 'sliver_varied_extent_list.dart';
 import 'text.dart';
 import 'ticker_provider.dart';
 
@@ -74,7 +73,7 @@ class SliverTreeNode<T> {
 ///
 /// Used by [SliverTree.treeRowBuilder] to build rows on demand for the
 /// tree.
-typedef TreeRowBuilder = Widget Function(
+typedef TreeNodeBuilder = Widget Function(
   BuildContext context,
   SliverTreeNode<dynamic> node, {
   AnimationStyle? animationStyle,
@@ -356,7 +355,7 @@ class SliverTree<T> extends StatefulWidget {
   const SliverTree({
     super.key,
     required this.tree,
-    this.treeRowBuilder = SliverTree.defaultTreeRowBuilder,
+    this.treeNodeBuilder = SliverTree.defaultTreeNodeBuilder,
     this.treeRowExtentBuilder = SliverTree.defaultTreeRowExtentBuilder,
     this.controller,
     this.onNodeToggle,
@@ -383,7 +382,7 @@ class SliverTree<T> extends StatefulWidget {
   ///
   /// By default, if this is unset, the [SliverTree.defaultTreeRowBuilder] is
   /// used.
-  final TreeRowBuilder treeRowBuilder;
+  final TreeNodeBuilder treeNodeBuilder;
 
   /// Called to calculate the extent of the widget built for the given
   /// [SliverTreeNode].
@@ -496,7 +495,7 @@ class SliverTree<T> extends StatefulWidget {
   /// If the [SliverTreeNode] is a parent of additional nodes, a arrow icon will
   /// precede the content, and will trigger an expand and collapse animation
   /// when tapped.
-  static Widget defaultTreeRowBuilder(
+  static Widget defaultTreeNodeBuilder(
     BuildContext context,
     SliverTreeNode<dynamic> node, {
     AnimationStyle? animationStyle
@@ -629,7 +628,7 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
       activeAnimations: _activeAnimations,
       itemBuilder: (BuildContext context, int index) {
         final SliverTreeNode<T> node = _activeNodes[index];
-        Widget child = widget.treeRowBuilder(
+        Widget child = widget.treeNodeBuilder(
           context,
           node,
           animationStyle: widget.animationStyle,
