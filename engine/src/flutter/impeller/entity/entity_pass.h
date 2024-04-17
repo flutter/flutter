@@ -111,13 +111,6 @@ class EntityPass {
   ///
   EntityPass* AddSubpass(std::unique_ptr<EntityPass> pass);
 
-  //----------------------------------------------------------------------------
-  /// @brief  Merges a given pass into this pass. Useful for drawing
-  ///         pre-recorded pictures that don't require rendering into a separate
-  ///         subpass.
-  ///
-  void AddSubpassInline(std::unique_ptr<EntityPass> pass);
-
   EntityPass* GetSuperpass() const;
 
   bool Render(ContentContext& renderer,
