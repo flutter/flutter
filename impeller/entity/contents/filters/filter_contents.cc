@@ -144,7 +144,7 @@ bool FilterContents::Render(const ContentContext& renderer,
   if (!maybe_entity.has_value()) {
     return true;
   }
-  maybe_entity->SetNewClipDepth(entity.GetNewClipDepth());
+  maybe_entity->SetClipDepth(entity.GetClipDepth());
   return maybe_entity->Render(renderer, pass);
 }
 
