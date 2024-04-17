@@ -10,6 +10,8 @@
   CGSize _size;
   IOSurfaceRef _ioSurface;
   id<MTLTexture> _texture;
+  // Used for testing.
+  BOOL _isInUseOverride;
 }
 @end
 
@@ -25,6 +27,18 @@
 
 - (int64_t)textureId {
   return reinterpret_cast<int64_t>(_texture);
+}
+
+- (BOOL)isInUse {
+  return _isInUseOverride || IOSurfaceIsInUse(_ioSurface);
+}
+
+- (BOOL)isInUseOverride {
+  return _isInUseOverride;
+}
+
+- (void)setIsInUseOverride:(BOOL)isInUseOverride {
+  _isInUseOverride = isInUseOverride;
 }
 
 - (instancetype)initWithSize:(CGSize)size device:(id<MTLDevice>)device {

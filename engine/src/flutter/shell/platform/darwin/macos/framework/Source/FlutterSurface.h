@@ -32,7 +32,13 @@
 @property(readonly, nonatomic, nonnull) IOSurfaceRef ioSurface;
 @property(readonly, nonatomic) CGSize size;
 @property(readonly, nonatomic) int64_t textureId;
+// Whether the surface is currently in use by the compositor.
+@property(readonly, nonatomic) BOOL isInUse;
 
+@end
+
+@interface FlutterSurface (Testing)
+@property(readwrite, nonatomic) BOOL isInUseOverride;
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERSURFACE_H_
