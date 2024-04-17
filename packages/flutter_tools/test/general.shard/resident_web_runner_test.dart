@@ -26,6 +26,7 @@ import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
@@ -1401,6 +1402,7 @@ ResidentRunner setUpResidentRunner(
     systemClock: systemClock ?? SystemClock.fixed(DateTime.now()),
     fileSystem: globals.fs,
     logger: logger ?? BufferLogger.test(),
+    devtoolsHandler: createNoOpHandler,
   );
 }
 
@@ -1734,8 +1736,9 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   @override
   Future<void> updateReloadStatus(bool wasReloadSuccessful) async {}
 
-  @override
-  Future<void> handleHotRestart() async {}
+  // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
+  // @override
+  // Future<void> handleHotRestart() async {}
 }
 
 class FakeShaderCompiler implements DevelopmentShaderCompiler {

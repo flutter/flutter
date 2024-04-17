@@ -36,6 +36,7 @@ import 'globals.dart' as globals;
 import 'ios/application_package.dart';
 import 'ios/devices.dart';
 import 'project.dart';
+import 'resident_devtools_handler.dart';
 import 'run_cold.dart';
 import 'run_hot.dart';
 import 'sksl_writer.dart';
@@ -344,6 +345,8 @@ class FlutterDevice {
       globals.printTrace('Successfully connected to service protocol: $vmServiceUri');
 
       vmService = service;
+      // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
+      /*
       if (debuggingOptions.enableDds && !existingDds) {
         // Don't await this as service extensions won't return if the target
         // isolate is paused on start.
@@ -357,6 +360,7 @@ class FlutterDevice {
           uri: debuggingOptions.devToolsServerAddress,
         ));
       }
+      */
       (await device!.getLogReader(app: package)).connectedVMService = vmService;
       completer.complete();
       await subscription.cancel();
@@ -611,9 +615,12 @@ class FlutterDevice {
     }
   }
 
+  // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
+  /*
   Future<void> handleHotRestart() async {
     await device?.dds.handleHotRestart(this);
   }
+  */
 }
 
 /// A subset of the [ResidentRunner] for delegating to attached flutter devices.
@@ -651,6 +658,9 @@ abstract class ResidentHandlers {
 
   /// Whether all of the connected devices support hot reload.
   bool get canHotReload;
+
+  // TODO(bkonyi): remove when ready to serve DevTools from DDS.
+  ResidentDevtoolsHandler? get residentDevtoolsHandler;
 
   @protected
   Logger get logger;
@@ -1104,6 +1114,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     this.hotMode = true,
     String? dillOutputPath,
     this.machine = false,
+    ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : mainPath = globals.fs.file(target).absolute.path,
        packagesFilePath = debuggingOptions.buildInfo.packagesPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
@@ -1121,6 +1132,8 @@ abstract class ResidentRunner extends ResidentHandlers {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
     }
+    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
+    _residentDevtoolsHandler = devtoolsHandler(DevtoolsLauncher.instance, this, globals.logger);
   }
 
   @override
@@ -1147,6 +1160,11 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   final CommandHelp commandHelp;
   final bool machine;
+  
+  // TODO(bkonyi): remove when ready to serve DevTools from DDS.
+  @override
+  ResidentDevtoolsHandler? get residentDevtoolsHandler => _residentDevtoolsHandler;
+  ResidentDevtoolsHandler? _residentDevtoolsHandler;
 
   bool _exited = false;
   Completer<int> _finished = Completer<int>();
@@ -1300,6 +1318,8 @@ abstract class ResidentRunner extends ResidentHandlers {
   @override
   Future<void> exit() async {
     _exited = true;
+    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
+    await residentDevtoolsHandler!.shutdown();
     await stopEchoingDeviceLog();
     await preExit();
     await exitApp(); // calls appFinished
@@ -1308,6 +1328,8 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   @override
   Future<void> detach() async {
+    // TODO(bkonyi): remove when ready to serve DevTools from DDS.
+    await residentDevtoolsHandler!.shutdown();
     await stopEchoingDeviceLog();
     await preExit();
     shutdownDartDevelopmentService();
@@ -1494,39 +1516,40 @@ abstract class ResidentRunner extends ResidentHandlers {
   bool get reportedDebuggers => _reportedDebuggers;
   bool _reportedDebuggers = false;
 
-  void printDebuggerList() {
+  void printDebuggerList({bool includeVmService = true, bool includeDevtools = true}) {
+    // TODO(bkonyi): update this logic when ready to serve DevTools from DDS.
+    final DevToolsServerAddress? devToolsServerAddress = residentDevtoolsHandler!.activeDevToolsServer;
+    if (!residentDevtoolsHandler!.readyToAnnounce) {
+      includeDevtools = false;
+    }
+    assert(!includeDevtools || devToolsServerAddress != null);
     for (final FlutterDevice? device in flutterDevices) {
       if (device!.vmService == null) {
         continue;
       }
-      // Caution: This log line is parsed by device lab tests.
-      globals.printStatus(
-        'A Dart VM Service on ${device.device!.name} is available at: '
-        '${device.vmService!.httpAddress}',
-      );
-
-      final DartDevelopmentService dds = device.device!.dds;
-      final Uri? dtdUri = dds.dtdUri;
-      if (debuggingOptions.printDtd && dtdUri != null) {
-        globals.printStatus('The Dart Tooling Daemon is available at: $dtdUri');
-      }
-      final Uri? devToolsUri = dds.devToolsUri;
-      if (devToolsUri != null) {
-        /// Convert a [URI] with query parameters into a display format instead
-        /// of the default URI encoding.
-        String urlToDisplayString(Uri uri) {
-          final StringBuffer base = StringBuffer(uri.replace(
-            queryParameters: <String, String>{},
-          ).toString());
-          base.write(uri.queryParameters.keys.map(
-            (String key) => '$key=${uri.queryParameters[key]}',
-          ).join('&'));
-          return base.toString();
-        }
+      if (includeVmService) {
+        // Caution: This log line is parsed by device lab tests.
         globals.printStatus(
-          'The Flutter DevTools debugger and profiler '
-          'on ${device.device!.name} is available at: ${urlToDisplayString(devToolsUri)}',
+          'A Dart VM Service on ${device.device!.name} is available at: '
+          '${device.vmService!.httpAddress}',
         );
+      }
+      if (includeDevtools) {
+        if (_residentDevtoolsHandler!.printDtdUri) {
+          final Uri? dtdUri = residentDevtoolsHandler!.dtdUri;
+          if (dtdUri != null) {
+            globals.printStatus('The Dart Tooling Daemon is available at: $dtdUri\n');
+          }
+        }
+        final Uri? uri = devToolsServerAddress!.uri?.replace(
+          queryParameters: <String, dynamic>{'uri': '${device.vmService!.httpAddress}'},
+        );
+        if (uri != null) {
+          globals.printStatus(
+            'The Flutter DevTools debugger and profiler '
+            'on ${device.device!.name} is available at: ${urlToDisplayString(uri)}',
+          );
+        }
       }
     }
     _reportedDebuggers = true;
@@ -1806,10 +1829,14 @@ class TerminalHandler {
         return residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
       case 'v':
       case 'V':
+        return residentRunner.residentDevtoolsHandler!.launchDevToolsInBrowser(flutterDevices: residentRunner.flutterDevices);
+        // TODO(bkonyi): uncomment and replace above line when ready to serve DevTools from DDS.
+        /*
         return residentRunner.flutterDevices.fold<bool>(
           true,
           (bool s, FlutterDevice? device) => s && device!.device!.dds.launchDevToolsInBrowser(device),
         );
+        */
       case 'w':
       case 'W':
         return residentRunner.debugDumpApp();
@@ -1949,6 +1976,17 @@ abstract class DevtoolsLauncher {
   Uri? _dtdUri;
   @protected
   set dtdUri(Uri? value) => _dtdUri = value;
+
+  // TODO(bkonyi): remove when ready to serve DevTools from DDS.
+  /// Whether to print the Dart Tooling Daemon URI.
+  ///
+  /// This will always return false when there is not a DTD instance being
+  /// served from the DevTools server.
+  bool get printDtdUri => _printDtdUri ?? false;
+  bool? _printDtdUri;
+  set printDtdUri(bool value) {
+    _printDtdUri = value;
+  }
 
   /// The URL of the current DevTools server.
   ///

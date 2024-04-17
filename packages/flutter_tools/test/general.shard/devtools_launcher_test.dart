@@ -33,7 +33,8 @@ void main() {
             'Artifact.engineDartBinary',
             'devtools',
             '--no-launch-browser',
-            '--print-dtd',
+            // TODO(bkonyi): does this need to be removed?
+            // '--print-dtd',
           ],
           stdout: 'Serving DevTools at http://127.0.0.1:9100.\n',
           completer: completer,
@@ -42,10 +43,46 @@ void main() {
     );
 
     expect(launcher.dtdUri, isNull);
+    expect(launcher.printDtdUri, false);
     final DevToolsServerAddress? address = await launcher.serve();
     expect(address?.host, '127.0.0.1');
     expect(address?.port, 9100);
     expect(launcher.dtdUri, isNull);
+    expect(launcher.printDtdUri, false);
+  });
+
+  // TODO(bkonyi): this test can be removed when DevTools is served from DDS.
+  testWithoutContext('DevtoolsLauncher saves the Dart Tooling Daemon uri', () async {
+    final (BufferLogger logger, Artifacts artifacts) = getTestState();
+    final Completer<void> completer = Completer<void>();
+    final DevtoolsLauncher launcher = DevtoolsServerLauncher(
+      artifacts: artifacts,
+      logger: logger,
+      botDetector: const FakeBotDetector(false),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'Artifact.engineDartBinary',
+            'devtools',
+            '--no-launch-browser',
+            '--print-dtd',
+          ],
+          stdout: '''
+Serving the Dart Tooling Daemon at ws://127.0.0.1:53449/
+Serving DevTools at http://127.0.0.1:9100.
+''',
+          completer: completer,
+        ),
+      ]),
+    )..printDtdUri = true;
+
+    expect(launcher.dtdUri, isNull);
+    expect(launcher.printDtdUri, true);
+    final DevToolsServerAddress? address = await launcher.serve();
+    expect(address?.host, '127.0.0.1');
+    expect(address?.port, 9100);
+    expect(launcher.dtdUri?.toString(), 'ws://127.0.0.1:53449/');
+    expect(launcher.printDtdUri, true);
   });
 
   testWithoutContext('DevtoolsLauncher does not launch a new DevTools instance if one is already active', () async {
@@ -61,7 +98,7 @@ void main() {
             'Artifact.engineDartBinary',
             'devtools',
             '--no-launch-browser',
-            '--print-dtd',
+            // '--print-dtd',
           ],
           stdout: 'Serving DevTools at http://127.0.0.1:9100.\n',
           completer: completer,
@@ -87,7 +124,7 @@ void main() {
           'Artifact.engineDartBinary',
           'devtools',
           '--no-launch-browser',
-          '--print-dtd',
+          // '--print-dtd',
           '--vm-uri=localhost:8181/abcdefg',
           '--profile-memory=foo',
         ],
@@ -119,7 +156,7 @@ void main() {
             'Artifact.engineDartBinary',
             'devtools',
             '--no-launch-browser',
-            '--print-dtd',
+            // '--print-dtd',
             '--vm-uri=http://127.0.0.1:1234/abcdefg',
           ],
           exception: ProcessException('pub', <String>[]),
@@ -145,7 +182,7 @@ void main() {
             'Artifact.engineDartBinary',
             'devtools',
             '--no-launch-browser',
-            '--print-dtd',
+            // '--print-dtd',
           ],
           stdout: 'Serving DevTools at http://127.0.0.1:9100.\n',
           completer: completer,

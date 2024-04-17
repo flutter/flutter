@@ -241,6 +241,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   @override
   FlutterVmService? vmService;
 
-  @override
-  Future<void> handleHotRestart() async {}
+  // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
+  // @override
+  // Future<void> handleHotRestart() async {}
 }

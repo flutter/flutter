@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -173,6 +174,25 @@ void main() {
         OutputPreferences: () => OutputPreferences.test(),
         Usage: () => testUsage,
         Analytics: () => fakeAnalytics,
+      });
+
+      // TODO(bkonyi): remove when ready to serve DevTools from DDS.
+      group('${FlutterGlobalOptions.kPrintDtd} flag', () {
+        testUsingContext('sets DevtoolsLauncher.printDtdUri to false when not present', () async {
+          final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+          await runner.run(<String>[]);
+          expect(DevtoolsLauncher.instance!.printDtdUri, false);
+        }, overrides: <Type, Generator>{
+          DevtoolsLauncher: () => FakeDevtoolsLauncher()..dtdUri = Uri(),
+        });
+
+        testUsingContext('sets DevtoolsLauncher.printDtdUri to true when present', () async {
+          final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+          await runner.run(<String>['--${FlutterGlobalOptions.kPrintDtd}']);
+          expect(DevtoolsLauncher.instance!.printDtdUri, true);
+        }, overrides: <Type, Generator>{
+          DevtoolsLauncher: () => FakeDevtoolsLauncher()..dtdUri = Uri(),
+        });
       });
 
       testUsingContext("Doesn't crash on invalid .packages file", () async {

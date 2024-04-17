@@ -128,8 +128,9 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     required PackageConfig packageConfig,
   }) => updateDevFSReportCallback();
 
-  @override
-  Future<void> handleHotRestart() async {}
+  // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
+  // @override
+  // Future<void> handleHotRestart() async {}
 
   @override
   TargetPlatform? get targetPlatform => device._targetPlatform;

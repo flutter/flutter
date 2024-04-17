@@ -166,6 +166,8 @@ class FakeDartDevelopmentService extends Fake with DartDevelopmentServiceLocalOp
   @override
   Uri? get uri => null;
 
+  // TODO(bkonyi): uncomment when ready to serve DevTools from DDS>
+  /*
   @override
   Uri? get devToolsUri => null;
 
@@ -174,6 +176,7 @@ class FakeDartDevelopmentService extends Fake with DartDevelopmentServiceLocalOp
 
   @override
   Future<void> handleHotRestart(FlutterDevice? device) async {}
+  */
 }
 
 class FakeDartDevelopmentServiceException implements DartDevelopmentServiceException {
@@ -308,8 +311,9 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   @override
   Future<void> updateReloadStatus(bool wasReloadSuccessful) async { }
 
-  @override
-  Future<void> handleHotRestart() async {}
+  // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
+  // @override
+  // Future<void> handleHotRestart() async {}
 }
 
 class FakeDelegateFlutterDevice extends FlutterDevice {

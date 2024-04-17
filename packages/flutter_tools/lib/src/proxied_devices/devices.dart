@@ -782,14 +782,6 @@ class ProxiedDartDevelopmentService with DartDevelopmentServiceLocalOperationsMi
   Uri? _localUri;
 
   @override
-  Uri? get devToolsUri => _ddsStartedLocally ? _localDds.devToolsUri : _remoteDevToolsUri;
-  Uri? _remoteDevToolsUri;
-
-  @override
-  Uri? get dtdUri => _ddsStartedLocally ? _localDds.dtdUri : _remoteDtdUri;
-  Uri? _remoteDtdUri;
-
-  @override
   Future<void> get done => _completer.future;
   final Completer<void> _completer = Completer<void>();
 
@@ -828,7 +820,8 @@ class ProxiedDartDevelopmentService with DartDevelopmentServiceLocalOperationsMi
         google3WorkspaceRoot: google3WorkspaceRoot,
         devToolsServerAddress: devToolsServerAddress,
       );
-      unawaited(_localDds.invokeServiceExtensions(device));
+      // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
+      // unawaited(_localDds.invokeServiceExtensions(device));
       unawaited(_localDds.done.then(_completer.complete));
     }
 
@@ -858,11 +851,15 @@ class ProxiedDartDevelopmentService with DartDevelopmentServiceLocalOperationsMi
           'deviceId': deviceId,
           'vmServiceUri': remoteVMServiceUri.toString(),
           'disableServiceAuthCodes': disableServiceAuthCodes,
-          'enableDevTools': enableDevTools,
-          if (devToolsServerAddress != null) 'devToolsServerAddress': devToolsServerAddress.toString(),
+          // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
+          // 'enableDevTools': enableDevTools,
+          // if (devToolsServerAddress != null) 'devToolsServerAddress': devToolsServerAddress.toString(),
         }
       ));
+      
       remoteUriStr = response['ddsUri'] as String?;
+      // TODO(bkonyi): uncomment when ready to serve DevTools from DDS.
+      /*
       final String? devToolsUriStr = response['devToolsUri'] as String?;
       if (devToolsUriStr != null) {
         _remoteDevToolsUri = Uri.parse(devToolsUriStr);
@@ -871,6 +868,7 @@ class ProxiedDartDevelopmentService with DartDevelopmentServiceLocalOperationsMi
       if (dtdUriStr != null) {
         _remoteDtdUri = Uri.parse(dtdUriStr);
       }
+      */
     } on String catch (e) {
       if (!e.contains(method)) {
         rethrow;
