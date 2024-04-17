@@ -344,9 +344,6 @@ optional("fontmgr_win") {
   ]
   public = [ "$_skia_root/include/ports/SkTypeface_win.h" ]
   sources = [
-    "$_skia_root/include/ports/SkFontMgr_indirect.h",
-    "$_skia_root/include/ports/SkRemotableFontMgr.h",
-    "$_skia_root/src/fonts/SkFontMgr_indirect.cpp",
     "$_skia_root/src/ports/SkFontMgr_win_dw.cpp",
     "$_skia_root/src/ports/SkScalerContext_win_dw.cpp",
     "$_skia_root/src/ports/SkScalerContext_win_dw.h",
