@@ -310,7 +310,7 @@ void main() {
     expect(result,
       '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
       '$lines\n'
-      '║ See: https://github.com/flutter/flutter/blob/master/dev/tools/gen_defaults to update the token template files.\n'
+      '║ See: https://github.com/flutter/flutter/blob/main/dev/tools/gen_defaults to update the token template files.\n'
       '╚═══════════════════════════════════════════════════════════════════════════════\n'
     );
   });

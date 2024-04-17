@@ -109,8 +109,11 @@ Future<void> run(List<String> arguments) async {
   printProgress('Debug mode instead of checked mode...');
   await verifyNoCheckedMode(flutterRoot);
 
-  printProgress('Links for creating GitHub issues');
+  printProgress('Links for creating GitHub issues...');
   await verifyIssueLinks(flutterRoot);
+
+  printProgress('Links to repositories...');
+  await verifyRepositoryLinks(flutterRoot);
 
   printProgress('Unexpected binaries...');
   await verifyNoBinaries(flutterRoot);
@@ -471,7 +474,7 @@ Future<void> verifyMaterialFilesAreUpToDateWithTemplateFiles(String workingDirec
   if (errors.isNotEmpty) {
     foundError(<String>[
       ...errors,
-      '${bold}See: https://github.com/flutter/flutter/blob/master/dev/tools/gen_defaults to update the token template files.$reset',
+      '${bold}See: https://github.com/flutter/flutter/blob/main/dev/tools/gen_defaults to update the token template files.$reset',
     ]);
   }
 }
@@ -1223,7 +1226,7 @@ String _bullets(String value) => ' * $value';
 Future<void> verifyIssueLinks(String workingDirectory) async {
   const String issueLinkPrefix = 'https://github.com/flutter/flutter/issues/new';
   const Set<String> stops = <String>{ '\n', ' ', "'", '"', r'\', ')', '>' };
-  assert(!stops.contains('.')); // instead of "visit https://foo." say "visit: https://", it copy-pastes better
+  assert(!stops.contains('.')); // instead of "visit https://foo." say "visit: https://foo", it copy-pastes better
   const String kGiveTemplates =
     'Prefer to provide a link either to $issueLinkPrefix/choose (the list of issue '
     'templates) or to a specific template directly ($issueLinkPrefix?template=...).\n';
@@ -1283,6 +1286,68 @@ Future<void> verifyIssueLinks(String workingDirectory) async {
         suggestions.add('Update analyze.dart to handle the URLs above, or change them to the expected pattern.');
       }
       start = end;
+    }
+  }
+  assert(problems.isEmpty == suggestions.isEmpty);
+  if (problems.isNotEmpty) {
+    foundError(<String>[
+      ...problems,
+      ...suggestions,
+    ]);
+  }
+}
+
+Future<void> verifyRepositoryLinks(String workingDirectory) async {
+  const Set<String> stops = <String>{ '\n', ' ', "'", '"', r'\', ')', '>' };
+  assert(!stops.contains('.')); // instead of "visit https://foo." say "visit: https://foo", it copy-pastes better
+
+  // Repos whose default branch is still 'master'
+  const Set<String> repoExceptions = <String>{
+    'clojure/clojure',
+    'dart-lang/test', // TODO(guidezpl): remove when https://github.com/dart-lang/test/issues/2209 is closed
+    'eseidelGoogle/bezier_perf',
+    'flutter/devtools', // TODO(guidezpl): remove when https://github.com/flutter/devtools/issues/7551 is closed
+    'flutter/flutter_gallery_assets', // TODO(guidezpl): remove when subtask in https://github.com/flutter/flutter/issues/121564 is complete
+    'flutter/flutter-intellij', // TODO(guidezpl): remove when https://github.com/flutter/flutter-intellij/issues/7342 is closed
+    'flutter/platform_tests', // TODO(guidezpl): remove when subtask in https://github.com/flutter/flutter/issues/121564 is complete
+    'glfw/glfw',
+    'material-components/material-components-android', // TODO(guidezpl): remove when https://github.com/material-components/material-components-android/issues/4144 is closed
+    'torvalds/linux',
+    'tpn/winsdk-10',
+  };
+
+  const List<String> linkPrefixes = <String>[
+    'https://raw.githubusercontent.com/',
+    'https://github.com/',
+  ];
+
+  final List<String> problems = <String>[];
+  final Set<String> suggestions = <String>{};
+  final List<File> files = await _gitFiles(workingDirectory);
+  for (final File file in files) {
+    for (final String linkPrefix in linkPrefixes) {
+      final Uint8List bytes = file.readAsBytesSync();
+      // We allow invalid UTF-8 here so that binaries don't trip us up.
+      // There's a separate test in this file that verifies that all text
+      // files are actually valid UTF-8 (see verifyNoBinaries below).
+      final String contents = utf8.decode(bytes, allowMalformed: true);
+      int start = 0;
+      while ((start = contents.indexOf(linkPrefix, start)) >= 0) {
+        int end = start + linkPrefixes.length;
+        while (end < contents.length && !stops.contains(contents[end])) {
+          end += 1;
+        }
+        final String url = contents.substring(start, end);
+        if (url.startsWith(linkPrefix) && !repoExceptions.any(url.contains)) {
+          if (url.contains('master')) {
+            problems.add('${file.path} contains $url, which uses the banned "master" branch.');
+            suggestions.add('Change the URLs above to the expected pattern by '
+              'using the "main" branch if it exists, otherwise adding the '
+              'repository to the list of exceptions in analyze.dart.');
+          }
+        }
+        start = end;
+      }
     }
   }
   assert(problems.isEmpty == suggestions.isEmpty);
