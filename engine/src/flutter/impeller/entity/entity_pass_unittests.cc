@@ -97,7 +97,6 @@ TEST(EntityPassClipStackTest, AppendAndRestoreClipCoverage) {
 
   // Push a clip.
   Entity entity;
-  entity.SetClipDepth(0);
   EntityPassClipStack::ClipStateResult result = recorder.ApplyClipState(
       Contents::ClipCoverage{
           .type = Contents::ClipCoverage::Type::kAppend,
@@ -166,7 +165,6 @@ TEST(EntityPassClipStackTest, ClipAndRestoreWithSubpasses) {
 
   // Push a clip.
   Entity entity;
-  entity.SetClipDepth(0u);
   {
     EntityPassClipStack::ClipStateResult result = recorder.ApplyClipState(
         Contents::ClipCoverage{
@@ -190,7 +188,6 @@ TEST(EntityPassClipStackTest, ClipAndRestoreWithSubpasses) {
   EXPECT_EQ(recorder.GetClipCoverageLayers()[0].coverage,
             Rect::MakeLTRB(50, 50, 55, 55));
 
-  entity.SetClipDepth(1);
   {
     EntityPassClipStack::ClipStateResult result = recorder.ApplyClipState(
         Contents::ClipCoverage{

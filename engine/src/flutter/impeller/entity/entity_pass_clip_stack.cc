@@ -103,7 +103,7 @@ EntityPassClipStack::ClipStateResult EntityPassClipStack::ApplyClipState(
       FML_DCHECK(restoration_index < subpass_state.clip_coverage.size());
 
       // We only need to restore the area that covers the coverage of the
-      // clip rect at target depth + 1.
+      // clip rect at target height + 1.
       std::optional<Rect> restore_coverage =
           (restoration_index + 1 < subpass_state.clip_coverage.size())
               ? subpass_state.clip_coverage[restoration_index + 1].coverage
