@@ -4,7 +4,6 @@
 
 import 'package:meta/meta.dart';
 
-import '../platform_dispatcher.dart';
 import 'accessibility.dart';
 import 'label_and_value.dart';
 import 'semantics.dart';
@@ -32,7 +31,7 @@ class LiveRegion extends RoleManager {
 
   AccessibilityAnnouncements get _accessibilityAnnouncements =>
       _accessibilityAnnouncementsOverride ??
-      EnginePlatformDispatcher.instance.implicitView!.accessibilityAnnouncements;
+      EngineSemantics.instance.accessibilityAnnouncements;
 
   @override
   void update() {
