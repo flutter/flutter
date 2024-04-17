@@ -61,6 +61,7 @@ abstract class BuildTestTask {
       await flutter('build', options: getBuildArgs(deviceOperatingSystem));
       copyArtifacts();
     });
+
   }
 
   /// Run Flutter drive test from [getTestArgs] against the application under test on the device.
@@ -72,8 +73,8 @@ abstract class BuildTestTask {
     await inDirectory<void>(workingDirectory, () async {
       section('DRIVE START');
       await flutter('drive', options: getTestArgs(deviceOperatingSystem, device.deviceId));
-      await device.uninstallApp();
     });
+
     return parseTaskResult();
   }
 

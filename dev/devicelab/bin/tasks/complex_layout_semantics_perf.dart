@@ -32,7 +32,6 @@ void main() {
         '-d',
         deviceId,
       ]);
-      await device.uninstallApp();
     });
 
     final String outputPath = Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? p.join(complexLayoutPath, 'build');
