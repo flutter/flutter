@@ -61,7 +61,7 @@ actions through `recipe_modules`. Searching the builder config in [infra](https:
 will indicate the recipe used for a test.
 
 Recipes are just Python with some limitations on what can be imported. They are
-[documented](https://github.com/luci/recipes-py/blob/master/doc/user_guide.md)
+[documented](https://github.com/luci/recipes-py/blob/main/doc/user_guide.md)
 by the [luci/recipes-py GitHub project](https://github.com/luci/recipes-py).
 
 The typical cycle for editing a recipe is:
