@@ -44,7 +44,7 @@ void main() {
           matching: find.byType(Padding),
         ),
       );
-      expect(padding.padding, equals(const EdgeInsets.all(100)));
+      expect(padding.padding, equals(const EdgeInsets.all(100.0)));
     },
   );
 }
