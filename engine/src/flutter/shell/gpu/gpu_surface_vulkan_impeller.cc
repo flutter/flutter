@@ -13,6 +13,8 @@
 
 namespace flutter {
 
+#define ENABLE_EXPERIMENTAL_CANVAS false
+
 GPUSurfaceVulkanImpeller::GPUSurfaceVulkanImpeller(
     std::shared_ptr<impeller::Context> context) {
   if (!context || !context->IsValid()) {
@@ -82,21 +84,40 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
 
         auto cull_rect =
             surface->GetTargetRenderPassDescriptor().GetRenderTargetSize();
-        impeller::Rect dl_cull_rect = impeller::Rect::MakeSize(cull_rect);
-        impeller::DlDispatcher impeller_dispatcher(dl_cull_rect);
-        display_list->Dispatch(
-            impeller_dispatcher,
-            SkIRect::MakeWH(cull_rect.width, cull_rect.height));
-        auto picture = impeller_dispatcher.EndRecordingAsPicture();
 
         return renderer->Render(
             std::move(surface),
-            fml::MakeCopyable(
-                [aiks_context, picture = std::move(picture)](
-                    impeller::RenderTarget& render_target) -> bool {
-                  return aiks_context->Render(picture, render_target,
-                                              /*reset_host_buffer=*/true);
-                }));
+            fml::MakeCopyable([aiks_context, cull_rect, display_list](
+                                  impeller::RenderTarget& render_target)
+                                  -> bool {
+#if ENABLE_EXPERIMENTAL_CANVAS
+              impeller::TextFrameDispatcher collector(
+                  aiks_context->GetContentContext(), impeller::Matrix());
+              display_list->Dispatch(
+                  collector,
+                  SkIRect::MakeWH(cull_rect.width, cull_rect.height));
+              impeller::ExperimentalDlDispatcher impeller_dispatcher(
+                  aiks_context->GetContentContext(), render_target,
+                  impeller::IRect::RoundOut(
+                      impeller::Rect::MakeSize(cull_rect)));
+              display_list->Dispatch(
+                  impeller_dispatcher,
+                  SkIRect::MakeWH(cull_rect.width, cull_rect.height));
+              impeller_dispatcher.FinishRecording();
+              aiks_context->GetContentContext().GetTransientsBuffer().Reset();
+              return true;
+#else
+              impeller::Rect dl_cull_rect = impeller::Rect::MakeSize(cull_rect);
+              impeller::DlDispatcher impeller_dispatcher(dl_cull_rect);
+              display_list->Dispatch(
+                  impeller_dispatcher,
+                  SkIRect::MakeWH(cull_rect.width, cull_rect.height));
+              auto picture = impeller_dispatcher.EndRecordingAsPicture();
+
+              return aiks_context->Render(picture, render_target,
+                                          /*reset_host_buffer=*/true);
+#endif
+            }));
       });
 
   return std::make_unique<SurfaceFrame>(

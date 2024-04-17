@@ -53,6 +53,8 @@ class TextContents final : public Contents {
       const std::shared_ptr<LazyGlyphAtlas>& lazy_glyph_atlas,
       Scalar scale) override;
 
+  void SetScale(Scalar scale) { scale_ = scale; }
+
   // |Contents|
   bool Render(const ContentContext& renderer,
               const Entity& entity,
