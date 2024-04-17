@@ -562,6 +562,28 @@ TEST(FlutterMutatorViewTest, HitTestIgnoreRegion) {
   EXPECT_EQ([mutatorView hitTest:NSMakePoint(10, 50)], platformView);
 }
 
+TEST(FlutterMutatorViewTest, ReparentingPlatformView) {
+  NSView* platformView = [[NSView alloc] init];
+  FlutterMutatorView* mutatorView = [[FlutterMutatorView alloc] initWithPlatformView:platformView];
+  ApplyFlutterLayer(mutatorView, FlutterSize{100, 100}, {});
+  EXPECT_TRUE(platformView.superview == mutatorView.platformViewContainer);
+  EXPECT_TRUE(CGRectEqualToRect(platformView.frame, CGRectMake(0, 0, 100, 100)));
+
+  // Reparent platform view and replace it with placeholder (mimicking WKWebKit going full screen)
+  NSView* newParent = [[NSView alloc] init];
+  [newParent addSubview:platformView];
+  platformView.frame = CGRectMake(10, 10, 200, 200);
+
+  NSView* placeholderView = [[NSView alloc] init];
+  [mutatorView.platformViewContainer addSubview:placeholderView];
+  ApplyFlutterLayer(mutatorView, FlutterSize{100, 100}, {});
+
+  // Platform view should not be touched but the replacement view should be properly positioned.
+  EXPECT_TRUE(platformView.superview == newParent);
+  EXPECT_TRUE(CGRectEqualToRect(platformView.frame, CGRectMake(10, 10, 200, 200)));
+  EXPECT_TRUE(CGRectEqualToRect(placeholderView.frame, CGRectMake(0, 0, 100, 100)));
+}
+
 @interface FlutterCursorCoordinatorTest : NSObject
 
 @end
