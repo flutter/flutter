@@ -34,7 +34,8 @@ TaskFunction androidViewsTest({
         final int exitCode = await exec(
           './gradlew',
            <String>['-q', 'dependencies'],
-          workingDirectory: '${flutterDirectory.path}/dev/integration_tests/android_views/android'
+          workingDirectory:
+          '${flutterDirectory.path}/dev/integration_tests/android_views/android'
         );
         if (exitCode != 0) {
           return TaskResult.failure('Failed to download gradle dependencies');
@@ -49,12 +50,6 @@ TaskFunction androidViewsTest({
           ],
           environment: environment,
           workingDirectory: '${flutterDirectory.path}/dev/integration_tests/android_views'
-        );
-        await flutter(
-          'install',
-          options: <String>['--uninstall-only'],
-          environment: environment,
-          workingDirectory: '${flutterDirectory.path}/dev/integration_tests/android_views',
         );
         return TaskResult.success(null);
       };

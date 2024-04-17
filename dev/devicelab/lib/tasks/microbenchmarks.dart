@@ -47,9 +47,7 @@ TaskFunction createMicrobenchmarkTask({
             environment: environment,
           );
         });
-        final Future<Map<String, double>> result = readJsonResults(flutterProcess);
-        await device.uninstallApp();
-        return result;
+        return readJsonResults(flutterProcess);
       }
 
       return run();
