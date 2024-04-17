@@ -129,7 +129,6 @@ struct MouseState {
     flutter_state_is_down = false;
     has_pending_exit = false;
     buttons = 0;
-    GestureReset();
   }
 };
 

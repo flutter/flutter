@@ -101,6 +101,7 @@
 - (bool)testFlagsChangedEventsArePropagatedIfNotHandled:(id)mockEngine;
 - (bool)testKeyboardIsRestartedOnEngineRestart:(id)mockEngine;
 - (bool)testTrackpadGesturesAreSentToFramework:(id)mockEngine;
+- (bool)mouseAndGestureEventsAreHandledSeparately:(id)engineMock;
 - (bool)testMouseDownUpEventsSentToNextResponder:(id)mockEngine;
 - (bool)testModifierKeysAreSynthesizedOnMouseMove:(id)mockEngine;
 - (bool)testViewWillAppearCalledMultipleTimes:(id)mockEngine;
@@ -285,6 +286,12 @@ TEST_F(FlutterViewControllerMockEngineTest, TestTrackpadGesturesAreSentToFramewo
   id mockEngine = GetMockEngine();
   ASSERT_TRUE(
       [[FlutterViewControllerTestObjC alloc] testTrackpadGesturesAreSentToFramework:mockEngine]);
+}
+
+TEST_F(FlutterViewControllerMockEngineTest, TestmouseAndGestureEventsAreHandledSeparately) {
+  id mockEngine = GetMockEngine();
+  ASSERT_TRUE(
+      [[FlutterViewControllerTestObjC alloc] mouseAndGestureEventsAreHandledSeparately:mockEngine]);
 }
 
 TEST_F(FlutterViewControllerMockEngineTest, TestMouseDownUpEventsSentToNextResponder) {
@@ -1000,6 +1007,42 @@ TEST_F(FlutterViewControllerTest, testViewControllerIsReleased) {
   [viewController rotateWithEvent:flutter::testing::MockGestureEvent(NSEventTypeRotate,
                                                                      NSEventPhaseCancelled, 0, 0)];
   EXPECT_FALSE(called);
+
+  return true;
+}
+
+// Magic mouse can interleave mouse events with scroll events. This must not crash.
+- (bool)mouseAndGestureEventsAreHandledSeparately:(id)engineMock {
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+  [viewController loadView];
+
+  // Test for pan events.
+  // Start gesture.
+  CGEventRef cgEventStart = CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitPixel, 1, 0);
+  CGEventSetType(cgEventStart, kCGEventScrollWheel);
+  CGEventSetIntegerValueField(cgEventStart, kCGScrollWheelEventScrollPhase, kCGScrollPhaseBegan);
+  CGEventSetIntegerValueField(cgEventStart, kCGScrollWheelEventIsContinuous, 1);
+  [viewController scrollWheel:[NSEvent eventWithCGEvent:cgEventStart]];
+  CFRelease(cgEventStart);
+
+  CGEventRef cgEventUpdate = CGEventCreateCopy(cgEventStart);
+  CGEventSetIntegerValueField(cgEventUpdate, kCGScrollWheelEventScrollPhase, kCGScrollPhaseChanged);
+  CGEventSetIntegerValueField(cgEventUpdate, kCGScrollWheelEventDeltaAxis2, 1);  // pan_x
+  CGEventSetIntegerValueField(cgEventUpdate, kCGScrollWheelEventDeltaAxis1, 2);  // pan_y
+  [viewController scrollWheel:[NSEvent eventWithCGEvent:cgEventUpdate]];
+  CFRelease(cgEventUpdate);
+
+  NSEvent* mouseEvent = flutter::testing::CreateMouseEvent(0x00);
+  [viewController mouseEntered:mouseEvent];
+  [viewController mouseExited:mouseEvent];
+
+  // End gesture.
+  CGEventRef cgEventEnd = CGEventCreateCopy(cgEventStart);
+  CGEventSetIntegerValueField(cgEventEnd, kCGScrollWheelEventScrollPhase, kCGScrollPhaseEnded);
+  [viewController scrollWheel:[NSEvent eventWithCGEvent:cgEventEnd]];
+  CFRelease(cgEventEnd);
 
   return true;
 }
