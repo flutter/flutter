@@ -1271,11 +1271,11 @@ class _SortArrow extends StatefulWidget {
 }
 
 class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
-  late AnimationController _opacityController;
-  late Animation<double> _opacityAnimation;
+  late final AnimationController _opacityController;
+  late final CurvedAnimation _opacityAnimation;
 
-  late AnimationController _orientationController;
-  late Animation<double> _orientationAnimation;
+  late final AnimationController _orientationController;
+  late final Animation<double> _orientationAnimation;
   double _orientationOffset = 0.0;
 
   bool? _up;
@@ -1354,6 +1354,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
   void dispose() {
     _opacityController.dispose();
     _orientationController.dispose();
+    _opacityAnimation.dispose();
     super.dispose();
   }
 
