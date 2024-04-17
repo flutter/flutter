@@ -8,6 +8,23 @@ import 'package:flutter_api_samples/widgets/dismissible/dismissible.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  Future<void> dismissHorizontally({
+    required WidgetTester tester,
+    required Finder finder,
+    required AxisDirection direction,
+  }) async {
+    final double width = (tester.renderObject(finder) as RenderBox).size.width;
+    final double dx = width * 0.8;
+
+    final Offset offset = switch (direction) {
+      AxisDirection.left => Offset(-dx, 0.0),
+      AxisDirection.right => Offset(dx, 0.0),
+      _ => throw ArgumentError('$direction is not supported'),
+    };
+
+    await tester.drag(finder, offset);
+  }
+
   testWidgets(
     'ListTiles can be dismissed from right to left',
     (WidgetTester tester) async {
@@ -22,8 +39,9 @@ void main() {
 
         expect(find.byKey(key), findsOneWidget);
 
-        await tester.dismissHorizontally(
-          find.byKey(key),
+        await dismissHorizontally(
+          tester: tester,
+          finder: find.byKey(key),
           direction: AxisDirection.left,
         );
 
@@ -48,8 +66,9 @@ void main() {
 
         expect(find.byKey(key), findsOneWidget);
 
-        await tester.dismissHorizontally(
-          find.byKey(key),
+        await dismissHorizontally(
+          tester: tester,
+          finder: find.byKey(key),
           direction: AxisDirection.right,
         );
 
@@ -59,22 +78,4 @@ void main() {
       }
     },
   );
-}
-
-extension on WidgetTester {
-  Future<void> dismissHorizontally(
-    Finder finder, {
-    required AxisDirection direction,
-  }) async {
-    final double width = (renderObject(finder) as RenderBox).size.width;
-    final double dx = width * 0.8;
-
-    final Offset offset = switch (direction) {
-      AxisDirection.left => Offset(-dx, 0.0),
-      AxisDirection.right => Offset(dx, 0.0),
-      _ => throw ArgumentError('$direction is not supported'),
-    };
-
-    await drag(finder, offset);
-  }
 }
