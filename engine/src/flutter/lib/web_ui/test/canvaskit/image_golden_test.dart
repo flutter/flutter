@@ -895,6 +895,24 @@ void _testCkBrowserImageDecoder() {
 
     debugRestoreWebDecoderExpireDuration();
   });
+
+  test('ImageDecoder toByteData(translucent PNG)', () async {
+    final CkBrowserImageDecoder image = await CkBrowserImageDecoder.create(
+      data: kTranslucentPng,
+      debugSource: 'test',
+    );
+    final ui.FrameInfo frame = await image.getNextFrame();
+
+    ByteData? data = await frame.image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
+    expect(data!.buffer.asUint8List(),
+           <int>[0x22, 0x44, 0x66, 0x80, 0x22, 0x44, 0x66, 0x80,
+                 0x22, 0x44, 0x66, 0x80, 0x22, 0x44, 0x66, 0x80]);
+
+    data = await frame.image.toByteData();
+    expect(data!.buffer.asUint8List(),
+           <int>[0x11, 0x22, 0x33, 0x80, 0x11, 0x22, 0x33, 0x80,
+                 0x11, 0x22, 0x33, 0x80, 0x11, 0x22, 0x33, 0x80]);
+  });
 }
 
 Future<void> expectFrameData(ui.FrameInfo frame, List<int> data) async {

@@ -96,10 +96,16 @@ Future<ByteData> readPixelsFromVideoFrame(VideoFrame videoFrame, ui.ImageByteFor
 
   // At this point we know we want to read unencoded pixels, and that the video
   // frame is _not_ using the same format as the requested one.
-  final bool isBgrFrame = videoFrame.format == 'BGRA' || videoFrame.format == 'BGRX';
-  if (format == ui.ImageByteFormat.rawRgba && isBgrFrame) {
-    _bgrToRgba(pixels);
-    return pixels.asByteData();
+  final bool isBgrx = videoFrame.format == 'BGRX';
+  final bool isBgrFrame = videoFrame.format == 'BGRA' || isBgrx;
+  if (isBgrFrame) {
+    if (format == ui.ImageByteFormat.rawStraightRgba || isBgrx) {
+      _bgrToStraightRgba(pixels, isBgrx);
+      return pixels.asByteData();
+    } else if (format == ui.ImageByteFormat.rawRgba) {
+      _bgrToRawRgba(pixels);
+      return pixels.asByteData();
+    }
   }
 
   // Last resort, just return the original pixels.
@@ -107,10 +113,9 @@ Future<ByteData> readPixelsFromVideoFrame(VideoFrame videoFrame, ui.ImageByteFor
 }
 
 /// Mutates the [pixels], converting them from BGRX/BGRA to RGBA.
-void _bgrToRgba(ByteBuffer pixels) {
-  final int pixelCount = pixels.lengthInBytes ~/ 4;
+void _bgrToStraightRgba(ByteBuffer pixels, bool isBgrx) {
   final Uint8List pixelBytes = pixels.asUint8List();
-  for (int i = 0; i < pixelCount; i += 4) {
+  for (int i = 0; i < pixelBytes.length; i += 4) {
     // It seems even in little-endian machines the BGR_ pixels are encoded as
     // big-endian, i.e. the blue byte is written into the lowest byte in the
     // memory address space.
@@ -121,6 +126,35 @@ void _bgrToRgba(ByteBuffer pixels) {
     // special treatment for alpha. This may need to change if we ever face
     // codecs that do something different.
     pixelBytes[i] = r;
+    pixelBytes[i + 2] = b;
+    if (isBgrx) {
+      pixelBytes[i + 3] = 255;
+    }
+  }
+}
+
+/// Based on Chromium's SetRGBAPremultiply.
+@pragma('dart2js:tryInline')
+int _premultiply(int value, int alpha) {
+  if (alpha == 255) {
+    return value;
+  }
+  const int kRoundFractionControl = 257 * 128;
+  return (value * alpha * 257 + kRoundFractionControl) >> 16;
+}
+
+/// Mutates the [pixels], converting them from BGRX/BGRA to RGBA with
+/// premultiplied alpha.
+void _bgrToRawRgba(ByteBuffer pixels) {
+  final Uint8List pixelBytes = pixels.asUint8List();
+  for (int i = 0; i < pixelBytes.length; i += 4) {
+    final int a = pixelBytes[i + 3];
+    final int r = _premultiply(pixelBytes[i + 2], a);
+    final int g = _premultiply(pixelBytes[i + 1], a);
+    final int b = _premultiply(pixelBytes[i], a);
+
+    pixelBytes[i] = r;
+    pixelBytes[i + 1] = g;
     pixelBytes[i + 2] = b;
   }
 }
@@ -133,7 +167,7 @@ bool _shouldReadPixelsUnmodified(VideoFrame videoFrame, ui.ImageByteFormat forma
   // Do not convert if the requested format is RGBA and the video frame is
   // encoded as either RGBA or RGBX.
   final bool isRgbFrame = videoFrame.format == 'RGBA' || videoFrame.format == 'RGBX';
-  return format == ui.ImageByteFormat.rawRgba && isRgbFrame;
+  return format == ui.ImageByteFormat.rawStraightRgba && isRgbFrame;
 }
 
 Future<ByteBuffer> readVideoFramePixelsUnmodified(VideoFrame videoFrame) async {
