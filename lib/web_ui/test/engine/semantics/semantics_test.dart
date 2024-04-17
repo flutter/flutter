@@ -229,6 +229,30 @@ void _testEngineSemanticsOwner() {
     expect(semantics().mode, AccessibilityMode.unknown);
   });
 
+  // Expecting the following DOM structure by default:
+  //
+  // <body>
+  //   <flt-announcement-host>
+  //     <flt-announcement-polite></flt-announcement-polite>
+  //     <flt-announcement-assertive></flt-announcement-assertive>
+  //   </flt-announcement-host>
+  // </body>
+  test('places accessibility announcements in the <body> tag', () {
+    final AccessibilityAnnouncements accessibilityAnnouncements = semantics().accessibilityAnnouncements;
+    final DomElement politeElement = accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.polite);
+    final DomElement assertiveElement = accessibilityAnnouncements.ariaLiveElementFor(Assertiveness.assertive);
+    final DomElement announcementHost = politeElement.parent!;
+
+    // Polite and assertive elements share the same host.
+    expect(
+      assertiveElement.parent,
+      announcementHost,
+    );
+
+    // The host is a direct child of <body>
+    expect(announcementHost.parent, domDocument.body);
+  });
+
   test('accessibilityFeatures copyWith function works', () {
     const EngineAccessibilityFeatures original = EngineAccessibilityFeatures(0);
     EngineAccessibilityFeatures copy =
