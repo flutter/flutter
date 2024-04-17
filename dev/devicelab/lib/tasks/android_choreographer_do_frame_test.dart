@@ -161,6 +161,13 @@ Future<void> main() async {
         await stderr.cancel();
         run.kill();
 
+        await inDirectory(path.join(tempDir.path, 'app'), () async {
+          await flutter(
+            'install',
+            options: <String>['--uninstall-only'],
+          );
+        });
+
         if (nextCompleterIdx == sentinelCompleters.values.length) {
           return TaskResult.success(null);
         }

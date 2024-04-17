@@ -1245,9 +1245,10 @@ class PerfTest {
   /// If null, the device is selected depending on the current environment.
   final Device? device;
 
-  /// The function called instead of the actually `flutter drive`.
+  /// The function called instead of the actual `flutter drive`.
   ///
-  /// If it is not `null`, `flutter drive` will not happen in the PerfTests.
+  /// If it is not `null`, `flutter drive` and `flutter install --uninstall-only`
+  /// will not happen in the PerfTests.
   final FlutterDriveCallback? flutterDriveCallback;
 
   /// Whether the perf test should enable Impeller.
@@ -1260,6 +1261,8 @@ class PerfTest {
   final bool disablePartialRepaint;
 
   /// Number of seconds to time out the test after, allowing debug callbacks to run.
+  ///
+  /// Passed to `--timeout`.
   final int? timeoutSeconds;
 
   /// The keys of the values that need to be reported.
@@ -1393,6 +1396,7 @@ class PerfTest {
           flutterDriveCallback!(options);
         } else {
           await flutter('drive', options: options);
+          await flutter('install', options: <String>['--uninstall-only', '-d', deviceId]);
         }
       } finally {
         await resetManifest();
@@ -2127,6 +2131,8 @@ class DevToolsMemoryTest {
         }
       }
 
+      await _device.uninstallApp();
+
       return TaskResult.success(
         <String, dynamic>{'maxRss': maxRss, 'maxAdbTotal': maxAdbTotal},
         benchmarkScoreKeys: <String>['maxRss', 'maxAdbTotal'],
@@ -2199,13 +2205,12 @@ class ReportedDurationTest {
       await device!.stop(package);
       await adb.cancel();
 
+      await device!.uninstallApp();
       _device = null;
 
       final Map<String, dynamic> reportedDuration = <String, dynamic>{
         'duration': duration,
       };
-      _device = null;
-
       return TaskResult.success(reportedDuration, benchmarkScoreKeys: reportedDuration.keys.toList());
     });
   }
