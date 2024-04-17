@@ -29,11 +29,11 @@ import io.flutter.view.TextureRegistry;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -445,7 +445,7 @@ public class FlutterRenderer implements TextureRegistry {
 
     private Object lock = new Object();
     // REQUIRED: The following fields must only be accessed when lock is held.
-    private final LinkedList<PerImageReader> imageReaderQueue = new LinkedList<PerImageReader>();
+    private final ArrayDeque<PerImageReader> imageReaderQueue = new ArrayDeque<PerImageReader>();
     private final HashMap<ImageReader, PerImageReader> perImageReaders =
         new HashMap<ImageReader, PerImageReader>();
     private PerImage lastDequeuedImage = null;
@@ -465,7 +465,7 @@ public class FlutterRenderer implements TextureRegistry {
     /** Internal class: state held per ImageReader. */
     private class PerImageReader {
       public final ImageReader reader;
-      private final LinkedList<PerImage> imageQueue = new LinkedList<PerImage>();
+      private final ArrayDeque<PerImage> imageQueue = new ArrayDeque<PerImage>();
       private boolean closed = false;
 
       private final ImageReader.OnImageAvailableListener onImageAvailableListener =
