@@ -14,7 +14,7 @@ Use of this source code is governed by a BSD-style license that can be found in 
 LICENSE
    }
   s.author           = { 'Flutter Team' => 'flutter-dev@googlegroups.com' }
-  s.source           = { :http => 'https://github.com/flutter/flutter/tree/master/packages/integration_test/integration_test_macos' }
+  s.source           = { :http => 'https://github.com/flutter/flutter/tree/main/packages/integration_test/integration_test_macos' }
   s.source_files = 'integration_test_macos/Sources/integration_test_macos/**/*'
   s.dependency 'FlutterMacOS'
 
