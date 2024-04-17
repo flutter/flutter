@@ -154,6 +154,13 @@ void main() {
         await lifecycles.close();
         await stdout.cancel();
         await stderr.cancel();
+
+        await inDirectory(path.join(tempDir.path, 'app'), () async {
+          await flutter(
+            'install',
+            options: <String>['--uninstall-only'],
+          );
+        });
         return TaskResult.success(null);
       }
 
