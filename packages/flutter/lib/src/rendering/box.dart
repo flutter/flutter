@@ -1185,7 +1185,7 @@ final class _LayoutCacheStorage {
 /// positioned at 0,0. If this is not true, then use [RenderShiftedBox] instead.
 ///
 /// See
-/// [proxy_box.dart](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/rendering/proxy_box.dart)
+/// [proxy_box.dart](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/rendering/proxy_box.dart)
 /// for examples of inheriting from [RenderProxyBox].
 ///
 /// #### Using RenderShiftedBox
@@ -1196,7 +1196,7 @@ final class _LayoutCacheStorage {
 /// default layout algorithm.
 ///
 /// See
-/// [shifted_box.dart](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/rendering/shifted_box.dart)
+/// [shifted_box.dart](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/rendering/shifted_box.dart)
 /// for examples of inheriting from [RenderShiftedBox].
 ///
 /// #### Kinds of children and child-specific data
