@@ -113,7 +113,7 @@ Future<void> run(List<String> arguments) async {
   await verifyIssueLinks(flutterRoot);
 
   printProgress('Links to repositories...');
-  await verifyGitHubLinks(flutterRoot);
+  await verifyRepositoryLinks(flutterRoot);
 
   printProgress('Unexpected binaries...');
   await verifyNoBinaries(flutterRoot);
@@ -1294,7 +1294,7 @@ Future<void> verifyIssueLinks(String workingDirectory) async {
   }
 }
 
-Future<void> verifyGitHubLinks(String workingDirectory) async {
+Future<void> verifyRepositoryLinks(String workingDirectory) async {
   const Set<String> stops = <String>{ '\n', ' ', "'", '"', r'\', ')', '>' };
   assert(!stops.contains('.')); // instead of "visit https://foo." say "visit: https://foo", it copy-pastes better
 
