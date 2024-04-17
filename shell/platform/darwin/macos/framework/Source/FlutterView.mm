@@ -106,6 +106,11 @@
 // - When context menu above FlutterView is closed. Context menu will change current cursor to arrow
 // and will not restore it back.
 - (void)cursorUpdate:(NSEvent*)event {
+  // Make sure to not override cursor when over a platform view.
+  NSView* hitTestView = [self hitTest:[self convertPoint:event.locationInWindow fromView:nil]];
+  if (hitTestView != self) {
+    return;
+  }
   [_lastCursor set];
   // It is possible that there is a platform view with NSTrackingArea below flutter content.
   // This could override the mouse cursor as a result of mouse move event. There is no good way
