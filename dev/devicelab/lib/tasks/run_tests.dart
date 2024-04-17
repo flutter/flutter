@@ -109,7 +109,7 @@ class AndroidRunOutputTest extends RunOutputTask {
 
   @override
   bool isExpectedStderr(String line) {
-    // TODO(egarciad): Remove (because https://github.com/flutter/flutter/issues/95131 is now fixed)
+    // TODO(egarciad): Remove once https://github.com/flutter/flutter/issues/95131 is fixed.
     return line.contains('Mapping new ns');
   }
 
@@ -320,8 +320,6 @@ abstract class RunOutputTask {
       run.stdin.write('q');
 
       await run.exitCode;
-
-      await device.uninstallApp();
 
       if (stderr.isNotEmpty) {
         throw 'flutter run ${release ? '--release' : ''} had unexpected output on standard error.';

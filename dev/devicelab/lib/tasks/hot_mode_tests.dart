@@ -168,8 +168,6 @@ TaskFunction createHotModeTest({
                 <Future<void>>[stdoutDone.future, stderrDone.future]);
             await process.exitCode;
 
-            await flutter('install', options: <String>['--uninstall-only', '-d', deviceIdOverride!]);
-
             freshRestartReloadsData =
                 json.decode(benchmarkFile.readAsStringSync()) as Map<String, dynamic>;
           }

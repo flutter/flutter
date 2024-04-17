@@ -65,13 +65,12 @@ class ApluginPlatformInterfaceMacOS {
       pluginImplPubspecContent = pluginImplPubspecContent.replaceFirst(
         '        pluginClass: ApluginPlatformImplementationPlugin',
         '        pluginClass: ApluginPlatformImplementationPlugin\n'
-        '        dartPluginClass: ApluginPlatformInterfaceMacOS\n',
+            '        dartPluginClass: ApluginPlatformInterfaceMacOS\n',
       );
       pluginImplPubspecContent = pluginImplPubspecContent.replaceFirst(
           '    platforms:\n',
           '    implements: aplugin_platform_interface\n'
-          '    platforms:\n',
-      );
+              '    platforms:\n');
       await pluginImplPubspec.writeAsString(pluginImplPubspecContent,
           flush: true);
 
@@ -105,8 +104,8 @@ class ApluginPlatformInterfaceMacOS {
           pluginInterfacePubspecContent.replaceFirst(
               'dependencies:',
               'dependencies:\n'
-              '  aplugin_platform_implementation:\n'
-              '    path: ../aplugin_platform_implementation\n');
+                  '  aplugin_platform_implementation:\n'
+                  '    path: ../aplugin_platform_implementation\n');
       await pluginInterfacePubspec.writeAsString(pluginInterfacePubspecContent,
           flush: true);
 
@@ -136,8 +135,8 @@ class ApluginPlatformInterfaceMacOS {
       appPubspecContent = appPubspecContent.replaceFirst(
           'dependencies:',
           'dependencies:\n'
-          '  aplugin_platform_interface:\n'
-          '    path: ../aplugin_platform_interface\n');
+              '  aplugin_platform_interface:\n'
+              '    path: ../aplugin_platform_interface\n');
       await appPubspec.writeAsString(appPubspecContent, flush: true);
 
       section('Flutter run for macos');
@@ -207,11 +206,6 @@ class ApluginPlatformInterfaceMacOS {
 
       unawaited(stdoutSub.cancel());
       unawaited(stderrSub.cancel());
-
-      await flutter(
-        'install',
-        options: <String>['--uninstall-only', '-d', 'macos'],
-      );
 
       return TaskResult.success(null);
     } finally {
