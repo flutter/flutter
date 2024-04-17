@@ -16,6 +16,7 @@ Future<String> _runWithMode(String mode, String deviceId) async {
     '-d',
     deviceId,
   ]);
+  await evalFlutter('install', options: <String>['--uninstall-only', '-d', deviceId]);
   return stderr.toString();
 }
 

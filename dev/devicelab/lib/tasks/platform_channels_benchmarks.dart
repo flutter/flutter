@@ -47,6 +47,7 @@ TaskFunction runTask(adb.DeviceOperatingSystem operatingSystem) {
 
     final Map<String, double> results =
         await microbenchmarks.readJsonResults(flutterProcess);
+    await device.uninstallApp();
     return TaskResult.success(results,
         benchmarkScoreKeys: results.keys.toList());
   };
