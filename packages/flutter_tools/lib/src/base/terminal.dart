@@ -7,6 +7,7 @@ import '../features.dart';
 import 'io.dart' as io;
 import 'logger.dart';
 import 'platform.dart';
+import 'process.dart';
 
 enum TerminalColor {
   red,
@@ -164,11 +165,14 @@ class AnsiTerminal implements Terminal {
     required Platform platform,
     DateTime? now, // Time used to determine preferredStyle. Defaults to 0001-01-01 00:00.
     bool defaultCliAnimationEnabled = true,
+    ShutdownHooks? shutdownHooks,
   })
     : _stdio = stdio,
       _platform = platform,
       _now = now ?? DateTime(1),
-      _isCliAnimationEnabled = defaultCliAnimationEnabled;
+      _isCliAnimationEnabled = defaultCliAnimationEnabled {
+    shutdownHooks?.addShutdownHook(() { singleCharMode = false; });
+  }
 
   final io.Stdio _stdio;
   final Platform _platform;
@@ -319,7 +323,7 @@ class AnsiTerminal implements Terminal {
       return false;
     }
     final io.Stdin stdin = _stdio.stdin as io.Stdin;
-    return stdin.lineMode && stdin.echoMode;
+    return !stdin.lineMode && !stdin.echoMode;
   }
   @override
   set singleCharMode(bool value) {
