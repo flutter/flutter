@@ -25,7 +25,6 @@ class InlinePassContext {
   InlinePassContext(
       const ContentContext& renderer,
       EntityPassTarget& pass_target,
-      uint32_t pass_texture_reads,
       uint32_t entity_count,
       std::optional<RenderPassResult> collapsed_parent_pass = std::nullopt);
 

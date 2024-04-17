@@ -110,7 +110,7 @@ void EntityPass::AddEntity(Entity entity) {
   }
 
   if (entity.GetBlendMode() > Entity::kLastPipelineBlendMode) {
-    advanced_blend_reads_from_pass_texture_ += 1;
+    advanced_blend_reads_from_pass_texture_ = true;
   }
   elements_.emplace_back(std::move(entity));
 }
@@ -277,10 +277,10 @@ EntityPass* EntityPass::AddSubpass(std::unique_ptr<EntityPass> pass) {
   pass->superpass_ = this;
 
   if (pass->backdrop_filter_proc_) {
-    backdrop_filter_reads_from_pass_texture_ += 1;
+    backdrop_filter_reads_from_pass_texture_ = true;
   }
   if (pass->blend_mode_ > Entity::kLastPipelineBlendMode) {
-    advanced_blend_reads_from_pass_texture_ += 1;
+    advanced_blend_reads_from_pass_texture_ = true;
   }
 
   auto subpass_pointer = pass.get();
@@ -299,9 +299,11 @@ void EntityPass::AddSubpassInline(std::unique_ptr<EntityPass> pass) {
     elements_.emplace_back(std::move(elements[i]));
   }
 
-  backdrop_filter_reads_from_pass_texture_ +=
+  backdrop_filter_reads_from_pass_texture_ =
+      backdrop_filter_reads_from_pass_texture_ ||
       pass->backdrop_filter_reads_from_pass_texture_;
-  advanced_blend_reads_from_pass_texture_ +=
+  advanced_blend_reads_from_pass_texture_ =
+      advanced_blend_reads_from_pass_texture_ ||
       pass->advanced_blend_reads_from_pass_texture_;
 }
 
@@ -366,10 +368,10 @@ static EntityPassTarget CreateRenderTarget(ContentContext& renderer,
       renderer.GetDeviceCapabilities().SupportsImplicitResolvingMSAA());
 }
 
-uint32_t EntityPass::GetTotalPassReads(ContentContext& renderer) const {
+bool EntityPass::DoesBackdropGetRead(ContentContext& renderer) const {
   return renderer.GetDeviceCapabilities().SupportsFramebufferFetch()
              ? backdrop_filter_reads_from_pass_texture_
-             : backdrop_filter_reads_from_pass_texture_ +
+             : backdrop_filter_reads_from_pass_texture_ ||
                    advanced_blend_reads_from_pass_texture_;
 }
 
@@ -413,11 +415,10 @@ bool EntityPass::Render(ContentContext& renderer,
   EntityPassClipStack clip_stack = EntityPassClipStack(
       Rect::MakeSize(root_render_target.GetRenderTargetSize()));
 
-  bool reads_from_onscreen_backdrop = GetTotalPassReads(renderer) > 0;
   // In this branch path, we need to render everything to an offscreen texture
   // and then blit the results onto the onscreen texture. If using this branch,
   // there's no need to set up a stencil attachment on the root render target.
-  if (reads_from_onscreen_backdrop) {
+  if (DoesBackdropGetRead(renderer)) {
     EntityPassTarget offscreen_target = CreateRenderTarget(
         renderer, root_render_target.GetRenderTargetSize(),
         GetRequiredMipCount(),
@@ -889,8 +890,7 @@ bool EntityPass::OnRender(
         pass_depth);
   }
 
-  InlinePassContext pass_context(renderer, pass_target,
-                                 GetTotalPassReads(renderer), GetElementCount(),
+  InlinePassContext pass_context(renderer, pass_target, GetElementCount(),
                                  collapsed_parent_pass);
   if (!pass_context.IsValid()) {
     VALIDATION_LOG << SPrintF("Pass context invalid (Depth=%d)", pass_depth);
