@@ -38,7 +38,22 @@ bool _isMainBranch(String? branch) {
 /// instantiated is based on the current testing environment.
 ///
 /// When set, the `namePrefix` is prepended to the names of all gold images.
+///
+/// This function assumes the [goldenFileComparator] has been set to a
+/// [LocalFileComparator], which happens in the bootstrap code used when running
+/// tests using `flutter test`. This should not be called when running a test
+/// using `flutter run`, as in that environment, the [goldenFileComparator] is a
+/// [TrivialComparator].
 Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePrefix}) async {
+  assert(
+    goldenFileComparator is LocalFileComparator,
+    'The flutter_goldens package should be used from a flutter_test_config.dart '
+    'file, which is only invoked when using "flutter test". The "flutter test" '
+    'bootstrap logic sets "goldenFileComparator" to a LocalFileComparator. It '
+    'appears in this instance however that the "goldenFileComparator" is a '
+    '${goldenFileComparator.runtimeType}.\n'
+    'See also: https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html',
+  );
   const Platform platform = LocalPlatform();
   const FileSystem fs = LocalFileSystem();
   if (FlutterPostSubmitFileComparator.isForEnvironment(platform)) {
