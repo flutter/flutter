@@ -384,11 +384,11 @@ class GalleryTransitionBuildTest extends BuildTestTask {
   String getApplicationBinaryPath() {
     if (deviceOperatingSystem == DeviceOperatingSystem.android) {
       return '$applicationBinaryPath/app-profile.apk';
-    } else if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
-      return '$applicationBinaryPath/Flutter Gallery.app';
-    } else {
-      return applicationBinaryPath!;
     }
+    if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+      return '$applicationBinaryPath/Flutter Gallery.app';
+    }
+    return applicationBinaryPath!;
   }
 }
 

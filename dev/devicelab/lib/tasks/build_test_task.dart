@@ -72,8 +72,8 @@ abstract class BuildTestTask {
     await inDirectory<void>(workingDirectory, () async {
       section('DRIVE START');
       await flutter('drive', options: getTestArgs(deviceOperatingSystem, device.deviceId));
+      await device.uninstallApp();
     });
-    await device.uninstallApp();
     return parseTaskResult();
   }
 
