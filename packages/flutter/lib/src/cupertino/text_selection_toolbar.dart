@@ -887,13 +887,12 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     _mountChild(toolbarItems.nextButton, _CupertinoTextSelectionToolbarItemsSlot.nextButton);
 
     // Mount list children.
-    _children = List<Element>.filled(toolbarItems.children.length, _NullElement.instance);
     Element? previousChild;
-    for (int i = 0; i < _children.length; i += 1) {
-      final Element newChild = inflateWidget(toolbarItems.children[i], IndexedSlot<Element?>(i, previousChild));
-      _children[i] = newChild;
-      previousChild = newChild;
-    }
+    _children = List<Element>.generate(toolbarItems.children.length, (int i) {
+      final Element result = inflateWidget(toolbarItems.children[i], IndexedSlot<Element?>(i, previousChild));
+      previousChild = result;
+      return result;
+    }, growable: false);
   }
 
   @override
@@ -1272,20 +1271,4 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
 enum _CupertinoTextSelectionToolbarItemsSlot {
   backButton,
   nextButton,
-}
-
-class _NullElement extends Element {
-  _NullElement() : super(const _NullWidget());
-
-  static _NullElement instance = _NullElement();
-
-  @override
-  bool get debugDoingBuild => throw UnimplementedError();
-}
-
-class _NullWidget extends Widget {
-  const _NullWidget();
-
-  @override
-  Element createElement() => throw UnimplementedError();
 }
