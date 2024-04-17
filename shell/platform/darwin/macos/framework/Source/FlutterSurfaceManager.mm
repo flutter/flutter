@@ -153,7 +153,7 @@ static void UpdateContentSubLayers(CALayer* layer,
   FML_DCHECK([NSThread isMainThread]);
 
   // Release all unused back buffer surfaces and replace them with front surfaces.
-  [_backBufferCache replaceSurfaces:_frontSurfaces];
+  [_backBufferCache returnSurfaces:_frontSurfaces];
 
   // Front surfaces will be replaced by currently presented surfaces.
   [_frontSurfaces removeAllObjects];
@@ -266,9 +266,15 @@ static CGSize GetRequiredFrameSize(NSArray<FlutterSurfacePresentInfo*>* surfaces
 
 // Cached back buffers will be released after kIdleDelay if there is no activity.
 static const double kIdleDelay = 1.0;
+// Once surfaces reach kEvictionAge, they will be evicted from the cache.
+// The age of 30 has been chosen to reduce potential surface allocation churn.
+// For unused surface 30 frames means only half a second at 60fps, and there is
+// idle timeout of 1 second where all surfaces are evicted.
+static const int kSurfaceEvictionAge = 30;
 
 @interface FlutterBackBufferCache () {
   NSMutableArray<FlutterSurface*>* _surfaces;
+  NSMapTable<FlutterSurface*, NSNumber*>* _surfaceAge;
 }
 
 @end
@@ -278,28 +284,65 @@ static const double kIdleDelay = 1.0;
 - (instancetype)init {
   if (self = [super init]) {
     self->_surfaces = [[NSMutableArray alloc] init];
+    self->_surfaceAge = [NSMapTable weakToStrongObjectsMapTable];
   }
   return self;
 }
 
+- (int)ageForSurface:(FlutterSurface*)surface {
+  NSNumber* age = [_surfaceAge objectForKey:surface];
+  return age != nil ? age.intValue : 0;
+}
+
+- (void)setAge:(int)age forSurface:(FlutterSurface*)surface {
+  [_surfaceAge setObject:@(age) forKey:surface];
+}
+
 - (nullable FlutterSurface*)removeSurfaceForSize:(CGSize)size {
   @synchronized(self) {
+    // Purge all cached surfaces if the size has changed.
+    if (_surfaces.firstObject != nil && !CGSizeEqualToSize(_surfaces.firstObject.size, size)) {
+      [_surfaces removeAllObjects];
+    }
+
+    FlutterSurface* res;
+
+    // Returns youngest surface that is not in use. Returning youngest surface ensures
+    // that the cache doesn't keep more surfaces than it needs to, as the unused surfaces
+    // kept in cache will have their age kept increasing until purged (inside [returnSurfaces:]).
     for (FlutterSurface* surface in _surfaces) {
-      if (CGSizeEqualToSize(surface.size, size)) {
-        // By default ARC doesn't retain enumeration iteration variables.
-        FlutterSurface* res = surface;
-        [_surfaces removeObject:surface];
-        return res;
+      if (!surface.isInUse &&
+          (res == nil || [self ageForSurface:res] > [self ageForSurface:surface])) {
+        res = surface;
       }
     }
-    return nil;
+    if (res != nil) {
+      [_surfaces removeObject:res];
+    }
+    return res;
   }
 }
 
-- (void)replaceSurfaces:(nonnull NSArray<FlutterSurface*>*)surfaces {
+- (void)returnSurfaces:(nonnull NSArray<FlutterSurface*>*)returnedSurfaces {
   @synchronized(self) {
-    [_surfaces removeAllObjects];
-    [_surfaces addObjectsFromArray:surfaces];
+    for (FlutterSurface* surface in returnedSurfaces) {
+      [self setAge:0 forSurface:surface];
+    }
+    for (FlutterSurface* surface in _surfaces) {
+      [self setAge:[self ageForSurface:surface] + 1 forSurface:surface];
+    }
+
+    [_surfaces addObjectsFromArray:returnedSurfaces];
+
+    // Purge all surface with age = kSurfaceEvictionAge. Reaching this age can mean two things:
+    // - Surface is still in use and we can't return it. This can happen in some edge
+    //   cases where the compositor holds on to the surface for much longer than expected.
+    // - Surface is not in use but it hasn't been requested from the cache for a while.
+    //   This means there are too many surfaces in the cache.
+    [_surfaces filterUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(FlutterSurface* surface,
+                                                                          NSDictionary* bindings) {
+                 return [self ageForSurface:surface] < kSurfaceEvictionAge;
+               }]];
   }
 
   // performSelector:withObject:afterDelay needs to be performed on RunLoop thread
