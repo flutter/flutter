@@ -133,7 +133,7 @@ void EntityPass::PopClips(size_t num_clips, uint64_t depth) {
     FML_DCHECK(active_clips_.back() < elements_.size());
     Entity* element = std::get_if<Entity>(&elements_[active_clips_.back()]);
     FML_DCHECK(element);
-    element->SetNewClipDepth(depth);
+    element->SetClipDepth(depth);
     active_clips_.pop_back();
   }
 }
@@ -592,7 +592,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
               Point(),                       // local_pass_position
               pass_depth,                    // pass_depth
               clip_coverage_stack,           // clip_coverage_stack
-              clip_depth_,                   // clip_height_floor
+              clip_height_,                  // clip_height_floor
               nullptr,                       // backdrop_filter_contents
               pass_context.GetRenderPass(pass_depth)  // collapsed_parent_pass
               )) {
@@ -691,7 +691,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
     // save layers may transform the subpass texture after it's rendered,
     // causing parent clip coverage to get misaligned with the actual area that
     // the subpass will affect in the parent pass.
-    clip_coverage_stack.PushSubpass(subpass_coverage, subpass->clip_depth_);
+    clip_coverage_stack.PushSubpass(subpass_coverage, subpass->clip_height_);
 
     // Stencil textures aren't shared between EntityPasses (as much of the
     // time they are transient).
@@ -705,7 +705,7 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
                 global_pass_position,         // local_pass_position
             ++pass_depth,                     // pass_depth
             clip_coverage_stack,              // clip_coverage_stack
-            subpass->clip_depth_,             // clip_height_floor
+            subpass->clip_height_,            // clip_height_floor
             subpass_backdrop_filter_contents  // backdrop_filter_contents
             )) {
       // Validation error messages are triggered for all `OnRender()` failure
@@ -739,10 +739,9 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
     Entity element_entity;
     Capture subpass_texture_capture =
         capture.CreateChild("Entity (Subpass texture)");
-    element_entity.SetNewClipDepth(subpass->new_clip_depth_);
+    element_entity.SetClipDepth(subpass->clip_depth_);
     element_entity.SetCapture(subpass_texture_capture);
     element_entity.SetContents(std::move(offscreen_texture_contents));
-    element_entity.SetClipDepth(subpass->clip_depth_);
     element_entity.SetBlendMode(subpass->blend_mode_);
     element_entity.SetTransform(subpass_texture_capture.AddMatrix(
         "Transform",
@@ -801,7 +800,7 @@ bool EntityPass::RenderElement(Entity& element_entity,
     Entity msaa_backdrop_entity;
     msaa_backdrop_entity.SetContents(std::move(msaa_backdrop_contents));
     msaa_backdrop_entity.SetBlendMode(BlendMode::kSource);
-    msaa_backdrop_entity.SetNewClipDepth(std::numeric_limits<uint32_t>::max());
+    msaa_backdrop_entity.SetClipDepth(std::numeric_limits<uint32_t>::max());
     if (!msaa_backdrop_entity.Render(renderer, *result.pass)) {
       VALIDATION_LOG << "Failed to render MSAA backdrop filter entity.";
       return false;
@@ -919,8 +918,7 @@ bool EntityPass::OnRender(
     backdrop_entity.SetContents(std::move(backdrop_filter_contents));
     backdrop_entity.SetTransform(
         Matrix::MakeTranslation(Vector3(-local_pass_position)));
-    backdrop_entity.SetClipDepth(clip_height_floor);
-    backdrop_entity.SetNewClipDepth(std::numeric_limits<uint32_t>::max());
+    backdrop_entity.SetClipDepth(std::numeric_limits<uint32_t>::max());
 
     RenderElement(backdrop_entity, clip_height_floor, pass_context, pass_depth,
                   renderer, clip_coverage_stack, global_pass_position);
@@ -1156,20 +1154,20 @@ void EntityPass::SetTransform(Matrix transform) {
   transform_ = transform;
 }
 
+void EntityPass::SetClipHeight(size_t clip_height) {
+  clip_height_ = clip_height;
+}
+
+size_t EntityPass::GetClipHeight() const {
+  return clip_height_;
+}
+
 void EntityPass::SetClipDepth(size_t clip_depth) {
   clip_depth_ = clip_depth;
 }
 
-size_t EntityPass::GetClipDepth() const {
+uint32_t EntityPass::GetClipDepth() const {
   return clip_depth_;
-}
-
-void EntityPass::SetNewClipDepth(size_t clip_depth) {
-  new_clip_depth_ = clip_depth;
-}
-
-uint32_t EntityPass::GetNewClipDepth() const {
-  return new_clip_depth_;
 }
 
 void EntityPass::SetBlendMode(BlendMode blend_mode) {

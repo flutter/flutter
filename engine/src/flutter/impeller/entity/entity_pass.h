@@ -161,13 +161,13 @@ class EntityPass {
 
   void SetTransform(Matrix transform);
 
+  void SetClipHeight(size_t clip_height);
+
+  size_t GetClipHeight() const;
+
   void SetClipDepth(size_t clip_depth);
 
-  size_t GetClipDepth() const;
-
-  void SetNewClipDepth(size_t clip_depth);
-
-  uint32_t GetNewClipDepth() const;
+  uint32_t GetClipDepth() const;
 
   void SetBlendMode(BlendMode blend_mode);
 
@@ -337,8 +337,8 @@ class EntityPass {
 
   EntityPass* superpass_ = nullptr;
   Matrix transform_;
-  size_t clip_depth_ = 0u;
-  uint32_t new_clip_depth_ = 1u;
+  size_t clip_height_ = 0u;
+  uint32_t clip_depth_ = 1u;
   BlendMode blend_mode_ = BlendMode::kSourceOver;
   bool flood_clip_ = false;
   bool enable_offscreen_debug_checkerboard_ = false;

@@ -2959,10 +2959,10 @@ TEST_P(AiksTest, CorrectClipDepthAssignedToEntities) {
 
   picture.pass->IterateAllElements([&](EntityPass::Element& element) -> bool {
     if (auto* subpass = std::get_if<std::unique_ptr<EntityPass>>(&element)) {
-      actual.push_back(subpass->get()->GetNewClipDepth());
+      actual.push_back(subpass->get()->GetClipDepth());
     }
     if (Entity* entity = std::get_if<Entity>(&element)) {
-      actual.push_back(entity->GetNewClipDepth());
+      actual.push_back(entity->GetClipDepth());
     }
     return true;
   });

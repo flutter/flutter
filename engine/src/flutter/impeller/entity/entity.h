@@ -101,13 +101,7 @@ class Entity {
 
   void SetClipDepth(uint32_t clip_depth);
 
-  void IncrementStencilDepth(uint32_t increment);
-
   uint32_t GetClipDepth() const;
-
-  void SetNewClipDepth(uint32_t clip_depth);
-
-  uint32_t GetNewClipDepth() const;
 
   float GetShaderClipDepth() const;
 
@@ -141,8 +135,7 @@ class Entity {
   Matrix transform_;
   std::shared_ptr<Contents> contents_;
   BlendMode blend_mode_ = BlendMode::kSourceOver;
-  uint32_t clip_depth_ = 0u;
-  uint32_t new_clip_depth_ = 1u;
+  uint32_t clip_depth_ = 1u;
   mutable Capture capture_;
 };
 
