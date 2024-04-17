@@ -127,11 +127,7 @@ abstract class GoldenFileComparator {
 ///
 ///  * [flutter_test] for more information about how to configure tests at the
 ///    directory-level.
-GoldenFileComparator get goldenFileComparator => _goldenFileComparator;
-GoldenFileComparator _goldenFileComparator = const TrivialComparator._();
-set goldenFileComparator(GoldenFileComparator value) {
-  _goldenFileComparator = value;
-}
+GoldenFileComparator goldenFileComparator = const TrivialComparator._();
 
 /// Compares image pixels against a golden image file.
 ///
