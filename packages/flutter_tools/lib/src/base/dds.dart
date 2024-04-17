@@ -16,6 +16,12 @@ import 'io.dart' as io;
 import 'logger.dart';
 import 'platform.dart' as p;
 
+/// A representation of the current DDS state including:
+///
+/// - The process the external DDS instance is running in
+/// - The service URI DDS is being served on
+/// - The URI DevTools is being served on, if applicable
+/// - The URI DTD is being served on, if applicable
 typedef DartDevelopmentServiceInstance = ({
   io.Process? process,
   Uri? serviceUri,
@@ -23,6 +29,7 @@ typedef DartDevelopmentServiceInstance = ({
   Uri? dtdUri,
 });
 
+/// The default DDSLauncherCallback used to spawn DDS.
 Future<DartDevelopmentServiceInstance> defaultStartDartDevelopmentService(
   Uri remoteVmServiceUri, {
   required bool enableAuthCodes,
@@ -109,9 +116,12 @@ typedef DDSLauncherCallback = Future<DartDevelopmentServiceInstance> Function(
 });
 
 // TODO(fujino): This should be direct injected, rather than mutable global state.
+/// Used by tests to override the DDS spawn behavior for mocking purposes.
 @visibleForTesting
 DDSLauncherCallback ddsLauncherCallback = defaultStartDartDevelopmentService;
 
+/// Thrown by DDS during initialization failures, unexpected connection issues,
+/// and when attempting to spawn DDS when an existing DDS instance exists.
 class DartDevelopmentServiceException implements Exception {
   factory DartDevelopmentServiceException.fromJson(Map<String, Object?> json) {
     if (json
@@ -137,6 +147,9 @@ class DartDevelopmentServiceException implements Exception {
     throw StateError('Invalid DartDevelopmentServiceException JSON: $json');
   }
 
+  /// Thrown when `DartDeveloperService.startDartDevelopmentService` is called
+  /// and the target VM service already has a Dart Developer Service instance
+  /// connected.
   factory DartDevelopmentServiceException.existingDdsInstance(
     String message, {
     Uri? ddsUri,
@@ -147,6 +160,8 @@ class DartDevelopmentServiceException implements Exception {
     );
   }
 
+  /// Thrown when the connection to the remote VM service terminates unexpectedly
+  /// during Dart Development Service startup.
   factory DartDevelopmentServiceException.failedToStart() {
     return DartDevelopmentServiceException._(
       failedToStartError,
@@ -154,6 +169,7 @@ class DartDevelopmentServiceException implements Exception {
     );
   }
 
+  /// Thrown when a connection error has occurred after startup.
   factory DartDevelopmentServiceException.connectionIssue(String message) {
     return DartDevelopmentServiceException._(connectionError, message);
   }
@@ -179,6 +195,7 @@ class DartDevelopmentServiceException implements Exception {
   final String message;
 }
 
+/// Thrown when attempting to start a new DDS instance when one already exists.
 class ExistingDartDevelopmentServiceException
     extends DartDevelopmentServiceException {
   ExistingDartDevelopmentServiceException._(
@@ -191,7 +208,7 @@ class ExistingDartDevelopmentServiceException
 
   /// The URI of the existing DDS instance, if available.
   ///
-  /// This URL is the base HTTP URI such as `http://127.0.0.1:1234/AbcDefg=/`,
+  /// This URI is the base HTTP URI such as `http://127.0.0.1:1234/AbcDefg=/`,
   /// not the WebSocket URI (which can be obtained by mapping the scheme to
   /// `ws` (or `wss`) and appending `ws` to the path segments).
   final Uri? ddsUri;
@@ -291,11 +308,14 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
   void shutdown() => _ddsInstance?.process?.kill();
 }
 
+/// Contains common functionality that can be used with any implementation of
+/// [DartDevelopmentService].
 mixin DartDevelopmentServiceLocalOperationsMixin {
   Uri? get uri;
   Uri? get devToolsUri;
   Logger get _logger;
 
+  /// Used to confirm `launchDevToolsInBrowser` is called in tests.
   @visibleForTesting
   bool get calledLaunchDevToolsInBrowser => _calledLaunchDevToolsInBrowser;
   bool _calledLaunchDevToolsInBrowser = false;
@@ -311,6 +331,8 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
     Uri? devToolsServerAddress,
   });
 
+  /// A convenience method used to create a [DartDevelopmentService] instance
+  /// from a [DebuggingOptions] instance.
   Future<void> startDartDevelopmentServiceFromDebuggingOptions(
     Uri vmServiceUri, {
     required DebuggingOptions debuggingOptions,
@@ -326,6 +348,8 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
         devToolsServerAddress: debuggingOptions.devToolsServerAddress,
       );
 
+  /// Launches a DevTools instance connected to the DDS instance connected to
+  /// [device] in Chrome.
   bool launchDevToolsInBrowser(FlutterDevice device) {
     _calledLaunchDevToolsInBrowser = true;
     if (devToolsUri == null) {
@@ -338,9 +362,13 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
     return true;
   }
 
+  /// Re-initializes Flutter framework service extension state after a hot
+  /// restart.
   Future<void> handleHotRestart(FlutterDevice? device) =>
       invokeServiceExtensions(device);
 
+  /// Initializes Flutter framework service extension state related to DevTools
+  /// and VM service connection information.
   Future<void> invokeServiceExtensions(FlutterDevice? device) async {
     await Future.wait(<Future<void>>[
       maybeCallDevToolsUriServiceExtension(
@@ -357,9 +385,7 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
     String extension,
   ) async {
     try {
-      await flutterDevice.vmService?.findExtensionIsolate(
-        extension,
-      );
+      await flutterDevice.vmService?.findExtensionIsolate(extension);
       return true;
     } on VmServiceDisappearedException {
       _logger.printTrace(
@@ -371,8 +397,12 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
     }
   }
 
-  Future<void> maybeCallDevToolsUriServiceExtension(
-      {required FlutterDevice? device, required Uri? uri}) async {
+  /// Sets the DevTools URI in the Flutter framework, used for deep linking
+  /// support.
+  Future<void> maybeCallDevToolsUriServiceExtension({
+    required FlutterDevice? device,
+    required Uri? uri,
+  }) async {
     if (uri != null && device?.vmService != null) {
       await _callDevToolsUriExtension(device!, uri);
     }
