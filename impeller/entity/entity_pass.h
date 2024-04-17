@@ -346,18 +346,18 @@ class EntityPass {
   ContentBoundsPromise bounds_promise_ = ContentBoundsPromise::kUnknown;
   int32_t required_mip_count_ = 1;
 
-  /// These values are incremented whenever something is added to the pass that
-  /// requires reading from the backdrop texture. Currently, this can happen in
-  /// the following scenarios:
+  /// These values indicate whether something has been added to the EntityPass
+  /// that requires reading from the backdrop texture. Currently, this can
+  /// happen in the following scenarios:
   ///   1. An entity with an "advanced blend" is added to the pass.
   ///   2. A subpass with a backdrop filter is added to the pass.
   /// These are tracked as separate values because we may ignore
-  /// blend_reads_from_pass_texture_ if the device supports framebuffer based
+  /// `blend_reads_from_pass_texture_` if the device supports framebuffer based
   /// advanced blends.
-  uint32_t advanced_blend_reads_from_pass_texture_ = 0;
-  uint32_t backdrop_filter_reads_from_pass_texture_ = 0;
+  bool advanced_blend_reads_from_pass_texture_ = false;
+  bool backdrop_filter_reads_from_pass_texture_ = false;
 
-  uint32_t GetTotalPassReads(ContentContext& renderer) const;
+  bool DoesBackdropGetRead(ContentContext& renderer) const;
 
   BackdropFilterProc backdrop_filter_proc_ = nullptr;
 
