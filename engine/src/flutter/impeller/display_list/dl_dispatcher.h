@@ -5,22 +5,18 @@
 #ifndef FLUTTER_IMPELLER_DISPLAY_LIST_DL_DISPATCHER_H_
 #define FLUTTER_IMPELLER_DISPLAY_LIST_DL_DISPATCHER_H_
 
+#include "display_list/utils/dl_receiver_utils.h"
 #include "flutter/display_list/dl_op_receiver.h"
+#include "fml/logging.h"
 #include "impeller/aiks/canvas_type.h"
+#include "impeller/aiks/experimental_canvas.h"
 #include "impeller/aiks/paint.h"
+#include "impeller/entity/contents/content_context.h"
 
 namespace impeller {
 
-class DlDispatcher final : public flutter::DlOpReceiver {
+class DlDispatcherBase : public flutter::DlOpReceiver {
  public:
-  DlDispatcher();
-
-  explicit DlDispatcher(Rect cull_rect);
-
-  explicit DlDispatcher(IRect cull_rect);
-
-  ~DlDispatcher();
-
   Picture EndRecordingAsPicture();
 
   // |flutter::DlOpReceiver|
@@ -239,20 +235,99 @@ class DlDispatcher final : public flutter::DlOpReceiver {
                   bool transparent_occluder,
                   SkScalar dpr) override;
 
+  virtual Canvas& GetCanvas() = 0;
+
  private:
   Paint paint_;
-  CanvasType canvas_;
   Matrix initial_matrix_;
 
   static const Path& GetOrCachePath(const CacheablePath& cache);
 
-  static void SimplifyOrDrawPath(CanvasType& canvas,
+  static void SimplifyOrDrawPath(Canvas& canvas,
                                  const CacheablePath& cache,
                                  const Paint& paint);
+};
 
-  DlDispatcher(const DlDispatcher&) = delete;
+class DlDispatcher : public DlDispatcherBase {
+ public:
+  DlDispatcher();
 
-  DlDispatcher& operator=(const DlDispatcher&) = delete;
+  explicit DlDispatcher(IRect cull_rect);
+
+  explicit DlDispatcher(Rect cull_rect);
+
+  ~DlDispatcher() = default;
+
+ private:
+  Canvas canvas_;
+
+  Canvas& GetCanvas() override;
+};
+
+class ExperimentalDlDispatcher : public DlDispatcherBase {
+ public:
+  ExperimentalDlDispatcher(ContentContext& renderer,
+                           RenderTarget& render_target,
+                           IRect cull_rect);
+
+  ~ExperimentalDlDispatcher() = default;
+
+  void FinishRecording() { canvas_.EndReplay(); }
+
+ private:
+  ExperimentalCanvas canvas_;
+
+  Canvas& GetCanvas() override;
+};
+
+/// Performs a first pass over the display list to collect all text frames.
+class TextFrameDispatcher : public flutter::IgnoreAttributeDispatchHelper,
+                            public flutter::IgnoreClipDispatchHelper,
+                            public flutter::IgnoreDrawDispatchHelper {
+ public:
+  TextFrameDispatcher(const ContentContext& renderer,
+                      const Matrix& initial_matrix);
+  void save() override;
+
+  void saveLayer(const SkRect& bounds,
+                 const flutter::SaveLayerOptions options,
+                 const flutter::DlImageFilter* backdrop) override;
+
+  void restore() override;
+
+  void translate(SkScalar tx, SkScalar ty) override;
+
+  void scale(SkScalar sx, SkScalar sy) override;
+
+  void rotate(SkScalar degrees) override;
+
+  void skew(SkScalar sx, SkScalar sy) override;
+
+  // clang-format off
+  // 2x3 2D affine subset of a 4x4 transform in row major order
+  void transform2DAffine(SkScalar mxx, SkScalar mxy, SkScalar mxt,
+                         SkScalar myx, SkScalar myy, SkScalar myt) override;
+
+  // full 4x4 transform in row major order
+  void transformFullPerspective(
+      SkScalar mxx, SkScalar mxy, SkScalar mxz, SkScalar mxt,
+      SkScalar myx, SkScalar myy, SkScalar myz, SkScalar myt,
+      SkScalar mzx, SkScalar mzy, SkScalar mzz, SkScalar mzt,
+      SkScalar mwx, SkScalar mwy, SkScalar mwz, SkScalar mwt) override;
+
+  void transformReset() override;
+
+  void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
+                     SkScalar x,
+                     SkScalar y) override;
+
+  void drawDisplayList(const sk_sp<flutter::DisplayList> display_list,
+                       SkScalar opacity) override;
+
+ private:
+  const ContentContext& renderer_;
+  Matrix matrix_;
+  std::vector<Matrix> stack_;
 };
 
 }  // namespace impeller

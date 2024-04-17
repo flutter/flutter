@@ -71,17 +71,17 @@ class Canvas {
 
   explicit Canvas(IRect cull_rect);
 
-  ~Canvas();
+  virtual ~Canvas();
 
-  void Save();
+  virtual void Save();
 
-  void SaveLayer(
+  virtual void SaveLayer(
       const Paint& paint,
       std::optional<Rect> bounds = std::nullopt,
       const std::shared_ptr<ImageFilter>& backdrop_filter = nullptr,
       ContentBoundsPromise bounds_promise = ContentBoundsPromise::kUnknown);
 
-  bool Restore();
+  virtual bool Restore();
 
   size_t GetSaveCount() const;
 
@@ -160,9 +160,9 @@ class Canvas {
       const Size& corner_radii,
       Entity::ClipOperation clip_op = Entity::ClipOperation::kIntersect);
 
-  void DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
-                     Point position,
-                     const Paint& paint);
+  virtual void DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
+                             Point position,
+                             const Paint& paint);
 
   void DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
                     BlendMode blend_mode,
@@ -179,22 +179,24 @@ class Canvas {
 
   Picture EndRecordingAsPicture();
 
- private:
-  std::unique_ptr<EntityPass> base_pass_;
-  EntityPass* current_pass_ = nullptr;
-  uint64_t current_depth_ = 0u;
+ protected:
   std::deque<CanvasStackEntry> transform_stack_;
   std::optional<Rect> initial_cull_rect_;
+
+  size_t GetClipHeight() const;
 
   void Initialize(std::optional<Rect> cull_rect);
 
   void Reset();
 
+ private:
+  std::unique_ptr<EntityPass> base_pass_;
+  EntityPass* current_pass_ = nullptr;
+  uint64_t current_depth_ = 0u;
+
   EntityPass& GetCurrentPass();
 
-  size_t GetClipHeight() const;
-
-  void AddEntityToCurrentPass(Entity entity);
+  virtual void AddEntityToCurrentPass(Entity entity);
 
   void ClipGeometry(const std::shared_ptr<Geometry>& geometry,
                     Entity::ClipOperation clip_op);
@@ -202,9 +204,10 @@ class Canvas {
   void IntersectCulling(Rect clip_bounds);
   void SubtractCulling(Rect clip_bounds);
 
-  void Save(bool create_subpass,
-            BlendMode = BlendMode::kSourceOver,
-            const std::shared_ptr<ImageFilter>& backdrop_filter = nullptr);
+  virtual void Save(
+      bool create_subpass,
+      BlendMode = BlendMode::kSourceOver,
+      const std::shared_ptr<ImageFilter>& backdrop_filter = nullptr);
 
   void RestoreClip();
 
