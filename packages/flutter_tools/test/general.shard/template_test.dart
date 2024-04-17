@@ -194,6 +194,33 @@ void main() {
       expect(logger.errorText, isEmpty);
       expect(logger.statusText, isEmpty);
     });
+
+    testWithoutContext('skips excluded paths', () {
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final Directory templateDir = fileSystem.directory('templates');
+      templateDir.childFile('includedPath.txt.tmpl').createSync(recursive: true);
+      templateDir.childFile('subdir/includedPath.txt.tmpl').createSync(recursive: true);
+      templateDir.childFile('excludedPath.txt.tmpl').createSync(recursive: true);
+      templateDir.childFile('subdir/excludedPath.txt.tmpl').createSync(recursive: true);
+      final Template template = Template(
+        templateDir,
+        null,
+        fileSystem: fileSystem,
+        logger: logger,
+        templateRenderer: FakeTemplateRenderer(),
+      );
+      expect(
+        template.render(
+          destination,
+          <String, Object>{},
+          excludedPaths: <String>[
+            'excludedPath.txt.tmpl',
+            'subdir/excludedPath.txt.tmpl',
+          ],
+        ),
+        2,
+      );
+    });
   });
 
   testWithoutContext('escapeYamlString', () {

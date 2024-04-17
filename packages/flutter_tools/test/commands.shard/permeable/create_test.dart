@@ -718,6 +718,52 @@ void main() {
     );
   });
 
+  testUsingContext('swift plugin project with Swift Package Manager', () async {
+    return _createProject(
+      projectDir,
+      <String>['--no-pub', '--template=plugin', '--ios-language', 'swift', '--platforms', 'ios,macos'],
+      <String>[
+        'ios/flutter_project/Package.swift',
+        'ios/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
+        'ios/flutter_project/Sources/flutter_project/Resources/.gitkeep',
+        'macos/flutter_project/Package.swift',
+        'macos/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
+        'macos/flutter_project/Sources/flutter_project/Resources/.gitkeep',
+      ],
+      unexpectedPaths: <String>[
+        'ios/Classes/FlutterProjectPlugin.swift',
+        'macos/Classes/FlutterProjectPlugin.swift',
+        'ios/Classes/FlutterProjectPlugin.h',
+        'ios/Classes/FlutterProjectPlugin.m',
+        'ios/Assets/.gitkeep',
+        'macos/Assets/.gitkeep',
+      ],
+    );
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+  });
+
+  testUsingContext('objc plugin project with Swift Package Manager', () async {
+    return _createProject(
+      projectDir,
+      <String>['--no-pub', '--template=plugin', '--ios-language', 'objc', '--platforms', 'ios'],
+      <String>[
+        'ios/flutter_project/Package.swift',
+        'ios/flutter_project/Sources/flutter_project/include/flutter_project/FlutterProjectPlugin.h',
+        'ios/flutter_project/Sources/flutter_project/FlutterProjectPlugin.m',
+        'ios/flutter_project/Sources/flutter_project/Resources/.gitkeep',
+      ],
+      unexpectedPaths: <String>[
+        'ios/Classes/FlutterProjectPlugin.swift',
+        'ios/Classes/FlutterProjectPlugin.h',
+        'ios/Classes/FlutterProjectPlugin.m',
+        'ios/Assets/.gitkeep',
+      ],
+    );
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+  });
+
   testUsingContext('plugin project with custom org', () async {
     return _createProject(
       projectDir,
