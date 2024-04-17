@@ -18,6 +18,7 @@ import '../platform_dispatcher.dart';
 import '../util.dart';
 import '../vector_math.dart';
 import '../window.dart';
+import 'accessibility.dart';
 import 'checkable.dart';
 import 'dialog.dart';
 import 'focusable.dart';
@@ -1937,6 +1938,19 @@ class EngineSemantics {
   }
 
   static EngineSemantics? _instance;
+
+  /// The tag name for the accessibility announcements host.
+  static const String announcementsHostTagName = 'flt-announcement-host';
+
+  /// Implements verbal accessibility announcements.
+  final AccessibilityAnnouncements accessibilityAnnouncements =
+      AccessibilityAnnouncements(hostElement: _initializeAccessibilityAnnouncementHost());
+
+  static DomElement _initializeAccessibilityAnnouncementHost() {
+    final DomElement host = createDomElement(announcementsHostTagName);
+    domDocument.body!.append(host);
+    return host;
+  }
 
   /// Disables semantics and uninitializes the singleton [instance].
   ///

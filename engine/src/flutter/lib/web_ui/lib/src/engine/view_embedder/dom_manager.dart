@@ -26,8 +26,6 @@ import 'style_manager.dart';
 ///   |    |    |    |
 ///   |    |    |    +- <flt-scene>
 ///   |    |    |
-///   |    |    +- [announcementsHost] <flt-announcement-host>
-///   |    |    |
 ///   |    |    +- <style>
 ///   |    |
 ///   |    +- ...platform views
@@ -50,7 +48,6 @@ class DomManager {
     final DomElement sceneHost = domDocument.createElement(DomManager.sceneHostTagName);
     final DomElement textEditingHost = domDocument.createElement(DomManager.textEditingHostTagName);
     final DomElement semanticsHost = domDocument.createElement(DomManager.semanticsHostTagName);
-    final DomElement announcementsHost = createDomElement(DomManager.announcementsHostTagName);
 
     // Root element children.
     rootElement.appendChild(platformViewsHost);
@@ -71,7 +68,6 @@ class DomManager {
     // Rendering host (shadow root) children.
 
     renderingHost.append(sceneHost);
-    renderingHost.append(announcementsHost);
 
     // Styling.
 
@@ -106,7 +102,6 @@ class DomManager {
       sceneHost: sceneHost,
       textEditingHost: textEditingHost,
       semanticsHost: semanticsHost,
-      announcementsHost: announcementsHost,
     );
   }
 
@@ -117,7 +112,6 @@ class DomManager {
     required this.sceneHost,
     required this.textEditingHost,
     required this.semanticsHost,
-    required this.announcementsHost,
   });
 
   /// The tag name for the Flutter View root element.
@@ -134,9 +128,6 @@ class DomManager {
 
   /// The tag name for the semantics host.
   static const String semanticsHostTagName = 'flt-semantics-host';
-
-  /// The tag name for the accessibility announcements host.
-  static const String announcementsHostTagName = 'flt-announcement-host';
 
   /// The root DOM element for the entire Flutter View.
   ///
@@ -167,9 +158,6 @@ class DomManager {
   /// Otherwise, the phone will disable focusing by touch, only by tabbing
   /// around the UI.
   final DomElement semanticsHost;
-
-  /// This is where accessibility announcements are inserted.
-  final DomElement announcementsHost;
 
   DomElement? _lastSceneElement;
 
