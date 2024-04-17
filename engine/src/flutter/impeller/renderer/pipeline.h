@@ -13,6 +13,7 @@
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/pipeline_builder.h"
 #include "impeller/renderer/pipeline_descriptor.h"
+#include "impeller/renderer/shader_stage_compatibility_checker.h"
 
 namespace impeller {
 
@@ -89,6 +90,11 @@ PipelineFuture<ComputePipelineDescriptor> CreatePipelineFuture(
 
 template <class VertexShader_, class FragmentShader_>
 class RenderPipelineT {
+  static_assert(
+      ShaderStageCompatibilityChecker<VertexShader_, FragmentShader_>::Check(),
+      "The output slots for the fragment shader don't have matches in the "
+      "vertex shader's output slots. This will result in a linker error.");
+
  public:
   using VertexShader = VertexShader_;
   using FragmentShader = FragmentShader_;
