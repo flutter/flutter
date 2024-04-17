@@ -602,9 +602,18 @@ NSMutableArray* ClipPathFromMutations(CGRect master_clip, const MutationVector& 
   [containerSuperview addSubview:_platformViewContainer];
   _platformViewContainer.frame = self.bounds;
 
-  // Nest the platform view in the PlatformViewContainer.
-  [_platformViewContainer addSubview:_platformView];
-  _platformView.frame = untransformedBounds;
+  // Nest the platform view in the PlatformViewContainer, but only if the view doesn't have a
+  // superview yet. Sometimes the platform view reparents itself (WKWebView entering FullScreen)
+  // in which case do not forcefully move it back.
+  if (_platformView.superview == nil) {
+    [_platformViewContainer addSubview:_platformView];
+  }
+
+  // Originally first subview would be the _platformView. However during WKWebView full screen
+  // the platform view gets replaced with a placeholder. Given that _platformViewContainer does
+  // not contain any other views it is safe to assume that any subview found can be treated
+  // as the platform view.
+  _platformViewContainer.subviews.firstObject.frame = untransformedBounds;
 
   // Transform for the platform view is finalTransform adjusted for bounding rect origin.
   CATransform3D translation =
