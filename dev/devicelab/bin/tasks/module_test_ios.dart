@@ -679,6 +679,16 @@ end
         return TaskResult.failure('Failed to build existing Swift app .app');
       }
 
+      final String swiftAnalyticsOutput = swiftAnalyticsOutputFile.readAsStringSync();
+      if (!swiftAnalyticsOutput.contains('cd24: ios')
+          || !swiftAnalyticsOutput.contains('cd25: true')
+          || !swiftAnalyticsOutput.contains('viewName: assemble')) {
+        return TaskResult.failure(
+          'Building outer Swift app produced the following analytics: "$swiftAnalyticsOutput" '
+          'but not the expected strings: "cd24: ios", "cd25: true", "viewName: assemble"'
+        );
+      }
+
       return TaskResult.success(null);
     } catch (e) {
       return TaskResult.failure(e.toString());
