@@ -16,9 +16,9 @@ void main() {
     final Device device = await devices.workingDevice;
     await device.unlock();
     final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
-    section('TEST WHETHER `flutter drive --route` WORKS on IOS');
+    section('TEST WHETHER `flutter drive --route` WORKS ON iOS');
     await inDirectory(appDir, () async {
-      return flutter(
+      await flutter(
         'drive',
         options: <String>[
           '--verbose',
@@ -29,6 +29,7 @@ void main() {
           'lib/route.dart',
         ],
       );
+      await device.uninstallApp();
     });
     return TaskResult.success(null);
   });
