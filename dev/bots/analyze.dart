@@ -112,7 +112,7 @@ Future<void> run(List<String> arguments) async {
   printProgress('Links for creating GitHub issues...');
   await verifyIssueLinks(flutterRoot);
 
-  printProgress('Links to GitHub...');
+  printProgress('Links to repositories...');
   await verifyGitHubLinks(flutterRoot);
 
   printProgress('Unexpected binaries...');
@@ -474,7 +474,7 @@ Future<void> verifyMaterialFilesAreUpToDateWithTemplateFiles(String workingDirec
   if (errors.isNotEmpty) {
     foundError(<String>[
       ...errors,
-      '${bold}See: https://github.com/flutter/flutter/blob/master/dev/tools/gen_defaults to update the token template files.$reset',
+      '${bold}See: https://github.com/flutter/flutter/blob/main/dev/tools/gen_defaults to update the token template files.$reset',
     ]);
   }
 }
