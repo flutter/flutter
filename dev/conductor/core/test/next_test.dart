@@ -1002,7 +1002,7 @@ class _TestRepository extends Repository {
     name: name,
     requiredLocalBranches: <String>[],
     stdio: checkouts.stdio,
-    upstreamRemote: const Remote(name: RemoteName.upstream, url: 'git@github.com:upstream/repo.git'),
+    upstreamRemote: const Remote.upstream('git@github.com:upstream/repo.git'),
   );
 
   @override
