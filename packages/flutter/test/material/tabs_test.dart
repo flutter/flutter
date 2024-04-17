@@ -50,6 +50,7 @@ Widget buildFrame({
   TextDirection textDirection = TextDirection.ltr,
   TabAlignment? tabAlignment,
   TabBarTheme? tabBarTheme,
+  Decoration? indicator,
   bool? useMaterial3,
 }) {
   if (secondaryTabBar) {
@@ -88,6 +89,7 @@ Widget buildFrame({
         indicatorColor: indicatorColor,
         padding: padding,
         tabAlignment: tabAlignment,
+        indicator: indicator,
       ),
     ),
   );
@@ -7074,5 +7076,51 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('View 0'), findsNothing);
     expect(find.text('View 2'), findsOneWidget);
+  });
+
+  testWidgets('Tab indicator painter image configuration', (WidgetTester tester) async {
+    final List<String> tabs = <String>['A', 'B'];
+    final TestIndicatorDecoration decoration = TestIndicatorDecoration();
+
+    Widget buildTabs({
+      TextDirection textDirection = TextDirection.ltr,
+      double ratio = 1.0,
+    }) {
+      return MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(devicePixelRatio: ratio),
+          child: Directionality(
+            textDirection: textDirection,
+            child: DefaultTabController(
+              length: tabs.length,
+              child: Scaffold(
+                appBar: AppBar(
+                  bottom: TabBar(
+                    indicator: decoration,
+                    tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabs());
+
+    ImageConfiguration config = decoration.painters.last.lastConfiguration!;
+    expect(config.size?.width, closeTo(14.1, 0.1));
+    expect(config.size?.height, equals(48.0));
+    expect(config.textDirection, TextDirection.ltr);
+    expect(config.devicePixelRatio, 1.0);
+
+    await tester.pumpWidget(buildTabs(textDirection: TextDirection.rtl, ratio: 2.33));
+
+    config = decoration.painters.last.lastConfiguration!;
+    expect(config.size?.width, closeTo(14.1, 0.1));
+    expect(config.size?.height, equals(48.0));
+    expect(config.textDirection, TextDirection.rtl);
+    expect(config.devicePixelRatio, 2.33);
   });
 }
