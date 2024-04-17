@@ -29,6 +29,7 @@ class HelloWorldMemoryTest extends MemoryTest {
     await recordStart();
     await Future<void>.delayed(const Duration(milliseconds: 3000));
     await recordEnd();
+    await device!.uninstallApp();
   }
 }
 
