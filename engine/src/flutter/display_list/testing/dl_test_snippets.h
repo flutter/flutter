@@ -228,14 +228,10 @@ SkFont CreateTestFontOfSize(SkScalar scalar);
 sk_sp<SkTextBlob> GetTestTextBlob(int index);
 
 struct DisplayListInvocation {
-  unsigned int op_count_;
+  uint32_t op_count_;
   size_t byte_count_;
 
-  // in some cases, running the sequence through an SkCanvas will result
-  // in fewer ops/bytes. Attribute invocations are recorded in an SkPaint
-  // and not forwarded on, and SkCanvas culls unused save/restore/transforms.
-  int sk_op_count_;
-  size_t sk_byte_count_;
+  uint32_t depth_;
 
   DlInvoker invoker;
   bool supports_group_opacity_ = false;
@@ -244,20 +240,16 @@ struct DisplayListInvocation {
 
   bool supports_group_opacity() { return supports_group_opacity_; }
 
-  unsigned int op_count() { return op_count_; }
+  uint32_t op_count() { return op_count_; }
   // byte count for the individual ops, no DisplayList overhead
   size_t raw_byte_count() { return byte_count_; }
   // byte count for the ops with DisplayList overhead, comparable
   // to |DisplayList.byte_count().
   size_t byte_count() { return sizeof(DisplayList) + byte_count_; }
 
-  void Invoke(DlOpReceiver& builder) { invoker(builder); }
+  uint32_t depth() { return depth_; }
 
-  // sk_sp<DisplayList> Build() {
-  //   DisplayListBuilder builder;
-  //   invoker(builder.asReceiver());
-  //   return builder.Build();
-  // }
+  void Invoke(DlOpReceiver& builder) { invoker(builder); }
 };
 
 struct DisplayListInvocationGroup {

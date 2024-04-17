@@ -96,6 +96,9 @@ enum class DisplayListCompare {
 // of data for "free" and works best when it packs well into an 8-byte
 // aligned size.
 struct DLOp {
+  static constexpr uint32_t kDepthInc = 0;
+  static constexpr uint32_t kRenderOpInc = 0;
+
   DisplayListOpType type : 8;
   uint32_t size : 24;
 
@@ -105,17 +108,17 @@ struct DLOp {
 };
 
 // 4 byte header + 4 byte payload packs into minimum 8 bytes
-#define DEFINE_SET_BOOL_OP(name)                             \
-  struct Set##name##Op final : DLOp {                        \
-    static const auto kType = DisplayListOpType::kSet##name; \
-                                                             \
-    explicit Set##name##Op(bool value) : value(value) {}     \
-                                                             \
-    const bool value;                                        \
-                                                             \
-    void dispatch(DispatchContext& ctx) const {              \
-      ctx.receiver.set##name(value);                         \
-    }                                                        \
+#define DEFINE_SET_BOOL_OP(name)                                 \
+  struct Set##name##Op final : DLOp {                            \
+    static constexpr auto kType = DisplayListOpType::kSet##name; \
+                                                                 \
+    explicit Set##name##Op(bool value) : value(value) {}         \
+                                                                 \
+    const bool value;                                            \
+                                                                 \
+    void dispatch(DispatchContext& ctx) const {                  \
+      ctx.receiver.set##name(value);                             \
+    }                                                            \
   };
 DEFINE_SET_BOOL_OP(AntiAlias)
 DEFINE_SET_BOOL_OP(InvertColors)
@@ -124,7 +127,7 @@ DEFINE_SET_BOOL_OP(InvertColors)
 // 4 byte header + 4 byte payload packs into minimum 8 bytes
 #define DEFINE_SET_ENUM_OP(name)                                         \
   struct SetStroke##name##Op final : DLOp {                              \
-    static const auto kType = DisplayListOpType::kSetStroke##name;       \
+    static constexpr auto kType = DisplayListOpType::kSetStroke##name;   \
                                                                          \
     explicit SetStroke##name##Op(DlStroke##name value) : value(value) {} \
                                                                          \
@@ -140,7 +143,7 @@ DEFINE_SET_ENUM_OP(Join)
 
 // 4 byte header + 4 byte payload packs into minimum 8 bytes
 struct SetStyleOp final : DLOp {
-  static const auto kType = DisplayListOpType::kSetStyle;
+  static constexpr auto kType = DisplayListOpType::kSetStyle;
 
   explicit SetStyleOp(DlDrawStyle style) : style(style) {}
 
@@ -152,7 +155,7 @@ struct SetStyleOp final : DLOp {
 };
 // 4 byte header + 4 byte payload packs into minimum 8 bytes
 struct SetStrokeWidthOp final : DLOp {
-  static const auto kType = DisplayListOpType::kSetStrokeWidth;
+  static constexpr auto kType = DisplayListOpType::kSetStrokeWidth;
 
   explicit SetStrokeWidthOp(float width) : width(width) {}
 
@@ -164,7 +167,7 @@ struct SetStrokeWidthOp final : DLOp {
 };
 // 4 byte header + 4 byte payload packs into minimum 8 bytes
 struct SetStrokeMiterOp final : DLOp {
-  static const auto kType = DisplayListOpType::kSetStrokeMiter;
+  static constexpr auto kType = DisplayListOpType::kSetStrokeMiter;
 
   explicit SetStrokeMiterOp(float limit) : limit(limit) {}
 
@@ -177,7 +180,7 @@ struct SetStrokeMiterOp final : DLOp {
 
 // 4 byte header + 4 byte payload packs into minimum 8 bytes
 struct SetColorOp final : DLOp {
-  static const auto kType = DisplayListOpType::kSetColor;
+  static constexpr auto kType = DisplayListOpType::kSetColor;
 
   explicit SetColorOp(DlColor color) : color(color) {}
 
@@ -187,7 +190,7 @@ struct SetColorOp final : DLOp {
 };
 // 4 byte header + 4 byte payload packs into minimum 8 bytes
 struct SetBlendModeOp final : DLOp {
-  static const auto kType = DisplayListOpType::kSetBlendMode;
+  static constexpr auto kType = DisplayListOpType::kSetBlendMode;
 
   explicit SetBlendModeOp(DlBlendMode mode) : mode(mode) {}
 
@@ -206,7 +209,7 @@ struct SetBlendModeOp final : DLOp {
 //      4 and 8 bytes unused
 #define DEFINE_SET_CLEAR_DLATTR_OP(name, sk_name, field)                    \
   struct Clear##name##Op final : DLOp {                                     \
-    static const auto kType = DisplayListOpType::kClear##name;              \
+    static constexpr auto kType = DisplayListOpType::kClear##name;          \
                                                                             \
     Clear##name##Op() {}                                                    \
                                                                             \
@@ -215,7 +218,7 @@ struct SetBlendModeOp final : DLOp {
     }                                                                       \
   };                                                                        \
   struct SetPod##name##Op final : DLOp {                                    \
-    static const auto kType = DisplayListOpType::kSetPod##name;             \
+    static constexpr auto kType = DisplayListOpType::kSetPod##name;         \
                                                                             \
     SetPod##name##Op() {}                                                   \
                                                                             \
@@ -234,7 +237,7 @@ DEFINE_SET_CLEAR_DLATTR_OP(PathEffect, PathEffect, effect)
 // 4 byte header + 80 bytes for the embedded DlImageColorSource
 // uses 84 total bytes (4 bytes unused)
 struct SetImageColorSourceOp : DLOp {
-  static const auto kType = DisplayListOpType::kSetImageColorSource;
+  static constexpr auto kType = DisplayListOpType::kSetImageColorSource;
 
   explicit SetImageColorSourceOp(const DlImageColorSource* source)
       : source(source->image(),
@@ -253,7 +256,7 @@ struct SetImageColorSourceOp : DLOp {
 // 56 bytes: 4 byte header, 4 byte padding, 8 for vtable, 8 * 2 for sk_sps, 24
 // for the std::vector.
 struct SetRuntimeEffectColorSourceOp : DLOp {
-  static const auto kType = DisplayListOpType::kSetRuntimeEffectColorSource;
+  static constexpr auto kType = DisplayListOpType::kSetRuntimeEffectColorSource;
 
   explicit SetRuntimeEffectColorSourceOp(
       const DlRuntimeEffectColorSource* source)
@@ -275,7 +278,7 @@ struct SetRuntimeEffectColorSourceOp : DLOp {
 
 #ifdef IMPELLER_ENABLE_3D
 struct SetSceneColorSourceOp : DLOp {
-  static const auto kType = DisplayListOpType::kSetSceneColorSource;
+  static constexpr auto kType = DisplayListOpType::kSetSceneColorSource;
 
   explicit SetSceneColorSourceOp(const DlSceneColorSource* source)
       : source(source->scene_node(), source->camera_matrix()) {}
@@ -295,7 +298,7 @@ struct SetSceneColorSourceOp : DLOp {
 
 // 4 byte header + 16 byte payload uses 24 total bytes (4 bytes unused)
 struct SetSharedImageFilterOp : DLOp {
-  static const auto kType = DisplayListOpType::kSetSharedImageFilter;
+  static constexpr auto kType = DisplayListOpType::kSetSharedImageFilter;
 
   explicit SetSharedImageFilterOp(const DlImageFilter* filter)
       : filter(filter->shared()) {}
@@ -315,16 +318,20 @@ struct SetSharedImageFilterOp : DLOp {
 // The base struct for all save() and saveLayer() ops
 // 4 byte header + 8 byte payload packs into 16 bytes (4 bytes unused)
 struct SaveOpBase : DLOp {
+  static constexpr uint32_t kDepthInc = 0;
+  static constexpr uint32_t kRenderOpInc = 1;
+
   SaveOpBase() : options(), restore_index(0) {}
 
   explicit SaveOpBase(const SaveLayerOptions& options)
-      : options(options), restore_index(0) {}
+      : options(options), restore_index(0), total_content_depth(0) {}
 
   // options parameter is only used by saveLayer operations, but since
   // it packs neatly into the empty space created by laying out the 64-bit
   // offsets, it can be stored for free and defaulted to 0 for save operations.
   SaveLayerOptions options;
   int restore_index;
+  uint32_t total_content_depth;
 
   inline bool save_needed(DispatchContext& ctx) const {
     bool needed = ctx.next_render_index <= restore_index;
@@ -335,13 +342,13 @@ struct SaveOpBase : DLOp {
 };
 // 16 byte SaveOpBase with no additional data (options is unsed here)
 struct SaveOp final : SaveOpBase {
-  static const auto kType = DisplayListOpType::kSave;
+  static constexpr auto kType = DisplayListOpType::kSave;
 
   SaveOp() : SaveOpBase() {}
 
   void dispatch(DispatchContext& ctx) const {
     if (save_needed(ctx)) {
-      ctx.receiver.save();
+      ctx.receiver.save(total_content_depth);
     }
   }
 };
@@ -355,20 +362,20 @@ struct SaveLayerOpBase : SaveOpBase {
 };
 // 32 byte SaveLayerOpBase with no additional data
 struct SaveLayerOp final : SaveLayerOpBase {
-  static const auto kType = DisplayListOpType::kSaveLayer;
+  static constexpr auto kType = DisplayListOpType::kSaveLayer;
 
   SaveLayerOp(const SaveLayerOptions& options, const SkRect& rect)
       : SaveLayerOpBase(options, rect) {}
 
   void dispatch(DispatchContext& ctx) const {
     if (save_needed(ctx)) {
-      ctx.receiver.saveLayer(rect, options);
+      ctx.receiver.saveLayer(rect, options, total_content_depth);
     }
   }
 };
 // 32 byte SaveLayerOpBase + 16 byte payload packs into minimum 48 bytes
 struct SaveLayerBackdropOp final : SaveLayerOpBase {
-  static const auto kType = DisplayListOpType::kSaveLayerBackdrop;
+  static constexpr auto kType = DisplayListOpType::kSaveLayerBackdrop;
 
   SaveLayerBackdropOp(const SaveLayerOptions& options,
                       const SkRect& rect,
@@ -379,7 +386,8 @@ struct SaveLayerBackdropOp final : SaveLayerOpBase {
 
   void dispatch(DispatchContext& ctx) const {
     if (save_needed(ctx)) {
-      ctx.receiver.saveLayer(rect, options, backdrop.get());
+      ctx.receiver.saveLayer(rect, options, total_content_depth,
+                             backdrop.get());
     }
   }
 
@@ -392,7 +400,9 @@ struct SaveLayerBackdropOp final : SaveLayerOpBase {
 };
 // 4 byte header + no payload uses minimum 8 bytes (4 bytes unused)
 struct RestoreOp final : DLOp {
-  static const auto kType = DisplayListOpType::kRestore;
+  static constexpr auto kType = DisplayListOpType::kRestore;
+  static constexpr uint32_t kDepthInc = 0;
+  static constexpr uint32_t kRenderOpInc = 1;
 
   RestoreOp() {}
 
@@ -407,6 +417,9 @@ struct RestoreOp final : DLOp {
 };
 
 struct TransformClipOpBase : DLOp {
+  static constexpr uint32_t kDepthInc = 0;
+  static constexpr uint32_t kRenderOpInc = 1;
+
   inline bool op_needed(const DispatchContext& context) const {
     return context.next_render_index <= context.next_restore_index;
   }
@@ -414,7 +427,7 @@ struct TransformClipOpBase : DLOp {
 // 4 byte header + 8 byte payload uses 12 bytes but is rounded up to 16 bytes
 // (4 bytes unused)
 struct TranslateOp final : TransformClipOpBase {
-  static const auto kType = DisplayListOpType::kTranslate;
+  static constexpr auto kType = DisplayListOpType::kTranslate;
 
   TranslateOp(SkScalar tx, SkScalar ty) : tx(tx), ty(ty) {}
 
@@ -430,7 +443,7 @@ struct TranslateOp final : TransformClipOpBase {
 // 4 byte header + 8 byte payload uses 12 bytes but is rounded up to 16 bytes
 // (4 bytes unused)
 struct ScaleOp final : TransformClipOpBase {
-  static const auto kType = DisplayListOpType::kScale;
+  static constexpr auto kType = DisplayListOpType::kScale;
 
   ScaleOp(SkScalar sx, SkScalar sy) : sx(sx), sy(sy) {}
 
@@ -445,7 +458,7 @@ struct ScaleOp final : TransformClipOpBase {
 };
 // 4 byte header + 4 byte payload packs into minimum 8 bytes
 struct RotateOp final : TransformClipOpBase {
-  static const auto kType = DisplayListOpType::kRotate;
+  static constexpr auto kType = DisplayListOpType::kRotate;
 
   explicit RotateOp(SkScalar degrees) : degrees(degrees) {}
 
@@ -460,7 +473,7 @@ struct RotateOp final : TransformClipOpBase {
 // 4 byte header + 8 byte payload uses 12 bytes but is rounded up to 16 bytes
 // (4 bytes unused)
 struct SkewOp final : TransformClipOpBase {
-  static const auto kType = DisplayListOpType::kSkew;
+  static constexpr auto kType = DisplayListOpType::kSkew;
 
   SkewOp(SkScalar sx, SkScalar sy) : sx(sx), sy(sy) {}
 
@@ -476,7 +489,7 @@ struct SkewOp final : TransformClipOpBase {
 // 4 byte header + 24 byte payload uses 28 bytes but is rounded up to 32 bytes
 // (4 bytes unused)
 struct Transform2DAffineOp final : TransformClipOpBase {
-  static const auto kType = DisplayListOpType::kTransform2DAffine;
+  static constexpr auto kType = DisplayListOpType::kTransform2DAffine;
 
   // clang-format off
   Transform2DAffineOp(SkScalar mxx, SkScalar mxy, SkScalar mxt,
@@ -497,7 +510,7 @@ struct Transform2DAffineOp final : TransformClipOpBase {
 // 4 byte header + 64 byte payload uses 68 bytes which is rounded up to 72 bytes
 // (4 bytes unused)
 struct TransformFullPerspectiveOp final : TransformClipOpBase {
-  static const auto kType = DisplayListOpType::kTransformFullPerspective;
+  static constexpr auto kType = DisplayListOpType::kTransformFullPerspective;
 
   // clang-format off
   TransformFullPerspectiveOp(
@@ -528,7 +541,7 @@ struct TransformFullPerspectiveOp final : TransformClipOpBase {
 
 // 4 byte header with no payload.
 struct TransformResetOp final : TransformClipOpBase {
-  static const auto kType = DisplayListOpType::kTransformReset;
+  static constexpr auto kType = DisplayListOpType::kTransformReset;
 
   TransformResetOp() = default;
 
@@ -549,22 +562,22 @@ struct TransformResetOp final : TransformClipOpBase {
 // the header, but the Windows compiler keeps wanting to expand that
 // packing into more bytes than needed (even when they are declared as
 // packed bit fields!)
-#define DEFINE_CLIP_SHAPE_OP(shapetype, clipop)                            \
-  struct Clip##clipop##shapetype##Op final : TransformClipOpBase {         \
-    static const auto kType = DisplayListOpType::kClip##clipop##shapetype; \
-                                                                           \
-    Clip##clipop##shapetype##Op(Sk##shapetype shape, bool is_aa)           \
-        : is_aa(is_aa), shape(shape) {}                                    \
-                                                                           \
-    const bool is_aa;                                                      \
-    const Sk##shapetype shape;                                             \
-                                                                           \
-    void dispatch(DispatchContext& ctx) const {                            \
-      if (op_needed(ctx)) {                                                \
-        ctx.receiver.clip##shapetype(shape, DlCanvas::ClipOp::k##clipop,   \
-                                     is_aa);                               \
-      }                                                                    \
-    }                                                                      \
+#define DEFINE_CLIP_SHAPE_OP(shapetype, clipop)                                \
+  struct Clip##clipop##shapetype##Op final : TransformClipOpBase {             \
+    static constexpr auto kType = DisplayListOpType::kClip##clipop##shapetype; \
+                                                                               \
+    Clip##clipop##shapetype##Op(Sk##shapetype shape, bool is_aa)               \
+        : is_aa(is_aa), shape(shape) {}                                        \
+                                                                               \
+    const bool is_aa;                                                          \
+    const Sk##shapetype shape;                                                 \
+                                                                               \
+    void dispatch(DispatchContext& ctx) const {                                \
+      if (op_needed(ctx)) {                                                    \
+        ctx.receiver.clip##shapetype(shape, DlCanvas::ClipOp::k##clipop,       \
+                                     is_aa);                                   \
+      }                                                                        \
+    }                                                                          \
   };
 DEFINE_CLIP_SHAPE_OP(Rect, Intersect)
 DEFINE_CLIP_SHAPE_OP(RRect, Intersect)
@@ -574,7 +587,7 @@ DEFINE_CLIP_SHAPE_OP(RRect, Difference)
 
 #define DEFINE_CLIP_PATH_OP(clipop)                                       \
   struct Clip##clipop##PathOp final : TransformClipOpBase {               \
-    static const auto kType = DisplayListOpType::kClip##clipop##Path;     \
+    static constexpr auto kType = DisplayListOpType::kClip##clipop##Path; \
                                                                           \
     Clip##clipop##PathOp(const SkPath& path, bool is_aa)                  \
         : is_aa(is_aa), cached_path(path) {}                              \
@@ -605,6 +618,9 @@ DEFINE_CLIP_PATH_OP(Difference)
 #undef DEFINE_CLIP_PATH_OP
 
 struct DrawOpBase : DLOp {
+  static constexpr uint32_t kDepthInc = 1;
+  static constexpr uint32_t kRenderOpInc = 1;
+
   inline bool op_needed(const DispatchContext& ctx) const {
     return ctx.cur_index >= ctx.next_render_index;
   }
@@ -612,7 +628,7 @@ struct DrawOpBase : DLOp {
 
 // 4 byte header + no payload uses minimum 8 bytes (4 bytes unused)
 struct DrawPaintOp final : DrawOpBase {
-  static const auto kType = DisplayListOpType::kDrawPaint;
+  static constexpr auto kType = DisplayListOpType::kDrawPaint;
 
   DrawPaintOp() {}
 
@@ -625,7 +641,7 @@ struct DrawPaintOp final : DrawOpBase {
 // 4 byte header + 8 byte payload uses 12 bytes but is rounded up to 16 bytes
 // (4 bytes unused)
 struct DrawColorOp final : DrawOpBase {
-  static const auto kType = DisplayListOpType::kDrawColor;
+  static constexpr auto kType = DisplayListOpType::kDrawColor;
 
   DrawColorOp(DlColor color, DlBlendMode mode) : color(color), mode(mode) {}
 
@@ -646,7 +662,7 @@ struct DrawColorOp final : DrawOpBase {
 // SkRRect is 52 more bytes, which packs efficiently into 56 bytes total
 #define DEFINE_DRAW_1ARG_OP(op_name, arg_type, arg_name)                  \
   struct Draw##op_name##Op final : DrawOpBase {                           \
-    static const auto kType = DisplayListOpType::kDraw##op_name;          \
+    static constexpr auto kType = DisplayListOpType::kDraw##op_name;      \
                                                                           \
     explicit Draw##op_name##Op(arg_type arg_name) : arg_name(arg_name) {} \
                                                                           \
@@ -666,7 +682,7 @@ DEFINE_DRAW_1ARG_OP(RRect, SkRRect, rrect)
 // 4 byte header + 128 byte payload uses 132 bytes but is rounded
 // up to 136 bytes (4 bytes unused)
 struct DrawPathOp final : DrawOpBase {
-  static const auto kType = DisplayListOpType::kDrawPath;
+  static constexpr auto kType = DisplayListOpType::kDrawPath;
 
   explicit DrawPathOp(const SkPath& path) : cached_path(path) {}
 
@@ -694,21 +710,21 @@ struct DrawPathOp final : DrawOpBase {
 // SkPoint + SkScalar is 12 more bytes, packing efficiently into 16 bytes total
 // 2 x SkRRect is 104 more bytes, using 108 and rounding up to 112 bytes total
 //             (4 bytes unused)
-#define DEFINE_DRAW_2ARG_OP(op_name, type1, name1, type2, name2) \
-  struct Draw##op_name##Op final : DrawOpBase {                  \
-    static const auto kType = DisplayListOpType::kDraw##op_name; \
-                                                                 \
-    Draw##op_name##Op(type1 name1, type2 name2)                  \
-        : name1(name1), name2(name2) {}                          \
-                                                                 \
-    const type1 name1;                                           \
-    const type2 name2;                                           \
-                                                                 \
-    void dispatch(DispatchContext& ctx) const {                  \
-      if (op_needed(ctx)) {                                      \
-        ctx.receiver.draw##op_name(name1, name2);                \
-      }                                                          \
-    }                                                            \
+#define DEFINE_DRAW_2ARG_OP(op_name, type1, name1, type2, name2)     \
+  struct Draw##op_name##Op final : DrawOpBase {                      \
+    static constexpr auto kType = DisplayListOpType::kDraw##op_name; \
+                                                                     \
+    Draw##op_name##Op(type1 name1, type2 name2)                      \
+        : name1(name1), name2(name2) {}                              \
+                                                                     \
+    const type1 name1;                                               \
+    const type2 name2;                                               \
+                                                                     \
+    void dispatch(DispatchContext& ctx) const {                      \
+      if (op_needed(ctx)) {                                          \
+        ctx.receiver.draw##op_name(name1, name2);                    \
+      }                                                              \
+    }                                                                \
   };
 DEFINE_DRAW_2ARG_OP(Line, SkPoint, p0, SkPoint, p1)
 DEFINE_DRAW_2ARG_OP(Circle, SkPoint, center, SkScalar, radius)
@@ -717,7 +733,7 @@ DEFINE_DRAW_2ARG_OP(DRRect, SkRRect, outer, SkRRect, inner)
 
 // 4 byte header + 28 byte payload packs efficiently into 32 bytes
 struct DrawArcOp final : DrawOpBase {
-  static const auto kType = DisplayListOpType::kDrawArc;
+  static constexpr auto kType = DisplayListOpType::kDrawArc;
 
   DrawArcOp(SkRect bounds, SkScalar start, SkScalar sweep, bool center)
       : bounds(bounds), start(start), sweep(sweep), center(center) {}
@@ -742,7 +758,7 @@ struct DrawArcOp final : DrawOpBase {
 // the fixed payload beyond the 8 bytes
 #define DEFINE_DRAW_POINTS_OP(name, mode)                                \
   struct Draw##name##Op final : DrawOpBase {                             \
-    static const auto kType = DisplayListOpType::kDraw##name;            \
+    static constexpr auto kType = DisplayListOpType::kDraw##name;        \
                                                                          \
     explicit Draw##name##Op(uint32_t count) : count(count) {}            \
                                                                          \
@@ -768,7 +784,7 @@ DEFINE_DRAW_POINTS_OP(Polygon, kPolygon);
 // indices so the alignment can be up to 6 bytes off leading to
 // up to 6 bytes of overhead
 struct DrawVerticesOp final : DrawOpBase {
-  static const auto kType = DisplayListOpType::kDrawVertices;
+  static constexpr auto kType = DisplayListOpType::kDrawVertices;
 
   explicit DrawVerticesOp(DlBlendMode mode) : mode(mode) {}
 
@@ -787,7 +803,7 @@ struct DrawVerticesOp final : DrawOpBase {
 // (4 bytes unused)
 #define DEFINE_DRAW_IMAGE_OP(name, with_attributes)                      \
   struct name##Op final : DrawOpBase {                                   \
-    static const auto kType = DisplayListOpType::k##name;                \
+    static constexpr auto kType = DisplayListOpType::k##name;            \
                                                                          \
     name##Op(const sk_sp<DlImage>& image,                                \
              const SkPoint& point,                                       \
@@ -818,7 +834,7 @@ DEFINE_DRAW_IMAGE_OP(DrawImageWithAttr, true)
 // 4 byte header + 72 byte payload uses 76 bytes but is rounded up to 80 bytes
 // (4 bytes unused)
 struct DrawImageRectOp final : DrawOpBase {
-  static const auto kType = DisplayListOpType::kDrawImageRect;
+  static constexpr auto kType = DisplayListOpType::kDrawImageRect;
 
   DrawImageRectOp(const sk_sp<DlImage>& image,
                   const SkRect& src,
@@ -860,7 +876,7 @@ struct DrawImageRectOp final : DrawOpBase {
 // 4 byte header + 44 byte payload packs efficiently into 48 bytes
 #define DEFINE_DRAW_IMAGE_NINE_OP(name, render_with_attributes)            \
   struct name##Op final : DrawOpBase {                                     \
-    static const auto kType = DisplayListOpType::k##name;                  \
+    static constexpr auto kType = DisplayListOpType::k##name;              \
                                                                            \
     name##Op(const sk_sp<DlImage>& image,                                  \
              const SkIRect& center,                                        \
@@ -940,7 +956,7 @@ struct DrawAtlasBaseOp : DrawOpBase {
 // Packs into 48 bytes as per DrawAtlasBaseOp
 // with array data following the struct also as per DrawAtlasBaseOp
 struct DrawAtlasOp final : DrawAtlasBaseOp {
-  static const auto kType = DisplayListOpType::kDrawAtlas;
+  static constexpr auto kType = DisplayListOpType::kDrawAtlas;
 
   DrawAtlasOp(const sk_sp<DlImage>& atlas,
               int count,
@@ -981,7 +997,7 @@ struct DrawAtlasOp final : DrawAtlasBaseOp {
 // of 56 bytes for the Culled drawAtlas.
 // Also with array data following the struct as per DrawAtlasBaseOp
 struct DrawAtlasCulledOp final : DrawAtlasBaseOp {
-  static const auto kType = DisplayListOpType::kDrawAtlasCulled;
+  static constexpr auto kType = DisplayListOpType::kDrawAtlasCulled;
 
   DrawAtlasCulledOp(const sk_sp<DlImage>& atlas,
                     int count,
@@ -1025,7 +1041,7 @@ struct DrawAtlasCulledOp final : DrawAtlasBaseOp {
 // 4 byte header + ptr aligned payload uses 12 bytes round up to 16
 // (4 bytes unused)
 struct DrawDisplayListOp final : DrawOpBase {
-  static const auto kType = DisplayListOpType::kDrawDisplayList;
+  static constexpr auto kType = DisplayListOpType::kDrawDisplayList;
 
   explicit DrawDisplayListOp(const sk_sp<DisplayList>& display_list,
                              SkScalar opacity)
@@ -1051,7 +1067,7 @@ struct DrawDisplayListOp final : DrawOpBase {
 // 4 byte header + 8 payload bytes + an aligned pointer take 24 bytes
 // (4 unused to align the pointer)
 struct DrawTextBlobOp final : DrawOpBase {
-  static const auto kType = DisplayListOpType::kDrawTextBlob;
+  static constexpr auto kType = DisplayListOpType::kDrawTextBlob;
 
   DrawTextBlobOp(const sk_sp<SkTextBlob>& blob, SkScalar x, SkScalar y)
       : x(x), y(y), blob(blob) {}
@@ -1068,7 +1084,7 @@ struct DrawTextBlobOp final : DrawOpBase {
 };
 
 struct DrawTextFrameOp final : DrawOpBase {
-  static const auto kType = DisplayListOpType::kDrawTextFrame;
+  static constexpr auto kType = DisplayListOpType::kDrawTextFrame;
 
   DrawTextFrameOp(const std::shared_ptr<impeller::TextFrame>& text_frame,
                   SkScalar x,
@@ -1089,7 +1105,7 @@ struct DrawTextFrameOp final : DrawOpBase {
 // 4 byte header + 140 byte payload packs evenly into 140 bytes
 #define DEFINE_DRAW_SHADOW_OP(name, transparent_occluder)                    \
   struct Draw##name##Op final : DrawOpBase {                                 \
-    static const auto kType = DisplayListOpType::kDraw##name;                \
+    static constexpr auto kType = DisplayListOpType::kDraw##name;            \
                                                                              \
     Draw##name##Op(const SkPath& path,                                       \
                    DlColor color,                                            \
