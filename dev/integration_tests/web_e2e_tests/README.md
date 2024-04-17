@@ -37,5 +37,5 @@ More resources:
 
 [1]: https://chromedriver.chromium.org/downloads
 [2]: https://flutter.dev/docs/development/tools/web-renderers
-[3]: https://github.com/flutter/flutter/blob/master/dev/bots/test.dart
+[3]: https://github.com/flutter/flutter/blob/main/dev/bots/test.dart
 [4]: https://flutter.dev/docs/testing/build-modes

@@ -296,7 +296,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
 }
 
 // The Glow logic is a port of the logic in the following file:
-// https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/widget/EdgeEffect.java
+// https://android.googlesource.com/platform/frameworks/base/+/main/core/java/android/widget/EdgeEffect.java
 // as of December 2016.
 
 enum _GlowState { idle, absorb, pull, recede }

@@ -60,7 +60,7 @@ Future<bool> run(List<String> arguments) async {
   void printHelp() {
     print('run_tests.dart [options...] path/to/file1.test path/to/file2.test...');
     print('For details on the test registry format, see:');
-    print('  https://github.com/flutter/tests/blob/master/registry/template.test');
+    print('  https://github.com/flutter/tests/blob/main/registry/template.test');
     print('');
     print(argParser.usage);
     print('');
