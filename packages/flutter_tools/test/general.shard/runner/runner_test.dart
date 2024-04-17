@@ -411,13 +411,12 @@ void main() {
         expect(
           testUsage.events,
           contains(const TestUsageEvent(
-            'analytics',
-            'enabled',
-            label: 'false',
+            'ga4_and_ga3_status_mismatch',
+            'opted_out_of_ga4',
           )),
         );
         expect(fakeAnalytics.telemetryEnabled, false);
-        expect(testUsage.enabled, false);
+        expect(testUsage.enabled, true);
         expect(fakeAnalytics.sentEvents, isEmpty);
 
       },

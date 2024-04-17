@@ -435,6 +435,18 @@ end
         }
       });
 
+      section('Check that the host build sends the correct analytics');
+
+      final String objectiveCAnalyticsOutput = objectiveCAnalyticsOutputFile.readAsStringSync();
+      if (!objectiveCAnalyticsOutput.contains('cd24: ios')
+          || !objectiveCAnalyticsOutput.contains('cd25: true')
+          || !objectiveCAnalyticsOutput.contains('viewName: assemble')) {
+        return TaskResult.failure(
+          'Building outer Objective-C app produced the following analytics: "$objectiveCAnalyticsOutput" '
+          'but not the expected strings: "cd24: ios", "cd25: true", "viewName: assemble"'
+        );
+      }
+
       section('Archive iOS Objective-C host app');
 
       await inDirectory(objectiveCHostApp, () async {
