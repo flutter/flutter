@@ -49,6 +49,8 @@ class Context {
     switch (subCommand) {
       case 'build':
         buildApp();
+      case 'prepare':
+        prepare();
       case 'thin':
         // No-op, thinning is handled during the bundle asset assemble build target.
         break;
@@ -351,20 +353,66 @@ class Context {
     }
   }
 
-  void buildApp() {
-    final bool verbose = environment['VERBOSE_SCRIPT_LOGGING'] != null && environment['VERBOSE_SCRIPT_LOGGING'] != '';
+  void prepare() {
+    final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
     final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
-    String projectPath = '$sourceRoot/..';
-    if (environment['FLUTTER_APPLICATION_PATH'] != null) {
-      projectPath = environment['FLUTTER_APPLICATION_PATH']!;
+    final String projectPath = environment['FLUTTER_APPLICATION_PATH'] ?? '$sourceRoot/..';
+
+    final String buildMode = parseFlutterBuildMode();
+
+    final List<String> flutterArgs = _generateFlutterArgsForAssemble(buildMode, verbose);
+
+    flutterArgs.add('${buildMode}_unpack_ios');
+
+    final ProcessResult result = runSync(
+      '${environmentEnsure('FLUTTER_ROOT')}/bin/flutter',
+      flutterArgs,
+      verbose: verbose,
+      allowFail: true,
+      workingDirectory: projectPath, // equivalent of RunCommand pushd "${project_path}"
+    );
+
+    if (result.exitCode != 0) {
+      echoError('Failed to copy Flutter framework.');
+      exitApp(-1);
+    }
+  }
+
+  void buildApp() {
+    final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
+    final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
+    final String projectPath = environment['FLUTTER_APPLICATION_PATH'] ?? '$sourceRoot/..';
+
+    final String buildMode = parseFlutterBuildMode();
+
+    final List<String> flutterArgs = _generateFlutterArgsForAssemble(buildMode, verbose);
+
+    flutterArgs.add('${buildMode}_ios_bundle_flutter_assets');
+
+    final ProcessResult result = runSync(
+      '${environmentEnsure('FLUTTER_ROOT')}/bin/flutter',
+      flutterArgs,
+      verbose: verbose,
+      allowFail: true,
+      workingDirectory: projectPath, // equivalent of RunCommand pushd "${project_path}"
+    );
+
+    if (result.exitCode != 0) {
+      echoError('Failed to package $projectPath.');
+      exitApp(-1);
     }
 
+    streamOutput('done');
+    streamOutput(' └─Compiling, linking and signing...');
+
+    echo('Project $projectPath built and packaged successfully.');
+  }
+
+  List<String> _generateFlutterArgsForAssemble(String buildMode, bool verbose) {
     String targetPath = 'lib/main.dart';
     if (environment['FLUTTER_TARGET'] != null) {
       targetPath = environment['FLUTTER_TARGET']!;
     }
-
-    final String buildMode = parseFlutterBuildMode();
 
     // Warn the user if not archiving (ACTION=install) in release mode.
     final String? action = environment['ACTION'];
@@ -432,24 +480,6 @@ class Context {
       flutterArgs.add('-dCodeSizeDirectory=${environment['CODE_SIZE_DIRECTORY']}');
     }
 
-    flutterArgs.add('${buildMode}_ios_bundle_flutter_assets');
-
-    final ProcessResult result = runSync(
-      '${environmentEnsure('FLUTTER_ROOT')}/bin/flutter',
-      flutterArgs,
-      verbose: verbose,
-      allowFail: true,
-      workingDirectory: projectPath, // equivalent of RunCommand pushd "${project_path}"
-    );
-
-    if (result.exitCode != 0) {
-      echoError('Failed to package $projectPath.');
-      exitApp(-1);
-    }
-
-    streamOutput('done');
-    streamOutput(' └─Compiling, linking and signing...');
-
-    echo('Project $projectPath built and packaged successfully.');
+    return flutterArgs;
   }
 }

@@ -94,7 +94,12 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
       await _produceAppFramework(buildInfo, modeDirectory, buildOutput);
 
       // Build and copy plugins.
-      await processPodsIfNeeded(project.macos, getMacOSBuildDirectory(), buildInfo.mode);
+      await processPodsIfNeeded(
+        project.macos,
+        getMacOSBuildDirectory(),
+        buildInfo.mode,
+        forceCocoaPodsOnly: true,
+      );
       if (boolArg('plugins') && hasPlugins(project)) {
         await _producePlugins(xcodeBuildConfiguration, buildOutput, modeDirectory);
       }
