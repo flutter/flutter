@@ -534,6 +534,31 @@ void main() {
           );
         });
 
+        testWidgets('container has correct color when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/146573.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          final Color focusColor = theme.colorScheme.surfaceContainerHighest;
+          final Color hoverColor = theme.hoverColor;
+          expect(findBorderPainter(), paints
+            ..path(
+              style: PaintingStyle.fill,
+              color: Color.alphaBlend(hoverColor, focusColor),
+            )
+          );
+        });
+
         testWidgets('active indicator has correct weight and color', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
