@@ -13,12 +13,12 @@ uniform f16sampler2D uv_texture;
 
 // These values must correspond to the order of the items in the
 // 'YUVColorSpace' enum class.
-const float16_t kBT601LimitedRange = 0.0hf;
-const float16_t kBT601FullRange = 1.0hf;
+// const float kBT601LimitedRange = 0.0;
+// const float kBT601FullRange = 1.0;
 
 uniform FragInfo {
   mat4 matrix;
-  float16_t yuv_color_space;
+  float yuv_color_space;
 }
 frag_info;
 
@@ -29,7 +29,7 @@ out f16vec4 frag_color;
 void main() {
   f16vec3 yuv;
   f16vec3 yuv_offset = f16vec3(0.0hf, 0.5hf, 0.5hf);
-  if (frag_info.yuv_color_space == kBT601LimitedRange) {
+  if (frag_info.yuv_color_space == /*kBT601LimitedRange*/ 0.0) {
     yuv_offset.x = 16.0hf / 255.0hf;
   }
 

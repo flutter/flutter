@@ -29,6 +29,5 @@ const float kSqrtThree = 1.73205080757;
 // which results in sharper looking images when mip sampling is enabled. This is
 // the same constant that Skia uses.
 const float kDefaultMipBias = -0.475;
-const float kDefaultMipBiasHalf = -0.475hf;
 
 #endif
