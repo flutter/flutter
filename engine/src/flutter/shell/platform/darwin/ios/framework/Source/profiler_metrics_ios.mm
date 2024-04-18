@@ -23,9 +23,9 @@ class MachThreads {
   MachThreads() = default;
 
   ~MachThreads() {
-    kern_return_t kernel_return_code = vm_deallocate(
+    [[maybe_unused]] kern_return_t kernel_return_code = vm_deallocate(
         mach_task_self(), reinterpret_cast<vm_offset_t>(threads), thread_count * sizeof(thread_t));
-    FML_CHECK(kernel_return_code == KERN_SUCCESS) << "Failed to deallocate thread infos.";
+    FML_DCHECK(kernel_return_code == KERN_SUCCESS) << "Failed to deallocate thread infos.";
   }
 
  private:
@@ -165,8 +165,6 @@ std::optional<CpuUsageInfo> ProfilerMetricsIOS::CpuUsage() {
   kernel_return_code =
       task_threads(mach_task_self(), &mach_threads.threads, &mach_threads.thread_count);
   if (kernel_return_code != KERN_SUCCESS) {
-    FML_LOG(ERROR) << "Error retrieving task information: "
-                   << mach_error_string(kernel_return_code);
     return std::nullopt;
   }
 
@@ -203,8 +201,6 @@ std::optional<CpuUsageInfo> ProfilerMetricsIOS::CpuUsage() {
         num_threads--;
         break;
       default:
-        FML_LOG(ERROR) << "Error retrieving thread information: "
-                       << mach_error_string(kernel_return_code);
         return std::nullopt;
     }
   }
@@ -223,8 +219,6 @@ std::optional<MemoryUsageInfo> ProfilerMetricsIOS::MemoryUsage() {
       task_info(mach_task_self(), TASK_VM_INFO, reinterpret_cast<task_info_t>(&task_memory_info),
                 &task_memory_info_count);
   if (kernel_return_code != KERN_SUCCESS) {
-    FML_LOG(ERROR) << " Error retrieving task memory information: "
-                   << mach_error_string(kernel_return_code);
     return std::nullopt;
   }
 
