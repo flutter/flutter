@@ -15,8 +15,8 @@ LICENSE
    }
   s.author           = { 'Flutter Team' => 'flutter-dev@googlegroups.com' }
   s.source           = { :http => 'https://github.com/flutter/flutter/tree/main/packages/integration_test' }
-  s.source_files = 'Classes/**/*'
-  s.public_header_files = 'Classes/**/*.h'
+  s.source_files = 'integration_test/Sources/integration_test/**/*.{h,m}'
+  s.public_header_files = 'integration_test/Sources/integration_test/**/*.h'
   s.dependency 'Flutter'
   s.ios.framework  = 'UIKit'
 

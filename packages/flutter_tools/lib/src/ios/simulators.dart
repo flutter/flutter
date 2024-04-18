@@ -571,7 +571,15 @@ class IOSSimulator extends Device {
       deviceID: id,
     );
     if (!buildResult.success) {
-      await diagnoseXcodeBuildFailure(buildResult, globals.flutterUsage, globals.logger, globals.analytics);
+      await diagnoseXcodeBuildFailure(
+        buildResult,
+        analytics: globals.analytics,
+        fileSystem: globals.fs,
+        flutterUsage: globals.flutterUsage,
+        logger: globals.logger,
+        platform: SupportedPlatform.ios,
+        project: app.project.parent,
+      );
       throwToolExit('Could not build the application for the simulator.');
     }
 

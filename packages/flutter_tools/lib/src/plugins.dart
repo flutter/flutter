@@ -397,6 +397,51 @@ class Plugin {
   /// Whether this plugin is a direct dependency of the app.
   /// If [false], the plugin is a dependency of another plugin.
   final bool isDirectDependency;
+
+  /// Expected path to the plugin's Package.swift. Returns null if the plugin
+  /// does not support the [platform] or the [platform] is not iOS or macOS.
+  String? pluginSwiftPackageManifestPath(
+    FileSystem fileSystem,
+    String platform,
+  ) {
+    final String? platformDirectoryName = _darwinPluginDirectoryName(platform);
+    if (platformDirectoryName == null) {
+      return null;
+    }
+    return fileSystem.path.join(
+      path,
+      platformDirectoryName,
+      name,
+      'Package.swift',
+    );
+  }
+
+  /// Expected path to the plugin's podspec. Returns null if the plugin does
+  /// not support the [platform] or the [platform] is not iOS or macOS.
+  String? pluginPodspecPath(FileSystem fileSystem, String platform) {
+    final String? platformDirectoryName = _darwinPluginDirectoryName(platform);
+    if (platformDirectoryName == null) {
+      return null;
+    }
+    return fileSystem.path.join(path, platformDirectoryName, '$name.podspec');
+  }
+
+  String? _darwinPluginDirectoryName(String platform) {
+    final PluginPlatform? platformPlugin = platforms[platform];
+    if (platformPlugin == null ||
+        (platform != IOSPlugin.kConfigKey &&
+            platform != MacOSPlugin.kConfigKey)) {
+      return null;
+    }
+
+    // iOS and macOS code can be shared in "darwin" directory, otherwise
+    // respectively in "ios" or "macos" directories.
+    if (platformPlugin is DarwinPlugin &&
+        (platformPlugin as DarwinPlugin).sharedDarwinSource) {
+      return 'darwin';
+    }
+    return platform;
+  }
 }
 
 /// Metadata associated with the resolution of a platform interface of a plugin.
