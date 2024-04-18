@@ -82,22 +82,20 @@ vec4 IPSampleWithTileMode(sampler2D tex,
   return texture(tex, coords, kDefaultMipBias);
 }
 
-const float16_t kTileModeDecalHf = 3.0hf;
-
 /// Sample a texture, emulating a specific tile mode.
 ///
 /// This is useful for Impeller graphics backend that don't have native support
 /// for Decal.
 f16vec4 IPHalfSampleWithTileMode(f16sampler2D tex,
                                  vec2 coords,
-                                 float16_t x_tile_mode,
-                                 float16_t y_tile_mode) {
-  if (x_tile_mode == kTileModeDecalHf && (coords.x < 0.0 || coords.x >= 1.0) ||
-      y_tile_mode == kTileModeDecalHf && (coords.y < 0.0 || coords.y >= 1.0)) {
+                                 float x_tile_mode,
+                                 float y_tile_mode) {
+  if (x_tile_mode == kTileModeDecal && (coords.x < 0.0 || coords.x >= 1.0) ||
+      y_tile_mode == kTileModeDecal && (coords.y < 0.0 || coords.y >= 1.0)) {
     return f16vec4(0.0hf);
   }
 
-  return texture(tex, coords, kDefaultMipBiasHalf);
+  return texture(tex, coords, float16_t(kDefaultMipBias));
 }
 
 /// Sample a texture, emulating a specific tile mode.
@@ -137,7 +135,7 @@ f16vec4 IPHalfSampleDecal(f16sampler2D texture_sampler, vec2 coords) {
       any(greaterThanEqual(coords, vec2(1)))) {
     return f16vec4(0.0);
   }
-  return texture(texture_sampler, coords, kDefaultMipBiasHalf);
+  return texture(texture_sampler, coords, float16_t(kDefaultMipBias));
 }
 
 /// Sample a texture, emulating a specific tile mode.
