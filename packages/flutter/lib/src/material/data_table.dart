@@ -1271,7 +1271,7 @@ class _SortArrow extends StatefulWidget {
 }
 
 class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
-  late final  AnimationController _opacityController;
+  late final AnimationController _opacityController;
   late final CurvedAnimation _opacityAnimation;
 
   late final AnimationController _orientationController;

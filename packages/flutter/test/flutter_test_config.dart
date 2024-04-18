@@ -52,8 +52,6 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
       classes: <String>[
         // TODO(polina-c): CurvedAnimation is leaking, https://github.com/flutter/flutter/issues/145600 [leaks-to-clean]
         'CurvedAnimation',
-        // TODO(polina-c): _NullElement is leaking, https://github.com/flutter/flutter/issues/145602 [leaks-to-clean]
-        '_NullElement',
       ],
     );
   }
