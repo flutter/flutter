@@ -1332,7 +1332,7 @@ Future<void> verifyRepositoryLinks(String workingDirectory) async {
       while (end < contents.length && !stops.contains(contents[end])) {
         end += 1;
       }
-      final String url = contents.substring(start, end);
+      final String url = contents.substring(start, end).replaceAll('\r', '');
 
       if (pattern.hasMatch(url) && !repoExceptions.any(url.contains)) {
         if (url.contains('master')) {
