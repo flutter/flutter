@@ -147,6 +147,29 @@ void main() {
     );
   });
 
+  test('analyze.dart - verifyRepositoryLinks', () async {
+    print('before');
+    await verifyRepositoryLinks(testRootPath);
+    print('after');
+    return;
+
+    final String result = await capture(() => verifyRepositoryLinks(testRootPath), shouldHaveErrors: true);
+    final String lines = <String>[
+        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart:1: no space after flow control statement',
+        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart:2: no space after flow control statement',
+        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart:3: no space after flow control statement',
+        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart:4: no space after flow control statement',
+        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart:5: no space after flow control statement',
+      ]
+      .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
+      .join('\n');
+    expect(result,
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
+      '$lines\n'
+      '╚═══════════════════════════════════════════════════════════════════════════════\n'
+    );
+  });
+
   test('analyze.dart - verifyNoBinaries - positive', () async {
     final String result = await capture(() => verifyNoBinaries(
       testRootPath,
