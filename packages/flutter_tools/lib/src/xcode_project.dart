@@ -736,6 +736,9 @@ class MacOSProject extends XcodeBasedProject {
 
   File get pluginRegistrantImplementation => managedDirectory.childFile('GeneratedPluginRegistrant.swift');
 
+  /// The 'AppDelegate.swift' file of the host app. This file might not exist if the app project uses Objective-C.
+  File get appDelegateSwift => hostAppRoot.childDirectory('Runner').childFile('AppDelegate.swift');
+
   @override
   File xcodeConfigFor(String mode) => managedDirectory.childFile('Flutter-$mode.xcconfig');
 
