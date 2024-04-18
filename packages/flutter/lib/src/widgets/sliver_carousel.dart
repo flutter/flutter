@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -13,6 +14,7 @@ class Carousel extends StatefulWidget {
   Carousel({
     super.key,
     this.itemSnap = false,
+    this.itemExtent,
     this.clipExtent,
     this.controller,
     this.scrollDirection = Axis.horizontal,
@@ -24,6 +26,7 @@ class Carousel extends StatefulWidget {
 
   final double? clipExtent;
   final bool itemSnap;
+  final double? itemExtent;
   final CarouselController? controller;
   final Axis scrollDirection;
   final bool reverse;
@@ -63,7 +66,11 @@ class _CarouselState extends State<Carousel> {
 
   void _initController(List<int> weights) {
     final double fraction = weights.first / weights.sum;
-    _controller = widget.controller ?? CarouselController(viewportFraction: fraction);
+    _controller = widget.controller
+      ?? CarouselController(
+        itemExtent: widget.itemExtent ?? 0,
+        viewportFraction: fraction
+      );
   }
 
   AxisDirection _getDirection(BuildContext context) {
@@ -123,6 +130,7 @@ class _CarouselState extends State<Carousel> {
             slivers: <Widget>[
               SliverCarousel(
                 clipExtent: widget.clipExtent,
+                itemExtent: widget.itemExtent,
                 childWeights: widget.childWeights ?? getChildWeights(),
                 children: widget.children,
               ),
@@ -138,11 +146,13 @@ class SliverCarousel extends StatelessWidget {
   const SliverCarousel({
     super.key,
     this.clipExtent = 0.0,
+    this.itemExtent,
     required this.childWeights,
     required this.children,
   });
 
   final double? clipExtent;
+  final double? itemExtent;
   final List<int> childWeights;
   final List<Widget> children;
 
@@ -168,7 +178,21 @@ class SliverCarousel extends StatelessWidget {
         break;
       }
     }
-    print(leftPaddingFraction);
+
+    if (itemExtent != null) {
+      // print('item extent: $itemExtent');
+      return _UncontainedCarousel(
+        delegate: SliverChildBuilderDelegate(
+          (BuildContext context, int index) {
+            return children.elementAt(index);
+          },
+          childCount: children.length,
+        ),
+        itemExtent: itemExtent!,
+        minExtent: clipExtent ?? itemExtent!,
+      );
+    }
+
     return _SliverFractionalPadding(
       leftPaddingFraction: childWeights.first == childWeights.max ? 0.0 : leftPaddingFraction,
       rightPaddingFraction: childWeights.last == childWeights.max ? 0.0 : rightPaddingFraction,
@@ -277,6 +301,143 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
     super.performLayout();
   }
 }
+
+class _UncontainedCarousel extends SliverMultiBoxAdaptorWidget {
+  const _UncontainedCarousel({
+    super.key,
+    required super.delegate,
+    required this.minExtent,
+    required this.itemExtent,
+  });
+
+  final double itemExtent;
+  final double minExtent;
+
+  @override
+  RenderSliverFixedExtentBoxAdaptor createRenderObject(BuildContext context) {
+    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
+    return RenderUnconstrainedCarousel(
+      childManager: element,
+      minExtent: minExtent,
+      maxExtent: itemExtent,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderUnconstrainedCarousel renderObject) {
+    renderObject.maxExtent = itemExtent;
+  }
+}
+
+class RenderUnconstrainedCarousel extends RenderSliverFixedExtentBoxAdaptor {
+  RenderUnconstrainedCarousel({
+    required super.childManager,
+    required double maxExtent,
+    required double minExtent,
+  }) : _maxExtent = maxExtent,
+       _minExtent = minExtent;
+
+  double get maxExtent => _maxExtent;
+  double _maxExtent;
+  set maxExtent(double value) {
+    if (_maxExtent == value) {
+      return;
+    }
+    _maxExtent = value;
+    markNeedsLayout();
+  }
+
+  double get minExtent => _minExtent;
+  double _minExtent;
+  set minExtent(double value) {
+    if (_minExtent == value) {
+      return;
+    }
+    _minExtent = value;
+    markNeedsLayout();
+  }
+
+  double _buildItemExtent(int index, SliverLayoutDimensions currentLayoutDimensions) {
+    final int firstVisibleIndex = (constraints.scrollOffset / maxExtent).floor();
+    final double shrinkExtent = constraints.scrollOffset - (constraints.scrollOffset / maxExtent).floor() * maxExtent;
+    final double effectiveMinExtent = math.max(constraints.remainingPaintExtent % maxExtent, minExtent);
+    if (index == firstVisibleIndex) {
+      final double effectiveExtent = maxExtent - shrinkExtent;
+      return math.max(effectiveExtent, effectiveMinExtent);
+    }
+
+    final double scrollOffsetForLastIndex = constraints.scrollOffset + constraints.remainingPaintExtent;
+    if (index == getMaxChildIndexForScrollOffset(scrollOffsetForLastIndex, maxExtent)) {
+      return clampDouble(scrollOffsetForLastIndex - maxExtent * index, effectiveMinExtent, maxExtent);
+    }
+    return maxExtent;
+  }
+
+  /// The layout offset for the child with the given index.
+  @override
+  double indexToLayoutOffset(
+    @Deprecated(
+      'The itemExtent is already available within the scope of this function. '
+      'This feature was deprecated after v3.20.0-7.0.pre.'
+    )
+    double itemExtent,
+    int index,
+  ) {
+    final int firstVisibleIndex = (constraints.scrollOffset / maxExtent).floor();
+    final double effectiveMinExtent = math.max(constraints.remainingPaintExtent % maxExtent, minExtent);
+    // print('shrinkExtent: $shrinkExtent');
+    if (index == firstVisibleIndex) {
+      final double firstVisibleItemExtent = _buildItemExtent(index, currentLayoutDimensions);
+      // print('firstVisibleItemExtent: $firstVisibleItemExtent');
+      if (firstVisibleItemExtent <= effectiveMinExtent) {
+        return maxExtent * index - effectiveMinExtent + maxExtent;
+      }
+      return constraints.scrollOffset;
+    }
+    return maxExtent * index;
+  }
+
+    /// The minimum child index that is visible at the given scroll offset.
+  @override
+  int getMinChildIndexForScrollOffset(
+    double scrollOffset,
+    @Deprecated(
+      'The itemExtent is already available within the scope of this function. '
+      'This feature was deprecated after v3.20.0-7.0.pre.'
+    )
+    double itemExtent,
+  ) {
+    final int firstVisibleIndex = (constraints.scrollOffset / maxExtent).floor();
+    return math.max(firstVisibleIndex, 0);
+  }
+
+  @override
+  int getMaxChildIndexForScrollOffset(
+    double scrollOffset,
+    @Deprecated(
+      'The itemExtent is already available within the scope of this function. '
+      'This feature was deprecated after v3.20.0-7.0.pre.'
+    )
+    double itemExtent,
+  ) {
+    if (maxExtent > 0.0) {
+      final double actual = scrollOffset / maxExtent - 1;
+      final int round = actual.round();
+      if ((actual * maxExtent - round * maxExtent).abs() < precisionErrorTolerance) {
+        return math.max(0, round);
+      }
+      return math.max(0, actual.ceil());
+    }
+    return 0;
+  }
+
+  @override
+  double? get itemExtent => null;
+
+  @override
+  ItemExtentBuilder? get itemExtentBuilder => _buildItemExtent;
+}
+
 
 
 class _SliverCarousel extends SliverMultiBoxAdaptorWidget {
@@ -554,7 +715,11 @@ class CarouselScrollPhysics extends ScrollPhysics {
   ) {
     double fraction;
     if (position is _CarouselItemPosition) {
-      fraction = position.viewportFraction;
+      if (position.itemExtent != 0) {
+        fraction = position.itemExtent / position.viewportDimension;
+      } else {
+        fraction = position.viewportFraction;
+      }
     } else {
       fraction = 1;
     }
@@ -607,6 +772,7 @@ class CarouselItemMetrics extends FixedScrollMetrics {
     required super.pixels,
     required super.viewportDimension,
     required super.axisDirection,
+    required this.itemExtent,
     required this.viewportFraction, // first item weight / total weight
     required super.devicePixelRatio,
   });
@@ -618,6 +784,7 @@ class CarouselItemMetrics extends FixedScrollMetrics {
     double? pixels,
     double? viewportDimension,
     AxisDirection? axisDirection,
+    double? itemExtent,
     double? viewportFraction,
     double? devicePixelRatio,
   }) {
@@ -627,10 +794,14 @@ class CarouselItemMetrics extends FixedScrollMetrics {
       pixels: pixels ?? (hasPixels ? this.pixels : null),
       viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
+      itemExtent: itemExtent ?? this.itemExtent,
       viewportFraction: viewportFraction ?? this.viewportFraction,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
     );
   }
+
+///
+  final double itemExtent;
 
   /// The fraction of the viewport that the first item occupies.
   ///
@@ -645,10 +816,12 @@ class _CarouselItemPosition extends ScrollPositionWithSingleContext implements C
     required super.context,
     // this.initialPage = 0,
     // bool keepPage = true,
+    double itemExtent = 0,
     double viewportFraction = 1.0,
     super.oldPosition,
   }) : assert(viewportFraction > 0.0),
-       _viewportFraction = viewportFraction;
+       _viewportFraction = viewportFraction,
+       _itemExtent = itemExtent;
 
   @override
   double get viewportFraction => _viewportFraction;
@@ -661,12 +834,23 @@ class _CarouselItemPosition extends ScrollPositionWithSingleContext implements C
   }
 
   @override
+  double get itemExtent => _itemExtent;
+  double _itemExtent;
+  set itemExtent(double value) {
+    if (_itemExtent == value) {
+      return;
+    }
+    _itemExtent = value;
+  }
+
+  @override
   CarouselItemMetrics copyWith({
     double? minScrollExtent,
     double? maxScrollExtent,
     double? pixels,
     double? viewportDimension,
     AxisDirection? axisDirection,
+    double? itemExtent,
     double? viewportFraction,
     double? devicePixelRatio,
   }) {
@@ -676,6 +860,7 @@ class _CarouselItemPosition extends ScrollPositionWithSingleContext implements C
       pixels: pixels ?? (hasPixels ? this.pixels : null),
       viewportDimension: viewportDimension ?? (hasViewportDimension ? this.viewportDimension : null),
       axisDirection: axisDirection ?? this.axisDirection,
+      itemExtent: itemExtent ?? this.itemExtent,
       viewportFraction: viewportFraction ?? this.viewportFraction,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
     );
@@ -687,8 +872,11 @@ class CarouselController extends ScrollController {
   CarouselController({
     // this.initialPage = 0,
     // this.keepPage = true,
+    this.itemExtent = 0,
     required this.viewportFraction,
   }) : assert(viewportFraction > 0.0);
+
+  final double itemExtent;
 
   /// The fraction of the viewport that the first carousel item should occupy.
   final double viewportFraction;
@@ -700,6 +888,7 @@ class CarouselController extends ScrollController {
       context: context,
       // initialPage: initialPage,
       // keepPage: keepPage,
+      itemExtent: itemExtent,
       viewportFraction: viewportFraction,
       oldPosition: oldPosition,
     );
