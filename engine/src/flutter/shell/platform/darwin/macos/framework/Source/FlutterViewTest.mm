@@ -34,7 +34,7 @@ TEST(FlutterView, ShouldInheritContentsScaleReturnsYes) {
                                                 commandQueue:queue
                                                     delegate:delegate
                                           threadSynchronizer:threadSynchronizer
-                                                      viewId:kImplicitViewId];
+                                              viewIdentifier:kImplicitViewId];
   EXPECT_EQ([view layer:view.layer shouldInheritContentsScale:3.0 fromWindow:view.window], YES);
 }
 
@@ -79,7 +79,7 @@ TEST(FlutterView, CursorUpdateDoesHitTest) {
                                                         commandQueue:queue
                                                             delegate:delegate
                                                   threadSynchronizer:threadSynchronizer
-                                                              viewId:kImplicitViewId];
+                                                      viewIdentifier:kImplicitViewId];
   NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
                                                  styleMask:NSBorderlessWindowMask
                                                    backing:NSBackingStoreBuffered
@@ -123,7 +123,7 @@ TEST(FlutterView, CursorUpdateDoesNotOverridePlatformView) {
                                                         commandQueue:queue
                                                             delegate:delegate
                                                   threadSynchronizer:threadSynchronizer
-                                                              viewId:kImplicitViewId];
+                                                      viewIdentifier:kImplicitViewId];
   NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
                                                  styleMask:NSBorderlessWindowMask
                                                    backing:NSBackingStoreBuffered

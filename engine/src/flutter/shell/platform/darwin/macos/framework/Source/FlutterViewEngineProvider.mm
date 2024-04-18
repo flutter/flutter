@@ -22,8 +22,8 @@
   return self;
 }
 
-- (nullable FlutterView*)viewForId:(FlutterViewId)viewId {
-  return [_engine viewControllerForId:viewId].flutterView;
+- (nullable FlutterView*)viewForIdentifier:(FlutterViewIdentifier)viewIdentifier {
+  return [_engine viewControllerForIdentifier:viewIdentifier].flutterView;
 }
 
 @end

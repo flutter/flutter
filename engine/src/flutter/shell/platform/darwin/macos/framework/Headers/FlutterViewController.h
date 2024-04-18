@@ -13,6 +13,14 @@
 #import "FlutterPluginRegistrarMacOS.h"
 
 /**
+ * A unique identifier for a view within which Flutter content is hosted.
+ *
+ * Identifiers are guaranteed to be unique for views owned by a given engine but
+ * may collide for views owned by different engines.
+ */
+typedef int64_t FlutterViewIdentifier;
+
+/**
  * Values for the `mouseTrackingMode` property.
  */
 typedef NS_ENUM(NSInteger, FlutterMouseTrackingMode) {
@@ -109,6 +117,17 @@ FLUTTER_DARWIN_EXPORT
 - (nonnull instancetype)initWithEngine:(nonnull FlutterEngine*)engine
                                nibName:(nullable NSString*)nibName
                                 bundle:(nullable NSBundle*)nibBundle NS_DESIGNATED_INITIALIZER;
+
+/**
+ * The identifier for this view controller, if it is attached.
+ *
+ * The identifier is assigned when the view controller is attached to a
+ * `FlutterEngine`.
+ *
+ * If the view controller is detached (see `FlutterViewController#attached`),
+ * reading this property throws an assertion.
+ */
+@property(nonatomic, readonly) FlutterViewIdentifier viewIdentifier;
 
 /**
  * Return YES if the view controller is attached to an engine.

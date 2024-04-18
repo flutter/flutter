@@ -10,7 +10,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 @interface FlutterView () <FlutterSurfaceManagerDelegate> {
-  int64_t _viewId;
+  FlutterViewIdentifier _viewIdentifier;
   __weak id<FlutterViewDelegate> _viewDelegate;
   FlutterThreadSynchronizer* _threadSynchronizer;
   FlutterSurfaceManager* _surfaceManager;
@@ -25,13 +25,13 @@
                      commandQueue:(id<MTLCommandQueue>)commandQueue
                          delegate:(id<FlutterViewDelegate>)delegate
                threadSynchronizer:(FlutterThreadSynchronizer*)threadSynchronizer
-                           viewId:(int64_t)viewId {
+                   viewIdentifier:(FlutterViewIdentifier)viewIdentifier {
   self = [super initWithFrame:NSZeroRect];
   if (self) {
     [self setWantsLayer:YES];
     [self setBackgroundColor:[NSColor blackColor]];
     [self setLayerContentsRedrawPolicy:NSViewLayerContentsRedrawDuringViewResize];
-    _viewId = viewId;
+    _viewIdentifier = viewIdentifier;
     _viewDelegate = delegate;
     _threadSynchronizer = threadSynchronizer;
     _surfaceManager = [[FlutterSurfaceManager alloc] initWithDevice:device
@@ -43,7 +43,7 @@
 }
 
 - (void)onPresent:(CGSize)frameSize withBlock:(dispatch_block_t)block {
-  [_threadSynchronizer performCommitForView:_viewId size:frameSize notify:block];
+  [_threadSynchronizer performCommitForView:_viewIdentifier size:frameSize notify:block];
 }
 
 - (FlutterSurfaceManager*)surfaceManager {
@@ -52,7 +52,7 @@
 
 - (void)reshaped {
   CGSize scaledSize = [self convertSizeToBacking:self.bounds.size];
-  [_threadSynchronizer beginResizeForView:_viewId
+  [_threadSynchronizer beginResizeForView:_viewIdentifier
                                      size:scaledSize
                                    notify:^{
                                      [_viewDelegate viewDidReshape:self];
