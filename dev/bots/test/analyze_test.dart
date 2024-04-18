@@ -149,7 +149,7 @@ void main() {
 
   test('analyze.dart - verifyRepositoryLinks', () async {
     final String result = await capture(() => verifyRepositoryLinks(testRootPath), shouldHaveErrors: true);
-    const bannedBranch = 'master';
+    const String bannedBranch = 'master';
     final String lines = <String>[
         '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart contains https://android.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
         '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart contains https://chromium.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
