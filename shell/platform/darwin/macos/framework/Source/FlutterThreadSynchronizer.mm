@@ -57,7 +57,7 @@
 }
 
 - (BOOL)allViewsHaveFrame {
-  for (auto const& [viewId, contentSize] : _contentSizes) {
+  for (auto const& [viewIdentifier, contentSize] : _contentSizes) {
     if (CGSizeEqualToSize(contentSize, CGSizeZero)) {
       return NO;
     }
@@ -66,7 +66,7 @@
 }
 
 - (BOOL)someViewsHaveFrame {
-  for (auto const& [viewId, contentSize] : _contentSizes) {
+  for (auto const& [viewIdentifier, contentSize] : _contentSizes) {
     if (!CGSizeEqualToSize(contentSize, CGSizeZero)) {
       return YES;
     }
@@ -99,7 +99,7 @@
   _beginResizeWaiting = NO;
 }
 
-- (void)beginResizeForView:(int64_t)viewId
+- (void)beginResizeForView:(FlutterViewIdentifier)viewIdentifier
                       size:(CGSize)size
                     notify:(nonnull dispatch_block_t)notify {
   dispatch_assert_queue(_mainQueue);
@@ -115,7 +115,7 @@
 
   notify();
 
-  _contentSizes[viewId] = CGSizeMake(-1, -1);
+  _contentSizes[viewIdentifier] = CGSizeMake(-1, -1);
 
   _beginResizeWaiting = YES;
 
@@ -123,7 +123,7 @@
     if (_shuttingDown) {
       break;
     }
-    const CGSize& contentSize = _contentSizes[viewId];
+    const CGSize& contentSize = _contentSizes[viewIdentifier];
     if (CGSizeEqualToSize(contentSize, size) || CGSizeEqualToSize(contentSize, CGSizeZero)) {
       break;
     }
@@ -134,7 +134,7 @@
   _beginResizeWaiting = NO;
 }
 
-- (void)performCommitForView:(int64_t)viewId
+- (void)performCommitForView:(FlutterViewIdentifier)viewIdentifier
                         size:(CGSize)size
                       notify:(nonnull dispatch_block_t)notify {
   dispatch_assert_queue_not(_mainQueue);
@@ -149,7 +149,7 @@
     fml::AutoResetWaitableEvent& e = event;
     _scheduledBlocks.push_back(^{
       notify();
-      _contentSizes[viewId] = size;
+      _contentSizes[viewIdentifier] = size;
       e.Signal();
     });
     if (_beginResizeWaiting) {
@@ -177,16 +177,16 @@
   }
 }
 
-- (void)registerView:(int64_t)viewId {
+- (void)registerView:(FlutterViewIdentifier)viewIdentifier {
   dispatch_assert_queue(_mainQueue);
   std::unique_lock<std::mutex> lock(_mutex);
-  _contentSizes[viewId] = CGSizeZero;
+  _contentSizes[viewIdentifier] = CGSizeZero;
 }
 
-- (void)deregisterView:(int64_t)viewId {
+- (void)deregisterView:(FlutterViewIdentifier)viewIdentifier {
   dispatch_assert_queue(_mainQueue);
   std::unique_lock<std::mutex> lock(_mutex);
-  _contentSizes.erase(viewId);
+  _contentSizes.erase(viewIdentifier);
 }
 
 - (void)shutdown {

@@ -12,19 +12,6 @@
 
 #include <stdint.h>
 
-typedef int64_t FlutterViewId;
-
-/**
- * The view ID for APIs that don't support multi-view.
- *
- * Some single-view APIs will eventually be replaced by their multi-view
- * variant. During the deprecation period, the single-view APIs will coexist with
- * and work with the multi-view APIs as if the other views don't exist.  For
- * backward compatibility, single-view APIs will always operate on the view with
- * this ID. Also, the first view assigned to the engine will also have this ID.
- */
-constexpr FlutterViewId kFlutterImplicitViewId = 0ll;
-
 /**
  * Delegate for FlutterView.
  */
@@ -54,7 +41,8 @@ constexpr FlutterViewId kFlutterImplicitViewId = 0ll;
                               commandQueue:(nonnull id<MTLCommandQueue>)commandQueue
                                   delegate:(nonnull id<FlutterViewDelegate>)delegate
                         threadSynchronizer:(nonnull FlutterThreadSynchronizer*)threadSynchronizer
-                                    viewId:(int64_t)viewId NS_DESIGNATED_INITIALIZER;
+                            viewIdentifier:(FlutterViewIdentifier)viewIdentifier
+    NS_DESIGNATED_INITIALIZER;
 
 - (nullable instancetype)initWithFrame:(NSRect)frameRect
                            pixelFormat:(nullable NSOpenGLPixelFormat*)format NS_UNAVAILABLE;

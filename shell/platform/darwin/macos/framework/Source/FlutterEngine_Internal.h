@@ -155,7 +155,8 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
 /**
  * The |FlutterViewController| associated with the given view ID, if any.
  */
-- (nullable FlutterViewController*)viewControllerForId:(FlutterViewId)viewId;
+- (nullable FlutterViewController*)viewControllerForIdentifier:
+    (FlutterViewIdentifier)viewIdentifier;
 
 /**
  * Informs the engine that the specified view controller's window metrics have changed.
