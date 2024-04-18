@@ -140,7 +140,7 @@ Future<void> main(List<String> args) async {
     await selectShard(<String, ShardRunner>{
       'add_to_app_life_cycle_tests': () => addToAppLifeCycleRunner(flutterRoot),
       'build_tests': _runBuildTests,
-      'framework_coverage': () => frameworkCoverageRunner(flutterRoot),
+      'framework_coverage': frameworkCoverageRunner,
       'framework_tests': _runFrameworkTests,
       'tool_tests': _runToolTests,
       // web_tool_tests is also used by HHH: https://dart.googlesource.com/recipes/+/refs/heads/master/recipes/dart/flutter_engine.py
