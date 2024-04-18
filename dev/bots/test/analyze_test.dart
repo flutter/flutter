@@ -148,18 +148,18 @@ void main() {
   });
 
   test('analyze.dart - verifyRepositoryLinks', () async {
-    print('before');
-    await verifyRepositoryLinks(testRootPath);
-    print('after');
-    return;
-
     final String result = await capture(() => verifyRepositoryLinks(testRootPath), shouldHaveErrors: true);
     final String lines = <String>[
-        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart:1: no space after flow control statement',
-        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart:2: no space after flow control statement',
-        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart:3: no space after flow control statement',
-        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart:4: no space after flow control statement',
-        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart:5: no space after flow control statement',
+        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart contains https://android.googlesource.com/+/master/file1, which uses the banned "master" branch.',
+        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart contains https://chromium.googlesource.com/+/master/file1, which uses the banned "master" branch.',
+        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart contains https://cs.opensource.google.com/+/master/file1, which uses the banned "master" branch.',
+        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart contains https://dart.googlesource.com/+/master/file1, which uses the banned "master" branch.',
+        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart contains https://flutter.googlesource.com/+/master/file1, which uses the banned "master" branch.',
+        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart contains https://source.chromium.org/+/master/file1, which uses the banned "master" branch.',
+        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart contains https://github.com/flutter/flutter/tree/master/file1, which uses the banned "master" branch.',
+        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart contains https://raw.githubusercontent.com/flutter/flutter/blob/master/file1, which uses the banned "master" branch.',
+        '║ Change the URLs above to the expected pattern by using the "main" branch if it exists, otherwise adding the repository to the list of exceptions in analyze.dart.',
+
       ]
       .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
       .join('\n');
