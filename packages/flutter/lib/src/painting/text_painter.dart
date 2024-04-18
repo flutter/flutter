@@ -1468,15 +1468,20 @@ class TextPainter {
     final _LineCaretMetrics metrics;
     final List<TextBox> boxes = cachedLayout.paragraph
       .getBoxesForRange(graphemeRange.start, graphemeRange.end, boxHeightStyle: ui.BoxHeightStyle.strut);
+
     if (boxes.isNotEmpty) {
-      final TextBox box = boxes.single;
+      final bool ahchorToLeft = switch (glyphInfo.writingDirection) {
+        TextDirection.ltr => anchorToLeadingEdge,
+        TextDirection.rtl => !anchorToLeadingEdge,
+      };
+      final TextBox box = ahchorToLeft ? boxes.first : boxes.last;
       metrics = _LineCaretMetrics(
-        offset: Offset(anchorToLeadingEdge ? box.start : box.end, box.top),
+        offset: Offset(ahchorToLeft ? box.left : box.right, box.top),
         writingDirection: box.direction,
       );
     } else {
       // Fall back to glyphInfo. This should only happen when using the HTML renderer.
-      assert(kIsWeb && !isCanvasKit);
+      assert(kIsWeb && !isSkiaWeb);
       final Rect graphemeBounds = glyphInfo.graphemeClusterLayoutBounds;
       final double dx = switch (glyphInfo.writingDirection) {
         TextDirection.ltr => anchorToLeadingEdge ? graphemeBounds.left : graphemeBounds.right,

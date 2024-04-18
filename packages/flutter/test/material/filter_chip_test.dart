@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'feedback_tester.dart';
 
@@ -905,7 +906,7 @@ void main() {
     // Test the delete button icon.
     expect(tester.getSize(find.byIcon(Icons.clear)), const Size(18.0, 18.0));
     expect(getIconData(tester).color, theme.colorScheme.onSurfaceVariant);
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('Material2 - FilterChip supports delete button', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: false);
@@ -956,7 +957,10 @@ void main() {
     expect(getIconData(tester).color, theme.iconTheme.color?.withAlpha(0xde));
   });
 
-  testWidgets('Customize FilterChip delete button', (WidgetTester tester) async {
+  testWidgets('Customize FilterChip delete button',
+  // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
+  experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
+  (WidgetTester tester) async {
     Widget buildChip({
       Widget? deleteIcon,
       Color? deleteIconColor,
