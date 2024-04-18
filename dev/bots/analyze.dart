@@ -1318,7 +1318,7 @@ Future<void> verifyRepositoryLinks(String workingDirectory) async {
 
   final List<String> problems = <String>[];
   final Set<String> suggestions = <String>{};
-  final List<File> files = await _gitFiles(workingDirectory);
+  final List<File> files = await _allFiles(workingDirectory, null, minimumMatches: 10).toList();
   for (final File file in files) {
     final Uint8List bytes = file.readAsBytesSync();
     // We allow invalid UTF-8 here so that binaries don't trip us up.
