@@ -178,15 +178,15 @@ class IosProject extends XcodeBasedProject {
 
   File get appFrameworkInfoPlist => _flutterLibRoot.childDirectory('Flutter').childFile('AppFrameworkInfo.plist');
 
+  /// The 'AppDelegate.swift' file of the host app. This file might not exist if the app project uses Objective-C.
+  File get appDelegateSwift => _editableDirectory.childDirectory('Runner').childFile('AppDelegate.swift');
+
   File get infoPlist => _editableDirectory.childDirectory('Runner').childFile('Info.plist');
 
   Directory get symlinks => _flutterLibRoot.childDirectory('.symlinks');
 
-  /// True, if the app project is using swift.
-  bool get isSwift {
-    final File appDelegateSwift = _editableDirectory.childDirectory('Runner').childFile('AppDelegate.swift');
-    return appDelegateSwift.existsSync();
-  }
+  /// True if the app project uses Swift.
+  bool get isSwift => appDelegateSwift.existsSync();
 
   /// Do all plugins support arm64 simulators to run natively on an ARM Mac?
   Future<bool> pluginsSupportArmSimulator() async {
@@ -714,6 +714,9 @@ class MacOSProject extends XcodeBasedProject {
   File get generatedXcodePropertiesFile => ephemeralDirectory.childFile('Flutter-Generated.xcconfig');
 
   File get pluginRegistrantImplementation => managedDirectory.childFile('GeneratedPluginRegistrant.swift');
+
+  /// The 'AppDelegate.swift' file of the host app. This file might not exist if the app project uses Objective-C.
+  File get appDelegateSwift => hostAppRoot.childDirectory('Runner').childFile('AppDelegate.swift');
 
   @override
   File xcodeConfigFor(String mode) => managedDirectory.childFile('Flutter-$mode.xcconfig');

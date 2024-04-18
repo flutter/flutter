@@ -649,7 +649,7 @@ class AndroidDevice extends Device {
 
   /// Retrieves device's wakefulness state.
   ///
-  /// See: https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/os/PowerManagerInternal.java
+  /// See: https://android.googlesource.com/platform/frameworks/base/+/main/core/java/android/os/PowerManagerInternal.java
   Future<String> _getWakefulness() async {
     final String powerInfo = await shellEval('dumpsys', <String>['power']);
     // A motoG4 phone returns `mWakefulness=Awake`.

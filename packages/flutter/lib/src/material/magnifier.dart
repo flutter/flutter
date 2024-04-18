@@ -289,7 +289,7 @@ class Magnifier extends StatelessWidget {
   /// The [kStandardVerticalFocalPointShift] value is a constant so that
   /// positioning of this [Magnifier] can be done with a guaranteed size, as
   /// opposed to an estimate.
-  static const double kStandardVerticalFocalPointShift = 22;
+  static const double kStandardVerticalFocalPointShift = 22.0;
 
   static const double _borderRadius = 40;
   static const double _magnification = 1.25;

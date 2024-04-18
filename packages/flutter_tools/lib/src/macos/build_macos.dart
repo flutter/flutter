@@ -24,6 +24,7 @@ import 'application_package.dart';
 import 'cocoapod_utils.dart';
 import 'migrations/flutter_application_migration.dart';
 import 'migrations/macos_deployment_target_migration.dart';
+import 'migrations/nsapplicationmain_deprecation_migration.dart';
 import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
 
 /// When run in -quiet mode, Xcode should only print from the underlying tasks to stdout.
@@ -83,10 +84,11 @@ Future<void> buildMacOS({
     XcodeScriptBuildPhaseMigration(flutterProject.macos, globals.logger),
     XcodeThinBinaryBuildPhaseInputPathsMigration(flutterProject.macos, globals.logger),
     FlutterApplicationMigration(flutterProject.macos, globals.logger),
+    NSApplicationMainDeprecationMigration(flutterProject.macos, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
-  migration.run();
+  await migration.run();
 
   final Directory flutterBuildDir = globals.fs.directory(getMacOSBuildDirectory());
   if (!flutterBuildDir.existsSync()) {
