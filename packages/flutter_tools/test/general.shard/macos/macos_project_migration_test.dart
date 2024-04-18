@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/macos/migrations/flutter_application_migration.dart';
 import 'package:flutter_tools/src/macos/migrations/macos_deployment_target_migration.dart';
+import 'package:flutter_tools/src/macos/migrations/nsapplicationmain_deprecation_migration.dart';
 import 'package:flutter_tools/src/macos/migrations/remove_macos_framework_link_and_embedding_migration.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -400,6 +401,92 @@ platform :osx, '10.14'
       expect(testLogger.traceText, isEmpty);
     });
   });
+
+  group('migrate @NSApplicationMain attribute to @main', () {
+    late MemoryFileSystem memoryFileSystem;
+    late BufferLogger testLogger;
+    late FakeMacOSProject project;
+    late File appDelegateFile;
+
+    setUp(() {
+      memoryFileSystem = MemoryFileSystem();
+      testLogger = BufferLogger.test();
+      project = FakeMacOSProject();
+      appDelegateFile = memoryFileSystem.file('AppDelegate.swift');
+      project.appDelegateSwift = appDelegateFile;
+    });
+
+    testWithoutContext('skipped if files are missing', () async {
+      final NSApplicationMainDeprecationMigration migration = NSApplicationMainDeprecationMigration(
+        project,
+        testLogger,
+      );
+      await migration.migrate();
+      expect(appDelegateFile.existsSync(), isFalse);
+
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('skipped if nothing to upgrade', () async {
+      const String appDelegateContents = '''
+import Cocoa
+import FlutterMacOS
+
+@main
+class AppDelegate: FlutterAppDelegate {
+  override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+    return true
+  }
+}
+''';
+      appDelegateFile.writeAsStringSync(appDelegateContents);
+      final DateTime lastModified = appDelegateFile.lastModifiedSync();
+
+      final NSApplicationMainDeprecationMigration migration = NSApplicationMainDeprecationMigration(
+        project,
+        testLogger,
+      );
+      await migration.migrate();
+
+      expect(appDelegateFile.lastModifiedSync(), lastModified);
+      expect(appDelegateFile.readAsStringSync(), appDelegateContents);
+
+      expect(testLogger.statusText, isEmpty);
+    });
+
+    testWithoutContext('updates AppDelegate.swift', () async {
+      appDelegateFile.writeAsStringSync('''
+import Cocoa
+import FlutterMacOS
+
+@NSApplicationMain
+class AppDelegate: FlutterAppDelegate {
+  override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+    return true
+  }
+}
+''');
+
+      final NSApplicationMainDeprecationMigration migration = NSApplicationMainDeprecationMigration(
+        project,
+        testLogger,
+      );
+      await migration.migrate();
+
+      expect(appDelegateFile.readAsStringSync(), '''
+import Cocoa
+import FlutterMacOS
+
+@main
+class AppDelegate: FlutterAppDelegate {
+  override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+    return true
+  }
+}
+''');
+      expect(testLogger.warningText, contains('uses the deprecated @NSApplicationMain attribute, updating'));
+    });
+  });
 }
 
 class FakeMacOSProject extends Fake implements MacOSProject {
@@ -411,4 +498,7 @@ class FakeMacOSProject extends Fake implements MacOSProject {
 
   @override
   File podfile = MemoryFileSystem.test().file('Podfile');
+
+  @override
+  File appDelegateSwift = MemoryFileSystem.test().file('AppDelegate.swift');
 }
