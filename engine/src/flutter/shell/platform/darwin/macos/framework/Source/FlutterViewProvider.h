@@ -21,7 +21,7 @@
  *
  * Returns nil if the ID is invalid.
  */
-- (nullable FlutterView*)viewForId:(FlutterViewId)id;
+- (nullable FlutterView*)viewForIdentifier:(FlutterViewIdentifier)id;
 
 @end
 

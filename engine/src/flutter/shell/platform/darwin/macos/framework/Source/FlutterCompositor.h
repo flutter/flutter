@@ -63,7 +63,7 @@ class FlutterCompositor {
 
   // Presents the FlutterLayers by updating the FlutterView specified by
   // `view_id` using the layer content.
-  bool Present(FlutterViewId view_id, const FlutterLayer** layers, size_t layers_count);
+  bool Present(FlutterViewIdentifier view_id, const FlutterLayer** layers, size_t layers_count);
 
  private:
   // A class that contains the information for a view to be presented.

@@ -6,13 +6,11 @@
 #import <Foundation/Foundation.h>
 #import <OCMock/OCMock.h>
 
+#include "flutter/common/constants.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngineTestUtils.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewEngineProvider.h"
-#import "flutter/testing/testing.h"
-#include "third_party/googletest/googletest/include/gtest/gtest.h"
-
 #import "flutter/testing/testing.h"
 #include "third_party/googletest/googletest/include/gtest/gtest.h"
 
@@ -22,12 +20,12 @@ TEST(FlutterViewEngineProviderUnittests, GetViewReturnsTheCorrectView) {
   FlutterViewEngineProvider* viewProvider;
   id mockEngine = CreateMockFlutterEngine(@"");
   __block id mockFlutterViewController;
-  OCMStub([mockEngine viewControllerForId:0])
+  OCMStub([mockEngine viewControllerForIdentifier:0])
       .ignoringNonObjectArgs()
       .andDo(^(NSInvocation* invocation) {
-        FlutterViewId viewId;
-        [invocation getArgument:&viewId atIndex:2];
-        if (viewId == kFlutterImplicitViewId) {
+        FlutterViewIdentifier viewIdentifier;
+        [invocation getArgument:&viewIdentifier atIndex:2];
+        if (viewIdentifier == kFlutterImplicitViewId) {
           if (mockFlutterViewController != nil) {
             [invocation setReturnValue:&mockFlutterViewController];
           }
@@ -36,13 +34,13 @@ TEST(FlutterViewEngineProviderUnittests, GetViewReturnsTheCorrectView) {
   viewProvider = [[FlutterViewEngineProvider alloc] initWithEngine:mockEngine];
 
   // When the view controller is not set, the returned view is nil.
-  EXPECT_EQ([viewProvider viewForId:0], nil);
+  EXPECT_EQ([viewProvider viewForIdentifier:0], nil);
 
   // When the view controller is set, the returned view is the controller's view.
   mockFlutterViewController = OCMStrictClassMock([FlutterViewController class]);
   id mockView = OCMStrictClassMock([FlutterView class]);
   OCMStub([mockFlutterViewController flutterView]).andReturn(mockView);
-  EXPECT_EQ([viewProvider viewForId:0], mockView);
+  EXPECT_EQ([viewProvider viewForIdentifier:0], mockView);
 }
 
 }  // namespace flutter::testing

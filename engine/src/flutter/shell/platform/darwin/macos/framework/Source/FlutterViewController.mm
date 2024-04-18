@@ -8,6 +8,9 @@
 #include <Carbon/Carbon.h>
 #import <objc/message.h>
 
+#include "flutter/common/constants.h"
+#include "flutter/shell/platform/embedder/embedder.h"
+
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
@@ -17,7 +20,6 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRenderer.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputSemanticsObject.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
-#import "flutter/shell/platform/embedder/embedder.h"
 
 #pragma mark - Static types and data.
 
@@ -322,14 +324,12 @@ static void OnKeyboardLayoutChanged(CFNotificationCenterRef center,
 
   std::shared_ptr<flutter::AccessibilityBridgeMac> _bridge;
 
-  FlutterViewId _id;
-
   // FlutterViewController does not actually uses the synchronizer, but only
   // passes it to FlutterView.
   FlutterThreadSynchronizer* _threadSynchronizer;
 }
 
-@synthesize viewId = _viewId;
+@synthesize viewIdentifier = _viewIdentifier;
 @dynamic accessibilityBridge;
 
 /**
@@ -350,7 +350,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
             @"The FlutterViewController unexpectedly stays unattached after initialization. "
             @"In unit tests, this is likely because either the FlutterViewController or "
             @"the FlutterEngine is mocked. Please subclass these classes instead.",
-            controller.engine, controller.viewId);
+            controller.engine, controller.viewIdentifier);
   controller->_mouseTrackingMode = kFlutterMouseTrackingModeInKeyWindow;
   controller->_textInputPlugin = [[FlutterTextInputPlugin alloc] initWithViewController:controller];
   [controller initializeKeyboard];
@@ -468,9 +468,9 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   [_flutterView setBackgroundColor:_backgroundColor];
 }
 
-- (FlutterViewId)viewId {
+- (FlutterViewIdentifier)viewIdentifier {
   NSAssert([self attached], @"This view controller is not attached.");
-  return _viewId;
+  return _viewIdentifier;
 }
 
 - (void)onPreEngineRestart {
@@ -498,18 +498,18 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
 }
 
 - (void)setUpWithEngine:(FlutterEngine*)engine
-                 viewId:(FlutterViewId)viewId
+         viewIdentifier:(FlutterViewIdentifier)viewIdentifier
      threadSynchronizer:(FlutterThreadSynchronizer*)threadSynchronizer {
   NSAssert(_engine == nil, @"Already attached to an engine %@.", _engine);
   _engine = engine;
-  _viewId = viewId;
+  _viewIdentifier = viewIdentifier;
   _threadSynchronizer = threadSynchronizer;
-  [_threadSynchronizer registerView:_viewId];
+  [_threadSynchronizer registerView:_viewIdentifier];
 }
 
 - (void)detachFromEngine {
   NSAssert(_engine != nil, @"Not attached to any engine.");
-  [_threadSynchronizer deregisterView:_viewId];
+  [_threadSynchronizer deregisterView:_viewIdentifier];
   _threadSynchronizer = nil;
   _engine = nil;
 }
@@ -742,7 +742,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
       .device_kind = deviceKind,
       // If a click triggered a synthesized kAdd, don't pass the buttons in that event.
       .buttons = phase == kAdd ? 0 : _mouseState.buttons,
-      .view_id = static_cast<FlutterViewId>(_viewId),
+      .view_id = static_cast<FlutterViewIdentifier>(_viewIdentifier),
   };
 
   if (phase == kPanZoomUpdate) {
@@ -833,7 +833,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
                                    commandQueue:commandQueue
                                        delegate:self
                              threadSynchronizer:_threadSynchronizer
-                                         viewId:_viewId];
+                                 viewIdentifier:_viewIdentifier];
 }
 
 - (void)onKeyboardLayoutChanged {
@@ -1070,7 +1070,7 @@ static NSData* CurrentKeyboardLayoutData() {
           .device = kPointerPanZoomDeviceId,
           .signal_kind = kFlutterPointerSignalKindScrollInertiaCancel,
           .device_kind = kFlutterPointerDeviceKindTrackpad,
-          .view_id = static_cast<FlutterViewId>(_viewId),
+          .view_id = static_cast<FlutterViewIdentifier>(_viewIdentifier),
       };
 
       [_engine sendPointerEvent:flutterEvent];

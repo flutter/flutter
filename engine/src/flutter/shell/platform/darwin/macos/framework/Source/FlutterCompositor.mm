@@ -4,6 +4,7 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.h"
 
+#include "flutter/common/constants.h"
 #include "flutter/fml/logging.h"
 
 namespace flutter {
@@ -45,7 +46,7 @@ bool FlutterCompositor::CreateBackingStore(const FlutterBackingStoreConfig* conf
   // TODO(dkwingsmt): This class only supports single-view for now. As more
   // classes are gradually converted to multi-view, it should get the view ID
   // from somewhere.
-  FlutterView* view = [view_provider_ viewForId:kFlutterImplicitViewId];
+  FlutterView* view = [view_provider_ viewForIdentifier:kFlutterImplicitViewId];
   if (!view) {
     return false;
   }
@@ -60,10 +61,10 @@ bool FlutterCompositor::CreateBackingStore(const FlutterBackingStoreConfig* conf
   return true;
 }
 
-bool FlutterCompositor::Present(FlutterViewId view_id,
+bool FlutterCompositor::Present(FlutterViewIdentifier view_id,
                                 const FlutterLayer** layers,
                                 size_t layers_count) {
-  FlutterView* view = [view_provider_ viewForId:view_id];
+  FlutterView* view = [view_provider_ viewForIdentifier:view_id];
   if (!view) {
     return false;
   }
