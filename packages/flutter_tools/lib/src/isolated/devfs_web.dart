@@ -180,6 +180,7 @@ class WebAssetServer implements AssetReader {
     Map<String, String> extraHeaders,
     NullSafetyMode nullSafetyMode, {
     required WebRendererMode webRenderer,
+    required bool isWasm,
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
     // TODO(markzipan): Make sure this default value aligns with that in the debugger options.
@@ -237,8 +238,8 @@ class WebAssetServer implements AssetReader {
       return server;
     }
 
-    // In release builds deploy a simpler proxy server.
-    if (buildInfo.mode != BuildMode.debug) {
+    // In release builds (or wasm builds) deploy a simpler proxy server.
+    if (buildInfo.mode != BuildMode.debug || isWasm) {
       final ReleaseAssetServer releaseAssetServer = ReleaseAssetServer(
         entrypoint,
         fileSystem: globals.fs,
@@ -246,6 +247,7 @@ class WebAssetServer implements AssetReader {
         flutterRoot: Cache.flutterRoot,
         webBuildDirectory: getWebBuildDirectory(),
         basePath: server.basePath,
+        needsCoopCoep: webRenderer == WebRendererMode.skwasm,
       );
       runZonedGuarded(() {
         shelf.serveRequests(httpServer!, releaseAssetServer.handle);
@@ -737,6 +739,7 @@ class WebDevFS implements DevFS {
     required this.nullSafetyMode,
     required this.ddcModuleSystem,
     required this.webRenderer,
+    required this.isWasm,
     required this.rootDirectory,
     this.testMode = false,
   }) : _port = port;
@@ -763,6 +766,7 @@ class WebDevFS implements DevFS {
   final String? tlsCertPath;
   final String? tlsCertKeyPath;
   final WebRendererMode webRenderer;
+  final bool isWasm;
 
   late WebAssetServer webAssetServer;
 
@@ -863,6 +867,7 @@ class WebDevFS implements DevFS {
       extraHeaders,
       nullSafetyMode,
       webRenderer: webRenderer,
+      isWasm: isWasm,
       testMode: testMode,
       ddcModuleSystem: ddcModuleSystem,
     );
@@ -1108,11 +1113,13 @@ class ReleaseAssetServer {
     required String? webBuildDirectory,
     required String? flutterRoot,
     required Platform platform,
+    required bool needsCoopCoep,
     this.basePath = '',
   })  : _fileSystem = fileSystem,
         _platform = platform,
         _flutterRoot = flutterRoot,
         _webBuildDirectory = webBuildDirectory,
+        _needsCoopCoep = needsCoopCoep,
         _fileSystemUtils =
             FileSystemUtils(fileSystem: fileSystem, platform: platform);
 
@@ -1122,6 +1129,7 @@ class ReleaseAssetServer {
   final FileSystem _fileSystem;
   final FileSystemUtils _fileSystemUtils;
   final Platform _platform;
+  final bool _needsCoopCoep;
 
   /// The base path to serve from.
   ///
@@ -1174,14 +1182,23 @@ class ReleaseAssetServer {
               'application/octet-stream';
       return shelf.Response.ok(bytes, headers: <String, String>{
         'Content-Type': mimeType,
+        if (_needsCoopCoep && file.basename == 'index.html') ...<String, String>{
+          'Cross-Origin-Opener-Policy': 'same-origin',
+          'Cross-Origin-Embedder-Policy': 'require-corp',
+        }
       });
     }
 
     final File file = _fileSystem
         .file(_fileSystem.path.join(_webBuildDirectory!, 'index.html'));
-    return shelf.Response.ok(file.readAsBytesSync(), headers: <String, String>{
-      'Content-Type': 'text/html',
-    });
+    return shelf.Response.ok(file.readAsBytesSync(),
+      headers: <String, String>{
+        'Content-Type': 'text/html',
+        if (_needsCoopCoep) ...<String, String>{
+          'Cross-Origin-Opener-Policy': 'same-origin',
+          'Cross-Origin-Embedder-Policy': 'require-corp',
+        },
+      });
   }
 }
 

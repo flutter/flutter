@@ -21,6 +21,7 @@ import '../convert.dart';
 import '../daemon.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
+import '../device_vm_service_discovery_for_attach.dart';
 import '../emulator.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
@@ -1009,6 +1010,8 @@ class DeviceDomain extends Domain {
     registerHandler('shutdownDartDevelopmentService', shutdownDartDevelopmentService);
     registerHandler('setExternalDevToolsUriForDartDevelopmentService', setExternalDevToolsUriForDartDevelopmentService);
     registerHandler('getDiagnostics', getDiagnostics);
+    registerHandler('startVMServiceDiscoveryForAttach', startVMServiceDiscoveryForAttach);
+    registerHandler('stopVMServiceDiscoveryForAttach', stopVMServiceDiscoveryForAttach);
 
     // Use the device manager discovery so that client provided device types
     // are usable via the daemon protocol.
@@ -1324,6 +1327,41 @@ class DeviceDomain extends Domain {
       for (final List<String> diagnostics in diagnosticsLists)
         ...diagnostics,
     ];
+  }
+
+  final Map<String, StreamSubscription<Uri>> _vmServiceDiscoverySubscriptions = <String, StreamSubscription<Uri>>{};
+
+  Future<String> startVMServiceDiscoveryForAttach(Map<String, Object?> args) async {
+    final String? deviceId = _getStringArg(args, 'deviceId', required: true);
+    final String? appId = _getStringArg(args, 'appId');
+    final String? fuchsiaModule = _getStringArg(args, 'fuchsiaModule');
+    final int? filterDevicePort = _getIntArg(args, 'filterDevicePort');
+    final bool? ipv6 = _getBoolArg(args, 'ipv6');
+
+    final Device? device = await daemon.deviceDomain._getDevice(deviceId);
+    if (device == null) {
+      throw DaemonException("device '$deviceId' not found");
+    }
+
+    final String id = '${_id++}';
+
+    final VMServiceDiscoveryForAttach discovery = device.getVMServiceDiscoveryForAttach(
+      appId: appId,
+      fuchsiaModule: fuchsiaModule,
+      filterDevicePort: filterDevicePort,
+      ipv6: ipv6 ?? false,
+      logger: globals.logger
+    );
+    _vmServiceDiscoverySubscriptions[id] = discovery.uris.listen(
+      (Uri uri) => sendEvent('device.VMServiceDiscoveryForAttach.$id', uri.toString()),
+    );
+
+    return id;
+  }
+
+  Future<void> stopVMServiceDiscoveryForAttach(Map<String, Object?> args) async {
+    final String? id = _getStringArg(args, 'id', required: true);
+    await _vmServiceDiscoverySubscriptions.remove(id)?.cancel();
   }
 }
 
