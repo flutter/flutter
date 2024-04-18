@@ -151,7 +151,7 @@ void main() {
     final String result = await capture(() => verifyRepositoryLinks(testRootPath), shouldHaveErrors: true);
     const String bannedBranch = 'master';
     final String file = Platform.isWindows ?
-      r'test\\analyze-test-input\\root\\packages\\foo\\bad_repository_links.dart' :
+      r'test\analyze-test-input\root\packages\foo\bad_repository_links.dart' :
       'test/analyze-test-input/root/packages/foo/bad_repository_links.dart';
     final String lines = <String>[
         '║ $file contains https://android.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
