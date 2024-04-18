@@ -305,7 +305,7 @@ void main() {
               BottomNavigationBarItem(label: '', icon: Text('2'))
             ],
           ),
-          tabBuilder: (_, int i) => PopScope(
+          tabBuilder: (_, int i) => PopScope<Object?>(
             canPop: false,
             child: CupertinoTabView(
               navigatorKey: key,
