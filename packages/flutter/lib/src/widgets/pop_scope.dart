@@ -10,15 +10,10 @@ import 'routes.dart';
 
 /// Manages back navigation gestures.
 ///
-/// The generic type should match or be supertype of the generic type of the
-/// enclosing [Route]. If the enclosing Route is a `MaterialPageRoute<int>`,
-/// you can define [PopScope] with int or any supertype of int.
-///
 /// The [canPop] parameter disables back gestures when set to `false`.
 ///
 /// The [onPopInvoked] parameter reports when pop navigation was attempted, and
-/// `didPop` indicates whether or not the navigation was successful. The
-/// `result` contains the pop result.
+/// `didPop` indicates whether or not the navigation was successful.
 ///
 /// Android has a system back gesture that is a swipe inward from near the edge
 /// of the screen. It is recognized by Android before being passed to Flutter.
@@ -46,13 +41,6 @@ import 'routes.dart';
 /// ** See code in examples/api/lib/widgets/pop_scope/pop_scope.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad}
-/// This sample demonstrates showing how to use PopScope to wrap widget that
-/// may pop the page with a result.
-///
-/// ** See code in examples/api/lib/widgets/pop_scope/pop_scope.1.dart **
-/// {@end-tool}
-///
 /// See also:
 ///
 ///  * [NavigatorPopHandler], which is a less verbose way to handle system back
@@ -61,7 +49,7 @@ import 'routes.dart';
 ///    back gestures in the case of a form with unsaved data.
 ///  * [ModalRoute.registerPopEntry] and [ModalRoute.unregisterPopEntry],
 ///    which this widget uses to integrate with Flutter's navigation system.
-class PopScope<T> extends StatefulWidget {
+class PopScope extends StatefulWidget {
   /// Creates a widget that registers a callback to veto attempts by the user to
   /// dismiss the enclosing [ModalRoute].
   const PopScope({
@@ -90,12 +78,10 @@ class PopScope<T> extends StatefulWidget {
   /// indicates whether or not the back navigation actually happened
   /// successfully.
   ///
-  /// The `result` contains the pop result.
-  ///
   /// See also:
   ///
   ///  * [Route.onPopInvoked], which is similar.
-  final PopInvokedCallback<T>? onPopInvoked;
+  final PopInvokedCallback? onPopInvoked;
 
   /// {@template flutter.widgets.PopScope.canPop}
   /// When false, blocks the current route from being popped.
@@ -113,16 +99,14 @@ class PopScope<T> extends StatefulWidget {
   final bool canPop;
 
   @override
-  State<PopScope<T>> createState() => _PopScopeState<T>();
+  State<PopScope> createState() => _PopScopeState();
 }
 
-class _PopScopeState<T> extends State<PopScope<T>> implements PopEntry<T> {
+class _PopScopeState extends State<PopScope> implements PopEntry {
   ModalRoute<dynamic>? _route;
 
   @override
-  void onPopInvoked(bool didPop, T? result) {
-    widget.onPopInvoked?.call(didPop, result);
-  }
+  PopInvokedCallback? get onPopInvoked => widget.onPopInvoked;
 
   @override
   late final ValueNotifier<bool> canPopNotifier;
@@ -145,7 +129,7 @@ class _PopScopeState<T> extends State<PopScope<T>> implements PopEntry<T> {
   }
 
   @override
-  void didUpdateWidget(PopScope<T> oldWidget) {
+  void didUpdateWidget(PopScope oldWidget) {
     super.didUpdateWidget(oldWidget);
     canPopNotifier.value = widget.canPop;
   }
