@@ -13,7 +13,6 @@ import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:file/file.dart' as fs;
 import 'package:file/local.dart';
-import 'package:file/local.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
@@ -21,18 +20,6 @@ import 'run_command.dart';
 import 'tool_subsharding.dart';
 
 typedef ShardRunner = Future<void> Function();
-
-/// A function used to validate the output of a test.
-///
-/// If the output matches expectations, the function shall return null.
-///
-/// If the output does not match expectations, the function shall return an
-/// appropriate error message.
-typedef OutputChecker = String? Function(CommandResult);
-
-
-import 'run_command.dart';
-import 'test.dart';
 
 /// A function used to validate the output of a test.
 ///
@@ -611,84 +598,5 @@ Future<void> _runFromList(Map<String, ShardRunner> items, String key, String nam
       return;
     }
     await items[item]!();
-  }
-}
-
-Future<void> runFlutterTest(String workingDirectory, {
-  String? script,
-  bool expectFailure = false,
-  bool printOutput = true,
-  OutputChecker? outputChecker,
-  List<String> options = const <String>[],
-  Map<String, String>? environment,
-  List<String> tests = const <String>[],
-  bool shuffleTests = true,
-  bool fatalWarnings = true,
-}) async {
-  final bool isRandomizationOff = bool.tryParse(Platform.environment['TEST_RANDOMIZATION_OFF'] ?? '') ?? false;
-
-  assert(!printOutput || outputChecker == null, 'Output either can be printed or checked but not both');
-
-  final List<String> tags = <String>[];
-  // Recipe-configured reduced test shards will only execute tests with the
-  // appropriate tag.
-  if (Platform.environment['REDUCED_TEST_SET'] == 'True') {
-    tags.addAll(<String>['-t', 'reduced-test-set']);
-  }
-
-  const LocalFileSystem fileSystem = LocalFileSystem();
-  final String suffix = DateTime.now().microsecondsSinceEpoch.toString();
-  final File metricFile = fileSystem.systemTempDirectory.childFile('metrics_$suffix.json');
-  final List<String> args = <String>[
-    'test',
-    '--reporter=expanded',
-    '--file-reporter=json:${metricFile.path}',
-    if (shuffleTests && !isRandomizationOff) '--test-randomize-ordering-seed=$shuffleSeed',
-    if (fatalWarnings) '--fatal-warnings',
-    ...options,
-    ...tags,
-    ...flutterTestArgs,
-  ];
-
-  if (script != null) {
-    final String fullScriptPath = path.join(workingDirectory, script);
-    if (!FileSystemEntity.isFileSync(fullScriptPath)) {
-      foundError(<String>[
-        '${red}Could not find test$reset: $green$fullScriptPath$reset',
-        'Working directory: $cyan$workingDirectory$reset',
-        'Script: $green$script$reset',
-        if (!printOutput)
-          'This is one of the tests that does not normally print output.',
-      ]);
-      return;
-    }
-    args.add(script);
-  }
-
-  args.addAll(tests);
-
-  final OutputMode outputMode = outputChecker == null && printOutput
-    ? OutputMode.print
-    : OutputMode.capture;
-
-  final CommandResult result = await runCommand(
-    flutter,
-    args,
-    workingDirectory: workingDirectory,
-    expectNonZeroExit: expectFailure,
-    outputMode: outputMode,
-    environment: environment,
-  );
-
-  // metriciFile is a transitional file that needs to be deleted once it is parsed.
-  // TODO(godofredoc): Ensure metricFile is parsed and aggregated before deleting.
-  // https://github.com/flutter/flutter/issues/146003
-  metricFile.deleteSync();
-
-  if (outputChecker != null) {
-    final String? message = outputChecker(result);
-    if (message != null) {
-      foundError(<String>[message]);
-    }
   }
 }
