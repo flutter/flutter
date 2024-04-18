@@ -675,13 +675,17 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
   @override
   SliverTreeNode<T>? getNodeFor(T content) => _getNode(content, widget.tree);
   SliverTreeNode<T>? _getNode(T content, List<SliverTreeNode<T>> tree) {
+    final List<SliverTreeNode<T>> nextDepth = <SliverTreeNode<T>>[];
     for (final SliverTreeNode<T> node in tree) {
       if (node.content == content) {
         return node;
       }
       if (node.children.isNotEmpty) {
-        return _getNode(content, node.children);
+        nextDepth.addAll(node.children);
       }
+    }
+    if (nextDepth.isNotEmpty) {
+      return _getNode(content, nextDepth);
     }
     return null;
   }
