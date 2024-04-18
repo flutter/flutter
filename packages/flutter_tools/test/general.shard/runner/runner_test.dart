@@ -390,7 +390,7 @@ void main() {
     );
 
     testUsingContext(
-      'runner disable legacy analytics if opted out of package:unified_analytics',
+      'runner sends mismatch event to ga3 if user opted in to ga3 but out of ga4 analytics',
       () async {
         io.setExitFunctionForTests((int exitCode) {});
 
@@ -417,6 +417,46 @@ void main() {
         );
         expect(fakeAnalytics.telemetryEnabled, false);
         expect(testUsage.enabled, true);
+        expect(fakeAnalytics.sentEvents, isEmpty);
+
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+        Usage: () => testUsage,
+      },
+    );
+
+    testUsingContext(
+      'runner does not send mismatch event to ga3 if user opted out of ga3 & ga4 analytics',
+      () async {
+        io.setExitFunctionForTests((int exitCode) {});
+
+        // Begin by opting out of telemetry for package:unified_analytics
+        // and leaving legacy analytics opted in
+        await fakeAnalytics.setTelemetry(false);
+        testUsage.enabled = false;
+        expect(fakeAnalytics.telemetryEnabled, false);
+        expect(testUsage.enabled, false);
+
+        await runner.run(
+          <String>[],
+          () => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect(
+          testUsage.events,
+          isNot(contains(const TestUsageEvent(
+            'ga4_and_ga3_status_mismatch',
+            'opted_out_of_ga4',
+          ))),
+        );
+        expect(fakeAnalytics.telemetryEnabled, false);
+        expect(testUsage.enabled, false);
         expect(fakeAnalytics.sentEvents, isEmpty);
 
       },
