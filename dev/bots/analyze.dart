@@ -1313,7 +1313,8 @@ Future<void> verifyRepositoryLinks(String workingDirectory) async {
     'tpn/winsdk-10',
   };
 
-  // See bad_repository_links.dart for examples of repository links that are not allowed.
+  // See dev/bots/test/analyze-test-input/root/packages/foo/bad_repository_links.dart
+  // for examples of repository links that are not allowed.
   final RegExp pattern = RegExp(r'^(https:\/\/(?:cs\.opensource\.google|github|raw\.githubusercontent|source\.chromium|([a-z0-9\-]+)\.googlesource)\.)');
 
   final List<String> problems = <String>[];

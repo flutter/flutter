@@ -150,18 +150,20 @@ void main() {
   test('analyze.dart - verifyRepositoryLinks', () async {
     final String result = await capture(() => verifyRepositoryLinks(testRootPath), shouldHaveErrors: true);
     const String bannedBranch = 'master';
+    final String file = Platform.isWindows ?
+      r'test\\analyze-test-input\\root\\packages\\foo\\bad_repository_links.dart' :
+      'test/analyze-test-input/root/packages/foo/bad_repository_links.dart';
     final String lines = <String>[
-        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart contains https://android.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
-        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart contains https://chromium.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
-        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart contains https://cs.opensource.google.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
-        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart contains https://dart.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
-        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart contains https://flutter.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
-        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart contains https://source.chromium.org/+/$bannedBranch/file1, which uses the banned "master" branch.',
-        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart contains https://github.com/flutter/flutter/tree/$bannedBranch/file1, which uses the banned "master" branch.',
-        '║ test/analyze-test-input/root/packages/foo/bad_repository_links.dart contains https://raw.githubusercontent.com/flutter/flutter/blob/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://android.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://chromium.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://cs.opensource.google.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://dart.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://flutter.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://source.chromium.org/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://github.com/flutter/flutter/tree/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://raw.githubusercontent.com/flutter/flutter/blob/$bannedBranch/file1, which uses the banned "master" branch.',
         '║ Change the URLs above to the expected pattern by using the "main" branch if it exists, otherwise adding the repository to the list of exceptions in analyze.dart.',
       ]
-      .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
       .join('\n');
     expect(result,
       '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
