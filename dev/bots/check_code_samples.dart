@@ -463,7 +463,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/tween_animation_builder/tween_animation_builder.0_test.dart',
   'examples/api/test/widgets/single_child_scroll_view/single_child_scroll_view.1_test.dart',
   'examples/api/test/widgets/single_child_scroll_view/single_child_scroll_view.0_test.dart',
-  'examples/api/test/widgets/overflow_bar/overflow_bar.0_test.dart',
   'examples/api/test/widgets/restoration/restoration_mixin.0_test.dart',
   'examples/api/test/widgets/actions/actions.0_test.dart',
   'examples/api/test/widgets/actions/action_listener.0_test.dart',
