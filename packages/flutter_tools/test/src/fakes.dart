@@ -707,6 +707,9 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   @override
   Uri? dtdUri;
 
+  @override
+  bool printDtdUri = false;
+
   final DevToolsServerAddress? _serverAddress;
 
   @override

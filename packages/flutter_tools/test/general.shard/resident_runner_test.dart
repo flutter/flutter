@@ -68,6 +68,7 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
         analytics: fakeAnalytics,
+        devtoolsHandler: createNoOpHandler,
       );
     });
     device = FakeDevice();
@@ -269,6 +270,7 @@ void main() {
         startPaused: true,
       ),
       target: 'main.dart',
+      devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
     );
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
@@ -426,11 +428,14 @@ void main() {
       ],
       stayResident: false,
       target: 'main.dart',
-      debuggingOptions: DebuggingOptions.enabled(const BuildInfo(
-        BuildMode.debug, '', treeShakeIcons: false, extraFrontEndOptions: <String>[
-        '--enable-experiment=non-nullable',
-        ],
-      )),
+      debuggingOptions: DebuggingOptions.enabled(
+        const BuildInfo(
+          BuildMode.debug, '', treeShakeIcons: false, extraFrontEndOptions: <String>[
+          '--enable-experiment=non-nullable',
+          ],
+        ),
+        enableDevTools: false,
+      ),
       analytics: fakeAnalytics,
     );
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();

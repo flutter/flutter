@@ -361,6 +361,7 @@ void main() {
       usage: globals.flutterUsage,
       analytics: globals.analytics,
       systemClock: globals.systemClock,
+      devtoolsHandler: createNoOpHandler,
     );
 
     expect(await residentWebRunner.run(), 0);
@@ -387,6 +388,7 @@ void main() {
       usage: globals.flutterUsage,
       analytics: globals.analytics,
       systemClock: globals.systemClock,
+      devtoolsHandler: createNoOpHandler,
     );
 
     expect(await residentWebRunner.run(), 0);
@@ -587,6 +589,7 @@ void main() {
       usage: globals.flutterUsage,
       analytics: globals.analytics,
       systemClock: globals.systemClock,
+      devtoolsHandler: createNoOpHandler,
     );
     fakeVmServiceHost =
         FakeVmServiceHost(requests: kAttachExpectations.toList());
@@ -1110,6 +1113,7 @@ void main() {
       usage: globals.flutterUsage,
       analytics: globals.analytics,
       systemClock: globals.systemClock,
+      devtoolsHandler: createNoOpHandler,
     );
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter =
@@ -1158,6 +1162,7 @@ void main() {
       usage: globals.flutterUsage,
       analytics: globals.analytics,
       systemClock: globals.systemClock,
+      devtoolsHandler: createNoOpHandler,
     );
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter =
@@ -1200,6 +1205,7 @@ void main() {
       usage: globals.flutterUsage,
       analytics: globals.analytics,
       systemClock: globals.systemClock,
+      devtoolsHandler: createNoOpHandler,
     );
 
     // Create necessary files.
