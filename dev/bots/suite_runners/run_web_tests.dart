@@ -17,7 +17,7 @@ typedef ShardRunner = Future<void> Function();
 
 class WebTestsSuite {
 
-  WebTestsSuite(this.flutterRoot, this.flutterTestArgs);
+  WebTestsSuite(this.flutterTestArgs);
 
   /// Tests that we don't run on Web.
   ///
@@ -87,7 +87,6 @@ class WebTestsSuite {
 
   static const List<String> _kAllBuildModes = <String>['debug', 'profile', 'release'];
 
-  final String flutterRoot;
   final List<String> flutterTestArgs;
 
   /// Coarse-grained integration tests running on the Web.

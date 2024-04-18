@@ -6,7 +6,7 @@ import '../run_command.dart';
 import '../utils.dart';
 
 // Runs flutter_precache.
-Future<void> fuchsiaPrecacheRunner(String flutterRoot) async {
+Future<void> fuchsiaPrecacheRunner() async {
   printProgress('${green}Running flutter precache tests$reset');
   await runCommand(
     'flutter',

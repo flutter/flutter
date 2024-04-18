@@ -5,7 +5,7 @@
 import '../run_command.dart';
 import '../utils.dart';
 
-Future<void> docsRunner(String flutterRoot) async {
+Future<void> docsRunner() async {
   printProgress('${green}Running flutter doc tests$reset');
   await runCommand(
     './dev/bots/docs.sh',
