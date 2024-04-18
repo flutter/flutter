@@ -63,12 +63,49 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     required this.optionsBuilder,
     this.displayStringForOption = RawAutocomplete.defaultStringForOption,
     this.fieldViewBuilder = _defaultFieldViewBuilder,
+    this.focusNode,
     this.onSelected,
+    this.textEditingController,
     this.optionsMaxHeight = 200.0,
     this.optionsViewBuilder,
     this.optionsViewOpenDirection = OptionsViewOpenDirection.down,
     this.initialValue,
-  });
+  }) : assert(
+         fieldViewBuilder != null
+            || (key != null && focusNode != null && textEditingController != null),
+         'Pass in a fieldViewBuilder, or otherwise create a separate field and pass in the FocusNode, TextEditingController, and a key. Use the key with RawAutocomplete.onFieldSubmitted.',
+        ),
+       assert((focusNode == null) == (textEditingController == null)),
+       assert(
+         !(textEditingController != null && initialValue != null),
+         'textEditingController and initialValue cannot be simultaneously defined.',
+       );
+
+  /// The [FocusNode] that is used for the text field.
+  ///
+  /// {@template flutter.widgets.RawAutocomplete.split}
+  /// The main purpose of this parameter is to allow the use of a separate text
+  /// field located in another part of the widget tree instead of the text
+  /// field built by [fieldViewBuilder]. For example, it may be desirable to
+  /// place the text field in the AppBar and the options below in the main body.
+  ///
+  /// When following this pattern, [fieldViewBuilder] can be omitted,
+  /// so that a text field is not drawn where it would normally be.
+  /// A separate text field can be created elsewhere, and a
+  /// FocusNode and TextEditingController can be passed both to that text field
+  /// and to RawAutocomplete.
+  ///
+  /// {@tool dartpad}
+  /// This examples shows how to create an autocomplete widget with the text
+  /// field in the AppBar and the results in the main body of the app.
+  ///
+  /// ** See code in examples/api/lib/widgets/autocomplete/raw_autocomplete.focus_node.0.dart **
+  /// {@end-tool}
+  /// {@endtemplate}
+  ///
+  /// If this parameter is not null, then [textEditingController] must also be
+  /// not null.
+  final FocusNode? focusNode;
 
   /// {@macro flutter.widgets.RawAutocomplete.displayStringForOption}
   final AutocompleteOptionToString<T> displayStringForOption;
@@ -84,6 +121,13 @@ class Autocomplete<T extends Object> extends StatelessWidget {
 
   /// {@macro flutter.widgets.RawAutocomplete.optionsBuilder}
   final AutocompleteOptionsBuilder<T> optionsBuilder;
+
+  /// The [TextEditingController] that is used for the text field.
+  ///
+  /// {@macro flutter.widgets.RawAutocomplete.split}
+  ///
+  /// If this parameter is not null, then [focusNode] must also be not null.
+  final TextEditingController? textEditingController;
 
   /// {@macro flutter.widgets.RawAutocomplete.optionsViewBuilder}
   ///
@@ -130,7 +174,9 @@ class Autocomplete<T extends Object> extends StatelessWidget {
           maxOptionsHeight: optionsMaxHeight,
         );
       },
+      focusNode: focusNode,
       onSelected: onSelected,
+      textEditingController: textEditingController,
     );
   }
 }
