@@ -136,9 +136,9 @@ Future<void> main(List<String> args) async {
     if (Platform.environment.containsKey(CIRRUS_TASK_NAME)) {
       printProgress('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
     }
-    final WebTestsSuite webTestsSuite = WebTestsSuite(flutterRoot, flutterTestArgs);
+    final WebTestsSuite webTestsSuite = WebTestsSuite(flutterTestArgs);
     await selectShard(<String, ShardRunner>{
-      'add_to_app_life_cycle_tests': () => addToAppLifeCycleRunner(flutterRoot),
+      'add_to_app_life_cycle_tests': addToAppLifeCycleRunner,
       'build_tests': _runBuildTests,
       'framework_coverage': frameworkCoverageRunner,
       'framework_tests': _runFrameworkTests,
@@ -156,14 +156,14 @@ Future<void> main(List<String> args) async {
       'web_skwasm_tests': webTestsSuite.runWebSkwasmUnitTests,
       // All web integration tests
       'web_long_running_tests': webTestsSuite.webLongRunningTestsRunner,
-      'flutter_plugins': () => flutterPackagesRunner(flutterRoot),
+      'flutter_plugins': flutterPackagesRunner,
       'skp_generator': skpGeneratorTestsRunner,
-      'realm_checker': () => realmCheckerTestRunner(flutterRoot),
-      'customer_testing': () => customerTestingRunner(flutterRoot),
-      'analyze': () => analyzeRunner(flutterRoot),
-      'fuchsia_precache': () => fuchsiaPrecacheRunner(flutterRoot),
-      'docs': () => docsRunner(flutterRoot),
-      'verify_binaries_codesigned': () => verifyCodesignedTestRunner(flutterRoot),
+      'realm_checker': realmCheckerTestRunner,
+      'customer_testing': customerTestingRunner,
+      'analyze': analyzeRunner,
+      'fuchsia_precache': fuchsiaPrecacheRunner,
+      'docs': docsRunner,
+      'verify_binaries_codesigned': verifyCodesignedTestRunner,
       kTestHarnessShardName: _runTestHarnessTests, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });
   } catch (error, stackTrace) {
