@@ -1,4 +1,4 @@
-Signature: 99e25575789f4e80c6b0209bf552dca1
+Signature: 78c22b981acdce2c96bb75f799906ee0
 
 ====================================================================================================
 LIBRARY: etc1
@@ -397,6 +397,7 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
+FILE: ../../../flutter/third_party/skia/relnotes/SkFloatBits.md
 FILE: ../../../flutter/third_party/skia/relnotes/ios_gl.md
 FILE: ../../../flutter/third_party/skia/relnotes/mac_gl.md
 FILE: ../../../flutter/third_party/skia/relnotes/moved_interfaces.md
@@ -1082,7 +1083,7 @@ LIBRARY: skia
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkMallocPixelRef.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkPixelRef.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkUnPreMultiply.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/include/private/base/SkFloatBits.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/base/SkFloatBits.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/base/SkMathPriv.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkBitmap.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkCanvas.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -1095,7 +1096,7 @@ TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/skia/include/core/SkMallocPixelRef.h
 FILE: ../../../flutter/third_party/skia/include/core/SkPixelRef.h
 FILE: ../../../flutter/third_party/skia/include/core/SkUnPreMultiply.h
-FILE: ../../../flutter/third_party/skia/include/private/base/SkFloatBits.h
+FILE: ../../../flutter/third_party/skia/src/base/SkFloatBits.h
 FILE: ../../../flutter/third_party/skia/src/base/SkMathPriv.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkBitmap.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkCanvas.cpp
