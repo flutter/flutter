@@ -669,7 +669,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   // it keeps track of the last accepted pointer. If this active pointer
   // leave up, it will be set to the first accepted pointer.
   // Refer to the implementation of Android `RecyclerView`(line 3846):
-  // https://android.googlesource.com/platform/frameworks/support/+/refs/heads/androidx-master-dev/recyclerview/recyclerview/src/main/java/androidx/recyclerview/widget/RecyclerView.java
+  // https://android.googlesource.com/platform/frameworks/support/+/refs/heads/androidx-main/recyclerview/recyclerview/src/main/java/androidx/recyclerview/widget/RecyclerView.java
   int? _activePointer;
 
   @override
