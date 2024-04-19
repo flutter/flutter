@@ -14,6 +14,8 @@
 #include "third_party/skia/include/core/SkTypeface.h"
 #include "txt/platform.h"
 
+#define ENABLE_EXPERIMENTAL_CANVAS false
+
 namespace impeller {
 
 DlPlayground::DlPlayground() = default;
@@ -47,11 +49,24 @@ bool DlPlayground::OpenPlaygroundHere(DisplayListPlaygroundCallback callback) {
 
         auto list = callback();
 
+#if ENABLE_EXPERIMENTAL_CANVAS
+        TextFrameDispatcher collector(context.GetContentContext(), Matrix());
+        list->Dispatch(collector);
+
+        ExperimentalDlDispatcher impeller_dispatcher(
+            context.GetContentContext(), render_target, IRect::MakeMaximum());
+        list->Dispatch(impeller_dispatcher);
+        impeller_dispatcher.FinishRecording();
+        context.GetContentContext().GetTransientsBuffer().Reset();
+        context.GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
+        return true;
+#else
         DlDispatcher dispatcher;
         list->Dispatch(dispatcher);
         auto picture = dispatcher.EndRecordingAsPicture();
 
         return context.Render(picture, render_target, true);
+#endif
       });
 }
 

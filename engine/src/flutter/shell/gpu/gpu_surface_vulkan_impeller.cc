@@ -105,6 +105,9 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
                   SkIRect::MakeWH(cull_rect.width, cull_rect.height));
               impeller_dispatcher.FinishRecording();
               aiks_context->GetContentContext().GetTransientsBuffer().Reset();
+              aiks_context->GetContentContext()
+                  .GetLazyGlyphAtlas()
+                  ->ResetTextFrames();
               return true;
 #else
               impeller::Rect dl_cull_rect = impeller::Rect::MakeSize(cull_rect);

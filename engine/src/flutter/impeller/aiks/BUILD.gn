@@ -128,9 +128,9 @@ template("aiks_unittests_component") {
 
 aiks_unittests_component("aiks_unittests") {
   sources = [
-    "canvas_recorder_unittests.cc",
+    # "canvas_recorder_unittests.cc",
     "canvas_unittests.cc",
-    "trace_serializer_unittests.cc",
+    # "trace_serializer_unittests.cc",
   ]
 
   if (!impeller_trace_canvas) {

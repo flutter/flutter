@@ -59,7 +59,7 @@ void* DisplayListBuilder::Push(size_t pod, Args&&... args) {
   op->type = T::kType;
   op->size = size;
   render_op_count_ += T::kRenderOpInc;
-  depth_ += T::kDepthInc;
+  depth_ += T::kDepthInc * render_op_depth_cost_;
   op_index_++;
   return op + 1;
 }
@@ -331,9 +331,11 @@ void DisplayListBuilder::onSetPathEffect(const DlPathEffect* effect) {
 void DisplayListBuilder::onSetMaskFilter(const DlMaskFilter* filter) {
   if (filter == nullptr) {
     current_.setMaskFilter(nullptr);
+    render_op_depth_cost_ = 1u;
     Push<ClearMaskFilterOp>(0);
   } else {
     current_.setMaskFilter(filter->shared());
+    render_op_depth_cost_ = 2u;
     switch (filter->type()) {
       case DlMaskFilterType::kBlur: {
         const DlBlurMaskFilter* blur_filter = filter->asBlur();
@@ -440,7 +442,7 @@ void DisplayListBuilder::Restore() {
       // A saveLayer will usually do a final copy to the main buffer in
       // addition to its content, but that is accounted for outside of
       // the total content depth computed above.
-      depth_++;
+      depth_ += render_op_depth_cost_;
     }
   }
 
