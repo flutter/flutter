@@ -486,10 +486,13 @@ class DisplayListBuilder final : public virtual DlCanvas,
   void checkForDeferredSave();
 
   DisplayListStorage storage_;
-  size_t used_ = 0;
-  size_t allocated_ = 0;
-  uint32_t render_op_count_ = 0;
-  uint32_t depth_ = 0;
+  size_t used_ = 0u;
+  size_t allocated_ = 0u;
+  uint32_t render_op_count_ = 0u;
+  uint32_t depth_ = 0u;
+  // Most rendering ops will use 1 depth value, but some attributes may
+  // require an additional depth value (due to implicit saveLayers)
+  uint32_t render_op_depth_cost_ = 1u;
   int op_index_ = 0;
 
   // bytes and ops from |drawPicture| and |drawDisplayList|

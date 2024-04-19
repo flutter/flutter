@@ -65,9 +65,10 @@ class DisplayListTestBase : public BaseT {
     DisplayListBuilder builder;
     DlOpReceiver& receiver =
         DisplayListTestBase<::testing::Test>::ToReceiver(builder);
-    uint32_t op_count = 0;
-    size_t byte_count = 0;
-    uint32_t depth = 0;
+    uint32_t op_count = 0u;
+    size_t byte_count = 0u;
+    uint32_t depth = 0u;
+    uint32_t render_op_depth_cost = 1u;
     for (size_t i = 0; i < allGroups.size(); i++) {
       DisplayListInvocationGroup& group = allGroups[i];
       size_t j = (i == g_index ? v_index : 0);
@@ -77,8 +78,10 @@ class DisplayListTestBase : public BaseT {
       DisplayListInvocation& invocation = group.variants[j];
       op_count += invocation.op_count();
       byte_count += invocation.raw_byte_count();
-      depth += invocation.depth();
-      invocation.invoker(receiver);
+      depth += invocation.depth_accumulated(render_op_depth_cost);
+      invocation.Invoke(receiver);
+      render_op_depth_cost =
+          invocation.adjust_render_op_depth_cost(render_op_depth_cost);
     }
     sk_sp<DisplayList> dl = builder.Build();
     std::string name;
@@ -579,7 +582,7 @@ TEST_F(DisplayListTest, SingleOpSizes) {
       auto desc = group.op_name + "(variant " + std::to_string(i + 1) + ")";
       ASSERT_EQ(dl->op_count(false), invocation.op_count()) << desc;
       ASSERT_EQ(dl->bytes(false), invocation.byte_count()) << desc;
-      EXPECT_EQ(dl->total_depth(), invocation.depth()) << desc;
+      EXPECT_EQ(dl->total_depth(), invocation.depth_accumulated()) << desc;
     }
   }
 }
@@ -668,8 +671,8 @@ TEST_F(DisplayListTest, SingleOpDisplayListsAreEqualWithOrWithoutRtree) {
     for (size_t i = 0; i < group.variants.size(); i++) {
       DisplayListBuilder builder1(/*prepare_rtree=*/false);
       DisplayListBuilder builder2(/*prepare_rtree=*/true);
-      group.variants[i].invoker(ToReceiver(builder1));
-      group.variants[i].invoker(ToReceiver(builder2));
+      group.variants[i].Invoke(ToReceiver(builder1));
+      group.variants[i].Invoke(ToReceiver(builder2));
       sk_sp<DisplayList> dl1 = builder1.Build();
       sk_sp<DisplayList> dl2 = builder2.Build();
 

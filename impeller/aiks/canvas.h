@@ -32,6 +32,7 @@ struct CanvasStackEntry {
   Matrix transform;
   // |cull_rect| is conservative screen-space bounds of the clipped output area
   std::optional<Rect> cull_rect;
+  uint32_t clip_depth = 0u;
   size_t clip_height = 0u;
   // The number of clips tracked for this canvas stack entry.
   size_t num_clips = 0u;
@@ -57,6 +58,8 @@ enum class SourceRectConstraint {
 
 class Canvas {
  public:
+  static constexpr uint32_t kMaxDepth = 1 << 24;
+
   struct DebugOptions {
     /// When enabled, layers that are rendered to an offscreen texture
     /// internally get a translucent checkerboard pattern painted over them.
@@ -73,13 +76,14 @@ class Canvas {
 
   virtual ~Canvas();
 
-  virtual void Save();
+  virtual void Save(uint32_t total_content_depth = kMaxDepth);
 
   virtual void SaveLayer(
       const Paint& paint,
       std::optional<Rect> bounds = std::nullopt,
       const std::shared_ptr<ImageFilter>& backdrop_filter = nullptr,
-      ContentBoundsPromise bounds_promise = ContentBoundsPromise::kUnknown);
+      ContentBoundsPromise bounds_promise = ContentBoundsPromise::kUnknown,
+      uint32_t total_content_depth = kMaxDepth);
 
   virtual bool Restore();
 
@@ -182,6 +186,7 @@ class Canvas {
  protected:
   std::deque<CanvasStackEntry> transform_stack_;
   std::optional<Rect> initial_cull_rect_;
+  uint64_t current_depth_ = 0u;
 
   size_t GetClipHeight() const;
 
@@ -192,11 +197,12 @@ class Canvas {
  private:
   std::unique_ptr<EntityPass> base_pass_;
   EntityPass* current_pass_ = nullptr;
-  uint64_t current_depth_ = 0u;
 
   EntityPass& GetCurrentPass();
 
-  virtual void AddEntityToCurrentPass(Entity entity);
+  virtual void AddRenderEntityToCurrentPass(Entity entity,
+                                            bool reuse_depth = false);
+  virtual void AddClipEntityToCurrentPass(Entity entity);
 
   void ClipGeometry(const std::shared_ptr<Geometry>& geometry,
                     Entity::ClipOperation clip_op);
@@ -206,6 +212,7 @@ class Canvas {
 
   virtual void Save(
       bool create_subpass,
+      uint32_t total_content_depth,
       BlendMode = BlendMode::kSourceOver,
       const std::shared_ptr<ImageFilter>& backdrop_filter = nullptr);
 
