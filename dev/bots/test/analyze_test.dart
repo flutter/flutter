@@ -147,6 +147,31 @@ void main() {
     );
   });
 
+  test('analyze.dart - verifyRepositoryLinks', () async {
+    final String result = await capture(() => verifyRepositoryLinks(testRootPath), shouldHaveErrors: true);
+    const String bannedBranch = 'master';
+    final String file = Platform.isWindows ?
+      r'test\analyze-test-input\root\packages\foo\bad_repository_links.dart' :
+      'test/analyze-test-input/root/packages/foo/bad_repository_links.dart';
+    final String lines = <String>[
+        '║ $file contains https://android.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://chromium.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://cs.opensource.google.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://dart.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://flutter.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://source.chromium.org/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://github.com/flutter/flutter/tree/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://raw.githubusercontent.com/flutter/flutter/blob/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ Change the URLs above to the expected pattern by using the "main" branch if it exists, otherwise adding the repository to the list of exceptions in analyze.dart.',
+      ]
+      .join('\n');
+    expect(result,
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
+      '$lines\n'
+      '╚═══════════════════════════════════════════════════════════════════════════════\n'
+    );
+  });
+
   test('analyze.dart - verifyNoBinaries - positive', () async {
     final String result = await capture(() => verifyNoBinaries(
       testRootPath,
@@ -310,7 +335,7 @@ void main() {
     expect(result,
       '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
       '$lines\n'
-      '║ See: https://github.com/flutter/flutter/blob/master/dev/tools/gen_defaults to update the token template files.\n'
+      '║ See: https://github.com/flutter/flutter/blob/main/dev/tools/gen_defaults to update the token template files.\n'
       '╚═══════════════════════════════════════════════════════════════════════════════\n'
     );
   });
