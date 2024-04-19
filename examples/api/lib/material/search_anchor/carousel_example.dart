@@ -35,31 +35,35 @@ class _CarouselExampleState extends State<CarouselExample> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        body: Carousel(
-          // centered: true,
-          scrollDirection: Axis.vertical,
-          snap: true,
-          itemExtent: 300,
-          clipExtent: 100,
-          // layout: CarouselLayout.multiBrowse,
-          // childWeights: const <int>[1,5,1], // [3,3,3,2,1], [1,5,1], [1,1,1], [5,1]
-          children: List<Widget>.generate(data.length, (int index) {
-            return Card.outlined(
-              clipBehavior: Clip.antiAlias,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0)
-              ),
-              color: Colors.primaries[index % Colors.primaries.length].withOpacity(0.5),
-              child: Center(
-                    child: Text(
-                      'Item ${data[index]}',
-                      style: const TextStyle(color: Colors.white, fontSize: 20),
-                      overflow: TextOverflow.clip,
-                      softWrap: false,
-                    ),
+        body: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints.tightFor(height: 200),
+            child: Carousel.hero(
+              centered: true,
+              // scrollDirection: Axis.vertical,
+              snap: true,
+              clipExtent: 100,
+              // layout: CarouselLayout.multiBrowse,
+              // childWeights: const <int>[1,5,1], // [3,3,3,2,1], [1,5,1], [1,1,1], [5,1]
+              children: List<Widget>.generate(data.length, (int index) {
+                return Card.outlined(
+                  clipBehavior: Clip.antiAlias,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0)
                   ),
-            );
-          }).toList()),
+                  color: Colors.primaries[index % Colors.primaries.length].withOpacity(0.5),
+                  child: Center(
+                        child: Text(
+                          'Item ${data[index]}',
+                          style: const TextStyle(color: Colors.white, fontSize: 20),
+                          overflow: TextOverflow.clip,
+                          softWrap: false,
+                        ),
+                      ),
+                );
+              }).toList()),
+          ),
+        ),
       ),
     );
   }

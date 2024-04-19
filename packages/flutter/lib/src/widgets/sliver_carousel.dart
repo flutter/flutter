@@ -80,11 +80,13 @@ class Carousel extends StatefulWidget {
 
 class _CarouselState extends State<Carousel> {
   late double? itemExtent;
+  late List<int>? weights;
   late CarouselController _controller;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    weights = widget.childWeights ?? getChildWeights();
     itemExtent = getItemExtent();
     _initController();
   }
@@ -110,13 +112,13 @@ class _CarouselState extends State<Carousel> {
 
   void _initController() {
     double? fraction;
-    if (widget.childWeights != null) {
-      fraction = widget.childWeights!.first / widget.childWeights!.sum;
+    if (weights != null) {
+      fraction = weights!.first / weights!.sum;
     }
 
     _controller = widget.controller
       ?? CarouselController(
-        itemExtent: itemExtent ?? 0,
+        itemExtent: itemExtent,
         viewportFraction: fraction
       );
   }
@@ -193,7 +195,7 @@ class _CarouselState extends State<Carousel> {
               SliverCarousel(
                 clipExtent: widget.clipExtent,
                 itemExtent: itemExtent,
-                childWeights: widget.childWeights ?? getChildWeights(),
+                childWeights: weights,
                 children: widget.children,
               ),
             ],
