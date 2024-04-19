@@ -512,6 +512,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   late Animation<double> _animation;
   double? _lastActualScrollOffset;
   double? _effectiveScrollOffset;
+  double? _effectivePaintOrigin;
   // Important for pointer scrolling, which does not have the same concept of
   // a hold and release scroll movement, like dragging.
   // This keeps track of the last ScrollDirection when scrolling started.
@@ -579,7 +580,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     final double layoutExtent = maxExtent - constraints.scrollOffset;
     geometry = SliverGeometry(
       scrollExtent: maxExtent,
-      paintOrigin: math.min(constraints.overlap, 0.0),
+      paintOrigin: _effectivePaintOrigin == 0 ? 0.0 : constraints.overlap,
       paintExtent: clampDouble(paintExtent, 0.0, constraints.remainingPaintExtent),
       layoutExtent: clampDouble(layoutExtent, 0.0, constraints.remainingPaintExtent),
       maxPaintExtent: maxExtent + stretchOffset,
@@ -660,6 +661,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
         if (_effectiveScrollOffset! > maxExtent) {
           // We're scrolled off-screen, but should reveal, so pretend we're just at the limit.
           _effectiveScrollOffset = maxExtent;
+          _effectivePaintOrigin = constraints.overlap;
         }
       } else {
         if (delta > 0.0) {
@@ -668,8 +670,10 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
         }
       }
       _effectiveScrollOffset = clampDouble(_effectiveScrollOffset! - delta, 0.0, constraints.scrollOffset);
+      _effectivePaintOrigin = clampDouble(_effectivePaintOrigin!, 0, constraints.overlap);
     } else {
       _effectiveScrollOffset = constraints.scrollOffset;
+      _effectivePaintOrigin = 0.0;
     }
     final bool overlapsContent = _effectiveScrollOffset! < constraints.scrollOffset;
 
