@@ -266,7 +266,7 @@ class IconButton extends StatelessWidget {
   }) : assert(splashRadius == null || splashRadius > 0),
        _variant = _IconButtonVariant.filledTonal;
 
-  /// Create a filled tonal variant of IconButton.
+  /// Create an outlined variant of IconButton.
   ///
   /// Outlined icon buttons are medium-emphasis buttons. They’re useful when an
   /// icon button needs more emphasis than a standard icon button but less than
