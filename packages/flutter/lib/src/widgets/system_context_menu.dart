@@ -92,8 +92,7 @@ class SystemContextMenu extends StatefulWidget {
   ///
   /// Currently, this is only supported on newer versions of iOS.
   static bool isSupported(BuildContext context) {
-    return defaultTargetPlatform == TargetPlatform.iOS
-        && (MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false);
+    return MediaQuery.maybeSupportsShowingSystemContextMenu(context) ?? false;
   }
 
   @override
