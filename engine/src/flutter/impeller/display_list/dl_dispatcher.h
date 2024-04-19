@@ -65,11 +65,12 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
   void setImageFilter(const flutter::DlImageFilter* filter) override;
 
   // |flutter::DlOpReceiver|
-  void save() override;
+  void save(uint32_t total_content_depth) override;
 
   // |flutter::DlOpReceiver|
   void saveLayer(const SkRect& bounds,
-                 const flutter::SaveLayerOptions options,
+                 const flutter::SaveLayerOptions& options,
+                 uint32_t total_content_depth,
                  const flutter::DlImageFilter* backdrop) override;
 
   // |flutter::DlOpReceiver|
@@ -258,6 +259,26 @@ class DlDispatcher : public DlDispatcherBase {
 
   ~DlDispatcher() = default;
 
+  // |flutter::DlOpReceiver|
+  void save() override {
+    // This dispatcher is used from test cases that might not supply
+    // a content_depth parameter. Since this dispatcher doesn't use
+    // the value, we just pass through a 0.
+    DlDispatcherBase::save(0u);
+  }
+  using DlDispatcherBase::save;
+
+  // |flutter::DlOpReceiver|
+  void saveLayer(const SkRect& bounds,
+                 const flutter::SaveLayerOptions options,
+                 const flutter::DlImageFilter* backdrop) override {
+    // This dispatcher is used from test cases that might not supply
+    // a content_depth parameter. Since this dispatcher doesn't use
+    // the value, we just pass through a 0.
+    DlDispatcherBase::saveLayer(bounds, options, 0u, backdrop);
+  }
+  using DlDispatcherBase::saveLayer;
+
  private:
   Canvas canvas_;
 
@@ -271,6 +292,24 @@ class ExperimentalDlDispatcher : public DlDispatcherBase {
                            IRect cull_rect);
 
   ~ExperimentalDlDispatcher() = default;
+
+  // |flutter::DlOpReceiver|
+  void save() override {
+    // This dispatcher should never be used with the save() variant
+    // that does not include the content_depth parameter.
+    FML_UNREACHABLE();
+  }
+  using DlDispatcherBase::save;
+
+  // |flutter::DlOpReceiver|
+  void saveLayer(const SkRect& bounds,
+                 const flutter::SaveLayerOptions options,
+                 const flutter::DlImageFilter* backdrop) override {
+    // This dispatcher should never be used with the saveLayer() variant
+    // that does not include the content_depth parameter.
+    FML_UNREACHABLE();
+  }
+  using DlDispatcherBase::saveLayer;
 
   void FinishRecording() { canvas_.EndReplay(); }
 

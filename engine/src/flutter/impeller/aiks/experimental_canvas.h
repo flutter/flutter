@@ -31,13 +31,13 @@ class ExperimentalCanvas : public Canvas {
 
   ~ExperimentalCanvas() override = default;
 
-  void Save() override;
+  void Save(uint32_t total_content_depth) override;
 
   void SaveLayer(const Paint& paint,
-                 std::optional<Rect> bounds = std::nullopt,
-                 const std::shared_ptr<ImageFilter>& backdrop_filter = nullptr,
-                 ContentBoundsPromise bounds_promise =
-                     ContentBoundsPromise::kUnknown) override;
+                 std::optional<Rect> bounds,
+                 const std::shared_ptr<ImageFilter>& backdrop_filter,
+                 ContentBoundsPromise bounds_promise,
+                 uint32_t total_content_depth) override;
 
   bool Restore() override;
 
@@ -71,7 +71,8 @@ class ExperimentalCanvas : public Canvas {
 
   void SetupRenderPass();
 
-  void AddEntityToCurrentPass(Entity entity) override;
+  void AddRenderEntityToCurrentPass(Entity entity, bool reuse_depth) override;
+  void AddClipEntityToCurrentPass(Entity entity) override;
 
   Point GetGlobalPassPosition() {
     if (save_layer_state_.empty()) {

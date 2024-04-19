@@ -228,17 +228,23 @@ SkFont CreateTestFontOfSize(SkScalar scalar);
 sk_sp<SkTextBlob> GetTestTextBlob(int index);
 
 struct DisplayListInvocation {
+  // ----------------------------------
+  // Required fields for initialization
   uint32_t op_count_;
   size_t byte_count_;
 
-  uint32_t depth_;
+  uint32_t depth_op_count_;
 
-  DlInvoker invoker;
-  bool supports_group_opacity_ = false;
+  DlInvoker invoker_;
+  // ----------------------------------
+
+  // ----------------------------------
+  // Optional fields for initialization
+  uint32_t additional_depth_ = 0u;
+  uint32_t render_op_cost_override_ = 0u;
+  // ----------------------------------
 
   bool is_empty() { return byte_count_ == 0; }
-
-  bool supports_group_opacity() { return supports_group_opacity_; }
 
   uint32_t op_count() { return op_count_; }
   // byte count for the individual ops, no DisplayList overhead
@@ -247,9 +253,18 @@ struct DisplayListInvocation {
   // to |DisplayList.byte_count().
   size_t byte_count() { return sizeof(DisplayList) + byte_count_; }
 
-  uint32_t depth() { return depth_; }
+  uint32_t depth_accumulated(uint32_t depth_scale = 1u) {
+    return depth_op_count_ * depth_scale + additional_depth_;
+  }
+  uint32_t depth_op_count() { return depth_op_count_; }
+  uint32_t additional_depth() { return additional_depth_; }
+  uint32_t adjust_render_op_depth_cost(uint32_t previous_cost) {
+    return render_op_cost_override_ == 0u  //
+               ? previous_cost
+               : render_op_cost_override_;
+  }
 
-  void Invoke(DlOpReceiver& builder) { invoker(builder); }
+  void Invoke(DlOpReceiver& builder) { invoker_(builder); }
 };
 
 struct DisplayListInvocationGroup {

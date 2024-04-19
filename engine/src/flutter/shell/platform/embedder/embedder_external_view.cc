@@ -10,7 +10,8 @@
 
 #ifdef IMPELLER_SUPPORTS_RENDERING
 #include "impeller/display_list/dl_dispatcher.h"  // nogncheck
-#endif                                            // IMPELLER_SUPPORTS_RENDERING
+#define ENABLE_EXPERIMENTAL_CANVAS false
+#endif  // IMPELLER_SUPPORTS_RENDERING
 
 namespace flutter {
 
@@ -103,11 +104,32 @@ bool EmbedderExternalView::Render(const EmbedderRenderTarget& render_target,
     auto dl_builder = DisplayListBuilder();
     dl_builder.SetTransform(&surface_transformation_);
     slice_->render_into(&dl_builder);
+    auto display_list = dl_builder.Build();
 
+#if ENABLE_EXPERIMENTAL_CANVAS
+    auto cull_rect =
+        impeller::IRect::MakeSize(impeller_target->GetRenderTargetSize());
+    SkIRect sk_cull_rect =
+        SkIRect::MakeWH(cull_rect.GetWidth(), cull_rect.GetHeight());
+
+    impeller::TextFrameDispatcher collector(aiks_context->GetContentContext(),
+                                            impeller::Matrix());
+    display_list->Dispatch(collector, sk_cull_rect);
+
+    impeller::ExperimentalDlDispatcher impeller_dispatcher(
+        aiks_context->GetContentContext(), *impeller_target, cull_rect);
+    display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
+    impeller_dispatcher.FinishRecording();
+    aiks_context->GetContentContext().GetTransientsBuffer().Reset();
+    aiks_context->GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
+
+    return true;
+#else
     auto dispatcher = impeller::DlDispatcher();
-    dispatcher.drawDisplayList(dl_builder.Build(), 1);
+    dispatcher.drawDisplayList(display_list, 1);
     return aiks_context->Render(dispatcher.EndRecordingAsPicture(),
                                 *impeller_target, /*reset_host_buffer=*/true);
+#endif
   }
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
