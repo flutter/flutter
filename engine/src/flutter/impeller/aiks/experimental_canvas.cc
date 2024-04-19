@@ -6,9 +6,22 @@
 #include "fml/logging.h"
 #include "impeller/aiks/canvas.h"
 #include "impeller/aiks/paint_pass_delegate.h"
+#include "impeller/base/validation.h"
+#include "impeller/entity/contents/framebuffer_blend_contents.h"
 #include "impeller/entity/contents/text_contents.h"
+#include "impeller/entity/entity.h"
+#include "impeller/geometry/color.h"
 
 namespace impeller {
+
+static void ApplyFramebufferBlend(Entity& entity) {
+  auto src_contents = entity.GetContents();
+  auto contents = std::make_shared<FramebufferBlendContents>();
+  contents->SetChildContents(src_contents);
+  contents->SetBlendMode(entity.GetBlendMode());
+  entity.SetContents(std::move(contents));
+  entity.SetBlendMode(BlendMode::kSource);
+}
 
 static const constexpr RenderTarget::AttachmentConfig kDefaultStencilConfig =
     RenderTarget::AttachmentConfig{
@@ -223,6 +236,16 @@ bool ExperimentalCanvas::Restore() {
     element_entity.SetBlendMode(save_layer_state.paint.blend_mode);
     element_entity.SetTransform(Matrix::MakeTranslation(
         Vector3(save_layer_state.coverage.GetOrigin())));
+
+    if (element_entity.GetBlendMode() > Entity::kLastPipelineBlendMode) {
+      if (renderer_.GetDeviceCapabilities().SupportsFramebufferFetch()) {
+        ApplyFramebufferBlend(element_entity);
+      } else {
+        VALIDATION_LOG << "Emulated advanced blends are currently unsupported.";
+        element_entity.SetBlendMode(BlendMode::kSourceOver);
+      }
+    }
+
     element_entity.Render(renderer_, *render_passes_.back());
   }
 
@@ -274,6 +297,16 @@ void ExperimentalCanvas::AddRenderEntityToCurrentPass(Entity entity,
   FML_CHECK(current_depth_ <= transform_stack_.back().clip_depth)
       << current_depth_ << " <=? " << transform_stack_.back().clip_depth;
   entity.SetClipDepth(current_depth_);
+
+  if (entity.GetBlendMode() > Entity::kLastPipelineBlendMode) {
+    if (renderer_.GetDeviceCapabilities().SupportsFramebufferFetch()) {
+      ApplyFramebufferBlend(entity);
+    } else {
+      VALIDATION_LOG << "Emulated advanced blends are currently unsupported.";
+      return;
+    }
+  }
+
   entity.Render(renderer_, *render_passes_.back());
 }
 
