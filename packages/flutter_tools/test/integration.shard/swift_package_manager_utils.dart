@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 
 import '../src/common.dart';
@@ -162,12 +163,120 @@ class SwiftPackageManagerUtils {
     );
   }
 
+  static Future<void> cleanApp(String flutterBin, String workingDirectory) async {
+    final ProcessResult result = await processManager.run(
+      <String>[
+        flutterBin,
+        ...getLocalEngineArguments(),
+        'clean',
+      ],
+      workingDirectory: workingDirectory,
+    );
+    expect(
+      result.exitCode,
+      0,
+      reason: 'Failed to clean app: \n'
+          'stdout: \n${result.stdout}\n'
+          'stderr: \n${result.stderr}\n',
+    );
+  }
+
+  static Future<SwiftPackageManagerPlugin> createPlugin(
+    String flutterBin,
+    String workingDirectory, {
+    required String platform,
+    required String iosLanguage,
+    bool usesSwiftPackageManager = false,
+  }) async {
+    final String dependencyManager = usesSwiftPackageManager ? 'spm' : 'cocoapods';
+
+    // Create plugin
+    final String pluginName = '${platform}_${iosLanguage}_${dependencyManager}_plugin';
+    final ProcessResult result = await processManager.run(
+      <String>[
+        flutterBin,
+        ...getLocalEngineArguments(),
+        'create',
+        '--org',
+        'io.flutter.devicelab',
+        '--template=plugin',
+        '--platforms=$platform',
+        '-i',
+        iosLanguage,
+        pluginName,
+      ],
+      workingDirectory: workingDirectory,
+    );
+
+    expect(
+      result.exitCode,
+      0,
+      reason: 'Failed to create plugin: \n'
+          'stdout: \n${result.stdout}\n'
+          'stderr: \n${result.stderr}\n',
+    );
+
+    final Directory pluginDirectory = fileSystem.directory(
+      fileSystem.path.join(workingDirectory, pluginName),
+    );
+
+    return SwiftPackageManagerPlugin(
+      pluginName: pluginName,
+      pluginPath: pluginDirectory.path,
+      platform: platform,
+    );
+  }
+
+  static void addDependency({
+    required SwiftPackageManagerPlugin plugin,
+    required String appDirectoryPath,
+  }) {
+    final File pubspec = fileSystem.file(
+      fileSystem.path.join(appDirectoryPath, 'pubspec.yaml'),
+    );
+    final String pubspecContent = pubspec.readAsStringSync();
+    pubspec.writeAsStringSync(
+      pubspecContent.replaceFirst(
+        '\ndependencies:\n',
+        '\ndependencies:\n  ${plugin.pluginName}:\n    path: ${plugin.pluginPath}\n',
+      ),
+    );
+  }
+
+  static void disableSwiftPackageManagerByPubspec({
+    required String appDirectoryPath,
+  }) {
+    final File pubspec = fileSystem.file(
+      fileSystem.path.join(appDirectoryPath, 'pubspec.yaml'),
+    );
+    final String pubspecContent = pubspec.readAsStringSync();
+    pubspec.writeAsStringSync(
+      pubspecContent.replaceFirst(
+        '\n# The following section is specific to Flutter packages.\nflutter:\n',
+        '\n# The following section is specific to Flutter packages.\nflutter:\n  disable-swift-package-manager: true',
+      ),
+    );
+  }
+
+  static SwiftPackageManagerPlugin integrationTestPlugin(String platform) {
+    final String flutterRoot = getFlutterRoot();
+    return SwiftPackageManagerPlugin(
+      platform: platform,
+      pluginName:
+          (platform == 'ios') ? 'integration_test' : 'integration_test_macos',
+      pluginPath: (platform == 'ios')
+          ? fileSystem.path.join(flutterRoot, 'packages', 'integration_test')
+          : fileSystem.path.join(flutterRoot, 'packages', 'integration_test', 'integration_test_macos'),
+    );
+  }
+
   static List<Pattern> expectedLines({
     required String platform,
     required String appDirectoryPath,
     SwiftPackageManagerPlugin? cococapodsPlugin,
     SwiftPackageManagerPlugin? swiftPackagePlugin,
     bool swiftPackageMangerEnabled = false,
+    bool migrated = false,
   }) {
     final String frameworkName = platform == 'ios' ? 'Flutter' : 'FlutterMacOS';
     final String appPlatformDirectoryPath = fileSystem.path.join(
@@ -206,6 +315,13 @@ class SwiftPackageManagerUtils {
         "➜ Explicit dependency on target '${cococapodsPlugin.pluginName}' in project 'Pods'",
       ]);
     }
+    if (migrated) {
+      expectedLines.addAll(<String>[
+        'Adding Swift Package Manager integration...',
+        'Running pod install...',
+        "Target 'Pods-Runner' in project 'Pods'",
+      ]);
+    }
     return expectedLines;
   }
 
@@ -215,10 +331,11 @@ class SwiftPackageManagerUtils {
     SwiftPackageManagerPlugin? cococapodsPlugin,
     SwiftPackageManagerPlugin? swiftPackagePlugin,
     bool swiftPackageMangerEnabled = false,
+    bool migrated = false,
   }) {
     final String frameworkName = platform == 'ios' ? 'Flutter' : 'FlutterMacOS';
     final List<String> unexpectedLines = <String>[];
-    if (cococapodsPlugin == null) {
+    if (cococapodsPlugin == null && !migrated) {
       unexpectedLines.addAll(<String>[
         'Running pod install...',
         '-> Installing $frameworkName (1.0.0)',
@@ -237,6 +354,11 @@ class SwiftPackageManagerUtils {
           "➜ Explicit dependency on target '${swiftPackagePlugin.pluginName}' in project '${swiftPackagePlugin.pluginName}'",
         ]);
       }
+    }
+    if (!migrated) {
+      unexpectedLines.addAll(<String>[
+        'Adding Swift Package Manager integration...',
+      ]);
     }
     return unexpectedLines;
   }

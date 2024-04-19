@@ -24,20 +24,21 @@ void main() {
     ];
 
     for (final String iosLanguage in iosLanguages) {
-      test('Create $platformName $iosLanguage app with Swift Package Manager disabled', () async {
+      test('Create $platformName $iosLanguage plugin with Swift Package Manager disabled', () async {
         final Directory workingDirectory = fileSystem.systemTempDirectory
-            .createTempSync('swift_package_manager_create_app_disabled.');
+            .createTempSync('swift_package_manager_create_plugin_disabled.');
         final String workingDirectoryPath = workingDirectory.path;
         try {
           await SwiftPackageManagerUtils.disableSwiftPackageManager(flutterBin, workingDirectoryPath);
 
-          final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
+          final SwiftPackageManagerPlugin createdCocoaPodsPlugin = await SwiftPackageManagerUtils.createPlugin(
             flutterBin,
             workingDirectoryPath,
-            iosLanguage: iosLanguage,
             platform: platformName,
-            options: <String>['--platforms=$platformName'],
+            iosLanguage: iosLanguage,
           );
+
+          final String appDirectoryPath = createdCocoaPodsPlugin.exampleAppPath;
 
           final File pbxprojFile = fileSystem
               .directory(appDirectoryPath)
@@ -63,6 +64,14 @@ void main() {
             isFalse,
           );
 
+          final File podspec = fileSystem
+              .directory(createdCocoaPodsPlugin.pluginPath)
+              .childDirectory(platformName)
+              .childFile('${createdCocoaPodsPlugin.pluginName}.podspec');
+          expect(podspec.existsSync(), isTrue);
+          expect(podspec.readAsStringSync(), contains('Classes'));
+          expect(podspec.readAsStringSync().contains('Sources'), isFalse);
+
           await SwiftPackageManagerUtils.buildApp(
             flutterBin,
             appDirectoryPath,
@@ -70,10 +79,12 @@ void main() {
             expectedLines: SwiftPackageManagerUtils.expectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
+              cococapodsPlugin: createdCocoaPodsPlugin,
             ),
             unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
+              cococapodsPlugin: createdCocoaPodsPlugin,
             ),
           );
         } finally {
@@ -85,20 +96,21 @@ void main() {
         }
       }, skip: !platform.isMacOS); // [intended] Swift Package Manager only works on macos.
 
-      test('Create $platformName $iosLanguage app with Swift Package Manager enabled', () async {
+      test('Create $platformName $iosLanguage plugin with Swift Package Manager enabled', () async {
         final Directory workingDirectory = fileSystem.systemTempDirectory
-            .createTempSync('swift_package_manager_create_app_enabled.');
+            .createTempSync('swift_package_manager_create_plugin_enabled.');
         final String workingDirectoryPath = workingDirectory.path;
         try {
           await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
 
-          final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
+          final SwiftPackageManagerPlugin createdSwiftPackagePlugin = await SwiftPackageManagerUtils.createPlugin(
             flutterBin,
             workingDirectoryPath,
-            iosLanguage: iosLanguage,
             platform: platformName,
-            options: <String>['--platforms=$platformName'],
+            iosLanguage: iosLanguage,
           );
+
+          final String appDirectoryPath = createdSwiftPackagePlugin.exampleAppPath;
 
           final File pbxprojFile = fileSystem
               .directory(appDirectoryPath)
@@ -124,6 +136,14 @@ void main() {
             contains('Run Prepare Flutter Framework Script'),
           );
 
+          final File podspec = fileSystem
+              .directory(createdSwiftPackagePlugin.pluginPath)
+              .childDirectory(platformName)
+              .childFile('${createdSwiftPackagePlugin.pluginName}.podspec');
+          expect(podspec.existsSync(), isTrue);
+          expect(podspec.readAsStringSync(), contains('Sources'));
+          expect(podspec.readAsStringSync().contains('Classes'), isFalse);
+
           await SwiftPackageManagerUtils.buildApp(
             flutterBin,
             appDirectoryPath,
@@ -131,10 +151,14 @@ void main() {
             expectedLines: SwiftPackageManagerUtils.expectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
+              swiftPackagePlugin: createdSwiftPackagePlugin,
+              swiftPackageMangerEnabled: true,
             ),
             unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
+              swiftPackagePlugin: createdSwiftPackagePlugin,
+              swiftPackageMangerEnabled: true,
             ),
           );
 
