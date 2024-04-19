@@ -8,7 +8,7 @@ import 'package:path/path.dart' as path;
 
 import '../utils.dart';
 
-Future<void> androidPreviewIntegrationToolTestsRunner(String flutterRoot) async {
+Future<void> androidPreviewIntegrationToolTestsRunner() async {
   final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
 
   final List<String> allTests = Directory(path.join(toolsPath, 'test', 'android_preview_integration.shard'))
