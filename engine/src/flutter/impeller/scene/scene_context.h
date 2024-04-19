@@ -125,13 +125,13 @@ class SceneContext {
   /// If a pipeline could not be created, returns nullptr.
   std::unique_ptr<PipelineVariants> MakePipelineVariants(Context& context) {
     auto pipeline =
-        PipelineVariantsT<RenderPipelineT<VertexShader, FragmentShader>>(
+        PipelineVariantsT<RenderPipelineHandle<VertexShader, FragmentShader>>(
             context);
     if (!pipeline.IsValid()) {
       return nullptr;
     }
     return std::make_unique<
-        PipelineVariantsT<RenderPipelineT<VertexShader, FragmentShader>>>(
+        PipelineVariantsT<RenderPipelineHandle<VertexShader, FragmentShader>>>(
         std::move(pipeline));
   }
 
