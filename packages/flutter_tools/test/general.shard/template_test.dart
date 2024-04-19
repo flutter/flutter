@@ -200,8 +200,10 @@ void main() {
       final Directory templateDir = fileSystem.directory('templates');
       templateDir.childFile('includedPath.txt.tmpl').createSync(recursive: true);
       templateDir.childFile('subdir/includedPath.txt.tmpl').createSync(recursive: true);
-      templateDir.childFile('excludedPath.txt.tmpl').createSync(recursive: true);
-      templateDir.childFile('subdir/excludedPath.txt.tmpl').createSync(recursive: true);
+      final File excludedFile = templateDir.childFile('excludedPath.txt.tmpl')
+          ..createSync(recursive: true);
+      final File excludedSubFile = templateDir.childFile('subdir/excludedPath.txt.tmpl')
+          ..createSync(recursive: true);
       final Template template = Template(
         templateDir,
         null,
@@ -214,8 +216,8 @@ void main() {
           destination,
           <String, Object>{},
           excludedPaths: <String>[
-            'excludedPath.txt.tmpl',
-            'subdir/excludedPath.txt.tmpl',
+            excludedFile.absolute.path,
+            excludedSubFile.absolute.path,
           ],
         ),
         2,

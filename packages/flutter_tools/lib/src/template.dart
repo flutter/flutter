@@ -289,7 +289,7 @@ class Template {
         return;
       }
 
-      if (excludedPaths.contains(relativeDestinationPath)) {
+      if (excludedPaths.contains(absoluteSourcePath)) {
         return;
       }
 

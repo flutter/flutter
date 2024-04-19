@@ -26,6 +26,7 @@ import '../macos/swift_packages.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
+import '../template.dart';
 import 'create_base.dart';
 
 const String kPlatformHelp =
@@ -618,12 +619,33 @@ Your $application code is in $relativeAppMain.
       templateContext['macosSupportedPlatform'] = SwiftPackageManager.macosSwiftPackageSupportedPlatform.format();
 
       // Exclude CocoaPod files from "plugin" template
+      final Directory pluginTemplates = templatePathProvider.directoryInPackage('plugin', globals.fs);
       excluded.addAll(<String>[
-        'ios-objc.tmpl/Classes/pluginClass.h.tmpl',
-        'ios-objc.tmpl/Classes/pluginClass.m.tmpl',
-        'ios-swift.tmpl/Classes/pluginClass.swift.tmpl',
-        'ios.tmpl/Assets/.gitkeep',
-        'macos.tmpl/Classes/pluginClass.swift.tmpl',
+        pluginTemplates
+            .childDirectory('ios-objc.tmpl')
+            .childDirectory('Classes')
+            .childFile('pluginClass.h.tmpl')
+            .absolute.path,
+        pluginTemplates
+            .childDirectory('ios-objc.tmpl')
+            .childDirectory('Classes')
+            .childFile('pluginClass.m.tmpl')
+            .absolute.path,
+        pluginTemplates
+            .childDirectory('ios-swift.tmpl')
+            .childDirectory('Classes')
+            .childFile('pluginClass.swift.tmpl')
+            .absolute.path,
+        pluginTemplates
+            .childDirectory('ios.tmpl')
+            .childDirectory('Assets')
+            .childFile('.gitkeep')
+            .absolute.path,
+        pluginTemplates
+            .childDirectory('macos.tmpl')
+            .childDirectory('Classes')
+            .childFile('pluginClass.swift.tmpl')
+            .absolute.path,
       ]);
     }
 
