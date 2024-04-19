@@ -70,12 +70,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.optionsViewBuilder,
     this.optionsViewOpenDirection = OptionsViewOpenDirection.down,
     this.initialValue,
-  }) : assert(
-         fieldViewBuilder != null
-            || (key != null && focusNode != null && textEditingController != null),
-         'Pass in a fieldViewBuilder, or otherwise create a separate field and pass in the FocusNode, TextEditingController, and a key. Use the key with RawAutocomplete.onFieldSubmitted.',
-        ),
-       assert((focusNode == null) == (textEditingController == null)),
+  }) : assert((focusNode == null) == (textEditingController == null)),
        assert(
          !(textEditingController != null && initialValue != null),
          'textEditingController and initialValue cannot be simultaneously defined.',
