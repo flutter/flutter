@@ -43,31 +43,31 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   final File _xcodeProjectInfoFile;
   final PlistParser _plistParser;
 
-  /// New identifer for FlutterGeneratedPluginSwiftPackage PBXBuildFile.
+  /// New identifier for FlutterGeneratedPluginSwiftPackage PBXBuildFile.
   static const String _flutterPluginsSwiftPackageBuildFileIdentifier = '78A318202AECB46A00862997';
 
-  /// New identifer for FlutterGeneratedPluginSwiftPackage XCLocalSwiftPackageReference.
+  /// New identifier for FlutterGeneratedPluginSwiftPackage XCLocalSwiftPackageReference.
   static const String _localFlutterPluginsSwiftPackageReferenceIdentifer = '781AD8BC2B33823900A9FFBB';
 
-  /// New identifer for FlutterGeneratedPluginSwiftPackage XCSwiftPackageProductDependency.
+  /// New identifier for FlutterGeneratedPluginSwiftPackage XCSwiftPackageProductDependency.
   static const String _flutterPluginsSwiftPackageProductDependencyIdentifer = '78A3181F2AECB46A00862997';
 
-  /// Existing iOS identifer for Runner PBXFrameworksBuildPhase.
+  /// Existing iOS identifier for Runner PBXFrameworksBuildPhase.
   static const String _iosRunnerFrameworksBuildPhaseIdentifer = '97C146EB1CF9000F007C117D';
 
-  /// Existing macOS identifer for Runner PBXFrameworksBuildPhase.
+  /// Existing macOS identifier for Runner PBXFrameworksBuildPhase.
   static const String _macosRunnerFrameworksBuildPhaseIdentifer = '33CC10EA2044A3C60003C045';
 
-  /// Existing iOS identifer for Runner PBXNativeTarget.
+  /// Existing iOS identifier for Runner PBXNativeTarget.
   static const String _iosRunnerNativeTargetIdentifer = '97C146ED1CF9000F007C117D';
 
-  /// Existing macOS identifer for Runner PBXNativeTarget.
+  /// Existing macOS identifier for Runner PBXNativeTarget.
   static const String _macosRunnerNativeTargetIdentifer = '33CC10EC2044A3C60003C045';
 
-  /// Existing iOS identifer for Runner PBXProject.
+  /// Existing iOS identifier for Runner PBXProject.
   static const String _iosProjectIdentifier = '97C146E61CF9000F007C117D';
 
-  /// Existing macOS identifer for Runner PBXProject.
+  /// Existing macOS identifier for Runner PBXProject.
   static const String _macosProjectIdentifier = '33CC10E52044A3C60003C045';
 
   File get backupProjectSettings => _fileSystem
@@ -160,7 +160,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       // TODO(vashworth): Add link to instructions on how to manually integrate
       // once available on website.
       throwToolExit(
-          'An error occured when adding Swift Package Manager integration:\n'
+          'An error occurred when adding Swift Package Manager integration:\n'
           '  $e\n\n'
           'Swift Package Manager is currently an experimental feature, please file a bug at\n'
           '  https://github.com/flutter/flutter/issues/new?template=1_activation.yml \n'
@@ -842,7 +842,7 @@ class SchemeInfo {
 class ParsedProjectInfo {
   ParsedProjectInfo._({
     required this.buildFileIdentifiers,
-    required this.fileReferenceIndentifiers,
+    required this.fileReferenceIdentifiers,
     required this.parsedGroups,
     required this.frameworksBuildPhases,
     required this.nativeTargets,
@@ -896,7 +896,7 @@ class ParsedProjectInfo {
 
     return ParsedProjectInfo._(
       buildFileIdentifiers: buildFiles,
-      fileReferenceIndentifiers: references,
+      fileReferenceIdentifiers: references,
       parsedGroups: groups,
       frameworksBuildPhases: buildPhases,
       nativeTargets: native,
@@ -911,7 +911,7 @@ class ParsedProjectInfo {
   List<String> buildFileIdentifiers;
 
   /// List of identifiers under PBXFileReference section.
-  List<String> fileReferenceIndentifiers;
+  List<String> fileReferenceIdentifiers;
 
   /// List of [ParsedProjectGroup] items under PBXGroup section.
   List<ParsedProjectGroup> parsedGroups;

@@ -3263,7 +3263,7 @@ void main() {
             );
 
             // Label and input are horizontally aligned despite `alignLabelWithHint` being false (default value).
-            // The reason is that `alignLabelWithHint` was initially intended for vertical alignement only.
+            // The reason is that `alignLabelWithHint` was initially intended for vertical alignment only.
             // See https://github.com/flutter/flutter/pull/24993 which introduced `alignLabelWithHint` parameter.
             // See https://github.com/flutter/flutter/pull/115409 which used `alignLabelWithHint` for
             // horizontal alignment in outlined text field.
