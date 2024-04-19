@@ -421,7 +421,6 @@ ContentContext::ContentContext(
       {static_cast<Scalar>(BlendSelectValues::kSoftLight), supports_decal});
 
   rrect_blur_pipelines_.CreateDefault(*context_, options_trianglestrip);
-  texture_blend_pipelines_.CreateDefault(*context_, options);
   texture_strict_src_pipelines_.CreateDefault(*context_, options);
   position_uv_pipelines_.CreateDefault(*context_, options);
   tiled_texture_pipelines_.CreateDefault(*context_, options);
@@ -448,9 +447,6 @@ ContentContext::ContentContext(
                                              {supports_decal});
   // GLES only shader that is unsupported on macOS.
 #if defined(IMPELLER_ENABLE_OPENGLES) && !defined(FML_OS_MACOSX)
-  if (GetContext()->GetBackendType() == Context::BackendType::kOpenGLES) {
-    texture_external_pipelines_.CreateDefault(*context_, options);
-  }
   if (GetContext()->GetBackendType() == Context::BackendType::kOpenGLES) {
     tiled_texture_external_pipelines_.CreateDefault(*context_, options);
   }

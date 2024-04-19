@@ -11,11 +11,11 @@ uniform f16sampler2D texture_sampler;
 
 uniform FragInfo {
   vec4 source_rect;
+  float alpha;
 }
 frag_info;
 
 in highp vec2 v_texture_coords;
-IMPELLER_MAYBE_FLAT in float16_t v_alpha;
 
 out f16vec4 frag_color;
 
@@ -26,5 +26,5 @@ void main() {
                                    frag_info.source_rect.w));
   f16vec4 sampled =
       texture(texture_sampler, texture_coords, float16_t(kDefaultMipBias));
-  frag_color = sampled * v_alpha;
+  frag_color = sampled * float16_t(frag_info.alpha);
 }
