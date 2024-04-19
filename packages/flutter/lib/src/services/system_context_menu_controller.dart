@@ -15,6 +15,11 @@ import 'package:flutter/services.dart';
 /// context menu is already visible will hide it and show it again at the new
 /// [Rect]. An instance that is hidden is informed via [onSystemHide].
 ///
+/// Currently this system context menu is bound to text input. The buttons that
+/// are shown and the actions they perform are dependent on the currently
+/// active [TextInputConnection]. Using this without an active
+/// [TextInputConnection] will be a noop.
+///
 /// Call [dispose] when no longer needed.
 ///
 /// See also:
@@ -84,7 +89,12 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// while another system context menu is already visible will remove the old
   /// menu before showing the new menu.
   ///
-  /// Currently this is only supported on iOS 16.0 and later.
+  /// Currently this system context menu is bound to text input. The buttons
+  /// that are shown and the actions they perform are dependent on the
+  /// currently active [TextInputConnection]. Using this without an active
+  /// [TextInputConnection] will be a noop.
+  ///
+  /// This is only supported on iOS 16.0 and later.
   ///
   /// See also:
   ///
