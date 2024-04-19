@@ -231,7 +231,6 @@ class Scrollable extends StatefulWidget {
   ///
   /// This defaults to [HitTestBehavior.opaque] which means it prevents targets
   /// behind this [Scrollable] from receiving events.
-  ///
   /// {@endtemplate}
   ///
   /// See also:
