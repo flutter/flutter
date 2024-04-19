@@ -701,27 +701,41 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
   }
 
   @override
-  void expandAll() => _expand(widget.tree);
-  void _expand(List<SliverTreeNode<T>> tree) {
+  void expandAll() => _expandAll(widget.tree);
+  void _expandAll(List<SliverTreeNode<T>> tree) {
     for (final SliverTreeNode<T> node in tree) {
       if (node.children.isNotEmpty) {
         if (!node.isExpanded) {
-          toggleNode(node);
+          if (_activeNodes.contains(node)) {
+            // This is an active node in the tree, trigger the animation and
+            // rebuild.
+            toggleNode(node);
+          } else {
+            // This is a hidden node. Update its expanded state.
+            node._expanded = true;
+          }
         }
-        _expand(node.children);
+        _expandAll(node.children);
       }
     }
   }
 
   @override
-  void collapseAll() => _collapse(widget.tree);
-  void _collapse(List<SliverTreeNode<T>> tree) {
+  void collapseAll() => _collapseAll(widget.tree);
+  void _collapseAll(List<SliverTreeNode<T>> tree) {
     for (final SliverTreeNode<T> node in tree) {
       if (node.children.isNotEmpty) {
         if (node.isExpanded) {
-          toggleNode(node);
+          if (_activeNodes.contains(node)) {
+            // This is an active node in the tree, trigger the animation and
+            // rebuild.
+            toggleNode(node);
+          } else {
+            // This is a hidden node. Update its expanded state.
+            node._expanded = false;
+          }
         }
-        _collapse(node.children);
+        _collapseAll(node.children);
       }
     }
   }
