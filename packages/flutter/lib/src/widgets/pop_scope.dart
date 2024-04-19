@@ -21,9 +21,10 @@ typedef PopInvokedCallback = void Function(bool didPop);
 
 /// Manages back navigation gestures.
 ///
-/// The generic type should match or be supertype of the generic type of the
-/// enclosing [Route]. If the enclosing Route is a `MaterialPageRoute<int>`,
-/// you can define [PopScope] with int or any supertype of int.
+/// The generic type should match or be a supertype of the generic type of the
+/// enclosing [Route]. For example, if the enclosing Route is a
+/// `MaterialPageRoute<int>`, you can define [PopScope] with `int` or any
+/// supertype of `int`.
 ///
 /// The [canPop] parameter disables back gestures when set to `false`.
 ///

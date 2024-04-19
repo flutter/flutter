@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This sample demonstrates showing how to use PopScope to wrap widget that
+// This sample demonstrates how to use a PopScope to wrap widget that
 // may pop the page with a result.
 
 import 'package:flutter/material.dart';
@@ -18,12 +18,12 @@ class NavigatorPopHandlerApp extends StatelessWidget {
       initialRoute: '/home',
       onGenerateRoute: (RouteSettings settings) {
         return switch (settings.name) {
-        '/two' => MaterialPageRoute<FormData>(
-          builder: (BuildContext context) => const _PageTwo(),
-        ),
-        _ => MaterialPageRoute<void>(
-        builder: (BuildContext context) => const _HomePage(),
-        ),
+          '/two' => MaterialPageRoute<FormData>(
+            builder: (BuildContext context) => const _PageTwo(),
+          ),
+          _ => MaterialPageRoute<void>(
+            builder: (BuildContext context) => const _HomePage(),
+          ),
         };
       },
     );
@@ -108,12 +108,13 @@ class _PopScopeWrapper extends StatelessWidget {
       },
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return PopScope<FormData>(
       canPop: false,
-      // The result contains pop result in `_PageTwo`.
-      onPopInvoked: (bool didPop, FormData? result) async {
+      // The result argument contains the pop result that is defined in `_PageTwo`.
+      onPopWithResultInvoked: (bool didPop, FormData? result) async {
         if (didPop) {
           return;
         }
@@ -122,7 +123,7 @@ class _PopScopeWrapper extends StatelessWidget {
           Navigator.pop(context, result);
         }
       },
-      child: const _PageTwoBody(),
+      child: child,
     );
   }
 }
