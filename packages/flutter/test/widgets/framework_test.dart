@@ -137,8 +137,8 @@ void main() {
   });
 
   testWidgets('GlobalKey correct case 3 - can deal with early rebuild in layoutbuilder - move backward', (WidgetTester tester) async {
-    const Key key1 = GlobalObjectKey('Text1');
-    const Key key2 = GlobalObjectKey('Text2');
+    final Key key1 = GlobalKey(debugLabel: 'Text1');
+    final Key key2 = GlobalKey(debugLabel: 'Text2');
     Key? rebuiltKeyOfSecondChildBeforeLayout;
     Key? rebuiltKeyOfFirstChildAfterLayout;
     Key? rebuiltKeyOfSecondChildAfterLayout;
@@ -147,7 +147,7 @@ void main() {
         builder: (BuildContext context, BoxConstraints constraints) {
           return Column(
             children: <Widget>[
-              const _Stateful(
+              _Stateful(
                 child: Text(
                   'Text1',
                   textDirection: TextDirection.ltr,
@@ -155,7 +155,7 @@ void main() {
                 ),
               ),
               _Stateful(
-                child: const Text(
+                child: Text(
                   'Text2',
                   textDirection: TextDirection.ltr,
                   key: key2,
@@ -186,14 +186,14 @@ void main() {
           return Column(
             children: <Widget>[
               _Stateful(
-                child: const Text(
+                child: Text(
                   'Text2',
                   textDirection: TextDirection.ltr,
                   key: key2,
                 ),
                 onElementRebuild: (StatefulElement element) {
-                  // Verifies the early rebuild happens before layout.
-                  expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
+                  // The widget is only built once.
+                  expect(rebuiltKeyOfSecondChildBeforeLayout, isNull);
                   // We don't want noise to override the result;
                   expect(rebuiltKeyOfFirstChildAfterLayout, isNull);
                   final _Stateful statefulWidget = element.widget as _Stateful;
@@ -201,14 +201,14 @@ void main() {
                 },
               ),
               _Stateful(
-                child: const Text(
+                child: Text(
                   'Text1',
                   textDirection: TextDirection.ltr,
                   key: key1,
                 ),
                 onElementRebuild: (StatefulElement element) {
-                  // Verifies the early rebuild happens before layout.
-                  expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
+                  // The widget is only built once.
+                  expect(rebuiltKeyOfSecondChildBeforeLayout, isNull);
                   // We don't want noise to override the result;
                   expect(rebuiltKeyOfSecondChildAfterLayout, isNull);
                   final _Stateful statefulWidget = element.widget as _Stateful;
@@ -220,7 +220,7 @@ void main() {
         },
       ),
     );
-    expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
+    expect(rebuiltKeyOfSecondChildBeforeLayout, isNull);
     expect(rebuiltKeyOfFirstChildAfterLayout, key2);
     expect(rebuiltKeyOfSecondChildAfterLayout, key1);
   });
@@ -295,8 +295,8 @@ void main() {
                   key: key3,
                 ),
                 onElementRebuild: (StatefulElement element) {
-                  // Verifies the early rebuild happens before layout.
-                  expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
+                  // The widget is only built once.
+                  expect(rebuiltKeyOfSecondChildBeforeLayout, isNull);
                   // We don't want noise to override the result;
                   expect(rebuiltKeyOfSecondChildAfterLayout, isNull);
                   final _Stateful statefulWidget = element.widget as _Stateful;
@@ -310,8 +310,8 @@ void main() {
                   key: key2,
                 ),
                 onElementRebuild: (StatefulElement element) {
-                  // Verifies the early rebuild happens before layout.
-                  expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
+                  // The widget is only built once.
+                  expect(rebuiltKeyOfSecondChildBeforeLayout, isNull);
                   // We don't want noise to override the result;
                   expect(rebuiltKeyOfThirdChildAfterLayout, isNull);
                   final _Stateful statefulWidget = element.widget as _Stateful;
@@ -323,7 +323,7 @@ void main() {
         },
       ),
     );
-    expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
+    expect(rebuiltKeyOfSecondChildBeforeLayout, isNull);
     expect(rebuiltKeyOfSecondChildAfterLayout, key3);
     expect(rebuiltKeyOfThirdChildAfterLayout, key2);
   });
@@ -391,8 +391,8 @@ void main() {
                   textDirection: TextDirection.ltr,
                 ),
                 onElementRebuild: (StatefulElement element) {
-                  // Verifies the early rebuild happens before layout.
-                  expect(rebuiltKeyOfSecondChildBeforeLayout, key1);
+                  // The widget is only built once.
+                  expect(rebuiltKeyOfSecondChildBeforeLayout, isNull);
                 },
               ),
               _Stateful(
@@ -402,8 +402,8 @@ void main() {
                   key: key1,
                 ),
                 onElementRebuild: (StatefulElement element) {
-                  // Verifies the early rebuild happens before layout.
-                  expect(rebuiltKeyOfSecondChildBeforeLayout, key1);
+                  // The widget is only built once.
+                  expect(rebuiltKeyOfSecondChildBeforeLayout, isNull);
                   // We don't want noise to override the result;
                   expect(rebuiltKeyOfThirdChildAfterLayout, isNull);
                   final _Stateful statefulWidget = element.widget as _Stateful;
@@ -415,7 +415,7 @@ void main() {
         },
       ),
     );
-    expect(rebuiltKeyOfSecondChildBeforeLayout, key1);
+    expect(rebuiltKeyOfSecondChildBeforeLayout, isNull);
     expect(rebuiltKeyOfThirdChildAfterLayout, key1);
   });
 
@@ -990,8 +990,8 @@ void main() {
                   key: key2,
                 ),
                 onElementRebuild: (StatefulElement element) {
-                  // Verifies the early rebuild happens before layout.
-                  expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
+                  // The widget is only rebuilt once.
+                  expect(rebuiltKeyOfSecondChildBeforeLayout, isNull);
                   // We don't want noise to override the result;
                   expect(rebuiltKeyOfFirstChildAfterLayout, isNull);
                   final _Stateful statefulWidget = element.widget as _Stateful;
@@ -1005,8 +1005,8 @@ void main() {
                   key: key2,
                 ),
                 onElementRebuild: (StatefulElement element) {
-                  // Verifies the early rebuild happens before layout.
-                  expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
+                  // The widget is only rebuilt once.
+                  expect(rebuiltKeyOfSecondChildBeforeLayout, isNull);
                   // We don't want noise to override the result;
                   expect(rebuiltKeyOfSecondChildAfterLayout, isNull);
                   final _Stateful statefulWidget = element.widget as _Stateful;
@@ -1018,7 +1018,7 @@ void main() {
         },
       ),
     );
-    expect(rebuiltKeyOfSecondChildBeforeLayout, key2);
+    expect(rebuiltKeyOfSecondChildBeforeLayout, isNull);
     expect(rebuiltKeyOfFirstChildAfterLayout, key2);
     expect(rebuiltKeyOfSecondChildAfterLayout, key2);
     final dynamic exception = tester.takeException();
@@ -1291,7 +1291,7 @@ void main() {
     late FlutterError error;
     try {
       tester.binding.buildOwner!.scheduleBuildFor(
-        DirtyElementWithCustomBuildOwner(tester.binding.buildOwner!, Container()),
+        DirtyElementWithCustomBuildOwner(tester.binding.buildOwner!, Container())
       );
     } on FlutterError catch (e) {
       error = e;
@@ -1951,14 +1951,10 @@ class _DecorateState extends State<Decorate> {
   }
 }
 
-class DirtyElementWithCustomBuildOwner extends Element {
-  DirtyElementWithCustomBuildOwner(BuildOwner buildOwner, super.widget)
-    : _owner = buildOwner;
-
-  final BuildOwner _owner;
-
-  @override
-  BuildOwner get owner => _owner;
+class DirtyElementWithCustomBuildOwner extends Element with RootElementMixin {
+  DirtyElementWithCustomBuildOwner(BuildOwner buildOwner, super.widget) {
+    assignOwner(buildOwner);
+  }
 
   @override
   bool get dirty => true;
@@ -2082,9 +2078,9 @@ class StatefulElementSpy extends StatefulElement {
   _Stateful get _statefulWidget => widget as _Stateful;
 
   @override
-  void rebuild({bool force = false}) {
+  void performRebuild() {
     _statefulWidget.onElementRebuild?.call(this);
-    super.rebuild(force: force);
+    super.performRebuild();
   }
 }
 

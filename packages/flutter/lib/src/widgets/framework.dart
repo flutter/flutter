@@ -2610,6 +2610,167 @@ abstract class BuildContext {
   DiagnosticsNode describeOwnershipChain(String name);
 }
 
+final class BuildScope {
+  BuildScope(this.onBuildScheduled);
+  late Element debugRootElement;
+
+  bool _buildScheduled = false;
+  final VoidCallback? onBuildScheduled;
+
+  /// Whether [_dirtyElements] need to be sorted again as a result of more
+  /// elements becoming dirty during the build.
+  ///
+  /// This is necessary to preserve the sort order defined by [Element._sort].
+  ///
+  /// This field is set to null when [buildScope] is not actively rebuilding
+  /// the widget tree.
+  bool? _dirtyElementsNeedsResorting;
+  final List<Element> _dirtyElements = <Element>[];
+
+  @pragma('dart2js:tryInline')
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  void _scheduleBuildFor(Element element) {
+    assert(element.buildScope == this);
+    if (!element._inDirtyList) {
+      _dirtyElements.add(element);
+      element._inDirtyList = true;
+    }
+    if (!_buildScheduled) {
+      _buildScheduled = true;
+      onBuildScheduled?.call();
+    }
+    if (_dirtyElementsNeedsResorting != null) {
+      _dirtyElementsNeedsResorting = true;
+    }
+  }
+
+  @pragma('dart2js:tryInline')
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  void _tryRebuild(Element element) {
+    if (!identical(element.buildScope, this)) {
+      return;
+    }
+    assert(element._inDirtyList);
+    assert(() {
+      if (element._lifecycleState == _ElementLifecycle.active && !element._debugIsDescsendantOf(debugRootElement)) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Tried to build dirty widget in the wrong build scope.'),
+          ErrorDescription(
+            'A widget which was marked as dirty and is still active was scheduled to be built, '
+            'but the current build scope unexpectedly does not contain that widget.',
+          ),
+          ErrorHint(
+            'Sometimes this is detected when an element is removed from the widget tree, but the '
+            'element somehow did not get marked as inactive. In that case, it might be caused by '
+            'an ancestor element failing to implement visitChildren correctly, thus preventing '
+            'some or all of its descendants from being correctly deactivated.',
+          ),
+          DiagnosticsProperty<Element>(
+            'The root of the build scope was',
+            debugRootElement,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+          DiagnosticsProperty<Element>(
+            'The offending element (which does not appear to be a descendant of the root of the build scope) was',
+            element,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+        ]);
+      }
+      return true;
+    }());
+    final bool isTimelineTracked = !kReleaseMode && _isProfileBuildsEnabledFor(element.widget);
+    if (isTimelineTracked) {
+      Map<String, String>? debugTimelineArguments;
+      assert(() {
+        if (kDebugMode && debugEnhanceBuildTimelineArguments) {
+          debugTimelineArguments = element.widget.toDiagnosticsNode().toTimelineArguments();
+        }
+        return true;
+      }());
+      FlutterTimeline.startSync(
+        '${element.widget.runtimeType}',
+        arguments: debugTimelineArguments,
+      );
+    }
+    try {
+      element.rebuild();
+    } catch (e, stack) {
+      _reportException(
+        ErrorDescription('while rebuilding dirty elements'),
+        e,
+        stack,
+        informationCollector: () => <DiagnosticsNode>[
+          if (kDebugMode)
+            DiagnosticsDebugCreator(DebugCreator(element)),
+          element.describeElement('The element being rebuilt at the time was')
+        ],
+      );
+    }
+    if (isTimelineTracked) {
+      FlutterTimeline.finishSync();
+    }
+  }
+
+  @pragma('dart2js:tryInline')
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  void _flushDirtyElements() {
+    assert(_dirtyElementsNeedsResorting == null, '_flushDirtyElements must be non-reentrant');
+    _dirtyElements.sort(Element._sort);
+    _dirtyElementsNeedsResorting = false;
+    try {
+      for (int index = 0; index < _dirtyElements.length; index = _dirtyElementIndexAfter(index)) {
+        final Element element = _dirtyElements[index];
+        _tryRebuild(element);
+      }
+    } finally {
+      for (final Element element in _dirtyElements) {
+        if (element.buildScope == this) {
+          element._inDirtyList = false;
+        }
+      }
+      _dirtyElements.clear();
+      _dirtyElementsNeedsResorting = null;
+      _buildScheduled = false;
+    }
+  }
+
+  @pragma('dart2js:tryInline')
+  @pragma('vm:prefer-inline')
+  @pragma('wasm:prefer-inline')
+  int _dirtyElementIndexAfter(int index) {
+    if (!_dirtyElementsNeedsResorting!) {
+      return index + 1;
+    }
+    index += 1;
+    _dirtyElements.sort(Element._sort);
+    _dirtyElementsNeedsResorting = false;
+    //for (int i = index; i > 0; i -= 1) {
+    //}
+    while (index > 0 && _dirtyElements[index - 1].dirty) {
+      // It is possible for previously dirty but inactive widgets to move right in the list.
+      // We therefore have to move the index left in the list to account for this.
+      // We don't know how many could have moved. However, we do know that the only possible
+      // change to the list is that nodes that were previously to the left of the index have
+      // now moved to be to the right of the right-most cleaned node, and we do know that
+      // all the clean nodes were to the left of the index. So we move the index left
+      // until just after the right-most clean node.
+      index -= 1;
+    }
+    assert(() {
+      for (int i = index - 1; i >= 0; i -= 1) {
+        final element = _dirtyElements[i];
+        assert(!element.dirty || element._lifecycleState != _ElementLifecycle.active, 'index = $index, $_dirtyElements @ $i');
+      }
+      return true;
+    }());
+    return index;
+  }
+}
+
 /// Manager class for the widgets framework.
 ///
 /// This class tracks which widgets need rebuilding, and handles other tasks
@@ -2651,22 +2812,7 @@ class BuildOwner {
 
   final _InactiveElements _inactiveElements = _InactiveElements();
 
-  final List<Element> _dirtyElements = <Element>[];
   bool _scheduledFlushDirtyElements = false;
-
-  /// Whether [_dirtyElements] need to be sorted again as a result of more
-  /// elements becoming dirty during the build.
-  ///
-  /// This is necessary to preserve the sort order defined by [Element._sort].
-  ///
-  /// This field is set to null when [buildScope] is not actively rebuilding
-  /// the widget tree.
-  bool? _dirtyElementsNeedsResorting;
-
-  /// Whether [buildScope] is actively rebuilding the widget tree.
-  ///
-  /// [scheduleBuildFor] should only be called when this value is true.
-  bool get _debugIsInBuildScope => _dirtyElementsNeedsResorting != null;
 
   /// The object in charge of the focus tree.
   ///
@@ -2686,9 +2832,10 @@ class BuildOwner {
   /// when [WidgetsBinding.drawFrame] calls [buildScope].
   void scheduleBuildFor(Element element) {
     assert(element.owner == this);
+    assert(element._buildScope != null);
     assert(() {
       if (debugPrintScheduleBuildForStacks) {
-        debugPrintStack(label: 'scheduleBuildFor() called for $element${_dirtyElements.contains(element) ? " (ALREADY IN LIST)" : ""}');
+        debugPrintStack(label: 'scheduleBuildFor() called for $element${element.buildScope._dirtyElements.contains(element) ? " (ALREADY IN LIST)" : ""}');
       }
       if (!element.dirty) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -2707,34 +2854,36 @@ class BuildOwner {
       }
       return true;
     }());
-    if (element._inDirtyList) {
-      assert(() {
-        if (debugPrintScheduleBuildForStacks) {
-          debugPrintStack(label: 'BuildOwner.scheduleBuildFor() called; _dirtyElementsNeedsResorting was $_dirtyElementsNeedsResorting (now true); dirty list is: $_dirtyElements');
-        }
-        if (!_debugIsInBuildScope) {
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('BuildOwner.scheduleBuildFor() called inappropriately.'),
-            ErrorHint(
-              'The BuildOwner.scheduleBuildFor() method should only be called while the '
-              'buildScope() method is actively rebuilding the widget tree.',
-            ),
-          ]);
-        }
-        return true;
-      }());
-      _dirtyElementsNeedsResorting = true;
-      return;
-    }
+    final BuildScope buildScope = element.buildScope;
+    assert(() {
+      if (debugPrintScheduleBuildForStacks && element._inDirtyList) {
+        debugPrintStack(
+          label: 'BuildOwner.scheduleBuildFor() called; '
+                  '_dirtyElementsNeedsResorting was ${buildScope._dirtyElementsNeedsResorting} (now true); '
+                  'dirty list is: ${buildScope._dirtyElements}',
+        );
+      }
+      // When reactivating an inactivate Element, _scheduleBuildFor should only be
+      // called within _flushDirtyElements
+      if (!_debugBuilding && element._inDirtyList) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('BuildOwner.scheduleBuildFor() called inappropriately.'),
+          ErrorHint(
+            'The BuildOwner.scheduleBuildFor() method should only be called while the '
+            'buildScope() method is actively rebuilding the widget tree.',
+          ),
+        ]);
+      }
+      return true;
+    }());
     if (!_scheduledFlushDirtyElements && onBuildScheduled != null) {
       _scheduledFlushDirtyElements = true;
       onBuildScheduled!();
     }
-    _dirtyElements.add(element);
-    element._inDirtyList = true;
+    buildScope._scheduleBuildFor(element);
     assert(() {
       if (debugPrintScheduleBuildForStacks) {
-        debugPrint('...dirty list is now: $_dirtyElements');
+        debugPrint('...dirty list is now: $buildScope._dirtyElements');
       }
       return true;
     }());
@@ -2799,14 +2948,19 @@ class BuildOwner {
   /// often.
   @pragma('vm:notify-debugger-on-exception')
   void buildScope(Element context, [ VoidCallback? callback ]) {
-    if (callback == null && _dirtyElements.isEmpty) {
+    final BuildScope buildScope = context.buildScope;
+    //assert(buildScope.debugRootElement == context);
+    if (callback == null && buildScope._dirtyElements.isEmpty) {
       return;
     }
     assert(_debugStateLockLevel >= 0);
     assert(!_debugBuilding);
     assert(() {
       if (debugPrintBuildScope) {
-        debugPrint('buildScope called with context $context; dirty list is: $_dirtyElements');
+        debugPrint(
+          'buildScope called with context $context; '
+          'dirty list is: ${buildScope._dirtyElements}',
+        );
       }
       _debugStateLockLevel += 1;
       _debugBuilding = true;
@@ -2817,8 +2971,8 @@ class BuildOwner {
       assert(() {
         if (debugEnhanceBuildTimelineArguments) {
           debugTimelineArguments = <String, String>{
-            'dirty count': '${_dirtyElements.length}',
-            'dirty list': '$_dirtyElements',
+            'dirty count': '${buildScope._dirtyElements.length}',
+            'dirty list': '${buildScope._dirtyElements}',
             'lock level': '$_debugStateLockLevel',
             'scope context': '$context',
           };
@@ -2840,7 +2994,6 @@ class BuildOwner {
           _debugCurrentBuildTarget = context;
           return true;
         }());
-        _dirtyElementsNeedsResorting = false;
         try {
           callback();
         } finally {
@@ -2852,110 +3005,19 @@ class BuildOwner {
           }());
         }
       }
-      _dirtyElements.sort(Element._sort);
-      _dirtyElementsNeedsResorting = false;
-      int dirtyCount = _dirtyElements.length;
-      int index = 0;
-      while (index < dirtyCount) {
-        final Element element = _dirtyElements[index];
-        assert(element._inDirtyList);
-        assert(() {
-          if (element._lifecycleState == _ElementLifecycle.active && !element._debugIsInScope(context)) {
-            throw FlutterError.fromParts(<DiagnosticsNode>[
-              ErrorSummary('Tried to build dirty widget in the wrong build scope.'),
-              ErrorDescription(
-                'A widget which was marked as dirty and is still active was scheduled to be built, '
-                'but the current build scope unexpectedly does not contain that widget.',
-              ),
-              ErrorHint(
-                'Sometimes this is detected when an element is removed from the widget tree, but the '
-                'element somehow did not get marked as inactive. In that case, it might be caused by '
-                'an ancestor element failing to implement visitChildren correctly, thus preventing '
-                'some or all of its descendants from being correctly deactivated.',
-              ),
-              DiagnosticsProperty<Element>(
-                'The root of the build scope was',
-                context,
-                style: DiagnosticsTreeStyle.errorProperty,
-              ),
-              DiagnosticsProperty<Element>(
-                'The offending element (which does not appear to be a descendant of the root of the build scope) was',
-                element,
-                style: DiagnosticsTreeStyle.errorProperty,
-              ),
-            ]);
-          }
-          return true;
-        }());
-        final bool isTimelineTracked = !kReleaseMode && _isProfileBuildsEnabledFor(element.widget);
-        if (isTimelineTracked) {
-          Map<String, String>? debugTimelineArguments;
-          assert(() {
-            if (kDebugMode && debugEnhanceBuildTimelineArguments) {
-              debugTimelineArguments = element.widget.toDiagnosticsNode().toTimelineArguments();
-            }
-            return true;
-          }());
-          FlutterTimeline.startSync(
-            '${element.widget.runtimeType}',
-            arguments: debugTimelineArguments,
-          );
-        }
-        try {
-          element.rebuild();
-        } catch (e, stack) {
-          _reportException(
-            ErrorDescription('while rebuilding dirty elements'),
-            e,
-            stack,
-            informationCollector: () => <DiagnosticsNode>[
-              if (kDebugMode && index < _dirtyElements.length)
-                DiagnosticsDebugCreator(DebugCreator(element)),
-              if (index < _dirtyElements.length)
-                element.describeElement('The element being rebuilt at the time was index $index of $dirtyCount')
-              else
-                ErrorHint('The element being rebuilt at the time was index $index of $dirtyCount, but _dirtyElements only had ${_dirtyElements.length} entries. This suggests some confusion in the framework internals.'),
-            ],
-          );
-        }
-        if (isTimelineTracked) {
-          FlutterTimeline.finishSync();
-        }
-        index += 1;
-        if (dirtyCount < _dirtyElements.length || _dirtyElementsNeedsResorting!) {
-          _dirtyElements.sort(Element._sort);
-          _dirtyElementsNeedsResorting = false;
-          dirtyCount = _dirtyElements.length;
-          while (index > 0 && _dirtyElements[index - 1].dirty) {
-            // It is possible for previously dirty but inactive widgets to move right in the list.
-            // We therefore have to move the index left in the list to account for this.
-            // We don't know how many could have moved. However, we do know that the only possible
-            // change to the list is that nodes that were previously to the left of the index have
-            // now moved to be to the right of the right-most cleaned node, and we do know that
-            // all the clean nodes were to the left of the index. So we move the index left
-            // until just after the right-most clean node.
-            index -= 1;
-          }
-        }
-      }
+      buildScope._flushDirtyElements();
       assert(() {
-        if (_dirtyElements.any((Element element) => element._lifecycleState == _ElementLifecycle.active && element.dirty)) {
+        if (buildScope._dirtyElements.any((Element element) => element._lifecycleState == _ElementLifecycle.active && element.dirty)) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('buildScope missed some dirty elements.'),
             ErrorHint('This probably indicates that the dirty list should have been resorted but was not.'),
-            Element.describeElements('The list of dirty elements at the end of the buildScope call was', _dirtyElements),
+            Element.describeElements('The list of dirty elements at the end of the buildScope call was', buildScope._dirtyElements),
           ]);
         }
         return true;
       }());
     } finally {
-      for (final Element element in _dirtyElements) {
-        assert(element._inDirtyList);
-        element._inDirtyList = false;
-      }
-      _dirtyElements.clear();
       _scheduledFlushDirtyElements = false;
-      _dirtyElementsNeedsResorting = null;
       if (!kReleaseMode) {
         FlutterTimeline.finishSync();
       }
@@ -2975,9 +3037,8 @@ class BuildOwner {
   Map<Element, Set<GlobalKey>>? _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans;
 
   void _debugTrackElementThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans(Element node, GlobalKey key) {
-    _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans ??= HashMap<Element, Set<GlobalKey>>();
-    final Set<GlobalKey> keys = _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans!
-      .putIfAbsent(node, () => HashSet<GlobalKey>());
+    final Map<Element, Set<GlobalKey>> map = _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans ??= HashMap<Element, Set<GlobalKey>>();
+    final Set<GlobalKey> keys = map.putIfAbsent(node, () => HashSet<GlobalKey>());
     keys.add(key);
   }
 
@@ -3177,8 +3238,7 @@ class BuildOwner {
         try {
           _debugVerifyGlobalKeyReservation();
           _debugVerifyIllFatedPopulation();
-          if (_debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans != null &&
-              _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans!.isNotEmpty) {
+          if (_debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans?.isNotEmpty ?? false) {
             final Set<GlobalKey> keys = HashSet<GlobalKey>();
             for (final Element element in _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans!.keys) {
               if (element._lifecycleState != _ElementLifecycle.defunct) {
@@ -3512,6 +3572,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   BuildOwner? get owner => _owner;
   BuildOwner? _owner;
 
+  BuildScope? _buildScope;
+  BuildScope get buildScope => _buildScope!;
+
   /// {@template flutter.widgets.Element.reassemble}
   /// Called whenever the application is reassembled during debugging, for
   /// example during hot reload.
@@ -3548,15 +3611,12 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     });
   }
 
-  bool _debugIsInScope(Element target) {
-    Element? current = this;
-    while (current != null) {
-      if (target == current) {
-        return true;
-      }
-      current = current._parent;
+  bool _debugIsDescsendantOf(Element target) {
+    Element? element = this;
+    while (element != null && element.depth > target.depth) {
+      element = element._parent;
     }
-    return false;
+    return element == target;
   }
 
   /// The render object at (or below) this location in the tree.
@@ -4102,6 +4162,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       // (the root node), the owner should have already been assigned.
       // See RootRenderObjectElement.assignOwner().
       _owner = parent.owner;
+      _buildScope = parent.buildScope;
     }
     assert(owner != null);
     final Key? key = widget.key;
@@ -4184,6 +4245,16 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         child._updateDepth(expectedDepth);
       });
     }
+  }
+
+  void _updateBuildScopeRecursively() {
+    if (buildScope == _parent?.buildScope) {
+      return;
+    }
+    _inDirtyList = false;
+    visitChildren((Element child) {
+      child._updateBuildScopeRecursively();
+    });
   }
 
   /// Remove [renderObject] from the render tree.
@@ -4425,6 +4496,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   void _activateWithParent(Element parent, Object? newSlot) {
     assert(_lifecycleState == _ElementLifecycle.inactive);
     _parent = parent;
+    _owner = parent.owner;
+    _buildScope = parent.buildScope;
     assert(() {
       if (debugPrintGlobalKeyedWidgetLifecycle) {
         debugPrint('Reactivating $this (now child of $_parent).');
@@ -4432,6 +4505,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       return true;
     }());
     _updateDepth(_parent!.depth);
+    _updateBuildScopeRecursively();
     _activateRecursively(this);
     attachRenderObject(newSlot);
     assert(_lifecycleState == _ElementLifecycle.active);
@@ -4994,8 +5068,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   bool get dirty => _dirty;
   bool _dirty = true;
 
-  // Whether this is in owner._dirtyElements. This is used to know whether we
-  // should be adding the element back into the list when it's reactivated.
+  // Whether this is in _buildScope._dirtyElements. This is used to know whether
+  // we should be adding the element back into the list when it's reactivated.
   bool _inDirtyList = false;
 
   // Whether we've already built or not. Set in [rebuild].
@@ -5019,7 +5093,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       if (owner!._debugBuilding) {
         assert(owner!._debugCurrentBuildTarget != null);
         assert(owner!._debugStateLocked);
-        if (_debugIsInScope(owner!._debugCurrentBuildTarget!)) {
+        if (_debugIsDescsendantOf(owner!._debugCurrentBuildTarget!)) {
           return true;
         }
         final List<DiagnosticsNode> information = <DiagnosticsNode>[
@@ -6687,6 +6761,11 @@ mixin RootElementMixin on Element {
   // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
   void assignOwner(BuildOwner owner) {
     _owner = owner;
+    _buildScope = BuildScope(null);
+    assert(() {
+      buildScope.debugRootElement = this;
+      return true;
+    }());
   }
 
   @override

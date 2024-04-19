@@ -80,6 +80,11 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
 
   Element? _child;
 
+  late final BuildScope _childBuildScope = BuildScope(renderObject.markNeedsLayout)..debugRootElement = this;
+
+  @override
+  BuildScope get buildScope => _childBuildScope;
+
   @override
   void visitChildren(ElementVisitor visitor) {
     if (_child != null) {
@@ -97,7 +102,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   @override
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot); // Creates the renderObject.
-    renderObject.updateCallback(_layout);
+    renderObject.updateCallback(_rebuildWithConstraints);
   }
 
   @override
@@ -107,10 +112,18 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
     super.update(newWidget);
     assert(widget == newWidget);
 
-    renderObject.updateCallback(_layout);
+    renderObject.updateCallback(_rebuildWithConstraints);
     if (newWidget.updateShouldRebuild(oldWidget)) {
-      renderObject.markNeedsBuild();
+      _needsBuild = true;
+      renderObject.markNeedsLayout();
     }
+  }
+
+  @override
+  void markNeedsBuild() {
+    super.markNeedsBuild();
+    renderObject.markNeedsLayout();
+    _needsBuild = true;
   }
 
   @override
@@ -121,9 +134,11 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
     // Force the callback to be called, even if the layout constraints are the
     // same. This is because that callback may depend on the updated widget
     // configuration, or an inherited widget.
-    renderObject.markNeedsBuild();
+    renderObject.markNeedsLayout();
+    _needsBuild = true;
     super.performRebuild(); // Calls widget.updateRenderObject (a no-op in this case).
   }
+
 
   @override
   void unmount() {
@@ -131,9 +146,15 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
     super.unmount();
   }
 
-  void _layout(ConstraintType constraints) {
+  // The constraints that were passed to this class last time it was laid out.
+  // These constraints are compared to the new constraints to determine whether
+  // [ConstrainedLayoutBuilder.builder] needs to be called.
+  ConstraintType? _previousConstraints;
+  bool _needsBuild = true;
+
+  void _rebuildWithConstraints(ConstraintType constraints) {
     @pragma('vm:notify-debugger-on-exception')
-    void layoutCallback() {
+    void rebuild() {
       Widget built;
       try {
         built = (widget as ConstrainedLayoutBuilder<ConstraintType>).builder(this, constraints);
@@ -167,10 +188,16 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
           ),
         );
         _child = updateChild(null, built, slot);
+      } finally {
+        _needsBuild = false;
+        _previousConstraints = constraints;
       }
     }
 
-    owner!.buildScope(this, layoutCallback);
+    final VoidCallback? rebuildCallback = _needsBuild || (constraints != _previousConstraints)
+      ? rebuild
+      : null;
+    owner!.buildScope(this, rebuildCallback);
   }
 
   @override
@@ -211,8 +238,6 @@ mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildTy
     markNeedsLayout();
   }
 
-  bool _needsBuild = true;
-
   /// Marks this layout builder as needing to rebuild.
   ///
   /// The layout build rebuilds automatically when layout constraints change.
@@ -223,30 +248,21 @@ mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildTy
   /// See also:
   ///
   ///  * [ConstrainedLayoutBuilder.builder], which is called during the rebuild.
-  void markNeedsBuild() {
-    // Do not call the callback directly. It must be called during the layout
-    // phase, when parent constraints are available. Calling `markNeedsLayout`
-    // will cause it to be called at the right time.
-    _needsBuild = true;
-    markNeedsLayout();
-  }
+  //void markNeedsBuild() {
+  //  // Do not call the callback directly. It must be called during the layout
+  //  // phase, when parent constraints are available. Calling `markNeedsLayout`
+  //  // will cause it to be called at the right time.
+  //  markNeedsLayout();
+  //}
 
-  // The constraints that were passed to this class last time it was laid out.
-  // These constraints are compared to the new constraints to determine whether
-  // [ConstrainedLayoutBuilder.builder] needs to be called.
-  Constraints? _previousConstraints;
 
   /// Invoke the callback supplied via [updateCallback].
   ///
   /// Typically this results in [ConstrainedLayoutBuilder.builder] being called
   /// during layout.
-  void rebuildIfNecessary() {
+  void runLayoutCallback() {
     assert(_callback != null);
-    if (_needsBuild || constraints != _previousConstraints) {
-      _previousConstraints = constraints;
-      _needsBuild = false;
-      invokeLayoutCallback(_callback!);
-    }
+    invokeLayoutCallback(_callback!);
   }
 }
 
@@ -337,7 +353,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    rebuildIfNecessary();
+    runLayoutCallback();
     if (child != null) {
       child!.layout(constraints, parentUsesSize: true);
       size = constraints.constrain(child!.size);
