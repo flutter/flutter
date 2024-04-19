@@ -814,7 +814,7 @@ class PageView extends StatefulWidget {
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
-  
+
   /// {@macro flutter.widgets.scrollable.hitTestBehavior}
   ///
   /// Defaults to [HitTestBehavior.opaque].
