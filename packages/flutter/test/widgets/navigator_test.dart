@@ -4910,7 +4910,7 @@ void main() {
                 builderSetState = setState;
                 return PopScope<Object?>(
                   canPop: canPop(),
-                  onPopInvoked: (bool success, Object? result) {
+                  onPopWithResultInvoked: (bool success, Object? result) {
                     if (success || pages.last == _Page.noPop) {
                       return;
                     }
@@ -5026,7 +5026,7 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return PopScope<Object?>(
                   canPop: canPop(),
-                  onPopInvoked: (bool success, Object? result) {
+                  onPopWithResultInvoked: (bool success, Object? result) {
                     if (success || pages.last == _Page.noPop) {
                       return;
                     }
@@ -5119,7 +5119,7 @@ void main() {
               builder: (BuildContext context, StateSetter setState) {
                 return PopScope<Object?>(
                   canPop: canPop(),
-                  onPopInvoked: (bool success, Object? result) {
+                  onPopWithResultInvoked: (bool success, Object? result) {
                     if (success || pages.last == _PageWithYesPop.noPop) {
                       return;
                     }
@@ -5556,7 +5556,7 @@ class _LinksPage extends StatelessWidget {
   final bool? canPop;
   final VoidCallback? onBack;
   final String title;
-  final PopInvokedCallback<Object?>? onPopInvoked;
+  final PopWithResultInvokedCallback<Object?>? onPopInvoked;
 
   @override
   Widget build(BuildContext context) {
@@ -5577,7 +5577,7 @@ class _LinksPage extends StatelessWidget {
             if (canPop != null)
               PopScope<void>(
                 canPop: canPop!,
-                onPopInvoked: onPopInvoked,
+                onPopWithResultInvoked: onPopInvoked,
                 child: const SizedBox.shrink(),
               ),
           ],

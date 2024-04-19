@@ -8,6 +8,17 @@ import 'framework.dart';
 import 'navigator.dart';
 import 'routes.dart';
 
+/// A callback type for informing that a navigation pop has been invoked,
+/// whether or not it was handled successfully.
+///
+/// Accepts a didPop boolean indicating whether or not back navigation
+/// succeeded.
+@Deprecated(
+  'Use PopWithResultInvokedCallback instead. '
+  'This feature was deprecated after v3.22.0-12.0.pre.',
+)
+typedef PopInvokedCallback = void Function(bool didPop);
+
 /// Manages back navigation gestures.
 ///
 /// The generic type should match or be supertype of the generic type of the
@@ -16,7 +27,7 @@ import 'routes.dart';
 ///
 /// The [canPop] parameter disables back gestures when set to `false`.
 ///
-/// The [onPopInvoked] parameter reports when pop navigation was attempted, and
+/// The [onPopWithResultInvoked] parameter reports when pop navigation was attempted, and
 /// `didPop` indicates whether or not the navigation was successful. The
 /// `result` contains the pop result.
 ///
@@ -27,15 +38,15 @@ import 'routes.dart';
 /// back gesture.
 ///
 /// If [canPop] is false, then a system back gesture will not pop the route off
-/// of the enclosing [Navigator]. [onPopInvoked] will still be called, and
+/// of the enclosing [Navigator]. [onPopWithResultInvoked] will still be called, and
 /// `didPop` will be `false`. On iOS when using [CupertinoRouteTransitionMixin]
 /// with [canPop] set to false, no gesture will be detected at all, so
-/// [onPopInvoked] will not be called. Programmatically attempting pop
-/// navigation will also result in a call to [onPopInvoked], with `didPop`
+/// [onPopWithResultInvoked] will not be called. Programmatically attempting pop
+/// navigation will also result in a call to [onPopWithResultInvoked], with `didPop`
 /// indicating success or failure.
 ///
 /// If [canPop] is true, then a system back gesture will cause the enclosing
-/// [Navigator] to receive a pop as usual. [onPopInvoked] will be called with
+/// [Navigator] to receive a pop as usual. [onPopWithResultInvoked] will be called with
 /// `didPop` as true, unless the pop failed for reasons unrelated to
 /// [PopScope], in which case it will be false.
 ///
@@ -68,15 +79,20 @@ class PopScope<T> extends StatefulWidget {
     super.key,
     required this.child,
     this.canPop = true,
+    this.onPopWithResultInvoked,
+    @Deprecated(
+      'Use onPopWithResultInvoked instead. '
+      'This feature was deprecated after v3.22.0-12.0.pre.',
+    )
     this.onPopInvoked,
-  });
+  }) : assert(onPopWithResultInvoked == null || onPopInvoked == null);
 
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  /// {@template flutter.widgets.PopScope.onPopInvoked}
+  /// {@template flutter.widgets.PopScope.onPopWithResultInvoked}
   /// Called after a route pop was handled.
   /// {@endtemplate}
   ///
@@ -95,7 +111,32 @@ class PopScope<T> extends StatefulWidget {
   /// See also:
   ///
   ///  * [Route.onPopInvoked], which is similar.
-  final PopInvokedCallback<T>? onPopInvoked;
+  final PopWithResultInvokedCallback<T>? onPopWithResultInvoked;
+
+  /// Called after a route pop was handled.
+  ///
+  /// It's not possible to prevent the pop from happening at the time that this
+  /// method is called; the pop has already happened. Use [canPop] to
+  /// disable pops in advance.
+  ///
+  /// This will still be called even when the pop is canceled. A pop is canceled
+  /// when the relevant [Route.popDisposition] returns false, such as when
+  /// [canPop] is set to false on a [PopScope]. The `didPop` parameter
+  /// indicates whether or not the back navigation actually happened
+  /// successfully.
+  @Deprecated(
+    'Use onPopWithResultInvoked instead. '
+    'This feature was deprecated after v3.22.0-12.0.pre.',
+  )
+  final PopInvokedCallback? onPopInvoked;
+
+  void _callPopInvoked(bool didPop, T? result) {
+    if (onPopWithResultInvoked != null) {
+      onPopWithResultInvoked!(didPop, result);
+      return;
+    }
+    onPopInvoked?.call(didPop);
+  }
 
   /// {@template flutter.widgets.PopScope.canPop}
   /// When false, blocks the current route from being popped.
@@ -121,7 +162,7 @@ class _PopScopeState<T> extends State<PopScope<T>> implements PopEntry<T> {
 
   @override
   void onPopInvoked(bool didPop, T? result) {
-    widget.onPopInvoked?.call(didPop, result);
+    widget._callPopInvoked(didPop, result);
   }
 
   @override

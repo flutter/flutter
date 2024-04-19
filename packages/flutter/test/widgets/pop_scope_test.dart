@@ -90,7 +90,7 @@ void main() {
         home: Scaffold(
           body: PopScope<Object?>(
             canPop: false,
-            onPopInvoked: (bool didPop, Object? result) {
+            onPopWithResultInvoked: (bool didPop, Object? result) {
               receivedResult = result;
             },
             child: const Center(
@@ -124,7 +124,7 @@ void main() {
         home: Scaffold(
           body: PopScope<Object?>(
             canPop: false,
-            onPopInvoked: (bool didPop, Object? result) {
+            onPopWithResultInvoked: (bool didPop, Object? result) {
               receivedResult = result;
             },
             child: const Center(
@@ -146,7 +146,7 @@ void main() {
           return Scaffold(
             body: PopScope<Object?>(
               canPop: false,
-              onPopInvoked: (bool didPop, Object? result) {
+              onPopWithResultInvoked: (bool didPop, Object? result) {
                 receivedResult = result;
               },
               child: const Center(
@@ -205,7 +205,7 @@ void main() {
                 setState = stateSetter;
                 return PopScope<Object?>(
                   canPop: canPop,
-                  onPopInvoked: (bool didPop, Object? result) {
+                  onPopWithResultInvoked: (bool didPop, Object? result) {
                     lastPopSuccess = didPop;
                   },
                   child: const Center(
