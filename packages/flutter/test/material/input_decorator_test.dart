@@ -350,7 +350,7 @@ void main() {
             ..path(
               style: PaintingStyle.fill,
               color: theme.colorScheme.surfaceContainerHighest,
-            )
+            ),
           );
         });
 
@@ -409,7 +409,7 @@ void main() {
             ..path(
               style: PaintingStyle.fill,
               color: theme.colorScheme.onSurface.withOpacity(0.04),
-            )
+            ),
           );
         });
 
@@ -470,7 +470,7 @@ void main() {
             ..path(
               style: PaintingStyle.fill,
               color: Color.alphaBlend(theme.hoverColor, theme.colorScheme.surfaceContainerHighest),
-            )
+            ),
           );
         });
 
@@ -530,7 +530,7 @@ void main() {
             ..path(
               style: PaintingStyle.fill,
               color: theme.colorScheme.surfaceContainerHighest,
-            )
+            ),
           );
         });
 
@@ -555,7 +555,7 @@ void main() {
             ..path(
               style: PaintingStyle.fill,
               color: Color.alphaBlend(hoverColor, focusColor),
-            )
+            ),
           );
         });
 
@@ -632,7 +632,7 @@ void main() {
             ..path(
               style: PaintingStyle.fill,
               color: theme.colorScheme.surfaceContainerHighest,
-            )
+            ),
           );
         });
 
@@ -754,7 +754,7 @@ void main() {
           expect(findBorderPainter(), paints
             ..path(
               style: PaintingStyle.stroke,
-            )
+            ),
           );
         });
 
@@ -809,7 +809,7 @@ void main() {
           expect(findBorderPainter(), paints
             ..path(
               style: PaintingStyle.stroke,
-            )
+            ),
           );
         });
 
@@ -865,7 +865,7 @@ void main() {
           expect(findBorderPainter(), paints
             ..path(
               style: PaintingStyle.stroke,
-            )
+            ),
           );
         });
 
@@ -921,7 +921,7 @@ void main() {
           expect(findBorderPainter(), paints
             ..path(
               style: PaintingStyle.stroke,
-            )
+            ),
           );
         });
 
@@ -994,7 +994,7 @@ void main() {
           expect(findBorderPainter(), paints
             ..path(
               style: PaintingStyle.stroke,
-            )
+            ),
           );
         });
 
