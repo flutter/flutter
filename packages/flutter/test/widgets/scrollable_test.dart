@@ -163,7 +163,8 @@ void main() {
               ),
             ),
             const SingleChildScrollView(
-                hitTestBehavior: HitTestBehavior.translucent),
+              hitTestBehavior: HitTestBehavior.translucent,
+            ),
           ],
         ),
       ),
