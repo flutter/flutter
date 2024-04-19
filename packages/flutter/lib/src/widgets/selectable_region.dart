@@ -1826,7 +1826,7 @@ class _DirectionallyExtendCaretSelectionAction<T extends DirectionalCaretMovemen
 /// This class manages updating multiple [Selectable] children where the
 /// [Selectable]s do not change or move around frequently.
 ///
-/// It keeps track of the [Selectable]s that have received start and end
+/// It keeps track of the [Selectable]s that received start or end
 /// [SelectionEvent]s to accurately synthesize a [SelectionEvent] for the
 /// opposite edge when needed.
 ///
