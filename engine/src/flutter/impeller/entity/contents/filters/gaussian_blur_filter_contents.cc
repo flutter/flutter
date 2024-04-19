@@ -95,7 +95,9 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
         TextureFillVertexShader::FrameInfo frame_info;
         frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
         frame_info.texture_sampler_y_coord_scale = 1.0;
-        frame_info.alpha = 1.0;
+
+        TextureFillFragmentShader::FragInfo frag_info;
+        frag_info.alpha = 1.0;
 
         BindVertices<TextureFillVertexShader>(pass, host_buffer,
                                               {
@@ -111,6 +113,8 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
         linear_sampler_descriptor.min_filter = MinMagFilter::kLinear;
         TextureFillVertexShader::BindFrameInfo(
             pass, host_buffer.EmplaceUniform(frame_info));
+        TextureFillFragmentShader::BindFragInfo(
+            pass, host_buffer.EmplaceUniform(frag_info));
         TextureFillFragmentShader::BindTextureSampler(
             pass, input_texture,
             renderer.GetContext()->GetSamplerLibrary()->GetSampler(

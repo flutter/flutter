@@ -10,22 +10,22 @@ precision mediump float;
 uniform f16sampler2D texture_sampler;
 
 uniform FragInfo {
-  float16_t x_tile_mode;
-  float16_t y_tile_mode;
+  float x_tile_mode;
+  float y_tile_mode;
+  float alpha;
 }
 frag_info;
 
 in highp vec2 v_texture_coords;
-IMPELLER_MAYBE_FLAT in float16_t v_alpha;
 
 out f16vec4 frag_color;
 
 void main() {
   frag_color =
-      IPHalfSampleWithTileMode(texture_sampler,        // sampler
-                               v_texture_coords,       // texture coordinates
-                               frag_info.x_tile_mode,  // x tile mode
-                               frag_info.y_tile_mode   // y tile mode
+      IPHalfSampleWithTileMode(texture_sampler,   // sampler
+                               v_texture_coords,  // texture coordinates
+                               float16_t(frag_info.x_tile_mode),  // x tile mode
+                               float16_t(frag_info.y_tile_mode)   // y tile mode
                                ) *
-      v_alpha;
+      float16_t(frag_info.alpha);
 }

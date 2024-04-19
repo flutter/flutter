@@ -11,11 +11,11 @@ uniform sampler2D SAMPLER_EXTERNAL_OES_texture_sampler;
 uniform FragInfo {
   float x_tile_mode;
   float y_tile_mode;
+  float alpha;
 }
 frag_info;
 
 in vec2 v_texture_coords;
-in float v_alpha;
 
 out vec4 frag_color;
 
@@ -26,5 +26,5 @@ void main() {
                               frag_info.x_tile_mode,  // x tile mode
                               frag_info.y_tile_mode   // y tile mode
                               ) *
-      v_alpha;
+      frag_info.alpha;
 }
