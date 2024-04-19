@@ -143,7 +143,6 @@ Future<void> main(List<String> args) async {
       'framework_coverage': frameworkCoverageRunner,
       'framework_tests': _runFrameworkTests,
       'tool_tests': _runToolTests,
-      // web_tool_tests is also used by HHH: https://dart.googlesource.com/recipes/+/refs/heads/master/recipes/dart/flutter_engine.py
       'web_tool_tests': _runWebToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
       'android_preview_tool_integration_tests': _runAndroidPreviewIntegrationToolTests,
