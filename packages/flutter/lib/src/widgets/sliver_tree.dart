@@ -16,10 +16,6 @@ import 'sliver.dart';
 import 'text.dart';
 import 'ticker_provider.dart';
 
-// TODO(Piinks): still to cover
-//  * Example code
-//  * Tests
-
 /// A data structure for configuring children of a [SliverTree].
 ///
 /// A [SliverTreeNode.content] can be of any type, but must correspond with the
@@ -142,6 +138,12 @@ mixin TreeStateMixin<T> {
   /// If no node exists, this will return null. This does not reflect whether
   /// or not a node [isActive], or if it is visible in the viewport.
   SliverTreeNode<T>? getNodeFor(T content);
+
+  /// Returns the current row index of the given [SliverTreeNode].
+  ///
+  /// If the node is not currently active in the tree, meaning its parent is
+  /// collapsed, this will return null.
+  int? getActiveIndexFor(SliverTreeNode<T> node);
 }
 
 /// Enables control over the [TreeNodes] of a [SliverTree].
@@ -686,6 +688,14 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
     }
     if (nextDepth.isNotEmpty) {
       return _getNode(content, nextDepth);
+    }
+    return null;
+  }
+
+  @override
+  int? getActiveIndexFor(SliverTreeNode<T> node) {
+    if (_activeNodes.contains(node)) {
+      return _activeNodes.indexOf(node);
     }
     return null;
   }
