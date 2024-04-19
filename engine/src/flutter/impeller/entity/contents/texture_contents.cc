@@ -13,7 +13,8 @@
 #include "impeller/entity/entity.h"
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
-#include "impeller/entity/texture_fill_external.frag.h"
+#include "impeller/entity/texture_fill_strict_src.frag.h"
+#include "impeller/entity/tiled_texture_fill_external.frag.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
@@ -113,8 +114,8 @@ bool TextureContents::Render(const ContentContext& renderer,
 
   using VS = TextureFillVertexShader;
   using FS = TextureFillFragmentShader;
-  using FSStrictSrc = TextureFillStrictSrcFragmentShader;
-  using FSExternal = TextureFillExternalFragmentShader;
+  using FSExternal = TiledTextureFillExternalFragmentShader;
+  using FSStrict = TextureFillStrictSrcFragmentShader;
 
   if (destination_rect_.IsEmpty() || source_rect_.IsEmpty() ||
       texture_ == nullptr || texture_->GetSize().IsEmpty()) {
@@ -129,7 +130,6 @@ bool TextureContents::Render(const ContentContext& renderer,
       Rect::MakeSize(texture_->GetSize()).Project(source_rect);
 
   VertexBufferBuilder<VS::PerVertexData> vertex_builder;
-
   auto destination_rect =
       capture.AddRect("Destination rect", destination_rect_);
   vertex_builder.AddVertices({
@@ -144,7 +144,6 @@ bool TextureContents::Render(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   frame_info.mvp = entity.GetShaderTransform(pass);
   frame_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
-  frame_info.alpha = capture.AddScalar("Alpha", GetOpacity());
 
 #ifdef IMPELLER_DEBUG
   if (label_.empty()) {
@@ -163,7 +162,7 @@ bool TextureContents::Render(const ContentContext& renderer,
   std::shared_ptr<Pipeline<PipelineDescriptor>> pipeline;
 #ifdef IMPELLER_ENABLE_OPENGLES
   if (is_external_texture) {
-    pipeline = renderer.GetTextureExternalPipeline(pipeline_options);
+    pipeline = renderer.GetTiledTextureExternalPipeline(pipeline_options);
   }
 #endif  // IMPELLER_ENABLE_OPENGLES
 
@@ -178,11 +177,27 @@ bool TextureContents::Render(const ContentContext& renderer,
 
   pass.SetVertexBuffer(vertex_builder.CreateVertexBuffer(host_buffer));
   VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
+
   if (is_external_texture) {
+    FSExternal::FragInfo frag_info;
+    frag_info.x_tile_mode =
+        static_cast<int>(sampler_descriptor_.width_address_mode);
+    frag_info.y_tile_mode =
+        static_cast<int>(sampler_descriptor_.height_address_mode);
+    frag_info.alpha = capture.AddScalar("Alpha", GetOpacity());
+
+    auto sampler_descriptor = sampler_descriptor_;
+    // OES_EGL_image_external states that only CLAMP_TO_EDGE is valid, so
+    // we emulate all other tile modes here by remapping the texture
+    // coordinates.
+    sampler_descriptor.width_address_mode = SamplerAddressMode::kClampToEdge;
+    sampler_descriptor.height_address_mode = SamplerAddressMode::kClampToEdge;
+
+    FSExternal::BindFragInfo(pass, host_buffer.EmplaceUniform((frag_info)));
     FSExternal::BindSAMPLEREXTERNALOESTextureSampler(
         pass, texture_,
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
-            sampler_descriptor_));
+            sampler_descriptor));
   } else if (strict_source_rect_enabled_) {
     // For a strict source rect, shrink the texture coordinate range by half a
     // texel to ensure that linear filtering does not sample anything outside
@@ -190,14 +205,18 @@ bool TextureContents::Render(const ContentContext& renderer,
     auto strict_texture_coords =
         Rect::MakeSize(texture_->GetSize()).Project(source_rect.Expand(-0.5));
 
-    FSStrictSrc::FragInfo frag_info;
+    FSStrict::FragInfo frag_info;
     frag_info.source_rect = Vector4(strict_texture_coords.GetLTRB());
-    FSStrictSrc::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
-    FSStrictSrc::BindTextureSampler(
+    frag_info.alpha = capture.AddScalar("Alpha", GetOpacity());
+    FSStrict::BindFragInfo(pass, host_buffer.EmplaceUniform((frag_info)));
+    FSStrict::BindTextureSampler(
         pass, texture_,
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
             sampler_descriptor_));
   } else {
+    FS::FragInfo frag_info;
+    frag_info.alpha = capture.AddScalar("Alpha", GetOpacity());
+    FS::BindFragInfo(pass, host_buffer.EmplaceUniform((frag_info)));
     FS::BindTextureSampler(
         pass, texture_,
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(

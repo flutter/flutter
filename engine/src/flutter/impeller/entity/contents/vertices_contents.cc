@@ -169,9 +169,11 @@ bool VerticesUVContents::Render(const ContentContext& renderer,
   frame_info.mvp = geometry_result.transform;
   frame_info.texture_sampler_y_coord_scale =
       snapshot->texture->GetYCoordScale();
-  frame_info.alpha = alpha_ * snapshot->opacity;
   VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
 
+  FS::FragInfo frag_info;
+  frag_info.alpha = alpha_ * snapshot->opacity;
+  FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
   FS::BindTextureSampler(pass, snapshot->texture,
                          renderer.GetContext()->GetSamplerLibrary()->GetSampler(
                              snapshot->sampler_descriptor));

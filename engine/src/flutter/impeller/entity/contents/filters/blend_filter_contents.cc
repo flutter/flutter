@@ -505,8 +505,8 @@ static std::optional<Entity> PipelineBlend(
     std::optional<Color> foreground_color,
     ColorFilterContents::AbsorbOpacity absorb_opacity,
     std::optional<Scalar> alpha) {
-  using VS = BlendPipeline::VertexShader;
-  using FS = BlendPipeline::FragmentShader;
+  using VS = TexturePipeline::VertexShader;
+  using FS = TexturePipeline::FragmentShader;
 
   auto dst_snapshot =
       inputs[0]->GetSnapshot("PipelineBlend(Dst)", renderer, entity);
@@ -552,7 +552,7 @@ static std::optional<Entity> PipelineBlend(
       const std::unique_ptr<const Sampler>& sampler =
           renderer.GetContext()->GetSamplerLibrary()->GetSampler(
               input->sampler_descriptor);
-      FS::BindTextureSamplerSrc(pass, input->texture, sampler);
+      FS::BindTextureSampler(pass, input->texture, sampler);
 
       auto size = input->texture->GetSize();
       VertexBufferBuilder<VS::PerVertexData> vtx_builder;
@@ -572,7 +572,7 @@ static std::optional<Entity> PipelineBlend(
           input->texture->GetYCoordScale();
 
       FS::FragInfo frag_info;
-      frag_info.input_alpha =
+      frag_info.alpha =
           absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
               ? input->opacity
               : 1.0;
@@ -584,7 +584,7 @@ static std::optional<Entity> PipelineBlend(
 
     // Draw the first texture using kSource.
     options.blend_mode = BlendMode::kSource;
-    pass.SetPipeline(renderer.GetBlendPipeline(options));
+    pass.SetPipeline(renderer.GetTexturePipeline(options));
     if (!add_blend_command(dst_snapshot)) {
       return true;
     }
@@ -593,7 +593,7 @@ static std::optional<Entity> PipelineBlend(
 
     if (inputs.size() >= 2) {
       options.blend_mode = blend_mode;
-      pass.SetPipeline(renderer.GetBlendPipeline(options));
+      pass.SetPipeline(renderer.GetTexturePipeline(options));
 
       for (auto texture_i = inputs.begin() + 1; texture_i < inputs.end();
            texture_i++) {
