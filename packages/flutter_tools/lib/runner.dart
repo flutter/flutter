@@ -115,8 +115,8 @@ Future<int> run(
           await globals.analytics.setTelemetry(true);
         }
 
-        // Ensure that anyone opted out of package:unified_analytics is also
-        // opted out of legacy analytics and that analytics is not being suppressed
+        // Send an event to GA3 for any users that are opted into GA3
+        // analytics but have opted out of GA4 (package:unified_analytics)
         // TODO(eliasyishak): remove once GA3 sunset, https://github.com/flutter/flutter/issues/128251
         if (!globals.analytics.telemetryEnabled &&
             globals.flutterUsage.enabled) {

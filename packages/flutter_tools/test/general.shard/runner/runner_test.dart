@@ -434,7 +434,7 @@ void main() {
         io.setExitFunctionForTests((int exitCode) {});
 
         // Begin by opting out of telemetry for package:unified_analytics
-        // and leaving legacy analytics opted in
+        // and legacy analytics
         await fakeAnalytics.setTelemetry(false);
         testUsage.enabled = false;
         expect(fakeAnalytics.telemetryEnabled, false);
