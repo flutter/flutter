@@ -111,7 +111,7 @@ abstract class FlutterBaseDebugAdapter extends DartDebugAdapter<FlutterLaunchReq
     // terminating, however for Flutter apps it may be running on a remote
     // device so it's not valid to terminate a process with that pid locally.
     // For attach, pids should never be collected as terminateRequest() should
-    // not terminate the debugee.
+    // not terminate the debugger.
   }
 
   /// Called by [disconnectRequest] to request that we forcefully shut down the app being run (or in the case of an attach, disconnect).

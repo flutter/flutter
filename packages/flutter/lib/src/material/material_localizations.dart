@@ -32,6 +32,9 @@ abstract class MaterialLocalizations {
   /// The [BackButton]'s tooltip.
   String get backButtonTooltip;
 
+  /// The tooltip for the clear button to clear text on [SearchAnchor]'s search view.
+  String get clearButtonTooltip;
+
   /// The [CloseButton]'s tooltip.
   String get closeButtonTooltip;
 
@@ -178,6 +181,10 @@ abstract class MaterialLocalizations {
 
   /// Label indicating that a given date is the current date.
   String get currentDateLabel;
+
+  /// The semantics label to describe the selected date in the calendar picker
+  /// invoked using [showDatePicker].
+  String get selectedDateLabel;
 
   /// Label for the scrim rendered underneath a [BottomSheet].
   String get scrimLabel;
@@ -991,12 +998,10 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get inputTimeModeButtonLabel => 'Switch to text input mode';
 
   String _formatDayPeriod(TimeOfDay timeOfDay) {
-    switch (timeOfDay.period) {
-      case DayPeriod.am:
-        return anteMeridiemAbbreviation;
-      case DayPeriod.pm:
-        return postMeridiemAbbreviation;
-    }
+    return switch (timeOfDay.period) {
+      DayPeriod.am => anteMeridiemAbbreviation,
+      DayPeriod.pm => postMeridiemAbbreviation,
+    };
   }
 
   @override
@@ -1054,6 +1059,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get backButtonTooltip => 'Back';
 
   @override
+  String get clearButtonTooltip => 'Clear text';
+
+  @override
   String get closeButtonTooltip => 'Close';
 
   @override
@@ -1105,6 +1113,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get currentDateLabel => 'Today';
 
   @override
+  String get selectedDateLabel => 'Selected';
+
+  @override
   String get scrimLabel => 'Scrim';
 
   @override
@@ -1122,14 +1133,11 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   @override
   String licensesPackageDetailText(int licenseCount) {
     assert(licenseCount >= 0);
-    switch (licenseCount) {
-      case 0:
-        return 'No licenses.';
-      case 1:
-        return '1 license.';
-      default:
-        return '$licenseCount licenses.';
-    }
+    return switch (licenseCount) {
+      0 => 'No licenses.',
+      1 => '1 license.',
+      _ => '$licenseCount licenses.',
+    };
   }
 
   @override
@@ -1151,14 +1159,11 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String selectedRowCountTitle(int selectedRowCount) {
-    switch (selectedRowCount) {
-      case 0:
-        return 'No items selected';
-      case 1:
-        return '1 item selected';
-      default:
-        return '$selectedRowCount items selected';
-    }
+    return switch (selectedRowCount) {
+      0 => 'No items selected',
+      1 => '1 item selected',
+      _ => '$selectedRowCount items selected',
+    };
   }
 
   @override
@@ -1301,14 +1306,11 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String remainingTextFieldCharacterCount(int remaining) {
-    switch (remaining) {
-      case 0:
-        return 'No characters remaining';
-      case 1:
-        return '1 character remaining';
-      default:
-        return '$remaining characters remaining';
-    }
+    return switch (remaining) {
+      0 => 'No characters remaining',
+      1 => '1 character remaining',
+      _ => '$remaining characters remaining',
+    };
   }
 
   @override

@@ -495,7 +495,7 @@ void main() {
         ..save()
         ..rrect(
           style: PaintingStyle.fill,
-          color: colors.surfaceVariant,
+          color: colors.surfaceContainerHighest,
           rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
         )
         ..rrect(
@@ -560,7 +560,7 @@ void main() {
         ..save()
         ..rrect(
           style: PaintingStyle.fill,
-          color: colors.surfaceVariant,
+          color: colors.surfaceContainerHighest,
           rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
         )
         ..rrect(
@@ -680,7 +680,7 @@ void main() {
         ..save()
         ..rrect(
           style: PaintingStyle.fill,
-          color: colors.surfaceVariant.withOpacity(0.12),
+          color: colors.surfaceContainerHighest.withOpacity(0.12),
           rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
         )
         ..rrect(
@@ -800,7 +800,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(getSwitchMaterial(tester),
-      paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))
+      paints..circle(color: theme.colorScheme.primary.withOpacity(0.1))
     );
 
     // On both hovered and focused, the overlay color should show hovered overlay color.
@@ -1828,7 +1828,7 @@ void main() {
         paints
           ..rrect(
             style: PaintingStyle.fill,
-            color: colors.surfaceVariant,
+            color: colors.surfaceContainerHighest,
             rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
           )
           ..rrect(
@@ -1849,7 +1849,7 @@ void main() {
       paints
         ..rrect(
           style: PaintingStyle.fill,
-          color: colors.surfaceVariant.withOpacity(0.12),
+          color: colors.surfaceContainerHighest.withOpacity(0.12),
           rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
         )
         ..rrect(
@@ -2392,7 +2392,7 @@ void main() {
       paints
         ..rrect(
           style: PaintingStyle.fill,
-          color: colors.surfaceVariant.withOpacity(0.12),
+          color: colors.surfaceContainerHighest.withOpacity(0.12),
           rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
         )
         ..rrect(
@@ -2428,7 +2428,7 @@ void main() {
       paints
         ..rrect(
           style: PaintingStyle.fill,
-          color: colors.surfaceVariant,
+          color: colors.surfaceContainerHighest,
           rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
         )
         ..rrect()
@@ -2582,7 +2582,7 @@ void main() {
           color: colors.primary,
           rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
         )
-        ..circle(color: colors.primary.withOpacity(0.12))
+        ..circle(color: colors.primary.withOpacity(0.1))
         ..rrect(color: focusedThumbColor),
       reason: 'active enabled switch should default track and custom thumb color',
     );
@@ -3568,7 +3568,7 @@ void main() {
 
       expect(Material.of(tester.element(find.byType(Switch))),
         paints..rrect(
-          color: colors.surfaceVariant, // track color
+          color: colors.surfaceContainerHighest, // track color
           style: PaintingStyle.fill
         )..rrect(
           color: colors.outline, // track outline color
@@ -3598,7 +3598,7 @@ void main() {
 
       expect(Material.of(tester.element(find.byType(Switch))),
         paints..rrect(
-          color: colors.surfaceVariant.withOpacity(0.12), // track color
+          color: colors.surfaceContainerHighest.withOpacity(0.12), // track color
           style: PaintingStyle.fill,
         )..rrect(
           color: colors.onSurface.withOpacity(0.12), // track outline color

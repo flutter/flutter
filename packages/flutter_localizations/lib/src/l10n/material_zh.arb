@@ -142,7 +142,9 @@
   "expandedHint": "已收起",
   "collapsedHint": "已展开",
   "menuDismissLabel": "关闭菜单",
-  "lookUpButtonLabel": "向上看",
-  "searchWebButtonLabel": "在网络上搜索",
-  "shareButtonLabel": "分享…"
+  "lookUpButtonLabel": "查询",
+  "searchWebButtonLabel": "搜索",
+  "shareButtonLabel": "共享…",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

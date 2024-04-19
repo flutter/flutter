@@ -2,18 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'context.dart';
 import 'platform.dart';
 
-/// Contains messages produced by Flutter tools.
+/// Class containing some message strings that can be produced by Flutter tools.
 //
 // This allows partial reimplementations of the flutter tool to override
 // certain messages.
 // TODO(andrewkolos): It is unclear if this is worth keeping. See
 // https://github.com/flutter/flutter/issues/125155.
-UserMessages get userMessages => context.get<UserMessages>()!;
-
-/// Class containing message strings that can be produced by Flutter tools.
 class UserMessages {
   // Messages used in multiple components.
   String get flutterToolBugInstructions =>
@@ -197,24 +193,19 @@ class UserMessages {
   String cocoaPodsMissing(String consequence, String installInstructions) =>
       'CocoaPods not installed.\n'
       '$consequence\n'
-      'To install $installInstructions';
+      'For installation instructions, $installInstructions';
   String cocoaPodsUnknownVersion(String consequence, String upgradeInstructions) =>
       'Unknown CocoaPods version installed.\n'
       '$consequence\n'
-      'To upgrade $upgradeInstructions';
+      'To update CocoaPods, $upgradeInstructions';
   String cocoaPodsOutdated(String currentVersion, String recVersion, String consequence, String upgradeInstructions) =>
       'CocoaPods $currentVersion out of date ($recVersion is recommended).\n'
       '$consequence\n'
-      'To upgrade $upgradeInstructions';
+      'To update CocoaPods, $upgradeInstructions';
   String cocoaPodsBrokenInstall(String consequence, String reinstallInstructions) =>
       'CocoaPods installed but not working.\n'
       '$consequence\n'
-      'To re-install $reinstallInstructions';
-
-  // Messages used in VsCodeValidator
-  String vsCodeVersion(String version) => 'version $version';
-  String vsCodeLocation(String location) => 'VS Code at $location';
-  String vsCodeFlutterExtensionMissing(String url) => 'Flutter extension not installed; install from\n$url';
+      'For re-installation instructions, $reinstallInstructions';
 
   // Messages used in VisualStudioValidator
   String visualStudioVersion(String name, String version) => '$name version $version';

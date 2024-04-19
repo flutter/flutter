@@ -302,8 +302,9 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: CupertinoAlertDialog(
               title: const Text('The Title'),
               content: Text('Very long content ' * 20),
@@ -345,7 +346,7 @@ void main() {
     // regular font. However, when using the test font, "Cancel" becomes 2 lines which
     // is why the height we're verifying for "Cancel" is larger than "OK".
 
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(tester.getSize(find.text('The Title')), equals(const Size(270.0, 132.0)));
     }
     expect(tester.getTopLeft(find.text('The Title')), equals(const Offset(265.0, 80.0 + 24.0)));
@@ -405,8 +406,9 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: CupertinoAlertDialog(
               title: const Text('The title'),
               content: const Text('The content.'),
@@ -461,14 +463,12 @@ void main() {
   });
 
   testWidgets('Title Section is empty, Button section is not empty.', (WidgetTester tester) async {
-    const double textScaleFactor = 1.0;
     final ScrollController actionScrollController = ScrollController();
     addTearDown(actionScrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+          return MediaQuery.withNoTextScaling(
             child: CupertinoAlertDialog(
               actions: const <Widget>[
                 CupertinoDialogAction(
@@ -515,14 +515,12 @@ void main() {
   });
 
   testWidgets('Button section is empty, Title section is not empty.', (WidgetTester tester) async {
-    const double textScaleFactor = 1.0;
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+          return MediaQuery.withNoTextScaling(
             child: CupertinoAlertDialog(
               title: const Text('The title'),
               content: const Text('The content.'),
@@ -715,8 +713,9 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: CupertinoAlertDialog(
               title: const Text('The Title'),
               content: Text('The message\n' * 20),
@@ -1193,8 +1192,9 @@ void main() {
       createAppWithButtonThatLaunchesDialog(
         useMaterial3: false,
         dialogBuilder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: const RepaintBoundary(
               child: CupertinoAlertDialog(
                 title: Text('Title'),
@@ -1224,8 +1224,9 @@ void main() {
       createAppWithButtonThatLaunchesDialog(
         useMaterial3: true,
         dialogBuilder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: const RepaintBoundary(
               child: CupertinoAlertDialog(
                 title: Text('Title'),
@@ -1322,14 +1323,12 @@ void main() {
 
   testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to CupertinoAlertDialog', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/83819
-    const double textScaleFactor = 1.0;
     final ScrollController actionScrollController = ScrollController();
     addTearDown(actionScrollController.dispose);
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+          return MediaQuery.withNoTextScaling(
             child: CupertinoAlertDialog(
               title: const Text('Test Title'),
               content: const Text('Test Content'),
@@ -1507,8 +1506,9 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         dialogBuilder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: RepaintBoundary(
               child: CupertinoAlertDialog(
                 title: const Text('Title'),

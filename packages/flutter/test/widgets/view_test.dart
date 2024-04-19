@@ -7,6 +7,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'multi_view_testing.dart';
 
@@ -77,9 +78,9 @@ void main() {
     PipelineOwner? outsideParent;
     PipelineOwner? insideParent;
 
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: Builder(
+    await tester.pumpWidget(
+      wrapWithView: false,
+      Builder(
         builder: (BuildContext context) {
           outsideView = View.maybeOf(context);
           outsideParent = View.pipelineOwnerOf(context);
@@ -114,9 +115,9 @@ void main() {
   });
 
   testWidgets('cannot have multiple views with same FlutterView', (WidgetTester tester) async {
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: ViewCollection(
+    await tester.pumpWidget(
+      wrapWithView: false,
+      ViewCollection(
         views: <Widget>[
           View(
             view: tester.view,
@@ -224,9 +225,9 @@ void main() {
   });
 
   testWidgets('visitChildren of ViewCollection visits all children', (WidgetTester tester) async {
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: ViewCollection(
+    await tester.pumpWidget(
+      wrapWithView: false,
+      ViewCollection(
         views: <Widget>[
           View(
             view: tester.view,
@@ -250,9 +251,9 @@ void main() {
     });
     expect(children, hasLength(3));
 
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: ViewCollection(
+    await tester.pumpWidget(
+      wrapWithView: false,
+      ViewCollection(
         views: <Widget>[
           View(
             view: tester.view,
@@ -271,9 +272,9 @@ void main() {
   group('renderObject getter', () {
     testWidgets('ancestors of view see RenderView as renderObject', (WidgetTester tester) async {
       late BuildContext builderContext;
-      await pumpWidgetWithoutViewWrapper(
-        tester: tester,
-        widget: Builder(
+      await tester.pumpWidget(
+        wrapWithView: false,
+        Builder(
           builder: (BuildContext context) {
             builderContext = context;
             return View(
@@ -293,9 +294,9 @@ void main() {
 
     testWidgets('ancestors of ViewCollection get null for renderObject', (WidgetTester tester) async {
       late BuildContext builderContext;
-      await pumpWidgetWithoutViewWrapper(
-        tester: tester,
-        widget: Builder(
+      await tester.pumpWidget(
+        wrapWithView: false,
+        Builder(
           builder: (BuildContext context) {
             builderContext = context;
             return ViewCollection(
@@ -344,10 +345,12 @@ void main() {
     });
   });
 
-  testWidgets('correctly switches between view configurations', (WidgetTester tester) async {
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: View(
+  testWidgets('correctly switches between view configurations',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // Leaking by design as contains deprecated items.
+  (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrapWithView: false,
+      View(
         view: tester.view,
         deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner: tester.binding.pipelineOwner,
         deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView: tester.binding.renderView,
@@ -359,9 +362,9 @@ void main() {
     expect(renderView.owner, same(tester.binding.pipelineOwner));
     expect(tester.renderObject(find.byType(SizedBox)).owner, same(tester.binding.pipelineOwner));
 
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: View(
+    await tester.pumpWidget(
+      wrapWithView: false,
+      View(
         view: tester.view,
         child: const SizedBox(),
       ),
@@ -371,9 +374,9 @@ void main() {
     expect(renderView.owner, isNot(same(tester.binding.pipelineOwner)));
     expect(tester.renderObject(find.byType(SizedBox)).owner, isNot(same(tester.binding.pipelineOwner)));
 
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: View(
+    await tester.pumpWidget(
+      wrapWithView: false,
+      View(
         view: tester.view,
         deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner: tester.binding.pipelineOwner,
         deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView: tester.binding.renderView,
@@ -511,12 +514,6 @@ void main() {
     expect(child.debugCanParentUseSize, isTrue);
     expect(child.size, const Size(100, 200));
   });
-}
-
-Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, required  Widget widget}) {
-  tester.binding.attachRootWidget(widget);
-  tester.binding.scheduleFrame();
-  return tester.binding.pump();
 }
 
 class SpyRenderWidget extends SizedBox {

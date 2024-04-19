@@ -153,7 +153,7 @@ void main() {
       tabBarBox,
       paints
         ..line(
-          color: theme.colorScheme.surfaceVariant,
+          color: theme.colorScheme.outlineVariant,
           strokeWidth: 1.0,
         )
         ..rrect(color: theme.colorScheme.primary),
@@ -209,7 +209,7 @@ void main() {
       tabBarBox,
       paints
         ..line(
-          color: theme.colorScheme.surfaceVariant,
+          color: theme.colorScheme.outlineVariant,
           strokeWidth: 1.0,
         )
         ..line(color: theme.colorScheme.primary),
@@ -637,7 +637,7 @@ void main() {
       paints
         // Divider.
         ..line(
-          color: theme.colorScheme.surfaceVariant,
+          color: theme.colorScheme.outlineVariant,
           strokeWidth: 1.0,
         )
         // Tab indicator.
@@ -691,7 +691,7 @@ void main() {
       paints
         // Divider.
         ..line(
-          color: theme.colorScheme.surfaceVariant,
+          color: theme.colorScheme.outlineVariant,
           strokeWidth: 1.0,
         )
         // Tab indicator
@@ -973,8 +973,7 @@ void main() {
   });
 
   testWidgets(
-    "TabBarTheme's labelColor & unselectedLabelColor override labelStyle & unselectedLabelStyle colors",
-    (WidgetTester tester) async {
+    "TabBarTheme's labelColor & unselectedLabelColor override labelStyle & unselectedLabelStyle colors", (WidgetTester tester) async {
       const Color labelColor = Color(0xfff00000);
       const Color unselectedLabelColor = Color(0x95ff0000);
       const TextStyle labelStyle = TextStyle(

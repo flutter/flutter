@@ -117,7 +117,6 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
       }
     }
     super.onSingleTapUp(details);
-    _state._requestKeyboard();
     _state.widget.onTap?.call();
   }
 
@@ -163,6 +162,14 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 /// needed. This will ensure we discard any resources used by the object.
 ///
 /// {@macro flutter.widgets.editableText.showCaretOnScreen}
+///
+/// ## Scrolling Considerations
+///
+/// If this [CupertinoTextField] is not a descendant of [Scaffold] and is being
+/// used within a [Scrollable] or nested [Scrollable]s, consider placing a
+/// [ScrollNotificationObserver] above the root [Scrollable] that contains this
+/// [CupertinoTextField] to ensure proper scroll coordination for
+/// [CupertinoTextField] and its components like [TextSelectionOverlay].
 ///
 /// See also:
 ///
@@ -756,15 +763,14 @@ class CupertinoTextField extends StatefulWidget {
     );
   }
 
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
+  /// Configuration for the text field magnifier.
+  ///
+  /// By default (when this property is set to null), a [CupertinoTextMagnifier]
+  /// is used on mobile platforms, and nothing on desktop platforms. To suppress
+  /// the magnifier on all platforms, consider passing
+  /// [TextMagnifierConfiguration.disabled] explicitly.
   ///
   /// {@macro flutter.widgets.magnifier.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
-  ///
-  /// By default, builds a [CupertinoTextMagnifier] on iOS and Android nothing on all other
-  /// platforms. If it is desired to suppress the magnifier, consider passing
-  /// [TextMagnifierConfiguration.disabled].
   ///
   /// {@tool dartpad}
   /// This sample demonstrates how to customize the magnifier that this text field uses.

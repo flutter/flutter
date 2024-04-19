@@ -635,15 +635,6 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   }
 }
 
-/// Signature for the builder callback used by [AnimatedList].
-///
-/// This is deprecated, use the identical [AnimatedItemBuilder] instead.
-@Deprecated(
-  'Use AnimatedItemBuilder instead. '
-  'This feature was deprecated after v3.5.0-4.0.pre.',
-)
-typedef AnimatedListItemBuilder = Widget Function(BuildContext context, int index, Animation<double> animation);
-
 /// Signature for the builder callback used by [AnimatedList] & [AnimatedGrid] to
 /// build their animated children.
 ///
@@ -657,16 +648,6 @@ typedef AnimatedListItemBuilder = Widget Function(BuildContext context, int inde
 /// * [AnimatedRemovedItemBuilder], a builder that is for removing items with
 ///   animations instead of adding them.
 typedef AnimatedItemBuilder = Widget Function(BuildContext context, int index, Animation<double> animation);
-
-/// Signature for the builder callback used by [AnimatedListState.removeItem].
-///
-/// This is deprecated, use the identical [AnimatedRemovedItemBuilder]
-/// instead.
-@Deprecated(
-  'Use AnimatedRemovedItemBuilder instead. '
-  'This feature was deprecated after v3.5.0-4.0.pre.',
-)
-typedef AnimatedListRemovedItemBuilder = Widget Function(BuildContext context, Animation<double> animation);
 
 /// Signature for the builder callback used in [AnimatedListState.removeItem] and
 /// [AnimatedGridState.removeItem] to animate their children after they have

@@ -1023,7 +1023,7 @@ void main() {
 
     await tester.pumpWidget(
       buildTable(const ValueKey<int>(1)),
-      null, EnginePhase.build, // Children are not laid out!
+      phase: EnginePhase.build, // Children are not laid out!
     );
 
     await tester.pumpWidget(

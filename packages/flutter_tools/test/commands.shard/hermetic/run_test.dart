@@ -7,17 +7,13 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/android/android_device.dart';
-import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
@@ -26,9 +22,11 @@ import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/macos/macos_ipad_device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/compile.dart';
@@ -48,11 +46,13 @@ void main() {
   });
 
   group('run', () {
+    late BufferLogger logger;
     late TestDeviceManager testDeviceManager;
     late FileSystem fileSystem;
 
     setUp(() {
-      testDeviceManager = TestDeviceManager(logger: BufferLogger.test());
+      logger = BufferLogger.test();
+      testDeviceManager = TestDeviceManager(logger: logger);
       fileSystem = MemoryFileSystem.test();
     });
 
@@ -65,7 +65,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Logger: () => BufferLogger.test(),
+      Logger: () => logger,
     });
 
     testUsingContext('does not support --no-sound-null-safety by default', () async {
@@ -89,7 +89,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Logger: () => BufferLogger.test(),
+      Logger: () => logger,
     });
 
     testUsingContext('supports --no-sound-null-safety with an overridden NonNullSafeBuilds', () async {
@@ -109,7 +109,7 @@ void main() {
     }, overrides: <Type, Generator>{
       DeviceManager: () => testDeviceManager,
       FileSystem: () => fileSystem,
-      Logger: () => BufferLogger.test(),
+      Logger: () => logger,
       NonNullSafeBuilds: () => NonNullSafeBuilds.allowed,
       ProcessManager: () => FakeProcessManager.any(),
     });
@@ -137,7 +137,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Logger: () => BufferLogger.test(),
+      Logger: () => logger,
     });
 
     testUsingContext('Walks upward looking for a pubspec.yaml and succeeds if found', () async {
@@ -165,7 +165,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Logger: () => BufferLogger.test(),
+      Logger: () => logger,
     });
 
     testUsingContext('Walks upward looking for a pubspec.yaml and exits if missing', () async {
@@ -185,7 +185,7 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      Logger: () => BufferLogger.test(),
+      Logger: () => logger,
     });
 
     group('run app', () {
@@ -240,6 +240,62 @@ void main() {
         DeviceManager: () => testDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      });
+
+      testUsingContext('Using flutter run -d with MacOSDesignedForIPadDevices throws an error', () async {
+        final RunCommand command = RunCommand();
+        testDeviceManager.devices = <Device>[FakeMacDesignedForIpadDevice()];
+
+        await expectLater(
+              () => createTestCommandRunner(command).run(<String>[
+            'run',
+            '-d',
+            'mac-designed-for-ipad',
+              ]), throwsToolExit(message: 'Mac Designed for iPad is currently not supported for flutter run -d'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => testDeviceManager,
+        Stdio: () => FakeStdio(),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      });
+
+      testUsingContext('Using flutter run -d all with a single MacOSDesignedForIPadDevices throws a tool error', () async {
+        final RunCommand command = RunCommand();
+        testDeviceManager.devices = <Device>[FakeMacDesignedForIpadDevice()];
+
+        await expectLater(
+                () => createTestCommandRunner(command).run(<String>[
+              'run',
+              '-d',
+              'all',
+            ]), throwsToolExit(message: 'Mac Designed for iPad is currently not supported for flutter run -d'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => testDeviceManager,
+        Stdio: () => FakeStdio(),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      });
+
+      testUsingContext('Using flutter run -d all with MacOSDesignedForIPadDevices removes from device list, and attempts to launch', () async {
+        final RunCommand command = TestRunCommandThatOnlyValidates();
+        testDeviceManager.devices = <Device>[FakeMacDesignedForIpadDevice(), FakeDevice()];
+
+        await createTestCommandRunner(command).run(<String>[
+          'run',
+          '-d',
+          'all',
+        ]);
+
+        expect(command.devices?.length, 1);
+        expect(command.devices?.single.id, 'fake_device');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => testDeviceManager,
+        Stdio: () => FakeStdio(),
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       });
 
@@ -311,84 +367,6 @@ void main() {
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       });
 
-      testUsingContext('fails when v1 FlutterApplication is detected', () async {
-        fs.file('pubspec.yaml').createSync();
-        fs.file('android/AndroidManifest.xml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-              package="com.example.v1">
-             <application
-                  android:name="io.flutter.app.FlutterApplication">
-              </application>
-          </manifest>
-        ''', flush: true);
-        fs.file('.packages').writeAsStringSync('\n');
-        fs.file('lib/main.dart').createSync(recursive: true);
-        final AndroidDevice device = AndroidDevice('1234',
-          modelID: 'TestModel',
-          logger: testLogger,
-          platform: FakePlatform(),
-          androidSdk: FakeAndroidSdk(),
-          fileSystem: fs,
-          processManager: FakeProcessManager.any(),
-        );
-
-        testDeviceManager.devices = <Device>[device];
-
-        final RunCommand command = RunCommand();
-        await expectLater(createTestCommandRunner(command).run(<String>[
-          'run',
-          '--pub',
-        ]), throwsToolExit(message: 'Build failed due to use of deprecated Android v1 embedding.'));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager: () => testDeviceManager,
-        Stdio: () => FakeStdio(),
-        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      });
-
-      testUsingContext('fails when v1 metadata is detected', () async {
-        fs.file('pubspec.yaml').createSync();
-        fs.file('android/AndroidManifest.xml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-              package="com.example.v1">
-              <application >
-                <meta-data
-                    android:name="flutterEmbedding"
-                    android:value="1" />
-              </application>
-          </manifest>
-        ''', flush: true);
-        fs.file('.packages').writeAsStringSync('\n');
-        fs.file('lib/main.dart').createSync(recursive: true);
-        final AndroidDevice device = AndroidDevice('1234',
-          modelID: 'TestModel',
-          logger: testLogger,
-          platform: FakePlatform(),
-          androidSdk: FakeAndroidSdk(),
-          fileSystem: fs,
-          processManager: FakeProcessManager.any(),
-        );
-
-        testDeviceManager.devices = <Device>[device];
-
-        final RunCommand command = RunCommand();
-        await expectLater(createTestCommandRunner(command).run(<String>[
-          'run',
-          '--pub',
-        ]), throwsToolExit(message: 'Build failed due to use of deprecated Android v1 embedding.'));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-        DeviceManager: () => testDeviceManager,
-        Stdio: () => FakeStdio(),
-        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      });
-
       testUsingContext('shows unsupported devices when no supported devices are found',  () async {
         final RunCommand command = RunCommand();
         final FakeDevice mockDevice = FakeDevice(
@@ -419,7 +397,7 @@ void main() {
         expect(
           testLogger.statusText,
           containsIgnoringWhitespace(
-            userMessages.flutterMissPlatformProjects(
+            globals.userMessages.flutterMissPlatformProjects(
               Device.devicesPlatformTypes(<Device>[mockDevice]),
             ),
           ),
@@ -431,7 +409,7 @@ void main() {
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       });
 
-      testUsingContext('fails when --flavor is used with an unsupported target platform', () async {
+      testUsingContext('prints warning when --flavor is used with an unsupported target platform', () async {
         const List<String> runCommand = <String>[
           'run',
           '--no-pub',
@@ -440,24 +418,25 @@ void main() {
           '-d',
           'all',
         ];
-
         // Useful for test readability.
         // ignore: avoid_redundant_argument_values
         final FakeDevice deviceWithoutFlavorSupport = FakeDevice(supportsFlavors: false);
         final FakeDevice deviceWithFlavorSupport = FakeDevice(supportsFlavors: true);
         testDeviceManager.devices = <Device>[deviceWithoutFlavorSupport, deviceWithFlavorSupport];
 
-        await expectLater(
-          () => createTestCommandRunner(RunCommand()).run(runCommand),
-          throwsToolExit(
-            message: '--flavor is only supported for Android, macOS, and iOS devices.',
-          ),
-        );
+        await createTestCommandRunner(TestRunCommandThatOnlyValidates()).run(runCommand);
+
+        expect(logger.warningText, contains(
+          '--flavor is only supported for Android, macOS, and iOS devices. '
+          'Flavor-related features may not function properly and could '
+          'behave differently in a future release.'
+        ));
       }, overrides: <Type, Generator>{
         DeviceManager: () => testDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        Logger: () => logger,
       });
 
       testUsingContext('forwards --uninstall-only to DebuggingOptions', () async {
@@ -596,61 +575,6 @@ void main() {
       });
 
       group('--machine', () {
-        testUsingContext('enables multidex by default', () async {
-          final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
-          final FakeDevice device = FakeDevice();
-          testDeviceManager.devices = <Device>[device];
-
-          await expectLater(
-                () => createTestCommandRunner(command).run(<String>[
-              'run',
-              '--no-pub',
-              '--machine',
-              '-d',
-              device.id,
-            ]),
-            throwsToolExit(),
-          );
-          expect(command.appDomain.multidexEnabled, isTrue);
-        }, overrides: <Type, Generator>{
-          Artifacts: () => artifacts,
-          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-          DeviceManager: () => testDeviceManager,
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          Usage: () => usage,
-          Stdio: () => FakeStdio(),
-          Logger: () => AppRunLogger(parent: BufferLogger.test()),
-        });
-
-        testUsingContext('can disable multidex with --no-multidex', () async {
-          final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
-          final FakeDevice device = FakeDevice();
-          testDeviceManager.devices = <Device>[device];
-
-          await expectLater(
-                () => createTestCommandRunner(command).run(<String>[
-              'run',
-              '--no-pub',
-              '--no-multidex',
-              '--machine',
-              '-d',
-              device.id,
-            ]),
-            throwsToolExit(),
-          );
-          expect(command.appDomain.multidexEnabled, isFalse);
-        }, overrides: <Type, Generator>{
-          Artifacts: () => artifacts,
-          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-          DeviceManager: () => testDeviceManager,
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          Usage: () => usage,
-          Stdio: () => FakeStdio(),
-          Logger: () => AppRunLogger(parent: BufferLogger.test()),
-        });
-
         testUsingContext('can pass --device-user', () async {
           final DaemonCapturingRunCommand command = DaemonCapturingRunCommand();
           final FakeDevice device = FakeDevice(platformType: PlatformType.android);
@@ -677,7 +601,7 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Usage: () => usage,
           Stdio: () => FakeStdio(),
-          Logger: () => AppRunLogger(parent: BufferLogger.test()),
+          Logger: () => AppRunLogger(parent: logger),
         });
 
         testUsingContext('can disable devtools with --no-devtools', () async {
@@ -705,7 +629,7 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Usage: () => usage,
           Stdio: () => FakeStdio(),
-          Logger: () => AppRunLogger(parent: BufferLogger.test()),
+          Logger: () => AppRunLogger(parent: logger),
         });
       });
     });
@@ -1014,7 +938,7 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => BufferLogger.test(),
+        Logger: () => logger,
         DeviceManager: () => testDeviceManager,
       });
 
@@ -1035,7 +959,7 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => BufferLogger.test(),
+        Logger: () => logger,
         DeviceManager: () => testDeviceManager,
       });
 
@@ -1059,7 +983,37 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => BufferLogger.test(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      });
+
+      testUsingContext('throws a ToolExit when using --wasm on a non-web platform', () async {
+        final RunCommand command = RunCommand();
+        await expectLater(
+          () => createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub',
+            '--wasm',
+          ]), throwsToolExit(message: '--wasm is only supported on the web platform'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      });
+
+      testUsingContext('throws a ToolExit when using the skwasm renderer without --wasm', () async {
+        final RunCommand command = RunCommand();
+        await expectLater(
+          () => createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub',
+            '--web-renderer=skwasm',
+          ]), throwsToolExit(message: 'Skwasm renderer requires --wasm'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
         DeviceManager: () => testDeviceManager,
       });
 
@@ -1079,50 +1033,9 @@ void main() {
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => BufferLogger.test(),
+        Logger: () => logger,
         DeviceManager: () => testDeviceManager,
       });
-    });
-  });
-
-  group('dart-defines and web-renderer options', () {
-    late List<String> dartDefines;
-
-    setUp(() {
-      dartDefines = <String>[];
-    });
-
-    test('auto web-renderer with no dart-defines', () {
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.auto);
-      expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=true']);
-    });
-
-    test('canvaskit web-renderer with no dart-defines', () {
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.canvaskit);
-      expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=false','FLUTTER_WEB_USE_SKIA=true']);
-    });
-
-    test('html web-renderer with no dart-defines', () {
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.html);
-      expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=false','FLUTTER_WEB_USE_SKIA=false']);
-    });
-
-    test('auto web-renderer with existing dart-defines', () {
-      dartDefines = <String>['FLUTTER_WEB_USE_SKIA=false'];
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.auto);
-      expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=true']);
-    });
-
-    test('canvaskit web-renderer with no dart-defines', () {
-      dartDefines = <String>['FLUTTER_WEB_USE_SKIA=false'];
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.canvaskit);
-      expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=false','FLUTTER_WEB_USE_SKIA=true']);
-    });
-
-    test('html web-renderer with no dart-defines', () {
-      dartDefines = <String>['FLUTTER_WEB_USE_SKIA=true'];
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.html);
-      expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=false','FLUTTER_WEB_USE_SKIA=false']);
     });
   });
 
@@ -1261,6 +1174,7 @@ void main() {
       '--skia-deterministic-rendering',
       '--enable-embedder-api',
       '--ci',
+      '--debug-logs-dir=path/to/logs'
     ]), throwsToolExit());
 
     final DebuggingOptions options = await command.createDebuggingOptions(false);
@@ -1280,6 +1194,25 @@ void main() {
     expect(options.enableSoftwareRendering, true);
     expect(options.skiaDeterministicRendering, true);
     expect(options.usingCISystem, true);
+    expect(options.debugLogsDirectoryPath, 'path/to/logs');
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
+  testUsingContext('wasm mode selects skwasm renderer by default', () async {
+    final RunCommand command = RunCommand();
+    await expectLater(() => createTestCommandRunner(command).run(<String>[
+      'run',
+      '-d chrome',
+      '--wasm',
+    ]), throwsToolExit());
+
+    final DebuggingOptions options = await command.createDebuggingOptions(false);
+
+    expect(options.webUseWasm, true);
+    expect(options.webRenderer, WebRendererMode.skwasm);
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
@@ -1321,11 +1254,6 @@ class TestDeviceManager extends DeviceManager {
     devices.forEach(discoverer.addDevice);
     return <DeviceDiscovery>[discoverer];
   }
-}
-
-class FakeAndroidSdk extends Fake implements AndroidSdk {
-  @override
-  String get adbPath => 'adb';
 }
 
 class FakeDevice extends Fake implements Device {
@@ -1469,6 +1397,27 @@ class FakeDevice extends Fake implements Device {
   }
 }
 
+class FakeMacDesignedForIpadDevice extends Fake implements MacOSDesignedForIPadDevice {
+
+  @override
+  String get id => 'mac-designed-for-ipad';
+
+  @override
+  bool get isConnected => true;
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
+
+  @override
+  DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
+
+  @override
+  bool isSupported() => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject project) => true;
+}
+
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({
     this.connectionInterface = DeviceConnectionInterface.attached,
@@ -1535,6 +1484,9 @@ class TestRunCommandThatOnlyValidates extends RunCommand {
   Future<FlutterCommandResult> runCommand() async {
     return FlutterCommandResult.success();
   }
+
+  @override
+  bool get shouldRunPub => false;
 }
 
 class FakeResidentRunner extends Fake implements ResidentRunner {
@@ -1571,7 +1523,6 @@ class DaemonCapturingRunCommand extends RunCommand {
 class CapturingAppDomain extends AppDomain {
   CapturingAppDomain(super.daemon);
 
-  bool? multidexEnabled;
   String? userIdentifier;
   bool? enableDevTools;
 
@@ -1589,14 +1540,13 @@ class CapturingAppDomain extends AppDomain {
     String? packagesFilePath,
     String? dillOutputPath,
     bool ipv6 = false,
-    bool multidexEnabled = false,
     String? isolateFilter,
     bool machine = true,
     String? userIdentifier,
     bool enableDevTools = true,
     String? flavor,
+    HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
-    this.multidexEnabled = multidexEnabled;
     this.userIdentifier = userIdentifier;
     this.enableDevTools = enableDevTools;
     throwToolExit('');

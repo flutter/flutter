@@ -65,9 +65,11 @@ class BuildPreviewCommand extends BuildSubCommand {
     final Directory targetDir = fs.systemTempDirectory.createTempSync('flutter-build-preview');
     try {
       final FlutterProject flutterProject = await _createProject(targetDir);
+      // TODO(loic-sharma): Support windows-arm64 preview device, https://github.com/flutter/flutter/issues/139949.
       await buildWindows(
         flutterProject.windows,
         buildInfo,
+        TargetPlatform.windows_x64,
       );
 
       final File previewDevice = targetDir

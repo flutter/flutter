@@ -33,7 +33,7 @@ void main () {
       mockProject = FakeWindowsProject(cmakeFile, resourceFile);
     });
 
-    testWithoutContext('skipped if CMake file is missing', () {
+    testWithoutContext('skipped if CMake file is missing', () async {
       const String resourceFileContents = 'Hello world';
 
       resourceFile.writeAsStringSync(resourceFileContents);
@@ -41,7 +41,7 @@ void main () {
         mockProject,
         testLogger,
       );
-      migration.migrate();
+      await migration.migrate();
       expect(cmakeFile.existsSync(), isFalse);
       expect(resourceFile.existsSync(), isTrue);
 
@@ -50,7 +50,7 @@ void main () {
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('skipped if resource file is missing', () {
+    testWithoutContext('skipped if resource file is missing', () async {
       const String cmakeFileContents = 'Hello world';
 
       cmakeFile.writeAsStringSync(cmakeFileContents);
@@ -58,7 +58,7 @@ void main () {
         mockProject,
         testLogger,
       );
-      migration.migrate();
+      await migration.migrate();
       expect(cmakeFile.existsSync(), isTrue);
       expect(resourceFile.existsSync(), isFalse);
 
@@ -67,7 +67,7 @@ void main () {
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('skipped if nothing to migrate', () {
+    testWithoutContext('skipped if nothing to migrate', () async {
       const String cmakeFileContents = 'Nothing to migrate';
       const String resourceFileContents = 'Nothing to migrate';
 
@@ -81,7 +81,7 @@ void main () {
         mockProject,
         testLogger,
       );
-      versionMigration.migrate();
+      await versionMigration.migrate();
 
       expect(cmakeFile.lastModifiedSync(), cmakeUpdatedAt);
       expect(cmakeFile.readAsStringSync(), cmakeFileContents);
@@ -91,7 +91,7 @@ void main () {
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('skipped if already migrated', () {
+    testWithoutContext('skipped if already migrated', () async {
       const String cmakeFileContents =
         '# Apply the standard set of build settings. This can be removed for applications\n'
         '# that need different build settings.\n'
@@ -129,7 +129,7 @@ void main () {
         mockProject,
         testLogger,
       );
-      versionMigration.migrate();
+      await versionMigration.migrate();
 
       expect(cmakeFile.lastModifiedSync(), cmakeUpdatedAt);
       expect(cmakeFile.readAsStringSync(), cmakeFileContents);
@@ -139,7 +139,7 @@ void main () {
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('skipped if already migrated (CRLF)', () {
+    testWithoutContext('skipped if already migrated (CRLF)', () async {
       const String cmakeFileContents =
         '# Apply the standard set of build settings. This can be removed for applications\r\n'
         '# that need different build settings.\r\n'
@@ -177,7 +177,7 @@ void main () {
         mockProject,
         testLogger,
       );
-      versionMigration.migrate();
+      await versionMigration.migrate();
 
       expect(cmakeFile.lastModifiedSync(), cmakeUpdatedAt);
       expect(cmakeFile.readAsStringSync(), cmakeFileContents);
@@ -187,7 +187,7 @@ void main () {
       expect(testLogger.statusText, isEmpty);
     });
 
-    testWithoutContext('migrates project to set version information', () {
+    testWithoutContext('migrates project to set version information', () async {
       cmakeFile.writeAsStringSync(
         '# Apply the standard set of build settings. This can be removed for applications\n'
         '# that need different build settings.\n'
@@ -214,7 +214,7 @@ void main () {
         mockProject,
         testLogger,
       );
-      versionMigration.migrate();
+      await versionMigration.migrate();
 
       expect(cmakeFile.readAsStringSync(),
         '# Apply the standard set of build settings. This can be removed for applications\n'
@@ -249,7 +249,7 @@ void main () {
       expect(testLogger.statusText, contains('windows/runner/Runner.rc does not use Flutter version information, updating.'));
     });
 
-    testWithoutContext('migrates project to set version information (CRLF)', () {
+    testWithoutContext('migrates project to set version information (CRLF)', () async {
       cmakeFile.writeAsStringSync(
         '# Apply the standard set of build settings. This can be removed for applications\r\n'
         '# that need different build settings.\r\n'
@@ -276,7 +276,7 @@ void main () {
         mockProject,
         testLogger,
       );
-      versionMigration.migrate();
+      await versionMigration.migrate();
 
       expect(cmakeFile.readAsStringSync(),
         '# Apply the standard set of build settings. This can be removed for applications\r\n'

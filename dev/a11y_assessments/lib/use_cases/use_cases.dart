@@ -11,6 +11,7 @@ import 'date_picker.dart';
 import 'dialog.dart';
 import 'material_banner.dart';
 import 'navigation_bar.dart';
+import 'radio_list_tile.dart';
 import 'slider.dart';
 import 'text_button.dart';
 import 'text_field.dart';
@@ -34,4 +35,5 @@ final List<UseCase> useCases = <UseCase>[
   MaterialBannerUseCase(),
   NavigationBarUseCase(),
   TextButtonUseCase(),
+  RadioListTileUseCase(),
 ];

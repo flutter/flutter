@@ -150,5 +150,7 @@
   "menuDismissLabel": "Закрыць меню",
   "lookUpButtonLabel": "Знайсці",
   "searchWebButtonLabel": "Пошук у сетцы",
-  "shareButtonLabel": "Абагуліць..."
+  "shareButtonLabel": "Абагуліць...",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

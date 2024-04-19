@@ -16,20 +16,13 @@ class TestSpecs {
   int startTime;
   int? _endTime;
 
-  int get milliseconds {
-    return endTime - startTime;
-  }
+  int get milliseconds => endTime - startTime;
 
   set endTime(int value) {
     _endTime = value;
   }
 
-  int get endTime {
-    if (_endTime == null) {
-      return 0;
-    }
-    return _endTime!;
-  }
+  int get endTime => _endTime ?? 0;
 
   String toJson() {
     return json.encode(
@@ -56,7 +49,14 @@ class TestFileReporterResults {
     final List<String> errors = <String>[];
 
     for (final String metric in metrics.readAsLinesSync()) {
-      final Map<String, Object?> entry = json.decode(metric) as Map<String, Object?>;
+      /// Using print within a test adds the printed content to the json file report
+      /// as \u0000 making the file parsing step fail. The content of the json file
+      /// is expected to be a json dictionary per line and the following line removes
+      /// all the additional content at the beginning of the line until it finds the
+      /// first opening curly bracket.
+      // TODO(godofredoc): remove when https://github.com/flutter/flutter/issues/145553 is fixed.
+      final String sanitizedMetric = metric.replaceAll(RegExp(r'$.*{'), '{');
+      final Map<String, Object?> entry = json.decode(sanitizedMetric) as Map<String, Object?>;
       if (entry.containsKey('suite')) {
         final Map<String, Object?> suite = entry['suite']! as Map<String, Object?>;
         addTestSpec(suite, entry['time']! as int, testSpecs);

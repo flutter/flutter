@@ -10,11 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
 void onChanged<T>(T _) { }
-final Type dropdownButtonType = DropdownButton<String>(
-  onChanged: (_) { },
-  items: const <DropdownMenuItem<String>>[],
-).runtimeType;
-
 Finder _iconRichText(Key iconKey) {
   return find.descendant(
     of: find.byKey(iconKey),
@@ -234,7 +229,7 @@ void main() {
 
     expect(value, null); // disabledHint shown.
     final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
-    expect(hintEmptyLabel, const Offset(0.0, 12.0));
+    expect(hintEmptyLabel, const Offset(0.0, 8.0));
   });
 
   testWidgets('label position test - show disabledHint: enable + null item', (WidgetTester tester) async {
@@ -259,7 +254,7 @@ void main() {
 
     expect(value, null); // disabledHint shown.
     final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
-    expect(hintEmptyLabel, const Offset(0.0, 12.0));
+    expect(hintEmptyLabel, const Offset(0.0, 8.0));
   });
 
   testWidgets('label position test - show disabledHint: enable + empty item', (WidgetTester tester) async {
@@ -284,7 +279,7 @@ void main() {
 
     expect(value, null); // disabledHint shown.
     final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
-    expect(hintEmptyLabel, const Offset(0.0, 12.0));
+    expect(hintEmptyLabel, const Offset(0.0, 8.0));
   });
 
   testWidgets('label position test - show hint: enable + empty item', (WidgetTester tester) async {
@@ -309,7 +304,7 @@ void main() {
 
     expect(value, null); // hint shown.
     final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
-    expect(hintEmptyLabel, const Offset(0.0, 12.0));
+    expect(hintEmptyLabel, const Offset(0.0, 8.0));
   });
 
   testWidgets('label position test - no hint shown: enable + no selected + disabledHint', (WidgetTester tester) async {
@@ -347,7 +342,7 @@ void main() {
 
     expect(value, null);
     final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
-    expect(hintEmptyLabel, const Offset(0.0, 24.0));
+    expect(hintEmptyLabel, const Offset(0.0, 20.0));
   });
 
   testWidgets('label position test - show selected item: disabled + hint + disabledHint', (WidgetTester tester) async {
@@ -386,7 +381,7 @@ void main() {
 
     expect(value, 1);
     final Offset hintEmptyLabel = tester.getTopLeft(find.text('labelText'));
-    expect(hintEmptyLabel, const Offset(0.0, 12.0));
+    expect(hintEmptyLabel, const Offset(0.0, 8.0));
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/82910
@@ -566,8 +561,7 @@ void main() {
     }
   });
 
-  testWidgets('DropdownButtonFormField with isDense:true does not clip large scale text',
-      (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormField with isDense:true does not clip large scale text', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     const String value = 'two';
 
@@ -575,8 +569,9 @@ void main() {
       TestApp(
         textDirection: TextDirection.ltr,
         child: Builder(
-          builder: (BuildContext context) => MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+          builder: (BuildContext context) => MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: Material(
               child: Center(
                 child: DropdownButtonFormField<String>(
@@ -587,9 +582,11 @@ void main() {
                     return DropdownMenuItem<String>(
                       key: ValueKey<String>(item),
                       value: item,
-                      child: Text(item,
-                          key: ValueKey<String>('${item}Text'),
-                          style: const TextStyle(fontSize: 20.0)),
+                      child: Text(
+                        item,
+                        key: ValueKey<String>('${item}Text'),
+                        style: const TextStyle(fontSize: 20.0),
+                      ),
                     );
                   }).toList(),
                 ),
@@ -600,9 +597,8 @@ void main() {
       ),
     );
 
-    final RenderBox box =
-    tester.renderObject<RenderBox>(find.byType(dropdownButtonType));
-    expect(box.size.height, 72.0);
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(DropdownButton<String>));
+    expect(box.size.height, 64.0);
   });
 
   testWidgets('DropdownButtonFormField.isDense is true by default', (WidgetTester tester) async {
@@ -632,7 +628,7 @@ void main() {
       ),
     );
 
-    final RenderBox box = tester.renderObject<RenderBox>(find.byType(dropdownButtonType));
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(DropdownButton<String>));
     expect(box.size.height, 48.0);
   });
 
@@ -1076,7 +1072,7 @@ void main() {
     expect(find.text(currentValue), findsOneWidget);
 
     // Tap the DropdownButtonFormField widget
-    await tester.tap(find.byType(dropdownButtonType));
+    await tester.tap(find.byType(DropdownButton<String>));
     await tester.pumpAndSettle();
 
     // Tap the first dropdown menu item.
@@ -1277,5 +1273,38 @@ void main() {
     formKey.currentState!.reset();
     expect(value, equals('One'));
     expect(stateKey.currentState!.value, equals('One'));
+  });
+
+  testWidgets('DropdownButtonFormField with onChanged set to null does not throw on form reset', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/146335.
+    final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Form(
+            key: formKey,
+            child: DropdownButtonFormField<String>(
+              key: stateKey,
+              value: 'One',
+              items: <String>['One', 'Two', 'Free', 'Four']
+                .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+              }).toList(),
+              onChanged: null,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Reset the form.
+    formKey.currentState!.reset();
+
+    expect(tester.takeException(), isNull);
   });
 }

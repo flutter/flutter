@@ -544,6 +544,7 @@ abstract class CreateBase extends FlutterCommand {
       await generateLocalizationsSyntheticPackage(
         environment: environment,
         buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
       );
     }
     final List<SupportedPlatform> platformsForMigrateConfig = <SupportedPlatform>[SupportedPlatform.root];

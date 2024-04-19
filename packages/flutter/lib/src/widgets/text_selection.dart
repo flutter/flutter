@@ -21,6 +21,7 @@ import 'debug.dart';
 import 'editable_text.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'inherited_theme.dart';
 import 'magnifier.dart';
 import 'overlay.dart';
 import 'scrollable.dart';
@@ -448,7 +449,7 @@ class TextSelectionOverlay {
   void showToolbar() {
     _updateSelectionOverlay();
 
-    if (selectionControls is! TextSelectionHandleControls) {
+    if (selectionControls != null && selectionControls is! TextSelectionHandleControls) {
       _selectionOverlay.showToolbar();
       return;
     }
@@ -645,9 +646,6 @@ class TextSelectionOverlay {
     required Offset globalGesturePosition,
     required TextPosition currentTextPosition,
   }) {
-    final Offset globalRenderEditableTopLeft = renderEditable.localToGlobal(Offset.zero);
-    final Rect localCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
-
     final TextSelection lineAtOffset = renderEditable.getLineAtOffset(currentTextPosition);
     final TextPosition positionAtEndOfLine = TextPosition(
         offset: lineAtOffset.extentOffset,
@@ -659,43 +657,64 @@ class TextSelectionOverlay {
       offset: lineAtOffset.baseOffset,
     );
 
-    final Rect lineBoundaries = Rect.fromPoints(
+    final Rect localLineBoundaries = Rect.fromPoints(
       renderEditable.getLocalRectForCaret(positionAtBeginningOfLine).topCenter,
       renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomCenter,
     );
+    final RenderBox? overlay = Overlay.of(context, rootOverlay: true).context.findRenderObject() as RenderBox?;
+    final Matrix4 transformToOverlay = renderEditable.getTransformTo(overlay);
+    final Rect overlayLineBoundaries = MatrixUtils.transformRect(
+      transformToOverlay,
+      localLineBoundaries,
+    );
+
+    final Rect localCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
+    final Rect overlayCaretRect = MatrixUtils.transformRect(
+      transformToOverlay,
+      localCaretRect,
+    );
+
+    final Offset overlayGesturePosition = overlay?.globalToLocal(globalGesturePosition) ?? globalGesturePosition;
 
     return MagnifierInfo(
-      fieldBounds: globalRenderEditableTopLeft & renderEditable.size,
-      globalGesturePosition: globalGesturePosition,
-      caretRect: localCaretRect.shift(globalRenderEditableTopLeft),
-      currentLineBoundaries: lineBoundaries.shift(globalRenderEditableTopLeft),
+      fieldBounds: MatrixUtils.transformRect(transformToOverlay, renderEditable.paintBounds),
+      globalGesturePosition: overlayGesturePosition,
+      caretRect: overlayCaretRect,
+      currentLineBoundaries: overlayLineBoundaries,
     );
   }
 
-  // The contact position of the gesture at the current end handle location.
-  // Updated when the handle moves.
+  // The contact position of the gesture at the current end handle location, in
+  // global coordinates. Updated when the handle moves.
   late double _endHandleDragPosition;
 
   // The distance from _endHandleDragPosition to the center of the line that it
-  // corresponds to.
-  late double _endHandleDragPositionToCenterOfLine;
+  // corresponds to, in global coordinates.
+  late double _endHandleDragTarget;
 
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
     if (!renderObject.attached) {
       return;
     }
 
-    // This adjusts for the fact that the selection handles may not
-    // perfectly cover the TextPosition that they correspond to.
     _endHandleDragPosition = details.globalPosition.dy;
-    final Offset endPoint =
-        renderObject.localToGlobal(_selectionOverlay.selectionEndpoints.last.point);
-    final double centerOfLine = endPoint.dy - renderObject.preferredLineHeight / 2;
-    _endHandleDragPositionToCenterOfLine = centerOfLine - _endHandleDragPosition;
+
+    // Use local coordinates when dealing with line height. because in case of a
+    // scale transformation, the line height will also be scaled.
+    final double centerOfLineLocal = _selectionOverlay.selectionEndpoints.last.point.dy
+        - renderObject.preferredLineHeight / 2;
+    final double centerOfLineGlobal = renderObject.localToGlobal(
+      Offset(0.0, centerOfLineLocal),
+    ).dy;
+    _endHandleDragTarget = centerOfLineGlobal  - details.globalPosition.dy;
+    // Instead of finding the TextPosition at the handle's location directly,
+    // use the vertical center of the line that it points to. This is because
+    // selection handles typically hang above or below the line that they point
+    // to.
     final TextPosition position = renderObject.getPositionForPoint(
       Offset(
         details.globalPosition.dx,
-        centerOfLine,
+        centerOfLineGlobal,
       ),
     );
 
@@ -714,7 +733,17 @@ class TextSelectionOverlay {
   /// The handle jumps instantly between lines when the drag reaches a full
   /// line's height away from the original handle position. In other words, the
   /// line jump happens when the contact point would be located at the same
-  /// place on the handle at the new line as when the gesture started.
+  /// place on the handle at the new line as when the gesture started, for both
+  /// directions.
+  ///
+  /// This is not the same as just maintaining an offset from the target and the
+  /// contact point. There is no point at which moving the drag up and down a
+  /// small sub-line-height distance will cause the cursor to jump up and down
+  /// between lines. The drag distance must be a full line height for the cursor
+  /// to change lines, for both directions.
+  ///
+  /// Both parameters must be in local coordinates because the untransformed
+  /// line height is used, and the return value is in local coordinates as well.
   double _getHandleDy(double dragDy, double handleDy) {
     final double distanceDragged = dragDy - handleDy;
     final int dragDirection = distanceDragged < 0.0 ? -1 : 1;
@@ -728,13 +757,24 @@ class TextSelectionOverlay {
       return;
     }
 
-    _endHandleDragPosition = _getHandleDy(details.globalPosition.dy, _endHandleDragPosition);
-    final Offset adjustedOffset = Offset(
+    // This is NOT the same as details.localPosition. That is relative to the
+    // selection handle, whereas this is relative to the RenderEditable.
+    final Offset localPosition = renderObject.globalToLocal(details.globalPosition);
+
+    final double nextEndHandleDragPositionLocal = _getHandleDy(
+      localPosition.dy,
+      renderObject.globalToLocal(Offset(0.0, _endHandleDragPosition)).dy,
+    );
+    _endHandleDragPosition = renderObject.localToGlobal(
+      Offset(0.0, nextEndHandleDragPositionLocal),
+    ).dy;
+
+    final Offset handleTargetGlobal = Offset(
       details.globalPosition.dx,
-      _endHandleDragPosition + _endHandleDragPositionToCenterOfLine,
+      _endHandleDragPosition + _endHandleDragTarget,
     );
 
-    final TextPosition position = renderObject.getPositionForPoint(adjustedOffset);
+    final TextPosition position = renderObject.getPositionForPoint(handleTargetGlobal);
 
     if (_selection.isCollapsed) {
       _selectionOverlay.updateMagnifier(_buildMagnifier(
@@ -782,30 +822,37 @@ class TextSelectionOverlay {
     ));
   }
 
-  // The contact position of the gesture at the current start handle location.
-  // Updated when the handle moves.
+  // The contact position of the gesture at the current start handle location,
+  // in global coordinates. Updated when the handle moves.
   late double _startHandleDragPosition;
 
   // The distance from _startHandleDragPosition to the center of the line that
-  // it corresponds to.
-  late double _startHandleDragPositionToCenterOfLine;
+  // it corresponds to, in global coordinates.
+  late double _startHandleDragTarget;
 
   void _handleSelectionStartHandleDragStart(DragStartDetails details) {
     if (!renderObject.attached) {
       return;
     }
 
-    // This adjusts for the fact that the selection handles may not
-    // perfectly cover the TextPosition that they correspond to.
     _startHandleDragPosition = details.globalPosition.dy;
-    final Offset startPoint =
-        renderObject.localToGlobal(_selectionOverlay.selectionEndpoints.first.point);
-    final double centerOfLine = startPoint.dy - renderObject.preferredLineHeight / 2;
-    _startHandleDragPositionToCenterOfLine = centerOfLine - _startHandleDragPosition;
+
+    // Use local coordinates when dealing with line height. because in case of a
+    // scale transformation, the line height will also be scaled.
+    final double centerOfLineLocal = _selectionOverlay.selectionEndpoints.first.point.dy
+        - renderObject.preferredLineHeight / 2;
+    final double centerOfLineGlobal = renderObject.localToGlobal(
+      Offset(0.0, centerOfLineLocal),
+    ).dy;
+    _startHandleDragTarget = centerOfLineGlobal - details.globalPosition.dy;
+    // Instead of finding the TextPosition at the handle's location directly,
+    // use the vertical center of the line that it points to. This is because
+    // selection handles typically hang above or below the line that they point
+    // to.
     final TextPosition position = renderObject.getPositionForPoint(
       Offset(
         details.globalPosition.dx,
-        centerOfLine,
+        centerOfLineGlobal,
       ),
     );
 
@@ -823,12 +870,21 @@ class TextSelectionOverlay {
       return;
     }
 
-    _startHandleDragPosition = _getHandleDy(details.globalPosition.dy, _startHandleDragPosition);
-    final Offset adjustedOffset = Offset(
-      details.globalPosition.dx,
-      _startHandleDragPosition + _startHandleDragPositionToCenterOfLine,
+    // This is NOT the same as details.localPosition. That is relative to the
+    // selection handle, whereas this is relative to the RenderEditable.
+    final Offset localPosition = renderObject.globalToLocal(details.globalPosition);
+    final double nextStartHandleDragPositionLocal = _getHandleDy(
+      localPosition.dy,
+      renderObject.globalToLocal(Offset(0.0, _startHandleDragPosition)).dy,
     );
-    final TextPosition position = renderObject.getPositionForPoint(adjustedOffset);
+    _startHandleDragPosition = renderObject.localToGlobal(
+      Offset(0.0, nextStartHandleDragPositionLocal),
+    ).dy;
+    final Offset handleTargetGlobal = Offset(
+      details.globalPosition.dx,
+      _startHandleDragPosition + _startHandleDragTarget,
+    );
+    final TextPosition position = renderObject.getPositionForPoint(handleTargetGlobal);
 
     if (_selection.isCollapsed) {
       _selectionOverlay.updateMagnifier(_buildMagnifier(
@@ -912,12 +968,10 @@ class TextSelectionOverlay {
       return TextSelectionHandleType.collapsed;
     }
 
-    switch (textDirection) {
-      case TextDirection.ltr:
-        return ltrType;
-      case TextDirection.rtl:
-        return rtlType;
-    }
+    return switch (textDirection) {
+      TextDirection.ltr => ltrType,
+      TextDirection.rtl => rtlType,
+    };
   }
 }
 
@@ -988,19 +1042,18 @@ class SelectionOverlay {
   final ValueNotifier<MagnifierInfo> _magnifierInfo =
       ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
 
-  /// [MagnifierController.show] and [MagnifierController.hide] should not be called directly, except
-  /// from inside [showMagnifier] and [hideMagnifier]. If it is desired to show or hide the magnifier,
-  /// call [showMagnifier] or [hideMagnifier]. This is because the magnifier needs to orchestrate
-  /// with other properties in [SelectionOverlay].
+  // [MagnifierController.show] and [MagnifierController.hide] should not be
+  // called directly, except from inside [showMagnifier] and [hideMagnifier]. If
+  // it is desired to show or hide the magnifier, call [showMagnifier] or
+  // [hideMagnifier]. This is because the magnifier needs to orchestrate with
+  // other properties in [SelectionOverlay].
   final MagnifierController _magnifierController = MagnifierController();
 
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.intro}
+  /// The configuration for the magnifier.
   ///
   /// By default, [SelectionOverlay]'s [TextMagnifierConfiguration] is disabled.
   ///
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
+  /// {@macro flutter.widgets.magnifier.intro}
   final TextMagnifierConfiguration magnifierConfiguration;
 
   /// {@template flutter.widgets.SelectionOverlay.toolbarIsVisible}
@@ -1046,11 +1099,12 @@ class SelectionOverlay {
     }
 
     _magnifierController.show(
-        context: context,
-        below: magnifierConfiguration.shouldDisplayHandlesInMagnifier
-            ? null
-            : _handles?.start,
-        builder: (_) => builtMagnifier);
+      context: context,
+      below: magnifierConfiguration.shouldDisplayHandlesInMagnifier
+          ? null
+          : _handles?.start,
+      builder: (_) => builtMagnifier,
+    );
   }
 
   /// {@template flutter.widgets.SelectionOverlay.hideMagnifier}
@@ -1375,12 +1429,22 @@ class SelectionOverlay {
       return;
     }
 
-    _handles = (
-      start: OverlayEntry(builder: _buildStartHandle),
-      end: OverlayEntry(builder: _buildEndHandle),
+    final OverlayState overlay = Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor);
+
+    final CapturedThemes capturedThemes = InheritedTheme.capture(
+      from: context,
+      to: overlay.context,
     );
-    Overlay.of(context, rootOverlay: true, debugRequiredFor: debugRequiredFor)
-        .insertAll(<OverlayEntry>[_handles!.start, _handles!.end]);
+
+    _handles = (
+      start: OverlayEntry(builder: (BuildContext context) {
+        return capturedThemes.wrap(_buildStartHandle(context));
+      }),
+      end: OverlayEntry(builder: (BuildContext context) {
+        return capturedThemes.wrap(_buildEndHandle(context));
+      }),
+    );
+    overlay.insertAll(<OverlayEntry>[_handles!.start, _handles!.end]);
   }
 
   /// {@template flutter.widgets.SelectionOverlay.hideHandles}
@@ -1421,6 +1485,7 @@ class SelectionOverlay {
       context: context,
       contextMenuBuilder: (BuildContext context) {
         return _SelectionToolbarWrapper(
+          visibility: toolbarVisible,
           layerLink: toolbarLayerLink,
           offset: -renderBox.localToGlobal(Offset.zero),
           child: contextMenuBuilder(context),
@@ -1498,13 +1563,7 @@ class SelectionOverlay {
   /// {@endtemplate}
   void hide() {
     _magnifierController.hide();
-    if (_handles != null) {
-      _handles!.start.remove();
-      _handles!.start.dispose();
-      _handles!.end.remove();
-      _handles!.end.dispose();
-      _handles = null;
-    }
+    hideHandles();
     if (_toolbar != null || _contextMenuController.isShown || _spellCheckToolbarController.isShown) {
       hideToolbar();
     }
@@ -2131,6 +2190,14 @@ class TextSelectionGestureDetectorBuilder {
         : scrollableState.position.pixels;
   }
 
+  AxisDirection? get _scrollDirection {
+    final ScrollableState? scrollableState =
+        delegate.editableTextKey.currentContext == null
+            ? null
+            : Scrollable.maybeOf(delegate.editableTextKey.currentContext!);
+    return scrollableState?.axisDirection;
+  }
+
   // For a shift + tap + drag gesture, the TextSelection at the point of the
   // tap. Mac uses this value to reset to the original selection when an
   // inversion of the base and offset happens.
@@ -2215,8 +2282,6 @@ class TextSelectionGestureDetectorBuilder {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        // On mobile platforms the selection is set on tap up.
-        editableText.hideToolbar(false);
       case TargetPlatform.iOS:
         // On mobile platforms the selection is set on tap up.
         break;
@@ -2339,6 +2404,7 @@ class TextSelectionGestureDetectorBuilder {
           break;
           // On desktop platforms the selection is set on tap down.
         case TargetPlatform.android:
+          editableText.hideToolbar(false);
           if (isShiftPressedValid) {
             _extendSelection(details.globalPosition, SelectionChangedCause.tap);
             return;
@@ -2346,6 +2412,7 @@ class TextSelectionGestureDetectorBuilder {
           renderEditable.selectPosition(cause: SelectionChangedCause.tap);
           editableText.showSpellCheckSuggestionsToolbar();
         case TargetPlatform.fuchsia:
+          editableText.hideToolbar(false);
           if (isShiftPressedValid) {
             _extendSelection(details.globalPosition, SelectionChangedCause.tap);
             return;
@@ -2417,6 +2484,7 @@ class TextSelectionGestureDetectorBuilder {
           }
       }
     }
+    editableText.requestKeyboard();
   }
 
   /// Handler for [TextSelectionGestureDetector.onSingleTapCancel].
@@ -2497,9 +2565,11 @@ class TextSelectionGestureDetectorBuilder {
       final Offset editableOffset = renderEditable.maxLines == 1
           ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
           : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
+      final double effectiveScrollPosition = _scrollPosition - _dragStartScrollOffset;
+      final bool scrollingOnVerticalAxis = _scrollDirection == AxisDirection.up || _scrollDirection == AxisDirection.down;
       final Offset scrollableOffset = Offset(
-        0.0,
-        _scrollPosition - _dragStartScrollOffset,
+        !scrollingOnVerticalAxis ? effectiveScrollPosition : 0.0,
+        scrollingOnVerticalAxis ? effectiveScrollPosition : 0.0,
       );
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
@@ -2796,7 +2866,7 @@ class TextSelectionGestureDetectorBuilder {
             case PointerDeviceKind.invertedStylus:
             case PointerDeviceKind.touch:
             case PointerDeviceKind.unknown:
-              // For Android, Fucshia, and iOS platforms, a touch drag
+              // For Android, Fuchsia, and iOS platforms, a touch drag
               // does not initiate unless the editable has focus.
               if (renderEditable.hasFocus) {
                 renderEditable.selectPositionAt(
@@ -2838,9 +2908,11 @@ class TextSelectionGestureDetectorBuilder {
       final Offset editableOffset = renderEditable.maxLines == 1
           ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
           : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
+      final double effectiveScrollPosition = _scrollPosition - _dragStartScrollOffset;
+      final bool scrollingOnVerticalAxis = _scrollDirection == AxisDirection.up || _scrollDirection == AxisDirection.down;
       final Offset scrollableOffset = Offset(
-        0.0,
-        _scrollPosition - _dragStartScrollOffset,
+        !scrollingOnVerticalAxis ? effectiveScrollPosition : 0.0,
+        scrollingOnVerticalAxis ? effectiveScrollPosition : 0.0,
       );
       final Offset dragStartGlobalPosition = details.globalPosition - details.offsetFromOrigin;
 

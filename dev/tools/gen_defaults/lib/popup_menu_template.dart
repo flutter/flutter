@@ -23,6 +23,7 @@ class _${blockName}DefaultsM3 extends PopupMenuThemeData {
 
   @override MaterialStateProperty<TextStyle?>? get labelTextStyle {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    // TODO(quncheng): Update this hard-coded value to use the latest tokens.
     final TextStyle style = _textTheme.labelLarge!;
       if (states.contains(MaterialState.disabled)) {
         return style.apply(color: ${componentColor('md.comp.list.list-item.disabled.label-text')});
@@ -38,7 +39,7 @@ class _${blockName}DefaultsM3 extends PopupMenuThemeData {
   Color? get shadowColor => ${color("md.comp.menu.container.shadow-color")};
 
   @override
-  Color? get surfaceTintColor => ${color("md.comp.menu.container.surface-tint-layer.color")};
+  Color? get surfaceTintColor => ${colorOrTransparent("md.comp.menu.container.surface-tint-layer.color")};
 
   @override
   ShapeBorder? get shape => ${shape("md.comp.menu.container")};

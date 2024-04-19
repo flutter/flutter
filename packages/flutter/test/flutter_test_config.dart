@@ -10,7 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart'
+import '_goldens_io.dart' if (dart.library.js_interop) '_goldens_web.dart'
     as flutter_goldens;
 
 /// If true, leak tracking is enabled for all `testWidgets`.
@@ -20,7 +20,7 @@ import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart'
 /// `--dart-define LEAK_TRACKING=true` or invoke `export LEAK_TRACKING=true`.
 ///
 /// See documentation for [testWidgets] on how to except individual tests.
-bool isLeakTrackingEnabled() {
+bool _isLeakTrackingEnabled() {
   if (kIsWeb) {
     return false;
   }
@@ -41,7 +41,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
   // receive the event.
   WidgetController.hitTestWarningShouldBeFatal = true;
 
-  if (isLeakTrackingEnabled()) {
+  if (_isLeakTrackingEnabled()) {
     LeakTesting.enable();
 
     LeakTracking.warnForUnsupportedPlatforms = false;
@@ -49,6 +49,10 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
     LeakTesting.settings = LeakTesting.settings.withIgnored(
       createdByTestHelpers: true,
       allNotGCed: true,
+      classes: <String>[
+        // TODO(polina-c): CurvedAnimation is leaking, https://github.com/flutter/flutter/issues/145600 [leaks-to-clean]
+        'CurvedAnimation',
+      ],
     );
   }
 

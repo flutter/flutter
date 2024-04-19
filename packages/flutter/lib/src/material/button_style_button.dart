@@ -11,10 +11,45 @@ import 'package:flutter/widgets.dart';
 import 'button_style.dart';
 import 'colors.dart';
 import 'constants.dart';
+import 'elevated_button.dart';
+import 'filled_button.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_state.dart';
+import 'outlined_button.dart';
+import 'text_button.dart';
 import 'theme_data.dart';
+
+/// {@template flutter.material.ButtonStyleButton.iconAlignment}
+/// Determines the alignment of the icon within the widgets such as:
+///   - [ElevatedButton.icon],
+///   - [FilledButton.icon],
+///   - [FilledButton.tonalIcon].
+///   - [OutlinedButton.icon],
+///   - [TextButton.icon],
+///
+/// The effect of `iconAlignment` depends on [TextDirection]. If textDirection is
+/// [TextDirection.ltr] then [IconAlignment.start] and [IconAlignment.end] align the
+/// icon on the left or right respectively.  If textDirection is [TextDirection.rtl] the
+/// the alignments are reversed.
+///
+/// Defaults to [IconAlignment.start].
+///
+/// {@tool dartpad}
+/// This sample demonstrates how to use `iconAlignment` to align the button icon to the start
+/// or the end of the button.
+///
+/// ** See code in examples/api/lib/material/button_style_button/button_style_button.icon_alignment.0.dart **
+/// {@end-tool}
+///
+/// {@endtemplate}
+enum IconAlignment {
+  /// The icon is placed at the start of the button.
+  start,
+
+  /// The icon is placed at the end of the button.
+  end,
+}
 
 /// The base [StatefulWidget] class for buttons whose style is defined by a [ButtonStyle] object.
 ///
@@ -44,6 +79,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
     this.statesController,
     this.isSemanticButton = true,
     required this.child,
+    this.iconAlignment = IconAlignment.start,
   });
 
   /// Called when the button is tapped or otherwise activated.
@@ -89,8 +125,10 @@ abstract class ButtonStyleButton extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none].
-  final Clip clipBehavior;
+  /// Defaults to [Clip.none] unless [ButtonStyle.backgroundBuilder] or
+  /// [ButtonStyle.foregroundBuilder] is specified. In those
+  /// cases the default is [Clip.antiAlias].
+  final Clip? clipBehavior;
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
@@ -114,6 +152,9 @@ abstract class ButtonStyleButton extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
+
+  /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
+  final IconAlignment iconAlignment;
 
   /// Returns a non-null [ButtonStyle] that's based primarily on the [Theme]'s
   /// [ThemeData.textTheme] and [ThemeData.colorScheme].
@@ -318,6 +359,11 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final AlignmentGeometry? resolvedAlignment = effectiveValue((ButtonStyle? style) => style?.alignment);
     final Offset densityAdjustment = resolvedVisualDensity!.baseSizeAdjustment;
     final InteractiveInkFeatureFactory? resolvedSplashFactory = effectiveValue((ButtonStyle? style) => style?.splashFactory);
+    final ButtonLayerBuilder? resolvedBackgroundBuilder = effectiveValue((ButtonStyle? style) => style?.backgroundBuilder);
+    final ButtonLayerBuilder? resolvedForegroundBuilder = effectiveValue((ButtonStyle? style) => style?.foregroundBuilder);
+
+    final Clip effectiveClipBehavior = widget.clipBehavior
+      ?? ((resolvedBackgroundBuilder ?? resolvedForegroundBuilder) != null ? Clip.antiAlias : Clip.none);
 
     BoxConstraints effectiveConstraints = resolvedVisualDensity.effectiveConstraints(
       BoxConstraints(
@@ -384,6 +430,21 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     elevation = resolvedElevation;
     backgroundColor = resolvedBackgroundColor;
 
+    Widget effectiveChild = Padding(
+      padding: padding,
+      child: Align(
+        alignment: resolvedAlignment!,
+        widthFactor: 1.0,
+        heightFactor: 1.0,
+        child: resolvedForegroundBuilder != null
+          ? resolvedForegroundBuilder(context, statesController.value, widget.child)
+          : widget.child,
+      ),
+    );
+    if (resolvedBackgroundBuilder != null) {
+      effectiveChild = resolvedBackgroundBuilder(context, statesController.value, effectiveChild);
+    }
+
     final Widget result = ConstrainedBox(
       constraints: effectiveConstraints,
       child: Material(
@@ -395,7 +456,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
         surfaceTintColor: resolvedSurfaceTintColor,
         type: resolvedBackgroundColor == null ? MaterialType.transparency : MaterialType.button,
         animationDuration: resolvedAnimationDuration,
-        clipBehavior: widget.clipBehavior,
+        clipBehavior: effectiveClipBehavior,
         child: InkWell(
           onTap: widget.onPressed,
           onLongPress: widget.onLongPress,
@@ -413,15 +474,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
           statesController: statesController,
           child: IconTheme.merge(
             data: IconThemeData(color: resolvedIconColor ?? resolvedForegroundColor, size: resolvedIconSize),
-            child: Padding(
-              padding: padding,
-              child: Align(
-                alignment: resolvedAlignment!,
-                widthFactor: 1.0,
-                heightFactor: 1.0,
-                child: widget.child,
-              ),
-            ),
+            child: effectiveChild,
           ),
         ),
       ),
@@ -549,6 +602,20 @@ class _RenderInputPadding extends RenderShiftedBox {
       constraints: constraints,
       layoutChild: ChildLayoutHelper.dryLayoutChild,
     );
+  }
+
+  @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    final double? result = child.getDryBaseline(constraints, baseline);
+    if (result == null) {
+      return null;
+    }
+    final Size childSize = child.getDryLayout(constraints);
+    return result + Alignment.center.alongOffset(getDryLayout(constraints) - childSize as Offset).dy;
   }
 
   @override

@@ -17,8 +17,25 @@ pluginManagement {
     settings.ext.flutterSdkPath = flutterSdkPath()
 
     includeBuild("${settings.ext.flutterSdkPath}/packages/flutter_tools/gradle")
+
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+buildscript {
+    dependencyLocking {
+        lockFile = file("${rootProject.projectDir}/buildscript-gradle.lockfile")
+        lockAllConfigurations()
+    }
+}
+
+plugins {
+    id "dev.flutter.flutter-plugin-loader" version "1.0.0"
+    id "com.android.application" version "8.1.0" apply false
+    id "org.jetbrains.kotlin.android" version "1.7.10" apply false
 }
 
 include ":app"
-
-apply from: "${settings.ext.flutterSdkPath}/packages/flutter_tools/gradle/app_plugin_loader.gradle"

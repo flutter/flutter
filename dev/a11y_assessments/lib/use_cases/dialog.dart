@@ -29,7 +29,6 @@ class _MainWidget extends StatelessWidget {
       ),
       body: Center(
         child: TextButton(
-          autofocus: true,
           onPressed: () => showDialog<String>(
             context: context,
             builder: (BuildContext context) => Dialog(
@@ -41,12 +40,21 @@ class _MainWidget extends StatelessWidget {
                   children: <Widget>[
                     const Text('This is a typical dialog.'),
                     const SizedBox(height: 15),
-                    TextButton(
-                      autofocus: true,
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Close'),
+                    Row(
+                      children: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('OK'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Cancel'),
+                        ),
+                      ],
                     ),
                   ],
                 ),

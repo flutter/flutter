@@ -329,8 +329,7 @@ void main() {
     expect(paint.color, const Color(0x7F000000)); // 0.5 opacity
     expect(paint.filterQuality, FilterQuality.high);
     expect(paint.isAntiAlias, true);
-    // TODO(craiglabenz): change to true when https://github.com/flutter/flutter/issues/88909 is fixed
-    expect(paint.invertColors, !kIsWeb || isCanvasKit);
+    expect(paint.invertColors, isTrue);
   });
 
   test('DecorationImage.toString', () async {
@@ -813,4 +812,17 @@ void main() {
 
     info.dispose();
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
+
+  test('BoxShadow.copyWith', () {
+    expect(const BoxShadow(), isNot(const BoxShadow(color: Color(0xFF112233))));
+    expect(const BoxShadow().copyWith(color: const Color(0xFF112233)), const BoxShadow(color: Color(0xFF112233)));
+    expect(const BoxShadow(), isNot(const BoxShadow(offset: Offset(1.0, 2.0))));
+    expect(const BoxShadow().copyWith(offset: const Offset(1.0, 2.0)), const BoxShadow(offset: Offset(1.0, 2.0)));
+    expect(const BoxShadow(), isNot(const BoxShadow(blurRadius: 123.0)));
+    expect(const BoxShadow().copyWith(blurRadius: 123.0), const BoxShadow(blurRadius: 123.0));
+    expect(const BoxShadow(), isNot(const BoxShadow(spreadRadius: 123.0)));
+    expect(const BoxShadow().copyWith(spreadRadius: 123.0), const BoxShadow(spreadRadius: 123.0));
+    expect(const BoxShadow(), isNot(const BoxShadow(blurStyle: BlurStyle.outer)));
+    expect(const BoxShadow().copyWith(blurStyle: BlurStyle.outer), const BoxShadow(blurStyle: BlurStyle.outer));
+  });
 }

@@ -233,7 +233,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return Theme(
-              data: Theme.of(context).copyWith(bottomAppBarColor: const Color(0xffffff00)),
+              data: Theme.of(context).copyWith(bottomAppBarTheme: const BottomAppBarTheme(color: Color(0xffffff00))),
               child: const Scaffold(
                 floatingActionButton: FloatingActionButton(
                   onPressed: null,
@@ -259,7 +259,7 @@ void main() {
         home: Builder(
           builder: (BuildContext context) {
             return Theme(
-              data: Theme.of(context).copyWith(bottomAppBarColor: const Color(0xffffff00)),
+              data: Theme.of(context).copyWith(bottomAppBarTheme: const BottomAppBarTheme(color: Color(0xffffff00))),
               child: const Scaffold(
                 floatingActionButton: FloatingActionButton(
                   onPressed: null,
@@ -287,7 +287,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.light(useMaterial3: true).copyWith(
-          bottomAppBarColor: const Color(0xffffff00),
+          bottomAppBarTheme: const BottomAppBarTheme(color: Color(0xffffff00)),
         ),
         home: Builder(
           builder: (BuildContext context) {
@@ -358,7 +358,7 @@ void main() {
         theme: ThemeData.from(useMaterial3: true, colorScheme: colorScheme),
         home: Scaffold(
           bottomNavigationBar: BottomAppBar(
-            color: colorScheme.surface,
+            color: colorScheme.surfaceContainer,
           ),
         ),
       ),
@@ -367,8 +367,9 @@ void main() {
     final PhysicalShape physicalShape = tester.widget(find.byType(PhysicalShape).at(0));
 
     const double elevation = 3.0; // Default for M3.
-    final Color overlayColor = ElevationOverlay.applySurfaceTint(colorScheme.surface, colorScheme.surfaceTint, elevation);
-    expect(physicalShape.color, overlayColor);
+    final Color overlayColor = ElevationOverlay.applySurfaceTint(colorScheme.surfaceContainer, colorScheme.surfaceTint, elevation);
+    expect(physicalShape.color, isNot(overlayColor));
+    expect(physicalShape.color, colorScheme.surfaceContainer);
   });
 
   // This is a regression test for a bug we had where toggling the notch on/off

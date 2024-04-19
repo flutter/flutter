@@ -4,7 +4,6 @@
 
 import groovy.json.JsonSlurper
 
-@Singleton
 class NativePluginLoader {
 
     // This string must match _kFlutterPluginsHasNativeBuildKey defined in
@@ -116,5 +115,5 @@ class NativePluginLoader {
 
 // TODO(135392): Remove and use declarative form when migrated
 ext {
-    nativePluginLoader = NativePluginLoader.instance
+    nativePluginLoader = new NativePluginLoader()
 }

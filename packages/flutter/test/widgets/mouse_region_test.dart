@@ -1836,7 +1836,8 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/67044
-  testWidgets('Handle mouse events should ignore the detached MouseTrackerAnnotation', (WidgetTester tester) async {
+  testWidgets('Handle mouse events should ignore the detached MouseTrackerAnnotation',
+  (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Center(
         child: Draggable<int>(
@@ -1862,6 +1863,9 @@ void main() {
 
     // Continue drag mouse should not trigger any assert.
     await gesture.moveBy(const Offset(10.0, 10.0));
+
+     // Dispose gesture
+    await gesture.cancel();
     expect(tester.takeException(), isNull);
   });
 }

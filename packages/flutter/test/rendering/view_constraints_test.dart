@@ -13,9 +13,9 @@ void main() {
       ..physicalConstraints = ViewConstraints.tight(const Size(1008.0, 2198.0))
       ..devicePixelRatio = 1.912500023841858;
 
-    await pumpWidgetWithoutViewWrapper(
-      tester: tester,
-      widget: View(
+    await tester.pumpWidget(
+      wrapWithView: false,
+      View(
         view: view,
         child: const SizedBox(),
       ),
@@ -34,10 +34,4 @@ class FlutterViewSpy extends TestFlutterView  {
   void render(Scene scene, {Size? size}) {
     sizes.add(size);
   }
-}
-
-Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, required  Widget widget}) {
-  tester.binding.attachRootWidget(widget);
-  tester.binding.scheduleFrame();
-  return tester.binding.pump();
 }

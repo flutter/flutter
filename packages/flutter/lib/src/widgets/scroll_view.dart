@@ -24,7 +24,6 @@ import 'scrollable.dart';
 import 'scrollable_helpers.dart';
 import 'sliver.dart';
 import 'sliver_prototype_extent_list.dart';
-import 'sliver_varied_extent_list.dart';
 import 'viewport.dart';
 
 // Examples can assume:
@@ -1505,6 +1504,9 @@ class ListView extends BoxScrollView {
   ///
   /// This will be called multiple times during the layout phase of a frame to find
   /// the items that should be loaded by the lazy loading process.
+  ///
+  /// Should return null if asked to build an item extent with a greater index than
+  /// exists.
   ///
   /// Unlike [itemExtent] or [prototypeItem], this allows children to have
   /// different extents.

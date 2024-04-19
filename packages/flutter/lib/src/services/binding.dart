@@ -205,20 +205,15 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   // This is run in another isolate created by _addLicenses above.
   static List<LicenseEntry> _parseLicenses(String rawLicenses) {
     final String licenseSeparator = '\n${'-' * 80}\n';
-    final List<LicenseEntry> result = <LicenseEntry>[];
-    final List<String> licenses = rawLicenses.split(licenseSeparator);
-    for (final String license in licenses) {
-      final int split = license.indexOf('\n\n');
-      if (split >= 0) {
-        result.add(LicenseEntryWithLineBreaks(
-          license.substring(0, split).split('\n'),
-          license.substring(split + 2),
-        ));
-      } else {
-        result.add(LicenseEntryWithLineBreaks(const <String>[], license));
-      }
-    }
-    return result;
+    return <LicenseEntry>[
+      for (final String license in rawLicenses.split(licenseSeparator))
+        if (license.indexOf('\n\n') case final int split when split >= 0)
+          LicenseEntryWithLineBreaks(
+            license.substring(0, split).split('\n'),
+            license.substring(split + 2),
+          )
+        else LicenseEntryWithLineBreaks(const <String>[], license),
+    ];
   }
 
   @override
@@ -289,12 +284,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     if (previousState == state) {
       return const <AppLifecycleState>[];
     }
-    if (previousState == AppLifecycleState.paused && state == AppLifecycleState.detached) {
-      // Handle the wrap-around from paused to detached
-      return const <AppLifecycleState>[
-        AppLifecycleState.detached,
-      ];
-    }
     final List<AppLifecycleState> stateChanges = <AppLifecycleState>[];
     if (previousState == null) {
       // If there was no previous state, just jump directly to the new state.
@@ -304,7 +293,12 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
       final int stateIndex = AppLifecycleState.values.indexOf(state);
       assert(previousStateIndex != -1, 'State $previousState missing in stateOrder array');
       assert(stateIndex != -1, 'State $state missing in stateOrder array');
-      if (previousStateIndex > stateIndex) {
+      if (state == AppLifecycleState.detached) {
+        for (int i = previousStateIndex + 1; i < AppLifecycleState.values.length; ++i) {
+          stateChanges.add(AppLifecycleState.values[i]);
+        }
+        stateChanges.add(AppLifecycleState.detached);
+      } else if (previousStateIndex > stateIndex) {
         for (int i = stateIndex; i < previousStateIndex; ++i) {
           stateChanges.insert(0, AppLifecycleState.values[i]);
         }
@@ -336,30 +330,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
       // Any transition to itself shouldn't happen.
       return false;
     }
-    switch (starting) {
-      case AppLifecycleState.detached:
-        if (ending == AppLifecycleState.resumed || ending == AppLifecycleState.paused) {
-          return true;
-        }
-      case AppLifecycleState.resumed:
-        // Can't go from resumed to detached directly (must go through paused).
-        if (ending == AppLifecycleState.inactive) {
-          return true;
-        }
-      case AppLifecycleState.inactive:
-        if (ending == AppLifecycleState.resumed || ending == AppLifecycleState.hidden) {
-          return true;
-        }
-      case AppLifecycleState.hidden:
-        if (ending == AppLifecycleState.inactive || ending == AppLifecycleState.paused) {
-          return true;
-        }
-      case AppLifecycleState.paused:
-        if (ending == AppLifecycleState.hidden || ending == AppLifecycleState.detached) {
-          return true;
-        }
-    }
-    return false;
+    return switch (starting) {
+      // Can't go from resumed to detached directly (must go through paused).
+      AppLifecycleState.resumed  => ending == AppLifecycleState.inactive,
+      AppLifecycleState.detached => ending == AppLifecycleState.resumed || ending == AppLifecycleState.paused,
+      AppLifecycleState.inactive => ending == AppLifecycleState.resumed || ending == AppLifecycleState.hidden,
+      AppLifecycleState.hidden   => ending == AppLifecycleState.paused  || ending == AppLifecycleState.inactive,
+      AppLifecycleState.paused   => ending == AppLifecycleState.hidden  || ending == AppLifecycleState.detached,
+    };
   }
 
 
@@ -392,19 +370,14 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   }
 
   static AppLifecycleState? _parseAppLifecycleMessage(String message) {
-    switch (message) {
-      case 'AppLifecycleState.resumed':
-        return AppLifecycleState.resumed;
-      case 'AppLifecycleState.inactive':
-        return AppLifecycleState.inactive;
-      case 'AppLifecycleState.hidden':
-        return AppLifecycleState.hidden;
-      case 'AppLifecycleState.paused':
-        return AppLifecycleState.paused;
-      case 'AppLifecycleState.detached':
-        return AppLifecycleState.detached;
-    }
-    return null;
+    return switch (message) {
+      'AppLifecycleState.resumed'  => AppLifecycleState.resumed,
+      'AppLifecycleState.inactive' => AppLifecycleState.inactive,
+      'AppLifecycleState.hidden'   => AppLifecycleState.hidden,
+      'AppLifecycleState.paused'   => AppLifecycleState.paused,
+      'AppLifecycleState.detached' => AppLifecycleState.detached,
+      _ => null,
+    };
   }
 
   /// Handles any requests for application exit that may be received on the
