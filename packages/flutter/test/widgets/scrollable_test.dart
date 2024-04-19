@@ -110,9 +110,9 @@ void resetScrollOffset(WidgetTester tester) {
 
 void main() {
   testWidgets('hitTestBehavior is respected', (WidgetTester tester) async {
-    HitTestBehavior? getBehavior() {
+    HitTestBehavior? getBehavior(Type of) {
       final RawGestureDetector widget = tester.widget(find.descendant(
-        of: find.byType(Scrollable),
+        of: find.byType(of),
         matching: find.byType(RawGestureDetector),
       ));
       return widget.behavior;
@@ -125,7 +125,7 @@ void main() {
         ),
       ),
     );
-    expect(getBehavior(), HitTestBehavior.translucent);
+    expect(getBehavior(SingleChildScrollView), HitTestBehavior.translucent);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -134,7 +134,7 @@ void main() {
         ),
       ),
     );
-    expect(getBehavior(), HitTestBehavior.translucent);
+    expect(getBehavior(CustomScrollView), HitTestBehavior.translucent);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -143,7 +143,37 @@ void main() {
         ),
       ),
     );
-    expect(getBehavior(), HitTestBehavior.translucent);
+    expect(getBehavior(ListView), HitTestBehavior.translucent);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: GridView.extent(
+          maxCrossAxisExtent: 1,
+          hitTestBehavior: HitTestBehavior.translucent,
+        ),
+      ),
+    );
+    expect(getBehavior(GridView), HitTestBehavior.translucent);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PageView(
+          hitTestBehavior: HitTestBehavior.translucent,
+        ),
+      ),
+    );
+    expect(getBehavior(PageView), HitTestBehavior.translucent);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListWheelScrollView(
+          itemExtent: 10,
+          hitTestBehavior: HitTestBehavior.translucent,
+          children: const <Widget>[],
+        ),
+      ),
+    );
+    expect(getBehavior(ListWheelScrollView), HitTestBehavior.translucent);
   });
 
   testWidgets(

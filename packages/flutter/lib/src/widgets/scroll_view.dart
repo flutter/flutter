@@ -1869,6 +1869,7 @@ class GridView extends BoxScrollView {
     super.clipBehavior,
     super.keyboardDismissBehavior,
     super.restorationId,
+    super.hitTestBehavior,
   }) : childrenDelegate = SliverChildListDelegate(
          children,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
@@ -1925,6 +1926,7 @@ class GridView extends BoxScrollView {
     super.keyboardDismissBehavior,
     super.restorationId,
     super.clipBehavior,
+    super.hitTestBehavior,
   }) : childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
          findChildIndexCallback: findChildIndexCallback,
@@ -1959,6 +1961,7 @@ class GridView extends BoxScrollView {
     super.keyboardDismissBehavior,
     super.restorationId,
     super.clipBehavior,
+    super.hitTestBehavior,
   });
 
   /// Creates a scrollable, 2D array of widgets with a fixed number of tiles in
@@ -1998,6 +2001,7 @@ class GridView extends BoxScrollView {
     super.keyboardDismissBehavior,
     super.restorationId,
     super.clipBehavior,
+    super.hitTestBehavior,
   }) : gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
          crossAxisCount: crossAxisCount,
          mainAxisSpacing: mainAxisSpacing,
@@ -2051,6 +2055,7 @@ class GridView extends BoxScrollView {
     super.keyboardDismissBehavior,
     super.restorationId,
     super.clipBehavior,
+    super.hitTestBehavior,
   }) : gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
          maxCrossAxisExtent: maxCrossAxisExtent,
          mainAxisSpacing: mainAxisSpacing,
