@@ -477,7 +477,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/implicit_animations/animated_positioned.0_test.dart',
   'examples/api/test/widgets/implicit_animations/animated_padding.0_test.dart',
   'examples/api/test/widgets/implicit_animations/sliver_animated_opacity.0_test.dart',
-  'examples/api/test/widgets/dismissible/dismissible.0_test.dart',
   'examples/api/test/widgets/scroll_view/custom_scroll_view.1_test.dart',
   'examples/api/test/widgets/inherited_notifier/inherited_notifier.0_test.dart',
   'examples/api/test/animation/curves/curve2_d.0_test.dart',
