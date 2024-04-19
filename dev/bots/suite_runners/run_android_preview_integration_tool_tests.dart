@@ -6,7 +6,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import '../runner_utils.dart';
+import '../utils.dart';
 
 Future<void> androidPreviewIntegrationToolTestsRunner(String flutterRoot) async {
   final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
