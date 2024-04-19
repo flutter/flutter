@@ -21,6 +21,8 @@ import '../flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../ios/code_signing.dart';
+import '../macos/swift_package_manager.dart';
+import '../macos/swift_packages.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
@@ -611,6 +613,9 @@ Your $application code is in $relativeAppMain.
     if ((templateContext['ios'] == true || templateContext['macos'] == true) && featureFlags.isSwiftPackageManagerEnabled) {
       templates.add('plugin_swift_package_manager');
       templateContext['swiftLibraryName'] = projectName?.replaceAll('_', '-');
+      templateContext['swiftToolsVersion'] = minimumSwiftToolchainVersion;
+      templateContext['iosSupportedPlatform'] = SwiftPackageManager.iosSwiftPackageSupportedPlatform.format();
+      templateContext['macosSupportedPlatform'] = SwiftPackageManager.macosSwiftPackageSupportedPlatform.format();
 
       // Exclude CocoaPod files from "plugin" template
       excluded.addAll(<String>[

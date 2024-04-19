@@ -740,7 +740,10 @@ void main() {
       ],
     );
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+    FeatureFlags: () => TestFeatureFlags(
+      isSwiftPackageManagerEnabled: true,
+      isMacOSEnabled: true,
+    ),
   });
 
   testUsingContext('objc plugin project with Swift Package Manager', () async {

@@ -4,7 +4,8 @@
 {{#withPlatformChannelPluginHook}}
 
 {{#withSwiftPackageManager}}
-// If your plugin is Swift Package Manager compatible and has been explicitly set to "type: .dynamic", you will need to add your plugin as a dependency of RunnerTests.
+// If your plugin has been explicitly set to "type: .dynamic" in the Package.swift,
+// you will need to add your plugin as a dependency of RunnerTests within Xcode.
 {{/withSwiftPackageManager}}
 
 @import {{pluginProjectName}};
