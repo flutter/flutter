@@ -125,9 +125,10 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
 /**
  * Attach a view controller to the engine as its default controller.
  *
- * Practically, since FlutterEngine can only be attached with one controller,
- * the given controller, if successfully attached, will always have the default
- * view ID kFlutterImplicitViewId.
+ * Since FlutterEngine can only handle the implicit view for now, the given
+ * controller will always be assigned to the implicit view, if there isn't an
+ * implicit view yet. If the engine already has an implicit view, this call
+ * throws an assertion.
  *
  * The engine holds a weak reference to the attached view controller.
  *
@@ -146,9 +147,6 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
  *
  * If the view controller is not associated with this engine, this call throws an
  * assertion.
- *
- * Practically, since FlutterEngine can only be attached with one controller for
- * now, the given controller must be the current view controller.
  */
 - (void)removeViewController:(FlutterViewController*)viewController;
 

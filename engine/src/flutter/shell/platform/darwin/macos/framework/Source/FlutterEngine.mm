@@ -456,9 +456,6 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
   FlutterThreadSynchronizer* _threadSynchronizer;
 
-  // The next available view ID.
-  int _nextviewIdentifier;
-
   // Whether the application is currently the active application.
   BOOL _active;
 
@@ -515,8 +512,6 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   _binaryMessenger = [[FlutterBinaryMessengerRelay alloc] initWithParent:self];
   _isResponseValid = [[NSMutableArray alloc] initWithCapacity:1];
   [_isResponseValid addObject:@YES];
-  // kFlutterImplicitViewId is reserved for the implicit view.
-  _nextviewIdentifier = kFlutterImplicitViewId + 1;
 
   _embedderAPI.struct_size = sizeof(FlutterEngineProcTable);
   FlutterEngineGetProcAddresses(&_embedderAPI);
@@ -736,15 +731,25 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 - (void)registerViewController:(FlutterViewController*)controller
                  forIdentifier:(FlutterViewIdentifier)viewIdentifier {
   NSAssert(controller != nil, @"The controller must not be nil.");
-  NSAssert(![controller attached],
-           @"The incoming view controller is already attached to an engine.");
+  NSAssert(controller.engine == nil,
+           @"The FlutterViewController is unexpectedly attached to "
+           @"engine %@ before initialization.",
+           controller.engine);
   NSAssert([_viewControllers objectForKey:@(viewIdentifier)] == nil,
            @"The requested view ID is occupied.");
+  [_viewControllers setObject:controller forKey:@(viewIdentifier)];
   [controller setUpWithEngine:self
                viewIdentifier:viewIdentifier
            threadSynchronizer:_threadSynchronizer];
   NSAssert(controller.viewIdentifier == viewIdentifier, @"Failed to assign view ID.");
-  [_viewControllers setObject:controller forKey:@(viewIdentifier)];
+  // Verify that the controller's property are updated accordingly. Failing the
+  // assertions is likely because either the FlutterViewController or the
+  // FlutterEngine is mocked. Please subclass these classes instead.
+  NSAssert(controller.attached, @"The FlutterViewController should switch to the attached mode "
+                                @"after it is added to a FlutterEngine.");
+  NSAssert(controller.engine == self,
+           @"The FlutterViewController was added to %@, but its engine unexpectedly became %@.",
+           self, controller.engine);
 
   if (controller.viewLoaded) {
     [self viewControllerViewDidLoad:controller];
@@ -779,11 +784,17 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 }
 
 - (void)deregisterViewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier {
-  FlutterViewController* oldController = [self viewControllerForIdentifier:viewIdentifier];
-  if (oldController != nil) {
-    [oldController detachFromEngine];
-    [_viewControllers removeObjectForKey:@(viewIdentifier)];
+  FlutterViewController* controller = [self viewControllerForIdentifier:viewIdentifier];
+  // The controller can be nil. The engine stores only a weak ref, and this
+  // method could have been called from the controller's dealloc.
+  if (controller != nil) {
+    [controller detachFromEngine];
+    NSAssert(!controller.attached,
+             @"The FlutterViewController unexpectedly stays attached after being removed. "
+             @"In unit tests, this is likely because either the FlutterViewController or "
+             @"the FlutterEngine is mocked. Please subclass these classes instead.");
   }
+  [_viewControllers removeObjectForKey:@(viewIdentifier)];
   @synchronized(_vsyncWaiters) {
     [_vsyncWaiters removeObjectForKey:@(viewIdentifier)];
   }
@@ -877,26 +888,14 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 #pragma mark - Framework-internal methods
 
 - (void)addViewController:(FlutterViewController*)controller {
-  NSAssert(controller.engine == nil,
-           @"The FlutterViewController is unexpectedly attached to "
-           @"engine %@ before initialization.",
-           controller.engine);
-  [self registerViewController:controller forIdentifier:kFlutterImplicitViewId];
-  NSAssert(controller.attached,
-           @"The FlutterViewController unexpectedly stays unattached after being added. "
-           @"In unit tests, this is likely because either the FlutterViewController or "
-           @"the FlutterEngine is mocked. Please subclass these classes instead.");
-  NSAssert(controller.engine == self,
-           @"The FlutterViewController #%lld has unexpected engine %@ after being added, "
-           @"instead of %@. "
-           @"In unit tests, this is likely because either the FlutterViewController or "
-           @"the FlutterEngine is mocked. Please subclass these classes instead.",
-           controller.viewIdentifier, controller.engine, self);
+  // FlutterEngine can only handle the implicit view for now. Adding more views
+  // throws an assertion.
+  NSAssert(self.viewController == nil,
+           @"The engine already has a view controller for the implicit view.");
+  self.viewController = controller;
 }
 
 - (void)removeViewController:(nonnull FlutterViewController*)viewController {
-  NSAssert([viewController attached] && viewController.engine == self,
-           @"The given view controller is not associated with this engine.");
   [self deregisterViewControllerForIdentifier:viewController.viewIdentifier];
   [self shutDownIfNeeded];
 }
