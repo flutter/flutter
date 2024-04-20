@@ -34,33 +34,6 @@ GeometryResult PointFieldGeometry::GetPositionBuffer(
   };
 }
 
-GeometryResult PointFieldGeometry::GetPositionUVBuffer(
-    Rect texture_coverage,
-    Matrix effect_transform,
-    const ContentContext& renderer,
-    const Entity& entity,
-    RenderPass& pass) const {
-  if (renderer.GetDeviceCapabilities().SupportsCompute()) {
-    return GetPositionBufferGPU(renderer, entity, pass, texture_coverage,
-                                effect_transform);
-  }
-
-  auto vtx_builder = GetPositionBufferCPU(renderer, entity, pass);
-  if (!vtx_builder.has_value()) {
-    return {};
-  }
-  auto uv_vtx_builder =
-      ComputeUVGeometryCPU(vtx_builder.value(), {0, 0},
-                           texture_coverage.GetSize(), effect_transform);
-
-  auto& host_buffer = renderer.GetTransientsBuffer();
-  return {
-      .type = PrimitiveType::kTriangleStrip,
-      .vertex_buffer = uv_vtx_builder.CreateVertexBuffer(host_buffer),
-      .transform = entity.GetShaderTransform(pass),
-  };
-}
-
 std::optional<VertexBufferBuilder<SolidFillVertexShader::PerVertexData>>
 PointFieldGeometry::GetPositionBufferCPU(const ContentContext& renderer,
                                          const Entity& entity,
@@ -127,9 +100,7 @@ PointFieldGeometry::GetPositionBufferCPU(const ContentContext& renderer,
 GeometryResult PointFieldGeometry::GetPositionBufferGPU(
     const ContentContext& renderer,
     const Entity& entity,
-    RenderPass& pass,
-    std::optional<Rect> texture_coverage,
-    std::optional<Matrix> effect_transform) const {
+    RenderPass& pass) const {
   FML_DCHECK(renderer.GetDeviceCapabilities().SupportsCompute());
   if (radius_ < 0.0) {
     return {};
@@ -184,33 +155,6 @@ GeometryResult PointFieldGeometry::GetPositionBufferGPU(
       return {};
     }
     output = geometry_buffer;
-  }
-
-  if (texture_coverage.has_value() && effect_transform.has_value()) {
-    BufferView geometry_uv_buffer = host_buffer.Emplace(
-        nullptr, total * sizeof(Vector4),
-        std::max(DefaultUniformAlignment(), alignof(Vector4)));
-
-    using UV = UvComputeShader;
-
-    compute_pass->AddBufferMemoryBarrier();
-    compute_pass->SetCommandLabel("UV Geometry");
-    compute_pass->SetPipeline(renderer.GetUvComputePipeline());
-
-    UV::FrameInfo frame_info;
-    frame_info.count = total;
-    frame_info.effect_transform = effect_transform.value();
-    frame_info.texture_origin = {0, 0};
-    frame_info.texture_size = Vector2(texture_coverage.value().GetSize());
-
-    UV::BindFrameInfo(*compute_pass, host_buffer.EmplaceUniform(frame_info));
-    UV::BindGeometryData(*compute_pass, geometry_buffer);
-    UV::BindGeometryUVData(*compute_pass, geometry_uv_buffer);
-
-    if (!compute_pass->Compute(ISize(total, 1)).ok()) {
-      return {};
-    }
-    output = geometry_uv_buffer;
   }
 
   if (!compute_pass->EncodeCommands()) {

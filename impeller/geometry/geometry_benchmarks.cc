@@ -5,7 +5,6 @@
 #include "flutter/benchmarking/benchmarking.h"
 
 #include "flutter/impeller/entity/solid_fill.vert.h"
-#include "flutter/impeller/entity/texture_fill.vert.h"
 
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/geometry/path.h"
@@ -25,21 +24,6 @@ class ImpellerBenchmarkAccessor {
                               Scalar scale) {
     return StrokePathGeometry::GenerateSolidStrokeVertices(
         polyline, stroke_width, miter_limit, stroke_join, stroke_cap, scale);
-  }
-
-  static std::vector<TextureFillVertexShader::PerVertexData>
-  GenerateSolidStrokeVerticesUV(const Path::Polyline& polyline,
-                                Scalar stroke_width,
-                                Scalar miter_limit,
-                                Join stroke_join,
-                                Cap stroke_cap,
-                                Scalar scale,
-                                Point texture_origin,
-                                Size texture_size,
-                                const Matrix& effect_transform) {
-    return StrokePathGeometry::GenerateSolidStrokeVerticesUV(
-        polyline, stroke_width, miter_limit, stroke_join, stroke_cap, scale,
-        texture_origin, texture_size, effect_transform);
   }
 };
 
@@ -80,28 +64,16 @@ static void BM_Polyline(benchmark::State& state, Args&&... args) {
   state.counters["TotalPointCount"] = point_count;
 }
 
-enum class UVMode {
-  kNoUV,
-  kUVRect,
-  kUVRectTx,
-};
-
 template <class... Args>
 static void BM_StrokePolyline(benchmark::State& state, Args&&... args) {
   auto args_tuple = std::make_tuple(std::move(args)...);
   auto path = std::get<Path>(args_tuple);
   auto cap = std::get<Cap>(args_tuple);
   auto join = std::get<Join>(args_tuple);
-  auto generate_uv = std::get<UVMode>(args_tuple);
 
   const Scalar stroke_width = 5.0f;
   const Scalar miter_limit = 10.0f;
   const Scalar scale = 1.0f;
-  const Point texture_origin = Point(0, 0);
-  const Size texture_size = Size(100, 100);
-  const Matrix effect_transform = (generate_uv == UVMode::kUVRectTx)
-                                      ? Matrix::MakeScale({2.0f, 2.0f, 1.0f})
-                                      : Matrix();
 
   auto points = std::make_unique<std::vector<Point>>();
   points->reserve(2048);
@@ -114,16 +86,9 @@ static void BM_StrokePolyline(benchmark::State& state, Args&&... args) {
   size_t point_count = 0u;
   size_t single_point_count = 0u;
   while (state.KeepRunning()) {
-    if (generate_uv == UVMode::kNoUV) {
-      auto vertices = ImpellerBenchmarkAccessor::GenerateSolidStrokeVertices(
-          polyline, stroke_width, miter_limit, join, cap, scale);
-      single_point_count = vertices.size();
-    } else {
-      auto vertices = ImpellerBenchmarkAccessor::GenerateSolidStrokeVerticesUV(
-          polyline, stroke_width, miter_limit, join, cap, scale,  //
-          texture_origin, texture_size, effect_transform);
-      single_point_count = vertices.size();
-    }
+    auto vertices = ImpellerBenchmarkAccessor::GenerateSolidStrokeVertices(
+        polyline, stroke_width, miter_limit, join, cap, scale);
+    single_point_count = vertices.size();
     point_count += single_point_count;
   }
   state.counters["SinglePointCount"] = single_point_count;
@@ -152,7 +117,7 @@ static void BM_Convex(benchmark::State& state, Args&&... args) {
 
 #define MAKE_STROKE_BENCHMARK_CAPTURE(path, cap, join, closed, uvname, uvtype) \
   BENCHMARK_CAPTURE(BM_StrokePolyline, stroke_##path##_##cap##_##join##uvname, \
-                    Create##path(closed), Cap::k##cap, Join::k##join, uvtype)
+                    Create##path(closed), Cap::k##cap, Join::k##join)
 
 #define MAKE_STROKE_BENCHMARK_CAPTURE_CAPS_JOINS(path, uvname, uvtype)       \
   MAKE_STROKE_BENCHMARK_CAPTURE(path, Butt, Bevel, false, uvname, uvtype);   \
@@ -161,29 +126,20 @@ static void BM_Convex(benchmark::State& state, Args&&... args) {
   MAKE_STROKE_BENCHMARK_CAPTURE(path, Square, Bevel, false, uvname, uvtype); \
   MAKE_STROKE_BENCHMARK_CAPTURE(path, Round, Bevel, false, uvname, uvtype)
 
-#define MAKE_STROKE_BENCHMARK_CAPTURE_UVS(path)                           \
-  MAKE_STROKE_BENCHMARK_CAPTURE_CAPS_JOINS(path, , UVMode::kNoUV);        \
-  MAKE_STROKE_BENCHMARK_CAPTURE_CAPS_JOINS(path, _uv, UVMode::kUVRectTx); \
-  MAKE_STROKE_BENCHMARK_CAPTURE_CAPS_JOINS(path, _uvNoTx, UVMode::kUVRect)
-
 BENCHMARK_CAPTURE(BM_Polyline, cubic_polyline, CreateCubic(true), false);
 BENCHMARK_CAPTURE(BM_Polyline,
                   unclosed_cubic_polyline,
                   CreateCubic(false),
                   false);
-MAKE_STROKE_BENCHMARK_CAPTURE_UVS(Cubic);
 
 BENCHMARK_CAPTURE(BM_Polyline, quad_polyline, CreateQuadratic(true), false);
 BENCHMARK_CAPTURE(BM_Polyline,
                   unclosed_quad_polyline,
                   CreateQuadratic(false),
                   false);
-MAKE_STROKE_BENCHMARK_CAPTURE_UVS(Quadratic);
 
 BENCHMARK_CAPTURE(BM_Convex, rrect_convex, CreateRRect(), true);
-MAKE_STROKE_BENCHMARK_CAPTURE(RRect, Butt, Bevel, , , UVMode::kNoUV);
-MAKE_STROKE_BENCHMARK_CAPTURE(RRect, Butt, Bevel, , _uv, UVMode::kUVRectTx);
-MAKE_STROKE_BENCHMARK_CAPTURE(RRect, Butt, Bevel, , _uvNoTx, UVMode::kUVRect);
+MAKE_STROKE_BENCHMARK_CAPTURE(RRect, Butt, Bevel, , , );
 
 namespace {
 

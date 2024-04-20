@@ -47,42 +47,6 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
   };
 }
 
-// |Geometry|
-GeometryResult FillPathGeometry::GetPositionUVBuffer(
-    Rect texture_coverage,
-    Matrix effect_transform,
-    const ContentContext& renderer,
-    const Entity& entity,
-    RenderPass& pass) const {
-  const auto& bounding_box = path_.GetBoundingBox();
-  if (bounding_box.has_value() && bounding_box->IsEmpty()) {
-    return GeometryResult{
-        .type = PrimitiveType::kTriangle,
-        .vertex_buffer =
-            VertexBuffer{
-                .vertex_buffer = {},
-                .vertex_count = 0,
-                .index_type = IndexType::k16bit,
-            },
-        .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
-    };
-  }
-
-  auto uv_transform =
-      texture_coverage.GetNormalizingTransform() * effect_transform;
-
-  VertexBuffer vertex_buffer = renderer.GetTessellator()->TessellateConvex(
-      path_, renderer.GetTransientsBuffer(),
-      entity.GetTransform().GetMaxBasisLength(), uv_transform);
-
-  return GeometryResult{
-      .type = PrimitiveType::kTriangleStrip,
-      .vertex_buffer = vertex_buffer,
-      .transform = entity.GetShaderTransform(pass),
-      .mode = GetResultMode(),
-  };
-}
-
 GeometryResult::Mode FillPathGeometry::GetResultMode() const {
   const auto& bounding_box = path_.GetBoundingBox();
   if (path_.IsConvex() ||
