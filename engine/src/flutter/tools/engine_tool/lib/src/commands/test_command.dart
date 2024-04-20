@@ -70,10 +70,10 @@ et test //flutter/fml:fml_benchmarks  # Run a single test target in `//flutter/f
       );
     }
 
+    final List<BuildTarget> testTargets = <BuildTarget>[];
     for (final BuildTarget target in selectedTargets) {
-      if (!target.testOnly || target.type != BuildTargetType.executable) {
-        // Remove any targets that aren't testOnly and aren't executable.
-        selectedTargets.remove(target);
+      if (_isTestExecutable(target)) {
+        testTargets.add(target);
       }
       if (target.executable == null) {
         environment.logger.fatal(
@@ -81,7 +81,7 @@ et test //flutter/fml:fml_benchmarks  # Run a single test target in `//flutter/f
       }
     }
     // Chop off the '//' prefix.
-    final List<String> buildTargets = selectedTargets
+    final List<String> buildTargets = testTargets
         .map<String>(
             (BuildTarget target) => target.label.substring('//'.length))
         .toList();
@@ -95,11 +95,16 @@ et test //flutter/fml:fml_benchmarks  # Run a single test target in `//flutter/f
     final WorkerPool workerPool =
         WorkerPool(environment, ProcessTaskProgressReporter(environment));
     final Set<ProcessTask> tasks = <ProcessTask>{};
-    for (final BuildTarget target in selectedTargets) {
+    for (final BuildTarget target in testTargets) {
       final List<String> commandLine = <String>[target.executable!.path];
       tasks.add(ProcessTask(
           target.label, environment, environment.engine.srcDir, commandLine));
     }
     return await workerPool.run(tasks) ? 0 : 1;
+  }
+
+  /// Returns true if `target` is a testonly executable.
+  static bool _isTestExecutable(BuildTarget target) {
+    return target.testOnly && target.type == BuildTargetType.executable;
   }
 }
