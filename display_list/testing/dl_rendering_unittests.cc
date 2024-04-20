@@ -4111,7 +4111,7 @@ TEST_F(DisplayListRendering, MatrixColorFilterOpacityCommuteCheck) {
         "matrix[" + std::to_string(element) + "] = " + std::to_string(value);
     matrix[element] = value;
     auto filter = DlMatrixColorFilter::Make(matrix);
-    EXPECT_EQ(SkScalarIsFinite(value), filter != nullptr);
+    EXPECT_EQ(std::isfinite(value), filter != nullptr);
 
     DlPaint paint(DlColor(0x80808080));
     DlPaint opacity_save_paint = DlPaint().setOpacity(0.5);
