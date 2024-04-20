@@ -67,4 +67,28 @@ void main() {
       testEnvironment.cleanup();
     }
   });
+
+  test('test command skips non-testonly executables', () async {
+    final TestEnvironment testEnvironment = TestEnvironment.withTestEngine(
+      cannedProcesses: cannedProcesses,
+    );
+    try {
+      final Environment env = testEnvironment.environment;
+      final ToolCommandRunner runner = ToolCommandRunner(
+        environment: env,
+        configs: configs,
+      );
+      final int result = await runner.run(<String>[
+        'test',
+        '//third_party/protobuf:protoc',
+      ]);
+      expect(result, equals(1));
+      expect(testEnvironment.processHistory.length, lessThan(3));
+      expect(testEnvironment.processHistory.where((ExecutedProcess process) {
+        return process.command[0].contains('protoc');
+      }), isEmpty);
+    } finally {
+      testEnvironment.cleanup();
+    }
+  });
 }
