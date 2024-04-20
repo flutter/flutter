@@ -100,11 +100,13 @@ void main() {
     // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
     experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
     (WidgetTester tester) async {
-      final Animation<Decoration> curvedDecorationAnimation =
-        decorationTween.animate(CurvedAnimation(
+      final CurvedAnimation curvedAnimation = CurvedAnimation(
         parent: controller,
         curve: Curves.easeOut,
-      ));
+      );
+      addTearDown(curvedAnimation.dispose);
+      final Animation<Decoration> curvedDecorationAnimation =
+        decorationTween.animate(curvedAnimation);
 
       final DecoratedBoxTransition transitionUnderTest = DecoratedBoxTransition(
         decoration: curvedDecorationAnimation,
