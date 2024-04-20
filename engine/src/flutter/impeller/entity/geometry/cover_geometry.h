@@ -34,13 +34,6 @@ class CoverGeometry final : public Geometry {
   // |Geometry|
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
-  // |Geometry|
-  GeometryResult GetPositionUVBuffer(Rect texture_coverage,
-                                     Matrix effect_transform,
-                                     const ContentContext& renderer,
-                                     const Entity& entity,
-                                     RenderPass& pass) const override;
-
   CoverGeometry(const CoverGeometry&) = delete;
 
   CoverGeometry& operator=(const CoverGeometry&) = delete;

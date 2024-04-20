@@ -174,26 +174,20 @@ class Tessellator {
   ///                        path for rendering.
   /// @param[in]  host_buffer  The host buffer for allocation of vertices/index
   ///                          data.
-  /// @param[in]  uv_transform If provided, then uvs are also generated into the
-  ///                          point buffer. Defaults to std::nullopt.
   ///
   /// @return A vertex buffer containing all data from the provided curve.
-  VertexBuffer TessellateConvex(
-      const Path& path,
-      HostBuffer& host_buffer,
-      Scalar tolerance,
-      std::optional<Matrix> uv_transform = std::nullopt);
+  VertexBuffer TessellateConvex(const Path& path,
+                                HostBuffer& host_buffer,
+                                Scalar tolerance);
 
   /// Visible for testing.
   ///
   /// This method only exists for the ease of benchmarking without using the
   /// real allocator needed by the [host_buffer].
-  void TessellateConvexInternal(
-      const Path& path,
-      std::vector<Point>& point_buffer,
-      std::vector<uint16_t>& index_buffer,
-      Scalar tolerance,
-      std::optional<Matrix> uv_transform = std::nullopt);
+  void TessellateConvexInternal(const Path& path,
+                                std::vector<Point>& point_buffer,
+                                std::vector<uint16_t>& index_buffer,
+                                Scalar tolerance);
 
   //----------------------------------------------------------------------------
   /// @brief      Create a temporary polyline. Only one per-process can exist at
