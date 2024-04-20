@@ -29,7 +29,6 @@ typedef ShardRunner = Future<void> Function();
 /// appropriate error message.
 typedef OutputChecker = String? Function(CommandResult);
 
-
 const Duration _quietTimeout = Duration(minutes: 10); // how long the output should be hidden between calls to printProgress before just being verbose
 
 // If running from LUCI set to False.

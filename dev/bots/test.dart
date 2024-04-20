@@ -61,9 +61,11 @@ import 'package:path/path.dart' as path;
 import 'run_command.dart';
 import 'suite_runners/run_add_to_app_life_cycle_tests.dart';
 import 'suite_runners/run_analyze_tests.dart';
+import 'suite_runners/run_android_preview_integration_tool_tests.dart';
 import 'suite_runners/run_customer_testing_tests.dart';
 import 'suite_runners/run_docs_tests.dart';
 import 'suite_runners/run_flutter_packages_tests.dart';
+import 'suite_runners/run_framework_coverage_tests.dart';
 import 'suite_runners/run_fuchsia_precache.dart';
 import 'suite_runners/run_realm_checker_tests.dart';
 import 'suite_runners/run_skp_generator_tests.dart';
@@ -135,17 +137,16 @@ Future<void> main(List<String> args) async {
     if (Platform.environment.containsKey(CIRRUS_TASK_NAME)) {
       printProgress('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
     }
-    final WebTestsSuite webTestsSuite = WebTestsSuite(flutterRoot, flutterTestArgs);
+    final WebTestsSuite webTestsSuite = WebTestsSuite(flutterTestArgs);
     await selectShard(<String, ShardRunner>{
-      'add_to_app_life_cycle_tests': () => addToAppLifeCycleRunner(flutterRoot),
+      'add_to_app_life_cycle_tests': addToAppLifeCycleRunner,
       'build_tests': _runBuildTests,
-      'framework_coverage': _runFrameworkCoverage,
+      'framework_coverage': frameworkCoverageRunner,
       'framework_tests': _runFrameworkTests,
       'tool_tests': _runToolTests,
-      // web_tool_tests is also used by HHH: https://dart.googlesource.com/recipes/+/refs/heads/master/recipes/dart/flutter_engine.py
       'web_tool_tests': _runWebToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
-      'android_preview_tool_integration_tests': _runAndroidPreviewIntegrationToolTests,
+      'android_preview_tool_integration_tests': androidPreviewIntegrationToolTestsRunner,
       'tool_host_cross_arch_tests': _runToolHostCrossArchTests,
       // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=html`
       'web_tests': webTestsSuite.runWebHtmlUnitTests,
@@ -155,14 +156,14 @@ Future<void> main(List<String> args) async {
       'web_skwasm_tests': webTestsSuite.runWebSkwasmUnitTests,
       // All web integration tests
       'web_long_running_tests': webTestsSuite.webLongRunningTestsRunner,
-      'flutter_plugins': () => flutterPackagesRunner(flutterRoot),
+      'flutter_plugins': flutterPackagesRunner,
       'skp_generator': skpGeneratorTestsRunner,
-      'realm_checker': () => realmCheckerTestRunner(flutterRoot),
-      'customer_testing': () => customerTestingRunner(flutterRoot),
-      'analyze': () => analyzeRunner(flutterRoot),
-      'fuchsia_precache': () => fuchsiaPrecacheRunner(flutterRoot),
-      'docs': () => docsRunner(flutterRoot),
-      'verify_binaries_codesigned': () => verifyCodesignedTestRunner(flutterRoot),
+      'realm_checker': realmCheckerTestRunner,
+      'customer_testing': customerTestingRunner,
+      'analyze': analyzeRunner,
+      'fuchsia_precache': fuchsiaPrecacheRunner,
+      'docs': docsRunner,
+      'verify_binaries_codesigned': verifyCodesignedTestRunner,
       kTestHarnessShardName: _runTestHarnessTests, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });
   } catch (error, stackTrace) {
@@ -376,20 +377,6 @@ Future<void> _runToolHostCrossArchTests() {
 
 Future<void> _runIntegrationToolTests() async {
   final List<String> allTests = Directory(path.join(_toolsPath, 'test', 'integration.shard'))
-      .listSync(recursive: true).whereType<File>()
-      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
-      .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
-
-  await runDartTest(
-    _toolsPath,
-    forceSingleCore: true,
-    testPaths: selectIndexOfTotalSubshard<String>(allTests),
-    collectMetrics: true,
-  );
-}
-
-Future<void> _runAndroidPreviewIntegrationToolTests() async {
-  final List<String> allTests = Directory(path.join(_toolsPath, 'test', 'android_preview_integration.shard'))
       .listSync(recursive: true).whereType<File>()
       .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
       .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
@@ -987,31 +974,6 @@ Future<void> _runFrameworkTests() async {
     'impeller': runImpeller,
   });
 }
-
-Future<void> _runFrameworkCoverage() async {
-  final File coverageFile = File(path.join(flutterRoot, 'packages', 'flutter', 'coverage', 'lcov.info'));
-  if (!coverageFile.existsSync()) {
-    foundError(<String>[
-      '${red}Coverage file not found.$reset',
-      'Expected to find: $cyan${coverageFile.absolute.path}$reset',
-      'This file is normally obtained by running `${green}flutter update-packages$reset`.',
-    ]);
-    return;
-  }
-  coverageFile.deleteSync();
-  await runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'),
-    options: const <String>['--coverage'],
-  );
-  if (!coverageFile.existsSync()) {
-    foundError(<String>[
-      '${red}Coverage file not found.$reset',
-      'Expected to find: $cyan${coverageFile.absolute.path}$reset',
-      'This file should have been generated by the `${green}flutter test --coverage$reset` script, but was not.',
-    ]);
-    return;
-  }
-}
-
 
 /// This will force the next run of the Flutter tool (if it uses the provided
 /// environment) to have asserts enabled, by setting an environment variable.
