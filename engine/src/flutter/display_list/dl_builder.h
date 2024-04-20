@@ -509,7 +509,7 @@ class DisplayListBuilder final : public virtual DlCanvas,
   // kInvalidSigma is used to indicate that no MaskBlur is currently set.
   static constexpr SkScalar kInvalidSigma = 0.0;
   static bool mask_sigma_valid(SkScalar sigma) {
-    return SkScalarIsFinite(sigma) && sigma > 0.0;
+    return std::isfinite(sigma) && sigma > 0.0;
   }
 
   class SaveInfo {

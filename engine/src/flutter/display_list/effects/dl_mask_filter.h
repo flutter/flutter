@@ -53,7 +53,7 @@ class DlBlurMaskFilter final : public DlMaskFilter {
   static std::shared_ptr<DlMaskFilter> Make(DlBlurStyle style,
                                             SkScalar sigma,
                                             bool respect_ctm = true) {
-    if (SkScalarIsFinite(sigma) && sigma > 0) {
+    if (std::isfinite(sigma) && sigma > 0) {
       return std::make_shared<DlBlurMaskFilter>(style, sigma, respect_ctm);
     }
     return nullptr;

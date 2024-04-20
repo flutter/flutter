@@ -707,8 +707,7 @@ void DisplayListBuilder::SaveLayer(const SkRect* bounds,
 }
 
 void DisplayListBuilder::Translate(SkScalar tx, SkScalar ty) {
-  if (SkScalarIsFinite(tx) && SkScalarIsFinite(ty) &&
-      (tx != 0.0 || ty != 0.0)) {
+  if (std::isfinite(tx) && std::isfinite(ty) && (tx != 0.0 || ty != 0.0)) {
     checkForDeferredSave();
     Push<TranslateOp>(0, tx, ty);
     tracker_.translate(tx, ty);
@@ -718,8 +717,7 @@ void DisplayListBuilder::Translate(SkScalar tx, SkScalar ty) {
   }
 }
 void DisplayListBuilder::Scale(SkScalar sx, SkScalar sy) {
-  if (SkScalarIsFinite(sx) && SkScalarIsFinite(sy) &&
-      (sx != 1.0 || sy != 1.0)) {
+  if (std::isfinite(sx) && std::isfinite(sy) && (sx != 1.0 || sy != 1.0)) {
     checkForDeferredSave();
     Push<ScaleOp>(0, sx, sy);
     tracker_.scale(sx, sy);
@@ -739,8 +737,7 @@ void DisplayListBuilder::Rotate(SkScalar degrees) {
   }
 }
 void DisplayListBuilder::Skew(SkScalar sx, SkScalar sy) {
-  if (SkScalarIsFinite(sx) && SkScalarIsFinite(sy) &&
-      (sx != 0.0 || sy != 0.0)) {
+  if (std::isfinite(sx) && std::isfinite(sy) && (sx != 0.0 || sy != 0.0)) {
     checkForDeferredSave();
     Push<SkewOp>(0, sx, sy);
     tracker_.skew(sx, sy);
@@ -756,9 +753,9 @@ void DisplayListBuilder::Skew(SkScalar sx, SkScalar sy) {
 void DisplayListBuilder::Transform2DAffine(
     SkScalar mxx, SkScalar mxy, SkScalar mxt,
     SkScalar myx, SkScalar myy, SkScalar myt) {
-  if (SkScalarsAreFinite(mxx, myx) &&
-      SkScalarsAreFinite(mxy, myy) &&
-      SkScalarsAreFinite(mxt, myt)) {
+  if (std::isfinite(mxx) && std::isfinite(myx) &&
+      std::isfinite(mxy) && std::isfinite(myy) &&
+      std::isfinite(mxt) && std::isfinite(myt)) {
     if (mxx == 1 && mxy == 0 &&
         myx == 0 && myy == 1) {
       Translate(mxt, myt);
@@ -788,10 +785,14 @@ void DisplayListBuilder::TransformFullPerspective(
       mwx == 0 && mwy == 0 && mwz == 0 && mwt == 1) {
     Transform2DAffine(mxx, mxy, mxt,
                       myx, myy, myt);
-  } else if (SkScalarsAreFinite(mxx, mxy) && SkScalarsAreFinite(mxz, mxt) &&
-             SkScalarsAreFinite(myx, myy) && SkScalarsAreFinite(myz, myt) &&
-             SkScalarsAreFinite(mzx, mzy) && SkScalarsAreFinite(mzz, mzt) &&
-             SkScalarsAreFinite(mwx, mwy) && SkScalarsAreFinite(mwz, mwt)) {
+  } else if (std::isfinite(mxx) && std::isfinite(mxy) &&
+             std::isfinite(mxz) && std::isfinite(mxt) &&
+             std::isfinite(myx) && std::isfinite(myy) &&
+             std::isfinite(myz) && std::isfinite(myt) &&
+             std::isfinite(mzx) && std::isfinite(mzy) &&
+             std::isfinite(mzz) && std::isfinite(mzt) &&
+             std::isfinite(mwx) && std::isfinite(mwy) &&
+             std::isfinite(mwz) && std::isfinite(mwt)) {
     checkForDeferredSave();
     Push<TransformFullPerspectiveOp>(0,
                                      mxx, mxy, mxz, mxt,
@@ -1377,7 +1378,7 @@ void DisplayListBuilder::DrawAtlas(const sk_sp<DlImage>& atlas,
 
 void DisplayListBuilder::DrawDisplayList(const sk_sp<DisplayList> display_list,
                                          SkScalar opacity) {
-  if (!SkScalarIsFinite(opacity) || opacity <= SK_ScalarNearlyZero ||
+  if (!std::isfinite(opacity) || opacity <= SK_ScalarNearlyZero ||
       display_list->op_count() == 0 || display_list->bounds().isEmpty() ||
       current_layer_->is_nop_) {
     return;
