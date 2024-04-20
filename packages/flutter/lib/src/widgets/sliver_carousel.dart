@@ -380,7 +380,7 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
   @override
   RenderSliverFixedExtentBoxAdaptor createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
-    return RenderUnconstrainedCarousel(
+    return RenderSliverFixedExtentCarousel(
       childManager: element,
       minExtent: minExtent,
       maxExtent: itemExtent,
@@ -388,13 +388,13 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderUnconstrainedCarousel renderObject) {
+  void updateRenderObject(BuildContext context, RenderSliverFixedExtentCarousel renderObject) {
     renderObject.maxExtent = itemExtent;
   }
 }
 
-class RenderUnconstrainedCarousel extends RenderSliverFixedExtentBoxAdaptor {
-  RenderUnconstrainedCarousel({
+class RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor {
+  RenderSliverFixedExtentCarousel({
     required super.childManager,
     required double maxExtent,
     required double minExtent,
