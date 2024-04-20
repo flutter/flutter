@@ -140,7 +140,7 @@ class TabController extends ChangeNotifier {
 
 
   /// Creates a new [TabController] with `index`, `previousIndex`, `length`, and
-  /// `animationDuration` if they are non-null.
+  /// `animationDuration` if they are non-null, and disposes current instance.
   ///
   /// This method is used by [DefaultTabController].
   ///
