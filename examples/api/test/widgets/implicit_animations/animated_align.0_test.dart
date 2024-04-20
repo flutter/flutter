@@ -13,35 +13,67 @@ void main() {
       const example.AnimatedAlignExampleApp(),
     );
 
-    Align align = tester.widget(
-      find.descendant(
-        of: find.byType(AnimatedAlign),
-        matching: find.byType(Align),
-      ),
+    final Finder alignFinder = find.descendant(
+      of: find.byType(AnimatedAlign),
+      matching: find.byType(Align),
     );
-    expect(align.alignment, Alignment.bottomLeft);
 
-    await tester.tap(find.byType(AnimatedAlign));
+    const Alignment beginAlignment = Alignment.bottomLeft;
+    const Alignment endAlignment = Alignment.topRight;
+
+    Align align = tester.widget(alignFinder);
+    expect(align.alignment, beginAlignment);
+
+    // Tap on the AnimatedAlignExample to start the forward animation.
+    await tester.tap(find.byType(example.AnimatedAlignExample));
     await tester.pump();
 
-    align = tester.widget(
-      find.descendant(
-        of: find.byType(AnimatedAlign),
-        matching: find.byType(Align),
+    align = tester.widget(alignFinder);
+    expect(align.alignment, beginAlignment);
+
+    // Advance animation to the middle.
+    await tester.pump(example.AnimatedAlignExampleApp.duration ~/ 2);
+
+    align = tester.widget(alignFinder);
+    expect(
+      align.alignment,
+      Alignment.lerp(
+        beginAlignment,
+        endAlignment,
+        example.AnimatedAlignExampleApp.curve.transform(0.5),
       ),
     );
-    expect(align.alignment, Alignment.bottomLeft);
 
-    // Advance animation to the end by the 1-second duration specified in
-    // the example app.
-    await tester.pump(const Duration(seconds: 1));
+    // Advance animation to the end.
+    await tester.pump(example.AnimatedAlignExampleApp.duration ~/ 2);
 
-    align = tester.widget(
-      find.descendant(
-        of: find.byType(AnimatedAlign),
-        matching: find.byType(Align),
+    align = tester.widget(alignFinder);
+    expect(align.alignment, endAlignment);
+
+    // Tap on the AnimatedAlignExample again to start the reverse animation.
+    await tester.tap(find.byType(example.AnimatedAlignExample));
+    await tester.pump();
+
+    align = tester.widget(alignFinder);
+    expect(align.alignment, endAlignment);
+
+    // Advance animation to the middle.
+    await tester.pump(example.AnimatedAlignExampleApp.duration ~/ 2);
+
+    align = tester.widget(alignFinder);
+    expect(
+      align.alignment,
+      Alignment.lerp(
+        endAlignment,
+        beginAlignment,
+        example.AnimatedAlignExampleApp.curve.transform(0.5),
       ),
     );
-    expect(align.alignment, Alignment.topRight);
+
+    // Advance animation to the end.
+    await tester.pump(example.AnimatedAlignExampleApp.duration ~/ 2);
+
+    align = tester.widget(alignFinder);
+    expect(align.alignment, beginAlignment);
   });
 }
