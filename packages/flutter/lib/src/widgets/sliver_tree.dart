@@ -16,6 +16,8 @@ import 'sliver.dart';
 import 'text.dart';
 import 'ticker_provider.dart';
 
+const double _kDefaultRowExtent = 40.0;
+
 /// A data structure for configuring children of a [SliverTree].
 ///
 /// A [SliverTreeNode.content] can be of any type, but must correspond with the
@@ -101,11 +103,11 @@ typedef TreeRowExtentBuilder = double Function(
 typedef TreeNodeCallback = void Function(SliverTreeNode<dynamic> node);
 
 /// A mixin for classes implementing a tree structure as expected by a
-/// [TreeController].
+/// [SliverTreeController].
 ///
-/// Used by [SliverTree] to implement an interface for the [TreeController].
+/// Used by [SliverTree] to implement an interface for the [SliverTreeController].
 ///
-/// This allows the [TreeController] to be used in other widgets that implement
+/// This allows the [SliverTreeController] to be used in other widgets that implement
 /// this interface.
 mixin TreeStateMixin<T> {
   /// Returns whether or not the given [SliverTreeNode] is expanded.
@@ -151,16 +153,16 @@ mixin TreeStateMixin<T> {
 /// It can be useful to expand or collapse nodes of the tree
 /// programmatically, for example to reconfigure an existing node
 /// based on a system event. To do so, create an [SliverTree]
-/// with an [TreeController] that's owned by a stateful widget
-/// or look up the tile's automatically created [TreeController]
-/// with [TreeController.of]
+/// with an [SliverTreeController] that's owned by a stateful widget
+/// or look up the tile's automatically created [SliverTreeController]
+/// with [SliverTreeController.of]
 ///
 /// The controller's methods to expand or collapse nodes cause the
 /// the [SliverTree] to rebuild, so they may not be called from
 /// a build method.
-class TreeController {
+class SliverTreeController {
   /// Create a controller to be used with [SliverTree.controller].
-  TreeController();
+  SliverTreeController();
 
   TreeStateMixin<dynamic>? _state;
 
@@ -267,7 +269,16 @@ class TreeController {
     }
   }
 
-  /// Finds the [TreeController] for the closest [SliverTree] instance
+  /// Returns the current row index of the given [TreeViewNode].
+  ///
+  /// If the node is not currently active in the tree, meaning its parent is
+  /// collapsed, this will return null.
+  int? getActiveIndexFor(SliverTreeNode<dynamic> node) {
+    assert(_state != null);
+    return _state!.getActiveIndexFor(node);
+  }
+
+  /// Finds the [SliverTreeController] for the closest [SliverTree] instance
   /// that encloses the given context.
   ///
   /// If no [SliverTree] encloses the given context, calling this
@@ -277,20 +288,20 @@ class TreeController {
   /// To return null if there is no [SliverTree] use [maybeOf] instead.
   ///
   /// {@tool dartpad}
-  /// Typical usage of the [TreeController.of] function is to call it
+  /// Typical usage of the [SliverTreeController.of] function is to call it
   /// from within the `build` method of a descendant of an [SliverTree].
   ///
   /// When the [SliverTree] is actually created in the same `build`
   /// function as the callback that refers to the controller, then the
   /// `context` argument to the `build` function can't be used to find
-  /// the [TreeController] (since it's "above" the widget
+  /// the [SliverTreeController] (since it's "above" the widget
   /// being returned in the widget tree). In cases like that you can
   /// add a [Builder] widget, which provides a new scope with a
   /// [BuildContext] that is "under" the [SliverTree]:
   ///
   // TODO(Piinks): add sample code
   /// {@end-tool}
-  static TreeController of(BuildContext context) {
+  static SliverTreeController of(BuildContext context) {
     final _SliverTreeState<dynamic>? result =
         context.findAncestorStateOfType<_SliverTreeState<dynamic>>();
     if (result != null) {
@@ -325,7 +336,7 @@ class TreeController {
   }
 
   /// Finds the [SliverTree] from the closest instance of this class that
-  /// encloses the given context and returns its [TreeController].
+  /// encloses the given context and returns its [SliverTreeController].
   ///
   /// If no [SliverTree] encloses the given context then return null.
   /// To throw an exception instead, use [of] instead of this function.
@@ -335,7 +346,7 @@ class TreeController {
   ///  * [of], a similar function to this one that throws if no [SliverTree]
   ///    encloses the given context. Also includes some sample code in its
   ///    documentation.
-  static TreeController? maybeOf(BuildContext context) {
+  static SliverTreeController? maybeOf(BuildContext context) {
     return context.findAncestorStateOfType<_SliverTreeState<dynamic>>()?.controller;
   }
 }
@@ -401,7 +412,7 @@ class SliverTree<T> extends StatefulWidget {
   /// If provided, the controller can be used to expand and collapse
   /// [SliverTreeNode]s, or lookup information about the current state of the
   /// [SliverTree].
-  final TreeController? controller;
+  final SliverTreeController? controller;
 
   /// Called when a [SliverTreeNode] expands or collapses.
   ///
@@ -472,7 +483,7 @@ class SliverTree<T> extends StatefulWidget {
     return Builder(builder: (BuildContext context) {
       return GestureDetector(
         onTap: () {
-          TreeController.of(context).toggleNode(node);
+          SliverTreeController.of(context).toggleNode(node);
         },
         child: child,
       );
@@ -486,7 +497,7 @@ class SliverTree<T> extends StatefulWidget {
     SliverTreeNode<dynamic> node,
     SliverLayoutDimensions dimensions,
   ) {
-    return 40.0;
+    return _kDefaultRowExtent;
   }
 
   /// Returns the default tree row for a given [SliverTreeNode].
@@ -505,8 +516,6 @@ class SliverTree<T> extends StatefulWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(children: <Widget>[
-        // Indent
-        // SizedBox.square(dimension: node.depth! * 10.0),
         // Icon for parent nodes
         SliverTree.toggleNodeWith(
           node: node,
@@ -542,8 +551,8 @@ typedef _AnimationRecord = ({
 });
 
 class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateMixin, TreeStateMixin<T> {
-  TreeController get controller => _treeController!;
-  TreeController? _treeController;
+  SliverTreeController get controller => _treeController!;
+  SliverTreeController? _treeController;
 
   final List<SliverTreeNode<T>> _activeNodes = <SliverTreeNode<T>>[];
   void _unpackActiveNodes({
@@ -576,7 +585,7 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
   void initState() {
     _unpackActiveNodes();
     assert(widget.controller?._state == null);
-    _treeController = widget.controller ?? TreeController();
+    _treeController = widget.controller ?? SliverTreeController();
     _treeController!._state = this;
     super.initState();
   }
@@ -596,7 +605,7 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
       // one internally.
       assert(oldWidget.controller == _treeController);
       oldWidget.controller!._state = null;
-      _treeController = TreeController();
+      _treeController = SliverTreeController();
       _treeController!._state = this;
     } else if (oldWidget.controller != widget.controller) {
       assert(oldWidget.controller != null);
@@ -700,42 +709,60 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
     return null;
   }
 
+  final List<SliverTreeNode<T>> _activeNodesToExpand = <SliverTreeNode<T>>[];
   @override
-  void expandAll() => _expandAll(widget.tree);
+  void expandAll() {
+    _activeNodesToExpand.clear();
+    _expandAll(widget.tree);
+    _activeNodesToExpand.reversed.forEach(toggleNode);
+  }
   void _expandAll(List<SliverTreeNode<T>> tree) {
     for (final SliverTreeNode<T> node in tree) {
       if (node.children.isNotEmpty) {
+        // This is a parent node.
+        // Expand all the children, and their children.
+        _expandAll(node.children);
         if (!node.isExpanded) {
+          // The node itself needs to be expanded.
           if (_activeNodes.contains(node)) {
-            // This is an active node in the tree, trigger the animation and
-            // rebuild.
-            toggleNode(node);
+            // This is an active node in the tree, add to
+            // the list to toggle once all hidden nodes
+            // have been handled.
+            _activeNodesToExpand.add(node);
           } else {
             // This is a hidden node. Update its expanded state.
             node._expanded = true;
           }
         }
-        _expandAll(node.children);
       }
     }
   }
 
+  final List<SliverTreeNode<T>> _activeNodesToCollapse = <SliverTreeNode<T>>[];
   @override
-  void collapseAll() => _collapseAll(widget.tree);
+  void collapseAll() {
+    _activeNodesToCollapse.clear();
+    _collapseAll(widget.tree);
+    _activeNodesToCollapse.reversed.forEach(toggleNode);
+  }
   void _collapseAll(List<SliverTreeNode<T>> tree) {
     for (final SliverTreeNode<T> node in tree) {
       if (node.children.isNotEmpty) {
+        // This is a parent node.
+        // Collapse all the children, and their children.
+        _collapseAll(node.children);
         if (node.isExpanded) {
+          // The node itself needs to be collapsed.
           if (_activeNodes.contains(node)) {
-            // This is an active node in the tree, trigger the animation and
-            // rebuild.
-            toggleNode(node);
+            // This is an active node in the tree, add to
+            // the list to toggle once all hidden nodes
+            // have been handled.
+            _activeNodesToCollapse.add(node);
           } else {
             // This is a hidden node. Update its expanded state.
             node._expanded = false;
           }
         }
-        _collapseAll(node.children);
       }
     }
   }
@@ -765,13 +792,12 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
       return;
     }
     setState(() {
-      node._expanded = !node._expanded;
       if (widget.onNodeToggle != null) {
         widget.onNodeToggle!(node);
       }
       final AnimationController controller = _currentAnimationForParent[node]?.controller
         ?? AnimationController(
-          value: node._expanded ? 0.0 : 1.0,
+          value: node._expanded ? 1.0 : 0.0,
           vsync: this,
           duration: widget.animationStyle?.duration ?? SliverTree.defaultAnimationDuration,
         )..addStatusListener((AnimationStatus status) {
@@ -810,17 +836,20 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
         // render object, since the indexes can change at any time.
         key: UniqueKey(),
       );
-      switch (node._expanded) {
+      switch (!node._expanded) {
         case true:
           // Expanding
           // Adds new nodes that are coming into view.
+          node._expanded = true;
           _unpackActiveNodes();
           controller.forward();
         case false:
           // Collapsing
           controller.reverse().then((_) {
             // Removes nodes that have been hidden after the collapsing
-            // animation completes.
+            // animation completes, only change node expansion state after
+            // animation completes as this effects which nodes are unpacked.
+            node._expanded = false;
             _unpackActiveNodes();
           });
       }

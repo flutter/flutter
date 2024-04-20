@@ -857,6 +857,9 @@ class SliverTreeIndentationType {
   }
 }
 
+// Used during paint to delineate animating portions of the tree.
+typedef _PaintSegment = ({int leadingIndex, int trailingIndex});
+
 // This will likely need to move to the same file as RenderSliverMultiBoxAdaptor
 // to access private API around keep alives and visiting children in depth and breadth first traversal order
 
@@ -1154,7 +1157,7 @@ class RenderSliverTree extends RenderSliverVariedExtentList {
     // Separate animating segments to clip for any overlap.
     int leadingIndex = indexOf(firstChild!);
     final List<int> animationIndices = _animationLeadingIndices.keys.toList()..sort();
-    final List<({int leadingIndex, int trailingIndex})> paintSegments = <({int leadingIndex, int trailingIndex})>[];
+    final List<_PaintSegment> paintSegments = <_PaintSegment>[];
     while (animationIndices.isNotEmpty) {
       final int trailingIndex = animationIndices.removeAt(0);
       paintSegments.add((leadingIndex: leadingIndex, trailingIndex: trailingIndex));
@@ -1166,7 +1169,7 @@ class RenderSliverTree extends RenderSliverVariedExtentList {
     paintUpTo(paintSegments.removeAt(0).trailingIndex, nextChild, context, offset);
     // Paint the rest with clip layers.
     while (paintSegments.isNotEmpty) {
-      final ({int leadingIndex, int trailingIndex}) segment = paintSegments.removeAt(0);
+      final _PaintSegment segment = paintSegments.removeAt(0);
 
       // Rect is calculated by the trailing edge of the parent (preceding
       // leadingIndex), and the trailing edge of the trailing index. We cannot

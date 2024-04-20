@@ -124,8 +124,8 @@ void main() {
       ];
     });
     testWidgets('Can set controller on SliverTree', (WidgetTester tester) async {
-      final TreeController controller = TreeController();
-      TreeController? returnedController;
+      final SliverTreeController controller = SliverTreeController();
+      SliverTreeController? returnedController;
       await tester.pumpWidget(MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
@@ -133,7 +133,7 @@ void main() {
               tree: simpleNodeSet,
               controller: controller,
               treeNodeBuilder: (BuildContext context, SliverTreeNode<dynamic> node, {AnimationStyle? animationStyle}) {
-                returnedController ??= TreeController.of(context);
+                returnedController ??= SliverTreeController.of(context);
                 return SliverTree.defaultTreeNodeBuilder(
                   context,
                   node,
@@ -148,7 +148,7 @@ void main() {
     });
 
     testWidgets('Can get default controller on SliverTree', (WidgetTester tester) async {
-      TreeController? returnedController;
+      SliverTreeController? returnedController;
       await tester.pumpWidget(MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
@@ -159,7 +159,7 @@ void main() {
                 SliverTreeNode<dynamic> node, {
                 AnimationStyle? animationStyle,
               }) {
-                returnedController ??= TreeController.maybeOf(context);
+                returnedController ??= SliverTreeController.maybeOf(context);
                 return SliverTree.defaultTreeNodeBuilder(
                   context,
                   node,
@@ -174,7 +174,7 @@ void main() {
     });
 
     testWidgets('Can get node for SliverTreeNode.content', (WidgetTester tester) async {
-      final TreeController controller = TreeController();
+      final SliverTreeController controller = SliverTreeController();
       await tester.pumpWidget(MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
@@ -190,7 +190,7 @@ void main() {
     });
 
     testWidgets('Can get isExpanded for a node', (WidgetTester tester) async {
-      final TreeController controller = TreeController();
+      final SliverTreeController controller = SliverTreeController();
       await tester.pumpWidget(MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
@@ -212,7 +212,7 @@ void main() {
     });
 
     testWidgets('Can get isActive for a node', (WidgetTester tester) async {
-      final TreeController controller = TreeController();
+      final SliverTreeController controller = SliverTreeController();
       await tester.pumpWidget(MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
@@ -243,7 +243,7 @@ void main() {
     });
 
     testWidgets('Can toggleNode, to collapse or expand', (WidgetTester tester) async {
-      final TreeController controller = TreeController();
+      final SliverTreeController controller = SliverTreeController();
       await tester.pumpWidget(MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
@@ -288,15 +288,19 @@ void main() {
       controller.toggleNode(simpleNodeSet[1]);
       expect(
         controller.isExpanded(simpleNodeSet[1]),
-        isFalse,
+        isTrue,
       );
       expect(
         controller.isActive(simpleNodeSet[1].children[0]),
         isTrue,
       );
       // Nodes are not removed from the active list until the collapse animation
-      // completes.
+      // completes. The parent expansion state also updates.
       await tester.pumpAndSettle();
+      expect(
+        controller.isExpanded(simpleNodeSet[1]),
+        isFalse,
+      );
       expect(
         controller.isActive(simpleNodeSet[1].children[0]),
         isFalse,
@@ -305,7 +309,7 @@ void main() {
 
     testWidgets('Can expandNode, then collapseAll',
         (WidgetTester tester) async {
-      final TreeController controller = TreeController();
+      final SliverTreeController controller = SliverTreeController();
       await tester.pumpWidget(MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
@@ -344,6 +348,7 @@ void main() {
       expect(controller.isExpanded(simpleNodeSet[2]), isTrue);
       // Collapse both.
       controller.collapseAll();
+      await tester.pumpAndSettle();
       // Both parents from our simple node set have collapsed.
       // 'Root 1'
       expect(controller.isExpanded(simpleNodeSet[1]), isFalse);
@@ -352,7 +357,7 @@ void main() {
     });
 
     testWidgets('Can collapseNode, then expandAll', (WidgetTester tester) async {
-      final TreeController controller = TreeController();
+      final SliverTreeController controller = SliverTreeController();
       await tester.pumpWidget(MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
@@ -377,7 +382,7 @@ void main() {
       controller.collapseNode(simpleNodeSet[1]);
       expect(
         controller.isExpanded(simpleNodeSet[1]),
-        isFalse,
+        isTrue,
       );
       expect(
         controller.isActive(simpleNodeSet[1].children[0]),
@@ -418,7 +423,7 @@ void main() {
   });
 
   testWidgets('.toggleNodeWith, onNodeToggle', (WidgetTester tester) async {
-    final TreeController controller = TreeController();
+    final SliverTreeController controller = SliverTreeController();
     // The default node builder wraps the leading icon with toggleNodeWith.
     bool toggled = false;
     SliverTreeNode<String>? toggledNode;
@@ -439,9 +444,11 @@ void main() {
     expect(controller.isExpanded(simpleNodeSet[1]), isTrue);
     await tester.tap(find.byType(Icon).first);
     await tester.pump();
-    expect(controller.isExpanded(simpleNodeSet[1]), isFalse);
+    expect(controller.isExpanded(simpleNodeSet[1]), isTrue);
     expect(toggled, isTrue);
     expect(toggledNode, simpleNodeSet[1]);
+    await tester.pumpAndSettle();
+    expect(controller.isExpanded(simpleNodeSet[1]), isFalse);
     toggled = false;
     toggledNode = null;
     // Use toggleNodeWith to make the whole row trigger the node state.
