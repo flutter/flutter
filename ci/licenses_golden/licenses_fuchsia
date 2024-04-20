@@ -1,4 +1,4 @@
-Signature: 4d1d8022b5894211c07958fdad2ffdb6
+Signature: 613be34013a0837946dc7893b80e2e7f
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -3889,6 +3889,7 @@ FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/x64-api-20/release/con
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/x64-api-20/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/async-default.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/backend_fuchsia_globals/backend_fuchsia_globals.ifs
+FILE: ../../../fuchsia/sdk/linux/pkg/driver_component/driver_component.json
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_runtime_shared_lib/driver_runtime.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/fdio.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/heapdump_instrumentation.ifs
@@ -5295,6 +5296,10 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_wire/include/lib/fidl/cpp/wire/s
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_wire/include/lib/fidl/cpp/wire/vector_view.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/function.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/internal/function.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/hwreg/include/hwreg/bitfields.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/hwreg/include/hwreg/internal.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/hwreg/include/hwreg/mmio.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/hwreg/printers.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace-engine-headersonly/include/lib/trace-engine/context.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace-engine-headersonly/include/lib/trace-engine/fields.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace-engine-headersonly/include/lib/trace-engine/handler.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -5626,6 +5631,10 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_wire/include/lib/fidl/cpp/wire/str
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_wire/include/lib/fidl/cpp/wire/vector_view.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/function.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/internal/function.h
+FILE: ../../../fuchsia/sdk/linux/pkg/hwreg/include/hwreg/bitfields.h
+FILE: ../../../fuchsia/sdk/linux/pkg/hwreg/include/hwreg/internal.h
+FILE: ../../../fuchsia/sdk/linux/pkg/hwreg/include/hwreg/mmio.h
+FILE: ../../../fuchsia/sdk/linux/pkg/hwreg/printers.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine-headersonly/include/lib/trace-engine/context.h
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine-headersonly/include/lib/trace-engine/fields.h
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine-headersonly/include/lib/trace-engine/handler.h
@@ -5989,6 +5998,8 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/vmo/state.cc + ../../../fuchsia/s
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/vmo/types.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/media_cpp/include/lib/media/cpp/type_converters.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/media_cpp/type_converters.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/mmio/include/lib/mmio/mmio.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/mmio/mmio-buffer.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_token_pair.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/optional.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/queue.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -6335,6 +6346,8 @@ FILE: ../../../fuchsia/sdk/linux/pkg/inspect/vmo/state.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/vmo/types.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp/include/lib/media/cpp/type_converters.h
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp/type_converters.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/mmio/include/lib/mmio/mmio.h
+FILE: ../../../fuchsia/sdk/linux/pkg/mmio/mmio-buffer.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_token_pair.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/optional.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/queue.h
@@ -10293,6 +10306,7 @@ FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/x64-api-20/release/con
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/x64-api-20/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/async-default.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/backend_fuchsia_globals/backend_fuchsia_globals.ifs
+FILE: ../../../fuchsia/sdk/linux/pkg/driver_component/driver_component.json
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_runtime_shared_lib/driver_runtime.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/fdio.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/heapdump_instrumentation.ifs
@@ -11284,6 +11298,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/frames.fidl + .
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/instance.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/mac.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/session.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.pci/pci.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.sensor/sensor.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/reboot_reason.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.temperature/temperature.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -11478,6 +11493,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/internal/compiler.h +
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/internal/result.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/result.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/input_report_reader/include/lib/input_report_reader/reader.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/mmio-ptr/include/lib/mmio-ptr/mmio-ptr.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/array.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/bit.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/array.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -11566,6 +11582,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/frames.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/instance.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/mac.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/session.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.pci/pci.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.sensor/sensor.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/reboot_reason.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.temperature/temperature.fidl
@@ -11760,6 +11777,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/internal/compiler.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/internal/result.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/result.h
 FILE: ../../../fuchsia/sdk/linux/pkg/input_report_reader/include/lib/input_report_reader/reader.h
+FILE: ../../../fuchsia/sdk/linux/pkg/mmio-ptr/include/lib/mmio-ptr/mmio-ptr.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/array.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/bit.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/array.h
@@ -12390,6 +12408,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_outgoing_cpp/include/lib/compon
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_outgoing_cpp/include/lib/component/outgoing/cpp/outgoing_directory.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_outgoing_cpp/include/lib/component/outgoing/cpp/structured_config.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_outgoing_cpp/outgoing_directory.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_component/driver.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/include/lib/driver/component/cpp/composite_node_spec.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/include/lib/driver/component/cpp/driver_base.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/include/lib/driver/component/cpp/node_add_args.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -12489,6 +12508,10 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/include/lib/inspect
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/include/lib/inspect/component/cpp/tree_handler_settings.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/service.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/testing.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/mmio/include/lib/mmio/mmio-buffer.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/mmio/include/lib/mmio/mmio-internal.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/mmio/include/lib/mmio/mmio-pinned-buffer.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/mmio/include/lib/mmio/mmio-view.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp_testing/fake_flatland.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp_testing/fake_flatland_types.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/linkage.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -12511,6 +12534,15 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/utf-utils/include/lib/utf-utils/utf-utils
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/utf-utils/internal/scalar.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/utf-utils/utf-utils.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/vulkan/client.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/zbi-format/include/lib/zbi-format/board.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/zbi-format/include/lib/zbi-format/cpu.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/zbi-format/include/lib/zbi-format/driver-config.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/zbi-format/include/lib/zbi-format/graphics.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/zbi-format/include/lib/zbi-format/kernel.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/zbi-format/include/lib/zbi-format/memory.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/zbi-format/include/lib/zbi-format/partition.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/zbi-format/include/lib/zbi-format/reboot.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/zbi-format/include/lib/zbi-format/zbi.h + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/errors.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/zircon/syscalls/internal/cdecls.inc
@@ -12715,6 +12747,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/component_outgoing_cpp/include/lib/componen
 FILE: ../../../fuchsia/sdk/linux/pkg/component_outgoing_cpp/include/lib/component/outgoing/cpp/outgoing_directory.h
 FILE: ../../../fuchsia/sdk/linux/pkg/component_outgoing_cpp/include/lib/component/outgoing/cpp/structured_config.h
 FILE: ../../../fuchsia/sdk/linux/pkg/component_outgoing_cpp/outgoing_directory.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/driver_component/driver.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/include/lib/driver/component/cpp/composite_node_spec.h
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/include/lib/driver/component/cpp/driver_base.h
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/include/lib/driver/component/cpp/node_add_args.h
@@ -12814,6 +12847,10 @@ FILE: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/include/lib/inspect/c
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/include/lib/inspect/component/cpp/tree_handler_settings.h
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/service.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect_component_cpp/testing.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/mmio/include/lib/mmio/mmio-buffer.h
+FILE: ../../../fuchsia/sdk/linux/pkg/mmio/include/lib/mmio/mmio-internal.h
+FILE: ../../../fuchsia/sdk/linux/pkg/mmio/include/lib/mmio/mmio-pinned-buffer.h
+FILE: ../../../fuchsia/sdk/linux/pkg/mmio/include/lib/mmio/mmio-view.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp_testing/fake_flatland.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp_testing/fake_flatland_types.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/linkage.h
@@ -12836,6 +12873,15 @@ FILE: ../../../fuchsia/sdk/linux/pkg/utf-utils/include/lib/utf-utils/utf-utils.h
 FILE: ../../../fuchsia/sdk/linux/pkg/utf-utils/internal/scalar.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/utf-utils/utf-utils.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/client.shard.cml
+FILE: ../../../fuchsia/sdk/linux/pkg/zbi-format/include/lib/zbi-format/board.h
+FILE: ../../../fuchsia/sdk/linux/pkg/zbi-format/include/lib/zbi-format/cpu.h
+FILE: ../../../fuchsia/sdk/linux/pkg/zbi-format/include/lib/zbi-format/driver-config.h
+FILE: ../../../fuchsia/sdk/linux/pkg/zbi-format/include/lib/zbi-format/graphics.h
+FILE: ../../../fuchsia/sdk/linux/pkg/zbi-format/include/lib/zbi-format/kernel.h
+FILE: ../../../fuchsia/sdk/linux/pkg/zbi-format/include/lib/zbi-format/memory.h
+FILE: ../../../fuchsia/sdk/linux/pkg/zbi-format/include/lib/zbi-format/partition.h
+FILE: ../../../fuchsia/sdk/linux/pkg/zbi-format/include/lib/zbi-format/reboot.h
+FILE: ../../../fuchsia/sdk/linux/pkg/zbi-format/include/lib/zbi-format/zbi.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2022 The Fuchsia Authors. All rights reserved.
 
@@ -12956,6 +13002,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/stats.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/offer.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/use.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/mmio/include/lib/mmio/mmio-ops.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sync_cpp/include/lib/sync/cpp/mutex.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service_handler.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/vfs_internal/include/lib/vfs/internal/libvfs_private.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -13055,6 +13102,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/s
 FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/stats.h
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/offer.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/use.shard.cml
+FILE: ../../../fuchsia/sdk/linux/pkg/mmio/include/lib/mmio/mmio-ops.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sync_cpp/include/lib/sync/cpp/mutex.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service_handler.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_internal/include/lib/vfs/internal/libvfs_private.h
@@ -17032,6 +17080,7 @@ FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/x64-api-20/release/con
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/x64-api-20/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/async-default.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/backend_fuchsia_globals/backend_fuchsia_globals.ifs
+FILE: ../../../fuchsia/sdk/linux/pkg/driver_component/driver_component.json
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_runtime_shared_lib/driver_runtime.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/fdio.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/heapdump_instrumentation.ifs
