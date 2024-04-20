@@ -27,7 +27,7 @@ function follow_links() (
   echo "$file"
 )
 
-SCRIPT_DIR=$(follow_links "$(dirname -- "${BASH_SOURCE[0]}")")
+SCRIPT_DIR="$(dirname -- "$(follow_links "${BASH_SOURCE[0]}")")"
 ENGINE_DIR="$(cd "$SCRIPT_DIR/.."; pwd -P)"
 
 case "$(uname -s)" in
