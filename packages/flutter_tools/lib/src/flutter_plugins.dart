@@ -1189,8 +1189,9 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
     for (final MapEntry<String, List<Plugin>> implCandidatesEntry in pluginImplCandidates.entries) {
       try {
         final Plugin? resolution = _resolveImplementationOfPlugin(
-          platformKey,
-          implCandidatesEntry,
+          platformKey: platformKey,
+          pluginName: implCandidatesEntry.key,
+          candidates: implCandidatesEntry.value,
           defaultPackageName: defaultImplementations[implCandidatesEntry.key],
         );
         if (resolution != null) {
@@ -1286,13 +1287,14 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
   return (implementsPackage, null);
 }
 
-/// Get the resolved plugin name serving as implementation for a plugin.
-Plugin? _resolveImplementationOfPlugin(
-  String platformKey,
-  MapEntry<String, List<Plugin>> implCandidatesEntry, {
+/// Get the resolved plugin from the [candidates] serving as implementation for
+/// [pluginName].
+Plugin? _resolveImplementationOfPlugin({
+  required String platformKey,
+  required String pluginName,
+  required List<Plugin> candidates,
   String? defaultPackageName,
 }) {
-  final List<Plugin> candidates = implCandidatesEntry.value;
   // If there's only one candidate, use it.
   if (candidates.length == 1) {
     return candidates.first;
@@ -1304,7 +1306,7 @@ Plugin? _resolveImplementationOfPlugin(
   if (directDependencies.isNotEmpty) {
     if (directDependencies.length > 1) {
       throwToolExit(
-          'Plugin ${implCandidatesEntry.key}:$platformKey has conflicting direct dependency implementations:\n'
+          'Plugin $pluginName:$platformKey has conflicting direct dependency implementations:\n'
           '${directDependencies.map((Plugin plugin) => '  ${plugin.name}\n').join()}'
           'To fix this issue, remove all but one of these dependencies from pubspec.yaml.\n');
     } else {
@@ -1321,7 +1323,7 @@ Plugin? _resolveImplementationOfPlugin(
   }
   // Otherwise, require an explicit choice.
   if (candidates.length > 1) {
-    throwToolExit('Plugin ${implCandidatesEntry.key}:$platformKey has multiple possible implementations:\n'
+    throwToolExit('Plugin $pluginName:$platformKey has multiple possible implementations:\n'
         '${candidates.map((Plugin plugin) => '  ${plugin.name}\n').join()}'
         'To fix this issue, add one of these dependencies to pubspec.yaml.\n');
   }
