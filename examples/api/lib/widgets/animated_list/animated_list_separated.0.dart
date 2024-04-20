@@ -170,7 +170,7 @@ class ListModel<E> {
       final bool isLastItem = index == length;
       // If the removed item is the last item in the list, the separator of the preceding item is removed.
       final E itemOfRemovedSeparator = isLastItem && length > 0 ? _items[index - 1] : removedItem;
-      _animatedListSeparated!.removeSeparatedItem(
+      _animatedListSeparated!.removeItem(
         index,
         (BuildContext context, Animation<double> animation) {
           return removedItemBuilder(removedItem, context, animation);

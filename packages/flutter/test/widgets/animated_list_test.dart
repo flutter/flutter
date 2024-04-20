@@ -743,17 +743,6 @@ void main() {
     expect(find.text('separator after item 2'), findsNothing);
     await tester.pumpAndSettle();
 
-    // Test that removeItem throws for AnimatedList.separated
-    expect(() => listKey.currentState!.removeItem(
-      2,
-      (BuildContext context, Animation<double> animation) => const SizedBox.shrink(),
-      duration: const Duration(milliseconds: 100),
-    ), throwsA(isA<Exception>().having(
-      (Exception exception) => exception.toString(),
-      'text',
-      contains('Separated list items can not be removed with this method. Use removeSeparatedItem instead.'),
-    )));
-
      // Test for removeAllItems
     listKey.currentState!.removeAllSeparatedItems(
       itemRemovalBuilder,
@@ -785,7 +774,7 @@ void main() {
 
 
     // Test for removeSeparatedItem
-    listKey.currentState!.removeSeparatedItem(
+    listKey.currentState!.removeItem(
       1,
       itemRemovalBuilder,
       separatorRemovalBuilder,
@@ -812,16 +801,6 @@ void main() {
     expect(find.text('separator after item 2'), findsNothing);
     await tester.pumpAndSettle();
 
-    // Test that removeAllItems throws for AnimatedList.separated
-    expect(() => listKey.currentState!.removeAllItems(
-      (BuildContext context, Animation<double> animation) => const SizedBox.shrink(),
-      duration: const Duration(milliseconds: 100),
-    ), throwsA(isA<Exception>().having(
-      (Exception exception) => exception.toString(),
-      'text',
-      contains('Separated list items can not be removed with this method. Use removeAllSeparatedItems instead.'),
-    )));
-
     // Test for removeSeparatedItem when only one item left
     // Prepare
     listKey.currentState!.removeAllSeparatedItems(
@@ -837,7 +816,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Test
-    listKey.currentState!.removeSeparatedItem(
+    listKey.currentState!.removeItem(
       0,
       itemRemovalBuilder,
       separatorRemovalBuilder,
@@ -871,7 +850,7 @@ void main() {
 
     // Test for removeSeparatedItem on first item in list
     expect(find.byType(SizedBox), findsNWidgets(3));
-    listKey.currentState!.removeSeparatedItem(
+    listKey.currentState!.removeItem(
       0,
       itemRemovalBuilder,
       separatorRemovalBuilder,
@@ -926,6 +905,50 @@ void main() {
       );
     },
   );
+
+  testWidgets('AnimatedListSeparated applies MediaQuery padding', (WidgetTester tester) async {
+    const EdgeInsets padding = EdgeInsets.all(30.0);
+    EdgeInsets? innerMediaQueryPaddingItem;
+    EdgeInsets? innerMediaQueryPaddingSeparator;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.all(30.0),
+          ),
+          child: AnimatedListSeparated(
+            initialItemCount: 3,
+            itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+              innerMediaQueryPaddingItem = MediaQuery.paddingOf(context);
+              return const Placeholder();
+            },
+            separatorBuilder: (BuildContext context, int index, Animation<double> animation) {
+              innerMediaQueryPaddingSeparator = MediaQuery.paddingOf(context);
+              return const Placeholder();
+            },
+          ),
+        ),
+      ),
+    );
+    final Offset topLeft = tester.getTopLeft(find.byType(Placeholder).first);
+    // Automatically apply the top padding into sliver.
+    expect(topLeft, Offset(0.0, padding.top));
+
+    // Scroll to the bottom.
+    await tester.drag(find.byType(AnimatedListSeparated), const Offset(0.0, -1000.0));
+    await tester.pumpAndSettle();
+
+    final Offset bottomLeft = tester.getBottomLeft(find.byType(Placeholder).last);
+    // Automatically apply the bottom padding into sliver.
+    expect(bottomLeft, Offset(0.0, 660.0 - padding.bottom));
+
+    // Verify that the left/right padding is not applied to the item.
+    expect(innerMediaQueryPaddingItem, const EdgeInsets.symmetric(horizontal: 30.0));
+
+    // Verify that the left/right padding is not applied to the separator.
+    expect(innerMediaQueryPaddingSeparator, const EdgeInsets.symmetric(horizontal: 30.0));
+  });
 }
 
 
