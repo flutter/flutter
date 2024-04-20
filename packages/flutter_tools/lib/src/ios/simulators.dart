@@ -21,6 +21,7 @@ import '../convert.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
+import '../device_vm_service_discovery_for_attach.dart';
 import '../globals.dart' as globals;
 import '../macos/xcode.dart';
 import '../project.dart';
@@ -570,7 +571,15 @@ class IOSSimulator extends Device {
       deviceID: id,
     );
     if (!buildResult.success) {
-      await diagnoseXcodeBuildFailure(buildResult, globals.flutterUsage, globals.logger, globals.analytics);
+      await diagnoseXcodeBuildFailure(
+        buildResult,
+        analytics: globals.analytics,
+        fileSystem: globals.fs,
+        flutterUsage: globals.flutterUsage,
+        logger: globals.logger,
+        platform: SupportedPlatform.ios,
+        project: app.project.parent,
+      );
       throwToolExit('Could not build the application for the simulator.');
     }
 
@@ -652,6 +661,37 @@ class IOSSimulator extends Device {
         logFile.writeAsBytesSync(<int>[]);
       }
     }
+  }
+
+  @override
+  VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
+    String? appId,
+    String? fuchsiaModule,
+    int? filterDevicePort,
+    int? expectedHostPort,
+    required bool ipv6,
+    required Logger logger,
+  }) {
+    final MdnsVMServiceDiscoveryForAttach mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
+      device: this,
+      appId: appId,
+      deviceVmservicePort: filterDevicePort,
+      hostVmservicePort: expectedHostPort,
+      usesIpv6: ipv6,
+      useDeviceIPAsHost: false,
+    );
+
+    return DelegateVMServiceDiscoveryForAttach(<VMServiceDiscoveryForAttach>[
+      mdnsVMServiceDiscoveryForAttach,
+      super.getVMServiceDiscoveryForAttach(
+        appId: appId,
+        fuchsiaModule: fuchsiaModule,
+        filterDevicePort: filterDevicePort,
+        expectedHostPort: expectedHostPort,
+        ipv6: ipv6,
+        logger: logger,
+      ),
+    ]);
   }
 
   @override

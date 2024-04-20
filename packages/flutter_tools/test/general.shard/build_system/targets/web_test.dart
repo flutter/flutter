@@ -170,6 +170,8 @@ void main() {
       ..writeAsStringSync('A');
     environment.buildDir.childFile('main.dart.js').createSync();
     environment.buildDir.childFile('main.dart.js.map').createSync();
+    environment.buildDir.childFile('main.dart.js_1.part.js').createSync();
+    environment.buildDir.childFile('main.dart.js_1.part.js.map').createSync();
 
     await WebReleaseBundle(<WebCompilerConfig>[
         const JsCompilerConfig()
@@ -180,6 +182,10 @@ void main() {
     expect(environment.outputDir.childFile('main.dart.js')
       .existsSync(), true);
     expect(environment.outputDir.childFile('main.dart.js.map')
+      .existsSync(), true);
+    expect(environment.outputDir.childFile('main.dart.js_1.part.js')
+      .existsSync(), true);
+    expect(environment.outputDir.childFile('main.dart.js_1.part.js.map')
       .existsSync(), true);
     expect(environment.outputDir.childDirectory('assets')
       .childFile('AssetManifest.bin.json').existsSync(), true);
@@ -944,6 +950,68 @@ void main() {
       }
     }
   }
+
+  test('Dart2JSTarget has unique build keys for compiler configurations', () {
+    const List<JsCompilerConfig> testConfigs = <JsCompilerConfig>[
+      // Default values
+      JsCompilerConfig(),
+
+      // Each individual property being made non-default
+      JsCompilerConfig(csp: true),
+      JsCompilerConfig(dumpInfo: true),
+      JsCompilerConfig(nativeNullAssertions: true),
+      JsCompilerConfig(optimizationLevel: 0),
+      JsCompilerConfig(noFrequencyBasedMinification: true),
+      JsCompilerConfig(sourceMaps: false),
+      JsCompilerConfig(renderer: WebRendererMode.canvaskit),
+
+      // All properties non-default
+      JsCompilerConfig(
+        csp: true,
+        dumpInfo: true,
+        nativeNullAssertions: true,
+        optimizationLevel: 0,
+        noFrequencyBasedMinification: true,
+        sourceMaps: false,
+        renderer: WebRendererMode.canvaskit,
+      ),
+    ];
+
+    final Iterable<String> buildKeys = testConfigs.map((JsCompilerConfig config) {
+      final Dart2JSTarget target = Dart2JSTarget(config);
+      return target.buildKey;
+    });
+
+    // Make sure all the build keys are unique.
+    expect(buildKeys.toSet().length, buildKeys.length);
+  });
+
+  test('Dart2Wasm has unique build keys for compiler configurations', () {
+    const List<WasmCompilerConfig> testConfigs = <WasmCompilerConfig>[
+      // Default values
+      WasmCompilerConfig(),
+
+      // Each individual property being made non-default
+      WasmCompilerConfig(optimizationLevel: 0),
+      WasmCompilerConfig(renderer: WebRendererMode.canvaskit),
+      WasmCompilerConfig(stripWasm: false),
+
+      // All properties non-default
+      WasmCompilerConfig(
+        optimizationLevel: 0,
+        stripWasm: false,
+        renderer: WebRendererMode.canvaskit,
+      ),
+    ];
+
+    final Iterable<String> buildKeys = testConfigs.map((WasmCompilerConfig config) {
+      final Dart2WasmTarget target = Dart2WasmTarget(config);
+      return target.buildKey;
+    });
+
+    // Make sure all the build keys are unique.
+    expect(buildKeys.toSet().length, buildKeys.length);
+  });
 
   test('Generated service worker is empty with none-strategy', () => testbed.run(() {
     final String fileGeneratorsPath =
