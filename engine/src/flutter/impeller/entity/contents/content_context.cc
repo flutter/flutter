@@ -260,8 +260,7 @@ ContentContext::ContentContext(
                                ? std::make_shared<RenderTargetCache>(
                                      context_->GetResourceAllocator())
                                : std::move(render_target_allocator)),
-      host_buffer_(HostBuffer::Create(context_->GetResourceAllocator())),
-      pending_command_buffers_(std::make_unique<PendingCommandBuffers>()) {
+      host_buffer_(HostBuffer::Create(context_->GetResourceAllocator())) {
   if (!context_ || !context_->IsValid()) {
     return;
   }
@@ -422,8 +421,7 @@ ContentContext::ContentContext(
 
   rrect_blur_pipelines_.CreateDefault(*context_, options_trianglestrip);
   texture_strict_src_pipelines_.CreateDefault(*context_, options);
-  position_uv_pipelines_.CreateDefault(*context_, options);
-  tiled_texture_pipelines_.CreateDefault(*context_, options);
+  tiled_texture_pipelines_.CreateDefault(*context_, options, {supports_decal});
   kernel_decal_pipelines_.CreateDefault(*context_, options_trianglestrip);
   kernel_nodecal_pipelines_.CreateDefault(*context_, options_trianglestrip);
   border_mask_blur_pipelines_.CreateDefault(*context_, options_trianglestrip);
@@ -456,11 +454,6 @@ ContentContext::ContentContext(
         PointsComputeShaderPipeline::MakeDefaultPipelineDescriptor(*context_);
     point_field_compute_pipelines_ =
         context_->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
-
-    auto uv_pipeline_desc =
-        UvComputeShaderPipeline::MakeDefaultPipelineDescriptor(*context_);
-    uv_compute_pipelines_ =
-        context_->GetPipelineLibrary()->GetPipeline(uv_pipeline_desc).Get();
   }
 
   is_valid_ = true;

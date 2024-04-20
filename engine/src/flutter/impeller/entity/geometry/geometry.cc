@@ -7,7 +7,6 @@
 #include <memory>
 #include <optional>
 
-#include "fml/status.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/geometry/circle_geometry.h"
 #include "impeller/entity/geometry/cover_geometry.h"
@@ -52,120 +51,6 @@ GeometryResult Geometry::ComputePositionGeometry(
           },
       .transform = entity.GetShaderTransform(pass),
   };
-}
-
-GeometryResult Geometry::ComputePositionUVGeometry(
-    const ContentContext& renderer,
-    const Tessellator::VertexGenerator& generator,
-    const Matrix& uv_transform,
-    const Entity& entity,
-    RenderPass& pass) {
-  using VT = TextureFillVertexShader::PerVertexData;
-
-  size_t count = generator.GetVertexCount();
-
-  return GeometryResult{
-      .type = generator.GetTriangleType(),
-      .vertex_buffer =
-          {
-              .vertex_buffer = renderer.GetTransientsBuffer().Emplace(
-                  count * sizeof(VT), alignof(VT),
-                  [&generator, &uv_transform](uint8_t* buffer) {
-                    auto vertices = reinterpret_cast<VT*>(buffer);
-                    generator.GenerateVertices(
-                        [&vertices, &uv_transform](const Point& p) {  //
-                          *vertices++ = {
-                              .position = p,
-                              .texture_coords = uv_transform * p,
-                          };
-                        });
-                    FML_DCHECK(vertices == reinterpret_cast<VT*>(buffer) +
-                                               generator.GetVertexCount());
-                  }),
-              .vertex_count = count,
-              .index_type = IndexType::kNone,
-          },
-      .transform = entity.GetShaderTransform(pass),
-  };
-}
-
-VertexBufferBuilder<TextureFillVertexShader::PerVertexData>
-ComputeUVGeometryCPU(
-    VertexBufferBuilder<SolidFillVertexShader::PerVertexData>& input,
-    Point texture_origin,
-    Size texture_coverage,
-    Matrix effect_transform) {
-  VertexBufferBuilder<TextureFillVertexShader::PerVertexData> vertex_builder;
-  vertex_builder.Reserve(input.GetVertexCount());
-  input.IterateVertices(
-      [&vertex_builder, &texture_coverage, &effect_transform,
-       &texture_origin](SolidFillVertexShader::PerVertexData old_vtx) {
-        TextureFillVertexShader::PerVertexData data;
-        data.position = old_vtx.position;
-        data.texture_coords = effect_transform *
-                              (old_vtx.position - texture_origin) /
-                              texture_coverage;
-        vertex_builder.AppendVertex(data);
-      });
-  return vertex_builder;
-}
-
-GeometryResult ComputeUVGeometryForRect(Rect source_rect,
-                                        Rect texture_bounds,
-                                        Matrix effect_transform,
-                                        const ContentContext& renderer,
-                                        const Entity& entity,
-                                        RenderPass& pass) {
-  auto& host_buffer = renderer.GetTransientsBuffer();
-
-  // Calculate UV-specific transform based on texture coverage and effect.
-  // For example, if the texture is 100x100 and the effect transform is
-  // scaling by 2.0, texture_bounds.GetNormalizingTransform() will result in a
-  // Matrix that scales by 0.01, and then if the effect_transform is
-  // Matrix::MakeScale(Vector2{2, 2}), the resulting uv_transform will have x
-  // and y basis vectors with scale 0.02.
-  auto uv_transform = texture_bounds.GetNormalizingTransform() *  //
-                      effect_transform;
-
-  // Allocate space for vertex and UV data (4 vertices)
-  // 0: position
-  // 1: UV
-  // 2: position
-  // 3: UV
-  // etc.
-  Point data[8];
-
-  // Get the raw points from the rect and transform them into UV space.
-  auto points = source_rect.GetPoints();
-  for (auto i = 0u, j = 0u; i < 8; i += 2, j++) {
-    // Store original coordinates.
-    data[i] = points[j];
-
-    // Store transformed UV coordinates.
-    data[i + 1] = uv_transform * points[j];
-  }
-
-  return GeometryResult{
-      .type = PrimitiveType::kTriangleStrip,
-      .vertex_buffer =
-          {
-              .vertex_buffer = host_buffer.Emplace(
-                  /*buffer=*/data,
-                  /*length=*/16 * sizeof(float),
-                  /*align=*/alignof(float)),
-              .vertex_count = 4,
-              .index_type = IndexType::kNone,
-          },
-      .transform = entity.GetShaderTransform(pass),
-  };
-}
-
-GeometryResult Geometry::GetPositionUVBuffer(Rect texture_coverage,
-                                             Matrix effect_transform,
-                                             const ContentContext& renderer,
-                                             const Entity& entity,
-                                             RenderPass& pass) const {
-  return {};
 }
 
 GeometryResult::Mode Geometry::GetResultMode() const {

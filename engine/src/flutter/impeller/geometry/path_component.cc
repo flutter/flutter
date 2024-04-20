@@ -11,9 +11,8 @@
 namespace impeller {
 
 VertexWriter::VertexWriter(std::vector<Point>& points,
-                           std::vector<uint16_t>& indices,
-                           std::optional<Matrix> uv_transform)
-    : points_(points), indices_(indices), uv_transform_(uv_transform) {}
+                           std::vector<uint16_t>& indices)
+    : points_(points), indices_(indices) {}
 
 void VertexWriter::EndContour() {
   if (points_.size() == 0u || contour_start_ == points_.size() - 1) {
@@ -66,9 +65,6 @@ void VertexWriter::EndContour() {
 
 void VertexWriter::Write(Point point) {
   points_.emplace_back(point);
-  if (uv_transform_.has_value()) {
-    points_.emplace_back(*uv_transform_ * point);
-  }
 }
 
 /*
