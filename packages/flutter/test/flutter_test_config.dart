@@ -41,7 +41,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
   // receive the event.
   WidgetController.hitTestWarningShouldBeFatal = true;
 
-  //if (_isLeakTrackingEnabled()) {
+  if (_isLeakTrackingEnabled()) {
     LeakTesting.enable();
 
     LeakTracking.warnForUnsupportedPlatforms = false;
@@ -54,7 +54,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
         'CurvedAnimation',
       ],
     );
-  //}
+  }
 
   // Enable golden file testing using Skia Gold.
   return flutter_goldens.testExecutable(testMain);

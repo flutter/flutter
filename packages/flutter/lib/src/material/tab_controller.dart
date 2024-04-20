@@ -146,6 +146,8 @@ class TabController extends ChangeNotifier {
   ///
   /// When [DefaultTabController.length] is updated, this method is called to
   /// create a new [TabController] without creating a new [AnimationController].
+  /// Instead the [_animationController] is nulled in current instance and
+  /// passed to the new instance.
   TabController _copyWithAndDispose({
     required int? index,
     required int? length,
@@ -162,15 +164,10 @@ class TabController extends ChangeNotifier {
       previousIndex: previousIndex ?? _previousIndex,
       animationDuration: animationDuration ?? _animationDuration,
     );
-    _disposeAnimationController = false;
+    _animationController = null;
     dispose();
     return result;
   }
-
-  /// If false, it means the ownership of [_animationController] is transferred to another TabController
-  /// by the method [_copyWithAndDispose], so the controller is in use and should not be disposed
-  /// by this class.
-  bool _disposeAnimationController = true;
 
   /// An animation whose value represents the current position of the [TabBar]'s
   /// selected tab indicator as well as the scrollOffsets of the [TabBar]
@@ -284,9 +281,7 @@ class TabController extends ChangeNotifier {
 
   @override
   void dispose() {
-    if (_disposeAnimationController) {
-      _animationController?.dispose();
-    }
+    _animationController?.dispose();
     _animationController = null;
     super.dispose();
   }
