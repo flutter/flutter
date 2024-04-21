@@ -9,7 +9,7 @@ import 'package:path/path.dart' as path;
 import '../run_command.dart';
 import '../utils.dart';
 
-Future<void> customerTestingRunner(String flutterRoot) async {
+Future<void> customerTestingRunner() async {
   printProgress('${green}Running customer testing$reset');
   await runCommand(
     'git',

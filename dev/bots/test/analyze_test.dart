@@ -45,6 +45,7 @@ void main() {
   final String testRootPath = path.join('test', 'analyze-test-input', 'root');
   final String dartName = Platform.isWindows ? 'dart.exe' : 'dart';
   final String dartPath = path.canonicalize(path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', dartName));
+  final String testGenDefaultsPath = path.join('test', 'analyze-gen-defaults');
 
   test('analyze.dart - verifyDeprecations', () async {
     final String result = await capture(() => verifyDeprecations(testRootPath, minimumMatches: 2), shouldHaveErrors: true);
@@ -138,6 +139,31 @@ void main() {
         '║ test/analyze-test-input/root/packages/foo/spaces_after_flow.dart:35: no space after flow control statement',
       ]
       .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
+      .join('\n');
+    expect(result,
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
+      '$lines\n'
+      '╚═══════════════════════════════════════════════════════════════════════════════\n'
+    );
+  });
+
+  test('analyze.dart - verifyRepositoryLinks', () async {
+    final String result = await capture(() => verifyRepositoryLinks(testRootPath), shouldHaveErrors: true);
+    const String bannedBranch = 'master';
+    final String file = Platform.isWindows ?
+      r'test\analyze-test-input\root\packages\foo\bad_repository_links.dart' :
+      'test/analyze-test-input/root/packages/foo/bad_repository_links.dart';
+    final String lines = <String>[
+        '║ $file contains https://android.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://chromium.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://cs.opensource.google.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://dart.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://flutter.googlesource.com/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://source.chromium.org/+/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://github.com/flutter/flutter/tree/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ $file contains https://raw.githubusercontent.com/flutter/flutter/blob/$bannedBranch/file1, which uses the banned "master" branch.',
+        '║ Change the URLs above to the expected pattern by using the "main" branch if it exists, otherwise adding the repository to the list of exceptions in analyze.dart.',
+      ]
       .join('\n');
     expect(result,
       '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
@@ -290,6 +316,26 @@ void main() {
       '$lines\n'
       '║ \n'
       '║ Typically the get* methods should be used to obtain the intrinsics of a RenderBox.\n'
+      '╚═══════════════════════════════════════════════════════════════════════════════\n'
+    );
+  });
+
+  test('analyze.dart - verifyMaterialFilesAreUpToDateWithTemplateFiles', () async {
+    String result = await capture(() => verifyMaterialFilesAreUpToDateWithTemplateFiles(
+      testGenDefaultsPath,
+      dartPath,
+    ), shouldHaveErrors: true);
+    final String lines = <String>[
+        '║ chip.dart is not up-to-date with the token template file.',
+      ]
+      .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
+      .join('\n');
+    const String errorStart = '╔═';
+    result = result.substring(result.indexOf(errorStart));
+    expect(result,
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
+      '$lines\n'
+      '║ See: https://github.com/flutter/flutter/blob/main/dev/tools/gen_defaults to update the token template files.\n'
       '╚═══════════════════════════════════════════════════════════════════════════════\n'
     );
   });
