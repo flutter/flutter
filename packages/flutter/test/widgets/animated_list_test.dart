@@ -690,6 +690,10 @@ void main() {
   });
 
   testWidgets('AnimatedListSeparated', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(600, 1800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
     Widget builder(BuildContext context, int index, Animation<double> animation) {
       return SizedBox(
         height: 100.0,
@@ -718,6 +722,12 @@ void main() {
           child: Center(child: Text('removing separator')),
         );
       }
+
+    List<Text> getItemsSeparatorsTexts(WidgetTester tester) {
+      final Finder itemsSeparators = find.descendant(of: find.byType(SliverAnimatedList), matching: find.byType(Text));
+      return itemsSeparators.allCandidates.map((Element e) => e.widget).whereType<Text>().toList();
+    }
+
     final GlobalKey<AnimatedListSeparatedState> listKey = GlobalKey<AnimatedListSeparatedState>();
 
     await tester.pumpWidget(
@@ -736,44 +746,135 @@ void main() {
     expect(sliverAnimatedList, findsOneWidget);
     expect((sliverAnimatedList.evaluate().first.widget as SliverAnimatedList).initialItemCount, 3); // 2 items + 1 separator
 
-    // Test for insertItem
-    listKey.currentState!.insertItem(0);
-    await tester.pump();
-    expect(find.text('item 2'), findsOneWidget);
-    expect(find.text('separator after item 2'), findsNothing);
+    List<Text> itemsSeparatorsTexts;
+
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
+
+    expect(itemsSeparatorsTexts.length, 3);
+    expect(itemsSeparatorsTexts[0].data, 'item 0');
+    expect(itemsSeparatorsTexts[1].data, 'separator after item 0');
+    expect(itemsSeparatorsTexts[2].data, 'item 1');
+
     await tester.pumpAndSettle();
 
-     // Test for removeAllItems
-    listKey.currentState!.removeAllSeparatedItems(
+    // Begin testing
+
+    // insertItem - Insert at beginning of list
+    listKey.currentState!.insertItem(0);
+    await tester.pump();
+
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
+
+    expect(itemsSeparatorsTexts.length, 5);
+    expect(itemsSeparatorsTexts[0].data, 'item 0');
+    expect(itemsSeparatorsTexts[1].data, 'separator after item 0');
+    expect(itemsSeparatorsTexts[2].data, 'item 1');
+    expect(itemsSeparatorsTexts[3].data, 'separator after item 1');
+    expect(itemsSeparatorsTexts[4].data, 'item 2');
+
+    await tester.pumpAndSettle();
+
+    // insertItem - Insert at end of list
+    listKey.currentState!.insertItem(3);
+    await tester.pump();
+
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
+
+    expect(itemsSeparatorsTexts.length, 7);
+    expect(itemsSeparatorsTexts[0].data, 'item 0');
+    expect(itemsSeparatorsTexts[1].data, 'separator after item 0');
+    expect(itemsSeparatorsTexts[2].data, 'item 1');
+    expect(itemsSeparatorsTexts[3].data, 'separator after item 1');
+    expect(itemsSeparatorsTexts[4].data, 'item 2');
+    expect(itemsSeparatorsTexts[5].data, 'separator after item 2');
+    expect(itemsSeparatorsTexts[6].data, 'item 3');
+
+    await tester.pumpAndSettle();
+
+    // insertItem - Insert in middle of list
+    listKey.currentState!.insertItem(2);
+    await tester.pump();
+
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
+
+    expect(itemsSeparatorsTexts.length, 9);
+    expect(itemsSeparatorsTexts[0].data, 'item 0');
+    expect(itemsSeparatorsTexts[1].data, 'separator after item 0');
+    expect(itemsSeparatorsTexts[2].data, 'item 1');
+    expect(itemsSeparatorsTexts[3].data, 'separator after item 1');
+    expect(itemsSeparatorsTexts[4].data, 'item 2');
+    expect(itemsSeparatorsTexts[5].data, 'separator after item 2');
+    expect(itemsSeparatorsTexts[6].data, 'item 3');
+    expect(itemsSeparatorsTexts[7].data, 'separator after item 3');
+    expect(itemsSeparatorsTexts[8].data, 'item 4');
+
+    await tester.pumpAndSettle();
+
+    // insertItem - Insert at negative index
+    expect(() => listKey.currentState!.insertItem(-1), throwsAssertionError);
+
+    // insertItem - Insert at index greater than itemCount
+    expect(() => listKey.currentState!.insertItem(42), throwsAssertionError);
+
+    // removeItem - Remove at beginning of list
+    listKey.currentState!.removeItem(
+      0,
+      itemRemovalBuilder,
+      separatorRemovalBuilder,
+      duration: const Duration(milliseconds: 100),
+    );
+    await tester.pump();
+
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
+
+    expect(itemsSeparatorsTexts.length, 9);
+    expect(itemsSeparatorsTexts[0].data, 'removing item');
+    expect(itemsSeparatorsTexts[1].data, 'removing separator');
+    expect(itemsSeparatorsTexts[2].data, 'item 0');
+    expect(itemsSeparatorsTexts[3].data, 'separator after item 0');
+    expect(itemsSeparatorsTexts[4].data, 'item 1');
+    expect(itemsSeparatorsTexts[5].data, 'separator after item 1');
+    expect(itemsSeparatorsTexts[6].data, 'item 2');
+    expect(itemsSeparatorsTexts[7].data, 'separator after item 2');
+    expect(itemsSeparatorsTexts[8].data, 'item 3');
+
+    await tester.pumpAndSettle();
+
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
+
+    expect(itemsSeparatorsTexts.length, 7);
+    expect(itemsSeparatorsTexts[0].data, 'item 0');
+    expect(itemsSeparatorsTexts[1].data, 'separator after item 0');
+    expect(itemsSeparatorsTexts[2].data, 'item 1');
+    expect(itemsSeparatorsTexts[3].data, 'separator after item 1');
+    expect(itemsSeparatorsTexts[4].data, 'item 2');
+    expect(itemsSeparatorsTexts[5].data, 'separator after item 2');
+    expect(itemsSeparatorsTexts[6].data, 'item 3');
+
+    // removeItem - Remove at end of list
+    listKey.currentState!.removeItem(
+      3,
       itemRemovalBuilder,
       separatorRemovalBuilder,
       duration: const Duration(milliseconds: 100),
     );
 
     await tester.pump();
-    expect(find.text('removing item'), findsNWidgets(3));
-    expect(find.text('removing separator'), findsNWidgets(2));
-    expect(find.text('item 0'), findsNothing);
-    expect(find.text('separator after item 0'), findsNothing);
-    expect(find.text('item 1'), findsNothing);
-    expect(find.text('separator after item 1'), findsNothing);
-    expect(find.text('item 2'), findsNothing);
+
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
+
+    expect(itemsSeparatorsTexts.length, 7);
+    expect(itemsSeparatorsTexts[0].data, 'item 0');
+    expect(itemsSeparatorsTexts[1].data, 'separator after item 0');
+    expect(itemsSeparatorsTexts[2].data, 'item 1');
+    expect(itemsSeparatorsTexts[3].data, 'separator after item 1');
+    expect(itemsSeparatorsTexts[4].data, 'item 2');
+    expect(itemsSeparatorsTexts[5].data, 'removing separator');
+    expect(itemsSeparatorsTexts[6].data, 'removing item');
 
     await tester.pumpAndSettle();
-    expect(find.text('removing item'), findsNothing);
-    expect(find.text('removing separator'), findsNothing);
 
-    // Test for insertAllItems at the beginning of the list
-    listKey.currentState!.insertAllItems(0, 2);
-    await tester.pump();
-    expect(find.text('item 0'), findsOneWidget);
-    expect(find.text('separator after item 0'), findsOneWidget);
-    expect(find.text('item 1'), findsOneWidget);
-    expect(find.text('separator after item 1'), findsNothing);
-    await tester.pumpAndSettle();
-
-
-    // Test for removeSeparatedItem
+    // removeItem - Remove in middle of list
     listKey.currentState!.removeItem(
       1,
       itemRemovalBuilder,
@@ -782,38 +883,193 @@ void main() {
     );
 
     await tester.pump();
-    expect(find.text('removing separator'), findsOneWidget);
-    expect(find.text('removing item'), findsOneWidget);
-    expect(find.text('item 1'), findsNothing);
+
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
+
+    expect(itemsSeparatorsTexts.length, 5);
+    expect(itemsSeparatorsTexts[0].data, 'item 0');
+    expect(itemsSeparatorsTexts[1].data, 'separator after item 0');
+    expect(itemsSeparatorsTexts[2].data, 'removing item');
+    expect(itemsSeparatorsTexts[3].data, 'removing separator');
+    expect(itemsSeparatorsTexts[4].data, 'item 1');
 
     await tester.pumpAndSettle();
-    expect(find.byType(SizedBox), findsNWidgets(1));
-    expect(find.text('removing item'), findsNothing);
-    expect(find.text('removing separator'), findsNothing);
 
-    // Test for insertAllItems at the end of the list
-    listKey.currentState!.insertAllItems(1, 2);
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
+
+    expect(itemsSeparatorsTexts.length, 3);
+    expect(itemsSeparatorsTexts[0].data, 'item 0');
+    expect(itemsSeparatorsTexts[1].data, 'separator after item 0');
+    expect(itemsSeparatorsTexts[2].data, 'item 1');
+
+    // removeItem - Remove at negative index
+    expect(
+      () => listKey.currentState!.removeItem(
+        -1,
+        itemRemovalBuilder,
+        separatorRemovalBuilder,
+        duration: const Duration(milliseconds: 100),
+      ),
+      throwsAssertionError,
+    );
+
+    // removeItem - Remove at index greater than itemCount
+    expect(
+      () => listKey.currentState!.removeItem(
+        42,
+        itemRemovalBuilder,
+        separatorRemovalBuilder,
+        duration: const Duration(milliseconds: 100),
+      ),
+      throwsAssertionError,
+    );
+
+    // insertAllItems - Insert no items
+    listKey.currentState!.insertAllItems(0, 0);
     await tester.pump();
-    expect(find.text('separator after item 0'), findsOneWidget);
-    expect(find.text('item 1'), findsOneWidget);
-    expect(find.text('separator after item 1'), findsOneWidget);
-    expect(find.text('item 2'), findsOneWidget);
-    expect(find.text('separator after item 2'), findsNothing);
+
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
+
+    expect(itemsSeparatorsTexts.length, 3);
+    expect(itemsSeparatorsTexts[0].data, 'item 0');
+    expect(itemsSeparatorsTexts[1].data, 'separator after item 0');
+    expect(itemsSeparatorsTexts[2].data, 'item 1');
+
     await tester.pumpAndSettle();
 
-    // Test for removeSeparatedItem when only one item left
-    // Prepare
-    listKey.currentState!.removeAllSeparatedItems(
+    // insertAllItems - Insert negative number of items
+    listKey.currentState!.insertAllItems(0, -1);
+    await tester.pump();
+
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
+
+    expect(itemsSeparatorsTexts.length, 3);
+    expect(itemsSeparatorsTexts[0].data, 'item 0');
+    expect(itemsSeparatorsTexts[1].data, 'separator after item 0');
+    expect(itemsSeparatorsTexts[2].data, 'item 1');
+
+    await tester.pumpAndSettle();
+
+    // insertAllItems - Insert at beginning of list
+    listKey.currentState!.insertAllItems(0, 2);
+    await tester.pump();
+
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
+
+    expect(itemsSeparatorsTexts.length, 7);
+    expect(itemsSeparatorsTexts[0].data, 'item 0');
+    expect(itemsSeparatorsTexts[1].data, 'separator after item 0');
+    expect(itemsSeparatorsTexts[2].data, 'item 1');
+    expect(itemsSeparatorsTexts[3].data, 'separator after item 1');
+    expect(itemsSeparatorsTexts[4].data, 'item 2');
+    expect(itemsSeparatorsTexts[5].data, 'separator after item 2');
+    expect(itemsSeparatorsTexts[6].data, 'item 3');
+
+    await tester.pumpAndSettle();
+
+    // insertAllItems - Insert at end of list
+    listKey.currentState!.insertAllItems(4, 2);
+    await tester.pump();
+
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
+
+    expect(itemsSeparatorsTexts.length, 11);
+    expect(itemsSeparatorsTexts[0].data, 'item 0');
+    expect(itemsSeparatorsTexts[1].data, 'separator after item 0');
+    expect(itemsSeparatorsTexts[2].data, 'item 1');
+    expect(itemsSeparatorsTexts[3].data, 'separator after item 1');
+    expect(itemsSeparatorsTexts[4].data, 'item 2');
+    expect(itemsSeparatorsTexts[5].data, 'separator after item 2');
+    expect(itemsSeparatorsTexts[6].data, 'item 3');
+    expect(itemsSeparatorsTexts[7].data, 'separator after item 3');
+    expect(itemsSeparatorsTexts[8].data, 'item 4');
+    expect(itemsSeparatorsTexts[9].data, 'separator after item 4');
+    expect(itemsSeparatorsTexts[10].data, 'item 5');
+
+    await tester.pumpAndSettle();
+
+    // insertAllItems - Insert in middle of list
+    listKey.currentState!.insertAllItems(3, 2);
+    await tester.pump();
+
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
+
+    expect(itemsSeparatorsTexts.length, 15);
+    expect(itemsSeparatorsTexts[0].data, 'item 0');
+    expect(itemsSeparatorsTexts[1].data, 'separator after item 0');
+    expect(itemsSeparatorsTexts[2].data, 'item 1');
+    expect(itemsSeparatorsTexts[3].data, 'separator after item 1');
+    expect(itemsSeparatorsTexts[4].data, 'item 2');
+    expect(itemsSeparatorsTexts[5].data, 'separator after item 2');
+    expect(itemsSeparatorsTexts[6].data, 'item 3');
+    expect(itemsSeparatorsTexts[7].data, 'separator after item 3');
+    expect(itemsSeparatorsTexts[8].data, 'item 4');
+    expect(itemsSeparatorsTexts[9].data, 'separator after item 4');
+    expect(itemsSeparatorsTexts[10].data, 'item 5');
+    expect(itemsSeparatorsTexts[11].data, 'separator after item 5');
+    expect(itemsSeparatorsTexts[12].data, 'item 6');
+    expect(itemsSeparatorsTexts[13].data, 'separator after item 6');
+    expect(itemsSeparatorsTexts[14].data, 'item 7');
+
+    await tester.pumpAndSettle();
+
+    // insertAllItems - Insert at negative index
+    expect(() => listKey.currentState!.insertAllItems(-1, 2), throwsAssertionError);
+
+    // insertAllItems - Insert at index greater than itemCount
+    expect(() => listKey.currentState!.insertAllItems(42, 2), throwsAssertionError);
+
+    // removeAllItems - Remove all items from list with multiple items
+    listKey.currentState!.removeAllItems(
       itemRemovalBuilder,
       separatorRemovalBuilder,
       duration: const Duration(milliseconds: 100),
     );
-    await tester.pumpAndSettle();
-    listKey.currentState!.insertItem(0);
+
     await tester.pump();
-    expect(find.text('item 0'), findsOneWidget);
-    expect(find.text('separator after item 0'), findsNothing);
+
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
+
+    expect(itemsSeparatorsTexts.length, 15);
+    expect(itemsSeparatorsTexts[0].data, 'removing item');
+    expect(itemsSeparatorsTexts[1].data, 'removing separator');
+    expect(itemsSeparatorsTexts[2].data, 'removing item');
+    expect(itemsSeparatorsTexts[3].data, 'removing separator');
+    expect(itemsSeparatorsTexts[4].data, 'removing item');
+    expect(itemsSeparatorsTexts[5].data, 'removing separator');
+    expect(itemsSeparatorsTexts[6].data, 'removing item');
+    expect(itemsSeparatorsTexts[7].data, 'removing separator');
+    expect(itemsSeparatorsTexts[8].data, 'removing item');
+    expect(itemsSeparatorsTexts[9].data, 'removing separator');
+    expect(itemsSeparatorsTexts[10].data, 'removing item');
+    expect(itemsSeparatorsTexts[11].data, 'removing separator');
+    expect(itemsSeparatorsTexts[12].data, 'removing item');
+    expect(itemsSeparatorsTexts[13].data, 'removing separator');
+    expect(itemsSeparatorsTexts[14].data, 'removing item');
+
     await tester.pumpAndSettle();
+
+    // removeItem - Remove from empty list
+    expect(
+      () => listKey.currentState!.removeItem(
+        0,
+        itemRemovalBuilder,
+        separatorRemovalBuilder,
+        duration: const Duration(milliseconds: 100),
+      ),
+      throwsAssertionError,
+    );
+
+    // removeItem - Remove item from list with single item
+    // Prepare
+    listKey.currentState!.insertItem(0);
+
+    await tester.pumpAndSettle();
+
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
+
+    expect(itemsSeparatorsTexts.length, 1);
+    expect(itemsSeparatorsTexts[0].data, 'item 0');
 
     // Test
     listKey.currentState!.removeItem(
@@ -824,47 +1080,73 @@ void main() {
     );
 
     await tester.pump();
-    expect(find.text('removing item'), findsOneWidget);
-    expect(find.text('removing separator'), findsNothing);
-    expect(find.text('item 0'), findsNothing);
+
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
+
+    expect(itemsSeparatorsTexts.length, 1);
+    expect(itemsSeparatorsTexts[0].data, 'removing item');
 
     await tester.pumpAndSettle();
-    expect(find.byType(SizedBox), findsNothing);
-    expect(find.text('removing item'), findsNothing);
-    expect(find.text('removing separator'), findsNothing);
 
-    // Test for insertItem on empty list
-    listKey.currentState!.insertItem(0);
-    await tester.pump();
-    expect(find.text('item 0'), findsOneWidget);
-    expect(find.text('separator after item 0'), findsNothing);
-    await tester.pumpAndSettle();
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
 
-    // Test for insertItem on list with one item
-    listKey.currentState!.insertItem(1);
-    await tester.pump();
-    expect(find.text('separator after item 0'), findsOneWidget);
-    expect(find.text('item 1'), findsOneWidget);
-    expect(find.text('separator after item 1'), findsNothing);
-    await tester.pumpAndSettle();
+    expect(itemsSeparatorsTexts.length, 0);
 
-    // Test for removeSeparatedItem on first item in list
-    expect(find.byType(SizedBox), findsNWidgets(3));
-    listKey.currentState!.removeItem(
-      0,
+    // removeAllItems - Remove all items from empty list
+    listKey.currentState!.removeAllItems(
       itemRemovalBuilder,
       separatorRemovalBuilder,
       duration: const Duration(milliseconds: 100),
     );
 
     await tester.pump();
-    expect(find.text('removing item'), findsOneWidget);
-    expect(find.text('removing separator'), findsOneWidget);
+
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
+
+    expect(itemsSeparatorsTexts.length, 0);
 
     await tester.pumpAndSettle();
-    expect(find.text('removing item'), findsNothing);
-    expect(find.text('removing separator'), findsNothing);
-    expect(find.byType(SizedBox), findsOneWidget);
+
+    // removeAllItems - Remove all items from list with single item
+    // Prepare
+    listKey.currentState!.insertItem(0);
+    await tester.pumpAndSettle();
+
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
+
+    expect(itemsSeparatorsTexts.length, 1);
+    expect(itemsSeparatorsTexts[0].data, 'item 0');
+
+    // Test
+    listKey.currentState!.removeAllItems(
+      itemRemovalBuilder,
+      separatorRemovalBuilder,
+      duration: const Duration(milliseconds: 100),
+    );
+
+    await tester.pump();
+
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
+
+    expect(itemsSeparatorsTexts.length, 1);
+    expect(itemsSeparatorsTexts[0].data, 'removing item');
+
+    await tester.pumpAndSettle();
+
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
+
+    expect(itemsSeparatorsTexts.length, 0);
+
+    // insertAllItems - Insert into empty list
+    listKey.currentState!.insertAllItems(0, 2);
+    await tester.pump();
+
+    itemsSeparatorsTexts = getItemsSeparatorsTexts(tester);
+
+    expect(itemsSeparatorsTexts.length, 3);
+    expect(itemsSeparatorsTexts[0].data, 'item 0');
+    expect(itemsSeparatorsTexts[1].data, 'separator after item 0');
+    expect(itemsSeparatorsTexts[2].data, 'item 1');
   });
 
   testWidgets(

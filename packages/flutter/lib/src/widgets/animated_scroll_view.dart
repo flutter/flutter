@@ -553,7 +553,7 @@ class AnimatedListSeparatedState extends _AnimatedScrollViewState<AnimatedListSe
   ///
   /// This method's semantics are the same as Dart's [List.clear] method: it
   /// removes all the items in the list.
-  void removeAllSeparatedItems(
+  void removeAllItems(
     AnimatedRemovedItemBuilder itemBuilder,
     AnimatedRemovedItemBuilder separatorBuilder, {
     Duration duration = _kDuration,
