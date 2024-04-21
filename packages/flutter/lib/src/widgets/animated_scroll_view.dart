@@ -431,12 +431,12 @@ class AnimatedListSeparated extends _AnimatedScrollView {
 /// and [AnimatedListSeparated.separatorBuilder] whenever
 /// the item's and separator's widgets are needed.
 ///
-/// When an item is removed with [removeSeparatedItem] its animation
+/// When an item is removed with [removeItem] its animation
 /// as well as that of its corresponding separator are reversed.
 /// The removed item's animation is passed to
-/// the [removeSeparatedItem] itemBuilder parameter.
+/// the [removeItem] itemBuilder parameter.
 /// The corresponding separator's animation is passed
-/// to the [removeSeparatedItem] separatorBuilder parameter.
+/// to the [removeItem] separatorBuilder parameter.
 ///
 /// An app that needs to insert or remove items in response to an event
 /// can refer to the [AnimatedListSeparated]'s state with a global key:
