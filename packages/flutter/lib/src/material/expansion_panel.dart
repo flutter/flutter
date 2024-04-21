@@ -80,6 +80,7 @@ class ExpansionPanel {
     this.isExpanded = false,
     this.canTapOnHeader = false,
     this.backgroundColor,
+    this.splashColor,
   });
 
   /// The widget builder that builds the expansion panels' header.
@@ -94,6 +95,11 @@ class ExpansionPanel {
   ///
   /// Defaults to false.
   final bool isExpanded;
+
+  /// Defines the splash color of the panel if [canTapOnHeader] is true, or the expand/collapse IconButton if [canTapOnHeader] is false.
+  ///
+  /// Defaults to [ThemeData.splashColor] if [canTapOnHeader] is true, or [ThemeData.highlightColor] if [canTapOnHeader] is false.
+  final Color? splashColor;
 
   /// Whether tapping on the panel's header will expand/collapse it.
   ///
@@ -125,6 +131,7 @@ class ExpansionPanelRadio extends ExpansionPanel {
     required super.body,
     super.canTapOnHeader,
     super.backgroundColor,
+    super.splashColor,
   });
 
   /// The value that uniquely identifies a radio panel so that the currently
@@ -365,6 +372,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           color: widget.expandIconColor,
           isExpanded: _isChildExpanded(index),
           padding: _kExpandIconPadding,
+          splashColor: child.splashColor,
           onPressed: !child.canTapOnHeader
               ? (bool isExpanded) => _handlePressed(isExpanded, index)
               : null,
@@ -397,6 +405,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       if (child.canTapOnHeader) {
         header = MergeSemantics(
           child: InkWell(
+            splashColor: child.splashColor,
             onTap: () => _handlePressed(_isChildExpanded(index), index),
             child: header,
           ),

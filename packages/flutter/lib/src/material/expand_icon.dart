@@ -39,6 +39,7 @@ class ExpandIcon extends StatefulWidget {
     this.color,
     this.disabledColor,
     this.expandedColor,
+    this.splashColor,
   });
 
   /// Whether the icon is in an expanded state.
@@ -93,6 +94,11 @@ class ExpandIcon extends StatefulWidget {
   /// Material Design specifications for [icons](https://material.io/design/iconography/system-icons.html#color)
   /// and for [dark theme](https://material.io/design/color/dark-theme.html#ui-application)
   final Color? expandedColor;
+
+  /// Defines the splash color of the IconButton.
+  ///
+  /// Defaults to the Theme's highlight color, [ThemeData.highlightColor].
+  final Color? splashColor;
 
   @override
   State<ExpandIcon> createState() => _ExpandIconState();
@@ -170,6 +176,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
       child: IconButton(
         padding: widget.padding,
         iconSize: widget.size,
+        highlightColor: widget.splashColor,
         color: _iconColor,
         disabledColor: widget.disabledColor,
         onPressed: widget.onPressed == null ? null : _handlePressed,
