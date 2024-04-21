@@ -75,6 +75,7 @@ class _SliverTreeExampleState extends State<SliverTreeExample> {
               AnimationStyle? animationStyle,
             }) {
               Widget child = GestureDetector(
+                behavior: HitTestBehavior.translucent,
                 onTap: () {
                   setState(() {
                     controller.toggleNode(node);
