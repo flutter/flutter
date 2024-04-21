@@ -18,7 +18,7 @@ class AnimatedListSeparatedSample extends StatefulWidget {
 }
 
 class _AnimatedListSeparatedSampleState extends State<AnimatedListSeparatedSample> {
-  final GlobalKey<AnimatedListSeparatedState> _listKey = GlobalKey<AnimatedListSeparatedState>();
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
   late ListModel<int> _list;
   int? _selectedItem;
   late int _nextItem; // The next item inserted when the user presses the '+' button.
@@ -120,12 +120,12 @@ class _AnimatedListSeparatedSampleState extends State<AnimatedListSeparatedSampl
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: AnimatedListSeparated(
+          child: AnimatedList.separated(
             key: _listKey,
             initialItemCount: _list.length,
             itemBuilder: _buildItem,
             separatorBuilder: _buildSeparator,
-            removeSeparatorBuilder: _buildRemovedSeparator,
+            removedSeparatorBuilder: _buildRemovedSeparator,
           ),
         ),
       ),
@@ -151,11 +151,11 @@ class ListModel<E> {
     Iterable<E>? initialItems,
   }) : _items = List<E>.from(initialItems ?? <E>[]);
 
-  final GlobalKey<AnimatedListSeparatedState> listKey;
+  final GlobalKey<AnimatedListState> listKey;
   final RemovedItemBuilder<E> removedItemBuilder;
   final List<E> _items;
 
-  AnimatedListSeparatedState? get _animatedListSeparated => listKey.currentState;
+  AnimatedListState? get _animatedListSeparated => listKey.currentState;
 
   void insert(int index, E item) {
     _items.insert(index, item);

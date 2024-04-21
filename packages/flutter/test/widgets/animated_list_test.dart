@@ -738,17 +738,17 @@ void main() {
       return itemsSeparators.allCandidates.map((Element e) => e.widget).whereType<Text>().toList();
     }
 
-    final GlobalKey<AnimatedListSeparatedState> listKey = GlobalKey<AnimatedListSeparatedState>();
+    final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
 
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: AnimatedListSeparated(
+        child: AnimatedList.separated(
           key: listKey,
           initialItemCount: 2,
           itemBuilder: builder,
           separatorBuilder: separatorBuilder,
-          removeSeparatorBuilder: separatorRemovalBuilder,
+          removedSeparatorBuilder: separatorRemovalBuilder,
         ),
       ),
     );
@@ -1148,93 +1148,6 @@ void main() {
     expect(itemsSeparatorsTexts[0].data, 'item 0');
     expect(itemsSeparatorsTexts[1].data, 'separator after item 0');
     expect(itemsSeparatorsTexts[2].data, 'item 1');
-  });
-
-  testWidgets(
-    'AnimatedListSeparated.of() and maybeOf called with a context that does not contain AnimatedListSeparated',
-    (WidgetTester tester) async {
-      final GlobalKey key = GlobalKey();
-      await tester.pumpWidget(Container(key: key));
-      late FlutterError error;
-      expect(AnimatedListSeparated.maybeOf(key.currentContext!), isNull);
-      try {
-        AnimatedListSeparated.of(key.currentContext!);
-      } on FlutterError catch (e) {
-        error = e;
-      }
-      expect(error.diagnostics.length, 4);
-      expect(error.diagnostics[2].level, DiagnosticLevel.hint);
-      expect(
-        error.diagnostics[2].toStringDeep(),
-        equalsIgnoringHashCodes(
-          'This can happen when the context provided is from the same\n'
-          'StatefulWidget that built the AnimatedListSeparated.\n'
-        ),
-      );
-      expect(error.diagnostics[3], isA<DiagnosticsProperty<Element>>());
-      expect(
-        error.toStringDeep(),
-        equalsIgnoringHashCodes(
-          'FlutterError\n'
-          '   AnimatedListSeparated.of() called with a context that does not\n'
-          '   contain an AnimatedListSeparated.\n'
-          '   No AnimatedListSeparated ancestor could be found starting from\n'
-          '   the context that was passed to AnimatedListSeparated.of().\n'
-          '   This can happen when the context provided is from the same\n'
-          '   StatefulWidget that built the AnimatedListSeparated.\n'
-          '   The context used was:\n'
-          '     Container-[GlobalKey#32cc6]\n',
-        ),
-      );
-    },
-  );
-
-  testWidgets('AnimatedListSeparated applies MediaQuery padding', (WidgetTester tester) async {
-    const EdgeInsets padding = EdgeInsets.all(30.0);
-    EdgeInsets? innerMediaQueryPaddingItem;
-    EdgeInsets? innerMediaQueryPaddingSeparator;
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(
-            padding: EdgeInsets.all(30.0),
-          ),
-          child: AnimatedListSeparated(
-            initialItemCount: 3,
-            itemBuilder: (BuildContext context, int index, Animation<double> animation) {
-              innerMediaQueryPaddingItem = MediaQuery.paddingOf(context);
-              return const Placeholder();
-            },
-            separatorBuilder: (BuildContext context, int index, Animation<double> animation) {
-              innerMediaQueryPaddingSeparator = MediaQuery.paddingOf(context);
-              return const Placeholder();
-            },
-            removeSeparatorBuilder: (BuildContext context, int index, Animation<double> animation) {
-              innerMediaQueryPaddingSeparator = MediaQuery.paddingOf(context);
-              return const Placeholder();
-            },
-          ),
-        ),
-      ),
-    );
-    final Offset topLeft = tester.getTopLeft(find.byType(Placeholder).first);
-    // Automatically apply the top padding into sliver.
-    expect(topLeft, Offset(0.0, padding.top));
-
-    // Scroll to the bottom.
-    await tester.drag(find.byType(AnimatedListSeparated), const Offset(0.0, -1000.0));
-    await tester.pumpAndSettle();
-
-    final Offset bottomLeft = tester.getBottomLeft(find.byType(Placeholder).last);
-    // Automatically apply the bottom padding into sliver.
-    expect(bottomLeft, Offset(0.0, 660.0 - padding.bottom));
-
-    // Verify that the left/right padding is not applied to the item.
-    expect(innerMediaQueryPaddingItem, const EdgeInsets.symmetric(horizontal: 30.0));
-
-    // Verify that the left/right padding is not applied to the separator.
-    expect(innerMediaQueryPaddingSeparator, const EdgeInsets.symmetric(horizontal: 30.0));
   });
 }
 
