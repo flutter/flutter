@@ -264,7 +264,7 @@ class SliverCarousel extends StatelessWidget {
       sliver: _SliverWeightedCarousel(
         paddingFraction: leading,
         clipExtent: clipExtent ?? 0.0,
-        childExtentList: weights,
+        weights: weights,
         delegate: SliverChildBuilderDelegate(
           (BuildContext context, int index) {
             return children.elementAt(index);
@@ -510,40 +510,40 @@ class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
     required super.delegate,
     required this.paddingFraction,
     required this.clipExtent,
-    required this.childExtentList,
+    required this.weights,
   });
 
   final double clipExtent;
   final double paddingFraction;
-  final List<int> childExtentList;
+  final List<int> weights;
 
   @override
   RenderSliverFixedExtentBoxAdaptor createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
-    return RenderSliverCarousel(
+    return _RenderSliverWeightedCarousel(
       childManager: element,
       clipExtent: clipExtent,
       paddingFraction: paddingFraction,
-      childExtentList: childExtentList,
+      weights: weights,
     );
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderSliverCarousel renderObject) {
+  void updateRenderObject(BuildContext context, _RenderSliverWeightedCarousel renderObject) {
     renderObject.clipExtent = clipExtent;
-    renderObject.childExtentList = childExtentList;
+    renderObject.weights = weights;
   }
 }
 
-class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
-  RenderSliverCarousel({
+class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
+  _RenderSliverWeightedCarousel({
     required super.childManager,
     required double clipExtent,
     required double paddingFraction,
-    required List<int> childExtentList,
+    required List<int> weights,
   }) : _clipExtent = clipExtent,
        _paddingFraction = paddingFraction,
-       _childExtentList = childExtentList;
+       _weights = weights;
 
   double get clipExtent => _clipExtent;
   double _clipExtent;
@@ -565,28 +565,28 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
     markNeedsLayout();
   }
 
-  List<int> get childExtentList => _childExtentList;
-  List<int> _childExtentList;
-  set childExtentList(List<int> value) {
-    if (_childExtentList == value) {
+  List<int> get weights => _weights;
+  List<int> _weights;
+  set weights(List<int> value) {
+    if (_weights == value) {
       return;
     }
-    _childExtentList = value;
+    _weights = value;
     markNeedsLayout();
   }
 
   double _handleOverscroll(int index) {
     double extent;
-    if (index < childExtentList.length - 2) {
-      final int currWeight = childExtentList.elementAt(index + 1);
+    if (index < weights.length - 2) {
+      final int currWeight = weights.elementAt(index + 1);
       extent = extentUnit * currWeight; // initial extent
       final double progress = constraints.overlap.abs() / firstChildExtent;
-      final int prevWeight = childExtentList.elementAt(index + 2);
-      final double finalIncrease = (prevWeight - currWeight) / childExtentList.max;
+      final int prevWeight = weights.elementAt(index + 2);
+      final double finalIncrease = (prevWeight - currWeight) / weights.max;
       extent = extent + finalIncrease * progress * maxChildExtent;
     }
     else {
-      extent = extentUnit * childExtentList.last - constraints.overlap.abs();
+      extent = extentUnit * weights.last - constraints.overlap.abs();
     }
     return math.max(extent, 0);
   }
@@ -603,19 +603,19 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
     }
     else if (index > _firstVisibleItemIndex
       // In this if statement, children are visible items except the first one.
-      && index - _firstVisibleItemIndex + 1 <= childExtentList.length
+      && index - _firstVisibleItemIndex + 1 <= weights.length
     ) {
-      assert(index - _firstVisibleItemIndex < childExtentList.length);
-      final int currWeight = childExtentList.elementAt(index - _firstVisibleItemIndex);
+      assert(index - _firstVisibleItemIndex < weights.length);
+      final int currWeight = weights.elementAt(index - _firstVisibleItemIndex);
       extent = extentUnit * currWeight; // initial extent
-      final double progress = _gapBetweenCurrentAndPrev / firstChildExtent;
+      final double progress = _firstVisibleItemOffscreenExtent / firstChildExtent;
 
-      assert(index - _firstVisibleItemIndex - 1 < childExtentList.length, '$index');
-      final int prevWeight = childExtentList.elementAt(index - _firstVisibleItemIndex - 1);
-      final double finalIncrease = (prevWeight - currWeight) / childExtentList.max;
+      assert(index - _firstVisibleItemIndex - 1 < weights.length, '$index');
+      final int prevWeight = weights.elementAt(index - _firstVisibleItemIndex - 1);
+      final double finalIncrease = (prevWeight - currWeight) / weights.max;
       extent = extent + finalIncrease * progress * maxChildExtent;
     } else if (index > _firstVisibleItemIndex
-      && index - _firstVisibleItemIndex + 1 > childExtentList.length)
+      && index - _firstVisibleItemIndex + 1 > weights.length)
     {
       double visibleItemsTotalExtent = _distanceToLeadingEdge;
       for (int i = _firstVisibleItemIndex + 1; i < index; i++) {
@@ -632,13 +632,13 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
   double get paddingValue {
     return constraints.viewportMainAxisExtent * paddingFraction;
   }
-  double get extentUnit => constraints.viewportMainAxisExtent / (childExtentList.reduce((int total, int extent) => total + extent));
+  double get extentUnit => constraints.viewportMainAxisExtent / (weights.reduce((int total, int extent) => total + extent));
 
   double get firstChildExtent {
-    return childExtentList.first * extentUnit;
+    return weights.first * extentUnit;
   }
-  double get maxChildExtent => childExtentList.max * extentUnit;
-  double get minChildExtent => childExtentList.min * extentUnit;
+  double get maxChildExtent => weights.max * extentUnit;
+  double get minChildExtent => weights.min * extentUnit;
 
   int get _firstVisibleItemIndex {
     if (constraints.remainingPaintExtent < constraints.viewportMainAxisExtent) {
@@ -646,7 +646,8 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
     }
     return (constraints.scrollOffset / firstChildExtent).floor();
   }
-  double get _gapBetweenCurrentAndPrev {
+  double get _firstVisibleItemOffscreenExtent {
+    print('viewport main axis extent: ${constraints.viewportMainAxisExtent}, remaining extent: ${constraints.remainingPaintExtent}');
     if (constraints.remainingPaintExtent < constraints.viewportMainAxisExtent) {
       return firstChildExtent - (constraints.viewportMainAxisExtent - constraints.remainingPaintExtent);
     }
@@ -654,7 +655,7 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
     // when scroll offset is 400, and first child extent is 133.33333333333334, mod result is 133.33333333333331 which is supposed to be almost 0.
     // return constraints.scrollOffset % firstChildExtent;
   }
-  double get _distanceToLeadingEdge => firstChildExtent - _gapBetweenCurrentAndPrev;
+  double get _distanceToLeadingEdge => firstChildExtent - _firstVisibleItemOffscreenExtent;
 
   /// The layout offset for the child with the given index.
   @override
@@ -677,7 +678,7 @@ class RenderSliverCarousel extends RenderSliverFixedExtentBoxAdaptor {
         for (int i = _firstVisibleItemIndex + 1; i < index; i++) {
           visibleItemsTotalExtent += _buildItemExtent(i, currentLayoutDimensions);
         }
-        return constraints.scrollOffset + visibleItemsTotalExtent - firstChildExtent + firstChildExtent + (childExtentList.elementAt(1) - childExtentList.first) * constraints.overlap.abs();
+        return constraints.scrollOffset + visibleItemsTotalExtent - firstChildExtent + firstChildExtent + (weights.elementAt(1) - weights.first) * constraints.overlap.abs();
       }
 
       double visibleItemsTotalExtent = _firstVisibleItemIndex == -1 ? 0 : _distanceToLeadingEdge;
