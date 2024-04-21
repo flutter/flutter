@@ -978,7 +978,7 @@ class RenderSliverTree extends RenderSliverVariedExtentList {
   void performLayout() {
     assert(
       constraints.axisDirection == AxisDirection.down,
-      'SliverTree is only supported in Viewports with and AxisDirection.down. '
+      'SliverTree is only supported in Viewports with an AxisDirection.down. '
       'The current axis direction is: ${constraints.axisDirection}.',
     );
     _updateAnimationCache();
