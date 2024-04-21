@@ -60,6 +60,10 @@ abstract class UnpackMacOS extends Target {
       '--delete',
       '--filter',
       '- .DS_Store/',
+      // ensure that the files we copy are read-write, since XCode expects to be able to write to the directories that
+      // are copied. when using Flutter on MacOS with Nix, the files are read-only in the Nix store, and stay that way
+      // after rsync copies them, leading to the build failing when xcbuild tries to write to a directory that is copied.
+      "--chmod=755",
       basePath,
       environment.outputDir.path,
     ]);
