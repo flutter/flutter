@@ -537,6 +537,8 @@ class AnimatedListSeparatedState extends _AnimatedScrollViewState<AnimatedListSe
     super.internalRemoveItem(itemIndex, itemBuilder, duration: duration);
     if (_itemsCount > 1) {
       if (itemIndex == _itemsCount - 1) {
+      // Removing from the end of the list, so the separator to remove
+      // is the one at `last index` - 1.
         super.internalRemoveItem(itemIndex - 1, separatorBuilder, duration: duration);
       } else {
         super.internalRemoveItem(itemIndex, separatorBuilder, duration: duration);
