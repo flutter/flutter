@@ -710,20 +710,14 @@ void main() {
         ),
       );
     }
+
     Widget itemRemovalBuilder(BuildContext context, int? index, Animation<double> animation) {
-        final String text = index != null ? 'removing item $index' : 'removing item';
-        return  SizedBox(
-          height: 100.0,
-          child: Center(child: Text(text)),
-        );
-      }
-    Widget separatorRemovalBuilder(BuildContext context, int? index, Animation<double> animation) {
-        final String text = index != null ? 'removing separator after item $index' : 'removing separator';
-        return SizedBox(
-          height: 100.0,
-          child: Center(child: Text(text)),
-        );
-      }
+      final String text = index != null ? 'removing item $index' : 'removing item';
+      return  SizedBox(
+        height: 100.0,
+        child: Center(child: Text(text)),
+      );
+    }
 
     AnimatedRemovedItemBuilder itemRemovalBuilderWrapper({int? index}) {
       return (BuildContext context, Animation<double> animation) {
@@ -731,11 +725,13 @@ void main() {
       };
     }
 
-    AnimatedRemovedItemBuilder separatorRemovalBuilderWrapper({int? index}) {
-      return (BuildContext context, Animation<double> animation) {
-        return separatorRemovalBuilder(context, index, animation);
-      };
+    Widget separatorRemovalBuilder(BuildContext context, int index, Animation<double> animation) {
+      return SizedBox(
+        height: 100.0,
+        child: Center(child: Text('removing separator after item $index')),
+      );
     }
+
 
     List<Text> getItemsSeparatorsTexts(WidgetTester tester) {
       final Finder itemsSeparators = find.descendant(of: find.byType(SliverAnimatedList), matching: find.byType(Text));
@@ -752,6 +748,7 @@ void main() {
           initialItemCount: 2,
           itemBuilder: builder,
           separatorBuilder: separatorBuilder,
+          removeSeparatorBuilder: separatorRemovalBuilder,
         ),
       ),
     );
@@ -834,7 +831,6 @@ void main() {
     listKey.currentState!.removeItem(
       0,
       itemRemovalBuilderWrapper(index: 0),
-      separatorRemovalBuilderWrapper(index: 0),
       duration: const Duration(milliseconds: 100),
     );
     await tester.pump();
@@ -869,9 +865,6 @@ void main() {
     listKey.currentState!.removeItem(
       3,
       itemRemovalBuilderWrapper(index: 3),
-      // Removing from the end of the list, so the separator to remove
-      // is the one at `last index` - 1: 3 - 1 = 2.
-      separatorRemovalBuilderWrapper(index: 2),
       duration: const Duration(milliseconds: 100),
     );
 
@@ -894,7 +887,6 @@ void main() {
     listKey.currentState!.removeItem(
       1,
       itemRemovalBuilderWrapper(index: 1),
-      separatorRemovalBuilderWrapper(index: 1),
       duration: const Duration(milliseconds: 100),
     );
 
@@ -923,7 +915,6 @@ void main() {
       () => listKey.currentState!.removeItem(
         -1,
       itemRemovalBuilderWrapper(index: -1),
-      separatorRemovalBuilderWrapper(index: -1),
         duration: const Duration(milliseconds: 100),
       ),
       throwsAssertionError,
@@ -934,7 +925,6 @@ void main() {
       () => listKey.currentState!.removeItem(
         42,
       itemRemovalBuilderWrapper(index: 42),
-      separatorRemovalBuilderWrapper(index: 42),
         duration: const Duration(milliseconds: 100),
       ),
       throwsAssertionError,
@@ -1038,7 +1028,6 @@ void main() {
     // removeAllItems - Remove all items from list with multiple items
     listKey.currentState!.removeAllItems(
       itemRemovalBuilderWrapper(),
-      separatorRemovalBuilderWrapper(),
       duration: const Duration(milliseconds: 100),
     );
 
@@ -1048,19 +1037,19 @@ void main() {
 
     expect(itemsSeparatorsTexts.length, 15);
     expect(itemsSeparatorsTexts[0].data, 'removing item');
-    expect(itemsSeparatorsTexts[1].data, 'removing separator');
+    expect(itemsSeparatorsTexts[1].data, 'removing separator after item 0');
     expect(itemsSeparatorsTexts[2].data, 'removing item');
-    expect(itemsSeparatorsTexts[3].data, 'removing separator');
+    expect(itemsSeparatorsTexts[3].data, 'removing separator after item 1');
     expect(itemsSeparatorsTexts[4].data, 'removing item');
-    expect(itemsSeparatorsTexts[5].data, 'removing separator');
+    expect(itemsSeparatorsTexts[5].data, 'removing separator after item 2');
     expect(itemsSeparatorsTexts[6].data, 'removing item');
-    expect(itemsSeparatorsTexts[7].data, 'removing separator');
+    expect(itemsSeparatorsTexts[7].data, 'removing separator after item 3');
     expect(itemsSeparatorsTexts[8].data, 'removing item');
-    expect(itemsSeparatorsTexts[9].data, 'removing separator');
+    expect(itemsSeparatorsTexts[9].data, 'removing separator after item 4');
     expect(itemsSeparatorsTexts[10].data, 'removing item');
-    expect(itemsSeparatorsTexts[11].data, 'removing separator');
+    expect(itemsSeparatorsTexts[11].data, 'removing separator after item 5');
     expect(itemsSeparatorsTexts[12].data, 'removing item');
-    expect(itemsSeparatorsTexts[13].data, 'removing separator');
+    expect(itemsSeparatorsTexts[13].data, 'removing separator after item 6');
     expect(itemsSeparatorsTexts[14].data, 'removing item');
 
     await tester.pumpAndSettle();
@@ -1070,7 +1059,6 @@ void main() {
       () => listKey.currentState!.removeItem(
         0,
         itemRemovalBuilderWrapper(index: 0),
-        separatorRemovalBuilderWrapper(index: 0),
         duration: const Duration(milliseconds: 100),
       ),
       throwsAssertionError,
@@ -1091,7 +1079,6 @@ void main() {
     listKey.currentState!.removeItem(
       0,
       itemRemovalBuilderWrapper(index: 0),
-      separatorRemovalBuilderWrapper(index: 0),
       duration: const Duration(milliseconds: 100),
     );
 
@@ -1111,7 +1098,6 @@ void main() {
     // removeAllItems - Remove all items from empty list
     listKey.currentState!.removeAllItems(
       itemRemovalBuilderWrapper(),
-      separatorRemovalBuilderWrapper(),
       duration: const Duration(milliseconds: 100),
     );
 
@@ -1136,7 +1122,6 @@ void main() {
     // Test
     listKey.currentState!.removeAllItems(
       itemRemovalBuilderWrapper(),
-      separatorRemovalBuilderWrapper(),
       duration: const Duration(milliseconds: 100),
     );
 
@@ -1222,6 +1207,10 @@ void main() {
               return const Placeholder();
             },
             separatorBuilder: (BuildContext context, int index, Animation<double> animation) {
+              innerMediaQueryPaddingSeparator = MediaQuery.paddingOf(context);
+              return const Placeholder();
+            },
+            removeSeparatorBuilder: (BuildContext context, int index, Animation<double> animation) {
               innerMediaQueryPaddingSeparator = MediaQuery.paddingOf(context);
               return const Placeholder();
             },

@@ -30,7 +30,6 @@ class _AnimatedListSeparatedSampleState extends State<AnimatedListSeparatedSampl
       listKey: _listKey,
       initialItems: <int>[0, 1, 2],
       removedItemBuilder: _buildRemovedItem,
-      removedSeparatorBuilder: _buildRemovedSeparator,
     );
     _nextItem = 3;
   }
@@ -75,7 +74,7 @@ class _AnimatedListSeparatedSampleState extends State<AnimatedListSeparatedSampl
   // Build a separator for items that have been removed from the list.
   /// The widget will be used by the [AnimatedListSeparatedState.removeSeparatedItem] method's
   /// `separatorBuilder` parameter.
-  Widget _buildRemovedSeparator(int item, BuildContext context, Animation<double> animation) => SizeTransition(
+  Widget _buildRemovedSeparator(BuildContext context, int item, Animation<double> animation) => SizeTransition(
                 sizeFactor: animation,
                 child: ItemSeparator(
                   animation: animation,
@@ -126,6 +125,7 @@ class _AnimatedListSeparatedSampleState extends State<AnimatedListSeparatedSampl
             initialItemCount: _list.length,
             itemBuilder: _buildItem,
             separatorBuilder: _buildSeparator,
+            removeSeparatorBuilder: _buildRemovedSeparator,
           ),
         ),
       ),
@@ -148,13 +148,11 @@ class ListModel<E> {
   ListModel({
     required this.listKey,
     required this.removedItemBuilder,
-    required this.removedSeparatorBuilder,
     Iterable<E>? initialItems,
   }) : _items = List<E>.from(initialItems ?? <E>[]);
 
   final GlobalKey<AnimatedListSeparatedState> listKey;
   final RemovedItemBuilder<E> removedItemBuilder;
-  final RemovedItemBuilder<E> removedSeparatorBuilder;
   final List<E> _items;
 
   AnimatedListSeparatedState? get _animatedListSeparated => listKey.currentState;
@@ -167,16 +165,10 @@ class ListModel<E> {
   E removeAt(int index) {
     final E removedItem = _items.removeAt(index);
     if (removedItem != null) {
-      final bool isLastItem = index == length;
-      // If the removed item is the last item in the list, the separator of the preceding item is removed.
-      final E itemOfRemovedSeparator = isLastItem && length > 0 ? _items[index - 1] : removedItem;
       _animatedListSeparated!.removeItem(
         index,
         (BuildContext context, Animation<double> animation) {
           return removedItemBuilder(removedItem, context, animation);
-        },
-        (BuildContext context, Animation<double> animation) {
-          return removedSeparatorBuilder(itemOfRemovedSeparator, context, animation);
         },
       );
     }

@@ -209,55 +209,6 @@ class AnimatedListState extends _AnimatedScrollViewState<AnimatedList> {
       widget.scrollDirection,
     );
   }
-
-  /// Insert an item at [index] and start an animation that will be passed
-  /// to [AnimatedList.itemBuilder] when the item is visible.
-  ///
-  /// This method's semantics are the same as Dart's [List.insert] method: it
-  /// increases the length of the list of items by one and shifts
-  /// all items at or after [index] towards the end of the list of items.
-  void insertItem(int index, { Duration duration = _kDuration }) {
-    super.internalInsertItem(index, duration: duration);
-  }
-
-  /// Insert multiple items at [index] and start an animation that will be passed
-  /// to [AnimatedList.itemBuilder] when the items are visible.
-  void insertAllItems(int index, int length, { Duration duration = _kDuration, bool isAsync = false }) {
-    super.internalInsertAllItems(index, length, duration: duration, isAsync: isAsync);
-  }
-
-  /// Remove the item at `index` and start an animation that will be passed to
-  /// `builder` when the item is visible.
-  ///
-  /// Items are removed immediately. After an item has been removed, its index
-  /// will no longer be passed to the `itemBuilder`. However, the
-  /// item will still appear for `duration` and during that time
-  /// `builder` must construct its widget as needed.
-  ///
-  /// This method's semantics are the same as Dart's [List.remove] method: it
-  /// decreases the length of items by one and shifts all items at or before
-  /// `index` towards the beginning of the list of items.
-  ///
-  /// See also:
-  ///
-  ///   * [AnimatedRemovedItemBuilder], which describes the arguments to the
-  ///     `builder` argument.
-  void removeItem(int index, AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
-    super.internalRemoveItem(index, builder, duration: duration);
-  }
-
-  /// Remove all the items and start an animation that will be passed to
-  /// `builder` when the items are visible.
-  ///
-  /// Items are removed immediately. However, the
-  /// items will still appear for `duration`, and during that time
-  /// `builder` must construct its widget as needed.
-  ///
-  /// This method's semantics are the same as Dart's [List.clear] method: it
-  /// removes all the items in the list.
-  void removeAllItems(AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
-    super.internalRemoveAllItems(builder, duration: duration);
-  }
 }
 
 /// A scrolling container that animates items with separators when they are inserted or removed.
@@ -321,7 +272,8 @@ class AnimatedListSeparated extends _AnimatedScrollView {
   AnimatedListSeparated({
     super.key,
     required AnimatedItemBuilder itemBuilder,
-    required AnimatedItemBuilder separatorBuilder,
+    required AnimatedSeparatorBuilder separatorBuilder,
+    required this.removeSeparatorBuilder,
     int initialItemCount = 0,
     super.scrollDirection = Axis.vertical,
     super.reverse = false,
@@ -342,6 +294,10 @@ class AnimatedListSeparated extends _AnimatedScrollView {
            return separatorBuilder(context, itemIndex, animation);
          },
        );
+
+  /// The builder used to animate the removal of the corresponding separator
+  /// when an item is removed.
+  final AnimatedRemovedSeparatorBuilder removeSeparatorBuilder;
 
   /// The state from the closest instance of this class that encloses the given
   /// context.
@@ -416,6 +372,34 @@ class AnimatedListSeparated extends _AnimatedScrollView {
     return itemCount * 2 - 1;
   }
 }
+
+/// Signature for the builder callback used by [AnimatedListSeparated] to
+/// build its animated separators.
+///
+/// The [context] argument is the build context where the widget will be
+/// created, the [index] is the index of the item of the separator to be built,
+/// and the [animation] is an [Animation] that should be used to animate an entry
+/// transition for the widget that is built.
+///
+/// See also:
+///
+/// * [AnimatedRemovedItemBuilder], a builder that is for removing items with
+///   animations instead of adding them.
+typedef AnimatedSeparatorBuilder = Widget Function(BuildContext context, int index, Animation<double> animation);
+
+/// Signature for the builder callback used in [AnimatedListSeparated]
+/// to animate its separators after they have been removed.
+///
+/// The [context] argument is the build context where the widget will be
+/// created, the [index] is the index of the corresponding item of the separator
+/// that is removed, and the [animation] is an [Animation] that should be used to
+/// animate an exit transition for the widget that is built.
+///
+/// See also:
+///
+/// * [AnimatedItemBuilder], a builder that is for adding items with animations
+///   instead of removing them.
+typedef AnimatedRemovedSeparatorBuilder = Widget Function(BuildContext context, int index, Animation<double> animation);
 
 /// The [AnimatedListSeparatedState] for [AnimatedListSeparated],
 /// a scrolling list container that animates items with separators when they are
@@ -492,11 +476,12 @@ class AnimatedListSeparatedState extends _AnimatedScrollViewState<AnimatedListSe
   /// This method's semantics are the same as Dart's [List.insert] method: it
   /// increases the length of the list of items by one and shifts
   /// all items at or after [index] towards the end of the list of items.
+  @override
   void insertItem(int index, { Duration duration = _kDuration }) {
       final int itemIndex = _computeItemIndex(index);
-      super.internalInsertItem(itemIndex, duration: duration);
+      super.insertItem(itemIndex, duration: duration);
       if (_itemsCount > 1) {
-        super.internalInsertItem(itemIndex, duration: duration);
+        super.insertItem(itemIndex, duration: duration);
       }
   }
 
@@ -504,20 +489,21 @@ class AnimatedListSeparatedState extends _AnimatedScrollViewState<AnimatedListSe
   /// and start an animation that will be passed to
   /// [AnimatedListSeparated.itemBuilder] and [AnimatedListSeparated.separatorBuilder]
   /// when the items are visible.
+  @override
   void insertAllItems(int index, int length, { Duration duration = _kDuration, bool isAsync = false }) {
     final int itemIndex = _computeItemIndex(index);
     final int lengthWithSeparators = _itemsCount == 0 ? length * 2 - 1 : length * 2;
-    super.internalInsertAllItems(itemIndex, lengthWithSeparators, duration: duration, isAsync: isAsync);
+    super.insertAllItems(itemIndex, lengthWithSeparators, duration: duration, isAsync: isAsync);
   }
 
   /// Remove the item at [index] with its corresponding separator
-  /// and start an animation that will be passed to
-  /// [itemBuilder] and [separatorBuilder] when the item is visible.
+  /// and start an animation that will be passed to [builder] and
+  /// [AnimatedListSeparated.removeSeparatorBuilder] when the item is visible.
   ///
   /// Items are removed immediately. After an item has been removed, its index
   /// will no longer be passed to the [AnimatedListSeparated.itemBuilder].
   /// However, the item will still appear for [duration] and during that time
-  /// [itemBuilder] must construct its widget as needed.
+  /// [builder] must construct its widget as needed.
   ///
   /// This method's semantics are the same as Dart's [List.remove] method: it
   /// decreases the length of items by one and shifts all items at or before
@@ -526,45 +512,42 @@ class AnimatedListSeparatedState extends _AnimatedScrollViewState<AnimatedListSe
   /// See also:
   ///
   ///   * [AnimatedRemovedItemBuilder], which describes the arguments to the
-  ///     [itemBuilder] and [separatorBuilder] arguments.
-  void removeItem(
-    int index,
-    AnimatedRemovedItemBuilder itemBuilder,
-    AnimatedRemovedItemBuilder separatorBuilder, {
-    Duration duration = _kDuration,
-  }) {
+  ///     [builder] argument.
+  @override
+  void removeItem(int index, AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
     final int itemIndex = _computeItemIndex(index);
-    super.internalRemoveItem(itemIndex, itemBuilder, duration: duration);
+    super.removeItem(itemIndex, builder, duration: duration);
     if (_itemsCount > 1) {
+      int separatorIndex;
       if (itemIndex == _itemsCount - 1) {
       // Removing from the end of the list, so the separator to remove
       // is the one at `last index` - 1.
-        super.internalRemoveItem(itemIndex - 1, separatorBuilder, duration: duration);
+        super.removeItem(itemIndex - 1, _toRemovedItemBuilder(widget.removeSeparatorBuilder, index - 1), duration: duration);
       } else {
-        super.internalRemoveItem(itemIndex, separatorBuilder, duration: duration);
+        separatorIndex = itemIndex;
+        super.removeItem(separatorIndex, _toRemovedItemBuilder(widget.removeSeparatorBuilder, index), duration: duration);
       }
     }
   }
 
-  /// Remove all the items and corresponding separators and start an animation that will be passed to
-  /// [itemBuilder] and [separatorBuilder] when the items are visible.
+  /// Remove all the items and corresponding separators and start an animation
+  /// that will be passed to [builder] and [AnimatedListSeparated.removeSeparatorBuilder]
+  /// when the items are visible.
   ///
-  /// Items are removed immediately. However, the
-  /// items will still appear for [duration], and during that time
-  /// [itemBuilder] must construct its widget as needed.
+  /// Items are removed immediately. However, the items will still appear for
+  /// [duration], and during that time [builder] must construct its widget as needed.
   ///
   /// This method's semantics are the same as Dart's [List.clear] method: it
   /// removes all the items in the list.
-  void removeAllItems(
-    AnimatedRemovedItemBuilder itemBuilder,
-    AnimatedRemovedItemBuilder separatorBuilder, {
-    Duration duration = _kDuration,
-  }) {
-    for (int itemIndex = _itemsCount - 1; itemIndex >= 0 ; itemIndex--) {
-      if (itemIndex.isEven) {
-        super.internalRemoveItem(itemIndex, itemBuilder, duration: duration);
+  @override
+  void removeAllItems(AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
+    for (int index = _itemsCount - 1; index >= 0 ; index--) {
+      if (index.isEven) {
+        super.removeItem(index, builder, duration: duration);
       } else {
-        super.internalRemoveItem(itemIndex, separatorBuilder, duration: duration);
+        // The index of the separator's corresponding item
+        final int itemIndex = index ~/ 2;
+        super.removeItem(index, _toRemovedItemBuilder(widget.removeSeparatorBuilder, itemIndex), duration: duration);
       }
     }
   }
@@ -579,6 +562,14 @@ class AnimatedListSeparatedState extends _AnimatedScrollViewState<AnimatedListSe
     final int indexSeparated = index * 2 - 1;
     final bool isNewLastIndex = indexSeparated == _itemsCount;
     return isNewLastIndex ? indexSeparated : indexSeparated + 1;
+  }
+
+  // Helper method to create a [AnimatedRemovedItemBuilder]
+  // from a [AnimatedRemovedSeparatorBuilder] for given [index].
+  AnimatedRemovedItemBuilder _toRemovedItemBuilder(AnimatedRemovedSeparatorBuilder builder, int index) {
+    return (BuildContext context, Animation<double> animation) {
+      return builder(context, index, animation);
+    };
   }
 }
 
@@ -790,55 +781,6 @@ class AnimatedGridState extends _AnimatedScrollViewState<AnimatedGrid> {
       widget.scrollDirection,
     );
   }
-
-  /// Insert an item at [index] and start an animation that will be passed
-  /// to [AnimatedGrid.itemBuilder] when the item is visible.
-  ///
-  /// This method's semantics are the same as Dart's [List.insert] method: it
-  /// increases the length of the list of items by one and shifts
-  /// all items at or after [index] towards the end of the list of items.
-  void insertItem(int index, { Duration duration = _kDuration }) {
-    super.internalInsertItem(index, duration: duration);
-  }
-
-  /// Insert multiple items at [index] and start an animation that will be passed
-  /// to [AnimatedGrid.itemBuilder] when the items are visible.
-  void insertAllItems(int index, int length, { Duration duration = _kDuration, bool isAsync = false }) {
-    super.internalInsertAllItems(index, length, duration: duration, isAsync: isAsync);
-  }
-
-  /// Remove the item at `index` and start an animation that will be passed to
-  /// `builder` when the item is visible.
-  ///
-  /// Items are removed immediately. After an item has been removed, its index
-  /// will no longer be passed to the `itemBuilder`. However, the
-  /// item will still appear for `duration` and during that time
-  /// `builder` must construct its widget as needed.
-  ///
-  /// This method's semantics are the same as Dart's [List.remove] method: it
-  /// decreases the length of items by one and shifts all items at or before
-  /// `index` towards the beginning of the list of items.
-  ///
-  /// See also:
-  ///
-  ///   * [AnimatedRemovedItemBuilder], which describes the arguments to the
-  ///     `builder` argument.
-  void removeItem(int index, AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
-    super.internalRemoveItem(index, builder, duration: duration);
-  }
-
-  /// Remove all the items and start an animation that will be passed to
-  /// `builder` when the items are visible.
-  ///
-  /// Items are removed immediately. However, the
-  /// items will still appear for `duration`, and during that time
-  /// `builder` must construct its widget as needed.
-  ///
-  /// This method's semantics are the same as Dart's [List.clear] method: it
-  /// removes all the items in the list.
-  void removeAllItems(AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
-    super.internalRemoveAllItems(builder, duration: duration);
-  }
 }
 
 abstract class _AnimatedScrollView extends StatefulWidget {
@@ -969,16 +911,14 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   /// This method's semantics are the same as Dart's [List.insert] method: it
   /// increases the length of the list of items by one and shifts
   /// all items at or after [index] towards the end of the list of items.
-  @protected
-  void internalInsertItem(int index, { Duration duration = _kDuration }) {
+  void insertItem(int index, { Duration duration = _kDuration }) {
     _sliverAnimatedMultiBoxKey.currentState!.insertItem(index, duration: duration);
   }
 
   /// Insert multiple items at [index] and start an animation that will be passed
   /// to [AnimatedGrid.itemBuilder] or [AnimatedList.itemBuilder] when the items
   /// are visible.
-  @protected
-  void internalInsertAllItems(int index, int length, { Duration duration = _kDuration, bool isAsync = false }) {
+  void insertAllItems(int index, int length, { Duration duration = _kDuration, bool isAsync = false }) {
     _sliverAnimatedMultiBoxKey.currentState!.insertAllItems(index, length, duration: duration);
   }
 
@@ -998,8 +938,7 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   ///
   ///   * [AnimatedRemovedItemBuilder], which describes the arguments to the
   ///     `builder` argument.
-  @protected
-  void internalRemoveItem(int index, AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
+  void removeItem(int index, AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
     _sliverAnimatedMultiBoxKey.currentState!.removeItem(index, builder, duration: duration);
   }
 
@@ -1012,8 +951,7 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   ///
   /// This method's semantics are the same as Dart's [List.clear] method: it
   /// removes all the items in the list.
-  @protected
-  void internalRemoveAllItems(AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
+  void removeAllItems(AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
     _sliverAnimatedMultiBoxKey.currentState!.removeAllItems(builder, duration: duration);
   }
 
