@@ -88,10 +88,11 @@ final class AssetTransformer {
           ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
         }
       }
+
+      logger.printTrace("Finished transforming asset at path '${asset.path}' (${stopwatch.elapsedMilliseconds}ms)");
     } finally {
       ErrorHandlingFileSystem.deleteIfExists(tempInputFile);
       ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
-      logger.printTrace("Finished transforming asset at path '${asset.path}' (${stopwatch.elapsedMilliseconds}ms)");
     }
 
     return null;
