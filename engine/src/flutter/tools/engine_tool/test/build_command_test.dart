@@ -360,11 +360,11 @@ void main() {
         '//flutter/fml:fml_arc_unittests',
       ]);
       expect(result, equals(0));
-      expect(testEnv.processHistory.length, greaterThanOrEqualTo(2));
-      expect(testEnv.processHistory[3].command[0], contains('ninja'));
-      expect(testEnv.processHistory[3].command[2], endsWith('/host_debug'));
+      expect(testEnv.processHistory.length, greaterThan(6));
+      expect(testEnv.processHistory[6].command[0], contains('ninja'));
+      expect(testEnv.processHistory[6].command[2], endsWith('/host_debug'));
       expect(
-        testEnv.processHistory[3].command[5],
+        testEnv.processHistory[6].command[5],
         equals('flutter/fml:fml_arc_unittests'),
       );
     } finally {
@@ -389,19 +389,19 @@ void main() {
         '//flutter/...',
       ]);
       expect(result, equals(0));
-      expect(testEnv.processHistory.length, greaterThanOrEqualTo(2));
-      expect(testEnv.processHistory[3].command[0], contains('ninja'));
-      expect(testEnv.processHistory[3].command[2], endsWith('/host_debug'));
+      expect(testEnv.processHistory.length, greaterThan(6));
+      expect(testEnv.processHistory[6].command[0], contains('ninja'));
+      expect(testEnv.processHistory[6].command[2], endsWith('/host_debug'));
       expect(
-        testEnv.processHistory[3].command[5],
+        testEnv.processHistory[6].command[5],
         equals('flutter/display_list:display_list_unittests'),
       );
       expect(
-        testEnv.processHistory[3].command[6],
+        testEnv.processHistory[6].command[6],
         equals('flutter/flow:flow_unittests'),
       );
       expect(
-        testEnv.processHistory[3].command[7],
+        testEnv.processHistory[6].command[7],
         equals('flutter/fml:fml_arc_unittests'),
       );
     } finally {
