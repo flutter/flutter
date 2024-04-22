@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -1119,7 +1120,7 @@ void testMain() {
       ]);
     });
 
-    test('optimized overlays correctly with transforms and clips', () async {
+    test('optimizes overlays correctly with transforms and clips', () async {
       ui_web.platformViewRegistry.registerViewFactory(
         'test-view',
         (int viewId) => createDomHTMLDivElement()..className = 'platform-view',
@@ -1148,6 +1149,73 @@ void testMain() {
       final LayerScene scene = sb.build();
       await renderScene(scene);
       _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+      ]);
+    });
+
+    test('can customize amount of overlays', () async {
+      final CkPicture testPicture =
+          paintPicture(const ui.Rect.fromLTRB(0, 0, 10, 10), (CkCanvas canvas) {
+        canvas.drawCircle(const ui.Offset(5, 5), 5, CkPaint());
+      });
+
+      // Initialize all platform views to be used in the test.
+      final List<int> platformViewIds = <int>[];
+      for (int i = 0; i < 16; i++) {
+        ui_web.platformViewRegistry.registerViewFactory(
+          'test-platform-view',
+          (int viewId) => createDomHTMLDivElement()..id = 'view-$i',
+        );
+        await createPlatformView(i, 'test-platform-view');
+        platformViewIds.add(i);
+      }
+
+      Future<void> renderTestScene({required int viewCount}) async {
+        final LayerSceneBuilder sb = LayerSceneBuilder();
+        sb.pushOffset(0, 0);
+        for (int i = 0; i < viewCount; i++) {
+          sb.addPicture(ui.Offset.zero, testPicture);
+          sb.addPlatformView(i, width: 10, height: 10);
+        }
+        await renderScene(sb.build());
+      }
+
+      // Set maximum overlays to 4.
+      debugOverrideJsConfiguration(<String, Object?>{
+        'canvasKitMaximumSurfaces': 4,
+      }.jsify() as JsFlutterConfiguration?);
+
+      await renderTestScene(viewCount: 8);
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _overlay,
+        _platformView,
+      ]);
+
+      // Set maximum overlays to -1. Should default to 1.
+      debugOverrideJsConfiguration(<String, Object?>{
+        'canvasKitMaximumSurfaces': -1,
+      }.jsify() as JsFlutterConfiguration?);
+
+      await renderTestScene(viewCount: 8);
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
         _overlay,
         _platformView,
       ]);
