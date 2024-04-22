@@ -3,19 +3,8 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
-#include <Metal/Metal.h>
 
-#include "flutter/common/settings.h"
-#include "flutter/common/task_runners.h"
-#include "flutter/flow/layers/layer_tree.h"
 #include "flutter/fml/platform/darwin/cf_utils.h"
-#include "flutter/fml/synchronization/waitable_event.h"
-#include "flutter/fml/trace_event.h"
-#include "flutter/shell/common/platform_view.h"
-#include "flutter/shell/common/rasterizer.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
-#import "flutter/shell/platform/darwin/ios/ios_surface_software.h"
-#include "third_party/skia/include/utils/mac/SkCGUtils.h"
 
 @implementation FlutterView {
   id<FlutterViewEngineDelegate> _delegate;

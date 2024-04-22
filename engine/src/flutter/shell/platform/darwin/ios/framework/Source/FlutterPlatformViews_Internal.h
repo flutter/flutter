@@ -5,15 +5,17 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMVIEWS_INTERNAL_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMVIEWS_INTERNAL_H_
 
-#include <Metal/Metal.h>
-#include "flutter/flow/embedded_views.h"
-#include "flutter/fml/platform/darwin/scoped_nsobject.h"
-#include "flutter/shell/common/shell.h"
-#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
-#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
+
+#include <Metal/Metal.h>
+
+#include "flutter/flow/surface.h"
+#include "flutter/fml/memory/weak_ptr.h"
+#include "flutter/fml/platform/darwin/scoped_nsobject.h"
+#include "flutter/fml/trace_event.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewResponder.h"
 #import "flutter/shell/platform/darwin/ios/ios_context.h"
 
 @class FlutterTouchInterceptingView;
@@ -210,9 +212,9 @@ class FlutterPlatformViewsController {
 
   void SetFlutterView(UIView* flutter_view);
 
-  void SetFlutterViewController(UIViewController* flutter_view_controller);
+  void SetFlutterViewController(UIViewController<FlutterViewResponder>* flutter_view_controller);
 
-  UIViewController* getFlutterViewController();
+  UIViewController<FlutterViewResponder>* getFlutterViewController();
 
   void RegisterViewFactory(
       NSObject<FlutterPlatformViewFactory>* factory,
@@ -353,7 +355,7 @@ class FlutterPlatformViewsController {
 
   fml::scoped_nsobject<FlutterMethodChannel> channel_;
   fml::scoped_nsobject<UIView> flutter_view_;
-  fml::scoped_nsobject<UIViewController> flutter_view_controller_;
+  fml::scoped_nsobject<UIViewController<FlutterViewResponder>> flutter_view_controller_;
   fml::scoped_nsobject<FlutterClippingMaskViewPool> mask_view_pool_;
   std::map<std::string, fml::scoped_nsobject<NSObject<FlutterPlatformViewFactory>>> factories_;
   std::map<int64_t, fml::scoped_nsobject<NSObject<FlutterPlatformView>>> views_;

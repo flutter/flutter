@@ -3,20 +3,11 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
-#include <CoreGraphics/CGColorSpace.h>
-#include <Metal/Metal.h>
 
-#include "flutter/common/settings.h"
-#include "flutter/common/task_runners.h"
-#include "flutter/flow/layers/layer_tree.h"
-#include "flutter/fml/platform/darwin/cf_utils.h"
-#include "flutter/fml/synchronization/waitable_event.h"
-#include "flutter/fml/trace_event.h"
-#include "flutter/shell/common/platform_view.h"
-#include "flutter/shell/common/rasterizer.h"
+#include <CoreGraphics/CGColorSpace.h>
+
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
-#import "flutter/shell/platform/darwin/ios/ios_surface_software.h"
-#include "third_party/skia/include/utils/mac/SkCGUtils.h"
+#include "fml/platform/darwin/cf_utils.h"
 
 // This is mostly a duplication of FlutterView.
 // TODO(amirh): once GL support is in evaluate if we can merge this with FlutterView.

@@ -60,9 +60,6 @@ typedef void (^FlutterKeyboardAnimationCallback)(fml::TimePoint);
 - (fml::WeakNSObject<FlutterViewController>)getWeakNSObject;
 - (std::shared_ptr<flutter::FlutterPlatformViewsController>&)platformViewsController;
 - (FlutterRestorationPlugin*)restorationPlugin;
-// Send touches to the Flutter Engine while forcing the change type to be cancelled.
-// The `phase`s in `touches` are ignored.
-- (void)forceTouchesCancelled:(NSSet*)touches;
 
 // Accepts keypress events, and then calls |nextAction| if the event was not
 // handled.

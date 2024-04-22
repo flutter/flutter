@@ -8,15 +8,6 @@
 #include <Metal/Metal.h>
 #include <UIKit/UIKit.h>
 
-#include <memory>
-
-#include "flutter/fml/memory/weak_ptr.h"
-#include "flutter/shell/common/shell.h"
-#import "flutter/shell/platform/darwin/ios/ios_surface.h"
-#include "fml/platform/darwin/cf_utils.h"
-
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
-
 /// UIViews that are used by |FlutterPlatformViews| to present Flutter
 /// rendering on top of system compositor rendering (ex. a web view).
 ///

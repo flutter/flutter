@@ -6,13 +6,12 @@
 #import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
 
-#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
+#import "flutter/fml/thread.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlatformViews.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTouchInterceptingView_Test.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
 FLUTTER_ASSERT_ARC
@@ -2158,7 +2157,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   [forwardGectureRecognizer touchesBegan:touches1 withEvent:event1];
   OCMVerify([mockFlutterViewContoller touchesBegan:touches1 withEvent:event1]);
 
-  UIViewController* mockFlutterViewContoller2 = OCMClassMock([UIViewController class]);
+  FlutterViewController* mockFlutterViewContoller2 = OCMClassMock([FlutterViewController class]);
   flutterPlatformViewsController->SetFlutterViewController(mockFlutterViewContoller2);
 
   // Touch events should still send to the old FlutterViewController if FlutterViewController
