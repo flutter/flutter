@@ -69,7 +69,7 @@ class SliverTreeNode<T> {
 /// Signature for a function that creates a [Widget] to represent the given
 /// [SliverTreeNode] in the [SliverTree].
 ///
-/// Used by [SliverTree.treeRowBuilder] to build rows on demand for the
+/// Used by [SliverTree.treeNodeBuilder] to build rows on demand for the
 /// tree.
 typedef TreeNodeBuilder = Widget Function(
   BuildContext context,
@@ -98,7 +98,7 @@ typedef TreeRowExtentBuilder = double Function(
 ///
 /// See also:
 ///
-///   * [SliverTreeNode.toggleNode], for controlling node expansion
+///   * [SliverTreeNode.onNodeToggle], for controlling node expansion
 ///     programmatically.
 typedef TreeNodeCallback = void Function(SliverTreeNode<dynamic> node);
 
@@ -117,9 +117,9 @@ mixin TreeStateMixin<T> {
   /// Returns whether or not the given [SliverTreeNode] is enclosed within its
   /// parent [SliverTreeNode].
   ///
-  /// If the [TreeNode.parent] [isExpanded], or this is a root node, the given
-  /// node is active and this method will return true. This does not reflect
-  /// whether or not the node is visible in the [Viewport].
+  /// If the [SliverTreeNode.parent] [isExpanded], or this is a root node, the
+  /// given node is active and this method will return true. This does not
+  /// reflect whether or not the node is visible in the [Viewport].
   bool isActive(SliverTreeNode<T> node);
 
   /// Switches the given [SliverTreeNode]s expanded state.
@@ -150,7 +150,7 @@ mixin TreeStateMixin<T> {
   int? getActiveIndexFor(SliverTreeNode<T> node);
 }
 
-/// Enables control over the [TreeNodes] of a [SliverTree].
+/// Enables control over the [SliverTreeNode]s of a [SliverTree].
 ///
 /// It can be useful to expand or collapse nodes of the tree
 /// programmatically, for example to reconfigure an existing node
@@ -187,7 +187,7 @@ class SliverTreeController {
   /// Whether or not the given [SliverTreeNode] is enclosed within its parent
   /// [SliverTreeNode].
   ///
-  /// If the [TreeNode.parent] [isExpanded], or this is a root node, the given
+  /// If the [SliverTreeNode.parent] [isExpanded], or this is a root node, the given
   /// node is active and this method will return true. This does not reflect
   /// whether or not the node is visible in the [Viewport].
   bool isActive(SliverTreeNode<dynamic> node) {
@@ -356,7 +356,7 @@ int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
 /// a vertically scrolling [Viewport].
 ///
 /// The rows of the tree are laid out on demand, using
-/// [SliverTree.treeRowBuilder]. This will only be called for the nodes that are
+/// [SliverTree.treeNodeBuilder]. This will only be called for the nodes that are
 /// visible, or within the [Viewport.cacheExtent.]
 ///
 /// Only [Viewport]s that scroll with and axis direction of [AxisDirection.down]
@@ -409,7 +409,7 @@ class SliverTree<T> extends StatefulWidget {
 
   /// Called to build and entry of the [SliverTree] for the given node.
   ///
-  /// By default, if this is unset, the [SliverTree.defaultTreeRowBuilder] is
+  /// By default, if this is unset, the [SliverTree.defaultTreeNodeBuilder] is
   /// used.
   final TreeNodeBuilder treeNodeBuilder;
 
@@ -487,10 +487,11 @@ class SliverTree<T> extends StatefulWidget {
   /// A wrapper method for triggering the expansion or collapse of a
   /// [SliverTreeNode].
   ///
-  /// Use as part of [SliverTree.defaultTreeRowBuilder] to wrap the leading icon
-  /// of parent [TreeNode]s such that tapping on it triggers the animation.
+  /// Used as part of [SliverTree.defaultTreeNodeBuilder] to wrap the leading
+  /// icon of parent [SliverTreeNode]s such that tapping on it triggers the
+  /// animation.
   ///
-  /// If defining your own [SliverTree.treeRowBuilder], this method can be used
+  /// If defining your own [SliverTree.treeNodeBuilder], this method can be used
   /// to wrap any part, or all, of the returned widget in order to trigger the
   /// change in state for the node.
   static Widget toggleNodeWith({
@@ -519,7 +520,7 @@ class SliverTree<T> extends StatefulWidget {
 
   /// Returns the default tree row for a given [SliverTreeNode].
   ///
-  /// Used by [SliverTree.defaultTreeRowBuilder].
+  /// Used by [SliverTree.treeNodeBuilder].
   ///
   /// This will return a [Row] containing the [toString] of
   /// [SliverTreeNode.content]. If the [SliverTreeNode] is a parent of
@@ -818,7 +819,7 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
           vsync: this,
           duration: widget.animationStyle?.duration ?? SliverTree.defaultAnimationDuration,
         )..addStatusListener((AnimationStatus status) {
-          switch(status) {
+          switch (status) {
             case AnimationStatus.dismissed:
             case AnimationStatus.completed:
               _currentAnimationForParent[node]!.controller.dispose();
@@ -833,7 +834,7 @@ class _SliverTreeState<T> extends State<SliverTree<T>> with TickerProviderStateM
           });
         });
 
-      switch(controller.status) {
+      switch (controller.status) {
         case AnimationStatus.forward:
         case AnimationStatus.reverse:
           // We're interrupting an animation already in progress.
