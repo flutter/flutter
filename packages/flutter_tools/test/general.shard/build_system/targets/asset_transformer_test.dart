@@ -71,6 +71,7 @@ void main() {
           ],
         )
       ],
+      logger: logger,
     );
 
     expect(transformationFailure, isNull, reason: logger.errorText);
@@ -127,6 +128,7 @@ void main() {
           args: <String>[],
         )
       ],
+      logger: BufferLogger.test(),
     );
 
     expect(asset, exists);
@@ -187,6 +189,7 @@ Something went wrong''');
           args: <String>[],
         )
       ],
+      logger: BufferLogger.test(),
     );
 
     expect(processManager, hasNoRemainingExpectations);
@@ -286,6 +289,7 @@ Transformation failed, but I forgot to exit with a non-zero code.'''
           args: <String>[],
         ),
       ],
+      logger: BufferLogger.test(),
     );
 
     expect(processManager, hasNoRemainingExpectations);
@@ -364,6 +368,7 @@ Transformation failed, but I forgot to exit with a non-zero code.'''
           args: <String>[],
         ),
       ],
+      logger: BufferLogger.test(),
     );
 
     expect(failure, isNotNull);
