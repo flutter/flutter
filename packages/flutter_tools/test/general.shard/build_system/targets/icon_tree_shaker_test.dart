@@ -561,6 +561,86 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
+  testWithoutContext('Allows system font fallback when there are none', () async {
+    final Environment environment = createEnvironment(<String, String>{
+      kIconTreeShakerFlag: 'true',
+      kBuildMode: 'release',
+    });
+    final File appDill = environment.buildDir.childFile('app.dill')
+      ..createSync(recursive: true);
+
+    // Valid manifest, just not using it.
+    fontManifestContent = DevFSStringContent(validFontManifestJson);
+
+    final IconTreeShaker iconTreeShaker = IconTreeShaker(
+      environment,
+      fontManifestContent,
+      logger: logger,
+      processManager: processManager,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
+    );
+
+    addConstFinderInvocation(appDill.path, stdout: emptyConstFinderResult);
+    // Does not throw
+    await iconTreeShaker.subsetFont(
+      input: fileSystem.file(inputPath),
+      outputPath: outputPath,
+      relativePath: relativePath,
+    );
+
+    expect(
+      logger.statusText,
+      'Expected to find fontFamily for constant IconData with codepoint: '
+      '59470, but found fontFamily: null. This usually means '
+      'you are relying on the system font. Alternatively, font families in '
+      'an IconData class can be provided in the assets section of your '
+      'pubspec.yaml, or you are missing "uses-material-design: true".\n',
+    );
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('Allows system font fallback when there are none', () async {
+    final Environment environment = createEnvironment(<String, String>{
+      kIconTreeShakerFlag: 'true',
+      kBuildMode: 'release',
+    });
+    final File appDill = environment.buildDir.childFile('app.dill')
+      ..createSync(recursive: true);
+
+    // Nothing in font manifest
+    fontManifestContent = DevFSStringContent(emptyFontManifestJson);
+
+    final IconTreeShaker iconTreeShaker = IconTreeShaker(
+      environment,
+      fontManifestContent,
+      logger: logger,
+      processManager: processManager,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
+    );
+
+    addConstFinderInvocation(appDill.path, stdout: emptyConstFinderResult);
+    // Does not throw
+    await iconTreeShaker.subsetFont(
+      input: fileSystem.file(inputPath),
+      outputPath: outputPath,
+      relativePath: relativePath,
+    );
+
+    expect(
+      logger.statusText,
+      'Expected to find fontFamily for constant IconData with codepoint: '
+      '59470, but found fontFamily: null. This usually means '
+      'you are relying on the system font. Alternatively, font families in '
+      'an IconData class can be provided in the assets section of your '
+      'pubspec.yaml, or you are missing "uses-material-design: true".\n',
+    );
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
   testWithoutContext('ConstFinder non-zero exit', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
@@ -601,6 +681,20 @@ const String validConstFinderResult = '''
     {
       "codePoint": 59470,
       "fontFamily": "MaterialIcons",
+      "fontPackage": null,
+      "matchTextDirection": false
+    }
+  ],
+  "nonConstantLocations": []
+}
+''';
+
+const String emptyConstFinderResult = '''
+{
+  "constantInstances": [
+    {
+      "codePoint": 59470,
+      "fontFamily": null,
       "fontPackage": null,
       "matchTextDirection": false
     }
@@ -668,3 +762,5 @@ const String invalidFontManifestJson = '''
   ]
 }
 ''';
+
+const String emptyFontManifestJson = '[]';
