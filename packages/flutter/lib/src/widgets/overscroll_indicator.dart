@@ -841,15 +841,23 @@ class _StretchController extends ChangeNotifier {
 
   double get value => _stretchSize.value;
 
+  // Constants for absorbImpact.
+  static const double _minVelocity = 1;
+  static const double _maxVelocity = 10000;
+  static const Duration _minStretchDuration = Duration(milliseconds: 50);
+
   /// Handle a fling to the edge of the viewport at a particular velocity.
   ///
   /// The velocity must be positive.
   void absorbImpact(double velocity, double totalOverscroll) {
     assert(velocity >= 0.0);
-    velocity = clampDouble(velocity, 1, 10000);
+    velocity = clampDouble(velocity, _minVelocity, _maxVelocity);
     _stretchSizeTween.begin = _stretchSize.value;
     _stretchSizeTween.end = math.min(_stretchIntensity + (_flingFriction / velocity), 1.0);
-    _stretchController.duration = Duration(milliseconds: math.max(velocity * 0.02, 50).round());
+    _stretchController.duration = Duration(
+      milliseconds:
+          math.max(velocity * 0.02, _minStretchDuration.inMilliseconds).round(),
+    );
     _stretchController.forward(from: 0.0);
     _state = _StretchState.absorb;
     _stretchDirection = totalOverscroll > 0 ? _StretchDirection.trailing : _StretchDirection.leading;
