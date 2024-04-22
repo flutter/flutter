@@ -128,10 +128,6 @@ coverage/
 # Symbols
 app.*.symbols
 
-# Platform specific in the examples
-examples/api/android/
-examples/api/ios/
-
 # Exceptions to above rules.
 !**/ios/**/default.mode1v3
 !**/ios/**/default.mode2v3
