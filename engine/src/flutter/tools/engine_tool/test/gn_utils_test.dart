@@ -39,6 +39,8 @@ void main() {
   final List<CannedProcess> cannedProcesses = <CannedProcess>[
     CannedProcess((List<String> command) => command.contains('desc'),
         stdout: fixtures.gnDescOutput()),
+    CannedProcess((List<String> command) => command.contains('outputs'),
+        stdout: 'display_list_unittests'),
   ];
 
   test('find test targets', () async {
