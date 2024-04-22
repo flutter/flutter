@@ -7,15 +7,14 @@ import 'package:path/path.dart' as path;
 import '../utils.dart';
 
 Future<void> toolTestsRunner() async {
-  final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
 
   await selectSubshard(<String, ShardRunner>{
-    'general': () => _runGeneralToolTests(toolsPath),
-    'commands': () =>  _runCommandsToolTests(toolsPath),
+    'general': _runGeneralToolTests,
+    'commands': _runCommandsToolTests,
   });
 }
 
-Future<void> _runGeneralToolTests(String toolsPath) async {
+Future<void> _runGeneralToolTests() async {
   await runDartTest(
     toolsPath,
     testPaths: <String>[path.join('test', 'general.shard')],
@@ -28,7 +27,7 @@ Future<void> _runGeneralToolTests(String toolsPath) async {
   );
 }
 
-Future<void> _runCommandsToolTests(String toolsPath) async {
+Future<void> _runCommandsToolTests() async {
   await runDartTest(
     toolsPath,
     forceSingleCore: true,
