@@ -561,7 +561,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('Allows system font fallback when there are none', () async {
+  testWithoutContext('Allow system font fallback when fontFamily is null', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
@@ -601,7 +601,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('Allows system font fallback when there are none', () async {
+  testWithoutContext('Allow system font fallback when fontFamily is null and manifest is empty', () async {
     final Environment environment = createEnvironment(<String, String>{
       kIconTreeShakerFlag: 'true',
       kBuildMode: 'release',
