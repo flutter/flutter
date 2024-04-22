@@ -1827,8 +1827,20 @@ class _DirectionallyExtendCaretSelectionAction<T extends DirectionalCaretMovemen
 /// [Selectable]s do not change or move around frequently.
 ///
 /// It keeps track of the [Selectable]s that received start or end
-/// [SelectionEvent]s to accurately synthesize a [SelectionEvent] for the
-/// opposite edge when needed.
+/// [SelectionEvent]s to accurately synthesize [SelectionEvent]s for the
+/// children [Selectable]s when needed.
+///
+/// When a new [SelectionEdgeUpdateEvent] is dispatched to a [Selectable], this
+/// delegate checks whether the [Selectable] has already received a selection
+/// update for each edge that currently exists, and synthesizes an event for the
+/// edges that have not yet received an update. This synthesized event is dispatched
+/// before dispatching the new event.
+///
+/// For example, if we have an existing start edge for this delegate and a
+/// [Selectable] receives an end [SelectionEdgeUpdateEvent] and it hasn't yet
+/// received a start [SelectionEdgeUpdateEvent], it synthesizes a start
+/// [SelectionEdgeUpdateEvent] and dispatches it before dispatching the original
+/// end [SelectionEdgeUpdateEvent].
 ///
 /// See also:
 ///
