@@ -768,8 +768,8 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
 /// Represents the animation of the children of a parent [SliverTreeNode] that
 /// are animating into or out of view.
 ///
-/// The [fromIndex] and [toIndex] are inclusive of the children following the
-/// parent, with the [value] representing the status of the current animation.
+/// The `fromIndex` and `toIndex` are inclusive of the children following the
+/// parent, with the `value` representing the status of the current animation.
 ///
 /// Provided to [RenderSliverTree] by [SliverTree] to properly offset animating
 /// children.
@@ -819,10 +819,10 @@ enum SliverTreeTraversalOrder {
 /// are offset by the indentation specified by
 /// [SliverTreeIndentationType.value] in the cross axis of the viewport. This
 /// means the space allotted to the indentation will not be part of the space
-/// made available to the Widget returned by [SliverTree.treeRowBuilder].
+/// made available to the Widget returned by [SliverTree.treeNodeBuilder].
 ///
 /// Alternatively, the indentation can be implemented in
-/// [SliverTree.treeRowBuilder], with the depth of the given tree row accessed
+/// [SliverTree.treeNodeBuilder], with the depth of the given tree row accessed
 /// by [SliverTreeNode.depth]. This allows for more customization in building
 /// tree rows, such as filling the indented area with decorations or ink
 /// effects.
@@ -853,7 +853,7 @@ class SliverTreeIndentationType {
   /// Configures no offsetting of child nodes in a [SliverTree].
   ///
   /// Useful if the indentation is implemented in the
-  /// [SliverTree.treeRowBuilder] instead for more customization options.
+  /// [SliverTree.treeNodeBuilder] instead for more customization options.
   ///
   /// Child nodes will not be offset in the tree.
   static const SliverTreeIndentationType none = SliverTreeIndentationType._internal(0.0);
@@ -926,7 +926,7 @@ class RenderSliverTree extends RenderSliverVariedExtentList {
   /// The number of pixels by which child nodes will be offset in the cross axis
   /// based on their [TreeNodeParentData.depth].
   ///
-  /// If zero, can alternatively offset children in [SliverTree.treeRowBuilder]
+  /// If zero, can alternatively offset children in [SliverTree.treeNodeBuilder]
   /// for more options to customize the indented space.
   double get indentation => _indentation;
   double _indentation;
