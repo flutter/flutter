@@ -435,7 +435,7 @@ class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.primaryRouteAnimation != widget.primaryRouteAnimation
     || oldWidget.secondaryRouteAnimation != widget.secondaryRouteAnimation
-    || oldWidget.child != widget.child) {
+    || oldWidget.child != widget.child || oldWidget.linearTransition != widget.linearTransition) {
     _disposeCurve();
     _setupAnimation();
     }
