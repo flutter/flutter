@@ -38,7 +38,12 @@ PathBuilder& PathBuilder::MoveTo(Point point, bool relative) {
 }
 
 PathBuilder& PathBuilder::Close() {
-  LineTo(subpath_start_);
+  // If the subpath start is the same as the current position, this
+  // is an empty contour and inserting a line segment will just
+  // confuse the tessellator.
+  if (subpath_start_ != current_) {
+    LineTo(subpath_start_);
+  }
   SetContourClosed(true);
   AddContourComponent(current_);
   return *this;
