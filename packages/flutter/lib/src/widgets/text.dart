@@ -894,10 +894,10 @@ class _SelectableTextContainerDelegate extends MultiStaticSelectableSelectionCon
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
     final SelectionResult result = _handleSelectParagraph(event);
     if (currentSelectionStartIndex != -1) {
-      markReceivedStartEvent(selectables[currentSelectionStartIndex]);
+      hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
     }
     if (currentSelectionEndIndex != -1) {
-      markReceivedEndEvent(selectables[currentSelectionEndIndex]);
+      hasReceivedEndEvent.add(selectables[currentSelectionEndIndex]);
     }
     updateLastEdgeEventsFromGeometries();
     return result;
@@ -1264,9 +1264,9 @@ class _SelectableTextContainerDelegate extends MultiStaticSelectableSelectionCon
       return super.handleSelectionEdgeUpdate(event);
     }
     if (event.type == SelectionEventType.endEdgeUpdate) {
-      updateLastEndEdgeUpdateGlobalPosition(event.globalPosition);
+      lastEndEdgeUpdateGlobalPosition = event.globalPosition;
     } else {
-      updateLastStartEdgeUpdateGlobalPosition(event.globalPosition);
+      lastStartEdgeUpdateGlobalPosition = event.globalPosition;
     }
     if (event.type == SelectionEventType.endEdgeUpdate) {
       return currentSelectionEndIndex == -1 ? _initSelection(event, isEnd: true) : _adjustSelection(event, isEnd: true);
