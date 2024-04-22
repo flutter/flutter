@@ -411,7 +411,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
     String? testAssetDirectory;
     if (buildTestAssets) {
-      await _buildTestAsset(flavor: buildInfo.flavor, impellerStatus: debuggingOptions.enableImpeller);
+      await _buildTestAsset(
+        flavor: buildInfo.flavor,
+        impellerStatus: debuggingOptions.enableImpeller,
+        buildMode: debuggingOptions.buildInfo.mode,
+      );
       testAssetDirectory = globals.fs.path.
         join(flutterProject.directory.path, 'build', 'unit_test_assets');
     }
@@ -674,6 +678,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   Future<void> _buildTestAsset({
     required String? flavor,
     required ImpellerStatus impellerStatus,
+    required BuildMode buildMode,
   }) async {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     final int build = await assetBundle.build(
@@ -694,6 +699,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         artifacts: globals.artifacts!,
         logger: globals.logger,
         projectDir: globals.fs.currentDirectory,
+        buildMode: buildMode,
       );
     }
   }
