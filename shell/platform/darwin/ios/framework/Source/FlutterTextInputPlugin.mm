@@ -794,6 +794,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 // This is cleared at the start of each keyboard interaction. (Enter a character, delete a character
 // etc)
 @property(nonatomic, copy) NSString* temporarilyDeletedComposedCharacter;
+@property(nonatomic, assign) CGRect editMenuTargetRect;
 
 - (void)setEditableTransform:(NSArray*)matrix;
 @end
@@ -859,7 +860,42 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     }
   }
 
+  if (@available(iOS 16.0, *)) {
+    _editMenuInteraction = [[UIEditMenuInteraction alloc] initWithDelegate:self];
+    [self addInteraction:_editMenuInteraction];
+  }
+
   return self;
+}
+
+- (UIMenu*)editMenuInteraction:(UIEditMenuInteraction*)interaction
+          menuForConfiguration:(UIEditMenuConfiguration*)configuration
+              suggestedActions:(NSArray<UIMenuElement*>*)suggestedActions API_AVAILABLE(ios(16.0)) {
+  return [UIMenu menuWithChildren:suggestedActions];
+}
+
+- (void)editMenuInteraction:(UIEditMenuInteraction*)interaction
+    willDismissMenuForConfiguration:(UIEditMenuConfiguration*)configuration
+                           animator:(id<UIEditMenuInteractionAnimating>)animator
+    API_AVAILABLE(ios(16.0)) {
+  [self.textInputDelegate flutterTextInputView:self
+        willDismissEditMenuWithTextInputClient:_textInputClient];
+}
+
+- (CGRect)editMenuInteraction:(UIEditMenuInteraction*)interaction
+    targetRectForConfiguration:(UIEditMenuConfiguration*)configuration API_AVAILABLE(ios(16.0)) {
+  return _editMenuTargetRect;
+}
+
+- (void)showEditMenuWithTargetRect:(CGRect)targetRect API_AVAILABLE(ios(16.0)) {
+  _editMenuTargetRect = targetRect;
+  UIEditMenuConfiguration* config =
+      [UIEditMenuConfiguration configurationWithIdentifier:nil sourcePoint:CGPointZero];
+  [self.editMenuInteraction presentEditMenuWithConfiguration:config];
+}
+
+- (void)hideEditMenu API_AVAILABLE(ios(16.0)) {
+  [self.editMenuInteraction dismissMenu];
 }
 
 - (void)configureWithDictionary:(NSDictionary*)configuration {
@@ -1148,8 +1184,10 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   if (action == @selector(paste:)) {
     // Forbid pasting images, memojis, or other non-string content.
     return [UIPasteboard generalPasteboard].hasStrings;
+  } else if (action == @selector(copy:) || action == @selector(cut:) ||
+             action == @selector(delete:)) {
+    return [self textInRange:_selectedTextRange].length > 0;
   }
-
   return [super canPerformAction:action withSender:sender];
 }
 
@@ -2509,6 +2547,23 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   }
   _keyboardViewContainer.layer.zPosition = NSIntegerMax;
   _keyboardViewContainer.frame = _keyboardRect;
+}
+
+- (BOOL)showEditMenu:(NSDictionary*)args API_AVAILABLE(ios(16.0)) {
+  if (!self.activeView.isFirstResponder) {
+    return NO;
+  }
+  NSDictionary<NSString*, NSNumber*>* encodedTargetRect = args[@"targetRect"];
+  CGRect globalTargetRect = CGRectMake(
+      [encodedTargetRect[@"x"] doubleValue], [encodedTargetRect[@"y"] doubleValue],
+      [encodedTargetRect[@"width"] doubleValue], [encodedTargetRect[@"height"] doubleValue]);
+  CGRect localTargetRect = [self.hostView convertRect:globalTargetRect toView:self.activeView];
+  [self.activeView showEditMenuWithTargetRect:localTargetRect];
+  return YES;
+}
+
+- (void)hideEditMenu {
+  [self.activeView hideEditMenu];
 }
 
 - (void)setEditableSizeAndTransform:(NSDictionary*)dictionary {

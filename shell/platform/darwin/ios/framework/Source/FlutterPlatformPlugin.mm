@@ -149,8 +149,33 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
   } else if ([method isEqualToString:@"Share.invoke"]) {
     [self showShareViewController:args];
     result(nil);
+  } else if ([method isEqualToString:@"ContextMenu.showSystemContextMenu"]) {
+    [self showSystemContextMenu:args];
+    result(nil);
+  } else if ([method isEqualToString:@"ContextMenu.hideSystemContextMenu"]) {
+    [self hideSystemContextMenu];
+    result(nil);
   } else {
     result(FlutterMethodNotImplemented);
+  }
+}
+
+- (void)showSystemContextMenu:(NSDictionary*)args {
+  if (@available(iOS 16.0, *)) {
+    FlutterTextInputPlugin* textInputPlugin = [_engine.get() textInputPlugin];
+    BOOL shownEditMenu = [textInputPlugin showEditMenu:args];
+    if (!shownEditMenu) {
+      FML_LOG(ERROR) << "Only text input supports system context menu for now. Ensure the system "
+                        "context menu is shown with an active text input connection. See "
+                        "https://github.com/flutter/flutter/issues/143033.";
+    }
+  }
+}
+
+- (void)hideSystemContextMenu {
+  if (@available(iOS 16.0, *)) {
+    FlutterTextInputPlugin* textInputPlugin = [_engine.get() textInputPlugin];
+    [textInputPlugin hideEditMenu];
   }
 }
 

@@ -1075,6 +1075,14 @@ class PlatformDispatcher {
   bool get nativeSpellCheckServiceDefined => _nativeSpellCheckServiceDefined;
   bool _nativeSpellCheckServiceDefined = false;
 
+  /// Whether showing system context menu is supported on the current platform.
+  ///
+  /// This option is used by [AdaptiveTextSelectionToolbar] to decide whether
+  /// to show system context menu, or to fallback to the default Flutter context
+  /// menu.
+  bool get supportsShowingSystemContextMenu => _supportsShowingSystemContextMenu;
+  bool _supportsShowingSystemContextMenu = false;
+
   /// Whether briefly displaying the characters as you type in obscured text
   /// fields is enabled in system settings.
   ///
@@ -1142,6 +1150,14 @@ class PlatformDispatcher {
     } else {
       _nativeSpellCheckServiceDefined = false;
     }
+
+    final bool? supportsShowingSystemContextMenu = data['supportsShowingSystemContextMenu'] as bool?;
+    if (supportsShowingSystemContextMenu != null) {
+      _supportsShowingSystemContextMenu = supportsShowingSystemContextMenu;
+    } else {
+      _supportsShowingSystemContextMenu = false;
+    }
+
     // This field is optional.
     final bool? brieflyShowPassword = data['brieflyShowPassword'] as bool?;
     if (brieflyShowPassword != null) {
