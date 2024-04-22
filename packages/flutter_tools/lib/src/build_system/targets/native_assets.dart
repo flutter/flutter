@@ -381,7 +381,7 @@ class NativeAssets extends Target {
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart'),
     // If different packages are resolved, different native assets might need to be built.
     Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
-    // TODO(mosum): Should consume resources.json. https://github.com/flutter/flutter/issues/146263
+    // TODO(mosuem): Should consume resources.json. https://github.com/flutter/flutter/issues/146263
   ];
 
   @override

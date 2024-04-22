@@ -139,7 +139,7 @@ class KernelSnapshotProgram extends Target {
 
   @override
   List<Source> get outputs => const <Source>[
-    // TODO(mosum): Should output resources.json. https://github.com/flutter/flutter/issues/146263
+    // TODO(mosuem): Should output resources.json. https://github.com/flutter/flutter/issues/146263
   ];
 
   @override
