@@ -3705,10 +3705,15 @@ void main() {
   testUsingContext('flutter create should tool exit if the template manifest cannot be read', () async {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
-    projectDir.createSync(recursive: true);
+
     await expectLater(
-      runner.run(
-          <String>['create', '--no-pub', '--template=plugin', projectDir.path]),
+      runner.run(<String>[
+        'create',
+        '--no-pub',
+        '--template=plugin',
+        '--project-name=test',
+        projectDir.path,
+      ]),
       throwsToolExit(message: 'Unable to read the template manifest at path'),
     );
   }, overrides: <Type, Generator>{
