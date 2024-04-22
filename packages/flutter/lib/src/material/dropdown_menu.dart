@@ -524,7 +524,10 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final BuildContext? highlightContext = buttonItemKeys[currentHighlight!].currentContext;
       if (highlightContext != null) {
-        Scrollable.ensureVisible(highlightContext);
+        final ScrollableState? scrollable = Scrollable.maybeOf(highlightContext);
+        scrollable?.widget.controller?.position.ensureVisible(
+          highlightContext.findRenderObject()!,
+        );
       }
     }, debugLabel: 'DropdownMenu.scrollToHighlight');
   }

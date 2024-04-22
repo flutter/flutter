@@ -2129,6 +2129,32 @@ void main() {
     // No exception should be thrown.
     expect(tester.takeException(), isNull);
   });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/146764.
+  testWidgets('Ensure visible does not throw an error in nested scroll views', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SingleChildScrollView(
+          child: Card(
+            child: SingleChildScrollView(
+              child: DropdownMenu<TestMenu>(
+                dropdownMenuEntries: menuChildren,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+    await tester.enterText(find.byType(TextField).first, 'Item');
+    await tester.pumpAndSettle();
+
+    // No exception should be thrown.
+    expect(tester.takeException(), isNull);
+
+  }, variant: TargetPlatformVariant.desktop());
 }
 
 enum TestMenu {
