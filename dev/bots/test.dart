@@ -79,8 +79,6 @@ typedef ShardRunner = Future<void> Function();
 /// if such flags are provided to `test.dart`.
 final Map<String,String> localEngineEnv = <String, String>{};
 
-const String kTestHarnessShardName = 'test_harness_tests';
-
 const String CIRRUS_TASK_NAME = 'CIRRUS_TASK_NAME';
 
 /// When you call this, you can pass additional arguments to pass custom

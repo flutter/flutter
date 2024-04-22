@@ -59,6 +59,7 @@ final bool runningInDartHHHBot =
 
 const String kShardKey = 'SHARD';
 const String kSubshardKey = 'SUBSHARD';
+const String kTestHarnessShardName = 'test_harness_tests';
 const String CIRRUS_TASK_NAME = 'CIRRUS_TASK_NAME';
 
 /// Environment variables to override the local engine when running `pub test`,
