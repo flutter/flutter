@@ -1168,10 +1168,9 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
     final Map<String, String> defaultImplementations = <String, String>{};
 
     for (final Plugin plugin in plugins) {
-      final (String? implementsPluginName, String? defaultImplPluginName) = _getPluginImplCandidateAndDefaultPlugin(
-        plugin,
-        platformKey,
-      );
+      final String? implementsPluginName = _getPluginImplCandidate(plugin, platformKey);
+      final String? defaultImplPluginName = _getDefaultPlugin(plugin, platformKey);
+
       if (defaultImplPluginName != null) {
         // Each plugin can only have one default implementation for this [platformKey].
         defaultImplementations[plugin.name] = defaultImplPluginName;
@@ -1216,75 +1215,78 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
   return pluginResolutions;
 }
 
-/// Determine whether this plugin serves as implementation for an app-facing
-/// package with [implementsPluginName] or/and whether it references a default
-/// plugin [defaultImplPluginName] for the given platform [platformKey].
+/// Determine if this plugin serves as implementation for an app-facing
+/// package with [implementsPluginName] for the given platform [platformKey].
 ///
 /// Options:
 ///   * The [plugin] (e.g. 'url_launcher_linux') serves as implementation for
 ///     [implementsPluginName] (e.g. 'url_launcher').
+///   * The [plugin] (e.g. 'url_launcher') implements itself [implementsPluginName]
+///     and then serves as its own default implementation [defaultImplPluginName].
+///   * The [plugin] does not provide an implementation for [implementsPluginName].
+String? _getPluginImplCandidate(Plugin plugin, String platformKey) {
+  if(_isEligibleInlineImplementation(plugin, platformKey)) {
+    return plugin.name;
+  }
+
+  final String? implementsPackage = plugin.implementsPackage;
+  if (implementsPackage != null && implementsPackage.isNotEmpty) {
+    return implementsPackage;
+  }
+  
+  return null;
+}
+
+/// Determine if this plugin references a default plugin [defaultImplPluginName]
+/// for the given platform [platformKey].
+///
+/// Options:
 ///   * The [plugin] (e.g. 'url_launcher') references a default implementation
 ///     [defaultImplPluginName] (e.g. 'url_launcher_linux').
 ///   * The [plugin] (e.g. 'url_launcher') implements itself [implementsPluginName]
 ///     and then serves as its own default implementation [defaultImplPluginName].
-///   * The [plugin] neither provides an implementation for [implementsPluginName]
-///     nor references a default implementation [defaultImplPluginName].
-(String? implementsPluginName, String? defaultImplPluginName) _getPluginImplCandidateAndDefaultPlugin(Plugin plugin, String platformKey) {
-  String? defaultImplPluginName = plugin.defaultPackagePlatforms[platformKey];
-  if (plugin.platforms[platformKey] == null && defaultImplPluginName == null) {
-    // The plugin doesn't implement this platform nor reference a default implementation.
-    return (null, null);
+///   * The [plugin] does not reference a default implementation [defaultImplPluginName].
+String? _getDefaultPlugin(Plugin plugin, String platformKey) {
+  if (_isEligibleInlineImplementation(plugin, platformKey)) {
+    // The inline Dart plugin serves as its own default implementation.
+    return plugin.name;
   }
-  String? implementsPackage = plugin.implementsPackage;
+
+  final String? defaultImplPluginName = plugin.defaultPackagePlatforms[platformKey];
+  if (defaultImplPluginName != null) {
+    return defaultImplPluginName;
+  }
+
+  return null;
+}
+
+/// Determine if the [plugin] has an inline implementation for the [platformKey]
+/// and if it's eligible to serve as its own default.
+bool _isEligibleInlineImplementation(Plugin plugin, String platformKey) {
   final bool hasInlineDartImplementation =
       plugin.pluginDartClassPlatforms[platformKey] != null &&
           plugin.pluginDartClassPlatforms[platformKey] != 'none';
-  if (implementsPackage == null || implementsPackage.isEmpty) {
-    // Plugin does not serve as implementation for another app-facing package.
-    if (defaultImplPluginName == null && !hasInlineDartImplementation) {
-      // Skip native inline PluginPlatform implementation.
-      return (null, null);
-    }
-    if (defaultImplPluginName != null) {
-      return (null, defaultImplPluginName);
-    } else {
-      // An app-facing package (i.e., one with no 'implements') with an
-      // inline implementation should be its own default implementation.
-      // Desktop platforms originally did not work that way, and enabling
-      // it unconditionally would break existing published plugins, so
-      // only treat it as such if either:
-      // - the platform is not desktop, or
-      // - the plugin requires at least Flutter 2.11 (when this opt-in logic
-      //   was added), so that existing plugins continue to work.
-      // See https://github.com/flutter/flutter/issues/87862 for details.
-      final bool isDesktop = platformKey == 'linux' || platformKey == 'macos' || platformKey == 'windows';
-      final semver.VersionConstraint? flutterConstraint = plugin.flutterConstraint;
-      final semver.Version? minFlutterVersion = flutterConstraint != null &&
-          flutterConstraint is semver.VersionRange ? flutterConstraint.min : null;
-      final bool hasMinVersionForImplementsRequirement = minFlutterVersion != null &&
-          minFlutterVersion.compareTo(semver.Version(2, 11, 0)) >= 0;
-      if (!isDesktop || hasMinVersionForImplementsRequirement) {
-        // Dart plugin serves as its own default implementation.
-        implementsPackage = plugin.name;
-        defaultImplPluginName = plugin.name;
-        return (implementsPackage, defaultImplPluginName);
-      } else {
-        // If the inline dart implementation is desktop and it's flutter min
-        // constraint isn't fulfilled, it isn't eligible for auto-registration.
-        return (null, null);
-      }
-    }
+  if(!hasInlineDartImplementation) {
+    // The inline Dart plugin implements itself.
+    return false;
   }
-
-  if (!hasInlineDartImplementation) {
-    // If there's no Dart implementation, there's nothing to register.
-    return (null, null);
-  }
-
-  // If it hasn't been skipped, it's a candidate for auto-registration,
-  // means it can serve as implementation for [implementsPackage],
-  // so add it as implementation candidate.
-  return (implementsPackage, null);
+  
+  // An app-facing package (i.e., one with no 'implements') with an
+  // inline implementation should be its own default implementation.
+  // Desktop platforms originally did not work that way, and enabling
+  // it unconditionally would break existing published plugins, so
+  // only treat it as such if either:
+  // - the platform is not desktop, or
+  // - the plugin requires at least Flutter 2.11 (when this opt-in logic
+  //   was added), so that existing plugins continue to work.
+  // See https://github.com/flutter/flutter/issues/87862 for details.
+  final bool isDesktop = platformKey == 'linux' || platformKey == 'macos' || platformKey == 'windows';
+  final semver.VersionConstraint? flutterConstraint = plugin.flutterConstraint;
+  final semver.Version? minFlutterVersion = flutterConstraint != null &&
+      flutterConstraint is semver.VersionRange ? flutterConstraint.min : null;
+  final bool hasMinVersionForImplementsRequirement = minFlutterVersion != null &&
+      minFlutterVersion.compareTo(semver.Version(2, 11, 0)) >= 0;
+  return !isDesktop || hasMinVersionForImplementsRequirement;
 }
 
 /// Get the resolved plugin from the [candidates] serving as implementation for
