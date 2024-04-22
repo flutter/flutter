@@ -442,6 +442,7 @@ class _IndicatorPainter extends CustomPainter {
     this.dividerColor,
     this.dividerHeight,
     required this.showDivider,
+    this.devicePixelRatio,
   }) : super(repaint: controller.animation) {
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
@@ -466,6 +467,7 @@ class _IndicatorPainter extends CustomPainter {
   final Color? dividerColor;
   final double? dividerHeight;
   final bool showDivider;
+  final double? devicePixelRatio;
 
   // _currentTabOffsets and _currentTextDirection are set each time TabBar
   // layout is completed. These values can be null when TabBar contains no
@@ -562,6 +564,7 @@ class _IndicatorPainter extends CustomPainter {
     final ImageConfiguration configuration = ImageConfiguration(
       size: _currentRect!.size,
       textDirection: _currentTextDirection,
+      devicePixelRatio: devicePixelRatio,
     );
     if (showDivider && dividerHeight !> 0) {
       final Paint dividerPaint = Paint()..color = dividerColor!..strokeWidth = dividerHeight!;
@@ -1433,6 +1436,7 @@ class _TabBarState extends State<TabBar> {
       dividerColor: widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor,
       dividerHeight: widget.dividerHeight ?? tabBarTheme.dividerHeight ?? _defaults.dividerHeight,
       showDivider: theme.useMaterial3 && !widget.isScrollable,
+      devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
     );
 
     oldPainter?.dispose();
@@ -2441,7 +2445,7 @@ class _TabsPrimaryDefaultsM3 extends TabBarTheme {
   static double indicatorWeight(TabBarIndicatorSize indicatorSize) {
     return switch (indicatorSize) {
       TabBarIndicatorSize.label => 3.0,
-      TabBarIndicatorSize.tab => 2.0,
+      TabBarIndicatorSize.tab   => 2.0,
     };
   }
 

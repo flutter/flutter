@@ -11,6 +11,7 @@ import 'border_radius.dart';
 import 'box_border.dart';
 import 'box_shadow.dart';
 import 'colors.dart';
+import 'debug.dart';
 import 'decoration.dart';
 import 'decoration_image.dart';
 import 'edge_insets.dart';
@@ -439,7 +440,20 @@ class _BoxDecorationPainter extends BoxPainter {
     for (final BoxShadow boxShadow in _decoration.boxShadow!) {
       final Paint paint = boxShadow.toPaint();
       final Rect bounds = rect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius);
+      assert(() {
+        if (debugDisableShadows && boxShadow.blurStyle == BlurStyle.outer) {
+          canvas.save();
+          canvas.clipRect(bounds);
+        }
+        return true;
+      }());
       _paintBox(canvas, bounds, paint, textDirection);
+      assert(() {
+        if (debugDisableShadows && boxShadow.blurStyle == BlurStyle.outer) {
+          canvas.restore();
+        }
+        return true;
+      }());
     }
   }
 

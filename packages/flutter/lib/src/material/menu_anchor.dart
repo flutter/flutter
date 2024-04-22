@@ -848,6 +848,7 @@ class MenuItemButton extends StatefulWidget {
     this.onFocusChange,
     this.focusNode,
     this.shortcut,
+    this.semanticsLabel,
     this.style,
     this.statesController,
     this.clipBehavior = Clip.none,
@@ -891,6 +892,21 @@ class MenuItemButton extends StatefulWidget {
   ///
   /// {@macro flutter.material.MenuBar.shortcuts_note}
   final MenuSerializableShortcut? shortcut;
+
+  /// An optional Semantics label, applied to the entire [MenuItemButton].
+  ///
+  /// A screen reader will default to reading the derived text on the
+  /// [MenuItemButton] itself, which is not guaranteed to be readable.
+  /// (For some shortcuts, such as comma, semicolon, and other
+  /// punctuation, screen readers read silence)
+  ///
+  /// Setting this label overwrites the semantics properties of the entire
+  /// Widget, including its children. Consider wrapping this widget in
+  /// [Semantics] if you want to customize other properties besides just
+  /// the label.
+  ///
+  /// Null by default.
+  final String? semanticsLabel;
 
   /// Customizes this button's appearance.
   ///
@@ -1119,6 +1135,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
       child: _MenuItemLabel(
         leadingIcon: widget.leadingIcon,
         shortcut: widget.shortcut,
+        semanticsLabel: widget.semanticsLabel,
         trailingIcon: widget.trailingIcon,
         hasSubmenu: false,
         overflowAxis: _anchor?._orientation ?? widget.overflowAxis,
@@ -2108,37 +2125,22 @@ class _LocalizedShortcutLabeler {
         keySeparator = '+';
     }
     if (serialized.trigger != null) {
-      final List<String> modifiers = <String>[];
       final LogicalKeyboardKey trigger = serialized.trigger!;
-      if (_usesSymbolicModifiers) {
-        // macOS/iOS platform convention uses this ordering, with ⌘ always last.
-        if (serialized.control!) {
-          modifiers.add(_getModifierLabel(LogicalKeyboardKey.control, localizations));
-        }
-        if (serialized.alt!) {
-          modifiers.add(_getModifierLabel(LogicalKeyboardKey.alt, localizations));
-        }
-        if (serialized.shift!) {
-          modifiers.add(_getModifierLabel(LogicalKeyboardKey.shift, localizations));
-        }
-        if (serialized.meta!) {
-          modifiers.add(_getModifierLabel(LogicalKeyboardKey.meta, localizations));
-        }
-      } else {
-        // These should be in this order, to match the LogicalKeySet version.
-        if (serialized.alt!) {
-          modifiers.add(_getModifierLabel(LogicalKeyboardKey.alt, localizations));
-        }
-        if (serialized.control!) {
-          modifiers.add(_getModifierLabel(LogicalKeyboardKey.control, localizations));
-        }
-        if (serialized.meta!) {
-          modifiers.add(_getModifierLabel(LogicalKeyboardKey.meta, localizations));
-        }
-        if (serialized.shift!) {
-          modifiers.add(_getModifierLabel(LogicalKeyboardKey.shift, localizations));
-        }
-      }
+      final List<String> modifiers = <String>[
+        if (_usesSymbolicModifiers) ...<String>[
+          // MacOS/iOS platform convention uses this ordering, with ⌘ always last.
+          if (serialized.control!) _getModifierLabel(LogicalKeyboardKey.control, localizations),
+          if (serialized.alt!)     _getModifierLabel(LogicalKeyboardKey.alt, localizations),
+          if (serialized.shift!)   _getModifierLabel(LogicalKeyboardKey.shift, localizations),
+          if (serialized.meta!)    _getModifierLabel(LogicalKeyboardKey.meta, localizations),
+        ] else ...<String>[
+          // This order matches the LogicalKeySet version.
+          if (serialized.alt!)     _getModifierLabel(LogicalKeyboardKey.alt, localizations),
+          if (serialized.control!) _getModifierLabel(LogicalKeyboardKey.control, localizations),
+          if (serialized.meta!)    _getModifierLabel(LogicalKeyboardKey.meta, localizations),
+          if (serialized.shift!)   _getModifierLabel(LogicalKeyboardKey.shift, localizations),
+        ],
+      ];
       String? shortcutTrigger;
       final int logicalKeyId = trigger.keyId;
       if (_shortcutGraphicEquivalents.containsKey(trigger)) {
@@ -2973,6 +2975,7 @@ class _MenuItemLabel extends StatelessWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.shortcut,
+    this.semanticsLabel,
     this.overflowAxis = Axis.vertical,
     required this.child,
   });
@@ -2997,6 +3000,10 @@ class _MenuItemLabel extends StatelessWidget {
   /// the shortcut.
   final MenuSerializableShortcut? shortcut;
 
+  /// An optional Semantics label, which replaces the generated string when
+  /// read by a screen reader.
+  final String? semanticsLabel;
+
   /// The direction in which the menu item expands.
   final Axis overflowAxis;
 
@@ -3010,7 +3017,6 @@ class _MenuItemLabel extends StatelessWidget {
       _kLabelItemMinSpacing,
       _kLabelItemDefaultSpacing + density.horizontal * 2,
     );
-
     Widget leadings;
     if (overflowAxis == Axis.vertical) {
       leadings = Expanded(
@@ -3044,7 +3050,7 @@ class _MenuItemLabel extends StatelessWidget {
       );
     }
 
-    return Row(
+    Widget menuItemLabel = Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         leadings,
@@ -3073,6 +3079,10 @@ class _MenuItemLabel extends StatelessWidget {
           ),
       ],
     );
+    if (semanticsLabel != null) {
+      menuItemLabel = Semantics(label: semanticsLabel, excludeSemantics: true, child: menuItemLabel);
+    }
+    return menuItemLabel;
   }
 
   @override

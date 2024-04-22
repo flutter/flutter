@@ -4,9 +4,9 @@
 
 import 'package:path/path.dart' as path;
 
-import '../test.dart';
+import '../utils.dart';
 
-Future<void> toolTestsRunner(String flutterRoot) async {
+Future<void> toolTestsRunner() async {
   final String toolsPath = path.join(flutterRoot, 'packages', 'flutter_tools');
 
   await selectSubshard(<String, ShardRunner>{

@@ -604,7 +604,7 @@ abstract interface class PredictiveBackRoute {
   /// Handles a predictive back gesture ending successfully.
   void handleCommitBackGesture();
 
-  /// Handles a predictive back gesture ending in cancelation.
+  /// Handles a predictive back gesture ending in cancellation.
   void handleCancelBackGesture();
 }
 

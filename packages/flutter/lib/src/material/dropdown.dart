@@ -118,6 +118,40 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
 }
 
 class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> {
+  CurvedAnimation? _opacityAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _setOpacityAnimation();
+  }
+
+  @override
+  void didUpdateWidget(_DropdownMenuItemButton<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.itemIndex != widget.itemIndex ||
+        oldWidget.route.animation != widget.route.animation ||
+        oldWidget.route.selectedIndex != widget.route.selectedIndex ||
+        widget.route.items.length != oldWidget.route.items.length) {
+      _setOpacityAnimation();
+    }
+  }
+
+  void _setOpacityAnimation() {
+    _opacityAnimation?.dispose();
+    final double unit = 0.5 / (widget.route.items.length + 1.5);
+    if (widget.itemIndex == widget.route.selectedIndex) {
+      _opacityAnimation = CurvedAnimation(
+          parent: widget.route.animation!, curve: const Threshold(0.0));
+    } else {
+      final double start =
+          clampDouble(0.5 + (widget.itemIndex + 1) * unit, 0.0, 1.0);
+      final double end = clampDouble(start + 1.5 * unit, 0.0, 1.0);
+      _opacityAnimation = CurvedAnimation(
+          parent: widget.route.animation!, curve: Interval(start, end));
+    }
+  }
+
   void _handleFocusChange(bool focused) {
     final bool inTraditionalMode = switch (FocusManager.instance.highlightMode) {
       FocusHighlightMode.touch       => false,
@@ -157,17 +191,15 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
   };
 
   @override
+  void dispose() {
+    _opacityAnimation?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final DropdownMenuItem<T> dropdownMenuItem = widget.route.items[widget.itemIndex].item!;
-    final CurvedAnimation opacity;
-    final double unit = 0.5 / (widget.route.items.length + 1.5);
-    if (widget.itemIndex == widget.route.selectedIndex) {
-      opacity = CurvedAnimation(parent: widget.route.animation!, curve: const Threshold(0.0));
-    } else {
-      final double start = clampDouble(0.5 + (widget.itemIndex + 1) * unit, 0.0, 1.0);
-      final double end = clampDouble(start + 1.5 * unit, 0.0, 1.0);
-      opacity = CurvedAnimation(parent: widget.route.animation!, curve: Interval(start, end));
-    }
+    final DropdownMenuItem<T> dropdownMenuItem =
+        widget.route.items[widget.itemIndex].item!;
     Widget child = Container(
       padding: widget.padding,
       height: widget.route.itemHeight,
@@ -183,7 +215,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
         child: child,
       );
     }
-    child = FadeTransition(opacity: opacity, child: child);
+    child = FadeTransition(opacity: _opacityAnimation!, child: child);
     if (kIsWeb && dropdownMenuItem.enabled) {
       child = Shortcuts(
         shortcuts: _webShortcuts,
@@ -221,8 +253,8 @@ class _DropdownMenu<T> extends StatefulWidget {
 }
 
 class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
-  late CurvedAnimation _fadeOpacity;
-  late CurvedAnimation _resize;
+  late final CurvedAnimation _fadeOpacity;
+  late final CurvedAnimation _resize;
 
   @override
   void initState() {
@@ -241,6 +273,13 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
       curve: const Interval(0.25, 0.5),
       reverseCurve: const Threshold(0.0),
     );
+  }
+
+  @override
+  void dispose() {
+    _fadeOpacity.dispose();
+    _resize.dispose();
+    super.dispose();
   }
 
   @override
@@ -1726,7 +1765,7 @@ class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
   @override
   void didChange(T? value) {
     super.didChange(value);
-    _dropdownButtonFormField.onChanged!(value);
+    _dropdownButtonFormField.onChanged?.call(value);
   }
 
   @override
@@ -1740,6 +1779,6 @@ class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
  @override
   void reset() {
     super.reset();
-    _dropdownButtonFormField.onChanged!(value);
+    _dropdownButtonFormField.onChanged?.call(value);
   }
 }
