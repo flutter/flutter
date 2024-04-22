@@ -23,8 +23,8 @@ const double _kDefaultRowExtent = 40.0;
 /// A [SliverTreeNode.content] can be of any type, but must correspond with the
 /// same type of the [SliverTree].
 ///
-/// Getters for [depth], [parent] and [isExpanded] are managed by the
-/// [SliverTree]'s state.
+/// The values returned by [depth], [parent] and [isExpanded] getters are
+/// managed by the [SliverTree]'s state.
 class SliverTreeNode<T> {
   /// Creates a [SliverTreeNode] instance for use in a [SliverTree].
   SliverTreeNode(
@@ -105,16 +105,17 @@ typedef TreeNodeCallback = void Function(SliverTreeNode<dynamic> node);
 /// A mixin for classes implementing a tree structure as expected by a
 /// [SliverTreeController].
 ///
-/// Used by [SliverTree] to implement an interface for the [SliverTreeController].
+/// Used by [SliverTree] to implement an interface for the
+/// [SliverTreeController].
 ///
-/// This allows the [SliverTreeController] to be used in other widgets that implement
-/// this interface.
+/// This allows the [SliverTreeController] to be used in other widgets that
+/// implement this interface.
 mixin TreeStateMixin<T> {
   /// Returns whether or not the given [SliverTreeNode] is expanded.
   bool isExpanded(SliverTreeNode<T> node);
 
-  /// Returns whether or not the given [SliverTreeNode] is enclosed within its parent
-  /// [SliverTreeNode].
+  /// Returns whether or not the given [SliverTreeNode] is enclosed within its
+  /// parent [SliverTreeNode].
   ///
   /// If the [TreeNode.parent] [isExpanded], or this is a root node, the given
   /// node is active and this method will return true. This does not reflect
@@ -135,7 +136,8 @@ mixin TreeStateMixin<T> {
   /// Expands all parent [SliverTreeNode]s in the tree.
   void expandAll();
 
-  /// Retrieves the [SliverTreeNode] containing the associated content, if it exists.
+  /// Retrieves the [SliverTreeNode] containing the associated content, if it
+  /// exists.
   ///
   /// If no node exists, this will return null. This does not reflect whether
   /// or not a node [isActive], or if it is visible in the viewport.
@@ -193,7 +195,8 @@ class SliverTreeController {
     return _state!.isActive(node);
   }
 
-  /// Returns the [SliverTreeNode] containing the associated content, if it exists.
+  /// Returns the [SliverTreeNode] containing the associated content, if it
+  /// exists.
   ///
   /// If no node exists, this will return null. This does not reflect whether
   /// or not a node [isActive], or if it is currently visible in the viewport.
@@ -269,7 +272,7 @@ class SliverTreeController {
     }
   }
 
-  /// Returns the current row index of the given [TreeViewNode].
+  /// Returns the current row index of the given [SliverTreeNode].
   ///
   /// If the node is not currently active in the tree, meaning its parent is
   /// collapsed, this will return null.
@@ -287,7 +290,6 @@ class SliverTreeController {
   ///
   /// To return null if there is no [SliverTree] use [maybeOf] instead.
   ///
-  /// {@tool dartpad}
   /// Typical usage of the [SliverTreeController.of] function is to call it
   /// from within the `build` method of a descendant of an [SliverTree].
   ///
@@ -297,10 +299,7 @@ class SliverTreeController {
   /// the [SliverTreeController] (since it's "above" the widget
   /// being returned in the widget tree). In cases like that you can
   /// add a [Builder] widget, which provides a new scope with a
-  /// [BuildContext] that is "under" the [SliverTree]:
-  ///
-  // TODO(Piinks): add sample code
-  /// {@end-tool}
+  /// [BuildContext] that is "under" the [SliverTree].
   static SliverTreeController of(BuildContext context) {
     final _SliverTreeState<dynamic>? result =
         context.findAncestorStateOfType<_SliverTreeState<dynamic>>();
@@ -356,12 +355,28 @@ int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
 /// A sliver for lazily displaying [SliverTreeNode]s that expand and collapse in
 /// a vertically scrolling [Viewport].
 ///
-/// The rows of the tree are laid our on demand, using
+/// The rows of the tree are laid out on demand, using
 /// [SliverTree.treeRowBuilder]. This will only be called for the nodes that are
 /// visible, or within the [Viewport.cacheExtent.]
 ///
 /// Only [Viewport]s that scroll with and axis direction of [AxisDirection.down]
 /// can use SliverTree.
+///
+///{@tool dartpad}
+/// This example uses a [SliverTree] to display nodes, highlighting nodes as
+/// they are selected.
+///
+/// ** See code in examples/api/lib/widgets/sliver/sliver_tree.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows a highly customized [SliverTree] configured to
+/// [SliverTreeIndentationType.none]. This allows the indentation to be handled
+/// by the developer in [SliverTree.treeNodeBuilder], where a decoration is
+/// used to fill the indented space.
+///
+/// ** See code in examples/api/lib/widgets/sliver/sliver_tree.1.dart **
+/// {@end-tool}
 class SliverTree<T> extends StatefulWidget {
   /// Creates an instance of a [SliverTree] for displaying [SliverTreeNode]s
   /// that animate expanding and collapsing of nodes.
@@ -385,10 +400,11 @@ class SliverTree<T> extends StatefulWidget {
 
   /// The list of [SliverTreeNode]s that may be displayed in the [SliverTree].
   ///
-  /// Beyond root nodes, whether or not a given [SliverTreeNode] is displayed depends
-  /// on the [SliverTreeNode.isExpanded] value of its parent. The [SliverTree] will
-  /// set the [SliverTreeNode.parent] and [SliverTreeNode.depth] as nodes are built on
-  /// demand to ensure the integrity of the tree.
+  /// Beyond root nodes, whether or not a given [SliverTreeNode] is displayed
+  /// depends on the [SliverTreeNode.isExpanded] value of its parent. The
+  /// [SliverTree] will set the [SliverTreeNode.parent] and
+  /// [SliverTreeNode.depth] as nodes are built on demand to ensure the
+  /// integrity of the tree.
   final List<SliverTreeNode<T>> tree;
 
   /// Called to build and entry of the [SliverTree] for the given node.
@@ -468,7 +484,8 @@ class SliverTree<T> extends StatefulWidget {
   /// {@macro flutter.rendering.SliverTreeIndentationType}
   final SliverTreeIndentationType indentation;
 
-  /// A wrapper method for triggering the expansion or collapse of a [SliverTreeNode].
+  /// A wrapper method for triggering the expansion or collapse of a
+  /// [SliverTreeNode].
   ///
   /// Use as part of [SliverTree.defaultTreeRowBuilder] to wrap the leading icon
   /// of parent [TreeNode]s such that tapping on it triggers the animation.
@@ -504,10 +521,10 @@ class SliverTree<T> extends StatefulWidget {
   ///
   /// Used by [SliverTree.defaultTreeRowBuilder].
   ///
-  /// This will return a [Row] containing the [toString] of [SliverTreeNode.content].
-  /// If the [SliverTreeNode] is a parent of additional nodes, a arrow icon will
-  /// precede the content, and will trigger an expand and collapse animation
-  /// when tapped.
+  /// This will return a [Row] containing the [toString] of
+  /// [SliverTreeNode.content]. If the [SliverTreeNode] is a parent of
+  /// additional nodes, a arrow icon will precede the content, and will trigger
+  /// an expand and collapse animation when tapped.
   static Widget defaultTreeNodeBuilder(
     BuildContext context,
     SliverTreeNode<dynamic> node, {

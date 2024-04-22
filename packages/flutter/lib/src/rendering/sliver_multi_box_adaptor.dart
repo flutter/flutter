@@ -781,8 +781,8 @@ typedef SliverTreeNodesAnimation = ({
 
 /// Used to pass information down to [RenderSliverTree].
 ///
-/// The depth is used for breadth first traversal, where as depth first traversal
-/// follows the indexed order.
+/// The depth is used for breadth first traversal, where as depth first
+/// traversal follows the indexed order.
 class TreeNodeParentData extends SliverMultiBoxAdaptorParentData {
   /// The depth of the node, used by [RenderSliverTree] to traverse nodes in the
   /// designated [SliverTreeTraversalOrder].
@@ -806,7 +806,8 @@ enum SliverTreeTraversalOrder {
   /// [SliverTreeNode.depth], before progressing to the next depth of nodes in
   /// the tree.
   ///
-  /// Can be used in [SliverTree.traversalOrder], which defaults to [depthFirst].
+  /// Can be used in [SliverTree.traversalOrder], which defaults to
+  /// [depthFirst].
   breadthFirst,
 }
 
@@ -825,6 +826,16 @@ enum SliverTreeTraversalOrder {
 /// by [SliverTreeNode.depth]. This allows for more customization in building
 /// tree rows, such as filling the indented area with decorations or ink
 /// effects.
+///
+/// {@tool dartpad}
+/// This example shows a highly customized [SliverTree] configured to
+/// [SliverTreeIndentationType.none]. This allows the indentation to be handled
+/// by the developer in [SliverTree.treeNodeBuilder], where a decoration is
+/// used to fill the indented space.
+///
+/// ** See code in examples/api/lib/widgets/sliver/sliver_tree.1.dart **
+/// {@end-tool}
+///
 /// {@endtemplate}
 class SliverTreeIndentationType {
   const SliverTreeIndentationType._internal(double value) : _value = value;
@@ -859,9 +870,6 @@ class SliverTreeIndentationType {
 
 // Used during paint to delineate animating portions of the tree.
 typedef _PaintSegment = ({int leadingIndex, int trailingIndex});
-
-// This will likely need to move to the same file as RenderSliverMultiBoxAdaptor
-// to access private API around keep alives and visiting children in depth and breadth first traversal order
 
 /// A sliver that places multiple [SliverTreeNode]s in a linear array along the
 /// main access, while staggering nodes that are animating into and out of view.
@@ -1173,7 +1181,8 @@ class RenderSliverTree extends RenderSliverVariedExtentList {
 
       // Rect is calculated by the trailing edge of the parent (preceding
       // leadingIndex), and the trailing edge of the trailing index. We cannot
-      // rely on the leading edge of the leading index, because it is currently moving.
+      // rely on the leading edge of the leading index, because it is currently
+      // moving.
       final int parentIndex = math.max(segment.leadingIndex - 1, 0);
       final double leadingOffset = indexToLayoutOffset(0.0, parentIndex)
         + (parentIndex == 0 ? 0.0 : itemExtentBuilder(parentIndex, _currentLayoutDimensions)!);

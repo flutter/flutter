@@ -43,7 +43,7 @@ void main() {
       expect(node.children.first.content, 'child');
       expect(node.children.first.children.isEmpty, isTrue);
       expect(node.children.first.isExpanded, isFalse);
-      // Set by TreeView when built for tree integrity
+      // Set by SliverTree when built for tree integrity
       expect(node.depth, isNull);
       expect(node.parent, isNull);
       expect(node.children.first.depth, isNull);
@@ -83,7 +83,7 @@ void main() {
       expect(node.children.first.content, 'child');
       expect(node.children.first.children.isEmpty, isTrue);
       expect(node.children.first.isExpanded, isFalse);
-      // Set by TreeView when built for tree integrity
+      // Set by SliverTree when built for tree integrity
       expect(node.depth, 0);
       expect(node.parent, isNull);
       expect(node.children.first.depth, 1);
