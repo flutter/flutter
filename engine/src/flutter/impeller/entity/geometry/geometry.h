@@ -9,6 +9,7 @@
 #include "impeller/core/vertex_buffer.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
+#include "impeller/entity/texture_fill.vert.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 
@@ -50,6 +51,34 @@ enum GeometryVertexType {
   kColor,
   kUV,
 };
+
+/// @brief Compute UV geometry for a VBB that contains only position geometry.
+///
+/// texture_origin should be set to 0, 0 for stroke and stroke based geometry,
+/// like the point field.
+VertexBufferBuilder<TextureFillVertexShader::PerVertexData>
+ComputeUVGeometryCPU(
+    VertexBufferBuilder<SolidFillVertexShader::PerVertexData>& input,
+    Point texture_origin,
+    Size texture_coverage,
+    Matrix effect_transform);
+
+/// @brief Computes geometry and UV coordinates for a rectangle to be rendered.
+///
+/// UV is the horizontal and vertical coordinates within the texture.
+///
+/// @param source_rect      The rectangle to be rendered.
+/// @param texture_bounds The local space bounding box of the geometry.
+/// @param effect_transform The transform to apply to the UV coordinates.
+/// @param renderer         The content context to use for allocating buffers.
+/// @param entity           The entity to use for the transform.
+/// @param pass             The render pass to use for the transform.
+GeometryResult ComputeUVGeometryForRect(Rect source_rect,
+                                        Rect texture_bounds,
+                                        Matrix effect_transform,
+                                        const ContentContext& renderer,
+                                        const Entity& entity,
+                                        RenderPass& pass);
 
 class Geometry {
  public:
@@ -93,6 +122,12 @@ class Geometry {
                                            const Entity& entity,
                                            RenderPass& pass) const = 0;
 
+  virtual GeometryResult GetPositionUVBuffer(Rect texture_coverage,
+                                             Matrix effect_transform,
+                                             const ContentContext& renderer,
+                                             const Entity& entity,
+                                             RenderPass& pass) const = 0;
+
   virtual GeometryResult::Mode GetResultMode() const;
 
   virtual GeometryVertexType GetVertexType() const = 0;
@@ -119,6 +154,13 @@ class Geometry {
   static GeometryResult ComputePositionGeometry(
       const ContentContext& renderer,
       const Tessellator::VertexGenerator& generator,
+      const Entity& entity,
+      RenderPass& pass);
+
+  static GeometryResult ComputePositionUVGeometry(
+      const ContentContext& renderer,
+      const Tessellator::VertexGenerator& generator,
+      const Matrix& uv_transform,
       const Entity& entity,
       RenderPass& pass);
 };

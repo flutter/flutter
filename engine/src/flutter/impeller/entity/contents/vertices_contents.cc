@@ -133,8 +133,8 @@ void VerticesUVContents::SetAlpha(Scalar alpha) {
 bool VerticesUVContents::Render(const ContentContext& renderer,
                                 const Entity& entity,
                                 RenderPass& pass) const {
-  using VS = TiledTexturePipeline::VertexShader;
-  using FS = TiledTexturePipeline::FragmentShader;
+  using VS = TexturePipeline::VertexShader;
+  using FS = TexturePipeline::FragmentShader;
 
   auto src_contents = parent_.GetSourceContents();
 
@@ -158,23 +158,21 @@ bool VerticesUVContents::Render(const ContentContext& renderer,
   if (!coverage.has_value()) {
     return false;
   }
-  auto geometry_result = geometry->GetPositionBuffer(renderer, entity, pass);
+  auto geometry_result = geometry->GetPositionUVBuffer(
+      coverage.value(), Matrix(), renderer, entity, pass);
   auto opts = OptionsFromPassAndEntity(pass, entity);
   opts.primitive_type = geometry_result.type;
-  pass.SetPipeline(renderer.GetTiledTexturePipeline(opts));
+  pass.SetPipeline(renderer.GetTexturePipeline(opts));
   pass.SetVertexBuffer(std::move(geometry_result.vertex_buffer));
 
   VS::FrameInfo frame_info;
   frame_info.mvp = geometry_result.transform;
   frame_info.texture_sampler_y_coord_scale =
       snapshot->texture->GetYCoordScale();
-  frame_info.uv_transform = coverage.value().GetNormalizingTransform();
   VS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
 
   FS::FragInfo frag_info;
   frag_info.alpha = alpha_ * snapshot->opacity;
-  frag_info.x_tile_mode = 0;
-  frag_info.y_tile_mode = 0;
   FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
   FS::BindTextureSampler(pass, snapshot->texture,
                          renderer.GetContext()->GetSamplerLibrary()->GetSampler(
