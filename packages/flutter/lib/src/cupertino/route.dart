@@ -427,14 +427,18 @@ class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
   @override
   void initState() {
     super.initState();
-    _init();
+    _setupAnimation();
   }
 
   @override
   void didUpdateWidget(covariant CupertinoPageTransition oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.primaryRouteAnimation != widget.primaryRouteAnimation
+    || oldWidget.secondaryRouteAnimation != widget.secondaryRouteAnimation
+    || oldWidget.child != widget.child) {
     _disposeCurve();
-    _init();
+    _setupAnimation();
+    }
   }
 
   @override
@@ -449,7 +453,7 @@ class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
     _primaryShadowCurve?.dispose();
   }
 
-  void _init() {
+  void _setupAnimation() {
     _primaryPositionAnimation =
            (widget.linearTransition
              ? widget.primaryRouteAnimation
