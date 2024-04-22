@@ -328,7 +328,7 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
         bottom: false,
         child: PopScope<Object?>(
           canPop: _category == null,
-          onPopInvoked: (bool didPop, Object? result) {
+          onPopWithResultInvoked: (bool didPop, Object? result) {
             if (didPop) {
               return;
             }
