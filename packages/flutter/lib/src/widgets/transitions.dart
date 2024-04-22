@@ -126,6 +126,9 @@ class _AnimatedState extends State<AnimatedWidget> {
   }
 
   void _handleChange() {
+    if (!mounted) {
+      return;
+    }
     setState(() {
       // The listenable's state is our build state, and it changed already.
     });
