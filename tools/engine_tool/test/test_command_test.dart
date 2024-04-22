@@ -42,6 +42,8 @@ void main() {
   final List<CannedProcess> cannedProcesses = <CannedProcess>[
     CannedProcess((List<String> command) => command.contains('desc'),
         stdout: fixtures.gnDescOutput()),
+    CannedProcess((List<String> command) => command.contains('outputs'),
+        stdout: 'display_list_unittests'),
   ];
 
   test('test command executes test', () async {
@@ -83,7 +85,7 @@ void main() {
         '//third_party/protobuf:protoc',
       ]);
       expect(result, equals(1));
-      expect(testEnvironment.processHistory.length, lessThan(3));
+      expect(testEnvironment.processHistory.length, lessThan(6));
       expect(testEnvironment.processHistory.where((ExecutedProcess process) {
         return process.command[0].contains('protoc');
       }), isEmpty);
