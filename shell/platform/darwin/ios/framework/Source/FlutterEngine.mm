@@ -430,7 +430,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   [self maybeSetupPlatformViewChannels];
   [self updateDisplays];
   _textInputPlugin.get().viewController = viewController;
-  _undoManagerPlugin.get().viewController = viewController;
 
   if (viewController) {
     __block FlutterEngine* blockSelf = self;
@@ -465,7 +464,6 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 - (void)notifyViewControllerDeallocated {
   [[self lifecycleChannel] sendMessage:@"AppLifecycleState.detached"];
   _textInputPlugin.get().viewController = nil;
-  _undoManagerPlugin.get().viewController = nil;
   if (!_allowHeadlessExecution) {
     [self destroyContext];
   } else if (_shell) {
@@ -1189,10 +1187,17 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 #pragma mark - Undo Manager Delegate
 
-- (void)flutterUndoManagerPlugin:(FlutterUndoManagerPlugin*)undoManagerPlugin
-         handleUndoWithDirection:(FlutterUndoRedoDirection)direction {
+- (void)handleUndoWithDirection:(FlutterUndoRedoDirection)direction {
   NSString* action = (direction == FlutterUndoRedoDirectionUndo) ? @"undo" : @"redo";
   [_undoManagerChannel.get() invokeMethod:@"UndoManagerClient.handleUndo" arguments:@[ action ]];
+}
+
+- (UIView<UITextInput>*)activeTextInputView {
+  return [[self textInputPlugin] textInputView];
+}
+
+- (NSUndoManager*)undoManager {
+  return self.viewController.undoManager;
 }
 
 #pragma mark - Screenshot Delegate
