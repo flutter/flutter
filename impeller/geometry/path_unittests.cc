@@ -47,8 +47,8 @@ TEST(PathTest, PathBuilderSetsCorrectContourPropertiesForAddCommands) {
     Path path = PathBuilder{}.AddCircle({100, 100}, 50).TakePath();
     ContourComponent contour;
     path.GetContourComponentAtIndex(0, contour);
-    ASSERT_POINT_NEAR(contour.destination, Point(100, 50));
-    ASSERT_TRUE(contour.is_closed);
+    EXPECT_POINT_NEAR(contour.destination, Point(100, 50));
+    EXPECT_TRUE(contour.is_closed);
   }
 
   {
@@ -56,8 +56,8 @@ TEST(PathTest, PathBuilderSetsCorrectContourPropertiesForAddCommands) {
         PathBuilder{}.AddOval(Rect::MakeXYWH(100, 100, 100, 100)).TakePath();
     ContourComponent contour;
     path.GetContourComponentAtIndex(0, contour);
-    ASSERT_POINT_NEAR(contour.destination, Point(150, 100));
-    ASSERT_TRUE(contour.is_closed);
+    EXPECT_POINT_NEAR(contour.destination, Point(150, 100));
+    EXPECT_TRUE(contour.is_closed);
   }
 
   {
@@ -65,8 +65,8 @@ TEST(PathTest, PathBuilderSetsCorrectContourPropertiesForAddCommands) {
         PathBuilder{}.AddRect(Rect::MakeXYWH(100, 100, 100, 100)).TakePath();
     ContourComponent contour;
     path.GetContourComponentAtIndex(0, contour);
-    ASSERT_POINT_NEAR(contour.destination, Point(100, 100));
-    ASSERT_TRUE(contour.is_closed);
+    EXPECT_POINT_NEAR(contour.destination, Point(100, 100));
+    EXPECT_TRUE(contour.is_closed);
   }
 
   {
@@ -75,8 +75,8 @@ TEST(PathTest, PathBuilderSetsCorrectContourPropertiesForAddCommands) {
                     .TakePath();
     ContourComponent contour;
     path.GetContourComponentAtIndex(0, contour);
-    ASSERT_POINT_NEAR(contour.destination, Point(110, 100));
-    ASSERT_TRUE(contour.is_closed);
+    EXPECT_POINT_NEAR(contour.destination, Point(110, 100));
+    EXPECT_TRUE(contour.is_closed);
   }
 
   {
@@ -86,8 +86,8 @@ TEST(PathTest, PathBuilderSetsCorrectContourPropertiesForAddCommands) {
             .TakePath();
     ContourComponent contour;
     path.GetContourComponentAtIndex(0, contour);
-    ASSERT_POINT_NEAR(contour.destination, Point(110, 100));
-    ASSERT_TRUE(contour.is_closed);
+    EXPECT_POINT_NEAR(contour.destination, Point(110, 100));
+    EXPECT_TRUE(contour.is_closed);
   }
 
   // Open shapes.
@@ -452,6 +452,34 @@ TEST(PathTest, SimplePath) {
         }
         ASSERT_FALSE(contour.is_closed);
       });
+}
+
+TEST(PathTest, RepeatCloseDoesNotAddNewLines) {
+  PathBuilder builder;
+  auto path = builder.LineTo({0, 10})
+                  .LineTo({10, 10})
+                  .Close()  // Returns to (0, 0)
+                  .Close()  // No Op
+                  .Close()  // Still No op
+                  .TakePath();
+
+  EXPECT_EQ(path.GetComponentCount(), 5u);
+  EXPECT_EQ(path.GetComponentCount(Path::ComponentType::kLinear), 3u);
+  EXPECT_EQ(path.GetComponentCount(Path::ComponentType::kContour), 2u);
+}
+
+TEST(PathTest, CloseAfterMoveDoesNotAddNewLines) {
+  PathBuilder builder;
+  auto path = builder.LineTo({0, 10})
+                  .LineTo({10, 10})
+                  .MoveTo({30, 30})  // Moves to (30, 30)
+                  .Close()           // No Op
+                  .Close()           // Still No op
+                  .TakePath();
+
+  EXPECT_EQ(path.GetComponentCount(), 4u);
+  EXPECT_EQ(path.GetComponentCount(Path::ComponentType::kLinear), 2u);
+  EXPECT_EQ(path.GetComponentCount(Path::ComponentType::kContour), 2u);
 }
 
 TEST(PathTest, CanBeCloned) {
