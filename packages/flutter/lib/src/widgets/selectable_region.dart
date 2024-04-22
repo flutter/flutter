@@ -1840,6 +1840,22 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
   Offset? _lastStartEdgeUpdateGlobalPosition;
   Offset? _lastEndEdgeUpdateGlobalPosition;
 
+  void updateLastStartEdgeUpdateGlobalPosition(Offset globalPosition) {
+    _lastStartEdgeUpdateGlobalPosition = globalPosition;
+  }
+
+  void updateLastEndEdgeUpdateGlobalPosition(Offset globalPosition) {
+    _lastEndEdgeUpdateGlobalPosition = globalPosition;
+  }
+
+  bool markReceivedStartEvent(Selectable selectable) {
+    return _hasReceivedStartEvent.add(selectable);
+  }
+
+  bool markReceivedEndEvent(Selectable selectable) {
+    return _hasReceivedEndEvent.add(selectable);
+  }
+
   @override
   void remove(Selectable selectable) {
     _hasReceivedStartEvent.remove(selectable);
@@ -1847,7 +1863,7 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
     super.remove(selectable);
   }
 
-  void _updateLastEdgeEventsFromGeometries() {
+  void updateLastEdgeEventsFromGeometries() {
     if (currentSelectionStartIndex != -1 && selectables[currentSelectionStartIndex].value.hasSelection) {
       final Selectable start = selectables[currentSelectionStartIndex];
       final Offset localStartEdge = start.value.startSelectionPoint!.localPosition +
@@ -1862,6 +1878,14 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
     }
   }
 
+  void updateLastEdgeEventsFromSelectionEdgeUpdateEvent(SelectionEdgeUpdateEvent event) {
+    if (event.type == SelectionEventType.endEdgeUpdate) {
+      _lastEndEdgeUpdateGlobalPosition = event.globalPosition;
+    } else {
+      _lastStartEdgeUpdateGlobalPosition = event.globalPosition;
+    }
+  }
+
   @override
   SelectionResult handleSelectAll(SelectAllSelectionEvent event) {
     final SelectionResult result = super.handleSelectAll(event);
@@ -1870,7 +1894,7 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
       _hasReceivedEndEvent.add(selectable);
     }
     // Synthesize last update event so the edge updates continue to work.
-    _updateLastEdgeEventsFromGeometries();
+    updateLastEdgeEventsFromGeometries();
     return result;
   }
 
@@ -1885,7 +1909,7 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
     if (currentSelectionEndIndex != -1) {
       _hasReceivedEndEvent.add(selectables[currentSelectionEndIndex]);
     }
-    _updateLastEdgeEventsFromGeometries();
+    updateLastEdgeEventsFromGeometries();
     return result;
   }
 
@@ -1900,7 +1924,7 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
     if (currentSelectionEndIndex != -1) {
       _hasReceivedEndEvent.add(selectables[currentSelectionEndIndex]);
     }
-    _updateLastEdgeEventsFromGeometries();
+    updateLastEdgeEventsFromGeometries();
     return result;
   }
 
