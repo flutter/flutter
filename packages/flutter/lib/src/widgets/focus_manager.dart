@@ -1521,8 +1521,16 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }
-    _appLifecycleListener = _AppLifecycleListener(_appLifecycleChange);
-    WidgetsBinding.instance.addObserver(_appLifecycleListener);
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
+      // It appears that some Android keyboard implementations can cause
+      // app lifecycle state changes: adding this listener would cause the
+      // text field to unfocus as the user is trying to type.
+      //
+      // Until this is resolved, we won't be adding the listener to Android apps.
+      // https://github.com/flutter/flutter/pull/142930#issuecomment-1981750069
+      _appLifecycleListener = _AppLifecycleListener(_appLifecycleChange);
+      WidgetsBinding.instance.addObserver(_appLifecycleListener!);
+    }
     rootScope._manager = this;
   }
 
@@ -1539,7 +1547,9 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(_appLifecycleListener);
+    if (_appLifecycleListener != null) {
+      WidgetsBinding.instance.removeObserver(_appLifecycleListener!);
+    }
     _highlightManager.dispose();
     rootScope.dispose();
     super.dispose();
@@ -1700,7 +1710,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
 
   // Allows FocusManager to respond to app lifecycle state changes,
   // temporarily suspending the primaryFocus when the app is inactive.
-  late final _AppLifecycleListener _appLifecycleListener;
+  _AppLifecycleListener? _appLifecycleListener;
 
   // Stores the node that was focused before the app lifecycle changed.
   // Will be restored as the primary focus once app is resumed.
@@ -2025,15 +2035,11 @@ class _HighlightModeManager {
     // Check to see if any of the early handlers handle the key. If so, then
     // return early.
     if (_earlyKeyEventHandlers.isNotEmpty) {
-      final List<KeyEventResult> results = <KeyEventResult>[];
-      // Copy the list before iteration to prevent problems if the list gets
-      // modified during iteration.
-      final List<OnKeyEventCallback> iterationList = _earlyKeyEventHandlers.toList();
-      for (final OnKeyEventCallback callback in iterationList) {
-        for (final KeyEvent event in message.events) {
-          results.add(callback(event));
-        }
-      }
+      final List<KeyEventResult> results = <KeyEventResult>[
+        // Make a copy to prevent problems if the list is modified during iteration.
+        for (final OnKeyEventCallback callback in _earlyKeyEventHandlers.toList())
+          for (final KeyEvent event in message.events) callback(event),
+      ];
       final KeyEventResult result = combineKeyEventResults(results);
       switch (result) {
         case KeyEventResult.ignored:
@@ -2057,15 +2063,13 @@ class _HighlightModeManager {
       FocusManager.instance.primaryFocus!,
       ...FocusManager.instance.primaryFocus!.ancestors,
     ]) {
-      final List<KeyEventResult> results = <KeyEventResult>[];
-      if (node.onKeyEvent != null) {
-        for (final KeyEvent event in message.events) {
-          results.add(node.onKeyEvent!(node, event));
-        }
-      }
-      if (node.onKey != null && message.rawEvent != null) {
-        results.add(node.onKey!(node, message.rawEvent!));
-      }
+      final List<KeyEventResult> results = <KeyEventResult>[
+        if (node.onKeyEvent != null)
+          for (final KeyEvent event in message.events)
+            node.onKeyEvent!(node, event),
+        if (node.onKey != null && message.rawEvent != null)
+          node.onKey!(node, message.rawEvent!),
+      ];
       final KeyEventResult result = combineKeyEventResults(results);
       switch (result) {
         case KeyEventResult.ignored:
@@ -2085,15 +2089,11 @@ class _HighlightModeManager {
 
     // Check to see if any late key event handlers want to handle the event.
     if (!handled && _lateKeyEventHandlers.isNotEmpty) {
-      final List<KeyEventResult> results = <KeyEventResult>[];
-      // Copy the list before iteration to prevent problems if the list gets
-      // modified during iteration.
-      final List<OnKeyEventCallback> iterationList = _lateKeyEventHandlers.toList();
-      for (final OnKeyEventCallback callback in iterationList) {
-        for (final KeyEvent event in message.events) {
-          results.add(callback(event));
-        }
-      }
+      final List<KeyEventResult> results = <KeyEventResult>[
+        // Make a copy to prevent problems if the list is modified during iteration.
+        for (final OnKeyEventCallback callback in _lateKeyEventHandlers.toList())
+          for (final KeyEvent event in message.events) callback(event),
+      ];
       final KeyEventResult result = combineKeyEventResults(results);
       switch (result) {
         case KeyEventResult.ignored:

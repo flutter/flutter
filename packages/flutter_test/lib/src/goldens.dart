@@ -8,7 +8,7 @@ import 'dart:ui';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
-import '_goldens_io.dart' if (dart.library.html) '_goldens_web.dart' as goldens;
+import '_goldens_io.dart' if (dart.library.js_interop) '_goldens_web.dart' as goldens;
 
 /// Compares image pixels against a golden image file.
 ///
@@ -127,11 +127,7 @@ abstract class GoldenFileComparator {
 ///
 ///  * [flutter_test] for more information about how to configure tests at the
 ///    directory-level.
-GoldenFileComparator get goldenFileComparator => _goldenFileComparator;
-GoldenFileComparator _goldenFileComparator = const TrivialComparator._();
-set goldenFileComparator(GoldenFileComparator value) {
-  _goldenFileComparator = value;
-}
+GoldenFileComparator goldenFileComparator = const TrivialComparator._();
 
 /// Compares image pixels against a golden image file.
 ///

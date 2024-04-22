@@ -12,11 +12,7 @@ import 'system_channels.dart';
 /// See also:
 ///  * <https://developer.apple.com/documentation/uikit/uiresponder/3778577-capturetextfromcamera>
 ///  * <https://support.apple.com/guide/iphone/use-live-text-iphcf0b71b0e/ios>
-class LiveText {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  LiveText._();
-
+abstract final class LiveText {
   /// Returns true if the Live Text input feature is available on the current device.
   static Future<bool> isLiveTextInputAvailable() async {
     final bool supportLiveTextInput =

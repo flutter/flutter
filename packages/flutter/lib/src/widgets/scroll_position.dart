@@ -729,13 +729,10 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       AxisDirection.right => (SemanticsAction.scrollLeft, SemanticsAction.scrollRight),
     };
 
-    final Set<SemanticsAction> actions = <SemanticsAction>{};
-    if (pixels > minScrollExtent) {
-      actions.add(backward);
-    }
-    if (pixels < maxScrollExtent) {
-      actions.add(forward);
-    }
+    final Set<SemanticsAction> actions = <SemanticsAction>{
+      if (pixels > minScrollExtent) backward,
+      if (pixels < maxScrollExtent) forward,
+    };
 
     if (setEquals<SemanticsAction>(actions, _semanticActions)) {
       return;

@@ -740,6 +740,8 @@ class _ViewContentState extends State<_ViewContent> {
   late Rect _viewRect;
   late final SearchController _controller;
   Iterable<Widget> result = <Widget>[];
+  String? searchValue;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -770,12 +772,23 @@ class _ViewContentState extends State<_ViewContent> {
         _viewRect = Offset.zero & _screenSize!;
       }
     }
-    unawaited(updateSuggestions());
+
+    if (searchValue != _controller.text) {
+      _timer?.cancel();
+      _timer = Timer(Duration.zero, () async {
+        searchValue = _controller.text;
+        result = await widget.suggestionsBuilder(context, _controller);
+        _timer?.cancel();
+        _timer = null;
+      });
+    }
   }
 
   @override
   void dispose() {
     _controller.removeListener(updateSuggestions);
+    _timer?.cancel();
+    _timer = null;
     super.dispose();
   }
 
@@ -793,11 +806,14 @@ class _ViewContentState extends State<_ViewContent> {
   }
 
   Future<void> updateSuggestions() async {
-    final Iterable<Widget> suggestions = await widget.suggestionsBuilder(context, _controller);
-    if (mounted) {
-      setState(() {
-        result = suggestions;
-      });
+    if (searchValue != _controller.text) {
+      searchValue = _controller.text;
+      final Iterable<Widget> suggestions = await widget.suggestionsBuilder(context, _controller);
+      if (mounted) {
+        setState(() {
+          result = suggestions;
+        });
+      }
     }
   }
 
@@ -1118,6 +1134,7 @@ class SearchBar extends StatefulWidget {
     this.leading,
     this.trailing,
     this.onTap,
+    this.onTapOutside,
     this.onChanged,
     this.onSubmitted,
     this.constraints,
@@ -1169,6 +1186,9 @@ class SearchBar extends StatefulWidget {
 
   /// Called when the user taps this search bar.
   final GestureTapCallback? onTap;
+
+  /// Called when the user taps outside the search bar.
+  final TapRegionCallback? onTapOutside;
 
   /// Invoked upon user input.
   final ValueChanged<String>? onChanged;
@@ -1397,6 +1417,7 @@ class _SearchBarState extends State<SearchBar> {
                           autofocus: widget.autoFocus,
                           onTap: widget.onTap,
                           onTapAlwaysCalled: true,
+                          onTapOutside: widget.onTapOutside,
                           focusNode: _focusNode,
                           onChanged: widget.onChanged,
                           onSubmitted: widget.onSubmitted,

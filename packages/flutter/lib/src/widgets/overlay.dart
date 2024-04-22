@@ -864,6 +864,12 @@ class _WrappingOverlayState extends State<_WrappingOverlay> {
   }
 
   @override
+  void dispose() {
+    _entry..remove()..dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Overlay(
       clipBehavior: widget.clipBehavior,
@@ -1923,7 +1929,7 @@ final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation>
   //
   // Generally, `assert(_debugIsLocationValid())` should be used to prevent
   // invalid accesses to an invalid `_OverlayEntryLocation` object. Exceptions
-  // to this rule are _removeChild, _deactive, which will be called when the
+  // to this rule are _removeChild, _deactivate, which will be called when the
   // OverlayPortal is being removed from the widget tree and may use the
   // location information to perform cleanup tasks.
   //
@@ -2188,8 +2194,8 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
 //
 // This `RenderObject` must be a child of a `_RenderTheater`. It guarantees that:
 //
-// 1. It's a relayout boundary, and `markParentNeedsLayout` is overridden such
-//    that it never dirties its `_RenderTheater`.
+// 1. It's a relayout boundary, so calling `markNeedsLayout` on it never dirties
+//    its `_RenderTheater`.
 //
 // 2. Its `layout` implementation is overridden such that `performLayout` does
 //    not do anything when its called from `layout`, preventing the parent
@@ -2229,19 +2235,6 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
   void redepthChildren() {
     _layoutSurrogate.redepthChild(this);
     super.redepthChildren();
-  }
-
-  bool _callingMarkParentNeedsLayout = false;
-  @override
-  void markParentNeedsLayout() {
-    // No re-entrant calls.
-    if (_callingMarkParentNeedsLayout) {
-      return;
-    }
-    _callingMarkParentNeedsLayout = true;
-    markNeedsLayout();
-    _layoutSurrogate.markNeedsLayout();
-    _callingMarkParentNeedsLayout = false;
   }
 
   @override
