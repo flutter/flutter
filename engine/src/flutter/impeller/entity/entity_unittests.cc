@@ -2830,7 +2830,12 @@ TEST_P(EntityTest, CanComputeGeometryForEmptyPathsWithoutCrashing) {
   auto position_result =
       geom->GetPositionBuffer(*GetContentContext(), entity, render_pass);
 
+  auto uv_result =
+      geom->GetPositionUVBuffer(Rect::MakeLTRB(0, 0, 100, 100), Matrix(),
+                                *GetContentContext(), entity, render_pass);
+
   EXPECT_EQ(position_result.vertex_buffer.vertex_count, 0u);
+  EXPECT_EQ(uv_result.vertex_buffer.vertex_count, 0u);
 
   EXPECT_EQ(geom->GetResultMode(), GeometryResult::Mode::kNormal);
 }

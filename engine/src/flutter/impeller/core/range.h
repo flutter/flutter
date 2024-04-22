@@ -7,6 +7,8 @@
 
 #include <cstddef>
 
+#include "flutter/fml/macros.h"
+
 namespace impeller {
 
 struct Range {

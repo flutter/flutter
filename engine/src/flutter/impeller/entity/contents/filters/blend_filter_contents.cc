@@ -728,7 +728,8 @@ std::optional<Entity> BlendFilterContents::RenderFilter(
   }
 
   if (blend_mode_ <= Entity::kLastPipelineBlendMode) {
-    if (inputs.size() == 1 && foreground_color_.has_value()) {
+    if (inputs.size() == 1 && foreground_color_.has_value() &&
+        GetAbsorbOpacity() == ColorFilterContents::AbsorbOpacity::kYes) {
       return CreateForegroundPorterDuffBlend(
           inputs[0], renderer, entity, coverage, foreground_color_.value(),
           blend_mode_, GetAlpha(), GetAbsorbOpacity());
@@ -738,7 +739,8 @@ std::optional<Entity> BlendFilterContents::RenderFilter(
   }
 
   if (blend_mode_ <= Entity::kLastAdvancedBlendMode) {
-    if (inputs.size() == 1 && foreground_color_.has_value()) {
+    if (inputs.size() == 1 && foreground_color_.has_value() &&
+        GetAbsorbOpacity() == ColorFilterContents::AbsorbOpacity::kYes) {
       return CreateForegroundAdvancedBlend(
           inputs[0], renderer, entity, coverage, foreground_color_.value(),
           blend_mode_, GetAlpha(), GetAbsorbOpacity());

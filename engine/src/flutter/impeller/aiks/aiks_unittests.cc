@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "flutter/testing/testing.h"
+#include "gtest/gtest.h"
 #include "impeller/aiks/canvas.h"
 #include "impeller/aiks/color_filter.h"
 #include "impeller/aiks/image.h"
@@ -2348,6 +2349,10 @@ TEST_P(AiksTest, DrawPaintTransformsBounds) {
 }
 
 TEST_P(AiksTest, CanDrawPoints) {
+  if (GetBackend() == PlaygroundBackend::kMetal) {
+    // https://github.com/flutter/flutter/issues/147184
+    GTEST_SKIP() << "Draw Points is currently broken on the metal m1 backend.";
+  }
   std::vector<Point> points = {
       {0, 0},      //
       {100, 100},  //
@@ -2442,6 +2447,10 @@ TEST_P(AiksTest, DrawAtlasAdvancedAndTransform) {
 }
 
 TEST_P(AiksTest, CanDrawPointsWithTextureMap) {
+  if (GetBackend() == PlaygroundBackend::kMetal) {
+    // https://github.com/flutter/flutter/issues/147184
+    GTEST_SKIP() << "Draw Points is currently broken on the metal m1 backend.";
+  }
   auto texture = CreateTextureForFixture("table_mountain_nx.png",
                                          /*enable_mipmapping=*/true);
 

@@ -108,6 +108,58 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
   };
 }
 
+// |Geometry|
+GeometryResult LineGeometry::GetPositionUVBuffer(Rect texture_coverage,
+                                                 Matrix effect_transform,
+                                                 const ContentContext& renderer,
+                                                 const Entity& entity,
+                                                 RenderPass& pass) const {
+  auto& host_buffer = renderer.GetTransientsBuffer();
+  using VT = TextureFillVertexShader::PerVertexData;
+
+  auto& transform = entity.GetTransform();
+  auto radius = ComputePixelHalfWidth(transform, width_);
+
+  auto uv_transform =
+      texture_coverage.GetNormalizingTransform() * effect_transform;
+
+  if (cap_ == Cap::kRound) {
+    std::shared_ptr<Tessellator> tessellator = renderer.GetTessellator();
+    auto generator = tessellator->RoundCapLine(transform, p0_, p1_, radius);
+    return ComputePositionUVGeometry(renderer, generator, uv_transform, entity,
+                                     pass);
+  }
+
+  Point corners[4];
+  if (!ComputeCorners(corners, transform, cap_ == Cap::kSquare)) {
+    return kEmptyResult;
+  }
+
+  size_t count = 4;
+  BufferView vertex_buffer =
+      host_buffer.Emplace(count * sizeof(VT), alignof(VT),
+                          [&uv_transform, &corners](uint8_t* buffer) {
+                            auto vertices = reinterpret_cast<VT*>(buffer);
+                            for (auto& corner : corners) {
+                              *vertices++ = {
+                                  .position = corner,
+                                  .texture_coords = uv_transform * corner,
+                              };
+                            }
+                          });
+
+  return GeometryResult{
+      .type = PrimitiveType::kTriangleStrip,
+      .vertex_buffer =
+          {
+              .vertex_buffer = vertex_buffer,
+              .vertex_count = count,
+              .index_type = IndexType::kNone,
+          },
+      .transform = entity.GetShaderTransform(pass),
+  };
+}
+
 GeometryVertexType LineGeometry::GetVertexType() const {
   return GeometryVertexType::kPosition;
 }

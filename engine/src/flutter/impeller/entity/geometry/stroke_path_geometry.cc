@@ -7,6 +7,7 @@
 #include "impeller/core/buffer_view.h"
 #include "impeller/core/formats.h"
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/entity/texture_fill.vert.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/path_component.h"
 
@@ -42,6 +43,49 @@ class PositionWriter {
 
  private:
   std::vector<SolidFillVertexShader::PerVertexData> data_ = {};
+};
+
+class PositionUVWriter {
+ public:
+  PositionUVWriter(const Point& texture_origin,
+                   const Size& texture_size,
+                   const Matrix& effect_transform)
+      : texture_origin_(texture_origin),
+        texture_size_(texture_size),
+        effect_transform_(effect_transform) {}
+
+  const std::vector<TextureFillVertexShader::PerVertexData>& GetData() {
+    if (effect_transform_.IsIdentity()) {
+      auto origin = texture_origin_;
+      auto scale = 1.0 / texture_size_;
+
+      for (auto& pvd : data_) {
+        pvd.texture_coords = (pvd.position - origin) * scale;
+      }
+    } else {
+      auto texture_rect = Rect::MakeOriginSize(texture_origin_, texture_size_);
+      Matrix uv_transform =
+          texture_rect.GetNormalizingTransform() * effect_transform_;
+
+      for (auto& pvd : data_) {
+        pvd.texture_coords = uv_transform * pvd.position;
+      }
+    }
+    return data_;
+  }
+
+  void AppendVertex(const Point& point) {
+    data_.emplace_back(TextureFillVertexShader::PerVertexData{
+        .position = point,
+        // .texture_coords = default, will be filled in during |GetData()|
+    });
+  }
+
+ private:
+  std::vector<TextureFillVertexShader::PerVertexData> data_ = {};
+  const Point texture_origin_;
+  const Size texture_size_;
+  const Matrix effect_transform_;
 };
 
 template <typename VertexWriter>
@@ -481,6 +525,27 @@ StrokePathGeometry::GenerateSolidStrokeVertices(const Path::Polyline& polyline,
   return vtx_builder.GetData();
 }
 
+std::vector<TextureFillVertexShader::PerVertexData>
+StrokePathGeometry::GenerateSolidStrokeVerticesUV(
+    const Path::Polyline& polyline,
+    Scalar stroke_width,
+    Scalar miter_limit,
+    Join stroke_join,
+    Cap stroke_cap,
+    Scalar scale,
+    Point texture_origin,
+    Size texture_size,
+    const Matrix& effect_transform) {
+  auto scaled_miter_limit = stroke_width * miter_limit * 0.5f;
+  auto join_proc = GetJoinProc<PositionUVWriter>(stroke_join);
+  auto cap_proc = GetCapProc<PositionUVWriter>(stroke_cap);
+  StrokeGenerator stroke_generator(polyline, stroke_width, scaled_miter_limit,
+                                   join_proc, cap_proc, scale);
+  PositionUVWriter vtx_builder(texture_origin, texture_size, effect_transform);
+  stroke_generator.Generate(vtx_builder);
+  return vtx_builder.GetData();
+}
+
 StrokePathGeometry::StrokePathGeometry(const Path& path,
                                        Scalar stroke_width,
                                        Scalar miter_limit,
@@ -547,6 +612,52 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
           {
               .vertex_buffer = buffer_view,
               .vertex_count = position_writer.GetData().size(),
+              .index_type = IndexType::kNone,
+          },
+      .transform = entity.GetShaderTransform(pass),
+      .mode = GeometryResult::Mode::kPreventOverdraw,
+  };
+}
+
+GeometryResult StrokePathGeometry::GetPositionUVBuffer(
+    Rect texture_coverage,
+    Matrix effect_transform,
+    const ContentContext& renderer,
+    const Entity& entity,
+    RenderPass& pass) const {
+  if (stroke_width_ < 0.0) {
+    return {};
+  }
+  auto determinant = entity.GetTransform().GetDeterminant();
+  if (determinant == 0) {
+    return {};
+  }
+
+  Scalar min_size = 1.0f / sqrt(std::abs(determinant));
+  Scalar stroke_width = std::max(stroke_width_, min_size);
+
+  auto& host_buffer = renderer.GetTransientsBuffer();
+  auto scale = entity.GetTransform().GetMaxBasisLength();
+  auto polyline = renderer.GetTessellator()->CreateTempPolyline(path_, scale);
+
+  PositionUVWriter writer(Point{0, 0}, texture_coverage.GetSize(),
+                          effect_transform);
+  CreateSolidStrokeVertices(writer, polyline, stroke_width,
+                            miter_limit_ * stroke_width_ * 0.5f,
+                            GetJoinProc<PositionUVWriter>(stroke_join_),
+                            GetCapProc<PositionUVWriter>(stroke_cap_), scale);
+
+  BufferView buffer_view = host_buffer.Emplace(
+      writer.GetData().data(),
+      writer.GetData().size() * sizeof(TextureFillVertexShader::PerVertexData),
+      alignof(TextureFillVertexShader::PerVertexData));
+
+  return GeometryResult{
+      .type = PrimitiveType::kTriangleStrip,
+      .vertex_buffer =
+          {
+              .vertex_buffer = buffer_view,
+              .vertex_count = writer.GetData().size(),
               .index_type = IndexType::kNone,
           },
       .transform = entity.GetShaderTransform(pass),

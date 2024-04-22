@@ -10,63 +10,6 @@
 
 namespace impeller {
 
-VertexWriter::VertexWriter(std::vector<Point>& points,
-                           std::vector<uint16_t>& indices)
-    : points_(points), indices_(indices) {}
-
-void VertexWriter::EndContour() {
-  if (points_.size() == 0u || contour_start_ == points_.size() - 1) {
-    // Empty or first contour.
-    return;
-  }
-
-  auto start = contour_start_;
-  auto end = points_.size() - 1;
-  // All filled paths are drawn as if they are closed, but if
-  // there is an explicit close then a lineTo to the origin
-  // is inserted. This point isn't strictly necesary to
-  // correctly render the shape and can be dropped.
-  if (points_[end] == points_[start]) {
-    end--;
-  }
-
-  if (contour_start_ > 0) {
-    // Triangle strip break.
-    indices_.emplace_back(indices_.back());
-    indices_.emplace_back(start);
-    indices_.emplace_back(start);
-
-    // If the contour has an odd number of points, insert an extra point when
-    // bridging to the next contour to preserve the correct triangle winding
-    // order.
-    if (previous_contour_odd_points_) {
-      indices_.emplace_back(start);
-    }
-  } else {
-    indices_.emplace_back(start);
-  }
-
-  size_t a = start + 1;
-  size_t b = end;
-  while (a < b) {
-    indices_.emplace_back(a);
-    indices_.emplace_back(b);
-    a++;
-    b--;
-  }
-  if (a == b) {
-    indices_.emplace_back(a);
-    previous_contour_odd_points_ = false;
-  } else {
-    previous_contour_odd_points_ = true;
-  }
-  contour_start_ = points_.size();
-}
-
-void VertexWriter::Write(Point point) {
-  points_.emplace_back(point);
-}
-
 /*
  *  Based on: https://en.wikipedia.org/wiki/B%C3%A9zier_curve#Specific_cases
  */
@@ -176,16 +119,6 @@ void QuadraticPathComponent::ToLinearPathComponents(
   proc(p2);
 }
 
-void QuadraticPathComponent::ToLinearPathComponents(
-    Scalar scale,
-    VertexWriter& writer) const {
-  Scalar line_count = std::ceilf(ComputeQuadradicSubdivisions(scale, *this));
-  for (size_t i = 1; i < line_count; i += 1) {
-    writer.Write(Solve(i / line_count));
-  }
-  writer.Write(p2);
-}
-
 std::vector<Point> QuadraticPathComponent::Extrema() const {
   CubicPathComponent elevated(*this);
   return elevated.Extrema();
@@ -254,15 +187,6 @@ void CubicPathComponent::ToLinearPathComponents(Scalar scale,
     proc(Solve(i / line_count));
   }
   proc(p2);
-}
-
-void CubicPathComponent::ToLinearPathComponents(Scalar scale,
-                                                VertexWriter& writer) const {
-  Scalar line_count = std::ceilf(ComputeCubicSubdivisions(scale, *this));
-  for (size_t i = 1; i < line_count; i++) {
-    writer.Write(Solve(i / line_count));
-  }
-  writer.Write(p2);
 }
 
 static inline bool NearEqual(Scalar a, Scalar b, Scalar epsilon) {

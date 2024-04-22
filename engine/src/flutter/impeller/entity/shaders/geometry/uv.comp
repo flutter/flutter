@@ -1,0 +1,60 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include <impeller/texture.glsl>
+#include <impeller/types.glsl>
+
+// Unused, see See PointFieldGeometry::GetPositionBuffer
+layout(local_size_x = 16) in;
+
+layout(std430) readonly buffer GeometryData {
+  // Size of this input data is frame_info.count;
+  vec2 points[];
+}
+geometry_data;
+
+layout(std430) writeonly buffer GeometryUVData {
+  // Size of this output data is frame_info.count;
+  // x,y is the original geometry.
+  // u,v is the texture UV.
+  vec4 points_uv[];
+}
+geometry_uv_data;
+
+uniform FrameInfo {
+  uint count;
+  mat4 effect_transform;
+  vec2 texture_origin;
+  vec2 texture_size;
+}
+frame_info;
+
+vec2 project_point(mat4 m, vec2 v) {
+  float w = v.x * m[0][3] + v.y * m[1][3] + m[3][3];
+  vec2 result = vec2(v.x * m[0][0] + v.y * m[1][0] + m[3][0],
+                     v.x * m[0][1] + v.y * m[1][1] + m[3][1]);
+
+  // This is Skia's behavior, but it may be reasonable to allow UB for the w=0
+  // case.
+  if (w != 0) {
+    w = 1 / w;
+  }
+  return result * w;
+}
+
+void main() {
+  uint ident = gl_GlobalInvocationID.x;
+  if (ident >= frame_info.count) {
+    return;
+  }
+
+  vec2 point = geometry_data.points[ident];
+
+  vec2 coverage_coords =
+      (point - frame_info.texture_origin) / frame_info.texture_size;
+  vec2 texture_coords =
+      project_point(frame_info.effect_transform, coverage_coords);
+
+  geometry_uv_data.points_uv[ident] = vec4(point, texture_coords);
+}

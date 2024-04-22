@@ -35,6 +35,13 @@ class StrokePathGeometry final : public Geometry {
                                    RenderPass& pass) const override;
 
   // |Geometry|
+  GeometryResult GetPositionUVBuffer(Rect texture_coverage,
+                                     Matrix effect_transform,
+                                     const ContentContext& renderer,
+                                     const Entity& entity,
+                                     RenderPass& pass) const override;
+
+  // |Geometry|
   GeometryResult::Mode GetResultMode() const override;
 
   // |Geometry|
@@ -51,6 +58,17 @@ class StrokePathGeometry final : public Geometry {
                               Join stroke_join,
                               Cap stroke_cap,
                               Scalar scale);
+
+  static std::vector<TextureFillVertexShader::PerVertexData>
+  GenerateSolidStrokeVerticesUV(const Path::Polyline& polyline,
+                                Scalar stroke_width,
+                                Scalar miter_limit,
+                                Join stroke_join,
+                                Cap stroke_cap,
+                                Scalar scale,
+                                Point texture_origin,
+                                Size texture_size,
+                                const Matrix& effect_transform);
 
   friend class ImpellerBenchmarkAccessor;
   friend class ImpellerEntityUnitTestAccessor;
