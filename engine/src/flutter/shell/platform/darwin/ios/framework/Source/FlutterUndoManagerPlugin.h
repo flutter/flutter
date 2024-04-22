@@ -7,14 +7,10 @@
 
 #import <UIKit/UIKit.h>
 
-#import "flutter/fml/memory/weak_ptr.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterUndoManagerDelegate.h"
 
 @interface FlutterUndoManagerPlugin : NSObject
-
-@property(nonatomic, assign) FlutterViewController* viewController;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;

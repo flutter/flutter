@@ -8,54 +8,77 @@
 #import <XCTest/XCTest.h>
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 
 FLUTTER_ASSERT_ARC
 
-@interface FlutterEngine ()
-- (nonnull FlutterUndoManagerPlugin*)undoManagerPlugin;
-- (nonnull FlutterTextInputPlugin*)textInputPlugin;
+/// OCMock does not allow mocking both class and protocol. Use this to mock the methods used on
+/// `UIView<UITextInput>*` in the plugin.
+@interface TextInputViewTest : NSObject
+
+@property(nonatomic, weak) id<UITextInputDelegate> inputDelegate;
+@property(nonatomic, readonly) UITextInputAssistantItem* inputAssistantItem;
+
 @end
 
-@interface FlutterUndoManagerPluginForTest : FlutterUndoManagerPlugin
-@property(nonatomic, assign) NSUndoManager* undoManager;
+@implementation TextInputViewTest
 @end
 
-@implementation FlutterUndoManagerPluginForTest {
+@interface FakeFlutterUndoManagerDelegate : NSObject <FlutterUndoManagerDelegate>
+
+@property(readonly) NSUInteger undoCount;
+@property(readonly) NSUInteger redoCount;
+
+- (instancetype)initWithUndoManager:(NSUndoManager*)undoManager
+                activeTextInputView:(TextInputViewTest*)activeTextInputView;
+
+@end
+
+@implementation FakeFlutterUndoManagerDelegate
+
+@synthesize undoManager = _undoManager;
+@synthesize activeTextInputView = _activeTextInputView;
+
+- (instancetype)initWithUndoManager:(NSUndoManager*)undoManager
+                activeTextInputView:(UIView<UITextInput>*)activeTextInputView {
+  self = [super init];
+  if (self) {
+    _undoManager = undoManager;
+    _activeTextInputView = activeTextInputView;
+  }
+  return self;
 }
+
+- (void)handleUndoWithDirection:(FlutterUndoRedoDirection)direction {
+  if (direction == FlutterUndoRedoDirectionUndo) {
+    _undoCount++;
+  } else {
+    _redoCount++;
+  }
+}
+
 @end
 
 @interface FlutterUndoManagerPluginTest : XCTestCase
-@property(nonatomic, strong) id engine;
-@property(nonatomic, strong) FlutterUndoManagerPluginForTest* undoManagerPlugin;
-@property(nonatomic, strong) FlutterViewController* viewController;
-@property(nonatomic, strong) NSUndoManager* undoManager;
+@property(nonatomic) FakeFlutterUndoManagerDelegate* undoManagerDelegate;
+@property(nonatomic) FlutterUndoManagerPlugin* undoManagerPlugin;
+@property(nonatomic) TextInputViewTest* activeTextInputView;
+@property(nonatomic) NSUndoManager* undoManager;
 @end
 
-@implementation FlutterUndoManagerPluginTest {
-}
+@implementation FlutterUndoManagerPluginTest
 
 - (void)setUp {
   [super setUp];
-  self.engine = OCMClassMock([FlutterEngine class]);
-
-  self.undoManagerPlugin = [[FlutterUndoManagerPluginForTest alloc] initWithDelegate:self.engine];
-
-  self.viewController = [[FlutterViewController alloc] init];
-  self.undoManagerPlugin.viewController = self.viewController;
 
   self.undoManager = OCMClassMock([NSUndoManager class]);
-  self.undoManagerPlugin.undoManager = self.undoManager;
-}
+  self.activeTextInputView = OCMClassMock([TextInputViewTest class]);
 
-- (void)tearDown {
-  [self.undoManager removeAllActionsWithTarget:self.undoManagerPlugin];
-  self.engine = nil;
-  self.viewController = nil;
-  self.undoManager = nil;
-  [super tearDown];
+  self.undoManagerDelegate =
+      [[FakeFlutterUndoManagerDelegate alloc] initWithUndoManager:self.undoManager
+                                              activeTextInputView:self.activeTextInputView];
+
+  self.undoManagerPlugin =
+      [[FlutterUndoManagerPlugin alloc] initWithDelegate:self.undoManagerDelegate];
 }
 
 - (void)testSetUndoState {
@@ -73,18 +96,6 @@ FLUTTER_ASSERT_ARC
   OCMStub([self.undoManager removeAllActionsWithTarget:self.undoManagerPlugin])
       .andDo(^(NSInvocation* invocation) {
         removeAllActionsCount++;
-      });
-  __block int delegateUndoCount = 0;
-  OCMStub([self.engine flutterUndoManagerPlugin:[OCMArg any]
-                        handleUndoWithDirection:FlutterUndoRedoDirectionUndo])
-      .andDo(^(NSInvocation* invocation) {
-        delegateUndoCount++;
-      });
-  __block int delegateRedoCount = 0;
-  OCMStub([self.engine flutterUndoManagerPlugin:[OCMArg any]
-                        handleUndoWithDirection:FlutterUndoRedoDirectionRedo])
-      .andDo(^(NSInvocation* invocation) {
-        delegateRedoCount++;
       });
   __block int undoCount = 0;
   OCMStub([self.undoManager undo]).andDo(^(NSInvocation* invocation) {
@@ -114,14 +125,14 @@ FLUTTER_ASSERT_ARC
 
   // Invoking the undo handler will invoke the handleUndo delegate method with "undo".
   undoHandler(self.undoManagerPlugin);
-  XCTAssertEqual(1, delegateUndoCount);
-  XCTAssertEqual(0, delegateRedoCount);
+  XCTAssertEqual(1UL, self.undoManagerDelegate.undoCount);
+  XCTAssertEqual(0UL, self.undoManagerDelegate.redoCount);
   XCTAssertEqual(2, registerUndoCount);
 
   // Invoking the redo handler will invoke the handleUndo delegate method with "redo".
   undoHandler(self.undoManagerPlugin);
-  XCTAssertEqual(1, delegateUndoCount);
-  XCTAssertEqual(1, delegateRedoCount);
+  XCTAssertEqual(1UL, self.undoManagerDelegate.undoCount);
+  XCTAssertEqual(1UL, self.undoManagerDelegate.redoCount);
   XCTAssertEqual(3, registerUndoCount);
 
   // If canRedo is true, an undo will be registered and undo will be called.
@@ -137,22 +148,12 @@ FLUTTER_ASSERT_ARC
 
   // Invoking the redo handler will invoke the handleUndo delegate method with "redo".
   undoHandler(self.undoManagerPlugin);
-  XCTAssertEqual(1, delegateUndoCount);
-  XCTAssertEqual(2, delegateRedoCount);
+  XCTAssertEqual(1UL, self.undoManagerDelegate.undoCount);
+  XCTAssertEqual(2UL, self.undoManagerDelegate.redoCount);
 }
 
 - (void)testSetUndoStateDoesInteractWithInputDelegate {
   // Regression test for https://github.com/flutter/flutter/issues/133424
-  FlutterViewController* viewController = OCMPartialMock(self.viewController);
-  self.undoManagerPlugin.viewController = self.viewController;
-
-  FlutterTextInputPlugin* textInputPlugin = OCMClassMock([FlutterTextInputPlugin class]);
-  FlutterTextInputView* textInputView = OCMClassMock([FlutterTextInputView class]);
-
-  OCMStub([viewController engine]).andReturn(self.engine);
-  OCMStub([self.engine textInputPlugin]).andReturn(textInputPlugin);
-  OCMStub([textInputPlugin textInputView]).andReturn(textInputView);
-
   FlutterMethodCall* setUndoStateCall =
       [FlutterMethodCall methodCallWithMethodName:@"UndoManager.setUndoState"
                                         arguments:@{@"canUndo" : @NO, @"canRedo" : @NO}];
@@ -160,7 +161,7 @@ FLUTTER_ASSERT_ARC
                                     result:^(id _Nullable result){
                                     }];
 
-  OCMVerify(never(), [textInputView inputDelegate]);
+  OCMVerify(never(), [self.activeTextInputView inputDelegate]);
 }
 
 @end
