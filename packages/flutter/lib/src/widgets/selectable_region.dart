@@ -1841,29 +1841,32 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
   Offset? _lastStartEdgeUpdateGlobalPosition;
   Offset? _lastEndEdgeUpdateGlobalPosition;
 
+  /// This method updates the tracked global position of the selection start edge.
+  @protected
   void updateLastStartEdgeUpdateGlobalPosition(Offset globalPosition) {
     _lastStartEdgeUpdateGlobalPosition = globalPosition;
   }
 
+  /// This method updates the tracked global position of the selection end edge.
+  @protected
   void updateLastEndEdgeUpdateGlobalPosition(Offset globalPosition) {
     _lastEndEdgeUpdateGlobalPosition = globalPosition;
   }
 
+  /// This marks the given [Selectable] as having received a start event.
+  @protected
   bool markReceivedStartEvent(Selectable selectable) {
     return _hasReceivedStartEvent.add(selectable);
   }
 
+  /// This marks the given [Selectable] as having received a end event.
+  @protected
   bool markReceivedEndEvent(Selectable selectable) {
     return _hasReceivedEndEvent.add(selectable);
   }
 
-  @override
-  void remove(Selectable selectable) {
-    _hasReceivedStartEvent.remove(selectable);
-    _hasReceivedEndEvent.remove(selectable);
-    super.remove(selectable);
-  }
-
+  /// Updates the last tracked global positions of both start and end selection
+  /// edges based on their [SelectionGeometry].
   void updateLastEdgeEventsFromGeometries() {
     if (currentSelectionStartIndex != -1 && selectables[currentSelectionStartIndex].value.hasSelection) {
       final Selectable start = selectables[currentSelectionStartIndex];
@@ -1879,12 +1882,11 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
     }
   }
 
-  void updateLastEdgeEventsFromSelectionEdgeUpdateEvent(SelectionEdgeUpdateEvent event) {
-    if (event.type == SelectionEventType.endEdgeUpdate) {
-      _lastEndEdgeUpdateGlobalPosition = event.globalPosition;
-    } else {
-      _lastStartEdgeUpdateGlobalPosition = event.globalPosition;
-    }
+  @override
+  void remove(Selectable selectable) {
+    _hasReceivedStartEvent.remove(selectable);
+    _hasReceivedEndEvent.remove(selectable);
+    super.remove(selectable);
   }
 
   @override
@@ -1981,6 +1983,16 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
     return super.dispatchSelectionEventToChild(selectable, event);
   }
 
+  /// Ensures the [Selectable] child has received up to date selection event.
+  ///
+  /// This method is called when:
+  ///   1. A new [Selectable] is added to the delegate, and its screen location
+  ///   falls into the previous selection.
+  ///   2. A [Selectable] is dispatched a [SelectionEvent] of type
+  ///   [SelectionEventType.startEdgeUpdate], [SelectionEventType.endEdgeUpdate],
+  ///   [SelectionEventType.granularlyExtendSelection], or
+  ///   [SelectionEventType.directionallyExtendSelection] through
+  ///   [dispatchSelectionEventToChild].
   @override
   void ensureChildUpdated(Selectable selectable) {
     if (_lastEndEdgeUpdateGlobalPosition != null && _hasReceivedEndEvent.add(selectable)) {
