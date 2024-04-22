@@ -166,7 +166,8 @@
                         "ci/host_debug_unopt_arm64",
                         "--type",
                         "dart,dart-host,engine,impeller-golden",
-                        "--engine-capture-core-dump"
+                        "--engine-capture-core-dump",
+                        "--no-skia-gold"
                     ]
                 }
             ]
