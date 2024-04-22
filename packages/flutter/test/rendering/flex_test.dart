@@ -674,7 +674,7 @@ void main() {
 
     test('cross axis intrinsics, with ascending flex flow layout', () {
       const BoxConstraints square = BoxConstraints.tightFor(width: 5.0, height: 5.0);
-      // 3 'A's separated by zero-width spaces. Max instrinsic width = 30, min intrinsic width = 10
+      // 3 'A's separated by zero-width spaces. Max intrinsic width = 30, min intrinsic width = 10
       final TextSpan textSpan = TextSpan(text: List<String>.filled(3, 'A').join('\u200B') , style: const TextStyle(fontSize: 10));
       final RenderConstrainedBox box1 = RenderConstrainedBox(additionalConstraints: square);
       final RenderParagraph box2 = RenderParagraph(textSpan, textDirection: TextDirection.ltr);
@@ -711,7 +711,7 @@ void main() {
 
     test('cross axis intrinsics, with descending flex flow layout', () {
       const BoxConstraints square = BoxConstraints.tightFor(width: 5.0, height: 5.0);
-      // 3 'A's separated by zero-width spaces. Max instrinsic width = 30, min intrinsic width = 10
+      // 3 'A's separated by zero-width spaces. Max intrinsic width = 30, min intrinsic width = 10
       final TextSpan textSpan = TextSpan(text: List<String>.filled(3, 'A').join('\u200B') , style: const TextStyle(fontSize: 10));
       final RenderConstrainedBox box1 = RenderConstrainedBox(additionalConstraints: square);
       final RenderParagraph box2 = RenderParagraph(textSpan, textDirection: TextDirection.ltr);

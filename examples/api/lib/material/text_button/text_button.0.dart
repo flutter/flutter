@@ -103,7 +103,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
 
     // This gradient's appearance reflects the button's state.
     // Always return a gradient decoration so that AnimatedContainer
-    // can interpolorate in between. Used by TextButton #7.
+    // can interpolate in between. Used by TextButton #7.
     Decoration? statesToDecoration(Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
         return BoxDecoration(

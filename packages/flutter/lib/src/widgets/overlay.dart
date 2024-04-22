@@ -1929,7 +1929,7 @@ final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation>
   //
   // Generally, `assert(_debugIsLocationValid())` should be used to prevent
   // invalid accesses to an invalid `_OverlayEntryLocation` object. Exceptions
-  // to this rule are _removeChild, _deactive, which will be called when the
+  // to this rule are _removeChild, _deactivate, which will be called when the
   // OverlayPortal is being removed from the widget tree and may use the
   // location information to perform cleanup tasks.
   //

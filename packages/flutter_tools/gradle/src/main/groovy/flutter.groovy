@@ -1148,9 +1148,9 @@ class FlutterPlugin implements Plugin<Project> {
             bundleSkSLPathValue = project.property(propBundleSkslPath)
         }
         String performanceMeasurementFileValue
-        final String propPerformanceMesaurementFile = "performance-measurement-file"
-        if (project.hasProperty(propPerformanceMesaurementFile)) {
-            performanceMeasurementFileValue = project.property(propPerformanceMesaurementFile)
+        final String propPerformanceMeasurementFile = "performance-measurement-file"
+        if (project.hasProperty(propPerformanceMeasurementFile)) {
+            performanceMeasurementFileValue = project.property(propPerformanceMeasurementFile)
         }
         String codeSizeDirectoryValue
         final String propCodeSizeDirectory = "code-size-directory"

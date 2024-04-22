@@ -2045,7 +2045,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
   // [WidgetSpan]s.
   //
   // This method differs from [_updateSelectionStartEdgeByMultiSelectableBoundary]
-  // in that to mantain the origin text boundary selected at a placeholder,
+  // in that to maintain the origin text boundary selected at a placeholder,
   // this selectable fragment must be aware of the [RenderParagraph] that closely
   // encompasses the complete origin text boundary.
   //
@@ -2229,7 +2229,7 @@ class _SelectableFragment with Selectable, Diagnosticable, ChangeNotifier implem
   // [WidgetSpan]s.
   //
   // This method differs from [_updateSelectionEndEdgeByMultiSelectableBoundary]
-  // in that to mantain the origin text boundary selected at a placeholder, this
+  // in that to maintain the origin text boundary selected at a placeholder, this
   // selectable fragment must be aware of the [RenderParagraph] that closely
   // encompasses the complete origin text boundary.
   //
