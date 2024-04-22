@@ -372,7 +372,7 @@ class NativeAssets extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
-    // In AOT, depends on tree-shaking information (resources.json) from compiling dart. 
+    // In AOT, depends on tree-shaking information (resources.json) from compiling dart.
     KernelSnapshotProgram(),
   ];
 
