@@ -223,147 +223,29 @@ class SliverCarousel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (itemExtent != null) {
-      // print('item extent: $itemExtent');
       return _SliverFixedExtentCarousel(
+        itemExtent: itemExtent!,
+        minExtent: clipExtent ?? itemExtent!,
         delegate: SliverChildBuilderDelegate(
           (BuildContext context, int index) {
             return children.elementAt(index);
           },
           childCount: children.length,
         ),
-        itemExtent: itemExtent!,
-        minExtent: clipExtent ?? itemExtent!,
       );
     }
     assert(childWeights != null);
-    final List<int> weights = childWeights!;
-    final int maxWeight = weights.max;
-    double leading = 0;
-    for (final int weight in weights) {
-      if (weight < maxWeight) {
-        leading += weight;
-      } else {
-        leading = leading / weights.sum;
-        break;
-      }
-    }
 
-    double trailing = 0;
-    for (final int weight in weights.reversed) {
-      if (weight < maxWeight) {
-        trailing += weight;
-      } else {
-        trailing = trailing / weights.sum;
-        break;
-      }
-    }
-
-    return _SliverFractionalPadding(
-      leading: weights.first == weights.max ? 0.0 : leading,
-      trailing: weights.last == weights.max ? 0.0 : trailing,
-      sliver: _SliverWeightedCarousel(
-        paddingFraction: leading,
-        clipExtent: clipExtent ?? 0.0,
-        weights: weights,
-        delegate: SliverChildBuilderDelegate(
-          (BuildContext context, int index) {
-            return children.elementAt(index);
-          },
-          childCount: children.length,
-        ),
+    return _SliverWeightedCarousel(
+      clipExtent: clipExtent ?? 0.0,
+      weights: childWeights!,
+      delegate: SliverChildBuilderDelegate(
+        (BuildContext context, int index) {
+          return children.elementAt(index);
+        },
+        childCount: children.length,
       ),
     );
-  }
-}
-
-class _SliverFractionalPadding extends SingleChildRenderObjectWidget {
-  const _SliverFractionalPadding({
-    this.leading = 0,
-    this.trailing = 0,
-    Widget? sliver,
-  }) : assert(leading >= 0),
-      assert(trailing >= 0),
-      assert(leading <= 0.5),
-      assert(trailing <= 0.5),
-      super(child: sliver);
-
-  final double leading;
-  final double trailing;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) => _RenderSliverFractionalPadding(
-    leading: leading,
-    trailing: trailing,
-  );
-
-  @override
-  void updateRenderObject(BuildContext context, _RenderSliverFractionalPadding renderObject) {
-    renderObject.leading = leading;
-    renderObject.trailing = trailing;
-  }
-}
-
-class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
-  _RenderSliverFractionalPadding({
-    double leading = 0,
-    double trailing = 0,
-  }) : assert(leading <= 0.5),
-       assert(leading >= 0),
-       assert(trailing <= 0.5),
-       assert(trailing >= 0),
-       _leading = leading,
-       _trailing = trailing;
-
-  SliverConstraints? _lastResolvedConstraints;
-
-  double get leading => _leading;
-  double _leading;
-  set leading(double newValue) {
-    if (_leading == newValue) {
-      return;
-    }
-    _leading = newValue;
-    _markNeedsResolution();
-  }
-
-  double get trailing => _trailing;
-  double _trailing;
-  set trailing(double newValue) {
-    if (_trailing == newValue) {
-      return;
-    }
-    _trailing = newValue;
-    _markNeedsResolution();
-  }
-
-  @override
-  EdgeInsets? get resolvedPadding => _resolvedPadding;
-  EdgeInsets? _resolvedPadding;
-
-  void _markNeedsResolution() {
-    _resolvedPadding = null;
-    markNeedsLayout();
-  }
-
-  void _resolve() {
-    if (_resolvedPadding != null && _lastResolvedConstraints == constraints) {
-      return;
-    }
-
-    final double leftPadding = constraints.viewportMainAxisExtent * leading;
-    final double rightPadding = constraints.viewportMainAxisExtent * trailing;
-    _lastResolvedConstraints = constraints;
-    _resolvedPadding = switch (constraints.axis) {
-      Axis.horizontal => EdgeInsets.only(left: leftPadding, right: rightPadding),
-      Axis.vertical   => EdgeInsets.only(top: leftPadding, bottom: rightPadding),
-    };
-    return;
-  }
-
-  @override
-  void performLayout() {
-    _resolve();
-    super.performLayout();
   }
 }
 
@@ -449,10 +331,8 @@ class RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor 
   ) {
     final int firstVisibleIndex = (constraints.scrollOffset / maxExtent).floor();
     final double effectiveMinExtent = math.max(constraints.remainingPaintExtent % maxExtent, minExtent);
-    // print('shrinkExtent: $shrinkExtent');
     if (index == firstVisibleIndex) {
       final double firstVisibleItemExtent = _buildItemExtent(index, currentLayoutDimensions);
-      // print('firstVisibleItemExtent: $firstVisibleItemExtent');
       if (firstVisibleItemExtent <= effectiveMinExtent) {
         return maxExtent * index - effectiveMinExtent + maxExtent;
       }
@@ -508,13 +388,11 @@ class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
   const _SliverWeightedCarousel({
     super.key,
     required super.delegate,
-    required this.paddingFraction,
     required this.clipExtent,
     required this.weights,
   });
 
   final double clipExtent;
-  final double paddingFraction;
   final List<int> weights;
 
   @override
@@ -523,7 +401,6 @@ class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
     return _RenderSliverWeightedCarousel(
       childManager: element,
       clipExtent: clipExtent,
-      paddingFraction: paddingFraction,
       weights: weights,
     );
   }
@@ -539,10 +416,8 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
   _RenderSliverWeightedCarousel({
     required super.childManager,
     required double clipExtent,
-    required double paddingFraction,
     required List<int> weights,
   }) : _clipExtent = clipExtent,
-       _paddingFraction = paddingFraction,
        _weights = weights;
 
   double get clipExtent => _clipExtent;
@@ -552,16 +427,6 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
       return;
     }
     _clipExtent = value;
-    markNeedsLayout();
-  }
-
-  double get paddingFraction => _paddingFraction;
-  double _paddingFraction;
-  set paddingFraction(double value) {
-    if (_paddingFraction == value) {
-      return;
-    }
-    _paddingFraction = value;
     markNeedsLayout();
   }
 
@@ -594,10 +459,6 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
   double _buildItemExtent(int index, SliverLayoutDimensions currentLayoutDimensions) {
     double extent;
 
-    if (constraints.overlap < 0 && paddingFraction != 0) {
-      return _handleOverscroll(index);
-    }
-
     if (index == _firstVisibleItemIndex) {
       extent = math.max(_distanceToLeadingEdge, clipExtent);
     }
@@ -629,9 +490,6 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     return extent;
   }
 
-  double get paddingValue {
-    return constraints.viewportMainAxisExtent * paddingFraction;
-  }
   double get extentUnit => constraints.viewportMainAxisExtent / (weights.reduce((int total, int extent) => total + extent));
 
   double get firstChildExtent {
@@ -647,7 +505,6 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     return (constraints.scrollOffset / firstChildExtent).floor();
   }
   double get _firstVisibleItemOffscreenExtent {
-    print('viewport main axis extent: ${constraints.viewportMainAxisExtent}, remaining extent: ${constraints.remainingPaintExtent}');
     if (constraints.remainingPaintExtent < constraints.viewportMainAxisExtent) {
       return firstChildExtent - (constraints.viewportMainAxisExtent - constraints.remainingPaintExtent);
     }
@@ -673,13 +530,6 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
       }
       return constraints.scrollOffset;
     } else if (index > _firstVisibleItemIndex) {
-      if (constraints.overlap < 0 && paddingFraction != 0) {
-        double visibleItemsTotalExtent = 0;
-        for (int i = _firstVisibleItemIndex + 1; i < index; i++) {
-          visibleItemsTotalExtent += _buildItemExtent(i, currentLayoutDimensions);
-        }
-        return constraints.scrollOffset + visibleItemsTotalExtent - firstChildExtent + firstChildExtent + (weights.elementAt(1) - weights.first) * constraints.overlap.abs();
-      }
 
       double visibleItemsTotalExtent = _firstVisibleItemIndex == -1 ? 0 : _distanceToLeadingEdge;
       for (int i = _firstVisibleItemIndex + 1; i < index; i++) {
@@ -737,6 +587,177 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     double itemExtent,
   ) {
     return childManager.childCount * maxChildExtent;
+  }
+
+  BoxConstraints _getChildConstraints(int index) {
+    double extent;
+    extent = itemExtentBuilder!(index, currentLayoutDimensions)!;
+    return constraints.asBoxConstraints(
+      minExtent: math.min(extentUnit * weights.min, extent),
+      maxExtent: extent,
+    );
+  }
+
+  @override
+  void performLayout() {
+    assert((itemExtent != null && itemExtentBuilder == null) ||
+        (itemExtent == null && itemExtentBuilder != null));
+    assert(itemExtentBuilder != null || (itemExtent!.isFinite && itemExtent! >= 0));
+
+    final SliverConstraints constraints = this.constraints;
+    childManager.didStartLayout();
+    childManager.setDidUnderflow(false);
+
+    final double scrollOffset = constraints.scrollOffset + constraints.cacheOrigin;
+    assert(scrollOffset >= 0.0);
+    final double remainingExtent = constraints.remainingCacheExtent;
+    assert(remainingExtent >= 0.0);
+    final double targetEndScrollOffset = scrollOffset + extentUnit * weights.max * 2;
+    currentLayoutDimensions = SliverLayoutDimensions(
+        scrollOffset: constraints.scrollOffset,
+        precedingScrollExtent: constraints.precedingScrollExtent,
+        viewportMainAxisExtent: constraints.viewportMainAxisExtent,
+        crossAxisExtent: constraints.crossAxisExtent
+    );
+    // TODO(Piinks): Clean up when deprecation expires.
+    const double deprecatedExtraItemExtent = -1;
+
+    final int firstIndex = getMinChildIndexForScrollOffset(scrollOffset, deprecatedExtraItemExtent);
+    final int? targetLastIndex = targetEndScrollOffset.isFinite ?
+        getMaxChildIndexForScrollOffset(targetEndScrollOffset, deprecatedExtraItemExtent) : null;
+
+    if (firstChild != null) {
+      final int leadingGarbage = calculateLeadingGarbage(firstIndex: firstIndex);
+      final int trailingGarbage = targetLastIndex != null ? calculateTrailingGarbage(lastIndex: targetLastIndex) : 0;
+      collectGarbage(leadingGarbage, trailingGarbage);
+    } else {
+      collectGarbage(0, 0);
+    }
+
+    if (firstChild == null) {
+      final double layoutOffset = indexToLayoutOffset(deprecatedExtraItemExtent, firstIndex);
+      if (!addInitialChild(index: firstIndex, layoutOffset: layoutOffset)) {
+        // There are either no children, or we are past the end of all our children.
+        final double max;
+        if (firstIndex <= 0) {
+          max = 0.0;
+        } else {
+          max = computeMaxScrollOffset(constraints, deprecatedExtraItemExtent);
+        }
+        geometry = SliverGeometry(
+          scrollExtent: max,
+          maxPaintExtent: max,
+        );
+        childManager.didFinishLayout();
+        return;
+      }
+    }
+
+    RenderBox? trailingChildWithLayout;
+
+    for (int index = indexOf(firstChild!) - 1; index >= firstIndex; --index) {
+      final RenderBox? child = insertAndLayoutLeadingChild(_getChildConstraints(index));
+      if (child == null) {
+        // Items before the previously first child are no longer present.
+        // Reset the scroll offset to offset all items prior and up to the
+        // missing item. Let parent re-layout everything.
+        geometry = SliverGeometry(scrollOffsetCorrection: indexToLayoutOffset(deprecatedExtraItemExtent, index));
+        return;
+      }
+      final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
+      childParentData.layoutOffset = indexToLayoutOffset(deprecatedExtraItemExtent, index);
+      assert(childParentData.index == index);
+      trailingChildWithLayout ??= child;
+    }
+
+    if (trailingChildWithLayout == null) {
+      firstChild!.layout(_getChildConstraints(indexOf(firstChild!)));
+      final SliverMultiBoxAdaptorParentData childParentData = firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
+      childParentData.layoutOffset = indexToLayoutOffset(deprecatedExtraItemExtent, firstIndex);
+      trailingChildWithLayout = firstChild;
+    }
+
+    // From the last item to the firstly encountered max item
+    double extraLayoutOffset = 0;
+    for (int i = weights.length - 1; i >= 0; i--) {
+      if (weights.elementAt(i) == weights.max) {
+        break;
+      }
+      extraLayoutOffset += weights.elementAt(i) * extentUnit;
+    }
+
+    double estimatedMaxScrollOffset = double.infinity;
+    for (int index = indexOf(trailingChildWithLayout!) + 1; targetLastIndex == null || index <= targetLastIndex; ++index) {
+      RenderBox? child = childAfter(trailingChildWithLayout!);
+      if (child == null || indexOf(child) != index) {
+        child = insertAndLayoutChild(_getChildConstraints(index), after: trailingChildWithLayout);
+        if (child == null) {
+          // We have run out of children.
+          estimatedMaxScrollOffset = indexToLayoutOffset(deprecatedExtraItemExtent, index) + extraLayoutOffset;
+          break;
+        }
+      } else {
+        child.layout(_getChildConstraints(index));
+      }
+      trailingChildWithLayout = child;
+      final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
+      assert(childParentData.index == index);
+      childParentData.layoutOffset = indexToLayoutOffset(deprecatedExtraItemExtent, childParentData.index!);
+    }
+
+    final int lastIndex = indexOf(lastChild!);
+    final double leadingScrollOffset = indexToLayoutOffset(deprecatedExtraItemExtent, firstIndex);
+
+    final double trailingScrollOffset = indexToLayoutOffset(deprecatedExtraItemExtent, lastIndex + 1) + extraLayoutOffset;
+
+    assert(firstIndex == 0 || childScrollOffset(firstChild!)! - scrollOffset <= precisionErrorTolerance);
+    assert(debugAssertChildListIsNonEmptyAndContiguous());
+    assert(indexOf(firstChild!) == firstIndex);
+    assert(targetLastIndex == null || lastIndex <= targetLastIndex);
+
+    estimatedMaxScrollOffset = math.min(
+      estimatedMaxScrollOffset,
+      estimateMaxScrollOffset(
+        constraints,
+        firstIndex: firstIndex,
+        lastIndex: lastIndex,
+        leadingScrollOffset: leadingScrollOffset,
+        trailingScrollOffset: trailingScrollOffset,
+      ),
+    );
+
+    final double paintExtent = calculatePaintOffset(
+      constraints,
+      from: leadingScrollOffset,
+      to: trailingScrollOffset,
+    );
+
+    final double cacheExtent = calculateCacheOffset(
+      constraints,
+      from: leadingScrollOffset,
+      to: trailingScrollOffset,
+    );
+
+    final double targetEndScrollOffsetForPaint = constraints.scrollOffset + constraints.remainingPaintExtent;
+    final int? targetLastIndexForPaint = targetEndScrollOffsetForPaint.isFinite ?
+        getMaxChildIndexForScrollOffset(targetEndScrollOffsetForPaint, deprecatedExtraItemExtent) : null;
+
+    geometry = SliverGeometry(
+      scrollExtent: estimatedMaxScrollOffset,
+      paintExtent: paintExtent,
+      cacheExtent: cacheExtent,
+      maxPaintExtent: estimatedMaxScrollOffset,
+      // Conservative to avoid flickering away the clip during scroll.
+      hasVisualOverflow: (targetLastIndexForPaint != null && lastIndex >= targetLastIndexForPaint)
+        || constraints.scrollOffset > 0.0,
+    );
+
+    // We may have started the layout while scrolled to the end, which would not
+    // expose a new child.
+    if (estimatedMaxScrollOffset == trailingScrollOffset) {
+      childManager.setDidUnderflow(true);
+    }
+    childManager.didFinishLayout();
   }
 
   @override

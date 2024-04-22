@@ -14,7 +14,7 @@ class CarouselExample extends StatefulWidget {
 }
 
 class _CarouselExampleState extends State<CarouselExample> {
-  final List<int> data = List<int>.generate(20, (int index) => index);
+  final List<int> data = List<int>.generate(10, (int index) => index);
 
   final List<ImageProvider> images = <NetworkImage>[
     const NetworkImage(
@@ -44,17 +44,18 @@ class _CarouselExampleState extends State<CarouselExample> {
             child: ConstrainedBox(
               constraints: BoxConstraints.tightFor(height: 200, width: 500),
               child: Carousel.hero(
-                // centered: true,
+                centered: true,
                 // scrollDirection: Axis.vertical,
                 snap: true,
-                clipExtent: 20,
+                // clipExtent: 20,
                 // layout: CarouselLayout.multiBrowse,
-                // childWeights: const <int>[1,5,1], // [3,3,3,2,1], [1,5,1], [1,1,1], [5,1]
+                childWeights: const <int>[3,3,3,2,1], // [3,3,3,2,1], [1,5,1], [1,1,1], [5,1]
                 children: List<Widget>.generate(data.length, (int index) {
                   return Card.outlined(
+                    // margin: EdgeInsets.zero,
                     clipBehavior: Clip.antiAlias,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0)
+                      borderRadius: BorderRadius.circular(10.0)
                     ),
                     color: Colors.primaries[index % Colors.primaries.length].withOpacity(0.5),
                     child: Center(
