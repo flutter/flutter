@@ -2,21 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <Metal/Metal.h>
-#import <UIKit/UIGestureRecognizerSubclass.h>
-
-#include <list>
-#include <map>
-#include <memory>
-#include <string>
-
-#include "flutter/common/graphics/persistent_cache.h"
-#include "flutter/fml/platform/darwin/scoped_nsobject.h"
-#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
+
+#include <Metal/Metal.h>
+
+#include "flutter/fml/platform/darwin/scoped_nsobject.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 
 @implementation UIView (FirstResponder)
@@ -171,11 +163,11 @@ void FlutterPlatformViewsController::SetFlutterView(UIView* flutter_view) {
 }
 
 void FlutterPlatformViewsController::SetFlutterViewController(
-    UIViewController* flutter_view_controller) {
+    UIViewController<FlutterViewResponder>* flutter_view_controller) {
   flutter_view_controller_.reset([flutter_view_controller retain]);
 }
 
-UIViewController* FlutterPlatformViewsController::getFlutterViewController() {
+UIViewController<FlutterViewResponder>* FlutterPlatformViewsController::getFlutterViewController() {
   return flutter_view_controller_.get();
 }
 
@@ -1147,7 +1139,7 @@ void FlutterPlatformViewsController::ResetFrameState() {
   // This gesture recognizer retains the `FlutterViewController` until the
   // end of a gesture sequence, that is all the touches in touchesBegan are concluded
   // with |touchesCancelled| or |touchesEnded|.
-  fml::scoped_nsobject<UIViewController> _flutterViewController;
+  fml::scoped_nsobject<UIViewController<FlutterViewResponder>> _flutterViewController;
 }
 
 - (instancetype)initWithTarget:(id)target
@@ -1198,7 +1190,7 @@ void FlutterPlatformViewsController::ResetFrameState() {
   // Flutter needs all the cancelled touches to be "cancelled" change types in order to correctly
   // handle gesture sequence.
   // We always override the change type to "cancelled".
-  [((FlutterViewController*)_flutterViewController.get()) forceTouchesCancelled:touches];
+  [_flutterViewController.get() forceTouchesCancelled:touches];
   _currentTouchPointersCount -= touches.count;
   if (_currentTouchPointersCount == 0) {
     self.state = UIGestureRecognizerStateFailed;
