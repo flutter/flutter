@@ -1159,6 +1159,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
   ];
   final List<PluginInterfaceResolution> pluginResolutions = <PluginInterfaceResolution>[];
   bool hasResolutionError = false;
+  bool hasPluginPubspecError = false;
 
   for (final String platformKey in platformKeys) {
     // Key: the plugin name, value: the list of plugin candidates for the implementation of [platformKey].
@@ -1168,17 +1169,24 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
     final Map<String, String> defaultImplementations = <String, String>{};
 
     for (final Plugin plugin in plugins) {
-      _validatePlugin(plugin, platformKey);
-      final String? implementsPluginName = _getImplementedPlugin(plugin, platformKey);
-      final String? defaultImplPluginName = _getDefaultImplPlugin(plugin, platformKey);
+      try {
+        _validatePlugin(plugin, platformKey);
+        final String? implementsPluginName = _getImplementedPlugin(plugin, platformKey);
+        final String? defaultImplPluginName = _getDefaultImplPlugin(plugin, platformKey);
 
-      if (defaultImplPluginName != null) {
-        // Each plugin can only have one default implementation for this [platformKey].
-        defaultImplementations[plugin.name] = defaultImplPluginName;
-      }
-      if (implementsPluginName != null) {
-        pluginImplCandidates.putIfAbsent(implementsPluginName, () => <Plugin>[]);
-        pluginImplCandidates[implementsPluginName]!.add(plugin);
+        if (defaultImplPluginName != null) {
+          // Each plugin can only have one default implementation for this [platformKey].
+          defaultImplementations[plugin.name] = defaultImplPluginName;
+        }
+        if (implementsPluginName != null) {
+          pluginImplCandidates.putIfAbsent(implementsPluginName, () => <Plugin>[]);
+          pluginImplCandidates[implementsPluginName]!.add(plugin);
+        }
+      } on ToolExit catch (e) {
+        if (e.message != null) {
+          globals.printError(e.message!);
+        }
+        hasPluginPubspecError = true;
       }
     }
 
@@ -1209,6 +1217,9 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
       pluginResolution.values.map((Plugin plugin) =>
           PluginInterfaceResolution(plugin: plugin, platform: platformKey)),
     );
+  }
+  if (hasPluginPubspecError) {
+    throwToolExit('Please resolve the plugin pubspec errors');
   }
   if (hasResolutionError) {
     throwToolExit('Please resolve the plugin implementation selection errors');

@@ -551,6 +551,131 @@ void main() {
         );
       });
 
+      testUsingContext(
+          'provides error when a plugin has a default implementation and implements another plugin',
+          () async {
+        final Set<String> directDependencies = <String>{
+          'url_launcher',
+        };
+        expect(() {
+          resolvePlatformImplementation(<Plugin>[
+            Plugin.fromYaml(
+              'url_launcher',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{
+                    'default_package': 'url_launcher_linux_1',
+                  },
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              appDependencies: directDependencies,
+            ),
+            Plugin.fromYaml(
+              'url_launcher_linux_1',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'implements': 'url_launcher',
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{
+                    'default_package': 'url_launcher_linux_2',
+                  },
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              appDependencies: directDependencies,
+            ),
+            Plugin.fromYaml(
+              'url_launcher_linux_2',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'implements': 'url_launcher',
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{
+                    'dartPluginClass': 'UrlLauncherPluginLinux',
+                  },
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              appDependencies: directDependencies,
+            ),
+          ]);
+        },
+            throwsToolExit(
+              message: 'Please resolve the plugin pubspec errors',
+            ));
+
+        expect(
+            testLogger.errorText,
+            'Plugin url_launcher_linux_1:linux which provides an implementation for url_launcher '
+            'can not also reference a default implementation for url_launcher_linux_2. '
+            'Ask the maintainers of url_launcher_linux_1 to either remove the implementation via `implements: url_launcher` '
+            'or avoid referencing a default implementation via `platforms: linux: default_package: url_launcher_linux_2`.'
+            '\n\n');
+      });
+
+      testUsingContext(
+          'provides error when a plugin has a default implementation and an inline implementation',
+          () async {
+        final Set<String> directDependencies = <String>{
+          'url_launcher',
+        };
+        expect(() {
+          resolvePlatformImplementation(<Plugin>[
+            Plugin.fromYaml(
+              'url_launcher',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{
+                    'default_package': 'url_launcher_linux',
+                    'dartPluginClass': 'UrlLauncherPluginLinux',
+                  },
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              appDependencies: directDependencies,
+            ),
+            Plugin.fromYaml(
+              'url_launcher_linux',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'implements': 'url_launcher',
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{
+                    'dartPluginClass': 'UrlLauncherPluginLinux',
+                  },
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              appDependencies: directDependencies,
+            ),
+          ]);
+        },
+            throwsToolExit(
+              message: 'Please resolve the plugin pubspec errors',
+            ));
+
+        expect(
+            testLogger.errorText,
+            'Plugin url_launcher:linux which provides an inline implementation '
+            'can not also reference a default implementation for url_launcher_linux. '
+            'Ask the maintainers of url_launcher to either remove the implementation via `platforms: linux: dartPluginClass` '
+            'or avoid referencing a default implementation via `platforms: linux: default_package: url_launcher_linux`.'
+            '\n\n');
+      });
+
       testUsingContext('provides error when user selected multiple implementations', () async {
         final Set<String> directDependencies = <String>{
           'url_launcher_linux_1',
