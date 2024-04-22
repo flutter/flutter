@@ -52,6 +52,7 @@ final class AssetTransformer {
     required String outputPath,
     required String workingDirectory,
     required List<AssetTransformerEntry> transformerEntries,
+    required Logger logger,
   }) async {
 
     String getTempFilePath(int transformStep) {
@@ -65,6 +66,7 @@ final class AssetTransformer {
     File tempOutputFile = _fileSystem.systemTempDirectory.childFile(getTempFilePath(1));
     ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
 
+    final Stopwatch stopwatch = Stopwatch()..start();
     try {
       for (final (int i, AssetTransformerEntry transformer) in transformerEntries.indexed) {
         final AssetTransformationFailure? transformerFailure = await _applyTransformer(
@@ -72,6 +74,7 @@ final class AssetTransformer {
           output: tempOutputFile,
           transformer: transformer,
           workingDirectory: workingDirectory,
+          logger: logger,
         );
 
         if (transformerFailure != null) {
@@ -91,6 +94,8 @@ final class AssetTransformer {
           ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
         }
       }
+
+      logger.printTrace("Finished transforming asset at path '${asset.path}' (${stopwatch.elapsedMilliseconds}ms)");
     } finally {
       ErrorHandlingFileSystem.deleteIfExists(tempInputFile);
       ErrorHandlingFileSystem.deleteIfExists(tempOutputFile);
@@ -104,6 +109,7 @@ final class AssetTransformer {
     required File output,
     required AssetTransformerEntry transformer,
     required String workingDirectory,
+    required Logger logger,
   }) async {
     final List<String> transformerArguments = <String>[
       '--input=${asset.absolute.path}',
@@ -118,6 +124,7 @@ final class AssetTransformer {
       ...transformerArguments,
     ];
 
+    logger.printTrace("Transforming asset using command '${command.join(' ')}'");
     final ProcessResult result = await _processManager.run(
       command,
       workingDirectory: workingDirectory,
@@ -199,6 +206,7 @@ final class DevelopmentAssetTransformer {
         outputPath: output.path,
         transformerEntries: transformerEntries,
         workingDirectory: workingDirectory,
+        logger: _logger,
       );
       if (failure != null) {
         _logger.printError(failure.message);

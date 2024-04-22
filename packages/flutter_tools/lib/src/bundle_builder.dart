@@ -209,6 +209,7 @@ Future<void> writeBundle(
               outputPath: file.path,
               workingDirectory: projectDir.path,
               transformerEntries: entry.value.transformers,
+              logger: logger,
             );
             doCopy = false;
             if (failure != null) {

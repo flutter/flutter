@@ -150,6 +150,7 @@ Future<Depfile> copyAssets(
                   outputPath: file.path,
                   workingDirectory: environment.projectDir.path,
                   transformerEntries: entry.value.transformers,
+                  logger: environment.logger,
                 );
                 doCopy = false;
                 if (failure != null) {
