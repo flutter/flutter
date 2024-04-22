@@ -5,6 +5,7 @@
 #include "flutter/benchmarking/benchmarking.h"
 
 #include "flutter/impeller/entity/solid_fill.vert.h"
+#include "flutter/impeller/entity/texture_fill.vert.h"
 
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/geometry/path.h"
@@ -25,6 +26,21 @@ class ImpellerBenchmarkAccessor {
     return StrokePathGeometry::GenerateSolidStrokeVertices(
         polyline, stroke_width, miter_limit, stroke_join, stroke_cap, scale);
   }
+
+  static std::vector<TextureFillVertexShader::PerVertexData>
+  GenerateSolidStrokeVerticesUV(const Path::Polyline& polyline,
+                                Scalar stroke_width,
+                                Scalar miter_limit,
+                                Join stroke_join,
+                                Cap stroke_cap,
+                                Scalar scale,
+                                Point texture_origin,
+                                Size texture_size,
+                                const Matrix& effect_transform) {
+    return StrokePathGeometry::GenerateSolidStrokeVerticesUV(
+        polyline, stroke_width, miter_limit, stroke_join, stroke_cap, scale,
+        texture_origin, texture_size, effect_transform);
+  }
 };
 
 namespace {
@@ -43,26 +59,49 @@ template <class... Args>
 static void BM_Polyline(benchmark::State& state, Args&&... args) {
   auto args_tuple = std::make_tuple(std::move(args)...);
   auto path = std::get<Path>(args_tuple);
+  bool tessellate = std::get<bool>(args_tuple);
 
   size_t point_count = 0u;
   size_t single_point_count = 0u;
   auto points = std::make_unique<std::vector<Point>>();
   points->reserve(2048);
   while (state.KeepRunning()) {
-    auto polyline = path.CreatePolyline(
-        // Clang-tidy doesn't know that the points get moved back before
-        // getting moved again in this loop.
-        // NOLINTNEXTLINE(clang-analyzer-cplusplus.Move)
-        1.0f, std::move(points),
-        [&points](Path::Polyline::PointBufferPtr reclaimed) {
-          points = std::move(reclaimed);
-        });
-    single_point_count = polyline.points->size();
-    point_count += single_point_count;
+    if (tessellate) {
+      tess.Tessellate(path, 1.0f,
+                      [&point_count, &single_point_count](
+                          const float* vertices, size_t vertices_count,
+                          const uint16_t* indices, size_t indices_count) {
+                        if (indices_count > 0) {
+                          single_point_count = indices_count;
+                          point_count += indices_count;
+                        } else {
+                          single_point_count = vertices_count;
+                          point_count += vertices_count;
+                        }
+                        return true;
+                      });
+    } else {
+      auto polyline = path.CreatePolyline(
+          // Clang-tidy doesn't know that the points get moved back before
+          // getting moved again in this loop.
+          // NOLINTNEXTLINE(clang-analyzer-cplusplus.Move)
+          1.0f, std::move(points),
+          [&points](Path::Polyline::PointBufferPtr reclaimed) {
+            points = std::move(reclaimed);
+          });
+      single_point_count = polyline.points->size();
+      point_count += single_point_count;
+    }
   }
   state.counters["SinglePointCount"] = single_point_count;
   state.counters["TotalPointCount"] = point_count;
 }
+
+enum class UVMode {
+  kNoUV,
+  kUVRect,
+  kUVRectTx,
+};
 
 template <class... Args>
 static void BM_StrokePolyline(benchmark::State& state, Args&&... args) {
@@ -70,10 +109,16 @@ static void BM_StrokePolyline(benchmark::State& state, Args&&... args) {
   auto path = std::get<Path>(args_tuple);
   auto cap = std::get<Cap>(args_tuple);
   auto join = std::get<Join>(args_tuple);
+  auto generate_uv = std::get<UVMode>(args_tuple);
 
   const Scalar stroke_width = 5.0f;
   const Scalar miter_limit = 10.0f;
   const Scalar scale = 1.0f;
+  const Point texture_origin = Point(0, 0);
+  const Size texture_size = Size(100, 100);
+  const Matrix effect_transform = (generate_uv == UVMode::kUVRectTx)
+                                      ? Matrix::MakeScale({2.0f, 2.0f, 1.0f})
+                                      : Matrix();
 
   auto points = std::make_unique<std::vector<Point>>();
   points->reserve(2048);
@@ -86,9 +131,16 @@ static void BM_StrokePolyline(benchmark::State& state, Args&&... args) {
   size_t point_count = 0u;
   size_t single_point_count = 0u;
   while (state.KeepRunning()) {
-    auto vertices = ImpellerBenchmarkAccessor::GenerateSolidStrokeVertices(
-        polyline, stroke_width, miter_limit, join, cap, scale);
-    single_point_count = vertices.size();
+    if (generate_uv == UVMode::kNoUV) {
+      auto vertices = ImpellerBenchmarkAccessor::GenerateSolidStrokeVertices(
+          polyline, stroke_width, miter_limit, join, cap, scale);
+      single_point_count = vertices.size();
+    } else {
+      auto vertices = ImpellerBenchmarkAccessor::GenerateSolidStrokeVerticesUV(
+          polyline, stroke_width, miter_limit, join, cap, scale,  //
+          texture_origin, texture_size, effect_transform);
+      single_point_count = vertices.size();
+    }
     point_count += single_point_count;
   }
   state.counters["SinglePointCount"] = single_point_count;
@@ -103,13 +155,11 @@ static void BM_Convex(benchmark::State& state, Args&&... args) {
   size_t point_count = 0u;
   size_t single_point_count = 0u;
   auto points = std::make_unique<std::vector<Point>>();
-  auto indices = std::make_unique<std::vector<uint16_t>>();
   points->reserve(2048);
-  indices->reserve(2048);
   while (state.KeepRunning()) {
-    tess.TessellateConvexInternal(path, *points, *indices, 1.0f);
-    single_point_count = indices->size();
-    point_count += indices->size();
+    auto points = tess.TessellateConvex(path, 1.0f);
+    single_point_count = points.size();
+    point_count += points.size();
   }
   state.counters["SinglePointCount"] = single_point_count;
   state.counters["TotalPointCount"] = point_count;
@@ -117,7 +167,7 @@ static void BM_Convex(benchmark::State& state, Args&&... args) {
 
 #define MAKE_STROKE_BENCHMARK_CAPTURE(path, cap, join, closed, uvname, uvtype) \
   BENCHMARK_CAPTURE(BM_StrokePolyline, stroke_##path##_##cap##_##join##uvname, \
-                    Create##path(closed), Cap::k##cap, Join::k##join)
+                    Create##path(closed), Cap::k##cap, Join::k##join, uvtype)
 
 #define MAKE_STROKE_BENCHMARK_CAPTURE_CAPS_JOINS(path, uvname, uvtype)       \
   MAKE_STROKE_BENCHMARK_CAPTURE(path, Butt, Bevel, false, uvname, uvtype);   \
@@ -126,20 +176,39 @@ static void BM_Convex(benchmark::State& state, Args&&... args) {
   MAKE_STROKE_BENCHMARK_CAPTURE(path, Square, Bevel, false, uvname, uvtype); \
   MAKE_STROKE_BENCHMARK_CAPTURE(path, Round, Bevel, false, uvname, uvtype)
 
+#define MAKE_STROKE_BENCHMARK_CAPTURE_UVS(path)                           \
+  MAKE_STROKE_BENCHMARK_CAPTURE_CAPS_JOINS(path, , UVMode::kNoUV);        \
+  MAKE_STROKE_BENCHMARK_CAPTURE_CAPS_JOINS(path, _uv, UVMode::kUVRectTx); \
+  MAKE_STROKE_BENCHMARK_CAPTURE_CAPS_JOINS(path, _uvNoTx, UVMode::kUVRect)
+
 BENCHMARK_CAPTURE(BM_Polyline, cubic_polyline, CreateCubic(true), false);
+BENCHMARK_CAPTURE(BM_Polyline, cubic_polyline_tess, CreateCubic(true), true);
 BENCHMARK_CAPTURE(BM_Polyline,
                   unclosed_cubic_polyline,
                   CreateCubic(false),
                   false);
+BENCHMARK_CAPTURE(BM_Polyline,
+                  unclosed_cubic_polyline_tess,
+                  CreateCubic(false),
+                  true);
+MAKE_STROKE_BENCHMARK_CAPTURE_UVS(Cubic);
 
 BENCHMARK_CAPTURE(BM_Polyline, quad_polyline, CreateQuadratic(true), false);
+BENCHMARK_CAPTURE(BM_Polyline, quad_polyline_tess, CreateQuadratic(true), true);
 BENCHMARK_CAPTURE(BM_Polyline,
                   unclosed_quad_polyline,
                   CreateQuadratic(false),
                   false);
+BENCHMARK_CAPTURE(BM_Polyline,
+                  unclosed_quad_polyline_tess,
+                  CreateQuadratic(false),
+                  true);
+MAKE_STROKE_BENCHMARK_CAPTURE_UVS(Quadratic);
 
 BENCHMARK_CAPTURE(BM_Convex, rrect_convex, CreateRRect(), true);
-MAKE_STROKE_BENCHMARK_CAPTURE(RRect, Butt, Bevel, , , );
+MAKE_STROKE_BENCHMARK_CAPTURE(RRect, Butt, Bevel, , , UVMode::kNoUV);
+MAKE_STROKE_BENCHMARK_CAPTURE(RRect, Butt, Bevel, , _uv, UVMode::kUVRectTx);
+MAKE_STROKE_BENCHMARK_CAPTURE(RRect, Butt, Bevel, , _uvNoTx, UVMode::kUVRect);
 
 namespace {
 

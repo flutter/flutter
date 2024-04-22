@@ -38,6 +38,13 @@ class VerticesGeometry final : public Geometry {
                                           RenderPass& pass) const;
 
   // |Geometry|
+  GeometryResult GetPositionUVBuffer(Rect texture_coverage,
+                                     Matrix effect_transform,
+                                     const ContentContext& renderer,
+                                     const Entity& entity,
+                                     RenderPass& pass) const override;
+
+  // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,
                                    const Entity& entity,
                                    RenderPass& pass) const override;
