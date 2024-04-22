@@ -203,8 +203,11 @@ class Badge extends StatelessWidget {
 
     final AlignmentGeometry effectiveAlignment = alignment ?? badgeTheme.alignment ?? defaults.alignment!;
     final TextDirection textDirection = Directionality.of(context);
-    final Offset defaultOffset = textDirection == TextDirection.ltr ? const Offset(4, 4) : const Offset(-4, 4);
-    final Offset effectiveOffset = offset ?? badgeTheme.offset ?? defaultOffset;
+    final Offset defaultOffset = textDirection == TextDirection.ltr ? const Offset(4, -4) : const Offset(-4, -4);
+    // Adds a offset const Offset(0, 8) to avoiding breaking customers after
+    // the offset calculation changes.
+    // See https://github.com/flutter/flutter/pull/146853.
+    final Offset effectiveOffset = (offset ?? badgeTheme.offset ?? defaultOffset) + const Offset(0, 8);
 
     return
       Stack(

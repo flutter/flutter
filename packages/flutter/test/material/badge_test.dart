@@ -297,54 +297,54 @@ void main() {
 
     await tester.pumpWidget(buildFrame(Alignment.topLeft));
     final RenderBox box = tester.renderObject(find.byType(Badge));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(0, -8, 16, 8, badgeRadius)));
+    expect(box, paints..rrect(rrect: RRect.fromLTRBR(0, 0, 16, 16, badgeRadius)));
 
     await tester.pumpWidget(buildFrame(Alignment.topCenter));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(100 - 8, -8, 100 + 8, 8, badgeRadius)));
+    expect(box, paints..rrect(rrect: RRect.fromLTRBR(100 - 8, 0, 100 + 8, 16, badgeRadius)));
 
     await tester.pumpWidget(buildFrame(Alignment.topRight));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(200 - 16, -8, 200, 8, badgeRadius)));
+    expect(box, paints..rrect(rrect: RRect.fromLTRBR(200 - 16, 0, 200, 16, badgeRadius)));
 
     await tester.pumpWidget(buildFrame(Alignment.centerLeft));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(0, 100 - 8, 16, 100 + 8, badgeRadius)));
+    expect(box, paints..rrect(rrect: RRect.fromLTRBR(0, 100, 16, 100 + 16, badgeRadius)));
 
     await tester.pumpWidget(buildFrame(Alignment.centerRight));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(200 - 16, 100 - 8, 200, 100 + 8, badgeRadius)));
+    expect(box, paints..rrect(rrect: RRect.fromLTRBR(200 - 16, 100, 200, 100 + 16, badgeRadius)));
 
     await tester.pumpWidget(buildFrame(Alignment.bottomLeft));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(0, 200 - 8, 16, 200 + 8, badgeRadius)));
+    expect(box, paints..rrect(rrect: RRect.fromLTRBR(0, 200, 16, 200 + 16, badgeRadius)));
 
     await tester.pumpWidget(buildFrame(Alignment.bottomCenter));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(100 - 8, 200 - 8, 100 + 8, 200 + 8, badgeRadius)));
+    expect(box, paints..rrect(rrect: RRect.fromLTRBR(100 - 8, 200, 100 + 8, 200 + 16, badgeRadius)));
 
     await tester.pumpWidget(buildFrame(Alignment.bottomRight));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(200 - 16, 200 - 8, 200, 200 + 8, badgeRadius)));
+    expect(box, paints..rrect(rrect: RRect.fromLTRBR(200 - 16, 200, 200, 200 + 16, badgeRadius)));
 
     const Offset offset = Offset(5, 10);
 
     await tester.pumpWidget(buildFrame(Alignment.topLeft, offset));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(0, -8, 16, 8, badgeRadius).shift(offset)));
+    expect(box, paints..rrect(rrect: RRect.fromLTRBR(0, 0, 16, 16, badgeRadius).shift(offset)));
 
     await tester.pumpWidget(buildFrame(Alignment.topCenter, offset));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(100 - 8, -8, 100 + 8, 8, badgeRadius).shift(offset)));
+    expect(box, paints..rrect(rrect: RRect.fromLTRBR(100 - 8, 0, 100 + 8, 16, badgeRadius).shift(offset)));
 
     await tester.pumpWidget(buildFrame(Alignment.topRight, offset));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(200 - 16, -8 , 200, 8, badgeRadius).shift(offset)));
+    expect(box, paints..rrect(rrect: RRect.fromLTRBR(200 - 16, 0, 200, 16, badgeRadius).shift(offset)));
 
     await tester.pumpWidget(buildFrame(Alignment.centerLeft, offset));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(0, 100 - 8, 16, 100 + 8, badgeRadius).shift(offset)));
+    expect(box, paints..rrect(rrect: RRect.fromLTRBR(0, 100, 16, 100 + 16, badgeRadius).shift(offset)));
 
     await tester.pumpWidget(buildFrame(Alignment.centerRight, offset));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(200 - 16, 100 - 8, 200, 100 + 8, badgeRadius).shift(offset)));
+    expect(box, paints..rrect(rrect: RRect.fromLTRBR(200 - 16, 100, 200, 100 + 16, badgeRadius).shift(offset)));
 
     await tester.pumpWidget(buildFrame(Alignment.bottomLeft, offset));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(0, 200 - 8, 16, 200 + 8, badgeRadius).shift(offset)));
+    expect(box, paints..rrect(rrect: RRect.fromLTRBR(0, 200, 16, 200 + 16, badgeRadius).shift(offset)));
 
     await tester.pumpWidget(buildFrame(Alignment.bottomCenter, offset));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(100 - 8, 200 - 8, 100 + 8, 200 + 8, badgeRadius).shift(offset)));
+    expect(box, paints..rrect(rrect: RRect.fromLTRBR(100 - 8, 200, 100 + 8, 200 + 16, badgeRadius).shift(offset)));
 
     await tester.pumpWidget(buildFrame(Alignment.bottomRight, offset));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(200 - 16, 200 - 8, 200, 200 + 8, badgeRadius).shift(offset)));
+    expect(box, paints..rrect(rrect: RRect.fromLTRBR(200 - 16, 200, 200, 200 + 16, badgeRadius).shift(offset)));
   });
 
   testWidgets('Small Badge alignment', (WidgetTester tester) async {
@@ -447,6 +447,6 @@ void main() {
     await tester.pumpWidget(buildFrame(Alignment.topLeft));
     final RenderBox box = tester.renderObject(find.byType(Badge));
     // Badge should scale with content
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(0, -15, 30 + 8, 15, badgeRadius)));
+    expect(box, paints..rrect(rrect: RRect.fromLTRBR(0, -7, 30 + 8, 23, badgeRadius)));
   });
 }
