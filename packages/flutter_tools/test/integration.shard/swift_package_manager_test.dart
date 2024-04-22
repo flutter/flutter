@@ -54,12 +54,12 @@ void main() {
             expectedLines: _expectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
-              cococapodsPlugin: integrationTestPlugin,
+              cocoaPodsPlugin: integrationTestPlugin,
             ),
             unexpectedLines: _unexpectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
-              cococapodsPlugin: integrationTestPlugin,
+              cocoaPodsPlugin: integrationTestPlugin,
             ),
           );
           expect(
@@ -164,14 +164,14 @@ void main() {
             expectedLines: _expectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
-              cococapodsPlugin: createdCocoaPodsPlugin,
+              cocoaPodsPlugin: createdCocoaPodsPlugin,
               swiftPackageMangerEnabled: true,
               swiftPackagePlugin: integrationTestPlugin,
             ),
             unexpectedLines: _unexpectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
-              cococapodsPlugin: createdCocoaPodsPlugin,
+              cocoaPodsPlugin: createdCocoaPodsPlugin,
               swiftPackageMangerEnabled: true,
               swiftPackagePlugin: integrationTestPlugin,
             ),
@@ -208,12 +208,12 @@ void main() {
             expectedLines: _expectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
-              cococapodsPlugin: integrationTestPlugin,
+              cocoaPodsPlugin: integrationTestPlugin,
             ),
             unexpectedLines: _unexpectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
-              cococapodsPlugin: integrationTestPlugin,
+              cocoaPodsPlugin: integrationTestPlugin,
             ),
           );
 
@@ -229,12 +229,12 @@ void main() {
             expectedLines: _expectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
-              cococapodsPlugin: integrationTestPlugin,
+              cocoaPodsPlugin: integrationTestPlugin,
             ),
             unexpectedLines: _unexpectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
-              cococapodsPlugin: integrationTestPlugin,
+              cocoaPodsPlugin: integrationTestPlugin,
             ),
           );
         } finally {
@@ -679,7 +679,7 @@ _Plugin _integrationTestPlugin(String platform) {
 List<Pattern> _expectedLines({
   required String platform,
   required String appDirectoryPath,
-  _Plugin? cococapodsPlugin,
+  _Plugin? cocoaPodsPlugin,
   _Plugin? swiftPackagePlugin,
   bool swiftPackageMangerEnabled = false,
 }) {
@@ -710,14 +710,14 @@ List<Pattern> _expectedLines({
       ]);
     }
   }
-  if (cococapodsPlugin != null) {
+  if (cocoaPodsPlugin != null) {
     expectedLines.addAll(<String>[
       'Running pod install...',
       '-> Installing $frameworkName (1.0.0)',
-      '-> Installing ${cococapodsPlugin.pluginName} (0.0.1)',
+      '-> Installing ${cocoaPodsPlugin.pluginName} (0.0.1)',
       "Target 'Pods-Runner' in project 'Pods'",
       "➜ Explicit dependency on target '$frameworkName' in project 'Pods'",
-      "➜ Explicit dependency on target '${cococapodsPlugin.pluginName}' in project 'Pods'",
+      "➜ Explicit dependency on target '${cocoaPodsPlugin.pluginName}' in project 'Pods'",
     ]);
   }
   return expectedLines;
@@ -726,13 +726,13 @@ List<Pattern> _expectedLines({
 List<String> _unexpectedLines({
   required String platform,
   required String appDirectoryPath,
-  _Plugin? cococapodsPlugin,
+  _Plugin? cocoaPodsPlugin,
   _Plugin? swiftPackagePlugin,
   bool swiftPackageMangerEnabled = false,
 }) {
   final String frameworkName = platform == 'ios' ? 'Flutter' : 'FlutterMacOS';
   final List<String> unexpectedLines = <String>[];
-  if (cococapodsPlugin == null) {
+  if (cocoaPodsPlugin == null) {
     unexpectedLines.addAll(<String>[
       'Running pod install...',
       '-> Installing $frameworkName (1.0.0)',

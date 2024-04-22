@@ -298,7 +298,7 @@ Transformation failed, but I forgot to exit with a non-zero code.'''
     expect(fileSystem.directory('.tmp_rand0').listSync(), isEmpty, reason: 'Transformer did not clean up after itself.');
   });
 
-  testWithoutContext('prints an error when a transformer in a chain (thats not the first) does not produce an output', () async {
+  testWithoutContext("prints an error when a transformer in a chain (that's not the first) does not produce an output", () async {
     final FileSystem fileSystem = MemoryFileSystem();
     final Artifacts artifacts = Artifacts.test();
 
