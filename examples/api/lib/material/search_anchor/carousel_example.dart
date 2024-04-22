@@ -49,7 +49,7 @@ class _CarouselExampleState extends State<CarouselExample> {
                 snap: true,
                 // clipExtent: 20,
                 // layout: CarouselLayout.multiBrowse,
-                childWeights: const <int>[3,3,3,2,1], // [3,3,3,2,1], [1,5,1], [1,1,1], [5,1]
+                childWeights: const <int>[1,2,3,2,1], // [3,3,3,2,1], [1,5,1], [1,1,1], [5,1]
                 children: List<Widget>.generate(data.length, (int index) {
                   return Card.outlined(
                     // margin: EdgeInsets.zero,

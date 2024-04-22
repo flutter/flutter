@@ -382,8 +382,6 @@ class RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor 
   ItemExtentBuilder? get itemExtentBuilder => _buildItemExtent;
 }
 
-
-
 class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
   const _SliverWeightedCarousel({
     super.key,
@@ -499,15 +497,16 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
   double get minChildExtent => weights.min * extentUnit;
 
   int get _firstVisibleItemIndex {
-    if (constraints.remainingPaintExtent < constraints.viewportMainAxisExtent) {
-      return -1;
+    int smallerWeightCount = 0;
+    for (final int weight in weights) {
+      if (weight == weights.max) {
+        break;
+      }
+      smallerWeightCount += 1;
     }
-    return (constraints.scrollOffset / firstChildExtent).floor();
+    return (constraints.scrollOffset / firstChildExtent).floor() - smallerWeightCount;
   }
   double get _firstVisibleItemOffscreenExtent {
-    if (constraints.remainingPaintExtent < constraints.viewportMainAxisExtent) {
-      return firstChildExtent - (constraints.viewportMainAxisExtent - constraints.remainingPaintExtent);
-    }
     return constraints.scrollOffset - (constraints.scrollOffset / firstChildExtent).floor() * firstChildExtent;
     // when scroll offset is 400, and first child extent is 133.33333333333334, mod result is 133.33333333333331 which is supposed to be almost 0.
     // return constraints.scrollOffset % firstChildExtent;
@@ -531,7 +530,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
       return constraints.scrollOffset;
     } else if (index > _firstVisibleItemIndex) {
 
-      double visibleItemsTotalExtent = _firstVisibleItemIndex == -1 ? 0 : _distanceToLeadingEdge;
+      double visibleItemsTotalExtent = _distanceToLeadingEdge;
       for (int i = _firstVisibleItemIndex + 1; i < index; i++) {
         visibleItemsTotalExtent += _buildItemExtent(i, currentLayoutDimensions);
       }
