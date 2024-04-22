@@ -271,6 +271,18 @@ class FlutterConfiguration {
     'FLUTTER_WEB_CANVASKIT_FORCE_CPU_ONLY',
   );
 
+  /// The maximum number of canvases to use when rendering in CanvasKit.
+  ///
+  /// Limits the amount of overlays that can be created.
+  int get canvasKitMaximumSurfaces {
+    final int maxSurfaces =
+        _configuration?.canvasKitMaximumSurfaces?.toInt() ?? 8;
+    if (maxSurfaces < 1) {
+      return 1;
+    }
+    return maxSurfaces;
+  }
+
   /// Set this flag to `true` to cause the engine to visualize the semantics tree
   /// on the screen for debugging.
   ///
@@ -360,6 +372,11 @@ extension JsFlutterConfigurationExtension on JsFlutterConfiguration {
   @JS('canvasKitForceCpuOnly')
   external JSBoolean? get _canvasKitForceCpuOnly;
   bool? get canvasKitForceCpuOnly => _canvasKitForceCpuOnly?.toDart;
+
+  @JS('canvasKitMaximumSurfaces')
+  external JSNumber? get _canvasKitMaximumSurfaces;
+  double? get canvasKitMaximumSurfaces =>
+      _canvasKitMaximumSurfaces?.toDartDouble;
 
   @JS('debugShowSemanticsNodes')
   external JSBoolean? get _debugShowSemanticsNodes;

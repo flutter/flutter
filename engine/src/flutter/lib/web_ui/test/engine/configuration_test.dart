@@ -67,7 +67,7 @@ void testMain() {
       expect(() {
         config.setUserConfiguration(
           js_util.jsify(<String, Object?>{
-            'canvasKitMaximumSurfaces': 32.0,
+            'nonexistentProperty': 32.0,
           }) as JsFlutterConfiguration);
       }, returnsNormally);
     });

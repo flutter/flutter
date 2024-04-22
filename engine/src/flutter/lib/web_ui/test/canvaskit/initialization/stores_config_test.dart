@@ -20,7 +20,7 @@ void testMain() {
       // A property under test, that we'll try to read later.
       js_util.setProperty(config, 'nonce', 'some_nonce');
       // A non-existing property to verify our js-interop doesn't crash.
-      js_util.setProperty(config, 'canvasKitMaximumSurfaces', 32.0);
+      js_util.setProperty(config, 'nonexistentProperty', 32.0);
 
       // Remove window.flutterConfiguration (if it's there)
       js_util.setProperty(domWindow, 'flutterConfiguration', null);

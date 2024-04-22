@@ -5,7 +5,7 @@ import 'dart:math' as math;
 
 import 'package:ui/ui.dart' as ui;
 
-import '../../engine.dart' show PlatformViewManager, longestIncreasingSubsequence;
+import '../../engine.dart' show PlatformViewManager, configuration, longestIncreasingSubsequence;
 import '../display.dart';
 import '../dom.dart';
 import '../html/path_to_svg_clip.dart';
@@ -49,7 +49,7 @@ class HtmlViewEmbedder {
 
   /// The maximum number of render canvases to create. Too many canvases can
   /// cause a performance burden.
-  static const int maximumCanvases = 8;
+  static int get maximumCanvases => configuration.canvasKitMaximumSurfaces;
 
   /// The views that need to be recomposited into the scene on the next frame.
   final Set<int> _viewsToRecomposite = <int>{};
@@ -478,7 +478,7 @@ class HtmlViewEmbedder {
     final List<RenderingEntity> modifiedEntities =
         List<RenderingEntity>.from(rendering.entities);
     bool sawLastCanvas = false;
-    for (int i = rendering.entities.length - 1; i > 0; i--) {
+    for (int i = rendering.entities.length - 1; i >= 0; i--) {
       final RenderingEntity entity = modifiedEntities[i];
       if (entity is RenderingRenderCanvas) {
         if (!sawLastCanvas) {
