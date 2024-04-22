@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This sample demonstrates how to use a PopScope to wrap widget that
+// This sample demonstrates how to use a PopScope to wrap a widget that
 // may pop the page with a result.
 
 import 'package:flutter/material.dart';
