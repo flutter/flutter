@@ -46,6 +46,8 @@ abstract class SingletonFlutterWindow extends FlutterView {
 
   bool get nativeSpellCheckServiceDefined;
 
+  bool get supportsShowingSystemContextMenu;
+
   bool get brieflyShowPassword;
 
   bool get alwaysUse24HourFormat;

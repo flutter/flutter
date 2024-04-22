@@ -124,6 +124,8 @@ abstract class PlatformDispatcher {
 
   bool get nativeSpellCheckServiceDefined => false;
 
+  bool get supportsShowingSystemContextMenu => false;
+
   bool get brieflyShowPassword => true;
 
   VoidCallback? get onTextScaleFactorChanged;
