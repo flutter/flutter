@@ -551,6 +551,65 @@ void main() {
         );
       });
 
+      testWithoutContext('selects user selected implementation despite inline implementation', () async {
+        final Set<String> directDependencies = <String>{
+          'user_selected_url_launcher_implementation',
+          'url_launcher',
+        };
+
+        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
+          Plugin.fromYaml(
+            'url_launcher',
+            '',
+            YamlMap.wrap(<String, dynamic>{
+              'platforms': <String, dynamic>{
+                'android': <String, dynamic>{
+                  'dartPluginClass': 'UrlLauncherAndroid',
+                },
+                'ios': <String, dynamic>{
+                  'dartPluginClass': 'UrlLauncherIos',
+                },
+              },
+            }),
+            null,
+            <String>[],
+            fileSystem: fs,
+            appDependencies: directDependencies,
+          ),
+          Plugin.fromYaml(
+            'user_selected_url_launcher_implementation',
+            '',
+            YamlMap.wrap(<String, dynamic>{
+              'implements': 'url_launcher',
+              'platforms': <String, dynamic>{
+                'android': <String, dynamic>{
+                  'dartPluginClass': 'UrlLauncherAndroid',
+                },
+              },
+            }),
+            null,
+            <String>[],
+            fileSystem: fs,
+            appDependencies: directDependencies,
+          ),
+        ]);
+        expect(resolutions.length, equals(2));
+        expect(resolutions[0].toMap(), equals(
+            <String, String>{
+              'pluginName': 'user_selected_url_launcher_implementation',
+              'dartClass': 'UrlLauncherAndroid',
+              'platform': 'android',
+            })
+        );
+        expect(resolutions[1].toMap(), equals(
+            <String, String>{
+              'pluginName': 'url_launcher',
+              'dartClass': 'UrlLauncherIos',
+              'platform': 'ios',
+            })
+        );
+      });
+
       testUsingContext(
           'provides error when a plugin has a default implementation and implements another plugin',
           () async {

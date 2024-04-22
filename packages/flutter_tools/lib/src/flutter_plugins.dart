@@ -1359,6 +1359,15 @@ Plugin? _resolveImplementationOfPlugin({
   });
   if (directDependencies.isNotEmpty) {
     if (directDependencies.length > 1) {
+
+      // Allow overriding an app-facing package with an inline implementation (which is a direct dependency)
+      // with another direct dependency which implements the app-facing package.
+      final Iterable<Plugin> implementingPackage = directDependencies.where((Plugin plugin) => plugin.implementsPackage != null && plugin.implementsPackage!.isNotEmpty);
+      final Set<Plugin> appFacingPackage = directDependencies.toSet()..removeAll(implementingPackage);
+      if (implementingPackage.length == 1 && appFacingPackage.length == 1) {
+        return implementingPackage.first;
+      }
+
       throwToolExit(
           'Plugin $pluginName:$platformKey has conflicting direct dependency implementations:\n'
           '${directDependencies.map((Plugin plugin) => '  ${plugin.name}\n').join()}'
