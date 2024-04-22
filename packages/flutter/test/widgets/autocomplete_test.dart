@@ -637,7 +637,7 @@ void main() {
     expect(optionsOffsetOpen.dy, fieldOffset.dy + fieldSize.height);
   });
 
-  testWidgets('can prevent options from showing by returning an empty iterable', (WidgetTester tester) async {
+  testWidgets('does not prevent options from showing when returning an empty iterable', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<String> lastOptions;
@@ -685,7 +685,7 @@ void main() {
       selection: TextSelection(baseOffset: 0, extentOffset: 0),
     );
     await tester.pump();
-    expect(find.byKey(optionsKey), findsNothing);
+    expect(find.byKey(optionsKey), findsOneWidget);
 
     // Enter text. Now the options appear, filtered by the text.
     textEditingController.value = const TextEditingValue(
@@ -908,8 +908,8 @@ void main() {
     await tester.pumpAndSettle();
 
     // The options have not yet been built.
-    expect(find.byKey(optionsKey), findsNothing);
-    expect(lastOptions, isNull);
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions, isEmpty);
 
     // Await asynchronous options builder.
     await tester.pumpAndSettle(delay);
