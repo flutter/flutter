@@ -268,6 +268,15 @@ void main() {
     });
   });
 
+  testWidgets('Long helpText cant not cutoffs the save button', (WidgetTester tester) async {
+    helpText = 'long helpText' * 100;
+    saveText = 'make it so';
+    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      expect(find.text(helpText!), findsOneWidget);
+      expect(find.text(saveText!), findsOneWidget);
+    });
+  });
+
   testWidgets('Material3 has sentence case labels', (WidgetTester tester) async {
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
       expect(find.text('Save'), findsOneWidget);
