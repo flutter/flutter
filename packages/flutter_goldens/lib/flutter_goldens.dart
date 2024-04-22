@@ -22,7 +22,7 @@ export 'skia_client.dart';
 // titled "Inconsequential golden test" in this file:
 //   /packages/flutter/test/widgets/basic_test.dart
 
-// TODO(ianh): sort the parameters and arguments in this file so they use a consistent order througout.
+// TODO(ianh): sort the parameters and arguments in this file so they use a consistent order throughout.
 
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 
