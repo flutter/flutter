@@ -12,7 +12,7 @@ import '../run_command.dart';
 import '../utils.dart';
 
 /// Executes the test suite for the flutter/packages repo.
-Future<void> flutterPackagesRunner(String flutterRoot) async {
+Future<void> flutterPackagesRunner() async {
 
   Future<void> runAnalyze() async {
     printProgress('${green}Running analysis for flutter/packages$reset');

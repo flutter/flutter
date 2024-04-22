@@ -604,7 +604,7 @@ abstract interface class PredictiveBackRoute {
   /// Handles a predictive back gesture ending successfully.
   void handleCommitBackGesture();
 
-  /// Handles a predictive back gesture ending in cancelation.
+  /// Handles a predictive back gesture ending in cancellation.
   void handleCancelBackGesture();
 }
 
@@ -1669,9 +1669,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   final List<WillPopCallback> _willPopCallbacks = <WillPopCallback>[];
 
-  // Holding as Object? instead of T so that PopScope in this route can be
-  // declared with any supertype of T.
-  final Set<PopEntry<Object?>> _popEntries = <PopEntry<Object?>>{};
+  final Set<PopEntry> _popEntries = <PopEntry>{};
 
   /// Returns [RoutePopDisposition.doNotPop] if any of callbacks added with
   /// [addScopedWillPopCallback] returns either false or null. If they all
@@ -1726,7 +1724,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///    method checks.
   @override
   RoutePopDisposition get popDisposition {
-    for (final PopEntry<Object?> popEntry in _popEntries) {
+    for (final PopEntry popEntry in _popEntries) {
       if (!popEntry.canPopNotifier.value) {
         return RoutePopDisposition.doNotPop;
       }
@@ -1736,9 +1734,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   @override
-  void onPopInvoked(bool didPop, T? result) {
-    for (final PopEntry<Object?> popEntry in _popEntries) {
-      popEntry.onPopInvoked(didPop, result);
+  void onPopInvoked(bool didPop) {
+    for (final PopEntry popEntry in _popEntries) {
+      popEntry.onPopInvoked?.call(didPop);
     }
   }
 
@@ -1795,7 +1793,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// See also:
   ///
   ///  * [unregisterPopEntry], which performs the opposite operation.
-  void registerPopEntry(PopEntry<Object?> popEntry) {
+  void registerPopEntry(PopEntry popEntry) {
     _popEntries.add(popEntry);
     popEntry.canPopNotifier.addListener(_handlePopEntryChange);
     _handlePopEntryChange();
@@ -1806,7 +1804,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// See also:
   ///
   ///  * [registerPopEntry], which performs the opposite operation.
-  void unregisterPopEntry(PopEntry<Object?> popEntry) {
+  void unregisterPopEntry(PopEntry popEntry) {
     _popEntries.remove(popEntry);
     popEntry.canPopNotifier.removeListener(_handlePopEntryChange);
     _handlePopEntryChange();
@@ -2415,9 +2413,7 @@ typedef RouteTransitionsBuilder = Widget Function(BuildContext context, Animatio
 ///
 /// Accepts a didPop boolean indicating whether or not back navigation
 /// succeeded.
-///
-/// The `result` contains the pop result.
-typedef PopInvokedCallback<T> = void Function(bool didPop, T? result);
+typedef PopInvokedCallback = void Function(bool didPop);
 
 /// Allows listening to and preventing pops.
 ///
@@ -2429,13 +2425,9 @@ typedef PopInvokedCallback<T> = void Function(bool didPop, T? result);
 ///  * [PopScope], which provides similar functionality in a widget.
 ///  * [ModalRoute.registerPopEntry], which unregisters instances of this.
 ///  * [ModalRoute.unregisterPopEntry], which unregisters instances of this.
-abstract class PopEntry<T> {
+abstract class PopEntry {
   /// {@macro flutter.widgets.PopScope.onPopInvoked}
-  // This can't be a function getter since dart vm doesn't allow upcasting
-  // generic type of the function getter. This prevents customers from declaring
-  // PopScope with any generic type that is subtype of ModalRoute._popEntries.
-  // See https://github.com/dart-lang/sdk/issues/55427.
-  void onPopInvoked(bool didPop, T? result);
+  PopInvokedCallback? get onPopInvoked;
 
   /// {@macro flutter.widgets.PopScope.canPop}
   ValueListenable<bool> get canPopNotifier;

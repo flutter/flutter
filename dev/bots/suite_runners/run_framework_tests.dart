@@ -10,10 +10,10 @@ import 'package:archive/archive.dart';
 import 'package:path/path.dart' as path;
 
 import '../run_command.dart';
-import '../test.dart';
 import '../utils.dart';
+import 'run_test_harness_tests.dart';
 
-Future<void> frameworkTestsRunner(String flutterRoot) async {
+Future<void> frameworkTestsRunner() async {
   final List<String> trackWidgetCreationAlternatives = <String>['--track-widget-creation', '--no-track-widget-creation'];
 
   Future<void> runWidgets() async {
@@ -228,7 +228,7 @@ Future<void> frameworkTestsRunner(String flutterRoot) async {
 
   Future<void> runMisc() async {
     printProgress('${green}Running package tests$reset for directories other than packages/flutter');
-    await runTestHarnessTests();
+    await testHarnessTestsRunner();
     await runExampleTests();
     await runFlutterTest(
       path.join(flutterRoot, 'dev', 'a11y_assessments'),
