@@ -561,6 +561,13 @@ class SingletonFlutterWindow extends FlutterView {
   /// service is specified.
   bool get nativeSpellCheckServiceDefined => platformDispatcher.nativeSpellCheckServiceDefined;
 
+  /// Whether the spell check service is supported on the current platform.
+  ///
+  /// This option is used by [EditableTextState] to define its
+  /// [SpellCheckConfiguration] when a default spell check service
+  /// is requested.
+  bool get supportsShowingSystemContextMenu => platformDispatcher.supportsShowingSystemContextMenu;
+
   /// Whether briefly displaying the characters as you type in obscured text
   /// fields is enabled in system settings.
   ///

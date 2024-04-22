@@ -2204,4 +2204,18 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   XCTAssertNil(viewController.keyboardAnimationVSyncClient);
 }
 
+- (void)testSupportsShowingSystemContextMenuForIOS16AndAbove {
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  BOOL supportsShowingSystemContextMenu = [viewController supportsShowingSystemContextMenu];
+  if (@available(iOS 16.0, *)) {
+    XCTAssertTrue(supportsShowingSystemContextMenu);
+  } else {
+    XCTAssertFalse(supportsShowingSystemContextMenu);
+  }
+}
+
 @end
