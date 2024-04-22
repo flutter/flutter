@@ -452,7 +452,7 @@ native-assets: {}
           '--no-print-incremental-dependencies',
           ...buildModeOptions(buildMode, <String>[]),
           '--no-link-platform',
-          if(buildMode == BuildMode.release) ...<String>['--aot', '--tfa'],
+          if (buildMode == BuildMode.release) ...<String>['--aot', '--tfa'],
           '--packages',
           '/.dart_tool/package_config.json',
           '--output-dill',
