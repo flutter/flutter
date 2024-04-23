@@ -27,7 +27,6 @@ import 'tooltip.dart';
 
 // Some design constants
 const double _kChipHeight = 32.0;
-const double _kDeleteIconSize = 18.0;
 
 const int _kCheckmarkAlpha = 0xde; // 87%
 const int _kDisabledAlpha = 0x61; // 38%
@@ -41,7 +40,7 @@ const Duration _kReverseDrawerDuration = Duration(milliseconds: 100);
 const Duration _kDisableDuration = Duration(milliseconds: 75);
 
 const Color _kSelectScrimColor = Color(0x60191919);
-const Icon _kDefaultDeleteIcon = Icon(Icons.cancel, size: _kDeleteIconSize);
+const Icon _kDefaultDeleteIcon = Icon(Icons.cancel);
 
 /// An interface defining the base attributes for a Material Design chip.
 ///
@@ -262,7 +261,17 @@ abstract interface class ChipAttributes {
 abstract interface class DeletableChipAttributes {
   /// The icon displayed when [onDeleted] is set.
   ///
-  /// Defaults to an [Icon] widget set to use [Icons.cancel].
+  /// If [deleteIconColor] is provided, it will be used as the color of the
+  /// delete icon. If [deleteIconColor] is null, then the icon will use the
+  /// color specified in the chip [IconTheme]. If the [IconTheme] is null, then
+  /// the icon will use the color specified in the [ThemeData.iconTheme].
+  ///
+  /// If a size is specified in the chip [IconTheme], then the delete icon will
+  /// use that size. Otherwise, defaults to 18 pixels.
+  ///
+  /// Defaults to an [Icon] widget set to use [Icons.clear].
+  /// If [ThemeData.useMaterial3] is false, then defaults to an [Icon] widget
+  /// set to use [Icons.cancel].
   Widget? get deleteIcon;
 
   /// Called when the user taps the [deleteIcon] to delete the chip.
@@ -1179,6 +1188,20 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     if (!hasDeleteButton) {
       return null;
     }
+    final IconThemeData iconTheme = widget.iconTheme
+      ?? chipTheme.iconTheme
+      ?? theme.chipTheme.iconTheme
+      ?? _ChipDefaultsM3(context, widget.isEnabled).iconTheme!;
+    final Color? effectiveDeleteIconColor = widget.deleteIconColor
+      ?? chipTheme.deleteIconColor
+      ?? theme.chipTheme.deleteIconColor
+      ?? widget.iconTheme?.color
+      ?? chipTheme.iconTheme?.color
+      ?? chipDefaults.deleteIconColor;
+    final double effectiveIconSize = widget.iconTheme?.size
+      ?? chipTheme.iconTheme?.size
+      ?? theme.chipTheme.iconTheme?.size
+      ?? _ChipDefaultsM3(context, widget.isEnabled).iconTheme!.size!;
     return Semantics(
       container: true,
       button: true,
@@ -1194,11 +1217,9 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
           customBorder: const CircleBorder(),
           onTap: widget.isEnabled ? widget.onDeleted : null,
           child: IconTheme(
-            data: theme.iconTheme.copyWith(
-              color: widget.deleteIconColor
-                ?? chipTheme.deleteIconColor
-                ?? theme.chipTheme.deleteIconColor
-                ?? chipDefaults.deleteIconColor,
+            data: iconTheme.copyWith(
+              color: effectiveDeleteIconColor,
+              size: effectiveIconSize,
             ),
             child: widget.deleteIcon,
           ),
