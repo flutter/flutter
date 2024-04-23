@@ -28,18 +28,21 @@ void main() {
   late ResidentRunner residentRunner;
   late FakeDevice device;
   late FakeAnalytics fakeAnalytics;
+  late MemoryFileSystem fileSystem;
   FakeVmServiceHost? fakeVmServiceHost;
 
   setUp(() {
+    fileSystem = MemoryFileSystem.test();
+
     testbed = Testbed(setup: () {
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
-        fs: MemoryFileSystem.test(),
+        fs: fileSystem,
         fakeFlutterVersion: FakeFlutterVersion(),
       );
 
-      globals.fs.file('.packages')
+      fileSystem.file('.packages')
         .writeAsStringSync('\n');
-      globals.fs.file(globals.fs.path.join('build', 'app.dill'))
+      fileSystem.file(fileSystem.path.join('build', 'app.dill'))
         ..createSync(recursive: true)
         ..writeAsStringSync('ABC');
       residentRunner = HotRunner(
@@ -83,7 +86,7 @@ void main() {
           listViews,
         ]);
         globals.fs
-            .file(globals.fs.path.join('lib', 'main.dart'))
+            .file(fileSystem.path.join('lib', 'main.dart'))
             .createSync(recursive: true);
         final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner();
         residentRunner = HotRunner(
@@ -113,7 +116,7 @@ void main() {
         expect(buildRunner.packagesWithNativeAssetsInvocations, 0);
 
         expect(residentCompiler.recompileCalled, true);
-        expect(residentCompiler.receivedNativeAssetsYaml, globals.fs.path.toUri('foo.yaml'));
+        expect(residentCompiler.receivedNativeAssetsYaml, fileSystem.path.toUri('foo.yaml'));
       }),
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
