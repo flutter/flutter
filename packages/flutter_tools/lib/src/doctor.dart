@@ -427,7 +427,8 @@ class Doctor {
             doctorInvocationId: analyticsTimestamp,
           ));
         }
-        // TODO(eliasyishak): remove this after migrating from package:usage
+        // TODO(eliasyishak): remove this after migrating from package:usage,
+        //  https://github.com/flutter/flutter/issues/128251
         DoctorResultEvent(validator: validator, result: result).send();
       }
 
