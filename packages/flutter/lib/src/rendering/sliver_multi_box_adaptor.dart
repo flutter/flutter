@@ -797,7 +797,7 @@ enum SliverTreeTraversalOrder {
   /// This traversal pattern will visit each given [SliverTreeNode] before
   /// visiting each of its children.
   ///
-  /// This is the default traversal pattern for [SliverTree.traversalOrder].
+  /// This is the default traversal pattern for [SliverTreeList.traversalOrder].
   depthFirst,
 
   /// Lever order traversal.
@@ -806,7 +806,7 @@ enum SliverTreeTraversalOrder {
   /// [SliverTreeNode.depth], before progressing to the next depth of nodes in
   /// the tree.
   ///
-  /// Can be used in [SliverTree.traversalOrder], which defaults to
+  /// Can be used in [SliverTreeList.traversalOrder], which defaults to
   /// [depthFirst].
   breadthFirst,
 }
@@ -819,18 +819,18 @@ enum SliverTreeTraversalOrder {
 /// are offset by the indentation specified by
 /// [SliverTreeIndentationType.value] in the cross axis of the viewport. This
 /// means the space allotted to the indentation will not be part of the space
-/// made available to the Widget returned by [SliverTree.treeNodeBuilder].
+/// made available to the Widget returned by [SliverTreeList.treeNodeBuilder].
 ///
 /// Alternatively, the indentation can be implemented in
-/// [SliverTree.treeNodeBuilder], with the depth of the given tree row accessed
-/// by [SliverTreeNode.depth]. This allows for more customization in building
-/// tree rows, such as filling the indented area with decorations or ink
-/// effects.
+/// [SliverTreeList.treeNodeBuilder], with the depth of the given tree row
+/// accessed by [SliverTreeNode.depth]. This allows for more customization in
+/// building tree rows, such as filling the indented area with decorations or
+/// ink effects.
 ///
 /// {@tool dartpad}
 /// This example shows a highly customized [SliverTreeList] configured to
 /// [SliverTreeIndentationType.none]. This allows the indentation to be handled
-/// by the developer in [SliverTree.treeNodeBuilder], where a decoration is
+/// by the developer in [SliverTreeList.treeNodeBuilder], where a decoration is
 /// used to fill the indented space.
 ///
 /// ** See code in examples/api/lib/widgets/sliver/sliver_tree.1.dart **
@@ -853,7 +853,7 @@ class SliverTreeIndentationType {
   /// Configures no offsetting of child nodes in a [SliverTreeList].
   ///
   /// Useful if the indentation is implemented in the
-  /// [SliverTree.treeNodeBuilder] instead for more customization options.
+  /// [SliverTreeList.treeNodeBuilder] instead for more customization options.
   ///
   /// Child nodes will not be offset in the tree.
   static const SliverTreeIndentationType none = SliverTreeIndentationType._internal(0.0);
@@ -928,8 +928,9 @@ class RenderSliverTree extends RenderSliverVariedExtentList {
   /// The number of pixels by which child nodes will be offset in the cross axis
   /// based on their [TreeNodeParentData.depth].
   ///
-  /// If zero, can alternatively offset children in [SliverTree.treeNodeBuilder]
-  /// for more options to customize the indented space.
+  /// If zero, can alternatively offset children in
+  /// [SliverTreeList.treeNodeBuilder] for more options to customize the
+  /// indented space.
   double get indentation => _indentation;
   double _indentation;
   set indentation(double value) {
