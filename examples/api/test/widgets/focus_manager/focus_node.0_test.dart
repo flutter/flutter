@@ -72,8 +72,7 @@ void main() {
   );
 
   testWidgets(
-    'FocusNode updates color of the Container according to the key events '
-    'when focused',
+    'FocusNode updates color of the Container according to the key events when focused',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const example.FocusNodeExampleApp(),
@@ -147,8 +146,7 @@ void main() {
   );
 
   testWidgets(
-    'FocusNode sets color to the white when unfocused and sets it back to the '
-    'selected one when focused',
+    'FocusNode sets color to the white when unfocused and sets it back to the selected one when focused',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const example.FocusNodeExampleApp(),
