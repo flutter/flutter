@@ -108,8 +108,8 @@ class VerticesUVContents final : public Contents {
   VerticesUVContents& operator=(const VerticesUVContents&) = delete;
 };
 
-/// A vertices contents for per-color vertices + texture and porter duff
-/// blended.
+/// A vertices contents for (optional) per-color vertices + texture and any
+/// blend mode.
 class VerticesSimpleBlendContents final : public Contents {
  public:
   VerticesSimpleBlendContents();

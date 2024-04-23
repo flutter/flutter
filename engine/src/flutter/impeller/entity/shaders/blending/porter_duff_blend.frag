@@ -21,6 +21,8 @@ uniform FragInfo {
   float16_t dst_coeff_src_color;
   float16_t input_alpha;
   float16_t output_alpha;
+  float tmx;
+  float tmy;
 }
 frag_info;
 
@@ -29,16 +31,20 @@ in f16vec4 v_color;
 
 out f16vec4 frag_color;
 
-f16vec4 Sample(f16sampler2D texture_sampler, vec2 texture_coords) {
+f16vec4 Sample(f16sampler2D texture_sampler,
+               vec2 texture_coords,
+               float tmx,
+               float tmy) {
   if (supports_decal > 0.0) {
     return texture(texture_sampler, texture_coords);
   }
-  return IPHalfSampleDecal(texture_sampler, texture_coords);
+  return IPHalfSampleWithTileMode(texture_sampler, texture_coords, tmx, tmy);
 }
 
 void main() {
-  f16vec4 dst =
-      texture(texture_sampler_dst, v_texture_coords) * frag_info.input_alpha;
+  f16vec4 dst = Sample(texture_sampler_dst, v_texture_coords, frag_info.tmx,
+                       frag_info.tmy) *
+                frag_info.input_alpha;
   f16vec4 src = v_color;
   frag_color =
       src * (frag_info.src_coeff + dst.a * frag_info.src_coeff_dst_alpha) +
