@@ -81,6 +81,9 @@
 #include "impeller/entity/framebuffer_blend.frag.h"
 #include "impeller/entity/framebuffer_blend.vert.h"
 
+#include "impeller/entity/vertices_uber.frag.h"
+#include "impeller/entity/vertices_uber.vert.h"
+
 #ifdef IMPELLER_ENABLE_OPENGLES
 #include "impeller/entity/tiled_texture_fill_external.frag.h"
 #endif  // IMPELLER_ENABLE_OPENGLES
@@ -250,6 +253,10 @@ using FramebufferBlendScreenPipeline =
 using FramebufferBlendSoftLightPipeline =
     RenderPipelineHandle<FramebufferBlendVertexShader,
                          FramebufferBlendFragmentShader>;
+
+/// Draw Vertices/Atlas Uber Shader
+using VerticesUberShader =
+    RenderPipelineHandle<VerticesUberVertexShader, VerticesUberFragmentShader>;
 
 /// Geometry Pipelines
 using PointsComputeShaderPipeline = ComputePipelineBuilder<PointsComputeShader>;
@@ -721,6 +728,11 @@ class ContentContext {
     return GetPipeline(framebuffer_blend_softlight_pipelines_, opts);
   }
 
+  std::shared_ptr<Pipeline<PipelineDescriptor>> GetDrawVerticesUberShader(
+      ContentContextOptions opts) const {
+    return GetPipeline(vertices_uber_shader_, opts);
+  }
+
   std::shared_ptr<Pipeline<ComputePipelineDescriptor>> GetPointComputePipeline()
       const {
     FML_DCHECK(GetDeviceCapabilities().SupportsCompute());
@@ -995,6 +1007,7 @@ class ContentContext {
       framebuffer_blend_screen_pipelines_;
   mutable Variants<FramebufferBlendSoftLightPipeline>
       framebuffer_blend_softlight_pipelines_;
+  mutable Variants<VerticesUberShader> vertices_uber_shader_;
   mutable std::shared_ptr<Pipeline<ComputePipelineDescriptor>>
       point_field_compute_pipelines_;
   mutable std::shared_ptr<Pipeline<ComputePipelineDescriptor>>

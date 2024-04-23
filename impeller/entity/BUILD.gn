@@ -52,6 +52,8 @@ impeller_shaders("entity_shaders") {
     "shaders/filters/linear_to_srgb_filter.frag",
     "shaders/filters/morphology_filter.frag",
     "shaders/filters/morphology_filter.vert",
+    "shaders/blending/vertices_uber.frag",
+    "shaders/blending/vertices_uber.vert",
   ]
 
   if (impeller_debug) {
