@@ -8,6 +8,7 @@ import 'dart:io' as io;
 import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:engine_tool/src/environment.dart';
 import 'package:engine_tool/src/logger.dart';
+import 'package:litetest/litetest.dart' show Expect, Matcher;
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 import 'package:process_fakes/process_fakes.dart';
@@ -169,3 +170,48 @@ FakeProcess _getCannedResult(
   }
   return FakeProcess();
 }
+
+typedef CommandMatcher = bool Function(List<String> command);
+
+/// Returns a [Matcher] that fails the test if no process has a matching command.
+///
+/// Usage:
+///    expect(testEnv.processHistory,
+///        containsCommand((List<String> command) {
+///            return command.length > 5 &&
+///                command[0].contains('ninja') &&
+///                command[2].endsWith('/host_debug') &&
+///                command[5] == 'flutter/fml:fml_arc_unittests';
+///        })
+///    );
+Matcher containsCommand(CommandMatcher commandMatcher) => (dynamic processes) {
+      Expect.type<List<ExecutedProcess>>(processes);
+      final List<List<String>> commands = (processes as List<ExecutedProcess>)
+          .map((ExecutedProcess process) => process.command)
+          .toList();
+      if (!commands.any(commandMatcher)) {
+        Expect.fail('No process found with matching command');
+      }
+    };
+
+/// Returns a [Matcher] that fails the test if any process has a matching
+/// command.
+///
+/// Usage:
+///    expect(testEnv.processHistory,
+///        doesNotContainCommand((List<String> command) {
+///            return command.length > 5 &&
+///                command[0].contains('ninja') &&
+///                command[2].endsWith('/host_debug') &&
+///                command[5] == 'flutter/fml:fml_arc_unittests';
+///        })
+///    );
+Matcher doesNotContainCommand(CommandMatcher commandMatcher) => (dynamic processes) {
+      Expect.type<List<ExecutedProcess>>(processes);
+      final List<List<String>> commands = (processes as List<ExecutedProcess>)
+          .map((ExecutedProcess process) => process.command)
+          .toList();
+      if (commands.any(commandMatcher)) {
+        Expect.fail('Process found with matching command');
+      }
+    };
