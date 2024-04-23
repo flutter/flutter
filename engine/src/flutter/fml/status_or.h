@@ -37,6 +37,10 @@ class StatusOr {
 
   // These constructors are intended be compatible with absl::status_or.
   // NOLINTNEXTLINE(google-explicit-constructor)
+  StatusOr(T&& value) : status_(), value_(std::move(value)) {}
+
+  // These constructors are intended be compatible with absl::status_or.
+  // NOLINTNEXTLINE(google-explicit-constructor)
   StatusOr(const Status& status) : status_(status), value_() {
     // It's not valid to construct a StatusOr with an OK status and no value.
     FML_CHECK(!status_.ok());
