@@ -1575,15 +1575,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   /// Returns the [Axis] of the child scroll view, or null if the
-  /// current scroll controller does not have any attached positions.
+  /// we haven't seen a ScrollMetrics notification yet.
   @protected
-  Axis? getScrollbarDirection() {
-    assert(_cachedController != null);
-    if (_cachedController!.hasClients) {
-      return _cachedController!.position.axis;
-    }
-    return null;
-  }
+  Axis? getScrollbarDirection() => _axis;
 
   void _disposeThumbDrag() {
     _thumbDrag = null;
