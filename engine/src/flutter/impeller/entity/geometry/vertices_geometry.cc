@@ -9,6 +9,7 @@
 
 #include "impeller/core/buffer_view.h"
 #include "impeller/entity/contents/content_context.h"
+#include "impeller/geometry/color.h"
 
 namespace impeller {
 

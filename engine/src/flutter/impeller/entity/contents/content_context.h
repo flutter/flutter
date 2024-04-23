@@ -57,8 +57,8 @@
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
 #include "impeller/entity/texture_fill_strict_src.frag.h"
+#include "impeller/entity/texture_uv_fill.vert.h"
 #include "impeller/entity/tiled_texture_fill.frag.h"
-#include "impeller/entity/uv.comp.h"
 #include "impeller/entity/vertices.frag.h"
 #include "impeller/entity/yuv_to_rgb_filter.frag.h"
 
@@ -132,10 +132,8 @@ using TexturePipeline =
 using TextureStrictSrcPipeline =
     RenderPipelineHandle<TextureFillVertexShader,
                          TextureFillStrictSrcFragmentShader>;
-using PositionUVPipeline = RenderPipelineHandle<TextureFillVertexShader,
-                                                TiledTextureFillFragmentShader>;
 using TiledTexturePipeline =
-    RenderPipelineHandle<TextureFillVertexShader,
+    RenderPipelineHandle<TextureUvFillVertexShader,
                          TiledTextureFillFragmentShader>;
 using KernelDecalPipeline =
     RenderPipelineHandle<KernelVertexShader, KernelDecalFragmentShader>;
@@ -260,19 +258,12 @@ using VerticesUberShader =
 
 /// Geometry Pipelines
 using PointsComputeShaderPipeline = ComputePipelineBuilder<PointsComputeShader>;
-using UvComputeShaderPipeline = ComputePipelineBuilder<UvComputeShader>;
 
 #ifdef IMPELLER_ENABLE_OPENGLES
 using TiledTextureExternalPipeline =
-    RenderPipelineHandle<TextureFillVertexShader,
+    RenderPipelineHandle<TextureUvFillVertexShader,
                          TiledTextureFillExternalFragmentShader>;
 #endif  // IMPELLER_ENABLE_OPENGLES
-
-// A struct used to isolate command buffer storage from the content
-// context options to preserve const-ness.
-struct PendingCommandBuffers {
-  std::vector<std::shared_ptr<CommandBuffer>> command_buffers;
-};
 
 /// Pipeline state configuration.
 ///
@@ -484,11 +475,6 @@ class ContentContext {
     return GetPipeline(tiled_texture_external_pipelines_, opts);
   }
 #endif  // IMPELLER_ENABLE_OPENGLES
-
-  std::shared_ptr<Pipeline<PipelineDescriptor>> GetPositionUVPipeline(
-      ContentContextOptions opts) const {
-    return GetPipeline(position_uv_pipelines_, opts);
-  }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetTiledTexturePipeline(
       ContentContextOptions opts) const {
@@ -739,12 +725,6 @@ class ContentContext {
     return point_field_compute_pipelines_;
   }
 
-  std::shared_ptr<Pipeline<ComputePipelineDescriptor>> GetUvComputePipeline()
-      const {
-    FML_DCHECK(GetDeviceCapabilities().SupportsCompute());
-    return uv_compute_pipelines_;
-  }
-
   std::shared_ptr<Context> GetContext() const;
 
   const Capabilities& GetDeviceCapabilities() const;
@@ -944,7 +924,6 @@ class ContentContext {
   mutable Variants<TiledTextureExternalPipeline>
       tiled_texture_external_pipelines_;
 #endif  // IMPELLER_ENABLE_OPENGLES
-  mutable Variants<PositionUVPipeline> position_uv_pipelines_;
   mutable Variants<TiledTexturePipeline> tiled_texture_pipelines_;
   mutable Variants<KernelDecalPipeline> kernel_decal_pipelines_;
   mutable Variants<KernelPipeline> kernel_nodecal_pipelines_;
@@ -1010,8 +989,6 @@ class ContentContext {
   mutable Variants<VerticesUberShader> vertices_uber_shader_;
   mutable std::shared_ptr<Pipeline<ComputePipelineDescriptor>>
       point_field_compute_pipelines_;
-  mutable std::shared_ptr<Pipeline<ComputePipelineDescriptor>>
-      uv_compute_pipelines_;
 
   template <class TypedPipeline>
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetPipeline(
@@ -1071,7 +1048,6 @@ class ContentContext {
 #endif  // IMPELLER_ENABLE_3D
   std::shared_ptr<RenderTargetAllocator> render_target_cache_;
   std::shared_ptr<HostBuffer> host_buffer_;
-  std::unique_ptr<PendingCommandBuffers> pending_command_buffers_;
   bool wireframe_ = false;
 
   ContentContext(const ContentContext&) = delete;

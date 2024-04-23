@@ -36,13 +36,6 @@ class FillPathGeometry final : public Geometry {
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
   // |Geometry|
-  GeometryResult GetPositionUVBuffer(Rect texture_coverage,
-                                     Matrix effect_transform,
-                                     const ContentContext& renderer,
-                                     const Entity& entity,
-                                     RenderPass& pass) const override;
-
-  // |Geometry|
   GeometryResult::Mode GetResultMode() const override;
 
   Path path_;
