@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [SliverTree].
+/// Flutter code sample for [SliverTreeList].
 
 void main() => runApp(const SliverTreeExampleApp());
 
@@ -66,7 +66,7 @@ class _SliverTreeExampleState extends State<SliverTreeExample> {
       ),
       body: CustomScrollView(
         slivers: <Widget>[
-          SliverTree<String>(
+          SliverTreeList<String>(
             tree: _tree,
             controller: controller,
             treeNodeBuilder: (
@@ -82,7 +82,7 @@ class _SliverTreeExampleState extends State<SliverTreeExample> {
                     _selectedNode = node as SliverTreeNode<String>;
                   });
                 },
-                child: SliverTree.defaultTreeNodeBuilder(
+                child: SliverTreeList.defaultTreeNodeBuilder(
                   context,
                   node,
                   animationStyle: animationStyle,

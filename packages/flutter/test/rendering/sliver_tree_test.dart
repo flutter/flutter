@@ -55,7 +55,7 @@ void main() {
       home: CustomScrollView(
         reverse: true,
         slivers: <Widget>[
-          SliverTree<String>(tree: treeNodes),
+          SliverTreeList<String>(tree: treeNodes),
         ],
       ),
     ));
@@ -78,7 +78,7 @@ void main() {
         scrollDirection: Axis.horizontal,
         reverse: true,
         slivers: <Widget>[
-          SliverTree<String>(tree: treeNodes),
+          SliverTreeList<String>(tree: treeNodes),
         ],
       ),
     ));
@@ -100,7 +100,7 @@ void main() {
       home: CustomScrollView(
         scrollDirection: Axis.horizontal,
         slivers: <Widget>[
-          SliverTree<String>(tree: treeNodes),
+          SliverTreeList<String>(tree: treeNodes),
         ],
       ),
     ));
@@ -116,7 +116,7 @@ void main() {
   testWidgets('Basic layout', (WidgetTester tester) async {
     treeNodes = _setUpNodes();
     // Default layout, custom indentation values, row extents.
-    SliverTree<String> sliverTree = SliverTree<String>(
+    SliverTreeList<String> sliverTree = SliverTreeList<String>(
       tree: treeNodes,
     );
     await tester.pumpWidget(MaterialApp(
@@ -126,7 +126,7 @@ void main() {
     ));
     await tester.pump();
     expect(
-      find.byType(SliverTree<String>),
+      find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph(offset: const Offset(16.0, 53.0)) // Icon
@@ -174,7 +174,7 @@ void main() {
       const Rect.fromLTRB(46.0, 248.0, 334.0, 272.0),
     );
 
-    sliverTree = SliverTree<String>(
+    sliverTree = SliverTreeList<String>(
       tree: treeNodes,
       indentation: SliverTreeIndentationType.none,
     );
@@ -185,7 +185,7 @@ void main() {
     ));
     await tester.pump();
     expect(
-      find.byType(SliverTree<String>),
+      find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph(offset: const Offset(16.0, 53.0)) // Icon
@@ -233,7 +233,7 @@ void main() {
       const Rect.fromLTRB(46.0, 248.0, 334.0, 272.0),
     );
 
-    sliverTree = SliverTree<String>(
+    sliverTree = SliverTreeList<String>(
       tree: treeNodes,
       indentation: SliverTreeIndentationType.custom(50.0),
     );
@@ -244,7 +244,7 @@ void main() {
     ));
     await tester.pump();
     expect(
-      find.byType(SliverTree<String>),
+      find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph(offset: const Offset(16.0, 53.0)) // Icon
@@ -292,7 +292,7 @@ void main() {
       const Rect.fromLTRB(46.0, 248.0, 334.0, 272.0),
     );
 
-    sliverTree = SliverTree<String>(
+    sliverTree = SliverTreeList<String>(
       tree: treeNodes,
       treeRowExtentBuilder: (_, __) => 100,
     );
@@ -303,7 +303,7 @@ void main() {
     ));
     await tester.pump();
     expect(
-      find.byType(SliverTree<String>),
+      find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 26.0))
         ..paragraph(offset: const Offset(16.0, 143.0)) // Icon
@@ -349,7 +349,7 @@ void main() {
 
   testWidgets('Animating node segment', (WidgetTester tester) async {
     treeNodes = _setUpNodes();
-    SliverTree<String> sliverTree = SliverTree<String>(tree: treeNodes);
+    SliverTreeList<String> sliverTree = SliverTreeList<String>(tree: treeNodes);
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
         slivers: <Widget>[ sliverTree ],
@@ -357,7 +357,7 @@ void main() {
     ));
     await tester.pump();
     expect(
-      find.byType(SliverTree<String>),
+      find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph(offset: const Offset(16.0, 53.0)) // Icon
@@ -373,7 +373,7 @@ void main() {
     await tester.tap(find.byType(Icon).first);
     await tester.pump();
     expect(
-      find.byType(SliverTree<String>),
+      find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph(offset: const Offset(16.0, 53.0)) // Icon
@@ -403,7 +403,7 @@ void main() {
     // Progress the animation.
     await tester.pump(const Duration(milliseconds: 50));
     expect(
-      find.byType(SliverTree<String>),
+      find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph(offset: const Offset(16.0, 53.0)) // Icon
@@ -436,7 +436,7 @@ void main() {
     // Complete the animation
     await tester.pumpAndSettle();
     expect(
-      find.byType(SliverTree<String>),
+      find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))   // First
         ..paragraph(offset: const Offset(16.0, 53.0))  // Icon
@@ -469,7 +469,7 @@ void main() {
     );
 
     // Customize the animation
-    sliverTree = SliverTree<String>(
+    sliverTree = SliverTreeList<String>(
       tree: treeNodes,
       animationStyle: AnimationStyle(
         duration: const Duration(milliseconds: 500),
@@ -483,7 +483,7 @@ void main() {
     ));
     await tester.pump();
     expect(
-      find.byType(SliverTree<String>),
+      find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))   // First
         ..paragraph(offset: const Offset(16.0, 53.0))  // Icon
@@ -544,7 +544,7 @@ void main() {
     // Complete the animation
     await tester.pumpAndSettle();
     expect(
-      find.byType(SliverTree<String>),
+      find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph(offset: const Offset(16.0, 53.0)) // Icon
@@ -559,7 +559,7 @@ void main() {
     expect(find.text('alpha'), findsNothing);
 
     // Disable the animation
-    sliverTree = SliverTree<String>(
+    sliverTree = SliverTreeList<String>(
       tree: treeNodes,
       animationStyle: AnimationStyle.noAnimation,
     );
@@ -570,7 +570,7 @@ void main() {
     ));
     await tester.pump();
     expect(
-      find.byType(SliverTree<String>),
+      find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph(offset: const Offset(16.0, 53.0)) // Icon
@@ -589,7 +589,7 @@ void main() {
     await tester.pump();
     // No animating, straight to positions.
     expect(
-      find.byType(SliverTree<String>),
+      find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))   // First
         ..paragraph(offset: const Offset(16.0, 53.0))  // Icon
@@ -624,7 +624,7 @@ void main() {
 
   testWidgets('Multiple animating node segments', (WidgetTester tester) async {
     treeNodes = _setUpNodes();
-    final SliverTree<String> sliverTree =  SliverTree<String>(tree: treeNodes);
+    final SliverTreeList<String> sliverTree =  SliverTreeList<String>(tree: treeNodes);
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
         slivers: <Widget>[ sliverTree ],
@@ -632,7 +632,7 @@ void main() {
     ));
     await tester.pump();
     expect(
-      find.byType(SliverTree<String>),
+      find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph(offset: const Offset(16.0, 53.0)) // Icon
@@ -669,7 +669,7 @@ void main() {
     await tester.tap(find.byType(Icon).first);
     await tester.pump(const Duration(milliseconds: 15));
     expect(
-      find.byType(SliverTree<String>),
+      find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph(offset: const Offset(16.0, 53.0)) // Icon
@@ -704,7 +704,7 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 15));
     expect(
-      find.byType(SliverTree<String>),
+      find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph(offset: const Offset(16.0, 53.0))  // Icon
@@ -748,7 +748,7 @@ void main() {
     // Progress the animation further
     await tester.pump(const Duration(milliseconds: 15));
     expect(
-      find.byType(SliverTree<String>),
+      find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph(offset: const Offset(16.0, 53.0))  // Icon
@@ -792,7 +792,7 @@ void main() {
     // Complete the animations
     await tester.pumpAndSettle();
     expect(
-      find.byType(SliverTree<String>),
+      find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph(offset: const Offset(16.0, 53.0)) // Icon
@@ -827,7 +827,7 @@ void main() {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     treeNodes = _setUpNodes();
-    final SliverTree<String> sliverTree = SliverTree<String>(
+    final SliverTreeList<String> sliverTree = SliverTreeList<String>(
       treeRowExtentBuilder: (_, __) => 200,
       tree: treeNodes,
     );
