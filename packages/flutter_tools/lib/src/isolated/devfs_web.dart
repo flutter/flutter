@@ -1003,6 +1003,7 @@ class WebDevFS implements DevFS {
           artifacts: globals.artifacts!,
           logger: globals.logger,
           projectDir: rootDirectory,
+          buildMode: buildInfo.mode,
         );
       }
     }
