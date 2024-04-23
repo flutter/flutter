@@ -100,7 +100,10 @@ Future<void> testMain() async {
 
         final ui.PictureRecorder recorder = ui.PictureRecorder();
         final ui.Canvas canvas = ui.Canvas(recorder, drawRegion);
-        canvas.drawImage(image, const ui.Offset(100, 100), ui.Paint());
+        canvas.drawImage(image, ui.Offset.zero, ui.Paint()..filterQuality = ui.FilterQuality.none);
+        canvas.drawImage(image, const ui.Offset(150, 0), ui.Paint()..filterQuality = ui.FilterQuality.low);
+        canvas.drawImage(image, const ui.Offset(0, 150), ui.Paint()..filterQuality = ui.FilterQuality.medium);
+        canvas.drawImage(image, const ui.Offset(150, 150), ui.Paint()..filterQuality = ui.FilterQuality.high);
 
         await drawPictureUsingCurrentRenderer(recorder.endRecording());
 
@@ -112,11 +115,30 @@ Future<void> testMain() async {
 
         final ui.PictureRecorder recorder = ui.PictureRecorder();
         final ui.Canvas canvas = ui.Canvas(recorder, drawRegion);
+        const ui.Rect srcRect = ui.Rect.fromLTRB(50, 50, 100, 100);
         canvas.drawImageRect(
           image,
-          const ui.Rect.fromLTRB(50, 50, 100, 100),
-          const ui.Rect.fromLTRB(100, 100, 150, 150),
-          ui.Paint()
+          srcRect,
+          const ui.Rect.fromLTRB(0, 0, 150, 150),
+          ui.Paint()..filterQuality = ui.FilterQuality.none
+        );
+        canvas.drawImageRect(
+          image,
+          srcRect,
+          const ui.Rect.fromLTRB(150, 0, 300, 150),
+          ui.Paint()..filterQuality = ui.FilterQuality.low
+        );
+        canvas.drawImageRect(
+          image,
+          srcRect,
+          const ui.Rect.fromLTRB(0, 150, 150, 300),
+          ui.Paint()..filterQuality = ui.FilterQuality.medium
+        );
+        canvas.drawImageRect(
+          image,
+          srcRect,
+          const ui.Rect.fromLTRB(150, 150, 300, 300),
+          ui.Paint()..filterQuality = ui.FilterQuality.high
         );
 
         await drawPictureUsingCurrentRenderer(recorder.endRecording());

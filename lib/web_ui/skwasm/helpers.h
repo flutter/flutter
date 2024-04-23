@@ -49,7 +49,7 @@ inline SkSamplingOptions samplingOptionsForQuality(FilterQuality quality) {
     case FilterQuality::none:
       return SkSamplingOptions(SkFilterMode::kNearest, SkMipmapMode::kNone);
     case FilterQuality::low:
-      return SkSamplingOptions(SkFilterMode::kNearest, SkMipmapMode::kNearest);
+      return SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone);
     case FilterQuality::medium:
       return SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kLinear);
     case FilterQuality::high:
