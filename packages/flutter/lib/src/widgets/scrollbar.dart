@@ -1673,7 +1673,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   /// Handler called when a long press gesture has started.
   ///
-  /// Begins the fade out animation and creates the
+  /// Begins the fade out animation and creates the thumb's DragScrollController.
   @protected
   @mustCallSuper
   void handleThumbPressStart(Offset localPosition) {
