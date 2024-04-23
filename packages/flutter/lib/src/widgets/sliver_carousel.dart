@@ -608,7 +608,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     double extent;
     extent = itemExtentBuilder!(index, currentLayoutDimensions)!;
     return constraints.asBoxConstraints(
-      minExtent: math.min(extentUnit * weights.min, extent),
+      minExtent: extent,
       maxExtent: extent,
     );
   }
@@ -812,27 +812,24 @@ class CarouselScrollPhysics extends ScrollPhysics {
   }
 
   double _getTargetPixels(
-    ScrollMetrics position,
+    _CarouselPosition position,
     Tolerance tolerance,
     double velocity,
   ) {
     double fraction;
-    if (position is _CarouselPosition) {
-      if (position.itemExtent != null) {
-        fraction = position.itemExtent! / position.viewportDimension;
-      } else {
-        assert(position.viewportFraction != null);
-        fraction = position.viewportFraction!;
-      }
+    if (position.itemExtent != null) {
+      fraction = position.itemExtent! / position.viewportDimension;
     } else {
-      fraction = position.pixels / position.viewportDimension;
+      assert(position.viewportFraction != null);
+      fraction = position.viewportFraction!;
     }
+
     final double itemWidth = position.viewportDimension * fraction;
     double item = position.pixels / itemWidth;
     if (velocity < -tolerance.velocity) {
-      item -= 0.5;
+      item -= fraction / 2;
     } else if (velocity > tolerance.velocity) {
-      item += 0.5;
+      item += fraction / 2;
     }
     return math.min(
       item.roundToDouble() * itemWidth,
@@ -845,16 +842,24 @@ class CarouselScrollPhysics extends ScrollPhysics {
     ScrollMetrics position,
     double velocity,
   ) {
-    if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
-        (velocity >= 0.0 && position.pixels >= position.maxScrollExtent)) {
-      return super.createBallisticSimulation(position, velocity);
+    assert(
+      position is _CarouselPosition,
+      'CarouselScrollPhysics can only be used with Scrollables that uses '
+      'the CarouselController',
+    );
+
+    final _CarouselPosition metrics = position as _CarouselPosition;
+    if ((velocity <= 0.0 && metrics.pixels <= metrics.minScrollExtent) ||
+        (velocity >= 0.0 && metrics.pixels >= metrics.maxScrollExtent)) {
+      return super.createBallisticSimulation(metrics, velocity);
     }
-    final Tolerance tolerance = toleranceFor(position);
-    final double target = _getTargetPixels(position, tolerance, velocity);
-    if (target != position.pixels) {
+
+    final Tolerance tolerance = toleranceFor(metrics);
+    final double target = _getTargetPixels(metrics, tolerance, velocity);
+    if (target != metrics.pixels) {
       return ScrollSpringSimulation(
         spring,
-        position.pixels,
+        metrics.pixels,
         target,
         velocity,
         tolerance: tolerance,
@@ -990,7 +995,6 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements Carou
     final double? oldPixels = hasPixels ? pixels : null;
     double item;
     if (oldPixels == null) {
-      print('old pixels is null');
       item = _itemToShowOnStartup;
     } else if (oldViewportDimensions == 0.0) {
       // TODO(quncheng): If resize from zero, we should use the _cachedPage to recover the state.
