@@ -26,7 +26,6 @@ import '../macos/swift_packages.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
-import '../template.dart';
 import 'create_base.dart';
 
 const String kPlatformHelp =
@@ -610,43 +609,14 @@ Your $application code is in $relativeAppMain.
 
     final String? projectName = templateContext['projectName'] as String?;
     final List<String> templates = <String>['plugin', 'plugin_shared'];
-    final List<String> excluded = <String>[];
     if ((templateContext['ios'] == true || templateContext['macos'] == true) && featureFlags.isSwiftPackageManagerEnabled) {
       templates.add('plugin_swift_package_manager');
       templateContext['swiftLibraryName'] = projectName?.replaceAll('_', '-');
       templateContext['swiftToolsVersion'] = minimumSwiftToolchainVersion;
       templateContext['iosSupportedPlatform'] = SwiftPackageManager.iosSwiftPackageSupportedPlatform.format();
       templateContext['macosSupportedPlatform'] = SwiftPackageManager.macosSwiftPackageSupportedPlatform.format();
-
-      // Exclude CocoaPod files from "plugin" template
-      final Directory pluginTemplates = templatePathProvider.directoryInPackage('plugin', globals.fs);
-      excluded.addAll(<String>[
-        pluginTemplates
-            .childDirectory('ios-objc.tmpl')
-            .childDirectory('Classes')
-            .childFile('pluginClass.h.tmpl')
-            .absolute.path,
-        pluginTemplates
-            .childDirectory('ios-objc.tmpl')
-            .childDirectory('Classes')
-            .childFile('pluginClass.m.tmpl')
-            .absolute.path,
-        pluginTemplates
-            .childDirectory('ios-swift.tmpl')
-            .childDirectory('Classes')
-            .childFile('pluginClass.swift.tmpl')
-            .absolute.path,
-        pluginTemplates
-            .childDirectory('ios.tmpl')
-            .childDirectory('Assets')
-            .childFile('.gitkeep')
-            .absolute.path,
-        pluginTemplates
-            .childDirectory('macos.tmpl')
-            .childDirectory('Classes')
-            .childFile('pluginClass.swift.tmpl')
-            .absolute.path,
-      ]);
+    } else {
+      templates.add('plugin_cocoapods');
     }
 
     generatedCount += await renderMerged(
@@ -655,7 +625,6 @@ Your $application code is in $relativeAppMain.
       templateContext,
       overwrite: overwrite,
       printStatusWhenWriting: printStatusWhenWriting,
-      excludedPaths: excluded,
     );
 
     final FlutterProject project = FlutterProject.fromDirectory(directory);

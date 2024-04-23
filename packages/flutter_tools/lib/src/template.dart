@@ -289,10 +289,6 @@ class Template {
         return;
       }
 
-      if (excludedPaths.contains(absoluteSourcePath)) {
-        return;
-      }
-
       final String? finalDestinationPath = renderPath(relativeDestinationPath);
       if (finalDestinationPath == null) {
         return;

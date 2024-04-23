@@ -473,7 +473,6 @@ abstract class CreateBase extends FlutterCommand {
     Map<String, Object?> context, {
     bool overwrite = false,
     bool printStatusWhenWriting = true,
-    List<String> excludedPaths = const <String>[],
   }) async {
     final Template template = await Template.merged(
       names,
@@ -488,7 +487,6 @@ abstract class CreateBase extends FlutterCommand {
       context,
       overwriteExisting: overwrite,
       printStatusWhenWriting: printStatusWhenWriting,
-      excludedPaths: excludedPaths,
     );
   }
 
