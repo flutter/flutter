@@ -1066,8 +1066,13 @@ class _SwitchPainter extends ToggleablePainter {
       return;
     }
     _positionController = value;
+    _colorAnimation?.dispose();
+    _colorAnimation = CurvedAnimation(parent: positionController, curve: Curves.easeOut, reverseCurve: Curves.easeIn);
     notifyListeners();
   }
+
+  CurvedAnimation? _colorAnimation;
+
 
   Icon? get activeIcon => _activeIcon;
   Icon? _activeIcon;
@@ -1516,7 +1521,7 @@ class _SwitchPainter extends ToggleablePainter {
     final double inset = thumbOffset == null ? 0 : 1.0 - (currentValue - thumbOffset!).abs() * 2.0;
     thumbSize = Size(thumbSize!.width - inset, thumbSize.height - inset);
 
-    final double colorValue = CurvedAnimation(parent: positionController, curve: Curves.easeOut, reverseCurve: Curves.easeIn).value;
+    final double colorValue = _colorAnimation!.value;
     final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, colorValue)!;
     final Color? trackOutlineColor = inactiveTrackOutlineColor == null || activeTrackOutlineColor == null ? null
         : Color.lerp(inactiveTrackOutlineColor, activeTrackOutlineColor, colorValue);
@@ -1737,6 +1742,7 @@ class _SwitchPainter extends ToggleablePainter {
     _cachedThumbColor = null;
     _cachedThumbImage = null;
     _cachedThumbErrorListener = null;
+    _colorAnimation?.dispose();
     super.dispose();
   }
 }
