@@ -4,6 +4,11 @@
 
 #include "impeller/renderer/backend/vulkan/driver_info_vk.h"
 
+#include <iomanip>
+#include <sstream>
+
+#include "flutter/fml/build_config.h"
+
 namespace impeller {
 
 constexpr VendorVK IdentifyVendor(uint32_t vendor) {
@@ -39,6 +44,48 @@ constexpr VendorVK IdentifyVendor(uint32_t vendor) {
       // needed.
   }
   return VendorVK::kUnknown;
+}
+
+constexpr const char* VendorToString(VendorVK vendor) {
+  switch (vendor) {
+    case VendorVK::kUnknown:
+      return "Unknown";
+    case VendorVK::kGoogle:
+      return "Google";
+    case VendorVK::kQualcomm:
+      return "Qualcomm";
+    case VendorVK::kARM:
+      return "ARM";
+    case VendorVK::kImgTec:
+      return "ImgTec PowerVR";
+    case VendorVK::kAMD:
+      return "AMD";
+    case VendorVK::kNvidia:
+      return "Nvidia";
+    case VendorVK::kIntel:
+      return "Intel";
+    case VendorVK::kMesa:
+      return "Mesa";
+    case VendorVK::kApple:
+      return "Apple";
+  }
+  FML_UNREACHABLE();
+}
+
+constexpr const char* DeviceTypeToString(DeviceTypeVK type) {
+  switch (type) {
+    case DeviceTypeVK::kUnknown:
+      return "Unknown";
+    case DeviceTypeVK::kIntegratedGPU:
+      return "Integrated GPU";
+    case DeviceTypeVK::kDiscreteGPU:
+      return "Discrete GPU";
+    case DeviceTypeVK::kVirtualGPU:
+      return "Virtual GPU";
+    case DeviceTypeVK::kCPU:
+      return "CPU";
+  }
+  FML_UNREACHABLE();
 }
 
 constexpr DeviceTypeVK ToDeviceType(const vk::PhysicalDeviceType& type) {
@@ -90,6 +137,51 @@ const DeviceTypeVK& DriverInfoVK::GetDeviceType() const {
 
 const std::string& DriverInfoVK::GetDriverName() const {
   return driver_name_;
+}
+
+void DriverInfoVK::DumpToLog() const {
+  std::vector<std::pair<std::string, std::string>> items;
+  items.emplace_back("Name", driver_name_);
+  items.emplace_back("API Version", api_version_.ToString());
+  items.emplace_back("Vendor", VendorToString(vendor_));
+  items.emplace_back("Device Type", DeviceTypeToString(type_));
+  items.emplace_back("Is Emulator", std::to_string(IsEmulator()));
+
+  size_t padding = 0;
+
+  for (const auto& item : items) {
+    padding = std::max(padding, item.first.size());
+  }
+
+  padding += 1;
+
+  std::stringstream stream;
+
+  stream << std::endl;
+
+  stream << "--- Driver Information ------------------------------------------";
+
+  stream << std::endl;
+
+  for (const auto& item : items) {
+    stream << "| " << std::setw(static_cast<int>(padding)) << item.first
+           << std::setw(0) << ": " << item.second << std::endl;
+  }
+
+  stream << "-----------------------------------------------------------------";
+
+  FML_LOG(IMPORTANT) << stream.str();
+}
+
+bool DriverInfoVK::IsEmulator() const {
+#if FML_OS_ANDROID
+  // Google SwiftShader on Android.
+  if (type_ == DeviceTypeVK::kCPU && vendor_ == VendorVK::kGoogle &&
+      driver_name_.find("SwiftShader") != std::string::npos) {
+    return true;
+  }
+#endif  // FML_OS_ANDROID
+  return false;
 }
 
 }  // namespace impeller

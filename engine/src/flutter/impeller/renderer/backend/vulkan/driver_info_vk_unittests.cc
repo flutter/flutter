@@ -23,4 +23,14 @@ TEST_P(DriverInfoVKTest, CanQueryDriverInfo) {
   ASSERT_NE(driver_info->GetDriverName(), "");
 }
 
+TEST_P(DriverInfoVKTest, CanDumpToLog) {
+  ASSERT_TRUE(GetContext());
+  const auto& driver_info =
+      SurfaceContextVK::Cast(*GetContext()).GetParent().GetDriverInfo();
+  ASSERT_NE(driver_info, nullptr);
+  fml::testing::LogCapture log;
+  driver_info->DumpToLog();
+  ASSERT_TRUE(log.str().find("Driver Information") != std::string::npos);
+}
+
 }  // namespace impeller::testing

@@ -107,6 +107,21 @@ class DriverInfoVK {
   ///
   const std::string& GetDriverName() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Dumps the current driver info to the log.
+  ///
+  void DumpToLog() const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Determines if the driver represents an emulator. There is no
+  ///             definitive way to tell if a driver is an emulator and drivers
+  ///             don't self identify as emulators. So take this information
+  ///             with a pinch of salt.
+  ///
+  /// @return     True if emulator, False otherwise.
+  ///
+  bool IsEmulator() const;
+
  private:
   bool is_valid_ = false;
   Version api_version_;
