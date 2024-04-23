@@ -2688,22 +2688,23 @@ TEST_P(EntityTest, AdvancedBlendCoverageHintIsNotResetByEntityPass) {
 TEST_P(EntityTest, SpecializationConstantsAreAppliedToVariants) {
   auto content_context = GetContentContext();
 
-  auto default_color_burn = content_context->GetBlendColorBurnPipeline({
+  auto default_gyph = content_context->GetGlyphAtlasPipeline({
       .color_attachment_pixel_format = PixelFormat::kR8G8B8A8UNormInt,
       .has_depth_stencil_attachments = false,
   });
-  auto alt_color_burn = content_context->GetBlendColorBurnPipeline(
+  auto alt_gyph = content_context->GetGlyphAtlasPipeline(
       {.color_attachment_pixel_format = PixelFormat::kR8G8B8A8UNormInt,
        .has_depth_stencil_attachments = true});
 
-  ASSERT_NE(default_color_burn, alt_color_burn);
-  ASSERT_EQ(default_color_burn->GetDescriptor().GetSpecializationConstants(),
-            alt_color_burn->GetDescriptor().GetSpecializationConstants());
+  EXPECT_NE(default_gyph, alt_gyph);
+  EXPECT_EQ(default_gyph->GetDescriptor().GetSpecializationConstants(),
+            alt_gyph->GetDescriptor().GetSpecializationConstants());
 
-  auto decal_supported = static_cast<Scalar>(
-      GetContext()->GetCapabilities()->SupportsDecalSamplerAddressMode());
-  std::vector<Scalar> expected_constants = {5, decal_supported};
-  ASSERT_EQ(default_color_burn->GetDescriptor().GetSpecializationConstants(),
+  auto use_a8 = GetContext()->GetCapabilities()->GetDefaultGlyphAtlasFormat() ==
+                PixelFormat::kA8UNormInt;
+
+  std::vector<Scalar> expected_constants = {static_cast<Scalar>(use_a8)};
+  EXPECT_EQ(default_gyph->GetDescriptor().GetSpecializationConstants(),
             expected_constants);
 }
 
