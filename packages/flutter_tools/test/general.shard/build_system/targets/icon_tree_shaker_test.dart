@@ -591,12 +591,14 @@ void main() {
     );
 
     expect(
-      logger.statusText,
-      'Expected to find fontFamily for constant IconData with codepoint: '
-      '59470, but found fontFamily: null. This usually means '
-      'you are relying on the system font. Alternatively, font families in '
-      'an IconData class can be provided in the assets section of your '
-      'pubspec.yaml, or you are missing "uses-material-design: true".\n',
+      logger.traceText,
+      contains(
+        'Expected to find fontFamily for constant IconData with codepoint: '
+        '59470, but found fontFamily: null. This usually means '
+        'you are relying on the system font. Alternatively, font families in '
+        'an IconData class can be provided in the assets section of your '
+        'pubspec.yaml, or you are missing "uses-material-design: true".\n'
+      ),
     );
     expect(processManager, hasNoRemainingExpectations);
   });
@@ -631,12 +633,14 @@ void main() {
     );
 
     expect(
-      logger.statusText,
-      'Expected to find fontFamily for constant IconData with codepoint: '
-      '59470, but found fontFamily: null. This usually means '
-      'you are relying on the system font. Alternatively, font families in '
-      'an IconData class can be provided in the assets section of your '
-      'pubspec.yaml, or you are missing "uses-material-design: true".\n',
+      logger.traceText,
+      contains(
+        'Expected to find fontFamily for constant IconData with codepoint: '
+        '59470, but found fontFamily: null. This usually means '
+        'you are relying on the system font. Alternatively, font families in '
+        'an IconData class can be provided in the assets section of your '
+        'pubspec.yaml, or you are missing "uses-material-design: true".\n'
+      ),
     );
     expect(processManager, hasNoRemainingExpectations);
   });

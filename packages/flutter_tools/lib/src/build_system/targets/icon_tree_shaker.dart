@@ -336,7 +336,7 @@ class IconTreeShaker {
           'got: $iconDataMap.');
       }
       if (fontFamily == null) {
-        _logger.printStatus(
+        _logger.printTrace(
           'Expected to find fontFamily for constant IconData with codepoint: '
           '$codePoint, but found fontFamily: $fontFamily. This usually means '
           'you are relying on the system font. Alternatively, font families in '
