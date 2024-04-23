@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:package_config/package_config.dart';
+import 'package:yaml/yaml.dart';
 
 import '../../artifacts.dart';
 import '../../base/build.dart';
@@ -121,6 +122,9 @@ class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
 /// even though it is not listed as an input. Pub inserts a timestamp into
 /// the file which causes unnecessary rebuilds, so instead a subset of the contents
 /// are used an input instead.
+/// 
+/// This kernel snapshot is concatenated with the [KernelSnapshotNativeAssets]
+/// inside [KernelSnapshot] byte-wise to create the combined kernel snapshot.
 class KernelSnapshotProgram extends Target {
   const KernelSnapshotProgram();
 
@@ -271,6 +275,11 @@ class KernelSnapshotProgram extends Target {
   }
 }
 
+/// Generate a kernel snapshot of the native assets mapping for resolving
+/// `@Native` assets at runtime.
+/// 
+/// This kernel snapshot is concatenated to the [KernelSnapshotProgram]
+/// inside [KernelSnapshot] to create the combined kernel snapshot.
 class KernelSnapshotNativeAssets extends Target {
   const KernelSnapshotNativeAssets();
 
@@ -298,6 +307,18 @@ class KernelSnapshotNativeAssets extends Target {
 
   @override
   Future<void> build(Environment environment) async {
+    final File nativeAssetsFile = environment.buildDir.childFile('native_assets.yaml');
+    final File dillFile = environment.buildDir.childFile(dillName);
+
+    final YamlNode nativeAssetContents = loadYamlNode(await nativeAssetsFile.readAsString());
+    final Object? nativeAssetsInYaml = (nativeAssetContents as Map<Object?, Object?>)['native-assets'];
+    if (nativeAssetsInYaml is! Map || nativeAssetsInYaml.isEmpty) {
+      // Write an empty file to make concatenation a no-op.
+      // Write the file out to disk for caching.
+      await dillFile.writeAsBytes(<int>[]);
+      return;
+    }
+
     final KernelCompiler compiler = KernelCompiler(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
@@ -322,7 +343,6 @@ class KernelSnapshotNativeAssets extends Target {
 
     final String? frontendServerStarterPath = environment.defines[kFrontendServerStarterPath];
 
-    final File nativeAssetsFile = environment.buildDir.childFile('native_assets.yaml');
     final String nativeAssets = nativeAssetsFile.path;
     if (!await nativeAssetsFile.exists()) {
       throwToolExit("$nativeAssets doesn't exist.");
@@ -334,7 +354,7 @@ class KernelSnapshotNativeAssets extends Target {
       logger: environment.logger,
     );
 
-    final String dillPath = environment.buildDir.childFile(dillName).path;
+    final String dillPath = dillFile.path;
 
     final CompilerOutput? output = await compiler.compile(
       sdkRoot: environment.artifacts.getArtifactPath(

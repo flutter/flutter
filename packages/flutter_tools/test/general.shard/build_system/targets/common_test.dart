@@ -79,6 +79,18 @@ format-version:
 native-assets: {}
 ''';
 
+  const String nonEmptyNativeAssets = '''
+format-version:
+  - 1
+  - 0
+  - 0
+native-assets:
+  macos_arm64:
+    package:my_package/my_package_bindings_generated.dart:
+      - absolute
+      - my_package.framework/my_package
+''';
+
   testWithoutContext('KernelSnapshotProgram handles null result from kernel compilation', () async {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
@@ -427,50 +439,53 @@ native-assets: {}
   });
 
   for (final BuildMode buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
+    for (final bool empty in <bool>[true, false]) {
+      final String testName = empty ? 'empty' : 'non empty';
+      testWithoutContext('KernelSnapshotNativeAssets ${buildMode.name} $testName', () async {
+        fileSystem.file('.dart_tool/package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
+        androidEnvironment.buildDir.childFile('native_assets.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(empty ? emptyNativeAssets : nonEmptyNativeAssets);
+        final String build = androidEnvironment.buildDir.path;
+        final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+          Artifact.flutterPatchedSdkPath,
+          platform: TargetPlatform.darwin,
+          mode: buildMode,
+        );
+        processManager.addCommands(<FakeCommand>[
+          if (!empty)
+            FakeCommand(command: <String>[
+              artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
+              '--disable-dart-dev',
+              artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
+              '--sdk-root',
+              '$flutterPatchedSdkPath/',
+              '--target=flutter',
+              '--no-print-incremental-dependencies',
+              ...buildModeOptions(buildMode, <String>[]),
+              '--no-link-platform',
+              if (buildMode == BuildMode.release) ...<String>['--aot', '--tfa'],
+              '--packages',
+              '/.dart_tool/package_config.json',
+              '--output-dill',
+              '$build/native_assets.dill',
+              '--native-assets',
+              '$build/native_assets.yaml',
+              '--verbosity=error',
+              '--native-assets-only',
+            ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n'),
+        ]);
 
-    testWithoutContext('KernelSnapshotNativeAssets ${buildMode.name}', () async {
-      fileSystem.file('.dart_tool/package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
-      androidEnvironment.buildDir.childFile('native_assets.yaml')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(emptyNativeAssets);
-      final String build = androidEnvironment.buildDir.path;
-      final String flutterPatchedSdkPath = artifacts.getArtifactPath(
-        Artifact.flutterPatchedSdkPath,
-        platform: TargetPlatform.darwin,
-        mode: buildMode,
-      );
-      processManager.addCommands(<FakeCommand>[
-        FakeCommand(command: <String>[
-          artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
-          '--disable-dart-dev',
-          artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
-          '--sdk-root',
-          '$flutterPatchedSdkPath/',
-          '--target=flutter',
-          '--no-print-incremental-dependencies',
-          ...buildModeOptions(buildMode, <String>[]),
-          '--no-link-platform',
-          if (buildMode == BuildMode.release) ...<String>['--aot', '--tfa'],
-          '--packages',
-          '/.dart_tool/package_config.json',
-          '--output-dill',
-          '$build/native_assets.dill',
-          '--native-assets',
-          '$build/native_assets.yaml',
-          '--verbosity=error',
-          '--native-assets-only',
-        ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/app.dill 0\n'),
-      ]);
+        await const KernelSnapshotNativeAssets().build(androidEnvironment
+          ..defines[kTargetPlatform]  = getNameForTargetPlatform(TargetPlatform.darwin)
+          ..defines[kBuildMode] = buildMode.cliName
+        );
 
-      await const KernelSnapshotNativeAssets().build(androidEnvironment
-        ..defines[kTargetPlatform]  = getNameForTargetPlatform(TargetPlatform.darwin)
-        ..defines[kBuildMode] = buildMode.cliName
-      );
-
-      expect(processManager, hasNoRemainingExpectations);
-    });
+        expect(processManager, hasNoRemainingExpectations);
+      });
+    }
   }
 
   testUsingContext('AotElfProfile Produces correct output directory', () async {
