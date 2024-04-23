@@ -89,7 +89,7 @@ class CanvasRecorder {
       -> decltype((std::declval<Canvas>().*
                    canvasMethod)(std::forward<Args>(args)...)) {
     // Serialize each argument
-    (serializer_.Write(std::forward<Args>(args)), ...);
+    (serializer_.Write(args), ...);
     serializer_.Write(op);
     return (canvas_.*canvasMethod)(std::forward<Args>(args)...);
   }
@@ -110,7 +110,8 @@ class CanvasRecorder {
   //////////////////////////////////////////////////////////////////////////////
 
   void Save(uint32_t total_content_depth = Canvas::kMaxDepth) {
-    return ExecuteAndSerialize(FLT_CANVAS_RECORDER_OP_ARG(Save),
+    void (Canvas::*save_method)(uint32_t) = &Canvas::Save;
+    return ExecuteAndSerialize(CanvasRecorderOp::kSave, save_method,
                                total_content_depth);
   }
 

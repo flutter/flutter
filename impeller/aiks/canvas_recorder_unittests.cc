@@ -12,7 +12,7 @@ class Serializer {
  public:
   void Write(CanvasRecorderOp op) { last_op_ = op; }
 
-  void Write(const Paint& paint) {}
+  void Write(const Paint& paint) { last_paint_ = paint; }
 
   void Write(const std::optional<Rect> optional_rect) {}
 
@@ -59,6 +59,7 @@ class Serializer {
   void Write(const ContentBoundsPromise& promise) {}
 
   CanvasRecorderOp last_op_;
+  Paint last_paint_;
 };
 }  // namespace
 
@@ -152,8 +153,11 @@ TEST(CanvasRecorder, DrawPath) {
 
 TEST(CanvasRecorder, DrawPaint) {
   CanvasRecorder<Serializer> recorder;
-  recorder.DrawPaint(Paint());
+  Paint paint;
+  paint.color = Color::Red();
+  recorder.DrawPaint(paint);
   ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kDrawPaint);
+  ASSERT_EQ(recorder.GetSerializer().last_paint_.color, paint.color);
 }
 
 TEST(CanvasRecorder, DrawLine) {
@@ -164,8 +168,11 @@ TEST(CanvasRecorder, DrawLine) {
 
 TEST(CanvasRecorder, DrawRect) {
   CanvasRecorder<Serializer> recorder;
-  recorder.DrawRect(Rect(), Paint());
+  Paint paint;
+  paint.color = Color::Blue();
+  recorder.DrawRect(Rect(), paint);
   ASSERT_EQ(recorder.GetSerializer().last_op_, CanvasRecorderOp::kDrawRect);
+  ASSERT_EQ(recorder.GetSerializer().last_paint_.color, paint.color);
 }
 
 TEST(CanvasRecorder, DrawOval) {
