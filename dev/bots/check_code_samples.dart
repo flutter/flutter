@@ -392,7 +392,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/navigator/restorable_route_future.0_test.dart',
   'examples/api/test/widgets/navigator/navigator_state.restorable_push.0_test.dart',
   'examples/api/test/widgets/focus_manager/focus_node.unfocus.0_test.dart',
-  'examples/api/test/widgets/focus_manager/focus_node.0_test.dart',
   'examples/api/test/widgets/framework/build_owner.0_test.dart',
   'examples/api/test/widgets/framework/error_widget.0_test.dart',
   'examples/api/test/widgets/inherited_theme/inherited_theme.0_test.dart',
