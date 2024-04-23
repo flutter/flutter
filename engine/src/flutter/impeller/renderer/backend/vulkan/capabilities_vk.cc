@@ -390,6 +390,17 @@ CapabilitiesVK::GetEnabledDeviceFeatures(
     required.samplerYcbcrConversion = supported.samplerYcbcrConversion;
   }
 
+  // Vulkan 1.1
+  {
+    auto& required =
+        required_chain.get<vk::PhysicalDevice16BitStorageFeatures>();
+    const auto& supported =
+        supported_chain.get<vk::PhysicalDevice16BitStorageFeatures>();
+
+    required.uniformAndStorageBuffer16BitAccess =
+        supported.uniformAndStorageBuffer16BitAccess;
+  }
+
   return required_chain;
 }
 
