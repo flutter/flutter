@@ -9,7 +9,6 @@ import 'package:file/memory.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
-import '../analyze.dart';
 import '../suite_runners/run_flutter_packages_tests.dart';
 import '../utils.dart';
 import 'common.dart';
