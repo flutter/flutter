@@ -153,14 +153,11 @@ abstract class _SpringSolution {
     double initialPosition,
     double initialVelocity,
   ) {
-    final double cmk = spring.damping * spring.damping - 4 * spring.mass * spring.stiffness;
-    if (cmk == 0.0) {
-      return _CriticalSolution(spring, initialPosition, initialVelocity);
-    }
-    if (cmk > 0.0) {
-      return _OverdampedSolution(spring, initialPosition, initialVelocity);
-    }
-    return _UnderdampedSolution(spring, initialPosition, initialVelocity);
+    return switch (spring.damping * spring.damping - 4 * spring.mass * spring.stiffness) {
+      > 0.0 => _OverdampedSolution(spring, initialPosition, initialVelocity),
+      < 0.0 => _UnderdampedSolution(spring, initialPosition, initialVelocity),
+      _     => _CriticalSolution(spring, initialPosition, initialVelocity),
+    };
   }
 
   double x(double time);

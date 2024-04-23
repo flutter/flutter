@@ -562,13 +562,11 @@ class FloatingLabelAlignment {
   }
 
   static String _stringify(double x) {
-    if (x == -1.0) {
-      return 'FloatingLabelAlignment.start';
-    }
-    if (x == 0.0) {
-      return 'FloatingLabelAlignment.center';
-    }
-    return 'FloatingLabelAlignment(x: ${x.toStringAsFixed(1)})';
+    return switch (x) {
+     -1.0 => 'FloatingLabelAlignment.start',
+      0.0 => 'FloatingLabelAlignment.center',
+      _ => 'FloatingLabelAlignment(x: ${x.toStringAsFixed(1)})',
+    };
   }
 
   @override

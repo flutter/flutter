@@ -968,12 +968,10 @@ class _DragAvatar<T extends Object> extends Drag {
   }
 
   Offset _restrictAxis(Offset offset) {
-    if (axis == null) {
-      return offset;
-    }
-    if (axis == Axis.horizontal) {
-      return Offset(offset.dx, 0.0);
-    }
-    return Offset(0.0, offset.dy);
+    return switch (axis) {
+      Axis.horizontal => Offset(offset.dx, 0.0),
+      Axis.vertical   => Offset(0.0, offset.dy),
+      null => offset,
+    };
   }
 }

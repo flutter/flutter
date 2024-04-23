@@ -579,12 +579,10 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
         );
         slices = <Widget>[];
 
-        widgets.add(
-          SizedBox(
-            width: widget.mainAxis == Axis.horizontal ? _getGapSize(i) : null,
-            height: widget.mainAxis == Axis.vertical ? _getGapSize(i) : null,
-          ),
-        );
+        widgets.add(switch (widget.mainAxis) {
+          Axis.horizontal => SizedBox(width: _getGapSize(i)),
+          Axis.vertical   => SizedBox(height: _getGapSize(i)),
+        });
       } else {
         final MaterialSlice slice = _children[i] as MaterialSlice;
         Widget child = slice.child;
