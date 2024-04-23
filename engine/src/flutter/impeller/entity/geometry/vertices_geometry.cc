@@ -256,6 +256,7 @@ GeometryResult VerticesGeometry::GetPositionUVColorBuffer(
   auto uv_transform =
       texture_coverage.GetNormalizingTransform() * effect_transform;
   auto has_texture_coordinates = HasTextureCoordinates();
+  auto has_colors = HasVertexColors();
 
   size_t total_vtx_bytes = vertices_.size() * sizeof(VS::PerVertexData);
   auto vertex_buffer = renderer.GetTransientsBuffer().Emplace(
@@ -274,7 +275,7 @@ GeometryResult VerticesGeometry::GetPositionUVColorBuffer(
               .texture_coords =
                   Point(std::clamp(uv.x, 0.0f, 1.0f - kEhCloseEnough),
                         std::clamp(uv.y, 0.0f, 1.0f - kEhCloseEnough)),
-              .color = colors_[i],
+              .color = has_colors ? colors_[i] : Color::BlackTransparent(),
           };
           std::memcpy(vtx_contents++, &vertex_data, sizeof(VS::PerVertexData));
         }
