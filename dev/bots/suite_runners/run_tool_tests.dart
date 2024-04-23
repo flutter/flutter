@@ -7,7 +7,6 @@ import 'package:path/path.dart' as path;
 import '../utils.dart';
 
 Future<void> toolTestsRunner() async {
-
   await selectSubshard(<String, ShardRunner>{
     'general': _runGeneralToolTests,
     'commands': _runCommandsToolTests,
