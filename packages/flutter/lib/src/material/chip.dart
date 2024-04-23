@@ -1202,7 +1202,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     final double effectiveIconSize = widget.iconTheme?.size
       ?? chipTheme.iconTheme?.size
       ?? theme.chipTheme.iconTheme?.size
-      ?? _kDeleteIconSize;
+      ?? _ChipDefaultsM3(context, widget.isEnabled).iconTheme!.size!;
     return Semantics(
       container: true,
       button: true,
