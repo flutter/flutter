@@ -7,7 +7,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
@@ -85,7 +84,7 @@ void main() {
           listViews,
           listViews,
         ]);
-        globals.fs
+        fileSystem
             .file(fileSystem.path.join('lib', 'main.dart'))
             .createSync(recursive: true);
         final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner();

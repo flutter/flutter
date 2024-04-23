@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/dds.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
@@ -48,12 +49,15 @@ void main() {
   late ResidentRunner residentRunner;
   late FakeDevice device;
   late FakeAnalytics fakeAnalytics;
+  late MemoryFileSystem fileSystem;
   FakeVmServiceHost? fakeVmServiceHost;
 
   setUp(() {
+    fileSystem = MemoryFileSystem.test();
+
     testbed = Testbed(setup: () {
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
-        fs: MemoryFileSystem.test(),
+        fs: (globals.fs as ErrorHandlingFileSystem).fileSystem as MemoryFileSystem,
         fakeFlutterVersion: FakeFlutterVersion(),
       );
 
@@ -104,7 +108,7 @@ void main() {
   }));
 
   testUsingContext('ResidentRunner suppresses errors for the initial compilation', () => testbed.run(() async {
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
@@ -131,7 +135,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/60613
   testUsingContext('ResidentRunner calls appFailedToStart if initial compilation fails', () => testbed.run(() async {
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler()
@@ -155,7 +159,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/60613
   testUsingContext('ResidentRunner calls appFailedToStart if initial compilation fails - cold mode', () => testbed.run(() async {
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     residentRunner = ColdRunner(
@@ -176,7 +180,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/60613
   testUsingContext('ResidentRunner calls appFailedToStart if exception is thrown - cold mode', () => testbed.run(() async {
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     residentRunner = ColdRunner(
@@ -197,7 +201,7 @@ void main() {
   }));
 
   testUsingContext('ResidentRunner does not suppressErrors if running with an applicationBinary', () => testbed.run(() async {
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
@@ -209,7 +213,7 @@ void main() {
       <FlutterDevice>[
         flutterDevice,
       ],
-      applicationBinary: globals.fs.file('app-debug.apk'),
+      applicationBinary: fileSystem.file('app-debug.apk'),
       stayResident: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
@@ -578,7 +582,7 @@ void main() {
 
     final OperationResult result = await residentRunner.restart();
 
-    expect(globals.fs.file(globals.fs.path.join('lib', 'main.dart')), isNot(exists));
+    expect(fileSystem.file(fileSystem.path.join('lib', 'main.dart')), isNot(exists));
     expect(testLogger.errorText, contains('The entrypoint file (i.e. the file with main())'));
     expect(result.fatal, false);
     expect(result.code, 0);
@@ -1120,7 +1124,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      dillOutputPath: globals.fs.path.join('foobar', 'app.dill'),
+      dillOutputPath: fileSystem.path.join('foobar', 'app.dill'),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
       analytics: fakeAnalytics,
@@ -1137,7 +1141,7 @@ void main() {
   }));
 
   testUsingContext('ResidentRunner can run source generation', () => testbed.run(() async {
-    final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'app_en.arb'))
+    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
 {
@@ -1146,11 +1150,11 @@ void main() {
     "description": "Sample description"
   }
 }''');
-    globals.fs.file('l10n.yaml').createSync();
-    globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
+    fileSystem.file('l10n.yaml').createSync();
+    fileSystem.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
 
     // Create necessary files for [DartPluginRegistrantTarget]
-    final File packageConfig = globals.fs.directory('.dart_tool')
+    final File packageConfig = fileSystem.directory('.dart_tool')
         .childFile('package_config.json');
     packageConfig.createSync(recursive: true);
     packageConfig.writeAsStringSync('''
@@ -1167,7 +1171,7 @@ void main() {
 }
 ''');
     // Start from an empty dart_plugin_registrant.dart file.
-    globals.fs.directory('.dart_tool').childDirectory('flutter_build').childFile('dart_plugin_registrant.dart').createSync(recursive: true);
+    fileSystem.directory('.dart_tool').childDirectory('flutter_build').childFile('dart_plugin_registrant.dart').createSync(recursive: true);
 
     await residentRunner.runSourceGenerators();
 
@@ -1176,7 +1180,7 @@ void main() {
   }));
 
   testUsingContext('generated main uses correct target', () => testbed.run(() async {
-    final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'app_en.arb'))
+    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
 {
@@ -1185,8 +1189,8 @@ void main() {
     "description": "Sample description"
   }
 }''');
-    globals.fs.file('l10n.yaml').createSync();
-    globals.fs.file('pubspec.yaml').writeAsStringSync('''
+    fileSystem.file('l10n.yaml').createSync();
+    fileSystem.file('pubspec.yaml').writeAsStringSync('''
 flutter:
   generate: true
 
@@ -1198,7 +1202,7 @@ dependencies:
 
     // Create necessary files for [DartPluginRegistrantTarget], including a
     // plugin that will trigger generation.
-    final File packageConfig = globals.fs.directory('.dart_tool')
+    final File packageConfig = fileSystem.directory('.dart_tool')
         .childFile('package_config.json');
     packageConfig.createSync(recursive: true);
     packageConfig.writeAsStringSync('''
@@ -1214,10 +1218,10 @@ dependencies:
   ]
 }
 ''');
-    globals.fs.file('.packages').writeAsStringSync('''
+    fileSystem.file('.packages').writeAsStringSync('''
 path_provider_linux:/path_provider_linux/lib/
 ''');
-    final Directory fakePluginDir = globals.fs.directory('path_provider_linux');
+    final Directory fakePluginDir = fileSystem.directory('path_provider_linux');
     final File pluginPubspec = fakePluginDir.childFile('pubspec.yaml');
     pluginPubspec.createSync(recursive: true);
     pluginPubspec.writeAsStringSync('''
@@ -1243,7 +1247,7 @@ flutter:
       );
     await residentRunner.runSourceGenerators();
 
-    final File generatedMain = globals.fs.directory('.dart_tool')
+    final File generatedMain = fileSystem.directory('.dart_tool')
         .childDirectory('flutter_build')
         .childFile('dart_plugin_registrant.dart');
 
@@ -1255,7 +1259,7 @@ flutter:
   testUsingContext('ResidentRunner can run source generation - generation fails', () => testbed.run(() async {
     // Intentionally define arb file with wrong name. generate_localizations defaults
     // to app_en.arb.
-    final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'foo.arb'))
+    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'foo.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
 {
@@ -1264,8 +1268,8 @@ flutter:
     "description": "Sample description"
   }
 }''');
-    globals.fs.file('l10n.yaml').createSync();
-    globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
+    fileSystem.file('l10n.yaml').createSync();
+    fileSystem.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
 
     await residentRunner.runSourceGenerators();
 
@@ -1274,9 +1278,9 @@ flutter:
   }));
 
   testUsingContext('ResidentRunner generates files when l10n.yaml exists', () => testbed.run(() async {
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart'))
       .createSync(recursive: true);
-    final File arbFile = globals.fs.file(globals.fs.path.join('lib', 'l10n', 'app_en.arb'))
+    final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
       ..createSync(recursive: true);
     arbFile.writeAsStringSync('''
 {
@@ -1285,8 +1289,8 @@ flutter:
     "description": "Sample description"
   }
 }''');
-    globals.fs.file('l10n.yaml').createSync();
-    globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
+    fileSystem.file('l10n.yaml').createSync();
+    fileSystem.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
 
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler()
@@ -1305,7 +1309,7 @@ flutter:
 
     await residentRunner.run();
 
-    final File generatedLocalizationsFile = globals.fs.directory('.dart_tool')
+    final File generatedLocalizationsFile = fileSystem.directory('.dart_tool')
       .childDirectory('flutter_gen')
       .childDirectory('gen_l10n')
       .childFile('app_localizations.dart');
@@ -1496,8 +1500,8 @@ flutter:
     await residentRunner.writeSkSL();
 
     expect(testLogger.statusText, contains('flutter_01.sksl.json'));
-    expect(globals.fs.file('flutter_01.sksl.json'), exists);
-    expect(json.decode(globals.fs.file('flutter_01.sksl.json').readAsStringSync()), <String, Object>{
+    expect(fileSystem.file('flutter_01.sksl.json'), exists);
+    expect(json.decode(fileSystem.file('flutter_01.sksl.json').readAsStringSync()), <String, Object>{
       'platform': 'android',
       'name': 'FakeDevice',
       'engineRevision': 'abcdefg',
@@ -1506,7 +1510,7 @@ flutter:
     expect(fakeVmServiceHost?.hasRemainingExpectations, false);
   }, overrides: <Type, Generator>{
     FileSystemUtils: () => FileSystemUtils(
-      fileSystem: globals.fs,
+      fileSystem: fileSystem,
       platform: globals.platform,
     ),
     FlutterVersion: () => FakeFlutterVersion(engineRevision: 'abcdefg'),
@@ -1560,7 +1564,7 @@ flutter:
       listViews,
       listViews,
     ], wsAddress: testUri);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
         flutterDevice,
@@ -1575,7 +1579,7 @@ flutter:
     await residentRunner.run(enableDevTools: true);
 
     expect(fakeVmServiceHost?.hasRemainingExpectations, false);
-    expect(await globals.fs.file('foo').readAsString(), testUri.toString());
+    expect(await fileSystem.file('foo').readAsString(), testUri.toString());
   }));
 
   testUsingContext('HotRunner copies compiled app.dill to cache during startup', () => testbed.run(() async {
@@ -1583,7 +1587,7 @@ flutter:
       listViews,
       listViews,
     ], wsAddress: testUri);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
         flutterDevice,
@@ -1604,7 +1608,7 @@ flutter:
 
     await residentRunner.run(enableDevTools: true);
 
-    expect(await globals.fs.file(globals.fs.path.join('build', 'cache.dill')).readAsString(), 'ABC');
+    expect(await fileSystem.file(fileSystem.path.join('build', 'cache.dill')).readAsString(), 'ABC');
   }));
 
   testUsingContext('HotRunner copies compiled app.dill to cache during startup with dart defines', () => testbed.run(() async {
@@ -1612,7 +1616,7 @@ flutter:
       listViews,
       listViews,
     ], wsAddress: testUri);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
         flutterDevice,
@@ -1634,7 +1638,7 @@ flutter:
 
     await residentRunner.run(enableDevTools: true);
 
-    expect(await globals.fs.file(globals.fs.path.join(
+    expect(await fileSystem.file(fileSystem.path.join(
       'build', '187ef4436122d1cc2f40dc2b92f0eba0.cache.dill')).readAsString(), 'ABC');
   }));
 
@@ -1643,7 +1647,7 @@ flutter:
       listViews,
       listViews,
     ], wsAddress: testUri);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
         flutterDevice,
@@ -1665,7 +1669,7 @@ flutter:
 
     await residentRunner.run(enableDevTools: true);
 
-    expect(await globals.fs.file(globals.fs.path.join(
+    expect(await fileSystem.file(fileSystem.path.join(
       'build', 'cache.dill')).readAsString(), 'ABC');
   }));
 
@@ -1674,7 +1678,7 @@ flutter:
       listViews,
       listViews,
     ], wsAddress: testUri);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
         flutterDevice,
@@ -1689,7 +1693,7 @@ flutter:
 
     await residentRunner.run(enableDevTools: true);
 
-    expect(await globals.fs.file(globals.fs.path.join(
+    expect(await fileSystem.file(fileSystem.path.join(
       'build', 'cache.dill.track.dill')).readAsString(), 'ABC');
   }));
 
@@ -1698,7 +1702,7 @@ flutter:
       listViews,
       listViews,
     ], wsAddress: testUri);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
         flutterDevice,
@@ -1714,7 +1718,7 @@ flutter:
 
     await residentRunner.run(enableDevTools: true);
 
-    expect(globals.fs.file(globals.fs.path.join('build', 'cache.dill')), isNot(exists));
+    expect(fileSystem.file(fileSystem.path.join('build', 'cache.dill')), isNot(exists));
   }));
 
   testUsingContext('HotRunner copies compiled app.dill to cache during startup with --track-widget-creation', () => testbed.run(() async {
@@ -1722,7 +1726,7 @@ flutter:
       listViews,
       listViews,
     ], wsAddress: testUri);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
         flutterDevice,
@@ -1742,7 +1746,7 @@ flutter:
 
     await residentRunner.run(enableDevTools: true);
 
-    expect(await globals.fs.file(globals.fs.path.join('build', 'cache.dill.track.dill')).readAsString(), 'ABC');
+    expect(await fileSystem.file(fileSystem.path.join('build', 'cache.dill.track.dill')).readAsString(), 'ABC');
   }));
 
   testUsingContext('HotRunner calls device dispose', () => testbed.run(() async {
@@ -1750,7 +1754,7 @@ flutter:
       listViews,
       listViews,
     ], wsAddress: testUri);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
         flutterDevice,
@@ -1771,7 +1775,7 @@ flutter:
       listViews,
       listViews,
     ]);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
         flutterDevice,
@@ -1795,7 +1799,7 @@ flutter:
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
     ], wsAddress: testUri);
-    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = ColdRunner(
       <FlutterDevice>[
         flutterDevice,
@@ -1808,7 +1812,7 @@ flutter:
 
     await residentRunner.run(enableDevTools: true);
 
-    expect(await globals.fs.file('foo').readAsString(), testUri.toString());
+    expect(await fileSystem.file('foo').readAsString(), testUri.toString());
     expect(fakeVmServiceHost?.hasRemainingExpectations, false);
   }));
 
@@ -1828,9 +1832,9 @@ flutter:
     )).generator as DefaultResidentCompiler?;
 
     expect(residentCompiler!.initializeFromDill,
-      globals.fs.path.join(getBuildDirectory(), 'fbbe6a61fb7a1de317d381f8df4814e5.cache.dill'));
+      fileSystem.path.join(getBuildDirectory(), 'fbbe6a61fb7a1de317d381f8df4814e5.cache.dill'));
     expect(residentCompiler.librariesSpec,
-      globals.fs.file(globals.artifacts!.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
+      fileSystem.file(globals.artifacts!.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
         .uri.toString());
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
@@ -1859,9 +1863,9 @@ flutter:
     )).generator as DefaultResidentCompiler?;
 
     expect(residentCompiler!.initializeFromDill,
-      globals.fs.path.join(getBuildDirectory(), '80b1a4cf4e7b90e1ab5f72022a0bc624.cache.dill'));
+      fileSystem.path.join(getBuildDirectory(), '80b1a4cf4e7b90e1ab5f72022a0bc624.cache.dill'));
     expect(residentCompiler.librariesSpec,
-      globals.fs.file(globals.artifacts!.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
+      fileSystem.file(globals.artifacts!.getHostArtifact(HostArtifact.flutterWebLibrariesJson))
         .uri.toString());
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
@@ -2357,8 +2361,8 @@ flutter:
           listViews,
           listViews,
         ]);
-        globals.fs
-            .file(globals.fs.path.join('lib', 'main.dart'))
+        fileSystem
+            .file(fileSystem.path.join('lib', 'main.dart'))
             .createSync(recursive: true);
         residentRunner = HotRunner(
           <FlutterDevice>[
@@ -2381,7 +2385,7 @@ flutter:
         expect(result, 0);
 
         expect(residentCompiler.recompileCalled, true);
-        expect(residentCompiler.receivedNativeAssetsYaml, globals.fs.path.toUri('foo.yaml'));
+        expect(residentCompiler.receivedNativeAssetsYaml, fileSystem.path.toUri('foo.yaml'));
       }),
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
