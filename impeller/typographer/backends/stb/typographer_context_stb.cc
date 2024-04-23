@@ -70,10 +70,8 @@ static size_t PairsFitInAtlasOfSize(
     ISize glyph_size;
     {
       int x0 = 0, y0 = 0, x1 = 0, y1 = 0;
-      // NOTE: We increase the size of the glyph by one pixel in all dimensions
-      // to allow us to cut out padding later.
-      float scale = stbtt_ScaleForPixelHeight(typeface_stb->GetFontInfo(),
-                                              text_size_pixels);
+      float scale = stbtt_ScaleForMappingEmToPixels(typeface_stb->GetFontInfo(),
+                                                    text_size_pixels);
       stbtt_GetGlyphBitmapBox(typeface_stb->GetFontInfo(), pair.glyph.index,
                               scale, scale, &x0, &y0, &x1, &y1);
 
@@ -128,10 +126,8 @@ static bool CanAppendToExistingAtlas(
     ISize glyph_size;
     {
       int x0 = 0, y0 = 0, x1 = 0, y1 = 0;
-      // NOTE: We increase the size of the glyph by one pixel in all dimensions
-      // to allow us to cut out padding later.
-      float scale_y = stbtt_ScaleForPixelHeight(typeface_stb->GetFontInfo(),
-                                                text_size_pixels);
+      float scale_y = stbtt_ScaleForMappingEmToPixels(
+          typeface_stb->GetFontInfo(), text_size_pixels);
       float scale_x = scale_y;
       stbtt_GetGlyphBitmapBox(typeface_stb->GetFontInfo(), pair.glyph.index,
                               scale_x, scale_y, &x0, &y0, &x1, &y1);
@@ -210,8 +206,8 @@ static void DrawGlyph(BitmapSTB* bitmap,
   // Conversion factor to scale font size in Points to pixels.
   // Note this assumes typical DPI.
   float text_size_pixels = metrics.point_size * TypefaceSTB::kPointsToPixels;
-  float scale_y =
-      stbtt_ScaleForPixelHeight(typeface_stb->GetFontInfo(), text_size_pixels);
+  float scale_y = stbtt_ScaleForMappingEmToPixels(typeface_stb->GetFontInfo(),
+                                                  text_size_pixels);
   float scale_x = scale_y;
 
   auto output = bitmap->GetPixelAddress({static_cast<size_t>(location.GetX()),
