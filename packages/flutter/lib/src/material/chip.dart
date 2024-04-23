@@ -1192,7 +1192,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     final IconThemeData iconTheme = widget.iconTheme
       ?? chipTheme.iconTheme
       ?? theme.chipTheme.iconTheme
-      ?? const IconThemeData(size: _kDeleteIconSize);
+      ?? _ChipDefaultsM3(context, widget.isEnabled).iconTheme!;
     final Color? effectiveDeleteIconColor = widget.deleteIconColor
       ?? chipTheme.deleteIconColor
       ?? theme.chipTheme.deleteIconColor
