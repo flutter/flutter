@@ -728,7 +728,7 @@ void _handlePosixException(Exception e, String? message, int errorCode, String? 
   // From:
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno.h
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno-base.h
-  // https://github.com/apple/darwin-xnu/blob/master/bsd/dev/dtrace/scripts/errno.d
+  // https://github.com/apple/darwin-xnu/blob/main/bsd/dev/dtrace/scripts/errno.d
   const int eperm = 1;
   const int enospc = 28;
   const int eacces = 13;
@@ -762,7 +762,7 @@ void _handlePosixException(Exception e, String? message, int errorCode, String? 
 }
 
 void _handleMacOSException(Exception e, String? message, int errorCode, String? posixPermissionSuggestion) {
-  // https://github.com/apple/darwin-xnu/blob/master/bsd/dev/dtrace/scripts/errno.d
+  // https://github.com/apple/darwin-xnu/blob/main/bsd/dev/dtrace/scripts/errno.d
   const int ebadarch = 86;
   if (errorCode == ebadarch) {
     final StringBuffer errorBuffer = StringBuffer();

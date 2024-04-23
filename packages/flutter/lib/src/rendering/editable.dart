@@ -1768,8 +1768,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///    for a [TextPainter] object.
   TextPosition getPositionForPoint(Offset globalPosition) {
     _computeTextMetricsIfNeeded();
-    globalPosition += -_paintOffset;
-    return _textPainter.getPositionForOffset(globalToLocal(globalPosition));
+    return _textPainter.getPositionForOffset(globalToLocal(globalPosition) - _paintOffset);
   }
 
   /// Returns the [Rect] in local coordinates for the caret at the given text
@@ -1793,13 +1792,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     final double caretX = clampDouble(caretRect.left, 0, math.max(scrollableWidth - _caretMargin, 0));
     caretRect = Offset(caretX, caretRect.top) & caretRect.size;
 
-    final double caretHeight = cursorHeight;
+    final double fullHeight = _textPainter.getFullHeightForCaret(caretPosition, caretPrototype);
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        final double fullHeight = _textPainter.getFullHeightForCaret(caretPosition, caretPrototype);
-        final double heightDiff = fullHeight - caretRect.height;
         // Center the caret vertically along the text.
+        final double heightDiff = fullHeight - caretRect.height;
         caretRect = Rect.fromLTWH(
           caretRect.left,
           caretRect.top + heightDiff / 2,
@@ -1812,10 +1810,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       case TargetPlatform.windows:
         // Override the height to take the full height of the glyph at the TextPosition
         // when not on iOS. iOS has special handling that creates a taller caret.
-        // TODO(garyq): See the TODO for _computeCaretPrototype().
+        // TODO(garyq): see https://github.com/flutter/flutter/issues/120836.
+        final double caretHeight = cursorHeight;
+        // Center the caret vertically along the text.
+        final double heightDiff = fullHeight - caretHeight;
         caretRect = Rect.fromLTWH(
           caretRect.left,
-          caretRect.top - _kCaretHeightOffset,
+          caretRect.top - _kCaretHeightOffset + heightDiff / 2,
           caretRect.width,
           caretHeight,
         );
@@ -2068,10 +2069,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// to the [TextSelection.extentOffset].
   void selectPositionAt({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
     _computeTextMetricsIfNeeded();
-    final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
+    final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from) - _paintOffset);
     final TextPosition? toPosition = to == null
       ? null
-      : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
+      : _textPainter.getPositionForOffset(globalToLocal(to) - _paintOffset);
 
     final int baseOffset = fromPosition.offset;
     final int extentOffset = toPosition?.offset ?? fromPosition.offset;
@@ -2105,9 +2106,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// {@macro flutter.rendering.RenderEditable.selectPosition}
   void selectWordsInRange({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
     _computeTextMetricsIfNeeded();
-    final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
+    final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from) - _paintOffset);
     final TextSelection fromWord = getWordAtOffset(fromPosition);
-    final TextPosition toPosition = to == null ? fromPosition : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
+    final TextPosition toPosition = to == null ? fromPosition : _textPainter.getPositionForOffset(globalToLocal(to) - _paintOffset);
     final TextSelection toWord = toPosition == fromPosition ? fromWord : getWordAtOffset(toPosition);
     final bool isFromWordBeforeToWord = fromWord.start < toWord.end;
 
@@ -2127,7 +2128,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   void selectWordEdge({ required SelectionChangedCause cause }) {
     _computeTextMetricsIfNeeded();
     assert(_lastTapDownPosition != null);
-    final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition! - _paintOffset));
+    final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition!) - _paintOffset);
     final TextRange word = _textPainter.getWordBoundary(position);
     late TextSelection newSelection;
     if (position.offset <= word.start) {

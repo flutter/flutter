@@ -479,6 +479,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// zero.
   /// {@endtemplate}
   ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to implement a custom app bar shape for the
+  /// [shape] property.
+  ///
+  /// ** See code in examples/api/lib/material/app_bar/app_bar.4.dart **
+  /// {@end-tool}
   /// See also:
   ///
   ///  * [elevation], which defines the size of the shadow below the app bar.
