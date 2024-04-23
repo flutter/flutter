@@ -49,12 +49,12 @@ void main() {
             expectedLines: SwiftPackageManagerUtils.expectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
-              cococapodsPlugin: integrationTestPlugin,
+              cocoaPodsPlugin: integrationTestPlugin,
             ),
             unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
-              cococapodsPlugin: integrationTestPlugin,
+              cocoaPodsPlugin: integrationTestPlugin,
             ),
           );
           expect(
@@ -139,14 +139,14 @@ void main() {
             expectedLines: SwiftPackageManagerUtils.expectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
-              cococapodsPlugin: createdCocoaPodsPlugin,
+              cocoaPodsPlugin: createdCocoaPodsPlugin,
               swiftPackageMangerEnabled: true,
               swiftPackagePlugin: integrationTestPlugin,
             ),
             unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
-              cococapodsPlugin: createdCocoaPodsPlugin,
+              cocoaPodsPlugin: createdCocoaPodsPlugin,
               swiftPackageMangerEnabled: true,
               swiftPackagePlugin: integrationTestPlugin,
             ),
@@ -183,12 +183,12 @@ void main() {
             expectedLines: SwiftPackageManagerUtils.expectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
-              cococapodsPlugin: integrationTestPlugin,
+              cocoaPodsPlugin: integrationTestPlugin,
             ),
             unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
-              cococapodsPlugin: integrationTestPlugin,
+              cocoaPodsPlugin: integrationTestPlugin,
             ),
           );
 
@@ -204,12 +204,12 @@ void main() {
             expectedLines: SwiftPackageManagerUtils.expectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
-              cococapodsPlugin: integrationTestPlugin,
+              cocoaPodsPlugin: integrationTestPlugin,
             ),
             unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
-              cococapodsPlugin: integrationTestPlugin,
+              cocoaPodsPlugin: integrationTestPlugin,
             ),
           );
         } finally {

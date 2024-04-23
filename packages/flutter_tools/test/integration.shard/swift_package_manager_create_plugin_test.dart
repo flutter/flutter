@@ -79,12 +79,12 @@ void main() {
             expectedLines: SwiftPackageManagerUtils.expectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
-              cococapodsPlugin: createdCocoaPodsPlugin,
+              cocoaPodsPlugin: createdCocoaPodsPlugin,
             ),
             unexpectedLines: SwiftPackageManagerUtils.unexpectedLines(
               platform: platformName,
               appDirectoryPath: appDirectoryPath,
-              cococapodsPlugin: createdCocoaPodsPlugin,
+              cocoaPodsPlugin: createdCocoaPodsPlugin,
             ),
           );
         } finally {

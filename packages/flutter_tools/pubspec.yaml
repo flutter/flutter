@@ -36,7 +36,7 @@ dependencies:
   webkit_inspection_protocol: 1.2.1
   xml: 6.5.0
   yaml: 3.1.2
-  native_stack_traces: 0.5.6
+  native_stack_traces: 0.5.7
   shelf: 1.4.1
   vm_snapshot_analysis: 0.7.6
   uuid: 3.0.7
@@ -120,4 +120,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 1288
+# PUBSPEC CHECKSUM: 1789

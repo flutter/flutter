@@ -2867,7 +2867,7 @@ void main() {
       expect(tester.takeException(), isNull);
   });
 
-   testWidgets('ScaffoldMessenger showSnackBar default animatiom', (WidgetTester tester) async {
+   testWidgets('ScaffoldMessenger showSnackBar default animation', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(

@@ -273,7 +273,7 @@ class SwiftPackageManagerUtils {
   static List<Pattern> expectedLines({
     required String platform,
     required String appDirectoryPath,
-    SwiftPackageManagerPlugin? cococapodsPlugin,
+    SwiftPackageManagerPlugin? cocoaPodsPlugin,
     SwiftPackageManagerPlugin? swiftPackagePlugin,
     bool swiftPackageMangerEnabled = false,
     bool migrated = false,
@@ -305,14 +305,14 @@ class SwiftPackageManagerUtils {
         ]);
       }
     }
-    if (cococapodsPlugin != null) {
+    if (cocoaPodsPlugin != null) {
       expectedLines.addAll(<String>[
         'Running pod install...',
         '-> Installing $frameworkName (1.0.0)',
-        '-> Installing ${cococapodsPlugin.pluginName} (0.0.1)',
+        '-> Installing ${cocoaPodsPlugin.pluginName} (0.0.1)',
         "Target 'Pods-Runner' in project 'Pods'",
         "➜ Explicit dependency on target '$frameworkName' in project 'Pods'",
-        "➜ Explicit dependency on target '${cococapodsPlugin.pluginName}' in project 'Pods'",
+        "➜ Explicit dependency on target '${cocoaPodsPlugin.pluginName}' in project 'Pods'",
       ]);
     }
     if (migrated) {
@@ -328,14 +328,14 @@ class SwiftPackageManagerUtils {
   static List<String> unexpectedLines({
     required String platform,
     required String appDirectoryPath,
-    SwiftPackageManagerPlugin? cococapodsPlugin,
+    SwiftPackageManagerPlugin? cocoaPodsPlugin,
     SwiftPackageManagerPlugin? swiftPackagePlugin,
     bool swiftPackageMangerEnabled = false,
     bool migrated = false,
   }) {
     final String frameworkName = platform == 'ios' ? 'Flutter' : 'FlutterMacOS';
     final List<String> unexpectedLines = <String>[];
-    if (cococapodsPlugin == null && !migrated) {
+    if (cocoaPodsPlugin == null && !migrated) {
       unexpectedLines.addAll(<String>[
         'Running pod install...',
         '-> Installing $frameworkName (1.0.0)',
