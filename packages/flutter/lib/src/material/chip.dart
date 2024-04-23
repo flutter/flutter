@@ -27,7 +27,6 @@ import 'tooltip.dart';
 
 // Some design constants
 const double _kChipHeight = 32.0;
-const double _kDeleteIconSize = 18.0;
 
 const int _kCheckmarkAlpha = 0xde; // 87%
 const int _kDisabledAlpha = 0x61; // 38%
