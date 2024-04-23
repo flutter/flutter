@@ -129,9 +129,9 @@ void main() {
       find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
-        ..paragraph(offset: const Offset(16.0, 53.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))
-        ..paragraph(offset: const Offset(16.0, 93.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 88.0))
         ..paragraph(offset: const Offset(56.0, 128.0))
         ..paragraph(offset: const Offset(56.0, 168.0))
@@ -188,9 +188,9 @@ void main() {
       find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
-        ..paragraph(offset: const Offset(16.0, 53.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))
-        ..paragraph(offset: const Offset(16.0, 93.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 88.0))
         ..paragraph(offset: const Offset(46.0, 128.0))
         ..paragraph(offset: const Offset(46.0, 168.0))
@@ -247,9 +247,9 @@ void main() {
       find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
-        ..paragraph(offset: const Offset(16.0, 53.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))
-        ..paragraph(offset: const Offset(16.0, 93.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 88.0))
         ..paragraph(offset: const Offset(96.0, 128.0))
         ..paragraph(offset: const Offset(96.0, 168.0))
@@ -306,9 +306,9 @@ void main() {
       find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 26.0))
-        ..paragraph(offset: const Offset(16.0, 143.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 126.0))
-        ..paragraph(offset: const Offset(16.0, 243.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 226.0))
         ..paragraph(offset: const Offset(56.0, 326.0))
         ..paragraph(offset: const Offset(56.0, 426.0))
@@ -360,9 +360,9 @@ void main() {
       find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
-        ..paragraph(offset: const Offset(16.0, 53.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))
-        ..paragraph(offset: const Offset(16.0, 93.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 88.0))
         ..paragraph(offset: const Offset(56.0, 128.0))
         ..paragraph(offset: const Offset(56.0, 168.0))
@@ -376,11 +376,11 @@ void main() {
       find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
-        ..paragraph(offset: const Offset(16.0, 53.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))
         ..paragraph(offset: const Offset(56.0, 8.0))  // beta animating in
         ..paragraph(offset: const Offset(56.0, 48.0)) // kappa animating in
-        ..paragraph(offset: const Offset(16.0, 93.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 88.0))
         ..paragraph(offset: const Offset(56.0, 128.0))
         ..paragraph(offset: const Offset(56.0, 168.0))
@@ -406,13 +406,13 @@ void main() {
       find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
-        ..paragraph(offset: const Offset(16.0, 53.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))
         ..paragraph(offset: const Offset(26.0, 13.0))  // alpha icon
         ..paragraph(offset: const Offset(56.0, 8.0))   // alpha animating in
         ..paragraph(offset: const Offset(56.0, 48.0))  // beta animating in
         ..paragraph(offset: const Offset(56.0, 88.0))  // kappa animating in
-        ..paragraph(offset: const Offset(16.0, 133.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 128.0))
         ..paragraph(offset: const Offset(56.0, 168.0))
         ..paragraph(offset: const Offset(56.0, 208.0))
@@ -439,13 +439,13 @@ void main() {
       find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))   // First
-        ..paragraph(offset: const Offset(16.0, 53.0))  // Icon
+        ..paragraph()  // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))  // Second
         ..paragraph(offset: const Offset(26.0, 93.0))  // alpha icon
         ..paragraph(offset: const Offset(56.0, 88.0))  // alpha
         ..paragraph(offset: const Offset(56.0, 128.0)) // beta
         ..paragraph(offset: const Offset(56.0, 168.0)) // kappa
-        ..paragraph(offset: const Offset(16.0, 213.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 208.0)) // Third
         ..paragraph(offset: const Offset(56.0, 248.0)) // gamma
         ..paragraph(offset: const Offset(56.0, 288.0)) // delta
@@ -486,13 +486,13 @@ void main() {
       find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))   // First
-        ..paragraph(offset: const Offset(16.0, 53.0))  // Icon
+        ..paragraph()  // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))  // Second
         ..paragraph(offset: const Offset(26.0, 93.0))  // alpha icon
         ..paragraph(offset: const Offset(56.0, 88.0))  // alpha
         ..paragraph(offset: const Offset(56.0, 128.0)) // beta
         ..paragraph(offset: const Offset(56.0, 168.0)) // kappa
-        ..paragraph(offset: const Offset(16.0, 213.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 208.0)) // Third
         ..paragraph(offset: const Offset(56.0, 248.0)) // gamma
         ..paragraph(offset: const Offset(56.0, 288.0)) // delta
@@ -547,9 +547,9 @@ void main() {
       find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
-        ..paragraph(offset: const Offset(16.0, 53.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))
-        ..paragraph(offset: const Offset(16.0, 93.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 88.0))
         ..paragraph(offset: const Offset(56.0, 128.0))
         ..paragraph(offset: const Offset(56.0, 168.0))
@@ -573,9 +573,9 @@ void main() {
       find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
-        ..paragraph(offset: const Offset(16.0, 53.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))
-        ..paragraph(offset: const Offset(16.0, 93.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 88.0))
         ..paragraph(offset: const Offset(56.0, 128.0))
         ..paragraph(offset: const Offset(56.0, 168.0))
@@ -592,13 +592,13 @@ void main() {
       find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))   // First
-        ..paragraph(offset: const Offset(16.0, 53.0))  // Icon
+        ..paragraph()  // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))  // Second
         ..paragraph(offset: const Offset(26.0, 93.0))  // alpha icon
         ..paragraph(offset: const Offset(56.0, 88.0))  // alpha
         ..paragraph(offset: const Offset(56.0, 128.0)) // beta
         ..paragraph(offset: const Offset(56.0, 168.0)) // kappa
-        ..paragraph(offset: const Offset(16.0, 213.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 208.0)) // Third
         ..paragraph(offset: const Offset(56.0, 248.0)) // gamma
         ..paragraph(offset: const Offset(56.0, 288.0)) // delta
@@ -635,9 +635,9 @@ void main() {
       find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
-        ..paragraph(offset: const Offset(16.0, 53.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))
-        ..paragraph(offset: const Offset(16.0, 93.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 88.0))
         ..paragraph(offset: const Offset(56.0, 128.0))
         ..paragraph(offset: const Offset(56.0, 168.0))
@@ -672,11 +672,11 @@ void main() {
       find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
-        ..paragraph(offset: const Offset(16.0, 53.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))
         ..paragraph(offset: const Offset(56.0, 8.0))  // beta entering
         ..paragraph(offset: const Offset(56.0, 48.0)) // kappa entering
-        ..paragraph(offset: const Offset(16.0, 93.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 88.0))
         ..paragraph(offset: const Offset(56.0, 128.0))
         ..paragraph(offset: const Offset(56.0, 168.0))
@@ -707,13 +707,13 @@ void main() {
       find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
-        ..paragraph(offset: const Offset(16.0, 53.0))  // Icon
+        ..paragraph()  // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))
         ..paragraph(offset: const Offset(26.0, -15.0)) // alpha icon animating
         ..paragraph(offset: const Offset(56.0, -20.0)) // alpha naimating
         ..paragraph(offset: const Offset(56.0, 20.0))  // beta
         ..paragraph(offset: const Offset(56.0, 60.0))  // kappa
-        ..paragraph(offset: const Offset(16.0, 105.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 100.0)) // Third
         // Children of Third are animating, but the expand and
         // collapse counter each other, so their position is unchanged.
@@ -751,13 +751,13 @@ void main() {
       find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
-        ..paragraph(offset: const Offset(16.0, 53.0))  // Icon
+        ..paragraph()  // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))
         ..paragraph(offset: const Offset(26.0, -3.0)) // alpha icon animating
-        ..paragraph(offset: const Offset(56.0, -8.0)) // alpha naimating
+        ..paragraph(offset: const Offset(56.0, -8.0)) // alpha animating
         ..paragraph(offset: const Offset(56.0, 32.0))  // beta
         ..paragraph(offset: const Offset(56.0, 72.0))  // kappa
-        ..paragraph(offset: const Offset(16.0, 117.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 112.0)) // Third
         // Children of Third are animating, but the expand and
         // collapse counter each other, so their position is unchanged.
@@ -795,13 +795,13 @@ void main() {
       find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
-        ..paragraph(offset: const Offset(16.0, 53.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))
-        ..paragraph(offset: const Offset(26.0, 93.0)) // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(56.0, 88.0))
         ..paragraph(offset: const Offset(56.0, 128.0))
         ..paragraph(offset: const Offset(56.0, 168.0))
-        ..paragraph(offset: const Offset(16.0, 213.0))
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 208.0))
         ..paragraph(offset: const Offset(46.0, 248.0))
     );
