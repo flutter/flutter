@@ -16,9 +16,13 @@ final class BuildCommand extends CommandBase {
     required super.environment,
     required Map<String, BuilderConfig> configs,
     super.verbose = false,
+    super.help = false,
     super.usageLineLength,
   }) {
-    builds = runnableBuilds(environment, configs, verbose);
+    // When printing the help/usage for this command, only list all builds
+    // when the --verbose flag is supplied.
+    final bool includeCiBuilds = verbose || !help;
+    builds = runnableBuilds(environment, configs, includeCiBuilds);
     debugCheckBuilds(builds);
     addConfigOption(
       environment,
