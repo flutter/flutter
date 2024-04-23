@@ -1325,6 +1325,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   bool _hoverIsActive = false;
   Drag? _thumbDrag;
   ScrollHoldController? _thumbHold;
+  Axis? _axis;
   final GlobalKey<RawGestureDetectorState> _gestureDetectorKey = GlobalKey<RawGestureDetectorState>();
 
   ScrollController? get _effectiveScrollController => widget.controller ?? PrimaryScrollController.maybeOf(context);
@@ -1871,6 +1872,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     if (_shouldUpdatePainter(metrics.axis)) {
       scrollbarPainter.update(metrics, metrics.axisDirection);
     }
+    if (metrics.axis != _axis) {
+      setState(() { _axis = metrics.axis; });
+    }
+
     return false;
   }
 
@@ -1956,11 +1961,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   Map<Type, GestureRecognizerFactory> get _gestures {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
-    if (_effectiveScrollController == null || !enableGestures) {
+    if (_axis == null || !enableGestures) {
       return gestures;
     }
-    _cachedController = _effectiveScrollController;
-    if (getScrollbarDirection() == Axis.horizontal) {
+    if (_axis == Axis.horizontal) {
       gestures[_HorizontalThumbDragGestureRecognizer] =
         GestureRecognizerFactoryWithHandlers<_HorizontalThumbDragGestureRecognizer>(
           () => _HorizontalThumbDragGestureRecognizer(
