@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/dds.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
@@ -52,8 +53,18 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
+      // Logic to get the filesystem for analytics from globals
+      final ErrorHandlingFileSystem tempFs = globals.fs as ErrorHandlingFileSystem;
+      final MemoryFileSystem analyticsFileSystem;
+      if (tempFs.fileSystem is ThrowingForwardingFileSystem) {
+        analyticsFileSystem =
+            (tempFs.fileSystem as ThrowingForwardingFileSystem).fileSystem
+                as MemoryFileSystem;
+      } else {
+        analyticsFileSystem = tempFs.fileSystem as MemoryFileSystem;
+      }
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
-        fs: MemoryFileSystem.test(),
+        fs: analyticsFileSystem,
         fakeFlutterVersion: FakeFlutterVersion(),
       );
 

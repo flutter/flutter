@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:dds/dds.dart' as dds;
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/dds.dart';
@@ -192,6 +193,8 @@ class TestFlutterDevice extends FlutterDevice {
 
 class ThrowingForwardingFileSystem extends ForwardingFileSystem {
   ThrowingForwardingFileSystem(super.delegate);
+
+  FileSystem get fileSystem => delegate;
 
   @override
   File file(dynamic path) {
