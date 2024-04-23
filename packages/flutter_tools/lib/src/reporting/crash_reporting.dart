@@ -16,7 +16,6 @@ import '../base/platform.dart';
 import '../doctor.dart';
 import '../project.dart';
 import 'github_template.dart';
-import 'reporting.dart';
 
 /// Tells crash backend that the error is from the Flutter CLI.
 const String _kProductId = 'Flutter_Tools';
@@ -106,20 +105,17 @@ class CrashReporter {
 class CrashReportSender {
   CrashReportSender({
     http.Client? client,
-    required Usage usage,
     required Platform platform,
     required Logger logger,
     required OperatingSystemUtils operatingSystemUtils,
     required Analytics analytics,
   }) : _client = client ?? http.Client(),
-      _usage = usage,
       _platform = platform,
       _logger = logger,
       _operatingSystemUtils = operatingSystemUtils,
       _analytics = analytics;
 
   final http.Client _client;
-  final Usage _usage;
   final Platform _platform;
   final Logger _logger;
   final OperatingSystemUtils _operatingSystemUtils;

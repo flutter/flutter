@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
 import 'package:test/fake.dart';
@@ -26,7 +25,6 @@ import '../src/fakes.dart';
 void main() {
   late BufferLogger logger;
   late MemoryFileSystem fs;
-  late TestUsage testUsage;
   late Platform platform;
   late OperatingSystemUtils operatingSystemUtils;
   late StackTrace stackTrace;
@@ -35,7 +33,6 @@ void main() {
   setUp(() async {
     logger = BufferLogger.test();
     fs = MemoryFileSystem.test();
-    testUsage = TestUsage();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fs,
       fakeFlutterVersion: FakeFlutterVersion(),
@@ -111,12 +108,10 @@ void main() {
   });
 
   testWithoutContext('suppress analytics', () async {
-    testUsage.suppressAnalytics = true;
     fakeAnalytics.suppressTelemetry();
 
     final CrashReportSender crashReportSender = CrashReportSender(
       client: CrashingCrashReportSender(const SocketException('no internets')),
-      usage: testUsage,
       platform: platform,
       logger: logger,
       operatingSystemUtils: operatingSystemUtils,
@@ -135,7 +130,7 @@ void main() {
 
   group('allow analytics', () {
     setUp(() async {
-      testUsage.suppressAnalytics = false;
+      await fakeAnalytics.setTelemetry(true);
     });
 
     testWithoutContext('should send crash reports', () async {
@@ -143,7 +138,6 @@ void main() {
 
       final CrashReportSender crashReportSender = CrashReportSender(
         client: MockCrashReportSender(requestInfo),
-        usage: testUsage,
         platform: platform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -163,7 +157,6 @@ void main() {
     testWithoutContext('should print an explanatory message when there is a SocketException', () async {
       final CrashReportSender crashReportSender = CrashReportSender(
         client: CrashingCrashReportSender(const SocketException('no internets')),
-        usage: testUsage,
         platform: platform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -183,7 +176,6 @@ void main() {
     testWithoutContext('should print an explanatory message when there is an HttpException', () async {
       final CrashReportSender crashReportSender = CrashReportSender(
         client: CrashingCrashReportSender(const HttpException('no internets')),
-        usage: testUsage,
         platform: platform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -203,7 +195,6 @@ void main() {
     testWithoutContext('should print an explanatory message when there is a ClientException', () async {
       final CrashReportSender crashReportSender = CrashReportSender(
         client: CrashingCrashReportSender(const HttpException('no internets')),
-        usage: testUsage,
         platform: platform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -225,7 +216,6 @@ void main() {
 
       final CrashReportSender crashReportSender = CrashReportSender(
         client: MockCrashReportSender(requestInfo),
-        usage: testUsage,
         platform: platform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -280,7 +270,6 @@ void main() {
 
       final CrashReportSender crashReportSender = CrashReportSender(
         client: mockClient,
-        usage: testUsage,
         platform: platform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
@@ -318,7 +307,6 @@ void main() {
 
       final CrashReportSender crashReportSender = CrashReportSender(
         client: mockClient,
-        usage: testUsage,
         platform: environmentPlatform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,

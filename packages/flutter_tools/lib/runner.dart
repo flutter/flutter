@@ -201,7 +201,6 @@ Future<int> _handleToolError(
     globals.analytics.send(Event.exception(exception: error.runtimeType.toString()));
     await asyncGuard(() async {
       final CrashReportSender crashReportSender = CrashReportSender(
-        usage: globals.flutterUsage,
         platform: globals.platform,
         logger: globals.logger,
         operatingSystemUtils: globals.os,
