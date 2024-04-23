@@ -771,8 +771,8 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
 /// The `fromIndex` and `toIndex` are inclusive of the children following the
 /// parent, with the `value` representing the status of the current animation.
 ///
-/// Provided to [RenderSliverTree] by [SliverTree] to properly offset animating
-/// children.
+/// Provided to [RenderSliverTree] by [SliverTreeList] to properly offset
+/// animating children.
 typedef SliverTreeNodesAnimation = ({
   int fromIndex,
   int toIndex,
@@ -790,7 +790,7 @@ class TreeNodeParentData extends SliverMultiBoxAdaptorParentData {
 }
 
 /// Traversal order pattern for [SliverTreeNode]s that are children of a
-/// [SliverTree].
+/// [SliverTreeList].
 enum SliverTreeTraversalOrder {
   /// Pre-order depth traversal.
   ///
@@ -811,8 +811,8 @@ enum SliverTreeTraversalOrder {
   breadthFirst,
 }
 
-/// The style of indentation for [SliverTreeNode]s in a [SliverTree], as handled
-/// by [RenderSliverTree].
+/// The style of indentation for [SliverTreeNode]s in a [SliverTreeList], as
+/// handled by [RenderSliverTree].
 ///
 /// {@template flutter.rendering.SliverTreeIndentationType}
 /// By default, the indentation is handled by [RenderSliverTree]. Child nodes
@@ -828,7 +828,7 @@ enum SliverTreeTraversalOrder {
 /// effects.
 ///
 /// {@tool dartpad}
-/// This example shows a highly customized [SliverTree] configured to
+/// This example shows a highly customized [SliverTreeList] configured to
 /// [SliverTreeIndentationType.none]. This allows the indentation to be handled
 /// by the developer in [SliverTree.treeNodeBuilder], where a decoration is
 /// used to fill the indented space.
@@ -845,12 +845,12 @@ class SliverTreeIndentationType {
   double get value => _value;
   final double _value;
 
-  /// The default indentation of child [SliverTreeNode]s in a [SliverTree].
+  /// The default indentation of child [SliverTreeNode]s in a [SliverTreeList].
   ///
   /// Child nodes will be offset by 10 pixels for each level in the tree.
   static const SliverTreeIndentationType standard = SliverTreeIndentationType._internal(10.0);
 
-  /// Configures no offsetting of child nodes in a [SliverTree].
+  /// Configures no offsetting of child nodes in a [SliverTreeList].
   ///
   /// Useful if the indentation is implemented in the
   /// [SliverTree.treeNodeBuilder] instead for more customization options.
@@ -858,7 +858,8 @@ class SliverTreeIndentationType {
   /// Child nodes will not be offset in the tree.
   static const SliverTreeIndentationType none = SliverTreeIndentationType._internal(0.0);
 
-  /// Configures a custom offset for indenting child nodes in a [SliverTree].
+  /// Configures a custom offset for indenting child nodes in a
+  /// [SliverTreeList].
   ///
   /// Child nodes will be offset by the provided number of pixels in the tree.
   /// The [value] must be a non negative number.
@@ -878,10 +879,11 @@ typedef _PaintSegment = ({int leadingIndex, int trailingIndex});
 ///
 /// See also:
 ///
-///   * [SliverTree], the widget that creates and manages this render object.
+///   * [SliverTreeList], the widget that creates and manages this render
+///     object.
 class RenderSliverTree extends RenderSliverVariedExtentList {
   /// Creates the render object that lays out the [SliverTreeNode]s of a
-  /// [SliverTree].
+  /// [SliverTreeList].
   RenderSliverTree({
     required super.childManager,
     required super.itemExtentBuilder,

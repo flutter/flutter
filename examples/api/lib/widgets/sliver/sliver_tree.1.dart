@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-/// Flutter code sample for [SliverTree].
+/// Flutter code sample for [SliverTreeList].
 
 void main() => runApp(const SliverTreeExampleApp());
 
@@ -80,7 +80,7 @@ class _SliverTreeExampleState extends State<SliverTreeExample> {
       width: 2,
       color: Colors.purple[300]!,
     );
-    return SliverTree.toggleNodeWith(
+    return SliverTreeList.toggleNodeWith(
       node: node,
       child: Row(
         children: <Widget>[
@@ -120,7 +120,7 @@ class _SliverTreeExampleState extends State<SliverTreeExample> {
       decoration: BoxDecoration(
         border: Border.all(),
       ),
-      sliver: SliverTree<String>(
+      sliver: SliverTreeList<String>(
         tree: tree,
         onNodeToggle: (SliverTreeNode<dynamic> node) {
           setState(() {
