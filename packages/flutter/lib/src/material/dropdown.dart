@@ -200,11 +200,11 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
   Widget build(BuildContext context) {
     final DropdownMenuItem<T> dropdownMenuItem =
         widget.route.items[widget.itemIndex].item!;
-    Widget child = Container(
-      padding: widget.padding,
-      height: widget.route.itemHeight,
-      child: widget.route.items[widget.itemIndex],
-    );
+    Widget child = widget.route.items[widget.itemIndex];
+    if (widget.padding case final EdgeInsetsGeometry padding) {
+      child = Padding(padding: padding, child: child);
+    }
+    child = SizedBox(height: widget.route.itemHeight, child: child);
     // An [InkWell] is added to the item only if it is enabled
     if (dropdownMenuItem.enabled) {
       child = InkWell(
@@ -775,10 +775,9 @@ class _DropdownMenuItemContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
-      alignment: alignment,
-      child: child,
+      child: Align(alignment: alignment, child: child),
     );
   }
 }
@@ -1500,31 +1499,38 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     Widget result = DefaultTextStyle(
       style: _enabled ? _textStyle! : _textStyle!.copyWith(color: Theme.of(context).disabledColor),
-      child: Container(
-        padding: padding.resolve(Directionality.of(context)),
+      child: SizedBox(
         height: widget.isDense ? _denseButtonHeight : null,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            if (widget.isExpanded)
-              Expanded(child: innerItemsWidget)
-            else
-              innerItemsWidget,
-            IconTheme(
-              data: IconThemeData(
-                color: _iconColor,
-                size: widget.iconSize,
+        child: Padding(
+          padding: padding.resolve(Directionality.of(context)),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              if (widget.isExpanded)
+                Expanded(child: innerItemsWidget)
+              else
+                innerItemsWidget,
+              IconTheme(
+                data: IconThemeData(
+                  color: _iconColor,
+                  size: widget.iconSize,
+                ),
+                child: widget.icon ?? defaultIcon,
               ),
-              child: widget.icon ?? defaultIcon,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
 
     if (!DropdownButtonHideUnderline.at(context)) {
+      const Widget defaultDecoration = DecoratedBox(decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: Color(0xFFBDBDBD), width: 0.0)),
+      ));
+
       final double bottom = (widget.isDense || widget.itemHeight == null) ? 0.0 : 8.0;
+
       result = Stack(
         children: <Widget>[
           result,
@@ -1532,17 +1538,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
             left: 0.0,
             right: 0.0,
             bottom: bottom,
-            child: widget.underline ?? Container(
-              height: 1.0,
-              decoration: const BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: Color(0xFFBDBDBD),
-                    width: 0.0,
-                  ),
-                ),
-              ),
-            ),
+            child: widget.underline ?? const SizedBox(height: 1.0, child: defaultDecoration),
           ),
         ],
       );

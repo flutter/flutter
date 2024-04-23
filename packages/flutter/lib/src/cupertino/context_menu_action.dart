@@ -127,12 +127,7 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
                   : CupertinoDynamicColor.resolve(_kBackgroundColor, context),
               ),
               child: Padding(
-                padding: const EdgeInsets.only(
-                  top: 8,
-                  bottom: 8,
-                  left: 15.5,
-                  right: 17.5,
-                ),
+                padding: const EdgeInsets.fromLTRB(15.5, 8.0, 17.5, 8.0),
                 child: DefaultTextStyle(
                   style: _textStyle,
                   child: Row(
