@@ -1443,6 +1443,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
         _selectableStartEdgeUpdateRecords.remove(selectable);
       case SelectionEventType.selectAll:
       case SelectionEventType.selectWord:
+      case SelectionEventType.selectParagraph:
         _selectableEndEdgeUpdateRecords[selectable] = state.position.pixels;
         _selectableStartEdgeUpdateRecords[selectable] = state.position.pixels;
     }
@@ -2349,23 +2350,22 @@ class _HorizontalInnerDimensionState extends ScrollableState {
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
     RenderObject? targetRenderObject,
   }) {
-    final List<Future<void>> newFutures = <Future<void>>[];
-
-    newFutures.add(position.ensureVisible(
-      object,
-      alignment: alignment,
-      duration: duration,
-      curve: curve,
-      alignmentPolicy: alignmentPolicy,
-    ));
-
-    newFutures.add(verticalScrollable.position.ensureVisible(
-      object,
-      alignment: alignment,
-      duration: duration,
-      curve: curve,
-      alignmentPolicy: alignmentPolicy,
-    ));
+    final List<Future<void>> newFutures = <Future<void>>[
+      position.ensureVisible(
+        object,
+        alignment: alignment,
+        duration: duration,
+        curve: curve,
+        alignmentPolicy: alignmentPolicy,
+      ),
+      verticalScrollable.position.ensureVisible(
+        object,
+        alignment: alignment,
+        duration: duration,
+        curve: curve,
+        alignmentPolicy: alignmentPolicy,
+      ),
+    ];
 
     return (newFutures, verticalScrollable);
   }

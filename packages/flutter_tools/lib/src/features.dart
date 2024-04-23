@@ -51,6 +51,9 @@ abstract class FeatureFlags {
   /// Whether native assets compilation and bundling is enabled.
   bool get isPreviewDeviceEnabled => true;
 
+  /// Whether Swift Package Manager dependency management is enabled.
+  bool get isSwiftPackageManagerEnabled => false;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -70,6 +73,7 @@ const List<Feature> allFeatures = <Feature>[
   cliAnimation,
   nativeAssets,
   previewDevice,
+  swiftPackageManager,
 ];
 
 /// All current Flutter feature flags that can be configured.
@@ -175,6 +179,16 @@ const Feature previewDevice = Feature(
   ),
 );
 
+/// Enable Swift Package Mangaer as a darwin dependency manager.
+const Feature swiftPackageManager = Feature(
+  name: 'support for Swift Package Manager for iOS and macOS',
+  configSetting: 'enable-swift-package-manager',
+  environmentOverride: 'SWIFT_PACKAGE_MANAGER',
+  master: FeatureChannelSetting(
+    available: true,
+  ),
+);
+
 /// A [Feature] is a process for conditionally enabling tool features.
 ///
 /// All settings are optional, and if not provided will generally default to
@@ -270,15 +284,11 @@ class Feature {
 
   /// Retrieve the correct setting for the provided `channel`.
   FeatureChannelSetting getSettingForChannel(String channel) {
-    switch (channel) {
-      case 'stable':
-        return stable;
-      case 'beta':
-        return beta;
-      case 'master':
-      default:
-        return master;
-    }
+    return switch (channel) {
+      'stable' => stable,
+      'beta' => beta,
+      'master' || _ => master,
+    };
   }
 }
 

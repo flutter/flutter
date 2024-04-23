@@ -455,6 +455,13 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       vsync: this,
     )..addStatusListener(_handleStatusChanged);
   }
+  CurvedAnimation? _backingOverlayAnimation;
+  CurvedAnimation get _overlayAnimation {
+    return _backingOverlayAnimation ??= CurvedAnimation(
+      parent: _controller,
+      curve: Curves.fastOutSlowIn,
+    );
+  }
 
   LongPressGestureRecognizer? _longPressRecognizer;
   TapGestureRecognizer? _tapRecognizer;
@@ -796,7 +803,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       decoration: widget.decoration ?? tooltipTheme.decoration ?? defaultDecoration,
       textStyle: widget.textStyle ?? tooltipTheme.textStyle ?? defaultTextStyle,
       textAlign: widget.textAlign ?? tooltipTheme.textAlign ?? _defaultTextAlign,
-      animation: CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn),
+      animation:_overlayAnimation,
       target: target,
       verticalOffset: widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset,
       preferBelow: widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow,
@@ -821,6 +828,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _tapRecognizer?.dispose();
     _timer?.cancel();
     _backingController?.dispose();
+    _backingOverlayAnimation?.dispose();
     super.dispose();
   }
 

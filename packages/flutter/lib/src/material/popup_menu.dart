@@ -160,6 +160,11 @@ class _RenderMenuItem extends RenderShiftedBox {
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    return child?.getDryBaseline(constraints, baseline);
+  }
+
+  @override
   void performLayout() {
     if (child == null) {
       size = Size.zero;
@@ -1534,6 +1539,7 @@ class _PopupMenuDefaultsM3 extends PopupMenuThemeData {
 
   @override MaterialStateProperty<TextStyle?>? get labelTextStyle {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    // TODO(quncheng): Update this hard-coded value to use the latest tokens.
     final TextStyle style = _textTheme.labelLarge!;
       if (states.contains(MaterialState.disabled)) {
         return style.apply(color: _colors.onSurface.withOpacity(0.38));

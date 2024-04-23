@@ -40,6 +40,7 @@ linter:
     - always_specify_types
     # - always_use_package_imports # we do this commonly
     - annotate_overrides
+    - annotate_redeclares
     # - avoid_annotating_with_dynamic # conflicts with always_specify_types
     - avoid_bool_literals_in_conditional_expressions
     # - avoid_catches_without_on_clauses # blocked on https://github.com/dart-lang/linter/issues/3023
@@ -121,6 +122,7 @@ linter:
     # - lines_longer_than_80_chars # not required by flutter style
     - literal_only_boolean_expressions
     # - matching_super_parameters # blocked on https://github.com/dart-lang/language/issues/2509
+    - missing_code_block_language_in_doc_comment
     - missing_whitespace_between_adjacent_strings
     - no_adjacent_strings_in_list
     - no_default_cases
@@ -212,6 +214,7 @@ linter:
     # - unnecessary_lambdas # has false positives: https://github.com/dart-lang/linter/issues/498
     - unnecessary_late
     - unnecessary_library_directive
+    # - unnecessary_library_name # blocked on https://github.com/dart-lang/lints/issues/181#issuecomment-2018919034
     - unnecessary_new
     - unnecessary_null_aware_assignments
     - unnecessary_null_aware_operator_on_extension_on_nullable

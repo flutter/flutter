@@ -8,11 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_testing/leak_tracker_testing.dart';
 
 void main() {
-  // TODO(polina-c): _DropdownMenuState should not be used after disposal, https://github.com/flutter/flutter/issues/145622 [leaks-to-clean]
-  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
 
   const String longText = 'one two three four five six seven eight nine ten eleven twelve';
   final List<DropdownMenuEntry<TestMenu>> menuChildren = <DropdownMenuEntry<TestMenu>>[];
@@ -2070,6 +2067,7 @@ void main() {
       },
     );
     final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2107,6 +2105,29 @@ void main() {
     state.updateEditingValue(const TextEditingValue(text: 'Green2'));
     expect(called, 3);
     expect(controller.text, 'Green');
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/140596.
+  testWidgets('Long text item does not overflow', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: DropdownMenu<int>(
+          dropdownMenuEntries: <DropdownMenuEntry<int>>[
+            DropdownMenuEntry<int>(
+              value: 0,
+              label: 'This is a long text that is multiplied by 4 so it can overflow. ' * 4,
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.pump();
+    await tester.tap(find.byType(DropdownMenu<int>));
+    await tester.pumpAndSettle();
+
+    // No exception should be thrown.
+    expect(tester.takeException(), isNull);
   });
 }
 

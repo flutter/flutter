@@ -674,7 +674,7 @@ void main() {
 
     test('cross axis intrinsics, with ascending flex flow layout', () {
       const BoxConstraints square = BoxConstraints.tightFor(width: 5.0, height: 5.0);
-      // 3 'A's separated by zero-width spaces. Max instrinsic width = 30, min intrinsic width = 10
+      // 3 'A's separated by zero-width spaces. Max intrinsic width = 30, min intrinsic width = 10
       final TextSpan textSpan = TextSpan(text: List<String>.filled(3, 'A').join('\u200B') , style: const TextStyle(fontSize: 10));
       final RenderConstrainedBox box1 = RenderConstrainedBox(additionalConstraints: square);
       final RenderParagraph box2 = RenderParagraph(textSpan, textDirection: TextDirection.ltr);
@@ -711,7 +711,7 @@ void main() {
 
     test('cross axis intrinsics, with descending flex flow layout', () {
       const BoxConstraints square = BoxConstraints.tightFor(width: 5.0, height: 5.0);
-      // 3 'A's separated by zero-width spaces. Max instrinsic width = 30, min intrinsic width = 10
+      // 3 'A's separated by zero-width spaces. Max intrinsic width = 30, min intrinsic width = 10
       final TextSpan textSpan = TextSpan(text: List<String>.filled(3, 'A').join('\u200B') , style: const TextStyle(fontSize: 10));
       final RenderConstrainedBox box1 = RenderConstrainedBox(additionalConstraints: square);
       final RenderParagraph box2 = RenderParagraph(textSpan, textDirection: TextDirection.ltr);
@@ -773,9 +773,42 @@ void main() {
       expect(flex.getDryLayout(BoxConstraints.loose(size)), const Size(200.0, 30.0));
       expect(flex.getDryBaseline(BoxConstraints.loose(size), TextBaseline.alphabetic), 20.0);
       size = const Size(300, 100);
-      // box 1 one line, box 2 one.
+      // box 1 one line, box 2 one line.
       expect(flex.getDryLayout(BoxConstraints.loose(size)), const Size(300.0, 20.0));
       expect(flex.getDryBaseline(BoxConstraints.loose(size), TextBaseline.alphabetic), 10.0);
+    });
+
+    test('baseline aligned children cross intrinsic size', () {
+      // box1 has its baseline placed at the top of the box.
+      final RenderFlowBaselineTestBox box1 = RenderFlowBaselineTestBox()
+        ..baselinePlacer = ((double height) => 0.0)
+        ..gridCount = 10;
+
+      // box2 has its baseline placed at the bottom of the box.
+      final RenderFlowBaselineTestBox box2 = RenderFlowBaselineTestBox()
+        ..baselinePlacer = ((double height) => height)
+        ..gridCount = 10;
+
+      final RenderFlex flex = RenderFlex(
+        textDirection: TextDirection.ltr,
+        textBaseline: TextBaseline.alphabetic,
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        children: <RenderBox>[box1, box2],
+      );
+      final FlexParentData box1ParentData = box1.parentData! as FlexParentData;
+      box1ParentData.flex = 2;
+      box1ParentData.fit = FlexFit.tight;
+      final FlexParentData box2ParentData = box2.parentData! as FlexParentData;
+      box2ParentData.flex = 1;
+      box2ParentData.fit = FlexFit.loose;
+
+      // box 1 one line, box 2 two lines.
+      expect(flex.getMaxIntrinsicHeight(200), 30);
+      expect(flex.getMinIntrinsicHeight(200), 30);
+
+      // box 1 one line, box 2 one line.
+      expect(flex.getMaxIntrinsicHeight(300), 20);
+      expect(flex.getMinIntrinsicHeight(300), 20);
     });
 
     test('children with no baselines do not affect the baseline location', () {

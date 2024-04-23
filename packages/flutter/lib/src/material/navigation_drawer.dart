@@ -141,7 +141,6 @@ class NavigationDrawer extends StatelessWidget {
         children.whereType<NavigationDrawerDestination>().toList().length;
 
     int destinationIndex = 0;
-    final List<Widget> wrappedChildren = <Widget>[];
     Widget wrapChild(Widget child, int index) => _SelectableAnimatedBuilder(
         duration: const Duration(milliseconds: 500),
         isSelected: index == selectedIndex,
@@ -162,14 +161,11 @@ class NavigationDrawer extends StatelessWidget {
           );
         });
 
-    for (int i = 0; i < children.length; i++) {
-      if (children[i] is! NavigationDrawerDestination) {
-        wrappedChildren.add(children[i]);
-      } else {
-        wrappedChildren.add(wrapChild(children[i], destinationIndex));
-        destinationIndex += 1;
-      }
-    }
+    final List<Widget> wrappedChildren = <Widget>[
+      for (final Widget child in children)
+        if (child is! NavigationDrawerDestination) child
+        else wrapChild(child, destinationIndex++),
+    ];
     final NavigationDrawerThemeData navigationDrawerTheme = NavigationDrawerTheme.of(context);
 
     return Drawer(
