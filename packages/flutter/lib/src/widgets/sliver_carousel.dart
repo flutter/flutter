@@ -827,9 +827,9 @@ class CarouselScrollPhysics extends ScrollPhysics {
     final double itemWidth = position.viewportDimension * fraction;
     double item = position.pixels / itemWidth;
     if (velocity < -tolerance.velocity) {
-      item -= fraction / 2;
+      item -= fraction;
     } else if (velocity > tolerance.velocity) {
-      item += fraction / 2;
+      item += fraction;
     }
     return math.min(
       item.roundToDouble() * itemWidth,
