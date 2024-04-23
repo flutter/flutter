@@ -17,22 +17,29 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../src/common.dart';
 import '../src/fake_process_manager.dart';
+import '../src/fakes.dart';
 
 void main() {
   late BufferLogger logger;
-  late FileSystem fs;
+  late MemoryFileSystem fs;
   late TestUsage testUsage;
   late Platform platform;
   late OperatingSystemUtils operatingSystemUtils;
   late StackTrace stackTrace;
+  late FakeAnalytics fakeAnalytics;
 
   setUp(() async {
     logger = BufferLogger.test();
     fs = MemoryFileSystem.test();
     testUsage = TestUsage();
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: fs,
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
 
     platform = FakePlatform(environment: <String, String>{});
     operatingSystemUtils = OperatingSystemUtils(
@@ -63,7 +70,7 @@ void main() {
         'version': 'test-version',
       },
     ));
-    expect(crashInfo.fields?['uuid'], testUsage.clientId);
+    expect(crashInfo.fields?['uuid'], fakeAnalytics.clientId);
     expect(crashInfo.fields?['product'], 'Flutter_Tools');
     expect(crashInfo.fields?['version'], 'test-version');
     expect(crashInfo.fields?['osName'], 'linux');
@@ -105,6 +112,7 @@ void main() {
 
   testWithoutContext('suppress analytics', () async {
     testUsage.suppressAnalytics = true;
+    fakeAnalytics.suppressTelemetry();
 
     final CrashReportSender crashReportSender = CrashReportSender(
       client: CrashingCrashReportSender(const SocketException('no internets')),
@@ -112,6 +120,7 @@ void main() {
       platform: platform,
       logger: logger,
       operatingSystemUtils: operatingSystemUtils,
+      analytics: fakeAnalytics,
     );
 
     await crashReportSender.sendReport(
@@ -138,6 +147,7 @@ void main() {
         platform: platform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
+        analytics: fakeAnalytics,
       );
 
       await crashReportSender.sendReport(
@@ -157,6 +167,7 @@ void main() {
         platform: platform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
+        analytics: fakeAnalytics,
       );
 
       await crashReportSender.sendReport(
@@ -176,6 +187,7 @@ void main() {
         platform: platform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
+        analytics: fakeAnalytics,
       );
 
       await crashReportSender.sendReport(
@@ -195,6 +207,7 @@ void main() {
         platform: platform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
+        analytics: fakeAnalytics,
       );
 
       await crashReportSender.sendReport(
@@ -216,6 +229,7 @@ void main() {
         platform: platform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
+        analytics: fakeAnalytics,
       );
 
       await crashReportSender.sendReport(
@@ -270,6 +284,7 @@ void main() {
         platform: platform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
+        analytics: fakeAnalytics,
       );
 
       await crashReportSender.sendReport(
@@ -307,6 +322,7 @@ void main() {
         platform: environmentPlatform,
         logger: logger,
         operatingSystemUtils: operatingSystemUtils,
+        analytics: fakeAnalytics,
       );
 
       await crashReportSender.sendReport(

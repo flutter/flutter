@@ -205,6 +205,7 @@ Future<int> _handleToolError(
         platform: globals.platform,
         logger: globals.logger,
         operatingSystemUtils: globals.os,
+        analytics: globals.analytics,
       );
       await crashReportSender.sendReport(
         error: error,

@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:http/http.dart' as http;
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -109,17 +110,20 @@ class CrashReportSender {
     required Platform platform,
     required Logger logger,
     required OperatingSystemUtils operatingSystemUtils,
+    required Analytics analytics,
   }) : _client = client ?? http.Client(),
       _usage = usage,
       _platform = platform,
       _logger = logger,
-      _operatingSystemUtils = operatingSystemUtils;
+      _operatingSystemUtils = operatingSystemUtils,
+      _analytics = analytics;
 
   final http.Client _client;
   final Usage _usage;
   final Platform _platform;
   final Logger _logger;
   final OperatingSystemUtils _operatingSystemUtils;
+  final Analytics _analytics;
 
   bool _crashReportSent = false;
 
@@ -154,7 +158,7 @@ class CrashReportSender {
       final String flutterVersion = getFlutterVersion();
 
       // We don't need to report exceptions happening on user branches
-      if (_usage.suppressAnalytics || RegExp(r'^\[user-branch\]\/').hasMatch(flutterVersion)) {
+      if (!_analytics.okToSend || RegExp(r'^\[user-branch\]\/').hasMatch(flutterVersion)) {
         return;
       }
 
@@ -168,7 +172,7 @@ class CrashReportSender {
       );
 
       final http.MultipartRequest req = http.MultipartRequest('POST', uri);
-      req.fields['uuid'] = _usage.clientId;
+      req.fields['uuid'] = _analytics.clientId;
       req.fields['product'] = _kProductId;
       req.fields['version'] = flutterVersion;
       req.fields['osName'] = _platform.operatingSystem;
