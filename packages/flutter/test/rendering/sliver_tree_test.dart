@@ -408,7 +408,7 @@ void main() {
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))
-        ..paragraph(offset: const Offset(26.0, 13.0))  // alpha icon
+        ..paragraph() // alpha icon
         ..paragraph(offset: const Offset(56.0, 8.0))   // alpha animating in
         ..paragraph(offset: const Offset(56.0, 48.0))  // beta animating in
         ..paragraph(offset: const Offset(56.0, 88.0))  // kappa animating in
@@ -439,9 +439,9 @@ void main() {
       find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))   // First
-        ..paragraph()  // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))  // Second
-        ..paragraph(offset: const Offset(26.0, 93.0))  // alpha icon
+        ..paragraph() // alpha icon
         ..paragraph(offset: const Offset(56.0, 88.0))  // alpha
         ..paragraph(offset: const Offset(56.0, 128.0)) // beta
         ..paragraph(offset: const Offset(56.0, 168.0)) // kappa
@@ -486,9 +486,9 @@ void main() {
       find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))   // First
-        ..paragraph()  // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))  // Second
-        ..paragraph(offset: const Offset(26.0, 93.0))  // alpha icon
+        ..paragraph() // alpha icon
         ..paragraph(offset: const Offset(56.0, 88.0))  // alpha
         ..paragraph(offset: const Offset(56.0, 128.0)) // beta
         ..paragraph(offset: const Offset(56.0, 168.0)) // kappa
@@ -592,9 +592,9 @@ void main() {
       find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))   // First
-        ..paragraph()  // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))  // Second
-        ..paragraph(offset: const Offset(26.0, 93.0))  // alpha icon
+        ..paragraph() // alpha icon
         ..paragraph(offset: const Offset(56.0, 88.0))  // alpha
         ..paragraph(offset: const Offset(56.0, 128.0)) // beta
         ..paragraph(offset: const Offset(56.0, 168.0)) // kappa
@@ -707,9 +707,9 @@ void main() {
       find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
-        ..paragraph()  // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))
-        ..paragraph(offset: const Offset(26.0, -15.0)) // alpha icon animating
+        ..paragraph() // alpha icon animating
         ..paragraph(offset: const Offset(56.0, -20.0)) // alpha naimating
         ..paragraph(offset: const Offset(56.0, 20.0))  // beta
         ..paragraph(offset: const Offset(56.0, 60.0))  // kappa
@@ -751,9 +751,9 @@ void main() {
       find.byType(SliverTreeList<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
-        ..paragraph()  // Icon
+        ..paragraph() // Icon
         ..paragraph(offset: const Offset(46.0, 48.0))
-        ..paragraph(offset: const Offset(26.0, -3.0)) // alpha icon animating
+        ..paragraph() // alpha icon animating
         ..paragraph(offset: const Offset(56.0, -8.0)) // alpha animating
         ..paragraph(offset: const Offset(56.0, 32.0))  // beta
         ..paragraph(offset: const Offset(56.0, 72.0))  // kappa
