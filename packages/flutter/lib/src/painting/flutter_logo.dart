@@ -330,17 +330,11 @@ class _FlutterLogoPainter extends BoxPainter {
     if (canvasSize.isEmpty) {
       return;
     }
-    final Size logoSize;
-    if (_config._position > 0.0) {
-      // horizontal style
-      logoSize = const Size(820.0, 232.0);
-    } else if (_config._position < 0.0) {
-      // stacked style
-      logoSize = const Size(252.0, 306.0);
-    } else {
-      // only the mark
-      logoSize = const Size(202.0, 202.0);
-    }
+    final Size logoSize = switch (_config._position) {
+      > 0.0 => const Size(820.0, 232.0), // horizontal style
+      < 0.0 => const Size(252.0, 306.0), // stacked style
+      _     => const Size(202.0, 202.0), // only the mark
+    };
     final FittedSizes fittedSize = applyBoxFit(BoxFit.contain, logoSize, canvasSize);
     assert(fittedSize.source == logoSize);
     final Rect rect = Alignment.center.inscribe(fittedSize.destination, offset & canvasSize);
