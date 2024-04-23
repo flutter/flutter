@@ -639,14 +639,10 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
       ),
       if (widget.cancelButton != null) _buildCancelButton(),
     ];
-
-    final Orientation orientation = MediaQuery.orientationOf(context);
-    final double actionSheetWidth;
-    if (orientation == Orientation.portrait) {
-      actionSheetWidth = MediaQuery.sizeOf(context).width - (_kActionSheetEdgeHorizontalPadding * 2);
-    } else {
-      actionSheetWidth = MediaQuery.sizeOf(context).height - (_kActionSheetEdgeHorizontalPadding * 2);
-    }
+    final double actionSheetWidth = switch (MediaQuery.orientationOf(context)) {
+      Orientation.portrait  => MediaQuery.sizeOf(context).width,
+      Orientation.landscape => MediaQuery.sizeOf(context).height,
+    };
 
     return SafeArea(
       child: ScrollConfiguration(
@@ -665,7 +661,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
                 vertical: _kActionSheetEdgeVerticalPadding,
               ),
               child: SizedBox(
-                width: actionSheetWidth,
+                width: actionSheetWidth - _kActionSheetEdgeHorizontalPadding * 2,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
