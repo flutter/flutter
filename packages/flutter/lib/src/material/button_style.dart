@@ -210,6 +210,25 @@ class ButtonStyle with Diagnosticable {
   final MaterialStateProperty<double?>? elevation;
 
   /// The padding between the button's boundary and its child.
+  ///
+  /// The vertical aspect of the default or user-specified padding is adjusted
+  /// automatically based on [visualDensity].
+  ///
+  /// When the visual density is [VisualDensity.compact], the top and bottom insets
+  /// are reduced by 8 pixels or set to 0 pixels if the result of the reduced padding
+  /// is negative. For example: the visual density defaults to [VisualDensity.compact]
+  /// on desktop and web, so if the provided padding is 16 pixels on the top and bottom,
+  /// it will be reduced to 8 pixels on the top and bottom. If the provided padding
+  /// is 4 pixels, the result will be no padding on the top and bottom.
+  ///
+  /// When the visual density is [VisualDensity.comfortable], the top and bottom insets
+  /// are reduced by 4 pixels or set to 0 pixels if the result of the reduced padding
+  /// is negative.
+  ///
+  /// When the visual density is [VisualDensity.standard] the top and bottom insets
+  /// are not changed. The visual density defaults to [VisualDensity.standard] on mobile.
+  ///
+  /// See [ThemeData.visualDensity] for more details.
   final MaterialStateProperty<EdgeInsetsGeometry?>? padding;
 
   /// The minimum size of the button itself.
