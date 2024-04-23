@@ -33,18 +33,6 @@ GeometryResult CoverGeometry::GetPositionBuffer(const ContentContext& renderer,
   };
 }
 
-// |Geometry|
-GeometryResult CoverGeometry::GetPositionUVBuffer(
-    Rect texture_coverage,
-    Matrix effect_transform,
-    const ContentContext& renderer,
-    const Entity& entity,
-    RenderPass& pass) const {
-  auto rect = Rect::MakeSize(pass.GetRenderTargetSize());
-  return ComputeUVGeometryForRect(rect, texture_coverage, effect_transform,
-                                  renderer, entity, pass);
-}
-
 GeometryVertexType CoverGeometry::GetVertexType() const {
   return GeometryVertexType::kPosition;
 }

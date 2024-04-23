@@ -44,31 +44,6 @@ GeometryResult CircleGeometry::GetPositionBuffer(const ContentContext& renderer,
   return ComputePositionGeometry(renderer, generator, entity, pass);
 }
 
-// |Geometry|
-GeometryResult CircleGeometry::GetPositionUVBuffer(
-    Rect texture_coverage,
-    Matrix effect_transform,
-    const ContentContext& renderer,
-    const Entity& entity,
-    RenderPass& pass) const {
-  auto& transform = entity.GetTransform();
-  auto uv_transform =
-      texture_coverage.GetNormalizingTransform() * effect_transform;
-
-  Scalar half_width = stroke_width_ < 0 ? 0.0
-                                        : LineGeometry::ComputePixelHalfWidth(
-                                              transform, stroke_width_);
-  std::shared_ptr<Tessellator> tessellator = renderer.GetTessellator();
-
-  // We call the StrokedCircle method which will simplify to a
-  // FilledCircleGenerator if the inner_radius is <= 0.
-  auto generator =
-      tessellator->StrokedCircle(transform, center_, radius_, half_width);
-
-  return ComputePositionUVGeometry(renderer, generator, uv_transform, entity,
-                                   pass);
-}
-
 GeometryVertexType CircleGeometry::GetVertexType() const {
   return GeometryVertexType::kPosition;
 }
