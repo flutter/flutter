@@ -205,20 +205,15 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   // This is run in another isolate created by _addLicenses above.
   static List<LicenseEntry> _parseLicenses(String rawLicenses) {
     final String licenseSeparator = '\n${'-' * 80}\n';
-    final List<LicenseEntry> result = <LicenseEntry>[];
-    final List<String> licenses = rawLicenses.split(licenseSeparator);
-    for (final String license in licenses) {
-      final int split = license.indexOf('\n\n');
-      if (split >= 0) {
-        result.add(LicenseEntryWithLineBreaks(
-          license.substring(0, split).split('\n'),
-          license.substring(split + 2),
-        ));
-      } else {
-        result.add(LicenseEntryWithLineBreaks(const <String>[], license));
-      }
-    }
-    return result;
+    return <LicenseEntry>[
+      for (final String license in rawLicenses.split(licenseSeparator))
+        if (license.indexOf('\n\n') case final int split when split >= 0)
+          LicenseEntryWithLineBreaks(
+            license.substring(0, split).split('\n'),
+            license.substring(split + 2),
+          )
+        else LicenseEntryWithLineBreaks(const <String>[], license),
+    ];
   }
 
   @override

@@ -1537,15 +1537,68 @@ void main() {
 
       // Fill is the border's outer path, a rounded rectangle.
       expect(box, paints
-      ..drrect(
-        style: PaintingStyle.fill,
-        inner: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 47.5,
-            bottomRight: const Radius.elliptical(12.0, 11.5),
-            bottomLeft: const Radius.elliptical(12.0, 11.5)),
-        outer: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 48.5,
-            bottomRight: const Radius.elliptical(12.0, 12.5),
-            bottomLeft: const Radius.elliptical(12.0, 12.5)),
+        ..drrect(
+          style: PaintingStyle.fill,
+          inner: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 47.0,
+              bottomRight: const Radius.elliptical(12.0, 11.0),
+              bottomLeft: const Radius.elliptical(12.0, 11.0)),
+          outer: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 48.0,
+              bottomRight: const Radius.elliptical(12.0, 12.0),
+              bottomLeft: const Radius.elliptical(12.0, 12.0)),
       ));
+    });
+
+    testWidgets('UnderlineInputBorder clips top border to prevent anti-aliasing glitches', (WidgetTester tester) async {
+      const Rect canvasRect = Rect.fromLTWH(0, 0, 100, 100);
+      const UnderlineInputBorder border = UnderlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12.0)),
+      );
+      expect(
+        (Canvas canvas) => border.paint(canvas, canvasRect),
+        paints
+          ..drrect(
+            outer: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 100.0,
+                bottomRight: const Radius.elliptical(12.0, 12.0),
+                bottomLeft: const Radius.elliptical(12.0, 12.0)),
+            inner: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 99.0,
+                bottomRight: const Radius.elliptical(12.0, 11.0),
+                bottomLeft: const Radius.elliptical(12.0, 11.0)),
+          ),
+      );
+
+      const UnderlineInputBorder border2 = UnderlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(60.0)),
+      );
+      expect(
+        (Canvas canvas) => border2.paint(canvas, canvasRect),
+        paints
+          ..drrect(
+            outer: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 100.0,
+                bottomRight: const Radius.elliptical(50.0, 50.0),
+                bottomLeft: const Radius.elliptical(50.0, 50.0)),
+            inner: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 99.0,
+                bottomRight: const Radius.elliptical(50.0, 49.0),
+                bottomLeft: const Radius.elliptical(50.0, 49.0)),
+          ),
+        reason: 'clamp is expected',
+      );
+    });
+
+    testWidgets('UnderlineInputBorder draws bottom border inside container bounds', (WidgetTester tester) async {
+      const Rect canvasRect = Rect.fromLTWH(0, 0, 100, 100);
+      const double borderWidth = 2.0;
+      const UnderlineInputBorder border = UnderlineInputBorder(
+        borderSide: BorderSide(width: borderWidth),
+      );
+      expect(
+        (Canvas canvas) => border.paint(canvas, canvasRect),
+        paints
+          ..line(
+            p1: Offset(0, canvasRect.height - borderWidth / 2),
+            p2: Offset(100, canvasRect.height - borderWidth / 2),
+            strokeWidth: borderWidth,
+          ),
+      );
     });
 
     testWidgets('InputDecorator OutlineBorder focused label with icon', (WidgetTester tester) async {
@@ -1631,6 +1684,328 @@ void main() {
         find.byType(InputDecorator),
         matchesGoldenFile('m3_input_decorator.outline_icon_label.rtl.png'),
       );
+    });
+  });
+
+  group('Material3 - InputDecoration label', () {
+    group('for filled text field', () {
+      group('when field is enabled', () {
+        testWidgets('label text has correct style', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          // Current input decorator implementation forces line height to 1.0,
+          // this is not compliant with M3 spec.
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor, height: 1.0);
+          expect(getLabelStyle(tester), expectedStyle);
+        });
+      });
+
+      group('when field is disabled', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                enabled: false,
+                labelText: labelText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.onSurface.withOpacity(0.38));
+        });
+      });
+
+      group('when field is hovered', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.onSurfaceVariant);
+        });
+      });
+
+      group('when field is focused', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.primary);
+        });
+
+        testWidgets('label text has correct color when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/146565.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.primary);
+        });
+      });
+
+      group('when field is in error', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.error);
+        });
+
+        testWidgets('label text has correct color when focused', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.error);
+        });
+
+        testWidgets('label text has correct style when hovered', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.onErrorContainer);
+        });
+
+        testWidgets('label text has correct style when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/146565.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.error);
+        });
+      });
+    });
+
+    group('for outlined text field', () {
+      group('when field is enabled', () {
+        testWidgets('label text has correct style', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          final Color expectedColor = theme.colorScheme.onSurfaceVariant;
+          // Current input decorator implementation forces line height to 1.0,
+          // this is not compliant with M3 spec.
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor, height: 1.0);
+          expect(getLabelStyle(tester), expectedStyle);
+        });
+      });
+
+      group('when field is disabled', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                enabled: false,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.onSurface.withOpacity(0.38));
+        });
+      });
+
+      group('when field is hovered', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.onSurfaceVariant);
+        });
+      });
+
+      group('when field is focused', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.primary);
+        });
+
+
+        testWidgets('label text has correct color when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/146565.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.primary);
+        });
+      });
+
+      group('when field is in error', () {
+        testWidgets('label text has correct color', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.error);
+        });
+
+        testWidgets('label text has correct color when focused', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.error);
+        });
+
+        testWidgets('label text has correct color when hovered', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.onErrorContainer);
+        });
+
+        testWidgets('label text has correct color when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/146565.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                errorText: errorText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          expect(getLabelStyle(tester).color, theme.colorScheme.error);
+        });
+      });
     });
   });
 
@@ -2888,7 +3263,7 @@ void main() {
             );
 
             // Label and input are horizontally aligned despite `alignLabelWithHint` being false (default value).
-            // The reason is that `alignLabelWithHint` was initially intended for vertical alignement only.
+            // The reason is that `alignLabelWithHint` was initially intended for vertical alignment only.
             // See https://github.com/flutter/flutter/pull/24993 which introduced `alignLabelWithHint` parameter.
             // See https://github.com/flutter/flutter/pull/115409 which used `alignLabelWithHint` for
             // horizontal alignment in outlined text field.
@@ -3957,40 +4332,6 @@ void main() {
     expect(getIconStyle(tester, Icons.close)?.color, theme.colorScheme.error);
   });
 
-  testWidgets('InputDecoration default floatingLabelStyle resolves hovered/focused states', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: TextField(
-            focusNode: focusNode,
-            decoration: const InputDecoration(
-              labelText: 'label',
-            ),
-          ),
-        ),
-      ),
-    );
-
-    // Focused.
-    focusNode.requestFocus();
-    await tester.pump(kTransitionDuration);
-    final ThemeData theme = Theme.of(tester.element(find.byType(TextField)));
-    expect(getLabelStyle(tester).color, theme.colorScheme.primary);
-
-    // Hovered.
-    final Offset center = tester.getCenter(find.byType(TextField));
-    final TestGesture gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-    );
-    await gesture.addPointer();
-    await gesture.moveTo(center);
-    await tester.pump(kTransitionDuration);
-    expect(getLabelStyle(tester).color, theme.colorScheme.onSurfaceVariant);
-  });
-
   testWidgets('FloatingLabelAlignment.toString()', (WidgetTester tester) async {
     expect(FloatingLabelAlignment.start.toString(), 'FloatingLabelAlignment.start');
     expect(FloatingLabelAlignment.center.toString(), 'FloatingLabelAlignment.center');
@@ -4884,42 +5225,6 @@ void main() {
 
       expect(decoration.isCollapsed, true);
     });
-  });
-
-  testWidgets('UnderlineInputBorder clips top border to prevent anti-aliasing glitches', (WidgetTester tester) async {
-    const Rect canvasRect = Rect.fromLTWH(0, 0, 100, 100);
-    const UnderlineInputBorder border = UnderlineInputBorder(
-      borderRadius: BorderRadius.all(Radius.circular(12.0)),
-    );
-    expect(
-      (Canvas canvas) => border.paint(canvas, canvasRect),
-      paints
-        ..drrect(
-          outer: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 100.5,
-                bottomRight: const Radius.elliptical(12.0, 12.5),
-                bottomLeft: const Radius.elliptical(12.0, 12.5)),
-          inner: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 99.5,
-                bottomRight: const Radius.elliptical(12.0, 11.5),
-                bottomLeft: const Radius.elliptical(12.0, 11.5)),
-        ),
-    );
-
-    const UnderlineInputBorder border2 = UnderlineInputBorder(
-      borderRadius: BorderRadius.all(Radius.circular(60.0)),
-    );
-    expect(
-      (Canvas canvas) => border2.paint(canvas, canvasRect),
-      paints
-        ..drrect(
-          outer: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 100.5,
-                bottomRight: const Radius.elliptical(50.0, 50.5),
-                bottomLeft: const Radius.elliptical(50.0, 50.5)),
-          inner: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 99.5,
-                bottomRight: const Radius.elliptical(50.0, 49.5),
-                bottomLeft: const Radius.elliptical(50.0, 49.5)),
-        ),
-      reason: 'clamp is expected',
-    );
   });
 
   testWidgets('Ensure the height of labelStyle remains unchanged when TextField is focused', (WidgetTester tester) async {
@@ -9466,12 +9771,12 @@ void main() {
       expect(box, paints
       ..drrect(
         style: PaintingStyle.fill,
-        inner: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 47.5,
-            bottomRight: const Radius.elliptical(12.0, 11.5),
-            bottomLeft: const Radius.elliptical(12.0, 11.5)),
-        outer: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 48.5,
-            bottomRight: const Radius.elliptical(12.0, 12.5),
-            bottomLeft: const Radius.elliptical(12.0, 12.5)),
+        inner: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 47.0,
+            bottomRight: const Radius.elliptical(12.0, 11.0),
+            bottomLeft: const Radius.elliptical(12.0, 11.0)),
+        outer: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 48.0,
+            bottomRight: const Radius.elliptical(12.0, 12.0),
+            bottomLeft: const Radius.elliptical(12.0, 12.0)),
       ));
     });
 
