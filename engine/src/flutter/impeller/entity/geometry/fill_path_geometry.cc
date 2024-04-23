@@ -54,53 +54,6 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
   };
 }
 
-// |Geometry|
-GeometryResult FillPathGeometry::GetPositionUVBuffer(
-    Rect texture_coverage,
-    Matrix effect_transform,
-    const ContentContext& renderer,
-    const Entity& entity,
-    RenderPass& pass) const {
-  using VS = TextureFillVertexShader;
-
-  const auto& bounding_box = path_.GetBoundingBox();
-  if (bounding_box.has_value() && bounding_box->IsEmpty()) {
-    return GeometryResult{
-        .type = PrimitiveType::kTriangle,
-        .vertex_buffer =
-            VertexBuffer{
-                .vertex_buffer = {},
-                .vertex_count = 0,
-                .index_type = IndexType::k16bit,
-            },
-        .transform = pass.GetOrthographicTransform() * entity.GetTransform(),
-    };
-  }
-
-  auto uv_transform =
-      texture_coverage.GetNormalizingTransform() * effect_transform;
-
-  auto points = renderer.GetTessellator()->TessellateConvex(
-      path_, entity.GetTransform().GetMaxBasisLength());
-
-  VertexBufferBuilder<VS::PerVertexData> vertex_builder;
-  vertex_builder.Reserve(points.size());
-  for (auto i = 0u; i < points.size(); i++) {
-    VS::PerVertexData data;
-    data.position = points[i];
-    data.texture_coords = uv_transform * points[i];
-    vertex_builder.AppendVertex(data);
-  }
-
-  return GeometryResult{
-      .type = PrimitiveType::kTriangleStrip,
-      .vertex_buffer =
-          vertex_builder.CreateVertexBuffer(renderer.GetTransientsBuffer()),
-      .transform = entity.GetShaderTransform(pass),
-      .mode = GetResultMode(),
-  };
-}
-
 GeometryResult::Mode FillPathGeometry::GetResultMode() const {
   const auto& bounding_box = path_.GetBoundingBox();
   if (path_.IsConvex() ||
