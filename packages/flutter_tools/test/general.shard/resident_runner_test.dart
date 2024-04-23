@@ -53,7 +53,7 @@ void main() {
   setUp(() {
     testbed = Testbed(setup: () {
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
-        fs: globals.fs as MemoryFileSystem,
+        fs: MemoryFileSystem.test(),
         fakeFlutterVersion: FakeFlutterVersion(),
       );
 

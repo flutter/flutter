@@ -172,7 +172,7 @@ class FakeDartDevelopmentServiceException implements dds.DartDevelopmentServiceE
   @override
   final String message;
   static const String defaultMessage = 'A DDS instance is already connected at http://localhost:8181';
-  
+
   @override
   Map<String, Object?> toJson() => <String, Object?>{
         'error_code': errorCode,
