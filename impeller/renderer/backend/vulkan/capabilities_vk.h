@@ -137,7 +137,8 @@ class CapabilitiesVK final : public Capabilities,
 
   using PhysicalDeviceFeatures =
       vk::StructureChain<vk::PhysicalDeviceFeatures2,
-                         vk::PhysicalDeviceSamplerYcbcrConversionFeaturesKHR>;
+                         vk::PhysicalDeviceSamplerYcbcrConversionFeaturesKHR,
+                         vk::PhysicalDevice16BitStorageFeatures>;
 
   std::optional<PhysicalDeviceFeatures> GetEnabledDeviceFeatures(
       const vk::PhysicalDevice& physical_device) const;
