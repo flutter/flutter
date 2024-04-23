@@ -372,7 +372,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
       alignment: FractionalOffset.topLeft,
       child: PopScope<Object?>(
         canPop: !_isOpen,
-        onPopWithResultInvoked: _handlePopInvoked,
+        onPopInvokedWithResult: _handlePopInvoked,
         child: AnimatedBuilder(
           animation: widget.hideController,
           builder: _buildSlideAnimation,

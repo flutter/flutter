@@ -83,7 +83,7 @@ class _NavigatorPopHandlerState extends State<NavigatorPopHandler> {
     // here, so that it can be manually handled in canPop.
     return PopScope<Object?>(
       canPop: !widget.enabled || _canPop,
-      onPopWithResultInvoked: (bool didPop, Object? result) {
+      onPopInvokedWithResult: (bool didPop, Object? result) {
         if (didPop) {
           return;
         }

@@ -114,7 +114,7 @@ class _PopScopeWrapper extends StatelessWidget {
     return PopScope<FormData>(
       canPop: false,
       // The result argument contains the pop result that is defined in `_PageTwo`.
-      onPopWithResultInvoked: (bool didPop, FormData? result) async {
+      onPopInvokedWithResult: (bool didPop, FormData? result) async {
         if (didPop) {
           return;
         }

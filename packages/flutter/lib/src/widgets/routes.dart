@@ -2417,7 +2417,7 @@ typedef RouteTransitionsBuilder = Widget Function(BuildContext context, Animatio
 /// succeeded.
 ///
 /// The `result` contains the pop result.
-typedef PopWithResultInvokedCallback<T> = void Function(bool didPop, T? result);
+typedef PopInvokedWithResultCallback<T> = void Function(bool didPop, T? result);
 
 /// Allows listening to and preventing pops.
 ///
@@ -2430,11 +2430,7 @@ typedef PopWithResultInvokedCallback<T> = void Function(bool didPop, T? result);
 ///  * [ModalRoute.registerPopEntry], which unregisters instances of this.
 ///  * [ModalRoute.unregisterPopEntry], which unregisters instances of this.
 abstract class PopEntry<T> {
-  /// {@macro flutter.widgets.PopScope.onPopWithResultInvoked}
-  // This can't be a function getter since the Dart VM doesn't allow upcasting
-  // generic type of the function getter. This prevents customers from declaring
-  // PopScope with any generic type that is subtype of ModalRoute._popEntries.
-  // See https://github.com/dart-lang/sdk/issues/55427.
+  /// {@macro flutter.widgets.PopScope.onPopInvokedWithResult}
   void onPopInvoked(bool didPop, T? result);
 
   /// {@macro flutter.widgets.PopScope.canPop}

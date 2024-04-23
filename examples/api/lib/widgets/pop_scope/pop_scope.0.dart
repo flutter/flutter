@@ -111,7 +111,7 @@ class _PageTwoState extends State<_PageTwo> {
             const Text('Page Two'),
             PopScope<Object?>(
               canPop: false,
-              onPopWithResultInvoked: (bool didPop, Object? result) async {
+              onPopInvokedWithResult: (bool didPop, Object? result) async {
                 if (didPop) {
                   return;
                 }
