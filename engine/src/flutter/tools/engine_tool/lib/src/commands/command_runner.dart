@@ -26,6 +26,7 @@ final class ToolCommandRunner extends CommandRunner<int> {
     required this.environment,
     required this.configs,
     this.verbose = false,
+    this.help = false,
   }) : super(toolName, toolDescription, usageLineLength: _usageLineLength) {
     final List<Command<int>> commands = <Command<int>>[
       FetchCommand(
@@ -40,12 +41,14 @@ final class ToolCommandRunner extends CommandRunner<int> {
         environment: environment,
         configs: configs,
         verbose: verbose,
+        help: help,
         usageLineLength: _usageLineLength,
       ),
       BuildCommand(
         environment: environment,
         configs: configs,
         verbose: verbose,
+        help: help,
         usageLineLength: _usageLineLength,
       ),
       RunCommand(
@@ -62,6 +65,7 @@ final class ToolCommandRunner extends CommandRunner<int> {
         environment: environment,
         configs: configs,
         verbose: verbose,
+        help: help,
         usageLineLength: _usageLineLength,
       ),
     ];
@@ -92,6 +96,9 @@ final class ToolCommandRunner extends CommandRunner<int> {
 
   /// Whether et should emit verbose logs.
   final bool verbose;
+
+  /// Whether the invocation is for a help command
+  final bool help;
 
   @override
   Future<int> run(Iterable<String> args) async {

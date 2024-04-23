@@ -16,6 +16,7 @@ final class QueryCommand extends CommandBase {
     required super.environment,
     required this.configs,
     super.verbose = false,
+    super.help = false,
     super.usageLineLength,
   }) {
     // Add options here that are common to all queries.
@@ -45,11 +46,13 @@ final class QueryCommand extends CommandBase {
       environment: environment,
       configs: configs,
       verbose: verbose,
+      help: help,
     ));
     addSubcommand(QueryTargetsCommand(
       environment: environment,
       configs: configs,
       verbose: verbose,
+      help: help,
     ));
   }
 
@@ -71,6 +74,7 @@ final class QueryBuildersCommand extends CommandBase {
     required super.environment,
     required this.configs,
     super.verbose = false,
+    super.help = false,
   });
 
   /// Build configurations loaded from the engine from under ci/builders.
@@ -137,8 +141,12 @@ final class QueryTargetsCommand extends CommandBase {
     required super.environment,
     required this.configs,
     super.verbose = false,
+    super.help = false,
   }) {
-    builds = runnableBuilds(environment, configs, verbose);
+    // When printing the help/usage for this command, only list all builds
+    // when the --verbose flag is supplied.
+    final bool includeCiBuilds = verbose || !help;
+    builds = runnableBuilds(environment, configs, includeCiBuilds);
     debugCheckBuilds(builds);
     addConfigOption(
       environment,

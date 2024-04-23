@@ -16,6 +16,7 @@ abstract base class CommandBase extends Command<int> {
   CommandBase({
     required this.environment,
     this.verbose = false,
+    this.help = false,
     int? usageLineLength,
   }) : argParser = ArgParser(usageLineLength: usageLineLength);
 
@@ -24,6 +25,10 @@ abstract base class CommandBase extends Command<int> {
 
   /// Whether verbose logging is enabled.
   final bool verbose;
+
+  /// Whether the Command is being constructed only to print the usage/help
+  /// message.
+  final bool help;
 
   @override
   final ArgParser argParser;
