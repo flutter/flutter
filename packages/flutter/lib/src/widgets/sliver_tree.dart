@@ -41,7 +41,7 @@ class SliverTreeNode<T> {
   T get content => _content;
   final T _content;
 
-  /// Other [SliverTreeNode]s this this node will be [parent] to.
+  /// Other [SliverTreeNode]s this node will be [parent] to.
   List<SliverTreeNode<T>> get children => _children;
   final List<SliverTreeNode<T>> _children;
 
