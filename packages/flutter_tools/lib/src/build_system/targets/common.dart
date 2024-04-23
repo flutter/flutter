@@ -122,7 +122,7 @@ class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
 /// even though it is not listed as an input. Pub inserts a timestamp into
 /// the file which causes unnecessary rebuilds, so instead a subset of the contents
 /// are used an input instead.
-/// 
+///
 /// This kernel snapshot is concatenated with the [KernelSnapshotNativeAssets]
 /// inside [KernelSnapshot] byte-wise to create the combined kernel snapshot.
 class KernelSnapshotProgram extends Target {
@@ -277,7 +277,7 @@ class KernelSnapshotProgram extends Target {
 
 /// Generate a kernel snapshot of the native assets mapping for resolving
 /// `@Native` assets at runtime.
-/// 
+///
 /// This kernel snapshot is concatenated to the [KernelSnapshotProgram]
 /// inside [KernelSnapshot] to create the combined kernel snapshot.
 class KernelSnapshotNativeAssets extends Target {
