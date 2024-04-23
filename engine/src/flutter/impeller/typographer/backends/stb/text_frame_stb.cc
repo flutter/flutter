@@ -17,7 +17,7 @@ std::shared_ptr<TextFrame> MakeTextFrameSTB(
   // Shape the text run using STB. The glyph positions could also be resolved
   // using a more advanced text shaper such as harfbuzz.
 
-  float scale = stbtt_ScaleForPixelHeight(
+  float scale = stbtt_ScaleForMappingEmToPixels(
       typeface_stb->GetFontInfo(),
       metrics.point_size * TypefaceSTB::kPointsToPixels);
 
