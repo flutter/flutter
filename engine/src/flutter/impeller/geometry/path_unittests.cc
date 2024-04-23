@@ -482,6 +482,22 @@ TEST(PathTest, CloseAfterMoveDoesNotAddNewLines) {
   EXPECT_EQ(path.GetComponentCount(Path::ComponentType::kContour), 2u);
 }
 
+TEST(PathTest, CloseAtOriginDoesNotAddNewLineSegment) {
+  PathBuilder builder;
+  // Create a path that has a current position at the origin when close is
+  // called. This should not insert a new line segment
+  auto path = builder.LineTo({10, 0})
+                  .LineTo({10, 10})
+                  .LineTo({0, 10})
+                  .LineTo({0, 0})
+                  .Close()
+                  .TakePath();
+
+  EXPECT_EQ(path.GetComponentCount(), 6u);
+  EXPECT_EQ(path.GetComponentCount(Path::ComponentType::kLinear), 4u);
+  EXPECT_EQ(path.GetComponentCount(Path::ComponentType::kContour), 2u);
+}
+
 TEST(PathTest, CanBeCloned) {
   PathBuilder builder;
   builder.MoveTo({10, 10});
