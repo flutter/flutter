@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -32,7 +33,7 @@ void main() {
   setUp(() {
     testbed = Testbed(setup: () {
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
-        fs: globals.fs,
+        fs: globals.fs as MemoryFileSystem,
         fakeFlutterVersion: FakeFlutterVersion(),
       );
 
