@@ -133,7 +133,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
       case TextSelectionHandleType.right:
         desiredSize = getHandleSize(textLineHeight);
         handle = SizedBox.fromSize(
-          size: desiredSize,                                                                                                                                                 
+          size: desiredSize,
           child: customPaint,
         );
         return Transform(
