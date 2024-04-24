@@ -8,7 +8,7 @@
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
-#include "impeller/tessellator/tessellator.h"
+#include "impeller/tessellator/tessellator_libtess.h"
 
 namespace impeller {
 namespace testing {
@@ -16,7 +16,7 @@ namespace testing {
 TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
   // Zero points.
   {
-    Tessellator t;
+    TessellatorLibtess t;
     auto path = PathBuilder{}.TakePath(FillType::kOdd);
     Tessellator::Result result = t.Tessellate(
         path, 1.0f,
@@ -28,7 +28,7 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
 
   // One point.
   {
-    Tessellator t;
+    TessellatorLibtess t;
     auto path = PathBuilder{}.LineTo({0, 0}).TakePath(FillType::kOdd);
     Tessellator::Result result = t.Tessellate(
         path, 1.0f,
@@ -40,7 +40,7 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
 
   // Two points.
   {
-    Tessellator t;
+    TessellatorLibtess t;
     auto path = PathBuilder{}.AddLine({0, 0}, {0, 1}).TakePath(FillType::kOdd);
     Tessellator::Result result = t.Tessellate(
         path, 1.0f,
@@ -52,7 +52,7 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
 
   // Many points.
   {
-    Tessellator t;
+    TessellatorLibtess t;
     PathBuilder builder;
     for (int i = 0; i < 1000; i++) {
       auto coord = i * 1.0f;
@@ -69,7 +69,7 @@ TEST(TessellatorTest, TessellatorBuilderReturnsCorrectResultStatus) {
 
   // Closure fails.
   {
-    Tessellator t;
+    TessellatorLibtess t;
     auto path = PathBuilder{}.AddLine({0, 0}, {0, 1}).TakePath(FillType::kOdd);
     Tessellator::Result result = t.Tessellate(
         path, 1.0f,

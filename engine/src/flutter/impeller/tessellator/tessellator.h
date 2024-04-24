@@ -14,18 +14,14 @@
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/trig.h"
 
-struct TESStesselator;
-
 namespace impeller {
-
-void DestroyTessellator(TESStesselator* tessellator);
-
-using CTessellator =
-    std::unique_ptr<TESStesselator, decltype(&DestroyTessellator)>;
 
 //------------------------------------------------------------------------------
 /// @brief      A utility that generates triangles of the specified fill type
 ///             given a polyline. This happens on the CPU.
+///
+///             Also contains functionality for optimized generation of circles
+///             and ellipses.
 ///
 ///             This object is not thread safe, and its methods must not be
 ///             called from multiple threads.
@@ -171,33 +167,7 @@ class Tessellator {
 
   Tessellator();
 
-  ~Tessellator();
-
-  /// @brief A callback that returns the results of the tessellation.
-  ///
-  ///        The index buffer may not be populated, in which case [indices] will
-  ///        be nullptr and indices_count will be 0.
-  using BuilderCallback = std::function<bool(const float* vertices,
-                                             size_t vertices_count,
-                                             const uint16_t* indices,
-                                             size_t indices_count)>;
-
-  //----------------------------------------------------------------------------
-  /// @brief      Generates filled triangles from the path. A callback is
-  ///             invoked once for the entire tessellation.
-  ///
-  /// @param[in]  path  The path to tessellate.
-  /// @param[in]  tolerance  The tolerance value for conversion of the path to
-  ///                        a polyline. This value is often derived from the
-  ///                        Matrix::GetMaxBasisLength of the CTM applied to the
-  ///                        path for rendering.
-  /// @param[in]  callback  The callback, return false to indicate failure.
-  ///
-  /// @return The result status of the tessellation.
-  ///
-  Tessellator::Result Tessellate(const Path& path,
-                                 Scalar tolerance,
-                                 const BuilderCallback& callback);
+  virtual ~Tessellator();
 
   //----------------------------------------------------------------------------
   /// @brief      Given a convex path, create a triangle fan structure.
@@ -296,11 +266,11 @@ class Tessellator {
                                             const Rect& bounds,
                                             const Size& radii);
 
- private:
+ protected:
   /// Used for polyline generation.
   std::unique_ptr<std::vector<Point>> point_buffer_;
-  CTessellator c_tessellator_;
 
+ private:
   // Data for variouos Circle/EllipseGenerator classes, cached per
   // Tessellator instance which is usually the foreground life of an app
   // if not longer.

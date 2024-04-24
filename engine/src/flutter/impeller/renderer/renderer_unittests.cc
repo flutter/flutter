@@ -24,13 +24,10 @@
 #include "impeller/fixtures/sepia.frag.h"
 #include "impeller/fixtures/sepia.vert.h"
 #include "impeller/fixtures/swizzle.frag.h"
-#include "impeller/fixtures/test_texture.frag.h"
-#include "impeller/fixtures/test_texture.vert.h"
 #include "impeller/fixtures/texture.frag.h"
 #include "impeller/fixtures/texture.vert.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/playground/playground_test.h"
-#include "impeller/renderer/command.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/pipeline_builder.h"
 #include "impeller/renderer/pipeline_library.h"
@@ -38,7 +35,7 @@
 #include "impeller/renderer/render_target.h"
 #include "impeller/renderer/renderer.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
-#include "impeller/tessellator/tessellator.h"
+#include "impeller/tessellator/tessellator_libtess.h"
 #include "third_party/imgui/imgui.h"
 
 // TODO(zanderso): https://github.com/flutter/flutter/issues/127701
@@ -394,7 +391,7 @@ TEST_P(RendererTest, CanRenderInstanced) {
   VertexBufferBuilder<VS::PerVertexData> builder;
 
   ASSERT_EQ(Tessellator::Result::kSuccess,
-            Tessellator{}.Tessellate(
+            TessellatorLibtess{}.Tessellate(
                 PathBuilder{}
                     .AddRect(Rect::MakeXYWH(10, 10, 100, 100))
                     .TakePath(FillType::kOdd),
