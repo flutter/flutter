@@ -44,7 +44,6 @@
 #include "impeller/entity/linear_to_srgb_filter.frag.h"
 #include "impeller/entity/morphology_filter.frag.h"
 #include "impeller/entity/morphology_filter.vert.h"
-#include "impeller/entity/points.comp.h"
 #include "impeller/entity/porter_duff_blend.frag.h"
 #include "impeller/entity/porter_duff_blend.vert.h"
 #include "impeller/entity/radial_gradient_fill.frag.h"
@@ -255,9 +254,6 @@ using FramebufferBlendSoftLightPipeline =
 /// Draw Vertices/Atlas Uber Shader
 using VerticesUberShader =
     RenderPipelineHandle<VerticesUberVertexShader, VerticesUberFragmentShader>;
-
-/// Geometry Pipelines
-using PointsComputeShaderPipeline = ComputePipelineBuilder<PointsComputeShader>;
 
 #ifdef IMPELLER_ENABLE_OPENGLES
 using TiledTextureExternalPipeline =
@@ -719,12 +715,6 @@ class ContentContext {
     return GetPipeline(vertices_uber_shader_, opts);
   }
 
-  std::shared_ptr<Pipeline<ComputePipelineDescriptor>> GetPointComputePipeline()
-      const {
-    FML_DCHECK(GetDeviceCapabilities().SupportsCompute());
-    return point_field_compute_pipelines_;
-  }
-
   std::shared_ptr<Context> GetContext() const;
 
   const Capabilities& GetDeviceCapabilities() const;
@@ -987,8 +977,6 @@ class ContentContext {
   mutable Variants<FramebufferBlendSoftLightPipeline>
       framebuffer_blend_softlight_pipelines_;
   mutable Variants<VerticesUberShader> vertices_uber_shader_;
-  mutable std::shared_ptr<Pipeline<ComputePipelineDescriptor>>
-      point_field_compute_pipelines_;
 
   template <class TypedPipeline>
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetPipeline(

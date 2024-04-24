@@ -15,8 +15,6 @@ class PointFieldGeometry final : public Geometry {
 
   ~PointFieldGeometry() = default;
 
-  static size_t ComputeCircleDivisions(Scalar scaled_radius, bool round);
-
  private:
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,
@@ -25,15 +23,6 @@ class PointFieldGeometry final : public Geometry {
 
   // |Geometry|
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;
-
-  GeometryResult GetPositionBufferGPU(const ContentContext& renderer,
-                                      const Entity& entity,
-                                      RenderPass& pass) const;
-
-  std::optional<VertexBufferBuilder<SolidFillVertexShader::PerVertexData>>
-  GetPositionBufferCPU(const ContentContext& renderer,
-                       const Entity& entity,
-                       RenderPass& pass) const;
 
   std::vector<Point> points_;
   Scalar radius_;
