@@ -802,7 +802,7 @@ class _Label extends StatelessWidget {
 
 class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerProviderStateMixin {
   List<AnimationController> _controllers = <AnimationController>[];
-  List<CurvedAnimation> _animations = const <CurvedAnimation>[];
+  List<CurvedAnimation> _animations = <CurvedAnimation>[];
 
   // A queue of color splashes currently being animated.
   final Queue<_Circle> _circles = Queue<_Circle>();
