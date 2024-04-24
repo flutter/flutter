@@ -664,7 +664,7 @@ deps = {
   'src/flutter/third_party/wuffs':
    Var('skia_git') + '/external/github.com/google/wuffs-mirror-release-c.git' + '@' + '600cd96cf47788ee3a74b40a6028b035c9fd6a61',
 
-  'src/third_party/zlib':
+  'src/flutter/third_party/zlib':
    Var('chromium_git') + '/chromium/src/third_party/zlib.git' + '@' + '7d77fb7fd66d8a5640618ad32c71fdeb7d3e02df',
 
   'src/flutter/third_party/cpu_features/src':

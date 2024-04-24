@@ -198,6 +198,8 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/wuffs/docs',
   r'flutter/third_party/wuffs/script',
   r'flutter/third_party/yapf', // only used for code formatting
+  r'flutter/third_party/zlib/contrib/minizip/miniunz.c', // sample file
+  r'flutter/third_party/zlib/contrib/minizip/minizip.c', // sample file
   r'flutter/tools',
   r'flutter/web_sdk', // this code is not linked into Flutter apps; it's only used by engine tests and tools
   r'fuchsia/sdk/linux/docs',
@@ -221,8 +223,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/libcxxabi/www',
   r'third_party/libxml', // dependency of the testing system that we don't actually use
   r'third_party/web_dependencies/canvaskit', // redundant; covered by Skia dependencies
-  r'third_party/zlib/contrib/minizip/miniunz.c', // sample file
-  r'third_party/zlib/contrib/minizip/minizip.c', // sample file
   r'tools', // not distributed in binary
 };
 
@@ -470,5 +470,5 @@ final List<Pattern> skippedFilePatterns = <Pattern>[
   RegExp(r'^flutter/third_party/boringssl/src/crypto/fipsmodule/ec/[^/]+.go$'),
   RegExp(r'^flutter/third_party/dart/(?:.+/)*[^/]+_test\.[^/]+$'),
   RegExp(r'^flutter/third_party/freetype2/docs/(?!FTL\.TXT$).+'), // ignore all documentation except the license
-  RegExp(r'^third_party/zlib/(?:.+/)*[^/]+_unittest\.[^/]+$'),
+  RegExp(r'^flutter/third_party/zlib/(?:.+/)*[^/]+_unittest\.[^/]+$'),
 ];
