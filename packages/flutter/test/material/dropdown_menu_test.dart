@@ -765,8 +765,8 @@ void main() {
   }, variant: TargetPlatformVariant.desktop());
 
   // Regression test for https://github.com/flutter/flutter/issues/147253.
-  testWidgets('Down key and up key can navigate on desktop platforms '
-      'when a label text contains another label text', (WidgetTester tester) async {
+    testWidgets('Down key and up key can navigate on desktop platforms '
+    'when a label text contains another label text', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
