@@ -156,7 +156,7 @@ mixin SliverTreeStateMixin<T> {
 /// programmatically, for example to reconfigure an existing node
 /// based on a system event. To do so, create an [SliverTreeList]
 /// with an [SliverTreeController] that's owned by a stateful widget
-/// or look up the tile's automatically created [SliverTreeController]
+/// or look up the tree's automatically created [SliverTreeController]
 /// with [SliverTreeController.of]
 ///
 /// The controller's methods to expand or collapse nodes cause the
@@ -170,9 +170,6 @@ class SliverTreeController {
 
   /// Whether the given [SliverTreeNode] built with this controller is in an
   /// expanded state.
-  ///
-  /// This property doesn't take the animation into account. It reports `true`
-  /// even if the expansion animation is not completed.
   ///
   /// See also:
   ///
@@ -224,7 +221,8 @@ class SliverTreeController {
   /// Calling this method may cause the [SliverTreeList] to rebuild, so it may
   /// not be called from a build method.
   ///
-  /// Calling this method will trigger an [SliverTreeList.onNodeToggle] callback.
+  /// Calling this method will trigger the [SliverTreeList.onNodeToggle]
+  /// callback.
   ///
   /// See also:
   ///
@@ -258,7 +256,8 @@ class SliverTreeController {
   /// Calling this method may cause the [SliverTreeList] to rebuild, so it may
   /// not be called from a build method.
   ///
-  /// Calling this method will trigger an [SliverTreeList.onNodeToggle] callback.
+  /// Calling this method will trigger the [SliverTreeList.onNodeToggle]
+  /// callback.
   ///
   /// See also:
   ///
@@ -356,8 +355,8 @@ int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
 /// a vertically scrolling [Viewport].
 ///
 /// The rows of the tree are laid out on demand, using
-/// [SliverTreeList.treeNodeBuilder]. This will only be called for the nodes that are
-/// visible, or within the [Viewport.cacheExtent.]
+/// [SliverTreeList.treeNodeBuilder]. This will only be called for the nodes
+/// that are visible, or within the [Viewport.cacheExtent].
 ///
 /// Only [Viewport]s that scroll with and axis direction of [AxisDirection.down]
 /// can use SliverTree.
@@ -409,15 +408,15 @@ class SliverTreeList<T> extends StatefulWidget {
 
   /// Called to build and entry of the [SliverTreeList] for the given node.
   ///
-  /// By default, if this is unset, the [SliverTreeList.defaultTreeNodeBuilder] is
-  /// used.
+  /// By default, if this is unset, the [SliverTreeList.defaultTreeNodeBuilder]
+  /// is used.
   final SliverTreeNodeBuilder treeNodeBuilder;
 
   /// Called to calculate the extent of the widget built for the given
   /// [SliverTreeNode].
   ///
-  /// By default, if this is unset, the [SliverTreeList.defaultTreeRowExtentBuilder]
-  /// is used.
+  /// By default, if this is unset, the
+  /// [SliverTreeList.defaultTreeRowExtentBuilder] is used.
   ///
   /// See also:
   ///
@@ -456,11 +455,11 @@ class SliverTreeList<T> extends StatefulWidget {
   /// Used to override the toggle animation's curve and duration.
   ///
   /// If [AnimationStyle.duration] is provided, it will be used to override
-  /// the [SliverTreeList.defaultAnimationDuration], which defaults to 150
+  /// the [SliverTreeList.defaultAnimationDuration], which is 150
   /// milliseconds.
   ///
   /// If [AnimationStyle.curve] is provided, it will be used to override
-  /// the [SliverTreeList.defaultAnimationCurve], defaults to [Curves.linear].
+  /// the [SliverTreeList.defaultAnimationCurve], which is [Curves.linear].
   ///
   /// To disable the tree animation, use [AnimationStyle.noAnimation].
   final AnimationStyle? animationStyle;
