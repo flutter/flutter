@@ -13,6 +13,7 @@ import 'package:flutter/widgets.dart';
 class Carousel extends StatefulWidget {
   Carousel({
     super.key,
+    this.padding,
     this.snap = false,
     this.shrinkExtent,
     this.controller,
@@ -26,6 +27,7 @@ class Carousel extends StatefulWidget {
   /// fullscreen constructor
   const Carousel.fullscreen({
     super.key,
+    this.padding,
     this.snap = false,
     this.shrinkExtent,
     this.controller,
@@ -39,6 +41,7 @@ class Carousel extends StatefulWidget {
   /// multi-browse
   const Carousel.multibrowse({
     super.key,
+    this.padding,
     this.snap = false,
     this.shrinkExtent,
     this.controller,
@@ -52,6 +55,7 @@ class Carousel extends StatefulWidget {
   /// hero
   const Carousel.hero({
     super.key,
+    this.padding,
     bool centered = false,
     this.snap = false,
     this.shrinkExtent,
@@ -63,7 +67,7 @@ class Carousel extends StatefulWidget {
   }) : layout = centered ? _CarouselLayout.centeredHero : _CarouselLayout.hero,
        itemExtent = null;
 
-
+  final EdgeInsets? padding;
   final double? shrinkExtent;
   final bool snap;
   final double? itemExtent;
@@ -180,6 +184,13 @@ class _CarouselState extends State<Carousel> {
     final ScrollPhysics physics = widget.snap
       ? const CarouselScrollPhysics()
       : ScrollConfiguration.of(context).getScrollPhysics(context);
+
+    final List<Widget> children = List<Widget>.generate(
+      widget.children.length, (int index) => Padding(
+        padding: widget.padding ?? const EdgeInsets.all(4.0),
+        child: widget.children.elementAt(index),
+      )
+    );
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
         // TODO(qunc): get last reported carousel index
@@ -211,8 +222,8 @@ class _CarouselState extends State<Carousel> {
               SliverCarousel(
                 shrinkExtent: widget.shrinkExtent,
                 itemExtent: itemExtent,
-                childWeights: weights,
-                children: widget.children,
+                weights: weights,
+                children: children,
               ),
             ],
           );
@@ -227,13 +238,13 @@ class SliverCarousel extends StatelessWidget {
     super.key,
     this.shrinkExtent = 0.0,
     this.itemExtent,
-    this.childWeights,
+    this.weights,
     required this.children,
   });
 
   final double? shrinkExtent;
   final double? itemExtent;
-  final List<int>? childWeights;
+  final List<int>? weights;
   final List<Widget> children;
 
   @override
@@ -250,11 +261,11 @@ class SliverCarousel extends StatelessWidget {
         ),
       );
     }
-    assert(childWeights != null);
+    assert(weights != null);
 
     return _SliverWeightedCarousel(
       shrinkExtent: shrinkExtent ?? 0.0,
-      weights: childWeights!,
+      weights: weights!,
       delegate: SliverChildBuilderDelegate(
         (BuildContext context, int index) {
           return children.elementAt(index);
@@ -400,7 +411,6 @@ class RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor 
 
 class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
   const _SliverWeightedCarousel({
-    super.key,
     required super.delegate,
     required this.shrinkExtent,
     required this.weights,
@@ -454,22 +464,6 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     markNeedsLayout();
   }
 
-  double _handleOverscroll(int index) {
-    double extent;
-    if (index < weights.length - 2) {
-      final int currWeight = weights.elementAt(index + 1);
-      extent = extentUnit * currWeight; // initial extent
-      final double progress = constraints.overlap.abs() / firstChildExtent;
-      final int prevWeight = weights.elementAt(index + 2);
-      final double finalIncrease = (prevWeight - currWeight) / weights.max;
-      extent = extent + finalIncrease * progress * maxChildExtent;
-    }
-    else {
-      extent = extentUnit * weights.last - constraints.overlap.abs();
-    }
-    return math.max(extent, 0);
-  }
-
   double _buildItemExtent(int index, SliverLayoutDimensions currentLayoutDimensions) {
     double extent;
 
@@ -477,19 +471,20 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
       extent = math.max(_distanceToLeadingEdge, effectiveShrinkExtent);
     }
     else if (index > _firstVisibleItemIndex
-      // In this if statement, children are visible items except the first one.
       && index - _firstVisibleItemIndex + 1 <= weights.length
     ) {
       assert(index - _firstVisibleItemIndex < weights.length);
-      final int currWeight = weights.elementAt(index - _firstVisibleItemIndex);
+      final int currIndexOnWeightList = index - _firstVisibleItemIndex;
+      final int currWeight = weights.elementAt(currIndexOnWeightList);
       extent = extentUnit * currWeight; // initial extent
       final double progress = _firstVisibleItemOffscreenExtent / firstChildExtent;
 
-      assert(index - _firstVisibleItemIndex - 1 < weights.length, '$index');
-      final int prevWeight = weights.elementAt(index - _firstVisibleItemIndex - 1);
+      assert(currIndexOnWeightList - 1 < weights.length, '$index');
+      final int prevWeight = weights.elementAt(currIndexOnWeightList - 1);
       final double finalIncrease = (prevWeight - currWeight) / weights.max;
       extent = extent + finalIncrease * progress * maxChildExtent;
-    } else if (index > _firstVisibleItemIndex
+    }
+    else if (index > _firstVisibleItemIndex
       && index - _firstVisibleItemIndex + 1 > weights.length)
     {
       double visibleItemsTotalExtent = _distanceToLeadingEdge;
@@ -505,10 +500,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
   }
 
   double get extentUnit => constraints.viewportMainAxisExtent / (weights.reduce((int total, int extent) => total + extent));
-
-  double get firstChildExtent {
-    return weights.first * extentUnit;
-  }
+  double get firstChildExtent => weights.first * extentUnit;
   double get maxChildExtent => weights.max * extentUnit;
   double get minChildExtent => weights.min * extentUnit;
   double get effectiveShrinkExtent => clampDouble(shrinkExtent, 0, minChildExtent);
@@ -525,8 +517,6 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
   }
   double get _firstVisibleItemOffscreenExtent {
     return constraints.scrollOffset - (constraints.scrollOffset / firstChildExtent).floor() * firstChildExtent;
-    // when scroll offset is 400, and first child extent is 133.33333333333334, mod result is 133.33333333333331 which is supposed to be almost 0.
-    // return constraints.scrollOffset % firstChildExtent;
   }
   double get _distanceToLeadingEdge => firstChildExtent - _firstVisibleItemOffscreenExtent;
 
@@ -545,15 +535,12 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
         return constraints.scrollOffset - effectiveShrinkExtent + _distanceToLeadingEdge;
       }
       return constraints.scrollOffset;
-    } else if (index > _firstVisibleItemIndex) {
-
-      double visibleItemsTotalExtent = _distanceToLeadingEdge;
-      for (int i = _firstVisibleItemIndex + 1; i < index; i++) {
-        visibleItemsTotalExtent += _buildItemExtent(i, currentLayoutDimensions);
-      }
-      return constraints.scrollOffset + visibleItemsTotalExtent;
     }
-    return firstChildExtent * index;
+    double visibleItemsTotalExtent = _distanceToLeadingEdge;
+    for (int i = _firstVisibleItemIndex + 1; i < index; i++) {
+      visibleItemsTotalExtent += _buildItemExtent(i, currentLayoutDimensions);
+    }
+    return constraints.scrollOffset + visibleItemsTotalExtent;
   }
 
   /// The minimum child index that is visible at the given scroll offset.
@@ -697,6 +684,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     double extraLayoutOffset = 0;
     for (int i = weights.length - 1; i >= 0; i--) {
       if (weights.elementAt(i) == weights.max) {
+        extraLayoutOffset += maxChildExtent / 2;
         break;
       }
       extraLayoutOffset += weights.elementAt(i) * extentUnit;
@@ -827,7 +815,6 @@ class CarouselScrollPhysics extends ScrollPhysics {
 
     final double itemWidth = position.viewportDimension * fraction;
     double item = position.pixels / itemWidth;
-    print('pixels: ${position.pixels} item: $item');
     if (velocity < -tolerance.velocity) {
       item -= 0.5;
     } else if (velocity > tolerance.velocity) {
