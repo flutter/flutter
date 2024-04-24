@@ -2156,8 +2156,7 @@ void main() {
   // This is a regression test for https://github.com/flutter/flutter/issues/147173.
   testWidgets('Text field with large helper text can be selected', (WidgetTester tester) async {
     const String labelText = 'MenuEntry 1';
-    await tester.pumpWidget(
-     const MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
       home: Scaffold(
         body: Center(
           child: DropdownMenu<int>(
