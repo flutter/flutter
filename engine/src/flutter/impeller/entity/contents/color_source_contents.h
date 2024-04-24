@@ -195,7 +195,7 @@ class ColorSourceContents : public Contents {
     // the stencil buffer (happens below in this method).
     if (geometry_result.mode == GeometryResult::Mode::kPreventOverdraw) {
       options.stencil_mode =
-          ContentContextOptions::StencilMode::kLegacyClipIncrement;
+          ContentContextOptions::StencilMode::kOverdrawPreventionIncrement;
     }
     pass.SetStencilReference(0);
 
