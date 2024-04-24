@@ -121,6 +121,7 @@ class _CarouselState extends State<Carousel> {
       for (int index = 0; index < weights!.length; index++) {
         if (weights!.elementAt(index) == maxWeight) {
           expandedItem = index;
+          break;
         }
       }
     }
@@ -826,10 +827,11 @@ class CarouselScrollPhysics extends ScrollPhysics {
 
     final double itemWidth = position.viewportDimension * fraction;
     double item = position.pixels / itemWidth;
+    print('pixels: ${position.pixels} item: $item');
     if (velocity < -tolerance.velocity) {
-      item -= fraction;
+      item -= 0.5;
     } else if (velocity > tolerance.velocity) {
-      item += fraction;
+      item += 0.5;
     }
     return math.min(
       item.roundToDouble() * itemWidth,
