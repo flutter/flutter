@@ -764,6 +764,77 @@ void main() {
     expect(item5material.color, Colors.transparent); // the previous item should not be highlighted.
   }, variant: TargetPlatformVariant.desktop());
 
+  // Regression test for https://github.com/flutter/flutter/issues/147253.
+  testWidgets('Down key and up key can navigate on desktop platforms '
+      'when a label text contains another label text', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: const Scaffold(
+        body: DropdownMenu<int>(
+          dropdownMenuEntries: <DropdownMenuEntry<int>>[
+            DropdownMenuEntry<int>(
+              value: 0,
+              label: 'ABC'
+            ),
+            DropdownMenuEntry<int>(
+              value: 1,
+              label: 'AB'
+            ),
+            DropdownMenuEntry<int>(
+              value: 2,
+              label: 'ABCD'
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(DropdownMenu<int>));
+    await tester.pump();
+
+    final Finder button0Material = find.descendant(
+      of: find.widgetWithText(MenuItemButton, 'ABC').last,
+      matching: find.byType(Material),
+    );
+    final Finder button1Material = find.descendant(
+      of: find.widgetWithText(MenuItemButton, 'AB').last,
+      matching: find.byType(Material),
+    );
+    final Finder button2Material = find.descendant(
+      of: find.widgetWithText(MenuItemButton, 'ABCD').last,
+      matching: find.byType(Material),
+    );
+
+    // Press down key three times, the highlight should move to the next item each time.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    Material item0Material = tester.widget<Material>(button0Material);
+    expect(item0Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    Material item1Material = tester.widget<Material>(button1Material);
+    expect(item1Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    final Material item2Material = tester.widget<Material>(button2Material);
+    expect(item2Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+    // Press up key two times, the highlight should up each time.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    item1Material = tester.widget<Material>(button1Material);
+    expect(item1Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    item0Material = tester.widget<Material>(button0Material);
+    expect(item0Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+  }, variant: TargetPlatformVariant.desktop());
+
   testWidgets('The text input should match the label of the menu item '
       'while pressing down key on desktop platforms', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
