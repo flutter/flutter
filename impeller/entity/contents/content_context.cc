@@ -450,12 +450,6 @@ ContentContext::ContentContext(
     tiled_texture_external_pipelines_.CreateDefault(*context_, options);
   }
 #endif  // IMPELLER_ENABLE_OPENGLES
-  if (context_->GetCapabilities()->SupportsCompute()) {
-    auto pipeline_desc =
-        PointsComputeShaderPipeline::MakeDefaultPipelineDescriptor(*context_);
-    point_field_compute_pipelines_ =
-        context_->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
-  }
 
   is_valid_ = true;
   InitializeCommonlyUsedShadersIfNeeded();
