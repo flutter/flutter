@@ -288,4 +288,50 @@ TEST_F(FlutterEmbedderExternalTextureTest, TestPopulateExternalTextureYUVA2) {
   gpuSurface->makeImageSnapshot();
 }
 
+TEST_F(FlutterEmbedderExternalTextureTest, TestPopulateUnsupportedExternalTexture) {
+  // Constants.
+  const size_t width = 100;
+  const size_t height = 100;
+  const int64_t texture_id = 1;
+
+  // Set up the surface.
+  FlutterDarwinContextMetalSkia* darwinContextMetal =
+      [[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice];
+  SkImageInfo info = SkImageInfo::MakeN32Premul(width, height);
+  GrDirectContext* grContext = darwinContextMetal.mainContext.get();
+  sk_sp<SkSurface> gpuSurface(SkSurfaces::RenderTarget(grContext, skgpu::Budgeted::kNo, info));
+
+  // Create a texture.
+  TestExternalTexture* testExternalTexture =
+      [[TestExternalTexture alloc] initWidth:width
+                                      height:height
+                             pixelFormatType:kCVPixelFormatType_420YpCbCr8PlanarFullRange];
+  FlutterExternalTexture* textureHolder =
+      [[FlutterExternalTexture alloc] initWithFlutterTexture:testExternalTexture
+                                          darwinMetalContext:darwinContextMetal];
+
+  // Callback to resolve the texture.
+  EmbedderExternalTextureMetal::ExternalTextureCallback callback = [&](int64_t texture_id, size_t w,
+                                                                       size_t h) {
+    EXPECT_TRUE(w == width);
+    EXPECT_TRUE(h == height);
+
+    auto texture = std::make_unique<FlutterMetalExternalTexture>();
+    EXPECT_FALSE([textureHolder populateTexture:texture.get()]);
+    return nullptr;
+  };
+
+  // Render the texture.
+  std::unique_ptr<flutter::Texture> texture =
+      std::make_unique<EmbedderExternalTextureMetal>(texture_id, callback);
+  SkRect bounds = SkRect::MakeWH(info.width(), info.height());
+  DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
+  DlSkCanvasAdapter canvas(gpuSurface->getCanvas());
+  flutter::Texture::PaintContext context{
+      .canvas = &canvas,
+      .gr_context = grContext,
+  };
+  texture->Paint(context, bounds, /*freeze=*/false, sampling);
+}
+
 }  // namespace flutter::testing
