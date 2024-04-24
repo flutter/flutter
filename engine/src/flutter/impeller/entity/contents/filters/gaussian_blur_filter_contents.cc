@@ -8,25 +8,22 @@
 
 #include "flutter/fml/make_copyable.h"
 #include "impeller/entity/contents/clip_contents.h"
-#include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
-#include "impeller/renderer/command.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/renderer/texture_mipmap.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 
 namespace impeller {
 
-using GaussianBlurVertexShader = KernelPipeline::VertexShader;
-using GaussianBlurFragmentShader = KernelPipeline::FragmentShader;
+using GaussianBlurVertexShader = GaussianBlurPipeline::VertexShader;
+using GaussianBlurFragmentShader = GaussianBlurPipeline::FragmentShader;
 
 const int32_t GaussianBlurFilterContents::kBlurFilterRequiredMipCount = 4;
 
 namespace {
 
-// 48 comes from kernel.glsl.
+// 48 comes from gaussian.frag.
 const int32_t kMaxKernelSize = 48;
 
 SamplerDescriptor MakeSamplerDescriptor(MinMagFilter filter,
@@ -155,14 +152,7 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
 
         ContentContextOptions options = OptionsFromPass(pass);
         options.primitive_type = PrimitiveType::kTriangleStrip;
-
-        if (tile_mode == Entity::TileMode::kDecal &&
-            !renderer.GetDeviceCapabilities()
-                 .SupportsDecalSamplerAddressMode()) {
-          pass.SetPipeline(renderer.GetKernelDecalPipeline(options));
-        } else {
-          pass.SetPipeline(renderer.GetKernelPipeline(options));
-        }
+        pass.SetPipeline(renderer.GetGaussianBlurPipeline(options));
 
         BindVertices<GaussianBlurVertexShader>(pass, host_buffer,
                                                {
@@ -181,7 +171,7 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
                 linear_sampler_descriptor));
         GaussianBlurVertexShader::BindFrameInfo(
             pass, host_buffer.EmplaceUniform(frame_info));
-        KernelPipeline::FragmentShader::KernelSamples kernel_samples =
+        GaussianBlurPipeline::FragmentShader::KernelSamples kernel_samples =
             LerpHackKernelSamples(GenerateBlurInfo(blur_info));
         FML_CHECK(kernel_samples.sample_count < kMaxKernelSize);
         GaussianBlurFragmentShader::BindKernelSamples(
@@ -600,9 +590,9 @@ Scalar GaussianBlurFilterContents::ScaleSigma(Scalar sigma) {
   return clamped * scalar;
 }
 
-KernelPipeline::FragmentShader::KernelSamples GenerateBlurInfo(
+GaussianBlurPipeline::FragmentShader::KernelSamples GenerateBlurInfo(
     BlurParameters parameters) {
-  KernelPipeline::FragmentShader::KernelSamples result;
+  GaussianBlurPipeline::FragmentShader::KernelSamples result;
   result.sample_count =
       ((2 * parameters.blur_radius) / parameters.step_size) + 1;
 
@@ -617,7 +607,7 @@ KernelPipeline::FragmentShader::KernelSamples GenerateBlurInfo(
   Scalar tally = 0.0f;
   for (int i = 0; i < result.sample_count; ++i) {
     int x = x_offset + (i * parameters.step_size) - parameters.blur_radius;
-    result.samples[i] = KernelPipeline::FragmentShader::KernelSample{
+    result.samples[i] = GaussianBlurPipeline::FragmentShader::KernelSample{
         .uv_offset = parameters.blur_uv_offset * x,
         .coefficient = expf(-0.5f * (x * x) /
                             (parameters.blur_sigma * parameters.blur_sigma)) /
@@ -636,9 +626,9 @@ KernelPipeline::FragmentShader::KernelSamples GenerateBlurInfo(
 
 // This works by shrinking the kernel size by 2 and relying on lerp to read
 // between the samples.
-KernelPipeline::FragmentShader::KernelSamples LerpHackKernelSamples(
-    KernelPipeline::FragmentShader::KernelSamples parameters) {
-  KernelPipeline::FragmentShader::KernelSamples result;
+GaussianBlurPipeline::FragmentShader::KernelSamples LerpHackKernelSamples(
+    GaussianBlurPipeline::FragmentShader::KernelSamples parameters) {
+  GaussianBlurPipeline::FragmentShader::KernelSamples result;
   result.sample_count = ((parameters.sample_count - 1) / 2) + 1;
   int32_t middle = result.sample_count / 2;
   int32_t j = 0;
@@ -646,10 +636,11 @@ KernelPipeline::FragmentShader::KernelSamples LerpHackKernelSamples(
     if (i == middle) {
       result.samples[i] = parameters.samples[j++];
     } else {
-      KernelPipeline::FragmentShader::KernelSample left = parameters.samples[j];
-      KernelPipeline::FragmentShader::KernelSample right =
+      GaussianBlurPipeline::FragmentShader::KernelSample left =
+          parameters.samples[j];
+      GaussianBlurPipeline::FragmentShader::KernelSample right =
           parameters.samples[j + 1];
-      result.samples[i] = KernelPipeline::FragmentShader::KernelSample{
+      result.samples[i] = GaussianBlurPipeline::FragmentShader::KernelSample{
           .uv_offset = (left.uv_offset * left.coefficient +
                         right.uv_offset * right.coefficient) /
                        (left.coefficient + right.coefficient),
