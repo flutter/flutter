@@ -43,8 +43,11 @@
   if (pixel_format == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange ||
       pixel_format == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange) {
     return [self populateTextureFromYUVAPixelBuffer:pixelBuffer textureOut:textureOut];
-  } else {
+  } else if (pixel_format == kCVPixelFormatType_32BGRA) {
     return [self populateTextureFromRGBAPixelBuffer:pixelBuffer textureOut:textureOut];
+  } else {
+    NSLog(@"Unsupported pixel format: %d", pixel_format);
+    return NO;
   }
 }
 
