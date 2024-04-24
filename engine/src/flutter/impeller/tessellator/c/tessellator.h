@@ -8,7 +8,6 @@
 #include <cstdint>
 
 #include "impeller/geometry/path_builder.h"
-#include "impeller/tessellator/tessellator.h"
 
 #ifdef _WIN32
 #define IMPELLER_API __declspec(dllexport)

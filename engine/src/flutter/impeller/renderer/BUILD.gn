@@ -135,6 +135,7 @@ impeller_component("renderer_unittests") {
     ":renderer",
     "../fixtures",
     "../playground:playground_test",
+    "../tessellator:tessellator_libtess",
     "//flutter/testing:testing_lib",
   ]
 

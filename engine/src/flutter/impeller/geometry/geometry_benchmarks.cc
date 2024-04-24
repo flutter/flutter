@@ -10,6 +10,7 @@
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/tessellator/tessellator.h"
+#include "impeller/tessellator/tessellator_libtess.h"
 
 namespace impeller {
 
@@ -37,7 +38,7 @@ Path CreateQuadratic(bool closed);
 Path CreateRRect();
 }  // namespace
 
-static Tessellator tess;
+static TessellatorLibtess tess;
 
 template <class... Args>
 static void BM_Polyline(benchmark::State& state, Args&&... args) {
