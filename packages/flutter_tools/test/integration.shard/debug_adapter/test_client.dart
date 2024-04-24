@@ -71,7 +71,8 @@ class DapTestClient {
         // that started occurring with pkg:dds 4.2.0 because of how the stack
         // trace parsing is done. This will be unnecessary once fixed in
         // DDS/DAP.
-        // TODO(dantup): Remove this once DAP is updated.
+        // TODO(dantup): Remove this once we're updated to a version of DAP that
+        //  includes https://dart-review.googlesource.com/c/sdk/+/364340.
       .where((OutputEventBody output) => output.output.isNotEmpty)
       .map((OutputEventBody output) => output.output);
 
