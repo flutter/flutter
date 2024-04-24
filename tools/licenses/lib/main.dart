@@ -1436,9 +1436,6 @@ class _RepositoryRootThirdPartyDirectory extends _RepositoryGenericThirdPartyDir
     if (entry.name == 'icu') {
       return _RepositoryIcuDirectory(this, entry);
     }
-    if (entry.name == 'zlib') {
-      return _RepositoryZLibDirectory(this, entry);
-    }
     return super.createSubdirectory(entry);
   }
 }
@@ -1755,6 +1752,9 @@ class _RepositoryFlutterThirdPartyDirectory extends _RepositoryGenericThirdParty
     }
     if (entry.name == 'vulkan-deps') {
       return _RepositoryGenericThirdPartyDirectory(this, entry);
+    }
+    if (entry.name == 'zlib') {
+      return _RepositoryZLibDirectory(this, entry);
     }
     return super.createSubdirectory(entry);
   }
