@@ -304,17 +304,6 @@ GeometryResult VerticesGeometry::GetPositionUVColorBuffer(
   };
 }
 
-GeometryVertexType VerticesGeometry::GetVertexType() const {
-  if (HasVertexColors()) {
-    return GeometryVertexType::kColor;
-  }
-  if (HasTextureCoordinates()) {
-    return GeometryVertexType::kUV;
-  }
-
-  return GeometryVertexType::kPosition;
-}
-
 std::optional<Rect> VerticesGeometry::GetCoverage(
     const Matrix& transform) const {
   return bounds_.TransformBounds(transform);

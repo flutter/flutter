@@ -38,9 +38,6 @@ class StrokePathGeometry final : public Geometry {
   GeometryResult::Mode GetResultMode() const override;
 
   // |Geometry|
-  GeometryVertexType GetVertexType() const override;
-
-  // |Geometry|
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
   // Private for benchmarking and debugging
