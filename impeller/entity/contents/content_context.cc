@@ -193,25 +193,15 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
         front_stencil.stencil_failure = StencilOperation::kSetToReferenceValue;
         desc.SetStencilAttachmentDescriptors(front_stencil);
         break;
-      case StencilMode::kLegacyClipRestore:
-        front_stencil.stencil_compare = CompareFunction::kLess;
-        front_stencil.depth_stencil_pass =
-            StencilOperation::kSetToReferenceValue;
-        desc.SetStencilAttachmentDescriptors(front_stencil);
-        break;
-      case StencilMode::kLegacyClipIncrement:
+      case StencilMode::kOverdrawPreventionIncrement:
         front_stencil.stencil_compare = CompareFunction::kEqual;
         front_stencil.depth_stencil_pass = StencilOperation::kIncrementClamp;
         desc.SetStencilAttachmentDescriptors(front_stencil);
         break;
-      case StencilMode::kLegacyClipDecrement:
-        front_stencil.stencil_compare = CompareFunction::kEqual;
-        front_stencil.depth_stencil_pass = StencilOperation::kDecrementClamp;
-        desc.SetStencilAttachmentDescriptors(front_stencil);
-        break;
-      case StencilMode::kLegacyClipCompare:
-        front_stencil.stencil_compare = CompareFunction::kEqual;
-        front_stencil.depth_stencil_pass = StencilOperation::kKeep;
+      case StencilMode::kOverdrawPreventionRestore:
+        front_stencil.stencil_compare = CompareFunction::kLess;
+        front_stencil.depth_stencil_pass =
+            StencilOperation::kSetToReferenceValue;
         desc.SetStencilAttachmentDescriptors(front_stencil);
         break;
     }
@@ -617,9 +607,8 @@ void ContentContext::InitializeCommonlyUsedShadersIfNeeded() const {
   options.blend_mode = BlendMode::kDestination;
   options.primitive_type = PrimitiveType::kTriangleStrip;
   for (const auto stencil_mode :
-       {ContentContextOptions::StencilMode::kLegacyClipIncrement,
-        ContentContextOptions::StencilMode::kLegacyClipDecrement,
-        ContentContextOptions::StencilMode::kLegacyClipRestore}) {
+       {ContentContextOptions::StencilMode::kOverdrawPreventionIncrement,
+        ContentContextOptions::StencilMode::kOverdrawPreventionRestore}) {
     options.stencil_mode = stencil_mode;
     CreateIfNeeded(clip_pipelines_, options);
   }
