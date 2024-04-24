@@ -347,10 +347,9 @@ class SemanticsTester {
 
 /// Verifies the HTML structure of the current semantics tree.
 void expectSemanticsTree(EngineSemanticsOwner owner, String semanticsHtml) {
-  const List<String> ignoredStyleProperties = <String>['pointer-events'];
   expect(
-    canonicalizeHtml(owner.semanticsHost.querySelector('flt-semantics')!.outerHTML!, ignoredStyleProperties: ignoredStyleProperties),
-    canonicalizeHtml(semanticsHtml),
+    owner.semanticsHost.querySelector('flt-semantics'),
+    hasHtml(semanticsHtml),
   );
 }
 
