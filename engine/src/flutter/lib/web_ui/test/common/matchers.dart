@@ -7,8 +7,8 @@ library matchers;
 
 import 'dart:math' as math;
 
-import 'package:html/dom.dart' as html_package;
-import 'package:html/parser.dart' as html_package;
+import 'package:html/dom.dart' as html;
+import 'package:html/parser.dart' as html;
 
 import 'package:test/test.dart';
 
@@ -198,238 +198,6 @@ class _IsWithinDistance<T> extends Matcher {
   }
 }
 
-/// Controls how test HTML is canonicalized by [canonicalizeHtml] function.
-///
-/// In all cases whitespace between elements is stripped.
-enum HtmlComparisonMode {
-  /// Retains all attributes.
-  ///
-  /// Useful when very precise HTML comparison is needed that includes both
-  /// layout and non-layout style attributes. This mode is rarely needed. Most
-  /// tests should use [layoutOnly] or [nonLayoutOnly].
-  everything,
-
-  /// Retains only layout style attributes, such as "width".
-  ///
-  /// Useful when testing layout because it filters out all the noise that does
-  /// not affect layout.
-  layoutOnly,
-
-  /// Retains only non-layout style attributes, such as "color".
-  ///
-  /// Useful when testing styling because it filters out all the noise from the
-  /// layout attributes.
-  nonLayoutOnly,
-
-  /// Do not consider attributes when comparing HTML.
-  noAttributes,
-}
-
-/// Rewrites [htmlContent] by removing irrelevant style attributes.
-///
-/// If [throwOnUnusedStyleProperties] is `true`, throws instead of rewriting. Set
-/// [throwOnUnusedStyleProperties] to `true` to check that expected HTML strings do
-/// not contain irrelevant attributes. It is ok for actual HTML to contain all
-/// kinds of attributes. They only need to be filtered out before testing.
-String canonicalizeHtml(
-  String htmlContent, {
-  HtmlComparisonMode mode = HtmlComparisonMode.nonLayoutOnly,
-  bool throwOnUnusedStyleProperties = false,
-  List<String>? ignoredStyleProperties,
-}) {
-  if (htmlContent.trim().isEmpty) {
-    return '';
-  }
-
-  String? unusedStyleProperty(String name) {
-    if (throwOnUnusedStyleProperties) {
-      fail('Provided HTML contains style property "$name" which '
-          'is not used for comparison in the test. The HTML was:\n\n$htmlContent');
-    }
-
-    return null;
-  }
-
-  html_package.Element cleanup(html_package.Element original) {
-    String replacementTag = original.localName!;
-    switch (replacementTag) {
-      case 'flt-scene':
-        replacementTag = 's';
-      case 'flt-transform':
-        replacementTag = 't';
-      case 'flt-opacity':
-        replacementTag = 'o';
-      case 'flt-clip':
-        final String? clipType = original.attributes['clip-type'];
-        switch (clipType) {
-          case 'rect':
-            replacementTag = 'clip';
-          case 'rrect':
-            replacementTag = 'rclip';
-          case 'physical-shape':
-            replacementTag = 'pshape';
-          default:
-            throw Exception('Unknown clip type: $clipType');
-        }
-      case 'flt-clip-interior':
-        replacementTag = 'clip-i';
-      case 'flt-picture':
-        replacementTag = 'pic';
-      case 'flt-canvas':
-        replacementTag = 'c';
-      case 'flt-dom-canvas':
-        replacementTag = 'd';
-      case 'flt-semantics':
-        replacementTag = 'sem';
-      case 'flt-semantics-container':
-        replacementTag = 'sem-c';
-      case 'flt-semantics-img':
-        replacementTag = 'sem-img';
-      case 'flt-semantics-text-field':
-        replacementTag = 'sem-tf';
-    }
-
-    final html_package.Element replacement =
-        html_package.Element.tag(replacementTag);
-
-    if (mode != HtmlComparisonMode.noAttributes) {
-      // Sort the attributes so tests are not sensitive to their order, which
-      // does not matter in terms of functionality.
-      final List<String> attributeNames = original.attributes.keys.cast<String>().toList();
-      attributeNames.sort();
-      for (final String name in attributeNames) {
-        final String value = original.attributes[name]!;
-        if (name == 'style') {
-          // The style attribute is handled separately because it contains substructure.
-          continue;
-        }
-
-        // These are the only attributes we're interested in testing. This list
-        // can change over time.
-        if (name.startsWith('aria-') || name.startsWith('flt-') || name == 'role') {
-          replacement.attributes[name] = value;
-        }
-      }
-
-      if (original.attributes.containsKey('style')) {
-        final String styleValue = original.attributes['style']!;
-
-        int attrCount = 0;
-        final String processedAttributes = styleValue
-            .split(';')
-            .map((String attr) {
-              attr = attr.trim();
-              if (attr.isEmpty) {
-                return null;
-              }
-
-              if (mode != HtmlComparisonMode.everything) {
-                final bool forLayout = mode == HtmlComparisonMode.layoutOnly;
-                final List<String> parts = attr.split(':');
-                if (parts.length == 2) {
-                  final String name = parts.first;
-
-                  if (ignoredStyleProperties != null && ignoredStyleProperties.contains(name)) {
-                    return null;
-                  }
-
-                  // Whether the attribute is one that's set to the same value and
-                  // never changes. Such attributes are usually not interesting to
-                  // test.
-                  final bool isStaticAttribute = const <String>[
-                    'top',
-                    'left',
-                    'position',
-                  ].contains(name);
-
-                  if (isStaticAttribute) {
-                    return unusedStyleProperty(name);
-                  }
-
-                  // Whether the attribute is set by the layout system.
-                  final bool isLayoutAttribute = const <String>[
-                    'top',
-                    'left',
-                    'bottom',
-                    'right',
-                    'position',
-                    'width',
-                    'height',
-                    'font-size',
-                    'transform',
-                    'transform-origin',
-                    'white-space',
-                  ].contains(name);
-
-                  if (forLayout && !isLayoutAttribute ||
-                      !forLayout && isLayoutAttribute) {
-                    return unusedStyleProperty(name);
-                  }
-                }
-              }
-
-              attrCount++;
-              return attr.trim();
-            })
-            .where((String? attr) => attr != null && attr.isNotEmpty)
-            .join('; ');
-
-        if (attrCount > 0) {
-          replacement.attributes['style'] = processedAttributes;
-        }
-      }
-    } else if (throwOnUnusedStyleProperties && original.attributes.isNotEmpty) {
-      fail('Provided HTML contains attributes. However, the comparison mode '
-          'is $mode. The HTML was:\n\n$htmlContent');
-    }
-
-    for (final html_package.Node child in original.nodes) {
-      if (child is html_package.Text && child.text.trim().isEmpty) {
-        continue;
-      }
-
-      if (child is html_package.Element) {
-        replacement.append(cleanup(child));
-      } else {
-        replacement.append(child.clone(true));
-      }
-    }
-
-    return replacement;
-  }
-
-  final html_package.DocumentFragment originalDom =
-      html_package.parseFragment(htmlContent);
-
-  final html_package.DocumentFragment cleanDom =
-      html_package.DocumentFragment();
-  for (final html_package.Element child in originalDom.children) {
-    cleanDom.append(cleanup(child));
-  }
-
-  return cleanDom.outerHtml;
-}
-
-/// Tests that [element] has the HTML structure described by [expectedHtml].
-void expectHtml(DomElement element, String expectedHtml,
-    {HtmlComparisonMode mode = HtmlComparisonMode.nonLayoutOnly}) {
-  expectedHtml =
-      canonicalizeHtml(expectedHtml, mode: mode, throwOnUnusedStyleProperties: true);
-  final String actualHtml = canonicalizeHtml(element.outerHTML!, mode: mode);
-  expect(actualHtml, expectedHtml);
-}
-
-class SceneTester {
-  SceneTester(this.scene);
-
-  final SurfaceScene scene;
-
-  void expectSceneHtml(String expectedHtml) {
-    expectHtml(scene.webOnlyRootElement!, expectedHtml,
-        mode: HtmlComparisonMode.noAttributes);
-  }
-}
-
 /// A matcher for functions that throw [AssertionError].
 ///
 /// This is equivalent to `throwsA(isInstanceOf<AssertionError>())`.
@@ -454,3 +222,220 @@ final Matcher throwsAssertionError = throwsA(isAssertionError);
 ///  * [throwsAssertionError], to test if a function throws any [AssertionError].
 ///  * [isFlutterError], to test if any object is a [FlutterError].
 const Matcher isAssertionError = TypeMatcher<AssertionError>();
+
+/// Matches a [DomElement] against an HTML pattern.
+///
+/// An HTML pattern is a piece of valid HTML. The expectation is that the DOM
+/// element has the exact element structure as the provided [htmlPattern]. The
+/// DOM element is expected to have the exact element and style attributes
+/// specified in the pattern.
+///
+/// The DOM element may have additional attributes not specified in the pattern.
+/// This allows testing specific features relevant to the test.
+///
+/// The DOM structure may not have additional elements that are not specified in
+/// the pattern.
+Matcher hasHtml(String htmlPattern) {
+  final html.DocumentFragment originalDom = html.parseFragment(htmlPattern);
+  if (originalDom.children.isEmpty) {
+    fail(
+      'Test HTML pattern is empty.\n'
+      'The pattern must contain exacly one top-level element, but was: $htmlPattern');
+  }
+  if (originalDom.children.length > 1) {
+    fail(
+      'Test HTML pattern has more than one top-level element.\n'
+      'The pattern must contain exacly one top-level element, but was: $htmlPattern');
+  }
+  return HtmlPatternMatcher(originalDom.children.single);
+}
+
+enum _Breadcrumb { root, element, attribute, styleProperty }
+
+class _Breadcrumbs {
+  const _Breadcrumbs._(this.parent, this.kind, this.name);
+
+  final _Breadcrumbs? parent;
+  final _Breadcrumb kind;
+  final String name;
+
+  static const _Breadcrumbs root = _Breadcrumbs._(null, _Breadcrumb.root, '');
+
+  _Breadcrumbs element(String tagName) {
+    return _Breadcrumbs._(this, _Breadcrumb.element, tagName);
+  }
+
+  _Breadcrumbs attribute(String attributeName) {
+    return _Breadcrumbs._(this, _Breadcrumb.attribute, attributeName);
+  }
+
+  _Breadcrumbs styleProperty(String propertyName) {
+    return _Breadcrumbs._(this, _Breadcrumb.styleProperty, propertyName);
+  }
+
+  @override
+  String toString() {
+    return switch (kind) {
+      _Breadcrumb.root => '<root>',
+      _Breadcrumb.element => parent!.kind == _Breadcrumb.root ? '@$name' : '$parent > $name',
+      _Breadcrumb.attribute => '$parent#$name',
+      _Breadcrumb.styleProperty => '$parent#style($name)',
+    };
+  }
+}
+
+class HtmlPatternMatcher extends Matcher {
+  const HtmlPatternMatcher(this.pattern);
+
+  final html.Element pattern;
+
+  @override
+  bool matches(final Object? object, Map<Object?, Object?> matchState) {
+    if (object is! DomElement) {
+      return false;
+    }
+
+    final List<String> mismatches = <String>[];
+    matchState['mismatches'] = mismatches;
+
+    final html.Element element = html.parseFragment(object.outerHTML).children.single;
+    matchElements(_Breadcrumbs.root, mismatches, element, pattern);
+    return mismatches.isEmpty;
+  }
+
+  static bool _areTagsEqual(html.Element a, html.Element b) {
+    const Map<String, String> synonyms = <String, String>{
+      'sem': 'flt-semantics',
+      'sem-c': 'flt-semantics-container',
+      'sem-img': 'flt-semantics-img',
+      'sem-tf': 'flt-semantics-text-field',
+    };
+
+    String aName = a.localName!.toLowerCase();
+    String bName = b.localName!.toLowerCase();
+
+    if (synonyms.containsKey(aName)) {
+      aName = synonyms[aName]!;
+    }
+
+    if (synonyms.containsKey(bName)) {
+      bName = synonyms[bName]!;
+    }
+
+    return aName == bName;
+  }
+
+  void matchElements(_Breadcrumbs parent, List<String> mismatches, html.Element element, html.Element pattern) {
+    final _Breadcrumbs breadcrumb = parent.element(pattern.localName!);
+
+    if (!_areTagsEqual(element, pattern)) {
+      mismatches.add(
+        '$breadcrumb: unexpected tag name <${element.localName}> (expected <${pattern.localName}>).'
+      );
+      // Don't bother matching anything else. If tags are different, it's likely
+      // we're comparing apples to oranges at this point.
+      return;
+    }
+
+    matchAttributes(breadcrumb, mismatches, element, pattern);
+    matchChildren(breadcrumb, mismatches, element, pattern);
+  }
+
+  void matchAttributes(_Breadcrumbs parent, List<String> mismatches, html.Element element, html.Element pattern) {
+    for (final MapEntry<Object, String> attribute in pattern.attributes.entries) {
+      final String expectedName = attribute.key as String;
+      final String expectedValue = attribute.value;
+      final _Breadcrumbs breadcrumb = parent.attribute(expectedName);
+
+      if (expectedName == 'style') {
+        // Style is a complex attribute that deserves a special comparison algorithm.
+        matchStyle(parent, mismatches, element, pattern);
+      } else {
+        if (!element.attributes.containsKey(expectedName)) {
+          mismatches.add('$breadcrumb: attribute $expectedName="$expectedValue" missing.');
+        } else {
+          final String? actualValue = element.attributes[expectedName];
+          if (actualValue != expectedValue) {
+            mismatches.add(
+              '$breadcrumb: expected attribute value $expectedName="$expectedValue", '
+              'but found $expectedName="$actualValue".'
+            );
+          }
+        }
+      }
+    }
+  }
+
+  static Map<String, String> parseStyle(html.Element element) {
+    final Map<String, String> result = <String, String>{};
+
+    final String rawStyle = element.attributes['style']!;
+    for (final String attribute in rawStyle.split(';')) {
+      final List<String> parts = attribute.split(':');
+      final String name = parts[0].trim();
+      final String value = parts.skip(1).join(':').trim();
+      result[name] = value;
+    }
+
+    return result;
+  }
+
+  void matchStyle(_Breadcrumbs parent, List<String> mismatches, html.Element element, html.Element pattern) {
+    final Map<String, String> expected = parseStyle(pattern);
+    final Map<String, String> actual = parseStyle(element);
+    for (final MapEntry<String, String> entry in expected.entries) {
+      final _Breadcrumbs breadcrumb = parent.styleProperty(entry.key);
+      if (!actual.containsKey(entry.key)) {
+        mismatches.add(
+          '$breadcrumb: style property ${entry.key}="${entry.value}" missing.'
+        );
+      } else if (actual[entry.key] != entry.value) {
+        mismatches.add(
+          '$breadcrumb: expected style property ${entry.key}="${entry.value}", '
+          'but found ${entry.key}="${actual[entry.key]}".'
+        );
+      }
+    }
+  }
+
+  void matchChildren(_Breadcrumbs parent, List<String> mismatches, html.Element element, html.Element pattern) {
+    if (element.children.length != pattern.children.length) {
+      mismatches.add(
+        '$parent: expected ${pattern.children.length} children, but found ${element.children.length}.'
+      );
+      return;
+    }
+
+    for (int i = 0; i < pattern.children.length; i++) {
+      final html.Element expectedChild = pattern.children[i];
+      final html.Element actualChild = element.children[i];
+      matchElements(parent, mismatches, actualChild, expectedChild);
+    }
+  }
+
+  @override
+  Description describe(Description description) {
+    description.add('the element to have the following pattern:\n');
+    description.add(pattern.outerHtml);
+    return description;
+  }
+
+  @override
+  Description describeMismatch(
+    Object? object,
+    Description mismatchDescription,
+    Map<Object?, Object?> matchState,
+    bool verbose,
+  ) {
+    mismatchDescription.add('The following DOM structure did not match the expected pattern:\n');
+    mismatchDescription.add('${(object! as DomElement).outerHTML!}\n\n');
+    mismatchDescription.add('Specifically:\n');
+
+    final List<String> mismatches = matchState['mismatches']! as List<String>;
+    for (final String mismatch in mismatches) {
+      mismatchDescription.add(' - $mismatch\n');
+    }
+
+    return mismatchDescription;
+  }
+}

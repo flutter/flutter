@@ -93,8 +93,18 @@ void testMain() {
 
     expectSemanticsTree(owner(), '''
 <sem style="$rootSemanticStyle">
-  <input value="hello" />
+  <input />
 </sem>''');
+
+    // TODO(yjbanov): this used to attempt to test that value="hello" but the
+    //                test was a false positive. We should revise this test and
+    //                make sure it tests the right things:
+    //                https://github.com/flutter/flutter/issues/147200
+    final SemanticsObject node = owner().debugSemanticsTree![0]!;
+    expect(
+      (node.element as DomHTMLInputElement).value,
+      isNull,
+    );
   });
 
     // TODO(yjbanov): this test will need to be adjusted for Safari when we add
