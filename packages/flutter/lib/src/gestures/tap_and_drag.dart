@@ -748,6 +748,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     super.debugOwner,
     super.supportedDevices,
     super.allowedButtonsFilter,
+    this.eagerVictoryOnDrag = true,
   }) : _deadline = kPressTimeout,
       dragStartBehavior = DragStartBehavior.start;
 
@@ -781,6 +782,13 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
   /// recognizer will be reset.
   @override
   int? maxConsecutiveTap;
+
+  /// Whether this recognizer eagerly declares victory when it has detected
+  /// a drag.
+  ///
+  /// When this value is `false`, this recognizer will wait until it is the last
+  /// recognizer in the [GestureArena] before declaring victory on a drag.
+  bool eagerVictoryOnDrag;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
   ///
@@ -986,9 +994,12 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
 
     // resolve(GestureDisposition.accepted) will be called when the [PointerMoveEvent] has
     // moved a sufficient global distance.
-    if (_start != null && _dragState == _DragState.possible) {
-      // assert(_dragState == _DragState.accepted);
-      // assert(_dragState == _DragState.possible);
+    if (_start != null) {
+      if (eagerVictoryOnDrag) {
+        assert(_dragState == _DragState.accepted);
+      } else {
+        assert(_dragState == _DragState.possible);
+      }
       assert(currentUp == null);
       _acceptDrag(_start!);
     }
@@ -1122,7 +1133,9 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     if (!_wonArenaForPrimaryPointer) {
       return;
     }
-    _dragState = _DragState.accepted;//*
+    if (!eagerVictoryOnDrag) {
+      _dragState = _DragState.accepted;
+    }
     if (dragStartBehavior == DragStartBehavior.start) {
       _initialPosition = _initialPosition + OffsetPair(global: event.delta, local: event.localDelta);
     }
@@ -1158,10 +1171,12 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     if (_hasSufficientGlobalDistanceToAccept(event.kind)
         || (_wonArenaForPrimaryPointer && _globalDistanceMovedAllAxes.abs() > computePanSlop(event.kind, gestureSettings))) {
       _start = event;
-      // _dragState = _DragState.accepted;
-      // if (!_wonArenaForPrimaryPointer) {
-      //   resolve(GestureDisposition.accepted);
-      // }
+      if (eagerVictoryOnDrag) {
+        _dragState = _DragState.accepted;
+        if (!_wonArenaForPrimaryPointer) {
+          resolve(GestureDisposition.accepted);
+        }
+      }
     }
   }
 

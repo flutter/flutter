@@ -3410,6 +3410,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
                 // Text selection should start from the position of the first pointer
                 // down event.
                 ..dragStartBehavior = DragStartBehavior.down
+                ..eagerVictoryOnDrag = defaultTargetPlatform != TargetPlatform.iOS
                 ..onTapTrackStart = _handleTapTrackStart
                 ..onTapTrackReset = _handleTapTrackReset
                 ..onTapDown = _handleTapDown
