@@ -10,6 +10,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTouchInterceptingView_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObjectTestMocks.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -1006,6 +1007,21 @@ FLUTTER_ASSERT_ARC
   // Check if there's no more strong references to `platformView` after container and platformView
   // are released.
   XCTAssertNil(weakPlatformView);
+}
+
+- (void)testTextInputSemanticsObject {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode node;
+  node.label = "foo";
+  node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kIsTextField) |
+               static_cast<int32_t>(flutter::SemanticsFlags::kIsReadOnly);
+  TextInputSemanticsObject* object = [[TextInputSemanticsObject alloc] initWithBridge:bridge uid:0];
+  [object setSemanticsNode:&node];
+  [object accessibilityBridgeDidFinishUpdate];
+  XCTAssertEqual([object accessibilityTraits], UIAccessibilityTraitNone);
 }
 
 @end

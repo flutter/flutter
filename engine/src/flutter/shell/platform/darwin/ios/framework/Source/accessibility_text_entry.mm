@@ -304,12 +304,8 @@ static const UIAccessibilityTraits kUIAccessibilityTraitUndocumentedEmptyLine = 
   if (![self isAccessibilityBridgeAlive]) {
     return 0;
   }
-  // Adding UIAccessibilityTraitKeyboardKey to the trait list so that iOS treats it like
-  // a keyboard entry control, thus adding support for text editing features, such as
-  // pinch to select text, and up/down fling to move cursor.
-  UIAccessibilityTraits results = [super accessibilityTraits] |
-                                  [self textInputSurrogate].accessibilityTraits |
-                                  UIAccessibilityTraitKeyboardKey;
+  UIAccessibilityTraits results =
+      [super accessibilityTraits] | [self textInputSurrogate].accessibilityTraits;
   // We remove an undocumented flag to get rid of a bug where single-tapping
   // a text input field incorrectly says "empty line".
   // See also: https://github.com/flutter/flutter/issues/52487
