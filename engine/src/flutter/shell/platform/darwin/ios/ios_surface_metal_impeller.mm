@@ -8,6 +8,8 @@
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/shell/gpu/gpu_surface_metal_impeller.h"
 
+FLUTTER_ASSERT_ARC
+
 namespace flutter {
 
 IOSSurfaceMetalImpeller::IOSSurfaceMetalImpeller(const fml::scoped_nsobject<CAMetalLayer>& layer,
@@ -64,7 +66,7 @@ GPUCAMetalLayerHandle IOSSurfaceMetalImpeller::GetCAMetalLayer(const SkISize& fr
   // exit the app.
   layer.presentsWithTransaction = [[NSThread currentThread] isMainThread];
 
-  return layer;
+  return (__bridge GPUCAMetalLayerHandle)layer;
 }
 
 // |GPUSurfaceMetalDelegate|

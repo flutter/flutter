@@ -9,6 +9,8 @@
 #import "flutter/shell/platform/darwin/ios/ios_surface_software.h"
 #include "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 
+FLUTTER_ASSERT_ARC
+
 namespace flutter {
 
 std::unique_ptr<IOSSurface> IOSSurface::Create(std::shared_ptr<IOSContext> context,
@@ -21,16 +23,14 @@ std::unique_ptr<IOSSurface> IOSSurface::Create(std::shared_ptr<IOSContext> conte
       switch (context->GetBackend()) {
         case IOSRenderingBackend::kSkia:
           return std::make_unique<IOSSurfaceMetalSkia>(
-              fml::scoped_nsobject<CAMetalLayer>(
-                  reinterpret_cast<CAMetalLayer*>([layer.get() retain])),  // Metal layer
-              std::move(context)                                           // context
+              fml::scoped_nsobject<CAMetalLayer>((CAMetalLayer*)layer.get()),  // Metal layer
+              std::move(context)                                               // context
           );
           break;
         case IOSRenderingBackend::kImpeller:
           return std::make_unique<IOSSurfaceMetalImpeller>(
-              fml::scoped_nsobject<CAMetalLayer>(
-                  reinterpret_cast<CAMetalLayer*>([layer.get() retain])),  // Metal layer
-              std::move(context)                                           // context
+              fml::scoped_nsobject<CAMetalLayer>((CAMetalLayer*)layer.get()),  // Metal layer
+              std::move(context)                                               // context
           );
       }
     }
