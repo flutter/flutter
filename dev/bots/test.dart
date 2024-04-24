@@ -130,7 +130,7 @@ Future<void> main(List<String> args) async {
       'framework_tests': frameworkTestsRunner,
       'tool_tests': toolTestsRunner,
       'web_tool_tests': _runWebToolTests,
-      'tool_integration_tests': _runIntegrationToolTests,
+      'tool_integration_tests': runIntegrationToolTests,
       'android_preview_tool_integration_tests': androidPreviewIntegrationToolTestsRunner,
       'tool_host_cross_arch_tests': _runToolHostCrossArchTests,
       // All the unit/widget tests run using `flutter test --platform=chrome --web-renderer=html`
@@ -190,20 +190,6 @@ Future<void> _runToolHostCrossArchTests() {
     // These are integration tests
     forceSingleCore: true,
     testPaths: <String>[path.join('test', 'host_cross_arch.shard')],
-  );
-}
-
-Future<void> _runIntegrationToolTests() async {
-  final List<String> allTests = Directory(path.join(toolsPath, 'test', 'integration.shard'))
-      .listSync(recursive: true).whereType<File>()
-      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: toolsPath))
-      .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
-
-  await runDartTest(
-    toolsPath,
-    forceSingleCore: true,
-    testPaths: selectIndexOfTotalSubshard<String>(allTests),
-    collectMetrics: true,
   );
 }
 
