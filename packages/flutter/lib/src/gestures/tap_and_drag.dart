@@ -986,8 +986,9 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
 
     // resolve(GestureDisposition.accepted) will be called when the [PointerMoveEvent] has
     // moved a sufficient global distance.
-    if (_start != null) {
-      assert(_dragState == _DragState.accepted);
+    if (_start != null && _dragState == _DragState.possible) {
+      // assert(_dragState == _DragState.accepted);
+      // assert(_dragState == _DragState.possible);
       assert(currentUp == null);
       _acceptDrag(_start!);
     }
@@ -1121,6 +1122,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     if (!_wonArenaForPrimaryPointer) {
       return;
     }
+    _dragState = _DragState.accepted;//*
     if (dragStartBehavior == DragStartBehavior.start) {
       _initialPosition = _initialPosition + OffsetPair(global: event.delta, local: event.localDelta);
     }
@@ -1156,10 +1158,10 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     if (_hasSufficientGlobalDistanceToAccept(event.kind)
         || (_wonArenaForPrimaryPointer && _globalDistanceMovedAllAxes.abs() > computePanSlop(event.kind, gestureSettings))) {
       _start = event;
-      _dragState = _DragState.accepted;
-      if (!_wonArenaForPrimaryPointer) {
-        resolve(GestureDisposition.accepted);
-      }
+      // _dragState = _DragState.accepted;
+      // if (!_wonArenaForPrimaryPointer) {
+      //   resolve(GestureDisposition.accepted);
+      // }
     }
   }
 
