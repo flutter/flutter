@@ -7,12 +7,12 @@ import 'package:flutter_api_samples/widgets/sliver/pinned_header_sliver.0.dart' 
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('PinnedHeaderSliver example', (WidgetTester tester) async {
+  testWidgets('SliverPinnedHeader example', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.PinnedHeaderSliverApp(),
+      const example.SliverPinnedHeaderApp(),
     );
 
-    expect(find.text('PinnedHeaderSliver'), findsOneWidget);
+    expect(find.text('SliverPinnedHeader'), findsOneWidget);
 
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();

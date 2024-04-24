@@ -22,22 +22,22 @@ import 'framework.dart';
 ///
 /// ** See code in examples/api/lib/widgets/sliver/pinned_header_sliver.0.dart **
 /// {@end-tool}
-class PinnedHeaderSliver extends SingleChildRenderObjectWidget {
+class SliverPinnedHeader extends SingleChildRenderObjectWidget {
   /// Creates a sliver whose [Widget] child appears at the top of a
   /// [CustomScrollView].
-  const PinnedHeaderSliver({
+  const SliverPinnedHeader({
     super.key,
     super.child,
   });
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderPinnedHeaderSliver();
+    return _RenderSliverPinnedHeader();
   }
 }
 
-class _RenderPinnedHeaderSliver extends RenderSliverSingleBoxAdapter {
-  _RenderPinnedHeaderSliver();
+class _RenderSliverPinnedHeader extends RenderSliverSingleBoxAdapter {
+  _RenderSliverPinnedHeader();
 
   double get childExtent {
     if (child == null) {
