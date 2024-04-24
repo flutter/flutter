@@ -193,8 +193,6 @@ class TestFlutterDevice extends FlutterDevice {
 class ThrowingForwardingFileSystem extends ForwardingFileSystem {
   ThrowingForwardingFileSystem(super.delegate);
 
-  FileSystem get fileSystem => delegate;
-
   @override
   File file(dynamic path) {
     if (path == 'foo') {

@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/dds.dart';
-import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
@@ -31,7 +30,7 @@ import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:unified_analytics/testing.dart';
+import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -42,32 +41,18 @@ import '../src/fakes.dart';
 import '../src/testbed.dart';
 import 'resident_runner_helpers.dart';
 
+FakeAnalytics get fakeAnalytics => globals.analytics as FakeAnalytics;
+
 void main() {
   late Testbed testbed;
   late FakeFlutterDevice flutterDevice;
   late FakeDevFS devFS;
   late ResidentRunner residentRunner;
   late FakeDevice device;
-  late FakeAnalytics fakeAnalytics;
   FakeVmServiceHost? fakeVmServiceHost;
 
   setUp(() {
     testbed = Testbed(setup: () {
-      // Logic to get the filesystem for analytics from globals
-      final ErrorHandlingFileSystem tempFs = globals.fs as ErrorHandlingFileSystem;
-      final MemoryFileSystem analyticsFileSystem;
-      if (tempFs.fileSystem is ThrowingForwardingFileSystem) {
-        analyticsFileSystem =
-            (tempFs.fileSystem as ThrowingForwardingFileSystem).fileSystem
-                as MemoryFileSystem;
-      } else {
-        analyticsFileSystem = tempFs.fileSystem as MemoryFileSystem;
-      }
-      fakeAnalytics = getInitializedFakeAnalyticsInstance(
-        fs: analyticsFileSystem,
-        fakeFlutterVersion: FakeFlutterVersion(),
-      );
-
       globals.fs.file('.packages')
         .writeAsStringSync('\n');
       globals.fs.file(globals.fs.path.join('build', 'app.dill'))
@@ -81,8 +66,10 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
         devtoolsHandler: createNoOpHandler,
-        analytics: fakeAnalytics,
+        analytics: globals.analytics,
       );
+    }, overrides: <Type, Generator>{
+      Analytics: () => FakeAnalytics(),
     });
     device = FakeDevice();
     devFS = FakeDevFS();
@@ -131,7 +118,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
-      analytics: fakeAnalytics,
+      analytics: globals.analytics,
     );
     flutterDevice.generator = residentCompiler;
 
@@ -155,7 +142,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
-      analytics: fakeAnalytics,
+      analytics: globals.analytics,
     );
     flutterDevice.generator = residentCompiler;
 
@@ -225,7 +212,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
-      analytics: fakeAnalytics,
+      analytics: globals.analytics,
     );
     flutterDevice.generator = residentCompiler;
 
@@ -285,7 +272,7 @@ void main() {
       ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
-      analytics: fakeAnalytics,
+      analytics: globals.analytics,
     );
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();
@@ -330,7 +317,7 @@ void main() {
         hotEventFullRestart: false,
       )),
     ));
-    expect(fakeAnalytics.sentEvents, contains(
+    expect((globals.analytics as FakeAnalytics).sentEvents, contains(
       Event.hotRunnerInfo(
         label: 'exception',
         targetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
@@ -874,7 +861,7 @@ void main() {
 
     // Parse out the event of interest since we may have timing events with
     // the new analytics package
-    final List<Event> newEventList = fakeAnalytics.sentEvents.where((Event e) => e.eventName == DashEvent.hotRunnerInfo).toList();
+    final List<Event> newEventList = fakeAnalytics.sentEvents.where((Event e) => e.eventName.label == 'hot_runner_info').toList();
     expect(newEventList, hasLength(1));
     final Event newEvent = newEventList.first;
     expect(newEvent.eventName.label, 'hot_runner_info');
@@ -2384,7 +2371,7 @@ flutter:
           )),
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
-          analytics: fakeAnalytics,
+          analytics: globals.analytics,
           nativeAssetsYamlFile: 'foo.yaml',
         );
 
@@ -2398,4 +2385,11 @@ flutter:
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
       });
+}
+
+class FakeAnalytics extends Fake implements Analytics {
+  @override
+  void send(Event event) => sentEvents.add(event);
+
+  final List<Event> sentEvents = <Event>[];
 }
