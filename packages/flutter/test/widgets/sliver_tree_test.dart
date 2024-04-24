@@ -288,7 +288,7 @@ void main() {
       controller.toggleNode(simpleNodeSet[1]);
       expect(
         controller.isExpanded(simpleNodeSet[1]),
-        isTrue,
+        isFalse,
       );
       expect(
         controller.isActive(simpleNodeSet[1].children[0]),
@@ -382,7 +382,7 @@ void main() {
       controller.collapseNode(simpleNodeSet[1]);
       expect(
         controller.isExpanded(simpleNodeSet[1]),
-        isTrue,
+        isFalse,
       );
       expect(
         controller.isActive(simpleNodeSet[1].children[0]),
@@ -444,7 +444,7 @@ void main() {
     expect(controller.isExpanded(simpleNodeSet[1]), isTrue);
     await tester.tap(find.byType(Icon).first);
     await tester.pump();
-    expect(controller.isExpanded(simpleNodeSet[1]), isTrue);
+    expect(controller.isExpanded(simpleNodeSet[1]), isFalse);
     expect(toggled, isTrue);
     expect(toggledNode, simpleNodeSet[1]);
     await tester.pumpAndSettle();
