@@ -1080,23 +1080,23 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return overlayColor?.withOpacity(0.1) ?? selectedColor?.withOpacity(0.1);
+          return (overlayColor ?? selectedColor)?.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
-          return overlayColor?.withOpacity(0.08) ?? selectedColor?.withOpacity(0.08);
+          return (overlayColor ?? selectedColor)?.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return overlayColor?.withOpacity(0.1) ?? selectedColor?.withOpacity(0.1);
+          return (overlayColor ?? selectedColor)?.withOpacity(0.1);
         }
       } else {
         if (states.contains(MaterialState.pressed)) {
-          return overlayColor?.withOpacity(0.1) ?? unselectedColor?.withOpacity(0.1);
+          return (overlayColor ?? unselectedColor)?.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
-          return overlayColor?.withOpacity(0.08) ?? unselectedColor?.withOpacity(0.08);
+          return (overlayColor ?? unselectedColor)?.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return overlayColor?.withOpacity(0.1) ?? unselectedColor?.withOpacity(0.1);
+          return (overlayColor ?? unselectedColor)?.withOpacity(0.1);
         }
       }
       return Colors.transparent;
