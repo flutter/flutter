@@ -2155,6 +2155,7 @@ void main() {
 
   // This is a regression test for https://github.com/flutter/flutter/issues/147173.
   testWidgets('Text field with large helper text can be selected', (WidgetTester tester) async {
+    const String labelText = 'MenuEntry 1';
     await tester.pumpWidget(
      const MaterialApp(
       home: Scaffold(
@@ -2169,7 +2170,7 @@ void main() {
             dropdownMenuEntries: <DropdownMenuEntry<int>>[
               DropdownMenuEntry<int>(
                 value: 0,
-                label: 'MenuEntry 1',
+                label: labelText,
               ),
             ],
           ),
@@ -2177,10 +2178,11 @@ void main() {
       ),
     ));
 
-  await tester.pump();
-  await tester.tapAt(tester.getCenter(find.text('Hint text')));
-  await tester.pumpAndSettle();
-  expect(find.byType(MenuItemButton), findsNWidgets(2));
+    await tester.pump();
+    await tester.tapAt(tester.getCenter(find.text('Hint text')));
+    await tester.pumpAndSettle();
+    // One is layout for the _DropdownMenuBody, the other one is the real button item in the menu.
+    expect(find.widgetWithText(MenuItemButton, labelText), findsNWidgets(2));
   });
 }
 
