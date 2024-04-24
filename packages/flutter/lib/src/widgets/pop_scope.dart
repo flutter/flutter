@@ -69,7 +69,7 @@ typedef PopInvokedCallback = void Function(bool didPop);
 ///
 ///  * [NavigatorPopHandler], which is a less verbose way to handle system back
 ///    gestures in simple cases of nested [Navigator]s.
-///  * [Form.canPop] and [Form.onPopInvoked], which can be used to handle system
+///  * [Form.canPop] and [Form.onPopInvokedWithResult], which can be used to handle system
 ///    back gestures in the case of a form with unsaved data.
 ///  * [ModalRoute.registerPopEntry] and [ModalRoute.unregisterPopEntry],
 ///    which this widget uses to integrate with Flutter's navigation system.

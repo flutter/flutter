@@ -1719,7 +1719,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// See also:
   ///
-  ///  * [Form], which provides an `onPopInvoked` callback that is similar.
+  ///  * [Form], which provides an `onPopInvokedWithResult` callback that is similar.
   ///  * [registerPopEntry], which adds a [PopEntry] to the list this method
   ///    checks.
   ///  * [unregisterPopEntry], which removes a [PopEntry] from the list this

@@ -192,7 +192,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
           key: _formKey,
           autovalidateMode: _autovalidateMode,
           canPop: _formKey.currentState == null || !_formWasEdited || _formKey.currentState!.validate(),
-          onPopInvoked: _handlePopInvoked,
+          onPopInvokedWithResult: _handlePopInvoked,
           child: Scrollbar(
             child: SingleChildScrollView(
               primary: true,
