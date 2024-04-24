@@ -99,6 +99,17 @@ platform_properties:
       os: Linux
       device_type: "SM-A025V"
 
+  linux_mokey:
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:34v3"},
+          {"dependency": "open_jdk", "version": "version:17"},
+          {"dependency": "curl", "version": "version:7.64.0"}
+        ]
+      os: Linux
+      device_type: "mokey"
+
   mac:
     properties:
       contexts: >-
@@ -2797,6 +2808,28 @@ targets:
     properties:
       tags: >
         ["devicelab", "android", "linux"]
+      task_name: new_gallery__transition_perf
+
+  # Mokey, Impeller
+  - name: Linux_mokey new_gallery_impeller__transition_perf
+    recipe: devicelab/devicelab_drone
+    bringup: true # Device exists only in staging.
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "mokey"]
+      task_name: new_gallery_impeller__transition_perf
+
+  # Mokey, Skia
+  - name: Linux_mokey new_gallery__transition_perf
+    recipe: devicelab/devicelab_drone
+    bringup: true # Device exists only in staging.
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "mokey"]
       task_name: new_gallery__transition_perf
 
   # Pixel 7 Pro, Skia
