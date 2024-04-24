@@ -765,10 +765,10 @@ void main() {
   }, variant: TargetPlatformVariant.desktop());
 
   // Regression test for https://github.com/flutter/flutter/issues/147253.
-    testWidgets('Down key and up key can navigate on desktop platforms when a label text contains another label text',
-    (WidgetTester tester) async {
+    testWidgets('Down key and up key can navigate on desktop platforms '
+    'when a label text contains another label text', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
-    await tester.pumpWidget( MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: const Scaffold(
         body: DropdownMenu<int>(
@@ -806,7 +806,7 @@ void main() {
       matching: find.byType(Material),
     );
 
-    // Press down key three time, the highlight should move to the next item each time.
+    // Press down key three times, the highlight should move to the next item each time.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
     Material item0Material = tester.widget<Material>(button0Material);
