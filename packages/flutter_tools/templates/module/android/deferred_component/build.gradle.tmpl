@@ -26,6 +26,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
+    kotlinOptions{
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
+
     sourceSets {
         applicationVariants.all { variant ->
             main.assets.srcDirs += "${project.buildDir}/intermediates/flutter/${variant.name}/deferred_assets"
