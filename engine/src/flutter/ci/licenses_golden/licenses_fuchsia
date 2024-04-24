@@ -1,4 +1,4 @@
-Signature: 3c55d32e3ddca914fb59db1423361bf2
+Signature: a144b97f6290f61854c45712d27026ef
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -580,6 +580,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/sysroot/include/alloca.h
@@ -761,6 +762,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/alloca.h
@@ -942,6 +944,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/sysroot/include/alloca.h
@@ -1123,6 +1126,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/sysroot/include/alloca.h
@@ -1304,6 +1308,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/sysroot/include/alloca.h
@@ -1485,6 +1490,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/sysroot/include/alloca.h
@@ -1666,6 +1672,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/sysroot/include/alloca.h
@@ -1847,6 +1854,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/include/alloca.h
@@ -2028,6 +2036,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/sysroot/include/alloca.h
@@ -2209,6 +2218,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/sysroot/include/alloca.h
@@ -2390,6 +2400,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/sysroot/include/alloca.h
@@ -2571,6 +2582,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/sysroot/include/alloca.h
@@ -2752,6 +2764,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/sysroot/include/alloca.h
@@ -2933,6 +2946,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/include/alloca.h
@@ -3114,6 +3128,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/sysroot/include/alloca.h
@@ -3295,6 +3310,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/sysroot/include/alloca.h
@@ -3476,6 +3492,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/sysroot/include/alloca.h
@@ -3657,6 +3674,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/sysroot/include/alloca.h
@@ -3833,8 +3851,6 @@ FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/x64-api-19/release/
 FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/x64-api-19/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/x64-api-20/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/x64-api-20/release/package_manifest.json
-FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api--1/release/content_checklist_path
-FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api--1/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api-16/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api-16/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api-17/release/content_checklist_path
@@ -3845,8 +3861,6 @@ FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api-19/r
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api-19/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api-20/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api-20/release/package_manifest.json
-FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api--1/release/content_checklist_path
-FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api--1/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api-16/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api-16/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api-17/release/content_checklist_path
@@ -3857,8 +3871,6 @@ FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api-19
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api-19/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api-20/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api-20/release/package_manifest.json
-FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api--1/release/content_checklist_path
-FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api--1/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api-16/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api-16/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api-17/release/content_checklist_path
@@ -3869,20 +3881,14 @@ FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api-19/rel
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api-19/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api-20/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api-20/release/package_manifest.json
-FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/arm64-api--1/release/content_checklist_path
-FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/arm64-api--1/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/arm64-api-19/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/arm64-api-19/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/arm64-api-20/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/arm64-api-20/release/package_manifest.json
-FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/riscv64-api--1/release/content_checklist_path
-FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/riscv64-api--1/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/riscv64-api-19/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/riscv64-api-19/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/riscv64-api-20/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/riscv64-api-20/release/package_manifest.json
-FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/x64-api--1/release/content_checklist_path
-FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/x64-api--1/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/x64-api-19/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/x64-api-19/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/x64-api-20/release/content_checklist_path
@@ -3929,6 +3935,8 @@ FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.hardware.power.statecontrol/fuchsia.hardware.power.statecontrol.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.hardware.rtc/fuchsia.hardware.rtc.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.hwinfo/fuchsia.hwinfo.fidl.json
+FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.input.report/fuchsia.input.report.fidl.json
+FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.input/fuchsia.input.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.intl/fuchsia.intl.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.io/fuchsia.io.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.ldsvc/fuchsia.ldsvc.fidl.json
@@ -3939,6 +3947,10 @@ FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.sys2/fuchsia.sys2.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.tracing.controller/fuchsia.tracing.controller.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.tracing/fuchsia.tracing.fidl.json
+FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.ui.input3/fuchsia.ui.input3.fidl.json
+FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.ui.pointer/fuchsia.ui.pointer.fidl.json
+FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.ui.test.input/fuchsia.ui.test.input.fidl.json
+FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.ui.views/fuchsia.ui.views.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.unknown/fuchsia.unknown.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.url/fuchsia.url.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.version/fuchsia.version.fidl.json
@@ -6997,6 +7009,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/sysroot/include/alloca.h
@@ -7178,6 +7191,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/alloca.h
@@ -7359,6 +7373,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/sysroot/include/alloca.h
@@ -7540,6 +7555,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/sysroot/include/alloca.h
@@ -7721,6 +7737,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/sysroot/include/alloca.h
@@ -7902,6 +7919,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/sysroot/include/alloca.h
@@ -8083,6 +8101,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/sysroot/include/alloca.h
@@ -8264,6 +8283,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/include/alloca.h
@@ -8445,6 +8465,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/sysroot/include/alloca.h
@@ -8626,6 +8647,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/sysroot/include/alloca.h
@@ -8807,6 +8829,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/sysroot/include/alloca.h
@@ -8988,6 +9011,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/sysroot/include/alloca.h
@@ -9169,6 +9193,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/sysroot/include/alloca.h
@@ -9350,6 +9375,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/include/alloca.h
@@ -9531,6 +9557,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/sysroot/include/alloca.h
@@ -9712,6 +9739,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/sysroot/include/alloca.h
@@ -9893,6 +9921,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/sysroot/include/alloca.h
@@ -10074,6 +10103,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/sysroot/include/alloca.h
@@ -10250,8 +10280,6 @@ FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/x64-api-19/release/
 FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/x64-api-19/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/x64-api-20/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/x64-api-20/release/package_manifest.json
-FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api--1/release/content_checklist_path
-FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api--1/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api-16/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api-16/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api-17/release/content_checklist_path
@@ -10262,8 +10290,6 @@ FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api-19/r
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api-19/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api-20/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api-20/release/package_manifest.json
-FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api--1/release/content_checklist_path
-FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api--1/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api-16/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api-16/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api-17/release/content_checklist_path
@@ -10274,8 +10300,6 @@ FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api-19
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api-19/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api-20/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api-20/release/package_manifest.json
-FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api--1/release/content_checklist_path
-FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api--1/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api-16/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api-16/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api-17/release/content_checklist_path
@@ -10286,20 +10310,14 @@ FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api-19/rel
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api-19/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api-20/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api-20/release/package_manifest.json
-FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/arm64-api--1/release/content_checklist_path
-FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/arm64-api--1/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/arm64-api-19/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/arm64-api-19/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/arm64-api-20/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/arm64-api-20/release/package_manifest.json
-FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/riscv64-api--1/release/content_checklist_path
-FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/riscv64-api--1/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/riscv64-api-19/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/riscv64-api-19/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/riscv64-api-20/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/riscv64-api-20/release/package_manifest.json
-FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/x64-api--1/release/content_checklist_path
-FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/x64-api--1/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/x64-api-19/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/x64-api-19/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/x64-api-20/release/content_checklist_path
@@ -10346,6 +10364,8 @@ FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.hardware.power.statecontrol/fuchsia.hardware.power.statecontrol.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.hardware.rtc/fuchsia.hardware.rtc.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.hwinfo/fuchsia.hwinfo.fidl.json
+FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.input.report/fuchsia.input.report.fidl.json
+FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.input/fuchsia.input.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.intl/fuchsia.intl.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.io/fuchsia.io.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.ldsvc/fuchsia.ldsvc.fidl.json
@@ -10356,6 +10376,10 @@ FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.sys2/fuchsia.sys2.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.tracing.controller/fuchsia.tracing.controller.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.tracing/fuchsia.tracing.fidl.json
+FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.ui.input3/fuchsia.ui.input3.fidl.json
+FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.ui.pointer/fuchsia.ui.pointer.fidl.json
+FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.ui.test.input/fuchsia.ui.test.input.fidl.json
+FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.ui.views/fuchsia.ui.views.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.unknown/fuchsia.unknown.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.url/fuchsia.url.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.version/fuchsia.version.fidl.json
@@ -13773,6 +13797,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-15/sysroot/include/alloca.h
@@ -13954,6 +13979,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/alloca.h
@@ -14135,6 +14161,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-17/sysroot/include/alloca.h
@@ -14316,6 +14343,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-18/sysroot/include/alloca.h
@@ -14497,6 +14525,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-19/sysroot/include/alloca.h
@@ -14678,6 +14707,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/sysroot/include/alloca.h
@@ -14859,6 +14889,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-15/sysroot/include/alloca.h
@@ -15040,6 +15071,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/include/alloca.h
@@ -15221,6 +15253,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-17/sysroot/include/alloca.h
@@ -15402,6 +15435,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-18/sysroot/include/alloca.h
@@ -15583,6 +15617,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-19/sysroot/include/alloca.h
@@ -15764,6 +15799,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/sysroot/include/alloca.h
@@ -15945,6 +15981,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-15/sysroot/include/alloca.h
@@ -16126,6 +16163,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/include/alloca.h
@@ -16307,6 +16345,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-17/sysroot/include/alloca.h
@@ -16488,6 +16527,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-18/sysroot/include/alloca.h
@@ -16669,6 +16709,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-19/sysroot/include/alloca.h
@@ -16850,6 +16891,7 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libtrace-engine.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libtrace-provider-so.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/sysroot/include/alloca.h
@@ -17026,8 +17068,6 @@ FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/x64-api-19/release/
 FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/x64-api-19/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/x64-api-20/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/x64-api-20/release/package_manifest.json
-FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api--1/release/content_checklist_path
-FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api--1/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api-16/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api-16/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api-17/release/content_checklist_path
@@ -17038,8 +17078,6 @@ FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api-19/r
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api-19/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api-20/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/arm64-api-20/release/package_manifest.json
-FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api--1/release/content_checklist_path
-FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api--1/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api-16/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api-16/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api-17/release/content_checklist_path
@@ -17050,8 +17088,6 @@ FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api-19
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api-19/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api-20/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/riscv64-api-20/release/package_manifest.json
-FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api--1/release/content_checklist_path
-FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api--1/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api-16/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api-16/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api-17/release/content_checklist_path
@@ -17062,20 +17098,14 @@ FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api-19/rel
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api-19/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api-20/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/x64-api-20/release/package_manifest.json
-FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/arm64-api--1/release/content_checklist_path
-FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/arm64-api--1/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/arm64-api-19/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/arm64-api-19/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/arm64-api-20/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/arm64-api-20/release/package_manifest.json
-FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/riscv64-api--1/release/content_checklist_path
-FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/riscv64-api--1/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/riscv64-api-19/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/riscv64-api-19/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/riscv64-api-20/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/riscv64-api-20/release/package_manifest.json
-FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/x64-api--1/release/content_checklist_path
-FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/x64-api--1/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/x64-api-19/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/x64-api-19/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/vkreadback_test/x64-api-20/release/content_checklist_path
@@ -17122,6 +17152,8 @@ FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.hardware.power.statecontrol/fuchsia.hardware.power.statecontrol.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.hardware.rtc/fuchsia.hardware.rtc.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.hwinfo/fuchsia.hwinfo.fidl.json
+FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.input.report/fuchsia.input.report.fidl.json
+FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.input/fuchsia.input.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.intl/fuchsia.intl.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.io/fuchsia.io.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.ldsvc/fuchsia.ldsvc.fidl.json
@@ -17132,6 +17164,10 @@ FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.sys2/fuchsia.sys2.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.tracing.controller/fuchsia.tracing.controller.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.tracing/fuchsia.tracing.fidl.json
+FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.ui.input3/fuchsia.ui.input3.fidl.json
+FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.ui.pointer/fuchsia.ui.pointer.fidl.json
+FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.ui.test.input/fuchsia.ui.test.input.fidl.json
+FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.ui.views/fuchsia.ui.views.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.unknown/fuchsia.unknown.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.url/fuchsia.url.fidl.json
 FILE: ../../../fuchsia/sdk/linux/python/rtc_conformance_test/unversioned/ir_root/fuchsia.version/fuchsia.version.fidl.json
