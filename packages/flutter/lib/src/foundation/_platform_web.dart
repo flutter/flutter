@@ -4,7 +4,6 @@
 
 import 'dart:ui_web' as ui_web;
 
-import '../web.dart' as web;
 import 'platform.dart' as platform;
 
 export 'platform.dart' show TargetPlatform;
@@ -30,35 +29,18 @@ final platform.TargetPlatform? _testPlatform = () {
   return result;
 }();
 
-// Lazy-initialized and forever cached current browser platform.
+// Current browser platform.
 //
-// Computing the platform is expensive as it uses `window.matchMedia`, which
-// needs to parse and evaluate a CSS selector. On some devices this takes up to
-// 0.20ms. As `defaultTargetPlatform` is routinely called dozens of times per
-// frame this value should be cached.
+// Lazy-initialized and forever cached as `defaultTargetPlatform` is routinely
+// called dozens of times per frame.
 final platform.TargetPlatform _browserPlatform = () {
-  final String navigatorPlatform = web.window.navigator.platform.toLowerCase();
-  if (navigatorPlatform.startsWith('mac')) {
-    return platform.TargetPlatform.macOS;
-  }
-  if (navigatorPlatform.startsWith('win')) {
-    return platform.TargetPlatform.windows;
-  }
-  if (navigatorPlatform.contains('iphone') ||
-      navigatorPlatform.contains('ipad') ||
-      navigatorPlatform.contains('ipod')) {
-    return platform.TargetPlatform.iOS;
-  }
-  if (navigatorPlatform.contains('android')) {
-    return platform.TargetPlatform.android;
-  }
-  // Since some phones can report a window.navigator.platform as Linux, fall
-  // back to use CSS to disambiguate Android vs Linux desktop. If the CSS
-  // indicates that a device has a "fine pointer" (mouse) as the primary
-  // pointing device, then we'll assume desktop linux, and otherwise we'll
-  // assume Android.
-  if (web.window.matchMedia('only screen and (pointer: fine)').matches) {
-    return platform.TargetPlatform.linux;
-  }
-  return platform.TargetPlatform.android;
+  return switch (ui_web.browser.operatingSystem) {
+    ui_web.OperatingSystem.android => platform.TargetPlatform.android,
+    ui_web.OperatingSystem.iOs => platform.TargetPlatform.iOS,
+    ui_web.OperatingSystem.linux => platform.TargetPlatform.linux,
+    ui_web.OperatingSystem.macOs => platform.TargetPlatform.macOS,
+    ui_web.OperatingSystem.windows => platform.TargetPlatform.windows,
+    // Default 'unknown' OS values to `android`.
+    _ => platform.TargetPlatform.android,
+  };
 }();
