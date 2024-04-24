@@ -646,7 +646,7 @@ class IconButton extends StatelessWidget {
         ? null
         : switch (overlayColor) {
             (final Color overlayColor) when overlayColor.value == 0 => const MaterialStatePropertyAll<Color?>(Colors.transparent),
-            (_) => _IconButtonDefaultOverlay(foregroundColor, focusColor, hoverColor, highlightColor, overlayColor),
+            _ => _IconButtonDefaultOverlay(foregroundColor, focusColor, hoverColor, highlightColor, overlayColor),
           };
     final MaterialStateProperty<MouseCursor?> mouseCursor = _IconButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
 
@@ -1052,35 +1052,23 @@ class _IconButtonDefaultOverlay extends MaterialStateProperty<Color?> {
   Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.selected)) {
       if (states.contains(MaterialState.pressed)) {
-        return highlightColor
-          ?? overlayColor?.withOpacity(0.1)
-          ?? foregroundColor?.withOpacity(0.1);
+        return highlightColor ?? (overlayColor ?? foregroundColor)?.withOpacity(0.1);
       }
       if (states.contains(MaterialState.hovered)) {
-        return hoverColor
-          ?? overlayColor?.withOpacity(0.08)
-          ?? foregroundColor?.withOpacity(0.08);
+        return hoverColor ?? (overlayColor ?? foregroundColor)?.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return focusColor
-          ?? overlayColor?.withOpacity(0.1)
-          ?? foregroundColor?.withOpacity(0.1);
+        return focusColor ?? (overlayColor ?? foregroundColor)?.withOpacity(0.1);
       }
     }
     if (states.contains(MaterialState.pressed)) {
-      return highlightColor
-        ?? overlayColor?.withOpacity(0.1)
-        ?? foregroundColor?.withOpacity(0.1);
+      return highlightColor ?? (overlayColor ?? foregroundColor)?.withOpacity(0.1);
     }
     if (states.contains(MaterialState.hovered)) {
-      return hoverColor
-        ?? overlayColor?.withOpacity(0.08)
-        ?? foregroundColor?.withOpacity(0.08);
+      return hoverColor ?? (overlayColor ?? foregroundColor)?.withOpacity(0.08);
     }
     if (states.contains(MaterialState.focused)) {
-      return focusColor
-        ?? overlayColor?.withOpacity(0.1)
-        ?? foregroundColor?.withOpacity(0.1);
+      return focusColor ?? (overlayColor ?? foregroundColor)?.withOpacity(0.1);
     }
     return null;
   }

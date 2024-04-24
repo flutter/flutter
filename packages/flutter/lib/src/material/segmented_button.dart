@@ -297,7 +297,7 @@ class SegmentedButton<T> extends StatefulWidget {
         ? null
         : switch (overlayColor) {
             (final Color overlayColor) when overlayColor.value == 0 => const MaterialStatePropertyAll<Color?>(Colors.transparent),
-            (_) => _SegmentedButtonDefaultsM3.resolveStateColor(foregroundColor, selectedForegroundColor, overlayColor),
+            _ => _SegmentedButtonDefaultsM3.resolveStateColor(foregroundColor, selectedForegroundColor, overlayColor),
           };
     return TextButton.styleFrom(
       textStyle: textStyle,
