@@ -15,6 +15,8 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/utils/mac/SkCGUtils.h"
 
+FLUTTER_ASSERT_ARC
+
 namespace flutter {
 
 IOSSurfaceSoftware::IOSSurfaceSoftware(const fml::scoped_nsobject<CALayer>& layer,
@@ -118,7 +120,7 @@ bool IOSSurfaceSoftware::PresentBackingStore(sk_sp<SkSurface> backing_store) {
     return false;
   }
 
-  layer_.get().contents = reinterpret_cast<id>(static_cast<CGImageRef>(pixmap_image));
+  layer_.get().contents = (__bridge id)(static_cast<CGImageRef>(pixmap_image));
 
   return true;
 }

@@ -8,14 +8,17 @@
 #include "flutter/shell/gpu/gpu_surface_metal_skia.h"
 #include "flutter/shell/platform/darwin/ios/ios_context_metal_skia.h"
 
+FLUTTER_ASSERT_ARC
+
 @protocol FlutterMetalDrawable <MTLDrawable>
 - (void)flutterPrepareForPresent:(nonnull id<MTLCommandBuffer>)commandBuffer;
 @end
 
 namespace flutter {
 
-static IOSContextMetalSkia* CastToMetalContext(const std::shared_ptr<IOSContext>& context) {
-  return reinterpret_cast<IOSContextMetalSkia*>(context.get());
+static IOSContextMetalSkia* CastToMetalContext(const std::shared_ptr<IOSContext>& context)
+    __attribute__((cf_audited_transfer)) {
+  return (IOSContextMetalSkia*)context.get();
 }
 
 IOSSurfaceMetalSkia::IOSSurfaceMetalSkia(const fml::scoped_nsobject<CAMetalLayer>& layer,
@@ -72,7 +75,7 @@ GPUCAMetalLayerHandle IOSSurfaceMetalSkia::GetCAMetalLayer(const SkISize& frame_
   // the raster thread, there is no such transaction.
   layer.presentsWithTransaction = [[NSThread currentThread] isMainThread];
 
-  return layer;
+  return (__bridge GPUCAMetalLayerHandle)layer;
 }
 
 // |GPUSurfaceMetalDelegate|
@@ -82,16 +85,15 @@ bool IOSSurfaceMetalSkia::PresentDrawable(GrMTLHandle drawable) const {
     return false;
   }
 
-  auto command_buffer =
-      fml::scoped_nsprotocol<id<MTLCommandBuffer>>([[command_queue_ commandBuffer] retain]);
+  id<MTLCommandBuffer> command_buffer = [command_queue_ commandBuffer];
 
-  id<CAMetalDrawable> metal_drawable = reinterpret_cast<id<CAMetalDrawable>>(drawable);
+  id<CAMetalDrawable> metal_drawable = (__bridge id<CAMetalDrawable>)drawable;
   if ([metal_drawable conformsToProtocol:@protocol(FlutterMetalDrawable)]) {
-    [(id<FlutterMetalDrawable>)metal_drawable flutterPrepareForPresent:command_buffer.get()];
+    [(id<FlutterMetalDrawable>)metal_drawable flutterPrepareForPresent:command_buffer];
   }
 
-  [command_buffer.get() commit];
-  [command_buffer.get() waitUntilScheduled];
+  [command_buffer commit];
+  [command_buffer waitUntilScheduled];
 
   [metal_drawable present];
   return true;
