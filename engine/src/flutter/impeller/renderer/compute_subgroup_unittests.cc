@@ -145,7 +145,7 @@ TEST_P(ComputeSubgroupTest, PathPlayground) {
     options.primitive_type = PrimitiveType::kTriangleStrip;
 
     options.stencil_mode =
-        ContentContextOptions::StencilMode::kLegacyClipIncrement;
+        ContentContextOptions::StencilMode::kOverdrawPreventionIncrement;
 
     pass.SetPipeline(renderer.GetSolidFillPipeline(options));
 
@@ -343,7 +343,7 @@ TEST_P(ComputeSubgroupTest, LargePath) {
     options.primitive_type = PrimitiveType::kTriangleStrip;
 
     options.stencil_mode =
-        ContentContextOptions::StencilMode::kLegacyClipIncrement;
+        ContentContextOptions::StencilMode::kOverdrawPreventionIncrement;
 
     pass.SetPipeline(renderer.GetSolidFillPipeline(options));
 
@@ -422,7 +422,7 @@ TEST_P(ComputeSubgroupTest, QuadAndCubicInOnePath) {
     options.primitive_type = PrimitiveType::kTriangleStrip;
 
     options.stencil_mode =
-        ContentContextOptions::StencilMode::kLegacyClipIncrement;
+        ContentContextOptions::StencilMode::kOverdrawPreventionIncrement;
 
     pass.SetPipeline(renderer.GetSolidFillPipeline(options));
 

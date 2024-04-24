@@ -269,10 +269,11 @@ using TiledTextureExternalPipeline =
 /// but they shouldn't require e.g. 10s of thousands.
 struct ContentContextOptions {
   enum class StencilMode : uint8_t {
-    /// Turn the stencil test off. Used when drawing without stencil-then-cover.
+    /// Turn the stencil test off. Used when drawing without stencil-then-cover
+    /// or overdraw prevention.
     kIgnore,
 
-    // Operations used for stencil-then-cover
+    // Operations used for stencil-then-cover.
 
     /// Draw the stencil for the NonZero fill path rule.
     ///
@@ -298,24 +299,31 @@ struct ContentContextOptions {
     /// The stencil ref should always be 0 on commands using this mode.
     kCoverCompareInverted,
 
-    // Operations to control the legacy clip implementation, which forms a
-    // heightmap on the stencil buffer.
+    // Operations used for the "overdraw prevention" mechanism. This is used for
+    // drawing strokes.
 
-    /// Slice the clip heightmap to a new maximum height.
-    kLegacyClipRestore,
-    /// Increment the stencil heightmap.
-    kLegacyClipIncrement,
-    /// Decrement the stencil heightmap (used for difference clipping only).
-    kLegacyClipDecrement,
-    /// Used for applying clips to all non-clip draw calls.
-    kLegacyClipCompare,
+    /// For each fragment, increment the stencil value if it's currently zero.
+    /// Discard fragments when the value is non-zero. This prevents
+    /// self-overlapping strokes from drawing over themselves.
+    ///
+    /// Note that this is done for rendering correctness, not performance. If a
+    /// stroke is drawn with a backdrop-reliant blend and self-intersects, then
+    /// the intersected geometry will render incorrectly when overdrawn because
+    /// we don't adjust the geometry prevent self-intersection.
+    ///
+    /// The stencil ref should always be 0 on commands using this mode.
+    kOverdrawPreventionIncrement,
+    /// Reset the stencil to a new maximum value specified by the ref (currently
+    /// always 0).
+    ///
+    /// The stencil ref should always be 0 on commands using this mode.
+    kOverdrawPreventionRestore,
   };
 
   SampleCount sample_count = SampleCount::kCount1;
   BlendMode blend_mode = BlendMode::kSourceOver;
   CompareFunction depth_compare = CompareFunction::kAlways;
-  StencilMode stencil_mode =
-      ContentContextOptions::StencilMode::kLegacyClipCompare;
+  StencilMode stencil_mode = ContentContextOptions::StencilMode::kIgnore;
   PrimitiveType primitive_type = PrimitiveType::kTriangle;
   PixelFormat color_attachment_pixel_format = PixelFormat::kUnknown;
   bool has_depth_stencil_attachments = true;

@@ -133,7 +133,7 @@ bool ClipContents::Render(const ContentContext& renderer,
     case GeometryResult::Mode::kPreventOverdraw:
       pass.SetCommandLabel("Clip stencil preparation (Increment)");
       options.stencil_mode =
-          ContentContextOptions::StencilMode::kLegacyClipIncrement;
+          ContentContextOptions::StencilMode::kOverdrawPreventionIncrement;
       break;
   }
   pass.SetPipeline(renderer.GetClipPipeline(options));
@@ -235,7 +235,8 @@ bool ClipRestoreContents::Render(const ContentContext& renderer,
   pass.SetCommandLabel("Restore Clip");
   auto options = OptionsFromPass(pass);
   options.blend_mode = BlendMode::kDestination;
-  options.stencil_mode = ContentContextOptions::StencilMode::kLegacyClipRestore;
+  options.stencil_mode =
+      ContentContextOptions::StencilMode::kOverdrawPreventionRestore;
   options.primitive_type = PrimitiveType::kTriangleStrip;
   pass.SetPipeline(renderer.GetClipPipeline(options));
   pass.SetStencilReference(0);
