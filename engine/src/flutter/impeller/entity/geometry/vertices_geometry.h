@@ -27,21 +27,11 @@ class VerticesGeometry final : public Geometry {
 
   ~VerticesGeometry() = default;
 
-  GeometryResult GetPositionColorBuffer(const ContentContext& renderer,
-                                        const Entity& entity,
-                                        RenderPass& pass) const;
-
   GeometryResult GetPositionUVColorBuffer(Rect texture_coverage,
                                           Matrix effect_transform,
                                           const ContentContext& renderer,
                                           const Entity& entity,
                                           RenderPass& pass) const;
-
-  GeometryResult GetPositionUVBuffer(Rect texture_coverage,
-                                     Matrix effect_transform,
-                                     const ContentContext& renderer,
-                                     const Entity& entity,
-                                     RenderPass& pass) const;
 
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,

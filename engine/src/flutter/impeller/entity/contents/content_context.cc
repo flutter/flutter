@@ -11,6 +11,7 @@
 #include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/texture_descriptor.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/render_target_cache.h"
@@ -255,6 +256,18 @@ ContentContext::ContentContext(
     return;
   }
 
+  {
+    TextureDescriptor desc;
+    desc.storage_mode = StorageMode::kHostVisible;
+    desc.format = PixelFormat::kR8G8B8A8UNormInt;
+    desc.size = ISize{1, 1};
+    empty_texture_ = GetContext()->GetResourceAllocator()->CreateTexture(desc);
+    auto data = Color::BlackTransparent().ToR8G8B8A8();
+    if (!empty_texture_->SetContents(data.data(), 4)) {
+      VALIDATION_LOG << "Failed to create empty texture.";
+    }
+  }
+
   auto options = ContentContextOptions{
       .sample_count = SampleCount::kCount4,
       .color_attachment_pixel_format =
@@ -448,6 +461,10 @@ bool ContentContext::IsValid() const {
   return is_valid_;
 }
 
+std::shared_ptr<Texture> ContentContext::GetEmptyTexture() const {
+  return empty_texture_;
+}
+
 fml::StatusOr<RenderTarget> ContentContext::MakeSubpass(
     std::string_view label,
     ISize texture_size,
@@ -567,22 +584,6 @@ void ContentContext::ClearCachedRuntimeEffectPipeline(
 void ContentContext::InitializeCommonlyUsedShadersIfNeeded() const {
   TRACE_EVENT0("flutter", "InitializeCommonlyUsedShadersIfNeeded");
   GetContext()->InitializeCommonlyUsedShadersIfNeeded();
-
-  // On ARM devices, the initial usage of vkCmdCopyBufferToImage has been
-  // observed to take 10s of ms as an internal shader is compiled to perform
-  // the operation. Similarly, the initial render pass can also take 10s of ms
-  // for a similar reason. Because the context object is initialized far
-  // before the first frame, create a trivial texture and render pass to force
-  // the driver to compiler these shaders before the frame begins.
-  TextureDescriptor desc;
-  desc.size = {1, 1};
-  desc.storage_mode = StorageMode::kHostVisible;
-  desc.format = PixelFormat::kR8G8B8A8UNormInt;
-  auto texture = GetContext()->GetResourceAllocator()->CreateTexture(desc);
-  uint32_t color = 0;
-  if (!texture->SetContents(reinterpret_cast<uint8_t*>(&color), 4u)) {
-    VALIDATION_LOG << "Failed to set bootstrap texture.";
-  }
 }
 
 }  // namespace impeller
