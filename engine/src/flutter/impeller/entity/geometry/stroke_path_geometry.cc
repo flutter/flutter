@@ -558,10 +558,6 @@ GeometryResult::Mode StrokePathGeometry::GetResultMode() const {
   return GeometryResult::Mode::kPreventOverdraw;
 }
 
-GeometryVertexType StrokePathGeometry::GetVertexType() const {
-  return GeometryVertexType::kPosition;
-}
-
 std::optional<Rect> StrokePathGeometry::GetCoverage(
     const Matrix& transform) const {
   auto path_bounds = path_.GetBoundingBox();

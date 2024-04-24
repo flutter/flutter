@@ -19,10 +19,6 @@ GeometryResult RoundRectGeometry::GetPositionBuffer(
                                  entity, pass);
 }
 
-GeometryVertexType RoundRectGeometry::GetVertexType() const {
-  return GeometryVertexType::kPosition;
-}
-
 std::optional<Rect> RoundRectGeometry::GetCoverage(
     const Matrix& transform) const {
   return bounds_.TransformBounds(transform);

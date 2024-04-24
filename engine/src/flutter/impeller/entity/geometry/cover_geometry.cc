@@ -33,10 +33,6 @@ GeometryResult CoverGeometry::GetPositionBuffer(const ContentContext& renderer,
   };
 }
 
-GeometryVertexType CoverGeometry::GetVertexType() const {
-  return GeometryVertexType::kPosition;
-}
-
 std::optional<Rect> CoverGeometry::GetCoverage(const Matrix& transform) const {
   return Rect::MakeMaximum();
 }

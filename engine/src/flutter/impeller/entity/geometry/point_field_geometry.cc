@@ -203,11 +203,6 @@ size_t PointFieldGeometry::ComputeCircleDivisions(Scalar scaled_radius,
 }
 
 // |Geometry|
-GeometryVertexType PointFieldGeometry::GetVertexType() const {
-  return GeometryVertexType::kPosition;
-}
-
-// |Geometry|
 std::optional<Rect> PointFieldGeometry::GetCoverage(
     const Matrix& transform) const {
   if (points_.size() > 0) {

@@ -44,10 +44,6 @@ GeometryResult CircleGeometry::GetPositionBuffer(const ContentContext& renderer,
   return ComputePositionGeometry(renderer, generator, entity, pass);
 }
 
-GeometryVertexType CircleGeometry::GetVertexType() const {
-  return GeometryVertexType::kPosition;
-}
-
 std::optional<Rect> CircleGeometry::GetCoverage(const Matrix& transform) const {
   Point corners[4]{
       {center_.x, center_.y - radius_},

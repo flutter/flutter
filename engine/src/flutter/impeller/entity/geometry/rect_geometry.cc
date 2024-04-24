@@ -25,10 +25,6 @@ GeometryResult RectGeometry::GetPositionBuffer(const ContentContext& renderer,
   };
 }
 
-GeometryVertexType RectGeometry::GetVertexType() const {
-  return GeometryVertexType::kPosition;
-}
-
 std::optional<Rect> RectGeometry::GetCoverage(const Matrix& transform) const {
   return rect_.TransformBounds(transform);
 }

@@ -45,12 +45,6 @@ static const GeometryResult kEmptyResult = {
         },
 };
 
-enum GeometryVertexType {
-  kPosition,
-  kColor,
-  kUV,
-};
-
 class Geometry {
  public:
   static std::shared_ptr<Geometry> MakeFillPath(
@@ -94,8 +88,6 @@ class Geometry {
                                            RenderPass& pass) const = 0;
 
   virtual GeometryResult::Mode GetResultMode() const;
-
-  virtual GeometryVertexType GetVertexType() const = 0;
 
   virtual std::optional<Rect> GetCoverage(const Matrix& transform) const = 0;
 

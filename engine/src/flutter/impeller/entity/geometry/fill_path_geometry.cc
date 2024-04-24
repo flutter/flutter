@@ -71,10 +71,6 @@ GeometryResult::Mode FillPathGeometry::GetResultMode() const {
   FML_UNREACHABLE();
 }
 
-GeometryVertexType FillPathGeometry::GetVertexType() const {
-  return GeometryVertexType::kPosition;
-}
-
 std::optional<Rect> FillPathGeometry::GetCoverage(
     const Matrix& transform) const {
   return path_.GetTransformedBoundingBox(transform);
