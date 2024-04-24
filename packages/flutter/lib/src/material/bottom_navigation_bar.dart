@@ -802,7 +802,7 @@ class _Label extends StatelessWidget {
 
 class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerProviderStateMixin {
   List<AnimationController> _controllers = <AnimationController>[];
-  late List<CurvedAnimation> _animations;
+  List<CurvedAnimation> _animations = <CurvedAnimation>[];
 
   // A queue of color splashes currently being animated.
   final Queue<_Circle> _circles = Queue<_Circle>();
@@ -819,6 +819,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     }
     for (final _Circle circle in _circles) {
       circle.dispose();
+    }
+    for (final CurvedAnimation animation in _animations) {
+      animation.dispose();
     }
     _circles.clear();
 
@@ -1254,6 +1257,7 @@ class _Circle {
 
   void dispose() {
     controller.dispose();
+    animation.dispose();
   }
 }
 
