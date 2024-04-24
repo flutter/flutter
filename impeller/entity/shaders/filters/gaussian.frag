@@ -9,6 +9,8 @@
 
 uniform f16sampler2D texture_sampler;
 
+layout(constant_id = 0) const float supports_decal = 1.0;
+
 struct KernelSample {
   vec2 uv_offset;
   float coefficient;
@@ -21,11 +23,10 @@ uniform KernelSamples {
 blur_info;
 
 f16vec4 Sample(f16sampler2D tex, vec2 coords) {
-#if ENABLE_DECAL_SPECIALIZATION
+  if (supports_decal == 1.0) {
+    return texture(tex, coords);
+  }
   return IPHalfSampleDecal(tex, coords);
-#else
-  return texture(tex, coords);
-#endif
 }
 
 in vec2 v_texture_coords;

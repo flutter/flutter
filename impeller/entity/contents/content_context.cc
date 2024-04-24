@@ -422,8 +422,8 @@ ContentContext::ContentContext(
   rrect_blur_pipelines_.CreateDefault(*context_, options_trianglestrip);
   texture_strict_src_pipelines_.CreateDefault(*context_, options);
   tiled_texture_pipelines_.CreateDefault(*context_, options, {supports_decal});
-  kernel_decal_pipelines_.CreateDefault(*context_, options_trianglestrip);
-  kernel_nodecal_pipelines_.CreateDefault(*context_, options_trianglestrip);
+  gaussian_blur_pipelines_.CreateDefault(*context_, options_trianglestrip,
+                                         {supports_decal});
   border_mask_blur_pipelines_.CreateDefault(*context_, options_trianglestrip);
   morphology_filter_pipelines_.CreateDefault(*context_, options_trianglestrip,
                                              {supports_decal});

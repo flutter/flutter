@@ -5,6 +5,7 @@
 #include "flutter/testing/testing.h"
 #include "fml/status_or.h"
 #include "gmock/gmock.h"
+#include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/gaussian_blur_filter_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/entity_playground.h"
@@ -456,7 +457,7 @@ TEST(GaussianBlurFilterContentsTest, Coefficients) {
                                .blur_sigma = 1,
                                .blur_radius = 5,
                                .step_size = 1};
-  KernelPipeline::FragmentShader::KernelSamples samples =
+  GaussianBlurPipeline::FragmentShader::KernelSamples samples =
       GenerateBlurInfo(parameters);
   EXPECT_EQ(samples.sample_count, 9);
 
@@ -477,7 +478,7 @@ TEST(GaussianBlurFilterContentsTest, Coefficients) {
 }
 
 TEST(GaussianBlurFilterContentsTest, LerpHackKernelSamplesSimple) {
-  KernelPipeline::FragmentShader::KernelSamples kernel_samples = {
+  GaussianBlurPipeline::FragmentShader::KernelSamples kernel_samples = {
       .sample_count = 5,
       .samples =
           {
@@ -504,13 +505,13 @@ TEST(GaussianBlurFilterContentsTest, LerpHackKernelSamplesSimple) {
           },
   };
 
-  KernelPipeline::FragmentShader::KernelSamples fast_kernel_samples =
+  GaussianBlurPipeline::FragmentShader::KernelSamples fast_kernel_samples =
       LerpHackKernelSamples(kernel_samples);
   EXPECT_EQ(fast_kernel_samples.sample_count, 3);
 
-  KernelPipeline::FragmentShader::KernelSample* samples =
+  GaussianBlurPipeline::FragmentShader::KernelSample* samples =
       kernel_samples.samples;
-  KernelPipeline::FragmentShader::KernelSample* fast_samples =
+  GaussianBlurPipeline::FragmentShader::KernelSample* fast_samples =
       fast_kernel_samples.samples;
 
   //////////////////////////////////////////////////////////////////////////////
@@ -562,10 +563,10 @@ TEST(GaussianBlurFilterContentsTest, LerpHackKernelSamplesComplex) {
                                .blur_sigma = sigma,
                                .blur_radius = blur_radius,
                                .step_size = 1};
-  KernelPipeline::FragmentShader::KernelSamples kernel_samples =
+  GaussianBlurPipeline::FragmentShader::KernelSamples kernel_samples =
       GenerateBlurInfo(parameters);
   EXPECT_EQ(kernel_samples.sample_count, 33);
-  KernelPipeline::FragmentShader::KernelSamples fast_kernel_samples =
+  GaussianBlurPipeline::FragmentShader::KernelSamples fast_kernel_samples =
       LerpHackKernelSamples(kernel_samples);
   EXPECT_EQ(fast_kernel_samples.sample_count, 17);
   float data[33];
