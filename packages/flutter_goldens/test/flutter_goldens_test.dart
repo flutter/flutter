@@ -13,6 +13,7 @@ import 'package:file/memory.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_goldens/flutter_goldens.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
@@ -851,7 +852,8 @@ void main() {
         fs.directory(_kFlutterRoot).createSync(recursive: true);
         final FakeSkiaGoldClient fakeSkiaClient = FakeSkiaGoldClient();
         expect(fakeSkiaClient.initCalls, 0);
-        FlutterPostSubmitFileComparator.fromDefaultComparator(
+        FlutterPostSubmitFileComparator.fromLocalFileComparator(
+          localFileComparator: LocalFileComparator(Uri.parse('/test'), pathStyle: path.Style.posix),
           platform,
           goldens: fakeSkiaClient,
           log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
@@ -936,7 +938,8 @@ void main() {
         fs.directory(_kFlutterRoot).createSync(recursive: true);
         final FakeSkiaGoldClient fakeSkiaClient = FakeSkiaGoldClient();
         expect(fakeSkiaClient.tryInitCalls, 0);
-        FlutterPostSubmitFileComparator.fromDefaultComparator(
+        FlutterPostSubmitFileComparator.fromLocalFileComparator(
+          localFileComparator: LocalFileComparator(Uri.parse('/test'), pathStyle: path.Style.posix),
           platform,
           goldens: fakeSkiaClient,
           log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
@@ -1037,7 +1040,8 @@ void main() {
         fakeDirectory.uri = Uri.parse('/flutter');
 
         fakeSkiaClient.getExpectationForTestThrowable = const OSError("Can't reach Gold");
-        final FlutterGoldenFileComparator comparator1 = await FlutterLocalFileComparator.fromDefaultComparator(
+        final FlutterGoldenFileComparator comparator1 = await FlutterLocalFileComparator.fromLocalFileComparator(
+          localFileComparator: LocalFileComparator(Uri.parse('/test'), pathStyle: path.Style.posix),
           platform,
           goldens: fakeSkiaClient,
           baseDirectory: fakeDirectory,
@@ -1047,7 +1051,8 @@ void main() {
         expect(comparator1.runtimeType, FlutterSkippingFileComparator);
 
         fakeSkiaClient.getExpectationForTestThrowable =  const SocketException("Can't reach Gold");
-        final FlutterGoldenFileComparator comparator2 = await FlutterLocalFileComparator.fromDefaultComparator(
+        final FlutterGoldenFileComparator comparator2 = await FlutterLocalFileComparator.fromLocalFileComparator(
+          localFileComparator: LocalFileComparator(Uri.parse('/test'), pathStyle: path.Style.posix),
           platform,
           goldens: fakeSkiaClient,
           baseDirectory: fakeDirectory,
@@ -1057,7 +1062,8 @@ void main() {
         expect(comparator2.runtimeType, FlutterSkippingFileComparator);
 
         fakeSkiaClient.getExpectationForTestThrowable =  const FormatException("Can't reach Gold");
-        final FlutterGoldenFileComparator comparator3 = await FlutterLocalFileComparator.fromDefaultComparator(
+        final FlutterGoldenFileComparator comparator3 = await FlutterLocalFileComparator.fromLocalFileComparator(
+          localFileComparator: LocalFileComparator(Uri.parse('/test'), pathStyle: path.Style.posix),
           platform,
           goldens: fakeSkiaClient,
           baseDirectory: fakeDirectory,
