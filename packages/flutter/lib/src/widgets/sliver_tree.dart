@@ -540,6 +540,7 @@ class SliverTreeList<T> extends StatefulWidget {
             dimension: 30.0,
             child: node.children.isNotEmpty
                 ? AnimatedRotation(
+                    key: Key(node.content.toString()),
                     turns: node.isExpanded ? 0.25 : 0.0,
                     duration: animationStyle?.duration ?? SliverTreeList.defaultAnimationDuration,
                     curve: animationStyle?.curve ?? SliverTreeList.defaultAnimationCurve,
@@ -572,6 +573,19 @@ class _SliverTreeListState<T> extends State<SliverTreeList<T>> with TickerProvid
   SliverTreeController? _treeController;
 
   final List<SliverTreeNode<T>> _activeNodes = <SliverTreeNode<T>>[];
+  bool _shouldUnpackNode(SliverTreeNode<T> node) {
+    if (node.children.isEmpty) {
+      // No children to unpack.
+      return false;
+    }
+    if (_currentAnimationForParent[node] != null) {
+      // Whether expanding or collapsing, the child nodes are still active, so
+      // unpack.
+      return true;
+    }
+    // If we are not animating, respect node.isExpanded;
+    return node.isExpanded;
+  }
   void _unpackActiveNodes({
     int depth = 0,
     List<SliverTreeNode<T>>? nodes,
@@ -585,7 +599,7 @@ class _SliverTreeListState<T> extends State<SliverTreeList<T>> with TickerProvid
       node._depth = depth;
       node._parent = parent;
       _activeNodes.add(node);
-      if (node.children.isNotEmpty && node.isExpanded) {
+      if (_shouldUnpackNode(node)) {
         _unpackActiveNodes(
           depth: depth + 1,
           nodes: node.children,
@@ -809,12 +823,13 @@ class _SliverTreeListState<T> extends State<SliverTreeList<T>> with TickerProvid
       return;
     }
     setState(() {
+      node._expanded = !node._expanded;
       if (widget.onNodeToggle != null) {
         widget.onNodeToggle!(node);
       }
       final AnimationController controller = _currentAnimationForParent[node]?.controller
         ?? AnimationController(
-          value: node._expanded ? 1.0 : 0.0,
+          value: node._expanded ? 0.0 : 1.0,
           vsync: this,
           duration: widget.animationStyle?.duration ?? SliverTreeList.defaultAnimationDuration,
         )..addStatusListener((AnimationStatus status) {
@@ -853,20 +868,14 @@ class _SliverTreeListState<T> extends State<SliverTreeList<T>> with TickerProvid
         // render object, since the indexes can change at any time.
         key: UniqueKey(),
       );
-      switch (!node._expanded) {
+      switch (node._expanded) {
         case true:
           // Expanding
-          // Adds new nodes that are coming into view.
-          node._expanded = true;
           _unpackActiveNodes();
           controller.forward();
         case false:
           // Collapsing
           controller.reverse().then((_) {
-            // Removes nodes that have been hidden after the collapsing
-            // animation completes, only change node expansion state after
-            // animation completes as this effects which nodes are unpacked.
-            node._expanded = false;
             _unpackActiveNodes();
           });
       }
