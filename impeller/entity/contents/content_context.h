@@ -714,6 +714,10 @@ class ContentContext {
     return GetPipeline(vertices_uber_shader_, opts);
   }
 
+  // An empty 1x1 texture for binding drawVertices/drawAtlas or other cases
+  // that don't always have a texture (due to blending).
+  std::shared_ptr<Texture> GetEmptyTexture() const;
+
   std::shared_ptr<Context> GetContext() const;
 
   const Capabilities& GetDeviceCapabilities() const;
@@ -1034,6 +1038,7 @@ class ContentContext {
 #endif  // IMPELLER_ENABLE_3D
   std::shared_ptr<RenderTargetAllocator> render_target_cache_;
   std::shared_ptr<HostBuffer> host_buffer_;
+  std::shared_ptr<Texture> empty_texture_;
   bool wireframe_ = false;
 
   ContentContext(const ContentContext&) = delete;

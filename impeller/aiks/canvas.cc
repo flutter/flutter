@@ -16,6 +16,7 @@
 #include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/color_source_contents.h"
+#include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/solid_rrect_blur_contents.h"
 #include "impeller/entity/contents/text_contents.h"
@@ -933,8 +934,19 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
     return;
   }
 
-  // If there is are per-vertex colors, an image, and the blend mode
-  // is simple we can draw without a sub-renderpass.
+  // If the blend mode is destination don't bother to bind or create a texture.
+  if (blend_mode == BlendMode::kDestination) {
+    auto contents = std::make_shared<VerticesSimpleBlendContents>();
+    contents->SetBlendMode(blend_mode);
+    contents->SetAlpha(paint.color.alpha);
+    contents->SetGeometry(vertices);
+    entity.SetContents(paint.WithFilters(std::move(contents)));
+    AddRenderEntityToCurrentPass(std::move(entity));
+    return;
+  }
+
+  // If there is a texture, use this directly. Otherwise render the color
+  // source to a texture.
   if (std::optional<ImageData> maybe_image_data =
           GetImageColorSourceData(paint.color_source)) {
     const ImageData& image_data = maybe_image_data.value();
@@ -956,35 +968,35 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
 
   std::shared_ptr<Contents> src_contents =
       src_paint.CreateContentsForGeometry(vertices);
-  if (vertices->HasTextureCoordinates()) {
-    // If the color source has an intrinsic size, then we use that to
-    // create the src contents as a simplification. Otherwise we use
-    // the extent of the texture coordinates to determine how large
-    // the src contents should be. If neither has a value we fall back
-    // to using the geometry coverage data.
-    Rect src_coverage;
-    auto size = src_contents->GetColorSourceSize();
-    if (size.has_value()) {
-      src_coverage = Rect::MakeXYWH(0, 0, size->width, size->height);
-    } else {
-      auto cvg = vertices->GetCoverage(Matrix{});
-      FML_CHECK(cvg.has_value());
-      src_coverage =
-          // Covered by FML_CHECK.
-          // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-          vertices->GetTextureCoordinateCoverge().value_or(cvg.value());
-    }
-    src_contents =
-        src_paint.CreateContentsForGeometry(Geometry::MakeRect(src_coverage));
+
+  // If the color source has an intrinsic size, then we use that to
+  // create the src contents as a simplification. Otherwise we use
+  // the extent of the texture coordinates to determine how large
+  // the src contents should be. If neither has a value we fall back
+  // to using the geometry coverage data.
+  Rect src_coverage;
+  auto size = src_contents->GetColorSourceSize();
+  if (size.has_value()) {
+    src_coverage = Rect::MakeXYWH(0, 0, size->width, size->height);
+  } else {
+    auto cvg = vertices->GetCoverage(Matrix{});
+    FML_CHECK(cvg.has_value());
+    src_coverage =
+        // Covered by FML_CHECK.
+        // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+        vertices->GetTextureCoordinateCoverge().value_or(cvg.value());
   }
+  src_contents =
+      src_paint.CreateContentsForGeometry(Geometry::MakeRect(src_coverage));
 
-  auto contents = std::make_shared<VerticesContents>();
-  contents->SetAlpha(paint.color.alpha);
+  auto contents = std::make_shared<VerticesSimpleBlendContents>();
   contents->SetBlendMode(blend_mode);
+  contents->SetAlpha(paint.color.alpha);
   contents->SetGeometry(vertices);
-  contents->SetSourceContents(std::move(src_contents));
+  contents->SetLazyTexture([src_contents](const ContentContext& renderer) {
+    return src_contents->RenderToSnapshot(renderer, {})->texture;
+  });
   entity.SetContents(paint.WithFilters(std::move(contents)));
-
   AddRenderEntityToCurrentPass(std::move(entity));
 }
 
