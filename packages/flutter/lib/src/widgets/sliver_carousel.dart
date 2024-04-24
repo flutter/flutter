@@ -615,7 +615,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     assert(scrollOffset >= 0.0);
     final double remainingExtent = constraints.remainingCacheExtent;
     assert(remainingExtent >= 0.0);
-    final double targetEndScrollOffset = scrollOffset + extentUnit * weights.max * 2;
+    final double targetEndScrollOffset = scrollOffset + remainingExtent;
     currentLayoutDimensions = SliverLayoutDimensions(
         scrollOffset: constraints.scrollOffset,
         precedingScrollExtent: constraints.precedingScrollExtent,
