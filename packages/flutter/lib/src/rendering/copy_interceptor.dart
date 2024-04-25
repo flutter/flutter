@@ -4,10 +4,13 @@
 
 import 'selection.dart';
 
-/// Typedef for the inline intercept callback.
+/// Signature for the callback that intercepts copy operations.
 typedef CopyInterceptorCallback = String Function(List<SelectedContent> selections);
 
 /// A handler for intercepting copy operations.
+///
+/// Used by [SelectionArea], [SelectableRegion], and other selectable widgets
+/// to intercept the copy operations of their children.
 abstract class CopyInterceptor {
   /// Creates a [CopyInterceptor].
   const CopyInterceptor();
