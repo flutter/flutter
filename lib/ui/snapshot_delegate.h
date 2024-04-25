@@ -71,6 +71,12 @@ class SnapshotDelegate {
                                             SkISize picture_size) = 0;
 
   virtual sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) = 0;
+
+  /// Load and compile and initial PSO for the provided [runtime_stage].
+  ///
+  /// Impeller only.
+  virtual void CacheRuntimeStage(
+      const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) = 0;
 };
 
 }  // namespace flutter

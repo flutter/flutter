@@ -649,6 +649,10 @@ class Rasterizer final : public SnapshotDelegate,
   // |SnapshotDelegate|
   sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) override;
 
+  // |SnapshotDelegate|
+  void CacheRuntimeStage(
+      const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) override;
+
   // |Stopwatch::Delegate|
   /// Time limit for a smooth frame.
   ///

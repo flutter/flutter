@@ -12,6 +12,7 @@
 #include "flutter/fml/mapping.h"
 
 #include "flutter/impeller/core/runtime_types.h"
+#include "impeller/core/shader_types.h"
 #include "runtime_stage_types_flatbuffers.h"
 
 namespace impeller {
@@ -35,6 +36,8 @@ class RuntimeStage {
 
   const std::vector<RuntimeUniformDescription>& GetUniforms() const;
 
+  const std::vector<DescriptorSetLayout>& GetDescriptorSetLayouts() const;
+
   const std::string& GetEntrypoint() const;
 
   const RuntimeUniformDescription* GetUniform(const std::string& name) const;
@@ -51,6 +54,7 @@ class RuntimeStage {
   std::string entrypoint_;
   std::shared_ptr<fml::Mapping> code_mapping_;
   std::vector<RuntimeUniformDescription> uniforms_;
+  std::vector<DescriptorSetLayout> descriptor_set_layouts_;
   bool is_valid_ = false;
   bool is_dirty_ = true;
 
