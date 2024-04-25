@@ -998,7 +998,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
       assert(currentUp == null);
       _acceptDrag(_start!);
     }
-  
+
     if (_start != null && eagerVictoryOnDrag) {
       assert(_dragState == _DragState.accepted);
       assert(currentUp == null);
