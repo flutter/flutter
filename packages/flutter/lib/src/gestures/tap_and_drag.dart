@@ -788,6 +788,8 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
   ///
   /// When this value is `false`, this recognizer will wait until it is the last
   /// recognizer in the gesture arena before declaring victory on a drag.
+  ///
+  /// Defaults to `true`.
   bool eagerVictoryOnDrag;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
@@ -992,16 +994,21 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
 
     _wonArenaForPrimaryPointer = true;
 
-    // resolve(GestureDisposition.accepted) will be called when the [PointerMoveEvent] has
-    // moved a sufficient global distance.
-    if (_start != null && _dragState == _DragState.possible && !eagerVictoryOnDrag) {
+    // resolve(GestureDisposition.accepted) will be called when the [PointerMoveEvent]
+    // has moved a sufficient global distance to be considered a drag and
+    // `eagerVictoryOnDrag` is set to `true`.
+    if (_start != null && eagerVictoryOnDrag) {
+      assert(_dragState == _DragState.accepted);
       assert(currentUp == null);
       _acceptDrag(_start!);
     }
 
-    if (_start != null && eagerVictoryOnDrag) {
-      assert(_dragState == _DragState.accepted);
+    // This recognizer will wait until it is the last one in the gesture arena
+    // before accepting a drag when `eagerVictoryOnDrag` is set to `false`.
+    if (_start != null && !eagerVictoryOnDrag) {
+      assert(_dragState == _DragState.possible);
       assert(currentUp == null);
+      _dragState = _DragState.accepted;
       _acceptDrag(_start!);
     }
 
@@ -1133,9 +1140,6 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
   void _acceptDrag(PointerEvent event) {
     if (!_wonArenaForPrimaryPointer) {
       return;
-    }
-    if (!eagerVictoryOnDrag) {
-      _dragState = _DragState.accepted;
     }
     if (dragStartBehavior == DragStartBehavior.start) {
       _initialPosition = _initialPosition + OffsetPair(global: event.delta, local: event.localDelta);
