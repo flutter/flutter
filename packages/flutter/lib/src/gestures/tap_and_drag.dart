@@ -1096,7 +1096,8 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
 
         // This can occur when the recognizer is accepted before a [PointerMoveEvent] has been
         // received that moves the pointer a sufficient global distance to be considered a drag.
-        if (_start != null) {
+        if (_start != null && _wonArenaForPrimaryPointer) {
+          _dragState = _DragState.accepted;
           _acceptDrag(_start!);
         }
       }
