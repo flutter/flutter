@@ -82,10 +82,6 @@ abstract interface class MaterialInkController implements RenderBox {
   ///
   /// The ink feature will paint as part of this controller.
   void addInkFeature(InkFeature feature);
-
-  /// Notifies the controller that one of its ink features needs to repaint.
-  @override
-  void markNeedsPaint();
 }
 
 /// A piece of material.
