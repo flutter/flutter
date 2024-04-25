@@ -917,8 +917,6 @@ def run_impeller_cmake(args):
   if not os.path.isdir(os.path.join(SRC_ROOT, impeller_cmake_dir)):
     print('The Impeller cmake example directory "{}" does not exist'.format(impeller_cmake_dir))
     return 1
-  goma_gn_args = setup_goma(args)
-  goma_dir = goma_gn_args['goma_dir']
   cmake_cmd = [
       'python3',
       os.path.join(SRC_ROOT, 'flutter', 'ci', 'impeller_cmake_build_test.py'),
@@ -926,8 +924,6 @@ def run_impeller_cmake(args):
       impeller_cmake_dir,
       '--cmake',
   ]
-  if goma_dir is not None:
-    cmake_cmd = cmake_cmd + ['--goma-dir', goma_dir]
   if args.xcode_symlinks:
     cmake_cmd = cmake_cmd + ['--xcode-symlinks']
   try:
