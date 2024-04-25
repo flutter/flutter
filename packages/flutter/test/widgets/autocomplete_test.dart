@@ -637,7 +637,7 @@ void main() {
     expect(optionsOffsetOpen.dy, fieldOffset.dy + fieldSize.height);
   });
 
-  testWidgets('does not prevent options from showing when returning an empty iterable', (WidgetTester tester) async {
+  testWidgets('can prevent options from showing by returning an empty iterable', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<String> lastOptions;
@@ -648,6 +648,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: RawAutocomplete<String>(
+            shouldShowOptionsView: (_) => false,
             optionsBuilder: (TextEditingValue textEditingValue) {
               if (textEditingValue.text == '') {
                 return const Iterable<String>.empty();
@@ -685,7 +686,7 @@ void main() {
       selection: TextSelection(baseOffset: 0, extentOffset: 0),
     );
     await tester.pump();
-    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsNothing);
 
     // Enter text. Now the options appear, filtered by the text.
     textEditingController.value = const TextEditingValue(
@@ -874,6 +875,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: RawAutocomplete<String>(
+            shouldShowOptionsView: (_) => false,
             optionsBuilder: (TextEditingValue textEditingValue) async {
               final Iterable<String> options = kOptions.where((String option) {
                 return option.contains(textEditingValue.text.toLowerCase());
@@ -908,8 +910,8 @@ void main() {
     await tester.pumpAndSettle();
 
     // The options have not yet been built.
-    expect(find.byKey(optionsKey), findsOneWidget);
-    expect(lastOptions, isEmpty);
+    expect(find.byKey(optionsKey), findsNothing);
+    expect(lastOptions, isNull);
 
     // Await asynchronous options builder.
     await tester.pumpAndSettle(delay);

@@ -68,6 +68,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.optionsViewBuilder,
     this.optionsViewOpenDirection = OptionsViewOpenDirection.down,
     this.initialValue,
+    this.shouldShowOptionsView,
   });
 
   /// {@macro flutter.widgets.RawAutocomplete.displayStringForOption}
@@ -105,6 +106,9 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// {@macro flutter.widgets.RawAutocomplete.initialValue}
   final TextEditingValue? initialValue;
 
+  /// If the options view overlay should be shown depending on the text editing value
+  final bool Function(TextEditingValue)? shouldShowOptionsView;
+
   static Widget _defaultFieldViewBuilder(BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
     return _AutocompleteField(
       focusNode: focusNode,
@@ -131,6 +135,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
         );
       },
       onSelected: onSelected,
+      shouldShowOptionsView: shouldShowOptionsView ?? (TextEditingValue value) => false,
     );
   }
 }
