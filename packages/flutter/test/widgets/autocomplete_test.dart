@@ -648,7 +648,6 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: RawAutocomplete<String>(
-            shouldShowOptionsView: (_) => false,
             optionsBuilder: (TextEditingValue textEditingValue) {
               if (textEditingValue.text == '') {
                 return const Iterable<String>.empty();
@@ -875,7 +874,6 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: RawAutocomplete<String>(
-            shouldShowOptionsView: (_) => false,
             optionsBuilder: (TextEditingValue textEditingValue) async {
               final Iterable<String> options = kOptions.where((String option) {
                 return option.contains(textEditingValue.text.toLowerCase());
