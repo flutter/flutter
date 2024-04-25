@@ -40,9 +40,8 @@ enum MaterialType {
 
   /// A transparent piece of material that draws ink splashes and highlights.
   ///
-  /// A [Material] with the transparency type is similar to [BlankMaterial],
-  /// and it also includes configuration options for elevation, clipping,
-  /// and text style.
+  /// A [Material] with the transparency type is a [BlankMaterial] with options
+  /// for elevation, border clipping, and text style.
   transparency
 }
 
@@ -425,12 +424,6 @@ class Material extends StatelessWidget {
       MaterialType.card => theme.cardColor,
       MaterialType.button || MaterialType.circle || MaterialType.transparency => null,
     };
-    final Color shadowColor = this.shadowColor
-        ?? (theme.useMaterial3 ? theme.colorScheme.shadow : theme.shadowColor);
-    late final Color surfaceColor = theme.useMaterial3
-        ? ElevationOverlay.applySurfaceTint(color!, surfaceTintColor, elevation)
-        : ElevationOverlay.applyOverlay(context, color!, elevation);
-
     final bool animating = animationDuration != Duration.zero;
     final bool transparent = type == MaterialType.transparency;
     assert(
@@ -440,9 +433,14 @@ class Material extends StatelessWidget {
       'in the theme (ex. canvasColor != null if type is set to '
       'MaterialType.canvas)',
     );
+    final Color shadowColor = this.shadowColor
+        ?? (theme.useMaterial3 ? theme.colorScheme.shadow : theme.shadowColor);
+    late final Color surfaceColor = theme.useMaterial3
+        ? ElevationOverlay.applySurfaceTint(color!, surfaceTintColor, elevation)
+        : ElevationOverlay.applyOverlay(context, color!, elevation);
 
-    Widget? contents = child;
-    if (contents != null) {
+    Widget contents = BlankMaterial(color: color, child: child);
+    if (child != null) {
       final TextStyle style = textStyle ?? theme.textTheme.bodyMedium!;
       contents = animating
           ? AnimatedDefaultTextStyle(
@@ -452,11 +450,10 @@ class Material extends StatelessWidget {
             )
           : DefaultTextStyle(style: style, child: contents);
     }
-    contents = BlankMaterial(color: color, child: contents);
 
-    ShapeBorder? shape = borderRadius == null
-        ? this.shape
-        : RoundedRectangleBorder(borderRadius: borderRadius!);
+    ShapeBorder? shape = borderRadius != null
+        ? RoundedRectangleBorder(borderRadius: borderRadius!)
+        : this.shape;
 
     // PhysicalModel has a temporary workaround for a performance issue that
     // speeds up rectangular non transparent material (the workaround is to
@@ -552,8 +549,8 @@ class Material extends StatelessWidget {
 class BlankMaterial extends StatefulWidget {
   /// Creates a blank piece of material.
   ///
-  /// A [BlankMaterial] doesn't paint its [color]; instead,
-  /// the value is passed to the [MaterialInkController.color].
+  /// A [BlankMaterial] doesn't paint its [color]; instead, the value is
+  /// passed into [MaterialInkController.color].
   const BlankMaterial({
     super.key,
     this.color,
