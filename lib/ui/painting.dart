@@ -4964,6 +4964,18 @@ enum ClipOp {
 ///
 /// The current transform and clip can be saved and restored using the stack
 /// managed by the [save], [saveLayer], and [restore] methods.
+///
+/// ## Use with the Flutter framework
+///
+/// The Flutter framework's [RendererBinding] provides a hook for creating
+/// [Canvas] objects ([RendererBinding.createCanvas]) that allows tests to hook
+/// into the scene creation logic. When creating a [Canvas] that will be used
+/// with a [PictureLayer] as part of the [Scene] in the context of the Flutter
+/// framework, consider calling [RendererBinding.createCanvas] instead of
+/// calling the [Canvas.new] constructor directly.
+///
+/// This does not apply when using a canvas to generate a bitmap for other
+/// purposes, e.g. for generating a PNG image using [Picture.toImage].
 abstract class Canvas {
   /// Creates a canvas for recording graphical operations into the
   /// given picture recorder.
@@ -6415,6 +6427,19 @@ base class _NativePicture extends NativeFieldWrapperClass1 implements Picture {
 ///
 /// To begin recording, construct a [Canvas] to record the commands.
 /// To end recording, use the [PictureRecorder.endRecording] method.
+///
+/// ## Use with the Flutter framework
+///
+/// The Flutter framework's [RendererBinding] provides a hook for creating
+/// [PictureRecorder] objects ([RendererBinding.createPictureRecorder]) that
+/// allows tests to hook into the scene creation logic. When creating a
+/// [PictureRecorder] and [Canvas] that will be used with a [PictureLayer] as
+/// part of the [Scene] in the context of the Flutter framework, consider
+/// calling [RendererBinding.createPictureRecorder] instead of calling the
+/// [PictureRecorder.new] constructor directly.
+///
+/// This does not apply when using a canvas to generate a bitmap for other
+/// purposes, e.g. for generating a PNG image using [Picture.toImage].
 abstract class PictureRecorder {
   /// Creates a new idle PictureRecorder. To associate it with a
   /// [Canvas] and begin recording, pass this [PictureRecorder] to the
