@@ -521,6 +521,8 @@ class _CupertinoFullscreenDialogTransitionState extends State<CupertinoFullscree
   void _disposeCurve() {
     _primaryPositionCurve?.dispose();
     _secondaryPositionCurve?.dispose();
+    _primaryPositionCurve = null;
+    _secondaryPositionCurve = null;
   }
 
   void _setupAnimation() {
