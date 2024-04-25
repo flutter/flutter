@@ -2085,7 +2085,7 @@ void main() {
             child: const Column(
               children: <Widget>[
                 Text('How are you?'),
-                CopyInterceptorContainer(
+                CopyInterceptContainer(
                   copyInterceptor: CopyInterceptor.space,
                   child: Column(
                     children: <Widget>[

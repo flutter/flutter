@@ -2680,9 +2680,9 @@ typedef SelectableRegionContextMenuBuilder = Widget Function(
 );
 
 /// A wrapper around [SelectionContainer] which specifies a desired [copyInterceptor].
-class CopyInterceptorContainer extends StatelessWidget {
-  /// Creates a [CopyInterceptorContainer].
-  const CopyInterceptorContainer({
+class CopyInterceptContainer extends StatelessWidget {
+  /// Creates a [CopyInterceptContainer].
+  const CopyInterceptContainer({
     super.key,
     required this.copyInterceptor,
     required this.child,
@@ -2691,7 +2691,7 @@ class CopyInterceptorContainer extends StatelessWidget {
   /// Specifies how [Selectables] are serialized into a string when copied.
   final CopyInterceptor copyInterceptor;
 
-  /// The child widget this [CopyInterceptorContainer] applies to.
+  /// The child widget this [CopyInterceptContainer] applies to.
   final Widget child;
 
   @override
