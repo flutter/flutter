@@ -8,6 +8,7 @@
 #include <optional>
 #include <utility>
 
+#include "impeller/core/buffer_view.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/entity/contents/content_context.h"
@@ -83,11 +84,7 @@ bool TextContents::Render(const ContentContext& renderer,
   pass.SetCommandLabel("TextFrame");
   auto opts = OptionsFromPassAndEntity(pass, entity);
   opts.primitive_type = PrimitiveType::kTriangle;
-  if (type == GlyphAtlas::Type::kAlphaBitmap) {
-    pass.SetPipeline(renderer.GetGlyphAtlasPipeline(opts));
-  } else {
-    pass.SetPipeline(renderer.GetGlyphAtlasColorPipeline(opts));
-  }
+  pass.SetPipeline(renderer.GetGlyphAtlasPipeline(opts));
 
   using VS = GlyphAtlasPipeline::VertexShader;
   using FS = GlyphAtlasPipeline::FragmentShader;
@@ -103,18 +100,17 @@ bool TextContents::Render(const ContentContext& renderer,
   frame_info.is_translation_scale =
       entity.GetTransform().IsTranslationScaleOnly();
   frame_info.entity_transform = entity.GetTransform();
-  frame_info.text_color = ToVector(color.Premultiply());
 
   VS::BindFrameInfo(pass,
                     renderer.GetTransientsBuffer().EmplaceUniform(frame_info));
 
-  if (type == GlyphAtlas::Type::kColorBitmap) {
-    using FSS = GlyphAtlasColorPipeline::FragmentShader;
-    FSS::FragInfo frag_info;
-    frag_info.use_text_color = force_text_color_ ? 1.0 : 0.0;
-    FSS::BindFragInfo(pass,
-                      renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
-  }
+  FS::FragInfo frag_info;
+  frag_info.use_text_color = force_text_color_ ? 1.0 : 0.0;
+  frag_info.text_color = ToVector(color.Premultiply());
+  frag_info.is_color_glyph = type == GlyphAtlas::Type::kColorBitmap;
+
+  FS::BindFragInfo(pass,
+                   renderer.GetTransientsBuffer().EmplaceUniform(frag_info));
 
   SamplerDescriptor sampler_desc;
   if (frame_info.is_translation_scale) {
@@ -156,12 +152,13 @@ bool TextContents::Render(const ContentContext& renderer,
   }
   vertex_count *= 6;
 
-  auto buffer_view = host_buffer.Emplace(
+  BufferView buffer_view = host_buffer.Emplace(
       vertex_count * sizeof(VS::PerVertexData), alignof(VS::PerVertexData),
       [&](uint8_t* contents) {
         VS::PerVertexData vtx;
         VS::PerVertexData* vtx_contents =
             reinterpret_cast<VS::PerVertexData*>(contents);
+        size_t offset = 0u;
         for (const TextRun& run : frame_->GetRuns()) {
           const Font& font = run.GetFont();
           Scalar rounded_scale = TextFrame::RoundScaledFontSize(
@@ -188,7 +185,7 @@ bool TextContents::Render(const ContentContext& renderer,
 
             for (const Point& point : unit_points) {
               vtx.unit_position = point;
-              std::memcpy(vtx_contents++, &vtx, sizeof(VS::PerVertexData));
+              vtx_contents[offset++] = vtx;
             }
           }
         }
