@@ -85,10 +85,10 @@ const String _flutterRenderingLibrary = 'package:flutter/rendering.dart';
 /// different parents. The scene must be explicitly recomposited after such
 /// changes are made; the layer tree does not maintain its own dirty state.
 ///
-/// To composite the tree, create a [SceneBuilder] object, pass it to the
-/// root [Layer] object's [addToScene] method, and then call
-/// [SceneBuilder.build] to obtain a [Scene]. A [Scene] can then be painted
-/// using [dart:ui.FlutterView.render].
+/// To composite the tree, create a [SceneBuilder] object using
+/// [RendererBinding.createSceneBuilder], pass it to the root [Layer] object's
+/// [addToScene] method, and then call [SceneBuilder.build] to obtain a [Scene].
+/// A [Scene] can then be painted using [dart:ui.FlutterView.render].
 ///
 /// ## Memory
 ///
@@ -765,6 +765,8 @@ abstract class Layer with DiagnosticableTreeMixin {
 /// layer in [RenderObject.paint], it should dispose of the handle to the
 /// old layer. It should also dispose of any layer handles it holds in
 /// [RenderObject.dispose].
+///
+/// To dispose of a layer handle, set its [layer] property to null.
 class LayerHandle<T extends Layer> {
   /// Create a new layer handle, optionally referencing a [Layer].
   LayerHandle([this._layer]) {
