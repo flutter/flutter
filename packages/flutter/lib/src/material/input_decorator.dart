@@ -2155,7 +2155,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         child: AnimatedDefaultTextStyle(
           duration:_kTransitionDuration,
           curve: _kTransitionCurve,
-          style: widget._labelShouldWithdraw
+          style: widget._labelShouldWithdraw || decoration.floatingLabelBehavior == FloatingLabelBehavior.always
             ? _getFloatingLabelStyle(themeData, defaults)
             : labelStyle,
           child: decoration.label ?? Text(

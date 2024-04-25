@@ -2032,6 +2032,137 @@ void main() {
         });
       });
     });
+
+    testWidgets('floatingLabelStyle overrides default style', (WidgetTester tester) async {
+      const TextStyle floatingLabelStyle = TextStyle(color: Colors.indigo, fontSize: 16.0);
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          isFocused: true, // Label appears floating above input field.
+          decoration: const InputDecoration(
+            labelText: labelText,
+            floatingLabelStyle: floatingLabelStyle,
+          ),
+        ),
+      );
+
+      expect(getLabelStyle(tester).color, floatingLabelStyle.color);
+      expect(getLabelStyle(tester).fontSize, floatingLabelStyle.fontSize);
+    });
+
+    testWidgets('floatingLabelStyle defaults to labelStyle', (WidgetTester tester) async {
+      const TextStyle labelStyle = TextStyle(color: Colors.amber, fontSize: 16.0);
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          isFocused: true, // Label appears floating above input field.
+          decoration: const InputDecoration(
+            labelText: labelText,
+            labelStyle: labelStyle,
+          ),
+        ),
+      );
+
+      expect(getLabelStyle(tester).color, labelStyle.color);
+      expect(getLabelStyle(tester).fontSize, labelStyle.fontSize);
+    });
+
+    testWidgets('floatingLabelStyle takes precedence over labelStyle', (WidgetTester tester) async {
+      const TextStyle labelStyle = TextStyle(color: Colors.amber, fontSize: 16.0);
+      const TextStyle floatingLabelStyle = TextStyle(color: Colors.indigo, fontSize: 16.0);
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          isFocused: true, // Label appears floating above input field.
+          decoration: const InputDecoration(
+            labelText: labelText,
+            labelStyle: labelStyle,
+            floatingLabelStyle: floatingLabelStyle,
+          ),
+        ),
+      );
+
+      expect(getLabelStyle(tester).color, floatingLabelStyle.color);
+      expect(getLabelStyle(tester).fontSize, floatingLabelStyle.fontSize);
+    });
+
+    testWidgets('InputDecorationTheme labelStyle overrides default style', (WidgetTester tester) async {
+      const TextStyle labelStyle = TextStyle(color: Colors.amber, fontSize: 16.0);
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true, // Label appears inline, on top of the input field.
+          inputDecorationTheme: const InputDecorationTheme(
+            labelStyle: labelStyle,
+          ),
+          decoration: const InputDecoration(
+            labelText: labelText,
+          ),
+        ),
+      );
+
+      expect(getLabelStyle(tester).color, labelStyle.color);
+    });
+
+    testWidgets('InputDecorationTheme floatingLabelStyle overrides default style', (WidgetTester tester) async {
+      const TextStyle floatingLabelStyle = TextStyle(color: Colors.indigo, fontSize: 16.0);
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          isFocused: true, // Label appears floating above input field.
+          inputDecorationTheme: const InputDecorationTheme(
+            floatingLabelStyle: floatingLabelStyle,
+          ),
+          decoration: const InputDecoration(
+            labelText: labelText,
+          ),
+        ),
+      );
+
+      expect(getLabelStyle(tester).color, floatingLabelStyle.color);
+    });
+
+    testWidgets('floatingLabelStyle is always used when FloatingLabelBehavior.always', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/147231.
+      const TextStyle labelStyle = TextStyle(color: Colors.amber, fontSize: 16.0);
+      const TextStyle floatingLabelStyle = TextStyle(color: Colors.indigo, fontSize: 16.0);
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration(
+            labelText: labelText,
+            labelStyle: labelStyle,
+            floatingLabelStyle: floatingLabelStyle,
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+          ),
+        ),
+      );
+
+      expect(getLabelStyle(tester).color, floatingLabelStyle.color);
+      expect(getLabelStyle(tester).fontSize, floatingLabelStyle.fontSize);
+
+      // Focus the input decorator.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          isFocused: true,
+          decoration: const InputDecoration(
+            labelText: labelText,
+            labelStyle: labelStyle,
+            floatingLabelStyle: floatingLabelStyle,
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+          ),
+        ),
+      );
+
+      expect(getLabelStyle(tester).color, floatingLabelStyle.color);
+      expect(getLabelStyle(tester).fontSize, floatingLabelStyle.fontSize);
+    });
   });
 
   group('Material3 - InputDecoration labelText layout', () {
