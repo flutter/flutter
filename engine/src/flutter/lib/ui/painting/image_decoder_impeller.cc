@@ -16,6 +16,7 @@
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/lib/ui/painting/image_decoder_skia.h"
 #include "impeller/base/strings.h"
+#include "impeller/core/device_buffer.h"
 #include "impeller/display_list/skia_conversions.h"
 #include "impeller/geometry/size.h"
 #include "third_party/skia/include/core/SkAlphaType.h"
@@ -31,42 +32,6 @@
 #include "third_party/skia/include/core/SkSize.h"
 
 namespace flutter {
-
-class MallocDeviceBuffer : public impeller::DeviceBuffer {
- public:
-  explicit MallocDeviceBuffer(impeller::DeviceBufferDescriptor desc)
-      : impeller::DeviceBuffer(desc) {
-    data_ = static_cast<uint8_t*>(malloc(desc.size));
-  }
-
-  ~MallocDeviceBuffer() override { free(data_); }
-
-  bool SetLabel(const std::string& label) override { return true; }
-
-  bool SetLabel(const std::string& label, impeller::Range range) override {
-    return true;
-  }
-
-  uint8_t* OnGetContents() const override { return data_; }
-
-  bool OnCopyHostBuffer(const uint8_t* source,
-                        impeller::Range source_range,
-                        size_t offset) override {
-    memcpy(data_ + offset, source + source_range.offset, source_range.length);
-    return true;
-  }
-
- private:
-  uint8_t* data_;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(MallocDeviceBuffer);
-};
-
-#ifdef FML_OS_ANDROID
-static constexpr bool kShouldUseMallocDeviceBuffer = true;
-#else
-static constexpr bool kShouldUseMallocDeviceBuffer = false;
-#endif  // FML_OS_ANDROID
 
 namespace {
 /**
@@ -243,11 +208,14 @@ DecompressResult ImageDecoderImpeller::DecompressTexture(
   }
 
   if (bitmap->dimensions() == target_size) {
-    auto buffer = bitmap_allocator->GetDeviceBuffer();
+    std::shared_ptr<impeller::DeviceBuffer> buffer =
+        bitmap_allocator->GetDeviceBuffer();
     if (!buffer) {
       return DecompressResult{.decode_error = "Unable to get device buffer"};
     }
-    return DecompressResult{.device_buffer = buffer,
+    buffer->Flush();
+
+    return DecompressResult{.device_buffer = std::move(buffer),
                             .sk_bitmap = bitmap,
                             .image_info = bitmap->info()};
   }
@@ -275,11 +243,14 @@ DecompressResult ImageDecoderImpeller::DecompressTexture(
   }
   scaled_bitmap->setImmutable();
 
-  auto buffer = scaled_allocator->GetDeviceBuffer();
+  std::shared_ptr<impeller::DeviceBuffer> buffer =
+      scaled_allocator->GetDeviceBuffer();
+  buffer->Flush();
+
   if (!buffer) {
     return DecompressResult{.decode_error = "Unable to get device buffer"};
   }
-  return DecompressResult{.device_buffer = buffer,
+  return DecompressResult{.device_buffer = std::move(buffer),
                           .sk_bitmap = scaled_bitmap,
                           .image_info = scaled_bitmap->info()};
 }
@@ -457,7 +428,6 @@ ImageDecoderImpeller::UploadTextureToStorage(
           }
           blit_pass->SetLabel("Mipmap Blit Pass");
           blit_pass->GenerateMipmap(texture);
-
           blit_pass->EncodeCommands(context->GetResourceAllocator());
           if (!context->GetCommandQueue()->Submit({command_buffer}).ok()) {
             decode_error = "Failed to submit blit pass command buffer.";
@@ -523,8 +493,7 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
                                                  gpu_disabled_switch]() {
           sk_sp<DlImage> image;
           std::string decode_error;
-          if (!kShouldUseMallocDeviceBuffer &&
-              context->GetCapabilities()->SupportsBufferToTextureBlits()) {
+          if (context->GetCapabilities()->SupportsBufferToTextureBlits()) {
             std::tie(image, decode_error) = UploadTextureToPrivate(
                 context, bitmap_result.device_buffer, bitmap_result.image_info,
                 bitmap_result.sk_bitmap, gpu_disabled_switch);
@@ -571,9 +540,7 @@ bool ImpellerAllocator::allocPixelRef(SkBitmap* bitmap) {
                     (bitmap->width() * bitmap->bytesPerPixel());
 
   std::shared_ptr<impeller::DeviceBuffer> device_buffer =
-      kShouldUseMallocDeviceBuffer
-          ? std::make_shared<MallocDeviceBuffer>(descriptor)
-          : allocator_->CreateBuffer(descriptor);
+      allocator_->CreateBuffer(descriptor);
   if (!device_buffer) {
     return false;
   }
