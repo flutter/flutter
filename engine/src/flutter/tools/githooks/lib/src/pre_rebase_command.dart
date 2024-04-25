@@ -4,8 +4,6 @@
 
 import 'package:args/command_runner.dart';
 
-import 'messages.dart';
-
 /// The command that implements the pre-rebase githook
 class PreRebaseCommand extends Command<bool> {
   @override
@@ -16,7 +14,6 @@ class PreRebaseCommand extends Command<bool> {
 
   @override
   Future<bool> run() async {
-    printGclientSyncReminder(name);
     // Returning false here will block the rebase.
     return true;
   }

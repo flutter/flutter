@@ -10,9 +10,6 @@ const String _reset = '\x1B[0m';
 /// Prints a reminder to stdout to run `gclient sync -D`. Uses colors when
 /// stdout supports ANSI escape codes.
 void printGclientSyncReminder(String command) {
-  if (command == 'pre-rebase') {
-    return;
-  }
   final String prefix = io.stdout.supportsAnsiEscapes ? _redBoldUnderline : '';
   final String postfix = io.stdout.supportsAnsiEscapes ? _reset : '';
   io.stderr.writeln('$command: The engine source tree has been updated.');
