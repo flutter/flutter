@@ -135,7 +135,6 @@ abstract interface class MaterialInkController implements RenderBox {
 ///
 /// ## Layout change notifications
 ///
-/// {@template flutter.material.material.LayoutChangedNotification}
 /// If the layout changes (e.g. because there's a list on the material, and it's
 /// been scrolled), a [LayoutChangedNotification] must be dispatched at the
 /// relevant subtree. This in particular means that transitions (e.g.
@@ -144,7 +143,6 @@ abstract interface class MaterialInkController implements RenderBox {
 /// widgets that use the [InkFeature] mechanism. Otherwise, in-progress ink
 /// features (e.g., ink splashes and ink highlights) won't move to account for
 /// the new layout.
-/// {@endtemplate}
 ///
 /// ## Painting over the material
 ///
@@ -427,9 +425,14 @@ class Material extends StatelessWidget {
       MaterialType.card => theme.cardColor,
       MaterialType.button || MaterialType.circle || MaterialType.transparency => null,
     };
+    final Color shadowColor = this.shadowColor
+        ?? (theme.useMaterial3 ? theme.colorScheme.shadow : theme.shadowColor);
+    late final Color surfaceColor = theme.useMaterial3
+        ? ElevationOverlay.applySurfaceTint(color!, surfaceTintColor, elevation)
+        : ElevationOverlay.applyOverlay(context, color!, elevation);
 
+    final bool animating = animationDuration != Duration.zero;
     final bool transparent = type == MaterialType.transparency;
-
     assert(
       color != null || transparent,
       'If Material type is not MaterialType.transparency, a color must '
@@ -438,37 +441,22 @@ class Material extends StatelessWidget {
       'MaterialType.canvas)',
     );
 
-    final bool animating = animationDuration != Duration.zero;
-
     Widget? contents = child;
     if (contents != null) {
-      final TextStyle style = textStyle ?? Theme.of(context).textTheme.bodyMedium!;
+      final TextStyle style = textStyle ?? theme.textTheme.bodyMedium!;
       contents = animating
           ? AnimatedDefaultTextStyle(
               duration: animationDuration,
               style: style,
               child: contents,
             )
-          : DefaultTextStyle(
-              style: style,
-              child: contents,
-            );
+          : DefaultTextStyle(style: style, child: contents);
     }
+    contents = BlankMaterial(color: color, child: contents);
 
-    contents = BlankMaterial(
-      color: transparent ? null : color,
-      child: contents,
-    );
-
-    final bool useMaterial3 = theme.useMaterial3;
-    final Color shadowColor = this.shadowColor
-        ?? (useMaterial3 ? theme.colorScheme.shadow : theme.shadowColor);
-    late final Color surfaceColor = useMaterial3
-        ? ElevationOverlay.applySurfaceTint(color!, surfaceTintColor, elevation)
-        : ElevationOverlay.applyOverlay(context, color!, elevation);
-
-    ShapeBorder? shape =
-        borderRadius == null ? this.shape : RoundedRectangleBorder(borderRadius: borderRadius!);
+    ShapeBorder? shape = borderRadius == null
+        ? this.shape
+        : RoundedRectangleBorder(borderRadius: borderRadius!);
 
     // PhysicalModel has a temporary workaround for a performance issue that
     // speeds up rectangular non transparent material (the workaround is to
@@ -508,48 +496,45 @@ class Material extends StatelessWidget {
         ),
     };
 
-    if (transparent || !animating) {
-      final bool borderOnForeground = transparent || this.borderOnForeground;
-
-      final TextDirection? textDirection = Directionality.maybeOf(context);
-
-      final _ShapeBorderPainter painter = _ShapeBorderPainter(shape, textDirection);
-      final ShapeBorderClipper clipper = ShapeBorderClipper(shape: shape, textDirection: textDirection);
-
-      contents = CustomPaint(
-        painter: borderOnForeground ? null : painter,
-        foregroundPainter: borderOnForeground ? painter : null,
+    if (animating && !transparent) {
+      return _MaterialInterior(
+        curve: Curves.fastOutSlowIn,
+        duration: animationDuration,
+        shape: shape,
+        borderOnForeground: borderOnForeground,
+        clipBehavior: clipBehavior,
+        elevation: elevation,
+        color: color!,
+        shadowColor: shadowColor,
+        surfaceTintColor: surfaceTintColor,
         child: contents,
       );
-
-      return transparent
-          ? ClipPath(
-              clipper: clipper,
-              clipBehavior: clipBehavior,
-              child: contents,
-            )
-          : PhysicalShape(
-              clipper: clipper,
-              clipBehavior: clipBehavior,
-              elevation: elevation,
-              color: surfaceColor,
-              shadowColor: shadowColor,
-              child: contents,
-            );
     }
 
-    return _MaterialInterior(
-      curve: Curves.fastOutSlowIn,
-      duration: animationDuration,
-      shape: shape,
-      borderOnForeground: borderOnForeground,
-      clipBehavior: clipBehavior,
-      elevation: elevation,
-      color: color!,
-      shadowColor: shadowColor,
-      surfaceTintColor: surfaceTintColor,
+    final TextDirection? textDirection = Directionality.maybeOf(context);
+    final _ShapeBorderPainter painter = _ShapeBorderPainter(shape, textDirection);
+    final ShapeBorderClipper clipper = ShapeBorderClipper(shape: shape, textDirection: textDirection);
+    final bool paintForeground = transparent || borderOnForeground;
+    contents = CustomPaint(
+      painter: paintForeground ? null : painter,
+      foregroundPainter: paintForeground ? painter : null,
       child: contents,
     );
+
+    return transparent
+        ? ClipPath(
+            clipper: clipper,
+            clipBehavior: clipBehavior,
+            child: contents,
+          )
+        : PhysicalShape(
+            clipper: clipper,
+            clipBehavior: clipBehavior,
+            elevation: elevation,
+            color: surfaceColor,
+            shadowColor: shadowColor,
+            child: contents,
+          );
   }
 }
 
@@ -561,8 +546,6 @@ class Material extends StatelessWidget {
 ///
 /// A [BlankMaterial] can be placed on top of opaque widgets
 /// to show ink effects on top of them.
-///
-/// {@macro flutter.material.material.LayoutChangedNotification}
 ///
 /// To specify fill color, elevation, and border clipping, consider using a
 /// [Material] widget.
