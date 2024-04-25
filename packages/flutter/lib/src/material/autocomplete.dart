@@ -106,7 +106,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// {@macro flutter.widgets.RawAutocomplete.initialValue}
   final TextEditingValue? initialValue;
 
-  /// If the options view overlay should be shown depending on the text editing value
+  /// If the options view overlay should be shown depending on the text editing value.
   final bool Function(TextEditingValue)? shouldShowOptionsView;
 
   static Widget _defaultFieldViewBuilder(BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {

@@ -270,7 +270,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// This parameter is ignored if [textEditingController] is defined.
   final TextEditingValue? initialValue;
 
-  ///
+  /// If the options view overlay should be shown depending on the text editing value.
   final bool Function(TextEditingValue)? shouldShowOptionsView;
 
   /// Calls [AutocompleteFieldViewBuilder]'s onFieldSubmitted callback for the
