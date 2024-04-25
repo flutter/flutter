@@ -220,7 +220,7 @@ class SelectableRegion extends StatefulWidget {
     required this.child,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.onSelectionChanged,
-    this.copyInterceptor = CopyInterceptor.newline,
+    this.copyInterceptor = CopyInterceptor.none,
   });
 
   /// The configuration for the magnifier used with selections in this region.
@@ -254,10 +254,10 @@ class SelectableRegion extends StatefulWidget {
   final ValueChanged<SelectedContent?>? onSelectionChanged;
 
   /// {@template flutter.widgets.SelectableRegion.copyInterceptor}
-  /// The [CopyInterceptor] to use when copying the selected text.
+  /// Specifies how [Selectables] are serialized into a string when copied.
   ///
-  /// Defaults to [CopyInterceptor.newline], which is the desired behavior in
-  /// most cases.
+  /// Defaults to [CopyInterceptor.none], as a [SelectableRegion] cannot know
+  /// the structure of the [Selectable]s it contains.
   /// {@endtemplate}
   final CopyInterceptor copyInterceptor;
 

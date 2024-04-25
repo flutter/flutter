@@ -47,7 +47,7 @@ class SelectionArea extends StatefulWidget {
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.magnifierConfiguration,
     this.onSelectionChanged,
-    this.copyInterceptor = CopyInterceptor.newline,
+    this.copyInterceptor = CopyInterceptor.none,
     required this.child,
   });
 
