@@ -2039,7 +2039,7 @@ void main() {
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
 
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-      expect(clipboardData['text'], 'w are you?\nGood, and you?\nFine, ');
+      expect(clipboardData['text'], 'w are you?Good, and you?Fine, ');
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
 
     testWidgets('can copy a selection and insert separator', (WidgetTester tester) async {
@@ -2072,7 +2072,7 @@ void main() {
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
 
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-      expect(clipboardData['text'], 'w are you?\nGood, and you?\nFine, ');
+      expect(clipboardData['text'], 'w are you?Good, and you?Fine, ');
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
 
     testWidgets('can copy nested selectable regions with different separators', (WidgetTester tester) async {
@@ -2114,7 +2114,7 @@ void main() {
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
 
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-      expect(clipboardData['text'], 'w are you?\nGood, and you? Fine, ');
+      expect(clipboardData['text'], 'w are you?');
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
 
     testWidgets(
@@ -4142,7 +4142,7 @@ void main() {
     expect(paragraph2.selections[0].start, 0);
     expect(paragraph2.selections[0].end, 8);
     expect(content, isNotNull);
-    expect(content!.plainText, 'w are you?\nGood, an');
+    expect(content!.plainText, 'w are you?Good, an');
 
     await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true));
     await tester.pump();
@@ -4156,7 +4156,7 @@ void main() {
     expect(paragraph3.selections[0].start, 0);
     expect(paragraph3.selections[0].end, 9);
     expect(content, isNotNull);
-    expect(content!.plainText, 'w are you?\nGood, and you?\nFine, tha');
+    expect(content!.plainText, 'w are you?Good, and you?Fine, tha');
 
     await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true));
     await tester.pump();
@@ -4170,7 +4170,7 @@ void main() {
     expect(paragraph3.selections[0].start, 0);
     expect(paragraph3.selections[0].end, 16);
     expect(content, isNotNull);
-    expect(content!.plainText, 'w are you?\nGood, and you?\nFine, thank you.');
+    expect(content!.plainText, 'w are you?Good, and you?Fine, thank you.');
 
     await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true));
     await tester.pump();
@@ -4182,7 +4182,7 @@ void main() {
     expect(paragraph2.selections[0].end, 8);
     expect(paragraph3.selections.length, 1);
     expect(content, isNotNull);
-    expect(content!.plainText, 'w are you?\nGood, an\n');
+    expect(content!.plainText, 'w are you?Good, an');
 
     await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true));
     await tester.pump();
@@ -4192,7 +4192,7 @@ void main() {
     expect(paragraph2.selections.length, 1);
     expect(paragraph3.selections.length, 1);
     expect(content, isNotNull);
-    expect(content!.plainText, 'w are\n\n');
+    expect(content!.plainText, 'w are');
 
     await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true));
     await tester.pump();
@@ -4202,7 +4202,7 @@ void main() {
     expect(paragraph2.selections.length, 1);
     expect(paragraph3.selections.length, 1);
     expect(content, isNotNull);
-    expect(content!.plainText, 'Ho\n\n');
+    expect(content!.plainText, 'Ho');
   });
 
   group('BrowserContextMenu', () {
@@ -4266,7 +4266,6 @@ void main() {
         home: SelectableRegion(
           focusNode: focusNode,
           selectionControls: materialTextSelectionControls,
-          copyInterceptor: CopyInterceptor.none,
           child: Scaffold(
             body: Center(
               child: Text.rich(
