@@ -40,14 +40,9 @@ enum MaterialType {
 
   /// A transparent piece of material that draws ink splashes and highlights.
   ///
-  /// While the material metaphor describes child widgets as printed on the
-  /// material itself and do not hide ink effects, in practice the [Material]
-  /// widget draws child widgets on top of the ink effects.
-  /// A [Material] with type transparency can be placed on top of opaque widgets
-  /// to show ink effects on top of them.
-  ///
-  /// Prefer using the [Ink] widget for showing ink effects on top of opaque
-  /// widgets.
+  /// A [Material] with the transparency type is similar to [BlankMaterial],
+  /// and it also includes configuration options for elevation, clipping,
+  /// and text style.
   transparency
 }
 
@@ -140,6 +135,7 @@ abstract interface class MaterialInkController implements RenderBox {
 ///
 /// ## Layout change notifications
 ///
+/// {@template flutter.material.material.LayoutChangedNotification}
 /// If the layout changes (e.g. because there's a list on the material, and it's
 /// been scrolled), a [LayoutChangedNotification] must be dispatched at the
 /// relevant subtree. This in particular means that transitions (e.g.
@@ -148,6 +144,7 @@ abstract interface class MaterialInkController implements RenderBox {
 /// widgets that use the [InkFeature] mechanism. Otherwise, in-progress ink
 /// features (e.g., ink splashes and ink highlights) won't move to account for
 /// the new layout.
+/// {@endtemplate}
 ///
 /// ## Painting over the material
 ///
@@ -558,31 +555,22 @@ class Material extends StatelessWidget {
 
 /// A blank piece of material.
 ///
-/// This widget designates a space to paint [InkFeature]s
-/// like [InkSplash] and [InkHighlight] below its children.
+/// While the material metaphor describes child widgets as printed on the
+/// material itself and do not hide ink effects, in practice the [Material]
+/// widget draws child widgets on top of the ink effects.
 ///
+/// A [BlankMaterial] can be placed on top of opaque widgets
+/// to show ink effects on top of them.
 ///
-/// ## Painting over the material
+/// {@macro flutter.material.material.LayoutChangedNotification}
 ///
 /// To specify fill color, elevation, and border clipping, consider using a
 /// [Material] widget.
-///
-/// Material widgets will often trigger reactions on their nearest material
-/// ancestor. For example, [ListTile.hoverColor] triggers a reaction on the
-/// tile's material when a pointer is hovering over it. These reactions will be
-/// obscured if any widget in between them and the material paints in such a
-/// way as to obscure the material (such as setting a [BoxDecoration.color] on
-/// a [DecoratedBox]). To avoid this behavior, use [InkDecoration] to decorate
-/// the material itself.
-///
-/// See also:
-///
-///  * [MergeableMaterial], a piece of material that can split and re-merge.
-///  * [Card], a wrapper for a [Material] of [type] [MaterialType.card].
-///  * <https://material.io/design/>
-///  * <https://m3.material.io/styles/color/the-color-system/color-roles>
 class BlankMaterial extends StatefulWidget {
   /// Creates a blank piece of material.
+  ///
+  /// A [BlankMaterial] doesn't paint its [color]; instead,
+  /// the value is passed to the [MaterialInkController.color].
   const BlankMaterial({
     super.key,
     this.color,
@@ -594,10 +582,7 @@ class BlankMaterial extends StatefulWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
 
-  /// The color assigned to this material.
-  ///
-  /// A blank material doesn't paint any color; instead, this value
-  /// is assigned to [MaterialInkController.color].
+  /// The color for this widget's [MaterialInkController].
   ///
   /// The [child] (and its descendents) can access this value using
   /// `Material.of(context).color`.
