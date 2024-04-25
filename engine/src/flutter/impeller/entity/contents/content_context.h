@@ -39,7 +39,6 @@
 #include "impeller/entity/gaussian.frag.h"
 #include "impeller/entity/glyph_atlas.frag.h"
 #include "impeller/entity/glyph_atlas.vert.h"
-#include "impeller/entity/glyph_atlas_color.frag.h"
 #include "impeller/entity/gradient_fill.vert.h"
 #include "impeller/entity/linear_gradient_fill.frag.h"
 #include "impeller/entity/linear_to_srgb_filter.frag.h"
@@ -149,8 +148,7 @@ using YUVToRGBFilterPipeline =
 
 using GlyphAtlasPipeline =
     RenderPipelineHandle<GlyphAtlasVertexShader, GlyphAtlasFragmentShader>;
-using GlyphAtlasColorPipeline =
-    RenderPipelineHandle<GlyphAtlasVertexShader, GlyphAtlasColorFragmentShader>;
+
 using PorterDuffBlendPipeline =
     RenderPipelineHandle<PorterDuffBlendVertexShader,
                          PorterDuffBlendFragmentShader>;
@@ -514,11 +512,6 @@ class ContentContext {
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetGlyphAtlasPipeline(
       ContentContextOptions opts) const {
     return GetPipeline(glyph_atlas_pipelines_, opts);
-  }
-
-  std::shared_ptr<Pipeline<PipelineDescriptor>> GetGlyphAtlasColorPipeline(
-      ContentContextOptions opts) const {
-    return GetPipeline(glyph_atlas_color_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetYUVToRGBFilterPipeline(
@@ -917,7 +910,6 @@ class ContentContext {
   mutable Variants<SrgbToLinearFilterPipeline> srgb_to_linear_filter_pipelines_;
   mutable Variants<ClipPipeline> clip_pipelines_;
   mutable Variants<GlyphAtlasPipeline> glyph_atlas_pipelines_;
-  mutable Variants<GlyphAtlasColorPipeline> glyph_atlas_color_pipelines_;
   mutable Variants<YUVToRGBFilterPipeline> yuv_to_rgb_filter_pipelines_;
   mutable Variants<PorterDuffBlendPipeline> porter_duff_blend_pipelines_;
   // Advanced blends.
