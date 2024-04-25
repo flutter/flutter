@@ -531,6 +531,8 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     int index,
   ) {
     if (index == _firstVisibleItemIndex) {
+      // print('constraints.scrollOFfset: ${constraints.scrollOffset}');
+
       if (_distanceToLeadingEdge <= effectiveShrinkExtent) {
         return constraints.scrollOffset - effectiveShrinkExtent + _distanceToLeadingEdge;
       }
@@ -589,7 +591,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     )
     double itemExtent,
   ) {
-    return childManager.childCount * maxChildExtent;
+    return childManager.childCount * firstChildExtent;
   }
 
   BoxConstraints _getChildConstraints(int index) {
@@ -617,10 +619,10 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     assert(remainingExtent >= 0.0);
     final double targetEndScrollOffset = scrollOffset + remainingExtent;
     currentLayoutDimensions = SliverLayoutDimensions(
-        scrollOffset: constraints.scrollOffset,
-        precedingScrollExtent: constraints.precedingScrollExtent,
-        viewportMainAxisExtent: constraints.viewportMainAxisExtent,
-        crossAxisExtent: constraints.crossAxisExtent
+      scrollOffset: constraints.scrollOffset,
+      precedingScrollExtent: constraints.precedingScrollExtent,
+      viewportMainAxisExtent: constraints.viewportMainAxisExtent,
+      crossAxisExtent: constraints.crossAxisExtent
     );
     // TODO(Piinks): Clean up when deprecation expires.
     const double deprecatedExtraItemExtent = -1;
@@ -691,6 +693,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
     }
 
     double estimatedMaxScrollOffset = double.infinity;
+    // Layout visible items after the first visible item.
     for (int index = indexOf(trailingChildWithLayout!) + 1; targetLastIndex == null || index <= targetLastIndex; ++index) {
       RenderBox? child = childAfter(trailingChildWithLayout!);
       if (child == null || indexOf(child) != index) {
@@ -711,8 +714,10 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
 
     final int lastIndex = indexOf(lastChild!);
     final double leadingScrollOffset = indexToLayoutOffset(deprecatedExtraItemExtent, firstIndex);
-
-    final double trailingScrollOffset = indexToLayoutOffset(deprecatedExtraItemExtent, lastIndex + 1) + extraLayoutOffset;
+    double trailingScrollOffset = indexToLayoutOffset(deprecatedExtraItemExtent, lastIndex + 1);
+    if (lastIndex + 1 == childManager.childCount) {
+      trailingScrollOffset += extraLayoutOffset;
+    }
 
     assert(firstIndex == 0 || childScrollOffset(firstChild!)! - scrollOffset <= precisionErrorTolerance);
     assert(debugAssertChildListIsNonEmptyAndContiguous());
@@ -820,6 +825,7 @@ class CarouselScrollPhysics extends ScrollPhysics {
     } else if (velocity > tolerance.velocity) {
       item += 0.5;
     }
+    // print('maxScrollExtent: ${position.maxScrollExtent}');
     return math.min(
       item.roundToDouble() * itemWidth,
       position.maxScrollExtent,
@@ -1035,8 +1041,7 @@ class CarouselController extends ScrollController {
     // this.keepPage = true,
     this.itemExtent,
     this.viewportFraction,
-  }) : assert(viewportFraction == null && itemExtent != null
-    || viewportFraction != null && itemExtent == null);
+  });
 
   /// The item that expands to full size when first creating the [PageView].
   final int initialItem;
