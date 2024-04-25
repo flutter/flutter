@@ -917,6 +917,9 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
 
     // Display the overflow indicator if clipBehavior is Clip.none.
     assert(() {
+      if (size.isEmpty) {
+        return true;
+      }
       switch (clipBehavior) {
         case Clip.none:
           paintOverflowIndicator(context, offset, _overflowContainerRect, _overflowChildRect);
