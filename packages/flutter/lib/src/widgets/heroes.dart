@@ -507,6 +507,7 @@ class _HeroFlightManifest {
         'to route: ${toRoute.settings} with hero: $fromHero to $toHero)${isValid ? '' : ', INVALID'}';
   }
 
+  @mustCallSuper
   void dispose() {
     _animation?.dispose();
   }
