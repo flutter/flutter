@@ -90,10 +90,6 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// [SelectionContainer.maybeOf] if they want to participate in the
 /// selection.
 ///
-/// A [SelectableRegion] will defer to a [SelectionContainer] above it in the
-/// widget tree if one exists. This allows nested [SelectableRegion]s to
-/// coordinate their selection behavior.
-///
 /// An example selection tree will look like:
 ///
 /// {@tool snippet}
@@ -1495,15 +1491,11 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
-    final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     Widget result = SelectionContainer(
-      registrar: registrar ?? this,
+      registrar: this,
       delegate: _selectionDelegate,
       child: widget.child,
     );
-    if (registrar != null) {
-      return result;
-    }
     if (kIsWeb) {
       result = PlatformSelectableRegionContextMenu(
         child: result,
