@@ -896,8 +896,6 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    // There's no point in drawing the child if we're empty, or there is no
-    // child.
     if (child == null) {
       return;
     }
