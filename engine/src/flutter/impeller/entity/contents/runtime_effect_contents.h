@@ -35,7 +35,16 @@ class RuntimeEffectContents final : public ColorSourceContents {
               const Entity& entity,
               RenderPass& pass) const override;
 
+  /// Load the runtime effect and ensure a default PSO is initialized.
+  bool BootstrapShader(const ContentContext& renderer) const;
+
  private:
+  bool RegisterShader(const ContentContext& renderer) const;
+
+  std::shared_ptr<Pipeline<PipelineDescriptor>> CreatePipeline(
+      const ContentContext& renderer,
+      ContentContextOptions options) const;
+
   std::shared_ptr<RuntimeStage> runtime_stage_;
   std::shared_ptr<std::vector<uint8_t>> uniform_data_;
   std::vector<TextureInput> texture_inputs_;

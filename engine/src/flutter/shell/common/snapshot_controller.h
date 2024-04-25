@@ -44,6 +44,9 @@ class SnapshotController {
 
   virtual sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) = 0;
 
+  virtual void CacheRuntimeStage(
+      const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) = 0;
+
  protected:
   explicit SnapshotController(const Delegate& delegate);
   const Delegate& GetDelegate() { return delegate_; }

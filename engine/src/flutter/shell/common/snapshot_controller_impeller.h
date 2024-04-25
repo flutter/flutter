@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_COMMON_SNAPSHOT_CONTROLLER_IMPELLER_H_
 
 #include "flutter/shell/common/snapshot_controller.h"
+#include "impeller/runtime_stage/runtime_stage.h"
 
 namespace flutter {
 
@@ -19,6 +20,9 @@ class SnapshotControllerImpeller : public SnapshotController {
                                     SkISize size) override;
 
   sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) override;
+
+  void CacheRuntimeStage(
+      const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) override;
 
  private:
   sk_sp<DlImage> DoMakeRasterSnapshot(const sk_sp<DisplayList>& display_list,
