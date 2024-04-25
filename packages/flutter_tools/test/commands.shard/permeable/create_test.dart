@@ -3703,6 +3703,14 @@ void main() {
   });
 
   testUsingContext('flutter create should tool exit if the template manifest cannot be read', () async {
+    globals.fs.file(globals.fs.path.join(
+      Cache.flutterRoot!,
+      'packages',
+      'flutter_tools',
+      'templates',
+      'template_manifest.json',
+    )).createSync(recursive: true);
+
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -3719,7 +3727,7 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(
       opHandle: (String context, FileSystemOp operation) {
-        if (context.contains('template_manifest.json')) {
+        if (operation == FileSystemOp.read && context.contains('template_manifest.json')) {
           throw PathNotFoundException(
               context, const OSError(), 'Cannot open file');
         }
