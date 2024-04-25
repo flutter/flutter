@@ -7,10 +7,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('SliverPinnedHeader basics', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
+    Widget buildFrame({ required Axis axis, required bool reverse }) {
+      return MaterialApp(
         home: Scaffold(
           body: CustomScrollView(
+            scrollDirection: axis,
+            reverse: reverse,
             slivers: <Widget>[
               const SliverPinnedHeader(
                 child: Text('SliverPinnedHeader'),
@@ -24,33 +26,117 @@ void main() {
             ],
           ),
         ),
-      ),
-    );
+      );
+    }
 
     Rect getHeaderRect() => tester.getRect(find.text('SliverPinnedHeader'));
     Rect getItemRect(int index) => tester.getRect(find.text('Item $index'));
 
-    // The test viewport is 800 x 600 (width x height).
-    // The header's child is at the top of the scroll view and all items are the same height.
-    expect(getHeaderRect().top, 0);
-    expect(getHeaderRect().width, 800);
-    expect(getHeaderRect().height, getItemRect(0).height);
+    // axis: Axis.vertical, reverse: false
+    {
+      await tester.pumpWidget(buildFrame(axis: Axis.vertical, reverse: false));
+      await tester.pumpAndSettle();
+      final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
 
-    // First and last visible items
-    final double itemHeight = getItemRect(0).height;
-    final int visibleItemCount = (600 ~/ itemHeight) - 1; // less 1 for the header
-    expect(find.text('Item 0'), findsOneWidget);
-    expect(find.text('Item ${visibleItemCount - 1}'), findsOneWidget);
+      // The test viewport is 800 x 600 (width x height).
+      // The header's child is at the top of the scroll view and all items are the same height.
+      expect(getHeaderRect().topLeft, Offset.zero);
+      expect(getHeaderRect().width, 800);
+      expect(getHeaderRect().height, tester.getSize(find.text('SliverPinnedHeader')).height);
 
-    // Scrolling up and down leaves the header at the top.
-    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
-    position.moveTo(itemHeight * 5);
-    await tester.pumpAndSettle();
-    expect(getHeaderRect().top, 0);
-    expect(getHeaderRect().width, 800);
-    position.moveTo(itemHeight * -5);
-    expect(getHeaderRect().top, 0);
-    expect(getHeaderRect().width, 800);
+      // First and last visible items
+      final double itemHeight = getItemRect(0).height;
+      final int visibleItemCount = (600 ~/ itemHeight) - 1; // less 1 for the header
+      expect(find.text('Item 0'), findsOneWidget);
+      expect(find.text('Item ${visibleItemCount - 1}'), findsOneWidget);
+
+      // Scrolling up and down leaves the header at the top.
+      position.moveTo(itemHeight * 5);
+      await tester.pumpAndSettle();
+      expect(getHeaderRect().top, 0);
+      expect(getHeaderRect().width, 800);
+      position.moveTo(itemHeight * -5);
+      expect(getHeaderRect().top, 0);
+      expect(getHeaderRect().width, 800);
+    }
+
+    // axis: Axis.horizontal, reverse: false
+    {
+      await tester.pumpWidget(buildFrame(axis: Axis.horizontal, reverse: false));
+      final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+      await tester.pumpAndSettle();
+
+      expect(getHeaderRect().topLeft, Offset.zero);
+      expect(getHeaderRect().height, 600);
+      expect(getHeaderRect().width, tester.getSize(find.text('SliverPinnedHeader')).width);
+
+      // First and last visible items (assuming < 10 items visible)
+      final double itemWidth = getItemRect(0).width;
+      final int visibleItemCount = (800 - getHeaderRect().width) ~/ itemWidth;
+      expect(find.text('Item 0'), findsOneWidget);
+      expect(find.text('Item ${visibleItemCount - 1}'), findsOneWidget);
+
+      // Scrolling left and right leaves the header on the left.
+      position.moveTo(itemWidth * 5);
+      await tester.pumpAndSettle();
+      expect(getHeaderRect().left, 0);
+      expect(getHeaderRect().height, 600);
+      position.moveTo(itemWidth * -5);
+      expect(getHeaderRect().left, 0);
+      expect(getHeaderRect().height, 600);
+    }
+
+    // axis: Axis.vertical, reverse: true
+    {
+      await tester.pumpWidget(buildFrame(axis: Axis.vertical, reverse: true));
+      await tester.pumpAndSettle();
+      final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+
+      expect(getHeaderRect().bottomLeft, const Offset(0, 600));
+      expect(getHeaderRect().width, 800);
+      expect(getHeaderRect().height, tester.getSize(find.text('SliverPinnedHeader')).height);
+
+      // First and last visible items
+      final double itemHeight = getItemRect(0).height;
+      final int visibleItemCount = (600 ~/ itemHeight) - 1; // less 1 for the header
+      expect(find.text('Item 0'), findsOneWidget);
+      expect(find.text('Item ${visibleItemCount - 1}'), findsOneWidget);
+
+      // Scrolling up and down leaves the header at the bottom.
+      position.moveTo(itemHeight * 5);
+      await tester.pumpAndSettle();
+      expect(getHeaderRect().bottomLeft, const Offset(0, 600));
+      expect(getHeaderRect().width, 800);
+      position.moveTo(itemHeight * -5);
+      expect(getHeaderRect().bottomLeft, const Offset(0, 600));
+      expect(getHeaderRect().width, 800);
+    }
+
+    // axis: Axis.horizontal, reverse: true
+    {
+      await tester.pumpWidget(buildFrame(axis: Axis.horizontal, reverse: true));
+      final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+      await tester.pumpAndSettle();
+
+      expect(getHeaderRect().topRight, const Offset(800, 0));
+      expect(getHeaderRect().height, 600);
+      expect(getHeaderRect().width, tester.getSize(find.text('SliverPinnedHeader')).width);
+
+      // First and last visible items (assuming < 10 items visible)
+      final double itemWidth = getItemRect(0).width;
+      final int visibleItemCount = (800 - getHeaderRect().width) ~/ itemWidth;
+      expect(find.text('Item 0'), findsOneWidget);
+      expect(find.text('Item ${visibleItemCount - 1}'), findsOneWidget);
+
+      // Scrolling left and right leaves the header on the right.
+      position.moveTo(itemWidth * 5);
+      await tester.pumpAndSettle();
+      expect(getHeaderRect().topRight, const Offset(800, 0));
+      expect(getHeaderRect().height, 600);
+      position.moveTo(itemWidth * -5);
+      expect(getHeaderRect().topRight, const Offset(800, 0));
+      expect(getHeaderRect().height, 600);
+    }
   });
 
   testWidgets('SliverPinnedHeader: multiple headers layout one after the other', (WidgetTester tester) async {
