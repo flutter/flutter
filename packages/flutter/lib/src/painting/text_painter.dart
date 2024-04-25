@@ -1468,10 +1468,15 @@ class TextPainter {
     final _LineCaretMetrics metrics;
     final List<TextBox> boxes = cachedLayout.paragraph
       .getBoxesForRange(graphemeRange.start, graphemeRange.end, boxHeightStyle: ui.BoxHeightStyle.strut);
+
     if (boxes.isNotEmpty) {
-      final TextBox box = boxes.single;
+      final bool anchorToLeft = switch (glyphInfo.writingDirection) {
+        TextDirection.ltr => anchorToLeadingEdge,
+        TextDirection.rtl => !anchorToLeadingEdge,
+      };
+      final TextBox box = anchorToLeft ? boxes.first : boxes.last;
       metrics = _LineCaretMetrics(
-        offset: Offset(anchorToLeadingEdge ? box.start : box.end, box.top),
+        offset: Offset(anchorToLeft ? box.left : box.right, box.top),
         writingDirection: box.direction,
       );
     } else {

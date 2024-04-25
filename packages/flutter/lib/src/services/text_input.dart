@@ -1894,14 +1894,11 @@ class TextInput {
         TextInput._instance._updateEditingValue(value, exclude: _PlatformTextInputControl.instance);
       case 'TextInputClient.updateEditingStateWithDeltas':
         assert(_currentConnection!._client is DeltaTextInputClient, 'You must be using a DeltaTextInputClient if TextInputConfiguration.enableDeltaModel is set to true');
-        final List<TextEditingDelta> deltas = <TextEditingDelta>[];
-
         final Map<String, dynamic> encoded = args[1] as Map<String, dynamic>;
-
-        for (final dynamic encodedDelta in encoded['deltas'] as List<dynamic>) {
-          final TextEditingDelta delta = TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>);
-          deltas.add(delta);
-        }
+        final List<TextEditingDelta> deltas = <TextEditingDelta>[
+          for (final dynamic encodedDelta in encoded['deltas'] as List<dynamic>)
+            TextEditingDelta.fromJSON(encodedDelta as Map<String, dynamic>)
+        ];
 
         (_currentConnection!._client as DeltaTextInputClient).updateEditingValueWithDeltas(deltas);
       case 'TextInputClient.performAction':

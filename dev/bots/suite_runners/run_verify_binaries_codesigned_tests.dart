@@ -12,7 +12,7 @@ import 'package:process/process.dart';
 import '../run_command.dart';
 import '../utils.dart';
 
-Future<void> verifyCodesignedTestRunner(String flutterRoot) async {
+Future<void> verifyCodesignedTestRunner() async {
   printProgress('${green}Running binaries codesign verification$reset');
   await runCommand(
     'flutter',
@@ -139,28 +139,21 @@ Future<void> verifyExist(
   String flutterRoot,
   {@visibleForTesting ProcessManager processManager = const LocalProcessManager()
 }) async {
-  final Set<String> foundFiles = <String>{};
-  final String cacheDirectory =  path.join(flutterRoot, 'bin', 'cache');
-
-  for (final String binaryPath
-      in await findBinaryPaths(cacheDirectory, processManager: processManager)) {
-    if (binariesWithEntitlements(flutterRoot).contains(binaryPath)) {
-      foundFiles.add(binaryPath);
-    } else if (binariesWithoutEntitlements(flutterRoot).contains(binaryPath)) {
-      foundFiles.add(binaryPath);
-    } else {
-      throw Exception(
-          'Found unexpected binary in cache: $binaryPath');
-    }
-  }
-
+  final List<String> binaryPaths = await findBinaryPaths(
+    path.join(flutterRoot, 'bin', 'cache'),
+    processManager: processManager,
+  );
   final List<String> allExpectedFiles = binariesWithEntitlements(flutterRoot) + binariesWithoutEntitlements(flutterRoot);
+  final Set<String> foundFiles = <String>{
+    for (final String binaryPath in binaryPaths)
+      if (allExpectedFiles.contains(binaryPath)) binaryPath
+      else throw Exception('Found unexpected binary in cache: $binaryPath'),
+  };
+
   if (foundFiles.length < allExpectedFiles.length) {
-    final List<String> unfoundFiles = allExpectedFiles
-        .where(
-          (String file) => !foundFiles.contains(file),
-        )
-        .toList();
+    final List<String> unfoundFiles = <String>[
+      for (final String file in allExpectedFiles) if (!foundFiles.contains(file)) file,
+    ];
     print(
       'Expected binaries not found in cache:\n\n${unfoundFiles.join('\n')}\n\n'
       'If this commit is removing binaries from the cache, this test should be fixed by\n'
