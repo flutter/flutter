@@ -20,7 +20,6 @@ impeller_shaders("entity_shaders") {
     "shaders/clip.vert",
     "shaders/gradients/conical_gradient_fill.frag",
     "shaders/glyph_atlas.frag",
-    "shaders/glyph_atlas_color.frag",
     "shaders/glyph_atlas.vert",
     "shaders/gradients/gradient_fill.vert",
     "shaders/gradients/linear_gradient_fill.frag",
