@@ -2087,18 +2087,6 @@ class TextSelectionGestureDetectorBuilder {
         && selection.end >= textPosition.offset;
   }
 
-  /// Returns true if position was on selection.
-  bool _positionOnSelection(Offset position, TextSelection? targetSelection) {
-    if (targetSelection == null) {
-      return false;
-    }
-
-    final TextPosition textPosition = renderEditable.getPositionForPoint(position);
-
-    return targetSelection.start <= textPosition.offset
-        && targetSelection.end >= textPosition.offset;
-  }
-
   // Expand the selection to the given global position.
   //
   // Either base or extent will be moved to the last tapped position, whichever

@@ -787,7 +787,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
   /// a drag.
   ///
   /// When this value is `false`, this recognizer will wait until it is the last
-  /// recognizer in the [GestureArena] before declaring victory on a drag.
+  /// recognizer in the gesture arena before declaring victory on a drag.
   bool eagerVictoryOnDrag;
 
   /// {@macro flutter.gestures.tap.TapGestureRecognizer.onTapDown}
