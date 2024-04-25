@@ -2432,7 +2432,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)).dx, 390.0);
     });
   });
- 
+
   testWidgets(
   // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
   experimentalLeakTesting: LeakTesting.settings.withTracked(classes: <String>['CurvedAnimation']),
