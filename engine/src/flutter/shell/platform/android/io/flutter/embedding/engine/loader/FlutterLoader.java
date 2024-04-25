@@ -4,15 +4,12 @@
 
 package io.flutter.embedding.engine.loader;
 
-import static io.flutter.Build.API_LEVELS;
-
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.hardware.display.DisplayManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -237,13 +234,6 @@ public class FlutterLoader {
     }
   }
 
-  private static boolean areValidationLayersOnByDefault() {
-    if (BuildConfig.DEBUG && Build.VERSION.SDK_INT >= API_LEVELS.API_26) {
-      return Build.SUPPORTED_ABIS[0].equals("arm64-v8a");
-    }
-    return false;
-  }
-
   /**
    * Blocks until initialization of the native system has completed.
    *
@@ -353,8 +343,7 @@ public class FlutterLoader {
         if (metaData.getBoolean(ENABLE_IMPELLER_META_DATA_KEY, false)) {
           shellArgs.add("--enable-impeller");
         }
-        if (metaData.getBoolean(
-            ENABLE_VULKAN_VALIDATION_META_DATA_KEY, areValidationLayersOnByDefault())) {
+        if (metaData.getBoolean(ENABLE_VULKAN_VALIDATION_META_DATA_KEY, false)) {
           shellArgs.add("--enable-vulkan-validation");
         }
         if (metaData.getBoolean(IMPELLER_OPENGL_GPU_TRACING_DATA_KEY, false)) {
