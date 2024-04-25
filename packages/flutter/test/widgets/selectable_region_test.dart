@@ -2075,20 +2075,19 @@ void main() {
       expect(clipboardData['text'], 'w are you?Good, and you?Fine, ');
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
 
-    testWidgets('can copy nested selectable regions with different separators', (WidgetTester tester) async {
+    testWidgets('can change copyInterceptor with CopyInterceptorContainer', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            child: Column(
+            copyInterceptor: CopyInterceptor.newline,
+            child: const Column(
               children: <Widget>[
-                const Text('How are you?'),
-                SelectableRegion(
-                  focusNode: FocusNode(),
-                  selectionControls: materialTextSelectionControls,
+                Text('How are you?'),
+                CopyInterceptorContainer(
                   copyInterceptor: CopyInterceptor.space,
-                  child: const Column(
+                  child: Column(
                     children: <Widget>[
                       Text('Good, and you?'),
                       Text('Fine, thank you.'),
@@ -2114,7 +2113,7 @@ void main() {
       await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyC, control: true));
 
       final Map<String, dynamic> clipboardData = mockClipboard.clipboardData as Map<String, dynamic>;
-      expect(clipboardData['text'], 'w are you?');
+      expect(clipboardData['text'], 'w are you?\nGood, and you? Fine, ');
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
 
     testWidgets(

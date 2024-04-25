@@ -1790,7 +1790,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     }
   }
 
-  /// The [CopyInterceptor] to use for handling copy requests.
+  /// Specifies how [Selectables] are serialized into a string when copied.
   final CopyInterceptor copyInterceptor;
 
   /// Gets the list of [Selectable]s this delegate is managing.
@@ -2678,3 +2678,27 @@ typedef SelectableRegionContextMenuBuilder = Widget Function(
   BuildContext context,
   SelectableRegionState selectableRegionState,
 );
+
+/// A wrapper around [SelectionContainer] which specifies a desired [copyInterceptor].
+class CopyInterceptorContainer extends StatelessWidget {
+  /// Creates a [CopyInterceptorContainer].
+  const CopyInterceptorContainer({
+    super.key,
+    required this.copyInterceptor,
+    required this.child,
+  });
+
+  /// Specifies how [Selectables] are serialized into a string when copied.
+  final CopyInterceptor copyInterceptor;
+
+  /// The child widget this [CopyInterceptorContainer] applies to.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return SelectionContainer(
+      delegate: _SelectableRegionContainerDelegate(copyInterceptor: copyInterceptor),
+      child: child,
+    );
+  }
+}
