@@ -160,4 +160,7 @@ sk_sp<SkImage> SnapshotControllerSkia::ConvertToRasterImage(
   return result->skia_image();
 }
 
+void SnapshotControllerSkia::CacheRuntimeStage(
+    const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) {}
+
 }  // namespace flutter

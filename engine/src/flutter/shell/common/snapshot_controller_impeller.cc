@@ -70,6 +70,17 @@ sk_sp<DlImage> SnapshotControllerImpeller::DoMakeRasterSnapshot(
   return nullptr;
 }
 
+void SnapshotControllerImpeller::CacheRuntimeStage(
+    const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) {
+  impeller::RuntimeEffectContents runtime_effect;
+  runtime_effect.SetRuntimeStage(runtime_stage);
+  auto context = GetDelegate().GetAiksContext();
+  if (!context) {
+    return;
+  }
+  runtime_effect.BootstrapShader(context->GetContentContext());
+}
+
 sk_sp<SkImage> SnapshotControllerImpeller::ConvertToRasterImage(
     sk_sp<SkImage> image) {
   FML_UNREACHABLE();

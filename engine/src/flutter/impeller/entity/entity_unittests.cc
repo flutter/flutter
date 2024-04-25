@@ -2242,6 +2242,20 @@ TEST_P(EntityTest, RuntimeEffectCanSuccessfullyRender) {
                   .has_value());
 }
 
+TEST_P(EntityTest, RuntimeEffectCanPrecache) {
+  auto runtime_stages =
+      OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
+  auto runtime_stage =
+      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ASSERT_TRUE(runtime_stage);
+  ASSERT_TRUE(runtime_stage->IsDirty());
+
+  auto contents = std::make_shared<RuntimeEffectContents>();
+  contents->SetRuntimeStage(runtime_stage);
+
+  EXPECT_TRUE(contents->BootstrapShader(*GetContentContext()));
+}
+
 TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
   if (GetBackend() != PlaygroundBackend::kVulkan) {
     GTEST_SKIP() << "Test only applies to Vulkan";
