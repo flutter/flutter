@@ -652,9 +652,12 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 /// ### When competing with `TapGestureRecognizer` and `DragGestureRecognizer`
 ///
 /// Similar to [TapGestureRecognizer] and [DragGestureRecognizer],
-/// [BaseTapAndDragGestureRecognizer] will not aggressively declare victory when it detects
-/// a tap, so when it is competing with those gesture recognizers and others it has a chance
-/// of losing.
+/// [BaseTapAndDragGestureRecognizer] will not aggressively declare victory when
+/// it detects a tap, so when it is competing with those gesture recognizers and
+/// others it has a chance of losing. Similarly, when `eagerVictoryOnDrag` is set
+/// to `false`, this recognizer will not aggressively declare victory when it
+/// detects a drag. By default, `eagerVictoryOnDrag` is set to `true`, so this
+/// recognizer will aggressively declare victory when it detects a drag.
 ///
 /// When competing against [TapGestureRecognizer], if the pointer does not move past the tap
 /// tolerance, then the recognizer that entered the arena first will win. In this case the
