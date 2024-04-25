@@ -30,16 +30,6 @@ def parse_args(argv):
       help='Run cmake for impeller-cmake-example.',
   )
   parser.add_argument(
-      '--goma-dir',
-      '-g',
-      type=str,
-      default=os.getenv('GOMA_DIR'),
-      help=(
-          'The path to the Goma install. Defaults to the value of the '
-          'GOMA_DIR environment variable.'
-      ),
-  )
-  parser.add_argument(
       '--path',
       '-p',
       type=str,
@@ -133,7 +123,6 @@ def main(argv):
     cmake_env.update({
         'PATH': os.environ['PATH'] + ':' + ninja_path,
         'FLUTTER_ENGINE_SRC_DIR': SRC_ROOT,
-        'FLUTTER_GOMA_DIR': args.goma_dir,
     })
     if args.xcode_symlinks:
       xcode_symlink_path = create_xcode_symlink()
