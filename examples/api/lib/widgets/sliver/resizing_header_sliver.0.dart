@@ -5,11 +5,11 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const ResizingHeaderSliverApp());
+  runApp(const SliverResizingHeaderApp());
 }
 
-class ResizingHeaderSliverApp extends StatelessWidget {
-  const ResizingHeaderSliverApp({ super.key });
+class SliverResizingHeaderApp extends StatelessWidget {
+  const SliverResizingHeaderApp({ super.key });
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +52,7 @@ class _ResizingHeaderExampleState extends State<ResizingHeaderExample> {
             child: CustomScrollView(
               controller: scrollController,
               slivers: const <Widget>[
-                ResizingHeaderSliver(
+                SliverResizingHeader(
                   minExtentPrototype: ListHeader(
                     text: 'One',
                   ),
@@ -60,7 +60,7 @@ class _ResizingHeaderExampleState extends State<ResizingHeaderExample> {
                     text: 'One\nTwo\nThree'
                   ),
                   child: ListHeader(
-                    text: 'ResizingHeaderSliver\nWith Two Optional\nLines of Text',
+                    text: 'SliverResizingHeader\nWith Two Optional\nLines of Text',
                   ),
                 ),
                 ItemList(),

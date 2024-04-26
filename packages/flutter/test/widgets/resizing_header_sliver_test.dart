@@ -7,13 +7,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 
 void main() {
-  testWidgets('ResizingHeaderSliver basics', (WidgetTester tester) async {
+  testWidgets('SliverResizingHeader basics', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: CustomScrollView(
             slivers: <Widget>[
-              const ResizingHeaderSliver(
+              const SliverResizingHeader(
                 minExtentPrototype: SizedBox(height: 100),
                 maxExtentPrototype: SizedBox(height: 300),
                 child: SizedBox(height: 300, child: Text('header')),
@@ -43,13 +43,13 @@ void main() {
     expect(getHeaderHeight(), 300);
   });
 
-  testWidgets('ResizingHeaderSliver overrides initial out of bounds child size', (WidgetTester tester) async {
+  testWidgets('SliverResizingHeader overrides initial out of bounds child size', (WidgetTester tester) async {
     Widget buildFrame(double childHeight) {
       return MaterialApp(
         home: Scaffold(
           body: CustomScrollView(
             slivers: <Widget>[
-              ResizingHeaderSliver(
+              SliverResizingHeader(
                 minExtentPrototype: const SizedBox(height: 100),
                 maxExtentPrototype: const SizedBox(height: 300),
                 child: SizedBox(height: childHeight, child: const Text('header')),
@@ -67,13 +67,13 @@ void main() {
     expect(tester.getSize(find.text('header')).height, 300);
   });
 
-  testWidgets('ResizingHeaderSliver update prototypes', (WidgetTester tester) async {
+  testWidgets('SliverResizingHeader update prototypes', (WidgetTester tester) async {
     Widget buildFrame(double minHeight, double maxHeight) {
       return MaterialApp(
         home: Scaffold(
           body: CustomScrollView(
             slivers: <Widget>[
-              ResizingHeaderSliver(
+              SliverResizingHeader(
                 minExtentPrototype: SizedBox(height: minHeight),
                 maxExtentPrototype: SizedBox(height: maxHeight),
                 child: const SizedBox(height: 300, child: Text('header')),

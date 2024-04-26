@@ -7,12 +7,12 @@ import 'package:flutter_api_samples/widgets/sliver/resizing_header_sliver.0.dart
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ResizingHeaderSliver example', (WidgetTester tester) async {
+  testWidgets('SliverResizingHeader example', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.ResizingHeaderSliverApp(),
+      const example.SliverResizingHeaderApp(),
     );
 
-    final Finder headerMaterial = find.text('ResizingHeaderSliver\nWith Two Optional\nLines of Text');
+    final Finder headerMaterial = find.text('SliverResizingHeader\nWith Two Optional\nLines of Text');
     final double initialHeight = tester.getSize(headerMaterial).height;
 
     await tester.drag(find.byType(CustomScrollView), const Offset(0, -200));

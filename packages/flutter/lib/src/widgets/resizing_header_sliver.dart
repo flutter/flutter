@@ -30,10 +30,10 @@ import 'slotted_render_object_widget.dart';
 ///
 /// ** See code in examples/api/lib/widgets/sliver/resizing_header_sliver.0.dart **
 /// {@end-tool}
-class ResizingHeaderSliver extends StatelessWidget {
+class SliverResizingHeader extends StatelessWidget {
   /// Create a pinned header sliver that reacts to scrolling by resizing between
   /// the intrinsic sizes of the min and max extent prototypes.
-  const ResizingHeaderSliver({
+  const SliverResizingHeader({
     super.key,
     this.minExtentPrototype,
     this.maxExtentPrototype,
@@ -57,7 +57,7 @@ class ResizingHeaderSliver extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _ResizingHeaderSliver(
+    return _SliverResizingHeader(
       minExtentPrototype: minExtentPrototype,
       maxExtentPrototype: maxExtentPrototype,
       child: child,
@@ -71,8 +71,8 @@ enum _Slot {
   child,
 }
 
-class _ResizingHeaderSliver extends SlottedMultiChildRenderObjectWidget<_Slot, RenderBox> {
-  const _ResizingHeaderSliver({
+class _SliverResizingHeader extends SlottedMultiChildRenderObjectWidget<_Slot, RenderBox> {
+  const _SliverResizingHeader({
     this.minExtentPrototype,
     this.maxExtentPrototype,
     this.child,
@@ -95,12 +95,12 @@ class _ResizingHeaderSliver extends SlottedMultiChildRenderObjectWidget<_Slot, R
   }
 
   @override
-  _RenderResizingHeaderSliver createRenderObject(BuildContext context) {
-    return _RenderResizingHeaderSliver();
+  _RenderSliverResizingHeader createRenderObject(BuildContext context) {
+    return _RenderSliverResizingHeader();
   }
 }
 
-class _RenderResizingHeaderSliver extends RenderSliver with SlottedContainerRenderObjectMixin<_Slot, RenderBox>, RenderSliverHelpers {
+class _RenderSliverResizingHeader extends RenderSliver with SlottedContainerRenderObjectMixin<_Slot, RenderBox>, RenderSliverHelpers {
   RenderBox? get minExtentPrototype => childForSlot(_Slot.minExtent);
   RenderBox? get maxExtentPrototype => childForSlot(_Slot.maxExtent);
   RenderBox? get child => childForSlot(_Slot.child);
