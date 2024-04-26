@@ -3906,6 +3906,23 @@ void main() {
         expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + errorHeight * numberOfLines, 0.25));
       });
 
+      testWidgets('Error height is not limited by default', (WidgetTester tester) async {
+        const int numberOfLines = 3;
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(
+              labelText: 'label',
+              errorText: threeLines,
+              filled: true,
+            ),
+          ),
+        );
+
+        final Rect errorRect = tester.getRect(find.text(threeLines));
+        expect(errorRect.height, closeTo(errorHeight * numberOfLines, 0.25));
+        expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + errorHeight * numberOfLines, 0.25));
+      });
+
       testWidgets('Helper height grows to accommodate helper text', (WidgetTester tester) async {
         const int maxLines = 3;
         await tester.pumpWidget(
@@ -3957,6 +3974,23 @@ void main() {
         );
 
         final Rect helperRect = tester.getRect(find.text(twoLines));
+        expect(helperRect.height, closeTo(helperHeight * numberOfLines, 0.25));
+        expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + helperHeight * numberOfLines, 0.25));
+      });
+
+      testWidgets('Helper height is not limited by default', (WidgetTester tester) async {
+        const int numberOfLines = 3;
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(
+              labelText: 'label',
+              helperText: threeLines,
+              filled: true,
+            ),
+          ),
+        );
+
+        final Rect helperRect = tester.getRect(find.text(threeLines));
         expect(helperRect.height, closeTo(helperHeight * numberOfLines, 0.25));
         expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + helperHeight * numberOfLines, 0.25));
       });
