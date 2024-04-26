@@ -1237,14 +1237,14 @@ String? _validatePlugin(Plugin plugin, String platformKey) {
   if (defaultImplPluginName != null) {
     if (implementsPackage != null && implementsPackage.isNotEmpty) {
       return 'Plugin ${plugin.name}:$platformKey which provides an implementation for $implementsPackage '
-          'can not also reference a default implementation for $defaultImplPluginName. '
+          'cannot also reference a default implementation for $defaultImplPluginName. '
           'Ask the maintainers of ${plugin.name} to either remove the implementation via `implements: $implementsPackage` '
           'or avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName`.\n';
     }
 
     if (_hasPluginInlineDartImpl(plugin, platformKey)) {
       return 'Plugin ${plugin.name}:$platformKey which provides an inline implementation '
-          'can not also reference a default implementation for $defaultImplPluginName. '
+          'cannot also reference a default implementation for $defaultImplPluginName. '
           'Ask the maintainers of ${plugin.name} to either remove the implementation via `platforms: $platformKey: dartPluginClass` '
           'or avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName`.\n';
     }
