@@ -683,25 +683,23 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
 
     return UnconstrainedBox(
       constrainedAxis: Axis.horizontal,
-      child: DecoratedBox(
+      child: Container(
+        padding: widget.padding.resolve(Directionality.of(context)),
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(_kCornerRadius)),
           color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
         ),
-        child: Padding(
-          padding: widget.padding.resolve(Directionality.of(context)),
-          child: AnimatedBuilder(
-            animation: thumbScaleAnimation,
-            builder: (BuildContext context, Widget? child) {
-              return _SegmentedControlRenderWidget<T>(
-                highlightedIndex: highlightedIndex,
-                thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor, context),
-                thumbScale: thumbScaleAnimation.value,
-                state: this,
-                children: children,
-              );
-            },
-          ),
+        child: AnimatedBuilder(
+          animation: thumbScaleAnimation,
+          builder: (BuildContext context, Widget? child) {
+            return _SegmentedControlRenderWidget<T>(
+              highlightedIndex: highlightedIndex,
+              thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor, context),
+              thumbScale: thumbScaleAnimation.value,
+              state: this,
+              children: children,
+            );
+          },
         ),
       ),
     );

@@ -371,19 +371,17 @@ class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     const Radius radius = Radius.circular(_defaultSelectionOverlayRadius);
 
-    return Padding(
-      padding: EdgeInsetsDirectional.only(
+    return Container(
+      margin: EdgeInsetsDirectional.only(
         start: capStartEdge ? _defaultSelectionOverlayHorizontalMargin : 0,
         end: capEndEdge ? _defaultSelectionOverlayHorizontalMargin : 0,
       ),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadiusDirectional.horizontal(
-            start: capStartEdge ? radius : Radius.zero,
-            end: capEndEdge ? radius : Radius.zero,
-          ),
-          color: CupertinoDynamicColor.resolve(background, context),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadiusDirectional.horizontal(
+          start: capStartEdge ? radius : Radius.zero,
+          end: capEndEdge ? radius : Radius.zero,
         ),
+        color: CupertinoDynamicColor.resolve(background, context),
       ),
     );
   }

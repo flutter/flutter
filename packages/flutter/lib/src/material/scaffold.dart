@@ -2976,7 +2976,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     if (widget.persistentFooterButtons != null) {
       _addIfNonNull(
         children,
-        DecoratedBox(
+        Container(
           decoration: BoxDecoration(
             border: Border(
               top: Divider.createBorderSide(context, width: 1.0),

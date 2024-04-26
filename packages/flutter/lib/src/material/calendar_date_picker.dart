@@ -1291,18 +1291,15 @@ class _YearPickerState extends State<YearPicker> {
 
     final TextStyle? itemStyle = (datePickerTheme.yearStyle ?? defaults.yearStyle)?.apply(color: textColor);
     Widget yearItem = Center(
-      child: SizedBox(
+      child: Container(
+        decoration: decoration,
         height: decorationHeight,
         width: decorationWidth,
-        child: DecoratedBox(
-          decoration: decoration,
-          child: Center(
-            child: Semantics(
-              selected: isSelected,
-              button: true,
-              child: Text(year.toString(), style: itemStyle),
-            ),
-          ),
+        alignment: Alignment.center,
+        child: Semantics(
+          selected: isSelected,
+          button: true,
+          child: Text(year.toString(), style: itemStyle),
         ),
       ),
     );

@@ -2690,15 +2690,14 @@ class _DayItemState extends State<_DayItem> {
       semanticLabel = localizations.dateRangeEndDateSemanticLabel(semanticLabel);
     }
 
-    Widget dayWidget = DecoratedBox(
-      decoration: decoration ?? const BoxDecoration(),
-      child: Center(
-        child: Semantics(
-          label: semanticLabel,
-          selected: widget.isSelectedDayStart || widget.isSelectedDayEnd,
-          child: ExcludeSemantics(
-            child: Text(dayText, style: itemStyle),
-          ),
+    Widget dayWidget = Container(
+      decoration: decoration,
+      alignment: Alignment.center,
+      child: Semantics(
+        label: semanticLabel,
+        selected: widget.isSelectedDayStart || widget.isSelectedDayEnd,
+        child: ExcludeSemantics(
+          child: Text(dayText, style: itemStyle),
         ),
       ),
     );

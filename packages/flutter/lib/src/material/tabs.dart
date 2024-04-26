@@ -2197,17 +2197,14 @@ class TabPageSelectorIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(4.0),
-      child: SizedBox.fromSize(
-        size: Size.square(size),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            border: Border.all(color: borderColor, style: borderStyle),
-            shape: BoxShape.circle,
-          ),
-        ),
+    return Container(
+      width: size,
+      height: size,
+      margin: const EdgeInsets.all(4.0),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        border: Border.all(color: borderColor, style: borderStyle),
+        shape: BoxShape.circle,
       ),
     );
   }

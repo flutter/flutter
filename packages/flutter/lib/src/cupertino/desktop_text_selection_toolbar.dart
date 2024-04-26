@@ -18,7 +18,7 @@ const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarSaturationBoost = 3;
 const double _kToolbarBlurSigma = 20;
 const double _kToolbarWidth = 222.0;
-const BorderRadius _kToolbarBorderRadius = BorderRadius.all(Radius.circular(8.0));
+const Radius _kToolbarBorderRadius = Radius.circular(8.0);
 const EdgeInsets _kToolbarPadding = EdgeInsets.all(6.0);
 const List<BoxShadow> _kToolbarShadow = <BoxShadow>[
   BoxShadow(
@@ -96,39 +96,41 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
   // Builds a toolbar just like the default Mac toolbar, with the right color
   // background, padding, and rounded corners.
   static Widget _defaultToolbarBuilder(BuildContext context, Widget child) {
-    ImageFilter filter = ImageFilter.blur(
-      sigmaX: _kToolbarBlurSigma,
-      sigmaY: _kToolbarBlurSigma,
-    );
-    if (!kIsWeb) {
-      // Flutter web doesn't support ImageFilter.compose on CanvasKit yet
-      // (https://github.com/flutter/flutter/issues/120123).
-      final ImageFilter outer = ColorFilter.matrix(
-        _matrixWithSaturation(_kToolbarSaturationBoost),
-      );
-      filter = ImageFilter.compose(outer: outer, inner: filter);
-    }
-
-    return SizedBox(
+    return Container(
       width: _kToolbarWidth,
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          boxShadow: _kToolbarShadow,
-          borderRadius: _kToolbarBorderRadius,
-        ),
-        child: ClipRRect(
-          borderRadius: _kToolbarBorderRadius,
-          clipBehavior: Clip.hardEdge,
-          child: BackdropFilter(
-            filter: filter,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: _kToolbarBackgroundColor.resolveFrom(context),
-                border: Border.all(color: _kToolbarBorderColor.resolveFrom(context)),
-                borderRadius: _kToolbarBorderRadius,
+      clipBehavior: Clip.hardEdge,
+      decoration: const BoxDecoration(
+        boxShadow: _kToolbarShadow,
+        borderRadius: BorderRadius.all(_kToolbarBorderRadius),
+      ),
+      child: BackdropFilter(
+        // Flutter web doesn't support ImageFilter.compose on CanvasKit yet
+        // (https://github.com/flutter/flutter/issues/120123).
+        filter: kIsWeb
+            ? ImageFilter.blur(
+                sigmaX: _kToolbarBlurSigma,
+                sigmaY: _kToolbarBlurSigma,
+              )
+            : ImageFilter.compose(
+                outer: ColorFilter.matrix(
+                  _matrixWithSaturation(_kToolbarSaturationBoost),
+                ),
+                inner: ImageFilter.blur(
+                  sigmaX: _kToolbarBlurSigma,
+                  sigmaY: _kToolbarBlurSigma,
+                ),
               ),
-              child: Padding(padding: _kToolbarPadding, child: child),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: _kToolbarBackgroundColor.resolveFrom(context),
+            border: Border.all(
+              color: _kToolbarBorderColor.resolveFrom(context),
             ),
+            borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
+          ),
+          child: Padding(
+            padding: _kToolbarPadding,
+            child: child,
           ),
         ),
       ),

@@ -768,10 +768,7 @@ class _SnackBarState extends State<SnackBar> {
       if (width != null) {
         snackBar = Padding(
           padding: EdgeInsets.only(top: margin.top, bottom: margin.bottom),
-          child: SizedBox(
-            width: width,
-            child: snackBar,
-          ),
+          child: SizedBox(width: width, child: snackBar),
         );
       } else {
         snackBar = Padding(

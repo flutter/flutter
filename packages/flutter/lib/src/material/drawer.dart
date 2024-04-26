@@ -682,7 +682,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
             behavior: HitTestBehavior.translucent,
             excludeFromSemantics: true,
             dragStartBehavior: widget.dragStartBehavior,
-            child: SizedBox(width: dragAreaWidth, child: const LimitedBox(maxHeight: 0.0, child: SizedBox.expand())),
+            child: LimitedBox(maxHeight: 0.0, child: SizedBox(width: dragAreaWidth, height: double.infinity)),
           ),
         );
       } else {

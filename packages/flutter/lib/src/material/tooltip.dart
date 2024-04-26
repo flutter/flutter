@@ -954,21 +954,17 @@ class _TooltipOverlay extends StatelessWidget {
           style: Theme.of(context).textTheme.bodyMedium!,
           child: Semantics(
             container: true,
-            child: Padding(
-              padding: margin ?? EdgeInsets.zero,
-              child: DecoratedBox(
-                decoration: decoration ?? const BoxDecoration(),
-                child: Padding(
-                  padding: padding ?? EdgeInsets.zero,
-                  child: Center(
-                    widthFactor: 1.0,
-                    heightFactor: 1.0,
-                    child: Text.rich(
-                      richMessage,
-                      style: textStyle,
-                      textAlign: textAlign,
-                    ),
-                  ),
+            child: Container(
+              decoration: decoration,
+              padding: padding,
+              margin: margin,
+              child: Center(
+                widthFactor: 1.0,
+                heightFactor: 1.0,
+                child: Text.rich(
+                  richMessage,
+                  style: textStyle,
+                  textAlign: textAlign,
                 ),
               ),
             ),

@@ -361,7 +361,10 @@ class CupertinoListSection extends StatelessWidget {
     // Only used in CupertinoListSectionType.base mode.
     final Widget longDivider = ColoredBox(
       color: dividerColor,
-      child: SizedBox(width: double.infinity, height: dividerHeight),
+      child: LimitedBox(
+        maxWidth: 0,
+        child: SizedBox(width: double.infinity, height: dividerHeight),
+      ),
     );
 
     // Short divider is used between rows.

@@ -687,7 +687,7 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
   Widget _buildAnimation(BuildContext context, Widget? child) {
     return Positioned.fromRect(
       rect: _rect.value!,
-      child: DecoratedBox(
+      child: Container(
         decoration: _boxDecoration.value,
         child: widget.child,
       ),

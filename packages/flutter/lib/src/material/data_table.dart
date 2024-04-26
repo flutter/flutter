@@ -1172,8 +1172,8 @@ class DataTable extends StatelessWidget {
       displayColumnIndex += 1;
     }
 
-    return DecoratedBox(
-      decoration: decoration ?? dataTableTheme.decoration ?? theme.dataTableTheme.decoration ?? const BoxDecoration(),
+    return Container(
+      decoration: decoration ?? dataTableTheme.decoration ?? theme.dataTableTheme.decoration,
       child: Material(
         type: MaterialType.transparency,
         borderRadius: border?.borderRadius,

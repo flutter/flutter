@@ -460,16 +460,14 @@ class _DragHandle extends StatelessWidget {
           height: kMinInteractiveDimension,
           width: kMinInteractiveDimension,
           child: Center(
-            child: SizedBox(
+            child: Container(
               height: handleSize.height,
               width: handleSize.width,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(handleSize.height/2),
-                  color: MaterialStateProperty.resolveAs<Color?>(dragHandleColor, materialState)
-                    ?? MaterialStateProperty.resolveAs<Color?>(bottomSheetTheme.dragHandleColor, materialState)
-                    ?? m3Defaults.dragHandleColor,
-                ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(handleSize.height/2),
+                color: MaterialStateProperty.resolveAs<Color?>(dragHandleColor, materialState)
+                  ?? MaterialStateProperty.resolveAs<Color?>(bottomSheetTheme.dragHandleColor, materialState)
+                  ?? m3Defaults.dragHandleColor,
               ),
             ),
           ),

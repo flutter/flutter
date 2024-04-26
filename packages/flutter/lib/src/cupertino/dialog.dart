@@ -309,7 +309,10 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
   }
 
   Widget _buildActions() {
-    Widget actionSection = const SizedBox.shrink();
+    Widget actionSection = const LimitedBox(
+      maxWidth: 0,
+      child: SizedBox(width: double.infinity, height: 0),
+    );
     if (widget.actions.isNotEmpty) {
       actionSection = _CupertinoAlertActionSection(
         scrollController: _effectiveActionScrollController,
@@ -598,7 +601,10 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
   Widget _buildActions() {
     if (widget.actions == null || widget.actions!.isEmpty) {
-      return const SizedBox.shrink();
+      return const LimitedBox(
+        maxWidth: 0,
+        child: SizedBox(width: double.infinity, height: 0),
+      );
     }
     return _CupertinoAlertActionSection(
       scrollController: _effectiveActionScrollController,
@@ -789,7 +795,7 @@ class _CupertinoActionSheetCancelButtonState extends State<_CupertinoActionSheet
       onTapDown: _onTapDown,
       onTapUp: _onTapUp,
       onTapCancel: _onTapCancel,
-      child: DecoratedBox(
+      child: Container(
         decoration: BoxDecoration(
           color: CupertinoDynamicColor.resolve(backgroundColor, context),
           borderRadius: const BorderRadius.all(Radius.circular(_kCornerRadius)),
@@ -1757,9 +1763,7 @@ class CupertinoDialogAction extends StatelessWidget {
           ),
           child: Padding(
             padding: EdgeInsets.all(padding),
-            child: Center(
-              child: sizedContent,
-            ),
+            child: Center(child: sizedContent),
           ),
         ),
       ),

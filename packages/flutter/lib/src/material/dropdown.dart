@@ -1525,12 +1525,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     );
 
     if (!DropdownButtonHideUnderline.at(context)) {
-      const Widget defaultDecoration = DecoratedBox(decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFBDBDBD), width: 0.0)),
-      ));
-
       final double bottom = (widget.isDense || widget.itemHeight == null) ? 0.0 : 8.0;
-
       result = Stack(
         children: <Widget>[
           result,
@@ -1538,7 +1533,17 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
             left: 0.0,
             right: 0.0,
             bottom: bottom,
-            child: widget.underline ?? const SizedBox(height: 1.0, child: defaultDecoration),
+            child: widget.underline ?? Container(
+              height: 1.0,
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: Color(0xFFBDBDBD),
+                    width: 0.0,
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       );

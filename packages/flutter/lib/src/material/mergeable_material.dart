@@ -623,7 +623,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
         }
 
         slices.add(
-          DecoratedBox(
+          Container(
             decoration: BoxDecoration(
               color: (_children[i] as MaterialSlice).color ?? Theme.of(context).cardColor,
               borderRadius: _borderRadius(i, i == 0, i == _children.length - 1),

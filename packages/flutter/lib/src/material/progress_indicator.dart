@@ -362,33 +362,32 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
       indicatorTheme.linearMinHeight ??
       defaults.linearMinHeight!;
 
-    final Widget child = ConstrainedBox(
-      constraints: BoxConstraints(minWidth: double.infinity, minHeight: minHeight),
-      child: ClipRRect(
+    return widget._buildSemanticsWrapper(
+      context: context,
+      child: Container(
         // Clip is only needed with indeterminate progress indicators
         clipBehavior: (widget.borderRadius != BorderRadius.zero && widget.value == null)
             ? Clip.antiAlias
             : Clip.none,
-        borderRadius: widget.borderRadius,
-        child: ColoredBox(
+        decoration: ShapeDecoration(
           color: trackColor,
-          child: CustomPaint(
-            painter: _LinearProgressIndicatorPainter(
-              backgroundColor: trackColor,
-              valueColor: widget._getValueColor(context, defaultColor: defaults.color),
-              value: widget.value, // may be null
-              animationValue: animationValue, // ignored if widget.value is not null
-              textDirection: textDirection,
-              indicatorBorderRadius: widget.borderRadius,
-            ),
+          shape: RoundedRectangleBorder(borderRadius: widget.borderRadius),
+        ),
+        constraints: BoxConstraints(
+          minWidth: double.infinity,
+          minHeight: minHeight,
+        ),
+        child: CustomPaint(
+          painter: _LinearProgressIndicatorPainter(
+            backgroundColor: trackColor,
+            valueColor: widget._getValueColor(context, defaultColor: defaults.color),
+            value: widget.value, // may be null
+            animationValue: animationValue, // ignored if widget.value is not null
+            textDirection: textDirection,
+            indicatorBorderRadius: widget.borderRadius,
           ),
         ),
       ),
-    );
-
-    return widget._buildSemanticsWrapper(
-      context: context,
-      child: child,
     );
   }
 

@@ -644,9 +644,9 @@ class _DayPeriodControl extends StatelessWidget {
               child: Column(
                 children: <Widget>[
                   Expanded(child: amButton),
-                  DecoratedBox(
+                  Container(
                     decoration: BoxDecoration(border: Border(top: resolvedSide)),
-                    child: const LimitedBox(maxWidth: 0.0, child: SizedBox(width: double.infinity, height: 1)),
+                    height: 1,
                   ),
                   Expanded(child: pmButton),
                 ],
@@ -667,9 +667,9 @@ class _DayPeriodControl extends StatelessWidget {
               child: Row(
                 children: <Widget>[
                   Expanded(child: amButton),
-                  DecoratedBox(
+                  Container(
                     decoration: BoxDecoration(border: Border(left: resolvedSide)),
-                    child: const LimitedBox(maxHeight: 0.0, child: SizedBox(width: 1, height: double.infinity)),
+                    width: 1,
                   ),
                   Expanded(child: pmButton),
                 ],
