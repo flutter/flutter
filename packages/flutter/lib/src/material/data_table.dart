@@ -873,19 +873,15 @@ class DataTable extends StatelessWidget {
       ?? dataTableTheme.headingRowHeight
       ?? themeData.dataTableTheme.headingRowHeight
       ?? _headingRowHeight;
-    label = SizedBox(
+    label = Container(
+      padding: padding,
       height: effectiveHeadingRowHeight,
-      child: Padding(
-        padding: padding,
-        child: Align(
-          alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
-          child: AnimatedDefaultTextStyle(
-            style: DefaultTextStyle.of(context).style.merge(effectiveHeadingTextStyle),
-            softWrap: false,
-            duration: _sortArrowAnimationDuration,
-            child: label,
-          ),
-        ),
+      alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
+      child: AnimatedDefaultTextStyle(
+        style: DefaultTextStyle.of(context).style.merge(effectiveHeadingTextStyle),
+        softWrap: false,
+        duration: _sortArrowAnimationDuration,
+        child: label,
       ),
     );
     if (tooltip != null) {
@@ -946,19 +942,15 @@ class DataTable extends StatelessWidget {
       ?? dataTableTheme.dataRowMaxHeight
       ?? themeData.dataTableTheme.dataRowMaxHeight
       ?? kMinInteractiveDimension;
-    label = ConstrainedBox(
+    label = Container(
+      padding: padding,
       constraints: BoxConstraints(minHeight: effectiveDataRowMinHeight, maxHeight: effectiveDataRowMaxHeight),
-      child: Padding(
-        padding: padding,
-        child: Align(
-          alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
-          child: DefaultTextStyle(
-            style: DefaultTextStyle.of(context).style
-              .merge(effectiveDataTextStyle)
-              .copyWith(color: placeholder ? effectiveDataTextStyle.color!.withOpacity(0.6) : null),
-            child: DropdownButtonHideUnderline(child: label),
-          ),
-        ),
+      alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
+      child: DefaultTextStyle(
+        style: DefaultTextStyle.of(context).style
+          .merge(effectiveDataTextStyle)
+          .copyWith(color: placeholder ? effectiveDataTextStyle.color!.withOpacity(0.6) : null),
+        child: DropdownButtonHideUnderline(child: label),
       ),
     );
     if (onTap != null ||
