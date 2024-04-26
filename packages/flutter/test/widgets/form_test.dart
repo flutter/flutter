@@ -1258,9 +1258,13 @@ void main() {
   testWidgets('FocusNode should move to next field when TextInputAction.next is received', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     final FocusNode focusNode1 = FocusNode();
+    addTearDown(focusNode1.dispose);
     final FocusNode focusNode2 = FocusNode();
+    addTearDown(focusNode2.dispose);
     final TextEditingController controller1 = TextEditingController();
+    addTearDown(controller1.dispose);
     final TextEditingController controller2 = TextEditingController();
+    addTearDown(controller2.dispose);
 
     final Widget widget = MaterialApp(
       home: MediaQuery(
