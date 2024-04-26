@@ -148,6 +148,10 @@ void Playground::SetupWindow() {
   start_time_ = fml::TimePoint::Now().ToEpochDelta();
 }
 
+bool Playground::IsPlaygroundEnabled() const {
+  return switches_.enable_playground;
+}
+
 void Playground::TeardownWindow() {
   if (context_) {
     context_->Shutdown();
