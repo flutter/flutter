@@ -12,22 +12,22 @@
 
 #pragma mark - Static callbacks that require the engine.
 
-static FlutterMetalTexture OnGetNextDrawable(FlutterEngine* engine,
-                                             const FlutterFrameInfo* frameInfo) {
+static FlutterMetalTexture OnGetNextDrawable(void* user_data, const FlutterFrameInfo* frameInfo) {
   NSCAssert(NO, @"The renderer config should not be used to get the next drawable.");
   return FlutterMetalTexture{};
 }
 
-static bool OnPresentDrawable(FlutterEngine* engine, const FlutterMetalTexture* texture) {
+static bool OnPresentDrawable(void* user_data, const FlutterMetalTexture* texture) {
   NSCAssert(NO, @"The renderer config should not be used to present drawable.");
   return false;
 }
 
-static bool OnAcquireExternalTexture(FlutterEngine* engine,
+static bool OnAcquireExternalTexture(void* user_data,
                                      int64_t textureIdentifier,
                                      size_t width,
                                      size_t height,
                                      FlutterMetalExternalTexture* metalTexture) {
+  FlutterEngine* engine = (__bridge FlutterEngine*)user_data;
   return [engine.renderer populateTextureWithIdentifier:textureIdentifier
                                            metalTexture:metalTexture];
 }
