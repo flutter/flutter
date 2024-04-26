@@ -434,7 +434,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/image/image.loading_builder.0_test.dart',
   'examples/api/test/widgets/shortcuts/logical_key_set.0_test.dart',
   'examples/api/test/widgets/shortcuts/shortcuts.0_test.dart',
-  'examples/api/test/widgets/shortcuts/single_activator.single_activator.0_test.dart',
   'examples/api/test/widgets/shortcuts/shortcuts.1_test.dart',
   'examples/api/test/widgets/shortcuts/character_activator.0_test.dart',
   'examples/api/test/widgets/shortcuts/callback_shortcuts.0_test.dart',
