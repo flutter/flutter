@@ -82,7 +82,7 @@ $ flutter/tools/gn --runtime-mode=debug --unoptimized --no-lto --mac-cpu=arm64
 $ ninja -j100 -C out/host_debug_unopt_arm64
 # Run all cross-platform C++ tests for the debug build arm64 variant.
 $ cd flutter/testing
-$ ./run_tests.py --variant=host_debug_unopt_arm64 --type=engine`
+$ ./run_tests.py --variant=host_debug_unopt_arm64 --type=engine
 ```
 
 ### Directory
