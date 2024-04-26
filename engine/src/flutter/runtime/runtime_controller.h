@@ -20,6 +20,7 @@
 #include "flutter/lib/ui/volatile_path_tracker.h"
 #include "flutter/lib/ui/window/platform_configuration.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
+#include "flutter/lib/ui/window/pointer_data_packet_converter.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/platform_data.h"
 #include "flutter/runtime/platform_isolate_manager.h"
@@ -687,6 +688,7 @@ class RuntimeController : public PlatformConfigurationClient {
   const fml::closure isolate_shutdown_callback_;
   std::shared_ptr<const fml::Mapping> persistent_isolate_data_;
   UIDartState::Context context_;
+  PointerDataPacketConverter pointer_data_packet_converter_;
   std::shared_ptr<PlatformIsolateManager> platform_isolate_manager_ =
       std::shared_ptr<PlatformIsolateManager>(new PlatformIsolateManager());
   bool has_flushed_runtime_state_ = false;
