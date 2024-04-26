@@ -211,18 +211,12 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     _vibrate();
     setState(() {
       _mode = mode;
-      if (_selectedDate != null) {
-        if (_mode == DatePickerMode.day) {
-          SemanticsService.announce(
-            _localizations.formatMonthYear(_selectedDate!),
-            _textDirection,
-          );
-        } else {
-          SemanticsService.announce(
-            _localizations.formatYear(_selectedDate!),
-            _textDirection,
-          );
-        }
+      if (_selectedDate case final DateTime selected) {
+        final String message = switch (mode) {
+          DatePickerMode.day  => _localizations.formatMonthYear(selected),
+          DatePickerMode.year => _localizations.formatYear(selected),
+        };
+        SemanticsService.announce(message, _textDirection);
       }
     });
   }
