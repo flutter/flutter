@@ -360,7 +360,7 @@ class ListTileTheme extends InheritedTheme {
        _horizontalTitleGap = horizontalTitleGap,
        _minVerticalPadding = minVerticalPadding,
        _minLeadingWidth = minLeadingWidth,
-        _controlAffinity = controlAffinity;
+       _controlAffinity = controlAffinity;
 
   final ListTileThemeData? _data;
   final bool? _dense;
