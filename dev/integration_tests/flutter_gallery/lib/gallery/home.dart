@@ -326,9 +326,9 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
       backgroundColor: isDark ? _kFlutterBlue : theme.primaryColor,
       body: SafeArea(
         bottom: false,
-        child: PopScope(
+        child: PopScope<Object?>(
           canPop: _category == null,
-          onPopInvoked: (bool didPop) {
+          onPopInvokedWithResult: (bool didPop, Object? result) {
             if (didPop) {
               return;
             }
