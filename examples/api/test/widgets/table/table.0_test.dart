@@ -27,7 +27,7 @@ void main() {
       // Each row has three containers.
       expect(table.children[i].children.length, 3);
 
-      // Returs the width of given widget.
+      // Returns the width of given widget.
       double getWidgetWidth(Widget widget) {
         return tester.getSize(find.byWidget(widget)).width;
       }
