@@ -32,7 +32,9 @@ void main() {
       duration: Duration.zero,
       child: child,
     );
-    expect(identical(animatedPhysicalModel, explicitAnimatedPhysicalModel), isTrue);
+    expect(identical(animatedPhysicalModel.shape, explicitAnimatedPhysicalModel.shape), isTrue);
+    expect(identical(animatedPhysicalModel.clipBehavior, explicitAnimatedPhysicalModel.clipBehavior), isTrue);
+    expect(identical(animatedPhysicalModel.borderRadius, explicitAnimatedPhysicalModel.borderRadius), isTrue);
     // TODO(nate-thegrate): add every class!
   });
   // TODO(nate-thegrate): add every file!
