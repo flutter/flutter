@@ -89,12 +89,10 @@ class PointerDataPacketConverter {
   ///                                      embedding.
   ///
   /// @return     A full converted packet with all the required information
-  /// filled.
-  ///             It may contain synthetic pointer data as the result of
+  ///             filled. It may contain synthetic pointer data as the result of
   ///             converter's attempt to correct illegal pointer transitions.
   ///
-  std::unique_ptr<PointerDataPacket> Convert(
-      std::unique_ptr<PointerDataPacket> packet);
+  std::unique_ptr<PointerDataPacket> Convert(const PointerDataPacket& packet);
 
  private:
   std::map<int64_t, PointerState> states_;
