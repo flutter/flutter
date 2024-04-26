@@ -10,7 +10,6 @@ void main() {
   testWidgets('Table has expected arrangement', (WidgetTester tester) async {
     await tester.pumpWidget(const example.TableExampleApp());
 
-    // Check if table is visible.
     final Table table = tester.widget<Table>(find.byType(Table));
 
     // Check the defined columnWidths.
