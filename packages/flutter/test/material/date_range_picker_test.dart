@@ -270,7 +270,10 @@ void main() {
 
   testWidgets('Long helpText does not cutoff the save button', (WidgetTester tester) async {
     helpText = 'long helpText' * 100;
+    saveText = 'make it so';
     await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      expect(find.text(helpText!), findsOneWidget);
+      expect(find.text(saveText!), findsOneWidget);
       expect(tester.takeException(), null);
     });
   });
