@@ -235,6 +235,7 @@ class ListTileThemeData with Diagnosticable {
       mouseCursor,
       visualDensity,
       titleAlignment,
+      controlAffinity,
     ],
   );
 
