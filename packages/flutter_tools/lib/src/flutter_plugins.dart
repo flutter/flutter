@@ -1223,6 +1223,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
 
 /// Validates conflicting plugin parameters in pubspec, such as
 /// `dartPluginClass`, `default_package` and `implements`.
+///
 /// Returns an error, if failing.
 String? _validatePlugin(Plugin plugin, String platformKey) {
   final String? implementsPackage = plugin.implementsPackage;
@@ -1254,6 +1255,7 @@ String? _validatePlugin(Plugin plugin, String platformKey) {
 
 /// Determine if this [plugin] serves as implementation for an app-facing
 /// package for the given platform [platformKey].
+///
 /// If so, return the package name, which the [plugin] implements.
 ///
 /// Options:
@@ -1284,6 +1286,7 @@ String? _getImplementedPlugin(Plugin plugin, String platformKey) {
 
 /// Determine if this [plugin] (or package) references a default plugin with an
 /// implementation for the given platform [platformKey].
+///
 /// If so, return the plugin name, which provides the default implementation.
 ///
 /// Options:
@@ -1337,6 +1340,7 @@ bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) =>
 
 /// Get the resolved plugin [resolution] from the [candidates] serving as implementation for
 /// [pluginName].
+///
 /// Returns an [error] string, if failing.
 (Plugin? resolution, String? error) _resolveImplementationOfPlugin({
   required String platformKey,
