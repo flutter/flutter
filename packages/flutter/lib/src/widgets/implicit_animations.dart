@@ -1995,7 +1995,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   const AnimatedPhysicalModel({
     super.key,
     required this.child,
-    this.shape = BoxShape.rectangle,
+    required this.shape,
     this.clipBehavior = Clip.none,
     this.borderRadius = BorderRadius.zero,
     required this.elevation,

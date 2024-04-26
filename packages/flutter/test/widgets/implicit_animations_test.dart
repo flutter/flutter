@@ -906,6 +906,7 @@ class _TestAnimatedPhysicalModelWidgetState extends _TestAnimatedWidgetState {
       color: toggle ? Colors.red : Colors.green,
       elevation: 0,
       shadowColor: Colors.blue,
+      shape: BoxShape.rectangle,
       child: child,
     );
   }

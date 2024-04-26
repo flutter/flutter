@@ -424,7 +424,6 @@ class Material extends StatelessWidget {
       MaterialType.card => theme.cardColor,
       MaterialType.button || MaterialType.circle || MaterialType.transparency => null,
     };
-    final bool animating = animationDuration != Duration.zero;
     final bool transparent = type == MaterialType.transparency;
     assert(
       color != null || transparent,
@@ -442,13 +441,11 @@ class Material extends StatelessWidget {
     Widget contents = BlankMaterial(color: color, child: child);
     if (child != null) {
       final TextStyle style = textStyle ?? theme.textTheme.bodyMedium!;
-      contents = animating
-          ? AnimatedDefaultTextStyle(
-              duration: animationDuration,
-              style: style,
-              child: contents,
-            )
-          : DefaultTextStyle(style: style, child: contents);
+      contents = AnimatedDefaultTextStyle(
+        duration: animationDuration,
+        style: style,
+        child: contents,
+      );
     }
 
     ShapeBorder? shape = borderRadius != null
@@ -465,24 +462,17 @@ class Material extends StatelessWidget {
     // we choose not to as we want the change from the fast-path to the
     // slow-path to be noticeable in the construction site of Material.
     if (type == MaterialType.canvas && shape == null) {
-      return animating
-          ? AnimatedPhysicalModel(
-              curve: Curves.fastOutSlowIn,
-              duration: animationDuration,
-              clipBehavior: clipBehavior,
-              elevation: elevation,
-              color: surfaceColor,
-              shadowColor: shadowColor,
-              animateColor: false,
-              child: contents,
-            )
-          : PhysicalModel(
-              clipBehavior: clipBehavior,
-              elevation: elevation,
-              color: surfaceColor,
-              shadowColor: shadowColor,
-              child: contents,
-            );
+      return AnimatedPhysicalModel(
+        curve: Curves.fastOutSlowIn,
+        duration: animationDuration,
+        shape: BoxShape.rectangle,
+        clipBehavior: clipBehavior,
+        elevation: elevation,
+        color: surfaceColor,
+        shadowColor: shadowColor,
+        animateColor: false,
+        child: contents,
+      );
     }
 
     shape ??= switch (type) {
@@ -493,45 +483,29 @@ class Material extends StatelessWidget {
         ),
     };
 
-    if (animating && !transparent) {
-      return _MaterialInterior(
-        curve: Curves.fastOutSlowIn,
-        duration: animationDuration,
-        shape: shape,
-        borderOnForeground: borderOnForeground,
+    if (transparent) {
+      return ClipPath(
+        clipper: ShapeBorderClipper(
+          shape: shape,
+          textDirection: Directionality.maybeOf(context),
+        ),
         clipBehavior: clipBehavior,
-        elevation: elevation,
-        color: color!,
-        shadowColor: shadowColor,
-        surfaceTintColor: surfaceTintColor,
-        child: contents,
+        child: _ShapeBorderPaint(shape: shape, child: contents),
       );
     }
 
-    final TextDirection? textDirection = Directionality.maybeOf(context);
-    final _ShapeBorderPainter painter = _ShapeBorderPainter(shape, textDirection);
-    final ShapeBorderClipper clipper = ShapeBorderClipper(shape: shape, textDirection: textDirection);
-    final bool paintForeground = transparent || borderOnForeground;
-    contents = CustomPaint(
-      painter: paintForeground ? null : painter,
-      foregroundPainter: paintForeground ? painter : null,
+    return _MaterialInterior(
+      curve: Curves.fastOutSlowIn,
+      duration: animationDuration,
+      shape: shape,
+      borderOnForeground: borderOnForeground,
+      clipBehavior: clipBehavior,
+      elevation: elevation,
+      color: color!,
+      shadowColor: shadowColor,
+      surfaceTintColor: surfaceTintColor,
       child: contents,
     );
-
-    return transparent
-        ? ClipPath(
-            clipper: clipper,
-            clipBehavior: clipBehavior,
-            child: contents,
-          )
-        : PhysicalShape(
-            clipper: clipper,
-            clipBehavior: clipBehavior,
-            elevation: elevation,
-            color: surfaceColor,
-            shadowColor: shadowColor,
-            child: contents,
-          );
   }
 }
 
@@ -975,21 +949,41 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
       : ElevationOverlay.applyOverlay(context, widget.color, elevation);
     final Color shadowColor = _shadowColor!.evaluate(animation)!;
 
-    final TextDirection? textDirection = Directionality.maybeOf(context);
-    final _ShapeBorderPainter painter = _ShapeBorderPainter(shape, textDirection);
-    final bool borderOnForeground = widget.borderOnForeground;
-
     return PhysicalShape(
-      clipper: ShapeBorderClipper(shape: shape, textDirection: textDirection),
+      clipper: ShapeBorderClipper(
+        shape: shape,
+        textDirection: Directionality.maybeOf(context),
+      ),
       clipBehavior: widget.clipBehavior,
       elevation: elevation,
       color: color,
       shadowColor: shadowColor,
-      child: CustomPaint(
-        painter: borderOnForeground ? null : painter,
-        foregroundPainter: borderOnForeground ? painter : null,
+      child: _ShapeBorderPaint(
+        shape: shape,
+        borderOnForeground: widget.borderOnForeground,
         child: widget.child,
       ),
+    );
+  }
+}
+
+class _ShapeBorderPaint extends StatelessWidget {
+  const _ShapeBorderPaint({
+    required this.child,
+    required this.shape,
+    this.borderOnForeground = true,
+  });
+
+  final Widget child;
+  final ShapeBorder shape;
+  final bool borderOnForeground;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: borderOnForeground ? null : _ShapeBorderPainter(shape, Directionality.maybeOf(context)),
+      foregroundPainter: borderOnForeground ? _ShapeBorderPainter(shape, Directionality.maybeOf(context)) : null,
+      child: child,
     );
   }
 }
