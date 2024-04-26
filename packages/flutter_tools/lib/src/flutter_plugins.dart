@@ -1334,7 +1334,7 @@ bool _isEligibleDartSelfImpl(Plugin plugin, String platformKey) {
   return !isDesktop || hasMinVersionForImplementsRequirement;
 }
 
-/// Determine, if the plugin provides an inline dart implementation.
+/// Determine if the plugin provides an inline dart implementation.
 bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
   return plugin.pluginDartClassPlatforms[platformKey] != null &&
       plugin.pluginDartClassPlatforms[platformKey] != 'none';
