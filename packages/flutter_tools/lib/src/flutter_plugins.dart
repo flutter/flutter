@@ -1208,8 +1208,9 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
     }
 
     pluginResolutions.addAll(
-      pluginResolution.values.map((Plugin plugin) =>
-          PluginInterfaceResolution(plugin: plugin, platform: platformKey)),
+      pluginResolution.values.map((Plugin plugin) {
+        return PluginInterfaceResolution(plugin: plugin, platform: platformKey);
+      }),
     );
   }
   if (hasPluginPubspecError) {
@@ -1334,9 +1335,10 @@ bool _isEligibleDartSelfImpl(Plugin plugin, String platformKey) {
 }
 
 /// Determine, if the plugin provides an inline dart implementation.
-bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) =>
-    plugin.pluginDartClassPlatforms[platformKey] != null &&
-    plugin.pluginDartClassPlatforms[platformKey] != 'none';
+bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
+  return plugin.pluginDartClassPlatforms[platformKey] != null &&
+      plugin.pluginDartClassPlatforms[platformKey] != 'none';
+}
 
 /// Get the resolved plugin [resolution] from the [candidates] serving as implementation for
 /// [pluginName].
