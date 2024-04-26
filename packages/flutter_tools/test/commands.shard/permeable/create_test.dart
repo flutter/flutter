@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
-import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
@@ -15,6 +14,7 @@ import 'package:flutter_tools/src/android/gradle_utils.dart' show templateAndroi
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -3728,7 +3728,7 @@ void main() {
     FileSystem: () => MemoryFileSystem.test(
       opHandle: (String context, FileSystemOp operation) {
         if (operation == FileSystemOp.read && context.contains('template_manifest.json')) {
-          throw PathNotFoundException(
+          throw io.PathNotFoundException(
               context, const OSError(), 'Cannot open file');
         }
       },
