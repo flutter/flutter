@@ -674,7 +674,7 @@ void main() {
         expect(
             testLogger.errorText,
             'Plugin url_launcher_linux_1:linux which provides an implementation for url_launcher '
-            'can not also reference a default implementation for url_launcher_linux_2. '
+            'cannot also reference a default implementation for url_launcher_linux_2. '
             'Ask the maintainers of url_launcher_linux_1 to either remove the implementation via `implements: url_launcher` '
             'or avoid referencing a default implementation via `platforms: linux: default_package: url_launcher_linux_2`.'
             '\n\n');
@@ -729,7 +729,7 @@ void main() {
         expect(
             testLogger.errorText,
             'Plugin url_launcher:linux which provides an inline implementation '
-            'can not also reference a default implementation for url_launcher_linux. '
+            'cannot also reference a default implementation for url_launcher_linux. '
             'Ask the maintainers of url_launcher to either remove the implementation via `platforms: linux: dartPluginClass` '
             'or avoid referencing a default implementation via `platforms: linux: default_package: url_launcher_linux`.'
             '\n\n');
