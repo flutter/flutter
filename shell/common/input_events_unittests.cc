@@ -146,6 +146,7 @@ static void TestSimulatedInputEvents(
 
   // Make sure that all events have been consumed so
   // https://github.com/flutter/flutter/issues/40863 won't happen again.
+  ASSERT_GT(events_consumed_at_frame.size(), 0u);
   ASSERT_EQ(events_consumed_at_frame.back(), num_events);
 }
 

@@ -20,7 +20,6 @@
 #include "flutter/lib/ui/window/key_data_packet.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
-#include "flutter/lib/ui/window/pointer_data_packet_converter.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/shell/common/platform_message_handler.h"
 #include "flutter/shell/common/pointer_data_dispatcher.h"
@@ -961,7 +960,6 @@ class PlatformView {
 
   PlatformView::Delegate& delegate_;
   const TaskRunners task_runners_;
-  PointerDataPacketConverter pointer_data_packet_converter_;
   fml::WeakPtrFactory<PlatformView> weak_factory_;  // Must be the last member.
 
  private:
