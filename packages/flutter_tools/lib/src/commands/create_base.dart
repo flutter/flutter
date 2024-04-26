@@ -667,7 +667,7 @@ abstract class CreateBase extends FlutterCommand {
       'templates',
       'template_manifest.json',
     );
-    late final String manifestFileContents;
+    final String manifestFileContents;
     try {
       manifestFileContents = globals.fs.file(manifestPath).readAsStringSync();
     } on FileSystemException catch (e) {
