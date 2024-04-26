@@ -419,14 +419,14 @@ class Material extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final Color? color = this.color ?? switch (type) {
+    final Color? backgroundColor = this.color ?? switch (type) {
       MaterialType.canvas => theme.canvasColor,
       MaterialType.card => theme.cardColor,
       MaterialType.button || MaterialType.circle || MaterialType.transparency => null,
     };
     final bool transparent = type == MaterialType.transparency;
     assert(
-      color != null || transparent,
+      backgroundColor != null || transparent,
       'If Material type is not MaterialType.transparency, a color must '
       'either be passed in through the `color` property, or be defined '
       'in the theme (ex. canvasColor != null if type is set to '
@@ -434,11 +434,11 @@ class Material extends StatelessWidget {
     );
     final Color shadowColor = this.shadowColor
         ?? (theme.useMaterial3 ? theme.colorScheme.shadow : theme.shadowColor);
-    late final Color surfaceColor = theme.useMaterial3
-        ? ElevationOverlay.applySurfaceTint(color!, surfaceTintColor, elevation)
-        : ElevationOverlay.applyOverlay(context, color!, elevation);
+    late final Color color = theme.useMaterial3
+        ? ElevationOverlay.applySurfaceTint(backgroundColor!, surfaceTintColor, elevation)
+        : ElevationOverlay.applyOverlay(context, backgroundColor!, elevation);
 
-    Widget contents = BlankMaterial(color: color, child: child);
+    Widget contents = BlankMaterial(color: backgroundColor, child: child);
     if (child != null) {
       final TextStyle style = textStyle ?? theme.textTheme.bodyMedium!;
       contents = AnimatedDefaultTextStyle(
@@ -468,7 +468,7 @@ class Material extends StatelessWidget {
         shape: BoxShape.rectangle,
         clipBehavior: clipBehavior,
         elevation: elevation,
-        color: surfaceColor,
+        color: color,
         shadowColor: shadowColor,
         animateColor: false,
         child: contents,
@@ -501,7 +501,7 @@ class Material extends StatelessWidget {
       borderOnForeground: borderOnForeground,
       clipBehavior: clipBehavior,
       elevation: elevation,
-      color: color!,
+      color: backgroundColor!,
       shadowColor: shadowColor,
       surfaceTintColor: surfaceTintColor,
       child: contents,
@@ -515,8 +515,8 @@ class Material extends StatelessWidget {
 /// material itself and do not hide ink effects, in practice the [Material]
 /// widget draws child widgets on top of the ink effects.
 ///
-/// A [BlankMaterial] can be placed on top of opaque widgets
-/// to show ink effects on top of them.
+/// An opaque widget can have a [BlankMaterial] as its child in order to
+/// show ink effects.
 ///
 /// To specify fill color, elevation, and border clipping, consider using a
 /// [Material] widget.
