@@ -321,6 +321,26 @@ void main() {
     expect(pressed, isTrue);
   });
 
+  testWidgets('BlankMaterial correctly implements MaterialInkController', (WidgetTester tester) async {
+    Color? color;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: BlankMaterial(
+            color: Colors.cyan,
+            child: Builder(
+              builder: (BuildContext context) {
+                color = Material.maybeOf(context)?.color;
+                return const SizedBox.expand();
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(color, equals(Colors.cyan));
+  });
+
   group('Surface Tint Overlay', () {
     testWidgets('applyElevationOverlayColor does not effect anything with useMaterial3 set to true', (WidgetTester tester) async {
       const Color surfaceColor = Color(0xFF121212);
