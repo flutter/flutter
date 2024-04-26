@@ -503,6 +503,23 @@ void main() {
       // At least 2 lines.
       expect(constrainedHeight, greaterThanOrEqualTo(2 * unconstrainedHeight));
     });
+
+    test('paints even when its size is empty', () {
+      // Regression test for https://github.com/flutter/flutter/issues/146840.
+      final RenderParagraph child = RenderParagraph(
+        const TextSpan(text: ''),
+        textDirection: TextDirection.ltr,
+      );
+      final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
+        alignment: Alignment.center,
+        textDirection: TextDirection.ltr,
+        constraintsTransform: (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+        child: child,
+      );
+
+      layout(box, constraints: BoxConstraints.tight(Size.zero), phase: EnginePhase.paint);
+      expect(box, paints..paragraph());
+    });
   });
 
   test ('getMinIntrinsicWidth error handling', () {
