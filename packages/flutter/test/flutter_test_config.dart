@@ -41,7 +41,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
   // receive the event.
   WidgetController.hitTestWarningShouldBeFatal = true;
 
-  if (_isLeakTrackingEnabled()) {
+  // if (_isLeakTrackingEnabled()) {
     LeakTesting.enable();
 
     LeakTracking.warnForUnsupportedPlatforms = false;
@@ -51,10 +51,10 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
       allNotGCed: true,
       classes: <String>[
         // TODO(polina-c): CurvedAnimation is leaking, https://github.com/flutter/flutter/issues/145600 [leaks-to-clean]
-        'CurvedAnimation',
+        // 'CurvedAnimation',
       ],
     );
-  }
+  // }
 
   // Enable golden file testing using Skia Gold.
   return flutter_goldens.testExecutable(testMain);
