@@ -502,12 +502,12 @@ class _CupertinoFullscreenDialogTransitionState extends State<CupertinoFullscree
   @override
   void didUpdateWidget(covariant CupertinoFullscreenDialogTransition oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.primaryRouteAnimation != widget.primaryRouteAnimation
-      || oldWidget.secondaryRouteAnimation != widget.secondaryRouteAnimation
-      || oldWidget.child != widget.child
-      || oldWidget.linearTransition != widget.linearTransition) {
-    _disposeCurve();
-    _setupAnimation();
+    if (oldWidget.primaryRouteAnimation != widget.primaryRouteAnimation ||
+        oldWidget.secondaryRouteAnimation != widget.secondaryRouteAnimation ||
+        oldWidget.child != widget.child ||
+        oldWidget.linearTransition != widget.linearTransition) {
+        _disposeCurve();
+        _setupAnimation();
     }
   }
 
