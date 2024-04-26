@@ -28,8 +28,7 @@ void main() {
 
       elevation: 0,
       color: color,
-      shadowColor:
-      color,
+      shadowColor: color,
       duration: Duration.zero,
       child: child,
     );
