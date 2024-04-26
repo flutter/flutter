@@ -6,6 +6,8 @@
 
 #include <fuchsia/inspect/cpp/fidl.h>
 #include <fuchsia/logger/cpp/fidl.h>
+#include <fuchsia/sysmem/cpp/fidl.h>
+#include <fuchsia/sysmem2/cpp/fidl.h>
 #include <fuchsia/tracing/provider/cpp/fidl.h>
 #include <fuchsia/ui/app/cpp/fidl.h>
 #include <lib/async/cpp/task.h>
@@ -80,6 +82,11 @@ void PortableUITest::SetUpRealmBase() {
       .capabilities = {Protocol{fuchsia::logger::LogSink::Name_},
                        Protocol{fuchsia::inspect::InspectSink::Name_},
                        Protocol{fuchsia::sysmem::Allocator::Name_},
+
+                       // Replace string with
+                       // fuchsia::sysmem2::Allocator::Name_
+                       // when available (fuchsia SDK >= 19).
+                       Protocol{"fuchsia.sysmem2.Allocator"},
                        Protocol{fuchsia::tracing::provider::Registry::Name_},
                        Protocol{fuchsia::ui::input::ImeService::Name_},
                        Protocol{kPosixSocketProviderName},

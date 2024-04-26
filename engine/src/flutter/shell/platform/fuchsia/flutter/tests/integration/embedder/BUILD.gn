@@ -26,6 +26,8 @@ executable("flutter-embedder-test-bin") {
   deps = [
     "${fuchsia_sdk}/fidl/fuchsia.inspect",
     "${fuchsia_sdk}/fidl/fuchsia.logger",
+    "${fuchsia_sdk}/fidl/fuchsia.sysmem",
+    "${fuchsia_sdk}/fidl/fuchsia.sysmem2",
     "${fuchsia_sdk}/fidl/fuchsia.tracing.provider",
     "${fuchsia_sdk}/fidl/fuchsia.ui.app",
     "${fuchsia_sdk}/fidl/fuchsia.ui.composition",
