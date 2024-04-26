@@ -329,48 +329,48 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
       _CupertinoListTileType.notched => _kNotchedMinHeightWithoutLeading,
     };
 
-    final Widget child = DecoratedBox(
-      decoration: BoxDecoration(color: backgroundColor),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minWidth: double.infinity, minHeight: minHeight),
-        child: Padding(
-          padding: padding,
-          child: Row(
-            children: <Widget>[
-              if (widget.leading != null) ...<Widget>[
-                SizedBox.fromSize(
-                  size: Size.square(widget.leadingSize),
-                  child: Center(
-                    child: widget.leading,
-                  ),
-                ),
-                SizedBox(width: widget.leadingToTitle),
-              ] else
-                SizedBox(height: widget.leadingSize),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    title,
-                    if (subtitle != null) ...<Widget>[
-                      const SizedBox(height: _kNotchedTitleToSubtitle),
-                      subtitle,
-                    ],
-                  ],
+    Widget child = ConstrainedBox(
+      constraints: BoxConstraints(minWidth: double.infinity, minHeight: minHeight),
+      child: Padding(
+        padding: padding,
+        child: Row(
+          children: <Widget>[
+            if (widget.leading != null) ...<Widget>[
+              SizedBox.fromSize(
+                size: Size.square(widget.leadingSize),
+                child: Center(
+                  child: widget.leading,
                 ),
               ),
-              if (additionalInfo != null) ...<Widget>[
-                additionalInfo,
-                if (widget.trailing != null)
-                  const SizedBox(width: _kAdditionalInfoToTrailing),
-              ],
-              if (widget.trailing != null) widget.trailing!
+              SizedBox(width: widget.leadingToTitle),
+            ] else
+              SizedBox(height: widget.leadingSize),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  title,
+                  if (subtitle != null) ...<Widget>[
+                    const SizedBox(height: _kNotchedTitleToSubtitle),
+                    subtitle,
+                  ],
+                ],
+              ),
+            ),
+            if (additionalInfo != null) ...<Widget>[
+              additionalInfo,
+              if (widget.trailing != null)
+                const SizedBox(width: _kAdditionalInfoToTrailing),
             ],
-          ),
+            if (widget.trailing != null) widget.trailing!
+          ],
         ),
       ),
     );
+    if (backgroundColor != null) {
+      child = ColoredBox(color: backgroundColor);
+    }
 
     if (widget.onTap == null) {
       return child;
