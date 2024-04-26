@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
+import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart' show templateAndroidGradlePluginVersion, templateAndroidGradlePluginVersionForModule, templateDefaultGradleVersion;
@@ -3748,6 +3749,40 @@ void main() {
     const String expectedDescription = '"description": "A new Flutter project."';
 
     expect(rawManifestJson.contains(expectedDescription), isTrue);
+  });
+
+  testUsingContext('flutter create should tool exit if the template manifest cannot be read', () async {
+    globals.fs.file(globals.fs.path.join(
+      Cache.flutterRoot!,
+      'packages',
+      'flutter_tools',
+      'templates',
+      'template_manifest.json',
+    )).createSync(recursive: true);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await expectLater(
+      runner.run(<String>[
+        'create',
+        '--no-pub',
+        '--template=plugin',
+        '--project-name=test',
+        projectDir.path,
+      ]),
+      throwsToolExit(message: 'Unable to read the template manifest at path'),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(
+      opHandle: (String context, FileSystemOp operation) {
+        if (operation == FileSystemOp.read && context.contains('template_manifest.json')) {
+          throw io.PathNotFoundException(
+              context, const OSError(), 'Cannot open file');
+        }
+      },
+    ),
+    ProcessManager: () => fakeProcessManager,
   });
 }
 

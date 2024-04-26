@@ -669,8 +669,18 @@ abstract class CreateBase extends FlutterCommand {
       'templates',
       'template_manifest.json',
     );
+    final String manifestFileContents;
+    try {
+      manifestFileContents = globals.fs.file(manifestPath).readAsStringSync();
+    } on FileSystemException catch (e) {
+      throwToolExit(
+        'Unable to read the template manifest at path "$manifestPath".\n'
+        'Make sure that your user account has sufficient permissions to read this file.\n'
+        'Exception details: $e',
+      );
+    }
     final Map<String, Object?> manifest = json.decode(
-      globals.fs.file(manifestPath).readAsStringSync(),
+      manifestFileContents,
     ) as Map<String, Object?>;
     return Set<Uri>.from(
       (manifest['files']! as List<Object?>).cast<String>().map<Uri>(
