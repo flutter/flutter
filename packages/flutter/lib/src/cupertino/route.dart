@@ -464,7 +464,6 @@ class CupertinoFullscreenDialogTransition extends StatefulWidget {
     required this.linearTransition,
   });
 
-
   ///  * `primaryRouteAnimation` is a linear route animation from 0.0 to 1.0
   ///    when this screen is being pushed.
   final Animation<double> primaryRouteAnimation;
@@ -485,14 +484,13 @@ class CupertinoFullscreenDialogTransition extends StatefulWidget {
 }
 
 class _CupertinoFullscreenDialogTransitionState extends State<CupertinoFullscreenDialogTransition> {
-
-    // When this page is coming in to cover another page.
+  /// When this page is coming in to cover another page.
   late Animation<Offset> _primaryPositionAnimation;
-  // When this page is becoming covered by another page.
+  /// When this page is becoming covered by another page.
   late Animation<Offset> _secondaryPositionAnimation;
-  // Curve of primary page which is coming in to cover another page.
+  /// Curve of primary page which is coming in to cover another page.
   CurvedAnimation? _primaryPositionCurve;
-  // Curve of secondary page which is becoming covered by another page.
+  /// Curve of secondary page which is becoming covered by another page.
   CurvedAnimation? _secondaryPositionCurve;
 
   @override
@@ -505,8 +503,9 @@ class _CupertinoFullscreenDialogTransitionState extends State<CupertinoFullscree
   void didUpdateWidget(covariant CupertinoFullscreenDialogTransition oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.primaryRouteAnimation != widget.primaryRouteAnimation
-    || oldWidget.secondaryRouteAnimation != widget.secondaryRouteAnimation
-    || oldWidget.child != widget.child || oldWidget.linearTransition != widget.linearTransition) {
+      || oldWidget.secondaryRouteAnimation != widget.secondaryRouteAnimation
+      || oldWidget.child != widget.child
+      || oldWidget.linearTransition != widget.linearTransition) {
     _disposeCurve();
     _setupAnimation();
     }
@@ -514,8 +513,8 @@ class _CupertinoFullscreenDialogTransitionState extends State<CupertinoFullscree
 
    @override
   void dispose() {
-    super.dispose();
     _disposeCurve();
+    super.dispose();
   }
 
   void _disposeCurve() {
