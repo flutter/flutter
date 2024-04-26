@@ -399,7 +399,8 @@ constexpr char kTextPlainFormat[] = "text/plain";
 // Callbacks provided to the engine. See the called methods for documentation.
 #pragma mark - Static methods provided to engine configuration
 
-static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngine* engine) {
+static void OnPlatformMessage(const FlutterPlatformMessage* message, void* user_data) {
+  FlutterEngine* engine = (__bridge FlutterEngine*)user_data;
   [engine engineCallbackOnPlatformMessage:message];
 }
 
