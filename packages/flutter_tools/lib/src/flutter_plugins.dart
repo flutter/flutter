@@ -1169,8 +1169,11 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
     final Map<String, String> defaultImplementations = <String, String>{};
 
     for (final Plugin plugin in plugins) {
-      try {
-        _validatePlugin(plugin, platformKey);
+      final String? error = _validatePlugin(plugin, platformKey);
+      if (error != null) {
+        globals.printError(error);
+        hasPluginPubspecError = true;
+      } else {
         final String? implementsPluginName = _getImplementedPlugin(plugin, platformKey);
         final String? defaultImplPluginName = _getDefaultImplPlugin(plugin, platformKey);
 
@@ -1182,11 +1185,6 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
           pluginImplCandidates.putIfAbsent(implementsPluginName, () => <Plugin>[]);
           pluginImplCandidates[implementsPluginName]!.add(plugin);
         }
-      } on ToolExit catch (e) {
-        if (e.message != null) {
-          globals.printError(e.message!);
-        }
-        hasPluginPubspecError = true;
       }
     }
 
@@ -1195,21 +1193,17 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
     // Now resolve all the possible resolutions to a single option for each
     // plugin, or throw if that's not possible.
     for (final MapEntry<String, List<Plugin>> implCandidatesEntry in pluginImplCandidates.entries) {
-      try {
-        final Plugin? resolution = _resolveImplementationOfPlugin(
-          platformKey: platformKey,
-          pluginName: implCandidatesEntry.key,
-          candidates: implCandidatesEntry.value,
-          defaultPackageName: defaultImplementations[implCandidatesEntry.key],
-        );
-        if (resolution != null) {
-          pluginResolution[implCandidatesEntry.key] = resolution;
-        }
-      } on ToolExit catch (e) {
-        if (e.message != null) {
-          globals.printError(e.message!);
-        }
+      final (Plugin? resolution, String? error) = _resolveImplementationOfPlugin(
+        platformKey: platformKey,
+        pluginName: implCandidatesEntry.key,
+        candidates: implCandidatesEntry.value,
+        defaultPackageName: defaultImplementations[implCandidatesEntry.key],
+      );
+      if (error != null) {
+        globals.printError(error);
         hasResolutionError = true;
+      } else if (resolution != null) {
+        pluginResolution[implCandidatesEntry.key] = resolution;
       }
     }
 
@@ -1229,33 +1223,33 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
 
 /// Validates conflicting plugin parameters in pubspec, such as
 /// `dartPluginClass`, `default_package` and `implements`.
-void _validatePlugin(Plugin plugin, String platformKey) {
+/// Returns an error, if failing.
+String? _validatePlugin(Plugin plugin, String platformKey) {
   final String? implementsPackage = plugin.implementsPackage;
   final String? defaultImplPluginName = plugin.defaultPackagePlatforms[platformKey];
 
   if (plugin.name == implementsPackage &&
       plugin.name == defaultImplPluginName) {
     // Allow self implementing and self as platform default.
-    return;
+    return null;
   }
 
   if (defaultImplPluginName != null) {
     if (implementsPackage != null && implementsPackage.isNotEmpty) {
-      throwToolExit(
-          'Plugin ${plugin.name}:$platformKey which provides an implementation for $implementsPackage '
+      return 'Plugin ${plugin.name}:$platformKey which provides an implementation for $implementsPackage '
           'can not also reference a default implementation for $defaultImplPluginName. '
           'Ask the maintainers of ${plugin.name} to either remove the implementation via `implements: $implementsPackage` '
-          'or avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName`.\n');
+          'or avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName`.\n';
     }
 
     if (_hasPluginInlineDartImpl(plugin, platformKey)) {
-      throwToolExit(
-          'Plugin ${plugin.name}:$platformKey which provides an inline implementation '
+      return 'Plugin ${plugin.name}:$platformKey which provides an inline implementation '
           'can not also reference a default implementation for $defaultImplPluginName. '
           'Ask the maintainers of ${plugin.name} to either remove the implementation via `platforms: $platformKey: dartPluginClass` '
-          'or avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName`.\n');
+          'or avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName`.\n';
     }
   }
+  return null;
 }
 
 /// Determine if this [plugin] serves as implementation for an app-facing
@@ -1341,9 +1335,10 @@ bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) =>
     plugin.pluginDartClassPlatforms[platformKey] != null &&
     plugin.pluginDartClassPlatforms[platformKey] != 'none';
 
-/// Get the resolved plugin from the [candidates] serving as implementation for
+/// Get the resolved plugin [resolution] from the [candidates] serving as implementation for
 /// [pluginName].
-Plugin? _resolveImplementationOfPlugin({
+/// Returns an [error] string, if failing.
+(Plugin? resolution, String? error) _resolveImplementationOfPlugin({
   required String platformKey,
   required String pluginName,
   required List<Plugin> candidates,
@@ -1351,7 +1346,7 @@ Plugin? _resolveImplementationOfPlugin({
 }) {
   // If there's only one candidate, use it.
   if (candidates.length == 1) {
-    return candidates.first;
+    return (candidates.first, null);
   }
   // Next, try direct dependencies of the resolving application.
   final Iterable<Plugin> directDependencies = candidates.where((Plugin plugin) {
@@ -1365,15 +1360,17 @@ Plugin? _resolveImplementationOfPlugin({
       final Iterable<Plugin> implementingPackage = directDependencies.where((Plugin plugin) => plugin.implementsPackage != null && plugin.implementsPackage!.isNotEmpty);
       final Set<Plugin> appFacingPackage = directDependencies.toSet()..removeAll(implementingPackage);
       if (implementingPackage.length == 1 && appFacingPackage.length == 1) {
-        return implementingPackage.first;
+        return (implementingPackage.first, null);
       }
 
-      throwToolExit(
-          'Plugin $pluginName:$platformKey has conflicting direct dependency implementations:\n'
-          '${directDependencies.map((Plugin plugin) => '  ${plugin.name}\n').join()}'
-          'To fix this issue, remove all but one of these dependencies from pubspec.yaml.\n');
+      return (
+        null,
+        'Plugin $pluginName:$platformKey has conflicting direct dependency implementations:\n'
+            '${directDependencies.map((Plugin plugin) => '  ${plugin.name}\n').join()}'
+            'To fix this issue, remove all but one of these dependencies from pubspec.yaml.\n',
+      );
     } else {
-      return directDependencies.first;
+      return (directDependencies.first, null);
     }
   }
   // Next, defer to the default implementation if there is one.
@@ -1381,18 +1378,20 @@ Plugin? _resolveImplementationOfPlugin({
     final int defaultIndex = candidates
         .indexWhere((Plugin plugin) => plugin.name == defaultPackageName);
     if (defaultIndex != -1) {
-      return candidates[defaultIndex];
+      return (candidates[defaultIndex], null);
     }
   }
   // Otherwise, require an explicit choice.
   if (candidates.length > 1) {
-    throwToolExit(
-        'Plugin $pluginName:$platformKey has multiple possible implementations:\n'
-        '${candidates.map((Plugin plugin) => '  ${plugin.name}\n').join()}'
-        'To fix this issue, add one of these dependencies to pubspec.yaml.\n');
+    return (
+      null,
+      'Plugin $pluginName:$platformKey has multiple possible implementations:\n'
+          '${candidates.map((Plugin plugin) => '  ${plugin.name}\n').join()}'
+          'To fix this issue, add one of these dependencies to pubspec.yaml.\n',
+    );
   }
   // No implementation provided
-  return null;
+  return (null, null);
 }
 
 /// Generates the Dart plugin registrant, which allows to bind a platform
