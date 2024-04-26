@@ -700,6 +700,70 @@ void main() {
     expect(lastOptions.elementAt(1), 'elephant');
   });
 
+    testWidgets('can show options even when empty iterable is returned', (WidgetTester tester) async {
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    late Iterable<String> lastOptions;
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              if (textEditingValue.text == '') {
+                return const Iterable<String>.empty();
+              }
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            reloadOptionsViewOnChangedField: true,
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+              focusNode = fieldFocusNode;
+              textEditingController = fieldTextEditingController;
+              return TextField(
+                key: fieldKey,
+                focusNode: focusNode,
+                controller: fieldTextEditingController,
+              );
+            },
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              lastOptions = options;
+              return Container(key: optionsKey);
+            },
+          ),
+        ),
+      ),
+    );
+
+    // The field is always rendered, but the options are not unless needed.
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsNothing);
+
+    // Focus the empty field. The options are now displayed because
+    // reloadOptionsViewOnChangedField has been set to true.
+    focusNode.requestFocus();
+    textEditingController.value = const TextEditingValue(
+      selection: TextSelection(baseOffset: 0, extentOffset: 0),
+    );
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsOneWidget);
+
+    // Enter text. Now the options appear, filtered by the text.
+    textEditingController.value = const TextEditingValue(
+      text: 'ele',
+      selection: TextSelection(baseOffset: 3, extentOffset: 3),
+    );
+    await tester.pump();
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions.length, 2);
+    expect(lastOptions.elementAt(0), 'chameleon');
+    expect(lastOptions.elementAt(1), 'elephant');
+  });
+
   testWidgets('can create a field outside of fieldViewBuilder', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
