@@ -13,6 +13,10 @@ void sayHi() {
   print('Hi');
 }
 
+/// Pass a texture back to the playground for rendering to the surface.
+@pragma('vm:external-name', 'SetDisplayTexture')
+external void setDisplayTexture(gpu.Texture texture);
+
 @pragma('vm:entry-point')
 void instantiateDefaultContext() {
   // ignore: unused_local_variable
@@ -102,9 +106,9 @@ ByteData float32(List<double> values) {
 }
 
 @pragma('vm:entry-point')
-void canCreateRenderPassAndSubmit() {
-  final gpu.Texture? renderTexture =
-      gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, 100, 100);
+void canCreateRenderPassAndSubmit(int width, int height) {
+  final gpu.Texture? renderTexture = gpu.gpuContext
+      .createTexture(gpu.StorageMode.devicePrivate, width, height);
   assert(renderTexture != null);
 
   final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
@@ -123,9 +127,9 @@ void canCreateRenderPassAndSubmit() {
 
   final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
   final gpu.BufferView vertices = transients.emplace(float32(<double>[
-    -0.5, -0.5, //
+    -0.5, 0.5, //
+    0.0, -0.5, //
     0.5, 0.5, //
-    0.5, -0.5, //
   ]));
   final gpu.BufferView vertInfoData = transients.emplace(float32(<double>[
     1, 0, 0, 0, // mvp
@@ -142,4 +146,6 @@ void canCreateRenderPassAndSubmit() {
   encoder.draw();
 
   commandBuffer.submit();
+
+  setDisplayTexture(renderTexture);
 }

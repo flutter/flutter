@@ -64,6 +64,8 @@ class Playground {
 
   void TeardownWindow();
 
+  bool IsPlaygroundEnabled() const;
+
   Point GetCursorPosition() const;
 
   ISize GetWindowSize() const;
