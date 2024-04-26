@@ -622,7 +622,7 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
 ///
 /// {@tool dartpad}
 /// In the following example, when a key combination results in a question mark,
-/// the counter is increased:
+/// the [SnackBar] gets shown:
 ///
 /// ** See code in examples/api/lib/widgets/shortcuts/character_activator.0.dart **
 /// {@end-tool}
