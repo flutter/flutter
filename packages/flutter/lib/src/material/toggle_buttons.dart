@@ -826,7 +826,10 @@ class ToggleButtons extends StatelessWidget {
       direction: direction,
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      verticalDirection: verticalDirection,
+      verticalDirection: switch (direction) {
+        Axis.horizontal => VerticalDirection.down,
+        Axis.vertical   => verticalDirection,
+      },
       children: buttons,
     );
 
