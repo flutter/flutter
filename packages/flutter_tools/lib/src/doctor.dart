@@ -196,7 +196,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
   @override
   List<Workflow> get workflows {
-    return _workflows ?? <Workflow>[
+    return _workflows ??= <Workflow>[
       if (globals.iosWorkflow!.appliesToHostPlatform)      globals.iosWorkflow!,
       if (androidWorkflow?.appliesToHostPlatform ?? false) androidWorkflow!,
       if (fuchsiaWorkflow?.appliesToHostPlatform ?? false) fuchsiaWorkflow!,
