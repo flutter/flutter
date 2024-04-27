@@ -4,6 +4,7 @@
 
 import 'dart:ui' show DisplayFeature, DisplayFeatureState, DisplayFeatureType, SemanticsFlag;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -1720,10 +1721,19 @@ void main() {
     expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 2')).height, 56); // Padding (20.0 + 20.0) + Height of text (16) = 56
     expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 3')).height, 100); // Height value of 100, since child (16) + padding (40) < 100
 
-    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 0')).padding, EdgeInsets.zero);
-    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 1')).padding, EdgeInsets.zero);
-    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 2')).padding, const EdgeInsets.all(20));
-    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 3')).padding, const EdgeInsets.all(20));
+    EdgeInsetsGeometry paddingFor(String text) {
+      final ConstrainedBox widget = tester.widget<ConstrainedBox>(
+        find.ancestor(of: find.text(text), matching: find.byWidgetPredicate(
+            (Widget widget) => widget is ConstrainedBox && widget.child is Padding,
+        )),
+      );
+      return (widget.child! as Padding).padding;
+    }
+
+    expect(paddingFor('Item 0'), EdgeInsets.zero);
+    expect(paddingFor('Item 1'), EdgeInsets.zero);
+    expect(paddingFor('Item 2'), const EdgeInsets.all(20));
+    expect(paddingFor('Item 3'), const EdgeInsets.all(20));
   });
 
   testWidgets('CheckedPopupMenuItem child height is a minimum, child is vertically centered', (WidgetTester tester) async {
@@ -1870,10 +1880,19 @@ void main() {
     expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 2')).height, 96); // Padding (20.0 + 20.0) + Height of ListTile (56) = 96
     expect(tester.getSize(find.widgetWithText(menuItemType, 'Item 3')).height, 100); // Height value of 100, since child (56) + padding (40) < 100
 
-    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 0')).padding, EdgeInsets.zero);
-    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 1')).padding, EdgeInsets.zero);
-    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 2')).padding, const EdgeInsets.all(20));
-    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 3')).padding, const EdgeInsets.all(20));
+    EdgeInsetsGeometry paddingFor(String text) {
+      final ConstrainedBox widget = tester.widget<ConstrainedBox>(
+        find.ancestor(of: find.text(text), matching: find.byWidgetPredicate(
+            (Widget widget) => widget is ConstrainedBox && widget.child is Padding,
+        )),
+      );
+      return (widget.child! as Padding).padding;
+    }
+
+    expect(paddingFor('Item 0'), EdgeInsets.zero);
+    expect(paddingFor('Item 1'), EdgeInsets.zero);
+    expect(paddingFor('Item 2'), const EdgeInsets.all(20));
+    expect(paddingFor('Item 3'), const EdgeInsets.all(20));
   });
 
   testWidgets('Update PopupMenuItem layout while the menu is visible', (WidgetTester tester) async {
