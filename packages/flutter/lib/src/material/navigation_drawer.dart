@@ -351,44 +351,40 @@ class _NavigationDestinationBuilder extends StatelessWidget {
     final NavigationDrawerThemeData navigationDrawerTheme = NavigationDrawerTheme.of(context);
     final NavigationDrawerThemeData defaults = _NavigationDrawerDefaultsM3(context);
 
-    final Row destinationBody = Row(
-      children: <Widget>[
-        const SizedBox(width: 16),
-        buildIcon(context),
-        const SizedBox(width: 12),
-        buildLabel(context),
-      ],
-    );
-
-    return Padding(
-      padding: info.tilePadding,
-      child: DecoratedBox(
-        decoration: BoxDecoration(color: backgroundColor ?? navigationDrawerTheme.backgroundColor),
-        child: _NavigationDestinationSemantics(
-          child: SizedBox(
-            height: navigationDrawerTheme.tileHeight ?? defaults.tileHeight,
-            child: InkWell(
-              highlightColor: Colors.transparent,
-              onTap: enabled ? info.onTap : null,
-              customBorder: info.indicatorShape ?? navigationDrawerTheme.indicatorShape ?? defaults.indicatorShape!,
-              child: Stack(
-                alignment: Alignment.center,
+    Widget destination = _NavigationDestinationSemantics(
+      child: SizedBox(
+        height: navigationDrawerTheme.tileHeight ?? defaults.tileHeight,
+        child: InkWell(
+          highlightColor: Colors.transparent,
+          onTap: enabled ? info.onTap : null,
+          customBorder: info.indicatorShape ?? navigationDrawerTheme.indicatorShape ?? defaults.indicatorShape!,
+          child: Stack(
+            alignment: Alignment.center,
+            children: <Widget>[
+              NavigationIndicator(
+                animation: info.selectedAnimation,
+                color: info.indicatorColor ?? navigationDrawerTheme.indicatorColor ?? defaults.indicatorColor!,
+                shape: info.indicatorShape ?? navigationDrawerTheme.indicatorShape ?? defaults.indicatorShape!,
+                width: (navigationDrawerTheme.indicatorSize ?? defaults.indicatorSize!).width,
+                height: (navigationDrawerTheme.indicatorSize ?? defaults.indicatorSize!).height,
+              ),
+              Row(
                 children: <Widget>[
-                  NavigationIndicator(
-                    animation: info.selectedAnimation,
-                    color: info.indicatorColor ?? navigationDrawerTheme.indicatorColor ?? defaults.indicatorColor!,
-                    shape: info.indicatorShape ?? navigationDrawerTheme.indicatorShape ?? defaults.indicatorShape!,
-                    width: (navigationDrawerTheme.indicatorSize ?? defaults.indicatorSize!).width,
-                    height: (navigationDrawerTheme.indicatorSize ?? defaults.indicatorSize!).height,
-                  ),
-                  destinationBody
+                  const SizedBox(width: 16),
+                  buildIcon(context),
+                  const SizedBox(width: 12),
+                  buildLabel(context),
                 ],
               ),
-            ),
+            ],
           ),
         ),
       ),
     );
+    if (backgroundColor ?? navigationDrawerTheme.backgroundColor case final Color color) {
+      destination = ColoredBox(color: color, child: destination);
+    }
+    return Padding(padding: info.tilePadding, child: destination);
   }
 }
 
