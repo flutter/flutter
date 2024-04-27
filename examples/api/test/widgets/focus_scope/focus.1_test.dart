@@ -62,7 +62,7 @@ void main() {
           (WidgetTester tester) async {
     await tester.pumpWidget(const example.FocusExampleApp());
     await tester.pumpAndSettle();
-    
+
     expect(find.byType(ListView), findsOneWidget);
 
     final Finder childFinder = find.descendant(
