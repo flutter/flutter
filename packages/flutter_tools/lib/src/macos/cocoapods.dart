@@ -21,11 +21,11 @@ import '../cache.dart';
 import '../ios/xcodeproj.dart';
 import '../migrations/cocoapods_script_symlink.dart';
 import '../migrations/cocoapods_toolchain_directory_migration.dart';
+import '../project.dart';
 import '../reporting/reporting.dart';
-import '../xcode_project.dart';
 
 const String noCocoaPodsConsequence = '''
-  CocoaPods is used to retrieve the iOS and macOS platform side's plugin code that responds to your plugin usage on the Dart side.
+  CocoaPods is a package manager for iOS or macOS platform code.
   Without CocoaPods, plugins will not work on iOS or macOS.
   For more info, see https://flutter.dev/platform-plugins''';
 
@@ -47,9 +47,9 @@ const String outOfDatePluginsPodfileConsequence = '''
   See https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms for details.
   If you have local Podfile edits you would like to keep, see https://github.com/flutter/flutter/issues/45197 for instructions.''';
 
-const String cocoaPodsInstallInstructions = 'see https://guides.cocoapods.org/using/getting-started.html#installation for instructions.';
+const String cocoaPodsInstallInstructions = 'see https://guides.cocoapods.org/using/getting-started.html#installation';
 
-const String cocoaPodsUpdateInstructions = 'see https://guides.cocoapods.org/using/getting-started.html#updating-cocoapods for instructions.';
+const String cocoaPodsUpdateInstructions = 'see https://guides.cocoapods.org/using/getting-started.html#updating-cocoapods';
 
 const String podfileIosMigrationInstructions = '''
   rm ios/Podfile''';
@@ -166,6 +166,10 @@ class CocoaPods {
     bool dependenciesChanged = true,
   }) async {
     if (!xcodeProject.podfile.existsSync()) {
+      // Swift Package Manager doesn't need Podfile, so don't error.
+      if (xcodeProject.parent.usesSwiftPackageManager) {
+        return false;
+      }
       throwToolExit('Podfile missing');
     }
     _warnIfPodfileOutOfDate(xcodeProject);
@@ -185,7 +189,7 @@ class CocoaPods {
           _logger,
         ),
       ]);
-      postPodMigration.run();
+      await postPodMigration.run();
 
       podsProcessed = true;
     }
@@ -200,7 +204,7 @@ class CocoaPods {
         _logger.printWarning(
           'Warning: CocoaPods not installed. Skipping pod install.\n'
           '$noCocoaPodsConsequence\n'
-          'To install $cocoaPodsInstallInstructions\n',
+          'For installation instructions, $cocoaPodsInstallInstructions\n',
           emphasis: true,
         );
         return false;
@@ -208,7 +212,7 @@ class CocoaPods {
         _logger.printWarning(
           'Warning: CocoaPods is installed but broken. Skipping pod install.\n'
           '$brokenCocoaPodsConsequence\n'
-          'To re-install $cocoaPodsInstallInstructions\n',
+          'For re-installation instructions, $cocoaPodsInstallInstructions\n',
           emphasis: true,
         );
         return false;
@@ -216,14 +220,14 @@ class CocoaPods {
         _logger.printWarning(
           'Warning: Unknown CocoaPods version installed.\n'
           '$unknownCocoaPodsConsequence\n'
-          'To upgrade $cocoaPodsInstallInstructions\n',
+          'To update CocoaPods, $cocoaPodsUpdateInstructions\n',
           emphasis: true,
         );
       case CocoaPodsStatus.belowMinimumVersion:
         _logger.printWarning(
           'Warning: CocoaPods minimum required version $cocoaPodsMinimumVersion or greater not installed. Skipping pod install.\n'
           '$noCocoaPodsConsequence\n'
-          'To upgrade $cocoaPodsInstallInstructions\n',
+          'To update CocoaPods, $cocoaPodsUpdateInstructions\n',
           emphasis: true,
         );
         return false;
@@ -231,7 +235,7 @@ class CocoaPods {
         _logger.printWarning(
           'Warning: CocoaPods recommended version $cocoaPodsRecommendedVersion or greater not installed.\n'
           'Pods handling may fail on some projects involving plugins.\n'
-          'To upgrade $cocoaPodsInstallInstructions\n',
+          'To update CocoaPods, $cocoaPodsUpdateInstructions\n',
           emphasis: true,
         );
       case CocoaPodsStatus.recommended:
@@ -258,6 +262,18 @@ class CocoaPods {
       addPodsDependencyToFlutterXcconfig(xcodeProject);
       return;
     }
+    final File podfileTemplate = await getPodfileTemplate(
+      xcodeProject,
+      runnerProject,
+    );
+    podfileTemplate.copySync(podfile.path);
+    addPodsDependencyToFlutterXcconfig(xcodeProject);
+  }
+
+  Future<File> getPodfileTemplate(
+    XcodeBasedProject xcodeProject,
+    Directory runnerProject,
+  ) async {
     String podfileTemplateName;
     if (xcodeProject is MacOSProject) {
       podfileTemplateName = 'Podfile-macos';
@@ -268,7 +284,7 @@ class CocoaPods {
       )).containsKey('SWIFT_VERSION');
       podfileTemplateName = isSwift ? 'Podfile-ios-swift' : 'Podfile-ios-objc';
     }
-    final File podfileTemplate = _fileSystem.file(_fileSystem.path.join(
+    return _fileSystem.file(_fileSystem.path.join(
       Cache.flutterRoot!,
       'packages',
       'flutter_tools',
@@ -276,8 +292,6 @@ class CocoaPods {
       'cocoapods',
       podfileTemplateName,
     ));
-    podfileTemplate.copySync(podfile.path);
-    addPodsDependencyToFlutterXcconfig(xcodeProject);
   }
 
   /// Ensures all `Flutter/Xxx.xcconfig` files for the given Xcode-based
@@ -287,12 +301,24 @@ class CocoaPods {
     _addPodsDependencyToFlutterXcconfig(xcodeProject, 'Release');
   }
 
+  String includePodsXcconfig(String mode) {
+    return 'Pods/Target Support Files/Pods-Runner/Pods-Runner.${mode
+        .toLowerCase()}.xcconfig';
+  }
+
+  bool xcconfigIncludesPods(File xcodeConfig) {
+    if (xcodeConfig.existsSync()) {
+      final String content = xcodeConfig.readAsStringSync();
+      return content.contains('Pods/Target Support Files/Pods-');
+    }
+    return false;
+  }
+
   void _addPodsDependencyToFlutterXcconfig(XcodeBasedProject xcodeProject, String mode) {
     final File file = xcodeProject.xcodeConfigFor(mode);
     if (file.existsSync()) {
       final String content = file.readAsStringSync();
-      final String includeFile = 'Pods/Target Support Files/Pods-Runner/Pods-Runner.${mode
-          .toLowerCase()}.xcconfig';
+      final String includeFile = includePodsXcconfig(mode);
       final String include = '#include? "$includeFile"';
       if (!content.contains('Pods/Target Support Files/Pods-')) {
         file.writeAsStringSync('$include\n$content', flush: true);

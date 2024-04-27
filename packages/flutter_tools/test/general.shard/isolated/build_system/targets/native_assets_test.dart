@@ -130,18 +130,20 @@ void main() {
 
       final NativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[Package('foo', iosEnvironment.buildDir.uri)],
-        buildResult: FakeNativeAssetsBuilderResult(assets: <native_assets_cli.Asset>[
-          native_assets_cli.Asset(
-            id: 'package:foo/foo.dart',
-            linkMode: native_assets_cli.LinkMode.dynamic,
-            target: native_assets_cli.Target.iOSArm64,
-            path: native_assets_cli.AssetAbsolutePath(
-              Uri.file('foo.framework/foo'),
+        buildResult: FakeNativeAssetsBuilderResult(
+          assets: <native_assets_cli.AssetImpl>[
+            native_assets_cli.NativeCodeAssetImpl(
+              id: 'package:foo/foo.dart',
+              linkMode: native_assets_cli.DynamicLoadingBundledImpl(),
+              os: native_assets_cli.OSImpl.iOS,
+              architecture: native_assets_cli.ArchitectureImpl.arm64,
+              file: Uri.file('foo.framework/foo'),
             ),
-          )
-        ], dependencies: <Uri>[
-          Uri.file('src/foo.c'),
-        ]),
+          ],
+          dependencies: <Uri>[
+            Uri.file('src/foo.c'),
+          ],
+        ),
       );
       await NativeAssets(buildRunner: buildRunner).build(iosEnvironment);
 
@@ -191,23 +193,27 @@ void main() {
           packagesWithNativeAssetsResult: <Package>[
             Package('foo', androidEnvironment.buildDir.uri)
           ],
-          buildResult:
-              FakeNativeAssetsBuilderResult(assets: <native_assets_cli.Asset>[
-            if (hasAssets)
-              native_assets_cli.Asset(
-                id: 'package:foo/foo.dart',
-                linkMode: native_assets_cli.LinkMode.dynamic,
-                target: native_assets_cli.Target.androidArm64,
-                path: native_assets_cli.AssetAbsolutePath(
-                  Uri.file('libfoo.so'),
+          buildResult: FakeNativeAssetsBuilderResult(
+            assets: <native_assets_cli.AssetImpl>[
+              if (hasAssets)
+                native_assets_cli.NativeCodeAssetImpl(
+                  id: 'package:foo/foo.dart',
+                  linkMode: native_assets_cli.DynamicLoadingBundledImpl(),
+                  os: native_assets_cli.OSImpl.android,
+                  architecture: native_assets_cli.ArchitectureImpl.arm64,
+                  file: Uri.file('libfoo.so'),
                 ),
-              )
-          ], dependencies: <Uri>[
-            Uri.file('src/foo.c'),
-          ]),
+            ],
+            dependencies: <Uri>[
+              Uri.file('src/foo.c'),
+            ],
+          ),
         );
         await NativeAssets(buildRunner: buildRunner).build(androidEnvironment);
-        expect(buildRunner.lastBuildMode, native_assets_cli.BuildMode.release);
+        expect(
+          buildRunner.lastBuildMode,
+          native_assets_cli.BuildModeImpl.release,
+        );
       },
     );
   }

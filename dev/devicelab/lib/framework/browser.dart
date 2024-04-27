@@ -426,7 +426,7 @@ class BlinkTraceEvent {
   ///
   /// Sample event encoded as JSON (the data is bogus, this just shows the format):
   ///
-  /// ```
+  /// ```json
   /// {
   ///   "name": "myName",
   ///   "cat": "category,list",

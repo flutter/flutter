@@ -156,79 +156,6 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
     return nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog;
   }
 
-  /// True if an iOS-style back swipe pop gesture is currently underway for [route].
-  ///
-  /// This just checks the route's [NavigatorState.userGestureInProgress].
-  ///
-  /// See also:
-  ///
-  ///  * [popGestureEnabled], which returns true if a user-triggered pop gesture
-  ///    would be allowed.
-  static bool isPopGestureInProgress(PageRoute<dynamic> route) {
-    return route.navigator!.userGestureInProgress;
-  }
-
-  /// True if an iOS-style back swipe pop gesture is currently underway for this route.
-  ///
-  /// See also:
-  ///
-  ///  * [isPopGestureInProgress], which returns true if a Cupertino pop gesture
-  ///    is currently underway for specific route.
-  ///  * [popGestureEnabled], which returns true if a user-triggered pop gesture
-  ///    would be allowed.
-  bool get popGestureInProgress => isPopGestureInProgress(this);
-
-  /// Whether a pop gesture can be started by the user.
-  ///
-  /// Returns true if the user can edge-swipe to a previous route.
-  ///
-  /// Returns false once [isPopGestureInProgress] is true, but
-  /// [isPopGestureInProgress] can only become true if [popGestureEnabled] was
-  /// true first.
-  ///
-  /// This should only be used between frames, not during build.
-  bool get popGestureEnabled => _isPopGestureEnabled(this);
-
-  static bool _isPopGestureEnabled<T>(PageRoute<T> route) {
-    // If there's nothing to go back to, then obviously we don't support
-    // the back gesture.
-    if (route.isFirst) {
-      return false;
-    }
-    // If the route wouldn't actually pop if we popped it, then the gesture
-    // would be really confusing (or would skip internal routes), so disallow it.
-    if (route.willHandlePopInternally) {
-      return false;
-    }
-    // If attempts to dismiss this route might be vetoed such as in a page
-    // with forms, then do not allow the user to dismiss the route with a swipe.
-    if (route.hasScopedWillPopCallback
-        || route.popDisposition == RoutePopDisposition.doNotPop) {
-      return false;
-    }
-    // Fullscreen dialogs aren't dismissible by back swipe.
-    if (route.fullscreenDialog) {
-      return false;
-    }
-    // If we're in an animation already, we cannot be manually swiped.
-    if (route.animation!.status != AnimationStatus.completed) {
-      return false;
-    }
-    // If we're being popped into, we also cannot be swiped until the pop above
-    // it completes. This translates to our secondary animation being
-    // dismissed.
-    if (route.secondaryAnimation!.status != AnimationStatus.dismissed) {
-      return false;
-    }
-    // If we're in a gesture already, we cannot start another.
-    if (isPopGestureInProgress(route)) {
-      return false;
-    }
-
-    // Looks like a back gesture would be welcome!
-    return true;
-  }
-
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     final Widget child = buildContent(context);
@@ -243,7 +170,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   // gesture is detected. The returned controller handles all of the subsequent
   // drag events.
   static _CupertinoBackGestureController<T> _startPopGesture<T>(PageRoute<T> route) {
-    assert(_isPopGestureEnabled(route));
+    assert(route.popGestureEnabled);
 
     return _CupertinoBackGestureController<T>(
       navigator: route.navigator!,
@@ -279,7 +206,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
     //
     // In the middle of a back gesture drag, let the transition be linear to
     // match finger motions.
-    final bool linearTransition = isPopGestureInProgress(route);
+    final bool linearTransition = route.popGestureInProgress;
     if (route.fullscreenDialog) {
       return CupertinoFullscreenDialogTransition(
         primaryRouteAnimation: animation,
@@ -293,10 +220,8 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
         secondaryRouteAnimation: secondaryAnimation,
         linearTransition: linearTransition,
         child: _CupertinoBackGestureDetector<T>(
-          enabledCallback: () => _isPopGestureEnabled<T>(route),
+          enabledCallback: () => route.popGestureEnabled,
           onStartPopGesture: () => _startPopGesture<T>(route),
-          getIsCurrent: () => route.isCurrent,
-          getIsActive: () => route.isActive,
           child: child,
         ),
       );
@@ -453,56 +378,109 @@ class CupertinoPage<T> extends Page<T> {
 ///
 /// The page slides in from the right and exits in reverse. It also shifts to the left in
 /// a parallax motion when another page enters to cover it.
-class CupertinoPageTransition extends StatelessWidget {
+class CupertinoPageTransition extends StatefulWidget {
   /// Creates an iOS-style page transition.
   ///
-  ///  * `primaryRouteAnimation` is a linear route animation from 0.0 to 1.0
-  ///    when this screen is being pushed.
-  ///  * `secondaryRouteAnimation` is a linear route animation from 0.0 to 1.0
-  ///    when another screen is being pushed on top of this one.
-  ///  * `linearTransition` is whether to perform the transitions linearly.
-  ///    Used to precisely track back gesture drags.
-  CupertinoPageTransition({
+  const CupertinoPageTransition({
     super.key,
-    required Animation<double> primaryRouteAnimation,
-    required Animation<double> secondaryRouteAnimation,
+    required this.primaryRouteAnimation,
+    required this.secondaryRouteAnimation,
     required this.child,
-    required bool linearTransition,
-  }) : _primaryPositionAnimation =
-           (linearTransition
-             ? primaryRouteAnimation
-             : CurvedAnimation(
-                 parent: primaryRouteAnimation,
-                 curve: Curves.fastEaseInToSlowEaseOut,
-                 reverseCurve: Curves.fastEaseInToSlowEaseOut.flipped,
-               )
-           ).drive(_kRightMiddleTween),
-       _secondaryPositionAnimation =
-           (linearTransition
-             ? secondaryRouteAnimation
-             : CurvedAnimation(
-                 parent: secondaryRouteAnimation,
-                 curve: Curves.linearToEaseOut,
-                 reverseCurve: Curves.easeInToLinear,
-               )
-           ).drive(_kMiddleLeftTween),
-       _primaryShadowAnimation =
-           (linearTransition
-             ? primaryRouteAnimation
-             : CurvedAnimation(
-                 parent: primaryRouteAnimation,
-                 curve: Curves.linearToEaseOut,
-               )
-           ).drive(_CupertinoEdgeShadowDecoration.kTween);
-
-  // When this page is coming in to cover another page.
-  final Animation<Offset> _primaryPositionAnimation;
-  // When this page is becoming covered by another page.
-  final Animation<Offset> _secondaryPositionAnimation;
-  final Animation<Decoration> _primaryShadowAnimation;
+    required this.linearTransition,
+  });
 
   /// The widget below this widget in the tree.
   final Widget child;
+
+  ///  * `primaryRouteAnimation` is a linear route animation from 0.0 to 1.0
+  ///    when this screen is being pushed.
+  final Animation<double> primaryRouteAnimation;
+
+  ///  * `secondaryRouteAnimation` is a linear route animation from 0.0 to 1.0
+  ///    when another screen is being pushed on top of this one.
+  final Animation<double> secondaryRouteAnimation;
+
+  ///  * `linearTransition` is whether to perform the transitions linearly.
+  ///    Used to precisely track back gesture drags.
+  final bool linearTransition;
+
+  @override
+  State<CupertinoPageTransition> createState() => _CupertinoPageTransitionState();
+}
+
+class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
+
+
+  // When this page is coming in to cover another page.
+  late Animation<Offset> _primaryPositionAnimation;
+  // When this page is becoming covered by another page.
+  late Animation<Offset> _secondaryPositionAnimation;
+  // Shadow of page which is coming in to cover another page.
+  late Animation<Decoration> _primaryShadowAnimation;
+  // Curve of primary page which is coming in to cover another page.
+  CurvedAnimation? _primaryPositionCurve;
+  // Curve of secondary page which is becoming covered by another page.
+  CurvedAnimation? _secondaryPositionCurve;
+  // Curve of primary page's shadow.
+  CurvedAnimation? _primaryShadowCurve;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupAnimation();
+  }
+
+  @override
+  void didUpdateWidget(covariant CupertinoPageTransition oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.primaryRouteAnimation != widget.primaryRouteAnimation
+    || oldWidget.secondaryRouteAnimation != widget.secondaryRouteAnimation
+    || oldWidget.child != widget.child || oldWidget.linearTransition != widget.linearTransition) {
+    _disposeCurve();
+    _setupAnimation();
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _disposeCurve();
+  }
+
+  void _disposeCurve() {
+    _primaryPositionCurve?.dispose();
+    _secondaryPositionCurve?.dispose();
+    _primaryShadowCurve?.dispose();
+  }
+
+  void _setupAnimation() {
+    _primaryPositionAnimation =
+           (widget.linearTransition
+             ? widget.primaryRouteAnimation
+             : _primaryPositionCurve = CurvedAnimation(
+                 parent: widget.primaryRouteAnimation,
+                 curve: Curves.fastEaseInToSlowEaseOut,
+                 reverseCurve: Curves.fastEaseInToSlowEaseOut.flipped,
+               )
+           ).drive(_kRightMiddleTween);
+       _secondaryPositionAnimation =
+           (widget.linearTransition
+             ? widget.secondaryRouteAnimation
+             : _secondaryPositionCurve = CurvedAnimation(
+                 parent: widget.secondaryRouteAnimation,
+                 curve: Curves.linearToEaseOut,
+                 reverseCurve: Curves.easeInToLinear,
+               )
+           ).drive(_kMiddleLeftTween);
+       _primaryShadowAnimation =
+           (widget.linearTransition
+             ? widget.primaryRouteAnimation
+             : _secondaryPositionCurve = CurvedAnimation(
+                 parent: widget.primaryRouteAnimation,
+                 curve: Curves.linearToEaseOut,
+               )
+           ).drive(_CupertinoEdgeShadowDecoration.kTween);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -517,7 +495,7 @@ class CupertinoPageTransition extends StatelessWidget {
         textDirection: textDirection,
         child: DecoratedBoxTransition(
           decoration: _primaryShadowAnimation,
-          child: child,
+          child: widget.child,
         ),
       ),
     );
@@ -528,44 +506,96 @@ class CupertinoPageTransition extends StatelessWidget {
 ///
 /// For example, used when creating a new calendar event by bringing in the next
 /// screen from the bottom.
-class CupertinoFullscreenDialogTransition extends StatelessWidget {
+class CupertinoFullscreenDialogTransition extends StatefulWidget {
   /// Creates an iOS-style transition used for summoning fullscreen dialogs.
   ///
+  const CupertinoFullscreenDialogTransition({
+    super.key,
+    required this.primaryRouteAnimation,
+    required this.secondaryRouteAnimation,
+    required this.child,
+    required this.linearTransition,
+  });
+
   ///  * `primaryRouteAnimation` is a linear route animation from 0.0 to 1.0
   ///    when this screen is being pushed.
+  final Animation<double> primaryRouteAnimation;
+
   ///  * `secondaryRouteAnimation` is a linear route animation from 0.0 to 1.0
   ///    when another screen is being pushed on top of this one.
-  ///  * `linearTransition` is whether to perform the secondary transition linearly.
+  final Animation<double> secondaryRouteAnimation;
+
+  ///  * `linearTransition` is whether to perform the transitions linearly.
   ///    Used to precisely track back gesture drags.
-  CupertinoFullscreenDialogTransition({
-    super.key,
-    required Animation<double> primaryRouteAnimation,
-    required Animation<double> secondaryRouteAnimation,
-    required this.child,
-    required bool linearTransition,
-  }) : _positionAnimation = CurvedAnimation(
-         parent: primaryRouteAnimation,
+  final bool linearTransition;
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  @override
+  State<CupertinoFullscreenDialogTransition> createState() => _CupertinoFullscreenDialogTransitionState();
+}
+
+class _CupertinoFullscreenDialogTransitionState extends State<CupertinoFullscreenDialogTransition> {
+  /// When this page is coming in to cover another page.
+  late Animation<Offset> _primaryPositionAnimation;
+  /// When this page is becoming covered by another page.
+  late Animation<Offset> _secondaryPositionAnimation;
+  /// Curve of primary page which is coming in to cover another page.
+  CurvedAnimation? _primaryPositionCurve;
+  /// Curve of secondary page which is becoming covered by another page.
+  CurvedAnimation? _secondaryPositionCurve;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupAnimation();
+  }
+
+  @override
+  void didUpdateWidget(covariant CupertinoFullscreenDialogTransition oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.primaryRouteAnimation != widget.primaryRouteAnimation ||
+        oldWidget.secondaryRouteAnimation != widget.secondaryRouteAnimation ||
+        oldWidget.child != widget.child ||
+        oldWidget.linearTransition != widget.linearTransition) {
+        _disposeCurve();
+        _setupAnimation();
+    }
+  }
+
+   @override
+  void dispose() {
+    _disposeCurve();
+    super.dispose();
+  }
+
+  void _disposeCurve() {
+    _primaryPositionCurve?.dispose();
+    _secondaryPositionCurve?.dispose();
+    _primaryPositionCurve = null;
+    _secondaryPositionCurve = null;
+  }
+
+  void _setupAnimation() {
+    _primaryPositionAnimation =  (_primaryPositionCurve = CurvedAnimation(
+         parent: widget.primaryRouteAnimation,
          curve: Curves.linearToEaseOut,
          // The curve must be flipped so that the reverse animation doesn't play
          // an ease-in curve, which iOS does not use.
          reverseCurve: Curves.linearToEaseOut.flipped,
-       ).drive(_kBottomUpTween),
+       )).drive(_kBottomUpTween);
        _secondaryPositionAnimation =
-           (linearTransition
-             ? secondaryRouteAnimation
-             : CurvedAnimation(
-                 parent: secondaryRouteAnimation,
+           (widget.linearTransition
+             ? widget.secondaryRouteAnimation
+             : _secondaryPositionCurve = CurvedAnimation(
+                 parent: widget.secondaryRouteAnimation,
                  curve: Curves.linearToEaseOut,
                  reverseCurve: Curves.easeInToLinear,
                )
            ).drive(_kMiddleLeftTween);
+  }
 
-  final Animation<Offset> _positionAnimation;
-  // When this page is becoming covered by another page.
-  final Animation<Offset> _secondaryPositionAnimation;
-
-  /// The widget below this widget in the tree.
-  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -576,8 +606,8 @@ class CupertinoFullscreenDialogTransition extends StatelessWidget {
       textDirection: textDirection,
       transformHitTests: false,
       child: SlideTransition(
-        position: _positionAnimation,
-        child: child,
+        position: _primaryPositionAnimation,
+        child: widget.child,
       ),
     );
   }
@@ -600,8 +630,6 @@ class _CupertinoBackGestureDetector<T> extends StatefulWidget {
     required this.enabledCallback,
     required this.onStartPopGesture,
     required this.child,
-    required this.getIsActive,
-    required this.getIsCurrent,
   });
 
   final Widget child;
@@ -609,9 +637,6 @@ class _CupertinoBackGestureDetector<T> extends StatefulWidget {
   final ValueGetter<bool> enabledCallback;
 
   final ValueGetter<_CupertinoBackGestureController<T>> onStartPopGesture;
-
-  final ValueGetter<bool> getIsActive;
-  final ValueGetter<bool> getIsCurrent;
 
   @override
   _CupertinoBackGestureDetectorState<T> createState() => _CupertinoBackGestureDetectorState<T>();

@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -2431,6 +2432,53 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)).dx, 390.0);
     });
   });
+
+  testWidgets(
+  // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
+  experimentalLeakTesting: LeakTesting.settings.withTracked(classes: <String>['CurvedAnimation']),
+  'Fullscreen route does not leak CurveAnimation', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return CupertinoButton(
+              child: const Text('Button'),
+              onPressed: () {
+                Navigator.push<void>(context, CupertinoPageRoute<void>(
+                  fullscreenDialog: true,
+                  builder: (BuildContext context) {
+                    return Column(
+                      children: <Widget>[
+                        const Placeholder(),
+                        CupertinoButton(
+                          child: const Text('Close'),
+                          onPressed: () {
+                            Navigator.pop<void>(context);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ));
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    // Enter animation.
+    await tester.tap(find.text('Button'));
+    await tester.pump();
+
+    await tester.pump(const Duration(milliseconds: 400));
+
+    // Exit animation
+    await tester.tap(find.text('Close'));
+    await tester.pump();
+
+    await tester.pump(const Duration(milliseconds: 400));
+  });
 }
 
 class MockNavigatorObserver extends NavigatorObserver {
@@ -2662,21 +2710,14 @@ class _TestPostRouteCancelState extends State<_TestPostRouteCancel> {
   Widget build(BuildContext context) {
     return CupertinoApp(
       initialRoute: 'home',
-      onGenerateRoute: (RouteSettings settings) {
-        return CupertinoPageRoute<void>(
-          settings: settings,
-          builder: (BuildContext context) {
-            switch (settings.name) {
-              case 'home':
-                return _buildHome(context);
-              case 'sub':
-                return _buildSub(context);
-              default:
-                throw UnimplementedError();
-            }
-          },
-        );
-      },
+      onGenerateRoute: (RouteSettings settings) => CupertinoPageRoute<void>(
+        settings: settings,
+        builder: (BuildContext context) => switch (settings.name) {
+          'home' => _buildHome(context),
+          'sub'  => _buildSub(context),
+          _ => throw UnimplementedError(),
+        },
+      ),
     );
   }
 }

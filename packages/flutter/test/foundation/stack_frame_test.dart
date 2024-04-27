@@ -41,12 +41,19 @@ void main() {
     );
   });
 
-  test('Parses web stack', () {
-    expect(
-      StackFrame.fromStackString(webStackTrace),
-      webStackTraceFrames,
-    );
-  });
+  test(
+    'Parses web stack',
+    // Wasm stacks are not reliable, even in debug mode, so the stack
+    // parser doesn't do the standard debug stack parsing this test is
+    // expecting here.
+    skip: kIsWasm, // [intended] See comments above
+    () {
+      expect(
+        StackFrame.fromStackString(webStackTrace),
+        webStackTraceFrames,
+      );
+    }
+  );
 
   test('Parses ...',  () {
     expect(

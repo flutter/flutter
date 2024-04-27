@@ -10,6 +10,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/project_migrator.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -83,7 +84,7 @@ class WebBuilder {
     ];
 
     final ProjectMigration migration = ProjectMigration(migrators);
-    migration.run();
+    await migration.run();
 
     final Status status = _logger.startProgress('Compiling $target for the Web...');
     final Stopwatch sw = Stopwatch()..start();
@@ -130,6 +131,14 @@ class WebBuilder {
       status.stop();
     }
 
+    // We don't print a size because the output directory can contain
+    // optional files not needed by the user.
+    globals.printStatus(
+      '${globals.terminal.successMark} '
+      'Built ${globals.fs.path.relative(outputDirectory.path)}',
+      color: TerminalColor.green,
+    );
+
     final String buildSettingsString = _buildEventAnalyticsSettings(
       configs: compilerConfigs,
     );
@@ -174,6 +183,17 @@ enum WebRendererMode implements CliEnum {
 
   /// Always use skwasm.
   skwasm;
+
+  factory WebRendererMode.fromCliOption(String? webRendererString, {required bool useWasm}) {
+    final WebRendererMode mode = webRendererString != null
+      ? WebRendererMode.values.byName(webRendererString)
+      : WebRendererMode.auto;
+    if (mode == WebRendererMode.auto && useWasm) {
+      // Wasm defaults to skwasm
+      return WebRendererMode.skwasm;
+    }
+    return mode;
+  }
 
   @override
   String get cliName => snakeCase(name, '-');

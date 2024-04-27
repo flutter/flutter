@@ -11,6 +11,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 
+import 'binding.dart';
 import 'debug.dart';
 import 'layer.dart';
 
@@ -331,8 +332,8 @@ class PaintingContext extends ClipContext {
   void _startRecording() {
     assert(!_isRecording);
     _currentLayer = PictureLayer(estimatedBounds);
-    _recorder = ui.PictureRecorder();
-    _canvas = Canvas(_recorder!);
+    _recorder = RendererBinding.instance.createPictureRecorder();
+    _canvas = RendererBinding.instance.createCanvas(_recorder!);
     _containerLayer.append(_currentLayer!);
   }
 
@@ -2205,24 +2206,24 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   }
   Constraints? _constraints;
 
-  /// Verify that the object's constraints are being met. Override
-  /// this function in a subclass to verify that your state matches
-  /// the constraints object. This function is only called in checked
-  /// mode and only when needsLayout is false. If the constraints are
-  /// not met, it should assert or throw an exception.
+  /// Verify that the object's constraints are being met. Override this function
+  /// in a subclass to verify that your state matches the constraints object.
+  /// This function is only called when asserts are enabled (i.e. in debug mode)
+  /// and only when needsLayout is false. If the constraints are not met, it
+  /// should assert or throw an exception.
   @protected
   void debugAssertDoesMeetConstraints();
 
-  /// When true, debugAssertDoesMeetConstraints() is currently
-  /// executing asserts for verifying the consistent behavior of
+  /// When true, a debug method ([debugAssertDoesMeetConstraints], for instance)
+  /// is currently executing asserts for verifying the consistent behavior of
   /// intrinsic dimensions methods.
   ///
-  /// This should only be set by debugAssertDoesMeetConstraints()
-  /// implementations. It is used by tests to selectively ignore
-  /// custom layout callbacks. It should not be set outside of
-  /// debugAssertDoesMeetConstraints(), and should not be checked in
-  /// release mode (where it will always be false).
+  /// This is typically set by framework debug methods. It is read by tests to
+  /// selectively ignore custom layout callbacks. It should not be set outside of
+  /// intrinsic-checking debug methods, and should not be checked in release mode
+  /// (where it will always be false).
   static bool debugCheckingIntrinsics = false;
+
   bool _debugSubtreeRelayoutRootAlreadyMarkedNeedsLayout() {
     if (_relayoutBoundary == null) {
       // We don't know where our relayout boundary is yet.
