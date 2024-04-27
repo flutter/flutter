@@ -319,7 +319,18 @@ class RestorationManager extends ChangeNotifier {
       return null;
     }
     final ByteData encoded = data.buffer.asByteData(data.offsetInBytes, data.lengthInBytes);
-    return const StandardMessageCodec().decodeMessage(encoded) as Map<Object?, Object?>?;
+    Map<Object?, Object?>? decodedMessage;
+    try {
+      decodedMessage = const StandardMessageCodec().decodeMessage(encoded) as Map<Object?, Object?>?;
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'services library',
+        context: ErrorDescription('during restoration data decoding from the engine'),
+      ));
+    }
+    return decodedMessage;
   }
 
   Uint8List _encodeRestorationData(Map<Object?, Object?> data) {
