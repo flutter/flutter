@@ -3604,17 +3604,6 @@ targets:
         ]
       task_name: flutter_gallery_macos__compile
 
-  - name: Mac_benchmark flutter_gallery_macos__start_up
-    presubmit: false
-    recipe: devicelab/devicelab_drone
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
-        ]
-      task_name: flutter_gallery_macos__start_up
-
   - name: Mac flutter_packaging_test
     recipe: packaging/packaging
     presubmit: false
