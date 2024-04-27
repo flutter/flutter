@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This constant is in its own library so that the test exemption bot knows
+// The constant below is in its own library so that the test exemption bot knows
 // that changing a pin does not require a new test. These pins are already
 // tested as part of the analysis shard.
+
+// Pub packages are rolled automatically by the flutter-pub-roller-bot.
+// For the latest status, see:
+//   https://github.com/pulls?q=author%3Aflutter-pub-roller-bot
 
 /// Map from package name to package version, used to artificially pin a pub
 /// package version in cases when upgrading to the latest breaks Flutter.
@@ -26,5 +30,4 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'path_provider_android':
       '2.2.1', // https://github.com/flutter/flutter/issues/140796
   'camera_android': '0.10.8+17', // https://github.com/flutter/flutter/issues/146004
-  'frontend_server_client': '3.2.0', // https://github.com/flutter/flutter/issues/146164
 };

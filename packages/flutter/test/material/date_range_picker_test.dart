@@ -1576,7 +1576,7 @@ void main() {
         expect(appBar.actionsIconTheme, iconTheme);
         expect(appBar.elevation, null);
         expect(appBar.scrolledUnderElevation, null);
-        expect(appBar.backgroundColor, null);
+        expect(appBar.backgroundColor, theme.colorScheme.primary);
       });
     });
 

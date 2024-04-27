@@ -350,7 +350,7 @@ void main() {
             ..path(
               style: PaintingStyle.fill,
               color: theme.colorScheme.surfaceContainerHighest,
-            )
+            ),
           );
         });
 
@@ -409,7 +409,7 @@ void main() {
             ..path(
               style: PaintingStyle.fill,
               color: theme.colorScheme.onSurface.withOpacity(0.04),
-            )
+            ),
           );
         });
 
@@ -470,7 +470,7 @@ void main() {
             ..path(
               style: PaintingStyle.fill,
               color: Color.alphaBlend(theme.hoverColor, theme.colorScheme.surfaceContainerHighest),
-            )
+            ),
           );
         });
 
@@ -530,7 +530,32 @@ void main() {
             ..path(
               style: PaintingStyle.fill,
               color: theme.colorScheme.surfaceContainerHighest,
-            )
+            ),
+          );
+        });
+
+        testWidgets('container has correct color when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/146573.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          final Color focusColor = theme.colorScheme.surfaceContainerHighest;
+          final Color hoverColor = theme.hoverColor;
+          expect(findBorderPainter(), paints
+            ..path(
+              style: PaintingStyle.fill,
+              color: Color.alphaBlend(hoverColor, focusColor),
+            ),
           );
         });
 
@@ -607,7 +632,7 @@ void main() {
             ..path(
               style: PaintingStyle.fill,
               color: theme.colorScheme.surfaceContainerHighest,
-            )
+            ),
           );
         });
 
@@ -729,7 +754,7 @@ void main() {
           expect(findBorderPainter(), paints
             ..path(
               style: PaintingStyle.stroke,
-            )
+            ),
           );
         });
 
@@ -784,7 +809,7 @@ void main() {
           expect(findBorderPainter(), paints
             ..path(
               style: PaintingStyle.stroke,
-            )
+            ),
           );
         });
 
@@ -840,7 +865,7 @@ void main() {
           expect(findBorderPainter(), paints
             ..path(
               style: PaintingStyle.stroke,
-            )
+            ),
           );
         });
 
@@ -896,7 +921,7 @@ void main() {
           expect(findBorderPainter(), paints
             ..path(
               style: PaintingStyle.stroke,
-            )
+            ),
           );
         });
 
@@ -969,7 +994,7 @@ void main() {
           expect(findBorderPainter(), paints
             ..path(
               style: PaintingStyle.stroke,
-            )
+            ),
           );
         });
 
@@ -3263,7 +3288,7 @@ void main() {
             );
 
             // Label and input are horizontally aligned despite `alignLabelWithHint` being false (default value).
-            // The reason is that `alignLabelWithHint` was initially intended for vertical alignement only.
+            // The reason is that `alignLabelWithHint` was initially intended for vertical alignment only.
             // See https://github.com/flutter/flutter/pull/24993 which introduced `alignLabelWithHint` parameter.
             // See https://github.com/flutter/flutter/pull/115409 which used `alignLabelWithHint` for
             // horizontal alignment in outlined text field.
@@ -3881,6 +3906,23 @@ void main() {
         expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + errorHeight * numberOfLines, 0.25));
       });
 
+      testWidgets('Error height is not limited by default', (WidgetTester tester) async {
+        const int numberOfLines = 3;
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(
+              labelText: 'label',
+              errorText: threeLines,
+              filled: true,
+            ),
+          ),
+        );
+
+        final Rect errorRect = tester.getRect(find.text(threeLines));
+        expect(errorRect.height, closeTo(errorHeight * numberOfLines, 0.25));
+        expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + errorHeight * numberOfLines, 0.25));
+      });
+
       testWidgets('Helper height grows to accommodate helper text', (WidgetTester tester) async {
         const int maxLines = 3;
         await tester.pumpWidget(
@@ -3932,6 +3974,23 @@ void main() {
         );
 
         final Rect helperRect = tester.getRect(find.text(twoLines));
+        expect(helperRect.height, closeTo(helperHeight * numberOfLines, 0.25));
+        expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + helperHeight * numberOfLines, 0.25));
+      });
+
+      testWidgets('Helper height is not limited by default', (WidgetTester tester) async {
+        const int numberOfLines = 3;
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(
+              labelText: 'label',
+              helperText: threeLines,
+              filled: true,
+            ),
+          ),
+        );
+
+        final Rect helperRect = tester.getRect(find.text(threeLines));
         expect(helperRect.height, closeTo(helperHeight * numberOfLines, 0.25));
         expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + helperHeight * numberOfLines, 0.25));
       });
