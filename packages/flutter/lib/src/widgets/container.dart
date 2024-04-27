@@ -363,8 +363,9 @@ class Container extends StatelessWidget {
 
   EdgeInsetsGeometry? get _paddingIncludingDecoration {
     return switch ((padding, decoration?.padding)) {
-      (null, final EdgeInsets? padding) || (final EdgeInsets? padding, null) => padding,
-      _ => padding!.add(decoration!.padding),
+      (null, final EdgeInsetsGeometry? padding) => padding,
+      (final EdgeInsetsGeometry? padding, null) => padding,
+      (_) => padding!.add(decoration!.padding),
     };
   }
 
