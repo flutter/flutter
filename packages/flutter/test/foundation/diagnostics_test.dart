@@ -2015,7 +2015,7 @@ void main() {
           ),
           MessageProperty(
             'diagnosis',
-            'insufficient data to draw conclusion (less than five repaints)',
+            'insufficient data to draw conclusion (fewer than five repaints)',
             style: propertyStyle,
           ),
         ],

@@ -88,7 +88,7 @@ void main() {
         '     layer: OffsetLayer#00000 DETACHED\n'
         '     size: Size(800.0, 600.0)\n'
         '     metrics: 0.0% useful (1 bad vs 0 good)\n'
-        '     diagnosis: insufficient data to draw conclusion (less than five\n'
+        '     diagnosis: insufficient data to draw conclusion (fewer than five\n'
         '       repaints)\n'
         '   A RenderObject that still has dirty compositing bits cannot be\n'
         '   painted because this indicates that the tree has not yet been\n'
