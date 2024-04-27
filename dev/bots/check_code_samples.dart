@@ -317,7 +317,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/selectable_region/selectable_region.0_test.dart',
   'examples/api/test/material/text_field/text_field.2_test.dart',
   'examples/api/test/material/text_field/text_field.1_test.dart',
-  'examples/api/test/material/button_style/button_style.0_test.dart',
   'examples/api/test/material/range_slider/range_slider.0_test.dart',
   'examples/api/test/material/selection_container/selection_container_disabled.0_test.dart',
   'examples/api/test/material/selection_container/selection_container.0_test.dart',
