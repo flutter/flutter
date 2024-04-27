@@ -927,7 +927,6 @@ class _TestAnimatedPhysicalModelWidgetState extends _TestAnimatedWidgetState {
       duration: duration,
       onEnd: widget.callback,
       color: toggle ? Colors.red : Colors.green,
-      elevation: 0,
       shadowColor: Colors.blue,
       child: child,
     );
