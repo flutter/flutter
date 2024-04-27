@@ -403,7 +403,14 @@ void main() {
   // Ensures that the option with the given label has a given background color
   // if given, or no background if color is null.
   void checkOptionHighlight(WidgetTester tester, String label, Color? color) {
-    final RenderBox renderBox = tester.renderObject<RenderBox>(find.ancestor(matching: find.byType(Container), of: find.text(label)));
+    final Key key = color == null ? const Key('option padding') : const Key('option color');
+    print(key);
+    final RenderBox renderBox = tester.renderObject<RenderBox>(
+      find.ancestor(
+        of: find.text(label),
+        matching: find.byKey(key).last,
+      ),
+    );
     if (color != null) {
       // Check to see that the container is painted with the highlighted background color.
       expect(renderBox, paints..rect(color: color));
