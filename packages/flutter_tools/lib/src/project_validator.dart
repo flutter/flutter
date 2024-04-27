@@ -63,44 +63,48 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
       flutterRoot: Cache.flutterRoot!,
       fs: fileSystem,
     );
-    final Map<String, String> result = <String, String>{
-      'FlutterProject.directory':        _toJsonValue(project.directory.absolute.path),
-      'FlutterProject.metadataFile':     _toJsonValue(project.metadataFile.absolute.path),
-      'FlutterProject.android.exists':   _toJsonValue(project.android.existsSync()),
-      'FlutterProject.ios.exists':       _toJsonValue(project.ios.exists),
-      'FlutterProject.web.exists':       _toJsonValue(project.web.existsSync()),
-      'FlutterProject.macos.exists':     _toJsonValue(project.macos.existsSync()),
-      'FlutterProject.linux.exists':     _toJsonValue(project.linux.existsSync()),
-      'FlutterProject.windows.exists':   _toJsonValue(project.windows.existsSync()),
-      'FlutterProject.fuchsia.exists':   _toJsonValue(project.fuchsia.existsSync()),
+    final Map<String, Object?> result = <String, Object?>{
+      'FlutterProject.directory':         project.directory.absolute.path,
+      'FlutterProject.metadataFile':      project.metadataFile.absolute.path,
+      'FlutterProject.android.exists':    project.android.existsSync(),
+      'FlutterProject.ios.exists':        project.ios.exists,
+      'FlutterProject.web.exists':        project.web.existsSync(),
+      'FlutterProject.macos.exists':      project.macos.existsSync(),
+      'FlutterProject.linux.exists':      project.linux.existsSync(),
+      'FlutterProject.windows.exists':    project.windows.existsSync(),
+      'FlutterProject.fuchsia.exists':    project.fuchsia.existsSync(),
 
-      'FlutterProject.android.isKotlin': _toJsonValue(project.android.isKotlin),
-      'FlutterProject.ios.isSwift':      _toJsonValue(project.ios.isSwift),
+      'FlutterProject.android.isKotlin':  project.android.isKotlin,
+      'FlutterProject.ios.isSwift':       project.ios.isSwift,
 
-      'FlutterProject.isModule':         _toJsonValue(project.isModule),
-      'FlutterProject.isPlugin':         _toJsonValue(project.isPlugin),
+      'FlutterProject.isModule':          project.isModule,
+      'FlutterProject.isPlugin':          project.isPlugin,
 
-      'FlutterProject.manifest.appname': _toJsonValue(project.manifest.appName),
+      'FlutterProject.manifest.appname':  project.manifest.appName,
 
       // FlutterVersion
-      'FlutterVersion.frameworkRevision': _toJsonValue(version.frameworkRevision),
+      'FlutterVersion.frameworkRevision': version.frameworkRevision,
 
       // Platform
-      'Platform.operatingSystem':        _toJsonValue(platform.operatingSystem),
-      'Platform.isAndroid':              _toJsonValue(platform.isAndroid),
-      'Platform.isIOS':                  _toJsonValue(platform.isIOS),
-      'Platform.isWindows':              _toJsonValue(platform.isWindows),
-      'Platform.isMacOS':                _toJsonValue(platform.isMacOS),
-      'Platform.isFuchsia':              _toJsonValue(platform.isFuchsia),
-      'Platform.pathSeparator':          _toJsonValue(platform.pathSeparator),
+      'Platform.operatingSystem':         platform.operatingSystem,
+      'Platform.isAndroid':               platform.isAndroid,
+      'Platform.isIOS':                   platform.isIOS,
+      'Platform.isWindows':               platform.isWindows,
+      'Platform.isMacOS':                 platform.isMacOS,
+      'Platform.isFuchsia':               platform.isFuchsia,
+      'Platform.pathSeparator':           platform.pathSeparator,
 
       // Cache
-      'Cache.flutterRoot':               _toJsonValue(Cache.flutterRoot),
+      'Cache.flutterRoot':                Cache.flutterRoot,
     };
 
     return <ProjectValidatorResult>[
-      for (final MapEntry<String, String>(: String key, : String value) in result.entries)
-        ProjectValidatorResult(name: key, value: value, status: StatusProjectValidator.info)
+      for (final String key in result.keys)
+        ProjectValidatorResult(
+          name: key,
+          value: _toJsonValue(result[key]),
+          status: StatusProjectValidator.info,
+        ),
     ];
   }
 
