@@ -562,13 +562,11 @@ class FloatingLabelAlignment {
   }
 
   static String _stringify(double x) {
-    if (x == -1.0) {
-      return 'FloatingLabelAlignment.start';
-    }
-    if (x == 0.0) {
-      return 'FloatingLabelAlignment.center';
-    }
-    return 'FloatingLabelAlignment(x: ${x.toStringAsFixed(1)})';
+    return switch (x) {
+     -1.0 => 'FloatingLabelAlignment.start',
+      0.0 => 'FloatingLabelAlignment.center',
+      _ => 'FloatingLabelAlignment(x: ${x.toStringAsFixed(1)})',
+    };
   }
 
   @override
@@ -1952,7 +1950,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getHoverColor(ThemeData themeData) {
-    if (decoration.filled == null || !decoration.filled! || isFocused || !decoration.enabled) {
+    if (decoration.filled == null || !decoration.filled! || !decoration.enabled) {
       return Colors.transparent;
     }
     return decoration.hoverColor ?? themeData.inputDecorationTheme.hoverColor ?? themeData.hoverColor;
@@ -2785,8 +2783,7 @@ class InputDecoration {
 
   /// The maximum number of lines the [helperText] can occupy.
   ///
-  /// Defaults to null, which means that the [helperText] will be limited
-  /// to a single line with [TextOverflow.ellipsis].
+  /// Defaults to null, which means that the [helperText] is not limited.
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the helper.
@@ -2875,8 +2872,7 @@ class InputDecoration {
 
   /// The maximum number of lines the [errorText] can occupy.
   ///
-  /// Defaults to null, which means that the [errorText] will be limited
-  /// to a single line with [TextOverflow.ellipsis].
+  /// Defaults to null, which means that the [errorText] is not limited.
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the error.
