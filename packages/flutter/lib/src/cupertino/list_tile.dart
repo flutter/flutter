@@ -251,33 +251,27 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle titleTextStyle =
-        widget._type == _CupertinoListTileType.base || widget.subtitle == null
-            ? CupertinoTheme.of(context).textTheme.textStyle
-            : CupertinoTheme.of(context).textTheme.textStyle.merge(
-                  TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: widget.leading == null ? _kNotchedTitleWithSubtitleFontSize : null,
-                  ),
-                );
+    final TextStyle textStyle = CupertinoTheme.of(context).textTheme.textStyle;
+    final CupertinoDynamicColor color = CupertinoColors.secondaryLabel.resolveFrom(context);
 
-    final TextStyle subtitleTextStyle = widget._type == _CupertinoListTileType.base
-        ? CupertinoTheme.of(context).textTheme.textStyle.merge(
-              TextStyle(
-                fontSize: _kSubtitleFontSize,
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-              ),
-            )
-        : CupertinoTheme.of(context).textTheme.textStyle.merge(
-              TextStyle(
-                fontSize: _kNotchedSubtitleFontSize,
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-              ),
-            );
+    final TextStyle titleTextStyle = switch (widget._type) {
+      _CupertinoListTileType.notched when widget.subtitle != null => textStyle.merge(TextStyle(
+        fontWeight: FontWeight.w600,
+        fontSize: widget.leading == null ? _kNotchedTitleWithSubtitleFontSize : null,
+      )),
+      _CupertinoListTileType.base || _CupertinoListTileType.notched => textStyle,
+    };
+
+    final TextStyle subtitleTextStyle = textStyle.merge(TextStyle(
+      fontSize: switch (widget._type) {
+        _CupertinoListTileType.base => _kSubtitleFontSize,
+        _CupertinoListTileType.notched => _kNotchedSubtitleFontSize,
+      },
+      color: color,
+    ));
 
     final TextStyle? additionalInfoTextStyle = widget.additionalInfo != null
-        ? CupertinoTheme.of(context).textTheme.textStyle.merge(
-            TextStyle(color: CupertinoColors.secondaryLabel.resolveFrom(context)))
+        ? textStyle.merge(TextStyle(color: color))
         : null;
 
     final Widget title = DefaultTextStyle(

@@ -822,24 +822,18 @@ class ToggleButtons extends StatelessWidget {
       );
     });
 
-    if (direction == Axis.vertical) {
-      return IntrinsicWidth(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          verticalDirection: verticalDirection,
-          children: buttons,
-        ),
-      );
-    }
-
-    return IntrinsicHeight(
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: buttons,
-      ),
+    final Widget child = Flex(
+      direction: direction,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      verticalDirection: verticalDirection,
+      children: buttons,
     );
+
+    return switch (direction) {
+      Axis.horizontal => IntrinsicWidth(child: child),
+      Axis.vertical   => IntrinsicHeight(child: child),
+    };
   }
 
   @override
