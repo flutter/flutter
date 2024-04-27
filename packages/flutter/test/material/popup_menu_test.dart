@@ -1669,8 +1669,17 @@ void main() {
     await tester.tap(find.byKey(popupMenuButtonKey));
     await tester.pumpAndSettle();
 
-    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 0')).padding, const EdgeInsets.symmetric(horizontal: 16.0));
-    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 1')).padding, const EdgeInsets.symmetric(horizontal: 16.0));
+    EdgeInsetsGeometry paddingFor(String text) {
+      return tester.widget<Padding>(
+        find.ancestor(
+          of: find.widgetWithText(Align, 'Item 0'),
+          matching: find.byKey(const Key('menu item padding')),
+        ),
+      ).padding;
+    }
+
+    expect(paddingFor('Item 0'), const EdgeInsets.symmetric(horizontal: 16.0));
+    expect(paddingFor('Item 1'), const EdgeInsets.symmetric(horizontal: 16.0));
   });
 
   testWidgets('PopupMenuItem custom padding', (WidgetTester tester) async {
