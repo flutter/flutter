@@ -1998,7 +1998,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     this.shape = BoxShape.rectangle,
     this.clipBehavior = Clip.none,
     this.borderRadius = BorderRadius.zero,
-    required this.elevation,
+    this.elevation = 0.0,
     required this.color,
     this.animateColor = true,
     required this.shadowColor,
