@@ -2090,7 +2090,7 @@ void main() {
         '  [1.0, 0.0, 0.0, 1.0]\n'
         '--- example property at max length --\n'
         'diagnosis: insufficient data to draw\n'
-        '  conclusion (less than five repaints)\n'
+        '  conclusion (fewer than five repaints)\n'
         '════════════════════════════════════════\n',
       ),
     );
@@ -2164,7 +2164,7 @@ void main() {
         '   [1.0, 0.0, 0.0, 1.0]\n'
         '   --- example property at max length --\n'
         '   diagnosis: insufficient data to draw\n'
-        '   conclusion (less than five repaints)\n',
+        '   conclusion (fewer than five repaints)\n',
       ),
     );
 
@@ -2238,7 +2238,7 @@ void main() {
         '--- example property at max length --\n'
         'diagnosis:\n'
         '  insufficient data to draw conclusion\n'
-        '  (less than five repaints)\n'
+        '  (fewer than five repaints)\n'
         '════════════════════════════════════════\n',
       ),
     );
