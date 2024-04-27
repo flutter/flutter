@@ -372,7 +372,10 @@ class CupertinoListSection extends StatelessWidget {
       padding: EdgeInsetsDirectional.only(start: dividerMargin + additionalDividerMargin),
       child: ColoredBox(
         color: dividerColor,
-        child: SizedBox(width: double.infinity, height: dividerHeight),
+        child: LimitedBox(
+          maxWidth: 0,
+          child: SizedBox(width: double.infinity, height: dividerHeight),
+        ),
       ),
     );
 
