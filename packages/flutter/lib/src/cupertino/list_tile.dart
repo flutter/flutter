@@ -329,15 +329,17 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
       _CupertinoListTileType.notched => _kNotchedMinHeightWithoutLeading,
     };
 
-    Widget child = ConstrainedBox(
+    final Widget child = Container(
       constraints: BoxConstraints(minWidth: double.infinity, minHeight: minHeight),
+      color: backgroundColor,
       child: Padding(
         padding: padding,
         child: Row(
           children: <Widget>[
             if (widget.leading != null) ...<Widget>[
-              SizedBox.fromSize(
-                size: Size.square(widget.leadingSize),
+              SizedBox(
+                width: widget.leadingSize,
+                height: widget.leadingSize,
                 child: Center(
                   child: widget.leading,
                 ),
@@ -368,9 +370,6 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
         ),
       ),
     );
-    if (backgroundColor != null) {
-      child = ColoredBox(color: backgroundColor);
-    }
 
     if (widget.onTap == null) {
       return child;

@@ -359,24 +359,17 @@ class CupertinoListSection extends StatelessWidget {
 
     // Long divider is used for wrapping the top and bottom of rows.
     // Only used in CupertinoListSectionType.base mode.
-    final Widget longDivider = ColoredBox(
+    final Widget longDivider = Container(
       color: dividerColor,
-      child: LimitedBox(
-        maxWidth: 0,
-        child: SizedBox(width: double.infinity, height: dividerHeight),
-      ),
+      height: dividerHeight,
     );
 
     // Short divider is used between rows.
-    final Widget shortDivider = Padding(
-      padding: EdgeInsetsDirectional.only(start: dividerMargin + additionalDividerMargin),
-      child: ColoredBox(
-        color: dividerColor,
-        child: LimitedBox(
-          maxWidth: 0,
-          child: SizedBox(width: double.infinity, height: dividerHeight),
-        ),
-      ),
+    final Widget shortDivider = Container(
+      margin: EdgeInsetsDirectional.only(
+          start: dividerMargin + additionalDividerMargin),
+      color: dividerColor,
+      height: dividerHeight,
     );
 
     TextStyle style = CupertinoTheme.of(context).textTheme.textStyle;

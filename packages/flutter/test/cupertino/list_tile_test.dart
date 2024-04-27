@@ -113,9 +113,9 @@ void main() {
       ),
     );
 
-    // ColoredBox inside CupertinoListTile is the second one in row.
-    final ColoredBox coloredBox = tester.widgetList<ColoredBox>(find.byType(ColoredBox)).elementAt(1);
-    expect(coloredBox.color, backgroundColor);
+    // Container inside CupertinoListTile is the second one in row.
+    final Container container = tester.widgetList<Container>(find.byType(Container)).elementAt(1);
+    expect(container.color, backgroundColor);
   });
 
   testWidgets('does not change backgroundColor when tapped if onTap is not provided', (WidgetTester tester) async {
@@ -143,9 +143,9 @@ void main() {
     await tester.tap(find.byType(CupertinoListTile));
     await tester.pump();
 
-    // ColoredBox inside CupertinoListTile is the second one in row.
-    final ColoredBox coloredBox = tester.widgetList<ColoredBox>(find.byType(ColoredBox)).elementAt(1);
-    expect(coloredBox.color, backgroundColor);
+    // Container inside CupertinoListTile is the second one in row.
+    final Container container = tester.widgetList<Container>(find.byType(Container)).elementAt(1);
+    expect(container.color, backgroundColor);
   });
 
   testWidgets('changes backgroundColor when tapped if onTap is provided', (WidgetTester tester) async {
@@ -171,17 +171,17 @@ void main() {
       ),
     );
 
-    // ColoredBox inside CupertinoListTile is the second one in row.
-    ColoredBox coloredBox = tester.widgetList<ColoredBox>(find.byType(ColoredBox)).elementAt(1);
-    expect(coloredBox.color, backgroundColor);
+    // Container inside CupertinoListTile is the second one in row.
+    Container container = tester.widgetList<Container>(find.byType(Container)).elementAt(1);
+    expect(container.color, backgroundColor);
 
     // Pump only one frame so the color change persists.
     await tester.tap(find.byType(CupertinoListTile));
     await tester.pump();
 
-    // ColoredBox inside CupertinoListTile is the second one in row.
-    coloredBox = tester.widgetList<ColoredBox>(find.byType(ColoredBox)).elementAt(1);
-    expect(coloredBox.color, backgroundColorActivated);
+    // Container inside CupertinoListTile is the second one in row.
+    container = tester.widgetList<Container>(find.byType(Container)).elementAt(1);
+    expect(container.color, backgroundColorActivated);
 
     // Pump the rest of the frames to complete the test.
     await tester.pumpAndSettle();
@@ -204,6 +204,7 @@ void main() {
       ),
     );
 
+    // Container inside CupertinoListTile is the second one in row.
     expect(find.byType(GestureDetector), findsNothing);
   });
 
@@ -225,7 +226,7 @@ void main() {
       ),
     );
 
-    // ColoredBox inside CupertinoListTile is the second one in row.
+    // Container inside CupertinoListTile is the second one in row.
     expect(find.byType(GestureDetector), findsOneWidget);
   });
 
@@ -272,9 +273,9 @@ void main() {
     await tester.tap(find.byType(CupertinoButton));
     await tester.pumpAndSettle();
 
-    // ColoredBox inside CupertinoListTile is the second one in row.
-    final ColoredBox coloredBox = tester.widget<ColoredBox>(find.byType(ColoredBox));
-    expect(coloredBox.color, backgroundColor);
+    // Container inside CupertinoListTile is the second one in row.
+    final Container container = tester.widget<Container>(find.byType(Container));
+    expect(container.color, backgroundColor);
   });
 
   group('alignment of widgets for left-to-right', () {
