@@ -1081,28 +1081,30 @@ void main() {
 
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
-        TestSemantics.rootChild(
+        TestSemantics(
+          id: 1,
+          textDirection: TextDirection.ltr,
           children: <TestSemantics>[
             TestSemantics(
+              id: 7,
               children: <TestSemantics>[
                 TestSemantics(
-                  label: 'Dialog',
-                  textDirection: TextDirection.ltr,
+                  id: 8,
                   flags: <SemanticsFlag>[
                     SemanticsFlag.scopesRoute,
                     SemanticsFlag.namesRoute,
                   ],
+                  label: 'Dialog',
+                  textDirection: TextDirection.ltr,
                   children: <TestSemantics>[
                     TestSemantics(
+                      id: 9,
+                      flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                       children: <TestSemantics>[
                         TestSemantics(
-                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              label: 'BottomSheet',
-                              textDirection: TextDirection.ltr,
-                            ),
-                          ],
+                          id: 10,
+                          label: 'BottomSheet',
+                          textDirection: TextDirection.ltr,
                         ),
                       ],
                     ),
@@ -1111,8 +1113,10 @@ void main() {
               ],
             ),
             TestSemantics(
+              id: 5,
               children: <TestSemantics>[
                 TestSemantics(
+                  id: 6,
                   actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.dismiss],
                   label: 'Scrim',
                   textDirection: TextDirection.ltr,
