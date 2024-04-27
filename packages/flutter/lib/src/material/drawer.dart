@@ -701,6 +701,11 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           platformHasBackButton = false;
       }
 
+      Widget drawerScrim = const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand());
+      if (_scrimColorTween.evaluate(_controller) case final Color color) {
+        drawerScrim = ColoredBox(color: color, child: drawerScrim);
+      }
+
       final Widget child = _DrawerControllerScope(
         controller: widget,
         child: RepaintBoundary(
@@ -714,10 +719,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                     onTap: close,
                     child: Semantics(
                       label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-                      child: DecoratedBox( // The drawer's "scrim"
-                        decoration: BoxDecoration(color: _scrimColorTween.evaluate(_controller)),
-                        child: const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()),
-                      ),
+                      child: drawerScrim,
                     ),
                   ),
                 ),
