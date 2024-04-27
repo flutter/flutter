@@ -180,38 +180,6 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
   final Iterable<T> options;
   final double maxOptionsHeight;
 
-  Widget itemBuilder(BuildContext context, int index) {
-    final T option = options.elementAt(index);
-    return InkWell(
-      onTap: () {
-        onSelected(option);
-      },
-      child: Builder(
-        builder: (BuildContext context) {
-          final Widget widget = Padding(
-            key: const Key('option padding'),
-            padding: const EdgeInsets.all(16.0),
-            child: Text(displayStringForOption(option)),
-          );
-          if (AutocompleteHighlightedOption.of(context) != index) {
-            return widget;
-          }
-
-          SchedulerBinding.instance.addPostFrameCallback(
-            (Duration timeStamp) => Scrollable.ensureVisible(context, alignment: 0.5),
-            debugLabel: 'AutocompleteOptions.ensureVisible',
-          );
-
-          return ColoredBox(
-            key: const Key('option padding'),
-            color: Theme.of(context).focusColor,
-            child: widget,
-          );
-        }
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final AlignmentDirectional optionsAlignment = switch (openDirection) {
@@ -228,7 +196,29 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
             padding: EdgeInsets.zero,
             shrinkWrap: true,
             itemCount: options.length,
-            itemBuilder: itemBuilder,
+            itemBuilder: (BuildContext context, int index) {
+              final T option = options.elementAt(index);
+              return InkWell(
+                onTap: () {
+                  onSelected(option);
+                },
+                child: Builder(
+                  builder: (BuildContext context) {
+                    final bool highlight = AutocompleteHighlightedOption.of(context) == index;
+                    if (highlight) {
+                      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+                        Scrollable.ensureVisible(context, alignment: 0.5);
+                      }, debugLabel: 'AutocompleteOptions.ensureVisible');
+                    }
+                    return Container(
+                      color: highlight ? Theme.of(context).focusColor : null,
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(displayStringForOption(option)),
+                    );
+                  }
+                ),
+              );
+            },
           ),
         ),
       ),
