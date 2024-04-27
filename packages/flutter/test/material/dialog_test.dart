@@ -1721,22 +1721,29 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 4,
-                      label: 'title',
-                      textDirection: TextDirection.ltr,
-                    ),
-                    TestSemantics(
-                      id: 5,
-                      label: 'content',
-                      textDirection: TextDirection.ltr,
-                    ),
-                    TestSemantics(
-                      id: 6,
-                      flags: <SemanticsFlag>[
-                        SemanticsFlag.isButton,
-                        SemanticsFlag.hasEnabledState,
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 5,
+                          label: 'title',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        // The content semantics does not merge into the semantics
+                        // node 4.
+                        TestSemantics(
+                          id: 6,
+                          label: 'content',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          id: 7,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isButton,
+                            SemanticsFlag.hasEnabledState,
+                          ],
+                          label: 'action',
+                          textDirection: TextDirection.ltr,
+                        ),
                       ],
-                      label: 'action',
-                      textDirection: TextDirection.ltr,
                     ),
                   ],
                 ),
