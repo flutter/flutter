@@ -98,12 +98,10 @@ void main() {
     );
   }
 
-  Finder findStaticChildColor(WidgetTester tester) {
+  Finder findStaticChildDecoration(WidgetTester tester) {
     return find.descendant(
       of: findStatic(),
-      matching: find.byWidgetPredicate(
-        (Widget widget) => widget is ColoredBox && widget.color != CupertinoColors.activeOrange,
-      ),
+      matching: find.byType(DecoratedBox),
     );
   }
 
@@ -494,7 +492,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(findStatic(), findsOneWidget);
 
-      expect(findStaticChildColor(tester), findsNWidgets(1));
+      expect(findStaticChildDecoration(tester), findsNWidgets(1));
 
       // Close the CupertinoContextMenu.
       await tester.tapAt(const Offset(1.0, 1.0));
@@ -526,7 +524,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(findStatic(), findsOneWidget);
 
-      expect(findStaticChildColor(tester), findsNWidgets(2));
+      expect(findStaticChildDecoration(tester), findsNWidgets(3));
     });
 
     testWidgets('Can close CupertinoContextMenu by background tap', (WidgetTester tester) async {

@@ -120,28 +120,33 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
           ),
           child: Semantics(
             button: true,
-            child: ColoredBox(
-              color: _isPressed
+            child: Container(
+              decoration: BoxDecoration(
+                color: _isPressed
                   ? CupertinoDynamicColor.resolve(_kBackgroundColorPressed, context)
                   : CupertinoDynamicColor.resolve(_kBackgroundColor, context),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(15.5, 8.0, 17.5, 8.0),
-                child: DefaultTextStyle(
-                  style: _textStyle,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Flexible(
-                        child: widget.child,
+              ),
+              padding: const EdgeInsets.only(
+                top: 8,
+                bottom: 8,
+                left: 15.5,
+                right: 17.5,
+              ),
+              child: DefaultTextStyle(
+                style: _textStyle,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Flexible(
+                      child: widget.child,
+                    ),
+                    if (widget.trailingIcon != null)
+                      Icon(
+                        widget.trailingIcon,
+                        color: _textStyle.color,
+                        size: 21.0,
                       ),
-                      if (widget.trailingIcon != null)
-                        Icon(
-                          widget.trailingIcon,
-                          color: _textStyle.color,
-                          size: 21.0,
-                        ),
-                    ],
-                  ),
+                  ],
                 ),
               ),
             ),
