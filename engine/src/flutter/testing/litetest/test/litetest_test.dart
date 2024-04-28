@@ -109,7 +109,7 @@ Test "Test3": Passed
     expect(output.contains('Test "Test2": Started'), true);
     expect(output.contains('Test "Test2": Failed'), true);
     expect(output.contains(
-      'In test "Test2" Expect.deepEquals(expected: <3>, actual: <2>) fails.',
+      'In test "Test2" Expect.deepEquals(expected: <3>, actual: <2>, \'[]\') fails.',
     ), true);
     expect(output.contains('Test "Test3": Started'), true);
     expect(output.contains('Test "Test3": Passed'), true);
@@ -134,7 +134,7 @@ Test "Test3": Passed
     expect(output.contains('Test "Test": Failed'), true);
     expect(
       output.contains(
-        'In test "Test" Expect.deepEquals(expected: <2>, actual: <1>) fails.',
+        'In test "Test" Expect.deepEquals(expected: <2>, actual: <1>, \'[]\') fails.',
       ),
       true,
     );
@@ -188,7 +188,7 @@ Test "Test3": Passed
     expect(output.contains('Test "Test": Failed'), true);
     expect(
       output.contains(
-        'In test "Test" Expect.deepEquals(expected: <2>, actual: <1>) fails.',
+        'In test "Test" Expect.deepEquals(expected: <2>, actual: <1>, \'[]\') fails.',
       ),
       true,
     );
