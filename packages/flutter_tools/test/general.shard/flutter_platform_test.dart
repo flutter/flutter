@@ -163,8 +163,7 @@ void main() {
           'test.dart',
         );
 
-        const String expectedListenerFilePath =
-            '/build/068070b05f23393259df743349b63e04/listener.dart';
+        const String expectedListenerFilePath = '/build/068070b05f23393259df743349b63e04/listener.dart';
 
         expect(listenerFilePath, expectedListenerFilePath);
         expect(fileSystem.file(expectedListenerFilePath).existsSync(), isTrue);
