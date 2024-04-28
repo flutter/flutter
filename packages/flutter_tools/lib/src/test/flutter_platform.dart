@@ -474,40 +474,33 @@ class FlutterPlatform extends PlatformPlugin {
         }
       }
 
-      // If a kernel file is given, then use that to launch the test.
-      // If mapping is provided, look kernel file from mapping.
-      // If all fails, create a "listener" dart that invokes actual test.
       String? mainDart;
-      if (precompiledDillFiles != null) {
-        mainDart = precompiledDillFiles![testPath];
-      } else {
-        mainDart = _createListenerDart(finalizers, ourTestCount, testPath);
+      mainDart = _createListenerDart(finalizers, ourTestCount, testPath);
 
-        // Integration test device takes care of the compilation.
-        if (integrationTestDevice == null) {
-          // Lazily instantiate compiler so it is built only if it is actually used.
-          compiler ??= TestCompiler(
-            debuggingOptions.buildInfo,
-            flutterProject,
-            testTimeRecorder: testTimeRecorder,
-            nativeAssetsBuilder: nativeAssetsBuilder,
-          );
-          mainDart = await compiler!.compile(globals.fs.file(mainDart).uri);
+      // Integration test device takes care of the compilation.
+      if (integrationTestDevice == null) {
+        // Lazily instantiate compiler so it is built only if it is actually used.
+        compiler ??= TestCompiler(
+          debuggingOptions.buildInfo,
+          flutterProject,
+          testTimeRecorder: testTimeRecorder,
+          nativeAssetsBuilder: nativeAssetsBuilder,
+        );
+        mainDart = await compiler!.compile(globals.fs.file(mainDart).uri);
 
-          if (mainDart == null) {
-            testHarnessChannel.sink.addError('Compilation failed for testPath=$testPath');
-            return null;
-          }
-        } else {
-          // For integration tests, we may still need to set up expression compilation service.
-          initializeExpressionCompiler(mainDart);
+        if (mainDart == null) {
+          testHarnessChannel.sink.addError('Compilation failed for testPath=$testPath');
+          return null;
         }
+      } else {
+        // For integration tests, we may still need to set up expression compilation service.
+        initializeExpressionCompiler(mainDart);
       }
 
       globals.printTrace('test $ourTestCount: starting test device');
       final TestDevice testDevice = _createTestDevice(ourTestCount);
       final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Run);
-      final Future<StreamChannel<String>> remoteChannelFuture = testDevice.start(mainDart!);
+      final Future<StreamChannel<String>> remoteChannelFuture = testDevice.start(mainDart);
       finalizers.add(() async {
         globals.printTrace('test $ourTestCount: ensuring test device is terminated.');
         await testDevice.kill();
