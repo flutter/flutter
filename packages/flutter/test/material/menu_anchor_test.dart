@@ -2533,7 +2533,7 @@ void main() {
       );
     });
 
-    testWidgets('MenuItemButton was null check operator when child is null', (WidgetTester tester) async {
+    testWidgets('MenuItemButton was null check operator when it child is null', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
