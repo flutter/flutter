@@ -57,7 +57,6 @@ FlutterPlatform installHook({
   bool enableObservatory = false,
   bool enableVmService = false,
   bool machine = false,
-  String? precompiledDillPath,
   Map<String, String>? precompiledDillFiles,
   bool updateGoldens = false,
   String? testAssetDirectory,
@@ -281,7 +280,6 @@ class FlutterPlatform extends PlatformPlugin {
     this.enableVmService,
     this.machine,
     this.host,
-    this.precompiledDillFiles,
     this.updateGoldens,
     this.testAssetDirectory,
     this.projectRootDirectory,
@@ -300,7 +298,6 @@ class FlutterPlatform extends PlatformPlugin {
   final bool? enableVmService;
   final bool? machine;
   final InternetAddress? host;
-  final Map<String, String>? precompiledDillFiles;
   final bool? updateGoldens;
   final String? testAssetDirectory;
   final Uri? projectRootDirectory;

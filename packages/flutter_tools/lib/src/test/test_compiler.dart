@@ -40,17 +40,13 @@ class TestCompiler {
   ///
   /// [flutterProject] is the project for which we are running tests.
   ///
-  /// If [precompiledDillPath] is passed, it will be used to initialize the
-  /// compiler.
-  ///
   /// If [testTimeRecorder] is passed, times will be recorded in it.
   TestCompiler(
     this.buildInfo,
     this.flutterProject, {
-    String? precompiledDillPath,
     this.testTimeRecorder,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-  }) : testFilePath = precompiledDillPath ?? globals.fs.path.join(
+  }) : testFilePath = globals.fs.path.join(
         flutterProject!.directory.path,
         getBuildDirectory(),
         'test_cache',
@@ -59,7 +55,6 @@ class TestCompiler {
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         )),
-       shouldCopyDillFile = precompiledDillPath == null,
        _nativeAssetsBuilder = nativeAssetsBuilder {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
@@ -79,7 +74,6 @@ class TestCompiler {
   final FlutterProject? flutterProject;
   final BuildInfo buildInfo;
   final String testFilePath;
-  final bool shouldCopyDillFile;
   final TestTimeRecorder? testTimeRecorder;
   final TestCompilerNativeAssetsBuilder? _nativeAssetsBuilder;
 
@@ -191,24 +185,21 @@ class TestCompiler {
         request.result.complete();
         await _shutdown();
       } else {
-        if (shouldCopyDillFile) {
-          final String path = request.mainUri.toFilePath(windows: globals.platform.isWindows);
-          final File outputFile = globals.fs.file(outputPath);
-          final File kernelReadyToRun = await outputFile.copy('$path.dill');
-          final File testCache = globals.fs.file(testFilePath);
-          if (firstCompile || !testCache.existsSync() || (testCache.lengthSync() < outputFile.lengthSync())) {
-            // The idea is to keep the cache file up-to-date and include as
-            // much as possible in an effort to re-use as many packages as
-            // possible.
-            if (!testCache.parent.existsSync()) {
-              testCache.parent.createSync(recursive: true);
-            }
-            await outputFile.copy(testFilePath);
+        final String path = request.mainUri.toFilePath(windows: globals.platform.isWindows);
+        final File outputFile = globals.fs.file(outputPath);
+        final File kernelReadyToRun = await outputFile.copy('$path.dill');
+        final File testCache = globals.fs.file(testFilePath);
+        if (firstCompile || !testCache.existsSync() || (testCache.lengthSync() < outputFile.lengthSync())) {
+          // The idea is to keep the cache file up-to-date and include as
+          // much as possible in an effort to re-use as many packages as
+          // possible.
+          if (!testCache.parent.existsSync()) {
+            testCache.parent.createSync(recursive: true);
           }
-          request.result.complete(kernelReadyToRun.path);
-        } else {
-          request.result.complete(outputPath);
+          await outputFile.copy(testFilePath);
         }
+        request.result.complete(kernelReadyToRun.path);
+
         compiler!.accept();
         compiler!.reset();
       }

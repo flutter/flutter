@@ -1456,7 +1456,6 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     bool enableVmService = false,
     bool ipv6 = false,
     bool machine = false,
-    String? precompiledDillPath,
     Map<String, String>? precompiledDillFiles,
     bool updateGoldens = false,
     TestWatcher? watcher,

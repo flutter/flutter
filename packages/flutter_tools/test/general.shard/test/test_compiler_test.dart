@@ -62,22 +62,6 @@ void main() {
     Logger: () => BufferLogger.test(),
   });
 
-  testUsingContext('TestCompiler does not try to cache the dill file when precompiled dill is passed', () async {
-    residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
-    final FakeTestCompiler testCompiler = FakeTestCompiler(
-      debugBuild,
-      FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-      residentCompiler,
-      precompiledDillPath: 'precompiled.dill',
-    );
-
-    expect(await testCompiler.compile(Uri.parse('test/foo.dart')), 'abc.dill');
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    Platform: () => linuxPlatform,
-    ProcessManager: () => FakeProcessManager.any(),
-    Logger: () => BufferLogger.test(),
-  });
 
   testUsingContext('TestCompiler reports null when a compile fails', () async {
     residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 1, <Uri>[]);
@@ -202,7 +186,6 @@ class FakeTestCompiler extends TestCompiler {
     super.buildInfo,
     super.flutterProject,
     this.residentCompiler, {
-      super.precompiledDillPath,
       super.testTimeRecorder,
     }
   );
