@@ -2532,6 +2532,24 @@ void main() {
           ..rect(color: overlayColor.withOpacity(0.1)),
       );
     });
+
+    testWidgets('MenuItemButton was null check operator when child is null', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 200,
+              child: MenuItemButton(
+                child: null,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // exception `Null check operator used on a null value` would be thrown.
+      expect(tester.takeException(), isNull);
+    });
   });
 
   group('Layout', () {

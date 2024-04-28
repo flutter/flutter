@@ -1141,7 +1141,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
         trailingIcon: widget.trailingIcon,
         hasSubmenu: false,
         overflowAxis: _anchor?._orientation ?? widget.overflowAxis,
-        child: widget.child!,
+        child: widget.child ?? const SizedBox(),
       ),
     );
 
