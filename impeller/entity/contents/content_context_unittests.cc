@@ -122,8 +122,8 @@ class FakePipelineLibrary : public PipelineLibrary {
 
   bool IsValid() const override { return true; }
 
-  PipelineFuture<PipelineDescriptor> GetPipeline(
-      PipelineDescriptor descriptor) override {
+  PipelineFuture<PipelineDescriptor> GetPipeline(PipelineDescriptor descriptor,
+                                                 bool async) override {
     auto pipeline =
         std::make_shared<FakePipeline>(weak_from_this(), descriptor);
     std::promise<std::shared_ptr<Pipeline<PipelineDescriptor>>> promise;
@@ -136,7 +136,8 @@ class FakePipelineLibrary : public PipelineLibrary {
   }
 
   PipelineFuture<ComputePipelineDescriptor> GetPipeline(
-      ComputePipelineDescriptor descriptor) override {
+      ComputePipelineDescriptor descriptor,
+      bool async) override {
     auto pipeline =
         std::make_shared<FakeComputePipeline>(weak_from_this(), descriptor);
     std::promise<std::shared_ptr<Pipeline<ComputePipelineDescriptor>>> promise;

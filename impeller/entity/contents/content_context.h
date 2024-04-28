@@ -1000,8 +1000,8 @@ class ContentContext {
     }
 
     auto variant_future = pipeline->CreateVariant(
-        [&opts, variants_count =
-                    container.GetPipelineCount()](PipelineDescriptor& desc) {
+        /*async=*/false, [&opts, variants_count = container.GetPipelineCount()](
+                             PipelineDescriptor& desc) {
           opts.ApplyToPipelineDescriptor(desc);
           desc.SetLabel(
               SPrintF("%s V#%zu", desc.GetLabel().c_str(), variants_count));

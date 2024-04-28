@@ -11,9 +11,10 @@ PipelineLibrary::PipelineLibrary() = default;
 PipelineLibrary::~PipelineLibrary() = default;
 
 PipelineFuture<PipelineDescriptor> PipelineLibrary::GetPipeline(
-    std::optional<PipelineDescriptor> descriptor) {
+    std::optional<PipelineDescriptor> descriptor,
+    bool async) {
   if (descriptor.has_value()) {
-    return GetPipeline(descriptor.value());
+    return GetPipeline(descriptor.value(), async);
   }
   auto promise = std::make_shared<
       std::promise<std::shared_ptr<Pipeline<PipelineDescriptor>>>>();
@@ -22,9 +23,10 @@ PipelineFuture<PipelineDescriptor> PipelineLibrary::GetPipeline(
 }
 
 PipelineFuture<ComputePipelineDescriptor> PipelineLibrary::GetPipeline(
-    std::optional<ComputePipelineDescriptor> descriptor) {
+    std::optional<ComputePipelineDescriptor> descriptor,
+    bool async) {
   if (descriptor.has_value()) {
-    return GetPipeline(descriptor.value());
+    return GetPipeline(descriptor.value(), async);
   }
   auto promise = std::make_shared<
       std::promise<std::shared_ptr<Pipeline<ComputePipelineDescriptor>>>>();
