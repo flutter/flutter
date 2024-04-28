@@ -282,12 +282,19 @@ size_t DartVM::GetVMLaunchCount() {
   return gVMLaunchCount;
 }
 
+// Minimum and maximum number of worker threads.
+static constexpr size_t kMinCount = 2;
+static constexpr size_t kMaxCount = 4;
+
 DartVM::DartVM(const std::shared_ptr<const DartVMData>& vm_data,
                std::shared_ptr<IsolateNameServer> isolate_name_server)
     : settings_(vm_data->GetSettings()),
       concurrent_message_loop_(fml::ConcurrentMessageLoop::Create(
-          fml::EfficiencyCoreCount().value_or(
-              std::thread::hardware_concurrency()))),
+          std::clamp(fml::EfficiencyCoreCount().value_or(
+                         std::thread::hardware_concurrency()) /
+                         2,
+                     kMinCount,
+                     kMaxCount))),
       skia_concurrent_executor_(
           [runner = concurrent_message_loop_->GetTaskRunner()](
               const fml::closure& work) { runner->PostTask(work); }),
