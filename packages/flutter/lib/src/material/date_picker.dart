@@ -2151,8 +2151,8 @@ class _DayHeaders extends StatelessWidget {
     final List<Widget> labels = _getDayHeaders(textStyle, localizations);
 
     // Add leading and trailing boxes for edges of the custom grid layout.
-    labels.insert(0, const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()));
-    labels.add(const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()));
+    labels.insert(0, const SizedBox.shrink());
+    labels.add(const SizedBox.shrink());
 
     return ConstrainedBox(
       constraints: BoxConstraints(
@@ -2422,10 +2422,8 @@ class _MonthItemState extends State<_MonthItem> {
   }
 
   Widget _buildEdgeBox(BuildContext context, bool isHighlighted) {
-    return DecoratedBox(
-      decoration: BoxDecoration(color: isHighlighted ? _highlightColor(context) : null),
-      child: const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()),
-    );
+    const Widget empty = LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand());
+    return isHighlighted ? ColoredBox(color: _highlightColor(context), child: empty) : empty;
   }
 
   @override

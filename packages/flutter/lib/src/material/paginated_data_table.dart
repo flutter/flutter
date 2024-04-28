@@ -491,7 +491,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         .toList();
       footerWidgets.addAll(<Widget>[
         // Match trailing padding, in case we overflow and end up scrolling
-        const LimitedBox(maxHeight: 0.0, child: SizedBox(width: 14.0, height: double.infinity)),
+        const SizedBox(width: 14.0),
         Text(localizations.rowsPerPageTitle),
         ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 64.0), // 40.0 for the text, 24.0 for the icon

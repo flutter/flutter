@@ -1649,10 +1649,7 @@ class _TabBarState extends State<TabBar> {
 
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller!.length == 0) {
-      return LimitedBox(
-        maxWidth: 0.0,
-        child: SizedBox(width: double.infinity, height: _kTabHeight + widget.indicatorWeight),
-      );
+      return SizedBox(height: _kTabHeight + widget.indicatorWeight);
     }
 
     final List<Widget> wrappedTabs = List<Widget>.generate(widget.tabs.length, (int index) {

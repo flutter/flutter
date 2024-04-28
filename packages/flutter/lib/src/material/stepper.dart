@@ -798,16 +798,13 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             child: Center(
               child: SizedBox(
                 width: !_isLast(index) ? (widget.connectorThickness ?? 1.0) : 0.0,
-                child: ColoredBox(
-                  color: _connectorColor(widget.steps[index].isActive),
-                  child: const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()),
-                ),
+                child: ColoredBox(color: _connectorColor(widget.steps[index].isActive)),
               ),
             ),
           ),
         ),
         AnimatedCrossFade(
-          firstChild: const LimitedBox(maxWidth: 0.0, child: SizedBox(width: double.infinity, height: 0)),
+          firstChild: const SizedBox(height: 0),
           secondChild: Padding(
             padding: EdgeInsetsDirectional.only(
               // Adjust [controlsBuilder] padding so that the content is
@@ -902,7 +899,6 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 height: widget.steps[i].stepStyle?.connectorThickness ?? widget.connectorThickness ?? 1.0,
                 child: ColoredBox(
                   color: widget.steps[i].stepStyle?.connectorColor ?? _connectorColor(widget.steps[i].isActive),
-                  child: const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand()),
                 ),
               ),
             ),
