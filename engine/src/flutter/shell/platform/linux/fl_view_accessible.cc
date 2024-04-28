@@ -8,45 +8,31 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_value.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
+static constexpr int32_t kRootSemanticsNodeId = 0;
+
 struct _FlViewAccessible {
-  GtkContainerAccessible parent_instance;
+  AtkPlug parent_instance;
 
   FlEngine* engine;
 
   // Semantics nodes keyed by ID
   GHashTable* semantics_nodes_by_id;
+
+  // Flag to track when root node is created.
+  gboolean root_node_created;
 };
 
 enum { kProp0, kPropEngine, kPropLast };
 
-G_DEFINE_TYPE(FlViewAccessible,
-              fl_view_accessible,
-              GTK_TYPE_CONTAINER_ACCESSIBLE)
-
-static void init_engine(FlViewAccessible* self, FlEngine* engine) {
-  g_assert(self->engine == nullptr);
-  self->engine = engine;
-  g_object_add_weak_pointer(G_OBJECT(self),
-                            reinterpret_cast<gpointer*>(&self->engine));
-}
-
-static FlEngine* get_engine(FlViewAccessible* self) {
-  if (self->engine == nullptr) {
-    FlView* view = FL_VIEW(gtk_accessible_get_widget(GTK_ACCESSIBLE(self)));
-    init_engine(self, fl_view_get_engine(view));
-  }
-  return self->engine;
-}
+G_DEFINE_TYPE(FlViewAccessible, fl_view_accessible, ATK_TYPE_PLUG)
 
 static FlAccessibleNode* create_node(FlViewAccessible* self,
                                      FlutterSemanticsNode2* semantics) {
-  FlEngine* engine = get_engine(self);
-
   if (semantics->flags & kFlutterSemanticsFlagIsTextField) {
-    return fl_accessible_text_field_new(engine, semantics->id);
+    return fl_accessible_text_field_new(self->engine, semantics->id);
   }
 
-  return fl_accessible_node_new(engine, semantics->id);
+  return fl_accessible_node_new(self->engine, semantics->id);
 }
 
 static FlAccessibleNode* lookup_node(FlViewAccessible* self, int32_t id) {
@@ -64,13 +50,18 @@ static FlAccessibleNode* get_node(FlViewAccessible* self,
   }
 
   node = create_node(self, semantics);
-  if (semantics->id == 0) {
+  if (semantics->id == kRootSemanticsNodeId) {
     fl_accessible_node_set_parent(node, ATK_OBJECT(self), 0);
-    g_signal_emit_by_name(self, "children-changed::add", 0, node, nullptr);
   }
   g_hash_table_insert(self->semantics_nodes_by_id,
                       GINT_TO_POINTER(semantics->id),
                       reinterpret_cast<gpointer>(node));
+
+  // Update when root node is created.
+  if (!self->root_node_created && semantics->id == kRootSemanticsNodeId) {
+    g_signal_emit_by_name(self, "children-changed::add", 0, node, nullptr);
+    self->root_node_created = true;
+  }
 
   return node;
 }
@@ -104,20 +95,11 @@ static AtkRole fl_view_accessible_get_role(AtkObject* accessible) {
   return ATK_ROLE_PANEL;
 }
 
-// Implements GObject::set_property
-static void fl_view_accessible_set_property(GObject* object,
-                                            guint prop_id,
-                                            const GValue* value,
-                                            GParamSpec* pspec) {
-  FlViewAccessible* self = FL_VIEW_ACCESSIBLE(object);
-  switch (prop_id) {
-    case kPropEngine:
-      init_engine(self, FL_ENGINE(g_value_get_object(value)));
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
-      break;
-  }
+// Implements AtkObject::ref_state_set
+static AtkStateSet* fl_view_accessible_ref_state_set(AtkObject* accessible) {
+  FlViewAccessible* self = FL_VIEW_ACCESSIBLE(accessible);
+  FlAccessibleNode* node = lookup_node(self, 0);
+  return node != nullptr ? atk_object_ref_state_set(ATK_OBJECT(node)) : nullptr;
 }
 
 static void fl_view_accessible_dispose(GObject* object) {
@@ -138,21 +120,23 @@ static void fl_view_accessible_class_init(FlViewAccessibleClass* klass) {
   ATK_OBJECT_CLASS(klass)->get_n_children = fl_view_accessible_get_n_children;
   ATK_OBJECT_CLASS(klass)->ref_child = fl_view_accessible_ref_child;
   ATK_OBJECT_CLASS(klass)->get_role = fl_view_accessible_get_role;
+  ATK_OBJECT_CLASS(klass)->ref_state_set = fl_view_accessible_ref_state_set;
 
   G_OBJECT_CLASS(klass)->dispose = fl_view_accessible_dispose;
-  G_OBJECT_CLASS(klass)->set_property = fl_view_accessible_set_property;
-
-  g_object_class_install_property(
-      G_OBJECT_CLASS(klass), kPropEngine,
-      g_param_spec_object(
-          "engine", "engine", "Flutter engine", fl_engine_get_type(),
-          static_cast<GParamFlags>(G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY |
-                                   G_PARAM_STATIC_STRINGS)));
 }
 
 static void fl_view_accessible_init(FlViewAccessible* self) {
   self->semantics_nodes_by_id = g_hash_table_new_full(
       g_direct_hash, g_direct_equal, nullptr, g_object_unref);
+}
+
+FlViewAccessible* fl_view_accessible_new(FlEngine* engine) {
+  FlViewAccessible* self =
+      FL_VIEW_ACCESSIBLE(g_object_new(fl_view_accessible_get_type(), nullptr));
+  self->engine = engine;
+  g_object_add_weak_pointer(G_OBJECT(self),
+                            reinterpret_cast<gpointer*>(&self->engine));
+  return self;
 }
 
 void fl_view_accessible_handle_update_semantics(
@@ -161,7 +145,6 @@ void fl_view_accessible_handle_update_semantics(
   g_autoptr(GHashTable) pending_children =
       g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr,
                             reinterpret_cast<GDestroyNotify>(fl_value_unref));
-
   for (size_t i = 0; i < update->node_count; i++) {
     FlutterSemanticsNode2* node = update->nodes[i];
     FlAccessibleNode* atk_node = get_node(self, node);

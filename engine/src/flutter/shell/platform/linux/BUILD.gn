@@ -132,6 +132,7 @@ source_set("flutter_linux_sources") {
     "fl_settings.cc",
     "fl_settings_plugin.cc",
     "fl_settings_portal.cc",
+    "fl_socket_accessible.cc",
     "fl_standard_message_codec.cc",
     "fl_standard_method_codec.cc",
     "fl_string_codec.cc",
