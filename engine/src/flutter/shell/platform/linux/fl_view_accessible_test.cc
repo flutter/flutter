@@ -12,8 +12,7 @@
 
 TEST(FlViewAccessibleTest, BuildTree) {
   g_autoptr(FlEngine) engine = make_mock_engine();
-  g_autoptr(FlViewAccessible) accessible = FL_VIEW_ACCESSIBLE(
-      g_object_new(fl_view_accessible_get_type(), "engine", engine, nullptr));
+  g_autoptr(FlViewAccessible) accessible = fl_view_accessible_new(engine);
 
   int32_t children[] = {111, 222};
   FlutterSemanticsNode2 root_node = {
@@ -49,8 +48,7 @@ TEST(FlViewAccessibleTest, BuildTree) {
 
 TEST(FlViewAccessibleTest, AddRemoveChildren) {
   g_autoptr(FlEngine) engine = make_mock_engine();
-  g_autoptr(FlViewAccessible) accessible = FL_VIEW_ACCESSIBLE(
-      g_object_new(fl_view_accessible_get_type(), "engine", engine, nullptr));
+  g_autoptr(FlViewAccessible) accessible = fl_view_accessible_new(engine);
 
   FlutterSemanticsNode2 root_node = {
       .id = 0,

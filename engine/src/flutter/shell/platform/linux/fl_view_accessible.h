@@ -9,17 +9,24 @@
 #error "Only <flutter_linux/flutter_linux.h> can be included directly."
 #endif
 
-#include <gtk/gtk-a11y.h>
+#include <atk/atk.h>
 
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 
 G_BEGIN_DECLS
+
+// ATK g_autoptr macros weren't added until 2.37. Add them manually.
+// https://gitlab.gnome.org/GNOME/atk/-/issues/10
+#if !ATK_CHECK_VERSION(2, 37, 0)
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(AtkPlug, g_object_unref)
+#endif
 
 G_DECLARE_FINAL_TYPE(FlViewAccessible,
                      fl_view_accessible,
                      FL,
                      VIEW_ACCESSIBLE,
-                     GtkContainerAccessible)
+                     AtkPlug)
 
 /**
  * FlViewAccessible:
@@ -27,6 +34,16 @@ G_DECLARE_FINAL_TYPE(FlViewAccessible,
  * #FlViewAccessible is an object that exposes accessibility information for an
  * #FlView.
  */
+
+/**
+ * fl_view_accessible_new:
+ *
+ * Creates a new accessibility object that exposes Flutter accessibility
+ * information to ATK.
+ *
+ * Returns: a new #FlViewAccessible.
+ */
+FlViewAccessible* fl_view_accessible_new(FlEngine* engine);
 
 /**
  * fl_view_accessible_handle_update_semantics:
