@@ -6,8 +6,12 @@
 
 #include "flutter/shell/platform/linux/fl_view_private.h"
 
+#include <atk/atk.h>
+#include <gtk/gtk-a11y.h>
+
 #include <cstring>
 
+#include "flutter/shell/platform/linux/fl_accessible_node.h"
 #include "flutter/shell/platform/linux/fl_backing_store_provider.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_key_event.h"
@@ -19,6 +23,7 @@
 #include "flutter/shell/platform/linux/fl_renderer_gdk.h"
 #include "flutter/shell/platform/linux/fl_scrolling_manager.h"
 #include "flutter/shell/platform/linux/fl_scrolling_view_delegate.h"
+#include "flutter/shell/platform/linux/fl_socket_accessible.h"
 #include "flutter/shell/platform/linux/fl_text_input_plugin.h"
 #include "flutter/shell/platform/linux/fl_text_input_view_delegate.h"
 #include "flutter/shell/platform/linux/fl_view_accessible.h"
@@ -64,6 +69,9 @@ struct _FlView {
   gulong keymap_keys_changed_cb_id;  // Signal connection ID for
                                      // keymap-keys-changed
   gulong window_state_cb_id;  // Signal connection ID for window-state-changed
+
+  // Accessible tree from Flutter, exposed as an AtkPlug.
+  FlViewAccessible* view_accessible;
 };
 
 enum { kPropFlutterProject = 1, kPropLast };
@@ -231,9 +239,7 @@ static void update_semantics_cb(FlEngine* engine,
                                 gpointer user_data) {
   FlView* self = FL_VIEW(user_data);
 
-  AtkObject* accessible = gtk_widget_get_accessible(GTK_WIDGET(self));
-  fl_view_accessible_handle_update_semantics(FL_VIEW_ACCESSIBLE(accessible),
-                                             update);
+  fl_view_accessible_handle_update_semantics(self->view_accessible, update);
 }
 
 // Invoked by the engine right before the engine is restarted.
@@ -586,6 +592,11 @@ static void realize_cb(FlView* self) {
   }
 
   handle_geometry_changed(self);
+
+  self->view_accessible = fl_view_accessible_new(self->engine);
+  fl_socket_accessible_embed(
+      FL_SOCKET_ACCESSIBLE(gtk_widget_get_accessible(GTK_WIDGET(self))),
+      atk_plug_get_id(ATK_PLUG(self->view_accessible)));
 }
 
 static gboolean render_cb(FlView* self, GdkGLContext* context) {
@@ -691,6 +702,7 @@ static void fl_view_dispose(GObject* object) {
   }
   g_clear_object(&self->mouse_cursor_plugin);
   g_clear_object(&self->platform_plugin);
+  g_clear_object(&self->view_accessible);
 
   G_OBJECT_CLASS(fl_view_parent_class)->dispose(object);
 }
@@ -733,7 +745,7 @@ static void fl_view_class_init(FlViewClass* klass) {
                                    G_PARAM_STATIC_STRINGS)));
 
   gtk_widget_class_set_accessible_type(GTK_WIDGET_CLASS(klass),
-                                       fl_view_accessible_get_type());
+                                       fl_socket_accessible_get_type());
 }
 
 static void fl_view_init(FlView* self) {
