@@ -181,7 +181,8 @@ bool PipelineLibraryGLES::IsValid() const {
 
 // |PipelineLibrary|
 PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
-    PipelineDescriptor descriptor) {
+    PipelineDescriptor descriptor,
+    bool async) {
   if (auto found = pipelines_.find(descriptor); found != pipelines_.end()) {
     return found->second;
   }
@@ -258,7 +259,8 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
 
 // |PipelineLibrary|
 PipelineFuture<ComputePipelineDescriptor> PipelineLibraryGLES::GetPipeline(
-    ComputePipelineDescriptor descriptor) {
+    ComputePipelineDescriptor descriptor,
+    bool async) {
   auto promise = std::make_shared<
       std::promise<std::shared_ptr<Pipeline<ComputePipelineDescriptor>>>>();
   // TODO(dnfield): implement compute for GLES.

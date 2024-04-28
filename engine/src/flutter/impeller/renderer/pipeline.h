@@ -62,6 +62,7 @@ class Pipeline {
   const T& GetDescriptor() const;
 
   PipelineFuture<T> CreateVariant(
+      bool async,
       std::function<void(T& desc)> descriptor_callback) const;
 
  protected:

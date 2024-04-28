@@ -52,6 +52,7 @@ const T& Pipeline<T>::GetDescriptor() const {
 
 template <typename T>
 PipelineFuture<T> Pipeline<T>::CreateVariant(
+    bool async,
     std::function<void(T& desc)> descriptor_callback) const {
   if (!descriptor_callback) {
     return {std::nullopt,
@@ -69,7 +70,7 @@ PipelineFuture<T> Pipeline<T>::CreateVariant(
     return {desc_, RealizedFuture<std::shared_ptr<Pipeline<T>>>(nullptr)};
   }
 
-  return library->GetPipeline(std::move(copied_desc));
+  return library->GetPipeline(std::move(copied_desc), async);
 }
 
 template class Pipeline<PipelineDescriptor>;

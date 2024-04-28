@@ -157,12 +157,14 @@ std::unique_ptr<ComputePipelineVK> PipelineLibraryVK::CreateComputePipeline(
 
 // |PipelineLibrary|
 PipelineFuture<PipelineDescriptor> PipelineLibraryVK::GetPipeline(
-    PipelineDescriptor descriptor) {
+    PipelineDescriptor descriptor,
+    bool async) {
   Lock lock(pipelines_mutex_);
   if (auto found = pipelines_.find(descriptor); found != pipelines_.end()) {
     return found->second;
   }
 
+  cache_dirty_ = true;
   if (!IsValid()) {
     return {
         descriptor,
@@ -177,7 +179,7 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryVK::GetPipeline(
 
   auto weak_this = weak_from_this();
 
-  worker_task_runner_->PostTask([descriptor, weak_this, promise]() {
+  auto generation_task = [descriptor, weak_this, promise]() {
     auto thiz = weak_this.lock();
     if (!thiz) {
       promise->set_value(nullptr);
@@ -191,20 +193,28 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryVK::GetPipeline(
         PipelineLibraryVK::Cast(*thiz).device_holder_.lock(),  //
         weak_this                                              //
         ));
-  });
+  };
+
+  if (async) {
+    worker_task_runner_->PostTask(generation_task);
+  } else {
+    generation_task();
+  }
 
   return pipeline_future;
 }
 
 // |PipelineLibrary|
 PipelineFuture<ComputePipelineDescriptor> PipelineLibraryVK::GetPipeline(
-    ComputePipelineDescriptor descriptor) {
+    ComputePipelineDescriptor descriptor,
+    bool async) {
   Lock lock(compute_pipelines_mutex_);
   if (auto found = compute_pipelines_.find(descriptor);
       found != compute_pipelines_.end()) {
     return found->second;
   }
 
+  cache_dirty_ = true;
   if (!IsValid()) {
     return {
         descriptor,
@@ -220,7 +230,7 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryVK::GetPipeline(
 
   auto weak_this = weak_from_this();
 
-  worker_task_runner_->PostTask([descriptor, weak_this, promise]() {
+  auto generation_task = [descriptor, weak_this, promise]() {
     auto self = weak_this.lock();
     if (!self) {
       promise->set_value(nullptr);
@@ -238,7 +248,13 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryVK::GetPipeline(
     }
 
     promise->set_value(std::move(pipeline));
-  });
+  };
+
+  if (async) {
+    worker_task_runner_->PostTask(generation_task);
+  } else {
+    generation_task();
+  }
 
   return pipeline_future;
 }
@@ -256,7 +272,11 @@ void PipelineLibraryVK::RemovePipelinesWithEntryPoint(
 
 void PipelineLibraryVK::DidAcquireSurfaceFrame() {
   if (++frames_acquired_ == 50u) {
-    PersistPipelineCacheToDisk();
+    if (cache_dirty_) {
+      cache_dirty_ = false;
+      PersistPipelineCacheToDisk();
+    }
+    frames_acquired_ = 0;
   }
 }
 

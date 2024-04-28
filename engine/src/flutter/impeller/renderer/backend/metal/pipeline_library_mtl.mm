@@ -109,7 +109,8 @@ bool PipelineLibraryMTL::IsValid() const {
 
 // |PipelineLibrary|
 PipelineFuture<PipelineDescriptor> PipelineLibraryMTL::GetPipeline(
-    PipelineDescriptor descriptor) {
+    PipelineDescriptor descriptor,
+    bool async) {
   if (auto found = pipelines_.find(descriptor); found != pipelines_.end()) {
     return found->second;
   }
@@ -162,7 +163,8 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryMTL::GetPipeline(
 }
 
 PipelineFuture<ComputePipelineDescriptor> PipelineLibraryMTL::GetPipeline(
-    ComputePipelineDescriptor descriptor) {
+    ComputePipelineDescriptor descriptor,
+    bool async) {
   if (auto found = compute_pipelines_.find(descriptor);
       found != compute_pipelines_.end()) {
     return found->second;

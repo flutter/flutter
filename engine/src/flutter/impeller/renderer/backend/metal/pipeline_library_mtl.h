@@ -34,12 +34,13 @@ class PipelineLibraryMTL final : public PipelineLibrary {
   bool IsValid() const override;
 
   // |PipelineLibrary|
-  PipelineFuture<PipelineDescriptor> GetPipeline(
-      PipelineDescriptor descriptor) override;
+  PipelineFuture<PipelineDescriptor> GetPipeline(PipelineDescriptor descriptor,
+                                                 bool async) override;
 
   // |PipelineLibrary|
   PipelineFuture<ComputePipelineDescriptor> GetPipeline(
-      ComputePipelineDescriptor descriptor) override;
+      ComputePipelineDescriptor descriptor,
+      bool async) override;
 
   // |PipelineLibrary|
   void RemovePipelinesWithEntryPoint(

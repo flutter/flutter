@@ -96,8 +96,8 @@ class SceneContext {
       FML_CHECK(prototype != variants_.end());
 
       auto variant_future = prototype->second->WaitAndGet()->CreateVariant(
-          [&context, &opts,
-           variants_count = variants_.size()](PipelineDescriptor& desc) {
+          /*async=*/false, [&context, &opts, variants_count = variants_.size()](
+                               PipelineDescriptor& desc) {
             opts.ApplyToPipelineDescriptor(*context.GetCapabilities(), desc);
             desc.SetLabel(
                 SPrintF("%s V#%zu", desc.GetLabel().c_str(), variants_count));
