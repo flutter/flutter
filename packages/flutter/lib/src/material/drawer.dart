@@ -682,7 +682,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
             behavior: HitTestBehavior.translucent,
             excludeFromSemantics: true,
             dragStartBehavior: widget.dragStartBehavior,
-            child: SizedBox(width: dragAreaWidth),
+            child: LimitedBox(maxHeight: 0.0, child: SizedBox(width: dragAreaWidth, height: double.infinity)),
           ),
         );
       } else {
@@ -701,7 +701,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           platformHasBackButton = false;
       }
 
-      Widget drawerScrim = const SizedBox.shrink();
+      Widget drawerScrim = const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand());
       if (_scrimColorTween.evaluate(_controller) case final Color color) {
         drawerScrim = ColoredBox(color: color, child: drawerScrim);
       }

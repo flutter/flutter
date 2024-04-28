@@ -410,7 +410,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
             children: <Widget>[
               header,
               AnimatedCrossFade(
-                firstChild: const SizedBox(height: 0),
+                firstChild: const LimitedBox(maxWidth: 0.0, child: SizedBox(width: double.infinity, height: 0)),
                 secondChild: child.body,
                 firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
                 secondCurve: const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
