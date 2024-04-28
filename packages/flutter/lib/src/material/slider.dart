@@ -1868,7 +1868,7 @@ class _RenderValueIndicator extends RenderBox with RelayoutWhenSystemFontsChange
       curve: Curves.fastOutSlowIn,
     );
   }
-  late Animation<double> _valueIndicatorAnimation;
+  late CurvedAnimation _valueIndicatorAnimation;
   _SliderState _state;
 
   @override
@@ -1896,6 +1896,12 @@ class _RenderValueIndicator extends RenderBox with RelayoutWhenSystemFontsChange
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     return constraints.smallest;
+  }
+
+  @override
+  void dispose() {
+    _valueIndicatorAnimation.dispose();
+    super.dispose();
   }
 }
 
