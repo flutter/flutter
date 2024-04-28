@@ -47,22 +47,6 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('ensureConfiguration throws an error if a precompiled '
-      'entrypoint is specified and more that one test file', () {
-      final FlutterPlatform flutterPlatform = FlutterPlatform(
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        shellPath: '/',
-        precompiledDillPath: 'example.dill',
-        enableVmService: false,
-      );
-      flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform);
-
-      expect(() => flutterPlatform.loadChannel('test2.dart', fakeSuitePlatform), throwsToolExit());
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    });
-
     testUsingContext('installHook creates a FlutterPlatform', () {
       expect(() => installHook(
         shellPath: 'abc',
@@ -82,7 +66,6 @@ void main() {
       ), throwsAssertionError);
 
       FlutterPlatform? capturedPlatform;
-      final Map<String, String> expectedPrecompiledDillFiles = <String, String>{'Key': 'Value'};
       final FlutterPlatform flutterPlatform = installHook(
         shellPath: 'abc',
         debuggingOptions: DebuggingOptions.enabled(
@@ -93,8 +76,6 @@ void main() {
         ),
         enableVmService: true,
         machine: true,
-        precompiledDillPath: 'def',
-        precompiledDillFiles: expectedPrecompiledDillFiles,
         updateGoldens: true,
         testAssetDirectory: '/build/test',
         serverType: InternetAddressType.IPv6,
@@ -114,8 +95,6 @@ void main() {
       expect(flutterPlatform.enableVmService, equals(true));
       expect(flutterPlatform.machine, equals(true));
       expect(flutterPlatform.host, InternetAddress.loopbackIPv6);
-      expect(flutterPlatform.precompiledDillPath, equals('def'));
-      expect(flutterPlatform.precompiledDillFiles, expectedPrecompiledDillFiles);
       expect(flutterPlatform.updateGoldens, equals(true));
       expect(flutterPlatform.testAssetDirectory, '/build/test');
       expect(flutterPlatform.icudtlPath, equals('ghi'));

@@ -90,8 +90,6 @@ FlutterPlatform installHook({
     machine: machine,
     enableVmService: enableVmService || enableObservatory,
     host: _kHosts[serverType],
-    precompiledDillPath: precompiledDillPath,
-    precompiledDillFiles: precompiledDillFiles,
     updateGoldens: updateGoldens,
     testAssetDirectory: testAssetDirectory,
     projectRootDirectory: projectRootDirectory,
@@ -283,7 +281,6 @@ class FlutterPlatform extends PlatformPlugin {
     this.enableVmService,
     this.machine,
     this.host,
-    this.precompiledDillPath,
     this.precompiledDillFiles,
     this.updateGoldens,
     this.testAssetDirectory,
@@ -303,7 +300,6 @@ class FlutterPlatform extends PlatformPlugin {
   final bool? enableVmService;
   final bool? machine;
   final InternetAddress? host;
-  final String? precompiledDillPath;
   final Map<String, String>? precompiledDillFiles;
   final bool? updateGoldens;
   final String? testAssetDirectory;
@@ -364,10 +360,6 @@ class FlutterPlatform extends PlatformPlugin {
       // Fail if there will be a port conflict.
       if (debuggingOptions.hostVmServicePort != null) {
         throwToolExit('installHook() was called with a VM Service port or debugger mode enabled, but then more than one test suite was run.');
-      }
-      // Fail if we're passing in a precompiled entry-point.
-      if (precompiledDillPath != null) {
-        throwToolExit('installHook() was called with a precompiled test entry-point, but then more than one test suite was run.');
       }
     }
 
@@ -473,7 +465,6 @@ class FlutterPlatform extends PlatformPlugin {
           compiler ??= TestCompiler(
             debuggingOptions.buildInfo,
             flutterProject,
-            precompiledDillPath: precompiledDillPath,
             testTimeRecorder: testTimeRecorder,
             nativeAssetsBuilder: nativeAssetsBuilder,
           );
@@ -487,10 +478,7 @@ class FlutterPlatform extends PlatformPlugin {
       // If mapping is provided, look kernel file from mapping.
       // If all fails, create a "listener" dart that invokes actual test.
       String? mainDart;
-      if (precompiledDillPath != null) {
-        mainDart = precompiledDillPath;
-        initializeExpressionCompiler(testPath);
-      } else if (precompiledDillFiles != null) {
+      if (precompiledDillFiles != null) {
         mainDart = precompiledDillFiles![testPath];
       } else {
         mainDart = _createListenerDart(finalizers, ourTestCount, testPath);
