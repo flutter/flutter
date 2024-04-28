@@ -75,7 +75,8 @@ bool RuntimeEffectContents::BootstrapShader(
   ContentContextOptions options;
   options.color_attachment_pixel_format =
       renderer.GetContext()->GetCapabilities()->GetDefaultColorFormat();
-  return !!CreatePipeline(renderer, options);
+  CreatePipeline(renderer, options, /*async=*/true);
+  return true;
 }
 
 bool RuntimeEffectContents::RegisterShader(
@@ -134,7 +135,8 @@ bool RuntimeEffectContents::RegisterShader(
 
 std::shared_ptr<Pipeline<PipelineDescriptor>>
 RuntimeEffectContents::CreatePipeline(const ContentContext& renderer,
-                                      ContentContextOptions options) const {
+                                      ContentContextOptions options,
+                                      bool async) const {
   const std::shared_ptr<Context>& context = renderer.GetContext();
   const std::shared_ptr<ShaderLibrary>& library = context->GetShaderLibrary();
   const std::shared_ptr<const Capabilities>& caps = context->GetCapabilities();
@@ -169,7 +171,12 @@ RuntimeEffectContents::CreatePipeline(const ContentContext& renderer,
   desc.SetDepthPixelFormat(stencil_attachment_format);
 
   options.ApplyToPipelineDescriptor(desc);
-  auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).Get();
+  if (async) {
+    context->GetPipelineLibrary()->GetPipeline(desc, async);
+    return nullptr;
+  }
+
+  auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc, async).Get();
   if (!pipeline) {
     VALIDATION_LOG << "Failed to get or create runtime effect pipeline.";
     return nullptr;
@@ -315,8 +322,9 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
       [&](ContentContextOptions options) {
         // Pipeline creation callback for the cache handler to call.
         return renderer.GetCachedRuntimeEffectPipeline(
-            runtime_stage_->GetEntrypoint(), options,
-            [&]() { return CreatePipeline(renderer, options); });
+            runtime_stage_->GetEntrypoint(), options, [&]() {
+              return CreatePipeline(renderer, options, /*async=*/false);
+            });
       };
 
   return ColorSourceContents::DrawGeometry<VS>(renderer, entity, pass,
