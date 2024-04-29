@@ -20,7 +20,7 @@ import 'framework.dart';
 /// This example demonstrates that the sliver's size can change. Pressing the
 /// floating action button replaces the one line of header text with two lines.
 ///
-/// ** See code in examples/api/lib/widgets/sliver/pinned_header_sliver.0.dart **
+/// ** See code in examples/api/lib/widgets/sliver/sliver_pinned_header.0.dart **
 /// {@end-tool}
 class SliverPinnedHeader extends SingleChildRenderObjectWidget {
   /// Creates a sliver whose [Widget] child appears at the top of a
