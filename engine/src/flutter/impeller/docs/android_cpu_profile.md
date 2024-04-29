@@ -8,7 +8,7 @@ Add the `--no-stripped` flag to the gn config when building the android engine.
 
 Example config:
 
- `gn --no-lto --no-goma --runtime-mode=profile --android --android-cpu=arm64 --no-stripped`
+ `gn --no-lto --runtime-mode=profile --android --android-cpu=arm64 --no-stripped`
 
 2. Configure Gradle to not remove strip sources
 

@@ -18,7 +18,6 @@
 ###                  Valid values: [x64, arm64]
 ###                  Default value: x64
 ###   --unoptimized: Disables C++ compiler optimizations.
-###   --goma: Speeds up builds. For Googlers only, sorry. :(
 
 set -e  # Fail on any error.
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"/lib/vars.sh || exit $?
@@ -75,8 +74,6 @@ skip_fuchsia_emu=0
 runtime_mode="debug"
 compilation_mode="jit"
 fuchsia_cpu="x64"
-goma=0
-goma_flags=""
 ninja_cmd="ninja"
 unoptimized_flags=""
 unoptimized_suffix=""
@@ -118,12 +115,6 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       ;;
-    --goma)
-      goma=1
-      goma_flags="--goma"
-      ninja_cmd="autoninja"
-      shift # past argument
-      ;;
     --unopt|--unoptimized)
       unoptimized_flags="--unoptimized"
       unoptimized_suffix="_unopt"
@@ -146,7 +137,7 @@ then
   headless_flags="--headless"
 fi
 
-all_gn_args="--fuchsia --fuchsia-cpu="${fuchsia_cpu}" --runtime-mode="${runtime_mode}" ${goma_flags} ${unoptimized_flags} ${extra_gn_args[@]}"
+all_gn_args="--fuchsia --fuchsia-cpu="${fuchsia_cpu}" --runtime-mode="${runtime_mode}" ${unoptimized_flags} ${extra_gn_args[@]}"
 engine-info "Building Flutter test with GN args: ${all_gn_args}"
 
 "$ENGINE_DIR"/flutter/tools/gn ${all_gn_args}

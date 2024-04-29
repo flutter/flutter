@@ -191,35 +191,6 @@ void main() {
     expect(events[6].command.contains('--extra-test-arg'), isTrue);
   });
 
-  test('GlobalBuildRunner passes large -j for a goma build', () async {
-    final Build targetBuild = buildConfig.builds[0];
-    final BuildRunner buildRunner = BuildRunner(
-      platform: FakePlatform(operatingSystem: Platform.linux),
-      processRunner: ProcessRunner(
-        // dryRun should not try to spawn any processes.
-        processManager: _fakeProcessManager(),
-      ),
-      abi: ffi.Abi.linuxX64,
-      engineSrcDir: engine.srcDir,
-      build: targetBuild,
-      extraGnArgs: <String>['--goma'],
-      dryRun: true,
-    );
-    final List<RunnerEvent> events = <RunnerEvent>[];
-    void handler(RunnerEvent event) => events.add(event);
-    final bool runResult = await buildRunner.run(handler);
-
-    final String buildName = targetBuild.name;
-
-    expect(runResult, isTrue);
-
-    // Check that the events for the Ninja command are correct.
-    expect(events[2] is RunnerStart, isTrue);
-    expect(events[2].name, equals('$buildName: ninja'));
-    expect(events[2].command.contains('-j'), isTrue);
-    expect(events[2].command.contains('200'), isTrue);
-  });
-
   test('GlobalBuildRunner passes large -j for an rbe build', () async {
     final Build targetBuild = buildConfig.builds[0];
     final BuildRunner buildRunner = BuildRunner(
@@ -427,7 +398,7 @@ void main() {
       abi: ffi.Abi.linuxX64,
       engineSrcDir: engine.srcDir,
       build: targetBuild,
-      extraGnArgs: <String>['--no-lto', '--no-goma', '--rbe'],
+      extraGnArgs: <String>['--no-lto', '--rbe'],
       dryRun: true,
     );
     final List<RunnerEvent> events = <RunnerEvent>[];
@@ -443,10 +414,8 @@ void main() {
     expect(events[0].name, equals('$buildName: GN'));
     expect(events[0].command[0], contains('flutter/tools/gn'));
     expect(events[0].command.contains('--no-lto'), isTrue);
-    expect(events[0].command.contains('--no-goma'), isTrue);
     expect(events[0].command.contains('--rbe'), isTrue);
     expect(events[0].command.contains('--lto'), isFalse);
-    expect(events[0].command.contains('--goma'), isFalse);
     expect(events[0].command.contains('--no-rbe'), isFalse);
     expect(events[1] is RunnerResult, isTrue);
     expect(events[1].name, equals('$buildName: GN'));
