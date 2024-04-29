@@ -5,6 +5,7 @@
 #include "../export.h"
 #include "../wrappers.h"
 #include "third_party/skia/modules/skparagraph/include/ParagraphBuilder.h"
+#include "third_party/skia/modules/skunicode/include/SkUnicode_client.h"
 
 using namespace skia::textlayout;
 using namespace Skwasm;
@@ -12,7 +13,8 @@ using namespace Skwasm;
 SKWASM_EXPORT ParagraphBuilder* paragraphBuilder_create(
     ParagraphStyle* style,
     FlutterFontCollection* collection) {
-  return ParagraphBuilder::make(*style, collection->collection).release();
+  return ParagraphBuilder::make(*style, collection->collection, nullptr)
+      .release();
 }
 
 SKWASM_EXPORT void paragraphBuilder_dispose(ParagraphBuilder* builder) {
@@ -52,6 +54,11 @@ SKWASM_EXPORT void paragraphBuilder_pop(ParagraphBuilder* builder) {
 }
 
 SKWASM_EXPORT Paragraph* paragraphBuilder_build(ParagraphBuilder* builder) {
+  auto [words, graphemeBreaks, lineBreaks] = builder->getClientICUData();
+  auto text = builder->getText();
+  sk_sp<SkUnicode> clientICU =
+      SkUnicodes::Client::Make(text, words, graphemeBreaks, lineBreaks);
+  builder->SetUnicode(clientICU);
   return builder->Build().release();
 }
 
