@@ -22,7 +22,7 @@ class Carousel extends StatefulWidget {
     required this.itemExtent,
     required this.children,
   }) : layout = _CarouselLayout.uncontained,
-       childWeights = null;
+       layoutWeights = null;
 
   /// fullscreen constructor
   const Carousel.fullscreen({
@@ -36,7 +36,7 @@ class Carousel extends StatefulWidget {
     required this.children,
   }) : layout = _CarouselLayout.fullscreen,
        itemExtent = double.infinity,
-       childWeights = null;
+       layoutWeights = null;
 
   /// multi-browse
   const Carousel.multibrowse({
@@ -47,7 +47,7 @@ class Carousel extends StatefulWidget {
     this.controller,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
-    this.childWeights,
+    this.layoutWeights,
     required this.children,
   }) : layout = _CarouselLayout.multiBrowse,
        itemExtent = null;
@@ -62,7 +62,7 @@ class Carousel extends StatefulWidget {
     this.controller,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
-    this.childWeights,
+    this.layoutWeights,
     required this.children,
   }) : layout = centered ? _CarouselLayout.centeredHero : _CarouselLayout.hero,
        itemExtent = null;
@@ -75,7 +75,7 @@ class Carousel extends StatefulWidget {
   final Axis scrollDirection;
   final bool reverse;
   final _CarouselLayout layout;
-  final List<int>? childWeights;
+  final List<int>? layoutWeights;
   final List<Widget> children;
 
   @override
@@ -100,7 +100,7 @@ class _CarouselState extends State<Carousel> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    weights = widget.childWeights ?? getChildWeights();
+    weights = widget.layoutWeights ?? getlayoutWeights();
     itemExtent = getItemExtent();
     _initController();
   }
@@ -108,8 +108,8 @@ class _CarouselState extends State<Carousel> {
   @override
   void didUpdateWidget(covariant Carousel oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.childWeights != oldWidget.childWeights) {
-      weights = widget.childWeights ?? getChildWeights();
+    if (widget.layoutWeights != oldWidget.layoutWeights) {
+      weights = widget.layoutWeights ?? getlayoutWeights();
       _initController();
     }
     if (widget.itemExtent != oldWidget.itemExtent) {
@@ -166,7 +166,7 @@ class _CarouselState extends State<Carousel> {
     }
   }
 
-  List<int>? getChildWeights() {
+  List<int>? getlayoutWeights() {
     return switch (widget.layout) {
       _CarouselLayout.uncontained => null,
       _CarouselLayout.multiBrowse => <int>[3,2,1],
@@ -229,62 +229,37 @@ class _CarouselState extends State<Carousel> {
             offset: position,
             // clipBehavior: widget.clipBehavior,
             slivers: <Widget>[
-              SliverCarousel(
+              // SliverCarousel(
+              //   allowFullyExpand: allowFullyExpand,
+              //   shrinkExtent: widget.shrinkExtent,
+              //   itemExtent: itemExtent,
+              //   weights: weights,
+              //   children: children,
+              // ),
+              if (itemExtent != null) _SliverFixedExtentCarousel(
+                itemExtent: itemExtent!,
+                minExtent: widget.shrinkExtent ?? 0.0,
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) {
+                    return children.elementAt(index);
+                  },
+                  childCount: children.length,
+                ),
+              ),
+              if (weights != null) _SliverWeightedCarousel(
                 allowFullyExpand: allowFullyExpand,
-                shrinkExtent: widget.shrinkExtent,
-                itemExtent: itemExtent,
-                weights: weights,
-                children: children,
+                shrinkExtent: widget.shrinkExtent ?? 0.0,
+                weights: weights!,
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) {
+                    return children.elementAt(index);
+                  },
+                  childCount: children.length,
+                ),
               ),
             ],
           );
         },
-      ),
-    );
-  }
-}
-
-class SliverCarousel extends StatelessWidget {
-  const SliverCarousel({
-    super.key,
-    this.allowFullyExpand,
-    this.shrinkExtent = 0.0,
-    this.itemExtent,
-    this.weights,
-    required this.children,
-  });
-
-  final bool? allowFullyExpand;
-  final double? shrinkExtent;
-  final double? itemExtent;
-  final List<int>? weights;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    if (itemExtent != null) {
-      return _SliverFixedExtentCarousel(
-        itemExtent: itemExtent!,
-        minExtent: shrinkExtent ?? itemExtent!,
-        delegate: SliverChildBuilderDelegate(
-          (BuildContext context, int index) {
-            return children.elementAt(index);
-          },
-          childCount: children.length,
-        ),
-      );
-    }
-    assert(weights != null);
-
-    return _SliverWeightedCarousel(
-      allowFullyExpand: allowFullyExpand!,
-      shrinkExtent: shrinkExtent ?? 0.0,
-      weights: weights!,
-      delegate: SliverChildBuilderDelegate(
-        (BuildContext context, int index) {
-          return children.elementAt(index);
-        },
-        childCount: children.length,
       ),
     );
   }
@@ -303,7 +278,7 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
   @override
   RenderSliverFixedExtentBoxAdaptor createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
-    return RenderSliverFixedExtentCarousel(
+    return _RenderSliverFixedExtentCarousel(
       childManager: element,
       minExtent: minExtent,
       maxExtent: itemExtent,
@@ -311,13 +286,13 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderSliverFixedExtentCarousel renderObject) {
+  void updateRenderObject(BuildContext context, _RenderSliverFixedExtentCarousel renderObject) {
     renderObject.maxExtent = itemExtent;
   }
 }
 
-class RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor {
-  RenderSliverFixedExtentCarousel({
+class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor {
+  _RenderSliverFixedExtentCarousel({
     required super.childManager,
     required double maxExtent,
     required double minExtent,
@@ -788,13 +763,13 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
 
     final double paintExtent = calculatePaintOffset(
       constraints,
-      from: leadingScrollOffset,
+      from: allowFullyExpand ? 0 :leadingScrollOffset,
       to: trailingScrollOffset,
     );
 
     final double cacheExtent = calculateCacheOffset(
       constraints,
-      from: leadingScrollOffset,
+      from: allowFullyExpand ? 0 :leadingScrollOffset,
       to: trailingScrollOffset,
     );
 
