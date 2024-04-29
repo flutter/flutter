@@ -102,7 +102,6 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///  * [MediaQuery.supportsShowingSystemContextMenu], which indicates whether
   ///    this method is supported on the current platform.
   Future<void> show(Rect rect) {
-    assert(defaultTargetPlatform == TargetPlatform.iOS);
     assert(!_isDisposed);
     assert(
       _lastShown == null || _lastShown == this || !_lastShown!._isVisible,
@@ -137,7 +136,6 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///  * [MediaQuery.supportsShowingSystemContextMenu], which indicates whether
   ///    the system context menu is supported on the current platform.
   Future<void> hide() async {
-    assert(defaultTargetPlatform == TargetPlatform.iOS);
     assert(!_isDisposed);
     // This check prevents a given instance from accidentally hiding some other
     // instance, since only one can be visible at a time.
