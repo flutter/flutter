@@ -581,8 +581,15 @@ class _SnackBarState extends State<SnackBar> {
     _heightM3Animation = null;
   }
 
+  bool _debugDisposed = false;
+
   @override
   void dispose() {
+    assert(!_debugDisposed);
+    assert(() {
+      _debugDisposed = true;
+      return true;
+    }());
     widget.animation!.removeStatusListener(_onAnimationStatusChanged);
     _disposeAnimations();
     super.dispose();
@@ -604,6 +611,7 @@ class _SnackBarState extends State<SnackBar> {
 
   @override
   Widget build(BuildContext context) {
+    assert(!_debugDisposed);
     assert(debugCheckHasMediaQuery(context));
     final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
     assert(widget.animation != null);
