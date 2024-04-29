@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 /// Allows access to the system context menu.
@@ -51,6 +50,11 @@ class SystemContextMenuController with SystemContextMenuClient {
   static const MethodChannel _channel = SystemChannels.platform;
 
   static SystemContextMenuController? _lastShown;
+
+  /// The target [Rect] that was last given to [show].
+  ///
+  /// Null if [show] has not been called.
+  Rect? _lastTargetRect;
 
   /// True when the instance most recently [show]n has been hidden by the
   /// system.
@@ -101,23 +105,30 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///  * [hideSystemContextMenu], which hides the menu shown by this method.
   ///  * [MediaQuery.supportsShowingSystemContextMenu], which indicates whether
   ///    this method is supported on the current platform.
-  Future<void> show(Rect rect) {
+  Future<void> show(Rect targetRect) {
     assert(!_isDisposed);
+
+    // Don't show the same thing that's already being shown.
+    if (_lastShown != null && _lastShown!._isVisible && _lastShown!._lastTargetRect == targetRect) {
+      return Future<void>.value();
+    }
+
     assert(
       _lastShown == null || _lastShown == this || !_lastShown!._isVisible,
       'Attempted to show while another instance was still visible.',
     );
 
+    _lastTargetRect = targetRect;
     _lastShown = this;
     _hiddenBySystem = false;
     return _channel.invokeMethod<Map<String, dynamic>>(
       'ContextMenu.showSystemContextMenu',
       <String, dynamic>{
         'targetRect': <String, double>{
-          'x': rect.left,
-          'y': rect.top,
-          'width': rect.width,
-          'height': rect.height,
+          'x': targetRect.left,
+          'y': targetRect.top,
+          'width': targetRect.width,
+          'height': targetRect.height,
         },
       },
     );
