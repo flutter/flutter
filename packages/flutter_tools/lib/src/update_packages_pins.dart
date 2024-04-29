@@ -30,4 +30,5 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'path_provider_android':
       '2.2.1', // https://github.com/flutter/flutter/issues/140796
   'camera_android': '0.10.8+17', // https://github.com/flutter/flutter/issues/146004
+  'dds': '4.1.0', // https://github.com/dart-lang/sdk/issues/55559
 };
