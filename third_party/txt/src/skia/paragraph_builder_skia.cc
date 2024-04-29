@@ -19,6 +19,7 @@
 
 #include "third_party/skia/modules/skparagraph/include/ParagraphStyle.h"
 #include "third_party/skia/modules/skparagraph/include/TextStyle.h"
+#include "third_party/skia/modules/skunicode/include/SkUnicode_icu.h"
 #include "txt/paragraph_style.h"
 
 namespace skt = skia::textlayout;
@@ -50,7 +51,9 @@ ParagraphBuilderSkia::ParagraphBuilderSkia(
     const bool impeller_enabled)
     : base_style_(style.GetTextStyle()), impeller_enabled_(impeller_enabled) {
   builder_ = skt::ParagraphBuilder::make(
-      TxtToSkia(style), font_collection->CreateSktFontCollection());
+      TxtToSkia(style),
+      font_collection->CreateSktFontCollection(),
+      SkUnicodes::ICU::Make());
 }
 
 ParagraphBuilderSkia::~ParagraphBuilderSkia() = default;
