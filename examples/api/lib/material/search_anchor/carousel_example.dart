@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 void main() => runApp(const CarouselExample());
 
@@ -35,38 +37,54 @@ class _CarouselExampleState extends State<CarouselExample> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        body: Center(
-          child: SizedBox(
-            height: 200,
-            child: Carousel.hero(
-              // scrollDirection: Axis.vertical,
-              snap: true,
-              centered: true,
-              // itemExtent: 150,
-              shrinkExtent: 10,
-              // layout: CarouselLayout.multiBrowse,
-              // childWeights: const <int>[3,3,7,2,1], // [3,3,3,2,1], [1,5,1], [1,1,1], [5,1]
-              children: List<Widget>.generate(data.length, (int index) {
-                return Card.outlined(
-                  margin: EdgeInsets.zero,
-                  clipBehavior: Clip.antiAlias,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0)
+        body: ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 200),
+          child: Carousel.hero(
+            // controller: CarouselController(
+            //   initialItem: 7,
+            //   viewportFraction: 1 / ([1,2,3,2,1].sum)
+            // ),
+            // scrollDirection: Axis.vertical,
+            snap: true,
+            centered: true,
+            // reverse: true,
+            // itemExtent: 200,
+            // shri nkExtent: 120,
+            // layout: CarouselLayout.multiBrowse,
+            childWeights: const <int>[1,2,3,2,1], // [3,3,3,2,1], [1,5,1], [1,1,1], [5,1]
+            children: List<Widget>.generate(data.length, (int index) {
+              return Card.outlined(
+                margin: EdgeInsets.zero,
+                clipBehavior: Clip.antiAlias,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0)
+                ),
+                color: Colors.primaries[index % Colors.primaries.length].withOpacity(0.5),
+                child: Center(
+                  child: Text(
+                    'Item ${data[index]}',
+                    style: const TextStyle(color: Colors.white, fontSize: 20),
+                    overflow: TextOverflow.clip,
+                    softWrap: false,
                   ),
-                  color: Colors.primaries[index % Colors.primaries.length].withOpacity(0.5),
-                  child: Center(
-                    child: Text(
-                      'Item ${data[index]}',
-                      style: const TextStyle(color: Colors.white, fontSize: 20),
-                      overflow: TextOverflow.clip,
-                      softWrap: false,
-                    ),
-                  ),
-                );
-              }).toList()),
-          ),
+                ),
+              );
+            }).toList()),
         ),
       ),
     );
   }
 }
+
+// children: List<Widget>.generate(data.length, (int index) {
+//                 return ClipRect(
+//                   child: OverflowBox(
+//                     maxWidth: 500,
+//                     minWidth: 500,
+//                     child: Image(
+//                       fit: BoxFit.cover,
+//                       image: images[index % images.length],
+//                     ),
+//                   ),
+//                 );
+//               }).toList()),
