@@ -168,7 +168,7 @@ void main() {
       expect(result, equals(0));
       expect(testEnv.processHistory[0].command[0],
           contains(path.join('tools', 'gn')));
-      expect(testEnv.processHistory[0].command[3], equals('--rbe'));
+      expect(testEnv.processHistory[0].command[2], equals('--rbe'));
       expect(testEnv.processHistory[1].command[0],
           contains(path.join('reclient', 'bootstrap')));
     } finally {
@@ -351,10 +351,11 @@ void main() {
       ]);
       expect(result, equals(0));
       expect(testEnv.processHistory, containsCommand((List<String> command) {
-        return command.length > 5 &&
+        return command.length > 3 &&
             command[0].contains('ninja') &&
+            command[1].contains('-C') &&
             command[2].endsWith('/host_debug') &&
-            command[5] == 'flutter/fml:fml_arc_unittests';
+            command[3] == 'flutter/fml:fml_arc_unittests';
       }));
     } finally {
       testEnv.cleanup();
@@ -378,12 +379,13 @@ void main() {
       ]);
       expect(result, equals(0));
       expect(testEnv.processHistory, containsCommand((List<String> command) {
-        return command.length > 7 &&
+        return command.length > 5 &&
             command[0].contains('ninja') &&
+            command[1].contains('-C') &&
             command[2].endsWith('/host_debug') &&
-            command[5] == 'flutter/display_list:display_list_unittests' &&
-            command[6] == 'flutter/flow:flow_unittests' &&
-            command[7] == 'flutter/fml:fml_arc_unittests';
+            command[3] == 'flutter/display_list:display_list_unittests' &&
+            command[4] == 'flutter/flow:flow_unittests' &&
+            command[5] == 'flutter/fml:fml_arc_unittests';
       }));
     } finally {
       testEnv.cleanup();

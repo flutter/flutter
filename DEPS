@@ -44,12 +44,6 @@ vars = {
   # See https://github.com/flutter/flutter/wiki/Engine-pre‐submits-and-post‐submits#post-submit
   'clang_version': 'git_revision:725656bdd885483c39f482a01ea25d67acf39c46',
 
-  # The goma version and the clang version can be tightly coupled. If goma
-  # stops working on a clang roll, this may need to be updated using the value
-  # from the 'integration' tag of
-  # https://chrome-infra-packages.appspot.com/p/fuchsia/third_party/goma/client
-  'goma_version': ' git_revision:41b3bcb64014144a844153fd5588c36411fffb56',
-
   'reclient_version': 'git_revision:2c9285bdffcfd1b21afb028d57494ff78761af81',
 
   'gcloud_version': 'version:2@444.0.0.chromium.3',
@@ -130,11 +124,6 @@ vars = {
 
   # Setup Git hooks by default.
   'setup_githooks': True,
-
-  # When this is true, the goma client will be downloaded from cipd, and
-  # the engine build will prefer to use this client over a client that is
-  # specified by GOMA_DIR, or installed in the default goma install location.
-  'use_cipd_goma': False,
 
   # When this is true, the Flutter Engine's configuration files and scripts for
   # RBE will be downloaded from CIPD. This option is only usable by Googlers.
@@ -908,40 +897,6 @@ deps = {
     'dep_type': 'cipd',
   },
 
-  # GOMA
-  'src/flutter/buildtools/mac-x64/goma': {
-    'packages': [
-      {
-        'package': 'fuchsia/third_party/goma/client/mac-amd64',
-        'version': Var('goma_version'),
-      }
-    ],
-    'condition': 'use_cipd_goma and host_os == "mac"',
-    'dep_type': 'cipd',
-  },
-
-  'src/flutter/buildtools/linux-x64/goma': {
-    'packages': [
-      {
-        'package': 'fuchsia/third_party/goma/client/linux-amd64',
-        'version': Var('goma_version'),
-      }
-    ],
-    'condition': 'use_cipd_goma and host_os == "linux"',
-    'dep_type': 'cipd',
-  },
-
-  'src/flutter/buildtools/windows-x64/goma': {
-    'packages': [
-      {
-        'package': 'fuchsia/third_party/goma/client/windows-amd64',
-        'version': Var('goma_version'),
-      }
-    ],
-    'condition': 'use_cipd_goma and download_windows_deps',
-    'dep_type': 'cipd',
-  },
-
   # RBE binaries and configs.
   'src/flutter/buildtools/linux-x64/reclient': {
     'packages': [
@@ -1165,36 +1120,6 @@ hooks = [
     'action': [
       'python3',
       'src/flutter/tools/activate_emsdk.py',
-    ]
-  },
-  {
-    'name': 'Start compiler proxy',
-    'pattern': '.',
-    'condition': 'use_cipd_goma and host_os == "mac"',
-    'action': [
-      'python3',
-      'src/flutter/buildtools/mac-x64/goma/goma_ctl.py',
-      'ensure_start'
-    ]
-  },
-  {
-    'name': 'Start compiler proxy',
-    'pattern': '.',
-    'condition': 'use_cipd_goma and host_os == "linux"',
-    'action': [
-      'python3',
-      'src/flutter/buildtools/linux-x64/goma/goma_ctl.py',
-      'ensure_start'
-    ]
-  },
-  {
-    'name': 'Start compiler proxy',
-    'pattern': '.',
-    'condition': 'use_cipd_goma and download_windows_deps',
-    'action': [
-      'python3',
-      'src/flutter/buildtools/windows-x64/goma/goma_ctl.py',
-      'ensure_start'
     ]
   },
   {

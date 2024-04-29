@@ -35,8 +35,5 @@ $ENGINE_DIR/flutter/tools/fuchsia/devshell/build_and_copy_to_fuchsia.sh --runtim
 engine-info "Testing build_and_copy_to_fuchsia.sh --fuchsia-cpu arm64..."
 $ENGINE_DIR/flutter/tools/fuchsia/devshell/build_and_copy_to_fuchsia.sh --fuchsia-cpu arm64
 
-engine-info "Testing build_and_copy_to_fuchsia.sh --goma..."
-$ENGINE_DIR/flutter/tools/fuchsia/devshell/build_and_copy_to_fuchsia.sh --goma
-
 engine-info "Testing build_and_copy_to_fuchsia.sh --no-prebuilt-dart-sdk..."
 $ENGINE_DIR/flutter/tools/fuchsia/devshell/build_and_copy_to_fuchsia.sh --no-prebuilt-dart-sdk

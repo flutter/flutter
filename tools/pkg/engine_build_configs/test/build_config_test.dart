@@ -23,7 +23,7 @@ int main() {
     final Build globalBuild = buildConfig.builds[0];
     expect(globalBuild.name, equals('build_name'));
     expect(globalBuild.description, equals('build_description'));
-    expect(globalBuild.gn.length, equals(4));
+    expect(globalBuild.gn.length, equals(3));
     expect(globalBuild.gn[0], equals('--gn-arg'));
     expect(globalBuild.droneDimensions.length, equals(1));
     expect(globalBuild.droneDimensions[0], equals('os=Linux'));

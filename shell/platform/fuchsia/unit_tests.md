@@ -24,7 +24,6 @@ $ENGINE_DIR/flutter/tools/fuchsia/devshell/run_unit_tests.sh
 
 - Pass `--unopt` to turn off C++ compiler optimizations.
 - Pass `--count N` to do N test runs. Useful for testing for flakes.
-- Pass `--goma` to accelerate the build if you're a Googler.
 - Pass `--package-filter` to run a specific test package instead of all the test packages. For example:
 
   ```sh
