@@ -340,7 +340,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     SingleActivator(LogicalKeyboardKey.arrowDown): AutocompleteNextOptionIntent(),
   };
 
-  bool get _canShowOptionsView => _focusNode.hasFocus && _selection == null;
+  bool get _canShowOptionsView => _focusNode.hasFocus && _selection == null && _options.isNotEmpty;
 
   void _updateOptionsViewVisibility() {
     if (_canShowOptionsView) {
@@ -353,19 +353,23 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   // Called when _textEditingController changes.
   void _onChangedField() {
     final TextEditingValue value = _textEditingController.value;
-    _afterChangedField(value);
-  }
+    final FutureOr<Iterable<T>> options = widget.optionsBuilder(value);
 
-  enum futureStatus {loading, success, error}
+    if (options is Future){
+      (options as Future<Iterable<T>>).then((Iterable<T> value) => _options = value);
+    }
+    else{
+      _options = options;
+    }
 
-  Future<void> _afterChangedField(TextEditingValue value) async {
-    final Iterable<T> options = await widget.optionsBuilder(value);
-    _options = options;
     _updateHighlight(_highlightedOptionIndex.value);
     final T? selection = _selection;
     if (selection != null && value.text != widget.displayStringForOption(selection)) {
       _selection = null;
     }
+
+    // Make sure the options are no longer hidden if the content of the field
+    // changes (ignore selection changes).
     if (value.text != _lastFieldText) {
       _lastFieldText = value.text;
       _updateOptionsViewVisibility();
@@ -583,3 +587,5 @@ class AutocompleteHighlightedOption extends InheritedNotifier<ValueNotifier<int>
     return context.dependOnInheritedWidgetOfExactType<AutocompleteHighlightedOption>()?.notifier?.value ?? 0;
   }
 }
+
+  enum FutureStatus {loading, success, error}
