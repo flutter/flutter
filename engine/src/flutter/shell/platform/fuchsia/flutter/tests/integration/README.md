@@ -28,8 +28,6 @@ Command-line options:
 * Add `--runtime-mode debug` or `--runtime-mode profile` to switch between JIT and AOT
   builds.  These correspond to a vanilla Fuchsia build and a `--release` Fuchsia build
   respectively.  The default is debug/JIT builds.
-* For Googlers, add the `--goma` argument when using goma, and add the `--xcode-symlinks`
-  argument when using goma on macOS.
 * Remove `--no-lto` if you care about performance or binary size; unfortunately it results
   in a *much* slower build.
 

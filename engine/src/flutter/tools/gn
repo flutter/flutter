@@ -257,78 +257,6 @@ def setup_rbe(args):
   return rbe_gn_args
 
 
-def setup_goma(args):
-  goma_gn_args = {}
-  # If RBE is requested, don't try to use goma.
-  if args.rbe:
-    goma_gn_args['use_goma'] = False
-    goma_gn_args['goma_dir'] = None
-    return goma_gn_args
-
-  # args.goma has three states, True (--goma), False (--no-goma), and
-  # None (default). In True mode, we force GOMA to be used (and fail
-  # if we cannot enable it) unless the selected target definitely does
-  # not support it (in which case we print a warning). In False mode,
-  # we disable GOMA regardless. In None mode, we enable it if we can
-  # autodetect a configuration, and otherwise disable it.
-
-  # When running in CI, the recipes use their own goma install, and take
-  # care of starting and stopping the compiler proxy.
-  running_on_luci = os.environ.get('LUCI_CONTEXT') is not None
-
-  # The GOMA client has no arm64 binary, so run the x64 binary through
-  # Rosetta.
-  buildtools_platform = buildtools_dir()
-  if buildtools_platform == 'mac-arm64':
-    buildtools_platform = 'mac-x64'
-
-  # Prefer the goma fetched by gclient if it exists.
-  cipd_goma_dir = os.path.join(SRC_ROOT, 'flutter', 'buildtools', buildtools_platform, 'goma')
-
-  # Next, if GOMA_DIR is set, use that install.
-  goma_dir = os.environ.get('GOMA_DIR')
-
-  # Finally, look for goma in the install location recommended in our
-  # documentation.
-  goma_home_dir = os.path.join(os.getenv('HOME', ''), 'goma')
-  # GOMA has a different default (home) path on gWindows.
-  if not os.path.exists(goma_home_dir) and sys.platform.startswith(('cygwin', 'win')):
-    goma_home_dir = os.path.join('c:\\', 'src', 'goma', 'goma-win64')
-
-  if args.target_os == 'wasm' or args.web:
-    goma_gn_args['use_goma'] = False
-    goma_gn_args['goma_dir'] = None
-    if args.goma:
-      print('Disabling GOMA for wasm builds, it is not supported yet.')
-  elif args.goma is not False and not running_on_luci and os.path.exists(cipd_goma_dir):
-    goma_gn_args['use_goma'] = True
-    goma_gn_args['goma_dir'] = cipd_goma_dir
-  elif args.goma is not False and goma_dir and os.path.exists(goma_dir):
-    goma_gn_args['use_goma'] = True
-    goma_gn_args['goma_dir'] = goma_dir
-  elif args.goma is not False and os.path.exists(goma_home_dir):
-    goma_gn_args['use_goma'] = True
-    goma_gn_args['goma_dir'] = goma_home_dir
-  elif args.goma:
-    raise Exception(
-        'GOMA was specified but was not found. Set the GOMA_DIR environment '
-        'variable, install goma at $HOME/goma following the instructions at '
-        'https://github.com/flutter/flutter/wiki/Compiling-the-engine, or '
-        'run this script with the --no-goma flag to do a non-goma-enabled '
-        'build.',
-    )
-  else:
-    goma_gn_args['use_goma'] = False
-    goma_gn_args['goma_dir'] = None
-
-  if goma_gn_args['use_goma'] and sys.platform == 'darwin':
-    if (not running_on_luci or args.xcode_symlinks or
-        os.getenv('FLUTTER_GOMA_CREATE_XCODE_SYMLINKS', '0') == '1'):
-      goma_gn_args['create_xcode_symlinks'] = True
-
-  return goma_gn_args
-
-
 # Find the locations of the macOS and iOS SDKs under flutter/prebuilts.
 def setup_apple_sdks():
   sdks_gn_args = {}
@@ -474,8 +402,6 @@ def to_gn_args(args):
 
   gn_args.update(setup_git_versions())
 
-  gn_args.update(setup_goma(args))
-
   gn_args.update(setup_rbe(args))
 
   # If building for WASM, set the GN args using 'to_gn_wasm_args' as most
@@ -566,13 +492,8 @@ def to_gn_args(args):
     gn_args['host_cpu'] = 'x86'
     gn_args['current_cpu'] = 'x86'
 
-  # When building binaries to run on a macOS host (like gen_snapshot), always
-  # use the clang_x64 toolchain, which will run under Rosetta. This is done for
-  # two reasons:
-  #  1. goma currently only supports the clang_x64 toolchain.
-  #  2. gen_snapshot cannot crossbuild from arm64 to x64. Its host architecture
-  #     must be x64 to target x64.
-  # TODO(cbracken): https://github.com/flutter/flutter/issues/103386
+  # TODO(cbracken):
+  # https://github.com/flutter/flutter/issues/103386
   if get_host_os() == 'mac' and not args.force_mac_arm64:
     gn_args['host_cpu'] = 'x64'
 
@@ -1084,7 +1005,7 @@ def parse_args(args):
   parser.add_argument(
       '--xcode-symlinks',
       action='store_true',
-      help='Set to true for builds targeting macOS or iOS when using goma. If '
+      help='Set to true for builds targeting macOS or iOS when using RBE. If '
       'set, symlinks to the Xcode provided sysroot and SDKs will be '
       'created in a generated folder, which will avoid potential backend '
       'errors in Fuchsia RBE. Instead of specifying the flag on each '

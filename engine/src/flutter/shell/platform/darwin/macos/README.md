@@ -31,18 +31,15 @@ you can build the macOS embedder from the `src/flutter` directory using the
 following commands:
 ```sh
 # Perform the host build.
-./tools/gn --unopt --no-goma
-autoninja -C ../out/host_debug_unopt      
+./tools/gn --unopt
+ninja -C ../out/host_debug_unopt
 
 # Perform the macOS target build.
-./tools/gn --unopt --mac --no-goma
-autoninja -C ../out/mac_debug_unopt
+./tools/gn --unopt --mac
+ninja -C ../out/mac_debug_unopt
 ```
 Builds are architecture-specific, and can be controlled by specifying
 `--mac-cpu=arm64` or `--mac-cpu=x64` (default) when invoking `gn`.
-
-Googlers can remove `--no-goma` to make use of the Goma distributed compile
-service.
 
 ## Testing
 
