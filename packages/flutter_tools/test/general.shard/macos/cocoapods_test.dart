@@ -29,7 +29,7 @@ enum _StdioStream {
 }
 
 void main() {
-  late FileSystem fileSystem;
+  late MemoryFileSystem fileSystem;
   late FakeProcessManager fakeProcessManager;
   late CocoaPods cocoaPodsUnderTest;
   late BufferLogger logger;

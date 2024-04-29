@@ -64,7 +64,7 @@ final Platform notMacosPlatform = FakePlatform(
 );
 
 void main() {
-  late FileSystem fileSystem;
+  late MemoryFileSystem fileSystem;
   late TestUsage usage;
   late FakeProcessManager fakeProcessManager;
   late ProcessUtils processUtils;

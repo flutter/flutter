@@ -109,7 +109,7 @@ void main() {
 
   group('hotRestart', () {
     final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
-    late FileSystem fileSystem;
+    late MemoryFileSystem fileSystem;
     late TestUsage testUsage;
     late FakeAnalytics fakeAnalytics;
 
@@ -534,7 +534,7 @@ void main() {
   });
 
   group('hot attach', () {
-    late FileSystem fileSystem;
+    late MemoryFileSystem fileSystem;
     late FakeAnalytics fakeAnalytics;
 
     setUp(() {
@@ -578,7 +578,7 @@ void main() {
   });
 
   group('hot cleanupAtFinish()', () {
-    late FileSystem fileSystem;
+    late MemoryFileSystem fileSystem;
     late FakeAnalytics fakeAnalytics;
 
     setUp(() {

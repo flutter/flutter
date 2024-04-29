@@ -102,7 +102,7 @@ void main() {
   late FakeWebServerDevice webServerDevice;
   late FakeDevice mockDevice;
   late FakeVmServiceHost fakeVmServiceHost;
-  late FileSystem fileSystem;
+  late MemoryFileSystem fileSystem;
   late ProcessManager processManager;
   late TestUsage testUsage;
   late FakeAnalytics fakeAnalytics;

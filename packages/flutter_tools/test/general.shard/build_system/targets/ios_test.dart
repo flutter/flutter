@@ -42,7 +42,7 @@ const List<String> _kSharedConfig = <String>[
 
 void main() {
   late Environment environment;
-  late FileSystem fileSystem;
+  late MemoryFileSystem fileSystem;
   late FakeProcessManager processManager;
   late Artifacts artifacts;
   late BufferLogger logger;

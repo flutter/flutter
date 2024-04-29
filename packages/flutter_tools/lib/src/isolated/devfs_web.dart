@@ -292,7 +292,7 @@ class WebAssetServer implements AssetReader {
       },
       toolConfiguration: ToolConfiguration(
         loadStrategy: ddcModuleSystem
-            ? FrontendServerLegacyStrategyProvider(
+            ? FrontendServerDdcStrategyProvider(
         ReloadConfiguration.none,
         server,
         PackageUriMapper(packageConfig),
