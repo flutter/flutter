@@ -110,7 +110,7 @@ class SystemContextMenuController with SystemContextMenuClient {
 
     _lastShown = this;
     _hiddenBySystem = false;
-    return _channel.invokeMethod<void>(
+    return _channel.invokeMethod<Map<String, dynamic>>(
       'ContextMenu.showSystemContextMenu',
       <String, dynamic>{
         'targetRect': <String, double>{
