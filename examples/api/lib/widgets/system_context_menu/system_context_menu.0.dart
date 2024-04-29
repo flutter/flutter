@@ -18,33 +18,24 @@ class SystemContextMenuExampleApp extends StatelessWidget {
         appBar: AppBar(
           title: const Text('SystemContextMenu Basic Example'),
         ),
-        body: const Center(
-          child: SystemContextMenuBasicExample(),
+        body: Center(
+          child: TextField(
+            contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+              // If supported, show the system context menu.
+              if (SystemContextMenu.isSupported(context)) {
+                return SystemContextMenu.editableText(
+                  editableTextState: editableTextState,
+                );
+              }
+              // Otherwise, show the flutter-rendered context menu for the current
+              // platform.
+              return AdaptiveTextSelectionToolbar.editableText(
+                editableTextState: editableTextState,
+              );
+            },
+          ),
         ),
       ),
-    );
-  }
-}
-
-class SystemContextMenuBasicExample extends StatelessWidget {
-  const SystemContextMenuBasicExample({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
-        // If supported, show the system context menu.
-        if (SystemContextMenu.isSupported(context)) {
-          return SystemContextMenu.editableText(
-            editableTextState: editableTextState,
-          );
-        }
-        // Otherwise, show the flutter-rendered context menu for the current
-        // platform.
-        return AdaptiveTextSelectionToolbar.editableText(
-          editableTextState: editableTextState,
-        );
-      },
     );
   }
 }
