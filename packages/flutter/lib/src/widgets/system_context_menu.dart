@@ -33,7 +33,7 @@ import 'text_selection_toolbar_anchors.dart';
 /// menu where supported and does not show a system notification when the user
 /// presses the "Paste" button.
 ///
-/// ** See code in examples/api/lib/widgets/system_context_menu.0.dart **
+/// ** See code in examples/api/lib/widgets/system_context_menu/system_context_menu.0.dart **
 /// {@end-tool}
 ///
 /// See also:
