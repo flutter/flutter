@@ -739,10 +739,7 @@ class _RailDestinationState extends State<_RailDestination> {
           );
         }
         content = ConstrainedBox(
-          constraints: BoxConstraints(
-            minWidth: widget.minWidth,
-            minHeight: minHeight,
-          ),
+          constraints: BoxConstraints(minWidth: widget.minWidth, minHeight: minHeight),
           child: Padding(
             padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: _horizontalDestinationPadding),
             child: ClipRect(

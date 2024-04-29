@@ -591,7 +591,7 @@ class _PackagesViewState extends State<_PackagesView> {
                         color: Theme.of(context).cardColor,
                         elevation: 4.0,
                         child: ConstrainedBox(
-                          constraints: BoxConstraints.loose(const Size.fromWidth(600.0)),
+                          constraints: const BoxConstraints(maxWidth: 600.0),
                           child: _packagesList(context, selectedId, snapshot.data!, widget.isLateral),
                         ),
                       ),
@@ -888,7 +888,7 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
             color: theme.cardColor,
             elevation: 4.0,
             child: ConstrainedBox(
-              constraints: BoxConstraints.loose(const Size.fromWidth(600.0)),
+              constraints: const BoxConstraints(maxWidth: 600.0),
               child: Localizations.override(
                 locale: const Locale('en', 'US'),
                 context: context,
@@ -1361,8 +1361,8 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
               preferredSize: const Size.fromHeight(kToolbarHeight),
               child: Row(
                 children: <Widget>[
-                  ConstrainedBox(
-                    constraints: BoxConstraints.tightFor(width: masterViewWidth),
+                  SizedBox(
+                    width: masterViewWidth,
                     child: IconTheme(
                       data: Theme.of(context).primaryIconTheme,
                       child: Padding(
@@ -1407,9 +1407,8 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
                       child,
                     ),
                   duration: const Duration(milliseconds: 500),
-                  child: ConstrainedBox(
+                  child: SizedBox.expand(
                     key: ValueKey<Object?>(value ?? widget.initialArguments),
-                    constraints: const BoxConstraints.expand(),
                     child: _DetailView(
                       builder: widget.detailPageBuilder,
                       arguments: value ?? widget.initialArguments,

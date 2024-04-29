@@ -606,8 +606,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 
     return Padding(
       padding: const EdgeInsets.only(top: 16.0),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints.tightFor(height: 48.0),
+      child: SizedBox(
+        height: 48.0,
         child: Row(
           // The Material spec no longer includes a Stepper widget. The continue
           // and cancel button styles have been configured to match the original
