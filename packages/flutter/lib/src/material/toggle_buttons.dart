@@ -738,26 +738,16 @@ class ToggleButtons extends StatelessWidget {
         ?? theme.textTheme.bodyMedium!;
       final BoxConstraints? currentConstraints = constraints
         ?? toggleButtonsTheme.constraints;
-      final Size minimumSize = currentConstraints == null
-        ? const Size.square(kMinInteractiveDimension)
-        : Size(currentConstraints.minWidth, currentConstraints.minHeight);
-      final Size? maximumSize = currentConstraints == null
-        ? null
-        : Size(currentConstraints.maxWidth, currentConstraints.maxHeight);
+      final Size minimumSize = currentConstraints?.smallest
+        ?? const Size.square(kMinInteractiveDimension);
+      final Size? maximumSize = currentConstraints?.biggest;
       final Size minPaddingSize;
       switch (tapTargetSize ?? theme.materialTapTargetSize) {
         case MaterialTapTargetSize.padded:
-          if (direction == Axis.horizontal) {
-            minPaddingSize = const Size(
-              0.0,
-              kMinInteractiveDimension,
-            );
-          } else {
-            minPaddingSize = const Size(
-              kMinInteractiveDimension,
-              0.0,
-            );
-          }
+          minPaddingSize = switch (direction) {
+            Axis.horizontal => const Size(0.0, kMinInteractiveDimension),
+            Axis.vertical   => const Size(kMinInteractiveDimension, 0.0),
+          };
           assert(minPaddingSize.width >= 0.0);
           assert(minPaddingSize.height >= 0.0);
         case MaterialTapTargetSize.shrinkWrap:
@@ -1658,12 +1648,10 @@ class _RenderInputPadding extends RenderShiftedBox {
     }
 
     // Only adjust one axis to ensure the correct button is tapped.
-    Offset center;
-    if (direction == Axis.horizontal) {
-      center = Offset(position.dx, child!.size.height / 2);
-    } else {
-      center = Offset(child!.size.width / 2, position.dy);
-    }
+    final Offset center = switch (direction) {
+      Axis.horizontal => Offset(position.dx, child!.size.height / 2),
+      Axis.vertical   => Offset(child!.size.width / 2, position.dy),
+    };
     return result.addWithRawTransform(
       transform: MatrixUtils.forceToPoint(center),
       position: center,
