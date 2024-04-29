@@ -28,6 +28,7 @@
 #include "third_party/skia/modules/skparagraph/include/ParagraphBuilder.h"
 #include "third_party/skia/modules/skparagraph/include/TypefaceFontProvider.h"
 #include "third_party/skia/modules/skparagraph/utils/TestFontCollection.h"
+#include "third_party/skia/modules/skunicode/include/SkUnicode_icu.h"
 
 namespace sktxt = skia::textlayout;
 
@@ -55,7 +56,7 @@ BENCHMARK_F(SkParagraphFixture, ShortLayout)(benchmark::State& state) {
   text_style.setFontFamilies({SkString("Roboto")});
   text_style.setColor(SK_ColorBLACK);
   auto builder =
-      sktxt::ParagraphBuilder::make(paragraph_style, font_collection_);
+      sktxt::ParagraphBuilder::make(paragraph_style, font_collection_, SkUnicodes::ICU::Make());
   builder->pushStyle(text_style);
   builder->addText(text);
   builder->pop();
@@ -90,7 +91,7 @@ BENCHMARK_F(SkParagraphFixture, LongLayout)(benchmark::State& state) {
   text_style.setFontFamilies({SkString("Roboto")});
   text_style.setColor(SK_ColorBLACK);
   auto builder =
-      sktxt::ParagraphBuilder::make(paragraph_style, font_collection_);
+      sktxt::ParagraphBuilder::make(paragraph_style, font_collection_, SkUnicodes::ICU::Make());
   builder->pushStyle(text_style);
   builder->addText(text);
   builder->pop();
@@ -126,7 +127,7 @@ BENCHMARK_F(SkParagraphFixture, JustifyLayout)(benchmark::State& state) {
   text_style.setFontFamilies({SkString("Roboto")});
   text_style.setColor(SK_ColorBLACK);
   auto builder =
-      sktxt::ParagraphBuilder::make(paragraph_style, font_collection_);
+      sktxt::ParagraphBuilder::make(paragraph_style, font_collection_, SkUnicodes::ICU::Make());
   builder->pushStyle(text_style);
   builder->addText(text);
   builder->pop();
@@ -144,7 +145,7 @@ BENCHMARK_F(SkParagraphFixture, ManyStylesLayout)(benchmark::State& state) {
   text_style.setFontFamilies({SkString("Roboto")});
   text_style.setColor(SK_ColorBLACK);
   auto builder =
-      sktxt::ParagraphBuilder::make(paragraph_style, font_collection_);
+      sktxt::ParagraphBuilder::make(paragraph_style, font_collection_, SkUnicodes::ICU::Make());
   for (int i = 0; i < 1000; ++i) {
     builder->pushStyle(text_style);
     builder->addText(text);
@@ -167,7 +168,7 @@ BENCHMARK_DEFINE_F(SkParagraphFixture, TextBigO)(benchmark::State& state) {
   text_style.setFontFamilies({SkString("Roboto")});
   text_style.setColor(SK_ColorBLACK);
   auto builder =
-      sktxt::ParagraphBuilder::make(paragraph_style, font_collection_);
+      sktxt::ParagraphBuilder::make(paragraph_style, font_collection_, SkUnicodes::ICU::Make());
   builder->pushStyle(text_style);
   builder->addText(u16_text);
   builder->pop();
@@ -191,7 +192,8 @@ BENCHMARK_DEFINE_F(SkParagraphFixture, StylesBigO)(benchmark::State& state) {
   text_style.setColor(SK_ColorBLACK);
   auto builder = sktxt::ParagraphBuilder::make(
       paragraph_style,
-      sk_make_sp<sktxt::TestFontCollection>(txt::GetFontDir()));
+      sk_make_sp<sktxt::TestFontCollection>(txt::GetFontDir()),
+      SkUnicodes::ICU::Make());
   for (int i = 0; i < 1000; ++i) {
     builder->pushStyle(text_style);
     builder->addText(text);
@@ -215,7 +217,7 @@ BENCHMARK_F(SkParagraphFixture, PaintSimple)(benchmark::State& state) {
   text_style.setFontFamilies({SkString("Roboto")});
   text_style.setColor(SK_ColorBLACK);
   auto builder =
-      sktxt::ParagraphBuilder::make(paragraph_style, font_collection_);
+      sktxt::ParagraphBuilder::make(paragraph_style, font_collection_, SkUnicodes::ICU::Make());
   builder->pushStyle(text_style);
   builder->addText(text);
   builder->pop();
@@ -253,7 +255,7 @@ BENCHMARK_F(SkParagraphFixture, PaintLarge)(benchmark::State& state) {
   text_style.setFontFamilies({SkString("Roboto")});
   text_style.setColor(SK_ColorBLACK);
   auto builder =
-      sktxt::ParagraphBuilder::make(paragraph_style, font_collection_);
+      sktxt::ParagraphBuilder::make(paragraph_style, font_collection_, SkUnicodes::ICU::Make());
   builder->pushStyle(text_style);
   builder->addText(text);
   builder->pop();
@@ -278,7 +280,7 @@ BENCHMARK_F(SkParagraphFixture, PaintDecoration)(benchmark::State& state) {
       sktxt::TextDecoration::kLineThrough | sktxt::TextDecoration::kOverline |
       sktxt::TextDecoration::kUnderline));
   auto builder =
-      sktxt::ParagraphBuilder::make(paragraph_style, font_collection_);
+      sktxt::ParagraphBuilder::make(paragraph_style, font_collection_, SkUnicodes::ICU::Make());
   text_style.setDecorationStyle(sktxt::TextDecorationStyle::kSolid);
   builder->pushStyle(text_style);
   builder->addText(text);
@@ -308,7 +310,7 @@ BENCHMARK_F(SkParagraphFixture, SimpleBuilder)(benchmark::State& state) {
   text_style.setColor(SK_ColorBLACK);
   while (state.KeepRunning()) {
     auto builder =
-        sktxt::ParagraphBuilder::make(paragraph_style, font_collection_);
+        sktxt::ParagraphBuilder::make(paragraph_style, font_collection_, SkUnicodes::ICU::Make());
     builder->pushStyle(text_style);
     builder->addText(text);
     builder->pop();
