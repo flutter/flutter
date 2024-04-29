@@ -11,9 +11,29 @@ including cloudtop instances.
 The first step is to add an entry to the `.gclient` file. The entry to add is
 `"use_rbe": True` in the `custom_vars` section. It should look like this:
 
+```
+solutions = [
+  {
+    "managed": False,
+    "name": "src/flutter",
+    "url": "git@github.com:zanderso/engine.git",
+    "custom_deps": {},
+    "custom_vars": {
+      "use_rbe": True,
+    },
+    "deps_file": "DEPS",
+    "safesync_url": "",
+  },
+]
+```
+
 After making this edit, you must be authenticated as a Googler by CIPD so that
 the RBE configurations can be downloaded from the `flutter_internal`
 [CIPD bucket](https://chrome-infra-packages.appspot.com/p/flutter_internal):
+
+```
+cipd auth-login
+```
 
 After authentication successfully, run `gclient sync -D`.
 
@@ -42,6 +62,10 @@ On macOS, before running the `gcloud` command ensure that `python3` is on your
 path, and does not come from e.g. homebrew. The command `which python3` should
 return `/usr/bin/python3`.
 
+```
+gcloud init --project flutter-rbe-prod
+```
+
 ### Listing builds
 
 The builds available to the `et` tool are those specified by the build
@@ -55,13 +79,30 @@ run on CI with the same GN flags and Ninja targets.
 
 To run a build, pass the name of the configuration to the `et build` command:
 
+```
+et build -c host_debug
+```
+
 If RBE is working correctly, you should see logs like the following:
 
+```
+[2024-04-22T09:58:48.643][windows/host_debug: GN]: OK
+[2024-04-22T09:58:59.361][windows/host_debug: RBE startup]: OK
+```
+
 To disable RBE in a build, pass the flag `--no-rbe` to the `build` command.
+
+```
+et build -c host_debug --no-rbe
+```
 
 Since LTO is slow and rarely useful in local builds, `et` disables it by default
 in all builds, even when it is specified by a build configuration. To enable
 it, pass the `--lto` flag to the `build` command.
+
+```
+et build -c host_debug --lto
+```
 
 ### Customizing builds
 
@@ -115,6 +156,10 @@ builds.
 ### Proxy status and debug logs
 
 The status of the local RBE proxy can be queried with the following command
+
+```
+buildtools/mac-arm64/reclient/reproxystatus
+```
 
 It will give output describing the number of actions completed and in progress,
 and the number of remote executions, local executions, and remote cache hits.
