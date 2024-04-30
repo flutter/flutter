@@ -1955,27 +1955,31 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   Map<Type, GestureRecognizerFactory> get _gestures {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
-    if (_axis == null || !enableGestures) {
+    if (!enableGestures) {
       return gestures;
     }
-    if (_axis == Axis.horizontal) {
-      gestures[_HorizontalThumbDragGestureRecognizer] =
-        GestureRecognizerFactoryWithHandlers<_HorizontalThumbDragGestureRecognizer>(
-          () => _HorizontalThumbDragGestureRecognizer(
-            debugOwner: this,
-            customPaintKey: _scrollbarPainterKey,
-          ),
-          _initThumbDragGestureRecognizer,
-        );
-    } else {
-      gestures[_VerticalThumbDragGestureRecognizer] =
-        GestureRecognizerFactoryWithHandlers<_VerticalThumbDragGestureRecognizer>(
-          () => _VerticalThumbDragGestureRecognizer(
-            debugOwner: this,
-            customPaintKey: _scrollbarPainterKey,
-          ),
-          _initThumbDragGestureRecognizer,
-        );
+
+    switch (_axis) {
+      case Axis.horizontal:
+        gestures[_HorizontalThumbDragGestureRecognizer] =
+          GestureRecognizerFactoryWithHandlers<_HorizontalThumbDragGestureRecognizer>(
+            () => _HorizontalThumbDragGestureRecognizer(
+              debugOwner: this,
+              customPaintKey: _scrollbarPainterKey,
+            ),
+            _initThumbDragGestureRecognizer,
+          );
+      case Axis.vertical:
+        gestures[_VerticalThumbDragGestureRecognizer] =
+          GestureRecognizerFactoryWithHandlers<_VerticalThumbDragGestureRecognizer>(
+            () => _VerticalThumbDragGestureRecognizer(
+              debugOwner: this,
+              customPaintKey: _scrollbarPainterKey,
+            ),
+            _initThumbDragGestureRecognizer,
+          );
+      case null:
+        return gestures;
     }
 
     gestures[_TrackTapGestureRecognizer] =
