@@ -1955,7 +1955,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   Map<Type, GestureRecognizerFactory> get _gestures {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
-    if (!enableGestures) {
+    if (_effectiveScrollController == null || !enableGestures) {
       return gestures;
     }
 
