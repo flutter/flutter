@@ -1736,7 +1736,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   @override
-  void onPopInvoked(bool didPop, T? result) {
+  void onPopInvokedWithResult(bool didPop, T? result) {
     for (final PopEntry<Object?> popEntry in _popEntries) {
       popEntry.onPopInvoked(didPop, result);
     }

@@ -111,7 +111,7 @@ class PopScope<T> extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [Route.onPopInvoked], which is similar.
+  ///  * [Route.onPopInvokedWithResult], which is similar.
   final PopInvokedWithResultCallback<T>? onPopInvokedWithResult;
 
   /// Called after a route pop was handled.
