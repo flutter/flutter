@@ -87,6 +87,7 @@ void main() {
       const FakeCommand(
         command: <String>['adb', 'devices', '-l'],
         exitCode: 1,
+        stderr: '<stderr from adb>'
       ),
     ]);
     final AndroidDevices androidDevices = AndroidDevices(
@@ -99,8 +100,15 @@ void main() {
       userMessages: UserMessages(),
     );
 
-    expect(androidDevices.pollingGetDevices(),
-      throwsToolExit(message: RegExp('Unable to run "adb"')));
+    expect(
+      androidDevices.pollingGetDevices(),
+      throwsToolExit(
+        message:
+          'Unable to run "adb", check your Android SDK installation and ANDROID_HOME environment variable: adb\n'
+          'Error details: Process exited abnormally with exit code 1:\n'
+          '<stderr from adb>',
+      ),
+    );
   });
 
   testWithoutContext('AndroidDevices is disabled if feature is disabled', () {
