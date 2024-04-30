@@ -647,13 +647,41 @@ public class FlutterRendererTest {
     assertEquals(1, texture.numImageReaders());
     assertEquals(1, texture.numImages());
 
-    // Invoke the onTrimMemory callback.
+    // Invoke the onTrimMemory callback with level 0.
     // This should do nothing.
     texture.onTrimMemory(0);
     shadowOf(Looper.getMainLooper()).idle();
 
     assertEquals(1, texture.numImageReaders());
     assertEquals(1, texture.numImages());
+    assertEquals(0, texture.numTrims());
+
+    // Invoke the onTrimMemory callback with level 40.
+    // This should result in a trim.
+    texture.onTrimMemory(40);
+    shadowOf(Looper.getMainLooper()).idle();
+
+    assertEquals(0, texture.numImageReaders());
+    assertEquals(0, texture.numImages());
+    assertEquals(1, texture.numTrims());
+
+    // Request the surface, this should result in a new image reader.
+    surface = texture.getSurface();
+    assertEquals(1, texture.numImageReaders());
+    assertEquals(0, texture.numImages());
+    assertEquals(1, texture.numTrims());
+
+    // Render an image.
+    canvas = surface.lockHardwareCanvas();
+    canvas.drawARGB(255, 255, 0, 0);
+    surface.unlockCanvasAndPost(canvas);
+
+    // Let callbacks run, this will produce a single frame.
+    shadowOf(Looper.getMainLooper()).idle();
+
+    assertEquals(1, texture.numImageReaders());
+    assertEquals(1, texture.numImages());
+    assertEquals(1, texture.numTrims());
   }
 
   // A 0x0 ImageReader is a runtime error.

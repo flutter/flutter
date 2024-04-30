@@ -284,6 +284,49 @@ class VirtualDisplayController {
     presentation.dispatchTouchEvent(event);
   }
 
+  public void clearSurface() {
+    virtualDisplay.setSurface(null);
+  }
+
+  public void resetSurface() {
+    final int width = getRenderTargetWidth();
+    final int height = getRenderTargetHeight();
+    final boolean isFocused = getView().isFocused();
+    final SingleViewPresentation.PresentationState presentationState = presentation.detachState();
+
+    // We detach the surface to prevent it being destroyed when releasing the vd.
+    virtualDisplay.setSurface(null);
+    virtualDisplay.release();
+    final DisplayManager displayManager =
+        (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
+    int flags = 0;
+    virtualDisplay =
+        displayManager.createVirtualDisplay(
+            "flutter-vd#" + viewId,
+            width,
+            height,
+            densityDpi,
+            renderTarget.getSurface(),
+            flags,
+            callback,
+            null /* handler */);
+    // Create a new SingleViewPresentation and show() it before we cancel() the existing
+    // presentation. Calling show() and cancel() in this order fixes
+    // https://github.com/flutter/flutter/issues/26345 and maintains seamless transition
+    // of the contents of the presentation.
+    SingleViewPresentation newPresentation =
+        new SingleViewPresentation(
+            context,
+            virtualDisplay.getDisplay(),
+            accessibilityEventsDelegate,
+            presentationState,
+            focusChangeListener,
+            isFocused);
+    newPresentation.show();
+    presentation.cancel();
+    presentation = newPresentation;
+  }
+
   static class OneTimeOnDrawListener implements ViewTreeObserver.OnDrawListener {
     static void schedule(View view, Runnable runnable) {
       OneTimeOnDrawListener listener = new OneTimeOnDrawListener(view, runnable);

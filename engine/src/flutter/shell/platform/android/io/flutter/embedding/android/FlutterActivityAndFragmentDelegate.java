@@ -583,6 +583,7 @@ import java.util.List;
     ensureAlive();
     if (flutterEngine != null) {
       updateSystemUiOverlays();
+      flutterEngine.getPlatformViewsController().onResume();
     } else {
       Log.w(TAG, "onPostResume() invoked before FlutterFragment was attached to an Activity.");
     }
@@ -1020,6 +1021,7 @@ import java.util.List;
         flutterEngine.getSystemChannel().sendMemoryPressureWarning();
       }
       flutterEngine.getRenderer().onTrimMemory(level);
+      flutterEngine.getPlatformViewsController().onTrimMemory(level);
     }
   }
 
