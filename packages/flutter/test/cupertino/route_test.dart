@@ -720,7 +720,7 @@ void main() {
     // Give time to the animation to finish and update its status to
     // AnimationState.completed, so the reverse curved can be used in the next
     // step.
-    await tester.pump(const Duration(milliseconds: 1));
+    await tester.pumpAndSettle(const Duration(milliseconds: 1));
 
     // Exit animation
     await tester.tap(find.text('Close'));
@@ -842,7 +842,7 @@ void main() {
     // Give time to the animation to finish and update its status to
     // AnimationState.completed, so the reverse curved can be used in the next
     // step.
-    await tester.pump(const Duration(milliseconds: 1));
+    await tester.pumpAndSettle(const Duration(milliseconds: 1));
 
     // Exit animation
     await tester.tap(find.text('Close'));
@@ -1120,7 +1120,7 @@ void main() {
     // Give time to the animation to finish and update its status to
     // AnimationState.completed, so the reverse curved can be used in the next
     // step.
-    await tester.pump(const Duration(milliseconds: 1));
+    await tester.pumpAndSettle(const Duration(milliseconds: 1));
 
     tester.state<NavigatorState>(find.byType(Navigator)).pop();
     // The top left corner of the text 1 will go from -800 / 3 = - 266.67 to 0.
