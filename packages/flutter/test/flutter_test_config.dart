@@ -49,10 +49,10 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
     LeakTesting.settings = LeakTesting.settings.withIgnored(
       createdByTestHelpers: true,
       allNotGCed: true,
-      classes: <String>[
-        // TODO(polina-c): CurvedAnimation is leaking, https://github.com/flutter/flutter/issues/145600 [leaks-to-clean]
-        'CurvedAnimation',
-      ],
+      // classes: <String>[
+      //   // TODO(polina-c): CurvedAnimation is leaking, https://github.com/flutter/flutter/issues/145600 [leaks-to-clean]
+      //   'CurvedAnimation',
+      // ],
     );
   }
 
