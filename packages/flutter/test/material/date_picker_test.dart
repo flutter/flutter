@@ -871,9 +871,13 @@ void main() {
       // Test switch button position.
       final Finder switchButtonM3 = find.widgetWithIcon(IconButton, Icons.edit_outlined);
       final Offset switchButtonTopLeft = tester.getTopLeft(switchButtonM3);
+      final Offset switchButtonBottomLeft = tester.getBottomLeft(switchButtonM3);
       final Offset headerTextBottomLeft = tester.getBottomLeft(headerText);
-      expect(switchButtonTopLeft.dx, dialogTopLeft.dx + 4.0);
+      final Offset dialogBottomLeft = tester.getBottomLeft(find.byType(AnimatedContainer));
+      expect(switchButtonTopLeft.dx, dialogTopLeft.dx + 8.0);
       expect(switchButtonTopLeft.dy, headerTextBottomLeft.dy);
+      expect(switchButtonBottomLeft.dx, dialogTopLeft.dx + 8.0);
+      expect(switchButtonBottomLeft.dy, dialogBottomLeft.dy - 6.0);
 
       // Test vertical divider position.
       final Finder divider = find.byType(VerticalDivider);
