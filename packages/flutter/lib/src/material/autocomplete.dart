@@ -68,6 +68,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.optionsViewBuilder,
     this.optionsViewOpenDirection = OptionsViewOpenDirection.down,
     this.initialValue,
+    this.shouldReloadOptionsView,
   });
 
   /// {@macro flutter.widgets.RawAutocomplete.displayStringForOption}
@@ -105,6 +106,15 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// {@macro flutter.widgets.RawAutocomplete.initialValue}
   final TextEditingValue? initialValue;
 
+  /// If the options view overlay should be shown depending on the text editing
+  /// value.
+  ///
+  /// This is useful if one wants to display a custom options view on
+  /// first focus, to display a loading message while waiting for
+  /// options to be fetched over the network,
+  /// or to display a message if no options are found.
+  final bool Function(TextEditingValue, FutureStatus)? shouldReloadOptionsView;
+
   static Widget _defaultFieldViewBuilder(BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
     return _AutocompleteField(
       focusNode: focusNode,
@@ -131,6 +141,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
         );
       },
       onSelected: onSelected,
+      shouldReloadOptionsView: shouldReloadOptionsView ?? (TextEditingValue value, FutureStatus status) => false,
     );
   }
 }
