@@ -425,7 +425,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   bool isDisposed = false;
 
   void _updateCurveDirection(AnimationStatus status) {
-    assert(!_debugDisposed);
+    assert(!isDisposed);
     _curveDirection = switch (status) {
       AnimationStatus.dismissed || AnimationStatus.completed => null,
       AnimationStatus.forward || AnimationStatus.reverse => _curveDirection ?? status,
@@ -436,15 +436,9 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
     return reverseCurve == null || (_curveDirection ?? parent.status) != AnimationStatus.reverse;
   }
 
-  bool _debugDisposed = false;
-
   /// Cleans up any listeners added by this CurvedAnimation.
   void dispose() {
-    assert(!_debugDisposed);
-    assert(() {
-      _debugDisposed = true;
-      return true;
-    }());
+    assert(!isDisposed);
     // TODO(polina-c): stop duplicating code across disposables
     // https://github.com/flutter/flutter/issues/137435
     if (kFlutterMemoryAllocationsEnabled) {
@@ -456,7 +450,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
 
   @override
   double get value {
-    assert(!_debugDisposed);
+    assert(!isDisposed);
     final Curve? activeCurve = _useForwardCurve ? curve : reverseCurve;
 
     final double t = parent.value;
