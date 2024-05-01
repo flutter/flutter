@@ -60,6 +60,9 @@ class SurfaceControl {
   /// @brief      Remove the surface control from the hierarchy of nodes
   ///             presented by the system compositor.
   ///
+  ///             This is called implicitly when the surface control is
+  ///             collected.
+  ///
   /// @return     `true` If the control will be removed from the hierarchy of
   ///             nodes presented by the system compositor.
   ///

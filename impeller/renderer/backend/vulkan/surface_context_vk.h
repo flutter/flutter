@@ -72,6 +72,8 @@ class SurfaceContextVK : public Context,
   [[nodiscard]] bool SetWindowSurface(vk::UniqueSurfaceKHR surface,
                                       const ISize& size);
 
+  [[nodiscard]] bool SetSwapchain(std::shared_ptr<SwapchainVK> swapchain);
+
   std::unique_ptr<Surface> AcquireNextSurface();
 
   /// @brief Mark the current swapchain configuration as dirty, forcing it to be
@@ -80,13 +82,9 @@ class SurfaceContextVK : public Context,
 
   void InitializeCommonlyUsedShadersIfNeeded() const override;
 
-#ifdef FML_OS_ANDROID
-  vk::UniqueSurfaceKHR CreateAndroidSurface(ANativeWindow* window) const;
-#endif  // FML_OS_ANDROID
-
   const vk::Device& GetDevice() const;
 
-  const ContextVK& GetParent() const;
+  const std::shared_ptr<ContextVK>& GetParent() const;
 
  private:
   std::shared_ptr<ContextVK> parent_;
