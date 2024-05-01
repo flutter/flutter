@@ -153,9 +153,9 @@ void main() {
           'flutter',
           'run',
           '--local-engine',
-          'linux/android_debug_arm64',
+          'android_debug_arm64',
           '--local-engine-host',
-          'linux/host_debug',
+          'host_debug',
           '-d',
           'emulator'
         ]));
