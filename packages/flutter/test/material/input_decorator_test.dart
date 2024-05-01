@@ -5046,6 +5046,49 @@ void main() {
     expect(getOpacity(tester, prefixText), 1.0);
   });
 
+  testWidgets('Prefix and suffix are not visible when decorator is empty', (WidgetTester tester) async {
+    const String prefixText = 'Prefix';
+    const String suffixText = 'Suffix';
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        decoration: const InputDecoration(
+          filled: true,
+          labelText: labelText,
+          prefixText: prefixText,
+          suffixText: suffixText,
+        ),
+      ),
+    );
+
+    // Prefix and suffix are hidden.
+    expect(getOpacity(tester, prefixText), 0.0);
+    expect(getOpacity(tester, suffixText), 0.0);
+  });
+
+  testWidgets('Prefix and suffix are visible when decorator is empty and floating behavior is FloatingBehavior.always', (WidgetTester tester) async {
+    const String prefixText = 'Prefix';
+    const String suffixText = 'Suffix';
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        decoration: const InputDecoration(
+          filled: true,
+          labelText: labelText,
+          prefixText: prefixText,
+          suffixText: suffixText,
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+        ),
+      ),
+    );
+
+    // Prefix and suffix are visible.
+    expect(getOpacity(tester, prefixText), 1.0);
+    expect(getOpacity(tester, suffixText), 1.0);
+  });
+
   testWidgets('OutlineInputBorder and InputDecorator long labels and in Floating, the width should ignore the icon width', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/64427.
     const String labelText = 'Flutter is Google’s UI toolkit for building beautiful, natively compiled applications for mobile, web, and desktop from a single codebase.';
