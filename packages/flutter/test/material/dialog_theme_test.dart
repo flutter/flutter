@@ -73,6 +73,7 @@ void main() {
       actionsPadding: EdgeInsets.all(8.0),
       barrierColor: Color(0xff000005),
       insetPadding: EdgeInsets.all(20.0),
+      clipBehavior: Clip.antiAlias,
     ).debugFillProperties(builder);
     final List<String> description = builder.properties
         .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
@@ -89,6 +90,7 @@ void main() {
       'actionsPadding: EdgeInsets.all(8.0)',
       'barrierColor: Color(0xff000005)',
       'insetPadding: EdgeInsets.all(20.0)',
+      'clipBehavior: Clip.antiAlias'
     ]);
   });
 
@@ -547,5 +549,55 @@ void main() {
         screenRect.bottom - dialogTheme.insetPadding!.bottom,
       ),
     );
+  });
+
+  testWidgets('DialogTheme.clipBehavior updates the dialogs clip behavior', (WidgetTester tester) async {
+    const DialogTheme dialogTheme = DialogTheme(
+      clipBehavior: Clip.hardEdge
+    );
+    const Dialog dialog = Dialog(child: Placeholder());
+
+    await tester.pumpWidget(_appWithDialog(
+      tester,
+      dialog,
+      theme: ThemeData(dialogTheme: dialogTheme),
+    ));
+
+    final Material materialWidget = _getMaterialFromDialog(tester);
+    expect(materialWidget.clipBehavior, Clip.hardEdge);
+  });
+
+  testWidgets('Material3 - Dialog.clipBehavior takes priority over theme', (WidgetTester tester) async {
+    const Dialog dialog = Dialog(
+      clipBehavior: Clip.antiAlias,
+      child: Placeholder()
+    );
+    final ThemeData theme = ThemeData(
+      useMaterial3: true,
+      dialogTheme: const DialogTheme(clipBehavior: Clip.hardEdge),
+    );
+
+    await tester.pumpWidget(
+      _appWithDialog(tester, dialog, theme: theme),
+    );
+    final Material materialWidget = _getMaterialFromDialog(tester);
+    expect(materialWidget.clipBehavior, Clip.antiAlias);
+  });
+
+  testWidgets('Material2 - Dialog.clipBehavior takes priority over theme', (WidgetTester tester) async {
+    const Dialog dialog = Dialog(
+      clipBehavior: Clip.antiAlias,
+      child: Placeholder()
+    );
+    final ThemeData theme = ThemeData(
+      useMaterial3: false,
+      dialogTheme: const DialogTheme(clipBehavior: Clip.hardEdge),
+    );
+
+    await tester.pumpWidget(
+      _appWithDialog(tester, dialog, theme: theme),
+    );
+    final Material materialWidget = _getMaterialFromDialog(tester);
+    expect(materialWidget.clipBehavior, Clip.antiAlias);
   });
 }
