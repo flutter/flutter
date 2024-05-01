@@ -3399,6 +3399,7 @@ void main() {
     // This is a regression test for
     // https://github.com/flutter/flutter/issues/130198.
     final PageController pageController = PageController();
+    addTearDown(pageController.dispose);
     const String testValue = 'abc def ghi jkl mno pqr stu vwx yz';
 
     await tester.pumpWidget(
