@@ -970,16 +970,14 @@ class _IconButtonM3 extends ButtonStyleButton {
   @override
   ButtonStyle? themeStyleOf(BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-
-    bool isIconThemeDefault(Color? color) {
-      if (isDark) {
-        return identical(color, kDefaultIconLightColor);
-      }
-      return identical(color, kDefaultIconDarkColor);
-    }
-    final bool isDefaultColor = isIconThemeDefault(iconTheme.color);
     final bool isDefaultSize = iconTheme.size == const IconThemeData.fallback().size;
+    final bool isDefaultColor = identical(
+      iconTheme.color,
+      switch (Theme.of(context).brightness) {
+        Brightness.light => kDefaultIconDarkColor,
+        Brightness.dark => kDefaultIconLightColor,
+      },
+    );
 
     final ButtonStyle iconThemeStyle = IconButton.styleFrom(
       foregroundColor: isDefaultColor ? null : iconTheme.color,
