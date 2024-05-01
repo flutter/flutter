@@ -11,6 +11,7 @@
 #include "impeller/renderer/backend/vulkan/texture_source_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/backend/vulkan/yuv_conversion_vk.h"
+#include "impeller/toolkit/android/hardware_buffer.h"
 
 #include <android/hardware_buffer.h>
 #include <android/hardware_buffer_jni.h>
@@ -33,9 +34,13 @@ class ContextVK;
 ///
 class AHBTextureSourceVK final : public TextureSourceVK {
  public:
-  AHBTextureSourceVK(const std::shared_ptr<ContextVK>& context,
+  AHBTextureSourceVK(const std::shared_ptr<Context>& context,
                      struct AHardwareBuffer* hardware_buffer,
                      const AHardwareBuffer_Desc& hardware_buffer_desc);
+
+  AHBTextureSourceVK(const std::shared_ptr<Context>& context,
+                     std::unique_ptr<android::HardwareBuffer> backing_store,
+                     bool is_swapchain_image);
 
   // |TextureSourceVK|
   ~AHBTextureSourceVK() override;
@@ -57,12 +62,16 @@ class AHBTextureSourceVK final : public TextureSourceVK {
   // |TextureSourceVK|
   std::shared_ptr<YUVConversionVK> GetYUVConversion() const override;
 
+  const android::HardwareBuffer* GetBackingStore() const;
+
  private:
+  std::unique_ptr<android::HardwareBuffer> backing_store_;
   vk::UniqueDeviceMemory device_memory_ = {};
   vk::UniqueImage image_ = {};
   vk::UniqueImageView image_view_ = {};
   std::shared_ptr<YUVConversionVK> yuv_conversion_ = {};
   bool needs_yuv_conversion_ = false;
+  bool is_swapchain_image_ = false;
   bool is_valid_ = false;
 
   AHBTextureSourceVK(const AHBTextureSourceVK&) = delete;

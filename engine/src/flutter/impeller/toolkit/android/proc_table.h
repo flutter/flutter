@@ -44,7 +44,9 @@ namespace impeller::android {
   INVOKE(AHardwareBuffer_fromHardwareBuffer, 26) \
   INVOKE(AHardwareBuffer_getId, 31)              \
   INVOKE(AHardwareBuffer_isSupported, 29)        \
+  INVOKE(AHardwareBuffer_lock, 26)               \
   INVOKE(AHardwareBuffer_release, 26)            \
+  INVOKE(AHardwareBuffer_unlock, 26)             \
   INVOKE(ANativeWindow_acquire, 0)               \
   INVOKE(ANativeWindow_getHeight, 0)             \
   INVOKE(ANativeWindow_getWidth, 0)              \

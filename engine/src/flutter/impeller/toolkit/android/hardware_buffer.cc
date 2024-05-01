@@ -25,13 +25,26 @@ static AHardwareBuffer_Desc ToAHardwareBufferDesc(
   ahb_desc.format = ToAHardwareBufferFormat(desc.format);
   ahb_desc.layers = 1u;
   if (desc.usage & HardwareBufferUsageFlags::kFrameBufferAttachment) {
-    ahb_desc.usage |= AHARDWAREBUFFER_USAGE_GPU_FRAMEBUFFER;
+    ahb_desc.usage |= (AHARDWAREBUFFER_USAGE_GPU_FRAMEBUFFER |
+                       AHARDWAREBUFFER_USAGE_GPU_COLOR_OUTPUT);
   }
   if (desc.usage & HardwareBufferUsageFlags::kCompositorOverlay) {
     ahb_desc.usage |= AHARDWAREBUFFER_USAGE_COMPOSER_OVERLAY;
   }
   if (desc.usage & HardwareBufferUsageFlags::kSampledImage) {
     ahb_desc.usage |= AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE;
+  }
+  if (desc.usage & HardwareBufferUsageFlags::kCPUReadRarely) {
+    ahb_desc.usage |= AHARDWAREBUFFER_USAGE_CPU_READ_RARELY;
+  }
+  if (desc.usage & HardwareBufferUsageFlags::kCPUReadOften) {
+    ahb_desc.usage |= AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN;
+  }
+  if (desc.usage & HardwareBufferUsageFlags::kCPUWriteRarely) {
+    ahb_desc.usage |= AHARDWAREBUFFER_USAGE_CPU_WRITE_RARELY;
+  }
+  if (desc.usage & HardwareBufferUsageFlags::kCPUWriteOften) {
+    ahb_desc.usage |= AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN;
   }
   return ahb_desc;
 }
@@ -119,6 +132,39 @@ std::optional<AHardwareBuffer_Desc> HardwareBuffer::Describe(
   AHardwareBuffer_Desc desc = {};
   GetProcTable().AHardwareBuffer_describe(buffer, &desc);
   return desc;
+}
+
+void* HardwareBuffer::Lock(CPUAccessType type) const {
+  if (!is_valid_ || !GetProcTable().AHardwareBuffer_lock) {
+    return nullptr;
+  }
+  uint64_t usage = 0;
+  switch (type) {
+    case CPUAccessType::kRead:
+      usage |= AHARDWAREBUFFER_USAGE_CPU_READ_MASK;
+      break;
+    case CPUAccessType::kWrite:
+      usage |= AHARDWAREBUFFER_USAGE_CPU_WRITE_MASK;
+      break;
+  }
+  void* buffer = nullptr;
+  const auto result = GetProcTable().AHardwareBuffer_lock(  //
+      buffer_.get(),                                        // buffer
+      usage,                                                // usage
+      -1,                                                   // fence
+      nullptr,                                              // rect
+      &buffer                                               // out-addr
+  );
+  return result == 0 ? buffer : nullptr;
+}
+
+bool HardwareBuffer::Unlock() const {
+  if (!is_valid_ || !GetProcTable().AHardwareBuffer_unlock) {
+    return false;
+  }
+  const auto result =
+      GetProcTable().AHardwareBuffer_unlock(buffer_.get(), nullptr);
+  return result == 0;
 }
 
 }  // namespace impeller::android

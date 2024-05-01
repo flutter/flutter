@@ -52,15 +52,18 @@ bool SurfaceTransaction::Apply(OnCompleteCallback callback) {
 }
 
 bool SurfaceTransaction::SetContents(const SurfaceControl* control,
-                                     const HardwareBuffer* buffer) {
+                                     const HardwareBuffer* buffer,
+                                     fml::UniqueFD acquire_fence) {
   if (control == nullptr || buffer == nullptr) {
     VALIDATION_LOG << "Invalid control or buffer.";
     return false;
   }
-  GetProcTable().ASurfaceTransaction_setBuffer(transaction_.get(),    //
-                                               control->GetHandle(),  //
-                                               buffer->GetHandle(),   //
-                                               -1);
+  GetProcTable().ASurfaceTransaction_setBuffer(
+      transaction_.get(),                                      //
+      control->GetHandle(),                                    //
+      buffer->GetHandle(),                                     //
+      acquire_fence.is_valid() ? acquire_fence.release() : -1  //
+  );
   return true;
 }
 
