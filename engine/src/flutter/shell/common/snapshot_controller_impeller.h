@@ -16,8 +16,13 @@ class SnapshotControllerImpeller : public SnapshotController {
       const SnapshotController::Delegate& delegate)
       : SnapshotController(delegate) {}
 
-  sk_sp<DlImage> MakeRasterSnapshot(sk_sp<DisplayList> display_list,
-                                    SkISize size) override;
+  void MakeRasterSnapshot(
+      sk_sp<DisplayList> display_list,
+      SkISize picture_size,
+      std::function<void(const sk_sp<DlImage>&)> callback) override;
+
+  sk_sp<DlImage> MakeRasterSnapshotSync(sk_sp<DisplayList> display_list,
+                                        SkISize picture_size) override;
 
   sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) override;
 
@@ -25,9 +30,6 @@ class SnapshotControllerImpeller : public SnapshotController {
       const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) override;
 
  private:
-  sk_sp<DlImage> DoMakeRasterSnapshot(const sk_sp<DisplayList>& display_list,
-                                      SkISize size);
-
   FML_DISALLOW_COPY_AND_ASSIGN(SnapshotControllerImpeller);
 };
 

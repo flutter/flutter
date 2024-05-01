@@ -643,8 +643,14 @@ class Rasterizer final : public SnapshotDelegate,
       const SkImageInfo& image_info) override;
 
   // |SnapshotDelegate|
-  sk_sp<DlImage> MakeRasterSnapshot(sk_sp<DisplayList> display_list,
-                                    SkISize picture_size) override;
+  void MakeRasterSnapshot(
+      sk_sp<DisplayList> display_list,
+      SkISize picture_size,
+      std::function<void(sk_sp<DlImage>)> callback) override;
+
+  // |SnapshotDelegate|
+  sk_sp<DlImage> MakeRasterSnapshotSync(sk_sp<DisplayList> display_list,
+                                        SkISize picture_size) override;
 
   // |SnapshotDelegate|
   sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) override;
