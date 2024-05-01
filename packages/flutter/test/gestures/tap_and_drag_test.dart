@@ -682,9 +682,13 @@ void main() {
     tester.route(downB);
     tester.route(pointer.move(const Offset(40.0, 45.0)));
     tester.route(pointer.up());
-    expect(events, <String>[
-      'panstart',
-      'panend']);
+    expect(
+      events,
+      <String>[
+        'panstart',
+        'panend',
+      ],
+    );
   });
 
   testGesture('Beats LongPressGestureRecognizer on a consecutive tap greater than one', (GestureTester tester) {
