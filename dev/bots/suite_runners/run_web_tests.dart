@@ -143,11 +143,6 @@ class WebTestsSuite {
       ],
 
       // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
-      () => _runWebE2eTest('platform_messages_integration', buildMode: 'debug', renderer: 'canvaskit'),
-      () => _runWebE2eTest('platform_messages_integration', buildMode: 'profile', renderer: 'html'),
-      () => _runWebE2eTest('platform_messages_integration', buildMode: 'release', renderer: 'html'),
-
-      // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
       () => _runWebE2eTest('profile_diagnostics_integration', buildMode: 'debug', renderer: 'html'),
       () => _runWebE2eTest('profile_diagnostics_integration', buildMode: 'profile', renderer: 'canvaskit'),
       () => _runWebE2eTest('profile_diagnostics_integration', buildMode: 'release', renderer: 'html'),
