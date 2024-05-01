@@ -175,7 +175,7 @@ void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
               SkRect::MakeWH(wrapper->size_.width(), wrapper->size_.height()),
               wrapper->texture_registry_);
         }
-        auto snapshot = snapshot_delegate->MakeRasterSnapshot(
+        auto snapshot = snapshot_delegate->MakeRasterSnapshotSync(
             wrapper->display_list_, wrapper->size_);
         if (!snapshot) {
           std::scoped_lock lock(wrapper->error_mutex_);

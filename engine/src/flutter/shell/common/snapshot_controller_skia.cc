@@ -49,6 +49,13 @@ sk_sp<SkImage> DrawSnapshot(
 }
 }  // namespace
 
+void SnapshotControllerSkia::MakeRasterSnapshot(
+    sk_sp<DisplayList> display_list,
+    SkISize picture_size,
+    std::function<void(const sk_sp<DlImage>&)> callback) {
+  callback(MakeRasterSnapshotSync(display_list, picture_size));
+}
+
 sk_sp<DlImage> SnapshotControllerSkia::DoMakeRasterSnapshot(
     SkISize size,
     std::function<void(SkCanvas*)> draw_callback) {
@@ -129,7 +136,7 @@ sk_sp<DlImage> SnapshotControllerSkia::DoMakeRasterSnapshot(
   return DlImage::Make(result);
 }
 
-sk_sp<DlImage> SnapshotControllerSkia::MakeRasterSnapshot(
+sk_sp<DlImage> SnapshotControllerSkia::MakeRasterSnapshotSync(
     sk_sp<DisplayList> display_list,
     SkISize size) {
   return DoMakeRasterSnapshot(size, [display_list](SkCanvas* canvas) {
