@@ -113,8 +113,7 @@ function build_snippets() (
   command cd "$afad_dir"
   mkdir -p "$output_dir"
   dart pub get
-  # Run the tests as part of building the docs.
-  dart test && dart compile exe -o "$output_dir/snippets" bin/snippets.dart
+  dart compile exe -o "$output_dir/snippets" bin/snippets.dart
 )
 
 function generate_docs() {

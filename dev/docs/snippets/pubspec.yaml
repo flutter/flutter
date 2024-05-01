@@ -16,3 +16,6 @@ dependencies:
 
 dev_dependencies:
   test: ^1.25.2
+
+executables:
+  snippets:
