@@ -505,7 +505,7 @@ class ExpansionTile extends StatefulWidget {
 
   /// {@macro flutter.material.inkwell.overlayColor}
   final MaterialStateProperty<Color?>? overlayColor;
-  
+
   /// If provided, the controller can be used to expand and collapse tiles.
   ///
   /// In cases were control over the tile's state is needed from a callback triggered
