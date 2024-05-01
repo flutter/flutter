@@ -1551,7 +1551,7 @@ String generateFakePubspec(
     });
   }
   if (verbose && kExplicitlyExcludedPackages.isNotEmpty) {
-    globals.printStatus('WARNING: the following packages are explicitly excluded from version');
+    globals.printStatus('WARNING: the following packages are explicitly excluded from version pinning');
     for (final String package in kExplicitlyExcludedPackages) {
       globals.printStatus('  - $package');
     }
