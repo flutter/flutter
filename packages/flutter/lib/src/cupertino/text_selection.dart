@@ -143,9 +143,10 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
             ..translate(-desiredSize.width / 2, -desiredSize.height / 2),
           child: handle,
         );
-      // iOS doesn't draw anything for collapsed selections.
+      // iOS should draw an invisible box so the handle can still receive gestures
+      // on collapsed selections.
       case TextSelectionHandleType.collapsed:
-        return const SizedBox.shrink();
+        return SizedBox.fromSize(size: getHandleSize(textLineHeight));
     }
   }
 
