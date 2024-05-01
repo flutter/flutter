@@ -366,7 +366,7 @@ abstract class Route<T> extends _RoutePlaceholder {
   /// will still be called. The `didPop` parameter indicates whether or not the
   /// back navigation actually happened successfully.
   /// {@endtemplate}
-  void onPopInvokedWithResult(bool didPop, T? result) => onPopInvoked(didPop)
+  void onPopInvokedWithResult(bool didPop, T? result) => onPopInvoked(didPop);
 
   /// Whether calling [didPop] would return false.
   bool get willHandlePopInternally => false;
