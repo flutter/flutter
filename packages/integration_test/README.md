@@ -56,7 +56,7 @@ See the [extended driver](https://github.com/flutter/flutter/blob/main/packages/
 
 Your package should have a structure that looks like this:
 
-```
+```text
 lib/
   ...
 integration_test/
@@ -224,7 +224,7 @@ physical):
 Note:
 To use `--dart-define` with `gradlew` you must `base64` encode all parameters,
 and pass them to gradle in a comma separated list:
-```bash
+```sh
 ./gradlew project:task -Pdart-defines="{base64(key=value)},[...]"
 ```
 
@@ -238,7 +238,7 @@ to set up a project.
 To run a test on Android devices using Firebase Test Lab, use gradle commands to build an
 instrumentation test for Android, after creating `androidTest` as suggested in the last section.
 
-```bash
+```sh
 pushd android
 # flutter build generates files in android/ for building the app
 flutter build apk
@@ -250,7 +250,7 @@ popd
 Upload the build apks Firebase Test Lab, making sure to replace <PATH_TO_KEY_FILE>,
 <PROJECT_NAME>, <RESULTS_BUCKET>, and <RESULTS_DIRECTORY> with your values.
 
-```bash
+```sh
 gcloud auth activate-service-account --key-file=<PATH_TO_KEY_FILE>
 gcloud --quiet config set project <PROJECT_NAME>
 gcloud firebase test android run --type instrumentation \
