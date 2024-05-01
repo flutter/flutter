@@ -52,10 +52,17 @@ struct ConfigDescriptor {
   SurfaceType surface_type = SurfaceType::kPBuffer;
 };
 
+class Display;
+
+//------------------------------------------------------------------------------
+/// @brief      An EGL config. These are returned by the display to indicate
+///             support for a specific config descriptor.
+///
+///             There is no ability to construct these manually except for
+///             testing.
+///
 class Config {
  public:
-  Config(ConfigDescriptor descriptor, EGLConfig config);
-
   ~Config();
 
   bool IsValid() const;
@@ -63,6 +70,9 @@ class Config {
   const ConfigDescriptor& GetDescriptor() const;
 
   const EGLConfig& GetHandle() const;
+
+  // Do not use. Only for testing.
+  Config(ConfigDescriptor descriptor, EGLConfig config);
 
  private:
   const ConfigDescriptor desc_;

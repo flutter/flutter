@@ -66,7 +66,7 @@ std::unique_ptr<Context> Display::CreateContext(const Config& config,
     return nullptr;
   }
 
-  return std::make_unique<Context>(display_, context);
+  return std::unique_ptr<Context>(new Context(display_, context));
 }
 
 std::unique_ptr<Config> Display::ChooseConfig(ConfigDescriptor config) const {
@@ -182,7 +182,7 @@ std::unique_ptr<Surface> Display::CreateWindowSurface(
     IMPELLER_LOG_EGL_ERROR;
     return nullptr;
   }
-  return std::make_unique<Surface>(display_, surface);
+  return std::unique_ptr<Surface>(new Surface(display_, surface));
 }
 
 std::unique_ptr<Surface> Display::CreatePixelBufferSurface(const Config& config,
@@ -203,7 +203,7 @@ std::unique_ptr<Surface> Display::CreatePixelBufferSurface(const Config& config,
     IMPELLER_LOG_EGL_ERROR;
     return nullptr;
   }
-  return std::make_unique<Surface>(display_, surface);
+  return std::unique_ptr<Surface>(new Surface(display_, surface));
 }
 
 }  // namespace egl
