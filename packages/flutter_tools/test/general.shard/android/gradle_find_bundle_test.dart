@@ -15,7 +15,7 @@ import '../../src/common.dart';
 import '../../src/fakes.dart';
 
 void main() {
-  late FileSystem fileSystem;
+  late MemoryFileSystem fileSystem;
   late FakeAnalytics fakeAnalytics;
 
   setUp(() {
