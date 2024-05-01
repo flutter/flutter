@@ -162,7 +162,12 @@ class _PopScopeState<T> extends State<PopScope<T>> implements PopEntry<T> {
   ModalRoute<dynamic>? _route;
 
   @override
-  void onPopInvoked(bool didPop, T? result) {
+  void onPopInvoked(bool didPop) {
+    throw UnimplementedError();
+  }
+
+  @override
+  void onPopInvokedWithResult(bool didPop, T? result) {
     widget._callPopInvoked(didPop, result);
   }
 
