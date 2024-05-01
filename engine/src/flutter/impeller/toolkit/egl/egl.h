@@ -14,6 +14,12 @@
 namespace impeller {
 namespace egl {
 
+//------------------------------------------------------------------------------
+/// @brief      Creates a proc address resolver that resolves function pointers
+///             to EGL and OpenGL (ES) procs.
+///
+/// @return     The resolver if one can be created.
+///
 std::function<void*(const char*)> CreateProcAddressResolver();
 
 #define IMPELLER_LOG_EGL_ERROR LogEGLError(__FILE__, __LINE__);

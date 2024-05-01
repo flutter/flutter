@@ -11,21 +11,40 @@
 namespace impeller {
 namespace egl {
 
+//------------------------------------------------------------------------------
+/// @brief      An instance of an EGL surface. There is no ability to create
+///             surfaces directly. Instead, one must be created using a Display
+///             connection.
+///
 class Surface {
  public:
-  Surface(EGLDisplay display, EGLSurface surface);
-
   ~Surface();
 
+  //----------------------------------------------------------------------------
+  /// @return     True if this is a valid surface.
+  ///
   bool IsValid() const;
 
+  //----------------------------------------------------------------------------
+  /// @return     Get the handle to the underlying surface.
+  ///
   const EGLSurface& GetHandle() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Present the surface. For an offscreen pixel buffer surface,
+  ///             this is a no-op.
+  ///
+  /// @return     True if the surface could be presented.
+  ///
   bool Present() const;
 
  private:
+  friend class Display;
+
   EGLDisplay display_ = EGL_NO_DISPLAY;
   EGLSurface surface_ = EGL_NO_SURFACE;
+
+  Surface(EGLDisplay display, EGLSurface surface);
 
   Surface(const Surface&) = delete;
 
