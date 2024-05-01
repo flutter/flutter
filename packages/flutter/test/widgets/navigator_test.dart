@@ -220,8 +220,8 @@ void main() {
         ),
       ),
     );
-    // Default to hard edge.
-    expect(tester.widget<Overlay>(find.byType(Overlay)).clipBehavior, Clip.hardEdge);
+    // Default to none.
+    expect(tester.widget<Overlay>(find.byType(Overlay)).clipBehavior, Clip.none);
 
     await tester.pumpWidget(
       MediaQuery(
@@ -230,13 +230,14 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Navigator(
             pages: const <Page<void>>[page],
-            clipBehavior: Clip.none,
+            clipBehavior: Clip.hardEdge,
             onPopPage: (_, __) => false,
           ),
         ),
       ),
     );
-    expect(tester.widget<Overlay>(find.byType(Overlay)).clipBehavior, Clip.none);
+
+    expect(tester.widget<Overlay>(find.byType(Overlay)).clipBehavior, Clip.hardEdge);
   });
 
   testWidgets('Zero transition page-based route correctly notifies observers when it is popped', (WidgetTester tester) async {
