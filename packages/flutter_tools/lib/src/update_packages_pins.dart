@@ -32,3 +32,9 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'camera_android': '0.10.8+17', // https://github.com/flutter/flutter/issues/146004
   'dds': '4.1.0', // https://github.com/dart-lang/sdk/issues/55559
 };
+
+/// These are packages that are explicitly excluded from appearing in the list
+/// of pinned packages.
+const List<String> kExplicitlyExcludedPackages = <String>[
+  '_macros', // Transitive dependency for macros package, but isn't published.
+];

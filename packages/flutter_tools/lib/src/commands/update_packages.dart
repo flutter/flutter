@@ -1067,6 +1067,7 @@ class PubspecYaml {
       ...directDependencies,
       ...specialDependencies,
       ...devDependencies,
+      ...kExplicitlyExcludedPackages,
     };
 
     // Create a new set to hold the list of packages we've already processed, so
