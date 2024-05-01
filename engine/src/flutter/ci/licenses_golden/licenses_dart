@@ -1,4 +1,4 @@
-Signature: 6040cb84428108f48d980cc511a27458
+Signature: 47e99f7bae6c6857dc2a9b73d9867a53
 
 ====================================================================================================
 LIBRARY: dart
@@ -4084,6 +4084,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: dart
 ORIGIN: ../../../flutter/third_party/dart/runtime/bin/ifaddrs.cc + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/bin/ifaddrs.h + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/tools/dartfuzz/flag_fuzzer.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/compiler/backend/dart_calling_conventions.cc + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/compiler/backend/dart_calling_conventions.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/os.cc + ../../../flutter/third_party/dart/LICENSE
@@ -4094,6 +4095,7 @@ ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/compact_has
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/dart/runtime/bin/ifaddrs.cc
 FILE: ../../../flutter/third_party/dart/runtime/bin/ifaddrs.h
+FILE: ../../../flutter/third_party/dart/runtime/tools/dartfuzz/flag_fuzzer.dart
 FILE: ../../../flutter/third_party/dart/runtime/vm/compiler/backend/dart_calling_conventions.cc
 FILE: ../../../flutter/third_party/dart/runtime/vm/compiler/backend/dart_calling_conventions.h
 FILE: ../../../flutter/third_party/dart/runtime/vm/os.cc
@@ -4739,7 +4741,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/3f649c97a08cca6c751d072effa14ddedc70677e
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/d946408c559aeeeeab21f1e264b216db132ca7be
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
