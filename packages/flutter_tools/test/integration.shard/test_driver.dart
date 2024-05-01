@@ -96,7 +96,7 @@ abstract class FlutterTestDriver {
     if (withDebugger) {
       arguments.add('--start-paused');
     }
-    if (verbose) {
+    if (verbose || _printDebugOutputToStdOut) {
       arguments.add('--verbose');
     }
     if (script != null) {
