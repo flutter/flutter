@@ -199,12 +199,10 @@ void main() {
   testWidgets('Check onstage/offstage handling of barriers around transitions', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        onGenerateRoute: (RouteSettings settings) {
-          switch (settings.name) {
-            case '/': return TestRoute<void>(settings: settings, child: const Text('A'));
-            case '/1': return TestRoute<void>(settings: settings, barrierColor: const Color(0xFFFFFF00), child: const Text('B'));
-          }
-          return null;
+        onGenerateRoute: (RouteSettings settings) => switch (settings.name) {
+          '/'  => TestRoute<void>(settings: settings, child: const Text('A')),
+          '/1' => TestRoute<void>(settings: settings, barrierColor: const Color(0xFFFFFF00), child: const Text('B')),
+          _ => null,
         },
       ),
     );

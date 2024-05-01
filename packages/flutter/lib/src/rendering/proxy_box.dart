@@ -96,6 +96,12 @@ mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChi
 
   @override
   @protected
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    return child?.getDryBaseline(constraints, baseline);
+  }
+
+  @override
+  @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
     return child?.getDryLayout(constraints) ?? computeSizeForNoChild(constraints);
   }
@@ -274,6 +280,11 @@ class RenderConstrainedBox extends RenderProxyBox {
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    return child?.getDryBaseline(_additionalConstraints.enforce(constraints), baseline);
+  }
+
+  @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
     if (child != null) {
@@ -287,11 +298,8 @@ class RenderConstrainedBox extends RenderProxyBox {
   @override
   @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
-    if (child != null) {
-      return child!.getDryLayout(_additionalConstraints.enforce(constraints));
-    } else {
-      return _additionalConstraints.enforce(constraints).constrain(Size.zero);
-    }
+    return child?.getDryLayout(_additionalConstraints.enforce(constraints))
+        ?? _additionalConstraints.enforce(constraints).constrain(Size.zero);
   }
 
   @override
@@ -562,11 +570,14 @@ class RenderAspectRatio extends RenderProxyBox {
   }
 
   @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    return super.computeDryBaseline(BoxConstraints.tight(getDryLayout(constraints)), baseline);
+  }
+
+  @override
   void performLayout() {
-    size = computeDryLayout(constraints);
-    if (child != null) {
-      child!.layout(BoxConstraints.tight(size));
-    }
+    size = getDryLayout(constraints);
+    child?.layout(BoxConstraints.tight(size));
   }
 
   @override
@@ -661,7 +672,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    return computeMaxIntrinsicWidth(height);
+    return getMaxIntrinsicWidth(height);
   }
 
   @override
@@ -679,7 +690,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
       return 0.0;
     }
     if (!width.isFinite) {
-      width = computeMaxIntrinsicWidth(double.infinity);
+      width = getMaxIntrinsicWidth(double.infinity);
     }
     assert(width.isFinite);
     final double height = child!.getMinIntrinsicHeight(width);
@@ -692,29 +703,23 @@ class RenderIntrinsicWidth extends RenderProxyBox {
       return 0.0;
     }
     if (!width.isFinite) {
-      width = computeMaxIntrinsicWidth(double.infinity);
+      width = getMaxIntrinsicWidth(double.infinity);
     }
     assert(width.isFinite);
     final double height = child!.getMaxIntrinsicHeight(width);
     return _applyStep(height, _stepHeight);
   }
 
+  BoxConstraints _childConstraints(RenderBox child, BoxConstraints constraints) {
+    return constraints.tighten(
+      width: constraints.hasTightWidth ? null : _applyStep(child.getMaxIntrinsicWidth(constraints.maxHeight), _stepWidth),
+      height: stepHeight == null ? null : _applyStep(child.getMaxIntrinsicHeight(constraints.maxWidth), _stepHeight),
+    );
+  }
+
   Size _computeSize({required ChildLayouter layoutChild, required BoxConstraints constraints}) {
-    if (child != null) {
-      if (!constraints.hasTightWidth) {
-        final double width = child!.getMaxIntrinsicWidth(constraints.maxHeight);
-        assert(width.isFinite);
-        constraints = constraints.tighten(width: _applyStep(width, _stepWidth));
-      }
-      if (_stepHeight != null) {
-        final double height = child!.getMaxIntrinsicHeight(constraints.maxWidth);
-        assert(height.isFinite);
-        constraints = constraints.tighten(height: _applyStep(height, _stepHeight));
-      }
-      return layoutChild(child!, constraints);
-    } else {
-      return constraints.smallest;
-    }
+    final RenderBox? child = this.child;
+    return child == null ? constraints.smallest : layoutChild(child, _childConstraints(child, constraints));
   }
 
   @override
@@ -724,6 +729,12 @@ class RenderIntrinsicWidth extends RenderProxyBox {
       layoutChild: ChildLayoutHelper.dryLayoutChild,
       constraints: constraints,
     );
+  }
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    return child?.getDryBaseline(_childConstraints(child, constraints), baseline);
   }
 
   @override
@@ -802,20 +813,18 @@ class RenderIntrinsicHeight extends RenderProxyBox {
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    return computeMaxIntrinsicHeight(width);
+    return getMaxIntrinsicHeight(width);
+  }
+
+  BoxConstraints _childConstraints(RenderBox child, BoxConstraints constraints) {
+    return constraints.hasTightHeight
+      ? constraints
+      : constraints.tighten(height: child.getMaxIntrinsicHeight(constraints.maxWidth));
   }
 
   Size _computeSize({required ChildLayouter layoutChild, required BoxConstraints constraints}) {
-    if (child != null) {
-      if (!constraints.hasTightHeight) {
-        final double height = child!.getMaxIntrinsicHeight(constraints.maxWidth);
-        assert(height.isFinite);
-        constraints = constraints.tighten(height: height);
-      }
-      return layoutChild(child!, constraints);
-    } else {
-      return constraints.smallest;
-    }
+    final RenderBox? child = this.child;
+    return child == null ? constraints.smallest : layoutChild(child, _childConstraints(child, constraints));
   }
 
   @override
@@ -825,6 +834,12 @@ class RenderIntrinsicHeight extends RenderProxyBox {
       layoutChild: ChildLayoutHelper.dryLayoutChild,
       constraints: constraints,
     );
+  }
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    return child?.getDryBaseline(_childConstraints(child, constraints), baseline);
   }
 
   @override
@@ -844,7 +859,12 @@ class RenderIgnoreBaseline extends RenderProxyBox {
   }) : super(child);
 
   @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+  Null computeDistanceToActualBaseline(TextBaseline baseline) {
+    return null;
+  }
+
+  @override
+  Null computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
     return null;
   }
 }
@@ -1958,12 +1978,10 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   RRect get _defaultClip {
     assert(hasSize);
     final Rect rect = Offset.zero & size;
-    switch (_shape) {
-      case BoxShape.rectangle:
-        return (borderRadius ?? BorderRadius.zero).toRRect(rect);
-      case BoxShape.circle:
-        return RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
-    }
+    return switch (_shape) {
+      BoxShape.rectangle => (borderRadius ?? BorderRadius.zero).toRRect(rect),
+      BoxShape.circle => RRect.fromRectXY(rect, rect.width / 2, rect.height / 2),
+    };
   }
 
   @override
@@ -2590,14 +2608,8 @@ class RenderFittedBox extends RenderProxyBox {
        _clipBehavior = clipBehavior,
        super(child);
 
+  Alignment _resolve() => _resolvedAlignment ??= alignment.resolve(textDirection);
   Alignment? _resolvedAlignment;
-
-  void _resolve() {
-    if (_resolvedAlignment != null) {
-      return;
-    }
-    _resolvedAlignment = alignment.resolve(textDirection);
-  }
 
   void _markNeedResolution() {
     _resolvedAlignment = null;
@@ -2766,13 +2778,13 @@ class RenderFittedBox extends RenderProxyBox {
       _hasVisualOverflow = false;
       _transform = Matrix4.identity();
     } else {
-      _resolve();
+      final Alignment resolvedAlignment = _resolve();
       final Size childSize = child!.size;
       final FittedSizes sizes = applyBoxFit(_fit, childSize, size);
       final double scaleX = sizes.destination.width / sizes.source.width;
       final double scaleY = sizes.destination.height / sizes.source.height;
-      final Rect sourceRect = _resolvedAlignment!.inscribe(sizes.source, Offset.zero & childSize);
-      final Rect destinationRect = _resolvedAlignment!.inscribe(sizes.destination, Offset.zero & size);
+      final Rect sourceRect = resolvedAlignment.inscribe(sizes.source, Offset.zero & childSize);
+      final Rect destinationRect = resolvedAlignment.inscribe(sizes.destination, Offset.zero & size);
       _hasVisualOverflow = sourceRect.width < childSize.width || sourceRect.height < childSize.height;
       assert(scaleX.isFinite && scaleY.isFinite);
       _transform = Matrix4.translationValues(destinationRect.left, destinationRect.top, 0.0)
@@ -3692,6 +3704,11 @@ class RenderOffstage extends RenderProxyBox {
 
   @override
   bool get sizedByParent => offstage;
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    return offstage ? null : super.computeDryBaseline(constraints, baseline);
+  }
 
   @override
   @protected

@@ -625,7 +625,6 @@ void main() {
       canvasColor: Colors.black,
       shadowColor: Colors.black,
       scaffoldBackgroundColor: Colors.black,
-      bottomAppBarColor: Colors.black,
       cardColor: Colors.black,
       dividerColor: Colors.black,
       focusColor: Colors.black,
@@ -638,12 +637,9 @@ void main() {
       buttonTheme: const ButtonThemeData(colorScheme: ColorScheme.dark()),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
       secondaryHeaderColor: Colors.black,
-      backgroundColor: Colors.black,
       dialogBackgroundColor: Colors.black,
       indicatorColor: Colors.black,
       hintColor: Colors.black,
-      errorColor: Colors.black,
-      toggleableActiveColor: Colors.black,
       textTheme: ThemeData.dark().textTheme,
       primaryTextTheme: ThemeData.dark().textTheme,
       inputDecorationTheme: ThemeData.dark().inputDecorationTheme.copyWith(border: const OutlineInputBorder()),
@@ -2969,7 +2965,7 @@ void main() {
     await expectLater(find.byType(MaterialApp), matchesGoldenFile('m3_snack_bar.scaffold.nested.png'));
     final Offset snackBarTopRight = tester.getTopRight(find.byType(SnackBar));
 
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(snackBarTopRight.dy, 465.0);
     }
   });

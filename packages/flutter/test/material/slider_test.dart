@@ -13,6 +13,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -140,7 +141,10 @@ void main() {
     expect(log[0], const Offset(212.0, 300.0));
   });
 
-  testWidgets('Slider can move when tapped (LTR)', (WidgetTester tester) async {
+  testWidgets(
+    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
+    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: <String>['CurvedAnimation']),
+    'Slider can move when tapped (LTR)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     double? startValue;
@@ -1707,11 +1711,11 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Slider is focusable and has correct focus color', (WidgetTester tester) async {
+  testWidgets('Material3 - Slider is focusable and has correct focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
     addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     double value = 0.5;
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -1743,7 +1747,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
+      paints..circle(color: theme.colorScheme.primary.withOpacity(0.1)),
     );
 
     // Check that the overlay does not show when unfocused and disabled.
@@ -1752,7 +1756,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isFalse);
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
+      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.1))),
     );
   });
 
@@ -1941,10 +1945,10 @@ void main() {
     );
   });
 
-  testWidgets('Slider is draggable and has correct dragged color', (WidgetTester tester) async {
+  testWidgets('Material3 - Slider is draggable and has correct dragged color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double value = 0.5;
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final Key sliderKey = UniqueKey();
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
@@ -1978,7 +1982,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
+      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.1))),
     );
 
     // Start dragging.
@@ -1992,7 +1996,7 @@ void main() {
     // Slider has overlay when enabled and dragged.
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
+      paints..circle(color: theme.colorScheme.primary.withOpacity(0.1)),
     );
 
     await drag.up();
@@ -2002,7 +2006,7 @@ void main() {
     expect(focusNode.hasFocus, false);
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
+      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.1))),
     );
 
     // Slider has overlay when enabled, dragged and focused.
@@ -2012,7 +2016,7 @@ void main() {
     expect(focusNode.hasFocus, true);
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
+      paints..circle(color: theme.colorScheme.primary.withOpacity(0.1)),
     );
   });
 
@@ -3859,14 +3863,15 @@ void main() {
       );
     });
 
-    testWidgets('Slider is focusable and has correct focus color', (WidgetTester tester) async {
+    testWidgets('Material2 - Slider is focusable and has correct focus color', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
       addTearDown(focusNode.dispose);
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-      final ThemeData theme = ThemeData();
+      final ThemeData theme = ThemeData(useMaterial3: false);
       double value = 0.5;
       Widget buildApp({bool enabled = true}) {
         return MaterialApp(
+          theme: theme,
           home: Material(
             child: Center(
               child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -3907,16 +3912,17 @@ void main() {
       );
     });
 
-    testWidgets('Slider is draggable and has correct dragged color', (WidgetTester tester) async {
+    testWidgets('Material2 - Slider is draggable and has correct dragged color', (WidgetTester tester) async {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       double value = 0.5;
-      final ThemeData theme = ThemeData();
+      final ThemeData theme = ThemeData(useMaterial3: false);
       final Key sliderKey = UniqueKey();
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
       Widget buildApp({bool enabled = true}) {
         return MaterialApp(
+          theme: theme,
           home: Material(
             child: Center(
               child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -4250,5 +4256,33 @@ void main() {
         <String>['onChangeStart', 'onChanged', 'onChangeEnd', 'onChangeStart', 'onChanged', 'onChangeEnd'],
       );
     });
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/143524.
+  testWidgets('Discrete Slider.onChanged is called only once', (WidgetTester tester) async {
+    int onChangeCallbackCount = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Slider(
+              max: 5,
+              divisions: 5,
+              value: 0,
+              onChanged: (double newValue) {
+                onChangeCallbackCount++;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(tester.getTopLeft(find.byType(Slider)));
+    await tester.pump(kLongPressTimeout);
+    await gesture.moveBy(const Offset(160.0, 0.0));
+    await gesture.moveBy(const Offset(1.0, 0.0));
+    await gesture.moveBy(const Offset(1.0, 0.0));
+    expect(onChangeCallbackCount, 1);
   });
 }

@@ -30,8 +30,7 @@ import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-// TODO(goderbauer): Fix this ignore when https://github.com/dart-lang/tools/issues/234 is resolved.
-import 'package:unified_analytics/src/enums.dart' show DashEvent; // ignore: implementation_imports
+import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -42,22 +41,18 @@ import '../src/fakes.dart';
 import '../src/testbed.dart';
 import 'resident_runner_helpers.dart';
 
+FakeAnalytics get fakeAnalytics => globals.analytics as FakeAnalytics;
+
 void main() {
   late Testbed testbed;
   late FakeFlutterDevice flutterDevice;
   late FakeDevFS devFS;
   late ResidentRunner residentRunner;
   late FakeDevice device;
-  late FakeAnalytics fakeAnalytics;
   FakeVmServiceHost? fakeVmServiceHost;
 
   setUp(() {
     testbed = Testbed(setup: () {
-      fakeAnalytics = getInitializedFakeAnalyticsInstance(
-        fs: globals.fs,
-        fakeFlutterVersion: FakeFlutterVersion(),
-      );
-
       globals.fs.file('.packages')
         .writeAsStringSync('\n');
       globals.fs.file(globals.fs.path.join('build', 'app.dill'))
@@ -71,8 +66,10 @@ void main() {
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
         devtoolsHandler: createNoOpHandler,
-        analytics: fakeAnalytics,
+        analytics: globals.analytics,
       );
+    }, overrides: <Type, Generator>{
+      Analytics: () => FakeAnalytics(),
     });
     device = FakeDevice();
     devFS = FakeDevFS();
@@ -121,7 +118,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
-      analytics: fakeAnalytics,
+      analytics: globals.analytics,
     );
     flutterDevice.generator = residentCompiler;
 
@@ -145,7 +142,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
-      analytics: fakeAnalytics,
+      analytics: globals.analytics,
     );
     flutterDevice.generator = residentCompiler;
 
@@ -215,7 +212,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
-      analytics: fakeAnalytics,
+      analytics: globals.analytics,
     );
     flutterDevice.generator = residentCompiler;
 
@@ -275,7 +272,7 @@ void main() {
       ),
       target: 'main.dart',
       devtoolsHandler: createNoOpHandler,
-      analytics: fakeAnalytics,
+      analytics: globals.analytics,
     );
     final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> futureAppStart = Completer<void>.sync();
@@ -320,7 +317,7 @@ void main() {
         hotEventFullRestart: false,
       )),
     ));
-    expect(fakeAnalytics.sentEvents, contains(
+    expect((globals.analytics as FakeAnalytics).sentEvents, contains(
       Event.hotRunnerInfo(
         label: 'exception',
         targetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
@@ -330,6 +327,32 @@ void main() {
       ),
     ));
     expect(fakeVmServiceHost?.hasRemainingExpectations, false);
+  }, overrides: <Type, Generator>{
+    Usage: () => TestUsage(),
+  }));
+
+  testUsingContext('ResidentRunner can handle an RPC exception from debugFrameJankMetrics', () => testbed.run(() async {
+    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+      listViews,
+      listViews,
+      listViews,
+      renderFrameRasterStats,
+    ]);
+    final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
+    final Completer<void> futureAppStart = Completer<void>.sync();
+    unawaited(residentRunner.attach(
+      appStartedCompleter: futureAppStart,
+      connectionInfoCompleter: futureConnectionInfo,
+      enableDevTools: true,
+    ));
+    await futureAppStart.future;
+
+    final bool result = await residentRunner.debugFrameJankMetrics();
+    expect(result, true);
+    expect((globals.flutterUsage as TestUsage).events, isEmpty);
+    expect(fakeAnalytics.sentEvents, isEmpty);
+    expect(fakeVmServiceHost?.hasRemainingExpectations, false);
+    expect((globals.logger as BufferLogger).warningText, contains('Unable to get jank metrics for Impeller renderer'));
   }, overrides: <Type, Generator>{
     Usage: () => TestUsage(),
   }));
@@ -838,7 +861,7 @@ void main() {
 
     // Parse out the event of interest since we may have timing events with
     // the new analytics package
-    final List<Event> newEventList = fakeAnalytics.sentEvents.where((Event e) => e.eventName == DashEvent.hotRunnerInfo).toList();
+    final List<Event> newEventList = fakeAnalytics.sentEvents.where((Event e) => e.eventName.label == 'hot_runner_info').toList();
     expect(newEventList, hasLength(1));
     final Event newEvent = newEventList.first;
     expect(newEvent.eventName.label, 'hot_runner_info');
@@ -2348,7 +2371,7 @@ flutter:
           )),
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
-          analytics: fakeAnalytics,
+          analytics: globals.analytics,
           nativeAssetsYamlFile: 'foo.yaml',
         );
 
@@ -2362,4 +2385,11 @@ flutter:
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
       });
+}
+
+class FakeAnalytics extends Fake implements Analytics {
+  @override
+  void send(Event event) => sentEvents.add(event);
+
+  final List<Event> sentEvents = <Event>[];
 }

@@ -4,8 +4,7 @@
 
 // Shared logic between iOS and macOS implementations of native assets.
 
-import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    hide BuildMode;
+import 'package:native_assets_cli/native_assets_cli_internal.dart';
 
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
@@ -131,7 +130,7 @@ Future<void> codesignDylib(
 /// Flutter expects `xcrun` to be on the path on macOS hosts.
 ///
 /// Use the `clang`, `ar`, and `ld` that would be used if run with `xcrun`.
-Future<CCompilerConfig> cCompilerConfigMacOS() async {
+Future<CCompilerConfigImpl> cCompilerConfigMacOS() async {
   final ProcessResult xcrunResult = await globals.processManager.run(
     <String>['xcrun', 'clang', '--version'],
   );
@@ -142,10 +141,10 @@ Future<CCompilerConfig> cCompilerConfigMacOS() async {
       .firstWhere((String s) => s.startsWith('InstalledDir: '))
       .split(' ')
       .last;
-  return CCompilerConfig(
-    cc: Uri.file('$installPath/clang'),
-    ar: Uri.file('$installPath/ar'),
-    ld: Uri.file('$installPath/ld'),
+  return CCompilerConfigImpl(
+    compiler: Uri.file('$installPath/clang'),
+    archiver: Uri.file('$installPath/ar'),
+    linker: Uri.file('$installPath/ld'),
   );
 }
 
@@ -165,9 +164,6 @@ Future<CCompilerConfig> cCompilerConfigMacOS() async {
 /// (A–Z, a–z, and 0–9), hyphens (-), and periods (.).
 /// https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundleidentifier
 ///
-/// This name can contain up to 15 characters.
-/// https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundlename
-///
 /// The [alreadyTakenNames] are used to ensure that the framework name does not
 /// conflict with previously chosen names.
 Uri frameworkUri(String fileName, Set<String> alreadyTakenNames) {
@@ -185,13 +181,7 @@ Uri frameworkUri(String fileName, Set<String> alreadyTakenNames) {
     fileName = fileName.replaceFirst('lib', '');
   }
   fileName = fileName.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '');
-  if (fileName.length > 15) {
-    fileName = fileName.substring(0, 15);
-  }
   if (alreadyTakenNames.contains(fileName)) {
-    if (fileName.length > 12) {
-      fileName = fileName.substring(0, 12);
-    }
     final String prefixName = fileName;
     for (int i = 1; i < 1000; i++) {
       fileName = '$prefixName$i';

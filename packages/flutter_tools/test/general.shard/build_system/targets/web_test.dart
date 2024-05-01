@@ -12,10 +12,10 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/html_utils.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/file_generators/flutter_service_worker_js.dart';
+import 'package:flutter_tools/src/web_template.dart';
 
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
@@ -36,6 +36,8 @@ const List<String> _kDart2WasmLinuxArgs = <String> [
   '--packages=.dart_tool/package_config.json',
   '--extra-compiler-option=--dart-sdk=Artifact.engineDartSdkPath.TargetPlatform.web_javascript',
   '--extra-compiler-option=--platform=HostArtifact.webPlatformKernelFolder/dart2wasm_platform.dill',
+  '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
+  '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
 ];
 
 void main() {
@@ -66,6 +68,7 @@ void main() {
         outputDir: globals.fs.currentDirectory.childDirectory('bar'),
         defines: <String, String>{
           kTargetFile: globals.fs.path.join('foo', 'lib', 'main.dart'),
+          kBuildMode: BuildMode.debug.cliName,
         },
         artifacts: Artifacts.test(),
         processManager: processManager,
@@ -142,9 +145,7 @@ void main() {
 <!DOCTYPE html><html><base href="$kBaseHrefPlaceholder"><head></head></html>
     ''');
     environment.buildDir.childFile('main.dart.js').createSync();
-    await WebReleaseBundle(<WebCompilerConfig>[
-        const JsCompilerConfig()
-    ]).build(environment);
+    await WebTemplatedFiles('buildConfig').build(environment);
 
     expect(environment.outputDir.childFile('index.html').readAsStringSync(), contains('/basehreftest/'));
   }));
@@ -157,9 +158,7 @@ void main() {
 <!DOCTYPE html><html><head><base href='/basehreftest/'></head></html>
     ''');
     environment.buildDir.childFile('main.dart.js').createSync();
-    await WebReleaseBundle(<WebCompilerConfig>[
-        const JsCompilerConfig()
-    ]).build(environment);
+    await WebTemplatedFiles('build config').build(environment);
 
     expect(environment.outputDir.childFile('index.html').readAsStringSync(), contains('/basehreftest/'));
   }));
@@ -167,19 +166,13 @@ void main() {
   test('WebReleaseBundle copies dart2js output and resource files to output directory', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'release';
     final Directory webResources = environment.projectDir.childDirectory('web');
-    webResources.childFile('index.html')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('''
-<html>
-  <script src="main.dart.js" type="application/javascript"></script>
-  <script>
-    navigator.serviceWorker.register('flutter_service_worker.js');
-  </script>
-</html>
-''');
     webResources.childFile('foo.txt')
-      .writeAsStringSync('A');
+      ..createSync(recursive: true)
+      ..writeAsStringSync('A');
     environment.buildDir.childFile('main.dart.js').createSync();
+    environment.buildDir.childFile('main.dart.js.map').createSync();
+    environment.buildDir.childFile('main.dart.js_1.part.js').createSync();
+    environment.buildDir.childFile('main.dart.js_1.part.js.map').createSync();
 
     await WebReleaseBundle(<WebCompilerConfig>[
         const JsCompilerConfig()
@@ -188,6 +181,12 @@ void main() {
     expect(environment.outputDir.childFile('foo.txt')
       .readAsStringSync(), 'A');
     expect(environment.outputDir.childFile('main.dart.js')
+      .existsSync(), true);
+    expect(environment.outputDir.childFile('main.dart.js.map')
+      .existsSync(), true);
+    expect(environment.outputDir.childFile('main.dart.js_1.part.js')
+      .existsSync(), true);
+    expect(environment.outputDir.childFile('main.dart.js_1.part.js.map')
       .existsSync(), true);
     expect(environment.outputDir.childDirectory('assets')
       .childFile('AssetManifest.bin.json').existsSync(), true);
@@ -201,11 +200,6 @@ void main() {
 
     expect(environment.outputDir.childFile('foo.txt')
       .readAsStringSync(), 'B');
-    // Appends number to requests for service worker only
-    expect(environment.outputDir.childFile('index.html').readAsStringSync(), allOf(
-      contains('<script src="main.dart.js" type="application/javascript">'),
-      contains('flutter_service_worker.js?v='),
-    ));
   }));
 
   test('WebReleaseBundle copies over output files when they change', () => testbed.run(() async {
@@ -904,57 +898,121 @@ void main() {
     for (int level = 1; level <= 4; level++) {
       for (final bool strip in <bool>[true, false]) {
         for (final List<String> defines in const <List<String>>[<String>[], <String>['FOO=bar', 'BAZ=qux']]) {
-          test('Dart2WasmTarget invokes dart2wasm with renderer=$renderer, -O$level, stripping=$strip, defines=$defines', () => testbed.run(() async {
-            environment.defines[kBuildMode] = 'release';
-            environment.defines[kDartDefines] = encodeDartDefines(defines);
+          for (final String buildMode in const <String>['profile', 'release']) {
+            test('Dart2WasmTarget invokes dart2wasm with renderer=$renderer, -O$level, stripping=$strip, defines=$defines, modeMode=$buildMode', () => testbed.run(() async {
+              environment.defines[kBuildMode] = buildMode;
+              environment.defines[kDartDefines] = encodeDartDefines(defines);
 
-            final File depFile = environment.buildDir.childFile('dart2wasm.d');
+              final File depFile = environment.buildDir.childFile('dart2wasm.d');
 
-            final File outputJsFile = environment.buildDir.childFile('main.dart.mjs');
-            processManager.addCommand(FakeCommand(
-              command: <String>[
-                ..._kDart2WasmLinuxArgs,
-                if (renderer == WebRendererMode.skwasm) ...<String>[
-                  '--extra-compiler-option=--import-shared-memory',
-                  '--extra-compiler-option=--shared-memory-max-pages=32768',
+              final File outputJsFile = environment.buildDir.childFile('main.dart.mjs');
+              processManager.addCommand(FakeCommand(
+                command: <String>[
+                  ..._kDart2WasmLinuxArgs,
+                  if (renderer == WebRendererMode.skwasm) ...<String>[
+                    '--extra-compiler-option=--import-shared-memory',
+                    '--extra-compiler-option=--shared-memory-max-pages=32768',
+                  ],
+                  '-Ddart.vm.${buildMode == 'release' ? 'product' : 'profile' }=true',
+                  ...defines.map((String define) => '-D$define'),
+                  if (renderer == WebRendererMode.skwasm) ...<String>[
+                    '-DFLUTTER_WEB_AUTO_DETECT=false',
+                    '-DFLUTTER_WEB_USE_SKIA=false',
+                    '-DFLUTTER_WEB_USE_SKWASM=true',
+                  ],
+                  if (renderer == WebRendererMode.canvaskit) ...<String>[
+                    '-DFLUTTER_WEB_AUTO_DETECT=false',
+                    '-DFLUTTER_WEB_USE_SKIA=true',
+                  ],
+                  '--extra-compiler-option=--depfile=${depFile.absolute.path}',
+                  '-O$level',
+                  if (strip && buildMode == 'release') '--no-name-section' else '--name-section',
+                  '-o',
+                  environment.buildDir.childFile('main.dart.wasm').absolute.path,
+                  environment.buildDir.childFile('main.dart').absolute.path,
                 ],
-                '-Ddart.vm.product=true',
-                ...defines.map((String define) => '-D$define'),
-                if (renderer == WebRendererMode.skwasm) ...<String>[
-                  '-DFLUTTER_WEB_AUTO_DETECT=false',
-                  '-DFLUTTER_WEB_USE_SKIA=false',
-                  '-DFLUTTER_WEB_USE_SKWASM=true',
-                ],
-                if (renderer == WebRendererMode.canvaskit) ...<String>[
-                  '-DFLUTTER_WEB_AUTO_DETECT=false',
-                  '-DFLUTTER_WEB_USE_SKIA=true',
-                ],
-                '--extra-compiler-option=--depfile=${depFile.absolute.path}',
-                '-O$level',
-                if (strip) '--no-name-section' else '--name-section',
-                '-o',
-                environment.buildDir.childFile('main.dart.wasm').absolute.path,
-                environment.buildDir.childFile('main.dart').absolute.path,
-              ],
-              onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo'))
-            );
+                onRun: (_) => outputJsFile..createSync()..writeAsStringSync('foo'))
+              );
 
-            await Dart2WasmTarget(
-              WasmCompilerConfig(
-                optimizationLevel: level,
-                stripWasm: strip,
-                renderer: renderer,
-              )
-            ).build(environment);
+              await Dart2WasmTarget(
+                WasmCompilerConfig(
+                  optimizationLevel: level,
+                  stripWasm: strip,
+                  renderer: renderer,
+                )
+              ).build(environment);
 
-            expect(outputJsFile.existsSync(), isTrue);
-          }, overrides: <Type, Generator>{
+              expect(outputJsFile.existsSync(), isTrue);
+            }, overrides: <Type, Generator>{
             ProcessManager: () => processManager,
           }));
+        }
         }
       }
     }
   }
+
+  test('Dart2JSTarget has unique build keys for compiler configurations', () {
+    const List<JsCompilerConfig> testConfigs = <JsCompilerConfig>[
+      // Default values
+      JsCompilerConfig(),
+
+      // Each individual property being made non-default
+      JsCompilerConfig(csp: true),
+      JsCompilerConfig(dumpInfo: true),
+      JsCompilerConfig(nativeNullAssertions: true),
+      JsCompilerConfig(optimizationLevel: 0),
+      JsCompilerConfig(noFrequencyBasedMinification: true),
+      JsCompilerConfig(sourceMaps: false),
+      JsCompilerConfig(renderer: WebRendererMode.canvaskit),
+
+      // All properties non-default
+      JsCompilerConfig(
+        csp: true,
+        dumpInfo: true,
+        nativeNullAssertions: true,
+        optimizationLevel: 0,
+        noFrequencyBasedMinification: true,
+        sourceMaps: false,
+        renderer: WebRendererMode.canvaskit,
+      ),
+    ];
+
+    final Iterable<String> buildKeys = testConfigs.map((JsCompilerConfig config) {
+      final Dart2JSTarget target = Dart2JSTarget(config);
+      return target.buildKey;
+    });
+
+    // Make sure all the build keys are unique.
+    expect(buildKeys.toSet().length, buildKeys.length);
+  });
+
+  test('Dart2Wasm has unique build keys for compiler configurations', () {
+    const List<WasmCompilerConfig> testConfigs = <WasmCompilerConfig>[
+      // Default values
+      WasmCompilerConfig(),
+
+      // Each individual property being made non-default
+      WasmCompilerConfig(optimizationLevel: 0),
+      WasmCompilerConfig(renderer: WebRendererMode.canvaskit),
+      WasmCompilerConfig(stripWasm: false),
+
+      // All properties non-default
+      WasmCompilerConfig(
+        optimizationLevel: 0,
+        stripWasm: false,
+        renderer: WebRendererMode.canvaskit,
+      ),
+    ];
+
+    final Iterable<String> buildKeys = testConfigs.map((WasmCompilerConfig config) {
+      final Dart2WasmTarget target = Dart2WasmTarget(config);
+      return target.buildKey;
+    });
+
+    // Make sure all the build keys are unique.
+    expect(buildKeys.toSet().length, buildKeys.length);
+  });
 
   test('Generated service worker is empty with none-strategy', () => testbed.run(() {
     final String fileGeneratorsPath =

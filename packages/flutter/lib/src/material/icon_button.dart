@@ -266,7 +266,7 @@ class IconButton extends StatelessWidget {
   }) : assert(splashRadius == null || splashRadius > 0),
        _variant = _IconButtonVariant.filledTonal;
 
-  /// Create a filled tonal variant of IconButton.
+  /// Create an outlined variant of IconButton.
   ///
   /// Outlined icon buttons are medium-emphasis buttons. They’re useful when an
   /// icon button needs more emphasis than a standard icon button but less than
@@ -573,9 +573,15 @@ class IconButton extends StatelessWidget {
   /// [ButtonStyle.foregroundColor] value. Specify a value for [foregroundColor]
   /// to specify the color of the button's icons. The [hoverColor], [focusColor]
   /// and [highlightColor] colors are used to indicate the hover, focus,
-  /// and pressed states. Use [backgroundColor] for the button's background
-  /// fill color. Use [disabledForegroundColor] and [disabledBackgroundColor]
-  /// to specify the button's disabled icon and fill color.
+  /// and pressed states if [overlayColor] isn't specified.
+  ///
+  /// If [overlayColor] is specified and its value is [Colors.transparent]
+  /// then the pressed/focused/hovered highlights are effectively defeated.
+  /// Otherwise a [MaterialStateProperty] with the same opacities as the
+  /// default is created.
+  ///
+  /// Use [backgroundColor] for the button's background fill color. Use [disabledForegroundColor]
+  /// and [disabledBackgroundColor] to specify the button's disabled icon and fill color.
   ///
   /// Similarly, the [enabledMouseCursor] and [disabledMouseCursor]
   /// parameters are used to construct [ButtonStyle].mouseCursor.
@@ -611,6 +617,7 @@ class IconButton extends StatelessWidget {
     Color? highlightColor,
     Color? shadowColor,
     Color? surfaceTintColor,
+    Color? overlayColor,
     double? elevation,
     Size? minimumSize,
     Size? fixedSize,
@@ -629,20 +636,24 @@ class IconButton extends StatelessWidget {
     InteractiveInkFeatureFactory? splashFactory,
   }) {
     final MaterialStateProperty<Color?>? buttonBackgroundColor = (backgroundColor == null && disabledBackgroundColor == null)
-        ? null
-        : _IconButtonDefaultBackground(backgroundColor, disabledBackgroundColor);
+      ? null
+      : _IconButtonDefaultBackground(backgroundColor, disabledBackgroundColor);
     final MaterialStateProperty<Color?>? buttonForegroundColor = (foregroundColor == null && disabledForegroundColor == null)
+      ? null
+      : _IconButtonDefaultForeground(foregroundColor, disabledForegroundColor);
+    final MaterialStateProperty<Color?>? overlayColorProp = (foregroundColor == null &&
+      hoverColor == null && focusColor == null && highlightColor == null && overlayColor == null)
         ? null
-        : _IconButtonDefaultForeground(foregroundColor, disabledForegroundColor);
-    final MaterialStateProperty<Color?>? overlayColor = (foregroundColor == null && hoverColor == null && focusColor == null && highlightColor == null)
-        ? null
-        : _IconButtonDefaultOverlay(foregroundColor, focusColor, hoverColor, highlightColor);
+        : switch (overlayColor) {
+            (final Color overlayColor) when overlayColor.value == 0 => const MaterialStatePropertyAll<Color?>(Colors.transparent),
+            _ => _IconButtonDefaultOverlay(foregroundColor, focusColor, hoverColor, highlightColor, overlayColor),
+          };
     final MaterialStateProperty<MouseCursor?> mouseCursor = _IconButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
 
     return ButtonStyle(
       backgroundColor: buttonBackgroundColor,
       foregroundColor: buttonForegroundColor,
-      overlayColor: overlayColor,
+      overlayColor: overlayColorProp,
       shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
       surfaceTintColor: ButtonStyleButton.allOrNull<Color>(surfaceTintColor),
       elevation: ButtonStyleButton.allOrNull<double>(elevation),
@@ -919,9 +930,9 @@ class _IconButtonM3 extends ButtonStyleButton {
   /// * `overlayColor`
   ///   * selected
   ///      * hovered - Theme.colorScheme.primary(0.08)
-  ///      * focused or pressed - Theme.colorScheme.primary(0.12)
-  ///   * hovered or focused - Theme.colorScheme.onSurfaceVariant(0.08)
-  ///   * pressed - Theme.colorScheme.onSurfaceVariant(0.12)
+  ///      * focused or pressed - Theme.colorScheme.primary(0.1)
+  ///   * hovered - Theme.colorScheme.onSurfaceVariant(0.08)
+  ///   * pressed or focused - Theme.colorScheme.onSurfaceVariant(0.1)
   ///   * others - null
   /// * `shadowColor` - null
   /// * `surfaceTintColor` - null
@@ -1023,34 +1034,41 @@ class _IconButtonDefaultForeground extends MaterialStateProperty<Color?> {
 
 @immutable
 class _IconButtonDefaultOverlay extends MaterialStateProperty<Color?> {
-  _IconButtonDefaultOverlay(this.foregroundColor, this.focusColor, this.hoverColor, this.highlightColor);
+  _IconButtonDefaultOverlay(
+    this.foregroundColor,
+    this.focusColor,
+    this.hoverColor,
+    this.highlightColor,
+    this.overlayColor,
+  );
 
   final Color? foregroundColor;
   final Color? focusColor;
   final Color? hoverColor;
   final Color? highlightColor;
+  final Color? overlayColor;
 
   @override
   Color? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.selected)) {
       if (states.contains(MaterialState.pressed)) {
-        return highlightColor ?? foregroundColor?.withOpacity(0.12);
+        return highlightColor ?? (overlayColor ?? foregroundColor)?.withOpacity(0.1);
       }
       if (states.contains(MaterialState.hovered)) {
-        return hoverColor ?? foregroundColor?.withOpacity(0.08);
+        return hoverColor ?? (overlayColor ?? foregroundColor)?.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return focusColor ?? foregroundColor?.withOpacity(0.12);
+        return focusColor ?? (overlayColor ?? foregroundColor)?.withOpacity(0.1);
       }
     }
     if (states.contains(MaterialState.pressed)) {
-      return highlightColor ?? foregroundColor?.withOpacity(0.12);
+      return highlightColor ?? (overlayColor ?? foregroundColor)?.withOpacity(0.1);
     }
     if (states.contains(MaterialState.hovered)) {
-      return hoverColor ?? foregroundColor?.withOpacity(0.08);
+      return hoverColor ?? (overlayColor ?? foregroundColor)?.withOpacity(0.08);
     }
     if (states.contains(MaterialState.focused)) {
-      return focusColor ?? foregroundColor?.withOpacity(0.08);
+      return focusColor ?? (overlayColor ?? foregroundColor)?.withOpacity(0.1);
     }
     return null;
   }
@@ -1119,23 +1137,23 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return _colors.primary.withOpacity(0.12);
+          return _colors.primary.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
           return _colors.primary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.primary.withOpacity(0.12);
+          return _colors.primary.withOpacity(0.1);
         }
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.onSurfaceVariant.withOpacity(0.12);
+        return _colors.onSurfaceVariant.withOpacity(0.1);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSurfaceVariant.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSurfaceVariant.withOpacity(0.12);
+        return _colors.onSurfaceVariant.withOpacity(0.1);
       }
       return Colors.transparent;
     });
@@ -1229,7 +1247,7 @@ class _FilledIconButtonDefaultsM3 extends ButtonStyle {
         return _colors.primary;
       }
       if (toggleable) { // toggleable but unselected case
-        return _colors.surfaceVariant;
+        return _colors.surfaceContainerHighest;
       }
       return _colors.primary;
     });
@@ -1254,34 +1272,34 @@ class _FilledIconButtonDefaultsM3 extends ButtonStyle {
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return _colors.onPrimary.withOpacity(0.12);
+          return _colors.onPrimary.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onPrimary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.onPrimary.withOpacity(0.12);
+          return _colors.onPrimary.withOpacity(0.1);
         }
       }
       if (toggleable) { // toggleable but unselected case
         if (states.contains(MaterialState.pressed)) {
-          return _colors.primary.withOpacity(0.12);
+          return _colors.primary.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
           return _colors.primary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.primary.withOpacity(0.12);
+          return _colors.primary.withOpacity(0.1);
         }
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.onPrimary.withOpacity(0.12);
+        return _colors.onPrimary.withOpacity(0.1);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onPrimary.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onPrimary.withOpacity(0.12);
+        return _colors.onPrimary.withOpacity(0.1);
       }
       return Colors.transparent;
     });
@@ -1375,7 +1393,7 @@ class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
         return _colors.secondaryContainer;
       }
       if (toggleable) { // toggleable but unselected case
-        return _colors.surfaceVariant;
+        return _colors.surfaceContainerHighest;
       }
       return _colors.secondaryContainer;
     });
@@ -1400,34 +1418,34 @@ class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return _colors.onSecondaryContainer.withOpacity(0.12);
+          return _colors.onSecondaryContainer.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onSecondaryContainer.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.onSecondaryContainer.withOpacity(0.12);
+          return _colors.onSecondaryContainer.withOpacity(0.1);
         }
       }
       if (toggleable) { // toggleable but unselected case
         if (states.contains(MaterialState.pressed)) {
-          return _colors.onSurfaceVariant.withOpacity(0.12);
+          return _colors.onSurfaceVariant.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onSurfaceVariant.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.onSurfaceVariant.withOpacity(0.12);
+          return _colors.onSurfaceVariant.withOpacity(0.1);
         }
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.onSecondaryContainer.withOpacity(0.12);
+        return _colors.onSecondaryContainer.withOpacity(0.1);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSecondaryContainer.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSecondaryContainer.withOpacity(0.12);
+        return _colors.onSecondaryContainer.withOpacity(0.1);
       }
       return Colors.transparent;
     });
@@ -1542,7 +1560,7 @@ class _OutlinedIconButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color?>? get overlayColor =>    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return _colors.onInverseSurface.withOpacity(0.12);
+          return _colors.onInverseSurface.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onInverseSurface.withOpacity(0.08);
@@ -1552,7 +1570,7 @@ class _OutlinedIconButtonDefaultsM3 extends ButtonStyle {
         }
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.onSurface.withOpacity(0.12);
+        return _colors.onSurface.withOpacity(0.1);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSurfaceVariant.withOpacity(0.08);

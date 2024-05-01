@@ -1066,8 +1066,13 @@ class _SwitchPainter extends ToggleablePainter {
       return;
     }
     _positionController = value;
+    _colorAnimation?.dispose();
+    _colorAnimation = CurvedAnimation(parent: positionController, curve: Curves.easeOut, reverseCurve: Curves.easeIn);
     notifyListeners();
   }
+
+  CurvedAnimation? _colorAnimation;
+
 
   Icon? get activeIcon => _activeIcon;
   Icon? _activeIcon;
@@ -1516,7 +1521,7 @@ class _SwitchPainter extends ToggleablePainter {
     final double inset = thumbOffset == null ? 0 : 1.0 - (currentValue - thumbOffset!).abs() * 2.0;
     thumbSize = Size(thumbSize!.width - inset, thumbSize.height - inset);
 
-    final double colorValue = CurvedAnimation(parent: positionController, curve: Curves.easeOut, reverseCurve: Curves.easeIn).value;
+    final double colorValue = _colorAnimation!.value;
     final Color trackColor = Color.lerp(inactiveTrackColor, activeTrackColor, colorValue)!;
     final Color? trackOutlineColor = inactiveTrackOutlineColor == null || activeTrackOutlineColor == null ? null
         : Color.lerp(inactiveTrackOutlineColor, activeTrackOutlineColor, colorValue);
@@ -1737,6 +1742,7 @@ class _SwitchPainter extends ToggleablePainter {
     _cachedThumbColor = null;
     _cachedThumbImage = null;
     _cachedThumbErrorListener = null;
+    _colorAnimation?.dispose();
     super.dispose();
   }
 }
@@ -2069,7 +2075,7 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
         if (states.contains(MaterialState.selected)) {
           return _colors.onSurface.withOpacity(0.12);
         }
-        return _colors.surfaceVariant.withOpacity(0.12);
+        return _colors.surfaceContainerHighest.withOpacity(0.12);
       }
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
@@ -2084,15 +2090,15 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
         return _colors.primary;
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.surfaceVariant;
+        return _colors.surfaceContainerHighest;
       }
       if (states.contains(MaterialState.hovered)) {
-        return _colors.surfaceVariant;
+        return _colors.surfaceContainerHighest;
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.surfaceVariant;
+        return _colors.surfaceContainerHighest;
       }
-      return _colors.surfaceVariant;
+      return _colors.surfaceContainerHighest;
     });
   }
 
@@ -2114,24 +2120,24 @@ class _SwitchDefaultsM3 extends SwitchThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return _colors.primary.withOpacity(0.12);
+          return _colors.primary.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
           return _colors.primary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.primary.withOpacity(0.12);
+          return _colors.primary.withOpacity(0.1);
         }
         return null;
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.onSurface.withOpacity(0.12);
+        return _colors.onSurface.withOpacity(0.1);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSurface.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSurface.withOpacity(0.12);
+        return _colors.onSurface.withOpacity(0.1);
       }
       return null;
     });
@@ -2169,7 +2175,7 @@ class _SwitchConfigM3 with _SwitchConfig {
         if (states.contains(MaterialState.selected)) {
           return _colors.onSurface.withOpacity(0.38);
         }
-        return _colors.surfaceVariant.withOpacity(0.38);
+        return _colors.surfaceContainerHighest.withOpacity(0.38);
       }
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
@@ -2184,15 +2190,15 @@ class _SwitchConfigM3 with _SwitchConfig {
         return _colors.onPrimaryContainer;
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.surfaceVariant;
+        return _colors.surfaceContainerHighest;
       }
       if (states.contains(MaterialState.hovered)) {
-        return _colors.surfaceVariant;
+        return _colors.surfaceContainerHighest;
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.surfaceVariant;
+        return _colors.surfaceContainerHighest;
       }
-      return _colors.surfaceVariant;
+      return _colors.surfaceContainerHighest;
     });
   }
 

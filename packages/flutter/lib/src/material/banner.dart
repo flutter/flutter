@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'banner_theme.dart';
 import 'color_scheme.dart';
+import 'colors.dart';
 import 'divider.dart';
 import 'material.dart';
 import 'scaffold.dart';
@@ -153,16 +154,18 @@ class MaterialBanner extends StatefulWidget {
   /// The color of the surface of this [MaterialBanner].
   ///
   /// If `null`, [MaterialBannerThemeData.backgroundColor] is used. If that is
-  /// also `null`, [ColorScheme.surface] of [ThemeData.colorScheme] is used.
+  /// also `null`, [ColorScheme.surfaceContainerLow] of [ThemeData.colorScheme] is used.
   final Color? backgroundColor;
 
   /// The color used as an overlay on [backgroundColor] to indicate elevation.
   ///
   /// If null, [MaterialBannerThemeData.surfaceTintColor] is used. If that
-  /// is also null, the default value is [ColorScheme.surfaceTint].
+  /// is also null, the default value is [Colors.transparent].
   ///
-  /// See [Material.surfaceTintColor] for more details on how this
-  /// overlay is applied.
+  /// This is not recommended for use. [Material 3 spec](https://m3.material.io/styles/color/the-color-system/color-roles)
+  /// introduced a set of tone-based surfaces and surface containers in its [ColorScheme],
+  /// which provide more flexibility. The intention is to eventually remove surface tint color from
+  /// the framework.
   final Color? surfaceTintColor;
 
   /// The color of the shadow below the [MaterialBanner].
@@ -264,11 +267,15 @@ class MaterialBanner extends StatefulWidget {
 
 class _MaterialBannerState extends State<MaterialBanner> {
   bool _wasVisible = false;
+  CurvedAnimation? _heightAnimation;
+  CurvedAnimation? _slideOutCurvedAnimation;
 
   @override
   void initState() {
     super.initState();
     widget.animation?.addStatusListener(_onAnimationStatusChanged);
+    _setCurvedAnimations();
+
   }
 
   @override
@@ -277,12 +284,31 @@ class _MaterialBannerState extends State<MaterialBanner> {
     if (widget.animation != oldWidget.animation) {
       oldWidget.animation?.removeStatusListener(_onAnimationStatusChanged);
       widget.animation?.addStatusListener(_onAnimationStatusChanged);
+      _setCurvedAnimations();
     }
+  }
+
+  void _setCurvedAnimations() {
+    _heightAnimation?.dispose();
+    _slideOutCurvedAnimation?.dispose();
+    if (widget.animation != null) {
+      _heightAnimation = CurvedAnimation(parent: widget.animation!, curve: _materialBannerHeightCurve);
+      _slideOutCurvedAnimation = CurvedAnimation(
+        parent: widget.animation!,
+        curve: const Threshold(0.0),
+      );
+    } else {
+      _heightAnimation = null;
+      _slideOutCurvedAnimation = null;
+    }
+
   }
 
   @override
   void dispose() {
     widget.animation?.removeStatusListener(_onAnimationStatusChanged);
+    _heightAnimation?.dispose();
+    _slideOutCurvedAnimation?.dispose();
     super.dispose();
   }
 
@@ -405,14 +431,10 @@ class _MaterialBannerState extends State<MaterialBanner> {
       child: materialBanner,
     );
 
-    final CurvedAnimation heightAnimation = CurvedAnimation(parent: widget.animation!, curve: _materialBannerHeightCurve);
     final Animation<Offset> slideOutAnimation = Tween<Offset>(
       begin: const Offset(0.0, -1.0),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: widget.animation!,
-      curve: const Threshold(0.0),
-    ));
+    ).animate(_slideOutCurvedAnimation!);
 
     materialBanner = Semantics(
       container: true,
@@ -433,11 +455,11 @@ class _MaterialBannerState extends State<MaterialBanner> {
       materialBannerTransition = materialBanner;
     } else {
       materialBannerTransition = AnimatedBuilder(
-        animation: heightAnimation,
+        animation: _heightAnimation!,
         builder: (BuildContext context, Widget? child) {
           return Align(
             alignment: AlignmentDirectional.bottomStart,
-            heightFactor: heightAnimation.value,
+            heightFactor: _heightAnimation!.value,
             child: child,
           );
         },
@@ -483,10 +505,10 @@ class _BannerDefaultsM3 extends MaterialBannerThemeData {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
-  Color? get backgroundColor => _colors.surface;
+  Color? get backgroundColor => _colors.surfaceContainerLow;
 
   @override
-  Color? get surfaceTintColor => _colors.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
   Color? get dividerColor => _colors.outlineVariant;

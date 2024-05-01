@@ -53,7 +53,7 @@ class FlutterExtension {
      *
      * See https://developer.android.com/guide/topics/manifest/uses-sdk-element.
      */
-    public final int targetSdkVersion = 33
+    public final int targetSdkVersion = 34
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
@@ -78,7 +78,7 @@ class FlutterExtension {
     public String flutterVersionName = null
 
     /** Returns flutterVersionCode as an integer with error handling. */
-    public Integer versionCode() {
+    public Integer getVersionCode() {
         if (flutterVersionCode == null) {
             throw new GradleException("flutterVersionCode must not be null.")
         }
@@ -91,7 +91,7 @@ class FlutterExtension {
     }
 
     /** Returns flutterVersionName with error handling. */
-    public String versionName() {
+    public String getVersionName() {
         if (flutterVersionName == null) {
             throw new GradleException("flutterVersionName must not be null.")
         }
@@ -570,11 +570,12 @@ class FlutterPlugin implements Plugin<Project> {
                                         }
                                     }
                                 }
-                                schemes.each { scheme ->
-                                    hosts.each { host ->
-                                        if (!paths) {
-                                            appLinkSettings.deeplinks.add(new Deeplink(scheme: scheme, host: host, path: ".*", intentFilterCheck: intentFilterCheck))
-                                        } else {
+                                if(!hosts.isEmpty() || !paths.isEmpty()){
+                                    if(schemes.isEmpty()){schemes.add(null)}
+                                    if(hosts.isEmpty()){hosts.add(null)}
+                                    if(paths.isEmpty()){paths.add('.*')}
+                                    schemes.each { scheme ->
+                                        hosts.each { host ->
                                             paths.each { path ->
                                                 appLinkSettings.deeplinks.add(new Deeplink(scheme: scheme, host: host, path: path, intentFilterCheck: intentFilterCheck))
                                             }
@@ -1147,9 +1148,9 @@ class FlutterPlugin implements Plugin<Project> {
             bundleSkSLPathValue = project.property(propBundleSkslPath)
         }
         String performanceMeasurementFileValue
-        final String propPerformanceMesaurementFile = "performance-measurement-file"
-        if (project.hasProperty(propPerformanceMesaurementFile)) {
-            performanceMeasurementFileValue = project.property(propPerformanceMesaurementFile)
+        final String propPerformanceMeasurementFile = "performance-measurement-file"
+        if (project.hasProperty(propPerformanceMeasurementFile)) {
+            performanceMeasurementFileValue = project.property(propPerformanceMeasurementFile)
         }
         String codeSizeDirectoryValue
         final String propCodeSizeDirectory = "code-size-directory"

@@ -117,12 +117,10 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
     final Offset editableOffset = renderEditable.maxLines == 1
         ? Offset(renderEditable.offset.pixels - _dragStartViewportOffset, 0.0)
         : Offset(0.0, renderEditable.offset.pixels - _dragStartViewportOffset);
-    final double effectiveScrollPosition = _scrollPosition - _dragStartScrollOffset;
-    final bool scrollingOnVerticalAxis = _scrollDirection == AxisDirection.up || _scrollDirection == AxisDirection.down;
-    final Offset scrollableOffset = Offset(
-      !scrollingOnVerticalAxis ? effectiveScrollPosition : 0.0,
-      scrollingOnVerticalAxis ? effectiveScrollPosition : 0.0,
-    );
+    final Offset scrollableOffset = switch (axisDirectionToAxis(_scrollDirection ?? AxisDirection.left)) {
+      Axis.horizontal => Offset(_scrollPosition - _dragStartScrollOffset, 0),
+      Axis.vertical   => Offset(0, _scrollPosition - _dragStartScrollOffset),
+    };
     renderEditable.selectWordsInRange(
       from: details.globalPosition - details.offsetFromOrigin - editableOffset - scrollableOffset,
       to: details.globalPosition,
@@ -150,6 +148,9 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 }
 
 /// A run of selectable text with a single style.
+///
+/// Consider using [SelectionArea] or [SelectableRegion] instead, which enable
+/// selection on a widget subtree, including but not limited to [Text] widgets.
 ///
 /// The [SelectableText] widget displays a string of text with a single style.
 /// The string might break across multiple lines or might all be displayed on
@@ -214,6 +215,8 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 ///
 ///  * [Text], which is the non selectable version of this widget.
 ///  * [TextField], which is the editable version of this widget.
+///  * [SelectionArea], which enables the selection of multiple [Text] widgets
+///    and of other widgets.
 class SelectableText extends StatefulWidget {
   /// Creates a selectable text widget.
   ///

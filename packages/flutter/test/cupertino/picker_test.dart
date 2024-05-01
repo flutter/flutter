@@ -343,7 +343,7 @@ void main() {
       );
 
       // Drag it by a bit but not enough to move to the next item.
-      await tester.drag(find.text('10'), const Offset(0.0, 30.0), touchSlopY: 0.0, warnIfMissed: false); // has an IgnorePointer
+      await tester.drag(find.text('10'), const Offset(0.0, 30.0), pointer: 1, touchSlopY: 0.0, warnIfMissed: false); // has an IgnorePointer
 
       // The item that was in the center now moved a bit.
       expect(
@@ -360,7 +360,7 @@ void main() {
       expect(selectedItems.isEmpty, true);
 
       // Drag it by enough to move to the next item.
-      await tester.drag(find.text('10'), const Offset(0.0, 70.0), touchSlopY: 0.0, warnIfMissed: false); // has an IgnorePointer
+      await tester.drag(find.text('10'), const Offset(0.0, 70.0), pointer: 1, touchSlopY: 0.0, warnIfMissed: false); // has an IgnorePointer
 
       await tester.pumpAndSettle();
 

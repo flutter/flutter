@@ -354,7 +354,44 @@ void main() {
       logs.clear();
     }, variant: KeySimulatorTransitModeVariant.all());
 
+    testWidgets('FocusManager ignores app lifecycle changes on Android.', (WidgetTester tester) async {
+      final bool shouldRespond = kIsWeb || defaultTargetPlatform != TargetPlatform.android;
+      if (shouldRespond) {
+        return;
+      }
+
+      Future<void> setAppLifecycleState(AppLifecycleState state) async {
+        final ByteData? message = const StringCodec().encodeMessage(state.toString());
+        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .handlePlatformMessage('flutter/lifecycle', message, (_) {});
+      }
+
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      addTearDown(scope.dispose);
+      final FocusAttachment scopeAttachment = scope.attach(context);
+      final FocusNode focusNode = FocusNode(debugLabel: 'Focus Node');
+      addTearDown(focusNode.dispose);
+      final FocusAttachment focusNodeAttachment = focusNode.attach(context);
+      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+      focusNodeAttachment.reparent(parent: scope);
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      await setAppLifecycleState(AppLifecycleState.paused);
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      await setAppLifecycleState(AppLifecycleState.resumed);
+      expect(focusNode.hasPrimaryFocus, isTrue);
+    });
+
     testWidgets('FocusManager responds to app lifecycle changes.', (WidgetTester tester) async {
+      final bool shouldRespond = kIsWeb || defaultTargetPlatform != TargetPlatform.android;
+      if (!shouldRespond) {
+        return;
+      }
+
       Future<void> setAppLifecycleState(AppLifecycleState state) async {
         final ByteData? message = const StringCodec().encodeMessage(state.toString());
         await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -402,8 +439,6 @@ void main() {
       expect(focusNode.hasPrimaryFocus, isTrue);
 
       await setAppLifecycleState(AppLifecycleState.paused);
-      expect(focusNode.hasPrimaryFocus, isFalse);
-
       focusNodeAttachment.detach();
       expect(focusNode.hasPrimaryFocus, isFalse);
 
@@ -529,16 +564,16 @@ void main() {
       // child1
       //   |
       // child2
-      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope2');
+      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1');
       addTearDown(scope1.dispose);
       final FocusAttachment scope2Attachment = scope1.attach(context);
       scope2Attachment.reparent(parent: tester.binding.focusManager.rootScope);
 
-      final FocusNode child1 = FocusNode(debugLabel: 'child2');
+      final FocusNode child1 = FocusNode(debugLabel: 'child1');
       addTearDown(child1.dispose);
       final FocusAttachment child2Attachment = child1.attach(context);
 
-      final FocusNode child2 = FocusNode(debugLabel: 'child3');
+      final FocusNode child2 = FocusNode(debugLabel: 'child2');
       addTearDown(child2.dispose);
       final FocusAttachment child3Attachment = child2.attach(context);
 
@@ -695,6 +730,26 @@ void main() {
       expect(child2.parent, equals(parent1));
       expect(parent1.children.first, equals(child2));
       expect(parent2.children.first, equals(child1));
+    });
+
+    test('FocusScopeNode.canRequestFocus affects descendantsAreFocusable', () {
+      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+
+      scope.descendantsAreFocusable = false;
+      expect(scope.descendantsAreFocusable, isFalse);
+      expect(scope.canRequestFocus, isTrue);
+
+      scope.descendantsAreFocusable = true;
+      expect(scope.descendantsAreFocusable, isTrue);
+      expect(scope.canRequestFocus, isTrue);
+
+      scope.canRequestFocus = false;
+      expect(scope.descendantsAreFocusable, isFalse);
+      expect(scope.canRequestFocus, isFalse);
+
+      scope.canRequestFocus = true;
+      expect(scope.descendantsAreFocusable, isTrue);
+      expect(scope.canRequestFocus, isTrue);
     });
 
     testWidgets('canRequestFocus affects children.', (WidgetTester tester) async {

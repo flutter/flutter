@@ -114,6 +114,18 @@ final FakeVmServiceRequest listViews = FakeVmServiceRequest(
   },
 );
 
+const FakeVmServiceRequest renderFrameRasterStats = FakeVmServiceRequest(
+  method: kRenderFrameWithRasterStatsMethod,
+  args: <String, Object>{
+    'viewId': 'a',
+    'isolateId': '1',
+  },
+  error: FakeRPCError(
+    code: RPCErrorCodes.kServerError,
+    error: 'Raster status not supported on Impeller backend',
+  ),
+);
+
 const FakeVmServiceRequest setAssetBundlePath = FakeVmServiceRequest(
   method: '_flutter.setAssetBundlePath',
   args: <String, Object>{
@@ -160,6 +172,12 @@ class FakeDartDevelopmentServiceException implements dds.DartDevelopmentServiceE
   @override
   final String message;
   static const String defaultMessage = 'A DDS instance is already connected at http://localhost:8181';
+
+  @override
+  Map<String, Object?> toJson() => <String, Object?>{
+        'error_code': errorCode,
+        'message': message,
+      };
 }
 
 class TestFlutterDevice extends FlutterDevice {
@@ -268,7 +286,6 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     required Uri mainUri,
     String? target,
     AssetBundle? bundle,
-    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool bundleDirty = false,
     bool fullRestart = false,
@@ -506,7 +523,6 @@ class FakeDevFS extends Fake implements DevFS {
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
-    DateTime? firstBuildTime,
     bool bundleFirstUpload = false,
     bool fullRestart = false,
     String? projectRootPath,
