@@ -19,8 +19,8 @@ void main() {
         ),
       ),
     ));
-    // Autofocus needs to check no other node in the [FocusScope] is focused and
-    // can only request focus for the second frame.
+    // Autofocus needs to check that no other node in the [FocusScope] is
+    // focused and can only request focus for the second frame.
     await tester.pumpAndSettle();
     expect(find.descendant(
       of: find.byType(example.FocusableText),
@@ -58,6 +58,7 @@ void main() {
     ));
     expect(container2.color, Colors.red);
   });
+
   testWidgets('builds list showcasing focus traversal',
           (WidgetTester tester) async {
     await tester.pumpWidget(const example.FocusExampleApp());
