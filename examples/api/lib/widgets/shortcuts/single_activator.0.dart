@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// Flutter code sample for [SingleActivator.SingleActivator].
+/// Flutter code sample for [SingleActivator].
 
 void main() => runApp(const SingleActivatorExampleApp());
 
