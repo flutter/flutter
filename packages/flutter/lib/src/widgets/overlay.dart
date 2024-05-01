@@ -969,10 +969,8 @@ mixin _RenderTheaterMixin on RenderBox {
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(!debugNeedsLayout);
-    final Iterator<RenderBox> childIterator = _childrenInPaintOrder().iterator;
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
-    while (childIterator.moveNext()) {
-      final RenderBox child = childIterator.current;
+    for (final RenderBox child in _childrenInPaintOrder()) {
       assert(!child.debugNeedsLayout);
       final StackParentData childParentData = child.parentData! as StackParentData;
       baselineOffset = baselineOffset.minOf(BaselineOffset(child.getDistanceToActualBaseline(baseline)) + childParentData.offset.dy);
@@ -1237,11 +1235,11 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
       : _findSizeDeterminingChild().getDryLayout(constraints);
     final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(size);
     final Alignment alignment = theater._resolvedAlignment;
+
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
-    final Iterator<RenderBox> childIterator = _childrenInPaintOrder().iterator;
-    while (childIterator.moveNext()) {
+    for (final RenderBox child in _childrenInPaintOrder()) {
       baselineOffset = baselineOffset.minOf(BaselineOffset(
-        _RenderTheaterMixin.baselineForChild(childIterator.current, size, nonPositionedChildConstraints, alignment, baseline),
+        _RenderTheaterMixin.baselineForChild(child, size, nonPositionedChildConstraints, alignment, baseline),
       ));
     }
     return baselineOffset.offset;
