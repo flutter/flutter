@@ -186,7 +186,7 @@ class SkwasmImageShader extends SkwasmNativeShader implements ui.ImageShader {
           image.handle,
           tmx.index,
           tmy.index,
-          (filterQuality ?? ui.FilterQuality.medium).index,
+          (filterQuality ?? ui.FilterQuality.none).index,
           localMatrix,
         ));
       });
@@ -195,7 +195,7 @@ class SkwasmImageShader extends SkwasmNativeShader implements ui.ImageShader {
         image.handle,
         tmx.index,
         tmy.index,
-        (filterQuality ?? ui.FilterQuality.medium).index,
+        (filterQuality ?? ui.FilterQuality.none).index,
         nullptr,
       ));
     }
