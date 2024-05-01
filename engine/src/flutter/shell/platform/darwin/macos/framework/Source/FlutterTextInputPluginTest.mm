@@ -1801,6 +1801,42 @@
   return true;
 }
 
+- (bool)testSelectorsNotForwardedToFrameworkIfNoClient {
+  id engineMock = flutter::testing::CreateMockFlutterEngine(@"");
+  id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  OCMStub(  // NOLINT(google-objc-avoid-throwing-exception)
+      [engineMock binaryMessenger])
+      .andReturn(binaryMessengerMock);
+  // Make sure the selectors are not forwarded to the framework.
+  OCMReject([binaryMessengerMock sendOnChannel:@"flutter/textinput" message:[OCMArg any]]);
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
+
+  FlutterTextInputPlugin* plugin =
+      [[FlutterTextInputPlugin alloc] initWithViewController:viewController];
+
+  // Can't run CFRunLoop in default mode because it causes crashes from scheduled
+  // sources from other tests.
+  NSString* runLoopMode = @"FlutterTestRunLoopMode";
+  plugin.customRunLoopMode = runLoopMode;
+
+  // Call selectors without setting a client.
+  [plugin doCommandBySelector:@selector(moveUp:)];
+  [plugin doCommandBySelector:@selector(moveRightAndModifySelection:)];
+
+  __block bool done = false;
+  CFRunLoopPerformBlock(CFRunLoopGetMain(), (__bridge CFStringRef)runLoopMode, ^{
+    done = true;
+  });
+
+  while (!done) {
+    CFRunLoopRunInMode((__bridge CFStringRef)runLoopMode, 0, true);
+  }
+  // At this point the selectors should be dropped; otherwise, OCMReject will throw.
+  return true;
+}
+
 @end
 
 namespace flutter::testing {
@@ -1886,7 +1922,7 @@ TEST(FlutterTextInputPluginTest, TestComposingWithDelta) {
   ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testComposingWithDelta]);
 }
 
-TEST(FlutterTextInputPluginTest, testComposingWithDeltasWhenSelectionIsActive) {
+TEST(FlutterTextInputPluginTest, TestComposingWithDeltasWhenSelectionIsActive) {
   ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testComposingWithDeltasWhenSelectionIsActive]);
 }
 
@@ -1908,6 +1944,10 @@ TEST(FlutterTextInputPluginTest, UnhandledKeyEquivalent) {
 
 TEST(FlutterTextInputPluginTest, TestSelectorsAreForwardedToFramework) {
   ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testSelectorsAreForwardedToFramework]);
+}
+
+TEST(FlutterTextInputPluginTest, TestSelectorsNotForwardedToFrameworkIfNoClient) {
+  ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testSelectorsNotForwardedToFrameworkIfNoClient]);
 }
 
 TEST(FlutterTextInputPluginTest, TestInsertNewLine) {
