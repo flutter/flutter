@@ -117,6 +117,8 @@ source_set("flutter_framework_source_arc") {
     "ios_surface_metal_skia.mm",
     "ios_surface_software.h",
     "ios_surface_software.mm",
+    "platform_message_handler_ios.h",
+    "platform_message_handler_ios.mm",
     "rendering_api_selection.h",
     "rendering_api_selection.mm",
   ]
@@ -180,8 +182,6 @@ source_set("flutter_framework_source") {
     "framework/Source/accessibility_text_entry.mm",
     "ios_external_view_embedder.h",
     "ios_external_view_embedder.mm",
-    "platform_message_handler_ios.h",
-    "platform_message_handler_ios.mm",
     "platform_view_ios.h",
     "platform_view_ios.mm",
   ]
