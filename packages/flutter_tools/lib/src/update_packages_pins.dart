@@ -34,7 +34,7 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
 };
 
 /// These are packages that are explicitly excluded from appearing in the list
-/// of pinned packages.
+/// of pinned packages added to each pubspec.yaml.
 const List<String> kExplicitlyExcludedPackages = <String>[
-  '_macros', // Transitive dependency for macros package, but isn't published.
+  '_macros', // Synthetic dependency for macros package, which isn't published.
 ];

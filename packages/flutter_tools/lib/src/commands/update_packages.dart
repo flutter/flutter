@@ -1550,6 +1550,12 @@ String generateFakePubspec(
       }
     });
   }
+  if (verbose && kExplicitlyExcludedPackages.isNotEmpty) {
+    globals.printStatus('WARNING: the following packages are explicitly excluded from version');
+    for (final String package in kExplicitlyExcludedPackages) {
+      globals.printStatus('  - $package');
+    }
+  }
   for (final PubspecDependency dependency in dependencies) {
     if (!dependency.pointsToSdk) {
       dependency.describeForFakePubspec(result, overrides, allowUpgrade: doUpgrade);
