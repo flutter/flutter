@@ -2824,7 +2824,6 @@ targets:
   # Mokey, Skia
   - name: Linux_mokey new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
-    bringup: true # Device exists only in staging.
     presubmit: false
     timeout: 60
     properties:
