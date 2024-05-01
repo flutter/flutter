@@ -30,7 +30,9 @@ final class RunCommand extends CommandBase {
     // We default to nothing in order to automatically detect attached devices
     // and select an appropriate target from them.
     addConfigOption(
-      environment, argParser, builds,
+      environment,
+      argParser,
+      builds,
       defaultsTo: '',
     );
     argParser.addFlag(
@@ -58,7 +60,9 @@ See `flutter run --help` for a listing
 
   Build? _lookup(String configName) {
     final String demangledName = demangleConfigName(environment, configName);
-    return builds.where((Build build) => build.name == demangledName).firstOrNull;
+    return builds
+        .where((Build build) => build.name == demangledName)
+        .firstOrNull;
   }
 
   Build? _findHostBuild(Build? targetBuild) {
@@ -71,7 +75,8 @@ See `flutter run --help` for a listing
     }
     // TODO(johnmccutchan): This is brittle, it would be better if we encoded
     // the host config name in the target config.
-    final String ci = mangledName.startsWith('ci') ? mangledName.substring(0, 3) : '';
+    final String ci =
+        mangledName.startsWith('ci') ? mangledName.substring(0, 3) : '';
     if (mangledName.contains('_debug')) {
       return _lookup('${ci}host_debug');
     } else if (mangledName.contains('_profile')) {
@@ -166,21 +171,28 @@ See `flutter run --help` for a listing
       }
     }
 
+    final String mangledBuildName = mangleConfigName(environment, build.name);
+
+    final String mangledHostBuildName =
+        mangleConfigName(environment, hostBuild.name);
+
+    final List<String> command = <String>[
+      'flutter',
+      'run',
+      '--local-engine-src-path',
+      environment.engine.srcDir.path,
+      '--local-engine',
+      mangledBuildName,
+      '--local-engine-host',
+      mangledHostBuildName,
+      ...argResults!.rest
+    ];
+
     // TODO(johnmccutchan): Be smart and if the user requested a profile
     // config, add the '--profile' flag when invoking flutter run.
     final ProcessRunnerResult result =
         await environment.processRunner.runProcess(
-      <String>[
-        'flutter',
-        'run',
-        '--local-engine-src-path',
-        environment.engine.srcDir.path,
-        '--local-engine',
-        build.name,
-        '--local-engine-host',
-        hostBuild.name,
-        ...argResults!.rest,
-      ],
+      command,
       runInShell: true,
       startMode: ProcessStartMode.inheritStdio,
     );
