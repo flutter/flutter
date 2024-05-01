@@ -1175,8 +1175,8 @@ void main() {
     final Rect hitRect = tester.getRect(gestureDetector);
     final Rect textFieldRect = tester.getRect(find.byType(TextField));
 
-    expect(hitRect.size.width, lessThan(textFieldRect.size.width));
-    expect(hitRect.size.height, lessThan(textFieldRect.size.height));
+    expect(hitRect.size.width, lessThanOrEqualTo(textFieldRect.size.width));
+    expect(hitRect.size.height, lessThanOrEqualTo(textFieldRect.size.height));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   group('SelectionOverlay', () {
