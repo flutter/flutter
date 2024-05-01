@@ -31,6 +31,8 @@ class SharedObjectVKT : public SharedObjectVK {
 
   const Resource& Get() const { return *resource_; }
 
+  const UniqueResource& GetUniqueWrapper() const { return resource_; }
+
  private:
   UniqueResource resource_;
 

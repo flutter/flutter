@@ -14,7 +14,7 @@ INSTANTIATE_VULKAN_PLAYGROUND_SUITE(DriverInfoVKTest);
 TEST_P(DriverInfoVKTest, CanQueryDriverInfo) {
   ASSERT_TRUE(GetContext());
   const auto& driver_info =
-      SurfaceContextVK::Cast(*GetContext()).GetParent().GetDriverInfo();
+      SurfaceContextVK::Cast(*GetContext()).GetParent()->GetDriverInfo();
   ASSERT_NE(driver_info, nullptr);
   // 1.1 is the base Impeller version. The driver can't be lower than that.
   ASSERT_TRUE(driver_info->GetAPIVersion().IsAtLeast(Version{1, 1, 0}));
@@ -26,7 +26,7 @@ TEST_P(DriverInfoVKTest, CanQueryDriverInfo) {
 TEST_P(DriverInfoVKTest, CanDumpToLog) {
   ASSERT_TRUE(GetContext());
   const auto& driver_info =
-      SurfaceContextVK::Cast(*GetContext()).GetParent().GetDriverInfo();
+      SurfaceContextVK::Cast(*GetContext()).GetParent()->GetDriverInfo();
   ASSERT_NE(driver_info, nullptr);
   fml::testing::LogCapture log;
   driver_info->DumpToLog();

@@ -7,6 +7,7 @@
 
 #include <optional>
 
+#include "flutter/fml/unique_fd.h"
 #include "flutter/fml/unique_object.h"
 #include "impeller/base/mask.h"
 #include "impeller/geometry/size.h"
@@ -32,6 +33,10 @@ enum class HardwareBufferUsageFlags {
   kFrameBufferAttachment = 1u << 0u,
   kCompositorOverlay = 1u << 1u,
   kSampledImage = 1u << 2u,
+  kCPUReadRarely = 1u << 3u,
+  kCPUReadOften = 1u << 4u,
+  kCPUWriteRarely = 1u << 5u,
+  kCPUWriteOften = 1u << 6u,
 };
 
 using HardwareBufferUsage = Mask<HardwareBufferUsageFlags>;
@@ -126,6 +131,29 @@ class HardwareBuffer {
   /// @return     The system unique id if one can be obtained.
   ///
   static std::optional<uint64_t> GetSystemUniqueID(AHardwareBuffer* buffer);
+
+  enum class CPUAccessType {
+    kRead,
+    kWrite,
+  };
+  //----------------------------------------------------------------------------
+  /// @brief      Lock the buffer for CPU access. This call may fail if the
+  ///             buffer was not created with one the usages that allow for CPU
+  ///             access.
+  ///
+  /// @param[in]  type  The type
+  ///
+  /// @return     A host-accessible buffer if there was no error related to
+  ///             usage or buffer validity.
+  ///
+  void* Lock(CPUAccessType type) const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Unlock a mapping previously locked for CPU access.
+  ///
+  /// @return     If the unlock was successful.
+  ///
+  bool Unlock() const;
 
  private:
   struct UniqueAHardwareBufferTraits {

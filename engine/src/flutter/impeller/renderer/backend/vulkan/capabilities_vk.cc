@@ -179,6 +179,10 @@ static const char* GetExtensionName(RequiredAndroidDeviceExtensionVK ext) {
       return VK_EXT_QUEUE_FAMILY_FOREIGN_EXTENSION_NAME;
     case RequiredAndroidDeviceExtensionVK::kKHRDedicatedAllocation:
       return VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME;
+    case RequiredAndroidDeviceExtensionVK::kKHRExternalFenceFd:
+      return VK_KHR_EXTERNAL_FENCE_FD_EXTENSION_NAME;
+    case RequiredAndroidDeviceExtensionVK::kKHRExternalFence:
+      return VK_KHR_EXTERNAL_FENCE_EXTENSION_NAME;
     case RequiredAndroidDeviceExtensionVK::kLast:
       return "Unknown";
   }

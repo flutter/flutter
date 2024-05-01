@@ -45,11 +45,7 @@ class ScopedCleanupClosure final {
   explicit ScopedCleanupClosure(const fml::closure& closure)
       : closure_(closure) {}
 
-  ~ScopedCleanupClosure() {
-    if (closure_) {
-      closure_();
-    }
-  }
+  ~ScopedCleanupClosure() { Reset(); }
 
   fml::closure SetClosure(const fml::closure& closure) {
     auto old_closure = closure_;
@@ -61,6 +57,13 @@ class ScopedCleanupClosure final {
     fml::closure closure = closure_;
     closure_ = nullptr;
     return closure;
+  }
+
+  void Reset() {
+    if (closure_) {
+      closure_();
+      closure_ = nullptr;
+    }
   }
 
  private:

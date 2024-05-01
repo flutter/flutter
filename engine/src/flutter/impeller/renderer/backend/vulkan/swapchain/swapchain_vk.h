@@ -7,10 +7,15 @@
 
 #include <memory>
 
+#include "flutter/fml/build_config.h"
 #include "impeller/geometry/size.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/surface.h"
+
+#if FML_OS_ANDROID
+#include "impeller/toolkit/android/native_window.h"
+#endif  // FML_OS_ANDROID
 
 namespace impeller {
 
@@ -27,6 +32,13 @@ class SwapchainVK {
       vk::UniqueSurfaceKHR surface,
       const ISize& size,
       bool enable_msaa = true);
+
+#if FML_OS_ANDROID
+  static std::shared_ptr<SwapchainVK> Create(
+      const std::shared_ptr<Context>& context,
+      ANativeWindow* window,
+      bool enable_msaa = true);
+#endif  // FML_OS_ANDROID
 
   virtual ~SwapchainVK();
 

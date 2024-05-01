@@ -8,6 +8,7 @@
 #include <functional>
 #include <map>
 
+#include "flutter/fml/unique_fd.h"
 #include "flutter/fml/unique_object.h"
 #include "impeller/geometry/color.h"
 #include "impeller/toolkit/android/proc_table.h"
@@ -56,13 +57,16 @@ class SurfaceTransaction {
   ///
   /// @see        `SurfaceTransaction::Apply`.
   ///
-  /// @param[in]  control  The control
-  /// @param[in]  buffer   The hardware buffer
+  /// @param[in]  control         The control.
+  /// @param[in]  buffer          The hardware buffer.
+  /// @param[in]  acquire_fence   The fence to wait on before setting the
+  ///                             contents.
   ///
   /// @return     If the update was encoded in the transaction.
   ///
   [[nodiscard]] bool SetContents(const SurfaceControl* control,
-                                 const HardwareBuffer* buffer);
+                                 const HardwareBuffer* buffer,
+                                 fml::UniqueFD acquire_fence = {});
 
   //----------------------------------------------------------------------------
   /// @brief      Encodes the updated background color of the surface control.
