@@ -740,6 +740,8 @@ class _ViewContentState extends State<_ViewContent> {
   late Rect _viewRect;
   late final SearchController _controller;
   Iterable<Widget> result = <Widget>[];
+  String? searchValue;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -770,12 +772,23 @@ class _ViewContentState extends State<_ViewContent> {
         _viewRect = Offset.zero & _screenSize!;
       }
     }
-    unawaited(updateSuggestions());
+
+    if (searchValue != _controller.text) {
+      _timer?.cancel();
+      _timer = Timer(Duration.zero, () async {
+        searchValue = _controller.text;
+        result = await widget.suggestionsBuilder(context, _controller);
+        _timer?.cancel();
+        _timer = null;
+      });
+    }
   }
 
   @override
   void dispose() {
     _controller.removeListener(updateSuggestions);
+    _timer?.cancel();
+    _timer = null;
     super.dispose();
   }
 
@@ -793,11 +806,14 @@ class _ViewContentState extends State<_ViewContent> {
   }
 
   Future<void> updateSuggestions() async {
-    final Iterable<Widget> suggestions = await widget.suggestionsBuilder(context, _controller);
-    if (mounted) {
-      setState(() {
-        result = suggestions;
-      });
+    if (searchValue != _controller.text) {
+      searchValue = _controller.text;
+      final Iterable<Widget> suggestions = await widget.suggestionsBuilder(context, _controller);
+      if (mounted) {
+        setState(() {
+          result = suggestions;
+        });
+      }
     }
   }
 
@@ -1118,6 +1134,7 @@ class SearchBar extends StatefulWidget {
     this.leading,
     this.trailing,
     this.onTap,
+    this.onTapOutside,
     this.onChanged,
     this.onSubmitted,
     this.constraints,
@@ -1169,6 +1186,9 @@ class SearchBar extends StatefulWidget {
 
   /// Called when the user taps this search bar.
   final GestureTapCallback? onTap;
+
+  /// Called when the user taps outside the search bar.
+  final TapRegionCallback? onTapOutside;
 
   /// Invoked upon user input.
   final ValueChanged<String>? onChanged;
@@ -1303,7 +1323,6 @@ class _SearchBarState extends State<SearchBar> {
   Widget build(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final IconThemeData iconTheme = IconTheme.of(context);
     final SearchBarThemeData searchBarTheme = SearchBarTheme.of(context);
     final SearchBarThemeData defaults = _SearchBarDefaultsM3(context);
 
@@ -1334,33 +1353,27 @@ class _SearchBarState extends State<SearchBar> {
       ?? searchBarTheme.textStyle?.resolve(states)
       ?? defaults.hintStyle?.resolve(states);
 
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    bool isIconThemeColorDefault(Color? color) {
-      if (isDark) {
-        return color == kDefaultIconLightColor;
-      }
-      return color == kDefaultIconDarkColor;
-    }
+    final Color defaultColor = switch (colorScheme.brightness) {
+      Brightness.light => kDefaultIconDarkColor,
+      Brightness.dark  => kDefaultIconLightColor,
+    };
+    final IconThemeData? customTheme = switch (IconTheme.of(context)) {
+      final IconThemeData iconTheme when iconTheme.color != defaultColor => iconTheme,
+      _ => null,
+    };
 
     Widget? leading;
     if (widget.leading != null) {
       leading = IconTheme.merge(
-        data: isIconThemeColorDefault(iconTheme.color)
-          ? IconThemeData(color: colorScheme.onSurface)
-          : iconTheme,
+        data: customTheme ?? IconThemeData(color: colorScheme.onSurface),
         child: widget.leading!,
       );
     }
 
-    List<Widget>? trailing;
-    if (widget.trailing != null) {
-      trailing = widget.trailing?.map((Widget trailing) => IconTheme.merge(
-        data: isIconThemeColorDefault(iconTheme.color)
-          ? IconThemeData(color: colorScheme.onSurfaceVariant)
-          : iconTheme,
-        child: trailing,
-      )).toList();
-    }
+    final List<Widget>? trailing = widget.trailing?.map((Widget trailing) => IconTheme.merge(
+      data: customTheme ?? IconThemeData(color: colorScheme.onSurfaceVariant),
+      child: trailing,
+    )).toList();
 
     return ConstrainedBox(
       constraints: widget.constraints ?? searchBarTheme.constraints ?? defaults.constraints!,
@@ -1397,6 +1410,7 @@ class _SearchBarState extends State<SearchBar> {
                           autofocus: widget.autoFocus,
                           onTap: widget.onTap,
                           onTapAlwaysCalled: true,
+                          onTapOutside: widget.onTapOutside,
                           focusNode: _focusNode,
                           onChanged: widget.onChanged,
                           onSubmitted: widget.onSubmitted,
@@ -1423,7 +1437,7 @@ class _SearchBarState extends State<SearchBar> {
                         ),
                       ),
                     ),
-                    if (trailing != null) ...trailing,
+                    ...?trailing,
                   ],
                 ),
               ),

@@ -172,11 +172,9 @@ class CupertinoContextMenu extends StatefulWidget {
   ///
   ///     final Animation<Decoration> boxDecorationAnimation = DecorationTween(
   ///       begin: const BoxDecoration(
-  ///        color: Color(0xFFFFFFFF),
   ///        boxShadow: <BoxShadow>[],
   ///       ),
   ///       end: const BoxDecoration(
-  ///        color: Color(0xFFFFFFFF),
   ///        boxShadow: CupertinoContextMenu.kEndBoxShadow,
   ///       ),
   ///      ).animate(
@@ -279,11 +277,9 @@ class CupertinoContextMenu extends StatefulWidget {
   ///
   ///     final Animation<Decoration> boxDecorationAnimation = DecorationTween(
   ///       begin: const BoxDecoration(
-  ///        color: Color(0xFFFFFFFF),
   ///        boxShadow: <BoxShadow>[],
   ///       ),
   ///       end: const BoxDecoration(
-  ///        color: Color(0xFFFFFFFF),
   ///        boxShadow: CupertinoContextMenu.kEndBoxShadow,
   ///       ),
   ///      ).animate(
@@ -676,11 +672,9 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
 
     _boxDecoration = DecorationTween(
       begin: const BoxDecoration(
-        color: Color(0xFFFFFFFF),
         boxShadow: <BoxShadow>[],
       ),
       end: const BoxDecoration(
-        color: Color(0xFFFFFFFF),
         boxShadow: _endBoxShadow,
       ),
     ).animate(CurvedAnimation(
@@ -1304,15 +1298,14 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
           child: AnimatedBuilder(
             animation: _moveController,
             builder: _buildAnimation,
-            child: widget.orientation == Orientation.portrait
-              ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: children,
-              )
-              : Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: children,
-              ),
+            child: Flex(
+              direction: switch (widget.orientation) {
+                Orientation.portrait  => Axis.vertical,
+                Orientation.landscape => Axis.horizontal,
+              },
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: children,
+            ),
           ),
         ),
       ),

@@ -960,17 +960,11 @@ mixin WidgetInspectorService {
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
-        final List<String> args = <String>[];
-        int index = 0;
-        while (true) {
-          final String name = 'arg$index';
-          if (parameters.containsKey(name)) {
-            args.add(parameters[name]!);
-          } else {
-            break;
-          }
-          index++;
-        }
+        int index;
+        final List<String> args = <String>[
+          for (index = 0; parameters['arg$index'] != null; index++)
+            parameters['arg$index']!,
+        ];
         // Verify that the only arguments other than perhaps 'isolateId' are
         // arguments we have already handled.
         assert(index == parameters.length || (index == parameters.length - 1 && parameters.containsKey('isolateId')));
@@ -1675,30 +1669,26 @@ mixin WidgetInspectorService {
 
   List<Object?> _getParentChain(String? id, String groupName) {
     final Object? value = toObject(id);
-    List<_DiagnosticsPathNode> path;
-    if (value is RenderObject) {
-      path = _getRenderObjectParentChain(value, groupName)!;
-    } else if (value is Element) {
-      path = _getElementParentChain(value, groupName);
-    } else {
-      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Cannot get parent chain for node of type ${value.runtimeType}')]);
-    }
-
-    return path.map<Object?>((_DiagnosticsPathNode node) => _pathNodeToJson(
-      node,
-      InspectorSerializationDelegate(groupName: groupName, service: this),
-    )).toList();
-  }
-
-  Map<String, Object?>? _pathNodeToJson(_DiagnosticsPathNode? pathNode, InspectorSerializationDelegate delegate) {
-    if (pathNode == null) {
-      return null;
-    }
-    return <String, Object?>{
-      'node': _nodeToJson(pathNode.node, delegate),
-      'children': _nodesToJson(pathNode.children, delegate, parent: pathNode.node),
-      'childIndex': pathNode.childIndex,
+    final List<_DiagnosticsPathNode> path = switch (value) {
+      RenderObject() => _getRenderObjectParentChain(value, groupName)!,
+      Element() => _getElementParentChain(value, groupName),
+      _ => throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('Cannot get parent chain for node of type ${value.runtimeType}'),
+      ]),
     };
+
+    InspectorSerializationDelegate createDelegate() =>
+        InspectorSerializationDelegate(groupName: groupName, service: this);
+
+    return <Object?>[
+      for (final _DiagnosticsPathNode pathNode in path)
+        if (createDelegate() case final InspectorSerializationDelegate delegate)
+          <String, Object?>{
+            'node': _nodeToJson(pathNode.node, delegate),
+            'children': _nodesToJson(pathNode.children, delegate, parent: pathNode.node),
+            'childIndex': pathNode.childIndex,
+          },
+    ];
   }
 
   List<Element> _getRawElementParentChain(Element element, { required int? numLocalParents }) {
@@ -3408,27 +3398,16 @@ class _Location {
   final String? name;
 
   Map<String, Object?> toJsonMap() {
-    final Map<String, Object?> json = <String, Object?>{
+    return <String, Object?>{
       'file': file,
       'line': line,
       'column': column,
+      if (name != null) 'name': name,
     };
-    if (name != null) {
-      json['name'] = name;
-    }
-    return json;
   }
 
   @override
-  String toString() {
-    final List<String> parts = <String>[];
-    if (name != null) {
-      parts.add(name!);
-    }
-    parts.add(file);
-    parts..add('$line')..add('$column');
-    return parts.join(':');
-  }
+  String toString() => <String>[if (name != null) name!, file, '$line', '$column'].join(':');
 }
 
 bool _isDebugCreator(DiagnosticsNode node) => node is DiagnosticsDebugCreator;

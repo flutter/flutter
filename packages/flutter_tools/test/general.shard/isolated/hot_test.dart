@@ -14,9 +14,7 @@ import 'package:flutter_tools/src/resident_devtools_handler.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    hide BuildMode, Target;
-import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    as native_assets_cli;
+    hide Target;
 import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -29,7 +27,7 @@ import 'fake_native_assets_build_runner.dart';
 void main() {
   group('native assets', () {
     late TestHotRunnerConfig testingConfig;
-    late FileSystem fileSystem;
+    late MemoryFileSystem fileSystem;
     late FakeAnalytics fakeAnalytics;
 
     setUp(() {
@@ -65,12 +63,20 @@ void main() {
           Package('bar', fileSystem.currentDirectory.uri),
         ],
         dryRunResult: FakeNativeAssetsBuilderResult(
-          assets: <Asset>[
-            Asset(
+          assets: <AssetImpl>[
+            NativeCodeAssetImpl(
               id: 'package:bar/bar.dart',
-              linkMode: LinkMode.dynamic,
-              target: native_assets_cli.Target.macOSArm64,
-              path: AssetAbsolutePath(Uri.file('bar.dylib')),
+              linkMode: DynamicLoadingBundledImpl(),
+              os: OSImpl.macOS,
+              architecture: ArchitectureImpl.arm64,
+              file: Uri.file('bar.dylib'),
+            ),
+            NativeCodeAssetImpl(
+              id: 'package:bar/bar.dart',
+              linkMode: DynamicLoadingBundledImpl(),
+              os: OSImpl.macOS,
+              architecture: ArchitectureImpl.x64,
+              file: Uri.file('bar.dylib'),
             ),
           ],
         ),
@@ -124,12 +130,20 @@ void main() {
           Package('bar', fileSystem.currentDirectory.uri),
         ],
         dryRunResult: FakeNativeAssetsBuilderResult(
-          assets: <Asset>[
-            Asset(
+          assets: <AssetImpl>[
+            NativeCodeAssetImpl(
               id: 'package:bar/bar.dart',
-              linkMode: LinkMode.dynamic,
-              target: native_assets_cli.Target.macOSArm64,
-              path: AssetAbsolutePath(Uri.file('bar.dylib')),
+              linkMode: DynamicLoadingBundledImpl(),
+              os: OSImpl.macOS,
+              architecture: ArchitectureImpl.arm64,
+              file: Uri.file('bar.dylib'),
+            ),
+            NativeCodeAssetImpl(
+              id: 'package:bar/bar.dart',
+              linkMode: DynamicLoadingBundledImpl(),
+              os: OSImpl.macOS,
+              architecture: ArchitectureImpl.x64,
+              file: Uri.file('bar.dylib'),
             ),
           ],
         ),

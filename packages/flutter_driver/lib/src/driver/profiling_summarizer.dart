@@ -16,7 +16,7 @@ const Set<String> kProfilingEvents = <String>{
 };
 
 // These field names need to be in-sync with:
-// https://github.com/flutter/engine/blob/master/shell/profiling/sampling_profiler.cc
+// https://github.com/flutter/engine/blob/main/shell/profiling/sampling_profiler.cc
 const String _kCpuProfile = 'CpuUsage';
 const String _kGpuProfile = 'GpuUsage';
 const String _kMemoryProfile = 'MemoryUsage';

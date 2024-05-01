@@ -217,7 +217,7 @@ _TASK_- the name of your test that also matches the name of the
   file in `bin/tasks` without the `.dart` extension.
 
 1. Add target to
-   [.ci.yaml](https://github.com/flutter/flutter/blob/master/.ci.yaml)
+   [.ci.yaml](https://github.com/flutter/flutter/blob/main/.ci.yaml)
    * Mirror an existing one that has the recipe `devicelab_drone`
 
 If your test needs to run on multiple operating systems, create a separate
@@ -237,7 +237,7 @@ and the test will run based on the artifact against a testbed with a device.
 
 Steps:
 
-1. Update the task class to extend [`BuildTestTask`](https://github.com/flutter/flutter/blob/master/dev/devicelab/lib/tasks/build_test_task.dart)
+1. Update the task class to extend [`BuildTestTask`](https://github.com/flutter/flutter/blob/main/dev/devicelab/lib/tasks/build_test_task.dart)
    - Override function `getBuildArgs`
    - Override function `getTestArgs`
    - Override function `parseTaskResult`
