@@ -198,6 +198,7 @@ void main() {
         equals(<String>{
           'collection: 1.14.11',
           'meta: 1.1.8',
+          'macros: 0.0.1',
           'typed_data: 1.1.6',
           'vector_math: 2.0.8',
           'sky_engine: ',
@@ -213,6 +214,7 @@ void main() {
         equals(<String>{
           'collection: 1.14.11',
           'meta: 1.1.8',
+          'macros: 0.0.1',
           'typed_data: 1.1.6',
           'vector_math: 2.0.8',
           'sky_engine: ',
@@ -227,6 +229,7 @@ void main() {
         equals(<String>{
           'collection: 1.14.11',
           'meta: 1.1.8',
+          'macros: 0.0.1',
           'typed_data: 1.1.6',
           'vector_math: 2.0.8',
           'sky_engine: ',
