@@ -66,6 +66,14 @@ return `/usr/bin/python3`.
 gcloud init --project flutter-rbe-prod
 ```
 
+If you get an error from `bootstrap` about not being able to find `Application
+Default Credentials` you may need to execute the following to create the default
+credentials:
+
+```sh
+gcloud auth application-default login
+```
+
 ### Listing builds
 
 The builds available to the `et` tool are those specified by the build
