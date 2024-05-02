@@ -17,7 +17,7 @@ import 'package:flutter/services.dart';
 /// Currently this system context menu is bound to text input. The buttons that
 /// are shown and the actions they perform are dependent on the currently
 /// active [TextInputConnection]. Using this without an active
-/// [TextInputConnection] will be a noop.
+/// [TextInputConnection] is a noop.
 ///
 /// Call [dispose] when no longer needed.
 ///

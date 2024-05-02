@@ -620,6 +620,8 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
 ///    featured way to control the system context menu.
 ///  * [MediaQuery.maybeSupportsShowingSystemContextMenu], which indicates
 ///    whether the system context menu is supported.
+///  * [SystemContextMenu], which provides a widget interface for displaying the
+///    system context menu.
 mixin SystemContextMenuClient {
   /// Handles the system hiding a context menu.
   ///
