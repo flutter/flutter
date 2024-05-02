@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('showing and hiding one controller', (WidgetTester tester) async {
+  test('showing and hiding one controller', () {
     final List<Map<String, double>> targetRects = <Map<String, double>>[];
     int hideCount = 0;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -81,7 +81,7 @@ void main() {
     expect(hideCount, 2);
   });
 
-  testWidgets('the system can hide the menu with handleSystemHide', (WidgetTester tester) async {
+  test('the system can hide the menu with handleSystemHide', () async {
     final List<Map<String, double>> targetRects = <Map<String, double>>[];
     int hideCount = 0;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -162,7 +162,7 @@ void main() {
     controller1.hide();
   });
 
-  testWidgets('showing and hiding two controllers', (WidgetTester tester) async {
+  test('showing and hiding two controllers', () {
     final List<Map<String, double>> targetRects = <Map<String, double>>[];
     int hideCount = 0;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
