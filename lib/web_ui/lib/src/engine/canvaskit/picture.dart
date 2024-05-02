@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 
 import '../scene_painting.dart';
+import '../util.dart';
 import 'canvas.dart';
 import 'canvaskit_api.dart';
 import 'image.dart';
@@ -101,7 +102,7 @@ class CkPicture implements ScenePicture {
 
     final Surface surface = CanvasKitRenderer.instance.pictureToImageSurface;
     final CkSurface ckSurface = surface
-        .createOrUpdateSurface(ui.Size(width.toDouble(), height.toDouble()));
+        .createOrUpdateSurface(BitmapSize(width, height));
     final CkCanvas ckCanvas = ckSurface.getCanvas();
     ckCanvas.clear(const ui.Color(0x00000000));
     ckCanvas.drawPicture(this);

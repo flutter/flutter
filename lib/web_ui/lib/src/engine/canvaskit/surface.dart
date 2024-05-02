@@ -132,8 +132,8 @@ class Surface extends DisplayCanvas {
     _surface!.flush();
   }
 
-  Future<void> rasterizeToCanvas(
-      ui.Size frameSize, RenderCanvas canvas, List<CkPicture> pictures) async {
+  Future<void> rasterizeToCanvas(BitmapSize bitmapSize, RenderCanvas canvas,
+      List<CkPicture> pictures) async {
     final CkCanvas skCanvas = getCanvas();
     skCanvas.clear(const ui.Color(0x00000000));
     pictures.forEach(skCanvas.drawPicture);
@@ -148,9 +148,9 @@ class Surface extends DisplayCanvas {
       }
       final DomImageBitmap bitmap = await createImageBitmap(bitmapSource, (
         x: 0,
-        y: _pixelHeight - frameSize.height.toInt(),
-        width: frameSize.width.toInt(),
-        height: frameSize.height.toInt(),
+        y: _pixelHeight - bitmapSize.height,
+        width: bitmapSize.width,
+        height: bitmapSize.height,
       ));
       canvas.render(bitmap);
     } else {
@@ -162,7 +162,7 @@ class Surface extends DisplayCanvas {
       } else {
         imageSource = _canvasElement! as DomCanvasImageSource;
       }
-      canvas.renderWithNoBitmapSupport(imageSource, _pixelHeight, frameSize);
+      canvas.renderWithNoBitmapSupport(imageSource, _pixelHeight, bitmapSize);
     }
   }
 
@@ -170,7 +170,7 @@ class Surface extends DisplayCanvas {
   ///
   /// The given [size] is in physical pixels.
   SurfaceFrame acquireFrame(ui.Size size) {
-    final CkSurface surface = createOrUpdateSurface(size);
+    final CkSurface surface = createOrUpdateSurface(BitmapSize.fromSize(size));
 
     // ignore: prefer_function_declarations_over_variables
     final SubmitCallback submitCallback =
@@ -181,18 +181,11 @@ class Surface extends DisplayCanvas {
     return SurfaceFrame(surface, submitCallback);
   }
 
-  ui.Size? _currentCanvasPhysicalSize;
-  ui.Size? _currentSurfaceSize;
+  BitmapSize? _currentCanvasPhysicalSize;
+  BitmapSize? _currentSurfaceSize;
 
   /// Sets the CSS size of the canvas so that canvas pixels are 1:1 with device
   /// pixels.
-  ///
-  /// The logical size of the canvas is not based on the size of the window
-  /// but on the size of the canvas, which, due to `ceil()` above, may not be
-  /// the same as the window. We do not round/floor/ceil the logical size as
-  /// CSS pixels can contain more than one physical pixel and therefore to
-  /// match the size of the window precisely we use the most precise floating
-  /// point value we can get.
   void _updateLogicalHtmlCanvasSize() {
     final double devicePixelRatio =
         EngineFlutterDisplay.instance.devicePixelRatio;
@@ -209,7 +202,7 @@ class Surface extends DisplayCanvas {
   /// the <canvas> is, by default, positioned so that the top left corner is in
   /// the top left of the window. We need to shift the canvas down so that the
   /// bottom left of the <canvas> is the the bottom left corner of the window.
-  void positionToShowFrame(ui.Size frameSize) {
+  void positionToShowFrame(BitmapSize frameSize) {
     assert(isDisplayCanvas,
         'Should not position Surface if not used as a render canvas');
     final double devicePixelRatio =
@@ -236,7 +229,7 @@ class Surface extends DisplayCanvas {
   ///
   /// This also ensures that the gl/grcontext have been populated so
   /// that software rendering can be detected.
-  void ensureSurface([ui.Size size = const ui.Size(1, 1)]) {
+  void ensureSurface([BitmapSize size = const BitmapSize(1, 1)]) {
     // If the GrContext hasn't been setup yet then we need to force initialization
     // of the canvas and initial surface.
     if (_surface != null) {
@@ -249,7 +242,7 @@ class Surface extends DisplayCanvas {
   }
 
   /// Creates a <canvas> and SkSurface for the given [size].
-  CkSurface createOrUpdateSurface(ui.Size size) {
+  CkSurface createOrUpdateSurface(BitmapSize size) {
     if (size.isEmpty) {
       throw CanvasKitError('Cannot create surfaces of empty size.');
     }
@@ -257,7 +250,7 @@ class Surface extends DisplayCanvas {
     if (!_forceNewContext) {
       // Check if the window is the same size as before, and if so, don't allocate
       // a new canvas as the previous canvas is big enough to fit everything.
-      final ui.Size? previousSurfaceSize = _currentSurfaceSize;
+      final BitmapSize? previousSurfaceSize = _currentSurfaceSize;
       if (previousSurfaceSize != null &&
           size.width == previousSurfaceSize.width &&
           size.height == previousSurfaceSize.height) {
@@ -269,17 +262,17 @@ class Surface extends DisplayCanvas {
         return _surface!;
       }
 
-      final ui.Size? previousCanvasSize = _currentCanvasPhysicalSize;
+      final BitmapSize? previousCanvasSize = _currentCanvasPhysicalSize;
       // Initialize a new, larger, canvas. If the size is growing, then make the
       // new canvas larger than required to avoid many canvas creations.
       if (previousCanvasSize != null &&
           (size.width > previousCanvasSize.width ||
               size.height > previousCanvasSize.height)) {
-        final ui.Size newSize = size * 1.4;
+        final BitmapSize newSize = BitmapSize.fromSize(size.toSize() * 1.4);
         _surface?.dispose();
         _surface = null;
-        _pixelWidth = newSize.width.ceil();
-        _pixelHeight = newSize.height.ceil();
+        _pixelWidth = newSize.width;
+        _pixelHeight = newSize.height;
         if (useOffscreenCanvas) {
           _offscreenCanvas!.width = _pixelWidth.toDouble();
           _offscreenCanvas!.height = _pixelHeight.toDouble();
@@ -287,8 +280,7 @@ class Surface extends DisplayCanvas {
           _canvasElement!.width = _pixelWidth.toDouble();
           _canvasElement!.height = _pixelHeight.toDouble();
         }
-        _currentCanvasPhysicalSize =
-            ui.Size(_pixelWidth.toDouble(), _pixelHeight.toDouble());
+        _currentCanvasPhysicalSize = BitmapSize(_pixelWidth, _pixelHeight);
         if (isDisplayCanvas) {
           _updateLogicalHtmlCanvasSize();
         }
@@ -336,7 +328,7 @@ class Surface extends DisplayCanvas {
   /// This function is expensive.
   ///
   /// It's better to reuse canvas if possible.
-  void _createNewCanvas(ui.Size physicalSize) {
+  void _createNewCanvas(BitmapSize physicalSize) {
     // Clear the container, if it's not empty. We're going to create a new <canvas>.
     if (_offscreenCanvas != null) {
       _offscreenCanvas!.removeEventListener(
@@ -371,8 +363,8 @@ class Surface extends DisplayCanvas {
 
     // If `physicalSize` is not precise, use a slightly bigger canvas. This way
     // we ensure that the rendred picture covers the entire browser window.
-    _pixelWidth = physicalSize.width.ceil();
-    _pixelHeight = physicalSize.height.ceil();
+    _pixelWidth = physicalSize.width;
+    _pixelHeight = physicalSize.height;
     DomEventTarget htmlCanvas;
     if (useOffscreenCanvas) {
       final DomOffscreenCanvas offscreenCanvas = createDomOffscreenCanvas(
@@ -467,7 +459,7 @@ class Surface extends DisplayCanvas {
     _stencilBits = gl.getParameter(gl.stencilBits);
   }
 
-  CkSurface _createNewSurface(ui.Size size) {
+  CkSurface _createNewSurface(BitmapSize size) {
     assert(_offscreenCanvas != null || _canvasElement != null);
     if (webGLVersion == -1) {
       return _makeSoftwareCanvasSurface('WebGL support not detected');
@@ -478,8 +470,8 @@ class Surface extends DisplayCanvas {
     } else {
       final SkSurface? skSurface = canvasKit.MakeOnScreenGLSurface(
           _grContext!,
-          size.width.ceilToDouble(),
-          size.height.ceilToDouble(),
+          size.width.toDouble(),
+          size.height.toDouble(),
           SkColorSpaceSRGB,
           _sampleCount,
           _stencilBits);
