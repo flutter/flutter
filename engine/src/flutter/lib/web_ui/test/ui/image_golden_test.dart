@@ -192,9 +192,9 @@ Future<void> testMain() async {
         await drawOvalWithShader(const ui.Rect.fromLTRB(0, 0, 150, 100), ui.FilterQuality.none);
         await drawOvalWithShader(const ui.Rect.fromLTRB(150, 0, 300, 100), ui.FilterQuality.low);
 
-        // Note that for images that skia handles lazily (ones created via
+        // Note that for images that CanvasKit handles lazily (ones created via
         // `createImageFromImageBitmap` or `instantiateImageCodecFromUrl`)
-        // there is a skia bug that this just renders a black oval instead of
+        // there is a CanvasKit bug that this just renders a black oval instead of
         // actually texturing it with the image.
         // See https://g-issues.skia.org/issues/338095525
         await drawOvalWithShader(const ui.Rect.fromLTRB(0, 100, 150, 200), ui.FilterQuality.medium);
