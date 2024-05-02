@@ -2003,6 +2003,7 @@ class MultiStaticSelectableSelectionContainerDelegate extends MultiSelectableSel
         trackInternalSelectionStateForSelectable(selectable: selectable, forEnd: true);
         ensureChildUpdated(selectable);
       case SelectionEventType.clear:
+        clearInternalSelectionStateForSelectable(selectable);
       case SelectionEventType.selectAll:
       case SelectionEventType.selectWord:
       case SelectionEventType.selectParagraph:
