@@ -10,24 +10,25 @@ IsolateNameServer::IsolateNameServer() {}
 
 IsolateNameServer::~IsolateNameServer() = default;
 
-Dart_Port IsolateNameServer::LookupIsolatePortByName(const std::string& name) {
+Dart_PortEx IsolateNameServer::LookupIsolatePortByName(
+    const std::string& name) {
   std::scoped_lock lock(mutex_);
   return LookupIsolatePortByNameUnprotected(name);
 }
 
-Dart_Port IsolateNameServer::LookupIsolatePortByNameUnprotected(
+Dart_PortEx IsolateNameServer::LookupIsolatePortByNameUnprotected(
     const std::string& name) {
   auto port_iterator = port_mapping_.find(name);
   if (port_iterator != port_mapping_.end()) {
     return port_iterator->second;
   }
-  return ILLEGAL_PORT;
+  return {ILLEGAL_PORT, ILLEGAL_PORT};
 }
 
-bool IsolateNameServer::RegisterIsolatePortWithName(Dart_Port port,
+bool IsolateNameServer::RegisterIsolatePortWithName(Dart_PortEx port,
                                                     const std::string& name) {
   std::scoped_lock lock(mutex_);
-  if (LookupIsolatePortByNameUnprotected(name) != ILLEGAL_PORT) {
+  if (LookupIsolatePortByNameUnprotected(name).port_id != ILLEGAL_PORT) {
     // Name is already registered.
     return false;
   }

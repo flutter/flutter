@@ -25,11 +25,14 @@ TEST_F(DartVMTest, SimpleIsolateNameServer) {
   ASSERT_TRUE(vm);
   ASSERT_TRUE(vm.GetVMData());
   auto ns = vm->GetIsolateNameServer();
-  ASSERT_EQ(ns->LookupIsolatePortByName("foobar"), ILLEGAL_PORT);
+  ASSERT_EQ(ns->LookupIsolatePortByName("foobar").port_id, ILLEGAL_PORT);
   ASSERT_FALSE(ns->RemoveIsolateNameMapping("foobar"));
-  ASSERT_TRUE(ns->RegisterIsolatePortWithName(123, "foobar"));
-  ASSERT_FALSE(ns->RegisterIsolatePortWithName(123, "foobar"));
-  ASSERT_EQ(ns->LookupIsolatePortByName("foobar"), 123);
+  Dart_PortEx correct_portex = {123, 456};
+  ASSERT_TRUE(ns->RegisterIsolatePortWithName(correct_portex, "foobar"));
+  ASSERT_FALSE(ns->RegisterIsolatePortWithName(correct_portex, "foobar"));
+  Dart_PortEx response = ns->LookupIsolatePortByName("foobar");
+  ASSERT_EQ(response.port_id, correct_portex.port_id);
+  ASSERT_EQ(response.origin_id, correct_portex.origin_id);
   ASSERT_TRUE(ns->RemoveIsolateNameMapping("foobar"));
 }
 
