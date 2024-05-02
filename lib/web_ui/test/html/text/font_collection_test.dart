@@ -6,6 +6,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../../common/fake_asset_manager.dart';
 import '../../common/test_initialization.dart';
@@ -72,7 +73,7 @@ void testMain() {
         expect(fontFamilyList.first, 'Ahem ahem ahem');
       },
           // TODO(mdebbar): https://github.com/flutter/flutter/issues/51142
-          skip: browserEngine == BrowserEngine.webkit);
+          skip: ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit);
 
       test('Register Asset with capital case letters', () async {
         const String testFontFamily = 'AhEm';
@@ -133,7 +134,7 @@ void testMain() {
           fontFamilyList.add(f.family!);
         });
 
-        if (browserEngine != BrowserEngine.firefox) {
+        if (ui_web.browser.browserEngine != ui_web.BrowserEngine.firefox) {
           expect(fontFamilyList.length, equals(2));
           expect(fontFamilyList, contains("'/Ahem'"));
           expect(fontFamilyList, contains('/Ahem'));
@@ -143,7 +144,7 @@ void testMain() {
         }
       },
           // TODO(mdebbar): https://github.com/flutter/flutter/issues/51142
-          skip: browserEngine == BrowserEngine.webkit);
+          skip: ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit);
 
       test('Register Asset twice with exclamation mark', () async {
         const String testFontFamily = 'Ahem!!ahem';
@@ -160,7 +161,7 @@ void testMain() {
           fontFamilyList.add(f.family!);
         });
 
-        if (browserEngine != BrowserEngine.firefox) {
+        if (ui_web.browser.browserEngine != ui_web.BrowserEngine.firefox) {
           expect(fontFamilyList.length, equals(2));
           expect(fontFamilyList, contains("'Ahem!!ahem'"));
           expect(fontFamilyList, contains('Ahem!!ahem'));
@@ -170,7 +171,7 @@ void testMain() {
         }
       },
           // TODO(mdebbar): https://github.com/flutter/flutter/issues/51142
-          skip: browserEngine == BrowserEngine.webkit);
+          skip: ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit);
 
       test('Register Asset twice with comma', () async {
         const String testFontFamily = 'Ahem ,ahem';
@@ -187,7 +188,7 @@ void testMain() {
           fontFamilyList.add(f.family!);
         });
 
-        if (browserEngine != BrowserEngine.firefox) {
+        if (ui_web.browser.browserEngine != ui_web.BrowserEngine.firefox) {
           expect(fontFamilyList.length, equals(2));
           expect(fontFamilyList, contains("'Ahem ,ahem'"));
           expect(fontFamilyList, contains('Ahem ,ahem'));
@@ -197,7 +198,7 @@ void testMain() {
         }
       },
           // TODO(mdebbar): https://github.com/flutter/flutter/issues/51142
-          skip: browserEngine == BrowserEngine.webkit);
+          skip: ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit);
 
       test('Register Asset twice with a digit at the start of a token',
           () async {
@@ -215,7 +216,7 @@ void testMain() {
           fontFamilyList.add(f.family!);
         });
 
-        if (browserEngine != BrowserEngine.firefox) {
+        if (ui_web.browser.browserEngine != ui_web.BrowserEngine.firefox) {
           expect(fontFamilyList.length, equals(2));
           expect(fontFamilyList, contains('Ahem 1998'));
           expect(fontFamilyList, contains("'Ahem 1998'"));
@@ -225,7 +226,7 @@ void testMain() {
         }
       },
           // TODO(mdebbar): https://github.com/flutter/flutter/issues/51142
-          skip: browserEngine == BrowserEngine.webkit);
+          skip: ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit);
     });
   });
 }

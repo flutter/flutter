@@ -5,6 +5,7 @@
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -26,7 +27,7 @@ void testMain() {
   });
 
   test('prepends resources host as sibling to root element (webkit)', () {
-    debugBrowserEngineOverride = BrowserEngine.webkit;
+    ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
 
     // Resource host hasn't been inserted yet.
     expect(
@@ -49,11 +50,11 @@ void testMain() {
     // Make sure the resources were correctly inserted into the host.
     expect(resourcesHost.children, resources);
 
-    debugBrowserEngineOverride = null;
+    ui_web.browser.debugBrowserEngineOverride = null;
   });
 
   test('prepends resources host inside the shadow root (non-webkit)', () {
-    debugBrowserEngineOverride = BrowserEngine.blink;
+    ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.blink;
 
     // Resource host hasn't been inserted yet.
     expect(
@@ -76,7 +77,7 @@ void testMain() {
     // Make sure the resources were correctly inserted into the host.
     expect(resourcesHost.children, resources);
 
-    debugBrowserEngineOverride = null;
+    ui_web.browser.debugBrowserEngineOverride = null;
   });
 
   test('can remove resource', () {

@@ -5,8 +5,8 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import '../browser_detection.dart';
 import '../dom.dart';
 import 'semantics.dart';
 
@@ -43,7 +43,7 @@ String placeholderMessage = 'Enable accessibility';
 /// See [DesktopSemanticsEnabler], [MobileSemanticsEnabler].
 class SemanticsHelper {
   SemanticsEnabler _semanticsEnabler =
-      isDesktop ? DesktopSemanticsEnabler() : MobileSemanticsEnabler();
+      ui_web.browser.isDesktop ? DesktopSemanticsEnabler() : MobileSemanticsEnabler();
 
   @visibleForTesting
   set semanticsEnabler(SemanticsEnabler semanticsEnabler) {
@@ -257,7 +257,7 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
 
     if (_schedulePlaceholderRemoval) {
       // The event type can also be click for VoiceOver.
-      final bool removeNow = browserEngine != BrowserEngine.webkit ||
+      final bool removeNow = ui_web.browser.browserEngine != ui_web.BrowserEngine.webkit ||
           event.type == 'touchend' ||
           event.type == 'pointerup' ||
           event.type == 'click';

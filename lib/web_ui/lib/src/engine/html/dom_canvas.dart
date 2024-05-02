@@ -6,8 +6,8 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import '../browser_detection.dart';
 import '../dom.dart';
 import '../engine_canvas.dart';
 import '../svg.dart';
@@ -261,7 +261,7 @@ DomHTMLElement buildDrawRectElement(
 
   if (paint.maskFilter != null) {
     final double sigma = paint.maskFilter!.webOnlySigma;
-    if (browserEngine == BrowserEngine.webkit && !isStroke) {
+    if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit && !isStroke) {
       // A bug in webkit leaves artifacts when this element is animated
       // with filter: blur, we use boxShadow instead.
       style.boxShadow = '0px 0px ${sigma * 2.0}px $cssColor';

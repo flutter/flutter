@@ -18,8 +18,9 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import 'browser_detection.dart';
+import 'browser_detection.dart' show WebGLVersion, webGLVersion;
 import 'display.dart';
 import 'dom.dart';
 import 'vector_math.dart';
@@ -188,10 +189,10 @@ bool get _defaultBrowserSupportsImageDecoder =>
 // Frequently, when a browser launches an API that other browsers already
 // support, there are subtle incompatibilities that may cause apps to crash if,
 // we blindly adopt the new implementation. This variable prevents us from
-// picking up potentially incompatible implementations of ImagdeDecoder API.
+// picking up potentially incompatible implementations of ImageDecoder API.
 // Instead, when a new browser engine launches the API, we'll evaluate it and
 // enable it explicitly.
-bool get _isBrowserImageDecoderStable => browserEngine == BrowserEngine.blink;
+bool get _isBrowserImageDecoderStable => ui_web.browser.browserEngine == ui_web.BrowserEngine.blink;
 
 /// Corresponds to the browser's `ImageDecoder` type.
 ///
@@ -791,8 +792,8 @@ class GlContext {
     const int kBytesPerPixel = 4;
     final int bufferWidth = _widthInPixels!;
     final int bufferHeight = _heightInPixels!;
-    if (browserEngine == BrowserEngine.webkit ||
-        browserEngine == BrowserEngine.firefox) {
+    if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit ||
+        ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox) {
       final Uint8List pixels =
       Uint8List(bufferWidth * bufferHeight * kBytesPerPixel);
       js_util.callMethod<void>(glContext, 'readPixels',
@@ -1044,6 +1045,6 @@ class OffScreenCanvas {
   static bool get supported => _supported ??=
       // Safari 16.4 implements OffscreenCanvas, but without WebGL support. So
       // it's not really supported in a way that is useful to us.
-      !isSafari
+      !ui_web.browser.isSafari
       && js_util.hasProperty(domWindow, 'OffscreenCanvas');
 }

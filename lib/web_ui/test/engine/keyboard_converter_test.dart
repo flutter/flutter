@@ -8,6 +8,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/keyboard_test_common.dart';
 
@@ -86,7 +87,7 @@ void testMain() {
       keyDataList.add(key);
       // Only handle down events
       return key.type == ui.KeyEventType.down;
-    }, OperatingSystem.linux);
+    }, ui_web.OperatingSystem.linux);
 
     converter.handleEvent(keyDownEvent('KeyA', 'a')..timeStamp = 1);
     expectKeyData(keyDataList.last,
@@ -139,7 +140,7 @@ void testMain() {
       keyDataList.add(key);
       // Only handle down events
       return key.type == ui.KeyEventType.down;
-    }, OperatingSystem.windows);
+    }, ui_web.OperatingSystem.windows);
 
     // en-in.win, with AltGr
     converter.handleEvent(keyDownEvent('KeyL', 'l̥', kCtrl | kAlt)..timeStamp = 1);
@@ -159,7 +160,7 @@ void testMain() {
       keyDataList.add(key);
       // Only handle down events
       return key.type == ui.KeyEventType.down;
-    }, OperatingSystem.linux);
+    }, ui_web.OperatingSystem.linux);
 
     converter.handleEvent(keyDownEvent('ShiftLeft', 'Shift', kShift, kLocationLeft));
     expectKeyData(keyDataList.last,
@@ -237,7 +238,7 @@ void testMain() {
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    }, OperatingSystem.linux);
+    }, ui_web.OperatingSystem.linux);
 
     converter.handleEvent(keyDownEvent('ShiftLeft', 'Shift', kShift, kLocationLeft));
     expectKeyData(keyDataList.last,
@@ -281,7 +282,7 @@ void testMain() {
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    }, OperatingSystem.linux);
+    }, ui_web.OperatingSystem.linux);
 
     converter.handleEvent(keyDownEvent('', 'Shift', kShift));
     expectKeyData(keyDataList.last,
@@ -361,7 +362,7 @@ void testMain() {
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    }, OperatingSystem.linux);
+    }, ui_web.OperatingSystem.linux);
 
     converter.handleEvent(keyDownEvent('Digit1', '1'));
     expectKeyData(keyDataList.last,
@@ -405,7 +406,7 @@ void testMain() {
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    }, OperatingSystem.linux);
+    }, ui_web.OperatingSystem.linux);
 
     // The absolute values of the following logical keys are not guaranteed.
     const int kLogicalAltE = 0x1740070008;
@@ -485,7 +486,7 @@ void testMain() {
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    }, OperatingSystem.linux);
+    }, ui_web.OperatingSystem.linux);
 
     converter.handleEvent(keyDownEvent('ShiftLeft', 'Shift', kShift, kLocationLeft));
     expect(MockKeyboardEvent.lastDefaultPrevented, isTrue);
@@ -530,7 +531,7 @@ void testMain() {
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    }, OperatingSystem.linux);
+    }, ui_web.OperatingSystem.linux);
 
     // This test simulates the use of 'BracketLeft' on a french keyboard, see:
     // https://github.com/flutter/flutter/issues/126247#issuecomment-1856112566.
@@ -572,7 +573,7 @@ void testMain() {
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    }, OperatingSystem.linux);
+    }, ui_web.OperatingSystem.linux);
 
     // A KeyDown of ShiftRight is missed due to loss of focus.
     converter.handleEvent(keyUpEvent('ShiftRight', 'Shift', 0, kLocationRight));
@@ -587,7 +588,7 @@ void testMain() {
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    }, OperatingSystem.linux);
+    }, ui_web.OperatingSystem.linux);
 
     // Same layout
     converter.handleEvent(keyDownEvent('KeyA', 'a'));
@@ -622,7 +623,7 @@ void testMain() {
     );
   });
 
-  for (final OperatingSystem system in <OperatingSystem>[OperatingSystem.macOs, OperatingSystem.iOs]) {
+  for (final ui_web.OperatingSystem system in <ui_web.OperatingSystem>[ui_web.OperatingSystem.macOs, ui_web.OperatingSystem.iOs]) {
     testFakeAsync('CapsLock down synthesizes an immediate cancel on $system', (FakeAsync async) {
       final List<ui.KeyData> keyDataList = <ui.KeyData>[];
       final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
@@ -706,7 +707,7 @@ void testMain() {
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    }, OperatingSystem.linux);
+    }, ui_web.OperatingSystem.linux);
 
     converter.handleEvent(keyDownEvent('CapsLock', 'CapsLock'));
     expect(keyDataList, hasLength(1));
@@ -755,7 +756,7 @@ void testMain() {
     );
   });
 
-  for (final OperatingSystem system in <OperatingSystem>[OperatingSystem.macOs, OperatingSystem.iOs]) {
+  for (final ui_web.OperatingSystem system in <ui_web.OperatingSystem>[ui_web.OperatingSystem.macOs, ui_web.OperatingSystem.iOs]) {
     testFakeAsync('Key guards: key down events are guarded on $system', (FakeAsync async) {
       final List<ui.KeyData> keyDataList = <ui.KeyData>[];
       final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
@@ -831,7 +832,7 @@ void testMain() {
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    }, OperatingSystem.macOs);
+    }, ui_web.OperatingSystem.macOs);
 
     converter.handleEvent(keyDownEvent('MetaLeft', 'Meta', kMeta, kLocationLeft)..timeStamp = 100);
     async.elapse(const Duration(milliseconds: 100));
@@ -898,7 +899,7 @@ void testMain() {
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    }, OperatingSystem.macOs);
+    }, ui_web.OperatingSystem.macOs);
 
     converter.handleEvent(keyDownEvent('MetaLeft', 'Meta', kMeta, kLocationLeft)..timeStamp = 100);
     async.elapse(const Duration(milliseconds: 100));
@@ -959,7 +960,7 @@ void testMain() {
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    }, OperatingSystem.linux);
+    }, ui_web.OperatingSystem.linux);
 
     converter.handleEvent(keyDownEvent('MetaLeft', 'Meta', kMeta, kLocationLeft)..timeStamp = 100);
     async.elapse(const Duration(milliseconds: 100));
@@ -984,7 +985,7 @@ void testMain() {
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    }, OperatingSystem.linux);
+    }, ui_web.OperatingSystem.linux);
 
     converter.handleEvent(keyDownEvent('ScrollLock', 'ScrollLock'));
     expect(keyDataList, hasLength(1));
@@ -1035,7 +1036,7 @@ void testMain() {
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    }, OperatingSystem.linux);
+    }, ui_web.OperatingSystem.linux);
 
     converter.handleEvent(keyDownEvent('ShiftRight', 'Shift', kShift, kLocationRight));
     expectKeyData(keyDataList.last,
@@ -1096,7 +1097,7 @@ void testMain() {
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    }, OperatingSystem.linux);
+    }, ui_web.OperatingSystem.linux);
 
     converter.handleEvent(keyDownEvent('ShiftLeft', 'Shift', kShift, kLocationLeft));
     expectKeyData(keyDataList.last,
@@ -1149,7 +1150,7 @@ void testMain() {
     final KeyboardConverter converter = KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    }, OperatingSystem.linux);
+    }, ui_web.OperatingSystem.linux);
 
     converter.handleEvent(keyDownEvent(null, null));
     converter.handleEvent(keyUpEvent(null, null));

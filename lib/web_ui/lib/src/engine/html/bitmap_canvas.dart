@@ -6,8 +6,8 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import '../browser_detection.dart';
 import '../canvas_pool.dart';
 import '../display.dart';
 import '../dom.dart';
@@ -572,7 +572,7 @@ class BitmapCanvas extends EngineCanvas {
       final bool isStroke = paint.style == ui.PaintingStyle.stroke;
       final String cssColor = colorValueToCssString(paint.color);
       final double sigma = paint.maskFilter!.webOnlySigma;
-      if (browserEngine == BrowserEngine.webkit && !isStroke) {
+      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit && !isStroke) {
         // A bug in webkit leaves artifacts when this element is animated
         // with filter: blur, we use boxShadow instead.
         element.style.boxShadow = '0px 0px ${sigma * 2.0}px $cssColor';
@@ -1050,7 +1050,7 @@ class BitmapCanvas extends EngineCanvas {
   void endOfPaint() {
     _canvasPool.endOfPaint();
     _elementCache?.commitFrame();
-    if (_contains3dTransform && browserEngine == BrowserEngine.webkit) {
+    if (_contains3dTransform && ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit) {
       // Copy the children list to avoid concurrent modification.
       final List<DomElement> children = rootElement.children.toList();
       for (final DomElement element in children) {
@@ -1450,7 +1450,7 @@ List<DomElement> _clipContent(List<SaveClipEntry> clipStack,
 /// Only supported in non-WebKit browsers.
 String maskFilterToCanvasFilter(ui.MaskFilter? maskFilter) {
   assert(
-    browserEngine != BrowserEngine.webkit,
+    ui_web.browser.browserEngine != ui_web.BrowserEngine.webkit,
     'WebKit (Safari) does not support `filter` canvas property.',
   );
   if (maskFilter != null) {
