@@ -183,14 +183,19 @@ enum WebRendererMode implements CliEnum {
 
   factory WebRendererMode.fromCliOption(String? webRendererString, {required bool useWasm}) {
     if (webRendererString == null) {
-      // Wasm defaults to skwasm
-      return useWasm ? WebRendererMode.skwasm : WebRendererMode.defaultRenderer;
+      return getDefault(useWasm: useWasm);
     }
     return WebRendererMode.values.byName(webRendererString);
   }
 
-  /// The default web renderer mode used when the CLI argument is not provided.
-  static const WebRendererMode defaultRenderer = WebRendererMode.canvaskit;
+  static WebRendererMode getDefault({required bool useWasm}) {
+    return useWasm
+        ? WebRendererMode.defaultForWasm
+        : WebRendererMode.defaultForJs;
+  }
+
+  static const WebRendererMode defaultForJs = WebRendererMode.canvaskit;
+  static const WebRendererMode defaultForWasm = WebRendererMode.skwasm;
 
   @override
   String get cliName => snakeCase(name, '-');
@@ -205,16 +210,16 @@ enum WebRendererMode implements CliEnum {
       };
 
   Iterable<String> get dartDefines => switch (this) {
-        WebRendererMode.canvaskit => <String>[
+        canvaskit => <String>[
             'FLUTTER_WEB_USE_SKIA=true',
           ],
-        WebRendererMode.html => <String>[
+        html => <String>[
             'FLUTTER_WEB_USE_SKIA=false',
           ],
-        WebRendererMode.skwasm => <String>[
+        skwasm => <String>[
             'FLUTTER_WEB_USE_SKIA=false',
             'FLUTTER_WEB_USE_SKWASM=true',
-          ]
+          ],
       };
 
   List<String> updateDartDefines(List<String> inputDefines) {
