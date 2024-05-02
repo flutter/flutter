@@ -68,7 +68,8 @@ class Autocomplete<T extends Object> extends StatelessWidget {
     this.optionsViewBuilder,
     this.optionsViewOpenDirection = OptionsViewOpenDirection.down,
     this.initialValue,
-    this.reloadOptionsViewOnChangedField = false,
+    this.showOptionsViewOnEmptyOptions = false,
+    this.showOptionsViewOnUncompletedOptions = false,
   });
 
   /// {@macro flutter.widgets.RawAutocomplete.displayStringForOption}
@@ -106,16 +107,22 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// {@macro flutter.widgets.RawAutocomplete.initialValue}
   final TextEditingValue? initialValue;
 
-  /// If the options view overlay should be reloaded on every text field change.
+  /// If the options view overlay should be shown when the options returned from
+  /// [optionsBuilder] is empty.
   ///
   /// Set to true to display a custom options view on
-  /// first focus, to display a loading message while waiting for
-  /// options to be fetched over the network,
-  /// or to display a message if no options are found.
+  /// first focus or to display a message if no options are found.
   ///
   /// If not provided, will only display an options view when
   /// some options have been returned from [optionsViewBuilder].
-  final bool reloadOptionsViewOnChangedField;
+  final bool showOptionsViewOnEmptyOptions;
+
+  /// If the options view overlay should be shown while the [optionsBuilder]
+  /// future waits to be resolved.
+  ///
+  /// Set to true to display a loading message in the options view while waiting
+  /// for options to be fetched over the network.
+  final bool showOptionsViewOnUncompletedOptions;
 
   static Widget _defaultFieldViewBuilder(BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
     return _AutocompleteField(
@@ -143,7 +150,8 @@ class Autocomplete<T extends Object> extends StatelessWidget {
         );
       },
       onSelected: onSelected,
-      reloadOptionsViewOnChangedField: reloadOptionsViewOnChangedField,
+      showOptionsViewOnEmptyOptions: showOptionsViewOnEmptyOptions,
+      showOptionsViewOnUncompletedOptions: showOptionsViewOnUncompletedOptions,
     );
   }
 }

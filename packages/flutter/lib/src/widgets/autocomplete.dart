@@ -157,7 +157,8 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
     this.onSelected,
     this.textEditingController,
     this.initialValue,
-    this.reloadOptionsViewOnChangedField = false,
+    this.showOptionsViewOnEmptyOptions = false,
+    this.showOptionsViewOnUncompletedOptions = false,
   }) : assert(
          fieldViewBuilder != null
             || (key != null && focusNode != null && textEditingController != null),
@@ -270,8 +271,13 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// This parameter is ignored if [textEditingController] is defined.
   final TextEditingValue? initialValue;
 
-  /// If the options view overlay should be reloaded on every text field change.
-  final bool reloadOptionsViewOnChangedField;
+  /// If the options view overlay should be shown when no options were returned
+  /// from [optionsBuilder].
+  final bool showOptionsViewOnEmptyOptions;
+
+  /// If the options view overlay should be shown while the [optionsBuilder]
+  /// future waits to be resolved.
+  final bool showOptionsViewOnUncompletedOptions;
 
   /// Calls [AutocompleteFieldViewBuilder]'s onFieldSubmitted callback for the
   /// RawAutocomplete widget indicated by the given [GlobalKey].
@@ -344,7 +350,10 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     SingleActivator(LogicalKeyboardKey.arrowDown): AutocompleteNextOptionIntent(),
   };
 
-  bool get _canShowOptionsView => _focusNode.hasFocus && _selection == null && (_options.isNotEmpty || widget.reloadOptionsViewOnChangedField);
+  bool get _canShowOptionsView => _focusNode.hasFocus && _selection == null &&
+    (_options.isNotEmpty
+    || widget.showOptionsViewOnEmptyOptions
+    || widget.showOptionsViewOnUncompletedOptions);
 
   void _updateOptionsViewVisibility() {
     if (_canShowOptionsView) {
@@ -357,7 +366,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   // Called when _textEditingController changes.
   Future<void> _onChangedField() async {
     final TextEditingValue value = _textEditingController.value;
-    if (widget.reloadOptionsViewOnChangedField){
+    if (widget.showOptionsViewOnUncompletedOptions){
       _updateOptionsViewVisibility();
     }
     final Iterable<T> options = await widget.optionsBuilder(value);
