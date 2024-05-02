@@ -893,13 +893,7 @@ class _SelectableTextContainerDelegate extends MultiStaticSelectableSelectionCon
   @override
   SelectionResult handleSelectParagraph(SelectParagraphSelectionEvent event) {
     final SelectionResult result = _handleSelectParagraph(event);
-    if (currentSelectionStartIndex != -1) {
-      hasReceivedStartEvent.add(selectables[currentSelectionStartIndex]);
-    }
-    if (currentSelectionEndIndex != -1) {
-      hasReceivedEndEvent.add(selectables[currentSelectionEndIndex]);
-    }
-    updateLastEdgeEventsFromGeometries();
+    updateInternalSelectionStateForBoundaryEvents();
     return result;
   }
 
@@ -1263,11 +1257,10 @@ class _SelectableTextContainerDelegate extends MultiStaticSelectableSelectionCon
     if (event.granularity != TextGranularity.paragraph) {
       return super.handleSelectionEdgeUpdate(event);
     }
-    if (event.type == SelectionEventType.endEdgeUpdate) {
-      lastEndEdgeUpdateGlobalPosition = event.globalPosition;
-    } else {
-      lastStartEdgeUpdateGlobalPosition = event.globalPosition;
-    }
+    updateLastSelectionEdgeLocation(
+      globalSelectionEdgeLocation: event.globalPosition,
+      forEnd: event.type == SelectionEventType.endEdgeUpdate,
+    );
     if (event.type == SelectionEventType.endEdgeUpdate) {
       return currentSelectionEndIndex == -1 ? _initSelection(event, isEnd: true) : _adjustSelection(event, isEnd: true);
     }
