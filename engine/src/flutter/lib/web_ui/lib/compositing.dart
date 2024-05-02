@@ -107,9 +107,6 @@ abstract class SceneBuilder {
     double width = 0.0,
     double height = 0.0,
   });
-  void setRasterizerTracingThreshold(int frameInterval);
-  void setCheckerboardRasterCacheImages(bool checkerboard);
-  void setCheckerboardOffscreenLayers(bool checkerboard);
   Scene build();
   void setProperties(
     double width,

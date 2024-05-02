@@ -41,7 +41,6 @@ TEST(LayerStateStack, Defaults) {
   LayerStateStack state_stack;
 
   ASSERT_EQ(state_stack.canvas_delegate(), nullptr);
-  ASSERT_EQ(state_stack.checkerboard_func(), nullptr);
   ASSERT_EQ(state_stack.outstanding_opacity(), SK_Scalar1);
   ASSERT_EQ(state_stack.outstanding_color_filter(), nullptr);
   ASSERT_EQ(state_stack.outstanding_image_filter(), nullptr);

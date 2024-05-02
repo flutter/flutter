@@ -106,8 +106,6 @@ bool Rasterize(RasterCacheItem::CacheState cache_state,
   FML_DCHECK(cache_state != RasterCacheItem::CacheState::kNone);
   LayerStateStack state_stack;
   state_stack.set_delegate(canvas);
-  state_stack.set_checkerboard_func(
-      paint_context.state_stack.checkerboard_func());
   PaintContext context = {
       // clang-format off
       .state_stack                   = state_stack,

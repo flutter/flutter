@@ -131,13 +131,6 @@ class LayerStateStack {
   // by this LayerStateStack in the order encountered.
   void fill(MutatorsStack* mutators);
 
-  // Sets up a checkerboard function that will be used to checkerboard the
-  // contents of any saveLayer executed by the state stack.
-  CheckerboardFunc checkerboard_func() const { return checkerboard_func_; }
-  void set_checkerboard_func(CheckerboardFunc checkerboard_func) {
-    checkerboard_func_ = checkerboard_func;
-  }
-
   class AutoRestore {
    public:
     ~AutoRestore() {
@@ -475,7 +468,6 @@ class LayerStateStack {
 
   std::shared_ptr<Delegate> delegate_;
   RenderingAttributes outstanding_;
-  CheckerboardFunc checkerboard_func_ = nullptr;
 
   friend class SaveLayerEntry;
 };
