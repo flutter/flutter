@@ -325,10 +325,10 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
         _DatePickerModeToggleButton(
           mode: _mode,
           title: _localizations.formatMonthYear(_currentDisplayedMonthDate),
-          onTitlePressed: () {
-            // Toggle the day/year mode.
-            _handleModeChanged(_mode == DatePickerMode.day ? DatePickerMode.year : DatePickerMode.day);
-          },
+          onTitlePressed: () => _handleModeChanged(switch (_mode) {
+            DatePickerMode.day => DatePickerMode.year,
+            DatePickerMode.year => DatePickerMode.day,
+          }),
         ),
       ],
     );

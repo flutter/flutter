@@ -907,9 +907,11 @@ class _RenderDropdownMenuBody extends RenderBox
     double? maxHeight;
     RenderBox? child = firstChild;
 
+    final double intrinsicWidth = width ?? getMaxIntrinsicWidth(constraints.maxHeight);
+    final double widthConstraint = math.min(intrinsicWidth, constraints.maxWidth);
     final BoxConstraints innerConstraints = BoxConstraints(
-      maxWidth: width ?? getMaxIntrinsicWidth(constraints.maxWidth),
-      maxHeight: getMaxIntrinsicHeight(constraints.maxHeight),
+      maxWidth: widthConstraint,
+      maxHeight: getMaxIntrinsicHeight(widthConstraint),
     );
     while (child != null) {
       if (child == firstChild) {
@@ -949,9 +951,11 @@ class _RenderDropdownMenuBody extends RenderBox
     double maxWidth = 0.0;
     double? maxHeight;
     RenderBox? child = firstChild;
+    final double intrinsicWidth = width ?? getMaxIntrinsicWidth(constraints.maxHeight);
+    final double widthConstraint = math.min(intrinsicWidth, constraints.maxWidth);
     final BoxConstraints innerConstraints = BoxConstraints(
-      maxWidth: width ?? getMaxIntrinsicWidth(constraints.maxWidth),
-      maxHeight: getMaxIntrinsicHeight(constraints.maxHeight),
+      maxWidth: widthConstraint,
+      maxHeight: getMaxIntrinsicHeight(widthConstraint),
     );
 
     while (child != null) {

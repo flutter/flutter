@@ -35,7 +35,7 @@ All available commands can be seen via:
 
 Releases are initialized with the `start` sub-command, like:
 
-```
+```sh
 conductor start \
   --candidate-branch=flutter-2.2-candidate.10 \
   --release-channel=beta \
