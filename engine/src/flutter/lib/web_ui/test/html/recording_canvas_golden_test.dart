@@ -9,6 +9,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' hide ColorSpace;
 import 'package:ui/ui.dart' hide TextStyle;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 import 'package:web_engine_tester/golden_tester.dart';
 
 import '../common/matchers.dart';
@@ -323,8 +324,8 @@ Future<void> testMain() async {
     );
     await checkScreenshot(rc, 'draw_paragraph');
   },  // TODO(mdebbar): https://github.com/flutter/flutter/issues/65789
-      skip: browserEngine == BrowserEngine.webkit &&
-          operatingSystem == OperatingSystem.iOs);
+      skip: ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
+            ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs);
 
   test('Computes paint bounds for multi-line draw paragraph', () async {
     final RecordingCanvas rc = RecordingCanvas(screenRect);
@@ -355,8 +356,8 @@ Future<void> testMain() async {
     );
     await checkScreenshot(rc, 'draw_paragraph_multi_line');
   },  // TODO(mdebbar): https://github.com/flutter/flutter/issues/65789
-      skip: browserEngine == BrowserEngine.webkit &&
-          operatingSystem == OperatingSystem.iOs);
+      skip: ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
+          ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs);
 
   test('Should exclude painting outside simple clipRect', () async {
     // One clipped line.

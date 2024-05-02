@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../browser_detection.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
+
 import '../dom.dart';
 import '../view_embedder/dom_manager.dart';
 import '../window.dart';
@@ -47,7 +48,7 @@ class ResourceManager {
     resourcesHost.style.visibility = 'hidden';
     _resourcesHost = resourcesHost;
 
-    if (browserEngine == BrowserEngine.webkit) {
+    if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit) {
       final DomElement rootElement = _domManager.rootElement;
       // The resourcesHost *must* be a sibling of the rootElement.
       rootElement.parent!.prepend(resourcesHost);

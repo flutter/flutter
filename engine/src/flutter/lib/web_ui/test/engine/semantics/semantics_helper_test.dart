@@ -7,6 +7,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine/browser_detection.dart';
 import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/semantics.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -58,7 +59,7 @@ void testMain() {
       expect(shouldForwardToFramework, isTrue);
 
       // Pointer events are not defined in webkit.
-      if (browserEngine != BrowserEngine.webkit) {
+      if (ui_web.browser.browserEngine != ui_web.BrowserEngine.webkit) {
         event = createDomEvent('Event', 'pointermove');
         shouldForwardToFramework =
             desktopSemanticsEnabler.tryEnableSemantics(event);
@@ -160,6 +161,6 @@ void testMain() {
       });
     },
     // We can run `MobileSemanticsEnabler` tests in mobile browsers and in desktop Chrome.
-    skip: isDesktop && browserEngine != BrowserEngine.blink,
+    skip: isDesktop && ui_web.browser.browserEngine != ui_web.BrowserEngine.blink,
   );
 }

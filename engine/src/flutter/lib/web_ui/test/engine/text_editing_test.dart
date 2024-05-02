@@ -10,6 +10,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/spy.dart';
 import '../common/test_initialization.dart';
@@ -206,7 +207,7 @@ Future<void> testMain() async {
       expect(defaultTextEditingRoot.querySelectorAll('input'), hasLength(1));
       final DomElement input = defaultTextEditingRoot.querySelector('input')!;
       expect(editingStrategy!.domElement, input);
-      if (operatingSystem == OperatingSystem.iOs || operatingSystem == OperatingSystem.android){
+      if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs || ui_web.browser.operatingSystem == ui_web.OperatingSystem.android){
         expect(input.getAttribute('enterkeyhint'), 'send');
       } else {
         expect(input.getAttribute('enterkeyhint'), null);
@@ -943,8 +944,8 @@ Future<void> testMain() async {
           domDocument.body);
     },
         // Test on ios-safari only.
-        skip: browserEngine != BrowserEngine.webkit ||
-            operatingSystem != OperatingSystem.iOs);
+        skip: ui_web.browser.browserEngine != ui_web.BrowserEngine.webkit ||
+            ui_web.browser.operatingSystem != ui_web.OperatingSystem.iOs);
 
     test('finishAutofillContext closes connection no autofill element',
         () async {
@@ -1393,8 +1394,8 @@ Future<void> testMain() async {
       final DomHTMLInputElement inputElement =
           textEditing!.strategy.domElement! as DomHTMLInputElement;
       expect(inputElement.value, 'abcd');
-      if (!(browserEngine == BrowserEngine.webkit &&
-          operatingSystem == OperatingSystem.macOs)) {
+      if (!(ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
+          ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs)) {
         // In Safari Desktop Autofill menu appears as soon as an element is
         // focused, therefore the input element is only focused after the
         // location is received.
@@ -1510,8 +1511,8 @@ Future<void> testMain() async {
 
       // Test for mobile Safari. `sentences` is the default attribute for
       // mobile browsers. Check if `off` is added to the input element.
-      if (browserEngine == BrowserEngine.webkit &&
-          operatingSystem == OperatingSystem.iOs) {
+      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
+          ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
         expect(
             textEditing!.strategy.domElement!
                 .getAttribute('autocapitalize'),
@@ -1549,8 +1550,8 @@ Future<void> testMain() async {
       spy.messages.clear();
 
       // Test for mobile Safari.
-      if (browserEngine == BrowserEngine.webkit &&
-          operatingSystem == OperatingSystem.iOs) {
+      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
+          ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
         expect(
             textEditing!.strategy.domElement!
                 .getAttribute('autocapitalize'),
@@ -1610,7 +1611,7 @@ Future<void> testMain() async {
       expect(spy.messages, isEmpty);
     },
         // TODO(mdebbar): https://github.com/flutter/flutter/issues/50590
-        skip: browserEngine == BrowserEngine.webkit);
+        skip: ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit);
 
     test(
         'setClient, show, setEditableSizeAndTransform, setStyle, setEditingState, clearClient',
@@ -1669,8 +1670,8 @@ Future<void> testMain() async {
       );
 
       // For `blink` and `webkit` browser engines the overlay would be hidden.
-      if (browserEngine == BrowserEngine.blink ||
-          browserEngine == BrowserEngine.webkit) {
+      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.blink ||
+          ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit) {
         expect(textEditing!.strategy.domElement!.classList.contains('transparentTextEditing'),
             isTrue);
       } else {
@@ -1683,7 +1684,7 @@ Future<void> testMain() async {
       sendFrameworkMessage(codec.encodeMethodCall(clearClient));
     },
         // TODO(mdebbar): https://github.com/flutter/flutter/issues/50590
-        skip: browserEngine == BrowserEngine.webkit);
+        skip: ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit);
 
     test('input font set successfully with null fontWeightIndex', () {
       final MethodCall setClient = MethodCall(
@@ -1728,7 +1729,7 @@ Future<void> testMain() async {
       hideKeyboard();
     },
         // TODO(mdebbar): https://github.com/flutter/flutter/issues/50590
-        skip: browserEngine == BrowserEngine.webkit);
+        skip: ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit);
 
     test('Canonicalizes font family', () {
       showKeyboard(inputType: 'text');
@@ -1841,7 +1842,7 @@ Future<void> testMain() async {
       spy.messages.clear();
 
       input.setSelectionRange(2, 5);
-      if (browserEngine == BrowserEngine.firefox) {
+      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox) {
         final DomEvent keyup = createDomEvent('Event', 'keyup');
         textEditing!.strategy.domElement!.dispatchEvent(keyup);
       } else {
@@ -1894,7 +1895,7 @@ Future<void> testMain() async {
       spy.messages.clear();
 
       input.setSelectionRange(2, 5);
-      if (browserEngine == BrowserEngine.firefox) {
+      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox) {
         final DomEvent keyup = createDomEvent('Event', 'keyup');
         textEditing!.strategy.domElement!.dispatchEvent(keyup);
       } else {
@@ -2128,7 +2129,7 @@ Future<void> testMain() async {
       // Autofill one of the form elements.
       final DomHTMLInputElement element = formElement.childNodes.toList()[0] as
           DomHTMLInputElement;
-      if (browserEngine == BrowserEngine.firefox) {
+      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox) {
         expect(element.name,
             BrowserAutofillHints.instance.flutterToEngine(hintForFirstElement));
       } else {
@@ -2205,7 +2206,7 @@ Future<void> testMain() async {
 
       textarea.dispatchEvent(createDomEvent('Event', 'input'));
       textarea.setSelectionRange(2, 5);
-      if (browserEngine == BrowserEngine.firefox) {
+      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox) {
         textEditing!.strategy.domElement!
             .dispatchEvent(createDomEvent('Event', 'keyup'));
       } else {
@@ -2306,8 +2307,8 @@ Future<void> testMain() async {
     });
 
     test('sets correct input type in Android', () {
-      debugOperatingSystemOverride = OperatingSystem.android;
-      debugBrowserEngineOverride = BrowserEngine.blink;
+      ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.android;
+      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.blink;
 
       /// During initialization [HybridTextEditing] will pick the correct
       /// text editing strategy for [OperatingSystem.android].
@@ -2346,8 +2347,8 @@ Future<void> testMain() async {
     });
 
     test('sets correct input type for Firefox on Android', () {
-      debugOperatingSystemOverride = OperatingSystem.android;
-      debugBrowserEngineOverride = BrowserEngine.firefox;
+      ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.android;
+      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.firefox;
 
       /// During initialization [HybridTextEditing] will pick the correct
       /// text editing strategy for [OperatingSystem.android].
@@ -2382,8 +2383,8 @@ Future<void> testMain() async {
 
     test('prevent mouse events on Android', () {
       // Regression test for https://github.com/flutter/flutter/issues/124483.
-      debugOperatingSystemOverride = OperatingSystem.android;
-      debugBrowserEngineOverride = BrowserEngine.blink;
+      ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.android;
+      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.blink;
 
       /// During initialization [HybridTextEditing] will pick the correct
       /// text editing strategy for [OperatingSystem.android].
@@ -2436,8 +2437,8 @@ Future<void> testMain() async {
 
     test('sets correct input type in iOS', () {
       // Test on ios-safari only.
-      if (browserEngine == BrowserEngine.webkit &&
-          operatingSystem == OperatingSystem.iOs) {
+      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
+          ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
         /// During initialization [HybridTextEditing] will pick the correct
         /// text editing strategy for [OperatingSystem.iOs].
         textEditing = HybridTextEditing();
@@ -2741,7 +2742,7 @@ Future<void> testMain() async {
       expect(firstElement.id,
           BrowserAutofillHints.instance.flutterToEngine('password'));
       expect(firstElement.type, 'password');
-      if (browserEngine == BrowserEngine.firefox) {
+      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox) {
         expect(firstElement.name,
             BrowserAutofillHints.instance.flutterToEngine('password'));
       } else {
@@ -2760,8 +2761,8 @@ Future<void> testMain() async {
       expect(css.backgroundColor, 'transparent');
 
       // For `blink` and `webkit` browser engines the overlay would be hidden.
-      if (browserEngine == BrowserEngine.blink ||
-          browserEngine == BrowserEngine.webkit) {
+      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.blink ||
+          ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit) {
         expect(firstElement.classList.contains('transparentTextEditing'), isTrue);
       } else {
         expect(firstElement.classList.contains('transparentTextEditing'),
@@ -3045,7 +3046,7 @@ Future<void> testMain() async {
       expect(testInputElement.id,
           BrowserAutofillHints.instance.flutterToEngine(testHint));
       expect(testInputElement.type, 'text');
-      if (browserEngine == BrowserEngine.firefox) {
+      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox) {
         expect(testInputElement.name,
             BrowserAutofillHints.instance.flutterToEngine(testHint));
       } else {
@@ -3577,8 +3578,8 @@ void cleanTextEditingStrategy() {
 }
 
 void cleanTestFlags() {
-  debugBrowserEngineOverride = null;
-  debugOperatingSystemOverride = null;
+  ui_web.browser.debugBrowserEngineOverride = null;
+  ui_web.browser.debugOperatingSystemOverride = null;
 }
 
 void checkInputEditingState(

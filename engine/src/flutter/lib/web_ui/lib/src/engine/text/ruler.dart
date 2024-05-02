@@ -5,7 +5,6 @@
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import '../browser_detection.dart';
 import '../dom.dart';
 import '../util.dart';
 import '../view_embedder/style_manager.dart';
@@ -121,7 +120,7 @@ class TextDimensions {
   /// The height of the paragraph being measured.
   double get height {
     double cachedHeight = _readAndCacheMetrics().height;
-    if (browserEngine == BrowserEngine.firefox &&
+    if (ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox &&
       // In the flutter tester environment, we use a predictable-size for font
       // measurement tests.
       !ui_web.debugEmulateFlutterTesterEnvironment) {

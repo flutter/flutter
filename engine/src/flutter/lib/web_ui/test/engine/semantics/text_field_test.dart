@@ -11,6 +11,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart' hide window;
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../../common/test_initialization.dart';
 import 'semantics_tester.dart';
@@ -131,7 +132,7 @@ void testMain() {
       expect(await logger.actionLog.first, ui.SemanticsAction.didLoseAccessibilityFocus);
     }, // TODO(yjbanov): https://github.com/flutter/flutter/issues/46638
        // TODO(yjbanov): https://github.com/flutter/flutter/issues/50590
-    skip: browserEngine != BrowserEngine.blink);
+    skip: ui_web.browser.browserEngine != ui_web.BrowserEngine.blink);
 
     test('Syncs semantic state from framework', () {
       expect(owner().semanticsHost.ownerDocument?.activeElement, domDocument.body);
@@ -479,16 +480,16 @@ void testMain() {
       strategy = SemanticsTextEditingStrategy.instance;
       testTextEditing.debugTextEditingStrategyOverride = strategy;
       testTextEditing.configuration = singlelineConfig;
-      debugBrowserEngineOverride = BrowserEngine.webkit;
-      debugOperatingSystemOverride = OperatingSystem.iOs;
+      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
+      ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.iOs;
       semantics()
         ..debugOverrideTimestampFunction(() => _testTime)
         ..semanticsEnabled = true;
     });
 
     tearDown(() {
-      debugBrowserEngineOverride = null;
-      debugOperatingSystemOverride = null;
+      ui_web.browser.debugBrowserEngineOverride = null;
+      ui_web.browser.debugOperatingSystemOverride = null;
       semantics().semanticsEnabled = false;
     });
 

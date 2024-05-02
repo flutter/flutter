@@ -9,8 +9,9 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import 'browser_detection.dart';
+import 'browser_detection.dart' show isIOS15, isMacOrIOS;
 import 'dom.dart';
 import 'safe_browser_api.dart';
 import 'services.dart';
@@ -495,7 +496,7 @@ Float32List offsetListToFloat32List(List<ui.Offset> offsetList) {
 /// * Use 3D transform instead of 2D: this does not work because it causes text
 ///   blurriness: https://github.com/flutter/flutter/issues/32274
 void applyWebkitClipFix(DomElement? containerElement) {
-  if (browserEngine == BrowserEngine.webkit) {
+  if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit) {
     containerElement!.style.zIndex = '0';
   }
 }
@@ -690,7 +691,7 @@ void setElementStyle(DomElement element, String name, String? value) {
 }
 
 void setClipPath(DomElement element, String? value) {
-  if (browserEngine == BrowserEngine.webkit) {
+  if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit) {
     if (value == null) {
       element.style.removeProperty('-webkit-clip-path');
     } else {

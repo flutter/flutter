@@ -4,9 +4,9 @@
 
 import 'dart:async';
 import 'dart:typed_data';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../engine.dart'  show registerHotRestartListener;
-import 'browser_detection.dart';
 import 'dom.dart';
 import 'keyboard_binding.dart';
 import 'platform_dispatcher.dart';
@@ -120,7 +120,7 @@ class RawKeyboard {
         _lastMetaState |= modifierNumLock;
       } else if (event.key == 'ScrollLock') {
         _lastMetaState |= modifierScrollLock;
-      } else if (event.key == 'Meta' && operatingSystem == OperatingSystem.linux) {
+      } else if (event.key == 'Meta' && ui_web.browser.operatingSystem == ui_web.OperatingSystem.linux) {
         // On Chrome Linux, metaState can be wrong when a Meta key is pressed.
         _lastMetaState |= _modifierMeta;
       } else if (event.code == 'MetaLeft' && event.key == 'Process') {

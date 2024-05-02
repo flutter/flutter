@@ -6,6 +6,7 @@
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/test_initialization.dart';
 import '../ui/utils.dart';
@@ -20,7 +21,7 @@ Future<void> testMain() async {
   );
 
   test('bootstrapper selects correct builds', () {
-    if (browserEngine == BrowserEngine.blink) {
+    if (ui_web.browser.browserEngine == ui_web.BrowserEngine.blink) {
       expect(isWasm, isTrue);
       expect(isSkwasm, isTrue);
     } else {

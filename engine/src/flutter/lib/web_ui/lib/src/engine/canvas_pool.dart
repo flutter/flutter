@@ -7,8 +7,8 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import 'browser_detection.dart';
 import 'display.dart';
 import 'dom.dart';
 import 'engine_canvas.dart';
@@ -343,7 +343,7 @@ class CanvasPool extends _SaveStackTracking {
   void endOfPaint() {
     if (_reusablePool != null) {
       for (final DomCanvasElement e in _reusablePool!) {
-        if (browserEngine == BrowserEngine.webkit) {
+        if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit) {
           e.width = e.height = 0;
         }
         e.remove();
@@ -787,7 +787,7 @@ class CanvasPool extends _SaveStackTracking {
 
       // TODO(hterkelsen): Shadows with transparent occluders are not supported
       // on webkit since filter is unsupported.
-      if (transparentOccluder && browserEngine != BrowserEngine.webkit) {
+      if (transparentOccluder && ui_web.browser.browserEngine != ui_web.BrowserEngine.webkit) {
         // We paint shadows using a path and a mask filter instead of the
         // built-in shadow* properties. This is because the color alpha of the
         // paint is added to the shadow. The effect we're looking for is to just
@@ -841,7 +841,7 @@ class CanvasPool extends _SaveStackTracking {
     // towards the threshold. Setting width and height to zero tricks Webkit
     // into thinking that this canvas has a zero size so it doesn't count it
     // towards the threshold.
-    if (browserEngine == BrowserEngine.webkit && _canvas != null) {
+    if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit && _canvas != null) {
       _canvas!.width = _canvas!.height = 0;
     }
     _clearActiveCanvasList();
@@ -850,7 +850,7 @@ class CanvasPool extends _SaveStackTracking {
   void _clearActiveCanvasList() {
     if (_activeCanvasList != null) {
       for (final DomCanvasElement c in _activeCanvasList!) {
-        if (browserEngine == BrowserEngine.webkit) {
+        if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit) {
           c.width = c.height = 0;
         }
         c.remove();
@@ -955,7 +955,7 @@ class ContextStateHandle {
   /// This is used in screenshot tests to test Safari codepaths.
   static bool debugEmulateWebKitMaskFilter = false;
 
-  bool get _renderMaskFilterForWebkit => browserEngine == BrowserEngine.webkit || debugEmulateWebKitMaskFilter;
+  bool get _renderMaskFilterForWebkit => ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit || debugEmulateWebKitMaskFilter;
 
   /// Sets paint properties on the current canvas.
   ///

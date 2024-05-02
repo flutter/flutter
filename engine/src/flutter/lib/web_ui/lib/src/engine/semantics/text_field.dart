@@ -4,8 +4,9 @@
 
 import 'dart:async';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import '../browser_detection.dart';
+import '../browser_detection.dart' show isIosSafari;
 import '../dom.dart';
 import '../platform_dispatcher.dart';
 import '../text_editing/text_editing.dart';
@@ -287,11 +288,11 @@ class TextField extends PrimaryRoleManager {
   }
 
   void _setupDomElement() {
-    switch (browserEngine) {
-      case BrowserEngine.blink:
-      case BrowserEngine.firefox:
+    switch (ui_web.browser.browserEngine) {
+      case ui_web.BrowserEngine.blink:
+      case ui_web.BrowserEngine.firefox:
         _initializeForBlink();
-      case BrowserEngine.webkit:
+      case ui_web.BrowserEngine.webkit:
         _initializeForWebkit();
     }
   }
@@ -339,7 +340,7 @@ class TextField extends PrimaryRoleManager {
   /// semanicsObject.element to avoid confusing VoiceOver.
   void _initializeForWebkit() {
     // Safari for desktop is also initialized as the other browsers.
-    if (operatingSystem == OperatingSystem.macOs) {
+    if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs) {
       _initializeForBlink();
       return;
     }
