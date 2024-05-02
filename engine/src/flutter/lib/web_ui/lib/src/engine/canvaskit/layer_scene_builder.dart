@@ -203,21 +203,6 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     return pushLayer<TransformEngineLayer>(TransformEngineLayer(matrix));
   }
 
-  @override
-  void setCheckerboardOffscreenLayers(bool checkerboard) {
-    // TODO(hterkelsen): implement setCheckerboardOffscreenLayers
-  }
-
-  @override
-  void setCheckerboardRasterCacheImages(bool checkerboard) {
-    // TODO(hterkelsen): implement setCheckerboardRasterCacheImages
-  }
-
-  @override
-  void setRasterizerTracingThreshold(int frameInterval) {
-    // TODO(hterkelsen): implement setRasterizerTracingThreshold
-  }
-
   T pushLayer<T extends ContainerLayer>(T layer) {
     currentLayer.add(layer);
     currentLayer = layer;

@@ -228,16 +228,6 @@ class EngineSceneBuilder implements ui.SceneBuilder {
     );
 
   @override
-  void setCheckerboardOffscreenLayers(bool checkerboard) {
-    // Not implemented on web
-  }
-
-  @override
-  void setCheckerboardRasterCacheImages(bool checkerboard) {
-    // Not implemented on web
-  }
-
-  @override
   void setProperties(
     double width,
     double height,
@@ -247,11 +237,6 @@ class EngineSceneBuilder implements ui.SceneBuilder {
     double insetLeft,
     bool focusable
   ) {
-    // Not implemented on web
-  }
-
-  @override
-  void setRasterizerTracingThreshold(int frameInterval) {
     // Not implemented on web
   }
 

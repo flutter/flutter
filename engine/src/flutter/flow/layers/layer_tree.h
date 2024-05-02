@@ -21,14 +21,8 @@ namespace flutter {
 
 class LayerTree {
  public:
-  struct Config {
-    std::shared_ptr<Layer> root_layer;
-    uint32_t rasterizer_tracing_threshold = 0;
-    bool checkerboard_raster_cache_images = false;
-    bool checkerboard_offscreen_layers = false;
-  };
-
-  LayerTree(const Config& config, const SkISize& frame_size);
+  LayerTree(const std::shared_ptr<Layer>& root_layer,
+            const SkISize& frame_size);
 
   // Perform a preroll pass on the tree and return information about
   // the tree that affects rendering this frame.
@@ -60,15 +54,8 @@ class LayerTree {
   const PaintRegionMap& paint_region_map() const { return paint_region_map_; }
   PaintRegionMap& paint_region_map() { return paint_region_map_; }
 
-  // The number of frame intervals missed after which the compositor must
-  // trace the rasterized picture to a trace file. 0 stands for disabling all
-  // tracing.
-  uint32_t rasterizer_tracing_threshold() const {
-    return rasterizer_tracing_threshold_;
-  }
-
   /// When `Paint` is called, if leaf layer tracing is enabled, additional
-  /// metadata around raterization of leaf layers is collected.
+  /// metadata around rasterization of leaf layers is collected.
   ///
   /// This is not supported in the Impeller backend.
   ///
@@ -84,9 +71,6 @@ class LayerTree {
  private:
   std::shared_ptr<Layer> root_layer_;
   SkISize frame_size_ = SkISize::MakeEmpty();  // Physical pixels.
-  uint32_t rasterizer_tracing_threshold_;
-  bool checkerboard_raster_cache_images_;
-  bool checkerboard_offscreen_layers_;
   bool enable_leaf_layer_tracing_ = false;
 
   PaintRegionMap paint_region_map_;

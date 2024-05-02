@@ -425,42 +425,6 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     _addSurface(PersistedPlatformView(viewId, dx, dy, width, height));
   }
 
-  /// Sets a threshold after which additional debugging information should be
-  /// recorded.
-  ///
-  /// Currently this interface is difficult to use by end-developers. If you're
-  /// interested in using this feature, please contact [flutter-dev](https://groups.google.com/forum/#!forum/flutter-dev).
-  /// We'll hopefully be able to figure out how to make this feature more useful
-  /// to you.
-  @override
-  void setRasterizerTracingThreshold(int frameInterval) {}
-
-  /// Sets whether the raster cache should checkerboard cached entries. This is
-  /// only useful for debugging purposes.
-  ///
-  /// The compositor can sometimes decide to cache certain portions of the
-  /// widget hierarchy. Such portions typically don't change often from frame to
-  /// frame and are expensive to render. This can speed up overall rendering.
-  /// However, there is certain upfront cost to constructing these cache
-  /// entries. And, if the cache entries are not used very often, this cost may
-  /// not be worth the speedup in rendering of subsequent frames. If the
-  /// developer wants to be certain that populating the raster cache is not
-  /// causing stutters, this option can be set. Depending on the observations
-  /// made, hints can be provided to the compositor that aid it in making better
-  /// decisions about caching.
-  ///
-  /// Currently this interface is difficult to use by end-developers. If you're
-  /// interested in using this feature, please contact [flutter-dev](https://groups.google.com/forum/#!forum/flutter-dev).
-  @override
-  void setCheckerboardRasterCacheImages(bool checkerboard) {}
-
-  /// Sets whether the compositor should checkerboard layers that are rendered
-  /// to offscreen bitmaps.
-  ///
-  /// This is only useful for debugging purposes.
-  @override
-  void setCheckerboardOffscreenLayers(bool checkerboard) {}
-
   /// The scene recorded in the last frame.
   ///
   /// This is a surface tree that holds onto the DOM elements that can be reused

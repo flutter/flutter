@@ -166,8 +166,6 @@ class RasterCache {
 
   void Clear();
 
-  void SetCheckboardCacheImages(bool checkerboard);
-
   const RasterCacheMetrics& picture_metrics() const { return picture_metrics_; }
   const RasterCacheMetrics& layer_metrics() const { return layer_metrics_; }
 

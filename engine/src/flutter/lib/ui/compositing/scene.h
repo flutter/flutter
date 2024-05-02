@@ -20,10 +20,7 @@ class Scene : public RefCountedDartWrappable<Scene> {
  public:
   ~Scene() override;
   static void create(Dart_Handle scene_handle,
-                     std::shared_ptr<flutter::Layer> rootLayer,
-                     uint32_t rasterizerTracingThreshold,
-                     bool checkerboardRasterCacheImages,
-                     bool checkerboardOffscreenLayers);
+                     std::shared_ptr<flutter::Layer> rootLayer);
 
   std::unique_ptr<flutter::LayerTree> takeLayerTree(uint64_t width,
                                                     uint64_t height);
@@ -39,10 +36,7 @@ class Scene : public RefCountedDartWrappable<Scene> {
   void dispose();
 
  private:
-  Scene(std::shared_ptr<flutter::Layer> rootLayer,
-        uint32_t rasterizerTracingThreshold,
-        bool checkerboardRasterCacheImages,
-        bool checkerboardOffscreenLayers);
+  explicit Scene(std::shared_ptr<flutter::Layer> rootLayer);
 
   // Returns true if `dispose()` has not been called.
   bool valid();
@@ -53,7 +47,7 @@ class Scene : public RefCountedDartWrappable<Scene> {
 
   std::unique_ptr<LayerTree> BuildLayerTree(uint32_t width, uint32_t height);
 
-  flutter::LayerTree::Config layer_tree_config_;
+  std::shared_ptr<Layer> layer_tree_root_layer_;
 };
 
 }  // namespace flutter
