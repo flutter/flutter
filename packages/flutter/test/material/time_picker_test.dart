@@ -1996,7 +1996,7 @@ void main() {
     expect(paragraph.text.style!.fontSize, 56.0);
   });
 
-  testWidgets('Material3 - Padding between apm and time textField when hourDialType == _HourDialType.twelveHour && timeOfDayFormat == TimeOfDayFormat.a_space_h_colon_mm',
+  testWidgets('Material3 - Padding between apm and time textField - hourDialType == _HourDialType.twelveHour && timeOfDayFormat == TimeOfDayFormat.a_space_h_colon_mm',
       (WidgetTester tester) async {
         tester.view.physicalSize = const Size(540, 960);
         tester.view.devicePixelRatio = 1;
