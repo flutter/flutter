@@ -19,11 +19,11 @@ Dart_Handle IsolateNameServerNatives::LookupPortByName(
   if (!name_server) {
     return Dart_Null();
   }
-  Dart_Port port = name_server->LookupIsolatePortByName(name);
-  if (port == ILLEGAL_PORT) {
+  Dart_PortEx port = name_server->LookupIsolatePortByName(name);
+  if (port.port_id == ILLEGAL_PORT) {
     return Dart_Null();
   }
-  return Dart_NewSendPort(port);
+  return Dart_NewSendPortEx(port);
 }
 
 bool IsolateNameServerNatives::RegisterPortWithName(Dart_Handle port_handle,
@@ -32,8 +32,8 @@ bool IsolateNameServerNatives::RegisterPortWithName(Dart_Handle port_handle,
   if (!name_server) {
     return false;
   }
-  Dart_Port port = ILLEGAL_PORT;
-  Dart_SendPortGetId(port_handle, &port);
+  Dart_PortEx port;
+  Dart_SendPortGetIdEx(port_handle, &port);
   if (!name_server->RegisterIsolatePortWithName(port, name)) {
     return false;
   }
