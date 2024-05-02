@@ -274,7 +274,7 @@ void main() {
     ProcessManager: () => processManager,
   });
 
-  testUsingContext('Defaults to web renderer auto mode when no option is specified', () async {
+  testUsingContext('Defaults to web renderer canvaskit mode when no option is specified', () async {
     final TestWebBuildCommand buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
     setupFileSystemForEndToEndTest(fileSystem);
@@ -288,7 +288,7 @@ void main() {
       expect(target, isA<WebServiceWorker>());
       final List<WebCompilerConfig> configs = (target as WebServiceWorker).compileConfigs;
       expect(configs.length, 1);
-      expect(configs.first.renderer, WebRendererMode.auto);
+      expect(configs.first.renderer, WebRendererMode.canvaskit);
     }),
   });
 

@@ -1341,57 +1341,6 @@ void main() {
           }));
 
   test(
-      'Can start web server with auto detect enabled',
-      () => testbed.run(() async {
-            final File outputFile = globals.fs
-                .file(globals.fs.path.join('lib', 'main.dart'))
-              ..createSync(recursive: true);
-            outputFile.parent.childFile('a.sources').writeAsStringSync('');
-            outputFile.parent.childFile('a.json').writeAsStringSync('{}');
-            outputFile.parent.childFile('a.map').writeAsStringSync('{}');
-
-            final WebDevFS webDevFS = WebDevFS(
-              hostname: 'localhost',
-              port: 0,
-              tlsCertPath: null,
-              tlsCertKeyPath: null,
-              packagesFilePath: '.packages',
-              urlTunneller: null, // ignore: avoid_redundant_argument_values
-              useSseForDebugProxy: true,
-              useSseForDebugBackend: true,
-              useSseForInjectedClient: true,
-              nullAssertions: true,
-              nativeNullAssertions: true,
-              buildInfo: const BuildInfo(BuildMode.debug, '',
-                  treeShakeIcons: false,
-                  dartDefines: <String>[
-                    'FLUTTER_WEB_AUTO_DETECT=true',
-                  ]),
-              enableDwds: false,
-              enableDds: false,
-              entrypoint: Uri.base,
-              testMode: true,
-              expressionCompiler:
-                  null, // ignore: avoid_redundant_argument_values
-              extraHeaders: const <String, String>{},
-              chromiumLauncher: null, // ignore: avoid_redundant_argument_values
-              nullSafetyMode: NullSafetyMode.sound,
-              ddcModuleSystem: usesDdcModuleSystem,
-              webRenderer: WebRendererMode.auto,
-              isWasm: false,
-              rootDirectory: globals.fs.currentDirectory,
-            );
-            webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
-            webDevFS.stackTraceMapper.createSync(recursive: true);
-
-            await webDevFS.create();
-
-            expect(webDevFS.webAssetServer.webRenderer, WebRendererMode.auto);
-
-            await webDevFS.destroy();
-          }));
-
-  test(
       'Can start web server with tls connection',
       () => testbed.run(() async {
             final String dataPath = globals.fs.path.join(

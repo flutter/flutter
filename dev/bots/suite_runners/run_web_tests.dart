@@ -437,8 +437,6 @@ class WebTestsSuite {
           '--dart-define=FLUTTER_WEB_USE_SKIA=true',
         if (!canvasKit)
           '--dart-define=FLUTTER_WEB_USE_SKIA=false',
-        if (!canvasKit)
-          '--dart-define=FLUTTER_WEB_AUTO_DETECT=false',
         '--driver=test_driver/transitions_perf_e2e_test.dart',
         '--target=test_driver/transitions_perf_e2e.dart',
         '--browser-name=chrome',
@@ -517,7 +515,6 @@ class WebTestsSuite {
         'chrome',
         '--web-run-headless',
         '--dart-define=FLUTTER_WEB_USE_SKIA=false',
-        '--dart-define=FLUTTER_WEB_AUTO_DETECT=false',
         ...additionalArguments,
         '-t',
         target,

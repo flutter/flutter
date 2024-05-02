@@ -51,7 +51,7 @@ class JsCompilerConfig extends WebCompilerConfig {
     super.optimizationLevel = WebCompilerConfig.kDefaultOptimizationLevel,
     this.noFrequencyBasedMinification = false,
     this.sourceMaps = true,
-    super.renderer = WebRendererMode.auto,
+    super.renderer = WebRendererMode.defaultRenderer,
   });
 
   /// Instantiates [JsCompilerConfig] suitable for the `flutter run` command.
@@ -136,7 +136,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
   const WasmCompilerConfig({
     super.optimizationLevel = WebCompilerConfig.kDefaultOptimizationLevel,
     this.stripWasm = true,
-    super.renderer = WebRendererMode.auto,
+    super.renderer = WebRendererMode.defaultRenderer,
   });
 
   /// Build environment for [stripWasm].

@@ -14,37 +14,26 @@ void main() {
       dartDefines = <String>[];
     });
 
-    test('auto web-renderer with no dart-defines', () {
-      dartDefines = WebRendererMode.auto.updateDartDefines(dartDefines);
-      expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=true']);
-    });
-
     test('canvaskit web-renderer with no dart-defines', () {
       dartDefines = WebRendererMode.canvaskit.updateDartDefines(dartDefines);
-      expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=false','FLUTTER_WEB_USE_SKIA=true']);
+      expect(dartDefines, <String>['FLUTTER_WEB_USE_SKIA=true']);
     });
 
     test('html web-renderer with no dart-defines', () {
       dartDefines = WebRendererMode.html.updateDartDefines(dartDefines);
-      expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=false','FLUTTER_WEB_USE_SKIA=false']);
+      expect(dartDefines, <String>['FLUTTER_WEB_USE_SKIA=false']);
     });
 
-    test('auto web-renderer with existing dart-defines', () {
-      dartDefines = <String>['FLUTTER_WEB_USE_SKIA=false'];
-      dartDefines = WebRendererMode.auto.updateDartDefines(dartDefines);
-      expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=true']);
-    });
-
-    test('canvaskit web-renderer with no dart-defines', () {
+    test('canvaskit web-renderer with existing dart-defines', () {
       dartDefines = <String>['FLUTTER_WEB_USE_SKIA=false'];
       dartDefines = WebRendererMode.canvaskit.updateDartDefines(dartDefines);
-      expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=false','FLUTTER_WEB_USE_SKIA=true']);
+      expect(dartDefines, <String>['FLUTTER_WEB_USE_SKIA=true']);
     });
 
-    test('html web-renderer with no dart-defines', () {
+    test('html web-renderer with existing dart-defines', () {
       dartDefines = <String>['FLUTTER_WEB_USE_SKIA=true'];
       dartDefines = WebRendererMode.html.updateDartDefines(dartDefines);
-      expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=false','FLUTTER_WEB_USE_SKIA=false']);
+      expect(dartDefines, <String>['FLUTTER_WEB_USE_SKIA=false']);
     });
   });
 }

@@ -377,7 +377,7 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -390,7 +390,7 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--no-minify',
         '--no-source-maps',
         '-O4',
@@ -418,7 +418,7 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -431,7 +431,7 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--no-minify',
         '--no-source-maps',
         '-O4',
@@ -458,7 +458,7 @@ void main() {
         ..._kDart2jsLinuxArgs,
         '--enable-experiment=non-nullable',
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -472,7 +472,7 @@ void main() {
         ..._kDart2jsLinuxArgs,
         '--enable-experiment=non-nullable',
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--no-minify',
         '--no-source-maps',
         '-O4',
@@ -497,7 +497,7 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -510,7 +510,7 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--no-minify',
         '--no-source-maps',
         '-O4',
@@ -535,7 +535,7 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -548,7 +548,7 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--no-source-maps',
         '-O4',
         '-o',
@@ -573,7 +573,7 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--native-null-assertions',
         '--no-source-maps',
         '-o',
@@ -587,7 +587,7 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--native-null-assertions',
         '--no-source-maps',
         '-O4',
@@ -613,7 +613,7 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -626,7 +626,7 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--no-source-maps',
         '-O3',
         '-o',
@@ -651,7 +651,7 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -667,7 +667,7 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--no-source-maps',
         '-O4',
         '-o',
@@ -701,7 +701,7 @@ void main() {
         '-Ddart.vm.product=true',
         '-DFOO=bar',
         '-DBAZ=qux',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -716,7 +716,7 @@ void main() {
         '-Ddart.vm.product=true',
         '-DFOO=bar',
         '-DBAZ=qux',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--no-source-maps',
         '-O4',
         '-o',
@@ -741,7 +741,7 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
         '--packages=.dart_tool/package_config.json',
@@ -753,7 +753,7 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.product=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '-O4',
         '-o',
         environment.buildDir.childFile('main.dart.js').absolute.path,
@@ -778,7 +778,7 @@ void main() {
         '-Ddart.vm.profile=true',
         '-DFOO=bar',
         '-DBAZ=qux',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -793,7 +793,7 @@ void main() {
         '-Ddart.vm.profile=true',
         '-DFOO=bar',
         '-DBAZ=qux',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--no-minify',
         '--no-source-maps',
         '-O4',
@@ -819,7 +819,7 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -832,7 +832,7 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--no-minify',
         '--no-source-maps',
         '-O4',
@@ -860,7 +860,7 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--no-source-maps',
         '-o',
         environment.buildDir.childFile('app.dill').absolute.path,
@@ -873,7 +873,7 @@ void main() {
       command: <String>[
         ..._kDart2jsLinuxArgs,
         '-Ddart.vm.profile=true',
-        '-DFLUTTER_WEB_AUTO_DETECT=true',
+        '-DFLUTTER_WEB_USE_SKIA=true',
         '--no-minify',
         '--no-source-maps',
         '-O4',
@@ -916,12 +916,10 @@ void main() {
                   '-Ddart.vm.${buildMode == 'release' ? 'product' : 'profile' }=true',
                   ...defines.map((String define) => '-D$define'),
                   if (renderer == WebRendererMode.skwasm) ...<String>[
-                    '-DFLUTTER_WEB_AUTO_DETECT=false',
                     '-DFLUTTER_WEB_USE_SKIA=false',
                     '-DFLUTTER_WEB_USE_SKWASM=true',
                   ],
                   if (renderer == WebRendererMode.canvaskit) ...<String>[
-                    '-DFLUTTER_WEB_AUTO_DETECT=false',
                     '-DFLUTTER_WEB_USE_SKIA=true',
                   ],
                   '--extra-compiler-option=--depfile=${depFile.absolute.path}',
@@ -964,7 +962,7 @@ void main() {
       JsCompilerConfig(optimizationLevel: 0),
       JsCompilerConfig(noFrequencyBasedMinification: true),
       JsCompilerConfig(sourceMaps: false),
-      JsCompilerConfig(renderer: WebRendererMode.canvaskit),
+      JsCompilerConfig(renderer: WebRendererMode.skwasm),
 
       // All properties non-default
       JsCompilerConfig(
@@ -974,7 +972,7 @@ void main() {
         optimizationLevel: 0,
         noFrequencyBasedMinification: true,
         sourceMaps: false,
-        renderer: WebRendererMode.canvaskit,
+        renderer: WebRendererMode.skwasm,
       ),
     ];
 
@@ -994,14 +992,14 @@ void main() {
 
       // Each individual property being made non-default
       WasmCompilerConfig(optimizationLevel: 0),
-      WasmCompilerConfig(renderer: WebRendererMode.canvaskit),
+      WasmCompilerConfig(renderer: WebRendererMode.skwasm),
       WasmCompilerConfig(stripWasm: false),
 
       // All properties non-default
       WasmCompilerConfig(
         optimizationLevel: 0,
         stripWasm: false,
-        renderer: WebRendererMode.canvaskit,
+        renderer: WebRendererMode.skwasm,
       ),
     ];
 

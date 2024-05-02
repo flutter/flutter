@@ -167,10 +167,9 @@ class BuildWebCommand extends BuildSubCommand {
           nativeNullAssertions: boolArg('native-null-assertions'),
           noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
           sourceMaps: boolArg('source-maps'),
-          renderer: WebRendererMode.canvaskit,
         )];
     } else {
-      WebRendererMode webRenderer = WebRendererMode.auto;
+      WebRendererMode webRenderer = WebRendererMode.defaultRenderer;
       if (argParser.options.containsKey(FlutterOptions.kWebRendererFlag)) {
         webRenderer = WebRendererMode.values.byName(stringArg(FlutterOptions.kWebRendererFlag)!);
       }

@@ -165,7 +165,7 @@ void main() {
               BuildInfo.debug,
               ServiceWorkerStrategy.offlineFirst,
               compilerConfigs: <WebCompilerConfig>[
-                const JsCompilerConfig.run(nativeNullAssertions: true, renderer: WebRendererMode.auto),
+                const JsCompilerConfig.run(nativeNullAssertions: true, renderer: WebRendererMode.canvaskit),
               ]
             ),
         throwsToolExit(message: 'Failed to compile application for the Web.'));
