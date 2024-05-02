@@ -6,10 +6,10 @@ import 'dart:js_interop';
 
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 import 'package:web_locale_keymap/web_locale_keymap.dart' as locale_keymap;
 
 import '../engine.dart'  show registerHotRestartListener;
-import 'browser_detection.dart';
 import 'dom.dart';
 import 'key_map.g.dart';
 import 'platform_dispatcher.dart';
@@ -132,8 +132,8 @@ class KeyboardBinding {
   ///
   /// By default it is derived from [operatingSystem].
   @protected
-  OperatingSystem get localPlatform {
-    return operatingSystem;
+  ui_web.OperatingSystem get localPlatform {
+    return ui_web.browser.operatingSystem;
   }
 
   KeyboardConverter get converter => _converter;
@@ -223,8 +223,8 @@ class FlutterHtmlKeyboardEvent {
 // [dispatchKeyData] as given in the constructor. Some key data might be
 // dispatched asynchronously.
 class KeyboardConverter {
-  KeyboardConverter(this.performDispatchKeyData, OperatingSystem platform)
-    : onDarwin = platform == OperatingSystem.macOs || platform == OperatingSystem.iOs,
+  KeyboardConverter(this.performDispatchKeyData, ui_web.OperatingSystem platform)
+    : onDarwin = platform == ui_web.OperatingSystem.macOs || platform == ui_web.OperatingSystem.iOs,
       _mapping = _mappingFromPlatform(platform);
 
   final DispatchKeyData performDispatchKeyData;
@@ -234,16 +234,16 @@ class KeyboardConverter {
   /// Maps logical keys from key event properties.
   final locale_keymap.LocaleKeymap _mapping;
 
-  static locale_keymap.LocaleKeymap _mappingFromPlatform(OperatingSystem platform) {
+  static locale_keymap.LocaleKeymap _mappingFromPlatform(ui_web.OperatingSystem platform) {
     switch (platform) {
-      case OperatingSystem.iOs:
-      case OperatingSystem.macOs:
+      case ui_web.OperatingSystem.iOs:
+      case ui_web.OperatingSystem.macOs:
         return locale_keymap.LocaleKeymap.darwin();
-      case OperatingSystem.windows:
+      case ui_web.OperatingSystem.windows:
         return locale_keymap.LocaleKeymap.win();
-      case OperatingSystem.android:
-      case OperatingSystem.linux:
-      case OperatingSystem.unknown:
+      case ui_web.OperatingSystem.android:
+      case ui_web.OperatingSystem.linux:
+      case ui_web.OperatingSystem.unknown:
         return locale_keymap.LocaleKeymap.linux();
     }
   }

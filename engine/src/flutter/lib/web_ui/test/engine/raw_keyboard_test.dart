@@ -9,6 +9,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -179,7 +180,7 @@ void testMain() {
         'keyCode': 0,
       });
       RawKeyboard.instance!.dispose();
-    }, skip: operatingSystem != OperatingSystem.linux);
+    }, skip: ui_web.browser.operatingSystem != ui_web.OperatingSystem.linux);
 
     // Regression test for https://github.com/flutter/flutter/issues/141186.
     test('updates meta state for Meta key seen as "Process" key', () {

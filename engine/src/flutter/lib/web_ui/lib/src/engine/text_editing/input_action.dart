@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../browser_detection.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
+
 import '../dom.dart';
 
 /// Various input action types used in text fields.
@@ -82,8 +83,8 @@ abstract class EngineInputAction {
 
     // Only apply `enterkeyhint` in mobile browsers so that the right virtual
     // keyboard shows up.
-    if (operatingSystem == OperatingSystem.iOs ||
-        operatingSystem == OperatingSystem.android ||
+    if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs ||
+        ui_web.browser.operatingSystem == ui_web.OperatingSystem.android ||
         enterkeyhintAttribute == EngineInputAction.none.enterkeyhintAttribute) {
       domElement.setAttribute('enterkeyhint', enterkeyhintAttribute!);
     }

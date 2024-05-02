@@ -8,6 +8,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import 'keyboard_converter_test.dart';
 
@@ -46,7 +47,7 @@ void testMain() {
     return KeyboardConverter((ui.KeyData key) {
       keyDataList.add(key);
       return true;
-    }, OperatingSystem.linux);
+    }, ui_web.OperatingSystem.linux);
   }
 
   setUp(() {
@@ -820,7 +821,7 @@ void testMain() {
       final _ButtonedEventMixin context = _PointerEventContext();
 
       const double dpi = 2.5;
-      debugOperatingSystemOverride = OperatingSystem.macOs;
+      ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.macOs;
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpi);
 
       final List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
@@ -853,7 +854,7 @@ void testMain() {
       expect(packets[0].data[0].scrollDeltaY, equals(10.0 * dpi));
 
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
-      debugBrowserEngineOverride = null;
+      ui_web.browser.debugBrowserEngineOverride = null;
     },
   );
 
@@ -1108,7 +1109,7 @@ void testMain() {
         packets.add(packet);
       };
 
-      debugOperatingSystemOverride = OperatingSystem.macOs;
+      ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.macOs;
 
       rootElement.dispatchEvent(context.wheel(
         buttons: 0,
@@ -1197,7 +1198,7 @@ void testMain() {
       expect(packets[2].data[0].scrollDeltaX, equals(0.0));
       expect(packets[2].data[0].scrollDeltaY, equals(240.0));
 
-      debugOperatingSystemOverride = null;
+      ui_web.browser.debugOperatingSystemOverride = null;
     },
   );
 
@@ -2916,7 +2917,7 @@ void _testClickDebouncer({required PointerBinding Function() getBinding}) {
       isEmpty,
     );
     // TODO(yjbanov): https://github.com/flutter/flutter/issues/142991.
-  }, skip: operatingSystem == OperatingSystem.windows);
+  }, skip: ui_web.browser.operatingSystem == ui_web.OperatingSystem.windows);
 
   testWithSemantics('Forwards click if enough time passed after the last flushed pointerup', () async {
     expect(EnginePlatformDispatcher.instance.semanticsEnabled, true);

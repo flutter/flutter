@@ -6,6 +6,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../../common/test_initialization.dart';
 
@@ -207,8 +208,8 @@ void testMain() {
     },
         // This method failed on iOS Safari.
         // TODO(ferhat): https://github.com/flutter/flutter/issues/60036
-        skip: browserEngine == BrowserEngine.webkit &&
-            operatingSystem == OperatingSystem.iOs);
+        skip: ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
+            ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs);
 
     test('is retained', () {
       final SceneBuilder builder1 = SceneBuilder();

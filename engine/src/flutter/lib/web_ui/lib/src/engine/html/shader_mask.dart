@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import '../browser_detection.dart';
 import '../dom.dart';
 import 'bitmap_canvas.dart';
 import 'color_filter.dart';
@@ -39,7 +39,7 @@ class PersistedShaderMask extends PersistedContainerSurface
   final ui.BlendMode blendMode;
   final ui.FilterQuality filterQuality;
   DomElement? _shaderElement;
-  final bool isWebKit = browserEngine == BrowserEngine.webkit;
+  final bool isWebKit = ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit;
 
   @override
   void adoptElements(PersistedShaderMask oldSurface) {

@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../../engine/color_filter.dart';
-import '../browser_detection.dart';
 import '../dom.dart';
 import '../svg.dart';
 import '../util.dart';
@@ -298,7 +298,7 @@ class SvgFilterBuilder {
 
     // WebKit will not render if x/y/width/height is specified. So we return
     // explicit size here unless running on WebKit.
-    if (browserEngine != BrowserEngine.webkit) {
+    if (ui_web.browser.browserEngine != ui_web.BrowserEngine.webkit) {
       element.x!.baseVal!.newValueSpecifiedUnits(svgLengthTypeNumber, 0);
       element.y!.baseVal!.newValueSpecifiedUnits(svgLengthTypeNumber, 0);
       element.width!.baseVal!.newValueSpecifiedUnits(svgLengthTypeNumber, width);

@@ -9,6 +9,7 @@ import 'dart:js_interop';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../../common/matchers.dart';
 
@@ -74,7 +75,7 @@ void doTests() {
 
       // For some reason, only Firefox is able to correctly compute styles for
       // the `::placeholder` pseudo-element.
-    }, skip: browserEngine != BrowserEngine.firefox);
+    }, skip: ui_web.browser.browserEngine != ui_web.BrowserEngine.firefox);
   });
 
   group('Shadow root', () {
@@ -97,8 +98,8 @@ void doTests() {
 
       // The shadow root should be initialized with correct parameters.
       expect(domManager.renderingHost.mode, 'open');
-      if (browserEngine != BrowserEngine.firefox &&
-          browserEngine != BrowserEngine.webkit) {
+      if (ui_web.browser.browserEngine != ui_web.BrowserEngine.firefox &&
+          ui_web.browser.browserEngine != ui_web.BrowserEngine.webkit) {
         // Older versions of Safari and Firefox don't support this flag yet.
         // See: https://caniuse.com/mdn-api_shadowroot_delegatesfocus
         expect(domManager.renderingHost.delegatesFocus, isFalse);

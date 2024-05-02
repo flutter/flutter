@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 final Float32List identityTransform = Matrix4.identity().storage;
 final Float32List xTranslation = (Matrix4.identity()..translate(10)).storage;
@@ -42,7 +43,7 @@ void testMain() {
   });
 
   test('canonicalizes font families correctly on iOS (not 15)', () {
-    debugOperatingSystemOverride = OperatingSystem.iOs;
+    ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.iOs;
     debugIsIOS15 = false;
 
     expect(
@@ -58,12 +59,12 @@ void testMain() {
       '-apple-system, BlinkMacSystemFont',
     );
 
-    debugOperatingSystemOverride = null;
+    ui_web.browser.debugOperatingSystemOverride = null;
     debugIsIOS15 = null;
   });
 
   test('does not use -apple-system on iOS 15', () {
-    debugOperatingSystemOverride = OperatingSystem.iOs;
+    ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.iOs;
     debugIsIOS15 = true;
 
     expect(
@@ -79,7 +80,7 @@ void testMain() {
       'BlinkMacSystemFont',
     );
 
-    debugOperatingSystemOverride = null;
+    ui_web.browser.debugOperatingSystemOverride = null;
     debugIsIOS15 = null;
   });
 

@@ -8,8 +8,8 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import '../browser_detection.dart';
 import '../dom.dart';
 import '../mouse/prevent_default.dart';
 import '../platform_dispatcher.dart';
@@ -41,8 +41,8 @@ const int offScreenOffset = -9999;
 /// Blink and Webkit engines, bring an overlay on top of the text field when it
 /// is autofilled.
 bool browserHasAutofillOverlay() =>
-    browserEngine == BrowserEngine.blink ||
-    browserEngine == BrowserEngine.webkit;
+    ui_web.browser.browserEngine == ui_web.BrowserEngine.blink ||
+    ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit;
 
 /// `transparentTextEditing` class is configured to make the autofill overlay
 /// transparent.
@@ -1992,13 +1992,13 @@ class TextInputSetClient extends TextInputCommand {
 DefaultTextEditingStrategy createDefaultTextEditingStrategy(HybridTextEditing textEditing) {
   DefaultTextEditingStrategy strategy;
 
-  if(operatingSystem == OperatingSystem.iOs) {
+  if(ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
     strategy = IOSTextEditingStrategy(textEditing);
-  } else if(operatingSystem == OperatingSystem.android) {
+  } else if(ui_web.browser.operatingSystem == ui_web.OperatingSystem.android) {
     strategy = AndroidTextEditingStrategy(textEditing);
-  } else if(browserEngine == BrowserEngine.webkit) {
+  } else if(ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit) {
     strategy = SafariDesktopTextEditingStrategy(textEditing);
-  } else if(browserEngine == BrowserEngine.firefox) {
+  } else if(ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox) {
     strategy = FirefoxTextEditingStrategy(textEditing);
   } else {
     strategy = GloballyPositionedTextEditingStrategy(textEditing);

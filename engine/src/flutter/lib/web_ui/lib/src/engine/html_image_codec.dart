@@ -8,7 +8,6 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import 'browser_detection.dart';
 import 'dom.dart';
 import 'safe_browser_api.dart';
 
@@ -57,7 +56,7 @@ class HtmlCodec implements ui.Codec {
         int naturalWidth = imgElement.naturalWidth.toInt();
         int naturalHeight = imgElement.naturalHeight.toInt();
         // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=700533.
-        if (naturalWidth == 0 && naturalHeight == 0 && browserEngine == BrowserEngine.firefox) {
+        if (naturalWidth == 0 && naturalHeight == 0 && ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox) {
           const int kDefaultImageSizeFallback = 300;
           naturalWidth = kDefaultImageSizeFallback;
           naturalHeight = kDefaultImageSizeFallback;

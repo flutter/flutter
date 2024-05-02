@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import '../browser_detection.dart';
 import '../color_filter.dart';
 import '../dom.dart';
 import '../util.dart';
@@ -121,7 +121,7 @@ class PersistedBackdropFilter extends PersistedContainerSurface
       ..top = '${top}px'
       ..width = '${width}px'
       ..height = '${height}px';
-    if (browserEngine == BrowserEngine.firefox) {
+    if (ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox) {
       // For FireFox for now render transparent black background.
       // TODO(ferhat): Switch code to use filter when
       // See https://caniuse.com/#feat=css-backdrop-filter.
@@ -142,7 +142,7 @@ class PersistedBackdropFilter extends PersistedContainerSurface
       // CSS uses pixel radius for blur. Flutter & SVG use sigma parameters. For
       // Gaussian blur with standard deviation (normal distribution),
       // the blur will fall within 2 * sigma pixels.
-      if (browserEngine == BrowserEngine.webkit) {
+      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit) {
         setElementStyle(_filterElement!, '-webkit-backdrop-filter',
             backendFilter.filterAttribute);
       }

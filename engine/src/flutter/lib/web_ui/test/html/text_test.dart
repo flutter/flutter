@@ -26,8 +26,8 @@ Future<void> testMain() async {
 
   late String fallback;
   setUp(() {
-    if (operatingSystem == OperatingSystem.macOs ||
-        operatingSystem == OperatingSystem.iOs) {
+    if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs ||
+        ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
       if (isIOS15) {
         fallback = 'BlinkMacSystemFont';
       } else {
@@ -360,7 +360,7 @@ Future<void> testMain() async {
     expect(spans[1].style.fontFamily, 'FlutterTest, $fallback, sans-serif');
   },
       // TODO(mdebbar): https://github.com/flutter/flutter/issues/46638
-      skip: browserEngine == BrowserEngine.firefox);
+      skip: ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox);
 
   test('adds Arial and sans-serif as fallback fonts', () {
     // Set this to false so it doesn't default to the test font.
@@ -378,7 +378,7 @@ Future<void> testMain() async {
     ui_web.debugEmulateFlutterTesterEnvironment = true;
   },
       // TODO(mdebbar): https://github.com/flutter/flutter/issues/46638
-      skip: browserEngine == BrowserEngine.firefox);
+      skip: ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox);
 
   test('does not add fallback fonts to generic families', () {
     // Set this to false so it doesn't default to the default test font.

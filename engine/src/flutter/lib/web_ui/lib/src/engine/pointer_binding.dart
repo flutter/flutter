@@ -9,9 +9,10 @@ import 'dart:math' as math;
 import 'package:meta/meta.dart';
 import 'package:ui/src/engine/keyboard_binding.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../engine.dart' show registerHotRestartListener;
-import 'browser_detection.dart';
+import 'browser_detection.dart' show isIosSafari;
 import 'dom.dart';
 import 'platform_dispatcher.dart';
 import 'pointer_binding/event_position_helper.dart';
@@ -588,7 +589,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/platform/mac/PlatformEventFactoryMac.mm
     // https://searchfox.org/mozilla-central/source/dom/events/WheelEvent.h
     // https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-mousewheel
-    if (browserEngine == BrowserEngine.firefox) {
+    if (ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox) {
       // Firefox has restricted the wheelDelta properties, they do not provide
       // enough information to accurately disambiguate trackpad events from mouse
       // wheel events.
@@ -656,7 +657,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
         deltaX *= _view.physicalSize.width;
         deltaY *= _view.physicalSize.height;
       case domDeltaPixel:
-        if (operatingSystem == OperatingSystem.macOs) {
+        if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs) {
           // Safari and Firefox seem to report delta in logical pixels while
           // Chrome uses physical pixels.
           deltaX *= _view.devicePixelRatio;
@@ -669,7 +670,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     final List<ui.PointerData> data = <ui.PointerData>[];
     final ui.Offset offset = computeEventOffsetToTarget(event, _view);
     bool ignoreCtrlKey = false;
-    if (operatingSystem == OperatingSystem.macOs) {
+    if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs) {
       ignoreCtrlKey = (_keyboardConverter?.keyIsPressed(kPhysicalControlLeft) ?? false) ||
                       (_keyboardConverter?.keyIsPressed(kPhysicalControlRight) ?? false);
     }

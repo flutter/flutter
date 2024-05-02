@@ -1393,8 +1393,8 @@ void _testVerticalScrolling() {
     int browserMaxScrollDiff = 0;
     // The max scroll value varies between `9` and `10` for Safari desktop
     // browsers.
-    if (browserEngine == BrowserEngine.webkit &&
-        operatingSystem == OperatingSystem.macOs) {
+    if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
+        ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs) {
       browserMaxScrollDiff = 1;
     }
 
@@ -1544,8 +1544,8 @@ void _testHorizontalScrolling() {
     int browserMaxScrollDiff = 0;
     // The max scroll value varies between `9` and `10` for Safari desktop
     // browsers.
-    if (browserEngine == BrowserEngine.webkit &&
-        operatingSystem == OperatingSystem.macOs) {
+    if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
+        ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs) {
       browserMaxScrollDiff = 1;
     }
     expect(scrollable.scrollLeft >= (10 - browserMaxScrollDiff), isTrue);
@@ -1830,7 +1830,7 @@ void _testTextField() {
     semantics().semanticsEnabled = false;
   }, // TODO(yjbanov): https://github.com/flutter/flutter/issues/46638
       // TODO(yjbanov): https://github.com/flutter/flutter/issues/50590
-      skip: browserEngine != BrowserEngine.blink);
+      skip: ui_web.browser.browserEngine != ui_web.BrowserEngine.blink);
 }
 
 void _testCheckables() {

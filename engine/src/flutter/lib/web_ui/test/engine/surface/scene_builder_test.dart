@@ -13,6 +13,7 @@ import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../../common/matchers.dart';
 import '../../common/rendering.dart';
@@ -182,7 +183,7 @@ void testMain() {
       expect(picture.updateCount, 0);
       expect(picture.applyPaintCount, 2);
     }, // TODO(yjbanov): https://github.com/flutter/flutter/issues/46638
-        skip: browserEngine == BrowserEngine.firefox);
+        skip: ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox);
   });
 
   group('Compositing order', () {
