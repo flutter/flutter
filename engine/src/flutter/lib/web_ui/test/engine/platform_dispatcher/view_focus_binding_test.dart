@@ -17,12 +17,16 @@ void testMain() {
     late EnginePlatformDispatcher dispatcher;
 
     setUp(() {
-      domDocument.activeElement?.blur();
-      EngineSemantics.instance.semanticsEnabled = false;
+      ViewFocusBinding.isEnabled = true;
 
       dispatcher = EnginePlatformDispatcher.instance;
       dispatchedViewFocusEvents = <ui.ViewFocusEvent>[];
       dispatcher.onViewFocusChange = dispatchedViewFocusEvents.add;
+    });
+
+    tearDown(() {
+      ViewFocusBinding.isEnabled = false;
+      EngineSemantics.instance.semanticsEnabled = false;
     });
 
     test('The view is focusable and reachable by keyboard when registered', () async {
