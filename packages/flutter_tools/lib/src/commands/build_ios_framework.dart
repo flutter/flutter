@@ -445,7 +445,7 @@ end
     try {
       for (final EnvironmentType sdkType in EnvironmentType.values) {
         final Directory outputBuildDirectory = switch (sdkType) {
-          EnvironmentType.physical => iPhoneBuildOutput,
+          EnvironmentType.physical  => iPhoneBuildOutput,
           EnvironmentType.simulator => simulatorBuildOutput,
         };
         frameworks.add(outputBuildDirectory.childDirectory(appFrameworkName));

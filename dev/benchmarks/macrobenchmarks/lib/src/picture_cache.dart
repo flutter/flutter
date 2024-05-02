@@ -210,9 +210,9 @@ class ListItem extends StatelessWidget {
 
   String _convertCountToStr(int count) {
     return switch (count) {
-      < 10000 => count.toString(),
+      < 10000  => count.toString(),
       < 100000 => '${(count / 10000).toStringAsPrecision(2)}w',
-      _ => '${(count / 10000).floor()}w',
+      _        => '${(count / 10000).floor()}w',
     };
   }
 

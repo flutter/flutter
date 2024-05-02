@@ -667,7 +667,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     final String logTarget = environmentType == EnvironmentType.simulator ? 'simulator' : 'device';
     final String typeName = globals.artifacts!.getEngineType(TargetPlatform.ios, buildInfo.mode);
     globals.printStatus(switch (xcodeBuildAction) {
-      XcodeBuildAction.build => 'Building $app for $logTarget ($typeName)...',
+      XcodeBuildAction.build   => 'Building $app for $logTarget ($typeName)...',
       XcodeBuildAction.archive => 'Archiving $app...',
     });
     final XcodeBuildResult result = await buildXcodeProject(

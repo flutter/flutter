@@ -119,9 +119,9 @@ List<TimelineEvent>? _parseEvents(Map<String, dynamic> json) {
 
   timelineEvents.sort((TimelineEvent e1, TimelineEvent e2) {
     return switch ((e1.timestampMicros, e2.timestampMicros)) {
-      (null, null) => 0,
-      (_, null) => 1,
-      (null, _) => -1,
+      (null, null) =>  0,
+      (_, null)    =>  1,
+      (null, _)    => -1,
       (final int ts1, final int ts2) => ts1.compareTo(ts2),
     };
   });

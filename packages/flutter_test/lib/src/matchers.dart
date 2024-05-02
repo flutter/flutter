@@ -547,7 +547,7 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 ///    may swap out the backend for this matcher.
 AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
   return switch (key) {
-    Uri() => MatchesGoldenFile(key, version),
+    Uri()    => MatchesGoldenFile(key, version),
     String() => MatchesGoldenFile.forStringPath(key, version),
     _ => throw ArgumentError('Unexpected type for golden file: ${key.runtimeType}'),
   };
