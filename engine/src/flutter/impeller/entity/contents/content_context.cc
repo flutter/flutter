@@ -280,10 +280,6 @@ ContentContext::ContentContext(
   const auto supports_decal = static_cast<Scalar>(
       context_->GetCapabilities()->SupportsDecalSamplerAddressMode());
 
-#ifdef IMPELLER_DEBUG
-  checkerboard_pipelines_.CreateDefault(*context_, options);
-#endif  // IMPELLER_DEBUG
-
   {
     solid_fill_pipelines_.CreateDefault(*context_, options);
     texture_pipelines_.CreateDefault(*context_, options);

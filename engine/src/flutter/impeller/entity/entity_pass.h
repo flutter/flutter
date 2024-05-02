@@ -174,8 +174,6 @@ class EntityPass {
 
   void SetBackdropFilter(BackdropFilterProc proc);
 
-  void SetEnableOffscreenCheckerboard(bool enabled);
-
   int32_t GetRequiredMipCount() const { return required_mip_count_; }
 
   void SetRequiredMipCount(int32_t mip_count) {
@@ -334,7 +332,6 @@ class EntityPass {
   uint32_t clip_depth_ = 1u;
   BlendMode blend_mode_ = BlendMode::kSourceOver;
   bool flood_clip_ = false;
-  bool enable_offscreen_debug_checkerboard_ = false;
   std::optional<Rect> bounds_limit_;
   ContentBoundsPromise bounds_promise_ = ContentBoundsPromise::kUnknown;
   int32_t required_mip_count_ = 1;

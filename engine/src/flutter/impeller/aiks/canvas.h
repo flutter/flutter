@@ -60,14 +60,6 @@ class Canvas {
  public:
   static constexpr uint32_t kMaxDepth = 1 << 24;
 
-  struct DebugOptions {
-    /// When enabled, layers that are rendered to an offscreen texture
-    /// internally get a translucent checkerboard pattern painted over them.
-    ///
-    /// Requires the `IMPELLER_DEBUG` preprocessor flag.
-    bool offscreen_texture_checkerboard = false;
-  } debug_options;
-
   Canvas();
 
   explicit Canvas(Rect cull_rect);
