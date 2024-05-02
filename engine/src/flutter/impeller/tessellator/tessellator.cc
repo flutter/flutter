@@ -7,8 +7,10 @@
 namespace impeller {
 
 Tessellator::Tessellator()
-    : point_buffer_(std::make_unique<std::vector<Point>>()) {
+    : point_buffer_(std::make_unique<std::vector<Point>>()),
+      index_buffer_(std::make_unique<std::vector<uint16_t>>()) {
   point_buffer_->reserve(2048);
+  index_buffer_->reserve(2048);
 }
 
 Tessellator::~Tessellator() = default;
@@ -25,67 +27,48 @@ Path::Polyline Tessellator::CreateTempPolyline(const Path& path,
   return polyline;
 }
 
-std::vector<Point> Tessellator::TessellateConvex(const Path& path,
-                                                 Scalar tolerance) {
+VertexBuffer Tessellator::TessellateConvex(const Path& path,
+                                           HostBuffer& host_buffer,
+                                           Scalar tolerance) {
   FML_DCHECK(point_buffer_);
+  FML_DCHECK(index_buffer_);
+  TessellateConvexInternal(path, *point_buffer_, *index_buffer_, tolerance);
 
-  std::vector<Point> output;
-  point_buffer_->clear();
-  auto polyline =
-      path.CreatePolyline(tolerance, std::move(point_buffer_),
-                          [this](Path::Polyline::PointBufferPtr point_buffer) {
-                            point_buffer_ = std::move(point_buffer);
-                          });
-  if (polyline.points->size() == 0) {
-    return output;
+  if (point_buffer_->empty()) {
+    return VertexBuffer{
+        .vertex_buffer = {},
+        .index_buffer = {},
+        .vertex_count = 0u,
+        .index_type = IndexType::k16bit,
+    };
   }
 
-  output.reserve(polyline.points->size() +
-                 (4 * (polyline.contours.size() - 1)));
-  bool previous_contour_odd_points = false;
-  for (auto j = 0u; j < polyline.contours.size(); j++) {
-    auto [start, end] = polyline.GetContourPointBounds(j);
-    auto first_point = polyline.GetPoint(start);
+  BufferView vertex_buffer = host_buffer.Emplace(
+      point_buffer_->data(), sizeof(Point) * point_buffer_->size(),
+      alignof(Point));
 
-    // Some polygons will not self close and an additional triangle
-    // must be inserted, others will self close and we need to avoid
-    // inserting an extra triangle.
-    if (polyline.GetPoint(end - 1) == first_point) {
-      end--;
-    }
+  BufferView index_buffer = host_buffer.Emplace(
+      index_buffer_->data(), sizeof(uint16_t) * index_buffer_->size(),
+      alignof(uint16_t));
 
-    if (j > 0) {
-      // Triangle strip break.
-      output.emplace_back(output.back());
-      output.emplace_back(first_point);
-      output.emplace_back(first_point);
+  return VertexBuffer{
+      .vertex_buffer = std::move(vertex_buffer),
+      .index_buffer = std::move(index_buffer),
+      .vertex_count = index_buffer_->size(),
+      .index_type = IndexType::k16bit,
+  };
+}
 
-      // If the contour has an odd number of points, insert an extra point when
-      // bridging to the next contour to preserve the correct triangle winding
-      // order.
-      if (previous_contour_odd_points) {
-        output.emplace_back(first_point);
-      }
-    } else {
-      output.emplace_back(first_point);
-    }
+void Tessellator::TessellateConvexInternal(const Path& path,
+                                           std::vector<Point>& point_buffer,
+                                           std::vector<uint16_t>& index_buffer,
+                                           Scalar tolerance) {
+  point_buffer.clear();
+  index_buffer.clear();
 
-    size_t a = start + 1;
-    size_t b = end - 1;
-    while (a < b) {
-      output.emplace_back(polyline.GetPoint(a));
-      output.emplace_back(polyline.GetPoint(b));
-      a++;
-      b--;
-    }
-    if (a == b) {
-      previous_contour_odd_points = false;
-      output.emplace_back(polyline.GetPoint(a));
-    } else {
-      previous_contour_odd_points = true;
-    }
-  }
-  return output;
+  VertexWriter writer(point_buffer, index_buffer);
+
+  path.WritePolyline(tolerance, writer);
 }
 
 static constexpr int kPrecomputedDivisionCount = 1024;

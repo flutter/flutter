@@ -32,7 +32,7 @@ static const TESSalloc kAlloc = {
 };
 
 TessellatorLibtess::TessellatorLibtess()
-    : Tessellator(), c_tessellator_(nullptr, &DestroyTessellator) {
+    : c_tessellator_(nullptr, &DestroyTessellator) {
   TESSalloc alloc = kAlloc;
   {
     // libTess2 copies the TESSalloc despite the non-const argument.
@@ -58,25 +58,22 @@ TessellatorLibtess::Result TessellatorLibtess::Tessellate(
     Scalar tolerance,
     const BuilderCallback& callback) {
   if (!callback) {
-    return Result::kInputError;
+    return TessellatorLibtess::Result::kInputError;
   }
 
-  point_buffer_->clear();
-  auto polyline =
-      path.CreatePolyline(tolerance, std::move(point_buffer_),
-                          [this](Path::Polyline::PointBufferPtr point_buffer) {
-                            point_buffer_ = std::move(point_buffer);
-                          });
+  std::unique_ptr<std::vector<Point>> point_buffer =
+      std::make_unique<std::vector<Point>>();
+  auto polyline = path.CreatePolyline(tolerance, std::move(point_buffer));
 
   auto fill_type = path.GetFillType();
 
   if (polyline.points->empty()) {
-    return Result::kInputError;
+    return TessellatorLibtess::Result::kInputError;
   }
 
   auto tessellator = c_tessellator_.get();
   if (!tessellator) {
-    return Result::kTessellationError;
+    return TessellatorLibtess::Result::kTessellationError;
   }
 
   constexpr int kVertexSize = 2;
@@ -112,7 +109,7 @@ TessellatorLibtess::Result TessellatorLibtess::Tessellate(
   );
 
   if (result != 1) {
-    return Result::kTessellationError;
+    return TessellatorLibtess::Result::kTessellationError;
   }
 
   int element_item_count = tessGetElementCount(tessellator) * kPolygonSize;
@@ -135,7 +132,7 @@ TessellatorLibtess::Result TessellatorLibtess::Tessellate(
     }
     if (!callback(vertices, vertex_item_count, indices.data(),
                   element_item_count)) {
-      return Result::kInputError;
+      return TessellatorLibtess::Result::kInputError;
     }
   } else {
     std::vector<Point> points;
@@ -156,11 +153,11 @@ TessellatorLibtess::Result TessellatorLibtess::Tessellate(
       data.emplace_back(points[elements[i]].y);
     }
     if (!callback(data.data(), element_item_count, nullptr, 0u)) {
-      return Result::kInputError;
+      return TessellatorLibtess::Result::kInputError;
     }
   }
 
-  return Result::kSuccess;
+  return TessellatorLibtess::Result::kSuccess;
 }
 
 void DestroyTessellator(TESStesselator* tessellator) {
