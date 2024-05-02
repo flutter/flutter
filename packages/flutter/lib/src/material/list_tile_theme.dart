@@ -478,10 +478,10 @@ class ListTileTheme extends InheritedTheme {
   /// [ListTileThemeData.enableFeedback] property instead.
   bool? get enableFeedback => _data != null ? _data.enableFeedback : _enableFeedback;
 
-  /// Overrides the default value of [ListTile.enableFeedback].
+  /// Overrides the default value of [ListTile.controlAffinity].
   ///
   /// This property is obsolete: please use the [data]
-  /// [ListTileThemeData.enableFeedback] property instead.
+  /// [ListTileThemeData.controlAffinity] property instead.
   ListTileControlAffinity? get controlAffinity => _data != null ? _data.controlAffinity : _controlAffinity;
 
   /// The [data] property of the closest instance of this class that
