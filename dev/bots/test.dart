@@ -238,7 +238,7 @@ Future<void> _runToolTests() async {
 }
 
 Future<void> _runSnippetsTests() async {
-  final String snippetsPath = path.join(flutterRoot, 'dev', 'docs', 'snippets');
+  final String snippetsPath = path.join(flutterRoot, 'dev', 'snippets');
   final List<String> allTests = Directory(path.join(snippetsPath, 'test'))
       .listSync(recursive: true).whereType<File>()
       .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))

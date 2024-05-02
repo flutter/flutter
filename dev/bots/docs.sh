@@ -108,8 +108,9 @@ function parse_args() {
 }
 
 function build_snippets() (
-  local afad_dir="$FLUTTER_ROOT/dev/docs/snippets"
+  local afad_dir="$FLUTTER_ROOT/dev/snippets"
   local output_dir="$FLUTTER_BIN/cache/artifacts/snippets"
+  echo "Building snippets tool executable."
   command cd "$afad_dir"
   mkdir -p "$output_dir"
   dart pub get
@@ -124,7 +125,7 @@ function generate_docs() {
 
     # Build and install the snippets tool, which resides in
     # the dev/docs/snippets directory.
-    build_snippets()
+    build_snippets
 
     # This script generates a unified doc set, and creates
     # a custom index.html, placing everything into DOC_DIR.
