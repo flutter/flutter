@@ -287,13 +287,11 @@ class _Shaker extends AnimatedWidget {
   double get translateX {
     const double shakeDelta = 4.0;
     final double t = animation.value;
-    if (t <= 0.25) {
-      return -t * shakeDelta;
-    } else if (t < 0.75) {
-      return (t - 0.5) * shakeDelta;
-    } else {
-      return (1.0 - t) * 4.0 * shakeDelta;
-    }
+    return shakeDelta * switch (t) {
+      <= 0.25 => -t,
+      <  0.75 => t - 0.5,
+      _ => (1.0 - t) * 4.0,
+    };
   }
 
   @override
@@ -1950,7 +1948,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getHoverColor(ThemeData themeData) {
-    if (decoration.filled == null || !decoration.filled! || isFocused || !decoration.enabled) {
+    if (decoration.filled == null || !decoration.filled! || !decoration.enabled) {
       return Colors.transparent;
     }
     return decoration.hoverColor ?? themeData.inputDecorationTheme.hoverColor ?? themeData.hoverColor;
@@ -2783,8 +2781,7 @@ class InputDecoration {
 
   /// The maximum number of lines the [helperText] can occupy.
   ///
-  /// Defaults to null, which means that the [helperText] will be limited
-  /// to a single line with [TextOverflow.ellipsis].
+  /// Defaults to null, which means that the [helperText] is not limited.
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the helper.
@@ -2873,8 +2870,7 @@ class InputDecoration {
 
   /// The maximum number of lines the [errorText] can occupy.
   ///
-  /// Defaults to null, which means that the [errorText] will be limited
-  /// to a single line with [TextOverflow.ellipsis].
+  /// Defaults to null, which means that the [errorText] is not limited.
   ///
   /// This value is passed along to the [Text.maxLines] attribute
   /// of the [Text] widget used to display the error.
