@@ -3,25 +3,32 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/banner/material_banner.0.dart'
+import 'package:flutter_api_samples/material/banner/material_banner.1.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('shows all elements', (WidgetTester tester) async {
+  testWidgets('shows all elements when needed', (WidgetTester tester) async {
     await tester.pumpWidget(const example.MaterialBannerExampleApp());
-    expect(find.byType(MaterialBanner), findsOneWidget);
-    expect(find.byType(AppBar), findsOneWidget);
-    expect(find.byType(TextButton), findsNWidgets(2));
-    expect(find.text('Hello, I am a Material Banner'), findsOneWidget);
+    await tester.pumpAndSettle();
     expect(find.text('The MaterialBanner is below'), findsOneWidget);
-    expect(find.text('OPEN'), findsOneWidget);
+    expect(find.text('Show MaterialBanner'), findsOneWidget);
+    expect(find.byType(MaterialBanner), findsNothing);
+    expect(find.text('DISMISS'), findsNothing);
+    expect(find.byIcon(Icons.agriculture_outlined), findsNothing);
+
+    await tester.tap(find.text('Show MaterialBanner'));
+    await tester.pumpAndSettle();
+    expect(find.byType(MaterialBanner), findsOneWidget);
     expect(find.text('DISMISS'), findsOneWidget);
     expect(find.byIcon(Icons.agriculture_outlined), findsOneWidget);
   });
 
   testWidgets('the banner is below the text saying so', (WidgetTester tester) async {
     await tester.pumpWidget(const example.MaterialBannerExampleApp());
+    await tester.tap(find.text('Show MaterialBanner'));
+    await tester.pumpAndSettle();
+
     expect(find.byType(MaterialBanner), findsOneWidget);
     expect(find.text('The MaterialBanner is below'), findsOneWidget);
     final double bannerY = tester.getCenter(find.byType(MaterialBanner)).dy;
