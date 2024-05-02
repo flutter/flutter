@@ -143,11 +143,6 @@ class WebTestsSuite {
       ],
 
       // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
-      () => _runWebE2eTest('platform_messages_integration', buildMode: 'debug', renderer: 'canvaskit'),
-      () => _runWebE2eTest('platform_messages_integration', buildMode: 'profile', renderer: 'html'),
-      () => _runWebE2eTest('platform_messages_integration', buildMode: 'release', renderer: 'html'),
-
-      // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
       () => _runWebE2eTest('profile_diagnostics_integration', buildMode: 'debug', renderer: 'html'),
       () => _runWebE2eTest('profile_diagnostics_integration', buildMode: 'profile', renderer: 'canvaskit'),
       () => _runWebE2eTest('profile_diagnostics_integration', buildMode: 'release', renderer: 'html'),
@@ -737,7 +732,7 @@ class WebTestsSuite {
         // and it doesn't use most of startCommand's features; we could simplify this a lot by
         // inlining the relevant parts of startCommand here.
         'chromedriver',
-        <String>['--port=4444'],
+        <String>['--port=4444', '--log-level=INFO', '--enable-chrome-logs'],
       );
       while (!await _isChromeDriverRunning()) {
         await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -749,7 +744,8 @@ class WebTestsSuite {
     final Uri chromeDriverUrl = Uri.parse('http://localhost:4444/status');
     final HttpClientRequest request = await client.getUrl(chromeDriverUrl);
     final HttpClientResponse response = await request.close();
-    final Map<String, dynamic> webDriverStatus = json.decode(await response.transform(utf8.decoder).join()) as Map<String, dynamic>;
+    final String responseString = await response.transform(utf8.decoder).join();
+    final Map<String, dynamic> webDriverStatus = json.decode(responseString) as Map<String, dynamic>;
     client.close();
     final bool webDriverReady = (webDriverStatus['value'] as Map<String, dynamic>)['ready'] as bool;
     if (!webDriverReady) {
