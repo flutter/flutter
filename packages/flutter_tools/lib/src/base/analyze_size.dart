@@ -469,18 +469,15 @@ class _SymbolNode {
   }
 
   Map<String, Object?> toJson() {
-    final Map<String, Object?> json = <String, Object?>{
+    final List<Map<String, Object?>> childrenAsJson = <Map<String, Object?>>[
+      for (final _SymbolNode child in children) child.toJson(),
+    ];
+
+    return <String, Object?>{
       'n': name,
       'value': byteSize,
+      if (childrenAsJson.isNotEmpty) 'children': childrenAsJson,
     };
-    final List<Map<String, Object?>> childrenAsJson = <Map<String, Object?>>[];
-    for (final _SymbolNode child in children) {
-      childrenAsJson.add(child.toJson());
-    }
-    if (childrenAsJson.isNotEmpty) {
-      json['children'] = childrenAsJson;
-    }
-    return json;
   }
 }
 

@@ -188,15 +188,10 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
     if (text == null || text.isEmpty) {
       return <Device>[];
     }
-    final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
-    for (final String line in text) {
-      final FuchsiaDevice? device = await _parseDevice(line);
-      if (device == null) {
-        continue;
-      }
-      devices.add(device);
-    }
-    return devices;
+    return <FuchsiaDevice>[
+      for (final String line in text)
+        if (await _parseDevice(line) case final FuchsiaDevice device) device,
+    ];
   }
 
   @override
