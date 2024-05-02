@@ -3503,7 +3503,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
       } else {
         final double fraction = debugAsymmetricPaintCount / totalPaints;
         final String diagnosis = switch (fraction) {
-          _ when totalPaints < 5 => 'insufficient data to draw conclusion (fewer than five repaints)',
+          _ when totalPaints < 5 => 'insufficient data to draw conclusion (less than five repaints)',
           > 0.9 => 'this is an outstandingly useful repaint boundary and should definitely be kept',
           > 0.5 => 'this is a useful repaint boundary and should be kept',
           > 0.3 => 'this repaint boundary is probably useful, but maybe it would be more useful in tandem with adding more repaint boundaries elsewhere',

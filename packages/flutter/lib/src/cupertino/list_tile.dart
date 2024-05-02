@@ -252,30 +252,19 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
   @override
   Widget build(BuildContext context) {
     final TextStyle textStyle = CupertinoTheme.of(context).textTheme.textStyle;
-    final CupertinoDynamicColor color = CupertinoColors.secondaryLabel.resolveFrom(context);
+    final TextStyle coloredStyle = textStyle.copyWith(
+      color: CupertinoColors.secondaryLabel.resolveFrom(context),
+    );
 
-    final TextStyle titleTextStyle = switch (widget._type) {
-      _CupertinoListTileType.notched when widget.subtitle != null => textStyle.merge(TextStyle(
+    final bool baseType = switch (widget._type) {
+      _CupertinoListTileType.base    => true,
+      _CupertinoListTileType.notched => false,
+    };
+    final Widget title = DefaultTextStyle(
+      style: baseType || widget.subtitle == null ? textStyle : textStyle.copyWith(
         fontWeight: FontWeight.w600,
         fontSize: widget.leading == null ? _kNotchedTitleWithSubtitleFontSize : null,
-      )),
-      _CupertinoListTileType.base || _CupertinoListTileType.notched => textStyle,
-    };
-
-    final TextStyle subtitleTextStyle = textStyle.merge(TextStyle(
-      fontSize: switch (widget._type) {
-        _CupertinoListTileType.base => _kSubtitleFontSize,
-        _CupertinoListTileType.notched => _kNotchedSubtitleFontSize,
-      },
-      color: color,
-    ));
-
-    final TextStyle? additionalInfoTextStyle = widget.additionalInfo != null
-        ? textStyle.merge(TextStyle(color: color))
-        : null;
-
-    final Widget title = DefaultTextStyle(
-      style: titleTextStyle,
+      ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       child: widget.title,
@@ -288,25 +277,6 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
       _CupertinoListTileType.notched => _kNotchedPaddingWithoutLeading,
     };
 
-    Widget? subtitle;
-    if (widget.subtitle != null) {
-      subtitle = DefaultTextStyle(
-        style: subtitleTextStyle,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        child: widget.subtitle!,
-      );
-    }
-
-    Widget? additionalInfo;
-    if (widget.additionalInfo != null) {
-      additionalInfo = DefaultTextStyle(
-        style: additionalInfoTextStyle!,
-        maxLines: 1,
-        child: widget.additionalInfo!,
-      );
-    }
-
     // The color for default state tile is set to either what user provided or
     // null and it will resolve to the correct color provided by context. But if
     // the tile was tapped, it is set to what user provided or if null to the
@@ -317,7 +287,7 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
     }
 
     final double minHeight = switch (widget._type) {
-      _CupertinoListTileType.base when subtitle != null => _kMinHeightWithSubtitle,
+      _CupertinoListTileType.base when widget.subtitle != null => _kMinHeightWithSubtitle,
       _CupertinoListTileType.notched when widget.leading != null => _kNotchedMinHeight,
       _CupertinoListTileType.base => _kMinHeight,
       _CupertinoListTileType.notched => _kNotchedMinHeightWithoutLeading,
@@ -330,13 +300,10 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
         padding: padding,
         child: Row(
           children: <Widget>[
-            if (widget.leading != null) ...<Widget>[
-              SizedBox(
-                width: widget.leadingSize,
-                height: widget.leadingSize,
-                child: Center(
-                  child: widget.leading,
-                ),
+            if (widget.leading case final Widget leading) ...<Widget>[
+              SizedBox.square(
+                dimension: widget.leadingSize,
+                child: Center(child: leading),
               ),
               SizedBox(width: widget.leadingToTitle),
             ] else
@@ -347,15 +314,28 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   title,
-                  if (subtitle != null) ...<Widget>[
+                  if (widget.subtitle case final Widget subtitle) ...<Widget>[
                     const SizedBox(height: _kNotchedTitleToSubtitle),
-                    subtitle,
+                    DefaultTextStyle(
+                      style: coloredStyle.copyWith(
+                        fontSize: baseType
+                            ? _kSubtitleFontSize
+                            : _kNotchedSubtitleFontSize,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      child: subtitle,
+                    ),
                   ],
                 ],
               ),
             ),
-            if (additionalInfo != null) ...<Widget>[
-              additionalInfo,
+            if (widget.additionalInfo case final Widget additionalInfo) ...<Widget>[
+              DefaultTextStyle(
+                style: coloredStyle,
+                maxLines: 1,
+                child: additionalInfo,
+              ),
               if (widget.trailing != null)
                 const SizedBox(width: _kAdditionalInfoToTrailing),
             ],
