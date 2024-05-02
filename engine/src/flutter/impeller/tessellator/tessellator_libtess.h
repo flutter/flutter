@@ -9,7 +9,6 @@
 #include <memory>
 
 #include "impeller/geometry/path.h"
-#include "impeller/tessellator/tessellator.h"
 
 struct TESStesselator;
 
@@ -27,11 +26,17 @@ using CTessellator =
 ///             This object is not thread safe, and its methods must not be
 ///             called from multiple threads.
 ///
-class TessellatorLibtess : public Tessellator {
+class TessellatorLibtess {
  public:
   TessellatorLibtess();
 
   ~TessellatorLibtess();
+
+  enum class Result {
+    kSuccess,
+    kInputError,
+    kTessellationError,
+  };
 
   /// @brief A callback that returns the results of the tessellation.
   ///
@@ -55,9 +60,9 @@ class TessellatorLibtess : public Tessellator {
   ///
   /// @return The result status of the tessellation.
   ///
-  Tessellator::Result Tessellate(const Path& path,
-                                 Scalar tolerance,
-                                 const BuilderCallback& callback);
+  TessellatorLibtess::Result Tessellate(const Path& path,
+                                        Scalar tolerance,
+                                        const BuilderCallback& callback);
 
  private:
   CTessellator c_tessellator_;

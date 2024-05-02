@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "impeller/geometry/path_component.h"
+#include "impeller/geometry/rect.h"
 
 namespace impeller {
 
@@ -171,6 +172,13 @@ class Path {
   std::optional<Rect> GetBoundingBox() const;
 
   std::optional<Rect> GetTransformedBoundingBox(const Matrix& transform) const;
+
+  /// Generate a polyline into the temporary storage held by the [writer].
+  ///
+  /// It is suitable to use the max basis length of the matrix used to transform
+  /// the path. If the provided scale is 0, curves will revert to straight
+  /// lines.
+  void WritePolyline(Scalar scale, VertexWriter& writer) const;
 
  private:
   friend class PathBuilder;

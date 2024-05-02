@@ -9,7 +9,6 @@
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
-#include "impeller/tessellator/tessellator.h"
 #include "impeller/tessellator/tessellator_libtess.h"
 
 namespace impeller {
@@ -44,39 +43,22 @@ template <class... Args>
 static void BM_Polyline(benchmark::State& state, Args&&... args) {
   auto args_tuple = std::make_tuple(std::move(args)...);
   auto path = std::get<Path>(args_tuple);
-  bool tessellate = std::get<bool>(args_tuple);
 
   size_t point_count = 0u;
   size_t single_point_count = 0u;
   auto points = std::make_unique<std::vector<Point>>();
   points->reserve(2048);
   while (state.KeepRunning()) {
-    if (tessellate) {
-      tess.Tessellate(path, 1.0f,
-                      [&point_count, &single_point_count](
-                          const float* vertices, size_t vertices_count,
-                          const uint16_t* indices, size_t indices_count) {
-                        if (indices_count > 0) {
-                          single_point_count = indices_count;
-                          point_count += indices_count;
-                        } else {
-                          single_point_count = vertices_count;
-                          point_count += vertices_count;
-                        }
-                        return true;
-                      });
-    } else {
-      auto polyline = path.CreatePolyline(
-          // Clang-tidy doesn't know that the points get moved back before
-          // getting moved again in this loop.
-          // NOLINTNEXTLINE(clang-analyzer-cplusplus.Move)
-          1.0f, std::move(points),
-          [&points](Path::Polyline::PointBufferPtr reclaimed) {
-            points = std::move(reclaimed);
-          });
-      single_point_count = polyline.points->size();
-      point_count += single_point_count;
-    }
+    auto polyline = path.CreatePolyline(
+        // Clang-tidy doesn't know that the points get moved back before
+        // getting moved again in this loop.
+        // NOLINTNEXTLINE(clang-analyzer-cplusplus.Move)
+        1.0f, std::move(points),
+        [&points](Path::Polyline::PointBufferPtr reclaimed) {
+          points = std::move(reclaimed);
+        });
+    single_point_count = polyline.points->size();
+    point_count += single_point_count;
   }
   state.counters["SinglePointCount"] = single_point_count;
   state.counters["TotalPointCount"] = point_count;
@@ -121,11 +103,14 @@ static void BM_Convex(benchmark::State& state, Args&&... args) {
   size_t point_count = 0u;
   size_t single_point_count = 0u;
   auto points = std::make_unique<std::vector<Point>>();
+  auto indices = std::make_unique<std::vector<uint16_t>>();
   points->reserve(2048);
   while (state.KeepRunning()) {
-    auto points = tess.TessellateConvex(path, 1.0f);
-    single_point_count = points.size();
-    point_count += points.size();
+    points->clear();
+    indices->clear();
+    Tessellator::TessellateConvexInternal(path, *points, *indices, 1.0f);
+    single_point_count = indices->size();
+    point_count += indices->size();
   }
   state.counters["SinglePointCount"] = single_point_count;
   state.counters["TotalPointCount"] = point_count;
@@ -143,14 +128,12 @@ static void BM_Convex(benchmark::State& state, Args&&... args) {
   MAKE_STROKE_BENCHMARK_CAPTURE(path, Round, Bevel, false, uvname, uvtype)
 
 BENCHMARK_CAPTURE(BM_Polyline, cubic_polyline, CreateCubic(true), false);
-BENCHMARK_CAPTURE(BM_Polyline, cubic_polyline_tess, CreateCubic(true), true);
 BENCHMARK_CAPTURE(BM_Polyline,
                   unclosed_cubic_polyline,
                   CreateCubic(false),
                   false);
 
 BENCHMARK_CAPTURE(BM_Polyline, quad_polyline, CreateQuadratic(true), false);
-BENCHMARK_CAPTURE(BM_Polyline, quad_polyline_tess, CreateQuadratic(true), true);
 BENCHMARK_CAPTURE(BM_Polyline,
                   unclosed_quad_polyline,
                   CreateQuadratic(false),

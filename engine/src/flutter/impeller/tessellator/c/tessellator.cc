@@ -59,7 +59,7 @@ struct Vertices* Tessellate(PathBuilder* builder,
               points.push_back(point.y);
             }
             return true;
-          }) != Tessellator::Result::kSuccess) {
+          }) != TessellatorLibtess::Result::kSuccess) {
     return nullptr;
   }
 

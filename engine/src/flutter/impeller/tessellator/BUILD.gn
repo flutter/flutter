@@ -27,7 +27,6 @@ impeller_component("tessellator_libtess") {
   public_deps = [ "../geometry" ]
 
   deps = [
-    ":tessellator",
     "../core",
     "//flutter/fml",
     "//third_party/libtess2",
@@ -48,7 +47,6 @@ impeller_component("tessellator_shared") {
   ]
 
   deps = [
-    ":tessellator",
     ":tessellator_libtess",
     "../core",
     "../geometry",

@@ -10,6 +10,8 @@
 #include <vector>
 
 #include "impeller/core/formats.h"
+#include "impeller/core/host_buffer.h"
+#include "impeller/core/vertex_buffer.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/trig.h"
@@ -180,7 +182,21 @@ class Tessellator {
   ///
   /// @return A point vector containing the vertices in triangle strip format.
   ///
-  std::vector<Point> TessellateConvex(const Path& path, Scalar tolerance);
+  /// @param[in]  host_buffer  The host buffer for allocation of vertices/index
+  ///                          data.
+  /// @return A vertex buffer containing all data from the provided curve.
+  VertexBuffer TessellateConvex(const Path& path,
+                                HostBuffer& host_buffer,
+                                Scalar tolerance);
+
+  /// Visible for testing.
+  ///
+  /// This method only exists for the ease of benchmarking without using the
+  /// real allocator needed by the [host_buffer].
+  static void TessellateConvexInternal(const Path& path,
+                                       std::vector<Point>& point_buffer,
+                                       std::vector<uint16_t>& index_buffer,
+                                       Scalar tolerance);
 
   //----------------------------------------------------------------------------
   /// @brief      Create a temporary polyline. Only one per-process can exist at
@@ -269,9 +285,10 @@ class Tessellator {
  protected:
   /// Used for polyline generation.
   std::unique_ptr<std::vector<Point>> point_buffer_;
+  std::unique_ptr<std::vector<uint16_t>> index_buffer_;
 
  private:
-  // Data for variouos Circle/EllipseGenerator classes, cached per
+  // Data for various Circle/EllipseGenerator classes, cached per
   // Tessellator instance which is usually the foreground life of an app
   // if not longer.
   static constexpr size_t kCachedTrigCount = 300;
