@@ -30,6 +30,9 @@ void main() {
     });
 
     final SystemContextMenuController controller = SystemContextMenuController();
+    addTearDown(() {
+      controller.dispose();
+    });
 
     expect(targetRects, isEmpty);
     expect(hideCount, 0);
@@ -78,10 +81,16 @@ void main() {
 
   test('showing a second controller while one is visible is an error', () {
     final SystemContextMenuController controller1 = SystemContextMenuController();
+    addTearDown(() {
+      controller1.dispose();
+    });
     const Rect rect1 = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
     expect(() { controller1.show(rect1); }, isNot(throwsAssertionError));
 
     final SystemContextMenuController controller2 = SystemContextMenuController();
+    addTearDown(() {
+      controller2.dispose();
+    });
     const Rect rect2 = Rect.fromLTWH(1.0, 1.0, 200.0, 200.0);
     expect(() { controller2.show(rect2); }, throwsAssertionError);
 
@@ -112,6 +121,9 @@ void main() {
     });
 
     final SystemContextMenuController controller1 = SystemContextMenuController();
+    addTearDown(() {
+      controller1.dispose();
+    });
 
     expect(targetRects, isEmpty);
     expect(hideCount, 0);
@@ -128,6 +140,9 @@ void main() {
 
     // Showing a new controller calls the platform.
     final SystemContextMenuController controller2 = SystemContextMenuController();
+    addTearDown(() {
+      controller2.dispose();
+    });
     const Rect rect2 = Rect.fromLTWH(1.0, 1.0, 200.0, 200.0);
     controller2.show(rect2);
     expect(targetRects, hasLength(2));
@@ -135,6 +150,10 @@ void main() {
     expect(targetRects.last['y'], rect2.top);
     expect(targetRects.last['width'], rect2.width);
     expect(targetRects.last['height'], rect2.height);
+
+    // Hiding the old controller does nothing.
+    controller1.hide();
+    expect(hideCount, 1);
 
     // Hiding the new controller calls the platform.
     controller2.hide();
