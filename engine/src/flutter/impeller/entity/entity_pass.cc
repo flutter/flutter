@@ -28,10 +28,6 @@
 #include "impeller/geometry/size.h"
 #include "impeller/renderer/command_buffer.h"
 
-#ifdef IMPELLER_DEBUG
-#include "impeller/entity/contents/checkerboard_contents.h"
-#endif  // IMPELLER_DEBUG
-
 namespace impeller {
 
 namespace {
@@ -1003,31 +999,6 @@ bool EntityPass::OnRender(
     }
   }
 
-#ifdef IMPELLER_DEBUG
-  //--------------------------------------------------------------------------
-  /// Draw debug checkerboard over offscreen textures.
-  ///
-
-  // When the pass depth is > 0, this EntityPass is being rendered to an
-  // offscreen texture.
-  if (enable_offscreen_debug_checkerboard_ &&
-      !collapsed_parent_pass.has_value() && pass_depth > 0) {
-    auto result = pass_context.GetRenderPass(pass_depth);
-    if (!result.pass) {
-      // Failure to produce a render pass should be explained by specific errors
-      // in `InlinePassContext::GetRenderPass()`.
-      return false;
-    }
-    auto checkerboard = CheckerboardContents();
-    auto color = ColorHSB(0,                                    // hue
-                          1,                                    // saturation
-                          std::max(0.0, 0.6 - pass_depth / 5),  // brightness
-                          0.25);                                // alpha
-    checkerboard.SetColor(Color(color));
-    checkerboard.Render(renderer, {}, *result.pass);
-  }
-#endif
-
   return true;
 }
 
@@ -1188,10 +1159,6 @@ void EntityPass::SetBackdropFilter(BackdropFilterProc proc) {
   }
 
   backdrop_filter_proc_ = std::move(proc);
-}
-
-void EntityPass::SetEnableOffscreenCheckerboard(bool enabled) {
-  enable_offscreen_debug_checkerboard_ = enabled;
 }
 
 }  // namespace impeller

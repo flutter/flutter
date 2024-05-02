@@ -57,15 +57,7 @@ class ShaderStageCompatibilityChecker {
 // The following shaders don't define output slots.
 // TODO(https://github.com/flutter/flutter/issues/146852): Make impellerc emit
 // an empty array for output slots.
-struct CheckerboardVertexShader;
 struct ClipVertexShader;
-
-template <typename FragmentShaderT>
-class ShaderStageCompatibilityChecker<CheckerboardVertexShader,
-                                      FragmentShaderT> {
- public:
-  static constexpr bool Check() { return true; }
-};
 
 template <typename FragmentShaderT>
 class ShaderStageCompatibilityChecker<ClipVertexShader, FragmentShaderT> {

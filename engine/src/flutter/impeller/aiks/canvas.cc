@@ -227,8 +227,6 @@ void Canvas::Save(bool create_subpass,
   if (create_subpass) {
     entry.rendering_mode = Entity::RenderingMode::kSubpass;
     auto subpass = std::make_unique<EntityPass>();
-    subpass->SetEnableOffscreenCheckerboard(
-        debug_options.offscreen_texture_checkerboard);
     if (backdrop_filter) {
       EntityPass::BackdropFilterProc backdrop_filter_proc =
           [backdrop_filter = backdrop_filter->Clone()](

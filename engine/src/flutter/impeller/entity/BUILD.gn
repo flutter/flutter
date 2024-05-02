@@ -49,13 +49,6 @@ impeller_shaders("entity_shaders") {
     "shaders/filters/morphology_filter.frag",
     "shaders/blending/vertices_uber.frag",
   ]
-
-  if (impeller_debug) {
-    shaders += [
-      "shaders/debug/checkerboard.frag",
-      "shaders/debug/checkerboard.vert",
-    ]
-  }
 }
 
 impeller_shaders("modern_entity_shaders") {
@@ -208,13 +201,6 @@ impeller_component("entity") {
     "render_target_cache.h",
   ]
 
-  if (impeller_debug) {
-    sources += [
-      "contents/checkerboard_contents.cc",
-      "contents/checkerboard_contents.h",
-    ]
-  }
-
   public_deps = [
     ":entity_shaders",
     ":framebuffer_blend_entity_shaders",
@@ -252,7 +238,6 @@ impeller_component("entity_unittests") {
   testonly = true
 
   sources = [
-    "contents/checkerboard_contents_unittests.cc",
     "contents/clip_contents_unittests.cc",
     "contents/content_context_unittests.cc",
     "contents/filters/gaussian_blur_filter_contents_unittests.cc",
