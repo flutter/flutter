@@ -17,9 +17,11 @@ namespace impeller {
 
 //------------------------------------------------------------------------------
 /// The maximum number of presents pending in the compositor after which the
-/// acquire calls will block.
+/// acquire calls will block. This value is 2 images given to the system
+/// compositor and one for the raster thread, Because the semaphore is acquired
+/// when the CPU Begins working on the texture
 ///
-static constexpr const size_t kMaxPendingPresents = 2u;
+static constexpr const size_t kMaxPendingPresents = 3u;
 
 static TextureDescriptor ToSwapchainTextureDescriptor(
     const android::HardwareBufferDescriptor& ahb_desc) {
