@@ -391,6 +391,7 @@ class FlutterDevice {
       logger: globals.logger,
       processManager: globals.processManager,
       artifacts: globals.artifacts!,
+      buildMode: buildInfo.mode,
     );
     return devFS!.create();
   }
@@ -572,6 +573,7 @@ class FlutterDevice {
   }) async {
     final Status devFSStatus = globals.logger.startProgress(
       'Syncing files to device ${device!.name}...',
+      progressId: 'devFS.update',
     );
     UpdateFSReport report;
     try {
@@ -1181,10 +1183,10 @@ abstract class ResidentRunner extends ResidentHandlers {
   bool get debuggingEnabled => debuggingOptions.debuggingEnabled;
 
   @override
-  bool get isRunningDebug => debuggingOptions.buildInfo.isDebug;
+  bool get isRunningDebug => !debuggingOptions.webUseWasm && debuggingOptions.buildInfo.isDebug;
 
   @override
-  bool get isRunningProfile => debuggingOptions.buildInfo.isProfile;
+  bool get isRunningProfile => !debuggingOptions.webUseWasm && debuggingOptions.buildInfo.isProfile;
 
   @override
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
@@ -1450,17 +1452,12 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   Future<void> enableObservatory() async {
     assert(debuggingOptions.serveObservatory);
-    final List<Future<vm_service.Response?>> serveObservatoryRequests = <Future<vm_service.Response?>>[];
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device == null) {
-        continue;
-      }
-      // Notify the VM service if the user wants Observatory to be served.
-      serveObservatoryRequests.add(
-        device.vmService?.callMethodWrapper('_serveObservatory') ??
-          Future<vm_service.Response?>.value(),
-      );
-    }
+    final List<Future<vm_service.Response?>> serveObservatoryRequests = <Future<vm_service.Response?>>[
+      for (final FlutterDevice? device in flutterDevices)
+        if (device != null)
+          // Notify the VM service if the user wants Observatory to be served.
+          device.vmService?.callMethodWrapper('_serveObservatory') ?? Future<vm_service.Response?>.value(),
+    ];
     try {
       await Future.wait(serveObservatoryRequests);
     } on vm_service.RPCError catch (e) {

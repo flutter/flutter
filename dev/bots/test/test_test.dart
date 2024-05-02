@@ -10,7 +10,7 @@ import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
 import '../suite_runners/run_flutter_packages_tests.dart';
-import '../test.dart';
+import '../utils.dart';
 import 'common.dart';
 
 /// Fails a test if the exit code of `result` is not the expected value. This
