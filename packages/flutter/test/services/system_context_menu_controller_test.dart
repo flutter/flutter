@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+
   testWidgets('showing and hiding one controller', (WidgetTester tester) async {
     final List<Map<String, double>> targetRects = <Map<String, double>>[];
     int hideCount = 0;
@@ -77,6 +79,69 @@ void main() {
 
     controller.hide();
     expect(hideCount, 2);
+  });
+
+  testWidgets('the system can hide the menu with handleSystemHide', (WidgetTester tester) async {
+    final List<Map<String, double>> targetRects = <Map<String, double>>[];
+    int hideCount = 0;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+        switch (methodCall.method) {
+          case 'ContextMenu.showSystemContextMenu':
+            final Map<String, dynamic> arguments = methodCall.arguments as Map<String, dynamic>;
+            final Map<String, dynamic> untypedTargetRect = arguments['targetRect'] as Map<String, dynamic>;
+            final Map<String, double> lastTargetRect = untypedTargetRect.map((String key, dynamic value) {
+              return MapEntry<String, double>(key, value as double);
+            });
+            targetRects.add(lastTargetRect);
+          case 'ContextMenu.hideSystemContextMenu':
+            hideCount += 1;
+        }
+        return;
+      });
+    addTearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, null);
+    });
+
+    int systemHideCount = 0;
+    final SystemContextMenuController controller = SystemContextMenuController(
+      onSystemHide: () {
+        systemHideCount += 1;
+      },
+    );
+    addTearDown(() {
+      controller.dispose();
+    });
+
+    expect(targetRects, isEmpty);
+    expect(hideCount, 0);
+    expect(systemHideCount, 0);
+
+    // Showing calls the platform.
+    const Rect rect1 = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
+    controller.show(rect1);
+    expect(targetRects, hasLength(1));
+    expect(targetRects.last['x'], rect1.left);
+    expect(targetRects.last['y'], rect1.top);
+    expect(targetRects.last['width'], rect1.width);
+    expect(targetRects.last['height'], rect1.height);
+
+    // If the system hides the menu, onSystemHide is called.
+    final ByteData? messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      'method': 'ContextMenu.onDismissSystemContextMenu',
+    });
+    await binding.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/platform',
+      messageBytes,
+      (ByteData? data) {},
+    );
+    expect(hideCount, 0);
+    expect(systemHideCount, 1);
+
+    // Hiding does not call the platform, since the menu was already hidden.
+    controller.hide();
+    expect(hideCount, 0);
   });
 
   test('showing a second controller while one is visible is an error', () {
