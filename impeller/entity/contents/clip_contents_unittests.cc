@@ -7,7 +7,6 @@
 
 #include "gtest/gtest.h"
 
-#include "impeller/entity/contents/checkerboard_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/contents.h"
