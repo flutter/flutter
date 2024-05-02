@@ -651,14 +651,10 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   }
 
   // Platform or null affinity defaults to trailing.
-  ListTileControlAffinity _effectiveAffinity(ListTileControlAffinity? affinity) {
-    switch (affinity ?? ListTileControlAffinity.trailing) {
-      case ListTileControlAffinity.leading:
-        return ListTileControlAffinity.leading;
-      case ListTileControlAffinity.trailing:
-      case ListTileControlAffinity.platform:
-        return ListTileControlAffinity.trailing;
-    }
+  ListTileControlAffinity _getEffectiveAffinity() {
+    final ListTileControlAffinity affinity =
+        widget.controlAffinity ?? ListTileTheme.of(context).controlAffinity ?? ListTileControlAffinity.trailing;
+    return affinity == ListTileControlAffinity.platform ? ListTileControlAffinity.trailing : affinity;
   }
 
   Widget? _buildIcon(BuildContext context) {
@@ -669,14 +665,14 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   }
 
   Widget? _buildLeadingIcon(BuildContext context) {
-    if (_effectiveAffinity(widget.controlAffinity ?? ListTileTheme.of(context).controlAffinity) != ListTileControlAffinity.leading) {
+    if (_getEffectiveAffinity() != ListTileControlAffinity.leading) {
       return null;
     }
     return _buildIcon(context);
   }
 
   Widget? _buildTrailingIcon(BuildContext context) {
-    if (_effectiveAffinity(widget.controlAffinity ?? ListTileTheme.of(context).controlAffinity) != ListTileControlAffinity.trailing) {
+    if (_getEffectiveAffinity() != ListTileControlAffinity.trailing) {
       return null;
     }
     return _buildIcon(context);
