@@ -157,7 +157,6 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
     this.onSelected,
     this.textEditingController,
     this.initialValue,
-    this.shouldReloadOptionsView,
   }) : assert(
          fieldViewBuilder != null
             || (key != null && focusNode != null && textEditingController != null),
@@ -270,9 +269,6 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// This parameter is ignored if [textEditingController] is defined.
   final TextEditingValue? initialValue;
 
-  /// If the options view overlay should be shown depending on the text editing value.
-  final bool Function(TextEditingValue, FutureStatus)? shouldReloadOptionsView;
-
   /// Calls [AutocompleteFieldViewBuilder]'s onFieldSubmitted callback for the
   /// RawAutocomplete widget indicated by the given [GlobalKey].
   ///
@@ -344,9 +340,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     SingleActivator(LogicalKeyboardKey.arrowDown): AutocompleteNextOptionIntent(),
   };
 
-  FutureStatus _optionsBuilderStatus = FutureStatus.notStarted;
-  bool get _canShowOptionsView => _focusNode.hasFocus && _selection == null &&
-  (_options.isNotEmpty || (widget.shouldReloadOptionsView != null && widget.shouldReloadOptionsView!(_textEditingController.value, _optionsBuilderStatus)));
+  bool get _canShowOptionsView => _focusNode.hasFocus && _selection == null && _options.isNotEmpty;
 
   void _updateOptionsViewVisibility() {
     if (_canShowOptionsView) {
@@ -359,28 +353,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   // Called when _textEditingController changes.
   Future<void> _onChangedField() async {
     final TextEditingValue value = _textEditingController.value;
-    final FutureOr<Iterable<T>> options = widget.optionsBuilder(value);
-
-    if (options is Future){
-      _optionsBuilderStatus = FutureStatus.loading;
-
-      if (widget.shouldReloadOptionsView != null && widget.shouldReloadOptionsView!(value, _optionsBuilderStatus)){
-        _updateOptionsViewVisibility();
-      }
-
-      (options as Future<Iterable<T>>).then((Iterable<T> optionsFuture){
-        _optionsBuilderStatus = FutureStatus.finished;
-        _options = optionsFuture;
-        afterOptions(value);
-      });
-    }
-    else{
-      _options = options;
-      afterOptions(value);
-    }
-  }
-
-  void afterOptions(TextEditingValue value) {
+    final Iterable<T> options = await widget.optionsBuilder(value);
+    _options = options;
     _updateHighlight(_highlightedOptionIndex.value);
     final T? selection = _selection;
     if (selection != null && value.text != widget.displayStringForOption(selection)) {
@@ -606,13 +580,3 @@ class AutocompleteHighlightedOption extends InheritedNotifier<ValueNotifier<int>
     return context.dependOnInheritedWidgetOfExactType<AutocompleteHighlightedOption>()?.notifier?.value ?? 0;
   }
 }
-
-  /// Defines the status of the optionsBuilder future.
-  enum FutureStatus {
-    /// if the optionsBuilder future has not been triggered.
-    notStarted,
-    /// if the optionsBuilder future is in the process of being resolved.
-    loading,
-    /// if the optionsBuilder future resolves successfully or with an error.
-    finished
-    }

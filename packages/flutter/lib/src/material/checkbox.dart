@@ -102,16 +102,8 @@ class Checkbox extends StatefulWidget {
   /// or macOS, following Material design's
   /// [Cross-platform guidelines](https://material.io/design/platform-guidance/cross-platform-adaptation.html).
   ///
-  /// On iOS and macOS, this constructor creates a [CupertinoCheckbox], which has
-  /// matching functionality and presentation as Material checkboxes, and are the
-  /// graphics expected on iOS. On other platforms, this creates a Material
-  /// design [Checkbox].
-  ///
-  /// If a [CupertinoCheckbox] is created, the following parameters are ignored:
-  /// [mouseCursor], [fillColor], [hoverColor], [overlayColor], [splashRadius],
-  /// [materialTapTargetSize], [visualDensity], [isError]. However, [shape] and
-  /// [side] will still affect the [CupertinoCheckbox] and should be handled if
-  /// native fidelity is important.
+  /// Creates a checkbox that looks and feels native when the [ThemeData.platform]
+  /// is iOS or macOS, otherwise a Material Design switch is created.
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Checkbox.adaptive({
@@ -468,40 +460,30 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
 
   @override
   Widget build(BuildContext context) {
-    switch (widget._checkboxType) {
-      case _CheckboxType.material:
-        break;
-
-      case _CheckboxType.adaptive:
-        final ThemeData theme = Theme.of(context);
-        switch (theme.platform) {
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
-          case TargetPlatform.linux:
-          case TargetPlatform.windows:
-            break;
-          case TargetPlatform.iOS:
-          case TargetPlatform.macOS:
-            return CupertinoCheckbox(
-              value: value,
-              tristate: tristate,
-              onChanged: onChanged,
-              activeColor: widget.activeColor,
-              checkColor: widget.checkColor,
-              focusColor: widget.focusColor,
-              focusNode: widget.focusNode,
-              autofocus: widget.autofocus,
-              side: widget.side,
-              shape: widget.shape,
-            );
-        }
-    }
-
     assert(debugCheckHasMaterial(context));
     final CheckboxThemeData checkboxTheme = CheckboxTheme.of(context);
-    final CheckboxThemeData defaults = Theme.of(context).useMaterial3
-      ? _CheckboxDefaultsM3(context)
-      : _CheckboxDefaultsM2(context);
+    final CheckboxThemeData defaults;
+      switch (widget._checkboxType) {
+        case _CheckboxType.material:
+          defaults = Theme.of(context).useMaterial3
+            ? _CheckboxDefaultsM3(context)
+            : _CheckboxDefaultsM2(context);
+        case _CheckboxType.adaptive:
+          final ThemeData theme = Theme.of(context);
+          switch (theme.platform) {
+            case TargetPlatform.android:
+            case TargetPlatform.fuchsia:
+            case TargetPlatform.linux:
+            case TargetPlatform.windows:
+              defaults = Theme.of(context).useMaterial3
+                ? _CheckboxDefaultsM3(context)
+                : _CheckboxDefaultsM2(context);
+            case TargetPlatform.iOS:
+            case TargetPlatform.macOS:
+              defaults = _CheckboxDefaultsCupertino(context);
+          }
+      }
+
     final MaterialTapTargetSize effectiveMaterialTapTargetSize = widget.materialTapTargetSize
       ?? checkboxTheme.materialTapTargetSize
       ?? defaults.materialTapTargetSize!;
@@ -515,9 +497,26 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     size += effectiveVisualDensity.baseSizeAdjustment;
 
     final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
+      MouseCursor defaultMouseCursor;
+        switch (widget._checkboxType) {
+          case _CheckboxType.material:
+            defaultMouseCursor = MaterialStateMouseCursor.clickable.resolve(states);
+          case _CheckboxType.adaptive:
+            final ThemeData theme = Theme.of(context);
+            switch (theme.platform) {
+              case TargetPlatform.android:
+              case TargetPlatform.fuchsia:
+              case TargetPlatform.linux:
+              case TargetPlatform.windows:
+                defaultMouseCursor = MaterialStateMouseCursor.clickable.resolve(states);
+              case TargetPlatform.iOS:
+              case TargetPlatform.macOS:
+                defaultMouseCursor = SystemMouseCursors.basic;
+            }
+        }
       return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
         ?? checkboxTheme.mouseCursor?.resolve(states)
-        ?? MaterialStateMouseCursor.clickable.resolve(states);
+        ?? defaultMouseCursor;
     });
 
     // Colors need to be resolved in selected and non selected states separately
@@ -593,6 +592,23 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
       ?? checkboxTheme.splashRadius
       ?? defaults.splashRadius!;
 
+    switch (widget._checkboxType) {
+      case _CheckboxType.material:
+        break;
+      case _CheckboxType.adaptive:
+        final ThemeData theme = Theme.of(context);
+        switch (theme.platform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            break;
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+            positionController.duration = Duration.zero;
+        }
+    }
+
     return Semantics(
       label: widget.semanticLabel,
       checked: widget.value ?? false,
@@ -622,7 +638,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
           ..previousValue = _previousValue
           ..shape = widget.shape ?? checkboxTheme.shape ?? defaults.shape!
           ..activeSide = activeSide
-          ..inactiveSide = inactiveSide,
+          ..inactiveSide = inactiveSide
+          ..platform = Theme.of(context).platform,
       ),
     );
   }
@@ -630,6 +647,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
 
 const double _kEdgeSize = Checkbox.width;
 const double _kStrokeWidth = 2.0;
+const double _kCupertinoStrokeWidth = 2.5;
 
 class _CheckboxPainter extends ToggleablePainter {
   Color get checkColor => _checkColor!;
@@ -692,6 +710,20 @@ class _CheckboxPainter extends ToggleablePainter {
     notifyListeners();
   }
 
+// cannot set the platform directly. Must be chosen by user
+// otherwise will never make material on iOS or vice versa
+  TargetPlatform get platform => _platform!;
+  TargetPlatform? _platform;
+  bool _isCupertino = false;
+  set platform(TargetPlatform value) {
+    if (_platform == value) {
+      return;
+    }
+    _platform = value;
+    _isCupertino = _platform == TargetPlatform.iOS || _platform == TargetPlatform.macOS;
+    notifyListeners();
+  }
+
   // The square outer bounds of the checkbox at t, with the specified origin.
   // At t == 0.0, the outer rect's size is _kEdgeSize (Checkbox.width)
   // At t == 0.5, .. is _kEdgeSize - _kStrokeWidth
@@ -714,7 +746,12 @@ class _CheckboxPainter extends ToggleablePainter {
     return Paint()
       ..color = checkColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = _kStrokeWidth;
+      ..strokeWidth = _isCupertino
+        ? _kCupertinoStrokeWidth
+        : _kStrokeWidth
+      ..strokeCap = _isCupertino
+        ? StrokeCap.round
+        : StrokeCap.butt;
   }
 
   void _drawBox(Canvas canvas, Rect outer, Paint paint, BorderSide? side) {
@@ -729,9 +766,21 @@ class _CheckboxPainter extends ToggleablePainter {
     // As t goes from 0.0 to 1.0, animate the two check mark strokes from the
     // short side to the long side.
     final Path path = Path();
-    const Offset start = Offset(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
-    const Offset mid = Offset(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
-    const Offset end = Offset(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
+    Offset start;
+    Offset mid;
+    Offset end;
+
+    if (_isCupertino){
+      start = const Offset(_kEdgeSize * 0.25, _kEdgeSize * 0.52);
+      mid = const Offset(_kEdgeSize * 0.46, _kEdgeSize * 0.75);
+      end = const Offset(_kEdgeSize * 0.72, _kEdgeSize * 0.29);
+    }
+    else{
+      start = const Offset(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
+      mid = const Offset(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
+      end = const Offset(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
+
+    }
     if (t < 0.5) {
       final double strokeT = t * 2.0;
       final Offset drawMid = Offset.lerp(start, mid, strokeT)!;
@@ -751,9 +800,13 @@ class _CheckboxPainter extends ToggleablePainter {
     assert(t >= 0.0 && t <= 1.0);
     // As t goes from 0.0 to 1.0, animate the horizontal line from the
     // mid point outwards.
-    const Offset start = Offset(_kEdgeSize * 0.2, _kEdgeSize * 0.5);
+    final Offset start = _isCupertino
+      ? const Offset(_kEdgeSize * 0.25, _kEdgeSize * 0.5)
+      : const Offset(_kEdgeSize * 0.2, _kEdgeSize * 0.5);
     const Offset mid = Offset(_kEdgeSize * 0.5, _kEdgeSize * 0.5);
-    const Offset end = Offset(_kEdgeSize * 0.8, _kEdgeSize * 0.5);
+    final Offset end = _isCupertino
+      ? const Offset(_kEdgeSize * 0.75, _kEdgeSize * 0.5)
+      : const Offset(_kEdgeSize * 0.8, _kEdgeSize * 0.5);
     final Offset drawStart = Offset.lerp(start, mid, 1.0 - t)!;
     final Offset drawEnd = Offset.lerp(mid, end, t)!;
     canvas.drawLine(origin + drawStart, origin + drawEnd, paint);
@@ -761,7 +814,9 @@ class _CheckboxPainter extends ToggleablePainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    paintRadialReaction(canvas: canvas, origin: size.center(Offset.zero));
+    if (!_isCupertino) {
+      paintRadialReaction(canvas: canvas, origin: size.center(Offset.zero));
+    }
 
     final Paint strokePaint = _createStrokePaint();
     final Offset origin = size / 2.0 - const Size.square(_kEdgeSize) / 2.0 as Offset;
@@ -809,7 +864,156 @@ class _CheckboxPainter extends ToggleablePainter {
         }
       }
     }
+    if (_isCupertino){
+      if (isFocused) {
+        final Rect focusOuter = _outerRectAt(origin, 1.0).inflate(1);
+        final Paint borderPaint = Paint()
+          ..color = focusColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 3.5;
+
+        _drawBox(canvas, focusOuter, borderPaint, activeSide);
+      }
+    }
   }
+}
+
+// Hand coded defaults for iOS/macOS checkbox
+class _CheckboxDefaultsCupertino extends CheckboxThemeData {
+  _CheckboxDefaultsCupertino(BuildContext context)
+    : _theme = Theme.of(context),
+      _colors = Theme.of(context).colorScheme;
+
+  final ThemeData _theme;
+  final ColorScheme _colors;
+  final Color _effectiveFocusOverlayColor = HSLColor
+      .fromColor(CupertinoColors.activeBlue.withOpacity(0.80))
+      .withLightness(0.69)
+      .withSaturation(0.835)
+      .toColor();
+  final Color _activeColor = CupertinoColors.activeBlue;
+  final Color _inactiveColor = CupertinoColors.inactiveGray;
+
+  @override
+  MaterialStateBorderSide? get side {
+    return MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected)) {
+          return const BorderSide(color: Colors.transparent);
+        }
+        return BorderSide(color: _colors.onSurface.withOpacity(0.38));
+      }
+      if (states.contains(MaterialState.selected)) {
+        return const BorderSide(width: 0.0, color: Colors.transparent);
+      }
+      if (states.contains(MaterialState.error)) {
+        return BorderSide(color: _colors.error);
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return BorderSide(color: _inactiveColor);
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return BorderSide(color: _inactiveColor);
+      }
+      if (states.contains(MaterialState.focused)) {
+        return BorderSide(color: _activeColor);
+      }
+      return BorderSide(color: _inactiveColor);
+    });
+  }
+
+  @override
+  MaterialStateProperty<Color> get fillColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected)) {
+          return _activeColor;
+        }
+        return Colors.transparent;
+      }
+      if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.error)) {
+          return _colors.error;
+        }
+        return _activeColor;
+      }
+      return Colors.transparent;
+    });
+  }
+
+  @override
+  MaterialStateProperty<Color> get checkColor {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected)) {
+          return CupertinoColors.white;
+        }
+        return Colors.transparent; // No icons available when the checkbox is unselected.
+      }
+      if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.error)) {
+          return _colors.onError;
+        }
+        return _activeColor;
+      }
+      return Colors.transparent; // No icons available when the checkbox is unselected.
+    });
+  }
+
+  @override
+  MaterialStateProperty<Color> get overlayColor {
+    // The relative values needed to transform a color to it's equivalent focus
+    // outline color.
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.error)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _effectiveFocusOverlayColor;
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return _effectiveFocusOverlayColor;
+        }
+        if (states.contains(MaterialState.focused)) {
+          return _effectiveFocusOverlayColor;
+        }
+      }
+      if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _effectiveFocusOverlayColor;
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return _effectiveFocusOverlayColor;
+        }
+        if (states.contains(MaterialState.focused)) {
+          return _effectiveFocusOverlayColor;
+        }
+        return Colors.transparent;
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _effectiveFocusOverlayColor;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return _effectiveFocusOverlayColor;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return _effectiveFocusOverlayColor;
+      }
+      return Colors.transparent;
+    });
+  }
+
+  @override
+  double get splashRadius => 0.0;
+
+  @override
+  MaterialTapTargetSize get materialTapTargetSize => _theme.materialTapTargetSize;
+
+  @override
+  VisualDensity get visualDensity => _theme.visualDensity;
+
+  @override
+  OutlinedBorder get shape => const RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(4.0)),
+  );
 }
 
 // Hand coded defaults based on Material Design 2.
