@@ -44,6 +44,13 @@ DefaultTextStyle getLabelStyle(WidgetTester tester) {
   );
 }
 
+TextStyle? getIconStyle(WidgetTester tester, IconData icon) {
+  final RichText iconRichText = tester.widget<RichText>(
+    find.descendant(of: find.byIcon(icon).first, matching: find.byType(RichText)),
+  );
+  return iconRichText.text.style;
+}
+
 void main() {
   test('ChipThemeData copyWith, ==, hashCode basics', () {
     expect(const ChipThemeData(), const ChipThemeData().copyWith());
@@ -1400,6 +1407,82 @@ void main() {
     final Offset labelTopRight = tester.getTopRight(find.byType(Container));
     expect(labelTopRight.dx, deleteIconCenter.dx - (iconSize / 2) - labelPadding);
   });
+
+  testWidgets('ChipThemeData.iconTheme updates avatar and delete icons', (WidgetTester tester) async {
+    const Color iconColor = Color(0xffff0000);
+    const double iconSize = 32.0;
+    const IconData avatarIcon = Icons.favorite;
+    const IconData deleteIcon = Icons.delete;
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(chipTheme: const ChipThemeData(
+        iconTheme: IconThemeData(
+          color: iconColor,
+          size: iconSize,
+        ),
+      )),
+      home: Material(
+        child: Center(
+          child: RawChip(
+            avatar: const Icon(Icons.favorite),
+            deleteIcon: const Icon(Icons.delete),
+            onDeleted: () { },
+            label: const SizedBox(height: 100),
+          ),
+        ),
+      ),
+    ));
+
+    // Test rendered icon size.
+    final RenderBox avatarIconBox = tester.renderObject(find.byIcon(avatarIcon));
+    final RenderBox deleteIconBox = tester.renderObject(find.byIcon(deleteIcon));
+    expect(avatarIconBox.size.width, equals(iconSize));
+    expect(deleteIconBox.size.width, equals(iconSize));
+
+    // Test rendered icon color.
+    expect(getIconStyle(tester, avatarIcon)?.color, iconColor);
+    expect(getIconStyle(tester, deleteIcon)?.color, iconColor);
+  });
+
+  testWidgets('ChipThemeData.deleteIconColor overrides ChipThemeData.iconTheme color', (WidgetTester tester) async {
+    const Color iconColor = Color(0xffff00ff);
+    const Color deleteIconColor = Color(0xffff00ff);
+    const IconData deleteIcon = Icons.delete;
+
+    Widget buildChip({ Color? deleteIconColor, Color? iconColor }) {
+      return MaterialApp(
+        theme: ThemeData(
+          chipTheme: ChipThemeData(
+            deleteIconColor: deleteIconColor,
+            iconTheme: IconThemeData(color: iconColor),
+          )
+        ),
+        home: Material(
+          child: Center(
+            child: RawChip(
+              deleteIcon: const Icon(Icons.delete),
+              onDeleted: () { },
+              label: const SizedBox(height: 100),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildChip(iconColor: iconColor));
+
+    // Test rendered icon color.
+    expect(getIconStyle(tester, deleteIcon)?.color, iconColor);
+
+    await tester.pumpWidget(buildChip(
+      deleteIconColor: deleteIconColor,
+      iconColor: iconColor,
+    ));
+
+    // Test rendered icon color.
+    expect(getIconStyle(tester, deleteIcon)?.color, deleteIconColor);
+  });
+
 }
 
 class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStateOutlinedBorder {

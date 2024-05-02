@@ -13,6 +13,7 @@ import 'package:file/memory.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_goldens/flutter_goldens.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
@@ -851,126 +852,14 @@ void main() {
         fs.directory(_kFlutterRoot).createSync(recursive: true);
         final FakeSkiaGoldClient fakeSkiaClient = FakeSkiaGoldClient();
         expect(fakeSkiaClient.initCalls, 0);
-        FlutterPostSubmitFileComparator.fromDefaultComparator(
+        FlutterPostSubmitFileComparator.fromLocalFileComparator(
+          localFileComparator: LocalFileComparator(Uri.parse('/test'), pathStyle: path.Style.posix),
           platform,
           goldens: fakeSkiaClient,
           log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
           fs: fs,
         );
         expect(fakeSkiaClient.initCalls, 0);
-      });
-
-      group('correctly determines testing environment', () {
-        test('returns true for configured Luci', () {
-          final FakePlatform platform = FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-              'SWARMING_TASK_ID' : '12345678990',
-              'GOLDCTL' : 'goldctl',
-              'GIT_BRANCH' : 'master',
-            },
-            operatingSystem: 'macos',
-          );
-          expect(
-            FlutterPostSubmitFileComparator.isForEnvironment(platform),
-            isTrue,
-          );
-        });
-
-        test('returns false on release branches in postsubmit', () {
-          final FakePlatform platform = FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-              'SWARMING_TASK_ID' : 'sweet task ID',
-              'GOLDCTL' : 'some/path',
-              'GIT_BRANCH' : 'flutter-3.16-candidate.0',
-            },
-            operatingSystem: 'macos',
-          );
-          expect(
-            FlutterPostSubmitFileComparator.isForEnvironment(platform),
-            isFalse,
-          );
-        });
-
-        test('returns true on master branch in postsubmit', () {
-          final FakePlatform platform = FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-              'SWARMING_TASK_ID' : 'sweet task ID',
-              'GOLDCTL' : 'some/path',
-              'GIT_BRANCH' : 'master',
-            },
-            operatingSystem: 'macos',
-          );
-          expect(
-            FlutterPostSubmitFileComparator.isForEnvironment(platform),
-            isTrue,
-          );
-        });
-
-        test('returns true on main branch in postsubmit', () {
-          final FakePlatform platform = FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-              'SWARMING_TASK_ID' : 'sweet task ID',
-              'GOLDCTL' : 'some/path',
-              'GIT_BRANCH' : 'main',
-            },
-            operatingSystem: 'macos',
-          );
-          expect(
-            FlutterPostSubmitFileComparator.isForEnvironment(platform),
-            isTrue,
-          );
-        });
-
-        test('returns false - GOLDCTL not present', () {
-          final FakePlatform platform = FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-              'SWARMING_TASK_ID' : '12345678990',
-            },
-            operatingSystem: 'macos',
-          );
-          expect(
-            FlutterPostSubmitFileComparator.isForEnvironment(platform),
-            isFalse,
-          );
-        });
-
-        test('returns false - GOLD_TRYJOB active', () {
-          final FakePlatform platform = FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-              'SWARMING_TASK_ID' : '12345678990',
-              'GOLDCTL' : 'goldctl',
-              'GOLD_TRYJOB' : 'git/ref/12345/head',
-            },
-            operatingSystem: 'macos',
-          );
-          expect(
-            FlutterPostSubmitFileComparator.isForEnvironment(platform),
-            isFalse,
-          );
-        });
-
-        test('returns false - on Cirrus', () {
-          final FakePlatform platform = FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-              'CIRRUS_CI': 'true',
-              'CIRRUS_PR': '',
-              'CIRRUS_BRANCH': 'master',
-              'GOLD_SERVICE_ACCOUNT': 'service account...',
-            },
-            operatingSystem: 'macos',
-          );
-          expect(
-            FlutterPostSubmitFileComparator.isForEnvironment(platform),
-            isFalse,
-          );
-        });
       });
     });
 
@@ -1049,221 +938,14 @@ void main() {
         fs.directory(_kFlutterRoot).createSync(recursive: true);
         final FakeSkiaGoldClient fakeSkiaClient = FakeSkiaGoldClient();
         expect(fakeSkiaClient.tryInitCalls, 0);
-        FlutterPostSubmitFileComparator.fromDefaultComparator(
+        FlutterPostSubmitFileComparator.fromLocalFileComparator(
+          localFileComparator: LocalFileComparator(Uri.parse('/test'), pathStyle: path.Style.posix),
           platform,
           goldens: fakeSkiaClient,
           log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
           fs: fs,
         );
         expect(fakeSkiaClient.tryInitCalls, 0);
-      });
-
-      group('correctly determines testing environment', () {
-        test('returns false on release branches in presubmit', () {
-          final FakePlatform platform = FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-              'SWARMING_TASK_ID' : 'sweet task ID',
-              'GOLDCTL' : 'some/path',
-              'GOLD_TRYJOB' : 'true',
-              'GIT_BRANCH' : 'flutter-3.16-candidate.0',
-            },
-            operatingSystem: 'macos',
-          );
-          expect(
-            FlutterPreSubmitFileComparator.isForEnvironment(platform),
-            isFalse,
-          );
-        });
-
-        test('returns true on master branch in presubmit', () {
-          final FakePlatform platform = FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-              'SWARMING_TASK_ID' : 'sweet task ID',
-              'GOLDCTL' : 'some/path',
-              'GOLD_TRYJOB' : 'true',
-              'GIT_BRANCH' : 'master',
-            },
-            operatingSystem: 'macos',
-          );
-          expect(
-            FlutterPreSubmitFileComparator.isForEnvironment(platform),
-            isTrue,
-          );
-        });
-
-        test('returns true on main branch in presubmit', () {
-          final FakePlatform platform = FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-              'SWARMING_TASK_ID' : 'sweet task ID',
-              'GOLDCTL' : 'some/path',
-              'GOLD_TRYJOB' : 'true',
-              'GIT_BRANCH' : 'main',
-            },
-            operatingSystem: 'macos',
-          );
-          expect(
-            FlutterPreSubmitFileComparator.isForEnvironment(platform),
-            isTrue,
-          );
-        });
-
-        test('returns true for Luci', () {
-          final FakePlatform platform = FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-              'SWARMING_TASK_ID' : '12345678990',
-              'GOLDCTL' : 'goldctl',
-              'GOLD_TRYJOB' : 'git/ref/12345/head',
-              'GIT_BRANCH' : 'master',
-            },
-            operatingSystem: 'macos',
-          );
-          expect(
-            FlutterPreSubmitFileComparator.isForEnvironment(platform),
-            isTrue,
-          );
-        });
-
-        test('returns false - not on Luci', () {
-          final FakePlatform platform = FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-            },
-            operatingSystem: 'macos',
-          );
-          expect(
-            FlutterPreSubmitFileComparator.isForEnvironment(platform),
-            isFalse,
-          );
-        });
-
-        test('returns false - GOLDCTL missing', () {
-          final FakePlatform platform = FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-              'SWARMING_TASK_ID' : '12345678990',
-              'GOLD_TRYJOB' : 'git/ref/12345/head',
-            },
-            operatingSystem: 'macos',
-          );
-          expect(
-            FlutterPreSubmitFileComparator.isForEnvironment(platform),
-            isFalse,
-          );
-        });
-
-        test('returns false - GOLD_TRYJOB missing', () {
-          final FakePlatform platform = FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-              'SWARMING_TASK_ID' : '12345678990',
-              'GOLDCTL' : 'goldctl',
-            },
-            operatingSystem: 'macos',
-          );
-          expect(
-            FlutterPreSubmitFileComparator.isForEnvironment(platform),
-            isFalse,
-          );
-        });
-
-        test('returns false - on Cirrus', () {
-          final FakePlatform platform = FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-              'CIRRUS_CI': 'true',
-              'CIRRUS_PR': '',
-              'CIRRUS_BRANCH': 'master',
-              'GOLD_SERVICE_ACCOUNT': 'service account...',
-            },
-            operatingSystem: 'macos',
-          );
-          expect(
-            FlutterPostSubmitFileComparator.isForEnvironment(platform),
-            isFalse,
-          );
-        });
-      });
-    });
-
-    group('Skipping', () {
-      group('correctly determines testing environment', () {
-        test('returns true on release branches in presubmit', () {
-          final FakePlatform platform = FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-              'SWARMING_TASK_ID' : 'sweet task ID',
-              'GOLDCTL' : 'some/path',
-              'GOLD_TRYJOB' : 'true',
-              'GIT_BRANCH' : 'flutter-3.16-candidate.0',
-            },
-            operatingSystem: 'macos',
-          );
-          expect(
-            FlutterSkippingFileComparator.isForEnvironment(platform),
-            isTrue,
-          );
-        });
-
-        test('returns true on release branches in postsubmit', () {
-          final FakePlatform platform = FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-              'SWARMING_TASK_ID' : 'sweet task ID',
-              'GOLDCTL' : 'some/path',
-              'GIT_BRANCH' : 'flutter-3.16-candidate.0',
-            },
-            operatingSystem: 'macos',
-          );
-          expect(
-            FlutterSkippingFileComparator.isForEnvironment(platform),
-            isTrue,
-          );
-        });
-
-        test('returns true on Cirrus builds', () {
-          final FakePlatform platform = FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-              'CIRRUS_CI' : 'yep',
-            },
-            operatingSystem: 'macos',
-          );
-          expect(
-            FlutterSkippingFileComparator.isForEnvironment(platform),
-            isTrue,
-          );
-        });
-
-        test('returns true on irrelevant LUCI builds', () {
-          final FakePlatform platform = FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-              'SWARMING_TASK_ID' : '1234567890',
-            },
-            operatingSystem: 'macos'
-          );
-          expect(
-            FlutterSkippingFileComparator.isForEnvironment(platform),
-            isTrue,
-          );
-        });
-
-        test('returns false - not in CI', () {
-          final FakePlatform platform = FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-            },
-            operatingSystem: 'macos',
-          );
-          expect(
-            FlutterSkippingFileComparator.isForEnvironment(platform),
-            isFalse,
-          );
-        });
       });
     });
 
@@ -1358,7 +1040,8 @@ void main() {
         fakeDirectory.uri = Uri.parse('/flutter');
 
         fakeSkiaClient.getExpectationForTestThrowable = const OSError("Can't reach Gold");
-        final FlutterGoldenFileComparator comparator1 = await FlutterLocalFileComparator.fromDefaultComparator(
+        final FlutterGoldenFileComparator comparator1 = await FlutterLocalFileComparator.fromLocalFileComparator(
+          localFileComparator: LocalFileComparator(Uri.parse('/test'), pathStyle: path.Style.posix),
           platform,
           goldens: fakeSkiaClient,
           baseDirectory: fakeDirectory,
@@ -1368,7 +1051,8 @@ void main() {
         expect(comparator1.runtimeType, FlutterSkippingFileComparator);
 
         fakeSkiaClient.getExpectationForTestThrowable =  const SocketException("Can't reach Gold");
-        final FlutterGoldenFileComparator comparator2 = await FlutterLocalFileComparator.fromDefaultComparator(
+        final FlutterGoldenFileComparator comparator2 = await FlutterLocalFileComparator.fromLocalFileComparator(
+          localFileComparator: LocalFileComparator(Uri.parse('/test'), pathStyle: path.Style.posix),
           platform,
           goldens: fakeSkiaClient,
           baseDirectory: fakeDirectory,
@@ -1378,7 +1062,8 @@ void main() {
         expect(comparator2.runtimeType, FlutterSkippingFileComparator);
 
         fakeSkiaClient.getExpectationForTestThrowable =  const FormatException("Can't reach Gold");
-        final FlutterGoldenFileComparator comparator3 = await FlutterLocalFileComparator.fromDefaultComparator(
+        final FlutterGoldenFileComparator comparator3 = await FlutterLocalFileComparator.fromLocalFileComparator(
+          localFileComparator: LocalFileComparator(Uri.parse('/test'), pathStyle: path.Style.posix),
           platform,
           goldens: fakeSkiaClient,
           baseDirectory: fakeDirectory,

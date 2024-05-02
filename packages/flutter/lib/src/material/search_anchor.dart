@@ -1323,7 +1323,6 @@ class _SearchBarState extends State<SearchBar> {
   Widget build(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final IconThemeData iconTheme = IconTheme.of(context);
     final SearchBarThemeData searchBarTheme = SearchBarTheme.of(context);
     final SearchBarThemeData defaults = _SearchBarDefaultsM3(context);
 
@@ -1354,33 +1353,27 @@ class _SearchBarState extends State<SearchBar> {
       ?? searchBarTheme.textStyle?.resolve(states)
       ?? defaults.hintStyle?.resolve(states);
 
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    bool isIconThemeColorDefault(Color? color) {
-      if (isDark) {
-        return color == kDefaultIconLightColor;
-      }
-      return color == kDefaultIconDarkColor;
-    }
+    final Color defaultColor = switch (colorScheme.brightness) {
+      Brightness.light => kDefaultIconDarkColor,
+      Brightness.dark  => kDefaultIconLightColor,
+    };
+    final IconThemeData? customTheme = switch (IconTheme.of(context)) {
+      final IconThemeData iconTheme when iconTheme.color != defaultColor => iconTheme,
+      _ => null,
+    };
 
     Widget? leading;
     if (widget.leading != null) {
       leading = IconTheme.merge(
-        data: isIconThemeColorDefault(iconTheme.color)
-          ? IconThemeData(color: colorScheme.onSurface)
-          : iconTheme,
+        data: customTheme ?? IconThemeData(color: colorScheme.onSurface),
         child: widget.leading!,
       );
     }
 
-    List<Widget>? trailing;
-    if (widget.trailing != null) {
-      trailing = widget.trailing?.map((Widget trailing) => IconTheme.merge(
-        data: isIconThemeColorDefault(iconTheme.color)
-          ? IconThemeData(color: colorScheme.onSurfaceVariant)
-          : iconTheme,
-        child: trailing,
-      )).toList();
-    }
+    final List<Widget>? trailing = widget.trailing?.map((Widget trailing) => IconTheme.merge(
+      data: customTheme ?? IconThemeData(color: colorScheme.onSurfaceVariant),
+      child: trailing,
+    )).toList();
 
     return ConstrainedBox(
       constraints: widget.constraints ?? searchBarTheme.constraints ?? defaults.constraints!,
@@ -1444,7 +1437,7 @@ class _SearchBarState extends State<SearchBar> {
                         ),
                       ),
                     ),
-                    if (trailing != null) ...trailing,
+                    ...?trailing,
                   ],
                 ),
               ),

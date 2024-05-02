@@ -3497,26 +3497,21 @@ class RenderRepaintBoundary extends RenderProxyBox {
     bool inReleaseMode = true;
     assert(() {
       inReleaseMode = false;
-      if (debugSymmetricPaintCount + debugAsymmetricPaintCount == 0) {
+      final int totalPaints = debugSymmetricPaintCount + debugAsymmetricPaintCount;
+      if (totalPaints == 0) {
         properties.add(MessageProperty('usefulness ratio', 'no metrics collected yet (never painted)'));
       } else {
-        final double fraction = debugAsymmetricPaintCount / (debugSymmetricPaintCount + debugAsymmetricPaintCount);
-        final String diagnosis;
-        if (debugSymmetricPaintCount + debugAsymmetricPaintCount < 5) {
-          diagnosis = 'insufficient data to draw conclusion (less than five repaints)';
-        } else if (fraction > 0.9) {
-          diagnosis = 'this is an outstandingly useful repaint boundary and should definitely be kept';
-        } else if (fraction > 0.5) {
-          diagnosis = 'this is a useful repaint boundary and should be kept';
-        } else if (fraction > 0.30) {
-          diagnosis = 'this repaint boundary is probably useful, but maybe it would be more useful in tandem with adding more repaint boundaries elsewhere';
-        } else if (fraction > 0.1) {
-          diagnosis = 'this repaint boundary does sometimes show value, though currently not that often';
-        } else if (debugAsymmetricPaintCount == 0) {
-          diagnosis = 'this repaint boundary is astoundingly ineffectual and should be removed';
-        } else {
-          diagnosis = 'this repaint boundary is not very effective and should probably be removed';
-        }
+        final double fraction = debugAsymmetricPaintCount / totalPaints;
+        final String diagnosis = switch (fraction) {
+          _ when totalPaints < 5 => 'insufficient data to draw conclusion (less than five repaints)',
+          > 0.9 => 'this is an outstandingly useful repaint boundary and should definitely be kept',
+          > 0.5 => 'this is a useful repaint boundary and should be kept',
+          > 0.3 => 'this repaint boundary is probably useful, but maybe it would be more useful in tandem with adding more repaint boundaries elsewhere',
+          > 0.1 => 'this repaint boundary does sometimes show value, though currently not that often',
+          _ when debugAsymmetricPaintCount > 0 => 'this repaint boundary is not very effective and should probably be removed',
+          _ => 'this repaint boundary is astoundingly ineffectual and should be removed',
+        };
+
         properties.add(PercentProperty('metrics', fraction, unit: 'useful', tooltip: '$debugSymmetricPaintCount bad vs $debugAsymmetricPaintCount good'));
         properties.add(MessageProperty('diagnosis', diagnosis));
       }

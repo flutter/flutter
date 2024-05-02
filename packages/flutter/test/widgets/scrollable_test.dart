@@ -109,6 +109,100 @@ void resetScrollOffset(WidgetTester tester) {
 }
 
 void main() {
+  testWidgets('hitTestBehavior is respected', (WidgetTester tester) async {
+    HitTestBehavior? getBehavior(Type of) {
+      final RawGestureDetector widget = tester.widget(find.descendant(
+        of: find.byType(of),
+        matching: find.byType(RawGestureDetector),
+      ));
+      return widget.behavior;
+    }
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SingleChildScrollView(
+          hitTestBehavior: HitTestBehavior.translucent,
+        ),
+      ),
+    );
+    expect(getBehavior(SingleChildScrollView), HitTestBehavior.translucent);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: CustomScrollView(
+          hitTestBehavior: HitTestBehavior.translucent,
+        ),
+      ),
+    );
+    expect(getBehavior(CustomScrollView), HitTestBehavior.translucent);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListView(
+          hitTestBehavior: HitTestBehavior.translucent,
+        ),
+      ),
+    );
+    expect(getBehavior(ListView), HitTestBehavior.translucent);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: GridView.extent(
+          maxCrossAxisExtent: 1,
+          hitTestBehavior: HitTestBehavior.translucent,
+        ),
+      ),
+    );
+    expect(getBehavior(GridView), HitTestBehavior.translucent);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PageView(
+          hitTestBehavior: HitTestBehavior.translucent,
+        ),
+      ),
+    );
+    expect(getBehavior(PageView), HitTestBehavior.translucent);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListWheelScrollView(
+          itemExtent: 10,
+          hitTestBehavior: HitTestBehavior.translucent,
+          children: const <Widget>[],
+        ),
+      ),
+    );
+    expect(getBehavior(ListWheelScrollView), HitTestBehavior.translucent);
+  });
+
+  testWidgets(
+      'hitTestBehavior.translucent lets widgets underneath catch the hit',
+      (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    bool tapped = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Stack(
+          children: <Widget>[
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => tapped = true,
+                child: SizedBox(key: key, height: 300),
+              ),
+            ),
+            const SingleChildScrollView(
+              hitTestBehavior: HitTestBehavior.translucent,
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.tapAt(tester.getCenter(find.byKey(key)));
+    expect(tapped, isTrue);
+  });
+
   testWidgets('Flings on different platforms', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.android);
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -dragOffset), 1000.0);

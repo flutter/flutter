@@ -8,11 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_testing/leak_tracker_testing.dart';
 
 void main() {
-  // TODO(polina-c): _DropdownMenuState should not be used after disposal, https://github.com/flutter/flutter/issues/145622 [leaks-to-clean]
-  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
 
   const String longText = 'one two three four five six seven eight nine ten eleven twelve';
   final List<DropdownMenuEntry<TestMenu>> menuChildren = <DropdownMenuEntry<TestMenu>>[];
@@ -2070,6 +2067,7 @@ void main() {
       },
     );
     final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2130,6 +2128,60 @@ void main() {
 
     // No exception should be thrown.
     expect(tester.takeException(), isNull);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/147076.
+  testWidgets('Text field does not overflow parent', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SizedBox(
+          width: 300,
+          child: DropdownMenu<int>(
+            dropdownMenuEntries: <DropdownMenuEntry<int>>[
+              DropdownMenuEntry<int>(
+                value: 0,
+                label: 'This is a long text that is multiplied by 4 so it can overflow. ' * 4,
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump();
+    final RenderBox box = tester.firstRenderObject(find.byType(TextField));
+    expect(box.size.width, 300.0);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/147173.
+  testWidgets('Text field with large helper text can be selected', (WidgetTester tester) async {
+    const String labelText = 'MenuEntry 1';
+    await tester.pumpWidget(const MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: DropdownMenu<int>(
+            hintText: 'Hint text',
+            helperText: 'Menu Helper text',
+            inputDecorationTheme: InputDecorationTheme(
+              helperMaxLines: 2,
+              helperStyle: TextStyle(fontSize: 30),
+            ),
+            dropdownMenuEntries: <DropdownMenuEntry<int>>[
+              DropdownMenuEntry<int>(
+                value: 0,
+                label: labelText,
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump();
+    await tester.tapAt(tester.getCenter(find.text('Hint text')));
+    await tester.pumpAndSettle();
+    // One is layout for the _DropdownMenuBody, the other one is the real button item in the menu.
+    expect(find.widgetWithText(MenuItemButton, labelText), findsNWidgets(2));
   });
 }
 
