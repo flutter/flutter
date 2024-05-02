@@ -504,7 +504,7 @@ native-assets:
 
       expect(
         androidEnvironment.buildDir.childFile('app.dill').readAsBytesSync(),
-        equals([...programDillBytes, ...nativeAssetsDillBytes]),
+        equals(<int>[...programDillBytes, ...nativeAssetsDillBytes]),
       );
     });
   }

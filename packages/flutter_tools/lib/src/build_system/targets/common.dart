@@ -147,7 +147,7 @@ class KernelSnapshotProgram extends Target {
     // TODO(mosuem): Should output resources.json. https://github.com/flutter/flutter/issues/146263
   ];
 
-  static const depfile = 'kernel_snapshot_program.d';
+  static const String depfile = 'kernel_snapshot_program.d';
 
   @override
   List<String> get depfiles => const <String>[
@@ -397,7 +397,7 @@ class KernelSnapshot extends Target {
   ];
 
   @override
-  List<Source> get inputs => <Source>[
+  List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/${KernelSnapshotProgram.dillName}'),
     Source.pattern('{BUILD_DIR}/${KernelSnapshotNativeAssets.dillName}'),
   ];
