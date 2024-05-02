@@ -182,21 +182,13 @@ abstract class Target {
     List<File> outputs,
     Environment environment,
   ) {
-    final File stamp = _findStampFile(environment);
-    final List<String> inputPaths = <String>[];
-    for (final File input in inputs) {
-      inputPaths.add(input.path);
-    }
-    final List<String> outputPaths = <String>[];
-    for (final File output in outputs) {
-      outputPaths.add(output.path);
-    }
-    final String? key = buildKey;
+    String getPath(File file) => file.path;
     final Map<String, Object> result = <String, Object>{
-      'inputs': inputPaths,
-      'outputs': outputPaths,
-      if (key != null) 'buildKey': key,
+      'inputs': inputs.map(getPath).toList(),
+      'outputs': outputs.map(getPath).toList(),
+      if (buildKey case final String key) 'buildKey': key,
     };
+    final File stamp = _findStampFile(environment);
     if (!stamp.existsSync()) {
       stamp.createSync();
     }
