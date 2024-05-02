@@ -10,6 +10,64 @@
 
 namespace impeller {
 
+VertexWriter::VertexWriter(std::vector<Point>& points,
+                           std::vector<uint16_t>& indices)
+    : points_(points), indices_(indices) {}
+
+void VertexWriter::EndContour() {
+  if (points_.size() == 0u || contour_start_ == points_.size() - 1) {
+    // Empty or first contour.
+    return;
+  }
+
+  auto start = contour_start_;
+  auto end = points_.size() - 1;
+  // All filled paths are drawn as if they are closed, but if
+  // there is an explicit close then a lineTo to the origin
+  // is inserted. This point isn't strictly necesary to
+  // correctly render the shape and can be dropped.
+  if (points_[end] == points_[start]) {
+    end--;
+  }
+
+  // Triangle strip break for subsequent contours
+  if (contour_start_ != 0) {
+    auto back = indices_.back();
+    indices_.push_back(back);
+    indices_.push_back(start);
+    indices_.push_back(start);
+
+    // If the contour has an odd number of points, insert an extra point when
+    // bridging to the next contour to preserve the correct triangle winding
+    // order.
+    if (previous_contour_odd_points_) {
+      indices_.push_back(start);
+    }
+  } else {
+    indices_.push_back(start);
+  }
+
+  size_t a = start + 1;
+  size_t b = end;
+  while (a < b) {
+    indices_.push_back(a);
+    indices_.push_back(b);
+    a++;
+    b--;
+  }
+  if (a == b) {
+    indices_.push_back(a);
+    previous_contour_odd_points_ = false;
+  } else {
+    previous_contour_odd_points_ = true;
+  }
+  contour_start_ = points_.size();
+}
+
+void VertexWriter::Write(Point point) {
+  points_.push_back(point);
+}
+
 /*
  *  Based on: https://en.wikipedia.org/wiki/B%C3%A9zier_curve#Specific_cases
  */
@@ -100,6 +158,16 @@ Point QuadraticPathComponent::SolveDerivative(Scalar time) const {
   };
 }
 
+void QuadraticPathComponent::ToLinearPathComponents(
+    Scalar scale,
+    VertexWriter& writer) const {
+  Scalar line_count = std::ceilf(ComputeQuadradicSubdivisions(scale, *this));
+  for (size_t i = 1; i < line_count; i += 1) {
+    writer.Write(Solve(i / line_count));
+  }
+  writer.Write(p2);
+}
+
 void QuadraticPathComponent::AppendPolylinePoints(
     Scalar scale_factor,
     std::vector<Point>& points) const {
@@ -163,6 +231,15 @@ void CubicPathComponent::AppendPolylinePoints(
     std::vector<Point>& points) const {
   ToLinearPathComponents(
       scale, [&points](const Point& point) { points.emplace_back(point); });
+}
+
+void CubicPathComponent::ToLinearPathComponents(Scalar scale,
+                                                VertexWriter& writer) const {
+  Scalar line_count = std::ceilf(ComputeCubicSubdivisions(scale, *this));
+  for (size_t i = 1; i < line_count; i++) {
+    writer.Write(Solve(i / line_count));
+  }
+  writer.Write(p2);
 }
 
 inline QuadraticPathComponent CubicPathComponent::Lower() const {

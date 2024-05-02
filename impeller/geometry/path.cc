@@ -103,6 +103,72 @@ void Path::EnumerateComponents(
   }
 }
 
+void Path::WritePolyline(Scalar scale, VertexWriter& writer) const {
+  auto& path_components = data_->components;
+  auto& path_points = data_->points;
+  bool started_contour = false;
+  bool first_point = true;
+
+  for (size_t component_i = 0; component_i < path_components.size();
+       component_i++) {
+    const auto& path_component = path_components[component_i];
+    switch (path_component.type) {
+      case ComponentType::kLinear: {
+        const LinearPathComponent* linear =
+            reinterpret_cast<const LinearPathComponent*>(
+                &path_points[path_component.index]);
+        if (first_point) {
+          writer.Write(linear->p1);
+          first_point = false;
+        }
+        writer.Write(linear->p2);
+        break;
+      }
+      case ComponentType::kQuadratic: {
+        const QuadraticPathComponent* quad =
+            reinterpret_cast<const QuadraticPathComponent*>(
+                &path_points[path_component.index]);
+        if (first_point) {
+          writer.Write(quad->p1);
+          first_point = false;
+        }
+        quad->ToLinearPathComponents(scale, writer);
+        break;
+      }
+      case ComponentType::kCubic: {
+        const CubicPathComponent* cubic =
+            reinterpret_cast<const CubicPathComponent*>(
+                &path_points[path_component.index]);
+        if (first_point) {
+          writer.Write(cubic->p1);
+          first_point = false;
+        }
+        cubic->ToLinearPathComponents(scale, writer);
+        break;
+      }
+      case ComponentType::kContour:
+        if (component_i == path_components.size() - 1) {
+          // If the last component is a contour, that means it's an empty
+          // contour, so skip it.
+          continue;
+        }
+        // The contour component type is the first segment in a contour.
+        // Since this should contain the destination (if closed), we
+        // can start with this point. If there was already an open
+        // contour, or we've reached the end of the verb list, we
+        // also close the contour.
+        if (started_contour) {
+          writer.EndContour();
+        }
+        started_contour = true;
+        first_point = true;
+    }
+  }
+  if (started_contour) {
+    writer.EndContour();
+  }
+}
+
 bool Path::GetLinearComponentAtIndex(size_t index,
                                      LinearPathComponent& linear) const {
   auto& components = data_->components;
