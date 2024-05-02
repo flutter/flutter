@@ -688,7 +688,7 @@ void main() {
           child: Center(
             child: ExpansionTile(
               overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> state){
-                if(state.contains(MaterialState.hovered)){
+                if (state.contains(MaterialState.hovered)) {
                   return const Color(0xff00ff00);
                 }
                 return null;
