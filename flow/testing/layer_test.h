@@ -86,26 +86,11 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
             .texture_registry              = texture_registry_,
             .raster_cache                  = nullptr,
             // clang-format on
-        },
-        checkerboard_context_{
-            // clang-format off
-            .state_stack                   = checkerboard_state_stack_,
-            .canvas                        = &display_list_builder_,
-            .gr_context                    = nullptr,
-            .view_embedder                 = nullptr,
-            .raster_time                   = raster_time_,
-            .ui_time                       = ui_time_,
-            .texture_registry              = texture_registry_,
-            .raster_cache                  = nullptr,
-            // clang-format on
         } {
     use_null_raster_cache();
     preroll_state_stack_.set_preroll_delegate(kGiantRect, SkMatrix::I());
     paint_state_stack_.set_delegate(&TestT::mock_canvas());
     display_list_state_stack_.set_delegate(&display_list_builder_);
-    checkerboard_state_stack_.set_delegate(&display_list_builder_);
-    checkerboard_state_stack_.set_checkerboard_func(draw_checkerboard);
-    checkerboard_paint_.setColor(kCheckerboardColor);
   }
 
   /**
@@ -168,8 +153,6 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
   PaintContext& display_list_paint_context() {
     return display_list_paint_context_;
   }
-  const DlPaint& checkerboard_paint() { return checkerboard_paint_; }
-  PaintContext& checkerboard_context() { return checkerboard_context_; }
   LayerSnapshotStore& layer_snapshot_store() { return snapshot_store_; }
 
   sk_sp<DisplayList> display_list() {
@@ -205,19 +188,8 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
     display_list_paint_context_.raster_cache = raster_cache_.get();
   }
 
-  static constexpr DlColor kCheckerboardColor = DlColor(0x42424242);
-
-  static void draw_checkerboard(DlCanvas* canvas, const SkRect& rect) {
-    if (canvas) {
-      DlPaint paint;
-      paint.setColor(kCheckerboardColor);
-      canvas->DrawRect(rect, paint);
-    }
-  }
-
   LayerStateStack preroll_state_stack_;
   LayerStateStack paint_state_stack_;
-  LayerStateStack checkerboard_state_stack_;
   FixedRefreshRateStopwatch raster_time_;
   FixedRefreshRateStopwatch ui_time_;
   std::shared_ptr<TextureRegistry> texture_registry_;
@@ -229,8 +201,6 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
   LayerStateStack display_list_state_stack_;
   sk_sp<DisplayList> display_list_;
   PaintContext display_list_paint_context_;
-  DlPaint checkerboard_paint_;
-  PaintContext checkerboard_context_;
   LayerSnapshotStore snapshot_store_;
 
   std::vector<RasterCacheItem*> cacheable_items_;

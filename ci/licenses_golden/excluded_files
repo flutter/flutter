@@ -54,7 +54,6 @@
 ../../../flutter/flow/frame_timings_recorder_unittests.cc
 ../../../flutter/flow/gl_context_switch_unittests.cc
 ../../../flutter/flow/layers/backdrop_filter_layer_unittests.cc
-../../../flutter/flow/layers/checkerboard_layertree_unittests.cc
 ../../../flutter/flow/layers/clip_path_layer_unittests.cc
 ../../../flutter/flow/layers/clip_rect_layer_unittests.cc
 ../../../flutter/flow/layers/clip_rrect_layer_unittests.cc

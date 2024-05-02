@@ -25,36 +25,23 @@ namespace flutter {
 IMPLEMENT_WRAPPERTYPEINFO(ui, Scene);
 
 void Scene::create(Dart_Handle scene_handle,
-                   std::shared_ptr<flutter::Layer> rootLayer,
-                   uint32_t rasterizerTracingThreshold,
-                   bool checkerboardRasterCacheImages,
-                   bool checkerboardOffscreenLayers) {
-  auto scene = fml::MakeRefCounted<Scene>(
-      std::move(rootLayer), rasterizerTracingThreshold,
-      checkerboardRasterCacheImages, checkerboardOffscreenLayers);
+                   std::shared_ptr<flutter::Layer> rootLayer) {
+  auto scene = fml::MakeRefCounted<Scene>(std::move(rootLayer));
   scene->AssociateWithDartWrapper(scene_handle);
 }
 
-Scene::Scene(std::shared_ptr<flutter::Layer> rootLayer,
-             uint32_t rasterizerTracingThreshold,
-             bool checkerboardRasterCacheImages,
-             bool checkerboardOffscreenLayers) {
-  layer_tree_config_.root_layer = std::move(rootLayer);
-  layer_tree_config_.rasterizer_tracing_threshold = rasterizerTracingThreshold;
-  layer_tree_config_.checkerboard_raster_cache_images =
-      checkerboardRasterCacheImages;
-  layer_tree_config_.checkerboard_offscreen_layers =
-      checkerboardOffscreenLayers;
+Scene::Scene(std::shared_ptr<flutter::Layer> rootLayer) {
+  layer_tree_root_layer_ = std::move(rootLayer);
 }
 
 Scene::~Scene() {}
 
 bool Scene::valid() {
-  return layer_tree_config_.root_layer != nullptr;
+  return layer_tree_root_layer_ != nullptr;
 }
 
 void Scene::dispose() {
-  layer_tree_config_.root_layer.reset();
+  layer_tree_root_layer_.reset();
   ClearDartWrapper();
 }
 
@@ -137,7 +124,7 @@ std::unique_ptr<LayerTree> Scene::BuildLayerTree(uint32_t width,
   if (!valid()) {
     return nullptr;
   }
-  return std::make_unique<LayerTree>(layer_tree_config_,
+  return std::make_unique<LayerTree>(layer_tree_root_layer_,
                                      SkISize::Make(width, height));
 }
 

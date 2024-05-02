@@ -268,24 +268,10 @@ void SceneBuilder::addPerformanceOverlay(uint64_t enabledOptions,
   AddLayer(std::move(layer));
 }
 
-void SceneBuilder::setRasterizerTracingThreshold(uint32_t frameInterval) {
-  rasterizer_tracing_threshold_ = frameInterval;
-}
-
-void SceneBuilder::setCheckerboardRasterCacheImages(bool checkerboard) {
-  checkerboard_raster_cache_images_ = checkerboard;
-}
-
-void SceneBuilder::setCheckerboardOffscreenLayers(bool checkerboard) {
-  checkerboard_offscreen_layers_ = checkerboard;
-}
-
 void SceneBuilder::build(Dart_Handle scene_handle) {
   FML_DCHECK(layer_stack_.size() >= 1);
 
-  Scene::create(
-      scene_handle, std::move(layer_stack_[0]), rasterizer_tracing_threshold_,
-      checkerboard_raster_cache_images_, checkerboard_offscreen_layers_);
+  Scene::create(scene_handle, std::move(layer_stack_[0]));
   layer_stack_.clear();
   ClearDartWrapper();  // may delete this object.
 }

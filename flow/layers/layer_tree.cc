@@ -18,13 +18,9 @@
 
 namespace flutter {
 
-LayerTree::LayerTree(const Config& config, const SkISize& frame_size)
-    : root_layer_(config.root_layer),
-      frame_size_(frame_size),
-      rasterizer_tracing_threshold_(config.rasterizer_tracing_threshold),
-      checkerboard_raster_cache_images_(
-          config.checkerboard_raster_cache_images),
-      checkerboard_offscreen_layers_(config.checkerboard_offscreen_layers) {}
+LayerTree::LayerTree(const std::shared_ptr<Layer>& root_layer,
+                     const SkISize& frame_size)
+    : root_layer_(root_layer), frame_size_(frame_size) {}
 
 inline SkColorSpace* GetColorSpace(DlCanvas* canvas) {
   return canvas ? canvas->GetImageInfo().colorSpace() : nullptr;
@@ -41,8 +37,6 @@ bool LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
   }
 
   SkColorSpace* color_space = GetColorSpace(frame.canvas());
-  frame.context().raster_cache().SetCheckboardCacheImages(
-      checkerboard_raster_cache_images_);
   LayerStateStack state_stack;
   state_stack.set_preroll_delegate(cull_rect,
                                    frame.root_surface_transformation());
@@ -108,11 +102,6 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
   }
 
   LayerStateStack state_stack;
-
-  // DrawCheckerboard is not supported on Impeller.
-  if (checkerboard_offscreen_layers_ && !frame.aiks_context()) {
-    state_stack.set_checkerboard_func(DrawCheckerboard);
-  }
 
   DlCanvas* canvas = frame.canvas();
   state_stack.set_delegate(canvas);

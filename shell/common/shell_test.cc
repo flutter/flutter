@@ -241,7 +241,7 @@ void ShellTest::PumpOneFrame(Shell* shell, FrameContent frame_content) {
           identity.setIdentity();
           auto root_layer = std::make_shared<TransformLayer>(identity);
           auto layer_tree = std::make_unique<LayerTree>(
-              LayerTree::Config{.root_layer = root_layer},
+              root_layer,
               SkISize::Make(view_content.viewport_metrics.physical_width,
                             view_content.viewport_metrics.physical_height));
           float device_pixel_ratio = static_cast<float>(

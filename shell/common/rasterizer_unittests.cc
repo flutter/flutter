@@ -240,9 +240,8 @@ TEST(RasterizerTest,
   fml::AutoResetWaitableEvent latch;
   thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
     auto pipeline = std::make_shared<FramePipeline>(/*depth=*/10);
-    auto layer_tree =
-        std::make_unique<LayerTree>(/*config=*/LayerTree::Config(),
-                                    /*frame_size=*/SkISize());
+    auto layer_tree = std::make_unique<LayerTree>(/*root_layer=*/nullptr,
+                                                  /*frame_size=*/SkISize());
     auto layer_tree_item = std::make_unique<FrameItem>(
         SingleLayerTreeList(kImplicitViewId, std::move(layer_tree),
                             kDevicePixelRatio),
@@ -315,7 +314,7 @@ TEST(
   thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
     auto pipeline = std::make_shared<FramePipeline>(/*depth=*/10);
     auto layer_tree = std::make_unique<LayerTree>(
-        /*config=*/LayerTree::Config(), /*frame_size=*/SkISize());
+        /*root_layer=*/nullptr, /*frame_size=*/SkISize());
     auto layer_tree_item = std::make_unique<FrameItem>(
         SingleLayerTreeList(kImplicitViewId, std::move(layer_tree),
                             kDevicePixelRatio),
@@ -393,7 +392,7 @@ TEST(
   rasterizer->Setup(std::move(surface));
 
   auto pipeline = std::make_shared<FramePipeline>(/*depth=*/10);
-  auto layer_tree = std::make_unique<LayerTree>(/*config=*/LayerTree::Config(),
+  auto layer_tree = std::make_unique<LayerTree>(/*root_layer=*/nullptr,
                                                 /*frame_size=*/SkISize());
   auto layer_tree_item = std::make_unique<FrameItem>(
       SingleLayerTreeList(kImplicitViewId, std::move(layer_tree),
@@ -476,7 +475,7 @@ TEST(RasterizerTest,
   rasterizer->Setup(std::move(surface));
 
   auto pipeline = std::make_shared<FramePipeline>(/*depth=*/10);
-  auto layer_tree = std::make_unique<LayerTree>(/*config=*/LayerTree::Config(),
+  auto layer_tree = std::make_unique<LayerTree>(/*root_layer=*/nullptr,
                                                 /*frame_size=*/SkISize());
   auto layer_tree_item = std::make_unique<FrameItem>(
       SingleLayerTreeList(kImplicitViewId, std::move(layer_tree),
@@ -529,7 +528,7 @@ TEST(RasterizerTest, externalViewEmbedderDoesntEndFrameWhenNoSurfaceIsSet) {
   thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
     auto pipeline = std::make_shared<FramePipeline>(/*depth=*/10);
     auto layer_tree = std::make_unique<LayerTree>(
-        /*config=*/LayerTree::Config(), /*frame_size=*/SkISize());
+        /*root_layer=*/nullptr, /*frame_size=*/SkISize());
     auto layer_tree_item = std::make_unique<FrameItem>(
         SingleLayerTreeList(kImplicitViewId, std::move(layer_tree),
                             kDevicePixelRatio),
@@ -593,7 +592,7 @@ TEST(RasterizerTest, externalViewEmbedderDoesntEndFrameWhenNotUsedThisFrame) {
   thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
     auto pipeline = std::make_shared<FramePipeline>(/*depth=*/10);
     auto layer_tree = std::make_unique<LayerTree>(
-        /*config=*/LayerTree::Config(), /*frame_size=*/SkISize());
+        /*root_layer=*/nullptr, /*frame_size=*/SkISize());
     auto layer_tree_item = std::make_unique<FrameItem>(
         SingleLayerTreeList(kImplicitViewId, std::move(layer_tree),
                             kDevicePixelRatio),
@@ -722,9 +721,9 @@ TEST(RasterizerTest, drawMultipleViewsWithExternalViewEmbedder) {
     auto pipeline = std::make_shared<FramePipeline>(/*depth=*/10);
     std::vector<std::unique_ptr<LayerTreeTask>> tasks;
     tasks.push_back(std::make_unique<LayerTreeTask>(
-        0, std::make_unique<LayerTree>(LayerTree::Config(), SkISize()), 1.5));
+        0, std::make_unique<LayerTree>(nullptr, SkISize()), 1.5));
     tasks.push_back(std::make_unique<LayerTreeTask>(
-        1, std::make_unique<LayerTree>(LayerTree::Config(), SkISize()), 2.0));
+        1, std::make_unique<LayerTree>(nullptr, SkISize()), 2.0));
     auto layer_tree_item = std::make_unique<FrameItem>(
         std::move(tasks), CreateFinishedBuildRecorder());
     PipelineProduceResult result =
@@ -782,7 +781,7 @@ TEST(RasterizerTest,
   thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
     auto pipeline = std::make_shared<FramePipeline>(/*depth=*/10);
     auto layer_tree = std::make_unique<LayerTree>(
-        /*config=*/LayerTree::Config(), /*frame_size=*/SkISize());
+        /*root_layer=*/nullptr, /*frame_size=*/SkISize());
     auto layer_tree_item = std::make_unique<FrameItem>(
         SingleLayerTreeList(kImplicitViewId, std::move(layer_tree),
                             kDevicePixelRatio),
@@ -843,7 +842,7 @@ TEST(
   thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
     auto pipeline = std::make_shared<FramePipeline>(/*depth=*/10);
     auto layer_tree = std::make_unique<LayerTree>(
-        /*config=*/LayerTree::Config(), /*frame_size=*/SkISize());
+        /*root_layer=*/nullptr, /*frame_size=*/SkISize());
     auto layer_tree_item = std::make_unique<FrameItem>(
         SingleLayerTreeList(kImplicitViewId, std::move(layer_tree),
                             kDevicePixelRatio),
@@ -904,7 +903,7 @@ TEST(
   thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
     auto pipeline = std::make_shared<FramePipeline>(/*depth=*/10);
     auto layer_tree = std::make_unique<LayerTree>(
-        /*config=*/LayerTree::Config(), /*frame_size=*/SkISize());
+        /*root_layer=*/nullptr, /*frame_size=*/SkISize());
     auto layer_tree_item = std::make_unique<FrameItem>(
         SingleLayerTreeList(kImplicitViewId, std::move(layer_tree),
                             kDevicePixelRatio),
@@ -964,7 +963,7 @@ TEST(
   thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
     auto pipeline = std::make_shared<FramePipeline>(/*depth=*/10);
     auto layer_tree = std::make_unique<LayerTree>(
-        /*config=*/LayerTree::Config(), /*frame_size=*/SkISize());
+        /*root_layer=*/nullptr, /*frame_size=*/SkISize());
     auto layer_tree_item = std::make_unique<FrameItem>(
         SingleLayerTreeList(kImplicitViewId, std::move(layer_tree),
                             kDevicePixelRatio),
@@ -1022,7 +1021,7 @@ TEST(
   thread_host.raster_thread->GetTaskRunner()->PostTask([&] {
     auto pipeline = std::make_shared<FramePipeline>(/*depth=*/10);
     auto layer_tree = std::make_unique<LayerTree>(
-        /*config=*/LayerTree::Config(), /*frame_size=*/SkISize());
+        /*root_layer=*/nullptr, /*frame_size=*/SkISize());
     auto layer_tree_item = std::make_unique<FrameItem>(
         SingleLayerTreeList(kImplicitViewId, std::move(layer_tree),
                             kDevicePixelRatio),
@@ -1106,7 +1105,7 @@ TEST(RasterizerTest,
     auto pipeline = std::make_shared<FramePipeline>(/*depth=*/10);
     for (int i = 0; i < 2; i++) {
       auto layer_tree = std::make_unique<LayerTree>(
-          /*config=*/LayerTree::Config(), /*frame_size=*/SkISize());
+          /*root_layer=*/nullptr, /*frame_size=*/SkISize());
       auto layer_tree_item = std::make_unique<FrameItem>(
           SingleLayerTreeList(kImplicitViewId, std::move(layer_tree),
                               kDevicePixelRatio),
@@ -1280,7 +1279,7 @@ TEST(RasterizerTest, presentationTimeSetWhenVsyncTargetInFuture) {
     auto pipeline = std::make_shared<FramePipeline>(/*depth=*/10);
     for (int i = 0; i < 2; i++) {
       auto layer_tree = std::make_unique<LayerTree>(
-          /*config=*/LayerTree::Config(), /*frame_size=*/SkISize());
+          /*root_layer=*/nullptr, /*frame_size=*/SkISize());
       auto layer_tree_item = std::make_unique<FrameItem>(
           SingleLayerTreeList(kImplicitViewId, std::move(layer_tree),
                              kDevicePixelRatio),
@@ -1363,7 +1362,7 @@ TEST(RasterizerTest, presentationTimeNotSetWhenVsyncTargetInPast) {
     rasterizer->Setup(std::move(surface));
     auto pipeline = std::make_shared<FramePipeline>(/*depth=*/10);
     auto layer_tree = std::make_unique<LayerTree>(
-        /*config=*/LayerTree::Config(), /*frame_size=*/SkISize());
+        /*root_layer=*/nullptr, /*frame_size=*/SkISize());
     auto layer_tree_item = std::make_unique<FrameItem>(
         SingleLayerTreeList(kImplicitViewId, std::move(layer_tree),
                            kDevicePixelRatio),

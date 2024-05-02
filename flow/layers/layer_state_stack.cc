@@ -229,12 +229,6 @@ class SaveLayerEntry : public LayerStateStack::StateEntry {
     stack->outstanding_ = {};
   }
   void restore(LayerStateStack* stack) const override {
-    if (stack->checkerboard_func_) {
-      DlCanvas* canvas = stack->canvas_delegate();
-      if (canvas != nullptr) {
-        (*stack->checkerboard_func_)(canvas, bounds_);
-      }
-    }
     stack->delegate_->restore();
     stack->outstanding_ = old_attributes_;
   }

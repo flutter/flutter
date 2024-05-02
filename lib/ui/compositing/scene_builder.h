@@ -117,10 +117,6 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
                        double height,
                        int64_t viewId);
 
-  void setRasterizerTracingThreshold(uint32_t frameInterval);
-  void setCheckerboardRasterCacheImages(bool checkerboard);
-  void setCheckerboardOffscreenLayers(bool checkerboard);
-
   void build(Dart_Handle scene_handle);
 
   const std::vector<std::shared_ptr<ContainerLayer>>& layer_stack() {
@@ -135,9 +131,6 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
   void PopLayer();
 
   std::vector<std::shared_ptr<ContainerLayer>> layer_stack_;
-  int rasterizer_tracing_threshold_ = 0;
-  bool checkerboard_raster_cache_images_ = false;
-  bool checkerboard_offscreen_layers_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(SceneBuilder);
 };
