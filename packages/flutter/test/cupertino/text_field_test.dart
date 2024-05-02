@@ -5923,17 +5923,14 @@ void main() {
     // If the position we tap during a drag start is on the collapsed selection, then
     // we can move the cursor with a drag.
     // Here we tap on '|a', where our selection was previously, and attempt move
-    // to '|g'. The cursor will not move because the `VerticalDragGestureRecognizer`
-    // in the scrollable will beat the `TapAndHorizontalDragGestureRecognizer`
-    // in the TextField. This is because moving from `|a` to `|g` is a completely
-    // vertical movement.
+    // to '|g'.
     await gesture.down(aPos);
     await tester.pump();
     await gesture.moveTo(gPos);
     await tester.pumpAndSettle();
 
     expect(controller.selection.isCollapsed, true);
-    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.baseOffset, testValue.indexOf('g'));
 
     // Release the pointer.
     await gesture.up();
@@ -5941,11 +5938,8 @@ void main() {
 
     // If the position we tap during a drag start is on the collapsed selection, then
     // we can move the cursor with a drag.
-    // Here we tap on '|a', where our selection was previously, and move to '|i'.
-    // Unlike our previous attempt to drag to `|g`, this works because moving
-    // to `|i` includes a horizontal movement so the `TapAndHorizontalDragGestureRecognizer`
-    // in TextField can beat the `VerticalDragGestureRecognizer` in the scrollable.
-    await gesture.down(aPos);
+    // Here we tap on '|g', where our selection was previously, and move to '|i'.
+    await gesture.down(gPos);
     await tester.pump();
     await gesture.moveTo(iPos);
     await tester.pumpAndSettle();
