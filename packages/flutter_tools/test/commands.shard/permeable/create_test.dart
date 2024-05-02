@@ -2118,11 +2118,13 @@ void main() {
 
     projectDir.childDirectory('test').childFile('example_test.dart').createSync(recursive: true);
 
-    return _createProject(
+    await _createProject(
       projectDir,
       <String>['--no-pub', '--empty'],
       <String>['test/example_test.dart'],
     );
+
+    expect(projectDir.childDirectory('test').childFile('example_test.dart'), exists);
   });
 
   testUsingContext('can create a sample-based project', () async {
