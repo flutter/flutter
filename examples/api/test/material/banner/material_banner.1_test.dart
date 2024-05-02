@@ -22,6 +22,10 @@ void main() {
     expect(find.byType(MaterialBanner), findsOneWidget);
     expect(find.text('DISMISS'), findsOneWidget);
     expect(find.byIcon(Icons.agriculture_outlined), findsOneWidget);
+
+    final MaterialBanner banner = tester.widget<MaterialBanner>(
+        find.byType(MaterialBanner));
+    expect(banner.backgroundColor, Colors.green);
   });
 
   testWidgets('the banner is below the text saying so', (WidgetTester tester) async {
