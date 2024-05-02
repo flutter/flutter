@@ -66,9 +66,9 @@ class HtmlViewEmbedder {
   DisplayCanvas? debugBoundsCanvas;
 
   /// The size of the frame, in physical pixels.
-  late ui.Size _frameSize;
+  late BitmapSize _frameSize;
 
-  set frameSize(ui.Size size) {
+  set frameSize(BitmapSize size) {
     _frameSize = size;
   }
 
@@ -90,7 +90,7 @@ class HtmlViewEmbedder {
 
   void prerollCompositeEmbeddedView(int viewId, EmbeddedViewParams params) {
     final CkPictureRecorder pictureRecorder = CkPictureRecorder();
-    pictureRecorder.beginRecording(ui.Offset.zero & _frameSize);
+    pictureRecorder.beginRecording(ui.Offset.zero & _frameSize.toSize());
     _context.pictureRecordersCreatedDuringPreroll.add(pictureRecorder);
 
     // Do nothing if the params didn't change.
@@ -390,7 +390,13 @@ class HtmlViewEmbedder {
       debugBoundsCanvas ??= rasterizer.displayFactory.getCanvas();
       final CkPictureRecorder boundsRecorder = CkPictureRecorder();
       final CkCanvas boundsCanvas = boundsRecorder.beginRecording(
-          ui.Rect.fromLTWH(0, 0, _frameSize.width, _frameSize.height));
+          ui.Rect.fromLTWH(
+        0,
+        0,
+        _frameSize.width.toDouble(),
+        _frameSize.height.toDouble(),
+        ),
+      );
       final CkPaint platformViewBoundsPaint = CkPaint()
         ..color = const ui.Color.fromARGB(100, 0, 255, 0);
       final CkPaint pictureBoundsPaint = CkPaint()
