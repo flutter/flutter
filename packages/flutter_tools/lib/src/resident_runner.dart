@@ -573,6 +573,7 @@ class FlutterDevice {
   }) async {
     final Status devFSStatus = globals.logger.startProgress(
       'Syncing files to device ${device!.name}...',
+      progressId: 'devFS.update',
     );
     UpdateFSReport report;
     try {
