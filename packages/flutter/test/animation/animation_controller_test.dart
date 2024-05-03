@@ -187,6 +187,8 @@ void main() {
     expect(controller.value, moreOrLessEquals(0.0));
     controller.stop();
 
+    controller.dispose();
+
     // Swap which duration is longer.
     controller = AnimationController(
       duration: const Duration(milliseconds: 50),
@@ -250,6 +252,8 @@ void main() {
     tick(const Duration(milliseconds: 260));
     expect(controller.value, moreOrLessEquals(0.0));
     controller.stop();
+
+    controller.dispose();
 
     // Swap which duration is longer.
     controller = AnimationController(
