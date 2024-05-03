@@ -2282,12 +2282,6 @@ class _TabPageSelectorState extends State<TabPageSelector> {
   CurvedAnimation? _animation;
 
   @override
-  void initState() {
-    super.initState();
-    _setAnimation();
-  }
-
-  @override
   void didUpdateWidget (TabPageSelector oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_previousTabController?.animation != _tabController.animation) {
@@ -2301,7 +2295,7 @@ class _TabPageSelectorState extends State<TabPageSelector> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_previousTabController?.animation != _tabController.animation) {
+    if (_animation == null || _previousTabController?.animation != _tabController.animation) {
       _setAnimation();
     }
     if (_previousTabController != _tabController) {
