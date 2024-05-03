@@ -2227,6 +2227,48 @@ void main() {
 
       expect(find.text('leadingIcon'), findsOneWidget);
     });
+    testWidgets('autofocus is used when set and widget is enabled',
+        (WidgetTester tester) async {
+
+      listenForFocusChanges();
+
+      // Note: This DOES NOT WORK WITH MenuBar!
+      // Focus does not work under any circumstance with MenuBar!
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                MenuAnchor(
+                  controller: controller,
+                  menuChildren: <Widget>[
+                    MenuItemButton(
+                      autofocus: true,
+                      // required for clickability
+                      onPressed: () {},
+                      child: Text(TestMenu.mainMenu0.label),
+                    ),
+                    MenuItemButton(
+                      onPressed: () {},
+                      child: Text(TestMenu.mainMenu1.label),
+                    ),
+                  ],
+                ),
+                const Expanded(child: Placeholder()),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      controller.open();
+      await tester.pump();
+
+      expect(controller.isOpen, equals(true));
+
+      expect(focusedMenu, equals('MenuItemButton(Text("Menu 0"))'));
+    });
 
     testWidgets('trailingIcon is used when set', (WidgetTester tester) async {
       await tester.pumpWidget(
