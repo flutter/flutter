@@ -11,9 +11,8 @@ import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatf
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-
   tearDown(() {
-    // Remove 
+    // Remove the `debugOperatingSystemOverride`.
     ui_web.browser.debugOperatingSystemOverride = null;
   });
 

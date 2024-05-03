@@ -18,7 +18,7 @@ platform.TargetPlatform get defaultTargetPlatform {
       _browserPlatform;
 }
 
-// The TargetPlatform used ON WEB TESTS, unless overridden.
+// The TargetPlatform used on Web tests, unless overridden.
 //
 // Respects the `ui_web.browser.debugOperatingSystemOverride` value (when set).
 platform.TargetPlatform? get _testPlatform {
@@ -44,7 +44,7 @@ platform.TargetPlatform? get _testPlatform {
 // The computation of `operatingSystem` is cached in the ui_web package;
 // this getter may be called dozens of times per frame.
 //
-// _browserPlatform is lazily initialized, and 
+// _browserPlatform is lazily initialized, and cached forever.
 final platform.TargetPlatform _browserPlatform =
   _operatingSystemToTargetPlatform(ui_web.browser.operatingSystem);
 
