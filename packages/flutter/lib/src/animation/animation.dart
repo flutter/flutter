@@ -29,6 +29,12 @@ enum AnimationStatus {
   /// The animation is stopped at the end.
   completed;
 
+  /// Whether the animation is running in either direction.
+  bool get running => switch (this) {
+    forward   || reverse   => true,
+    completed || dismissed => false,
+  };
+
   /// {@template flutter.animation.aimedForward}
   /// Whether the current aim of the animation is toward completion.
   ///
@@ -164,6 +170,9 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
 
   /// Whether this animation is stopped at the end.
   bool get isCompleted => status == AnimationStatus.completed;
+
+  /// Whether this animation is running in either direction.
+  bool get running => status.running;
 
   /// {@macro flutter.animation.aimedForward}
   bool get aimedForward => status.aimedForward;
