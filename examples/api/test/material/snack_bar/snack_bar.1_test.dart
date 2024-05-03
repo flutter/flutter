@@ -25,7 +25,6 @@ void main() {
       of: find.text('Awesome SnackBar!'),
       matching: find.byType(SnackBar)));
     expect(bar.behavior, SnackBarBehavior.floating);
-    expect(bar.behavior, SnackBarBehavior.floating);
   });
 
   testWidgets('is styled correctly', (WidgetTester tester) async {
