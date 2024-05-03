@@ -2615,6 +2615,7 @@ final class BuildScope {
   late Element debugRootElement;
 
   bool _buildScheduled = false;
+  bool _building = false;
   final VoidCallback? onBuildScheduled;
 
   /// Whether [_dirtyElements] need to be sorted again as a result of more
@@ -2636,7 +2637,7 @@ final class BuildScope {
       _dirtyElements.add(element);
       element._inDirtyList = true;
     }
-    if (!_buildScheduled) {
+    if (!_buildScheduled && !_building) {
       _buildScheduled = true;
       onBuildScheduled?.call();
     }
@@ -2986,6 +2987,7 @@ class BuildOwner {
     }
     try {
       _scheduledFlushDirtyElements = true;
+      buildScope._building = true;
       if (callback != null) {
         assert(_debugStateLocked);
         Element? debugPreviousBuildTarget;
@@ -3017,6 +3019,7 @@ class BuildOwner {
         return true;
       }());
     } finally {
+      buildScope._building = false;
       _scheduledFlushDirtyElements = false;
       if (!kReleaseMode) {
         FlutterTimeline.finishSync();
@@ -4252,6 +4255,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       return;
     }
     _inDirtyList = false;
+    _buildScope = _parent?.buildScope;
     visitChildren((Element child) {
       child._updateBuildScopeRecursively();
     });
@@ -4497,7 +4501,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(_lifecycleState == _ElementLifecycle.inactive);
     _parent = parent;
     _owner = parent.owner;
-    _buildScope = parent.buildScope;
     assert(() {
       if (debugPrintGlobalKeyedWidgetLifecycle) {
         debugPrint('Reactivating $this (now child of $_parent).');
