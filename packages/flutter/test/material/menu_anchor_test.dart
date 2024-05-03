@@ -2533,15 +2533,13 @@ void main() {
       );
     });
 
-    testWidgets('MenuItemButton is null check operator when it child is null', (WidgetTester tester) async {
+    testWidgets('MenuItemButton can build when its child is null', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
             body: SizedBox(
               width: 200,
-              child: MenuItemButton(
-                child: null,
-              ),
+              child: MenuItemButton(),
             ),
           ),
         ),
