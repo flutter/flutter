@@ -585,8 +585,10 @@ class _SnackBarState extends State<SnackBar> {
 
   @override
   void dispose() {
-    assert(!_debugDisposed);
     assert(() {
+      if (_debugDisposed) {
+        print('Snackbar.dispose is used after being disposed. $this');
+      }
       _debugDisposed = true;
       return true;
     }());
@@ -611,7 +613,12 @@ class _SnackBarState extends State<SnackBar> {
 
   @override
   Widget build(BuildContext context) {
-    assert(!_debugDisposed);
+    assert(() {
+      if (_debugDisposed) {
+        print('Snackbar.dispose is used after being disposed. $this');
+      }
+      return true;
+    }());
     assert(debugCheckHasMediaQuery(context));
     final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
     assert(widget.animation != null);
