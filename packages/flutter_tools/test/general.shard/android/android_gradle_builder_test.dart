@@ -46,7 +46,7 @@ void main() {
     late BufferLogger logger;
     late TestUsage testUsage;
     late FakeAnalytics fakeAnalytics;
-    late FileSystem fileSystem;
+    late MemoryFileSystem fileSystem;
     late FakeProcessManager processManager;
 
     setUp(() {
