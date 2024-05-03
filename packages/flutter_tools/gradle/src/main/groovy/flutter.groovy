@@ -868,13 +868,21 @@ class FlutterPlugin implements Plugin<Project> {
                     numProcessedPlugins--
                     if (numProcessedPlugins == 0) {
                         if (maxPluginCompileSdkVersion > projectCompileSdkVersion) {
-                            project.logger.error("Your project is configured to compile against Android SDK $projectCompileSdkVersion, but the following plugins(s) require to be compiled against a higher Android SDK version:")s
+                            project.logger.error("Your project is configured to compile against Android SDK $projectCompileSdkVersion, but the following plugins(s) require to be compiled against a higher Android SDK version:")
                             for (Tuple2<String, String> pluginToCompileSdkVersion : pluginsWithHigherSdkVersion) {
                                 if (pluginToCompileSdkVersion.second > projectCompileSdkVersion) {
                                     project.logger.error("- ${pluginToCompileSdkVersion.first} compiles against Android SDK ${pluginToCompileSdkVersion.second}")
                                 }
                             }
-                            project.logger.error("Fix this issue by compiling against the highest Android SDK version.\nAdd the following to ${project.projectDir}${File.separator}build.gradle:\nandroid {\n  compileSdkVersion ${maxPluginCompileSdkVersion}\n  ...\n}\n")
+                            project.logger.error("""\
+                                Fix this issue by compiling against the highest Android SDK version (they are backward compatible).
+                                Add the following to ${project.projectDir}${File.separator}build.gradle:
+                                
+                                    android {
+                                        compileSdk = ${maxPluginCompileSdkVersion}
+                                        ...
+                                    }
+                                """.stripIndent())
                         }
                         if (maxPluginNdkVersion != projectNdkVersion) {
                             project.logger.error("Your project is configured with Android NDK $projectNdkVersion, but the following plugin(s) depend a different Android NDK version:")
@@ -883,7 +891,15 @@ class FlutterPlugin implements Plugin<Project> {
                                     project.logger.error("- ${pluginToNdkVersion.first} requires Android NDK ${pluginToNdkVersion.second}")
                                 }
                             }
-                            project.logger.error("Fix this issue by using the highest Android NDK version.\nAdd the following to ${project.projectDir}${File.separator}build.gradle:\nandroid {\n  ndkVersion = \"${maxPluginNdkVersion}\"\n  ...\n}\n")
+                            project.logger.error("""\
+                                Fix this issue by using the highest Android NDK version (they are backward compatible).
+                                Add the following to ${project.projectDir}${File.separator}build.gradle:
+                                
+                                    android {
+                                        ndkVersion = \"${maxPluginNdkVersion}\"
+                                        ...
+                                    }
+                                """.stripIndent())
                         }
                     }
                 }
