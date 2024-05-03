@@ -101,8 +101,7 @@ class FileSystemResourceProvider implements ResourceProvider {
 
   @override
   Link getLink(String path) {
-    // TODO: implement getLink
-    throw UnimplementedError();
+    throw UnimplementedError('getLink Not Implemented');
   }
 }
 
@@ -353,7 +352,6 @@ abstract class _PhysicalResource implements Resource {
   @override
   int get hashCode => path.hashCode;
 
-  @Deprecated('Use parent2 instead')
   @override
   Folder get parent {
     final String parentPath = pathContext.dirname(path);
