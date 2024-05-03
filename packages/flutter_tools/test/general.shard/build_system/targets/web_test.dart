@@ -992,14 +992,14 @@ void main() {
 
       // Each individual property being made non-default
       WasmCompilerConfig(optimizationLevel: 0),
-      WasmCompilerConfig(renderer: WebRendererMode.skwasm),
+      WasmCompilerConfig(renderer: WebRendererMode.canvaskit),
       WasmCompilerConfig(stripWasm: false),
 
       // All properties non-default
       WasmCompilerConfig(
         optimizationLevel: 0,
         stripWasm: false,
-        renderer: WebRendererMode.skwasm,
+        renderer: WebRendererMode.canvaskit,
       ),
     ];
 
