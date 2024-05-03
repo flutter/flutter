@@ -76,7 +76,6 @@ void main() {
         const WasmCompilerConfig(
           optimizationLevel: 0,
           stripWasm: false,
-          renderer: WebRendererMode.skwasm,
         ),
         const JsCompilerConfig.run(
           nativeNullAssertions: true,
