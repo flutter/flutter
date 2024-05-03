@@ -61,13 +61,13 @@ class SpringDescription {
   ///
   /// Stiffness defines the spring constant, which measures the strength of
   /// the spring. A stiff spring applies more force to the object that is
-  /// attached when the spring is not at the rest position.
+  /// attached for some deviation from the rest position.
   final double stiffness;
 
   /// The damping coefficient (c).
   ///
-  /// It is a pure number without physical meaning,describes the oscillation
-  /// and decay of a system after being disturbed.The larger the damping,
+  /// It is a pure number without physical meaning and describes the oscillation
+  /// and decay of a system after being disturbed. The larger the damping,
   /// the fewer oscillations and smaller the amplitude of the elastic motion.
   ///
   /// Do not confuse the damping _coefficient_ (c) with the damping _ratio_ (ζ).
@@ -125,7 +125,7 @@ enum SpringType {
 /// {@end-tool}
 ///
 /// This [AnimationController] could be used with an [AnimatedBuilder] to
-/// animate the position of a child as if it was attached to a spring.
+/// animate the position of a child as if it were attached to a spring.
 class SpringSimulation extends Simulation {
   /// Creates a spring simulation from the provided spring description, start
   /// distance, end distance, and initial velocity.
