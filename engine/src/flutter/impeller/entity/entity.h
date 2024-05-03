@@ -7,7 +7,6 @@
 
 #include <cstdint>
 
-#include "impeller/core/capture.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/matrix.h"
@@ -123,10 +122,6 @@ class Entity {
 
   Scalar DeriveTextScale() const;
 
-  Capture& GetCapture() const;
-
-  void SetCapture(Capture capture) const;
-
   Entity Clone() const;
 
  private:
@@ -136,7 +131,6 @@ class Entity {
   std::shared_ptr<Contents> contents_;
   BlendMode blend_mode_ = BlendMode::kSourceOver;
   uint32_t clip_depth_ = 1u;
-  mutable Capture capture_;
 };
 
 }  // namespace impeller

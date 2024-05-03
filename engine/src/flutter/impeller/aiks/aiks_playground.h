@@ -7,7 +7,6 @@
 
 #include "flutter/fml/macros.h"
 #include "impeller/aiks/aiks_context.h"
-#include "impeller/aiks/aiks_playground_inspector.h"
 #include "impeller/aiks/picture.h"
 #include "impeller/playground/playground_test.h"
 #include "impeller/typographer/typographer_context.h"
@@ -39,7 +38,6 @@ class AiksPlayground : public PlaygroundTest {
 
  private:
   std::shared_ptr<TypographerContext> typographer_context_;
-  AiksInspector inspector_;
 
   AiksPlayground(const AiksPlayground&) = delete;
 
