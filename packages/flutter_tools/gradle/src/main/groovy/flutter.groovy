@@ -837,6 +837,8 @@ class FlutterPlugin implements Plugin<Project> {
             String projectNdkVersion = project.android.ndkVersion ?: ndkVersionIfUnspecified
             String maxPluginNdkVersion = projectNdkVersion
             int numProcessedPlugins = getPluginList(project).size()
+            List<Tuple2<String, String>> pluginsToNdkVersions = []
+            List<Tuple2<String, String>> pluginsToSdkVersions = []
 
             getPluginList(project).each { pluginObject ->
                 assert(pluginObject.name instanceof String)
@@ -851,8 +853,13 @@ class FlutterPlugin implements Plugin<Project> {
                     if (getCompileSdkFromProject(pluginProject).isInteger()) {
                         pluginCompileSdkVersion = getCompileSdkFromProject(pluginProject) as int
                     }
+
+                    pluginsToSdkVersions.add(new Tuple(pluginProject.name, pluginProject.android.compileSdkVersion))
+
                     maxPluginCompileSdkVersion = Math.max(pluginCompileSdkVersion, maxPluginCompileSdkVersion)
                     String pluginNdkVersion = pluginProject.android.ndkVersion ?: ndkVersionIfUnspecified
+                    pluginsToNdkVersions.add(new Tuple(pluginProject.name, pluginNdkVersion))
+                    // project.logger.quiet("NDK version for plugin ${pluginProject.name} is ${pluginProject.android.ndkVersion}")
                     maxPluginNdkVersion = mostRecentSemanticVersion(pluginNdkVersion, maxPluginNdkVersion)
 
                     numProcessedPlugins--
