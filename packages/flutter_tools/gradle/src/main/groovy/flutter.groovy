@@ -693,7 +693,7 @@ class FlutterPlugin implements Plugin<Project> {
             if (pluginProject == null) {
                 // Plugin was not included in `settings.gradle`, but is listed in `.flutter-plugins`.
                 project.logger.error("Plugin project :${it.name} listed, but not found. Please fix your settings.gradle/settings.gradle.kts.")
-            } else if (doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path as String)) {
+            } else if (doesSupportAndroidPlatform(pluginProject)) {
                 // Plugin has a functioning `android` folder and is included successfully, although it's not supported.
                 // It must be configured nonetheless, to not throw an "Unresolved reference" exception.
                 configurePluginProject(it)
@@ -709,9 +709,18 @@ class FlutterPlugin implements Plugin<Project> {
      * Returns `true` if the given path contains an `android` directory
      * containing a `build.gradle` or `build.gradle.kts` file.
      */
-    private Boolean doesSupportAndroidPlatform(String path) {
-        File buildGradle = new File(path, 'android' + File.separator + 'build.gradle')
-        File buildGradleKts = new File(path, 'android' + File.separator + 'build.gradle.kts')
+    private Boolean doesSupportAndroidPlatform(Project project) {
+        return buildGradleFile(project).exists()
+    }
+
+    /**
+     * Returns the Gradle build script for the build. When both Groovy and
+     * Kotlin variants exist, then Groovy (build.gradle) is preferred over
+     * Kotlin (build.gradle.kts). This is the same behavior as Gradle 8.5.
+     */
+    private File buildGradleFile(Project project) {
+        File buildGradle = new File(project.projectDir.parentFile, "android" + File.separator + "build.gradle")
+        File buildGradleKts = new File(project.projectDir.parentFile, "android" + File.separator + "build.gradle")
         if (buildGradle.exists() && buildGradleKts.exists()) {
             project.logger.error(
                 "Both build.gradle and build.gradle.kts exist, so " +
@@ -719,7 +728,7 @@ class FlutterPlugin implements Plugin<Project> {
             )
         }
 
-        return buildGradle.exists() || buildGradleKts.exists()
+        return buildGradle.exists() ? buildGradle : buildGradleKts
     }
 
     /**
@@ -876,7 +885,7 @@ class FlutterPlugin implements Plugin<Project> {
                             }
                             project.logger.error("""\
                                 Fix this issue by compiling against the highest Android SDK version (they are backward compatible).
-                                Add the following to ${project.projectDir}${File.separator}build.gradle:
+                                Add the following to ${buildGradleFile(project).path}:
                                 
                                     android {
                                         compileSdk = ${maxPluginCompileSdkVersion}
@@ -893,8 +902,8 @@ class FlutterPlugin implements Plugin<Project> {
                             }
                             project.logger.error("""\
                                 Fix this issue by using the highest Android NDK version (they are backward compatible).
-                                Add the following to ${project.projectDir}${File.separator}build.gradle:
-                                
+                                Add the following to ${buildGradleFile(project).path}:
+
                                     android {
                                         ndkVersion = \"${maxPluginNdkVersion}\"
                                         ...
