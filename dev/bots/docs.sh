@@ -107,11 +107,11 @@ function parse_args() {
   fi
 }
 
-function build_snippets() (
-  local afad_dir="$FLUTTER_ROOT/dev/snippets"
+function build_snippets_tool() (
+  local snippets_dir="$FLUTTER_ROOT/dev/snippets"
   local output_dir="$FLUTTER_BIN/cache/artifacts/snippets"
   echo "Building snippets tool executable."
-  command cd "$afad_dir"
+  command cd "$snippets_dir"
   mkdir -p "$output_dir"
   dart pub get
   dart compile exe -o "$output_dir/snippets" bin/snippets.dart
@@ -121,11 +121,11 @@ function generate_docs() {
     # Install and activate dartdoc.
     # When updating to a new dartdoc version, please also update
     # `dartdoc_options.yaml` to include newly introduced error and warning types.
-    "$DART" pub global activate dartdoc 8.0.5
+    "$DART" pub global activate dartdoc 8.0.6
 
     # Build and install the snippets tool, which resides in
     # the dev/docs/snippets directory.
-    build_snippets
+    build_snippets_tool
 
     # This script generates a unified doc set, and creates
     # a custom index.html, placing everything into DOC_DIR.

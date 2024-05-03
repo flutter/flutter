@@ -215,12 +215,6 @@ void main(List<String> argList) {
     return;
   }
 
-  String template = '';
-  if (sampleType == 'sample' || sampleType == 'dartpad') {
-    template = (args[_kTemplateOption] as String? ?? '')
-        .replaceAll(RegExp(r'.tmpl$'), '');
-  }
-
   final bool formatOutput = args[_kFormatOutputOption]! as bool;
   final String packageName = args[_kPackageOption] as String? ?? '';
   final String libraryName = args[_kLibraryOption] as String? ?? '';
@@ -275,7 +269,6 @@ void main(List<String> argList) {
     startLine: sourceLine,
     element: elementName,
     sourceFile: filesystem.file(sourcePath),
-    template: template,
     type: sampleType,
   );
   final Map<String, Object?> metadata = <String, Object?>{

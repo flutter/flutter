@@ -78,7 +78,6 @@ class SnippetDartdocParser {
     int? startLine,
     String? element,
     required File sourceFile,
-    String template = '',
     String type = '',
     bool silent = true,
   }) {
@@ -88,7 +87,7 @@ class SnippetDartdocParser {
       // The parser wants to read the arguments from the input, so we create a new
       // tool line to match the given arguments, so that we can use the same parser for
       // editing and docs generation.
-      '/// {@tool $type ${template.isNotEmpty ? ' --template=$template}' : ''}}',
+      '/// {@tool $type}',
       // Snippet input comes in with the comment markers stripped, so we add them
       // back to make it conform to the source format, so we can use the same
       // parser for editing samples as we do for processing docs.
@@ -178,15 +177,12 @@ class SnippetDartdocParser {
       parseComment(element);
       for (final CodeSample sample in element.samples) {
         switch (sample.runtimeType) {
-          case ApplicationSample:
-            sampleCount++;
-            break;
-          case DartpadSample:
+          case DartpadSample _:
             dartpadCount++;
-            break;
-          case SnippetSample:
+          case ApplicationSample _:
+            sampleCount++;
+          case SnippetSample _:
             snippetCount++;
-            break;
         }
       }
     }
@@ -233,7 +229,6 @@ class SnippetDartdocParser {
                   lineProto: line,
                 ),
               );
-              break;
             case 'sample':
               if (linkedFile != null) {
                 samples.add(
@@ -255,7 +250,6 @@ class SnippetDartdocParser {
                   lineProto: line,
                 ),
               );
-              break;
             case 'dartpad':
               if (linkedFile != null) {
                 samples.add(
@@ -277,7 +271,6 @@ class SnippetDartdocParser {
                   lineProto: line,
                 ),
               );
-              break;
             default:
               throw SnippetException(
                   'Unknown snippet type ${snippetArgs.first}');

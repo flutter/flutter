@@ -78,7 +78,7 @@ class FileSystemResourceProvider implements ResourceProvider {
   Folder? getStateLocation(String pluginId) {
     if (_stateLocation != null) {
       final file.Directory directory =
-          filesystem.directory(join(_stateLocation!, pluginId));
+          filesystem.directory(join(_stateLocation, pluginId));
       directory.createSync(recursive: true);
       return _PhysicalFolder(directory);
     }

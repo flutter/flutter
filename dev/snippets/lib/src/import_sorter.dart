@@ -386,26 +386,18 @@ class _DirectiveInfo implements Comparable<_DirectiveInfo> {
   }
 }
 
-class _DirectivePriority {
-  const _DirectivePriority(this.name, this.ordinal);
+enum _DirectivePriority {
+  IMPORT_SDK('IMPORT_SDK', 0),
+  IMPORT_PKG('IMPORT_PKG', 1),
+  IMPORT_OTHER('IMPORT_OTHER', 2),
+  IMPORT_REL('IMPORT_REL', 3),
+  EXPORT_SDK('EXPORT_SDK', 4),
+  EXPORT_PKG('EXPORT_PKG', 5),
+  EXPORT_OTHER('EXPORT_OTHER', 6),
+  EXPORT_REL('EXPORT_REL', 7),
+  PART('PART', 8);
 
-  static const _DirectivePriority IMPORT_SDK =
-      _DirectivePriority('IMPORT_SDK', 0);
-  static const _DirectivePriority IMPORT_PKG =
-      _DirectivePriority('IMPORT_PKG', 1);
-  static const _DirectivePriority IMPORT_OTHER =
-      _DirectivePriority('IMPORT_OTHER', 2);
-  static const _DirectivePriority IMPORT_REL =
-      _DirectivePriority('IMPORT_REL', 3);
-  static const _DirectivePriority EXPORT_SDK =
-      _DirectivePriority('EXPORT_SDK', 4);
-  static const _DirectivePriority EXPORT_PKG =
-      _DirectivePriority('EXPORT_PKG', 5);
-  static const _DirectivePriority EXPORT_OTHER =
-      _DirectivePriority('EXPORT_OTHER', 6);
-  static const _DirectivePriority EXPORT_REL =
-      _DirectivePriority('EXPORT_REL', 7);
-  static const _DirectivePriority PART = _DirectivePriority('PART', 8);
+  const _DirectivePriority(this.name, this.ordinal);
 
   final String name;
   final int ordinal;

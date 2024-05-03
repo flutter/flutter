@@ -48,7 +48,6 @@ void main() {
 <iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?split=60&run=true&sample_id={{id}}&sample_channel={{channel}}"></iframe>
 <div>More HTML Bits</div>
 ''');
-          break;
         case 'sample':
         case 'snippet':
           configuration.getHtmlSkeletonFile(type).writeAsStringSync('''
@@ -58,7 +57,6 @@ void main() {
 <pre>{{app}}</pre>
 <div>More HTML Bits</div>
 ''');
-          break;
       }
     }
 

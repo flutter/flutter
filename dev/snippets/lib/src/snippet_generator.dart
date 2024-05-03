@@ -349,8 +349,8 @@ class SnippetGenerator {
     sample.description = description ?? sample.description;
     sample.metadata['description'] = _getDescription(sample);
     switch (sample.runtimeType) {
-      case DartpadSample:
-      case ApplicationSample:
+      case DartpadSample _:
+      case ApplicationSample _:
         String app;
         if (sample.sourceFile == null) {
           final String templateName = sample.template;
@@ -420,8 +420,7 @@ class SnippetGenerator {
           }
           metadataFile.writeAsStringSync(jsonEncoder.convert(metadata));
         }
-        break;
-      case SnippetSample:
+      case SnippetSample _:
         if (sample is SnippetSample) {
           String app;
           if (sample.sourceFile == null) {
@@ -444,7 +443,6 @@ class SnippetGenerator {
           }
           sample.output = app;
         }
-        break;
     }
     return sample.output;
   }
