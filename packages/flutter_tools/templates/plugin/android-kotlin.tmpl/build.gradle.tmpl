@@ -1,10 +1,10 @@
+plugins {
+    id("com.android.library")
+    id("kotlin-android")
+}
+
 group = "{{androidIdentifier}}"
 version = "1.0-SNAPSHOT"
-
-plugins {
-    id("com.android.library") version "{{agpVersion}}"
-    id("kotlin-android") version "{{kotlinVersion}}"
-}
 
 android {
     if (project.android.hasProperty("namespace")) {
