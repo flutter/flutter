@@ -837,8 +837,8 @@ class FlutterPlugin implements Plugin<Project> {
             String projectNdkVersion = project.android.ndkVersion ?: ndkVersionIfUnspecified
             String maxPluginNdkVersion = projectNdkVersion
             int numProcessedPlugins = getPluginList(project).size()
-            List<Tuple2<String, String>> pluginsToNdkVersions = []
-            List<Tuple2<String, String>> pluginsToSdkVersions = []
+            List<Tuple2<String, String>> pluginsWithHigherSdkVersion = []
+            List<Tuple2<String, String>> pluginsWithDifferentNdkVersion = []
 
             getPluginList(project).each { pluginObject ->
                 assert(pluginObject.name instanceof String)
@@ -854,21 +854,36 @@ class FlutterPlugin implements Plugin<Project> {
                         pluginCompileSdkVersion = getCompileSdkFromProject(pluginProject) as int
                     }
 
-                    pluginsToSdkVersions.add(new Tuple(pluginProject.name, pluginProject.android.compileSdkVersion))
-
                     maxPluginCompileSdkVersion = Math.max(pluginCompileSdkVersion, maxPluginCompileSdkVersion)
+                    if (pluginCompileSdkVersion > projectCompileSdkVersion) {
+                        pluginsWithHigherSdkVersion.add(new Tuple(pluginProject.name, pluginCompileSdkVersion))
+                    }
+
                     String pluginNdkVersion = pluginProject.android.ndkVersion ?: ndkVersionIfUnspecified
-                    pluginsToNdkVersions.add(new Tuple(pluginProject.name, pluginNdkVersion))
-                    // project.logger.quiet("NDK version for plugin ${pluginProject.name} is ${pluginProject.android.ndkVersion}")
                     maxPluginNdkVersion = mostRecentSemanticVersion(pluginNdkVersion, maxPluginNdkVersion)
+                    if (pluginNdkVersion != projectNdkVersion) {
+                        pluginsWithDifferentNdkVersion.add(new Tuple(pluginProject.name, pluginNdkVersion))
+                    }
 
                     numProcessedPlugins--
                     if (numProcessedPlugins == 0) {
                         if (maxPluginCompileSdkVersion > projectCompileSdkVersion) {
-                            project.logger.error("One or more plugins require a higher Android SDK version.\nFix this issue by adding the following to ${project.projectDir}${File.separator}build.gradle:\nandroid {\n  compileSdkVersion ${maxPluginCompileSdkVersion}\n  ...\n}\n")
+                            project.logger.error("Your project is configured to compile against Android SDK $projectCompileSdkVersion, but the following plugins(s) require to be compiled against a higher Android SDK version:")s
+                            for (Tuple2<String, String> pluginToCompileSdkVersion : pluginsWithHigherSdkVersion) {
+                                if (pluginToCompileSdkVersion.second > projectCompileSdkVersion) {
+                                    project.logger.error("- ${pluginToCompileSdkVersion.first} compiles against Android SDK ${pluginToCompileSdkVersion.second}")
+                                }
+                            }
+                            project.logger.error("Fix this issue by compiling against the highest Android SDK version.\nAdd the following to ${project.projectDir}${File.separator}build.gradle:\nandroid {\n  compileSdkVersion ${maxPluginCompileSdkVersion}\n  ...\n}\n")
                         }
                         if (maxPluginNdkVersion != projectNdkVersion) {
-                            project.logger.error("One or more plugins require a higher Android NDK version.\nFix this issue by adding the following to ${project.projectDir}${File.separator}build.gradle:\nandroid {\n  ndkVersion \"${maxPluginNdkVersion}\"\n  ...\n}\n")
+                            project.logger.error("Your project is configured with Android NDK $projectNdkVersion, but the following plugin(s) depend a different Android NDK version:")
+                            for (Tuple2<String, String> pluginToNdkVersion : pluginsWithDifferentNdkVersion) {
+                                if (pluginToNdkVersion.second != projectNdkVersion) {
+                                    project.logger.error("- ${pluginToNdkVersion.first} requires Android NDK ${pluginToNdkVersion.second}")
+                                }
+                            }
+                            project.logger.error("Fix this issue by using the highest Android NDK version.\nAdd the following to ${project.projectDir}${File.separator}build.gradle:\nandroid {\n  ndkVersion = \"${maxPluginNdkVersion}\"\n  ...\n}\n")
                         }
                     }
                 }
