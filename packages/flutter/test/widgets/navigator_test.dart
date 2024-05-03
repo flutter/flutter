@@ -2989,7 +2989,7 @@ void main() {
       const List<Page<void>> myPages = <Page<void>>[
         MaterialPage<void>(child: Text('page1')),
         MaterialPage<void>(
-          child: PopScope<void>(
+          child: PopScope(
             canPop: false,
             child: Text('page2'),
           ),
@@ -4908,9 +4908,9 @@ void main() {
             home: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 builderSetState = setState;
-                return PopScope<Object?>(
+                return PopScope(
                   canPop: canPop(),
-                  onPopInvokedWithResult: (bool success, Object? result) {
+                  onPopInvoked: (bool success) {
                     if (success || pages.last == _Page.noPop) {
                       return;
                     }
@@ -5024,9 +5024,9 @@ void main() {
           MaterialApp(
             home: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-                return PopScope<Object?>(
+                return PopScope(
                   canPop: canPop(),
-                  onPopInvokedWithResult: (bool success, Object? result) {
+                  onPopInvoked: (bool success) {
                     if (success || pages.last == _Page.noPop) {
                       return;
                     }
@@ -5117,9 +5117,9 @@ void main() {
           MaterialApp(
             home: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-                return PopScope<Object?>(
+                return PopScope(
                   canPop: canPop(),
-                  onPopInvokedWithResult: (bool success, Object? result) {
+                  onPopInvoked: (bool success) {
                     if (success || pages.last == _PageWithYesPop.noPop) {
                       return;
                     }
@@ -5189,7 +5189,7 @@ void main() {
                             child: _LinksPage(
                               title: 'Can pop page',
                               canPop: true,
-                              onPopInvoked: (bool didPop, void result) {
+                              onPopInvoked: (bool didPop) {
                                 onPopInvokedCallCount += 1;
                               },
                             ),
@@ -5556,7 +5556,7 @@ class _LinksPage extends StatelessWidget {
   final bool? canPop;
   final VoidCallback? onBack;
   final String title;
-  final PopInvokedWithResultCallback<Object?>? onPopInvoked;
+  final PopInvokedCallback? onPopInvoked;
 
   @override
   Widget build(BuildContext context) {
@@ -5575,9 +5575,9 @@ class _LinksPage extends StatelessWidget {
                 child: const Text('Go back'),
               ),
             if (canPop != null)
-              PopScope<void>(
+              PopScope(
                 canPop: canPop!,
-                onPopInvokedWithResult: onPopInvoked,
+                onPopInvoked: onPopInvoked,
                 child: const SizedBox.shrink(),
               ),
           ],
