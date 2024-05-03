@@ -629,7 +629,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
       child: AnimatedBuilder(
         animation: animation,
         builder: (BuildContext context, Widget? child) {
-           curvedAnimation ??= CurvedAnimation(
+          curvedAnimation ??= CurvedAnimation(
             parent: animation,
             curve: Curves.easeInOutCubicEmphasized,
             reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
@@ -640,11 +640,11 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
             ? lerpDouble(0.0, MediaQuery.paddingOf(context).top, curvedAnimation!.value)!
             : 0.0;
 
-            viewFadeOnIntervalCurve ??= CurvedAnimation(
-              parent: animation,
-              curve: _kViewFadeOnInterval,
-              reverseCurve: _kViewFadeOnInterval.flipped,
-            );
+          viewFadeOnIntervalCurve ??= CurvedAnimation(
+            parent: animation,
+            curve: _kViewFadeOnInterval,
+            reverseCurve: _kViewFadeOnInterval.flipped,
+          );
 
           return FadeTransition(
             opacity: viewFadeOnIntervalCurve!,
