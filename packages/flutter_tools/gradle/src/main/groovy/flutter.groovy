@@ -894,7 +894,7 @@ class FlutterPlugin implements Plugin<Project> {
                                 """.stripIndent())
                         }
                         if (maxPluginNdkVersion != projectNdkVersion) {
-                            project.logger.error("Your project is configured with Android NDK $projectNdkVersion, but the following plugin(s) depend a different Android NDK version:")
+                            project.logger.error("Your project is configured with Android NDK $projectNdkVersion, but the following plugin(s) depend on a different Android NDK version:")
                             for (Tuple2<String, String> pluginToNdkVersion : pluginsWithDifferentNdkVersion) {
                                 if (pluginToNdkVersion.second != projectNdkVersion) {
                                     project.logger.error("- ${pluginToNdkVersion.first} requires Android NDK ${pluginToNdkVersion.second}")
