@@ -6,12 +6,11 @@
 #include <optional>
 
 #include "fml/logging.h"
-#include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/entity/contents/anonymous_contents.h"
 #include "impeller/entity/contents/content_context.h"
-#include "impeller/entity/contents/texture_contents.h"
+#include "impeller/entity/entity.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_pass.h"
 
