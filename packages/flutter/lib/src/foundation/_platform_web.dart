@@ -18,29 +18,45 @@ platform.TargetPlatform get defaultTargetPlatform {
       _browserPlatform;
 }
 
-final platform.TargetPlatform? _testPlatform = () {
-  platform.TargetPlatform? result;
+// The TargetPlatform used ON WEB TESTS, unless overridden.
+//
+// Respects the `ui_web.browser.debugOperatingSystemOverride` value (when set).
+platform.TargetPlatform? get _testPlatform {
+  platform.TargetPlatform? testPlatform;
   assert(() {
     if (ui_web.debugEmulateFlutterTesterEnvironment) {
-      result = platform.TargetPlatform.android;
+      // Return the overridden operatingSystem in tests, if any...
+      if (ui_web.browser.debugOperatingSystemOverride != null) {
+        testPlatform =
+          _operatingSystemToTargetPlatform(ui_web.browser.operatingSystem);
+      } else {
+        // Fall back to `android` for tests.
+        testPlatform = platform.TargetPlatform.android;
+      }
     }
     return true;
   }());
-  return result;
-}();
+  return testPlatform;
+}
 
 // Current browser platform.
 //
-// Lazy-initialized and forever cached as `defaultTargetPlatform` is routinely
-// called dozens of times per frame.
-final platform.TargetPlatform _browserPlatform = () {
-  return switch (ui_web.browser.operatingSystem) {
+// The computation of `operatingSystem` is cached in the ui_web package;
+// this getter may be called dozens of times per frame.
+//
+// _browserPlatform is lazily initialized, and 
+final platform.TargetPlatform _browserPlatform =
+  _operatingSystemToTargetPlatform(ui_web.browser.operatingSystem);
+
+// Converts an ui_web.OperatingSystem enum into a platform.TargetPlatform.
+platform.TargetPlatform _operatingSystemToTargetPlatform(ui_web.OperatingSystem os) {
+  return switch (os) {
     ui_web.OperatingSystem.android => platform.TargetPlatform.android,
     ui_web.OperatingSystem.iOs => platform.TargetPlatform.iOS,
     ui_web.OperatingSystem.linux => platform.TargetPlatform.linux,
     ui_web.OperatingSystem.macOs => platform.TargetPlatform.macOS,
     ui_web.OperatingSystem.windows => platform.TargetPlatform.windows,
-    // Default 'unknown' OS values to `android`.
-    _ => platform.TargetPlatform.android,
+    // Resolve 'unknown' OS values to `android`.
+    ui_web.OperatingSystem.unknown => platform.TargetPlatform.android,
   };
-}();
+}
