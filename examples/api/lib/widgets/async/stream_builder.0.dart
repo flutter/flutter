@@ -144,7 +144,11 @@ class BidsListener extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
-                  child: Text('\$${snapshot.data} (closed)'),
+                  child: Text(
+                    snapshot.hasData
+                        ? '\$${snapshot.data} (closed)'
+                        : '(closed)',
+                  ),
                 ),
               ];
           }

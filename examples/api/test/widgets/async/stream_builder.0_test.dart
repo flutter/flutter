@@ -124,7 +124,7 @@ void main() {
           await tester.pump();
 
           expect(find.byIcon(Icons.info), findsOneWidget);
-          expect(find.text(r'$null (closed)'), findsOneWidget);
+          expect(find.text('(closed)'), findsOneWidget);
         },
       );
     });
