@@ -47,7 +47,7 @@ void main() {
     );
 
     testWidgets(
-      "updates bar value on 'change foo' button tap",
+      "updates bar value on 'change bar' button tap",
       (WidgetTester tester) async {
         await tester.pumpWidget(
           const example.SharedAppDataExampleApp(),
