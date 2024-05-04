@@ -23,7 +23,7 @@ void main() {
     expect(find.widgetWithText(SwitchListTile, 'Multi Line Text'), findsOneWidget);
     expect(find.widgetWithText(SwitchListTile, 'Include Action'), findsOneWidget);
     expect(find.widgetWithText(SwitchListTile, 'Long Action Label'), findsOneWidget);
-    
+
     await tester.scrollUntilVisible(find.byType(Slider), 30);
     expect(find.text('Action new-line overflow threshold'), findsOneWidget);
     expect(find.byType(Slider), findsOneWidget);
