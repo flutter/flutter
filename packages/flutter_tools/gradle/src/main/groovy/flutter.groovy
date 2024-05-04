@@ -215,7 +215,15 @@ class FlutterPlugin implements Plugin<Project> {
         this.project = project
 
         Project rootProject = project.rootProject
-        if (isFlutterAppProject()) {
+        boolean lockfilesExist = true
+        rootProject.subprojects.each { subproject ->
+            if (!(subproject.file("project-{subproject.name}.lockfile").exists() &&
+                  subproject.file("buildscript-gradle.lockfile").exists())) {
+                lockfilesExist = false
+                break
+            }
+        }
+        if (isFlutterAppProject() && !lockfilesExist) {
             rootProject.tasks.register("generateLockfiles") {
                 rootProject.subprojects.each { subproject ->
                     String gradlew = (OperatingSystem.current().isWindows()) ?
