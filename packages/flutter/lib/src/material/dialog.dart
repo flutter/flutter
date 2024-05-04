@@ -1306,15 +1306,6 @@ class SimpleDialog extends StatelessWidget {
   }
 }
 
-Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-  return FadeTransition(
-    opacity: CurvedAnimation(
-      parent: animation,
-      curve: Curves.easeOut,
-    ),
-    child: child,
-  );
-}
 
 /// Displays a Material dialog above the current contents of the app, with
 /// Material entrance and exit animations, modal barrier color, and modal
@@ -1586,8 +1577,27 @@ class DialogRoute<T> extends RawDialogRoute<T> {
          },
          barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,
          transitionDuration: const Duration(milliseconds: 150),
-         transitionBuilder: _buildMaterialDialogTransitions,
        );
+
+  CurvedAnimation? _fadeCurve;
+
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    _fadeCurve ??= CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOut,
+    );
+    return FadeTransition(
+      opacity: _fadeCurve!,
+      child: child,
+    );
+  }
+
+  @override
+  void dispose() {
+    _fadeCurve?.dispose();
+    super.dispose();
+  }
 }
 
 double _scalePadding(double textScaleFactor) {
