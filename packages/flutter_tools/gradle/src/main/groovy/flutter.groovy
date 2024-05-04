@@ -693,7 +693,7 @@ class FlutterPlugin implements Plugin<Project> {
             if (pluginProject == null) {
                 // Plugin was not included in `settings.gradle`, but is listed in `.flutter-plugins`.
                 project.logger.error("Plugin project :${it.name} listed, but not found. Please fix your settings.gradle/settings.gradle.kts.")
-            } else if (doesSupportAndroidPlatform(pluginProject)) {
+            } else if (pluginSupportsAndroidPlatform(pluginProject)) {
                 // Plugin has a functioning `android` folder and is included successfully, although it's not supported.
                 // It must be configured nonetheless, to not throw an "Unresolved reference" exception.
                 configurePluginProject(it)
@@ -706,11 +706,13 @@ class FlutterPlugin implements Plugin<Project> {
 
     // TODO(54566): Can remove this function and its call sites once resolved.
     /**
-     * Returns `true` if the given path contains an `android` directory
+     * Returns `true` if the given project is a plugin project having an `android` directory
      * containing a `build.gradle` or `build.gradle.kts` file.
      */
-    private Boolean doesSupportAndroidPlatform(Project project) {
-        return buildGradleFile(project).exists()
+    private Boolean pluginSupportsAndroidPlatform(Project project) {
+        File buildGradle = new File(project.projectDir.parentFile, "android" + File.separator + "build.gradle")
+        File buildGradleKts = new File(project.projectDir.parentFile, "android" + File.separator + "build.gradle.kts")
+        return buildGradle.exists() || buildGradleKts.exists()
     }
 
     /**
