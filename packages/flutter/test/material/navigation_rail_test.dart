@@ -3633,30 +3633,82 @@ void main() {
   });
 
   testWidgets('NavigationRail labels shall not overflow if longer texts provided - extended', (WidgetTester tester) async {
-    await _pumpNavigationRail(
-      tester,
-      navigationRail: NavigationRail(
-        selectedIndex: 1,
-        extended: true,
-        destinations: const <NavigationRailDestination>[
-          NavigationRailDestination(
-            icon: Icon(Icons.favorite_border),
-            selectedIcon: Icon(Icons.favorite),
-            label: Text('Abc'),
-          ),
-          NavigationRailDestination(
-            icon: Icon(Icons.bookmark_border),
-            selectedIcon: Icon(Icons.bookmark),
-            label: Text('Longer bookmark text'),
-          ),
-        ],
+
+    // Adding widget separately to ensure the navigation rail's width is fixed so navigation destination shall wrap itself as expected
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: Builder(
+        builder: (BuildContext context) {
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 1.0,
+            maxScaleFactor: 1.0,
+            child: Scaffold(
+              body: Row(
+                children: <Widget>[
+                  SizedBox(
+                    width: 140.0,
+                    child: NavigationRail(
+                      selectedIndex: 1,
+                      extended: true,
+                      destinations: const <NavigationRailDestination>[
+                        NavigationRailDestination(
+                          icon: Icon(Icons.favorite_border),
+                          selectedIcon: Icon(Icons.favorite),
+                          label: Text('Abc'),
+                        ),
+                        NavigationRailDestination(
+                          icon: Icon(Icons.bookmark_border),
+                          selectedIcon: Icon(Icons.bookmark),
+                          label: Text('Very long bookmark text for navigation destination'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Expanded(
+                    child: Text('body'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
-    );
+    ));
 
     expect(find.byType(NavigationRail), findsOneWidget);
-    final Finder longLabelNavDestinationFinder = find.text(
-      'Longer bookmark text',
+    final Finder normalLabelNavDestinationFinder = find.text(
+      'Abc',
     );
+    final Finder longLabelNavDestinationFinder = find.text(
+      'Very long bookmark text for navigation destination',
+    );
+    expect(normalLabelNavDestinationFinder, findsOneWidget);
+    expect(longLabelNavDestinationFinder, findsOneWidget);
+
+    // Getting text's widgets to determine their heights.
+    final Text normalTextWidget = tester.firstWidget(
+      normalLabelNavDestinationFinder,
+    );
+    final Text longerTextWidget = tester.firstWidget(
+      longLabelNavDestinationFinder,
+    );
+    expect(normalTextWidget, isNotNull);
+    expect(longerTextWidget, isNotNull);
+
+    // Getting widget's height for comparison
+    final Size baseSizeForNormalText = tester.getSize(
+      normalLabelNavDestinationFinder,
+    );
+    final Size baseSizeForLongerText = tester.getSize(
+      longLabelNavDestinationFinder,
+    );
+
+    // When longer text given, it's height shall differ from the normal text's height.
+    expect(
+      baseSizeForNormalText.height < baseSizeForLongerText.height,
+      isTrue,
+    );
+
     final Finder flexibleWithNavDestinationText = find.descendant(
       of: find.byType(Flexible),
       matching: find.descendant(
