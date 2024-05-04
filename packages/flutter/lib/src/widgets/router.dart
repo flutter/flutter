@@ -1476,15 +1476,15 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
 
   @override
   void routerReportsNewRouteInformation(RouteInformation routeInformation, {RouteInformationReportingType type = RouteInformationReportingType.none}) {
-    final bool replace =
-      type == RouteInformationReportingType.neglect ||
-      (type == RouteInformationReportingType.none &&
-      _equals(_valueInEngine.uri, routeInformation.uri));
     SystemNavigator.selectMultiEntryHistory();
     SystemNavigator.routeInformationUpdated(
       uri: routeInformation.uri,
       state: routeInformation.state,
-      replace: replace,
+      replace: switch (type) {
+        RouteInformationReportingType.neglect => true,
+        RouteInformationReportingType.navigate => false,
+        RouteInformationReportingType.none => _equals(_valueInEngine.uri, routeInformation.uri),
+      },
     );
     _value = routeInformation;
     _valueInEngine = routeInformation;
