@@ -1096,7 +1096,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   @override
   Duration get transitionDuration => _kModalPopupTransitionDuration;
 
-  Animation<double>? _animation;
+  CurvedAnimation? _animation;
 
   late Tween<Offset> _offsetTween;
 
@@ -1141,6 +1141,12 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
         child: child,
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _animation?.dispose();
+    super.dispose();
   }
 }
 
@@ -1237,26 +1243,6 @@ Future<T?> showCupertinoModalPopup<T>({
 // transitions.
 final Animatable<double> _dialogScaleTween = Tween<double>(begin: 1.3, end: 1.0)
   .chain(CurveTween(curve: Curves.linearToEaseOut));
-
-Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-  final CurvedAnimation fadeAnimation = CurvedAnimation(
-    parent: animation,
-    curve: Curves.easeInOut,
-  );
-  if (animation.status == AnimationStatus.reverse) {
-    return FadeTransition(
-      opacity: fadeAnimation,
-      child: child,
-    );
-  }
-  return FadeTransition(
-    opacity: fadeAnimation,
-    child: ScaleTransition(
-      scale: animation.drive(_dialogScaleTween),
-      child: child,
-    ),
-  );
-}
 
 /// Displays an iOS-style dialog above the current contents of the app, with
 /// iOS-style entrance and exit animations, modal barrier color, and modal
@@ -1382,7 +1368,6 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
     String? barrierLabel,
     // This transition duration was eyeballed comparing with iOS
     super.transitionDuration = const Duration(milliseconds: 250),
-    super.transitionBuilder = _buildCupertinoDialogTransitions,
     super.settings,
     super.anchorPoint,
   }) : super(
@@ -1392,4 +1377,33 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
         barrierLabel: barrierLabel ?? CupertinoLocalizations.of(context).modalBarrierDismissLabel,
         barrierColor: barrierColor ?? CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context),
       );
+
+  CurvedAnimation? _fadeAnimation;
+
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    _fadeAnimation ??= CurvedAnimation(
+    parent: animation,
+    curve: Curves.easeInOut,
+  );
+  if (animation.status == AnimationStatus.reverse) {
+    return FadeTransition(
+      opacity: _fadeAnimation!,
+      child: child,
+    );
+  }
+  return FadeTransition(
+    opacity: _fadeAnimation!,
+    child: ScaleTransition(
+      scale: animation.drive(_dialogScaleTween),
+      child: child,
+    ),
+  );
+  }
+
+  @override
+  void dispose() {
+    _fadeAnimation?.dispose();
+    super.dispose();
+  }
 }
