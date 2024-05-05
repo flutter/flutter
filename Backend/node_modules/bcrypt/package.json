@@ -1,0 +1,67 @@
+{
+  "name": "bcrypt",
+  "description": "A bcrypt library for NodeJS.",
+  "keywords": [
+    "bcrypt",
+    "password",
+    "auth",
+    "authentication",
+    "encryption",
+    "crypt",
+    "crypto"
+  ],
+  "main": "./bcrypt",
+  "version": "5.1.1",
+  "author": "Nick Campbell (https://github.com/ncb000gt)",
+  "engines": {
+    "node": ">= 10.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kelektiv/node.bcrypt.js.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kelektiv/node.bcrypt.js/issues"
+  },
+  "scripts": {
+    "test": "npm ci --build-from-source && jest",
+    "install": "node-pre-gyp install --fallback-to-build"
+  },
+  "dependencies": {
+    "@mapbox/node-pre-gyp": "^1.0.11",
+    "node-addon-api": "^5.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.6.2"
+  },
+  "contributors": [
+    "Antonio Salazar Cardozo <savedfastcool@gmail.com> (https://github.com/Shadowfiend)",
+    "Van Nguyen <the.gol.effect@gmail.com> (https://github.com/thegoleffect)",
+    "David Trejo <david@dtrejo.com> (https://github.com/dtrejo)",
+    "Ben Glow <glen.low@pixelglow.com> (https://github.com/pixelglow)",
+    "NewITFarmer.com <> (https://github.com/newitfarmer)",
+    "Alfred Westerveld <alfredwesterveld@gmail.com> (https://github.com/alfredwesterveld)",
+    "Vincent Côté-Roy <vincentcr@gmail.com> (https://github.com/vincentcr)",
+    "Lloyd Hilaiel <lloyd@hilaiel.com> (https://github.com/lloyd)",
+    "Roman Shtylman <shtylman@gmail.com> (https://github.com/shtylman)",
+    "Vadim Graboys <dimva13@gmail.com> (https://github.com/vadimg)",
+    "Ben Noorduis <> (https://github.com/bnoordhuis)",
+    "Nate Rajlich <nathan@tootallnate.net> (https://github.com/tootallnate)",
+    "Sean McArthur <sean.monstar@gmail.com> (https://github.com/seanmonstar)",
+    "Fanie Oosthuysen <fanie.oosthuysen@gmail.com> (https://github.com/weareu)",
+    "Amitosh Swain Mahapatra <amitosh.swain@gmail.com> (https://github.com/Agathver)",
+    "Corbin Crutchley <crutchcorn@gmail.com> (https://github.com/crutchcorn)",
+    "Nicola Del Gobbo <nicoladelgobbo@gmail.com> (https://github.com/NickNaso)"
+  ],
+  "binary": {
+    "module_name": "bcrypt_lib",
+    "module_path": "./lib/binding/napi-v{napi_build_version}",
+    "package_name": "{module_name}-v{version}-napi-v{napi_build_version}-{platform}-{arch}-{libc}.tar.gz",
+    "host": "https://github.com",
+    "remote_path": "kelektiv/node.bcrypt.js/releases/download/v{version}",
+    "napi_versions": [
+      3
+    ]
+  }
+}

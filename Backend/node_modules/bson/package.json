@@ -1,0 +1,120 @@
+{
+  "name": "bson",
+  "description": "A bson parser for node.js and the browser",
+  "keywords": [
+    "mongodb",
+    "bson",
+    "parser"
+  ],
+  "files": [
+    "lib",
+    "src",
+    "bson.d.ts",
+    "etc/prepare.js",
+    "vendor"
+  ],
+  "types": "bson.d.ts",
+  "version": "6.6.0",
+  "author": {
+    "name": "The MongoDB NodeJS Team",
+    "email": "dbx-node@mongodb.com"
+  },
+  "license": "Apache-2.0",
+  "contributors": [],
+  "repository": "mongodb/js-bson",
+  "bugs": {
+    "url": "https://jira.mongodb.org/projects/NODE/issues/"
+  },
+  "devDependencies": {
+    "@istanbuljs/nyc-config-typescript": "^1.0.2",
+    "@microsoft/api-extractor": "^7.40.5",
+    "@octokit/core": "^5.1.0",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@types/chai": "^4.3.11",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.11.19",
+    "@types/sinon": "^17.0.3",
+    "@types/sinon-chai": "^3.2.12",
+    "@typescript-eslint/eslint-plugin": "^7.0.2",
+    "@typescript-eslint/parser": "^7.0.2",
+    "benchmark": "^2.1.4",
+    "chai": "^4.3.10",
+    "chalk": "^5.3.0",
+    "dbx-js-tools": "github:mongodb-js/dbx-js-tools",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-no-bigint-usage": "file:etc/eslint/no-bigint-usage",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-tsdoc": "^0.2.17",
+    "magic-string": "^0.30.7",
+    "mocha": "10.3.0",
+    "node-fetch": "^3.3.2",
+    "nyc": "^15.1.0",
+    "prettier": "^3.2.5",
+    "rollup": "^4.12.0",
+    "sinon": "^17.0.1",
+    "sinon-chai": "^3.7.0",
+    "source-map-support": "^0.5.21",
+    "standard-version": "^9.5.0",
+    "tar": "^6.2.0",
+    "ts-node": "^10.9.2",
+    "tsd": "^0.30.5",
+    "typescript": "^5.0.4",
+    "typescript-cached-transpile": "0.0.6",
+    "uuid": "^9.0.1"
+  },
+  "tsd": {
+    "directory": "test/types",
+    "compilerOptions": {
+      "strict": true,
+      "target": "esnext",
+      "module": "commonjs",
+      "moduleResolution": "node"
+    }
+  },
+  "config": {
+    "native": false
+  },
+  "main": "./lib/bson.cjs",
+  "module": "./lib/bson.mjs",
+  "exports": {
+    "import": {
+      "types": "./bson.d.ts",
+      "default": "./lib/bson.mjs"
+    },
+    "require": {
+      "types": "./bson.d.ts",
+      "default": "./lib/bson.cjs"
+    },
+    "react-native": "./lib/bson.rn.cjs",
+    "browser": "./lib/bson.mjs"
+  },
+  "compass:exports": {
+    "import": "./lib/bson.cjs",
+    "require": "./lib/bson.cjs"
+  },
+  "engines": {
+    "node": ">=16.20.1"
+  },
+  "scripts": {
+    "pretest": "npm run build",
+    "test": "npm run check:node && npm run check:web && npm run check:web-no-bigint",
+    "check:node": "WEB=false mocha test/node",
+    "check:tsd": "npm run build:dts && tsd",
+    "check:web": "WEB=true mocha test/node",
+    "check:web-no-bigint": "WEB=true NO_BIGINT=true mocha test/node",
+    "check:granular-bench": "npm run build:bench && node ./test/bench/etc/run_granular_benchmarks.js",
+    "check:spec-bench": "npm run build:bench && node ./test/bench/lib/spec/bsonBench.js",
+    "build:bench": "cd test/bench && npx tsc",
+    "build:ts": "node ./node_modules/typescript/bin/tsc",
+    "build:dts": "npm run build:ts && api-extractor run --typescript-compiler-folder node_modules/typescript --local && node etc/clean_definition_files.cjs",
+    "build:bundle": "rollup -c rollup.config.mjs",
+    "build": "npm run build:dts && npm run build:bundle",
+    "check:lint": "eslint -v && eslint --ext '.js,.ts' --max-warnings=0 src test && npm run build:dts && npm run check:tsd",
+    "format": "eslint --ext '.js,.ts' src test --fix",
+    "check:coverage": "nyc --check-coverage npm run check:node",
+    "prepare": "node etc/prepare.js",
+    "release": "standard-version -i HISTORY.md"
+  }
+}

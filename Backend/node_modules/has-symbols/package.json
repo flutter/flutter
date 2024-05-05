@@ -1,0 +1,101 @@
+{
+	"name": "has-symbols",
+	"version": "1.0.3",
+	"description": "Determine if the JS environment has Symbol support. Supports spec, or shams.",
+	"main": "index.js",
+	"scripts": {
+		"prepublishOnly": "safe-publish-latest",
+		"prepublish": "not-in-publish || npm run prepublishOnly",
+		"pretest": "npm run --silent lint",
+		"test": "npm run tests-only",
+		"posttest": "aud --production",
+		"tests-only": "npm run test:stock && npm run test:staging && npm run test:shams",
+		"test:stock": "nyc node test",
+		"test:staging": "nyc node --harmony --es-staging test",
+		"test:shams": "npm run --silent test:shams:getownpropertysymbols && npm run --silent test:shams:corejs",
+		"test:shams:corejs": "nyc node test/shams/core-js.js",
+		"test:shams:getownpropertysymbols": "nyc node test/shams/get-own-property-symbols.js",
+		"lint": "eslint --ext=js,mjs .",
+		"version": "auto-changelog && git add CHANGELOG.md",
+		"postversion": "auto-changelog && git add CHANGELOG.md && git commit --no-edit --amend && git tag -f \"v$(node -e \"console.log(require('./package.json').version)\")\""
+	},
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/inspect-js/has-symbols.git"
+	},
+	"keywords": [
+		"Symbol",
+		"symbols",
+		"typeof",
+		"sham",
+		"polyfill",
+		"native",
+		"core-js",
+		"ES6"
+	],
+	"author": {
+		"name": "Jordan Harband",
+		"email": "ljharb@gmail.com",
+		"url": "http://ljharb.codes"
+	},
+	"contributors": [
+		{
+			"name": "Jordan Harband",
+			"email": "ljharb@gmail.com",
+			"url": "http://ljharb.codes"
+		}
+	],
+	"funding": {
+		"url": "https://github.com/sponsors/ljharb"
+	},
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/ljharb/has-symbols/issues"
+	},
+	"homepage": "https://github.com/ljharb/has-symbols#readme",
+	"devDependencies": {
+		"@ljharb/eslint-config": "^20.2.3",
+		"aud": "^2.0.0",
+		"auto-changelog": "^2.4.0",
+		"core-js": "^2.6.12",
+		"eslint": "=8.8.0",
+		"get-own-property-symbols": "^0.9.5",
+		"nyc": "^10.3.2",
+		"safe-publish-latest": "^2.0.0",
+		"tape": "^5.5.2"
+	},
+	"testling": {
+		"files": "test/index.js",
+		"browsers": [
+			"iexplore/6.0..latest",
+			"firefox/3.0..6.0",
+			"firefox/15.0..latest",
+			"firefox/nightly",
+			"chrome/4.0..10.0",
+			"chrome/20.0..latest",
+			"chrome/canary",
+			"opera/10.0..latest",
+			"opera/next",
+			"safari/4.0..latest",
+			"ipad/6.0..latest",
+			"iphone/6.0..latest",
+			"android-browser/4.2"
+		]
+	},
+	"engines": {
+		"node": ">= 0.4"
+	},
+	"auto-changelog": {
+		"output": "CHANGELOG.md",
+		"template": "keepachangelog",
+		"unreleased": false,
+		"commitLimit": false,
+		"backfillLimit": false,
+		"hideCredit": true
+	},
+	"greenkeeper": {
+		"ignore": [
+			"core-js"
+		]
+	}
+}

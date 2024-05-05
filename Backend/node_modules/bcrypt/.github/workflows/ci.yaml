@@ -1,0 +1,59 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, macos-11.0, windows-2019]
+        nodeVersion: [14, 16, 18, 20]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.nodeVersion }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.nodeVersion }}
+      - name: Test
+        run: npm test
+      - name: Package
+        if: startsWith(github.ref, 'refs/tags/') || startsWith(github.ref, 'refs/heads/master')
+        run: npx node-pre-gyp package
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        if: matrix.nodeVersion == '14' && (startsWith(github.ref, 'refs/tags/') || startsWith(github.ref, 'refs/heads/master'))
+        with:
+          name: bcrypt-lib-${{ matrix.os }}-${{ matrix.nodeVersion }}
+          path: build/stage/**/bcrypt_lib*.tar.gz
+
+  build-alpine:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        nodeVersion: [14, 16, 18, 20]
+    container:
+      image: node:${{ matrix.nodeVersion }}-alpine
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: |
+          apk add make g++ python3
+      - name: Test
+        run: |
+          npm test --unsafe-perm
+      - name: Package
+        if: startsWith(github.ref, 'refs/tags/') || startsWith(github.ref, 'refs/heads/master')
+        run: npx node-pre-gyp package --unsafe-perm
+      - name: Upload
+        if: matrix.nodeVersion == '14' && (startsWith(github.ref, 'refs/tags/') || startsWith(github.ref, 'refs/heads/master'))
+        uses: actions/upload-artifact@v3
+        with:
+          name: bcrypt-lib-alpine-${{ matrix.nodeVersion }}
+          path: build/stage/**/bcrypt_lib*.tar.gz

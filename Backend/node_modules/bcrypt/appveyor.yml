@@ -1,0 +1,39 @@
+environment:
+  matrix:
+  - nodejs_version: "14"
+    platform: x64
+  - nodejs_version: "14"
+    platform: x86
+  - nodejs_version: "16"
+    platform: x64
+  - nodejs_version: "16"
+    platform: x86
+  - nodejs_version: "18"
+    platform: x64
+
+install:
+  - where npm
+  - where node
+  - ps: Install-Product node $env:nodejs_version $env:platform
+
+build: off
+
+artifacts:
+  - path: 'build/stage/**/bcrypt*.tar.gz'
+
+test_script:
+  - node --version
+  - npm --version
+  - npm test
+
+after_test:
+  - .\node_modules\.bin\node-pre-gyp package
+
+on_success:
+  - ps: >
+        if ($env:NODE_PRE_GYP_GITHUB_TOKEN -ne $null -and $env:APPVEYOR_REPO_TAG_NAME -match '^v(0|[1-9]+)\.(0|[1-9]+)\.(0|[1-9]+)(-\w)?$') {
+            echo "Publishing $env:APPVEYOR_REPO_TAG_NAME"
+            npm install node-pre-gyp-github@1.4.3
+            ./node_modules/.bin/node-pre-gyp-github publish --release
+        }
+

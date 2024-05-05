@@ -1,0 +1,33 @@
+{
+  "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
+  "name": "npmlog",
+  "description": "logger for npm",
+  "version": "5.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/npm/npmlog.git"
+  },
+  "main": "log.js",
+  "files": [
+    "log.js"
+  ],
+  "scripts": {
+    "test": "tap test/*.js --branches=95",
+    "npmclilint": "npmcli-lint",
+    "lint": "npm run npmclilint -- \"*.*js\" \"test/**/*.*js\"",
+    "lintfix": "npm run lint -- --fix",
+    "posttest": "npm run lint --",
+    "postsnap": "npm run lintfix --"
+  },
+  "dependencies": {
+    "are-we-there-yet": "^2.0.0",
+    "console-control-strings": "^1.1.0",
+    "gauge": "^3.0.0",
+    "set-blocking": "^2.0.0"
+  },
+  "devDependencies": {
+    "@npmcli/lint": "^1.0.1",
+    "tap": "^15.0.9"
+  },
+  "license": "ISC"
+}
