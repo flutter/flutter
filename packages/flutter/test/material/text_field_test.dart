@@ -2511,6 +2511,7 @@ void main() {
     // https://github.com/flutter/flutter/issues/142624.
     final TextEditingController controller = _textEditingController();
     final PageController pageController = PageController();
+    addTearDown(pageController.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
