@@ -879,7 +879,7 @@ class FlutterPlugin implements Plugin<Project> {
                     numProcessedPlugins--
                     if (numProcessedPlugins == 0) {
                         if (maxPluginCompileSdkVersion > projectCompileSdkVersion) {
-                            project.logger.error("Your project is configured to compile against Android SDK $projectCompileSdkVersion, but the following plugin(s) require to be compiled against a higher Android SDK version:")
+                            project.logger.error("Your project is configured to compile using Android SDK $projectCompileSdkVersion, but the following plugin(s) require a higher Android SDK version:")
                             for (Tuple2<String, String> pluginToCompileSdkVersion : pluginsWithHigherSdkVersion) {
                                 if (pluginToCompileSdkVersion.second > projectCompileSdkVersion) {
                                     project.logger.error("- ${pluginToCompileSdkVersion.first} compiles against Android SDK ${pluginToCompileSdkVersion.second}")
