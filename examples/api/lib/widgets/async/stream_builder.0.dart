@@ -61,14 +61,14 @@ class _StreamBuilderExampleState extends State<StreamBuilderExample> {
       child: Container(
         alignment: FractionalOffset.center,
         color: Colors.white,
-        child: BidsListener(bids: _bids),
+        child: BidsStatus(bids: _bids),
       ),
     );
   }
 }
 
-class BidsListener extends StatelessWidget {
-  const BidsListener({
+class BidsStatus extends StatelessWidget {
+  const BidsStatus({
     required this.bids,
     super.key,
   });
@@ -94,7 +94,11 @@ class BidsListener extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.only(top: 8),
-              child: Text('Stack trace: ${snapshot.stackTrace}'),
+              child: Text(
+                'Stack trace: ${snapshot.stackTrace}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ];
         } else {

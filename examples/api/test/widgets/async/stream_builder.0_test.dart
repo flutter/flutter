@@ -33,7 +33,7 @@ void main() {
       },
     );
 
-    group('BidsListener', () {
+    group('BidsStatus', () {
       testWidgets(
         'correctly displays error state',
         (WidgetTester tester) async {
@@ -41,12 +41,12 @@ void main() {
           addTearDown(controller.close);
 
           controller.onListen = () {
-            controller.addError('Unexpected error!', StackTrace.empty);
+            controller.addError('Unexpected error!', StackTrace.current);
           };
 
           await tester.pumpWidget(
             MaterialApp(
-              home: example.BidsListener(bids: controller.stream),
+              home: example.BidsStatus(bids: controller.stream),
             ),
           );
           await tester.pump();
@@ -62,7 +62,7 @@ void main() {
         (WidgetTester tester) async {
           await tester.pumpWidget(
             const MaterialApp(
-              home: example.BidsListener(bids: null),
+              home: example.BidsStatus(bids: null),
             ),
           );
 
@@ -79,7 +79,7 @@ void main() {
 
           await tester.pumpWidget(
             MaterialApp(
-              home: example.BidsListener(bids: controller.stream),
+              home: example.BidsStatus(bids: controller.stream),
             ),
           );
 
@@ -100,7 +100,7 @@ void main() {
 
           await tester.pumpWidget(
             MaterialApp(
-              home: example.BidsListener(bids: controller.stream),
+              home: example.BidsStatus(bids: controller.stream),
             ),
           );
           await tester.pump();
@@ -118,7 +118,7 @@ void main() {
 
           await tester.pumpWidget(
             MaterialApp(
-              home: example.BidsListener(bids: controller.stream),
+              home: example.BidsStatus(bids: controller.stream),
             ),
           );
           await tester.pump();
