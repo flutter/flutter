@@ -848,12 +848,14 @@ class MenuItemButton extends StatefulWidget {
     this.onFocusChange,
     this.focusNode,
     this.shortcut,
+    this.semanticsLabel,
     this.style,
     this.statesController,
     this.clipBehavior = Clip.none,
     this.leadingIcon,
     this.trailingIcon,
     this.closeOnActivate = true,
+    this.overflowAxis = Axis.horizontal,
     required this.child,
   });
 
@@ -891,6 +893,21 @@ class MenuItemButton extends StatefulWidget {
   /// {@macro flutter.material.MenuBar.shortcuts_note}
   final MenuSerializableShortcut? shortcut;
 
+  /// An optional Semantics label, applied to the entire [MenuItemButton].
+  ///
+  /// A screen reader will default to reading the derived text on the
+  /// [MenuItemButton] itself, which is not guaranteed to be readable.
+  /// (For some shortcuts, such as comma, semicolon, and other
+  /// punctuation, screen readers read silence)
+  ///
+  /// Setting this label overwrites the semantics properties of the entire
+  /// Widget, including its children. Consider wrapping this widget in
+  /// [Semantics] if you want to customize other properties besides just
+  /// the label.
+  ///
+  /// Null by default.
+  final String? semanticsLabel;
+
   /// Customizes this button's appearance.
   ///
   /// Non-null properties of this style override the corresponding properties in
@@ -922,6 +939,18 @@ class MenuItemButton extends StatefulWidget {
   /// Defaults to true.
   /// {@endtemplate}
   final bool closeOnActivate;
+
+  /// The direction in which the menu item expands.
+  ///
+  /// If the menu item button is a descendent of [MenuAnchor] or [MenuBar], then
+  /// this property is ignored.
+  ///
+  /// If [overflowAxis] is [Axis.vertical], the menu will be expanded vertically.
+  /// If [overflowAxis] is [Axis.horizontal], then the menu  will be
+  /// expanded horizontally.
+  ///
+  /// Defaults to [Axis.horizontal].
+  final Axis overflowAxis;
 
   /// The widget displayed in the center of this button.
   ///
@@ -993,6 +1022,7 @@ class MenuItemButton extends StatefulWidget {
     Color? surfaceTintColor,
     Color? iconColor,
     TextStyle? textStyle,
+    Color? overlayColor,
     double? elevation,
     EdgeInsetsGeometry? padding,
     Size? minimumSize,
@@ -1018,6 +1048,7 @@ class MenuItemButton extends StatefulWidget {
       surfaceTintColor: surfaceTintColor,
       iconColor: iconColor,
       textStyle: textStyle,
+      overlayColor: overlayColor,
       elevation: elevation,
       padding: padding,
       minimumSize: minimumSize,
@@ -1052,6 +1083,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
   // If a focus node isn't given to the widget, then we have to manage our own.
   FocusNode? _internalFocusNode;
   FocusNode get _focusNode => widget.focusNode ?? _internalFocusNode!;
+  _MenuAnchorState? get _anchor => _MenuAnchorState._maybeOf(context);
 
   @override
   void initState() {
@@ -1105,8 +1137,10 @@ class _MenuItemButtonState extends State<MenuItemButton> {
       child: _MenuItemLabel(
         leadingIcon: widget.leadingIcon,
         shortcut: widget.shortcut,
+        semanticsLabel: widget.semanticsLabel,
         trailingIcon: widget.trailingIcon,
         hasSubmenu: false,
+        overflowAxis: _anchor?._orientation ?? widget.overflowAxis,
         child: widget.child!,
       ),
     );
@@ -1743,6 +1777,7 @@ class SubmenuButton extends StatefulWidget {
     Color? surfaceTintColor,
     Color? iconColor,
     TextStyle? textStyle,
+    Color? overlayColor,
     double? elevation,
     EdgeInsetsGeometry? padding,
     Size? minimumSize,
@@ -1768,6 +1803,7 @@ class SubmenuButton extends StatefulWidget {
       surfaceTintColor: surfaceTintColor,
       iconColor: iconColor,
       textStyle: textStyle,
+      overlayColor: overlayColor,
       elevation: elevation,
       padding: padding,
       minimumSize: minimumSize,
@@ -2093,37 +2129,22 @@ class _LocalizedShortcutLabeler {
         keySeparator = '+';
     }
     if (serialized.trigger != null) {
-      final List<String> modifiers = <String>[];
       final LogicalKeyboardKey trigger = serialized.trigger!;
-      if (_usesSymbolicModifiers) {
-        // macOS/iOS platform convention uses this ordering, with ⌘ always last.
-        if (serialized.control!) {
-          modifiers.add(_getModifierLabel(LogicalKeyboardKey.control, localizations));
-        }
-        if (serialized.alt!) {
-          modifiers.add(_getModifierLabel(LogicalKeyboardKey.alt, localizations));
-        }
-        if (serialized.shift!) {
-          modifiers.add(_getModifierLabel(LogicalKeyboardKey.shift, localizations));
-        }
-        if (serialized.meta!) {
-          modifiers.add(_getModifierLabel(LogicalKeyboardKey.meta, localizations));
-        }
-      } else {
-        // These should be in this order, to match the LogicalKeySet version.
-        if (serialized.alt!) {
-          modifiers.add(_getModifierLabel(LogicalKeyboardKey.alt, localizations));
-        }
-        if (serialized.control!) {
-          modifiers.add(_getModifierLabel(LogicalKeyboardKey.control, localizations));
-        }
-        if (serialized.meta!) {
-          modifiers.add(_getModifierLabel(LogicalKeyboardKey.meta, localizations));
-        }
-        if (serialized.shift!) {
-          modifiers.add(_getModifierLabel(LogicalKeyboardKey.shift, localizations));
-        }
-      }
+      final List<String> modifiers = <String>[
+        if (_usesSymbolicModifiers) ...<String>[
+          // MacOS/iOS platform convention uses this ordering, with ⌘ always last.
+          if (serialized.control!) _getModifierLabel(LogicalKeyboardKey.control, localizations),
+          if (serialized.alt!)     _getModifierLabel(LogicalKeyboardKey.alt, localizations),
+          if (serialized.shift!)   _getModifierLabel(LogicalKeyboardKey.shift, localizations),
+          if (serialized.meta!)    _getModifierLabel(LogicalKeyboardKey.meta, localizations),
+        ] else ...<String>[
+          // This order matches the LogicalKeySet version.
+          if (serialized.alt!)     _getModifierLabel(LogicalKeyboardKey.alt, localizations),
+          if (serialized.control!) _getModifierLabel(LogicalKeyboardKey.control, localizations),
+          if (serialized.meta!)    _getModifierLabel(LogicalKeyboardKey.meta, localizations),
+          if (serialized.shift!)   _getModifierLabel(LogicalKeyboardKey.shift, localizations),
+        ],
+      ];
       String? shortcutTrigger;
       final int logicalKeyId = trigger.keyId;
       if (_shortcutGraphicEquivalents.containsKey(trigger)) {
@@ -2958,6 +2979,8 @@ class _MenuItemLabel extends StatelessWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.shortcut,
+    this.semanticsLabel,
+    this.overflowAxis = Axis.vertical,
     required this.child,
   });
 
@@ -2981,6 +3004,13 @@ class _MenuItemLabel extends StatelessWidget {
   /// the shortcut.
   final MenuSerializableShortcut? shortcut;
 
+  /// An optional Semantics label, which replaces the generated string when
+  /// read by a screen reader.
+  final String? semanticsLabel;
+
+  /// The direction in which the menu item expands.
+  final Axis overflowAxis;
+
   /// The required label child widget.
   final Widget child;
 
@@ -2991,19 +3021,43 @@ class _MenuItemLabel extends StatelessWidget {
       _kLabelItemMinSpacing,
       _kLabelItemDefaultSpacing + density.horizontal * 2,
     );
-    return Row(
+    Widget leadings;
+    if (overflowAxis == Axis.vertical) {
+      leadings = Expanded(
+        child: ClipRect(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              if (leadingIcon != null) leadingIcon!,
+              Expanded(
+                child: ClipRect(
+                  child: Padding(
+                    padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
+                    child: child,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      leadings = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          if (leadingIcon != null) leadingIcon!,
+          Padding(
+            padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
+            child: child,
+          ),
+        ],
+      );
+    }
+
+    Widget menuItemLabel = Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            if (leadingIcon != null) leadingIcon!,
-            Padding(
-              padding: leadingIcon != null ? EdgeInsetsDirectional.only(start: horizontalPadding) : EdgeInsets.zero,
-              child: child,
-            ),
-          ],
-        ),
+        leadings,
         if (trailingIcon != null)
           Padding(
             padding: EdgeInsetsDirectional.only(start: horizontalPadding),
@@ -3029,6 +3083,10 @@ class _MenuItemLabel extends StatelessWidget {
           ),
       ],
     );
+    if (semanticsLabel != null) {
+      menuItemLabel = Semantics(label: semanticsLabel, excludeSemantics: true, child: menuItemLabel);
+    }
+    return menuItemLabel;
   }
 
   @override
@@ -3337,6 +3395,16 @@ class _MenuPanelState extends State<_MenuPanel> {
       }
     }
 
+    // If the menu panel is horizontal, then the children should be wrapped in
+    // an IntrinsicWidth widget to ensure that the children are as wide as the
+    // widest child.
+    List<Widget> children = widget.children;
+    if (widget.orientation == Axis.horizontal) {
+      children = children.map<Widget>((Widget child) {
+        return IntrinsicWidth(child: child);
+      }).toList();
+    }
+
     Widget menuPanel = _intrinsicCrossSize(
       child: Material(
         elevation: elevation,
@@ -3366,7 +3434,7 @@ class _MenuPanelState extends State<_MenuPanel> {
                     textDirection: Directionality.of(context),
                     direction: widget.orientation,
                     mainAxisSize: MainAxisSize.min,
-                    children: widget.children,
+                    children: children,
                   ),
                 ),
               ),

@@ -22,7 +22,6 @@ import 'scrollable.dart';
 import 'scrollable_helpers.dart';
 import 'sliver.dart';
 import 'sliver_prototype_extent_list.dart';
-import 'sliver_varied_extent_list.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
@@ -625,9 +624,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
 
   late ScrollableState _scrollable;
   Axis get _scrollDirection => axisDirectionToAxis(_scrollable.axisDirection);
-  bool get _reverse =>
-    _scrollable.axisDirection == AxisDirection.up ||
-    _scrollable.axisDirection == AxisDirection.left;
+  bool get _reverse => axisDirectionIsReversed(_scrollable.axisDirection);
 
   @override
   void didChangeDependencies() {
@@ -1489,12 +1486,10 @@ double _sizeExtent(Size size, Axis scrollDirection) {
 }
 
 Size _extentSize(double extent, Axis scrollDirection) {
-  switch (scrollDirection) {
-    case Axis.horizontal:
-      return Size(extent, 0);
-    case Axis.vertical:
-      return Size(0, extent);
-  }
+  return switch (scrollDirection) {
+    Axis.horizontal => Size(extent, 0),
+    Axis.vertical => Size(0, extent),
+  };
 }
 
 double _offsetExtent(Offset offset, Axis scrollDirection) {

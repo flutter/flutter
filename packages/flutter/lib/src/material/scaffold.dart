@@ -1320,6 +1320,9 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   // The animations applied to the Floating Action Button when it is entering or exiting.
   // Controls the previous widget.child as it exits.
   late AnimationController _previousController;
+  CurvedAnimation? _previousExitScaleAnimation;
+  CurvedAnimation? _previousExitRotationCurvedAnimation;
+  CurvedAnimation? _currentEntranceScaleAnimation;
   late Animation<double> _previousScaleAnimation;
   late TrainHoppingAnimation _previousRotationAnimation;
   // The animations to run, considering the widget's fabMoveAnimation and the current/previous entrance/exit animations.
@@ -1352,6 +1355,9 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   @override
   void dispose() {
     _previousController.dispose();
+    _previousExitScaleAnimation?.dispose();
+    _previousExitRotationCurvedAnimation?.dispose();
+    _currentEntranceScaleAnimation?.dispose();
     _disposeAnimations();
     super.dispose();
   }
@@ -1402,19 +1408,24 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   }
 
   void _updateAnimations() {
+    _previousExitScaleAnimation?.dispose();
     // Get the animations for exit and entrance.
-    final CurvedAnimation previousExitScaleAnimation = CurvedAnimation(
+    _previousExitScaleAnimation = CurvedAnimation(
       parent: _previousController,
       curve: Curves.easeIn,
     );
-    final Animation<double> previousExitRotationAnimation = Tween<double>(begin: 1.0, end: 1.0).animate(
-      CurvedAnimation(
+    _previousExitRotationCurvedAnimation?.dispose();
+    _previousExitRotationCurvedAnimation = CurvedAnimation(
         parent: _previousController,
         curve: Curves.easeIn,
-      ),
+      );
+
+    final Animation<double> previousExitRotationAnimation = Tween<double>(begin: 1.0, end: 1.0).animate(
+      _previousExitRotationCurvedAnimation!
     );
 
-    final CurvedAnimation currentEntranceScaleAnimation = CurvedAnimation(
+    _currentEntranceScaleAnimation?.dispose();
+    _currentEntranceScaleAnimation = CurvedAnimation(
       parent: widget.currentController,
       curve: Curves.easeIn,
     );
@@ -1425,13 +1436,19 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     final Animation<double> moveRotationAnimation = widget.fabMotionAnimator.getRotationAnimation(parent: widget.fabMoveAnimation);
 
     // Aggregate the animations.
-    _previousScaleAnimation = AnimationMin<double>(moveScaleAnimation, previousExitScaleAnimation);
-    _currentScaleAnimation = AnimationMin<double>(moveScaleAnimation, currentEntranceScaleAnimation);
+    if (widget.fabMotionAnimator == FloatingActionButtonAnimator.noAnimation) {
+      _previousScaleAnimation = moveScaleAnimation;
+      _currentScaleAnimation = moveScaleAnimation;
+      _previousRotationAnimation = TrainHoppingAnimation(moveRotationAnimation, null);
+      _currentRotationAnimation = TrainHoppingAnimation(moveRotationAnimation, null);
+    } else {
+      _previousScaleAnimation = AnimationMin<double>(moveScaleAnimation, _previousExitScaleAnimation!);
+      _currentScaleAnimation = AnimationMin<double>(moveScaleAnimation, _currentEntranceScaleAnimation!);
+      _previousRotationAnimation = TrainHoppingAnimation(previousExitRotationAnimation, moveRotationAnimation);
+      _currentRotationAnimation = TrainHoppingAnimation(currentEntranceRotationAnimation, moveRotationAnimation);
+    }
+
     _extendedCurrentScaleAnimation = _currentScaleAnimation.drive(CurveTween(curve: const Interval(0.0, 0.1)));
-
-    _previousRotationAnimation = TrainHoppingAnimation(previousExitRotationAnimation, moveRotationAnimation);
-    _currentRotationAnimation = TrainHoppingAnimation(currentEntranceRotationAnimation, moveRotationAnimation);
-
     _currentScaleAnimation.addListener(_onProgressChanged);
     _previousScaleAnimation.addListener(_onProgressChanged);
   }
@@ -2506,6 +2523,26 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///
   /// ** See code in examples/api/lib/material/scaffold/scaffold_state.show_bottom_sheet.0.dart **
   /// {@end-tool}
+  ///
+  /// The [sheetAnimationStyle] parameter is used to override the bottom sheet
+  /// animation duration and reverse animation duration.
+  ///
+  /// If [AnimationStyle.duration] is provided, it will be used to override
+  /// the bottom sheet animation duration in the underlying
+  /// [BottomSheet.createAnimationController].
+  ///
+  /// If [AnimationStyle.reverseDuration] is provided, it will be used to
+  /// override the bottom sheet reverse animation duration in the underlying
+  /// [BottomSheet.createAnimationController].
+  ///
+  /// To disable the bottom sheet animation, use [AnimationStyle.noAnimation].
+  ///
+  /// {@tool dartpad}
+  /// This sample showcases how to override the [showBottomSheet] animation
+  /// duration and reverse animation duration using [AnimationStyle].
+  ///
+  /// ** See code in examples/api/lib/material/scaffold/scaffold_state.show_bottom_sheet.1.dart **
+  /// {@end-tool}
   /// See also:
   ///
   ///  * [BottomSheet], which becomes the parent of the widget returned by the
@@ -2516,6 +2553,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
   ///  * The Material 2 spec at <https://m2.material.io/components/sheets-bottom>.
   ///  * The Material 3 spec at <https://m3.material.io/components/bottom-sheets/overview>.
+  ///  * [AnimationStyle], which is used to override the modal bottom sheet
+  ///    animation duration and reverse animation duration.
   PersistentBottomSheetController showBottomSheet(
     WidgetBuilder builder, {
     Color? backgroundColor,
@@ -2526,6 +2565,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     bool? enableDrag,
     bool? showDragHandle,
     AnimationController? transitionAnimationController,
+    AnimationStyle? sheetAnimationStyle,
   }) {
     assert(() {
       if (widget.bottomSheet != null) {
@@ -2540,7 +2580,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     assert(debugCheckHasMediaQuery(context));
 
     _closeCurrentBottomSheet();
-    final AnimationController controller = (transitionAnimationController ?? BottomSheet.createAnimationController(this))..forward();
+    final AnimationController controller = (transitionAnimationController
+      ?? BottomSheet.createAnimationController(this, sheetAnimationStyle: sheetAnimationStyle))
+         ..forward();
     setState(() {
       _currentBottomSheet = _buildBottomSheet(
         builder,

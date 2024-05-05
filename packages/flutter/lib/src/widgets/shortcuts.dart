@@ -432,7 +432,7 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
   /// In the following example, the shortcut `Control + C` increases the
   /// counter:
   ///
-  /// ** See code in examples/api/lib/widgets/shortcuts/single_activator.single_activator.0.dart **
+  /// ** See code in examples/api/lib/widgets/shortcuts/single_activator.0.dart **
   /// {@end-tool}
   const SingleActivator(
     this.trigger, {
@@ -622,7 +622,7 @@ class SingleActivator with Diagnosticable, MenuSerializableShortcut implements S
 ///
 /// {@tool dartpad}
 /// In the following example, when a key combination results in a question mark,
-/// the counter is increased:
+/// the [SnackBar] gets shown:
 ///
 /// ** See code in examples/api/lib/widgets/shortcuts/character_activator.0.dart **
 /// {@end-tool}

@@ -78,3 +78,15 @@ const double precisionErrorTolerance = 1e-10;
 /// * [dart:io.Platform], a way to find out the browser's platform that is not
 ///   overridable in tests.
 const bool kIsWeb = bool.fromEnvironment('dart.library.js_util');
+
+/// A constant that is true if the application was compiled to WebAssembly.
+///
+/// See also:
+///
+/// * [defaultTargetPlatform], which is used by themes to find out which
+///   platform the application is running on (or, in the case of a web app,
+///   which platform the application's browser is running in). Can be overridden
+///   in tests with [debugDefaultTargetPlatformOverride].
+/// * [dart:io.Platform], a way to find out the browser's platform that is not
+///   overridable in tests.
+const bool kIsWasm = kIsWeb && bool.fromEnvironment('dart.library.ffi');

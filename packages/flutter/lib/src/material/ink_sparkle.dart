@@ -316,9 +316,9 @@ class InkSparkle extends InteractiveInkFeature {
 
   /// All double values for uniforms come from the Android 12 ripple
   /// implementation from the following files:
-  /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleShader.java
-  /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleDrawable.java
-  /// - https://cs.android.com/android/platform/superproject/+/master:frameworks/base/graphics/java/android/graphics/drawable/RippleAnimationSession.java
+  /// - https://cs.android.com/android/platform/superproject/+/main:frameworks/base/graphics/java/android/graphics/drawable/RippleShader.java
+  /// - https://cs.android.com/android/platform/superproject/+/main:frameworks/base/graphics/java/android/graphics/drawable/RippleDrawable.java
+  /// - https://cs.android.com/android/platform/superproject/+/main:frameworks/base/graphics/java/android/graphics/drawable/RippleAnimationSession.java
   void _updateFragmentShader() {
     const double turbulenceScale = 1.5;
     final double turbulencePhase = _turbulenceSeed + _radiusScale.value;

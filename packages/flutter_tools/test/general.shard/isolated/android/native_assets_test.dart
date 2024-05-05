@@ -15,10 +15,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/android/native_assets.dart';
-import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    as native_assets_cli;
-import 'package:native_assets_cli/native_assets_cli_internal.dart'
-    hide BuildMode, Target;
+import 'package:native_assets_cli/native_assets_cli_internal.dart';
 import 'package:package_config/package_config_types.dart';
 
 import '../../../src/common.dart';
@@ -128,18 +125,20 @@ void main() {
           Package('bar', projectUri),
         ],
         dryRunResult: FakeNativeAssetsBuilderResult(
-          assets: <Asset>[
-            Asset(
+          assets: <AssetImpl>[
+            NativeCodeAssetImpl(
               id: 'package:bar/bar.dart',
-              linkMode: LinkMode.dynamic,
-              target: native_assets_cli.Target.macOSArm64,
-              path: AssetAbsolutePath(Uri.file('libbar.so')),
+              linkMode: DynamicLoadingBundledImpl(),
+              os: OSImpl.macOS,
+              architecture: ArchitectureImpl.arm64,
+              file: Uri.file('libbar.so'),
             ),
-            Asset(
+            NativeCodeAssetImpl(
               id: 'package:bar/bar.dart',
-              linkMode: LinkMode.dynamic,
-              target: native_assets_cli.Target.macOSX64,
-              path: AssetAbsolutePath(Uri.file('libbar.so')),
+              linkMode: DynamicLoadingBundledImpl(),
+              os: OSImpl.macOS,
+              architecture: ArchitectureImpl.x64,
+              file: Uri.file('libbar.so'),
             ),
           ],
         ),
@@ -237,12 +236,13 @@ void main() {
           Package('bar', projectUri),
         ],
         buildResult: FakeNativeAssetsBuilderResult(
-          assets: <Asset>[
-            Asset(
+          assets: <AssetImpl>[
+            NativeCodeAssetImpl(
               id: 'package:bar/bar.dart',
-              linkMode: LinkMode.dynamic,
-              target: native_assets_cli.Target.androidArm64,
-              path: AssetAbsolutePath(Uri.file('libbar.so')),
+              linkMode: DynamicLoadingBundledImpl(),
+              os: OSImpl.android,
+              architecture: ArchitectureImpl.arm64,
+              file: Uri.file('libbar.so'),
             ),
           ],
         ),
@@ -382,6 +382,6 @@ class _BuildRunnerWithoutNdk extends FakeNativeAssetsBuildRunner {
   });
 
   @override
-  Future<CCompilerConfig> get ndkCCompilerConfig async =>
+  Future<CCompilerConfigImpl> get ndkCCompilerConfigImpl async =>
       throwToolExit('Android NDK Clang could not be found.');
 }

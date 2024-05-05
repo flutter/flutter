@@ -353,6 +353,37 @@ void main() {
       expect(scrollable.widget.dragStartBehavior, DragStartBehavior.down);
     }, variant: TargetPlatformVariant.all());
 
+    testWidgets('TwoDimensionalScrollable with hitTestBehavior.translucent lets widgets underneath catch the hit', (WidgetTester tester) async {
+      bool tapped = false;
+      final Key key = UniqueKey();
+      late final TwoDimensionalChildBuilderDelegate delegate;
+      addTearDown(() => delegate.dispose());
+      await tester.pumpWidget(MaterialApp(
+        home: Stack(
+          children: <Widget>[
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => tapped = true,
+                child: SizedBox(key: key, height: 300),
+              ),
+            ),
+            SimpleBuilderTableView(
+              hitTestBehavior: HitTestBehavior.translucent,
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
+                builder: (BuildContext context, ChildVicinity vicinity) {
+                  return const SizedBox(width: 50, height: 50);
+                },
+              ),
+            ),
+          ],
+        ),
+      ));
+      await tester.pumpAndSettle();
+      await tester.tapAt(tester.getCenter(find.byKey(key)));
+      expect(tapped, isTrue);
+    }, variant: TargetPlatformVariant.all());
+
     testWidgets('Interrupt fling with tap stops scrolling', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/133529
       final List<String> log = <String>[];
@@ -360,6 +391,8 @@ void main() {
       addTearDown(verticalController.dispose);
       final ScrollController horizontalController = ScrollController();
       addTearDown(horizontalController.dispose);
+      late final TwoDimensionalChildBuilderDelegate delegate;
+      addTearDown(() => delegate.dispose());
 
       await tester.pumpWidget(
         Directionality(
@@ -368,7 +401,7 @@ void main() {
             verticalDetails: ScrollableDetails.vertical(controller: verticalController),
             horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
             diagonalDragBehavior: DiagonalDragBehavior.free,
-            delegate: TwoDimensionalChildBuilderDelegate(
+            delegate: delegate = TwoDimensionalChildBuilderDelegate(
               maxXIndex: 100,
               maxYIndex: 100,
               builder: (BuildContext context, ChildVicinity vicinity) {
@@ -503,6 +536,8 @@ void main() {
       addTearDown(verticalController.dispose);
       final ScrollController horizontalController = ScrollController();
       addTearDown(horizontalController.dispose);
+      late final TwoDimensionalChildBuilderDelegate delegate;
+      addTearDown(() => delegate.dispose());
 
       await tester.pumpWidget(
         Directionality(
@@ -511,7 +546,7 @@ void main() {
             verticalDetails: ScrollableDetails.vertical(controller: verticalController),
             horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
             diagonalDragBehavior: DiagonalDragBehavior.free,
-            delegate: TwoDimensionalChildBuilderDelegate(
+            delegate: delegate = TwoDimensionalChildBuilderDelegate(
               maxXIndex: 100,
               maxYIndex: 100,
               builder: (BuildContext context, ChildVicinity vicinity) {
@@ -588,6 +623,8 @@ void main() {
         addTearDown(verticalController.dispose);
         final ScrollController horizontalController = ScrollController();
         addTearDown(horizontalController.dispose);
+        late final TwoDimensionalChildBuilderDelegate delegate;
+        addTearDown(() => delegate.dispose());
 
         await tester.pumpWidget(
           Directionality(
@@ -596,7 +633,7 @@ void main() {
               verticalDetails: ScrollableDetails.vertical(controller: verticalController),
               horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
               diagonalDragBehavior: DiagonalDragBehavior.free,
-              delegate: TwoDimensionalChildBuilderDelegate(
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
                 maxXIndex: 20,
                 maxYIndex: 1,
                 builder: _testChildBuilder,
@@ -636,6 +673,8 @@ void main() {
         addTearDown(verticalController.dispose);
         final ScrollController horizontalController = ScrollController();
         addTearDown(horizontalController.dispose);
+        late final TwoDimensionalChildBuilderDelegate delegate;
+        addTearDown(() => delegate.dispose());
 
         await tester.pumpWidget(
           Directionality(
@@ -644,7 +683,7 @@ void main() {
               verticalDetails: ScrollableDetails.vertical(controller: verticalController),
               horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
               diagonalDragBehavior: DiagonalDragBehavior.weightedEvent,
-              delegate: TwoDimensionalChildBuilderDelegate(
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
                 maxXIndex: 20,
                 maxYIndex: 1,
                 builder: _testChildBuilder,
@@ -684,6 +723,8 @@ void main() {
         addTearDown(verticalController.dispose);
         final ScrollController horizontalController = ScrollController();
         addTearDown(horizontalController.dispose);
+        late final TwoDimensionalChildBuilderDelegate delegate;
+        addTearDown(() => delegate.dispose());
 
         await tester.pumpWidget(
           Directionality(
@@ -692,7 +733,7 @@ void main() {
               verticalDetails: ScrollableDetails.vertical(controller: verticalController),
               horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
               diagonalDragBehavior: DiagonalDragBehavior.weightedContinuous,
-              delegate: TwoDimensionalChildBuilderDelegate(
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
                 maxXIndex: 20,
                 maxYIndex: 1,
                 builder: _testChildBuilder,
@@ -734,6 +775,8 @@ void main() {
         addTearDown(verticalController.dispose);
         final ScrollController horizontalController = ScrollController();
         addTearDown(horizontalController.dispose);
+        late final TwoDimensionalChildBuilderDelegate delegate;
+        addTearDown(() => delegate.dispose());
 
         await tester.pumpWidget(
           Directionality(
@@ -742,7 +785,7 @@ void main() {
               verticalDetails: ScrollableDetails.vertical(controller: verticalController),
               horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
               diagonalDragBehavior: DiagonalDragBehavior.free,
-              delegate: TwoDimensionalChildBuilderDelegate(
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
                 maxXIndex: 1,
                 maxYIndex: 20,
                 builder: _testChildBuilder,
@@ -782,6 +825,8 @@ void main() {
         addTearDown(verticalController.dispose);
         final ScrollController horizontalController = ScrollController();
         addTearDown(horizontalController.dispose);
+        late final TwoDimensionalChildBuilderDelegate delegate;
+        addTearDown(() => delegate.dispose());
 
         await tester.pumpWidget(
           Directionality(
@@ -790,7 +835,7 @@ void main() {
               verticalDetails: ScrollableDetails.vertical(controller: verticalController),
               horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
               diagonalDragBehavior: DiagonalDragBehavior.weightedEvent,
-              delegate: TwoDimensionalChildBuilderDelegate(
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
                 maxXIndex: 1,
                 maxYIndex: 20,
                 builder: _testChildBuilder,
@@ -830,6 +875,8 @@ void main() {
         addTearDown(verticalController.dispose);
         final ScrollController horizontalController = ScrollController();
         addTearDown(horizontalController.dispose);
+        late final TwoDimensionalChildBuilderDelegate delegate;
+        addTearDown(() => delegate.dispose());
 
         await tester.pumpWidget(
           Directionality(
@@ -838,7 +885,7 @@ void main() {
               verticalDetails: ScrollableDetails.vertical(controller: verticalController),
               horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
               diagonalDragBehavior: DiagonalDragBehavior.weightedContinuous,
-              delegate: TwoDimensionalChildBuilderDelegate(
+              delegate: delegate = TwoDimensionalChildBuilderDelegate(
                 maxXIndex: 1,
                 maxYIndex: 20,
                 builder: _testChildBuilder,

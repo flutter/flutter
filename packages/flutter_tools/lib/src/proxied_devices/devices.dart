@@ -17,6 +17,7 @@ import '../convert.dart';
 import '../daemon.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
+import '../device_vm_service_discovery_for_attach.dart';
 import '../project.dart';
 import 'debounce_data_stream.dart';
 import 'file_transfer.dart';
@@ -295,6 +296,35 @@ class ProxiedDevice extends Device {
 
   @override
   void clearLogs() => throw UnimplementedError();
+
+  @override
+  VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
+    String? appId,
+    String? fuchsiaModule,
+    int? filterDevicePort,
+    int? expectedHostPort,
+    required bool ipv6,
+    required Logger logger,
+  }) =>
+      ProxiedVMServiceDiscoveryForAttach(
+        connection,
+        id,
+        proxiedPortForwarder: proxiedPortForwarder,
+        appId: appId,
+        fuchsiaModule: fuchsiaModule,
+        filterDevicePort: filterDevicePort,
+        expectedHostPort: expectedHostPort,
+        ipv6: ipv6,
+        logger: logger,
+        fallbackDiscovery: () => super.getVMServiceDiscoveryForAttach(
+          appId: appId,
+          fuchsiaModule: fuchsiaModule,
+          filterDevicePort: filterDevicePort,
+          expectedHostPort: expectedHostPort,
+          ipv6: ipv6,
+          logger: logger,
+        ),
+      );
 
   @override
   Future<LaunchResult> startApp(
@@ -603,11 +633,18 @@ class ProxiedPortForwarder extends DevicePortForwarder {
         'port': devicePort,
       }));
       final Stream<List<int>> dataStream = connection.listenToEvent('proxy.data.$id').asyncExpand((DaemonEventData event) => event.binary);
-      dataStream.listen(socket.add);
+      final StreamSubscription<List<int>> subscription = dataStream.listen(socket.add);
       final Future<DaemonEventData> disconnectFuture = connection.listenToEvent('proxy.disconnected.$id').first;
+
+      bool socketDoneCalled = false;
+
       unawaited(disconnectFuture.then<void>((_) async {
           try {
-            await socket.close();
+            if (socketDoneCalled) {
+              await subscription.cancel();
+            } else {
+              await (subscription.cancel(), socket.close()).wait;
+            }
           } on Exception {
             // ignore
           }
@@ -640,6 +677,8 @@ class ProxiedPortForwarder extends DevicePortForwarder {
         // Do nothing here. Everything will be handled in the `then` block below.
         return false;
       }).whenComplete(() {
+        socketDoneCalled = true;
+        unawaited(subscription.cancel());
         // Send a proxy disconnect event just in case.
         unawaited(connection.sendRequest('proxy.disconnect', <String, Object>{
           'id': id,
@@ -861,5 +900,86 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
       'deviceId': deviceId,
       'uri': uri.toString(),
     });
+  }
+}
+
+class ProxiedVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
+  ProxiedVMServiceDiscoveryForAttach(
+    this.connection,
+    this.deviceId, {
+    required this.proxiedPortForwarder,
+    required this.fallbackDiscovery,
+    this.appId,
+    this.fuchsiaModule,
+    this.filterDevicePort,
+    this.expectedHostPort,
+    required this.ipv6,
+    required this.logger,
+  });
+
+  /// [DaemonConnection] used to communicate with the daemon.
+  final DaemonConnection connection;
+
+  final String deviceId;
+
+  final String? appId;
+  final String? fuchsiaModule;
+  final int? filterDevicePort;
+  final int? expectedHostPort;
+  final bool ipv6;
+  final Logger logger;
+
+  final ProxiedPortForwarder proxiedPortForwarder;
+
+  VMServiceDiscoveryForAttach Function() fallbackDiscovery;
+
+  Stream<Uri>? _uris;
+
+  @override
+  Stream<Uri> get uris {
+    if (_uris == null) {
+      String? requestId;
+      final StreamController<Uri> controller = StreamController<Uri>();
+
+      controller.onListen = () {
+        connection.sendRequest('device.startVMServiceDiscoveryForAttach', <String, Object?>{
+          'deviceId': deviceId,
+          'appId': appId,
+          'fuchsiaModule': fuchsiaModule,
+          'filterDevicePort': filterDevicePort,
+          'ipv6': ipv6,
+        }).then(
+          (Object? response) async {
+            requestId = _cast<String>(response);
+            final Stream<Uri> vmService = connection
+                .listenToEvent('device.VMServiceDiscoveryForAttach.$requestId')
+                .asyncMap((DaemonEventData event) async {
+              // Forward the port.
+              final Uri remoteUri = Uri.parse(_cast<String>(event.data));
+              final int port = remoteUri.port;
+              final int localPort = await proxiedPortForwarder.forward(port, hostPort: expectedHostPort, ipv6: ipv6);
+              return remoteUri.replace(port: localPort);
+            });
+            await controller.addStream(vmService);
+          },
+          onError: (Object e) {
+            // Daemon throws string types.
+            if (e is String && e.contains('command not understood')) {
+              // Use a fallback if the daemon does not support VM service discovery.
+              controller.addStream(fallbackDiscovery().uris);
+            } else {
+              controller.addError(e);
+            }
+          },
+        );
+      };
+      controller.onCancel = () {
+        if (requestId != null) {
+          connection.sendRequest('device.stopVMServiceDiscoveryForAttach', <String, Object?>{'id': requestId});
+        }
+      };
+      _uris = controller.stream;
+    }
+    return _uris!;
   }
 }

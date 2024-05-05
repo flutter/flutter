@@ -12,7 +12,6 @@ import '../build_info.dart';
 import '../bundle_builder.dart';
 import '../devfs.dart';
 import '../device.dart';
-import '../features.dart';
 import '../globals.dart' as globals;
 import '../native_assets.dart';
 import '../project.dart';
@@ -240,7 +239,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         FlutterOptions.kWebWasmFlag,
         help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
         negatable: false,
-        hide: !featureFlags.isFlutterWebWasmEnabled,
       );
 
     addDdsOptions(verboseHelp: verboseHelp);
@@ -332,6 +330,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     return super.verifyThenRunCommand(commandPath);
   }
 
+  WebRendererMode get webRenderer => WebRendererMode.fromCliOption(
+    stringArg(FlutterOptions.kWebRendererFlag),
+    useWasm: useWasm
+  );
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (!globals.fs.isFileSync('pubspec.yaml')) {
@@ -390,10 +393,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    final String? webRendererString = stringArg('web-renderer');
-    final WebRendererMode webRenderer = (webRendererString != null)
-        ? WebRendererMode.values.byName(webRendererString)
-        : WebRendererMode.auto;
     final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
       buildInfo,
       startPaused: startPaused,
@@ -407,11 +406,16 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
       debugLogsDirectoryPath: debugLogsDirectoryPath,
       webRenderer: webRenderer,
+      webUseWasm: useWasm,
     );
 
     String? testAssetDirectory;
     if (buildTestAssets) {
-      await _buildTestAsset(flavor: buildInfo.flavor, impellerStatus: debuggingOptions.enableImpeller);
+      await _buildTestAsset(
+        flavor: buildInfo.flavor,
+        impellerStatus: debuggingOptions.enableImpeller,
+        buildMode: debuggingOptions.buildInfo.mode,
+      );
       testAssetDirectory = globals.fs.path.
         join(flutterProject.directory.path, 'build', 'unit_test_assets');
     }
@@ -513,6 +517,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       throwToolExit('--wasm is only supported on the web platform');
     }
 
+    if (webRenderer == WebRendererMode.skwasm && !useWasm) {
+      throwToolExit('Skwasm renderer requires --wasm');
+    }
+
     Device? integrationTestDevice;
     if (_isIntegrationTest) {
       integrationTestDevice = await findTargetDevice();
@@ -591,7 +599,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         testAssetDirectory: testAssetDirectory,
         flutterProject: flutterProject,
         web: isWeb,
-        useWasm: useWasm,
         randomSeed: stringArg('test-randomize-ordering-seed'),
         reporter: stringArg('reporter'),
         fileReporter: stringArg('file-reporter'),
@@ -671,6 +678,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   Future<void> _buildTestAsset({
     required String? flavor,
     required ImpellerStatus impellerStatus,
+    required BuildMode buildMode,
   }) async {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     final int build = await assetBundle.build(
@@ -691,6 +699,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         artifacts: globals.artifacts!,
         logger: globals.logger,
         projectDir: globals.fs.currentDirectory,
+        buildMode: buildMode,
       );
     }
   }

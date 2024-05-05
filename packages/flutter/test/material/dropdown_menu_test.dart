@@ -8,11 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_testing/leak_tracker_testing.dart';
 
 void main() {
-  // TODO(polina-c): _DropdownMenuState should not be used after disposal, https://github.com/flutter/flutter/issues/145622 [leaks-to-clean]
-  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
 
   const String longText = 'one two three four five six seven eight nine ten eleven twelve';
   final List<DropdownMenuEntry<TestMenu>> menuChildren = <DropdownMenuEntry<TestMenu>>[];
@@ -1342,6 +1339,68 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
+  testWidgets('If enabled is false, the mouse cursor should be deferred when hovered', (WidgetTester tester) async {
+    Widget buildDropdownMenu({ bool enabled = true,  bool? requestFocusOnTap }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              DropdownMenu<TestMenu>(
+                enabled: enabled,
+                requestFocusOnTap: requestFocusOnTap,
+                dropdownMenuEntries: menuChildren,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Check mouse cursor dropdown menu is disabled and requestFocusOnTap is true.
+    await tester.pumpWidget(buildDropdownMenu(enabled: false, requestFocusOnTap: true));
+    await tester.pumpAndSettle();
+
+    Finder textFieldFinder = find.byType(TextField);
+    TextField textField = tester.widget<TextField>(textFieldFinder);
+    expect(textField.canRequestFocus, true);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.moveTo(tester.getCenter(textFieldFinder));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    // Remove the pointer.
+    await gesture.removePointer();
+
+    // Check mouse cursor dropdown menu is disabled and requestFocusOnTap is false.
+    await tester.pumpWidget(buildDropdownMenu(enabled: false, requestFocusOnTap: false));
+    await tester.pumpAndSettle();
+
+    textFieldFinder = find.byType(TextField);
+    textField = tester.widget<TextField>(textFieldFinder);
+    expect(textField.canRequestFocus, false);
+
+    // Add a new pointer.
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(textFieldFinder));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    // Remove the pointer.
+    await gesture.removePointer();
+
+    // Check enabled dropdown menu updates the mouse cursor when hovered.
+    await tester.pumpWidget(buildDropdownMenu(requestFocusOnTap: true));
+    await tester.pumpAndSettle();
+
+    textFieldFinder = find.byType(TextField);
+    textField = tester.widget<TextField>(textFieldFinder);
+    expect(textField.canRequestFocus, true);
+
+    // Add a new pointer.
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(textFieldFinder));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+  });
+
   testWidgets('The menu has the same width as the input field in ListView', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/123631
     await tester.pumpWidget(MaterialApp(
@@ -2008,6 +2067,7 @@ void main() {
       },
     );
     final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2045,6 +2105,83 @@ void main() {
     state.updateEditingValue(const TextEditingValue(text: 'Green2'));
     expect(called, 3);
     expect(controller.text, 'Green');
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/140596.
+  testWidgets('Long text item does not overflow', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: DropdownMenu<int>(
+          dropdownMenuEntries: <DropdownMenuEntry<int>>[
+            DropdownMenuEntry<int>(
+              value: 0,
+              label: 'This is a long text that is multiplied by 4 so it can overflow. ' * 4,
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.pump();
+    await tester.tap(find.byType(DropdownMenu<int>));
+    await tester.pumpAndSettle();
+
+    // No exception should be thrown.
+    expect(tester.takeException(), isNull);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/147076.
+  testWidgets('Text field does not overflow parent', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SizedBox(
+          width: 300,
+          child: DropdownMenu<int>(
+            dropdownMenuEntries: <DropdownMenuEntry<int>>[
+              DropdownMenuEntry<int>(
+                value: 0,
+                label: 'This is a long text that is multiplied by 4 so it can overflow. ' * 4,
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump();
+    final RenderBox box = tester.firstRenderObject(find.byType(TextField));
+    expect(box.size.width, 300.0);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/147173.
+  testWidgets('Text field with large helper text can be selected', (WidgetTester tester) async {
+    const String labelText = 'MenuEntry 1';
+    await tester.pumpWidget(const MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: DropdownMenu<int>(
+            hintText: 'Hint text',
+            helperText: 'Menu Helper text',
+            inputDecorationTheme: InputDecorationTheme(
+              helperMaxLines: 2,
+              helperStyle: TextStyle(fontSize: 30),
+            ),
+            dropdownMenuEntries: <DropdownMenuEntry<int>>[
+              DropdownMenuEntry<int>(
+                value: 0,
+                label: labelText,
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump();
+    await tester.tapAt(tester.getCenter(find.text('Hint text')));
+    await tester.pumpAndSettle();
+    // One is layout for the _DropdownMenuBody, the other one is the real button item in the menu.
+    expect(find.widgetWithText(MenuItemButton, labelText), findsNWidgets(2));
   });
 }
 
