@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -643,7 +644,10 @@ void main() {
     );
   });
 
-  testWidgets('Fullscreen route animates correct transform values over time', (WidgetTester tester) async {
+  testWidgets('Fullscreen route animates correct transform values over time',
+    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
+    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
+    (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(
@@ -861,11 +865,17 @@ void main() {
     expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(-0.0, epsilon: 1.0));
   }
 
-  testWidgets('CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top', (WidgetTester tester) async {
+  testWidgets('CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top',
+    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
+    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
+    (WidgetTester tester) async {
     await testParallax(tester, fromFullscreenDialog: false);
   });
 
-  testWidgets('FullscreenDialog CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top', (WidgetTester tester) async {
+  testWidgets('FullscreenDialog CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top',
+    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
+    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
+    (WidgetTester tester) async {
     await testParallax(tester, fromFullscreenDialog: true);
   });
 
@@ -979,11 +989,17 @@ void main() {
       expect(tester.getTopLeft(find.byType(Placeholder)).dx, moreOrLessEquals(0.0, epsilon: 1.0));
     }
 
-    testWidgets('CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top and gets popped before the end of the animation', (WidgetTester tester) async {
+    testWidgets('CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top and gets popped before the end of the animation',
+      // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
+      experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
+      (WidgetTester tester) async {
       await testParallax(tester, fromFullscreenDialog: false);
     });
 
-    testWidgets('FullscreenDialog CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top and gets popped before the end of the animation', (WidgetTester tester) async {
+    testWidgets('FullscreenDialog CupertinoPageRoute has parallax when non fullscreenDialog route is pushed on top and gets popped before the end of the animation',
+      // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
+      experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
+      (WidgetTester tester) async {
       await testParallax(tester, fromFullscreenDialog: true);
     });
   });
@@ -1069,15 +1085,24 @@ void main() {
     expect(tester.getTopLeft(find.byType(Placeholder)).dx, 0.0);
   }
 
-  testWidgets('CupertinoPageRoute has no parallax when fullscreenDialog route is pushed on top', (WidgetTester tester) async {
+  testWidgets('CupertinoPageRoute has no parallax when fullscreenDialog route is pushed on top',
+    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
+    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
+    (WidgetTester tester) async {
     await testNoParallax(tester, fromFullscreenDialog: false);
   });
 
-  testWidgets('FullscreenDialog CupertinoPageRoute has no parallax when fullscreenDialog route is pushed on top', (WidgetTester tester) async {
+  testWidgets('FullscreenDialog CupertinoPageRoute has no parallax when fullscreenDialog route is pushed on top',
+    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
+    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
+    (WidgetTester tester) async {
     await testNoParallax(tester, fromFullscreenDialog: true);
   });
 
-  testWidgets('Animated push/pop is not linear', (WidgetTester tester) async {
+  testWidgets('Animated push/pop is not linear',
+    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
+    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
+    (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Text('1'),
@@ -2593,6 +2618,53 @@ void main() {
       expect(tester.getTopLeft(find.byType(Placeholder)).dx, 0.0);
       expect(tester.getBottomRight(find.byType(Placeholder)).dx, 390.0);
     });
+  });
+
+  testWidgets(
+  // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
+  experimentalLeakTesting: LeakTesting.settings.withTracked(classes: <String>['CurvedAnimation']),
+  'Fullscreen route does not leak CurveAnimation', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return CupertinoButton(
+              child: const Text('Button'),
+              onPressed: () {
+                Navigator.push<void>(context, CupertinoPageRoute<void>(
+                  fullscreenDialog: true,
+                  builder: (BuildContext context) {
+                    return Column(
+                      children: <Widget>[
+                        const Placeholder(),
+                        CupertinoButton(
+                          child: const Text('Close'),
+                          onPressed: () {
+                            Navigator.pop<void>(context);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ));
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    // Enter animation.
+    await tester.tap(find.text('Button'));
+    await tester.pump();
+
+    await tester.pump(const Duration(milliseconds: 400));
+
+    // Exit animation
+    await tester.tap(find.text('Close'));
+    await tester.pump();
+
+    await tester.pump(const Duration(milliseconds: 400));
   });
 }
 
