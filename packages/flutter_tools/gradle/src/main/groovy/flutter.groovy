@@ -220,8 +220,8 @@ class FlutterPlugin implements Plugin<Project> {
             File projectLockfile = subproject.file("project-${subproject.name}.lockfile")
             File buildscriptLockfile = subproject.file("buildscript-gradle.lockfile")
 
-            project.logger.quiet("Project lockfile: ${projectLockfile}")
-            project.logger.quiet("Buildscript lockfile: ${buildscriptLockfile}")
+            // project.logger.quiet("Project lockfile: ${projectLockfile}")
+            // project.logger.quiet("Buildscript lockfile: ${buildscriptLockfile}")
 
             if (!(projectLockfile.exists() && subprojectLockfile.exists())) {
                 lockfilesExist = false
