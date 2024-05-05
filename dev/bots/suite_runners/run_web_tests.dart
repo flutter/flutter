@@ -143,11 +143,6 @@ class WebTestsSuite {
       ],
 
       // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
-      () => _runWebE2eTest('platform_messages_integration', buildMode: 'debug', renderer: 'canvaskit'),
-      () => _runWebE2eTest('platform_messages_integration', buildMode: 'profile', renderer: 'html'),
-      () => _runWebE2eTest('platform_messages_integration', buildMode: 'release', renderer: 'html'),
-
-      // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
       () => _runWebE2eTest('profile_diagnostics_integration', buildMode: 'debug', renderer: 'html'),
       () => _runWebE2eTest('profile_diagnostics_integration', buildMode: 'profile', renderer: 'canvaskit'),
       () => _runWebE2eTest('profile_diagnostics_integration', buildMode: 'release', renderer: 'html'),
@@ -157,10 +152,9 @@ class WebTestsSuite {
 
       // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
       // These tests have been extremely flaky, so we are temporarily disabling them until we figure out how to make them more robust.
-      // See https://github.com/flutter/flutter/issues/143834
-      // () => _runWebE2eTest('text_editing_integration', buildMode: 'debug', renderer: 'canvaskit'),
-      // () => _runWebE2eTest('text_editing_integration', buildMode: 'profile', renderer: 'html'),
-      // () => _runWebE2eTest('text_editing_integration', buildMode: 'release', renderer: 'html'),
+      () => _runWebE2eTest('text_editing_integration', buildMode: 'debug', renderer: 'canvaskit'),
+      () => _runWebE2eTest('text_editing_integration', buildMode: 'profile', renderer: 'html'),
+      () => _runWebE2eTest('text_editing_integration', buildMode: 'release', renderer: 'html'),
 
       // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
       () => _runWebE2eTest('url_strategy_integration', buildMode: 'debug', renderer: 'html'),
@@ -298,6 +292,11 @@ class WebTestsSuite {
     bool expectWriteResponseFile = false,
     String expectResponseFileContent = '',
   }) async {
+    // TODO(yjbanov): this is temporarily disabled due to https://github.com/flutter/flutter/issues/147731
+    if (buildMode == 'debug' && renderer == 'canvaskit') {
+      print('SKIPPED: $target in debug CanvasKit mode due to https://github.com/flutter/flutter/issues/147731');
+      return;
+    }
     printProgress('${green}Running integration tests $target in $buildMode mode.$reset');
     await runCommand(
       flutter,
@@ -426,6 +425,11 @@ class WebTestsSuite {
   /// The test is written using `package:integration_test` (despite the "e2e" in
   /// the name, which is there for historic reasons).
   Future<void> _runGalleryE2eWebTest(String buildMode, { bool canvasKit = false }) async {
+    // TODO(yjbanov): this is temporarily disabled due to https://github.com/flutter/flutter/issues/147731
+    if (buildMode == 'debug' && canvasKit) {
+      print('SKIPPED: Gallery e2e web test in debug CanvasKit mode due to https://github.com/flutter/flutter/issues/147731');
+      return;
+    }
     printProgress('${green}Running flutter_gallery integration test in --$buildMode using ${canvasKit ? 'CanvasKit' : 'HTML'} renderer.$reset');
     final String testAppDirectory = path.join(flutterRoot, 'dev', 'integration_tests', 'flutter_gallery');
     await runCommand(
@@ -737,7 +741,7 @@ class WebTestsSuite {
         // and it doesn't use most of startCommand's features; we could simplify this a lot by
         // inlining the relevant parts of startCommand here.
         'chromedriver',
-        <String>['--port=4444'],
+        <String>['--port=4444', '--log-level=INFO', '--enable-chrome-logs'],
       );
       while (!await _isChromeDriverRunning()) {
         await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -749,7 +753,8 @@ class WebTestsSuite {
     final Uri chromeDriverUrl = Uri.parse('http://localhost:4444/status');
     final HttpClientRequest request = await client.getUrl(chromeDriverUrl);
     final HttpClientResponse response = await request.close();
-    final Map<String, dynamic> webDriverStatus = json.decode(await response.transform(utf8.decoder).join()) as Map<String, dynamic>;
+    final String responseString = await response.transform(utf8.decoder).join();
+    final Map<String, dynamic> webDriverStatus = json.decode(responseString) as Map<String, dynamic>;
     client.close();
     final bool webDriverReady = (webDriverStatus['value'] as Map<String, dynamic>)['ready'] as bool;
     if (!webDriverReady) {

@@ -718,17 +718,17 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
     assert(debugCheckHasDirectionality(context));
     // For devices with notches, the drag area needs to be larger on the side
     // that has the notch.
-    double dragAreaWidth = Directionality.of(context) == TextDirection.ltr ?
-                           MediaQuery.paddingOf(context).left :
-                           MediaQuery.paddingOf(context).right;
-    dragAreaWidth = max(dragAreaWidth, _kBackGestureWidth);
+    final double dragAreaWidth = switch (Directionality.of(context)) {
+      TextDirection.rtl => MediaQuery.paddingOf(context).right,
+      TextDirection.ltr => MediaQuery.paddingOf(context).left,
+    };
     return Stack(
       fit: StackFit.passthrough,
       children: <Widget>[
         widget.child,
         PositionedDirectional(
           start: 0.0,
-          width: dragAreaWidth,
+          width: max(dragAreaWidth, _kBackGestureWidth),
           top: 0.0,
           bottom: 0.0,
           child: Listener(
