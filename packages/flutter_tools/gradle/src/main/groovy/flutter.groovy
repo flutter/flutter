@@ -220,7 +220,6 @@ class FlutterPlugin implements Plugin<Project> {
             if (!(subproject.file("project-{subproject.name}.lockfile").exists() &&
                   subproject.file("buildscript-gradle.lockfile").exists())) {
                 lockfilesExist = false
-                break
             }
         }
         if (isFlutterAppProject() && !lockfilesExist) {
