@@ -14,10 +14,6 @@
 
 namespace impeller {
 
-class Path;
-class HostBuffer;
-struct VertexBuffer;
-
 class SolidColorContents final : public ColorSourceContents {
  public:
   SolidColorContents();
