@@ -2199,7 +2199,8 @@ void main() {
       await tester.pumpWidget(buildApp(platform));
       await tester.pumpAndSettle();
 
-      expect(find.byType(CupertinoCheckbox), findsOneWidget);
+      expect(find.byType(CupertinoCheckbox), findsNothing);
+      expect(find.byType(Checkbox), findsOneWidget);
     }
 
     for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
@@ -2207,6 +2208,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(CupertinoCheckbox), findsNothing);
+      expect(find.byType(Checkbox), findsOneWidget);
     }
   });
 
