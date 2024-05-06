@@ -1,4 +1,4 @@
-Signature: d31d229c02138305b56699fd9b4b13d1
+Signature: e7f970a172de7bf6d42a7dfefa7f6e4c
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9491,6 +9491,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
+ORIGIN: ../../../flutter/third_party/skia/fuzz/oss_fuzz/FuzzParsePath.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/gm/emptyshader.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/gm/imagedither.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/gm/rendertomipmappedyuvimageplanes.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -9548,6 +9549,7 @@ ORIGIN: ../../../flutter/third_party/skia/src/sksl/ir/SkSLSymbol.cpp + ../../../
 ORIGIN: ../../../flutter/third_party/skia/src/sksl/transform/SkSLEliminateUnnecessaryBraces.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/sksl/transform/SkSLFindAndDeclareBuiltinStructs.cpp + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/skia/fuzz/oss_fuzz/FuzzParsePath.cpp
 FILE: ../../../flutter/third_party/skia/gm/emptyshader.cpp
 FILE: ../../../flutter/third_party/skia/gm/imagedither.cpp
 FILE: ../../../flutter/third_party/skia/gm/rendertomipmappedyuvimageplanes.cpp
