@@ -1646,6 +1646,7 @@ class _DialogDefaultsM3 extends DialogTheme {
         alignment: Alignment.center,
         elevation: 6.0,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0))),
+        clipBehavior: Clip.none,
       );
 
   final BuildContext context;
@@ -1684,7 +1685,7 @@ class _DialogDefaultsM3 extends DialogTheme {
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
 class _DialogFullscreenDefaultsM3 extends DialogTheme {
-  const _DialogFullscreenDefaultsM3(this.context);
+  const _DialogFullscreenDefaultsM3(this.context): super(clipBehavior: Clip.none);
 
   final BuildContext context;
 
