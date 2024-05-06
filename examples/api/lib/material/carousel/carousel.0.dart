@@ -46,7 +46,6 @@ class _CarouselExampleState extends State<CarouselExample> with SingleTickerProv
 
     return ListView(
       children: <Widget>[
-        // This Carousel has a
         ConstrainedBox(
           constraints: BoxConstraints(maxHeight: height / 2),
           child: Carousel.hero(
@@ -70,6 +69,7 @@ class _CarouselExampleState extends State<CarouselExample> with SingleTickerProv
             children: List<Widget>.generate(20, (int index) {
               return ColoredBox(
                 color: Colors.primaries[index % Colors.primaries.length].withOpacity(0.8),
+                child: const SizedBox.expand(),
               );
             }),
           ),
@@ -81,7 +81,7 @@ class _CarouselExampleState extends State<CarouselExample> with SingleTickerProv
             layoutWeights: const <int>[3,3,3,2,1],
             children: CardInfo.values.map((CardInfo info) {
               return ColoredBox(
-                color: info.backgroundColor.withOpacity(0.8),
+                color: info.backgroundColor,
                 child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -104,7 +104,7 @@ class _CarouselExampleState extends State<CarouselExample> with SingleTickerProv
           constraints: const BoxConstraints(maxHeight: 200),
           child: Carousel(
             itemExtent: 330,
-            shrinkExtent: 0,
+            shrinkExtent: 200,
             children: List<Widget>.generate(20, (int index){
               return UncontainedLayoutCard(index: index, label: 'Show $index');
             }),
