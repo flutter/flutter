@@ -2367,7 +2367,6 @@ Widget buildAdaptiveCheckbox({
   BorderSide side = const BorderSide(),
   bool value = true,
   bool enabled = true,
-
 }) {
   final Widget adaptiveCheckbox = Checkbox.adaptive(
     value: value,

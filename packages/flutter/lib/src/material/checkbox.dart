@@ -782,7 +782,6 @@ class _CheckboxPainter extends ToggleablePainter {
       start = const Offset(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
       mid = const Offset(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
       end = const Offset(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
-
     }
     if (t < 0.5) {
       final double strokeT = t * 2.0;
@@ -874,7 +873,6 @@ class _CheckboxPainter extends ToggleablePainter {
           ..color = focusColor
           ..style = PaintingStyle.stroke
           ..strokeWidth = 3.5;
-
         _drawBox(canvas, focusOuter, borderPaint, activeSide);
       }
     }
