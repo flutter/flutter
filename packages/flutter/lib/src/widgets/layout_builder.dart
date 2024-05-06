@@ -81,7 +81,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   Element? _child;
 
   @override
-  late final BuildScope buildScope = BuildScope(renderObject.markNeedsLayout)..debugRootElement = this;
+  late final BuildScope buildScope = BuildScope(renderObject.markNeedsLayout);
 
   @override
   void visitChildren(ElementVisitor visitor) {

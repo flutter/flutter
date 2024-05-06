@@ -257,11 +257,6 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
 
   final bool floating;
 
-  late final BuildScope _childBuildScope = BuildScope(renderObject.triggerRebuild)..debugRootElement = this;
-
-  @override
-  BuildScope get buildScope => _childBuildScope;
-
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin get renderObject => super.renderObject as _RenderSliverPersistentHeaderForWidgetsMixin;
 

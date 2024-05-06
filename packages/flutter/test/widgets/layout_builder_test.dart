@@ -294,6 +294,43 @@ void main() {
     expect(built, 2);
   });
 
+  testWidgets('LayoutBuilder rebuilds once in the same frame', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/146379.
+    int built = 0;
+    final Widget target = LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return Builder(builder: (BuildContext context) {
+          built += 1;
+          MediaQuery.of(context);
+          return const Placeholder();
+        });
+      },
+    );
+    expect(built, 0);
+
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(size: Size(400.0, 300.0)),
+      child: Center(
+        child: SizedBox(
+          width: 400.0,
+          child: target,
+        ),
+      ),
+    ));
+    expect(built, 1);
+
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(size: Size(300.0, 400.0)),
+      child: Center(
+        child: SizedBox(
+          width: 300.0,
+          child: target,
+        ),
+      ),
+    ));
+    expect(built, 2);
+  });
+
   testWidgets('SliverLayoutBuilder and Inherited -- do not rebuild when not using inherited', (WidgetTester tester) async {
     int built = 0;
     final Widget target = Directionality(
