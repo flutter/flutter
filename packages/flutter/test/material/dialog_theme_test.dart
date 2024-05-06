@@ -39,11 +39,11 @@ MaterialApp _appWithDialog(WidgetTester tester, Widget dialog, { ThemeData? them
 
 final Key _painterKey = UniqueKey();
 
-Material _getMaterialFromAlertDialog(WidgetTester tester) {
+Material _getMaterialAlertDialog(WidgetTester tester) {
   return tester.widget<Material>(find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
 }
 
-Material _getMaterialFromDialog(WidgetTester tester) {
+Material _getMaterialDialog(WidgetTester tester) {
   return tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)));
 }
 
@@ -110,7 +110,7 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    final Material materialWidget = _getMaterialFromAlertDialog(tester);
+    final Material materialWidget = _getMaterialAlertDialog(tester);
     expect(materialWidget.color, customColor);
   });
 
@@ -136,7 +136,7 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    final Material materialWidget = _getMaterialFromAlertDialog(tester);
+    final Material materialWidget = _getMaterialAlertDialog(tester);
     expect(materialWidget.elevation, customElevation);
     expect(materialWidget.shadowColor, shadowColor);
     expect(materialWidget.surfaceTintColor, surfaceTintColor);
@@ -157,7 +157,7 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    final Material materialWidget = _getMaterialFromAlertDialog(tester);
+    final Material materialWidget = _getMaterialAlertDialog(tester);
     expect(materialWidget.shape, customBorder);
   });
 
@@ -567,7 +567,7 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    final Material materialWidget = _getMaterialFromDialog(tester);
+    final Material materialWidget = _getMaterialDialog(tester);
     expect(materialWidget.clipBehavior, dialogTheme.clipBehavior);
   });
 
@@ -586,7 +586,7 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    final Material materialWidget = _getMaterialFromDialog(tester);
+    final Material materialWidget = _getMaterialDialog(tester);
     expect(materialWidget.clipBehavior, Clip.antiAlias);
   });
 
@@ -606,7 +606,7 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    final Material materialWidget = _getMaterialFromDialog(tester);
+    final Material materialWidget = _getMaterialDialog(tester);
     expect(materialWidget.clipBehavior, Clip.antiAlias);
   });
 }
