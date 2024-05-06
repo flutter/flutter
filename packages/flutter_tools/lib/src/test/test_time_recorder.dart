@@ -35,11 +35,7 @@ class TestTimeRecorder {
 
   @visibleForTesting
   List<String> getPrintAsListForTesting() {
-    final List<String> result = <String>[];
-    for (final TestTimePhases phase in TestTimePhases.values) {
-      result.add(_getPrintStringForPhase(phase));
-    }
-    return result;
+    return TestTimePhases.values.map(_getPrintStringForPhase).toList();
   }
 
   @visibleForTesting
