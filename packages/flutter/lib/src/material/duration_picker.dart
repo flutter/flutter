@@ -255,6 +255,7 @@ class _DurationPickerHeader extends StatelessWidget {
             ),
             Row(
               // Hour/minutes should not change positions in RTL locales.
+              crossAxisAlignment: CrossAxisAlignment.start,
               textDirection: TextDirection.ltr,
               children: <Widget>[
                 if (durationPickerMode.hasHours) ...<Widget>[
@@ -285,6 +286,7 @@ class _DurationPickerHeader extends StatelessWidget {
                 children: <Widget>[
                   // TODO: may can remove column above
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     // Hour/minutes should not change positions in RTL locales.
                     textDirection: TextDirection.ltr,
                     children: <Widget>[
@@ -343,11 +345,23 @@ class _DurationControl extends StatelessWidget {
 
     // TODO: only used in dial mode, therefore can remove the other stuff.
     double height = defaultTheme.hourMinuteSize.height;
+    
+    // TODO: needs _TimePickerModel to resolve font size correctly.
+    final TextStyle effectiveHourMinuteStyle =
+    MaterialStateProperty.resolveAs<TextStyle>(
+      _DurationPickerModel.themeOf(context).hourMinuteTextStyle ?? _DurationPickerModel.defaultThemeOf(context).hourMinuteTextStyle,
+      states,
+    );
 
+    // TODO: remove
+    print('Duration effectiveHourMinuteStyle Control FontSize: ${effectiveHourMinuteStyle.fontSize}, is hms: ${_DurationPickerModel.durationPickerModeOf(context) == DurationPickerMode.hms}');
+    
     // TODO: check if it's valid to scale
     if (_DurationPickerModel.durationPickerModeOf(context) == DurationPickerMode.hms) {
       height = defaultTheme.hourMinuteInputSize.height;
-      effectiveStyle = effectiveStyle.copyWith(fontSize: 45); // Display medium
+      // effectiveStyle = effectiveStyle.copyWith(fontSize: effectiveHourMinuteStyle.fontSize); // Display medium
+      // effectiveHourMinuteStyle does not work, because of https://github.com/flutter/flutter/issues/131247
+      effectiveStyle = effectiveStyle.copyWith(fontSize: Theme.of(context).textTheme.displayMedium?.fontSize); // Display medium
     }
 
     return SizedBox(
@@ -415,11 +429,14 @@ class _HourControl extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          _DurationControl(
-            isSelected: _DurationPickerModel.durationModeOf(context) == _DurationMode.hour,
-            text: formattedHour,
-            onTap: Feedback.wrapForTap(() => _DurationPickerModel.setDurationMode(context, _DurationMode.hour), context)!,
-            onDoubleTap: _DurationPickerModel.of(context, _DurationPickerAspect.onHourDoubleTapped).onHourDoubleTapped,
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: _DurationControl(
+              isSelected: _DurationPickerModel.durationModeOf(context) == _DurationMode.hour,
+              text: formattedHour,
+              onTap: Feedback.wrapForTap(() => _DurationPickerModel.setDurationMode(context, _DurationMode.hour), context)!,
+              onDoubleTap: _DurationPickerModel.of(context, _DurationPickerAspect.onHourDoubleTapped).onHourDoubleTapped,
+            ),
           ),
           // TODO: is this practicable to state the unit here?
           ExcludeSemantics(
@@ -478,6 +495,13 @@ class _TimeSelectorSeparator extends StatelessWidget {
       states,
     ).copyWith(color: effectiveTextColor);
 
+    // TODO: needs _TimePickerModel to resolve font size correctly.
+    final TextStyle effectiveHourMinuteStyle =
+    MaterialStateProperty.resolveAs<TextStyle>(
+      _DurationPickerModel.themeOf(context).hourMinuteTextStyle ?? _DurationPickerModel.defaultThemeOf(context).hourMinuteTextStyle,
+      states,
+    );
+
     double height;
     switch (_DurationPickerModel.entryModeOf(context)) {
       case DurationPickerEntryMode.dial:
@@ -486,23 +510,32 @@ class _TimeSelectorSeparator extends StatelessWidget {
       case DurationPickerEntryMode.input:
       case DurationPickerEntryMode.inputOnly:
         height = defaultTheme.hourMinuteInputSize.height;
+        effectiveStyle = effectiveStyle.copyWith(fontSize: effectiveHourMinuteStyle.fontSize); // Display medium
     }
-
+  
     // TODO: check if it's valid to scale, also it isn't scaled in input dialog.
     if (_DurationPickerModel.durationPickerModeOf(context) == DurationPickerMode.hms) {
       height = defaultTheme.hourMinuteInputSize.height;
-      effectiveStyle = effectiveStyle.copyWith(fontSize: 45); // Display medium
+      // effectiveStyle = effectiveStyle.copyWith(fontSize: effectiveHourMinuteStyle.fontSize); // Display medium
+      // effectiveHourMinuteStyle does not work, because of https://github.com/flutter/flutter/issues/131247
+      effectiveStyle = effectiveStyle.copyWith(fontSize: Theme.of(context).textTheme.displayMedium?.fontSize); // Display medium
     }
+
+    // TODO: remove
+    // print('Duration effectiveHourMinuteStyle Separator FontSize: ${effectiveHourMinuteStyle.fontSize}, isHms: ${_DurationPickerModel.durationPickerModeOf(context) == DurationPickerMode.hms}');
 
     return ExcludeSemantics(
       child: SizedBox(
         width: durationFormat == DurationFormat.frenchCanadian ? 36 : 24,
         height: height,
-        child: Text(
-          _timeSelectorSeparatorValue(durationFormat),
-          style: effectiveStyle,
-          textScaler: TextScaler.noScaling,
-          textAlign: TextAlign.center,
+        // TODO: centering separator correct?
+        child: Center(
+          child: Text(
+            _timeSelectorSeparatorValue(durationFormat),
+            style: effectiveStyle,
+            textScaler: TextScaler.noScaling,
+            textAlign: TextAlign.center,
+          ),
         ),
       ),
     );
@@ -543,11 +576,14 @@ class _MinuteControl extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          _DurationControl(
-            isSelected: _DurationPickerModel.durationModeOf(context) == _DurationMode.minute,
-            text: formattedMinute,
-            onTap: Feedback.wrapForTap(() => _DurationPickerModel.setDurationMode(context, _DurationMode.minute), context)!,
-            onDoubleTap: _DurationPickerModel.of(context, _DurationPickerAspect.onMinuteDoubleTapped).onMinuteDoubleTapped,
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: _DurationControl(
+              isSelected: _DurationPickerModel.durationModeOf(context) == _DurationMode.minute,
+              text: formattedMinute,
+              onTap: Feedback.wrapForTap(() => _DurationPickerModel.setDurationMode(context, _DurationMode.minute), context)!,
+              onDoubleTap: _DurationPickerModel.of(context, _DurationPickerAspect.onMinuteDoubleTapped).onMinuteDoubleTapped,
+            ),
           ),
           // TODO: is this practicable to state the unit here?
           ExcludeSemantics(
@@ -598,11 +634,13 @@ class _SecondControl extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          _DurationControl(
-            isSelected: _DurationPickerModel.durationModeOf(context) == _DurationMode.second,
-            text: formattedSecond,
-            onTap: Feedback.wrapForTap(() => _DurationPickerModel.setDurationMode(context, _DurationMode.second), context)!,
-            onDoubleTap: _DurationPickerModel.of(context, _DurationPickerAspect.onSecondDoubleTapped).onSecondDoubleTapped,
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: _DurationControl(isSelected: _DurationPickerModel.durationModeOf(context) == _DurationMode.second,
+              text: formattedSecond,
+              onTap: Feedback.wrapForTap(() => _DurationPickerModel.setDurationMode(context, _DurationMode.second), context)!,
+              onDoubleTap: _DurationPickerModel.of(context, _DurationPickerAspect.onSecondDoubleTapped).onSecondDoubleTapped,
+            ),
           ),
           // TODO: is this practicable to state the unit here?
           ExcludeSemantics(

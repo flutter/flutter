@@ -76,37 +76,48 @@ class Home extends StatelessWidget {
             ),
             Row(
               children: [
-                const DurationPickerDialog(
+                TimePickerDialog(
+                  initialTime: TimeOfDay.now(),
+                ),
+                TimePickerDialog(
+                  initialEntryMode: TimePickerEntryMode.input,
+                  initialTime: TimeOfDay.now(),
+                ),
+              ],
+            ),
+            const Row(
+              children: [
+                DurationPickerDialog(
                   durationPickerMode: DurationPickerMode.hm,
                   initialDuration: Duration(hours: 1, minutes: 30, seconds: 45),
                 ),
-                const DurationPickerDialog(
+                DurationPickerDialog(
                   durationPickerMode: DurationPickerMode.hm,
                   initialEntryMode: DurationPickerEntryMode.input,
                   initialDuration: Duration(hours: 1, minutes: 30, seconds: 45),
                 ),
               ],
             ),
-            Row(
+            const Row(
               children: [
-                const DurationPickerDialog(
+                DurationPickerDialog(
                   durationPickerMode: DurationPickerMode.hms,
                   initialDuration: Duration(hours: 1, minutes: 30, seconds: 45),
                 ),
-                const DurationPickerDialog(
+                DurationPickerDialog(
                   durationPickerMode: DurationPickerMode.hms,
                   initialEntryMode: DurationPickerEntryMode.input,
                   initialDuration: Duration(hours: 1, minutes: 30, seconds: 45),
                 ),
               ],
             ),
-            Row(
+            const Row(
               children: [
-                const DurationPickerDialog(
+                DurationPickerDialog(
                   durationPickerMode: DurationPickerMode.ms,
                   initialDuration: Duration(hours: 1, minutes: 30, seconds: 45),
                 ),
-                const DurationPickerDialog(
+                DurationPickerDialog(
                   durationPickerMode: DurationPickerMode.ms,
                   initialEntryMode: DurationPickerEntryMode.input,
                   initialDuration: Duration(hours: 1, minutes: 30, seconds: 45),
