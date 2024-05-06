@@ -35,7 +35,7 @@ def main():
   parser.add_argument('--out-dir', type=str, required=True)
   parser.add_argument('--android-source-root', type=str, default=ANDROID_SRC_ROOT)
   parser.add_argument('--build-config-path', type=str)
-  parser.add_argument('--third-party', type=str, default='third_party')
+  parser.add_argument('--src-dir', type=str, default='.')
   parser.add_argument('--quiet', default=False, action='store_true')
   args = parser.parse_args()
 
@@ -49,10 +49,18 @@ def main():
   if not os.path.exists(args.out_dir):
     os.makedirs(args.out_dir)
 
+  android_jar_path = os.path.join(
+      args.src_dir, 'flutter', 'third_party', 'android_tools', 'sdk', 'platforms', 'android-34',
+      'android.jar'
+  )
+  if not os.path.exists(android_jar_path):
+    print('Android SDK not found at %s' % android_jar_path)
+    return 1
+
   classpath = [
       args.android_source_root,
-      os.path.join(args.third_party, 'android_tools/sdk/platforms/android-34/android.jar'),
-      os.path.join(args.third_party, 'android_embedding_dependencies', 'lib', '*'),
+      android_jar_path,
+      os.path.join(args.src_dir, 'third_party', 'android_embedding_dependencies', 'lib', '*'),
   ]
   if args.build_config_path:
     classpath.append(args.build_config_path)

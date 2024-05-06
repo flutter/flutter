@@ -104,14 +104,14 @@ See also:
 
 It's highly recommended to use the engine's vendored Android SDK, which once
 you have the engine set up, you can find at
-`$ENGINE/src/third_party/android_tools/sdk`. Testing or running with other
-versions of the SDK may work, but it's _not guaranteed_, and might have
+`$ENGINE/src/flutter/third_party/android_tools/sdk`. Testing or running with
+other versions of the SDK may work, but it's _not guaranteed_, and might have
 different results.
 
 Consider also placing this directory in the `ANDROID_HOME` environment variable:
 
 ```sh
-export ANDROID_HOME=$ENGINE/src/third_party/android_tools/sdk
+export ANDROID_HOME=$ENGINE/src/flutter/third_party/android_tools/sdk
 ```
 
 ### Device or Emulator

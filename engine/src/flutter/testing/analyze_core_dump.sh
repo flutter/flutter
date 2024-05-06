@@ -15,7 +15,7 @@ if [ "$UNAME" == "Linux" ]; then
   if [ -x "$(command -v gdb)" ]; then
     GDB=gdb
   else
-    GDB=$BUILDROOT/third_party/android_tools/ndk/prebuilt/linux-x86_64/bin/gdb
+    GDB=$BUILDROOT/flutter/third_party/android_tools/ndk/prebuilt/linux-x86_64/bin/gdb
   fi
   echo "GDB=$GDB"
   $GDB $EXE $CORE --batch -ex "thread apply all bt" > $OUTPUT

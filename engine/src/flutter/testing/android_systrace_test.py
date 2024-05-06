@@ -83,7 +83,7 @@ def collect_and_validate_trace(adb_path='adb'):
 
   print('Validating trace')
   traceconv = os.path.join(
-      BUILDROOT_DIR, 'third_party', 'android_tools', 'trace_to_text', 'trace_to_text'
+      BUILDROOT_DIR, 'flutter', 'third_party', 'android_tools', 'trace_to_text', 'trace_to_text'
   )
   traceconv_output = subprocess.check_output([traceconv, 'systrace', 'trace.pb'],
                                              stderr=subprocess.STDOUT,

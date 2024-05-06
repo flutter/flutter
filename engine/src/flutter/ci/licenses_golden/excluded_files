@@ -775,6 +775,7 @@
 ../../../flutter/third_party/accessibility/gfx/geometry/vector2d_unittest.cc
 ../../../flutter/third_party/accessibility/gfx/range/range_unittest.cc
 ../../../flutter/third_party/accessibility/gfx/test
+../../../flutter/third_party/android_tools
 ../../../flutter/third_party/angle/.clang-format
 ../../../flutter/third_party/angle/.git
 ../../../flutter/third_party/angle/.gitattributes
@@ -3506,7 +3507,6 @@
 ../../../fuchsia/sdk/linux/version_history.json
 ../../../out
 ../../../third_party/android_embedding_dependencies
-../../../third_party/android_tools
 ../../../third_party/gradle
 ../../../third_party/java
 ../../../third_party/libcxx/.clang-format

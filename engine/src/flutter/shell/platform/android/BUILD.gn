@@ -646,8 +646,8 @@ action("gen_android_javadoc") {
     rebase_path("."),
     "--build-config-path",
     rebase_path(target_gen_dir),
-    "--third-party",
-    rebase_path("//third_party"),
+    "--src-dir",
+    rebase_path("//"),
     "--quiet",
   ]
 

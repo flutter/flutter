@@ -21,7 +21,7 @@ GRADLE_BIN = os.path.normpath(
 )
 
 ANDROID_HOME = os.path.normpath(
-    os.path.join(SCRIPT_PATH, '..', '..', '..', 'third_party', 'android_tools', 'sdk')
+    os.path.join(SCRIPT_PATH, '..', '..', 'third_party', 'android_tools', 'sdk')
 )
 
 if platform.system() == 'Darwin':
