@@ -20,7 +20,7 @@ import 'toggleable.dart';
 
 enum _CheckboxType { material, adaptive }
 
-enum _DesignSpec { M2, M3, cupertino }
+enum _DesignSpec { material, cupertino }
 
 /// A Material Design checkbox.
 ///
@@ -598,7 +598,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
 
     switch (widget._checkboxType) {
       case _CheckboxType.material:
-        designSpec = _DesignSpec.M3;
+        designSpec = _DesignSpec.material;
       case _CheckboxType.adaptive:
         final ThemeData theme = Theme.of(context);
         switch (theme.platform) {
@@ -606,7 +606,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
-            designSpec = _DesignSpec.M3;
+            designSpec = _DesignSpec.material;
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:
             designSpec = _DesignSpec.cupertino;
