@@ -294,6 +294,7 @@ class _TimePickerHeader extends StatelessWidget {
   }
 }
 
+/// The control label for hour or minute in dial mode.
 class _HourMinuteControl extends StatelessWidget {
   const _HourMinuteControl({
     required this.text,
@@ -326,18 +327,8 @@ class _HourMinuteControl extends StatelessWidget {
       states,
     ).copyWith(color: effectiveTextColor);
 
-    final double height;
-    switch (_TimePickerModel.entryModeOf(context)) {
-      case TimePickerEntryMode.dial:
-      case TimePickerEntryMode.dialOnly:
-        height = defaultTheme.hourMinuteSize.height;
-      case TimePickerEntryMode.input:
-      case TimePickerEntryMode.inputOnly:
-        height = defaultTheme.hourMinuteInputSize.height;
-    }
-
     return SizedBox(
-      height: height,
+      height: defaultTheme.hourMinuteSize.height,
       child: Material(
         color: MaterialStateProperty.resolveAs(backgroundColor, states),
         clipBehavior: Clip.antiAlias,
@@ -461,13 +452,19 @@ class _TimeSelectorSeparator extends StatelessWidget {
         ?? defaultTheme.hourMinuteTextColor,
       states,
     );
-    final TextStyle effectiveStyle = MaterialStateProperty.resolveAs<TextStyle>(
+    TextStyle effectiveStyle = MaterialStateProperty.resolveAs<TextStyle>(
       timePickerTheme.timeSelectorSeparatorTextStyle?.resolve(states)
         ?? timePickerTheme.hourMinuteTextStyle
         ?? defaultTheme.timeSelectorSeparatorTextStyle?.resolve(states)
         ?? defaultTheme.hourMinuteTextStyle,
       states,
     ).copyWith(color: effectiveTextColor);
+    
+    // TODO: needs _TimePickerModel to resolve font size correctly.
+    final TextStyle effectiveHourMinuteStyle = MaterialStateProperty.resolveAs<TextStyle>(
+      _TimePickerModel.themeOf(context).hourMinuteTextStyle ?? _TimePickerModel.defaultThemeOf(context).hourMinuteTextStyle,
+      states,
+    );
 
     final double height;
     switch (_TimePickerModel.entryModeOf(context)) {
@@ -477,17 +474,22 @@ class _TimeSelectorSeparator extends StatelessWidget {
       case TimePickerEntryMode.input:
       case TimePickerEntryMode.inputOnly:
         height = defaultTheme.hourMinuteInputSize.height;
+        // TODO: check if it's valid to scale, as text is also scaled in input dialog,
+        //  see https://github.com/material-components/material-components-android/issues/4160
+        effectiveStyle = effectiveStyle.copyWith(fontSize: effectiveHourMinuteStyle.fontSize); // Display medium
     }
 
     return ExcludeSemantics(
       child: SizedBox(
         width: timeOfDayFormat == TimeOfDayFormat.frenchCanadian ? 36 : 24,
         height: height,
-        child: Text(
-          _timeSelectorSeparatorValue(timeOfDayFormat),
-          style: effectiveStyle,
-          textScaler: TextScaler.noScaling,
-          textAlign: TextAlign.center,
+        child: Center(
+          child: Text(
+            _timeSelectorSeparatorValue(timeOfDayFormat),
+            style: effectiveStyle,
+            textScaler: TextScaler.noScaling,
+            textAlign: TextAlign.center,
+          ),
         ),
       ),
     );
