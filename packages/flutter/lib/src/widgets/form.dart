@@ -55,22 +55,16 @@ class Form extends StatefulWidget {
     super.key,
     required this.child,
     this.canPop,
-    @Deprecated(
-      'Use onPopInvokedWithResult instead. '
-      'This feature was deprecated after v3.22.0-12.0.pre.',
-    )
     this.onPopInvoked,
-    this.onPopInvokedWithResult,
     @Deprecated(
-      'Use canPop and/or onPopInvokedWithResult instead. '
+      'Use canPop and/or onPopInvoked instead. '
       'This feature was deprecated after v3.12.0-1.0.pre.',
     )
     this.onWillPop,
     this.onChanged,
     AutovalidateMode? autovalidateMode,
   }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled,
-       assert(onPopInvokedWithResult == null || onPopInvoked == null, 'onPopInvoked is deprecated; use onPopInvokedWithResult'),
-       assert(((onPopInvokedWithResult ?? onPopInvoked ?? canPop) == null) || onWillPop == null, 'onWillPop is deprecated; use canPop and/or onPopInvokedWithResult.');
+       assert((onPopInvoked == null && canPop == null) || onWillPop == null, 'onWillPop is deprecated; use canPop and/or onPopInvoked.');
 
   /// Returns the [FormState] of the closest [Form] widget which encloses the
   /// given context, or null if none is found.
@@ -150,7 +144,7 @@ class Form extends StatefulWidget {
   ///  * [WillPopScope], another widget that provides a way to intercept the
   ///    back button.
   @Deprecated(
-    'Use canPop and/or onPopInvokedWithResult instead. '
+    'Use canPop and/or onPopInvoked instead. '
     'This feature was deprecated after v3.12.0-1.0.pre.',
   )
   final WillPopCallback? onWillPop;
@@ -166,17 +160,10 @@ class Form extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [onPopInvokedWithResult], which also comes from [PopScope] and is often used in
+  ///  * [onPopInvoked], which also comes from [PopScope] and is often used in
   ///    conjunction with this parameter.
   ///  * [PopScope.canPop], which is what [Form] delegates to internally.
   final bool? canPop;
-
-  /// {@macro flutter.widgets.navigator.onPopInvoked}
-  @Deprecated(
-    'Use onPopInvokedWithResult instead. '
-    'This feature was deprecated after v3.22.0-12.0.pre.',
-  )
-  final PopInvokedCallback? onPopInvoked;
 
   /// {@macro flutter.widgets.navigator.onPopInvoked}
   ///
@@ -191,8 +178,8 @@ class Form extends StatefulWidget {
   ///
   ///  * [canPop], which also comes from [PopScope] and is often used in
   ///    conjunction with this parameter.
-  ///  * [PopScope.onPopInvokedWithResult], which is what [Form] delegates to internally.
-  final PopInvokedWithResultCallback<Object?>? onPopInvokedWithResult;
+  ///  * [PopScope.onPopInvoked], which is what [Form] delegates to internally.
+  final PopInvokedCallback? onPopInvoked;
 
   /// Called when one of the form fields changes.
   ///
@@ -205,14 +192,6 @@ class Form extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.FormField.autovalidateMode}
   final AutovalidateMode autovalidateMode;
-
-  void _callPopInvoked(bool didPop, Object? result) {
-    if (onPopInvokedWithResult != null) {
-      onPopInvokedWithResult!(didPop, result);
-      return;
-    }
-    onPopInvoked?.call(didPop);
-  }
 
   @override
   FormState createState() => FormState();
@@ -279,10 +258,10 @@ class FormState extends State<Form> {
         break;
     }
 
-    if (widget.canPop != null || (widget.onPopInvokedWithResult ?? widget.onPopInvoked) != null) {
-      return PopScope<Object?>(
+    if (widget.canPop != null || widget.onPopInvoked != null) {
+      return PopScope(
         canPop: widget.canPop ?? true,
-        onPopInvokedWithResult: widget._callPopInvoked,
+        onPopInvoked: widget.onPopInvoked,
         child: _FormScope(
           formState: this,
           generation: _generation,

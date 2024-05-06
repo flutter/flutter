@@ -1486,12 +1486,10 @@ double _sizeExtent(Size size, Axis scrollDirection) {
 }
 
 Size _extentSize(double extent, Axis scrollDirection) {
-  switch (scrollDirection) {
-    case Axis.horizontal:
-      return Size(extent, 0);
-    case Axis.vertical:
-      return Size(0, extent);
-  }
+  return switch (scrollDirection) {
+    Axis.horizontal => Size(extent, 0),
+    Axis.vertical => Size(0, extent),
+  };
 }
 
 double _offsetExtent(Offset offset, Axis scrollDirection) {
