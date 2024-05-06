@@ -6,12 +6,9 @@
 #define FLUTTER_IMPELLER_GEOMETRY_GRADIENT_H_
 
 #include <cstdint>
-#include <memory>
 #include <vector>
 
 #include "impeller/geometry/color.h"
-#include "impeller/geometry/path.h"
-#include "impeller/geometry/point.h"
 
 namespace impeller {
 
