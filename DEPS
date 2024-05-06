@@ -277,7 +277,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '915f67999bfb4eb77cf596bbadacdce7868ede49',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'c5f0206b6fd70a85a41718f0bc6481b7c5348026',
 
   'src/flutter/third_party/depot_tools':
   Var('chromium_git') + '/chromium/tools/depot_tools.git' + '@' + '580b4ff3f5cd0dcaa2eacda28cefe0f45320e8f7',
@@ -745,7 +745,7 @@ deps = {
     'dep_type': 'cipd'
   },
 
-  'src/third_party/android_tools/trace_to_text': {
+  'src/flutter/third_party/android_tools/trace_to_text': {
     'packages': [
       {
         # 25.0 downloads for both mac-amd64 and mac-arm64
@@ -759,7 +759,7 @@ deps = {
     'dep_type': 'cipd'
   },
 
-   'src/third_party/android_tools/google-java-format': {
+   'src/flutter/third_party/android_tools/google-java-format': {
      'packages': [
        {
         'package': 'flutter/android/google-java-format',
@@ -773,7 +773,7 @@ deps = {
      'dep_type': 'cipd',
    },
 
-  'src/third_party/android_tools': {
+  'src/flutter/third_party/android_tools': {
      'packages': [
        {
         'package': 'flutter/android/sdk/all/${{platform}}',

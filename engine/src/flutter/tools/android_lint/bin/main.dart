@@ -48,12 +48,13 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
   }
 
   final Directory androidSdkDir = Directory(
-    path.join(inArgument, 'third_party', 'android_tools', 'sdk'),
+    path.join(inArgument, 'flutter', 'third_party', 'android_tools', 'sdk'),
   );
 
   if (!androidSdkDir.existsSync()) {
     print('The Android SDK for this engine is missing from the '
-        'third_party/android_tools directory. Have you run gclient sync?\n');
+        'flutter/third_party/android_tools directory. Have you run gclient '
+        'sync?\n');
     print(argParser.usage);
     return -1;
   }
