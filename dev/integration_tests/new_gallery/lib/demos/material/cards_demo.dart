@@ -298,8 +298,6 @@ class TravelDestinationContent extends StatelessWidget {
                     package: destination.assetPackage,
                   ),
                   fit: BoxFit.cover,
-                  width: 184,
-                  height: 184,
                   child: Container(),
                 ),
               ),
