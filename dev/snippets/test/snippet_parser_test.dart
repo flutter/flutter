@@ -325,7 +325,7 @@ import 'foo.dart';
 
 /// Class comment
 ///
-/// {@tool dartpad}
+/// {@tool dartpad --template=template}
 /// Description
 $source
 /// {@end-tool}

@@ -227,6 +227,7 @@ void main() {
       final SourceElement element = sampleParser.parseFromDartdocToolFile(
         inputFile,
         element: 'MyElement',
+        template: 'template',
         startLine: sourceLine,
         sourceFile: memoryFileSystem.file(sourcePath),
         type: 'dartpad',
@@ -274,6 +275,7 @@ void main() {
       final SourceElement element = sampleParser.parseFromDartdocToolFile(
         inputFile,
         element: 'MyElement',
+        template: 'template',
         startLine: sourceLine,
         sourceFile: memoryFileSystem.file(sourcePath),
         type: 'sample',
