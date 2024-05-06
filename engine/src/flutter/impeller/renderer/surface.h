@@ -5,12 +5,6 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_SURFACE_H_
 #define FLUTTER_IMPELLER_RENDERER_SURFACE_H_
 
-#include <functional>
-#include <memory>
-
-#include "flutter/fml/macros.h"
-#include "impeller/renderer/context.h"
-#include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
 
 namespace impeller {

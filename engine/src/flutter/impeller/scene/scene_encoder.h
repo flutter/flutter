@@ -9,9 +9,7 @@
 #include <string>
 #include <vector>
 
-#include "flutter/fml/macros.h"
 #include "impeller/renderer/command_buffer.h"
-#include "impeller/scene/camera.h"
 #include "impeller/scene/geometry.h"
 #include "impeller/scene/material.h"
 

@@ -7,6 +7,7 @@
 #include "impeller/renderer/backend/vulkan/swapchain/khr/khr_swapchain_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
+#include "impeller/renderer/render_pass.h"
 #include "vulkan/vulkan_enums.hpp"
 #include "vulkan/vulkan_handles.hpp"
 

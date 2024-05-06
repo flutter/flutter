@@ -8,7 +8,6 @@
 #include <set>
 #include <string>
 
-#include "flutter/fml/macros.h"
 #include "impeller/base/version.h"
 
 namespace impeller {

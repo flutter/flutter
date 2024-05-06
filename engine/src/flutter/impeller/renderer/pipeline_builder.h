@@ -5,8 +5,6 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_PIPELINE_BUILDER_H_
 #define FLUTTER_IMPELLER_RENDERER_PIPELINE_BUILDER_H_
 
-#include "flutter/fml/logging.h"
-#include "flutter/fml/macros.h"
 #include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"

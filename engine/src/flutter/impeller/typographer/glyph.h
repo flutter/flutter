@@ -8,8 +8,6 @@
 #include <cstdint>
 #include <functional>
 
-#include "flutter/fml/hash_combine.h"
-#include "flutter/fml/macros.h"
 #include "impeller/geometry/rect.h"
 
 namespace impeller {

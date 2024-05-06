@@ -7,7 +7,6 @@
 
 #include <Metal/Metal.h>
 
-#include "flutter/fml/macros.h"
 #include "impeller/renderer/backend/metal/blit_command_mtl.h"
 #include "impeller/renderer/blit_pass.h"
 

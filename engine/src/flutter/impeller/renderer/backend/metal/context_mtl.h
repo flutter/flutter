@@ -11,7 +11,6 @@
 #include <string>
 
 #include "flutter/fml/concurrent_message_loop.h"
-#include "flutter/fml/macros.h"
 #include "flutter/fml/synchronization/sync_switch.h"
 #include "impeller/base/backend_cast.h"
 #include "impeller/core/sampler.h"

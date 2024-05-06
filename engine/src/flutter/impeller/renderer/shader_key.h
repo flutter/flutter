@@ -10,7 +10,6 @@
 #include <unordered_map>
 
 #include "flutter/fml/hash_combine.h"
-#include "flutter/fml/macros.h"
 #include "impeller/core/shader_types.h"
 
 namespace impeller {

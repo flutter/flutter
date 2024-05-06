@@ -8,7 +8,6 @@
 #include <optional>
 
 #include "flutter/fml/logging.h"
-#include "flutter/fml/macros.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/renderer/backend/gles/gles.h"

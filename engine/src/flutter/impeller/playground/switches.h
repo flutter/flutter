@@ -9,7 +9,6 @@
 #include <optional>
 
 #include "flutter/fml/command_line.h"
-#include "flutter/fml/macros.h"
 
 namespace impeller {
 

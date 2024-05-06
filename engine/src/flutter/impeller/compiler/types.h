@@ -11,7 +11,6 @@
 #include <optional>
 #include <string>
 
-#include "flutter/fml/macros.h"
 #include "shaderc/shaderc.hpp"
 #include "spirv_cross.hpp"
 #include "spirv_msl.hpp"

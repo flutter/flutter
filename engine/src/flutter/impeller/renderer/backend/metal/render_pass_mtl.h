@@ -7,7 +7,6 @@
 
 #include <Metal/Metal.h>
 
-#include "flutter/fml/macros.h"
 #include "impeller/renderer/backend/metal/pass_bindings_cache_mtl.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"

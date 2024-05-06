@@ -8,7 +8,6 @@
 #include "impeller/typographer/typographer_context.h"
 
 #include <memory>
-#include "flutter/fml/macros.h"
 
 namespace impeller {
 
