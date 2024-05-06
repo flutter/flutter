@@ -31,6 +31,7 @@ final Set<String> skippedPaths = <String>{
   r'flutter/lib/web_ui/dev', // these are build tools; they do not end up in Engine artifacts
   r'flutter/prebuilts',
   r'flutter/sky/packages/sky_engine/LICENSE',
+  r'flutter/third_party/android_tools', // excluded on advice
   r'flutter/third_party/angle/android',
   r'flutter/third_party/angle/doc',
   r'flutter/third_party/angle/extensions',

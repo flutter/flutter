@@ -186,10 +186,12 @@ extension type const Options._(ArgResults _args) {
         'adb',
         help: 'Path to the Android Debug Bridge (adb) executable. '
             'If the current working directory is within the engine repository, '
-            'defaults to ./third_party/android_tools/sdk/platform-tools/adb.',
+            'defaults to '
+            './flutter/third_party/android_tools/sdk/platform-tools/adb.',
         defaultsTo: localEngine != null
             ? p.join(
                 localEngine.srcDir.path,
+                'flutter',
                 'third_party',
                 'android_tools',
                 'sdk',
@@ -204,14 +206,16 @@ extension type const Options._(ArgResults _args) {
         'ndk-stack',
         help:
             'Path to the NDK stack tool. Defaults to the checked-in version in '
-            'third_party/android_tools if the current working directory is '
-            'within the engine repository on a supported platform.',
+            'flutter/third_party/android_tools if the current working '
+            'directory is within the engine repository on a supported '
+            'platform.',
         defaultsTo: localEngine != null &&
                 (io.Platform.isLinux ||
                     io.Platform.isMacOS ||
                     io.Platform.isWindows)
             ? p.join(
                 localEngine.srcDir.path,
+                'flutter',
                 'third_party',
                 'android_tools',
                 'ndk',
