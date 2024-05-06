@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert' show LineSplitter, jsonDecode;
-import 'dart:io' as io show File, stderr, stdout;
+import 'dart:io' as io show File, ProcessSignal, stderr, stdout;
 
 import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:git_repo_tools/git_repo_tools.dart';
@@ -399,11 +399,12 @@ class ClangTidy {
 
   Future<int> _runJobs(List<WorkerJob> jobs) async {
     int result = 0;
+    int ignoredFailures = 0;
     final Set<String> pendingJobs = <String>{for (final WorkerJob job in jobs) job.name};
 
     void reporter(int totalJobs, int completed, int inProgress, int pending, int failed) {
       return _logWithTimestamp(ProcessPool.defaultReportToString(
-        totalJobs, completed, inProgress, pending, failed));
+        totalJobs, completed, inProgress, pending, failed - ignoredFailures));
     }
 
     final ProcessPool pool = ProcessPool(
@@ -423,6 +424,15 @@ class ClangTidy {
           _errSink.writeln('Results of --enable-check-profile for ${job.name}:');
           _errSink.writeln(stderr);
         }
+        continue;
+      }
+      // Recent versions of clang-tidy are segfaulting when processing some
+      // engine source files.
+      // (see https://github.com/flutter/flutter/issues/143178)
+      // TODO(jsimmons): remove this when the issue is fixed in Clang.
+      if (job.result.exitCode == -io.ProcessSignal.sigsegv.signalNumber) {
+        _errSink.writeln('❗ Crash when running clang-tidy for ${job.name}.  Skipping this file.');
+        ignoredFailures++;
         continue;
       }
       _errSink.writeln('❌ Failures for ${job.name}:');
