@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_api_samples/material/text_field/text_field.1.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
@@ -27,6 +26,4 @@ void main() {
     expect(find.widgetWithText(TextButton, 'OK'), findsOneWidget);
     expect(find.text('You typed "$sampleText", which has length ${sampleText.characters.length}.'), findsOneWidget);
   });
-
-  // emoji
 }
