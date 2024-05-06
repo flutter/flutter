@@ -880,7 +880,7 @@ class _CheckboxPainter extends ToggleablePainter {
 }
 
 // Hand coded defaults for iOS/macOS checkbox
-// TODO(victorsanni): Apply theme for widget state where app is open but inactive
+// TODO(victorsanni): Apply theme for widget state where app is open but inactive.
 class _CheckboxDefaultsCupertino extends CheckboxThemeData {
   _CheckboxDefaultsCupertino(BuildContext context)
     : _theme = Theme.of(context),
