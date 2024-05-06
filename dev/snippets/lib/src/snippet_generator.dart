@@ -348,7 +348,7 @@ class SnippetGenerator {
     final List<TemplateInjection> snippetData = parseInput(sample);
     sample.description = description ?? sample.description;
     sample.metadata['description'] = _getDescription(sample);
-    switch (sample.runtimeType) {
+    switch (sample) {
       case DartpadSample _:
       case ApplicationSample _:
         String app;
@@ -421,13 +421,14 @@ class SnippetGenerator {
           metadataFile.writeAsStringSync(jsonEncoder.convert(metadata));
         }
       case SnippetSample _:
-        if (sample is SnippetSample) {
           String app;
           if (sample.sourceFile == null) {
             String templateContents;
             if (includeAssumptions) {
               templateContents =
-                  '${headers.map<String>((SourceLine line) => line.text).join('\n')}\n{{#assumptions}}\n{{description}}\n{{code}}';
+                  '${headers.map<String>((SourceLine line) {
+                    return line.text;
+                  }).join('\n')}\n{{#assumptions}}\n{{description}}\n{{code}}';
             } else {
               templateContents = '{{description}}\n{{code}}';
             }
@@ -442,7 +443,6 @@ class SnippetGenerator {
             app = sample.inputAsString;
           }
           sample.output = app;
-        }
     }
     return sample.output;
   }

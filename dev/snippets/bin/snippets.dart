@@ -137,11 +137,6 @@ void main(List<String> argList) {
     },
     help: 'The type of snippet to produce.',
   );
-  // TODO(goderbauer): Remove template support, this is no longer used.
-  parser.addOption(
-    _kTemplateOption,
-    help: 'The name of the template to inject the code into.',
-  );
   parser.addOption(
     _kOutputOption,
     help: 'The output name for the generated sample application. Overrides '
