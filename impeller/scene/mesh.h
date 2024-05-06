@@ -6,9 +6,7 @@
 #define FLUTTER_IMPELLER_SCENE_MESH_H_
 
 #include <memory>
-#include <type_traits>
 
-#include "flutter/fml/macros.h"
 #include "impeller/scene/geometry.h"
 #include "impeller/scene/material.h"
 #include "impeller/scene/scene_encoder.h"

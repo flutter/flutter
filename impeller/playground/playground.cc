@@ -7,6 +7,7 @@
 #include <optional>
 #include <sstream>
 
+#include "fml/closure.h"
 #include "fml/time/time_point.h"
 #include "impeller/playground/image/backends/skia/compressed_image_skia.h"
 #include "impeller/playground/image/decompressed_image.h"

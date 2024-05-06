@@ -8,7 +8,6 @@
 #include <cstddef>
 
 #include "flutter/fml/build_config.h"
-#include "flutter/fml/macros.h"
 
 namespace impeller {
 

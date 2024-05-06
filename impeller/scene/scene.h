@@ -6,9 +6,6 @@
 #define FLUTTER_IMPELLER_SCENE_SCENE_H_
 
 #include <memory>
-#include <vector>
-
-#include "flutter/fml/macros.h"
 
 #include "impeller/renderer/render_target.h"
 #include "impeller/scene/camera.h"

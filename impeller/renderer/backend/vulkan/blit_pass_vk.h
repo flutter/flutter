@@ -5,7 +5,6 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_BLIT_PASS_VK_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_BLIT_PASS_VK_H_
 
-#include "flutter/fml/macros.h"
 #include "flutter/impeller/base/config.h"
 #include "impeller/renderer/backend/vulkan/blit_command_vk.h"
 #include "impeller/renderer/blit_pass.h"

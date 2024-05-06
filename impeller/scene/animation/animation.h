@@ -10,11 +10,7 @@
 #include <vector>
 
 #include "flutter/fml/hash_combine.h"
-#include "flutter/fml/macros.h"
 #include "impeller/base/timing.h"
-#include "impeller/geometry/quaternion.h"
-#include "impeller/geometry/scalar.h"
-#include "impeller/geometry/vector.h"
 #include "impeller/scene/animation/property_resolver.h"
 #include "impeller/scene/importer/scene_flatbuffers.h"
 

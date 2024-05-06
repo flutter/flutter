@@ -6,17 +6,14 @@
 #define FLUTTER_IMPELLER_RENDERER_VERTEX_BUFFER_BUILDER_H_
 
 #include <initializer_list>
-#include <map>
 #include <vector>
 
-#include "flutter/fml/macros.h"
 #include "impeller/base/strings.h"
 #include "impeller/core/allocator.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
 #include "impeller/core/vertex_buffer.h"
-#include "impeller/geometry/vector.h"
 
 namespace impeller {
 

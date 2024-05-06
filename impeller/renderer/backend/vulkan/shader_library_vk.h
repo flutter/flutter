@@ -5,7 +5,6 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_SHADER_LIBRARY_VK_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_SHADER_LIBRARY_VK_H_
 
-#include "flutter/fml/macros.h"
 #include "impeller/base/comparable.h"
 #include "impeller/base/thread.h"
 #include "impeller/renderer/backend/vulkan/device_holder_vk.h"

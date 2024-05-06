@@ -6,9 +6,6 @@
 #define FLUTTER_IMPELLER_SCENE_SKIN_H_
 
 #include <memory>
-#include <optional>
-
-#include "flutter/fml/macros.h"
 
 #include "impeller/core/allocator.h"
 #include "impeller/core/texture.h"

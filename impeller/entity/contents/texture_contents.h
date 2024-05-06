@@ -5,14 +5,10 @@
 #ifndef FLUTTER_IMPELLER_ENTITY_CONTENTS_TEXTURE_CONTENTS_H_
 #define FLUTTER_IMPELLER_ENTITY_CONTENTS_TEXTURE_CONTENTS_H_
 
-#include <functional>
 #include <memory>
-#include <vector>
 
-#include "flutter/fml/macros.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/entity/contents/contents.h"
-#include "impeller/geometry/path.h"
 
 namespace impeller {
 

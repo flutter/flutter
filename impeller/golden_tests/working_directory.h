@@ -7,8 +7,6 @@
 
 #include <string>
 
-#include "flutter/fml/macros.h"
-
 namespace impeller {
 namespace testing {
 

@@ -5,7 +5,6 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_COMPUTE_TESSELLATOR_H_
 #define FLUTTER_IMPELLER_RENDERER_COMPUTE_TESSELLATOR_H_
 
-#include "flutter/fml/macros.h"
 #include "impeller/core/buffer_view.h"
 #include "impeller/geometry/path.h"
 #include "impeller/renderer/command_buffer.h"

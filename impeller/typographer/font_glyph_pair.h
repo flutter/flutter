@@ -5,13 +5,9 @@
 #ifndef FLUTTER_IMPELLER_TYPOGRAPHER_FONT_GLYPH_PAIR_H_
 #define FLUTTER_IMPELLER_TYPOGRAPHER_FONT_GLYPH_PAIR_H_
 
-#include <optional>
 #include <unordered_map>
 #include <unordered_set>
-#include <vector>
 
-#include "flutter/fml/macros.h"
-#include "impeller/geometry/size.h"
 #include "impeller/typographer/font.h"
 #include "impeller/typographer/glyph.h"
 

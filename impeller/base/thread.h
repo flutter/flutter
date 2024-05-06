@@ -12,8 +12,6 @@
 #include <mutex>
 #include <thread>
 
-#include "flutter/fml/logging.h"
-#include "flutter/fml/macros.h"
 #include "flutter/fml/synchronization/shared_mutex.h"
 #include "impeller/base/thread_safety.h"
 

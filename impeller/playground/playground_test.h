@@ -7,10 +7,8 @@
 
 #include <memory>
 
-#include "flutter/fml/macros.h"
 #include "flutter/testing/test_args.h"
 #include "flutter/testing/testing.h"
-#include "impeller/geometry/scalar.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/switches.h"
 

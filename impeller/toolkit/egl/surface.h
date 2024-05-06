@@ -5,7 +5,6 @@
 #ifndef FLUTTER_IMPELLER_TOOLKIT_EGL_SURFACE_H_
 #define FLUTTER_IMPELLER_TOOLKIT_EGL_SURFACE_H_
 
-#include "flutter/fml/macros.h"
 #include "impeller/toolkit/egl/egl.h"
 
 namespace impeller {

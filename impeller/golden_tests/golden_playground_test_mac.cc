@@ -13,6 +13,7 @@
 #include "flutter/impeller/golden_tests/metal_screenshotter.h"
 #include "flutter/impeller/golden_tests/vulkan_screenshotter.h"
 #include "flutter/third_party/abseil-cpp/absl/base/no_destructor.h"
+#include "fml/closure.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "impeller/typographer/typographer_context.h"
 
