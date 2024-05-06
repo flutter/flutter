@@ -586,6 +586,7 @@ class _SnackBarState extends State<SnackBar> {
   @override
   void dispose() {
     assert(() {
+      print('Snackbar.dispose called. $this');
       if (_debugDisposed) {
         print('Snackbar.dispose is used after being disposed. $this');
       }
@@ -874,6 +875,15 @@ class _SnackBarState extends State<SnackBar> {
       snackBarTransition = AnimatedBuilder(
         animation: _heightAnimation!,
         builder: (BuildContext context, Widget? child) {
+          assert(() {
+            if (_heightAnimation == null) {
+              print('SnackBar._heightAnimation in AnimatedBuilder. $this');
+            }
+            if (_debugDisposed) {
+              print('SnackBar is disposed in AnimatedBuilder. $this');
+            }
+            return true;
+          }());
           return Align(
             alignment: AlignmentDirectional.topStart,
             heightFactor: _heightAnimation!.value,
