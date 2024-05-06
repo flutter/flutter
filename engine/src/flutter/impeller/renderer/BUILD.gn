@@ -20,25 +20,8 @@ if (impeller_enable_compute) {
     }
 
     shaders = [
-      "stroke.comp",
-      "path_polyline.comp",
       "prefix_sum_test.comp",
       "threadgroup_sizing_test.comp",
-    ]
-  }
-
-  impeller_component("compute_tessellation_unittests") {
-    testonly = true
-    sources = [ "compute_subgroup_unittests.cc" ]
-
-    deps = [
-      ":compute_shaders",
-      ":renderer",
-      "../display_list:skia_conversions",
-      "../entity",
-      "../fixtures",
-      "../playground:playground_test",
-      "//flutter/testing:testing_lib",
     ]
   }
 }
@@ -109,10 +92,6 @@ impeller_component("renderer") {
   ]
 
   if (impeller_enable_compute) {
-    sources += [
-      "compute_tessellator.cc",
-      "compute_tessellator.h",
-    ]
     public_deps += [ ":compute_shaders" ]
   }
 
