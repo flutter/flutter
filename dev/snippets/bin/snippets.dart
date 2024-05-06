@@ -21,7 +21,6 @@ const String _kOutputDirectoryOption = 'output-directory';
 const String _kOutputOption = 'output';
 const String _kPackageOption = 'package';
 const String _kSerialOption = 'serial';
-const String _kTemplateOption = 'template';
 const String _kTypeOption = 'type';
 
 class GitStatusFailed implements Exception {
@@ -126,21 +125,13 @@ void main(List<String> argList) {
     allowed: sampleTypes,
     allowedHelp: <String, String>{
       'dartpad':
-          'Produce a code sample application complete with embedding the sample in an '
-              'application template for using in Dartpad.',
+          'Produce a code sample application for using in Dartpad.',
       'sample':
-          'Produce a code sample application complete with embedding the sample in an '
-              'application template.',
+          'Produce a code sample application.',
       'snippet':
-          'Produce a nicely formatted piece of sample code. Does not embed the '
-              'sample into an application template.',
+          'Produce a nicely formatted piece of sample code.',
     },
     help: 'The type of snippet to produce.',
-  );
-  // TODO(goderbauer): Remove template support, this is no longer used.
-  parser.addOption(
-    _kTemplateOption,
-    help: 'The name of the template to inject the code into.',
   );
   parser.addOption(
     _kOutputOption,
@@ -215,12 +206,6 @@ void main(List<String> argList) {
     return;
   }
 
-  String template = '';
-  if (sampleType == 'sample' || sampleType == 'dartpad') {
-    template = (args[_kTemplateOption] as String? ?? '')
-        .replaceAll(RegExp(r'.tmpl$'), '');
-  }
-
   final bool formatOutput = args[_kFormatOutputOption]! as bool;
   final String packageName = args[_kPackageOption] as String? ?? '';
   final String libraryName = args[_kLibraryOption] as String? ?? '';
@@ -275,7 +260,6 @@ void main(List<String> argList) {
     startLine: sourceLine,
     element: elementName,
     sourceFile: filesystem.file(sourcePath),
-    template: template,
     type: sampleType,
   );
   final Map<String, Object?> metadata = <String, Object?>{

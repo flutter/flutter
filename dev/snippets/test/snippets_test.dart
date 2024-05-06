@@ -346,7 +346,7 @@ void main() {
           .file(tmpDir.childFile('input.snippet'))
         ..writeAsString('/// Test file');
       snippets_main.main(
-          <String>['--input=${input.absolute.path}', '--template=template']);
+          <String>['--input=${input.absolute.path}']);
 
       final Map<String, dynamic> metadata =
           mockSnippetGenerator.sample.metadata;
@@ -389,7 +389,7 @@ void main() {
 
       input.deleteSync();
       snippets_main.main(
-          <String>['--input=${input.absolute.path}', '--template=template']);
+          <String>['--input=${input.absolute.path}']);
       expect(errorMessage,
           equals('The input file ${input.absolute.path} does not exist.'));
       errorMessage = '';
