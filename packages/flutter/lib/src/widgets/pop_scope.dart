@@ -73,6 +73,7 @@ typedef PopInvokedCallback = void Function(bool didPop);
 ///    back gestures in the case of a form with unsaved data.
 ///  * [ModalRoute.registerPopEntry] and [ModalRoute.unregisterPopEntry],
 ///    which this widget uses to integrate with Flutter's navigation system.
+@optionalTypeArgs
 class PopScope<T> extends StatefulWidget {
   /// Creates a widget that registers a callback to veto attempts by the user to
   /// dismiss the enclosing [ModalRoute].
