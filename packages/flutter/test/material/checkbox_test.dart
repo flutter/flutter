@@ -2317,6 +2317,33 @@ void main() {
     );
     expect(getCheckboxRenderer(), paints..path(color: inactiveBackgroundColor));
   });
+
+  testWidgets('Checkbox.adaptive keeps default mouse cursor(Cupertino)', (WidgetTester tester) async {
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      await tester.pumpWidget(buildAdaptiveCheckbox(
+        platform: platform,
+        value: false,
+      ));
+      final Size checkboxSize = tester.getSize(find.byType(Checkbox));
+      expect(checkboxSize, const Size(48.0, 48.0));
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+      await gesture.addPointer(location: tester.getCenter(find.byType(Checkbox)));
+      await tester.pump();
+      await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+          kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic);
+
+      await tester.pumpWidget(buildAdaptiveCheckbox(platform: platform));
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+          kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic);
+
+      // Test disabled checkbox.
+      await tester.pumpWidget(buildAdaptiveCheckbox(platform: platform, enabled: false, value: false));
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+      await gesture.removePointer(location: tester.getCenter(find.byType(Checkbox)));
+      await tester.pump();
+    }
+  });
 }
 
 class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
@@ -2332,4 +2359,33 @@ class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
 
   @override
   String get debugDescription => '_SelectedGrabMouseCursor()';
+}
+
+Widget buildAdaptiveCheckbox({
+  required TargetPlatform platform,
+  RoundedRectangleBorder shape = const RoundedRectangleBorder(),
+  BorderSide side = const BorderSide(),
+  bool value = true,
+  bool enabled = true,
+
+}) {
+  final Widget adaptiveCheckbox = Checkbox.adaptive(
+    value: value,
+    onChanged: enabled ? (_) {} : null,
+    shape: shape,
+    side: side,
+  );
+
+  return MaterialApp(
+    theme: ThemeData(platform: platform),
+    home: StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        return Material(
+          child: Center(
+            child: adaptiveCheckbox,
+          ),
+        );
+      },
+    ),
+  );
 }
