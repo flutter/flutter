@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 
@@ -101,11 +102,13 @@ final class FakeProcess implements io.Process {
     String stderr = '',
   })  : _exitCode = exitCode,
         _stdout = stdout,
-        _stderr = stderr;
+        _stderr = stderr,
+        _stdin = io.IOSink(StreamController<List<int>>.broadcast().sink);
 
   final int _exitCode;
   final String _stdout;
   final String _stderr;
+  final io.IOSink _stdin;
 
   @override
   Future<int> get exitCode async => _exitCode;
@@ -122,7 +125,7 @@ final class FakeProcess implements io.Process {
   }
 
   @override
-  io.IOSink get stdin => throw UnimplementedError();
+  io.IOSink get stdin => _stdin;
 
   @override
   Stream<List<int>> get stdout {

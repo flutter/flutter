@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' as io show Directory, File, Platform, stderr;
+import 'dart:convert' show jsonEncode;
+import 'dart:io' as io show Directory, File, Platform, ProcessSignal, stderr;
 
 import 'package:clang_tidy/clang_tidy.dart';
 import 'package:clang_tidy/src/command.dart';
@@ -609,6 +610,52 @@ Future<int> main(List<String> args) async {
         'file': 'unused',
     });
     expect(command.tidyArgs.trim(), 'filename');
+  });
+
+  test('Files that cause clang-tidy to segfault are skipped', () async {
+    final Fixture fileListFixture = Fixture.fromOptions(
+      Options(
+        buildCommandsPath: io.File(buildCommands),
+        lintTarget: const LintAll(),
+      ),
+    );
+    final String firstFilePath = (await fileListFixture.tool.computeFilesOfInterest()).first.path;
+
+    final FakeProcessManager fakeProcessManager = FakeProcessManager(
+      onStart: (List<String> command) {
+        if (command.first.endsWith('clang-tidy')) {
+          return FakeProcess(exitCode: -io.ProcessSignal.sigsegv.signalNumber);
+        }
+        return FakeProcessManager.unhandledStart(command);
+      },
+    );
+
+    final List<dynamic> commandsData = <Map<String, dynamic>>[
+      <String, dynamic>{
+        'file': firstFilePath,
+        'directory': '/unused',
+        'command': 'clang/bin/clang $firstFilePath',
+      },
+    ];
+
+    final io.File commands = io.File(path.join(
+        io.Directory.systemTemp.path, 'test_compile_commands.json'));
+    int result;
+    try {
+      commands.writeAsStringSync(jsonEncode(commandsData));
+      final Fixture fixture = Fixture.fromOptions(
+        Options(
+          buildCommandsPath: commands,
+          lintTarget: const LintAll(),
+        ),
+        processManager: fakeProcessManager,
+      );
+      result = await fixture.tool.run();
+    } finally {
+      commands.deleteSync();
+    }
+
+    expect(result, 0);
   });
 
   return 0;
