@@ -28,7 +28,7 @@ dev_dependencies:
     sdk: flutter
   integration_test_macos:
     path: ../integration_test_macos
-  test: 1.25.4
+  test: 1.25.5
   pedantic: 1.11.1
 
 # For information on the generic Dart part of this file, see the
@@ -88,4 +88,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: d1ce
+# PUBSPEC CHECKSUM: 56cf
