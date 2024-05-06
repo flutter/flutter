@@ -20,6 +20,8 @@ import 'toggleable.dart';
 
 enum _CheckboxType { material, adaptive }
 
+enum _DesignSpec { M2, M3, cupertino }
+
 /// A Material Design checkbox.
 ///
 /// The checkbox itself does not maintain any state. Instead, when the state of
@@ -592,9 +594,11 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
       ?? checkboxTheme.splashRadius
       ?? defaults.splashRadius!;
 
+    _DesignSpec designSpec;
+
     switch (widget._checkboxType) {
       case _CheckboxType.material:
-        break;
+        designSpec = _DesignSpec.M3;
       case _CheckboxType.adaptive:
         final ThemeData theme = Theme.of(context);
         switch (theme.platform) {
@@ -602,9 +606,10 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
-            break;
+            designSpec = _DesignSpec.M3;
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:
+            designSpec = _DesignSpec.cupertino;
             positionController.duration = Duration.zero;
         }
     }
@@ -639,7 +644,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
           ..shape = widget.shape ?? checkboxTheme.shape ?? defaults.shape!
           ..activeSide = activeSide
           ..inactiveSide = inactiveSide
-          ..platform = Theme.of(context).platform,
+          ..designSpec = designSpec,
       ),
     );
   }
@@ -710,17 +715,15 @@ class _CheckboxPainter extends ToggleablePainter {
     notifyListeners();
   }
 
-// cannot set the platform directly. Must be chosen by user
-// otherwise will never make material on iOS or vice versa
-  TargetPlatform get platform => _platform!;
-  TargetPlatform? _platform;
+  _DesignSpec get designSpec => _designSpec!;
+  _DesignSpec? _designSpec;
   bool _isCupertino = false;
-  set platform(TargetPlatform value) {
-    if (_platform == value) {
+  set designSpec(_DesignSpec value) {
+    if (_designSpec == value) {
       return;
     }
-    _platform = value;
-    _isCupertino = _platform == TargetPlatform.iOS || _platform == TargetPlatform.macOS;
+    _designSpec = value;
+    _isCupertino = _designSpec == _DesignSpec.cupertino;
     notifyListeners();
   }
 
@@ -879,6 +882,7 @@ class _CheckboxPainter extends ToggleablePainter {
 }
 
 // Hand coded defaults for iOS/macOS checkbox
+// TODO(victorsanni): Apply theme for widget state where app is open but inactive
 class _CheckboxDefaultsCupertino extends CheckboxThemeData {
   _CheckboxDefaultsCupertino(BuildContext context)
     : _theme = Theme.of(context),
