@@ -2783,7 +2783,6 @@
 ../../../flutter/third_party/skia/src/effects/colorfilters/BUILD.bazel
 ../../../flutter/third_party/skia/src/effects/imagefilters/BUILD.bazel
 ../../../flutter/third_party/skia/src/encode/BUILD.bazel
-../../../flutter/third_party/skia/src/fonts/BUILD.bazel
 ../../../flutter/third_party/skia/src/gpu/BUILD.bazel
 ../../../flutter/third_party/skia/src/gpu/android/BUILD.bazel
 ../../../flutter/third_party/skia/src/gpu/ganesh/BUILD.bazel
