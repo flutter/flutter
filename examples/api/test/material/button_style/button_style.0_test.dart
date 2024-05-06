@@ -27,7 +27,7 @@ void main() {
       findsOne,
     );
 
-    //one OutlinedButton with onPressed null
+    // One OutlinedButton with onPressed null.
     expect(
       find.byWidgetPredicate((Widget widget) {
         return widget is OutlinedButton && widget.onPressed == null;
@@ -35,7 +35,7 @@ void main() {
       findsOne,
     );
 
-    //one OutlinedButton with onPressed not null
+    // One OutlinedButton with onPressed not null.
     expect(
       find.byWidgetPredicate((Widget widget) {
         return widget is OutlinedButton && widget.onPressed != null;
