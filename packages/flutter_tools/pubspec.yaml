@@ -16,7 +16,7 @@ dependencies:
   dds: 4.1.0
   dwds: 24.0.0
   completion: 1.0.1
-  coverage: 1.7.2
+  coverage: 1.8.0
   crypto: 3.0.3
   ffi: 2.1.2
   file: 7.0.0
@@ -121,4 +121,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 261d
+# PUBSPEC CHECKSUM: 341c
