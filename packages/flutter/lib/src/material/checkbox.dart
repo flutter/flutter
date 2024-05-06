@@ -105,7 +105,7 @@ class Checkbox extends StatefulWidget {
   /// [Cross-platform guidelines](https://material.io/design/platform-guidance/cross-platform-adaptation.html).
   ///
   /// Creates a checkbox that looks and feels native when the [ThemeData.platform]
-  /// is iOS or macOS, otherwise a Material Design switch is created.
+  /// is iOS or macOS, otherwise a Material Design checkbox is created.
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Checkbox.adaptive({
