@@ -1680,7 +1680,7 @@ void main() {
       ..layout();
       expect(painter.height, 100);
     });
-  }, skip: kIsWeb && !isSkiaWeb); // [intended] strut spport for HTML renderer https://github.com/flutter/flutter/issues/32243.
+  }, skip: kIsWeb && !isSkiaWeb); // [intended] strut support for HTML renderer https://github.com/flutter/flutter/issues/32243.
 
   test('getOffsetForCaret does not crash on decomposed characters', () {
     final TextPainter painter = TextPainter(

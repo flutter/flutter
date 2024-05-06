@@ -896,9 +896,7 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    // There's no point in drawing the child if we're empty, or there is no
-    // child.
-    if (child == null || size.isEmpty) {
+    if (child == null) {
       return;
     }
 
@@ -919,6 +917,9 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
 
     // Display the overflow indicator if clipBehavior is Clip.none.
     assert(() {
+      if (size.isEmpty) {
+        return true;
+      }
       switch (clipBehavior) {
         case Clip.none:
           paintOverflowIndicator(context, offset, _overflowContainerRect, _overflowChildRect);
