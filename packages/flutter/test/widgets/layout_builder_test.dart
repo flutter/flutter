@@ -853,7 +853,7 @@ class _RenderSmartLayoutBuilder extends RenderProxyBox
 
   @override
   void performLayout() {
-    runLayoutCallback();
+    rebuildIfNecessary();
     child?.layout(constraints);
   }
 

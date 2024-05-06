@@ -257,7 +257,7 @@ mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildTy
   ///
   /// Typically this results in [ConstrainedLayoutBuilder.builder] being called
   /// during layout.
-  void runLayoutCallback() {
+  void rebuildIfNecessary() {
     assert(_callback != null);
     invokeLayoutCallback(_callback!);
   }
@@ -350,7 +350,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    runLayoutCallback();
+    rebuildIfNecessary();
     if (child != null) {
       child!.layout(constraints, parentUsesSize: true);
       size = constraints.constrain(child!.size);

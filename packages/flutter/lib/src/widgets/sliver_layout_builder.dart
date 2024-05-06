@@ -43,7 +43,7 @@ class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChild
 
   @override
   void performLayout() {
-    runLayoutCallback();
+    rebuildIfNecessary();
     child?.layout(constraints, parentUsesSize: true);
     geometry = child?.geometry ?? SliverGeometry.zero;
   }

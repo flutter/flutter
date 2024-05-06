@@ -72,7 +72,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Row(
-          children: [
+          children: <Widget>[
             LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) => widgetWithKey,
             ),
@@ -85,7 +85,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.rtl,
         child: Row(
-          children: [
+          children: <Widget>[
             LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) => const Placeholder(),
             ),
