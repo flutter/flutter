@@ -7,7 +7,6 @@
 
 #include <functional>
 
-#include "flutter/fml/macros.h"
 #include "impeller/base/comparable.h"
 #include "impeller/base/thread.h"
 #include "impeller/toolkit/egl/egl.h"

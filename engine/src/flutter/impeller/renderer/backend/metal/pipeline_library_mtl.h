@@ -7,7 +7,6 @@
 
 #include <Metal/Metal.h>
 
-#include "flutter/fml/macros.h"
 #include "impeller/renderer/pipeline_library.h"
 
 namespace impeller {

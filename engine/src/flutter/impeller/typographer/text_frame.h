@@ -5,7 +5,6 @@
 #ifndef FLUTTER_IMPELLER_TYPOGRAPHER_TEXT_FRAME_H_
 #define FLUTTER_IMPELLER_TYPOGRAPHER_TEXT_FRAME_H_
 
-#include "flutter/fml/macros.h"
 #include "impeller/typographer/glyph_atlas.h"
 #include "impeller/typographer/text_run.h"
 

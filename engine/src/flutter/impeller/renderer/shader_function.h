@@ -6,8 +6,7 @@
 #define FLUTTER_IMPELLER_RENDERER_SHADER_FUNCTION_H_
 
 #include <string>
-#include "flutter/fml/hash_combine.h"
-#include "flutter/fml/macros.h"
+
 #include "impeller/base/comparable.h"
 #include "impeller/core/shader_types.h"
 

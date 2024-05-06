@@ -11,11 +11,7 @@
 #include <vector>
 
 #include "flutter/fml/closure.h"
-#include "flutter/fml/macros.h"
-#include "impeller/base/thread.h"
 #include "impeller/renderer/backend/vulkan/device_holder_vk.h"
-#include "impeller/renderer/backend/vulkan/shared_object_vk.h"
-#include "impeller/renderer/backend/vulkan/vk.h"
 
 namespace impeller {
 

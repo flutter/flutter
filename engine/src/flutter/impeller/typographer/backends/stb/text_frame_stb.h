@@ -5,7 +5,6 @@
 #ifndef FLUTTER_IMPELLER_TYPOGRAPHER_BACKENDS_STB_TEXT_FRAME_STB_H_
 #define FLUTTER_IMPELLER_TYPOGRAPHER_BACKENDS_STB_TEXT_FRAME_STB_H_
 
-#include "flutter/fml/macros.h"
 #include "impeller/typographer/backends/stb/typeface_stb.h"
 #include "impeller/typographer/text_frame.h"
 

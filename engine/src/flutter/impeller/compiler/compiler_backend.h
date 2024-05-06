@@ -9,8 +9,6 @@
 #include <memory>
 #include <variant>
 
-#include "flutter/fml/logging.h"
-#include "flutter/fml/macros.h"
 #include "spirv_glsl.hpp"
 #include "spirv_msl.hpp"
 #include "spirv_sksl.h"

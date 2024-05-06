@@ -5,7 +5,6 @@
 #ifndef FLUTTER_IMPELLER_PLAYGROUND_BACKEND_GLES_PLAYGROUND_IMPL_GLES_H_
 #define FLUTTER_IMPELLER_PLAYGROUND_BACKEND_GLES_PLAYGROUND_IMPL_GLES_H_
 
-#include "flutter/fml/macros.h"
 #include "impeller/playground/playground_impl.h"
 
 namespace impeller {

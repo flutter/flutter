@@ -6,13 +6,9 @@
 #define FLUTTER_IMPELLER_SCENE_ANIMATION_PROPERTY_RESOLVER_H_
 
 #include <memory>
-#include <string>
 #include <vector>
 
-#include "flutter/fml/hash_combine.h"
-#include "flutter/fml/macros.h"
 #include "impeller/base/timing.h"
-#include "impeller/geometry/matrix_decomposition.h"
 #include "impeller/geometry/quaternion.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/vector.h"

@@ -5,7 +5,6 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_PIPELINE_GLES_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_PIPELINE_GLES_H_
 
-#include "flutter/fml/macros.h"
 #include "impeller/base/backend_cast.h"
 #include "impeller/renderer/backend/gles/buffer_bindings_gles.h"
 #include "impeller/renderer/backend/gles/handle_gles.h"

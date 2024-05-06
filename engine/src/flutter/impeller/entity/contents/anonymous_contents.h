@@ -5,10 +5,8 @@
 #ifndef FLUTTER_IMPELLER_ENTITY_CONTENTS_ANONYMOUS_CONTENTS_H_
 #define FLUTTER_IMPELLER_ENTITY_CONTENTS_ANONYMOUS_CONTENTS_H_
 
-#include <functional>
 #include <memory>
 
-#include "flutter/fml/macros.h"
 #include "impeller/entity/contents/contents.h"
 
 namespace impeller {

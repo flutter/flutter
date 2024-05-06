@@ -9,13 +9,9 @@
 #include <sstream>
 #include <string>
 #include <type_traits>
-#include <unordered_map>
-#include <unordered_set>
 
 #include "flutter/fml/hash_combine.h"
-#include "flutter/fml/macros.h"
 #include "impeller/base/comparable.h"
-#include "impeller/renderer/backend/gles/gles.h"
 
 namespace impeller {
 

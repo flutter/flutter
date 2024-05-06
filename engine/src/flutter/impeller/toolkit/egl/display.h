@@ -6,9 +6,7 @@
 #define FLUTTER_IMPELLER_TOOLKIT_EGL_DISPLAY_H_
 
 #include <memory>
-#include <optional>
 
-#include "flutter/fml/macros.h"
 #include "impeller/toolkit/egl/config.h"
 #include "impeller/toolkit/egl/egl.h"
 

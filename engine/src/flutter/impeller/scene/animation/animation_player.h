@@ -8,14 +8,8 @@
 #include <map>
 #include <memory>
 #include <optional>
-#include <vector>
 
-#include "flutter/fml/hash_combine.h"
-#include "flutter/fml/macros.h"
-#include "flutter/fml/time/time_delta.h"
 #include "impeller/base/timing.h"
-#include "impeller/geometry/matrix.h"
-#include "impeller/geometry/matrix_decomposition.h"
 #include "impeller/scene/animation/animation_clip.h"
 
 namespace impeller {

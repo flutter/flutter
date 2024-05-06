@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/fml/macros.h"
-
+#include "impeller/scene/scene_encoder.h"
 #include "flutter/fml/logging.h"
-#include "impeller/renderer/command.h"
 #include "impeller/renderer/render_target.h"
 #include "impeller/scene/scene_context.h"
-#include "impeller/scene/scene_encoder.h"
 
 namespace impeller {
 namespace scene {

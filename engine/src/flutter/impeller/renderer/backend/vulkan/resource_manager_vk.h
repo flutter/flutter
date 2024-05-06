@@ -11,8 +11,6 @@
 #include <thread>
 #include <vector>
 
-#include "flutter/fml/macros.h"
-
 namespace impeller {
 
 //------------------------------------------------------------------------------

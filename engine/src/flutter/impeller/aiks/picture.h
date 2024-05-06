@@ -5,14 +5,11 @@
 #ifndef FLUTTER_IMPELLER_AIKS_PICTURE_H_
 #define FLUTTER_IMPELLER_AIKS_PICTURE_H_
 
-#include <deque>
 #include <memory>
 #include <optional>
 
-#include "flutter/fml/macros.h"
 #include "impeller/aiks/aiks_context.h"
 #include "impeller/aiks/image.h"
-#include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass.h"
 
 namespace impeller {

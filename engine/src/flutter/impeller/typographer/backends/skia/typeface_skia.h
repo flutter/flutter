@@ -5,7 +5,6 @@
 #ifndef FLUTTER_IMPELLER_TYPOGRAPHER_BACKENDS_SKIA_TYPEFACE_SKIA_H_
 #define FLUTTER_IMPELLER_TYPOGRAPHER_BACKENDS_SKIA_TYPEFACE_SKIA_H_
 
-#include "flutter/fml/macros.h"
 #include "impeller/base/backend_cast.h"
 #include "impeller/typographer/typeface.h"
 #include "third_party/skia/include/core/SkRefCnt.h"

@@ -5,7 +5,6 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_ALLOCATOR_GLES_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_ALLOCATOR_GLES_H_
 
-#include "flutter/fml/macros.h"
 #include "impeller/core/allocator.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
 

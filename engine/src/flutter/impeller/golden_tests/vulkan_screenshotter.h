@@ -5,7 +5,6 @@
 #ifndef FLUTTER_IMPELLER_GOLDEN_TESTS_VULKAN_SCREENSHOTTER_H_
 #define FLUTTER_IMPELLER_GOLDEN_TESTS_VULKAN_SCREENSHOTTER_H_
 
-#include "flutter/fml/macros.h"
 #include "flutter/impeller/aiks/picture.h"
 #include "flutter/impeller/golden_tests/metal_screenshot.h"
 #include "flutter/impeller/golden_tests/screenshotter.h"

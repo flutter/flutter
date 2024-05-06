@@ -7,11 +7,8 @@
 
 #include <functional>
 #include <memory>
-#include <vector>
 
-#include "flutter/fml/macros.h"
 #include "impeller/core/sampler_descriptor.h"
-#include "impeller/core/texture.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/renderer/snapshot.h"

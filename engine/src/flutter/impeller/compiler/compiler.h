@@ -9,7 +9,6 @@
 #include <sstream>
 #include <string>
 
-#include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "impeller/compiler/include_dir.h"
 #include "impeller/compiler/reflector.h"

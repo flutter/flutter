@@ -5,17 +5,13 @@
 #ifndef FLUTTER_IMPELLER_ENTITY_CONTENTS_GRADIENT_GENERATOR_H_
 #define FLUTTER_IMPELLER_ENTITY_CONTENTS_GRADIENT_GENERATOR_H_
 
-#include <functional>
 #include <memory>
 #include <vector>
 
-#include "flutter/fml/macros.h"
 #include "flutter/impeller/core/texture.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/gradient.h"
-#include "impeller/geometry/path.h"
-#include "impeller/geometry/point.h"
 
 namespace impeller {
 

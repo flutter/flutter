@@ -5,7 +5,6 @@
 #ifndef FLUTTER_IMPELLER_COMPILER_COMPILER_TEST_H_
 #define FLUTTER_IMPELLER_COMPILER_COMPILER_TEST_H_
 
-#include "flutter/fml/macros.h"
 #include "flutter/testing/testing.h"
 #include "impeller/base/validation.h"
 #include "impeller/compiler/compiler.h"

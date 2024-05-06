@@ -6,9 +6,8 @@
 #define FLUTTER_IMPELLER_TYPOGRAPHER_FONT_H_
 
 #include <memory>
-#include <optional>
 
-#include "flutter/fml/macros.h"
+#include "fml/hash_combine.h"
 #include "impeller/base/comparable.h"
 #include "impeller/typographer/glyph.h"
 #include "impeller/typographer/typeface.h"

@@ -5,7 +5,6 @@
 #ifndef FLUTTER_IMPELLER_RUNTIME_STAGE_RUNTIME_STAGE_PLAYGROUND_H_
 #define FLUTTER_IMPELLER_RUNTIME_STAGE_RUNTIME_STAGE_PLAYGROUND_H_
 
-#include "flutter/fml/macros.h"
 #include "impeller/playground/playground_test.h"
 #include "impeller/runtime_stage/runtime_stage.h"
 

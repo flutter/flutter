@@ -9,7 +9,6 @@
 #include <string>
 #include <vector>
 
-#include "flutter/fml/macros.h"
 #include "flutter/impeller/golden_tests/working_directory.h"
 
 namespace impeller {

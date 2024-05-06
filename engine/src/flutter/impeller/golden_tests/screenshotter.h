@@ -5,7 +5,6 @@
 #ifndef FLUTTER_IMPELLER_GOLDEN_TESTS_SCREENSHOTTER_H_
 #define FLUTTER_IMPELLER_GOLDEN_TESTS_SCREENSHOTTER_H_
 
-#include "flutter/fml/macros.h"
 #include "flutter/impeller/aiks/picture.h"
 #include "flutter/impeller/golden_tests/screenshot.h"
 #include "flutter/impeller/playground/playground_impl.h"
