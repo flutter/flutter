@@ -2610,25 +2610,35 @@ abstract class BuildContext {
   DiagnosticsNode describeOwnershipChain(String name);
 }
 
-/// A class that determines the scope of [BuildOwner.buildScope] operations.
+/// A class that determines the scope of a [BuildOwner.buildScope] operation.
 ///
-/// The [BuildOwner.buildScope] method rebuilds all dirty [Element]s with the
-/// same [Element.buildScope] as its `context` argument. An [Element]'s
-/// [BuildScope] is specified in [Element.buildScope], which, by default, has
-/// the same value as the parent [Element].
+/// The [BuildOwner.buildScope] method rebuilds all dirty [Element]s who share
+/// the same [Element.buildScope] as its `context` argument.
 ///
-/// By using a different [BuildScope] from its parent, an [Element] can wait for
-/// other necessary tasks before start rebuilding its own widget subtree. The
-/// [LayoutBuilder] widget, for example, establishes its own [BuildScope] such
-/// that no descendant [Element]s rebuild until the incoming constraints are known.
+/// [Element]s by default have the same `buildScope` as their parents. Special
+/// [Element]s may override [Element.buildScope] to create an isolated build scope
+/// for its descendants. The [LayoutBuilder] widget, for example, establishes its
+/// own [BuildScope] such that no descendant [Element]s may rebuild prematurely
+/// until the incoming constraints are known.
 final class BuildScope {
-  /// Creates a [BuildScope] with an optional [onBuildScheduled] callback.
-  BuildScope(this.onBuildScheduled);
+  /// Creates a [BuildScope] with an optional [scheduleRebuild] callback.
+  BuildScope(this.scheduleRebuild);
 
+  // Whether [onBuildScheduled] is called.
   bool _buildScheduled = false;
+  // Whether [BuildOwner.buildScope] is actively updating dirty elements in this
+  // [BuildScope].
   bool _building = false;
-  /// An optional [VoidCallback] that will be called
-  final VoidCallback? onBuildScheduled;
+
+  /// An optional [VoidCallback] that will be called when [Element]s in this
+  /// [BuildScope] is marked as dirty for the first time.
+  ///
+  /// This callback usually signifies that the [BuildOwner.buildScope] method
+  /// must be called at a later time in this frame to rebuild dirty elements in
+  /// this [BuildScope]. It will **not** be called if this scope is actively being
+  /// built by [BuildOwner.buildScope], since the [BuildScope] will be clean when
+  /// [BuildOwner.buildScope] returns.
+  final VoidCallback? scheduleRebuild;
 
   /// Whether [_dirtyElements] need to be sorted again as a result of more
   /// elements becoming dirty during the build.
@@ -2651,7 +2661,7 @@ final class BuildScope {
     }
     if (!_buildScheduled && !_building) {
       _buildScheduled = true;
-      onBuildScheduled?.call();
+      scheduleRebuild?.call();
     }
     if (_dirtyElementsNeedsResorting != null) {
       _dirtyElementsNeedsResorting = true;
@@ -2961,7 +2971,6 @@ class BuildOwner {
   @pragma('vm:notify-debugger-on-exception')
   void buildScope(Element context, [ VoidCallback? callback ]) {
     final BuildScope buildScope = context.buildScope;
-    //assert(buildScope.debugRootElement == context);
     if (callback == null && buildScope._dirtyElements.isEmpty) {
       return;
     }
@@ -3020,7 +3029,7 @@ class BuildOwner {
       }
       buildScope._flushDirtyElements(debugBuildRoot: context);
       assert(() {
-        if (buildScope._dirtyElements.any((Element element) => element._lifecycleState == _ElementLifecycle.active && element.dirty)) {
+        if (buildScope._dirtyElements.any((Element element) => element.debugIsActive && element.dirty)) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('buildScope missed some dirty elements.'),
             ErrorHint('This probably indicates that the dirty list should have been resorted but was not.'),

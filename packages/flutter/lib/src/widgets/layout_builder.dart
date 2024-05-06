@@ -137,7 +137,6 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
     super.performRebuild(); // Calls widget.updateRenderObject (a no-op in this case).
   }
 
-
   @override
   void unmount() {
     renderObject.updateCallback(null);
