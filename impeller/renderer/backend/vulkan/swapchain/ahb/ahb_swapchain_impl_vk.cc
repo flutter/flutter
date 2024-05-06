@@ -9,6 +9,7 @@
 #include "impeller/renderer/backend/vulkan/barrier_vk.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
+#include "impeller/renderer/backend/vulkan/gpu_tracer_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/ahb_formats.h"
 #include "impeller/renderer/backend/vulkan/swapchain/surface_vk.h"
 #include "impeller/toolkit/android/surface_transaction.h"
@@ -128,6 +129,11 @@ bool AHBSwapchainImplVK::Present(
     VALIDATION_LOG << "Surface control died before swapchain image could be "
                       "presented.";
     return false;
+  }
+
+  auto context = transients_->GetContext().lock();
+  if (context) {
+    ContextVK::Cast(*context).GetGPUTracer()->MarkFrameEnd();
   }
 
   if (!texture) {
