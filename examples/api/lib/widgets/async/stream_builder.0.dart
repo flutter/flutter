@@ -39,9 +39,16 @@ class _StreamBuilderExampleState extends State<StreamBuilderExample> {
   late final StreamController<int> _controller = StreamController<int>(
     onListen: () async {
       await Future<void>.delayed(widget.delay);
-      _controller.add(1);
+
+      if (!_controller.isClosed) {
+        _controller.add(1);
+      }
+
       await Future<void>.delayed(widget.delay);
-      await _controller.close();
+
+      if (!_controller.isClosed) {
+        _controller.close();
+      }
     },
   );
 
@@ -49,7 +56,9 @@ class _StreamBuilderExampleState extends State<StreamBuilderExample> {
 
   @override
   void dispose() {
-    _controller.close();
+    if (!_controller.isClosed) {
+      _controller.close();
+    }
     super.dispose();
   }
 

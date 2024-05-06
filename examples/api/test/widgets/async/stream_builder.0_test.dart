@@ -41,7 +41,7 @@ void main() {
           addTearDown(controller.close);
 
           controller.onListen = () {
-            controller.addError('Unexpected error!', StackTrace.current);
+            controller.addError('Unexpected error!', StackTrace.empty);
           };
 
           await tester.pumpWidget(
