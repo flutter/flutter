@@ -8,7 +8,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 
 class Carousel extends StatefulWidget {
   Carousel({
@@ -26,26 +25,8 @@ class Carousel extends StatefulWidget {
     this.onTap,
     required this.itemExtent,
     required this.children,
-  }) : layout = _CarouselLayout.uncontained,
-       layoutWeights = null;
-
-  /// fullscreen constructor
-  const Carousel.fullscreen({
-    super.key,
-    this.padding,
-    this.backgroundColor,
-    this.elevation,
-    this.shape,
-    this.overlayColor,
-    this.itemSnapping = false,
-    this.shrinkExtent,
-    this.controller,
-    this.scrollDirection = Axis.horizontal,
-    this.reverse = false,
-    this.onTap,
-    required this.children,
-  }) : layout = _CarouselLayout.fullscreen,
-       itemExtent = double.infinity,
+  }) : allowFullyExpand = null,
+       layout = _CarouselLayout.uncontained,
        layoutWeights = null;
 
   /// multi-browse
@@ -61,6 +42,7 @@ class Carousel extends StatefulWidget {
     this.controller,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
+    this.allowFullyExpand = false,
     this.onTap,
     required this.layoutWeights,
     required this.children,
@@ -76,6 +58,7 @@ class Carousel extends StatefulWidget {
     this.shape,
     this.overlayColor,
     bool centered = false,
+    this.allowFullyExpand = true,
     this.itemSnapping = false,
     this.shrinkExtent,
     this.controller,
@@ -98,6 +81,7 @@ class Carousel extends StatefulWidget {
   final CarouselController? controller;
   final Axis scrollDirection;
   final bool reverse;
+  final bool? allowFullyExpand;
   final ValueChanged<int>? onTap;
   final _CarouselLayout layout;
   final List<int>? layoutWeights;
@@ -111,34 +95,35 @@ class _CarouselState extends State<Carousel> {
   late double? itemExtent;
   late List<int>? weights;
   late CarouselController _controller;
-  late bool allowFullyExpand;
+  late bool? allowFullyExpand;
 
   @override
   void initState() {
-    allowFullyExpand = switch (widget.layout) {
-      _CarouselLayout.uncontained || _CarouselLayout.multiBrowse || _CarouselLayout.fullscreen || _CarouselLayout.hero => false,
-      _CarouselLayout.centeredHero => true,
-    };
+    _updateWeights();
     super.initState();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    weights = widget.layoutWeights;
+    allowFullyExpand = widget.allowFullyExpand;
     itemExtent = getItemExtent();
-    _initController();
+    _updateController();
   }
 
   @override
   void didUpdateWidget(covariant Carousel oldWidget) {
     super.didUpdateWidget(oldWidget);
+
     if (widget.layoutWeights != oldWidget.layoutWeights) {
-      weights = widget.layoutWeights;
-      _initController();
+      _updateWeights();
+      _updateController();
     }
     if (widget.itemExtent != oldWidget.itemExtent) {
       itemExtent = getItemExtent();
+    }
+    if (widget.layout != oldWidget.layout) {
+      allowFullyExpand = widget.allowFullyExpand;
     }
   }
 
@@ -150,22 +135,34 @@ class _CarouselState extends State<Carousel> {
     super.dispose();
   }
 
-  void _initController() {
-    int expandedItem = 0;
+  void _updateWeights() {
+    weights = widget.layoutWeights;
+    if (widget.layout == _CarouselLayout.centeredHero) {
+      assert(weights != null);
+      weights = List<int>.from(widget.layoutWeights!);
+      final int length = weights!.length;
+      final int minWeight = weights!.min;
+      weights!.sort();
+      weights!.insertAll(length, List<int>.filled(length - 1, minWeight));
+    }
+  }
+
+  void _updateController() {
+    int maxItem = 0;
     if (weights != null) {
       final int maxWeight = weights!.max;
       for (int index = 0; index < weights!.length; index++) {
         if (weights!.elementAt(index) == maxWeight) {
-          expandedItem = index;
+          maxItem = index;
           break;
         }
       }
     }
 
     final int initialItem = switch(widget.layout) {
-      _CarouselLayout.uncontained || _CarouselLayout.fullscreen || _CarouselLayout.hero => 0,
-      _CarouselLayout.multiBrowse => allowFullyExpand ? 0 : expandedItem,
-      _CarouselLayout.centeredHero => allowFullyExpand ? 0 : expandedItem,
+      _CarouselLayout.uncontained => 0,
+      _CarouselLayout.multiBrowse => 0,
+      _CarouselLayout.hero || _CarouselLayout.centeredHero => maxItem,
     };
 
     _controller = widget.controller
@@ -263,7 +260,7 @@ class _CarouselState extends State<Carousel> {
               ),
             ),
             if (weights != null) _SliverWeightedCarousel(
-              allowFullyExpand: allowFullyExpand,
+              allowFullyExpand: allowFullyExpand ?? false,
               shrinkExtent: widget.shrinkExtent ?? 0.0,
               weights: weights!,
               delegate: SliverChildBuilderDelegate(
@@ -510,7 +507,7 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
       for (int i = _firstVisibleItemIndex + 1; i < index; i++) {
         visibleItemsTotalExtent += _buildItemExtent(i, currentLayoutDimensions);
       }
-      extent = math.max(constraints.remainingCacheExtent - visibleItemsTotalExtent, effectiveShrinkExtent);
+      extent = math.max(constraints.remainingPaintExtent - visibleItemsTotalExtent, effectiveShrinkExtent);
     }
     else {
       extent = math.max(minChildExtent, effectiveShrinkExtent);
@@ -760,7 +757,6 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
       trailingScrollOffset = indexToLayoutOffset(deprecatedExtraItemExtent, lastIndex + 1);
     }
 
-    assert(firstIndex == 0 || childScrollOffset(firstChild!)! - scrollOffset <= precisionErrorTolerance);
     assert(debugAssertChildListIsNonEmptyAndContiguous());
     assert(indexOf(firstChild!) == firstIndex);
     assert(targetLastIndex == null || lastIndex <= targetLastIndex);
@@ -778,13 +774,13 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
 
     final double paintExtent = calculatePaintOffset(
       constraints,
-      from: allowFullyExpand ? 0 :leadingScrollOffset,
+      from: allowFullyExpand ? 0 : leadingScrollOffset,
       to: trailingScrollOffset,
     );
 
     final double cacheExtent = calculateCacheOffset(
       constraints,
-      from: allowFullyExpand ? 0 :leadingScrollOffset,
+      from: allowFullyExpand ? 0 : leadingScrollOffset,
       to: trailingScrollOffset,
     );
 
@@ -834,8 +830,6 @@ enum _CarouselLayout {
 
   /// The center-aligned hero layout shows at least one large item and two small items.
   centeredHero,
-
-  fullscreen,
 }
 
 class CarouselScrollPhysics extends ScrollPhysics {
