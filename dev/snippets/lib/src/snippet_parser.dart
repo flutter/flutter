@@ -78,6 +78,7 @@ class SnippetDartdocParser {
     int? startLine,
     String? element,
     required File sourceFile,
+    String template = '',
     String type = '',
     bool silent = true,
   }) {
@@ -87,7 +88,7 @@ class SnippetDartdocParser {
       // The parser wants to read the arguments from the input, so we create a new
       // tool line to match the given arguments, so that we can use the same parser for
       // editing and docs generation.
-      '/// {@tool $type}',
+      '/// {@tool $type ${template.isNotEmpty ? ' --template=$template}' : ''}}',
       // Snippet input comes in with the comment markers stripped, so we add them
       // back to make it conform to the source format, so we can use the same
       // parser for editing samples as we do for processing docs.

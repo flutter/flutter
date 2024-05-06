@@ -137,6 +137,11 @@ void main(List<String> argList) {
     },
     help: 'The type of snippet to produce.',
   );
+  // TODO(goderbauer): Remove template support, this is no longer used.
+  parser.addOption(
+    _kTemplateOption,
+    help: 'The name of the template to inject the code into.',
+  );
   parser.addOption(
     _kOutputOption,
     help: 'The output name for the generated sample application. Overrides '
@@ -210,6 +215,12 @@ void main(List<String> argList) {
     return;
   }
 
+  String template = '';
+  if (sampleType == 'sample' || sampleType == 'dartpad') {
+    template = (args[_kTemplateOption] as String? ?? '')
+        .replaceAll(RegExp(r'.tmpl$'), '');
+  }
+
   final bool formatOutput = args[_kFormatOutputOption]! as bool;
   final String packageName = args[_kPackageOption] as String? ?? '';
   final String libraryName = args[_kLibraryOption] as String? ?? '';
@@ -264,6 +275,7 @@ void main(List<String> argList) {
     startLine: sourceLine,
     element: elementName,
     sourceFile: filesystem.file(sourcePath),
+    template: template,
     type: sampleType,
   );
   final Map<String, Object?> metadata = <String, Object?>{
