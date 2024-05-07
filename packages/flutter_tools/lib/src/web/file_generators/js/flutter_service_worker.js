@@ -84,6 +84,11 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== 'GET') {
     return;
   }
+  // Prevent caching all requests, only attempt to handle flutter resources.
+  var requestUrl = new URL(event.request.url);
+  if (requestUrl.host !== self.location.host) {
+    return;
+  }
   var origin = self.location.origin;
   var key = event.request.url.substring(origin.length + 1);
   // Redirect URLs to the index.html
