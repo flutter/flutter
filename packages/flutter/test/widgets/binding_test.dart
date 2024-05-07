@@ -384,7 +384,7 @@ void main() {
     WidgetsBinding.instance.removeObserver(observer);
   });
 
-    testWidgets('pushRouteInformation not handled by observer', (WidgetTester tester) async {
+    testWidgets('pushRouteInformation not handled by observer returns false', (WidgetTester tester) async {
 
     const Map<String, dynamic> testRouteInformation = <String, dynamic>{
       'location': 'testRouteName',
@@ -401,7 +401,7 @@ void main() {
     expect(decodedResult, false);
   });
 
-    testWidgets('pushRoute not handled by observer', (WidgetTester tester) async {
+    testWidgets('pushRoute not handled by observer returns false', (WidgetTester tester) async {
 
     const String testRoute = 'testRouteName';
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
@@ -416,7 +416,7 @@ void main() {
   });
 
 
-    testWidgets('popRoute not handled by observer', (WidgetTester tester) async {
+    testWidgets('popRoute not handled by observer returns false', (WidgetTester tester) async {
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('popRoute'),
     );
