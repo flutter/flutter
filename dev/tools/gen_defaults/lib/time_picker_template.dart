@@ -287,7 +287,7 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
       // https://m3.material.io/components/time-pickers/specs#fd0b6939-edab-4058-82e1-93d163945215
       return switch (entryMode) {
         TimePickerEntryMode.dial || TimePickerEntryMode.dialOnly
-          => _textTheme.displayLarge!.copyWith(color: _hourMinuteTextColor.resolve(states)),
+          => ${textStyle('$hourMinuteComponent.label-text')}!.copyWith(color: _hourMinuteTextColor.resolve(states)),
         TimePickerEntryMode.input || TimePickerEntryMode.inputOnly
           => _textTheme.displayMedium!.copyWith(color: _hourMinuteTextColor.resolve(states)),
       };
