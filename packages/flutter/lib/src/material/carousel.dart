@@ -60,7 +60,7 @@ class Carousel extends StatefulWidget {
     this.onTap,
     required this.itemExtent,
     required this.children,
-  }) : allowFullyExpand = null,
+  }) : allowFullyExpand = true,
        _layout = _CarouselLayout.fixed,
        layoutWeights = null;
 
@@ -167,7 +167,7 @@ class Carousel extends StatefulWidget {
   /// a chance to be fully expanded.
   ///
   /// Defaults to true on hero layout and false on multi-browse layout.
-  final bool? allowFullyExpand;
+  final bool allowFullyExpand;
 
   /// Called when one of the [children] is tapped.
   final ValueChanged<int>? onTap;
@@ -201,12 +201,17 @@ class Carousel extends StatefulWidget {
 class _CarouselState extends State<Carousel> {
   late double? itemExtent;
   late List<int>? weights;
-  late CarouselController _controller;
-  late bool? allowFullyExpand;
+  CarouselController? _internalController;
+  CarouselController get _controller => widget.controller ?? _internalController!;
+  late bool allowFullyExpand;
 
   @override
   void initState() {
-    _updateWeights();
+    weights = widget.layoutWeights;
+    if (widget.controller == null) {
+      _internalController = CarouselController();
+    }
+    _controller._attach(this);
     super.initState();
   }
 
@@ -215,7 +220,6 @@ class _CarouselState extends State<Carousel> {
     super.didChangeDependencies();
     allowFullyExpand = widget.allowFullyExpand;
     itemExtent = getItemExtent();
-    _updateController();
   }
 
   @override
@@ -223,8 +227,7 @@ class _CarouselState extends State<Carousel> {
     super.didUpdateWidget(oldWidget);
 
     if (widget.layoutWeights != oldWidget.layoutWeights) {
-      _updateWeights();
-      _updateController();
+      weights = widget.layoutWeights;
     }
     if (widget.itemExtent != oldWidget.itemExtent) {
       itemExtent = getItemExtent();
@@ -236,22 +239,9 @@ class _CarouselState extends State<Carousel> {
 
   @override
   void dispose() {
-    if (widget.controller == null) {
-      _controller.dispose();
-    }
+    _controller._detach(this);
+    _internalController = null;
     super.dispose();
-  }
-
-  void _updateWeights() {
-    weights = widget.layoutWeights;
-  }
-
-  void _updateController() {
-    _controller = widget.controller
-      ?? CarouselController(
-        itemExtent: itemExtent,
-        layoutWeights: weights,
-      );
   }
 
   AxisDirection _getDirection(BuildContext context) {
@@ -1168,39 +1158,57 @@ class CarouselController extends ScrollController {
   /// Creates a carousel controller.
   CarouselController({
     this.initialItem = 0,
-    this.itemExtent,
-    this.layoutWeights,
   });
 
   /// The item that expands to full size when first creating the [PageView].
   final int initialItem;
 
-  final double? itemExtent;
+  _CarouselState? _carouselState;
 
-  /// The fraction of the viewport that the first visible carousel item should occupy.
-  final List<int>? layoutWeights;
+  void _attach(_CarouselState anchor) {
+    _carouselState = anchor;
+  }
+
+  void _detach(_CarouselState anchor) {
+    if (_carouselState == anchor) {
+      _carouselState = null;
+    }
+  }
 
   @override
   ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition) {
+    assert(_carouselState != null);
+    final List<int>? weights = _carouselState!.weights;
+    final double? itemExtent = _carouselState!.itemExtent;
+    int expandedItem = initialItem;
+
+    if (weights != null && !_carouselState!.allowFullyExpand) {
+      int smallerWeights = 0;
+      for (final int weight in weights) {
+        if (weight == weights.max) {
+          break;
+        }
+        smallerWeights += 1;
+      }
+      expandedItem -= smallerWeights;
+    }
+
     return _CarouselPosition(
       physics: physics,
       context: context,
-      initialItem: initialItem,
+      initialItem: expandedItem,
       itemExtent: itemExtent,
-      layoutWeights: layoutWeights,
+      layoutWeights: weights,
       oldPosition: oldPosition,
     );
   }
 
   @override
   void attach(ScrollPosition position) {
+    assert(_carouselState != null);
     super.attach(position);
     final _CarouselPosition carouselPosition = position as _CarouselPosition;
-    if (layoutWeights != null) {
-      carouselPosition.layoutWeights = layoutWeights;
-    }
-    if (itemExtent != null) {
-      carouselPosition.itemExtent = itemExtent;
-    }
+    carouselPosition.layoutWeights = _carouselState!.weights;
+    carouselPosition.itemExtent = _carouselState!.itemExtent;
   }
 }

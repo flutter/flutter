@@ -49,10 +49,7 @@ class _CarouselExampleState extends State<CarouselExample> with SingleTickerProv
         ConstrainedBox(
           constraints: BoxConstraints(maxHeight: height / 2),
           child: Carousel.weighted(
-            controller: CarouselController(
-              initialItem: 1,
-              layoutWeights: const <int>[1,7,1],
-            ),
+            controller: CarouselController(initialItem: 1),
             itemSnapping: true,
             layoutWeights: const <int>[1,7,1],
             children: ImageInfo.values.map((ImageInfo image) {
