@@ -3684,8 +3684,8 @@ void main() {
     );
     expect(normalLabelNavDestinationFinder, findsOneWidget);
     expect(longLabelNavDestinationFinder, findsOneWidget);
-  // If the widget manages to layout without throwing an overflow exception,
-  // the test passes.
+    // If the widget manages to layout without throwing an overflow exception,
+    // the test passes.
   });
 
   group('Material 2', () {
