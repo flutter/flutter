@@ -10,21 +10,21 @@ import 'environment.dart';
 import 'logger.dart';
 
 /// Update Flutter engine dependencies. Returns an exit code.
-Future<int> fetchDependencies(
-  Environment environment, {
-  bool verbose = false,
-}) async {
+Future<int> fetchDependencies(Environment environment) async {
   if (!environment.processRunner.processManager.canRun('gclient')) {
     environment.logger.error('Cannot find the gclient command in your path');
     return 1;
   }
 
-  environment.logger.status('Fetching dependencies... ', newline: verbose);
+  environment.logger.status(
+    'Fetching dependencies... ',
+    newline: environment.verbose,
+  );
 
   Spinner? spinner;
   ProcessRunnerResult result;
   try {
-    if (!verbose) {
+    if (!environment.verbose) {
       spinner = environment.logger.startSpinner();
     }
 
@@ -35,9 +35,9 @@ Future<int> fetchDependencies(
         '-D',
       ],
       runInShell: true,
-      startMode: verbose
-        ? io.ProcessStartMode.inheritStdio
-        : io.ProcessStartMode.normal,
+      startMode: environment.verbose
+          ? io.ProcessStartMode.inheritStdio
+          : io.ProcessStartMode.normal,
     );
   } finally {
     spinner?.finish();
@@ -48,7 +48,7 @@ Future<int> fetchDependencies(
 
     // Verbose mode already logged output by making the child process inherit
     // this process's stdio handles.
-    if (!verbose) {
+    if (!environment.verbose) {
       environment.logger.error('Output:\n${result.output}');
     }
   }

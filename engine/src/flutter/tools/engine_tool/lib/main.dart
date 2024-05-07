@@ -66,13 +66,13 @@ void main(List<String> args) async {
     platform: const LocalPlatform(),
     processRunner: ProcessRunner(),
     logger: Logger(),
+    verbose: verbose,
   );
 
   // Use the Engine and BuildConfig collection to build the CommandRunner.
   final ToolCommandRunner runner = ToolCommandRunner(
     environment: environment,
     configs: configs,
-    verbose: verbose,
     help: help,
   );
 

@@ -51,7 +51,7 @@ List<Build> runnableBuilds(
     Environment env, Map<String, BuilderConfig> input, bool verbose) {
   return filterBuilds(input, (String configName, Build build) {
     return build.canRunOn(env.platform) &&
-           (verbose || build.name.startsWith(env.platform.operatingSystem));
+        (verbose || build.name.startsWith(env.platform.operatingSystem));
   });
 }
 
@@ -119,9 +119,12 @@ String demangleConfigName(Environment env, String name) {
 }
 
 /// Build the build target in the environment.
-Future<int> runBuild(Environment environment, Build build,
-    {List<String> extraGnArgs = const <String>[],
-    List<String> targets = const <String>[]}) async {
+Future<int> runBuild(
+  Environment environment,
+  Build build, {
+  List<String> extraGnArgs = const <String>[],
+  List<String> targets = const <String>[],
+}) async {
   // If RBE config files aren't in the tree, then disable RBE.
   final String rbeConfigPath = p.join(
     environment.engine.srcDir.path,
@@ -143,7 +146,11 @@ Future<int> runBuild(Environment environment, Build build,
     build: build,
     extraGnArgs: gnArgs,
     runTests: false,
-    extraNinjaArgs: targets,
+    extraNinjaArgs: <String>[
+      ...targets,
+      // If the environment is verbose, pass the verbose flag to ninja.
+      if (environment.verbose) '--verbose',
+    ],
   );
 
   Spinner? spinner;
