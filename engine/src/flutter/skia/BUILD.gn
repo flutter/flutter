@@ -496,6 +496,7 @@ optional("jpeg_decode") {
   sources = [
     "$_skia_root/src/codec/SkJpegCodec.cpp",
     "$_skia_root/src/codec/SkJpegDecoderMgr.cpp",
+    "$_skia_root/src/codec/SkJpegMetadataDecoderImpl.cpp",
     "$_skia_root/src/codec/SkJpegSourceMgr.cpp",
     "$_skia_root/src/codec/SkJpegUtility.cpp",
   ]
