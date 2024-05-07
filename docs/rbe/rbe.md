@@ -55,8 +55,7 @@ The `gcloud` tool in this SDK must be on your path. The tool lives under
 `//flutter/buildtools/mac-arm64/gcloud/bin`, which is the path to add to your
 `PATH` environment variable. Alternatively, you can get the gcloud SDK on your
 path by installing it on your system by following the instructions at
-[https://cloud.google.com/sdk/docs/install]
-(https://cloud.google.com/sdk/docs/install).
+[https://cloud.google.com/sdk/docs/install](https://cloud.google.com/sdk/docs/install).
 
 On macOS, before running the `gcloud` command ensure that `python3` is on your
 path, and does not come from e.g. homebrew. The command `which python3` should
@@ -190,25 +189,23 @@ This can be debugged by doing a local build with RBE turned off.
 
 ## References
 
-* Code for RBE (i.e. reproxy, rewrapper, bootstrap, etc.) lives in [this GitHub
-  repository](https://github.com/bazelbuild/reclient). The tools are not
+* Code for RBE (i.e. reproxy, rewrapper, bootstrap, etc.) lives in
+  [this GitHub repository](https://github.com/bazelbuild/reclient). The tools are not
   well-documented, so the source code is the source of truth for the command
   line flags that they accept, for example.
 * Internal-facing RBE migration guide is [here](go/reclient-migration-guide).
   (Mostly focused on Chrome and Android, so not all parts are relevant to
   Flutter.)
-* The version of RBE for local development is set in the DEPS file [here]
-  (https://github.com/flutter/engine/blob/8578edf9c9393471ca9eab18e9154f0e6066dcb6/DEPS#L53).
+* The version of RBE for local development is set in the DEPS file
+  [here](https://github.com/flutter/engine/blob/8578edf9c9393471ca9eab18e9154f0e6066dcb6/DEPS#L53).
   It needs to be manually rolled occasionally.
-* The version of RBE used by CI is set in a LUCI recipe [here]
-  (https://flutter.googlesource.com/recipes/+/be12675150183af68223f5fbc6e0f888a1139e79/recipe_modules/rbe/api.py#16).
+* The version of RBE used by CI is set in a LUCI recipe
+  [here](https://flutter.googlesource.com/recipes/+/be12675150183af68223f5fbc6e0f888a1139e79/recipe_modules/rbe/api.py#16).
   It also needs to be manually rolled occasionally.
-* Googler-only RBE configuration files live in the CIPD bucket [here]
-  (https://chrome-infra-packages.appspot.com/p/flutter_internal/rbe/reclient_cfgs).
+* Googler-only RBE configuration files live in the CIPD bucket
+  [here](https://chrome-infra-packages.appspot.com/p/flutter_internal/rbe/reclient_cfgs).
   They need to be updated when we roll clang to a new version as described
-  [here]
-  (https://github.com/flutter/engine/pull/52062#issuecomment-2050902282).
-* Flutter’s RBE worker pool is defined [here]
-  (https://source.corp.google.com/piper///depot/google3/configs/cloud/gong/services/flutter_rbe/modules/infra/prod/main.tf).
-* Using RBE for Engine clang-tidy is blocked on [b/326591374]
-  (http://b/326591374).
+  [here](https://github.com/flutter/engine/pull/52062#issuecomment-2050902282).
+* Flutter’s RBE worker pool is defined
+  [here](https://source.corp.google.com/piper///depot/google3/configs/cloud/gong/services/flutter_rbe/modules/infra/prod/main.tf).
+* Using RBE for Engine clang-tidy is blocked on [b/326591374](http://b/326591374).
