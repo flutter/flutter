@@ -398,12 +398,12 @@ void main() {
       () async {
         final TestEnvironment testEnv = TestEnvironment.withTestEngine(
           cannedProcesses: cannedProcesses,
+          verbose: true,
         );
         try {
           final ToolCommandRunner runner = ToolCommandRunner(
             environment: testEnv.environment,
             configs: configs,
-            verbose: true,
             help: true,
           );
           final int result = await runner.run(<String>[
