@@ -113,33 +113,6 @@ demonstrate the API's functionality in a sample application, or used with the
 `dartpad` samples are embedded into the API docs web page and are live
 applications in the API documentation.
 
-```dart
-/// {@tool sample --template=stateless_widget_material}
-/// This example shows how to make a simple [FloatingActionButton] in a
-/// [Scaffold], with a pink [backgroundColor] and a thumbs up [Icon].
-///
-/// ```dart
-/// Widget build(BuildContext context) {
-///   return Scaffold(
-///     appBar: AppBar(
-///       title: Text('Floating Action Button Sample'),
-///     ),
-///     body: Center(
-///       child: Text('Press the button below!')
-///     ),
-///     floatingActionButton: FloatingActionButton(
-///       onPressed: () {
-///         // Add your onPressed code here!
-///       },
-///       child: Icon(Icons.thumb_up),
-///       backgroundColor: Colors.pink,
-///     ),
-///   );
-/// }
-/// ```
-/// {@end-tool}
-```
-
 This uses the skeleton for [application](https://github.com/flutter/flutter/blob/main/dev/snippets/config/skeletons/sample.html)
 snippets in the Flutter repo.
 
