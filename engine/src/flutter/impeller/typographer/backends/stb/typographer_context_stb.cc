@@ -79,7 +79,7 @@ static size_t PairsFitInAtlasOfSize(
     }
 
     IPoint16 location_in_atlas;
-    if (!rect_packer->addRect(glyph_size.width + kPadding,   //
+    if (!rect_packer->AddRect(glyph_size.width + kPadding,   //
                               glyph_size.height + kPadding,  //
                               &location_in_atlas             //
                               )) {
@@ -136,7 +136,7 @@ static bool CanAppendToExistingAtlas(
     }
 
     IPoint16 location_in_atlas;
-    if (!rect_packer->addRect(glyph_size.width + kPadding,   //
+    if (!rect_packer->AddRect(glyph_size.width + kPadding,   //
                               glyph_size.height + kPadding,  //
                               &location_in_atlas             //
                               )) {

@@ -297,12 +297,12 @@ TEST_P(TypographerTest, MaybeHasOverlapping) {
 TEST_P(TypographerTest, RectanglePackerAddsNonoverlapingRectangles) {
   auto packer = RectanglePacker::Factory(200, 100);
   ASSERT_NE(packer, nullptr);
-  ASSERT_EQ(packer->percentFull(), 0);
+  ASSERT_EQ(packer->PercentFull(), 0);
 
   const SkIRect packer_area = SkIRect::MakeXYWH(0, 0, 200, 100);
 
   IPoint16 first_output = {-1, -1};  // Fill with sentinel values
-  ASSERT_TRUE(packer->addRect(20, 20, &first_output));
+  ASSERT_TRUE(packer->AddRect(20, 20, &first_output));
   // Make sure the rectangle is placed such that it is inside the bounds of
   // the packer's area.
   const SkIRect first_rect =
@@ -311,10 +311,10 @@ TEST_P(TypographerTest, RectanglePackerAddsNonoverlapingRectangles) {
 
   // Initial area was 200 x 100 = 20_000
   // We added 20x20 = 400. 400 / 20_000 == 0.02 == 2%
-  ASSERT_TRUE(flutter::testing::NumberNear(packer->percentFull(), 0.02));
+  ASSERT_TRUE(flutter::testing::NumberNear(packer->PercentFull(), 0.02));
 
   IPoint16 second_output = {-1, -1};
-  ASSERT_TRUE(packer->addRect(140, 90, &second_output));
+  ASSERT_TRUE(packer->AddRect(140, 90, &second_output));
   const SkIRect second_rect =
       SkIRect::MakeXYWH(second_output.x(), second_output.y(), 140, 90);
   // Make sure the rectangle is placed such that it is inside the bounds of
@@ -324,18 +324,18 @@ TEST_P(TypographerTest, RectanglePackerAddsNonoverlapingRectangles) {
 
   // We added another 90 x 140 = 12_600 units, now taking us to 13_000
   // 13_000 / 20_000 == 0.65 == 65%
-  ASSERT_TRUE(flutter::testing::NumberNear(packer->percentFull(), 0.65));
+  ASSERT_TRUE(flutter::testing::NumberNear(packer->PercentFull(), 0.65));
 
   // There's enough area to add this rectangle, but no space big enough for
   // the 50 units of width.
   IPoint16 output;
-  ASSERT_FALSE(packer->addRect(50, 50, &output));
+  ASSERT_FALSE(packer->AddRect(50, 50, &output));
   // Should be unchanged.
-  ASSERT_TRUE(flutter::testing::NumberNear(packer->percentFull(), 0.65));
+  ASSERT_TRUE(flutter::testing::NumberNear(packer->PercentFull(), 0.65));
 
-  packer->reset();
+  packer->Reset();
   // Should be empty now.
-  ASSERT_EQ(packer->percentFull(), 0);
+  ASSERT_EQ(packer->PercentFull(), 0);
 }
 
 TEST_P(TypographerTest,
@@ -373,6 +373,58 @@ TEST_P(TypographerTest,
 
   ASSERT_NE(second_texture, first_texture);
   ASSERT_NE(old_packer, new_packer);
+}
+
+TEST(TypographerTest, CanCloneRectanglePackerEmpty) {
+  auto skyline = RectanglePacker::Factory(256, 256);
+
+  EXPECT_EQ(skyline->PercentFull(), 0);
+
+  auto skyline_2 = skyline->Clone(/*scale=*/2);
+
+  EXPECT_EQ(skyline->PercentFull(), 0);
+}
+
+TEST(TypographerTest, CanCloneRectanglePackerAndPreservePositions) {
+  auto skyline = RectanglePacker::Factory(256, 256);
+  IPoint16 loc;
+  EXPECT_TRUE(skyline->AddRect(100, 100, &loc));
+
+  EXPECT_EQ(loc.x(), 0);
+  EXPECT_EQ(loc.y(), 0);
+  auto percent = skyline->PercentFull();
+
+  auto skyline_2 = skyline->Clone(/*scale=*/2);
+
+  EXPECT_LT(skyline_2->PercentFull(), percent);
+}
+
+TEST(TypographerTest, CanCloneRectanglePackerWhileFull) {
+  auto skyline = RectanglePacker::Factory(256, 256);
+  IPoint16 loc;
+  // Add a rectangle the size of the entire area.
+  EXPECT_TRUE(skyline->AddRect(256, 256, &loc));
+  // Packer is now full.
+  EXPECT_FALSE(skyline->AddRect(256, 256, &loc));
+
+  auto skyline_2 = skyline->Clone(/*scale=*/2);
+
+  // Can now fit one more
+  EXPECT_TRUE(skyline_2->AddRect(256, 256, &loc));
+}
+
+TEST(TypographerTest, CloneToSameSizePreservesContents) {
+  auto skyline = RectanglePacker::Factory(256, 256);
+  IPoint16 loc;
+  // Add a rectangle the size of the entire area.
+  EXPECT_TRUE(skyline->AddRect(256, 256, &loc));
+  // Packer is now full.
+  EXPECT_FALSE(skyline->AddRect(256, 256, &loc));
+
+  auto skyline_2 = skyline->Clone(/*scale=*/1);
+
+  // Packer is still full.
+  EXPECT_FALSE(skyline->AddRect(256, 256, &loc));
 }
 
 }  // namespace testing
