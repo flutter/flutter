@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/services.dart';
+import 'dart:ui';
+
+import 'binding.dart';
+import 'system_channels.dart';
 
 /// Allows access to the system context menu.
 ///
