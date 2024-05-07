@@ -199,8 +199,9 @@ class CheckboxListTile extends StatelessWidget {
 
   /// Creates a combination of a list tile and a platform adaptive checkbox.
   ///
-  /// The checkbox uses [Checkbox.adaptive] to show a [CupertinoCheckbox] for
-  /// iOS platforms, or [Checkbox] for all others.
+  /// The checkbox uses [Checkbox.adaptive] to show a checkbox that looks and
+  /// feels native when the [ThemeData.platform] is iOS or macOS, and otherwise
+  /// shows a Material Design checkbox.
   ///
   /// All other properties are the same as [CheckboxListTile].
   const CheckboxListTile.adaptive({
