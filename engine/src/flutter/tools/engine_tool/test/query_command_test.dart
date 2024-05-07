@@ -65,7 +65,7 @@ void main() {
       ]);
       expect(result, equals(0));
       expect(
-        stringsFromLogs(env.logger.testLogs),
+        stringsFromLogs(testEnvironment.testLogs),
         equals(<String>[
           'Add --verbose to see detailed information about each builder\n',
           '\n',
@@ -105,7 +105,7 @@ void main() {
       ]);
       expect(result, equals(0));
       expect(
-          stringsFromLogs(env.logger.testLogs),
+          stringsFromLogs(testEnvironment.testLogs),
           equals(<String>[
             'Add --verbose to see detailed information about each builder\n',
             '\n',
@@ -137,7 +137,7 @@ void main() {
       ]);
       expect(result, equals(0));
       expect(
-        env.logger.testLogs.length,
+        testEnvironment.testLogs.length,
         equals(30),
       );
     } finally {
@@ -161,10 +161,10 @@ void main() {
       ]);
       expect(result, equals(0));
       expect(
-        env.logger.testLogs.length,
+        testEnvironment.testLogs.length,
         equals(4),
       );
-      expect(env.logger.testLogs[1].message,
+      expect(testEnvironment.testLogs[1].message,
           startsWith('//flutter/display_list:display_list_unittests'));
     } finally {
       testEnvironment.cleanup();

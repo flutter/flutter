@@ -86,7 +86,7 @@ void main() {
   }
 
   test('run command invokes flutter run', () async {
-    final Logger logger = Logger.test();
+    final Logger logger = Logger.test((_) {});
     final (Environment env, List<List<String>> runHistory) = linuxEnv(logger);
     final ToolCommandRunner runner = ToolCommandRunner(
       environment: env,
@@ -101,7 +101,7 @@ void main() {
   });
 
   test('parse devices list', () async {
-    final Logger logger = Logger.test();
+    final Logger logger = Logger.test((_) {});
     final (Environment env, _) = linuxEnv(logger);
     final List<RunTarget> targets =
         parseDevices(env, fixtures.attachedDevices());
@@ -112,7 +112,7 @@ void main() {
   });
 
   test('default device', () async {
-    final Logger logger = Logger.test();
+    final Logger logger = Logger.test((_) {});
     final (Environment env, _) = linuxEnv(logger);
     final List<RunTarget> targets =
         parseDevices(env, fixtures.attachedDevices());
@@ -125,7 +125,7 @@ void main() {
   });
 
   test('device select', () async {
-    final Logger logger = Logger.test();
+    final Logger logger = Logger.test((_) {});
     final (Environment env, _) = linuxEnv(logger);
     RunTarget target = selectRunTarget(env, fixtures.attachedDevices())!;
     expect(target.name, contains('gphone64'));
@@ -134,7 +134,7 @@ void main() {
   });
 
   test('flutter run device select', () async {
-    final Logger logger = Logger.test();
+    final Logger logger = Logger.test((_) {});
     final (Environment env, List<List<String>> runHistory) = linuxEnv(logger);
     final ToolCommandRunner runner = ToolCommandRunner(
       environment: env,

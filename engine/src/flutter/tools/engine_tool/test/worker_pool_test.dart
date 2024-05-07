@@ -100,7 +100,7 @@ void main() {
   }
 
   test('worker pool success', () async {
-    final Logger logger = Logger.test();
+    final Logger logger = Logger.test((_) {});
     final (Environment env, _) = macEnv(logger);
     final TestWorkerPoolProgressReporter reporter =
         TestWorkerPoolProgressReporter();
@@ -114,7 +114,7 @@ void main() {
   });
 
   test('worker pool failure', () async {
-    final Logger logger = Logger.test();
+    final Logger logger = Logger.test((_) {});
     final (Environment env, _) = macEnv(logger);
     final TestWorkerPoolProgressReporter reporter =
         TestWorkerPoolProgressReporter();
