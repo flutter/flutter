@@ -1767,8 +1767,8 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
     double totalColumnWidths = 3 * _kDatePickerPadSize;
 
     for (final (int i, double width) in columnWidths.indexed) {
-      final (bool first, bool last) = (i == 0, i == columnWidths.length - 1);
-      final double offAxisFraction = textDirectionFactor * (first ? -0.3 : 0.5);
+      final (bool firstColumn, bool lastColumn) = (i == 0, i == columnWidths.length - 1);
+      final double offAxisFraction = textDirectionFactor * (firstColumn ? -0.3 : 0.5);
 
       totalColumnWidths += width + (2 * _kDatePickerPadSize);
 
@@ -1777,26 +1777,28 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
         child: pickerBuilders[i](
           offAxisFraction,
           (BuildContext context, Widget? child) {
-            return Padding(
-              padding: switch (textDirectionFactor) {
-                _ when first => EdgeInsets.zero,
-                -1 => const EdgeInsets.only(left: _kDatePickerPadSize),
-                _  => const EdgeInsets.only(right: _kDatePickerPadSize),
-              },
-              child: Align(
-                alignment: last ? alignCenterLeft : alignCenterRight,
-                child: SizedBox(
-                  width: width + _kDatePickerPadSize,
-                  child: Align(
-                    alignment: first ? alignCenterLeft : alignCenterRight,
-                    child: child,
-                  ),
+            final Widget contents = Align(
+              alignment: lastColumn ? alignCenterLeft : alignCenterRight,
+              child: SizedBox(
+                width: width + _kDatePickerPadSize,
+                child: Align(
+                  alignment: firstColumn ? alignCenterLeft : alignCenterRight,
+                  child: child,
                 ),
               ),
             );
+            if (firstColumn) {
+              return contents;
+            }
+
+            const EdgeInsets padding = EdgeInsets.only(right: _kDatePickerPadSize);
+            return Padding(
+              padding: textDirectionFactor == -1 ? padding.flipped : padding,
+              child: contents,
+            );
           },
-          switch (last) {
-            _ when first => _startSelectionOverlay,
+          switch (lastColumn) {
+            _ when firstColumn => _startSelectionOverlay,
             false => _centerSelectionOverlay,
             true  => _endSelectionOverlay,
           },
