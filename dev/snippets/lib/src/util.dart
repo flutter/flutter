@@ -140,28 +140,12 @@ class FlutterInformation {
   }
 }
 
-/// Returns a marker with section arrows surrounding the given string.
-///
-/// Specifying `start` as false returns an ending marker instead of a starting
-/// marker.
-String sectionArrows(String name, {bool start = true}) {
-  const int markerArrows = 8;
-  final String arrows =
-      (start ? '\u25bc' /* ▼ */ : '\u25b2' /* ▲ */) * markerArrows;
-  final String marker =
-      '//* $arrows $name $arrows (do not modify or remove section marker)';
-  return '${start ? '\n//*${'*' * marker.length}\n' : '\n'}'
-      '$marker'
-      '${!start ? '\n//*${'*' * marker.length}\n' : '\n'}';
-}
-
 /// Injects the [injections] into the [template], while turning the
 /// "description" injection into a comment.
 String interpolateTemplate(
-  List<TemplateInjection> injections,
+  List<SkeletonInjection> injections,
   String template,
   Map<String, Object?> metadata, {
-  bool addSectionMarkers = false,
   bool addCopyright = false,
 }) {
   String wrapSectionMarker(Iterable<String> contents, {required String name}) {
@@ -170,13 +154,8 @@ String interpolateTemplate(
       return '';
     }
     // We don't wrap some sections, because otherwise they generate invalid files.
-    const Set<String> skippedSections = <String>{'element', 'copyright'};
-    final bool addMarkers =
-        addSectionMarkers && !skippedSections.contains(name);
     final String result = <String>[
-      if (addMarkers) sectionArrows(name),
       ...contents,
-      if (addMarkers) sectionArrows(name, start: false),
     ].join('\n');
     final RegExp wrappingNewlines = RegExp(r'^\n*(.*)\n*$', dotAll: true);
     return result.replaceAllMapped(
@@ -187,7 +166,7 @@ String interpolateTemplate(
       .replaceAllMapped(RegExp(r'{{([^}]+)}}'), (Match match) {
     final String name = match[1]!;
     final int componentIndex = injections
-        .indexWhere((TemplateInjection injection) => injection.name == name);
+        .indexWhere((SkeletonInjection injection) => injection.name == name);
     if (metadata[name] != null && componentIndex == -1) {
       // If the match isn't found in the injections, then just return the
       // metadata entry.

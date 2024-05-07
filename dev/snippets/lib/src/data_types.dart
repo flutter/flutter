@@ -58,8 +58,8 @@ class SourceLine {
 
 /// A class containing the name and contents associated with a code block inside of a
 /// code sample, for named injection into a template.
-class TemplateInjection {
-  TemplateInjection(this.name, this.contents, {this.language = ''});
+class SkeletonInjection {
+  SkeletonInjection(this.name, this.contents, {this.language = ''});
   final String name;
   final List<SourceLine> contents;
   final String language;
@@ -137,7 +137,7 @@ abstract class CodeSample {
   String get element => start.element ?? '';
   String output = '';
   Map<String, Object?> metadata = <String, Object?>{};
-  List<TemplateInjection> parts = <TemplateInjection>[];
+  List<SkeletonInjection> parts = <SkeletonInjection>[];
   SourceLine get start => input.isEmpty ? _lineProto : input.first;
 
   String get template {
