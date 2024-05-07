@@ -202,6 +202,11 @@ class Carousel extends StatefulWidget {
 
   /// The weights that each visible child should occupy the viewport.
   ///
+  /// The length of [layoutWeights] means how many items we want to lay out on
+  /// the viewport. For example, setting [layoutWeights] to `<int>[3,2,1]` means
+  /// there are 3 carousel items and their extents are 3/6, 2/6 and 1/6 of the
+  /// viewport extent.
+  ///
   /// This is a required property when [Carousel.multibrowse] or [Carousel.hero]
   /// is used. This is null for default [Carousel].
   final List<int>? layoutWeights;
