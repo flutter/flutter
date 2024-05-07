@@ -864,6 +864,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.splashFactory,
     this.splashBorderRadius,
     this.tabAlignment,
+    this.textScaler,
   }) : _isPrimary = true,
        assert(indicator != null || (indicatorWeight > 0.0));
 
@@ -915,6 +916,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.splashFactory,
     this.splashBorderRadius,
     this.tabAlignment,
+    this.textScaler,
   }) : _isPrimary = false,
        assert(indicator != null || (indicatorWeight > 0.0));
 
@@ -1245,6 +1247,16 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// then [TabAlignment.center] is used if [isScrollable] is true,
   /// otherwise [TabAlignment.fill] is used.
   final TabAlignment? tabAlignment;
+
+  /// Specifies the text scaling behavior for the [Tab] label.
+  ///
+  /// If this is null, then the value of [TabBarTheme.textScaler] is used. If that is
+  /// also null, then the text scaling behavior is determined by the [MediaQueryData.textScaler]
+  /// from the ambient [MediaQuery], or 1.0 if there is no [MediaQuery] in scope.
+  ///
+  /// See also:
+  ///   * [TextScaler], which is used to scale text based on the device's text scale factor.
+  final TextScaler? textScaler;
 
   /// A size whose height depends on if the tabs have both icons and text.
   ///
@@ -1828,7 +1840,10 @@ class _TabBarState extends State<TabBar> {
       );
     }
 
-    return tabBar;
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaler: widget.textScaler ?? tabBarTheme.textScaler),
+      child: tabBar,
+    );
   }
 }
 
