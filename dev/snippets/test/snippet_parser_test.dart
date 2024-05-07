@@ -37,7 +37,6 @@ void main() {
     late FlutterRepoSnippetConfiguration configuration;
     late SnippetGenerator generator;
     late Directory tmpDir;
-    late File template;
     late Directory flutterRoot;
 
     void writeSkeleton(String type) {
@@ -69,25 +68,13 @@ void main() {
           .directory(path.join(tmpDir.absolute.path, 'flutter'));
       configuration = FlutterRepoSnippetConfiguration(
           flutterRoot: flutterRoot, filesystem: memoryFileSystem);
-      configuration.templatesDirectory.createSync(recursive: true);
       configuration.skeletonsDirectory.createSync(recursive: true);
-      template = memoryFileSystem.file(
-          path.join(configuration.templatesDirectory.path, 'template.tmpl'));
-      template.writeAsStringSync('''
-// Flutter code sample for {{element}}
-
-{{description}}
-
-{{code-my-preamble}}
-
-{{code}}
-''');
       <String>['dartpad', 'sample', 'snippet'].forEach(writeSkeleton);
       FlutterInformation.instance = FakeFlutterInformation(flutterRoot);
       generator = SnippetGenerator(
           configuration: configuration,
           filesystem: memoryFileSystem,
-          flutterRoot: configuration.templatesDirectory.parent);
+          flutterRoot: configuration.skeletonsDirectory.parent);
     });
 
     test('parses from comments', () async {
@@ -123,35 +110,6 @@ void main() {
                 '<div class="snippet-description">{@end-inject-html}Description{@inject-html}</div>\n'));
       }
       expect(sampleCount, equals(8));
-    });
-    test('parses dartpad samples from comments', () async {
-      final File inputFile =
-          _createDartpadSourceFile(tmpDir, memoryFileSystem, flutterRoot);
-      final Iterable<SourceElement> elements = getFileElements(inputFile,
-          resourceProvider: FileSystemResourceProvider(memoryFileSystem));
-      expect(elements, isNotEmpty);
-      final SnippetDartdocParser sampleParser =
-          SnippetDartdocParser(memoryFileSystem);
-      sampleParser.parseFromComments(elements);
-      expect(elements.length, equals(1));
-      int sampleCount = 0;
-      for (final SourceElement element in elements) {
-        expect(element.samples.length, greaterThanOrEqualTo(1));
-        sampleCount += element.samples.length;
-        final String code = generator.generateCode(element.samples.first);
-        expect(code, contains('// Description'));
-        expect(
-            code,
-            contains(RegExp('^void ${element.name}Sample\\(\\) \\{.*\$',
-                multiLine: true)));
-        final String html = generator.generateHtml(element.samples.first);
-        expect(
-            html,
-            contains(RegExp(
-                '''^<iframe class="snippet-dartpad" src="https://dartpad.dev/.*sample_id=${element.name}.0.*></iframe>.*\$''',
-                multiLine: true)));
-      }
-      expect(sampleCount, equals(1));
     });
     test('parses dartpad samples from linked file', () async {
       final File inputFile = _createDartpadSourceFile(
