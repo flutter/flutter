@@ -143,7 +143,7 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///
   /// See also:
   ///
-  ///  * [showSystemContextMenu], which shows he menu hidden by this method.
+  ///  * [showSystemContextMenu], which shows the menu hidden by this method.
   ///  * [MediaQuery.supportsShowingSystemContextMenu], which indicates whether
   ///    the system context menu is supported on the current platform.
   Future<void> hide() async {
