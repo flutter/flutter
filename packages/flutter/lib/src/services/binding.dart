@@ -613,7 +613,7 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
 /// An interface to receive calls related to the system context menu from the
 /// engine.
 ///
-/// Currently this is only supported on iOS.
+/// Currently this is only supported on iOS 16+.
 ///
 /// See also:
 ///  * [SystemContextMenuController], which uses this to provide a fully
