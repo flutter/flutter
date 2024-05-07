@@ -48,7 +48,7 @@ void main() {
   }
 
   test('--fix is passed to ci/bin/format.dart by default', () async {
-    final Logger logger = Logger.test();
+    final Logger logger = Logger.test((_){ });
     final FakeProcessManager manager = _formatProcessManager(
       expectedFlags: <String>['--fix'],
     );
@@ -64,7 +64,7 @@ void main() {
   });
 
   test('--fix is not passed to ci/bin/format.dart with --dry-run', () async {
-    final Logger logger = Logger.test();
+    final Logger logger = Logger.test((_) {});
     final FakeProcessManager manager = _formatProcessManager(
       expectedFlags: <String>[],
     );
@@ -82,7 +82,7 @@ void main() {
 
   test('exit code is non-zero when ci/bin/format.dart exit code was non zero',
       () async {
-    final Logger logger = Logger.test();
+    final Logger logger = Logger.test((_) {});
     final FakeProcessManager manager = _formatProcessManager(
       expectedFlags: <String>['--fix'],
       exitCode: 1,
@@ -99,7 +99,7 @@ void main() {
   });
 
   test('--all-files is passed to ci/bin/format.dart correctly', () async {
-    final Logger logger = Logger.test();
+    final Logger logger = Logger.test((_){});
     final FakeProcessManager manager = _formatProcessManager(
       expectedFlags: <String>['--fix', '--all-files'],
     );
@@ -116,7 +116,7 @@ void main() {
   });
 
   test('--verbose is passed to ci/bin/format.dart correctly', () async {
-    final Logger logger = Logger.test();
+    final Logger logger = Logger.test((_){});
     final FakeProcessManager manager = _formatProcessManager(
       expectedFlags: <String>['--fix', '--verbose'],
     );
@@ -133,7 +133,8 @@ void main() {
   });
 
   test('--quiet suppresses non-error output', () async {
-    final Logger logger = Logger.test();
+    final List<LogRecord> testLogs = <LogRecord>[];
+    final Logger logger = Logger.test(testLogs.add);
     final FakeProcessManager manager = _formatProcessManager(
       expectedFlags: <String>['--fix'],
       stdout: <String>['many', 'lines', 'of', 'output'].join('\n'),
@@ -149,11 +150,12 @@ void main() {
       '--$quietFlag',
     ]);
     expect(result, equals(0));
-    expect(stringsFromLogs(logger.testLogs), equals(<String>['error\n']));
+    expect(stringsFromLogs(testLogs), equals(<String>['error\n']));
   });
 
   test('Diffs are suppressed by default', () async {
-    final Logger logger = Logger.test();
+    final List<LogRecord> testLogs = <LogRecord>[];
+    final Logger logger = Logger.test(testLogs.add);
     final FakeProcessManager manager = _formatProcessManager(
       expectedFlags: <String>['--fix'],
       stdout: <String>[
@@ -174,11 +176,12 @@ void main() {
       'format',
     ]);
     expect(result, equals(0));
-    expect(stringsFromLogs(logger.testLogs), isEmpty);
+    expect(stringsFromLogs(testLogs), isEmpty);
   });
 
   test('--dry-run disables --fix and prints diffs', () async {
-    final Logger logger = Logger.test();
+    final List<LogRecord> testLogs = <LogRecord>[];
+    final Logger logger = Logger.test(testLogs.add);
     final FakeProcessManager manager = _formatProcessManager(
       expectedFlags: <String>[],
       stdout: <String>[
@@ -201,7 +204,7 @@ void main() {
     ]);
     expect(result, equals(0));
     expect(
-        stringsFromLogs(logger.testLogs),
+        stringsFromLogs(testLogs),
         equals(<String>[
           'To fix, run `et format` or:\n',
           'many\n',
@@ -213,7 +216,8 @@ void main() {
   });
 
   test('progress lines are followed by a carriage return', () async {
-    final Logger logger = Logger.test();
+    final List<LogRecord> testLogs = <LogRecord>[];
+    final Logger logger = Logger.test(testLogs.add);
     const String progressLine = 'diff Jobs:  46% done, 1528/3301 completed,  '
         '7 in progress, 1753 pending,  13 failed.';
     final FakeProcessManager manager = _formatProcessManager(
@@ -229,8 +233,7 @@ void main() {
       'format',
     ]);
     expect(result, equals(0));
-    expect(
-        stringsFromLogs(logger.testLogs), equals(<String>['$progressLine\r']));
+    expect(stringsFromLogs(testLogs), equals(<String>['$progressLine\r']));
   });
 }
 

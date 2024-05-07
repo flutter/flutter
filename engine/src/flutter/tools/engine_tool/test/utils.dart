@@ -59,7 +59,8 @@ class TestEnvironment {
     bool verbose = false,
     this.cannedProcesses = const <CannedProcess>[],
   }) {
-    logger ??= Logger.test();
+    testLogs = <LogRecord>[];
+    logger ??= Logger.test(testLogs.add);
     environment = Environment(
       abi: abi,
       engine: engine,
@@ -137,6 +138,9 @@ class TestEnvironment {
 
   /// A history of all executed processes.
   final List<ExecutedProcess> processHistory = <ExecutedProcess>[];
+
+  /// Test log output.
+  late final List<LogRecord> testLogs;
 }
 
 String _operatingSystemForAbi(ffi.Abi abi) {

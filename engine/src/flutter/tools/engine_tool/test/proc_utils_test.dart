@@ -58,7 +58,7 @@ void main() {
   }
 
   test('process queue success', () async {
-    final Logger logger = Logger.test();
+    final Logger logger = Logger.test((_) {});
     final (Environment env, _) = macEnv(logger);
     final WorkerPool wp = WorkerPool(env, NoopWorkerPoolProgressReporter());
     final ProcessTask task =
@@ -72,7 +72,7 @@ void main() {
   });
 
   test('process queue failure', () async {
-    final Logger logger = Logger.test();
+    final Logger logger = Logger.test((_) {});
     final (Environment env, _) = macEnv(logger);
     final WorkerPool wp = WorkerPool(env, NoopWorkerPoolProgressReporter());
     final ProcessTask task =
