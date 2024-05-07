@@ -5366,11 +5366,21 @@ abstract class Canvas {
   void drawPath(Path path, Paint paint);
 
   /// Draws the given [Image] into the canvas with its top-left corner at the
-  /// given [Offset]. The image is composited into the canvas using the given [Paint].
+  /// given [Offset].
+  ///
+  /// The image is composited into the canvas using the given [Paint], by
+  /// applying the [Paint.color] (alpha channel only), [Paint.blendMode],
+  /// [Paint.colorFilter], [Paint.maskFilter], and [Paint.imageFilter]
+  /// properties of the `paint` argument (in that order).
   void drawImage(Image image, Offset offset, Paint paint);
 
   /// Draws the subset of the given image described by the `src` argument into
   /// the canvas in the axis-aligned rectangle given by the `dst` argument.
+  ///
+  /// The image is composited into the canvas using the given [Paint], by
+  /// applying the [Paint.color] (alpha channel only), [Paint.blendMode],
+  /// [Paint.colorFilter], [Paint.maskFilter], and [Paint.imageFilter]
+  /// properties of the `paint` argument (in that order).
   ///
   /// This might sample from outside the `src` rect by up to half the width of
   /// an applied filter.
@@ -5380,7 +5390,7 @@ abstract class Canvas {
   /// performance.
   void drawImageRect(Image image, Rect src, Rect dst, Paint paint);
 
-  /// Draws the given [Image] into the canvas using the given [Paint].
+  /// Draws the given [Image] into the canvas as a nine-patch image.
   ///
   /// The image is drawn in nine portions described by splitting the image by
   /// drawing two horizontal lines and two vertical lines, where the `center`
@@ -5393,6 +5403,15 @@ abstract class Canvas {
   /// five regions are drawn by stretching them to fit such that they exactly
   /// cover the destination rectangle while maintaining their relative
   /// positions.
+  ///
+  /// The image is composited into the canvas using the given [Paint], by
+  /// applying the [Paint.color] (alpha channel only), [Paint.blendMode],
+  /// [Paint.colorFilter], [Paint.maskFilter], and [Paint.imageFilter]
+  /// properties of the `paint` argument (in that order).
+  ///
+  /// See also:
+  ///
+  ///  * <https://en.wikipedia.org/wiki/9-slice_scaling>
   void drawImageNine(Image image, Rect center, Rect dst, Paint paint);
 
   /// Draw the given picture onto the canvas. To create a picture, see
@@ -5499,15 +5518,18 @@ abstract class Canvas {
   /// [blendMode] argument (if a color is specified). In this part of the operation,
   /// the image part will be considered the source of the operation and the associated
   /// color will be considered the destination.
-  /// - Blend the result from the first step onto the canvas using the translation,
-  /// rotation, and scale properties expressed in the associated entry in the
-  /// [transforms] list using the properties of the [Paint] object.
   ///
-  /// If the first stage of the operation which blends each part of the image with
-  /// a color is needed, then both the [colors] and [blendMode] arguments must
-  /// not be null and there must be an entry in the [colors] list for each
-  /// image part. If that stage is not needed, then the [colors] argument can
-  /// be either null or an empty list and the [blendMode] argument may also be null.
+  /// - Blend the result from the first step onto the canvas using the
+  /// translation, rotation, and scale properties expressed in the associated
+  /// entry in the [transforms] list, and the [Paint.color] (alpha channel
+  /// only), [Paint.blendMode], [Paint.colorFilter], [Paint.maskFilter], and
+  /// [Paint.imageFilter] properties of the `paint` argument (in that order).
+  ///
+  /// If the first stage of the operation which blends each part of the image
+  /// with a color is needed, then both the [colors] and [blendMode] arguments
+  /// must not be null and there must be an entry in the [colors] list for each
+  /// image part. If the [colors] argument is null or empty, or if the
+  /// [blendMode] argument is null, then this stage is skipped.
   ///
   /// The optional [cullRect] argument can provide an estimate of the bounds of the
   /// coordinates rendered by all components of the atlas to be compared against
