@@ -16,22 +16,24 @@ namespace impeller {
 class SkylineRectanglePacker final : public RectanglePacker {
  public:
   SkylineRectanglePacker(int w, int h) : RectanglePacker(w, h) {
-    this->reset();
+    this->Reset();
   }
 
   ~SkylineRectanglePacker() final {}
 
-  void reset() final {
+  void Reset() final {
     area_so_far_ = 0;
     skyline_.clear();
     skyline_.push_back(SkylineSegment{0, 0, this->width()});
   }
 
-  bool addRect(int w, int h, IPoint16* loc) final;
+  bool AddRect(int w, int h, IPoint16* loc) final;
 
-  float percentFull() const final {
+  Scalar PercentFull() const final {
     return area_so_far_ / ((float)this->width() * this->height());
   }
+
+  std::unique_ptr<RectanglePacker> Clone(uint32_t scale) final;
 
  private:
   struct SkylineSegment {
@@ -54,7 +56,7 @@ class SkylineRectanglePacker final : public RectanglePacker {
   void addSkylineLevel(int skylineIndex, int x, int y, int width, int height);
 };
 
-bool SkylineRectanglePacker::addRect(int width, int height, IPoint16* loc) {
+bool SkylineRectanglePacker::AddRect(int width, int height, IPoint16* loc) {
   if ((unsigned)width > (unsigned)this->width() ||
       (unsigned)height > (unsigned)this->height()) {
     return false;
@@ -164,6 +166,18 @@ void SkylineRectanglePacker::addSkylineLevel(int skylineIndex,
       --i;
     }
   }
+}
+
+std::unique_ptr<RectanglePacker> SkylineRectanglePacker::Clone(uint32_t scale) {
+  FML_DCHECK(scale != 0);
+  auto packer =
+      std::make_unique<SkylineRectanglePacker>(width(), height() * scale);
+  for (SkylineSegment segment : skyline_) {
+    packer->skyline_.push_back(segment);
+  }
+  packer->area_so_far_ = area_so_far_;
+
+  return packer;
 }
 
 std::unique_ptr<RectanglePacker> RectanglePacker::Factory(int width,
