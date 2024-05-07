@@ -384,8 +384,7 @@ void main() {
     WidgetsBinding.instance.removeObserver(observer);
   });
 
-    testWidgets('pushRouteInformation not handled', (WidgetTester tester) async {
-    final PushRouteInformationObserver observer = PushRouteInformationObserver();
+    testWidgets('pushRouteInformation not handled by observer', (WidgetTester tester) async {
 
     const Map<String, dynamic> testRouteInformation = <String, dynamic>{
       'location': 'testRouteName',
@@ -400,9 +399,34 @@ void main() {
     final bool decodedResult = const JSONMethodCodec().decodeEnvelope(result) as bool;
 
     expect(decodedResult, false);
-    WidgetsBinding.instance.removeObserver(observer);
   });
 
+    testWidgets('pushRoute not handled by observer', (WidgetTester tester) async {
+
+    const String testRoute = 'testRouteName';
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(
+      const MethodCall('pushRoute', testRoute),
+    );
+
+    final ByteData result = (await tester.binding.defaultBinaryMessenger
+        .handlePlatformMessage('flutter/navigation', message, (_) {}))!;
+    final bool decodedResult = const JSONMethodCodec().decodeEnvelope(result) as bool;
+
+    expect(decodedResult, false);
+  });
+
+
+    testWidgets('popRoute not handled by observer', (WidgetTester tester) async {
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(
+      const MethodCall('popRoute'),
+    );
+
+    final ByteData result = (await tester.binding.defaultBinaryMessenger
+        .handlePlatformMessage('flutter/navigation', message, (_) {}))!;
+    final bool decodedResult = const JSONMethodCodec().decodeEnvelope(result) as bool;
+
+    expect(decodedResult, false);
+  });
   testWidgets('Application lifecycle affects frame scheduling', (WidgetTester tester) async {
     expect(tester.binding.hasScheduledFrame, isFalse);
 
