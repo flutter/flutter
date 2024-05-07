@@ -78,7 +78,7 @@ void main() {
   }
 
   test('invoked linters', () async {
-    final Logger logger = Logger.test();
+    final Logger logger = Logger.test((_) {});
     final (Environment env, List<List<String>> runHistory) = macEnv(logger);
     final ToolCommandRunner runner = ToolCommandRunner(
       environment: env,
