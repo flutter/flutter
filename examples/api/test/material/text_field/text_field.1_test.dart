@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/text_field/text_field.1.dart' as ex
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Dialoge shows submitted TextField value', (WidgetTester tester) async {
+  testWidgets('Dialog shows submitted TextField value', (WidgetTester tester) async {
     // This example is also used to illustrate special character counting.
     const String sampleText = 'Some sample text 👨‍👩‍👦';
     await tester.pumpWidget(const example.TextFieldExampleApp());
