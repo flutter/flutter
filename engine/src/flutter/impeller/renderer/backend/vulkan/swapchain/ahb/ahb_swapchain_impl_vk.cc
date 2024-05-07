@@ -103,6 +103,11 @@ std::unique_ptr<Surface> AHBSwapchainImplVK::AcquireNextDrawable() {
     return nullptr;
   }
 
+  auto context = transients_->GetContext().lock();
+  if (context) {
+    ContextVK::Cast(*context).GetGPUTracer()->MarkFrameStart();
+  }
+
   auto surface = SurfaceVK::WrapSwapchainImage(
       transients_, texture,
       [signaler = auto_sema_signaler, weak = weak_from_this(), texture]() {
