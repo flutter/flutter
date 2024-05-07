@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_TYPOGRAPHER_RECTANGLE_PACKER_H_
 
 #include "flutter/fml/logging.h"
+#include "impeller/geometry/scalar.h"
 
 #include <cstdint>
 
@@ -41,19 +42,32 @@ class RectanglePacker {
   ///
   /// @return     Return true on success; false on failure.
   ///
-  virtual bool addRect(int width, int height, IPoint16* loc) = 0;
+  virtual bool AddRect(int width, int height, IPoint16* loc) = 0;
 
   //----------------------------------------------------------------------------
   /// @brief     Returns how much area has been filled with rectangles.
   ///
   /// @return    Percentage as a decimal between 0.0 and 1.0
   ///
-  virtual float percentFull() const = 0;
+  virtual Scalar PercentFull() const = 0;
+
+  //----------------------------------------------------------------------------
+  /// @brief     Create a new rectangle packer with a larger scaled height
+  ///            scaled and initialize its contents to the current packer.
+  ///
+  /// @param[in] scale  The scaling factor to be applied to the new height.
+  ///
+  /// @return    A new rectangle packer.
+  ///
+  ///            This method is used for growing the glyph atlas while keeping
+  ///            existing rects in place. The width of the rectangle packer
+  ///            cannot be increased.
+  virtual std::unique_ptr<RectanglePacker> Clone(uint32_t scale) = 0;
 
   //----------------------------------------------------------------------------
   /// @brief     Empty out all previously added rectangles.
   ///
-  virtual void reset() = 0;
+  virtual void Reset() = 0;
 
  protected:
   RectanglePacker(int width, int height) : width_(width), height_(height) {
