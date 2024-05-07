@@ -1173,18 +1173,18 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
       if (error != null) {
         globals.printError(error);
         hasPluginPubspecError = true;
-      } else {
-        final String? implementsPluginName = _getImplementedPlugin(plugin, platformKey);
-        final String? defaultImplPluginName = _getDefaultImplPlugin(plugin, platformKey);
+        continue;
+      }
+      final String? implementsPluginName = _getImplementedPlugin(plugin, platformKey);
+      final String? defaultImplPluginName = _getDefaultImplPlugin(plugin, platformKey);
 
-        if (defaultImplPluginName != null) {
-          // Each plugin can only have one default implementation for this [platformKey].
-          defaultImplementations[plugin.name] = defaultImplPluginName;
-        }
-        if (implementsPluginName != null) {
-          pluginImplCandidates.putIfAbsent(implementsPluginName, () => <Plugin>[]);
-          pluginImplCandidates[implementsPluginName]!.add(plugin);
-        }
+      if (defaultImplPluginName != null) {
+        // Each plugin can only have one default implementation for this [platformKey].
+        defaultImplementations[plugin.name] = defaultImplPluginName;
+      }
+      if (implementsPluginName != null) {
+        pluginImplCandidates.putIfAbsent(implementsPluginName, () => <Plugin>[]);
+        pluginImplCandidates[implementsPluginName]!.add(plugin);
       }
     }
 
@@ -1271,7 +1271,7 @@ String? _getImplementedPlugin(Plugin plugin, String platformKey) {
   if (hasInlineDartImpl) {
     final String? implementsPackage = plugin.implementsPackage;
 
-    // Only can serve, if the plugin has a dart inline implementation
+    // Only can serve, if the plugin has a dart inline implementation.
     if (implementsPackage != null && implementsPackage.isNotEmpty) {
       return implementsPackage;
     }
