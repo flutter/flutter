@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/widgets/shortcuts/shortcuts.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('displays correct labels', (WidgetTester tester) async {
+  testWidgets('Verify correct labels are displayed', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ShortcutsExampleApp(),
     );
@@ -25,7 +25,7 @@ void main() {
     expect(find.text('count: 0'), findsOneWidget);
   });
 
-  testWidgets('updates counter on arrowUp and arrowDown press', (WidgetTester tester) async {
+  testWidgets('Up and down arrow press updates counter', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ShortcutsExampleApp(),
     );
