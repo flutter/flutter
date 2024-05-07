@@ -268,7 +268,11 @@ void main() {
 
     const String testRouteName = 'testRouteName';
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('pushRoute', testRouteName));
-    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) {});
+    final ByteData result = (await tester.binding.defaultBinaryMessenger
+        .handlePlatformMessage('flutter/navigation', message, (_) {}))!;
+    final bool decodedResult = const JSONMethodCodec().decodeEnvelope(result) as bool;
+
+    expect(decodedResult, true);
     expect(observer.pushedRoute, testRouteName);
 
     WidgetsBinding.instance.removeObserver(observer);
@@ -286,8 +290,11 @@ void main() {
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
-    await tester.binding.defaultBinaryMessenger
-        .handlePlatformMessage('flutter/navigation', message, (_) {});
+    final ByteData result = (await tester.binding.defaultBinaryMessenger
+        .handlePlatformMessage('flutter/navigation', message, (_) {}))!;
+    final bool decodedResult = const JSONMethodCodec().decodeEnvelope(result) as bool;
+
+    expect(decodedResult, true);
     expect(observer.pushedRoute, 'testRouteName');
     WidgetsBinding.instance.removeObserver(observer);
   });
@@ -374,6 +381,25 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     expect(observer.pushedRouteInformation.uri.toString(), 'testRouteName');
     expect(observer.pushedRouteInformation.state, null);
+    WidgetsBinding.instance.removeObserver(observer);
+  });
+
+    testWidgets('pushRouteInformation not handled', (WidgetTester tester) async {
+    final PushRouteInformationObserver observer = PushRouteInformationObserver();
+
+    const Map<String, dynamic> testRouteInformation = <String, dynamic>{
+      'location': 'testRouteName',
+      'state': null,
+    };
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(
+      const MethodCall('pushRouteInformation', testRouteInformation),
+    );
+
+    final ByteData result = (await tester.binding.defaultBinaryMessenger
+        .handlePlatformMessage('flutter/navigation', message, (_) {}))!;
+    final bool decodedResult = const JSONMethodCodec().decodeEnvelope(result) as bool;
+
+    expect(decodedResult, false);
     WidgetsBinding.instance.removeObserver(observer);
   });
 
