@@ -19,8 +19,7 @@ namespace impeller {
 ///             sources that can be used as swapchain images.
 ///
 ///             The number of cached entries in the texture pool is capped to a
-///             caller specified value. Within this cap, no entry may be older
-///             than the caller specified duration.
+///             caller specified value.
 ///
 ///             If a previously cached entry cannot be obtained from the pool, a
 ///             new entry is created. The only case where a valid texture source
@@ -55,14 +54,10 @@ class AHBTexturePoolVK {
   ///                            the texture sources.
   /// @param[in]  max_entries    The maximum entries that will remain cached
   ///                            in the pool.
-  /// @param[in]  max_extry_age  The maximum duration an entry will remain
-  ///                            cached in the pool.
   ///
-  explicit AHBTexturePoolVK(
-      std::weak_ptr<Context> context,
-      android::HardwareBufferDescriptor desc,
-      size_t max_entries = 2u,
-      std::chrono::milliseconds max_extry_age = std::chrono::seconds{1});
+  explicit AHBTexturePoolVK(std::weak_ptr<Context> context,
+                            android::HardwareBufferDescriptor desc,
+                            size_t max_entries = 2u);
 
   ~AHBTexturePoolVK();
 
@@ -117,7 +112,6 @@ class AHBTexturePoolVK {
   const std::weak_ptr<Context> context_;
   const android::HardwareBufferDescriptor desc_;
   const size_t max_entries_;
-  const std::chrono::milliseconds max_extry_age_;
   bool is_valid_ = false;
   Mutex pool_mutex_;
   std::deque<PoolEntry> pool_ IPLR_GUARDED_BY(pool_mutex_);
