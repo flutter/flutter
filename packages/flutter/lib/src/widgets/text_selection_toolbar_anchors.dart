@@ -36,7 +36,7 @@ class TextSelectionToolbarAnchors {
       endGlyphHeight,
       selectionEndpoints,
     );
-    if (selectionRect.isEmpty) {
+    if (selectionRect == Rect.zero) {
       return const TextSelectionToolbarAnchors(primaryAnchor: Offset.zero);
     }
 
