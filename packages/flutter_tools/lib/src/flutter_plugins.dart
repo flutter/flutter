@@ -22,6 +22,8 @@ import 'dart/language_version.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
+import 'macos/darwin_dependency_management.dart';
+import 'macos/swift_package_manager.dart';
 import 'platform_plugins.dart';
 import 'plugins.dart';
 import 'project.dart';
@@ -160,7 +162,11 @@ const String _kFlutterPluginsSharedDarwinSource = 'shared_darwin_source';
 ///
 ///
 /// Finally, returns [true] if the plugins list has changed, otherwise returns [false].
-bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
+bool _writeFlutterPluginsList(
+  FlutterProject project,
+  List<Plugin> plugins, {
+  bool forceCocoaPodsOnly = false,
+}) {
   final File pluginsFile = project.flutterPluginsDependenciesFile;
   if (plugins.isEmpty) {
     return ErrorHandlingFileSystem.deleteIfExists(pluginsFile);
@@ -190,6 +196,7 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   result['dependencyGraph'] = _createPluginLegacyDependencyGraph(plugins);
   result['date_created'] = globals.systemClock.now().toString();
   result['version'] = globals.flutterVersion.frameworkVersion;
+  result['swift_package_manager_enabled'] = !forceCocoaPodsOnly && project.usesSwiftPackageManager;
 
   // Only notify if the plugins list has changed. [date_created] will always be different,
   // [version] is not relevant for this check.
@@ -309,14 +316,11 @@ public final class GeneratedPluginRegistrant {
 ''';
 
 List<Map<String, Object?>> _extractPlatformMaps(List<Plugin> plugins, String type) {
-  final List<Map<String, Object?>> pluginConfigs = <Map<String, Object?>>[];
-  for (final Plugin p in plugins) {
-    final PluginPlatform? platformPlugin = p.platforms[type];
-    if (platformPlugin != null) {
-      pluginConfigs.add(platformPlugin.toMap());
-    }
-  }
-  return pluginConfigs;
+  return <Map<String, Object?>>[
+    for (final Plugin plugin in plugins)
+      if (plugin.platforms[type] case final PluginPlatform platformPlugin)
+        platformPlugin.toMap(),
+  ];
 }
 
 Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
@@ -1000,6 +1004,7 @@ Future<void> refreshPluginsList(
   FlutterProject project, {
   bool iosPlatform = false,
   bool macOSPlatform = false,
+  bool forceCocoaPodsOnly = false,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
   // Sort the plugins by name to keep ordering stable in generated files.
@@ -1008,8 +1013,12 @@ Future<void> refreshPluginsList(
   // Write the legacy plugin files to avoid breaking existing apps.
   final bool legacyChanged = _writeFlutterPluginsListLegacy(project, plugins);
 
-  final bool changed = _writeFlutterPluginsList(project, plugins);
-  if (changed || legacyChanged) {
+  final bool changed = _writeFlutterPluginsList(
+    project,
+    plugins,
+    forceCocoaPodsOnly: forceCocoaPodsOnly,
+  );
+  if (changed || legacyChanged || forceCocoaPodsOnly) {
     createPluginSymlinks(project, force: true);
     if (iosPlatform) {
       globals.cocoaPods?.invalidatePodInstallOutput(project.ios);
@@ -1069,6 +1078,7 @@ Future<void> injectPlugins(
   bool macOSPlatform = false,
   bool windowsPlatform = false,
   Iterable<String>? allowedPlugins,
+  DarwinDependencyManagement? darwinDependencyManagement,
 }) async {
   final List<Plugin> plugins = await findPlugins(project);
   // Sort the plugins by name to keep ordering stable in generated files.
@@ -1088,20 +1098,27 @@ Future<void> injectPlugins(
   if (windowsPlatform) {
     await writeWindowsPluginFiles(project, plugins, globals.templateRenderer, allowedPlugins: allowedPlugins);
   }
-  if (!project.isModule) {
-    final List<XcodeBasedProject> darwinProjects = <XcodeBasedProject>[
-      if (iosPlatform) project.ios,
-      if (macOSPlatform) project.macos,
-    ];
-    for (final XcodeBasedProject subproject in darwinProjects) {
-      if (plugins.isNotEmpty) {
-        await globals.cocoaPods?.setupPodfile(subproject);
-      }
-      /// The user may have a custom maintained Podfile that they're running `pod install`
-      /// on themselves.
-      else if (subproject.podfile.existsSync() && subproject.podfileLock.existsSync()) {
-        globals.cocoaPods?.addPodsDependencyToFlutterXcconfig(subproject);
-      }
+  if (iosPlatform || macOSPlatform) {
+    final DarwinDependencyManagement darwinDependencyManagerSetup = darwinDependencyManagement ?? DarwinDependencyManagement(
+      project: project,
+      plugins: plugins,
+      cocoapods: globals.cocoaPods!,
+      swiftPackageManager: SwiftPackageManager(
+        fileSystem: globals.fs,
+        templateRenderer: globals.templateRenderer,
+      ),
+      fileSystem: globals.fs,
+      logger: globals.logger,
+    );
+    if (iosPlatform) {
+      await darwinDependencyManagerSetup.setUp(
+        platform: SupportedPlatform.ios,
+      );
+    }
+    if (macOSPlatform) {
+      await darwinDependencyManagerSetup.setUp(
+        platform: SupportedPlatform.macos,
+      );
     }
   }
 }

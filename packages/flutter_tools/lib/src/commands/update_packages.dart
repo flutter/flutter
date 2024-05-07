@@ -21,6 +21,11 @@ import '../runner/flutter_command.dart';
 import '../update_packages_pins.dart';
 import '../version.dart';
 
+// Pub packages are rolled automatically by the flutter-pub-roller-bot
+// by using the `flutter update-packages --force-upgrade`.
+// For the latest status, see:
+//   https://github.com/pulls?q=author%3Aflutter-pub-roller-bot
+
 class UpdatePackagesCommand extends FlutterCommand {
   UpdatePackagesCommand() {
     argParser
@@ -32,7 +37,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       )
       ..addOption(
         'cherry-pick-package',
-        help: 'Attempt to update only the specified package. The "-cherry-pick-version" version must be specified also.',
+        help: 'Attempt to update only the specified package. The "--cherry-pick-version" version must be specified also.',
       )
       ..addOption(
         'cherry-pick-version',
@@ -64,7 +69,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         'consumer-only',
         help: 'Only prints the dependency graph that is the transitive closure '
               'that a consumer of the Flutter SDK will observe (when combined '
-              'with transitive-closure).',
+              'with "--transitive-closure").',
         negatable: false,
       )
       ..addFlag(
@@ -1062,6 +1067,7 @@ class PubspecYaml {
       ...directDependencies,
       ...specialDependencies,
       ...devDependencies,
+      ...kExplicitlyExcludedPackages,
     };
 
     // Create a new set to hold the list of packages we've already processed, so
@@ -1543,6 +1549,12 @@ String generateFakePubspec(
         globals.printStatus('  - $package: $version');
       }
     });
+  }
+  if (verbose && kExplicitlyExcludedPackages.isNotEmpty) {
+    globals.printStatus('WARNING: the following packages are explicitly excluded from version pinning');
+    for (final String package in kExplicitlyExcludedPackages) {
+      globals.printStatus('  - $package');
+    }
   }
   for (final PubspecDependency dependency in dependencies) {
     if (!dependency.pointsToSdk) {

@@ -29,7 +29,6 @@ typedef ShardRunner = Future<void> Function();
 /// appropriate error message.
 typedef OutputChecker = String? Function(CommandResult);
 
-
 const Duration _quietTimeout = Duration(minutes: 10); // how long the output should be hidden between calls to printProgress before just being verbose
 
 // If running from LUCI set to False.
@@ -60,6 +59,7 @@ final bool runningInDartHHHBot =
 
 const String kShardKey = 'SHARD';
 const String kSubshardKey = 'SUBSHARD';
+const String kTestHarnessShardName = 'test_harness_tests';
 const String CIRRUS_TASK_NAME = 'CIRRUS_TASK_NAME';
 
 /// Environment variables to override the local engine when running `pub test`,
@@ -600,4 +600,25 @@ Future<void> _runFromList(Map<String, ShardRunner> items, String key, String nam
     }
     await items[item]!();
   }
+}
+
+/// Checks the given file's contents to determine if they match the allowed
+/// pattern for version strings.
+///
+/// Returns null if the contents are good. Returns a string if they are bad.
+/// The string is an error message.
+Future<String?> verifyVersion(File file) async {
+  final RegExp pattern = RegExp(
+    r'^(\d+)\.(\d+)\.(\d+)((-\d+\.\d+)?\.pre(\.\d+)?)?$');
+  if (!file.existsSync()) {
+    return 'The version logic failed to create the Flutter version file.';
+  }
+  final String version = await file.readAsString();
+  if (version == '0.0.0-unknown') {
+    return 'The version logic failed to determine the Flutter version.';
+  }
+  if (!version.contains(pattern)) {
+    return 'The version logic generated an invalid version string: "$version".';
+  }
+  return null;
 }
