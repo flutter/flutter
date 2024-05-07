@@ -872,7 +872,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       // handle it. The back gesture should still cause normal pop even if it
       // doesn't cause a predictive transition.
       await handlePopRoute();
-      return ;
+      return;
     }
     _backGestureObserver?.handleCommitBackGesture();
   }
