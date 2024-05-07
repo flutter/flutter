@@ -1740,7 +1740,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     for (final PopEntry<Object?> popEntry in _popEntries) {
       popEntry.onPopInvokedWithResult(didPop, result);
     }
-    super.onPopInvoked(didPop, result);
+    super.onPopInvokedWithResult(didPop, result);
   }
 
   /// Enables this route to veto attempts by the user to dismiss it.
