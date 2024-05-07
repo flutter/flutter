@@ -7,6 +7,7 @@
 
 #include <deque>
 
+#include "flutter/fml/unique_fd.h"
 #include "impeller/base/thread.h"
 #include "impeller/base/timing.h"
 #include "impeller/renderer/backend/vulkan/android/ahb_texture_source_vk.h"
@@ -29,6 +30,21 @@ namespace impeller {
 ///
 class AHBTexturePoolVK {
  public:
+  struct PoolEntry {
+    TimePoint last_access_time;
+    std::shared_ptr<AHBTextureSourceVK> texture;
+    std::shared_ptr<fml::UniqueFD> render_ready_fence;
+
+    explicit PoolEntry(std::shared_ptr<AHBTextureSourceVK> p_item,
+                       fml::UniqueFD p_render_ready_fence = {})
+        : last_access_time(Clock::now()),
+          texture(std::move(p_item)),
+          render_ready_fence(std::make_shared<fml::UniqueFD>(
+              std::move(p_render_ready_fence))) {}
+
+    constexpr bool IsValid() const { return !!texture; }
+  };
+
   //----------------------------------------------------------------------------
   /// @brief      Create a new (empty) texture pool.
   ///
@@ -72,7 +88,7 @@ class AHBTexturePoolVK {
   /// @return     A texture source that can be used as a swapchain image. This
   ///             can be nullptr in case of resource exhaustion.
   ///
-  std::shared_ptr<AHBTextureSourceVK> Pop();
+  PoolEntry Pop();
 
   //----------------------------------------------------------------------------
   /// @brief      Push a popped texture back into the pool. This also performs a
@@ -86,7 +102,8 @@ class AHBTexturePoolVK {
   ///
   /// @param[in]  texture  The texture to be returned to the pool.
   ///
-  void Push(std::shared_ptr<AHBTextureSourceVK> texture);
+  void Push(std::shared_ptr<AHBTextureSourceVK> texture,
+            fml::UniqueFD render_ready_fence);
 
   //----------------------------------------------------------------------------
   /// @brief      Perform an explicit GC of the pool items. This happens
@@ -97,14 +114,6 @@ class AHBTexturePoolVK {
   void PerformGC();
 
  private:
-  struct PoolEntry {
-    TimePoint last_access_time;
-    std::shared_ptr<AHBTextureSourceVK> item;
-
-    explicit PoolEntry(std::shared_ptr<AHBTextureSourceVK> p_item)
-        : last_access_time(Clock::now()), item(std::move(p_item)) {}
-  };
-
   const std::weak_ptr<Context> context_;
   const android::HardwareBufferDescriptor desc_;
   const size_t max_entries_;
