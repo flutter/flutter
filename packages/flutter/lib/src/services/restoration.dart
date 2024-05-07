@@ -321,7 +321,7 @@ class RestorationManager extends ChangeNotifier {
     final ByteData encoded = data.buffer.asByteData(data.offsetInBytes, data.lengthInBytes);
     Map<Object?, Object?>? decodedMessage;
     try {
-      decodedMessage = const StandardMessageCodec().decodeMessage(encoded) as Map<Object?, Object?>?;
+      return const StandardMessageCodec().decodeMessage(encoded) as Map<Object?, Object?>?;
     } catch (exception, stack) {
       FlutterError.reportError(FlutterErrorDetails(
         exception: exception,
