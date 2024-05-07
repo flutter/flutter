@@ -490,8 +490,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         })
         .toList();
       footerWidgets.addAll(<Widget>[
-        // Match trailing padding, in case we overflow and end up scrolling
-        const SizedBox(width: 14.0),
+        Container(width: 14.0), // to match trailing padding in case we overflow and end up scrolling
         Text(localizations.rowsPerPageTitle),
         ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 64.0), // 40.0 for the text, 24.0 for the icon
@@ -510,7 +509,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       ]);
     }
     footerWidgets.addAll(<Widget>[
-      const SizedBox(width: 32.0),
+      Container(width: 32.0),
       Text(
         localizations.pageRowsInfoTitle(
           _firstRowIndex + 1,
@@ -519,7 +518,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
           _rowCountApproximate,
         ),
       ),
-      const SizedBox(width: 32.0),
+      Container(width: 32.0),
       if (widget.showFirstLastButtons)
         IconButton(
           icon: Icon(Icons.skip_previous, color: widget.arrowHeadColor),
@@ -533,7 +532,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         tooltip: localizations.previousPageTooltip,
         onPressed: _firstRowIndex <= 0 ? null : _handlePrevious,
       ),
-      const SizedBox(width: 24.0),
+      Container(width: 24.0),
       IconButton(
         icon: Icon(Icons.chevron_right, color: widget.arrowHeadColor),
         padding: EdgeInsets.zero,
@@ -549,7 +548,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
               ? null
               : _handleLast,
         ),
-      const SizedBox(width: 14.0),
+      Container(width: 14.0),
     ]);
 
     // CARD

@@ -1266,20 +1266,20 @@ void main() {
         'Column-[GlobalKey#00000](direction: vertical, mainAxisAlignment: start, crossAxisAlignment: center, renderObject: RenderFlex#00000)\n'
         '├Container\n'
         '│└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
-        '│ └SizedBox.expand(renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
+        '│ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
         '├Container-[GlobalKey#00000]\n'
         '│└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
-        '│ └SizedBox.expand(renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
+        '│ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
         '├ColoredBox(color: MaterialColor(primary value: Color(0xff4caf50)), renderObject: _RenderColoredBox#00000 relayoutBoundary=up1)\n'
         '│└Container\n'
         '│ └LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up2)\n'
-        '│  └SizedBox.expand(renderObject: RenderConstrainedBox#00000 relayoutBoundary=up3)\n'
+        '│  └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up3)\n'
         '├Container-[GlobalKey#00000]\n'
         '│└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
-        '│ └SizedBox.expand(renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
+        '│ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
         '└Container\n'
         ' └LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
-        '  └SizedBox.expand(renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n',
+        '  └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n',
       ),
     );
   });

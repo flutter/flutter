@@ -572,52 +572,50 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
           child: SizeTransition(
             axisAlignment: _isIndicatorAtTop! ? 1.0 : -1.0,
             sizeFactor: _positionFactor, // this is what brings it down
-            child: Padding(
+            child: Container(
               padding: _isIndicatorAtTop!
                 ? EdgeInsets.only(top: widget.displacement)
                 : EdgeInsets.only(bottom: widget.displacement),
-              child: Align(
-                alignment: _isIndicatorAtTop!
-                  ? Alignment.topCenter
-                  : Alignment.bottomCenter,
-                child: ScaleTransition(
-                  scale: _scaleFactor,
-                  child: AnimatedBuilder(
-                    animation: _positionController,
-                    builder: (BuildContext context, Widget? child) {
-                      final Widget materialIndicator = RefreshProgressIndicator(
-                        semanticsLabel: widget.semanticsLabel ?? MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
-                        semanticsValue: widget.semanticsValue,
-                        value: showIndeterminateIndicator ? null : _value.value,
-                        valueColor: _valueColor,
-                        backgroundColor: widget.backgroundColor,
-                        strokeWidth: widget.strokeWidth,
-                      );
+              alignment: _isIndicatorAtTop!
+                ? Alignment.topCenter
+                : Alignment.bottomCenter,
+              child: ScaleTransition(
+                scale: _scaleFactor,
+                child: AnimatedBuilder(
+                  animation: _positionController,
+                  builder: (BuildContext context, Widget? child) {
+                    final Widget materialIndicator = RefreshProgressIndicator(
+                      semanticsLabel: widget.semanticsLabel ?? MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
+                      semanticsValue: widget.semanticsValue,
+                      value: showIndeterminateIndicator ? null : _value.value,
+                      valueColor: _valueColor,
+                      backgroundColor: widget.backgroundColor,
+                      strokeWidth: widget.strokeWidth,
+                    );
 
-                      final Widget cupertinoIndicator = CupertinoActivityIndicator(
-                        color: widget.color,
-                      );
+                    final Widget cupertinoIndicator = CupertinoActivityIndicator(
+                      color: widget.color,
+                    );
 
-                      switch (widget._indicatorType) {
-                        case _IndicatorType.material:
-                          return materialIndicator;
+                    switch (widget._indicatorType) {
+                      case _IndicatorType.material:
+                        return materialIndicator;
 
-                        case _IndicatorType.adaptive: {
-                          final ThemeData theme = Theme.of(context);
-                          switch (theme.platform) {
-                            case TargetPlatform.android:
-                            case TargetPlatform.fuchsia:
-                            case TargetPlatform.linux:
-                            case TargetPlatform.windows:
-                              return materialIndicator;
-                            case TargetPlatform.iOS:
-                            case TargetPlatform.macOS:
-                              return cupertinoIndicator;
-                          }
+                      case _IndicatorType.adaptive: {
+                        final ThemeData theme = Theme.of(context);
+                        switch (theme.platform) {
+                          case TargetPlatform.android:
+                          case TargetPlatform.fuchsia:
+                          case TargetPlatform.linux:
+                          case TargetPlatform.windows:
+                            return materialIndicator;
+                          case TargetPlatform.iOS:
+                          case TargetPlatform.macOS:
+                            return cupertinoIndicator;
                         }
                       }
-                    },
-                  ),
+                    }
+                  },
                 ),
               ),
             ),

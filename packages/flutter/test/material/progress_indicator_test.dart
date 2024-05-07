@@ -1245,24 +1245,24 @@ void main() {
         matching: find.byType(Material),
       ),
     );
-    Padding padding = tester.widget(
+    Container container = tester.widget(
       find.descendant(
         of: find.byType(RefreshProgressIndicator),
-        matching: find.byType(Padding),
-      ).first,
+        matching: find.byType(Container),
+      ),
     );
-    Padding innerPadding = tester.widget(
+    Padding padding = tester.widget(
       find.descendant(
         of: find.descendant(
           of: find.byType(RefreshProgressIndicator),
           matching: find.byType(Material),
         ),
         matching: find.byType(Padding),
-      ).last,
+      ),
     );
     expect(material.elevation, 2.0);
-    expect(padding.padding, const EdgeInsets.all(4.0));
-    expect(innerPadding.padding, const EdgeInsets.all(12.0));
+    expect(container.margin, const EdgeInsets.all(4.0));
+    expect(padding.padding, const EdgeInsets.all(12.0));
 
     // With values provided.
     const double testElevation = 1.0;
@@ -1281,24 +1281,24 @@ void main() {
         matching: find.byType(Material),
       ),
     );
-    padding = tester.widget(
+    container = tester.widget(
       find.descendant(
         of: find.byType(RefreshProgressIndicator),
-        matching: find.byType(Padding),
-      ).first,
+        matching: find.byType(Container),
+      ),
     );
-    innerPadding = tester.widget(
+    padding = tester.widget(
       find.descendant(
         of: find.descendant(
           of: find.byType(RefreshProgressIndicator),
           matching: find.byType(Material),
         ),
         matching: find.byType(Padding),
-      ).last,
+      ),
     );
     expect(material.elevation, testElevation);
-    expect(padding.padding, testIndicatorMargin);
-    expect(innerPadding.padding, testIndicatorPadding);
+    expect(container.margin, testIndicatorMargin);
+    expect(padding.padding, testIndicatorPadding);
   });
 }
 

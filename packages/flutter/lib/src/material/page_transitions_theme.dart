@@ -113,18 +113,16 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
         return AnimatedBuilder(
           animation: animation,
           builder: (BuildContext context, Widget? child) {
-            return ColoredBox(
+            return Container(
               color: Colors.black.withOpacity(opacityAnimation.value),
-              child: Align(
-                alignment: Alignment.bottomLeft,
-                child: ClipRect(
-                  child: SizedBox(
-                    height: clipAnimation.value,
-                    child: OverflowBox(
-                      alignment: Alignment.bottomLeft,
-                      maxHeight: size.height,
-                      child: child,
-                    ),
+              alignment: Alignment.bottomLeft,
+              child: ClipRect(
+                child: SizedBox(
+                  height: clipAnimation.value,
+                  child: OverflowBox(
+                    alignment: Alignment.bottomLeft,
+                    maxHeight: size.height,
+                    child: child,
                   ),
                 ),
               ),

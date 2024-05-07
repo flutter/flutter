@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'basic.dart';
+import 'container.dart';
 import 'editable_text.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
@@ -492,7 +493,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       controller: _optionsViewController,
       overlayChildBuilder: _buildOptionsView,
       child: TextFieldTapRegion(
-        child: SizedBox(
+        child: Container(
           key: _fieldKey,
           child: Shortcuts(
             shortcuts: _shortcuts,

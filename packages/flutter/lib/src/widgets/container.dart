@@ -374,10 +374,10 @@ class Container extends StatelessWidget {
     Widget? current = child;
 
     if (child == null && (constraints == null || !constraints!.isTight)) {
-      current = const LimitedBox(
+      current = LimitedBox(
         maxWidth: 0.0,
         maxHeight: 0.0,
-        child: SizedBox.expand(),
+        child: ConstrainedBox(constraints: const BoxConstraints.expand()),
       );
     } else if (alignment != null) {
       current = Align(alignment: alignment!, child: current);
