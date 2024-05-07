@@ -3633,59 +3633,53 @@ void main() {
   });
 
   testWidgets('NavigationRail labels shall not overflow if longer texts provided - extended', (WidgetTester tester) async {
-
+    // Regression test for https://github.com/flutter/flutter/issues/110901.
     // The navigation rail has a narrow width constraint. The text should wrap.
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(useMaterial3: true),
       home: Builder(
         builder: (BuildContext context) {
-          return MediaQuery.withClampedTextScaling(
-            minScaleFactor: 1.0,
-            maxScaleFactor: 1.0,
-            child: Scaffold(
-              body: Row(
-                children: <Widget>[
-                  SizedBox(
-                    width: 140.0,
-                    child: NavigationRail(
-                      selectedIndex: 1,
-                      extended: true,
-                      destinations: const <NavigationRailDestination>[
-                        NavigationRailDestination(
-                          icon: Icon(Icons.favorite_border),
-                          selectedIcon: Icon(Icons.favorite),
-                          label: Text('Abc'),
-                        ),
-                        NavigationRailDestination(
-                          icon: Icon(Icons.bookmark_border),
-                          selectedIcon: Icon(Icons.bookmark),
-                          label: Text('Very long bookmark text for navigation destination'),
-                        ),
-                      ],
-                    ),
+          return Scaffold(
+            body: Row(
+              children: <Widget>[
+                SizedBox(
+                  width: 140.0,
+                  child: NavigationRail(
+                    selectedIndex: 1,
+                    extended: true,
+                    destinations: const <NavigationRailDestination>[
+                      NavigationRailDestination(
+                        icon: Icon(Icons.favorite_border),
+                        selectedIcon: Icon(Icons.favorite),
+                        label: Text('Abc'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.bookmark_border),
+                        selectedIcon: Icon(Icons.bookmark),
+                        label: Text(
+                            'Very long bookmark text for navigation destination'),
+                      ),
+                    ],
                   ),
-                  const Expanded(
-                    child: Text('body'),
-                  ),
-                ],
-              ),
+                ),
+                const Expanded(
+                  child: Text('body'),
+                ),
+              ],
             ),
           );
         },
       ),
     ));
 
+    const String normalLabel = 'Abc';
+    const String longLabel = 'Very long bookmark text for navigation destination';
     expect(find.byType(NavigationRail), findsOneWidget);
-    final Finder normalLabelNavDestinationFinder = find.text(
-      'Abc',
-    );
-    final Finder longLabelNavDestinationFinder = find.text(
-      'Very long bookmark text for navigation destination',
-    );
-    expect(normalLabelNavDestinationFinder, findsOneWidget);
-    expect(longLabelNavDestinationFinder, findsOneWidget);
+    expect(find.text(normalLabel), findsOneWidget);
+    expect(find.text(longLabel), findsOneWidget);
+
     // If the widget manages to layout without throwing an overflow exception,
     // the test passes.
+    expect(tester.takeException(), isNull);
   });
 
   group('Material 2', () {
