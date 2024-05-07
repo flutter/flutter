@@ -68,7 +68,7 @@ class SystemContextMenuController with SystemContextMenuClient {
   /// After calling [dispose], this instance can no longer be used.
   bool _isDisposed = false;
 
-  // Begin SystemContextMenuClient
+  // Begin SystemContextMenuClient.
 
   @override
   void handleSystemHide() {
@@ -85,7 +85,7 @@ class SystemContextMenuController with SystemContextMenuClient {
     onSystemHide?.call();
   }
 
-  // End SystemContextMenuClient
+  // End SystemContextMenuClient.
 
   /// Shows the system context menu anchored on the given [Rect].
   ///
