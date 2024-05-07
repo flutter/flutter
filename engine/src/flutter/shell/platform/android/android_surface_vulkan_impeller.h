@@ -11,6 +11,7 @@
 #include "flutter/shell/platform/android/android_context_vulkan_impeller.h"
 #include "flutter/shell/platform/android/surface/android_native_window.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
+#include "shell/gpu/gpu_surface_vulkan_impeller.h"
 
 namespace flutter {
 
@@ -49,6 +50,11 @@ class AndroidSurfaceVulkanImpeller : public AndroidSurface {
  private:
   std::shared_ptr<impeller::SurfaceContextVK> surface_context_vk_;
   fml::RefPtr<AndroidNativeWindow> native_window_;
+  // The first GPU Surface is initialized as soon as the
+  // AndroidSurfaceVulkanImpeller is created. This ensures that the pipelines
+  // are bootstrapped as early as possible.
+  std::unique_ptr<GPUSurfaceVulkanImpeller> eager_gpu_surface_;
+
   bool is_valid_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceVulkanImpeller);
