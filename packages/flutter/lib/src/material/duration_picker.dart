@@ -345,23 +345,12 @@ class _DurationControl extends StatelessWidget {
 
     // TODO: only used in dial mode, therefore can remove the other stuff.
     double height = defaultTheme.hourMinuteSize.height;
-    
-    // TODO: needs _TimePickerModel to resolve font size correctly.
-    final TextStyle effectiveHourMinuteStyle =
-    MaterialStateProperty.resolveAs<TextStyle>(
-      _DurationPickerModel.themeOf(context).hourMinuteTextStyle ?? _DurationPickerModel.defaultThemeOf(context).hourMinuteTextStyle,
-      states,
-    );
 
-    // TODO: remove
-    print('Duration effectiveHourMinuteStyle Control FontSize: ${effectiveHourMinuteStyle.fontSize}, is hms: ${_DurationPickerModel.durationPickerModeOf(context) == DurationPickerMode.hms}');
-    
     // TODO: check if it's valid to scale
     if (_DurationPickerModel.durationPickerModeOf(context) == DurationPickerMode.hms) {
       height = defaultTheme.hourMinuteInputSize.height;
-      // effectiveStyle = effectiveStyle.copyWith(fontSize: effectiveHourMinuteStyle.fontSize); // Display medium
-      // effectiveHourMinuteStyle does not work, because of https://github.com/flutter/flutter/issues/131247
-      effectiveStyle = effectiveStyle.copyWith(fontSize: Theme.of(context).textTheme.displayMedium?.fontSize); // Display medium
+      // Use smaller font for hms. `hourMinuteTextStyle` is not consistent across entry modes.
+      effectiveStyle = effectiveStyle.copyWith(fontSize: Theme.of(context).textTheme.displayMedium?.fontSize);
     }
 
     return SizedBox(
@@ -516,13 +505,9 @@ class _TimeSelectorSeparator extends StatelessWidget {
     // TODO: check if it's valid to scale, also it isn't scaled in input dialog.
     if (_DurationPickerModel.durationPickerModeOf(context) == DurationPickerMode.hms) {
       height = defaultTheme.hourMinuteInputSize.height;
-      // effectiveStyle = effectiveStyle.copyWith(fontSize: effectiveHourMinuteStyle.fontSize); // Display medium
-      // effectiveHourMinuteStyle does not work, because of https://github.com/flutter/flutter/issues/131247
-      effectiveStyle = effectiveStyle.copyWith(fontSize: Theme.of(context).textTheme.displayMedium?.fontSize); // Display medium
+      // Use smaller font for hms. `hourMinuteTextStyle` is not consistent across entry modes.
+      effectiveStyle = effectiveStyle.copyWith(fontSize: Theme.of(context).textTheme.displayMedium?.fontSize);
     }
-
-    // TODO: remove
-    // print('Duration effectiveHourMinuteStyle Separator FontSize: ${effectiveHourMinuteStyle.fontSize}, isHms: ${_DurationPickerModel.durationPickerModeOf(context) == DurationPickerMode.hms}');
 
     return ExcludeSemantics(
       child: SizedBox(
