@@ -717,13 +717,11 @@ class _CheckboxPainter extends ToggleablePainter {
 
   _DesignSpec get designSpec => _designSpec!;
   _DesignSpec? _designSpec;
-  bool _isCupertino = false;
   set designSpec(_DesignSpec value) {
     if (_designSpec == value) {
       return;
     }
     _designSpec = value;
-    _isCupertino = _designSpec == _DesignSpec.cupertino;
     notifyListeners();
   }
 
@@ -749,12 +747,14 @@ class _CheckboxPainter extends ToggleablePainter {
     return Paint()
       ..color = checkColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = _isCupertino
-        ? _kCupertinoStrokeWidth
-        : _kStrokeWidth
-      ..strokeCap = _isCupertino
-        ? StrokeCap.round
-        : StrokeCap.butt;
+      ..strokeWidth = switch (_designSpec!) {
+        _DesignSpec.cupertino => _kCupertinoStrokeWidth,
+        _DesignSpec.material => _kStrokeWidth,
+      }
+      ..strokeCap = switch (_designSpec!) {
+        _DesignSpec.cupertino => StrokeCap.round,
+        _DesignSpec.material => StrokeCap.butt,
+      };
   }
 
   void _drawBox(Canvas canvas, Rect outer, Paint paint, BorderSide? side) {
@@ -773,15 +773,15 @@ class _CheckboxPainter extends ToggleablePainter {
     Offset mid;
     Offset end;
 
-    if (_isCupertino){
-      start = const Offset(_kEdgeSize * 0.25, _kEdgeSize * 0.52);
-      mid = const Offset(_kEdgeSize * 0.46, _kEdgeSize * 0.75);
-      end = const Offset(_kEdgeSize * 0.72, _kEdgeSize * 0.29);
-    }
-    else{
-      start = const Offset(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
-      mid = const Offset(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
-      end = const Offset(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
+    switch (_designSpec!) {
+      case _DesignSpec.cupertino:
+        start = const Offset(_kEdgeSize * 0.25, _kEdgeSize * 0.52);
+        mid = const Offset(_kEdgeSize * 0.46, _kEdgeSize * 0.75);
+        end = const Offset(_kEdgeSize * 0.72, _kEdgeSize * 0.29);
+      case _DesignSpec.material:
+        start = const Offset(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
+        mid = const Offset(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
+        end = const Offset(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
     }
     if (t < 0.5) {
       final double strokeT = t * 2.0;
@@ -802,13 +802,15 @@ class _CheckboxPainter extends ToggleablePainter {
     assert(t >= 0.0 && t <= 1.0);
     // As t goes from 0.0 to 1.0, animate the horizontal line from the
     // mid point outwards.
-    final Offset start = _isCupertino
-      ? const Offset(_kEdgeSize * 0.25, _kEdgeSize * 0.5)
-      : const Offset(_kEdgeSize * 0.2, _kEdgeSize * 0.5);
+    final Offset start = switch (_designSpec!) {
+      _DesignSpec.cupertino => const Offset(_kEdgeSize * 0.25, _kEdgeSize * 0.5),
+      _DesignSpec.material => const Offset(_kEdgeSize * 0.2, _kEdgeSize * 0.5),
+    };
     const Offset mid = Offset(_kEdgeSize * 0.5, _kEdgeSize * 0.5);
-    final Offset end = _isCupertino
-      ? const Offset(_kEdgeSize * 0.75, _kEdgeSize * 0.5)
-      : const Offset(_kEdgeSize * 0.8, _kEdgeSize * 0.5);
+    final Offset end = switch (_designSpec!) {
+      _DesignSpec.cupertino => const Offset(_kEdgeSize * 0.75, _kEdgeSize * 0.5),
+      _DesignSpec.material => const Offset(_kEdgeSize * 0.8, _kEdgeSize * 0.5),
+    };
     final Offset drawStart = Offset.lerp(start, mid, 1.0 - t)!;
     final Offset drawEnd = Offset.lerp(mid, end, t)!;
     canvas.drawLine(origin + drawStart, origin + drawEnd, paint);
@@ -816,8 +818,11 @@ class _CheckboxPainter extends ToggleablePainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (!_isCupertino) {
-      paintRadialReaction(canvas: canvas, origin: size.center(Offset.zero));
+    switch (_designSpec!) {
+      case _DesignSpec.cupertino:
+        break;
+      case _DesignSpec.material:
+        paintRadialReaction(canvas: canvas, origin: size.center(Offset.zero));
     }
 
     final Paint strokePaint = _createStrokePaint();
@@ -866,15 +871,18 @@ class _CheckboxPainter extends ToggleablePainter {
         }
       }
     }
-    if (_isCupertino){
-      if (isFocused) {
-        final Rect focusOuter = _outerRectAt(origin, 1.0).inflate(1);
-        final Paint borderPaint = Paint()
-          ..color = focusColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 3.5;
-        _drawBox(canvas, focusOuter, borderPaint, activeSide);
-      }
+    switch (_designSpec!) {
+      case _DesignSpec.cupertino:
+        if (isFocused) {
+          final Rect focusOuter = _outerRectAt(origin, 1.0).inflate(1);
+          final Paint borderPaint = Paint()
+            ..color = focusColor
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 3.5;
+          _drawBox(canvas, focusOuter, borderPaint, activeSide);
+        }
+      case _DesignSpec.material:
+        break;
     }
   }
 }
@@ -956,7 +964,7 @@ class _CheckboxDefaultsCupertino extends CheckboxThemeData {
         if (states.contains(MaterialState.error)) {
           return _colors.onError;
         }
-        return _activeColor;
+        return CupertinoColors.white;
       }
       return Colors.transparent; // No icons available when the checkbox is unselected.
     });
