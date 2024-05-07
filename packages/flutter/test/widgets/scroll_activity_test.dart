@@ -414,7 +414,4 @@ class _ScrollActivityDelegate extends ScrollActivityDelegate {
 
   @override
   bool get outOfRange => false;
-
-  @override
-  bool? get preferredBallisticIgnorePointer => null;
 }

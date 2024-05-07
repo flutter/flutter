@@ -323,10 +323,6 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   // for use when resizing the viewport to non-zero next time.
   double? _cachedPage;
 
-  /// When page view goes ballistic we want to allow interaction with the page
-  @override
-  bool? get preferredBallisticIgnorePointer => false;
-
   @override
   Future<void> ensureVisible(
     RenderObject object, {

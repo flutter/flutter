@@ -626,9 +626,6 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   late _NestedScrollController _innerController;
 
   @override
-  bool? get preferredBallisticIgnorePointer => null;
-
-  @override
   bool get outOfRange {
     return (_outerPosition?.outOfRange ?? false) || _innerPositions.any((_NestedScrollPosition position) => position.outOfRange);
   }
@@ -1243,9 +1240,6 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
 
   ScrollController? _parent;
 
-  @override
-  bool? get preferredBallisticIgnorePointer => null;
-
   void setParent(ScrollController? value) {
     _parent?.detach(this);
     _parent = value;
@@ -1420,7 +1414,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
       return IdleScrollActivity(this);
     }
     final bool shouldIgnorePointer = !outOfRange
-                                     && (preferredBallisticIgnorePointer ?? activity?.shouldIgnorePointer ?? true);
+      && (activity?.shouldIgnorePointer ?? true);
 
     switch (mode) {
       case _NestedBallisticScrollActivityMode.outer:
