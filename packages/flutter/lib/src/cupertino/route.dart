@@ -435,7 +435,7 @@ class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.primaryRouteAnimation != widget.primaryRouteAnimation
     || oldWidget.secondaryRouteAnimation != widget.secondaryRouteAnimation
-    || oldWidget.child != widget.child || oldWidget.linearTransition != widget.linearTransition) {
+    || oldWidget.linearTransition != widget.linearTransition) {
     _disposeCurve();
     _setupAnimation();
     }
@@ -443,14 +443,17 @@ class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
 
   @override
   void dispose() {
-    super.dispose();
     _disposeCurve();
+    super.dispose();
   }
 
   void _disposeCurve() {
     _primaryPositionCurve?.dispose();
     _secondaryPositionCurve?.dispose();
     _primaryShadowCurve?.dispose();
+    _primaryPositionCurve = null;
+    _secondaryPositionCurve = null;
+    _primaryShadowCurve = null;
   }
 
   void _setupAnimation() {
@@ -557,7 +560,6 @@ class _CupertinoFullscreenDialogTransitionState extends State<CupertinoFullscree
     super.didUpdateWidget(oldWidget);
     if (oldWidget.primaryRouteAnimation != widget.primaryRouteAnimation ||
         oldWidget.secondaryRouteAnimation != widget.secondaryRouteAnimation ||
-        oldWidget.child != widget.child ||
         oldWidget.linearTransition != widget.linearTransition) {
         _disposeCurve();
         _setupAnimation();

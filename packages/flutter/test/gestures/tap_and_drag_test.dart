@@ -671,6 +671,7 @@ void main() {
       ..onCancel = () {
         events.add('pancancel');
       };
+    addTearDown(pans.dispose);
 
     final TestPointer pointer = TestPointer(5);
     final PointerDownEvent downB = pointer.down(const Offset(10.0, 10.0));
