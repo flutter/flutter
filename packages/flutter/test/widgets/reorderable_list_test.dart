@@ -1560,13 +1560,13 @@ void main() {
         ),
       ),
     );
-    final Map<int, BoxConstraints> beforeLayoutBuilderCallbackCount = Map<int, BoxConstraints>.of(itemLayoutConstraints);
+    final Map<int, BoxConstraints> preDragLayoutConstraints = Map<int, BoxConstraints>.of(itemLayoutConstraints);
     itemLayoutConstraints.clear();
     final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('0')));
     await tester.pump(kLongPressTimeout);
     await drag.moveBy(const Offset(0, 20));
     await tester.pump();
-    expect(itemLayoutConstraints, beforeLayoutBuilderCallbackCount);
+    expect(itemLayoutConstraints, preDragLayoutConstraints);
     await drag.up();
     await tester.pumpAndSettle();
   });
