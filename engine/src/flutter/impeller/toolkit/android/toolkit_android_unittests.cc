@@ -89,7 +89,7 @@ TEST(ToolkitAndroidTest, CanApplySurfaceTransaction) {
   SurfaceTransaction transaction;
   ASSERT_TRUE(transaction.IsValid());
   fml::AutoResetWaitableEvent event;
-  ASSERT_TRUE(transaction.Apply([&event]() { event.Signal(); }));
+  ASSERT_TRUE(transaction.Apply([&event](auto) { event.Signal(); }));
   event.Wait();
 }
 
