@@ -673,8 +673,8 @@ void main() {
 
         expect(
             testLogger.errorText,
-            'Plugin url_launcher_linux_1:linux which provides an implementation for url_launcher '
-            'cannot also reference a default implementation for url_launcher_linux_2. '
+            'Plugin url_launcher_linux_1:linux provides an implementation for url_launcher '
+            'and also references a default implementation for url_launcher_linux_2, which is currently not supported. '
             'Ask the maintainers of url_launcher_linux_1 to either remove the implementation via `implements: url_launcher` '
             'or avoid referencing a default implementation via `platforms: linux: default_package: url_launcher_linux_2`.'
             '\n\n');

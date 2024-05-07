@@ -1238,8 +1238,8 @@ String? _validatePlugin(Plugin plugin, String platformKey) {
 
   if (defaultImplPluginName != null) {
     if (implementsPackage != null && implementsPackage.isNotEmpty) {
-      return 'Plugin ${plugin.name}:$platformKey which provides an implementation for $implementsPackage '
-          'cannot also reference a default implementation for $defaultImplPluginName. '
+      return 'Plugin ${plugin.name}:$platformKey provides an implementation for $implementsPackage '
+          'and also references a default implementation for $defaultImplPluginName, which is currently not supported. '
           'Ask the maintainers of ${plugin.name} to either remove the implementation via `implements: $implementsPackage` '
           'or avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName`.\n';
     }
