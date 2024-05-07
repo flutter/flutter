@@ -10,12 +10,8 @@ namespace impeller {
 
 AHBTexturePoolVK::AHBTexturePoolVK(std::weak_ptr<Context> context,
                                    android::HardwareBufferDescriptor desc,
-                                   size_t max_entries,
-                                   std::chrono::milliseconds max_extry_age)
-    : context_(std::move(context)),
-      desc_(desc),
-      max_entries_(max_entries),
-      max_extry_age_(max_extry_age) {
+                                   size_t max_entries)
+    : context_(std::move(context)), desc_(desc), max_entries_(max_entries) {
   if (!desc_.IsAllocatable()) {
     VALIDATION_LOG << "Swapchain image is not allocatable.";
     return;
@@ -29,8 +25,10 @@ AHBTexturePoolVK::PoolEntry AHBTexturePoolVK::Pop() {
   {
     Lock lock(pool_mutex_);
     if (!pool_.empty()) {
-      auto entry = pool_.back();
-      pool_.pop_back();
+      // Buffers are pushed to the back of the queue. To give the ready fences
+      // the most time to signal, pick a buffer from the front of the queue.
+      auto entry = pool_.front();
+      pool_.pop_front();
       return entry;
     }
   }
@@ -80,13 +78,12 @@ void AHBTexturePoolVK::PerformGC() {
 }
 
 void AHBTexturePoolVK::PerformGCLocked() {
-  // Push-Pop operations happen at the back of the deque so the front ages as
-  // much as possible. So that's where we collect entries.
-  auto now = Clock::now();
-  while (!pool_.empty() &&
-         (pool_.size() > max_entries_ ||
-          now - pool_.front().last_access_time > max_extry_age_)) {
-    pool_.pop_front();
+  while (!pool_.empty() && (pool_.size() > max_entries_)) {
+    // Buffers are pushed to the back of the queue and popped from the front.
+    // The ones at the back should be given the most time for their fences to
+    // signal. If we are going to get rid of textures, they might as well be the
+    // newest ones since their fences will take the longest to signal.
+    pool_.pop_back();
   }
 }
 
