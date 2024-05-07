@@ -11,6 +11,9 @@ import 'utils.dart';
 
 export 'tolerance.dart' show Tolerance;
 
+// Examples can assume:
+// late AnimationController _controller;
+
 /// Structure that describes a spring's constants.
 ///
 /// Used to configure a [SpringSimulation].
@@ -25,9 +28,13 @@ class SpringDescription {
   });
 
   /// Creates a spring given the mass (m), stiffness (k), and damping ratio (ζ).
-  /// The damping ratio is especially useful trying to determining the type of
-  /// spring to create. A ratio of 1.0 creates a critically damped spring, > 1.0
-  /// creates an overdamped spring and < 1.0 an underdamped one.
+  /// The damping ratio describes a gradual reduction in a spring oscillation.
+  /// By using the damping ratio, you can define how rapidly the oscillations
+  /// decay from one bounce to the next.
+  ///
+  /// The damping ratio is especially useful when trying to determining the type
+  /// of spring to create. A ratio of 1.0 creates a critically damped
+  /// spring, > 1.0 creates an overdamped spring and < 1.0 an underdamped one.
   ///
   /// See [mass] and [stiffness] for the units for those arguments. The damping
   /// ratio is unitless.
@@ -37,16 +44,31 @@ class SpringDescription {
     double ratio = 1.0,
   }) : damping = ratio * 2.0 * math.sqrt(mass * stiffness);
 
-  /// The mass of the spring (m). The units are arbitrary, but all springs
-  /// within a system should use the same mass units.
+  /// The mass of the spring (m).
+  ///
+  /// The units are arbitrary, but all springs within a system should use
+  /// the same mass units.
+  ///
+  /// The greater the mass, the larger the amplitude of oscillation,
+  /// and the longer the time to return to the equilibrium position.
   final double mass;
 
-  /// The spring constant (k). The units of stiffness are M/T², where M is the
-  /// mass unit used for the value of the [mass] property, and T is the time
-  /// unit used for driving the [SpringSimulation].
+  /// The spring constant (k).
+  ///
+  /// The units of stiffness are M/T², where M is the mass unit used for the
+  /// value of the [mass] property, and T is the time unit used for driving
+  /// the [SpringSimulation].
+  ///
+  /// Stiffness defines the spring constant, which measures the strength of
+  /// the spring. A stiff spring applies more force to the object that is
+  /// attached for some deviation from the rest position.
   final double stiffness;
 
   /// The damping coefficient (c).
+  ///
+  /// It is a pure number without physical meaning and describes the oscillation
+  /// and decay of a system after being disturbed. The larger the damping,
+  /// the fewer oscillations and smaller the amplitude of the elastic motion.
   ///
   /// Do not confuse the damping _coefficient_ (c) with the damping _ratio_ (ζ).
   /// To create a [SpringDescription] with a damping ratio, use the [
@@ -80,6 +102,30 @@ enum SpringType {
 /// A spring simulation.
 ///
 /// Models a particle attached to a spring that follows Hooke's law.
+///
+/// {@tool snippet}
+///
+/// This method triggers an [AnimationController] (a previously constructed
+/// `_controller` field) to simulate a spring oscillation.
+///
+/// ```dart
+/// void _startSpringMotion() {
+///   _controller.animateWith(SpringSimulation(
+///     const SpringDescription(
+///       mass: 1.0,
+///       stiffness: 300.0,
+///       damping: 15.0,
+///     ),
+///     0.0, // starting position
+///     1.0, // ending position
+///     0.0, // starting velocity
+///   ));
+/// }
+/// ```
+/// {@end-tool}
+///
+/// This [AnimationController] could be used with an [AnimatedBuilder] to
+/// animate the position of a child as if it were attached to a spring.
 class SpringSimulation extends Simulation {
   /// Creates a spring simulation from the provided spring description, start
   /// distance, end distance, and initial velocity.
