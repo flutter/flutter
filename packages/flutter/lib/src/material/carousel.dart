@@ -92,7 +92,6 @@ class Carousel extends StatefulWidget {
     this.elevation,
     this.shape,
     this.overlayColor,
-    bool centered = false,
     this.allowFullyExpand = true,
     this.itemSnapping = false,
     this.shrinkExtent,
@@ -102,7 +101,7 @@ class Carousel extends StatefulWidget {
     this.onTap,
     required this.layoutWeights,
     required this.children,
-  }) : _layout = centered ? _CarouselLayout.centeredHero : _CarouselLayout.hero,
+  }) : _layout = _CarouselLayout.hero,
        itemExtent = null;
 
   /// The amount of space to surround each carousel item with.
@@ -266,37 +265,11 @@ class _CarouselState extends State<Carousel> {
 
   void _updateWeights() {
     weights = widget.layoutWeights;
-    if (widget._layout == _CarouselLayout.centeredHero) {
-      assert(weights != null);
-      weights = List<int>.from(widget.layoutWeights!);
-      final int length = weights!.length;
-      final int minWeight = weights!.min;
-      weights!.sort();
-      weights!.insertAll(length, List<int>.filled(length - 1, minWeight));
-    }
   }
 
   void _updateController() {
-    int maxItem = 0;
-    if (weights != null) {
-      final int maxWeight = weights!.max;
-      for (int index = 0; index < weights!.length; index++) {
-        if (weights!.elementAt(index) == maxWeight) {
-          maxItem = index;
-          break;
-        }
-      }
-    }
-
-    final int initialItem = switch(widget._layout) {
-      _CarouselLayout.uncontained => 0,
-      _CarouselLayout.multiBrowse => 0,
-      _CarouselLayout.hero || _CarouselLayout.centeredHero => maxItem,
-    };
-
     _controller = widget.controller
       ?? CarouselController(
-        initialItem: initialItem,
         itemExtent: itemExtent,
         layoutWeights: weights,
       );
@@ -969,9 +942,6 @@ enum _CarouselLayout {
 
   /// The hero layout shows at least one large item and one small item.
   hero,
-
-  /// The center-aligned hero layout shows at least one large item and two small items.
-  centeredHero,
 }
 
 class CarouselScrollPhysics extends ScrollPhysics {
@@ -1100,7 +1070,6 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements Carou
     required super.physics,
     required super.context,
     this.initialItem = 0,
-    // bool keepPage = true,
     double? itemExtent,
     List<int>? layoutWeights,
     super.oldPosition,
@@ -1223,7 +1192,6 @@ class CarouselController extends ScrollController {
   /// Creates a carousel controller.
   CarouselController({
     this.initialItem = 0,
-    // this.keepPage = true,
     this.itemExtent,
     this.layoutWeights,
   });
@@ -1242,7 +1210,6 @@ class CarouselController extends ScrollController {
       physics: physics,
       context: context,
       initialItem: initialItem,
-      // keepPage: keepPage,
       itemExtent: itemExtent,
       layoutWeights: layoutWeights,
       oldPosition: oldPosition,
