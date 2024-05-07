@@ -49,7 +49,7 @@ class MyHomePage extends StatelessWidget {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).push(
-                  MaterialPageRoute(
+                  MaterialPageRoute<void>(
                     builder: (BuildContext context) {
                       return  const MyHomePage(title: 'Zoom Transition');
                     },
@@ -60,7 +60,7 @@ class MyHomePage extends StatelessWidget {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).push(
-                  CupertinoPageRoute(
+                  CupertinoPageRoute<void>(
                     builder: (BuildContext context) {
                       return  const MyHomePage(title: 'Cupertino Transition');
                     }
@@ -71,15 +71,121 @@ class MyHomePage extends StatelessWidget {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).push(
-                  MBSPageRoute(
-                    context: context,
-                    pageBuilder: (BuildContext buildContext) {
-                      return  const MyHomePage(title: 'MBS Transition');
-                    },
-                  ),
-                );},
+                    MBSPageRoute<void>(
+                      context: context,
+                    ),
+                  );
+                },
                 child: const Text('Modal Bottom Sheet'),
               ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MBSPageRoute<void>(
+                      context: context,
+                      firstRoute: '/page2'
+                    ),
+                  );
+                },
+                child: const Text('Modal Bottom Sheet Page 2'),
+              ),
+              if (MBSNavigator.of(context) != null)
+                TextButton(
+                  onPressed: () {
+                    (Navigator.of(context).widget as MBSNavigator).popMBS();
+                  },
+                  child: const Text('Pop Bottom Sheet')
+                ),
+            ],
+          ),
+        ),
+    );
+  }
+}
+
+class PageOne extends StatelessWidget {
+  const PageOne({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: const Text('Page One'),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text('Page One'),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/page2');},
+                child: const Text('Go to Page 2'),
+              ),
+              if (MBSNavigator.of(context) != null)
+                TextButton(
+                  onPressed: () {
+                    (Navigator.of(context).widget as MBSNavigator).popMBS();
+                  },
+                  child: const Text('Pop Bottom Sheet')
+                ),
+            ],
+          ),
+        ),
+    );
+  }
+}
+
+class PageTwo extends StatelessWidget {
+  const PageTwo({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: const Text('Page Two'),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text('Page Two'),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/page3');},
+                child: const Text('Go to Page 3'),
+              ),
+              if (MBSNavigator.of(context) != null)
+                TextButton(
+                  onPressed: () {
+                    (Navigator.of(context).widget as MBSNavigator).popMBS();
+                  },
+                  child: const Text('Pop Bottom Sheet')
+                ),
+            ],
+          ),
+        ),
+    );
+  }
+}
+
+class PageThree extends StatelessWidget {
+  const PageThree({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: const Text('Page Three'),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text('Page Three'),
               if (MBSNavigator.of(context) != null)
                 TextButton(
                   onPressed: () {
@@ -212,17 +318,17 @@ class MBSTransition extends StatelessWidget {
 class MBSPageRoute<T> extends PageRoute<T> with MBSRouteTransitionMixin<T> {
   /// Creates a page route for use in an iOS designed app.
   MBSPageRoute({
-    required this.pageBuilder,
     required BuildContext context,
+    this.firstRoute,
   }) : super(
     delegatedTransition: (Navigator.of(context).widget is MBSNavigator) ?
       MBSTransition.secondaryDelegateTransition : MBSTransition.delegateTransition,
   );
 
-  final WidgetBuilder pageBuilder;
+  final String? firstRoute;
 
   @override
-  Widget buildContent(BuildContext context) => pageBuilder(context);
+  String? get initialRoute => firstRoute;
 
   @override
   Color? get barrierColor => const Color(0x20000000);
@@ -241,22 +347,33 @@ class MBSPageRoute<T> extends PageRoute<T> with MBSRouteTransitionMixin<T> {
 }
 
 mixin MBSRouteTransitionMixin<T> on PageRoute<T> {
-  /// Builds the primary contents of the route.
+
   @protected
-  Widget buildContent(BuildContext context);
+  String? initialRoute;
 
   @override
+  // A relatively rigorous eyeball estimation.
   Duration get transitionDuration => const Duration(milliseconds: 500);
 
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    final Widget child = buildContent(context);
+    late Widget child;
     return MBSNavigator(
       parentNavigatorContext: context,
-      initialRoute: '/',
+      initialRoute: initialRoute ?? '/',
       onGenerateRoute: (RouteSettings settings) {
-        return CupertinoPageRoute(
+        switch (settings.name) {
+          case '/' :
+            child = const PageOne();
+          case '/page2' :
+            child = const PageTwo();
+          case '/page3' :
+            child = const PageThree();
+          default:
+            child = const PageOne();
+        }
+        return CupertinoPageRoute<void>(
           builder: (BuildContext context) {
             return Semantics(
               scopesRoute: true,
@@ -265,10 +382,24 @@ mixin MBSRouteTransitionMixin<T> on PageRoute<T> {
             );
           }
         );
-      }
+      },
     );
   }
 
+  /// Returns a [CupertinoFullscreenDialogTransition] if [route] is a full
+  /// screen dialog, otherwise a [CupertinoPageTransition] is returned.
+  ///
+  /// Used by [CupertinoPageRoute.buildTransitions].
+  ///
+  /// This method can be applied to any [PageRoute], not just
+  /// [CupertinoPageRoute]. It's typically used to provide a Cupertino style
+  /// horizontal transition for material widgets when the target platform
+  /// is [TargetPlatform.iOS].
+  ///
+  /// See also:
+  ///
+  ///  * [CupertinoPageTransitionsBuilder], which uses this method to define a
+  ///    [PageTransitionsBuilder] for the [PageTransitionsTheme].
   static Widget buildPageTransitions<T>(
     ModalRoute<T> route,
     BuildContext context,
@@ -291,7 +422,7 @@ mixin MBSRouteTransitionMixin<T> on PageRoute<T> {
 
 class MBSNavigator extends Navigator {
 
-  MBSNavigator({
+  const MBSNavigator({
     super.key,
     super.pages,
     super.onPopPage,
@@ -313,6 +444,7 @@ class MBSNavigator extends Navigator {
 
   void popMBS() {
     Navigator.of(parentNavigatorContext).pop();
+    // Navigator.of(parentNavigatorContext).delegateTransitionBuilder = null;
   }
 
   static NavigatorState? of(
