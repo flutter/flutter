@@ -24,7 +24,11 @@ final class Environment {
     required this.logger,
     required this.platform,
     required this.processRunner,
+    this.verbose = false,
   });
+
+  /// Whether the tool should be considered running in "verbose" mode.
+  final bool verbose;
 
   /// The host OS and architecture that the tool is running on.
   final ffi.Abi abi;

@@ -15,7 +15,6 @@ final class QueryCommand extends CommandBase {
   QueryCommand({
     required super.environment,
     required this.configs,
-    super.verbose = false,
     super.help = false,
     super.usageLineLength,
   }) {
@@ -45,13 +44,11 @@ final class QueryCommand extends CommandBase {
     addSubcommand(QueryBuildersCommand(
       environment: environment,
       configs: configs,
-      verbose: verbose,
       help: help,
     ));
     addSubcommand(QueryTargetsCommand(
       environment: environment,
       configs: configs,
-      verbose: verbose,
       help: help,
     ));
   }
@@ -73,7 +70,6 @@ final class QueryBuildersCommand extends CommandBase {
   QueryBuildersCommand({
     required super.environment,
     required this.configs,
-    super.verbose = false,
     super.help = false,
   });
 
@@ -93,7 +89,7 @@ final class QueryBuildersCommand extends CommandBase {
     // current platform.
     final bool all = parent!.argResults![allFlag]! as bool;
     final String? builderName = parent!.argResults![builderFlag] as String?;
-    if (!verbose) {
+    if (!environment.verbose) {
       environment.logger.status(
         'Add --verbose to see detailed information about each builder',
       );
@@ -115,7 +111,7 @@ final class QueryBuildersCommand extends CommandBase {
           continue;
         }
         environment.logger.status('"${build.name}" config', indent: 3);
-        if (!verbose) {
+        if (!environment.verbose) {
           continue;
         }
         environment.logger.status('gn flags:', indent: 6);
@@ -140,12 +136,11 @@ final class QueryTargetsCommand extends CommandBase {
   QueryTargetsCommand({
     required super.environment,
     required this.configs,
-    super.verbose = false,
     super.help = false,
   }) {
     // When printing the help/usage for this command, only list all builds
     // when the --verbose flag is supplied.
-    final bool includeCiBuilds = verbose || !help;
+    final bool includeCiBuilds = environment.verbose || !help;
     builds = runnableBuilds(environment, configs, includeCiBuilds);
     debugCheckBuilds(builds);
     addConfigOption(
