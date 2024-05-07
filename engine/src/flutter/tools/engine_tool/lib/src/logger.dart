@@ -26,10 +26,12 @@ import 'package:meta/meta.dart';
 /// which can be inspected by unit tetss.
 class Logger {
   /// Constructs a logger for use in the tool.
-  Logger()
+  Logger({
+    log.Level level = statusLevel,
+  })
       : _logger = log.Logger.detached('et'),
         _test = false {
-    _logger.level = statusLevel;
+    _logger.level = level;
     _logger.onRecord.listen(_handler);
     _setupIoSink(io.stderr);
     _setupIoSink(io.stdout);
@@ -37,10 +39,12 @@ class Logger {
 
   /// A logger for tests.
   @visibleForTesting
-  Logger.test()
+  Logger.test({
+    log.Level level = statusLevel,
+  })
       : _logger = log.Logger.detached('et'),
         _test = true {
-    _logger.level = statusLevel;
+    _logger.level = level;
     _logger.onRecord.listen((log.LogRecord r) => _testLogs.add(r));
   }
 
@@ -104,11 +108,6 @@ class Logger {
 
   /// Get the current logging level.
   log.Level get level => _logger.level;
-
-  /// Set the current logging level.
-  set level(log.Level l) {
-    _logger.level = l;
-  }
 
   /// Record a log message level [Logger.error] and throw a FatalError.
   /// This should only be called when the program has entered an impossible

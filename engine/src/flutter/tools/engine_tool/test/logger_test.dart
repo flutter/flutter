@@ -12,8 +12,7 @@ void main() {
   }
 
   test('Setting the level works', () {
-    final Logger logger = Logger.test();
-    logger.level = Logger.infoLevel;
+    final Logger logger = Logger.test(level: Logger.infoLevel);
     expect(logger.level, equals(Logger.infoLevel));
   });
 
@@ -42,8 +41,7 @@ void main() {
   });
 
   test('info messages are recorded at the infoLevel log level', () {
-    final Logger logger = Logger.test();
-    logger.level = Logger.infoLevel;
+    final Logger logger = Logger.test(level: Logger.infoLevel);
     logger.info('info');
     expect(stringsFromLogs(logger.testLogs), equals(<String>['info\n']));
   });
@@ -73,15 +71,13 @@ void main() {
   });
 
   test('newlines in info() can be disabled', () {
-    final Logger logger = Logger.test();
-    logger.level = Logger.infoLevel;
+    final Logger logger = Logger.test(level: Logger.infoLevel);
     logger.info('info', newline: false);
     expect(stringsFromLogs(logger.testLogs), equals(<String>['info']));
   });
 
   test('fatal throws exception', () {
-    final Logger logger = Logger.test();
-    logger.level = Logger.infoLevel;
+    final Logger logger = Logger.test(level: Logger.infoLevel);
     bool caught = false;
     try {
       logger.fatal('test', newline: false);
