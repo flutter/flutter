@@ -61,11 +61,10 @@ class Carousel extends StatefulWidget {
     required this.itemExtent,
     required this.children,
   }) : allowFullyExpand = null,
-       _layout = _CarouselLayout.uncontained,
+       _layout = _CarouselLayout.fixed,
        layoutWeights = null;
 
-  /// multi-browse
-  const Carousel.multibrowse({
+  const Carousel.weighted({
     super.key,
     this.padding,
     this.backgroundColor,
@@ -77,31 +76,11 @@ class Carousel extends StatefulWidget {
     this.controller,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
-    this.allowFullyExpand = false,
-    this.onTap,
-    required this.layoutWeights,
-    required this.children,
-  }) : _layout = _CarouselLayout.multiBrowse,
-       itemExtent = null;
-
-  /// hero
-  const Carousel.hero({
-    super.key,
-    this.padding,
-    this.backgroundColor,
-    this.elevation,
-    this.shape,
-    this.overlayColor,
     this.allowFullyExpand = true,
-    this.itemSnapping = false,
-    this.shrinkExtent,
-    this.controller,
-    this.scrollDirection = Axis.horizontal,
-    this.reverse = false,
     this.onTap,
     required this.layoutWeights,
     required this.children,
-  }) : _layout = _CarouselLayout.hero,
+  }) : _layout = _CarouselLayout.weighted,
        itemExtent = null;
 
   /// The amount of space to surround each carousel item with.
@@ -933,15 +912,12 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
 }
 
 enum _CarouselLayout {
-  /// Show carousel items with 3 sizes. Leading items have maximum size, the
-  /// second to last item has medium size and the last item has minimum size.
-  multiBrowse,
-
   /// Carousel items have same size.
-  uncontained,
+  fixed,
 
-  /// The hero layout shows at least one large item and one small item.
-  hero,
+  /// The extent of each carousel item is determined by the weight it occupied
+  /// on the viewport.
+  weighted,
 }
 
 class CarouselScrollPhysics extends ScrollPhysics {
