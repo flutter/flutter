@@ -84,7 +84,7 @@ class SurfaceTransaction {
   [[nodiscard]] bool SetBackgroundColor(const SurfaceControl& control,
                                         const Color& color);
 
-  using OnCompleteCallback = std::function<void(void)>;
+  using OnCompleteCallback = std::function<void(ASurfaceTransactionStats*)>;
 
   //----------------------------------------------------------------------------
   /// @brief      Applies the updated encoded in the transaction and invokes the

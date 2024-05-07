@@ -25,24 +25,25 @@ AHBTexturePoolVK::AHBTexturePoolVK(std::weak_ptr<Context> context,
 
 AHBTexturePoolVK::~AHBTexturePoolVK() = default;
 
-std::shared_ptr<AHBTextureSourceVK> AHBTexturePoolVK::Pop() {
+AHBTexturePoolVK::PoolEntry AHBTexturePoolVK::Pop() {
   {
     Lock lock(pool_mutex_);
     if (!pool_.empty()) {
-      auto texture = pool_.back().item;
+      auto entry = pool_.back();
       pool_.pop_back();
-      return texture;
+      return entry;
     }
   }
-  return CreateTexture();
+  return PoolEntry{CreateTexture()};
 }
 
-void AHBTexturePoolVK::Push(std::shared_ptr<AHBTextureSourceVK> texture) {
+void AHBTexturePoolVK::Push(std::shared_ptr<AHBTextureSourceVK> texture,
+                            fml::UniqueFD render_ready_fence) {
   if (!texture) {
     return;
   }
   Lock lock(pool_mutex_);
-  pool_.push_back(PoolEntry{std::move(texture)});
+  pool_.push_back(PoolEntry{std::move(texture), std::move(render_ready_fence)});
   PerformGCLocked();
 }
 
