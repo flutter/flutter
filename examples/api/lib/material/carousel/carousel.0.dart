@@ -49,9 +49,12 @@ class _CarouselExampleState extends State<CarouselExample> with SingleTickerProv
         ConstrainedBox(
           constraints: BoxConstraints(maxHeight: height / 2),
           child: Carousel.hero(
-            centered: true,
+            controller: CarouselController(
+              initialItem: 1,
+              layoutWeights: const <int>[1,7,1],
+            ),
             itemSnapping: true,
-            layoutWeights: const <int>[7,1],
+            layoutWeights: const <int>[1,7,1],
             children: ImageInfo.values.map((ImageInfo image) {
               return HeroLayoutCard(imageInfo: image);
             }).toList(),
@@ -224,17 +227,3 @@ enum ImageInfo {
   final String subtitle;
   final String url;
 }
-final List<ImageProvider> images = <NetworkImage>[
-  const NetworkImage(
-      'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_1.png'),
-  const NetworkImage(
-      'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_2.png'),
-  const NetworkImage(
-      'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_3.png'),
-  const NetworkImage(
-      'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_4.png'),
-  const NetworkImage(
-      'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_5.png'),
-  const NetworkImage(
-      'https://flutter.github.io/assets-for-api-docs/assets/material/content_based_color_scheme_6.png'),
-];
