@@ -143,12 +143,15 @@ class KernelSnapshotProgram extends Target {
 
   @override
   List<Source> get outputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/${KernelSnapshotProgram.dillName}'),
     // TODO(mosuem): Should output resources.json. https://github.com/flutter/flutter/issues/146263
   ];
 
+  static const String depfile = 'kernel_snapshot_program.d';
+
   @override
-  List<String> get depfiles => <String>[
-    'kernel_snapshot.d',
+  List<String> get depfiles => const <String>[
+    depfile,
   ];
 
   @override
@@ -258,7 +261,7 @@ class KernelSnapshotProgram extends Target {
       packagesPath: packagesFile.path,
       linkPlatformKernelIn: forceLinkPlatform || buildMode.isPrecompiled,
       mainPath: targetFileAbsolute,
-      depFilePath: environment.buildDir.childFile('kernel_snapshot.d').path,
+      depFilePath: environment.buildDir.childFile(depfile).path,
       frontendServerStarterPath: frontendServerStarterPath,
       extraFrontEndOptions: extraFrontEndOptions,
       fileSystemRoots: fileSystemRoots,
@@ -293,7 +296,9 @@ class KernelSnapshotNativeAssets extends Target {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[];
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/${KernelSnapshotNativeAssets.dillName}'),
+  ];
 
   @override
   List<String> get depfiles => const <String>[];
@@ -392,7 +397,10 @@ class KernelSnapshot extends Target {
   ];
 
   @override
-  List<Source> get inputs => <Source>[];
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/${KernelSnapshotProgram.dillName}'),
+    Source.pattern('{BUILD_DIR}/${KernelSnapshotNativeAssets.dillName}'),
+  ];
 
   @override
   List<Source> get outputs => <Source>[];
