@@ -5,7 +5,9 @@
 #include "impeller/renderer/backend/gles/blit_command_gles.h"
 
 #include "flutter/fml/closure.h"
+#include "fml/trace_event.h"
 #include "impeller/base/validation.h"
+#include "impeller/geometry/point.h"
 #include "impeller/renderer/backend/gles/device_buffer_gles.h"
 #include "impeller/renderer/backend/gles/texture_gles.h"
 
@@ -116,6 +118,168 @@ bool BlitCopyTextureToTextureCommandGLES::Encode(
 
   return true;
 };
+
+namespace {
+struct TexImage2DData {
+  GLint internal_format = 0;
+  GLenum external_format = GL_NONE;
+  GLenum type = GL_NONE;
+  BufferView buffer_view;
+
+  explicit TexImage2DData(PixelFormat pixel_format) {
+    switch (pixel_format) {
+      case PixelFormat::kA8UNormInt:
+        internal_format = GL_ALPHA;
+        external_format = GL_ALPHA;
+        type = GL_UNSIGNED_BYTE;
+        break;
+      case PixelFormat::kR8UNormInt:
+        internal_format = GL_RED;
+        external_format = GL_RED;
+        type = GL_UNSIGNED_BYTE;
+        break;
+      case PixelFormat::kR8G8B8A8UNormInt:
+      case PixelFormat::kB8G8R8A8UNormInt:
+      case PixelFormat::kR8G8B8A8UNormIntSRGB:
+      case PixelFormat::kB8G8R8A8UNormIntSRGB:
+        internal_format = GL_RGBA;
+        external_format = GL_RGBA;
+        type = GL_UNSIGNED_BYTE;
+        break;
+      case PixelFormat::kR32G32B32A32Float:
+        internal_format = GL_RGBA;
+        external_format = GL_RGBA;
+        type = GL_FLOAT;
+        break;
+      case PixelFormat::kR16G16B16A16Float:
+        internal_format = GL_RGBA;
+        external_format = GL_RGBA;
+        type = GL_HALF_FLOAT;
+        break;
+      case PixelFormat::kS8UInt:
+        // Pure stencil textures are only available in OpenGL 4.4+, which is
+        // ~0% of mobile devices. Instead, we use a depth-stencil texture and
+        // only use the stencil component.
+        //
+        // https://registry.khronos.org/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
+      case PixelFormat::kD24UnormS8Uint:
+        internal_format = GL_DEPTH_STENCIL;
+        external_format = GL_DEPTH_STENCIL;
+        type = GL_UNSIGNED_INT_24_8;
+        break;
+      case PixelFormat::kUnknown:
+      case PixelFormat::kD32FloatS8UInt:
+      case PixelFormat::kR8G8UNormInt:
+      case PixelFormat::kB10G10R10XRSRGB:
+      case PixelFormat::kB10G10R10XR:
+      case PixelFormat::kB10G10R10A10XR:
+        return;
+    }
+    is_valid_ = true;
+  }
+
+  TexImage2DData(PixelFormat pixel_format, BufferView p_buffer_view)
+      : TexImage2DData(pixel_format) {
+    buffer_view = std::move(p_buffer_view);
+  }
+
+  bool IsValid() const { return is_valid_; }
+
+ private:
+  bool is_valid_ = false;
+};
+}  // namespace
+
+BlitCopyBufferToTextureCommandGLES::~BlitCopyBufferToTextureCommandGLES() =
+    default;
+
+std::string BlitCopyBufferToTextureCommandGLES::GetLabel() const {
+  return label;
+}
+
+bool BlitCopyBufferToTextureCommandGLES::Encode(
+    const ReactorGLES& reactor) const {
+  TextureGLES& texture_gles = TextureGLES::Cast(*destination);
+
+  if (texture_gles.GetType() != TextureGLES::Type::kTexture) {
+    VALIDATION_LOG << "Incorrect texture usage flags for setting contents on "
+                      "this texture object.";
+    return false;
+  }
+
+  if (texture_gles.IsWrapped()) {
+    VALIDATION_LOG << "Cannot set the contents of a wrapped texture.";
+    return false;
+  }
+
+  const auto& tex_descriptor = texture_gles.GetTextureDescriptor();
+
+  if (tex_descriptor.size.IsEmpty()) {
+    return true;
+  }
+
+  if (!tex_descriptor.IsValid() ||
+      source.range.length < tex_descriptor.GetByteSizeOfBaseMipLevel()) {
+    return false;
+  }
+
+  destination->SetCoordinateSystem(TextureCoordinateSystem::kUploadFromHost);
+
+  GLenum texture_type;
+  GLenum texture_target;
+  switch (tex_descriptor.type) {
+    case TextureType::kTexture2D:
+      texture_type = GL_TEXTURE_2D;
+      texture_target = GL_TEXTURE_2D;
+      break;
+    case TextureType::kTexture2DMultisample:
+      VALIDATION_LOG << "Multisample texture uploading is not supported for "
+                        "the OpenGLES backend.";
+      return false;
+    case TextureType::kTextureCube:
+      texture_type = GL_TEXTURE_CUBE_MAP;
+      texture_target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + slice;
+      break;
+    case TextureType::kTextureExternalOES:
+      texture_type = GL_TEXTURE_EXTERNAL_OES;
+      texture_target = GL_TEXTURE_EXTERNAL_OES;
+      break;
+  }
+
+  TexImage2DData data = TexImage2DData(tex_descriptor.format, source);
+  if (!data.IsValid()) {
+    VALIDATION_LOG << "Invalid texture format.";
+    return false;
+  }
+
+  auto gl_handle = texture_gles.GetGLHandle();
+  if (!gl_handle.has_value()) {
+    VALIDATION_LOG
+        << "Texture was collected before it could be uploaded to the GPU.";
+    return false;
+  }
+  const auto& gl = reactor.GetProcTable();
+  gl.BindTexture(texture_type, gl_handle.value());
+  const GLvoid* tex_data =
+      data.buffer_view.buffer->OnGetContents() + data.buffer_view.range.offset;
+
+  {
+    TRACE_EVENT1("impeller", "TexImage2DUpload", "Bytes",
+                 std::to_string(data.buffer_view.range.length).c_str());
+    gl.TexImage2D(texture_target,              // target
+                  0u,                          // LOD level
+                  data.internal_format,        // internal format
+                  tex_descriptor.size.width,   // width
+                  tex_descriptor.size.height,  // height
+                  0u,                          // border
+                  data.external_format,        // external format
+                  data.type,                   // type
+                  tex_data                     // data
+    );
+  }
+  texture_gles.MarkContentsInitialized();
+  return true;
+}
 
 BlitCopyTextureToBufferCommandGLES::~BlitCopyTextureToBufferCommandGLES() =
     default;

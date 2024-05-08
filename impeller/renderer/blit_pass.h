@@ -93,13 +93,16 @@ class BlitPass {
   ///                                 destination buffer.
   /// @param[in]  label               The optional debug label to give the
   ///                                 command.
+  /// @param[in]  slice               For cubemap textures, the slice to write
+  ///                                 data to.
   ///
   /// @return     If the command was valid for subsequent commitment.
   ///
   bool AddCopy(BufferView source,
                std::shared_ptr<Texture> destination,
                IPoint destination_origin = {},
-               std::string label = "");
+               std::string label = "",
+               uint32_t slice = 0);
 
   //----------------------------------------------------------------------------
   /// @brief      Record a command to generate all mip levels for a texture.
@@ -146,7 +149,8 @@ class BlitPass {
       BufferView source,
       std::shared_ptr<Texture> destination,
       IPoint destination_origin,
-      std::string label) = 0;
+      std::string label,
+      uint32_t slice) = 0;
 
   virtual bool OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
                                        std::string label) = 0;

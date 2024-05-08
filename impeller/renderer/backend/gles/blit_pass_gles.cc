@@ -104,7 +104,7 @@ bool BlitPassGLES::OnCopyTextureToTextureCommand(
   command->source_region = source_region;
   command->destination_origin = destination_origin;
 
-  commands_.emplace_back(std::move(command));
+  commands_.push_back(std::move(command));
   return true;
 }
 
@@ -122,7 +122,26 @@ bool BlitPassGLES::OnCopyTextureToBufferCommand(
   command->source_region = source_region;
   command->destination_offset = destination_offset;
 
-  commands_.emplace_back(std::move(command));
+  commands_.push_back(std::move(command));
+  return true;
+}
+
+// |BlitPass|
+bool BlitPassGLES::OnCopyBufferToTextureCommand(
+    BufferView source,
+    std::shared_ptr<Texture> destination,
+    IPoint destination_origin,
+    std::string label,
+    uint32_t slice) {
+  auto command = std::make_unique<BlitCopyBufferToTextureCommandGLES>();
+  command->label = label;
+  command->source = std::move(source);
+  command->destination = std::move(destination);
+  command->destination_origin = destination_origin;
+  command->label = label;
+  command->slice = slice;
+
+  commands_.push_back(std::move(command));
   return true;
 }
 
@@ -133,7 +152,7 @@ bool BlitPassGLES::OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
   command->label = label;
   command->texture = std::move(texture);
 
-  commands_.emplace_back(std::move(command));
+  commands_.push_back(std::move(command));
   return true;
 }
 

@@ -20,11 +20,13 @@ class Texture {
 
   virtual void SetLabel(std::string_view label) = 0;
 
+  // Deprecated: use BlitPass::AddCopy instead.
   [[nodiscard]] bool SetContents(const uint8_t* contents,
                                  size_t length,
                                  size_t slice = 0,
                                  bool is_opaque = false);
 
+  // Deprecated: use BlitPass::AddCopy instead.
   [[nodiscard]] bool SetContents(std::shared_ptr<const fml::Mapping> mapping,
                                  size_t slice = 0,
                                  bool is_opaque = false);
@@ -39,6 +41,10 @@ class Texture {
 
   const TextureDescriptor& GetTextureDescriptor() const;
 
+  /// Update the coordinate system used by the texture.
+  ///
+  /// The setting is used to conditionally invert the coordinates to
+  /// account for the different origin of GLES textures.
   void SetCoordinateSystem(TextureCoordinateSystem coordinate_system);
 
   TextureCoordinateSystem GetCoordinateSystem() const;

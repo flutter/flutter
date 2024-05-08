@@ -97,13 +97,15 @@ bool BlitPassVK::OnCopyBufferToTextureCommand(
     BufferView source,
     std::shared_ptr<Texture> destination,
     IPoint destination_origin,
-    std::string label) {
+    std::string label,
+    uint32_t slice) {
   auto command = std::make_unique<BlitCopyBufferToTextureCommandVK>();
 
   command->source = std::move(source);
   command->destination = std::move(destination);
   command->destination_origin = destination_origin;
   command->label = std::move(label);
+  command->slice = slice;
 
   commands_.push_back(std::move(command));
   return true;

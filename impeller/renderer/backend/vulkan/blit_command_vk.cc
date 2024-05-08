@@ -262,6 +262,22 @@ bool BlitCopyBufferToTextureCommandVK::Encode(CommandEncoderVK& encoder) const {
                                image_copy               //
   );
 
+  // Transition to shader-read.
+  {
+    BarrierVK barrier;
+    barrier.cmd_buffer = cmd_buffer;
+    barrier.src_access = vk::AccessFlagBits::eTransferWrite;
+    barrier.src_stage = vk::PipelineStageFlagBits::eTransfer;
+    barrier.dst_access = vk::AccessFlagBits::eShaderRead;
+    barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
+
+    barrier.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+
+    if (!dst.SetLayout(barrier)) {
+      return false;
+    }
+  }
+
   return true;
 }
 
