@@ -332,7 +332,7 @@ bool AHBSwapchainImplVK::SubmitWaitForRenderReady(
   vk::SubmitInfo submit_info;
 
   if (render_ready_semaphore) {
-    constexpr const auto kWaitStages =
+    static constexpr const auto kWaitStages =
         vk::PipelineStageFlagBits::eColorAttachmentOutput |
         vk::PipelineStageFlagBits::eFragmentShader |
         vk::PipelineStageFlagBits::eTransfer;
