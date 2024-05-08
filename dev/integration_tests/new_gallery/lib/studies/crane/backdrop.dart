@@ -337,9 +337,13 @@ class _CraneAppBarState extends State<CraneAppBar> {
           children: <Widget>[
             const ExcludeSemantics(
               child: FadeInImagePlaceholder(
-                image: AssetImage(
-                  'crane/logo/logo.png',
-                  package: 'flutter_gallery_assets',
+                image: ResizeImage(
+                  AssetImage(
+                    'crane/logo/logo.png',
+                    package: 'flutter_gallery_assets',
+                  ),
+                  width: 40,
+                  height: 60,
                 ),
                 placeholder: SizedBox(
                   width: 40,
