@@ -10,17 +10,18 @@
 #include <optional>
 #include <unordered_map>
 
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/status_or.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
+#include "impeller/entity/entity.h"
 #include "impeller/renderer/capabilities.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/pipeline.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/render_target.h"
-#include "impeller/typographer/lazy_glyph_atlas.h"
 #include "impeller/typographer/typographer_context.h"
 
 #include "impeller/entity/border_mask_blur.frag.h"
@@ -52,6 +53,8 @@
 #include "impeller/entity/texture_uv_fill.vert.h"
 #include "impeller/entity/tiled_texture_fill.frag.h"
 #include "impeller/entity/yuv_to_rgb_filter.frag.h"
+
+#include "impeller/typographer/glyph_atlas.h"
 
 #include "impeller/entity/conical_gradient_ssbo_fill.frag.h"
 #include "impeller/entity/linear_gradient_ssbo_fill.frag.h"

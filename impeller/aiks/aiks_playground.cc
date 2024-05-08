@@ -23,6 +23,7 @@ void AiksPlayground::SetTypographerContext(
 }
 
 void AiksPlayground::TearDown() {
+  inspector_.HackResetDueToTextureLeaks();
   PlaygroundTest::TearDown();
 }
 
@@ -44,8 +45,9 @@ bool AiksPlayground::OpenPlaygroundHere(AiksPlaygroundCallback callback) {
   }
 
   return Playground::OpenPlaygroundHere(
-      [&renderer, &callback](RenderTarget& render_target) -> bool {
-        const std::optional<Picture>& picture = callback(renderer);
+      [this, &renderer, &callback](RenderTarget& render_target) -> bool {
+        const std::optional<Picture>& picture = inspector_.RenderInspector(
+            renderer, [&]() { return callback(renderer); });
 
         if (!picture.has_value()) {
           return false;
