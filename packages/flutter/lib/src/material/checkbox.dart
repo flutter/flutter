@@ -738,9 +738,9 @@ class _CheckboxPainter extends ToggleablePainter {
 
   void _drawCheck(Canvas canvas, Offset origin, double t, Paint paint) {
     final Path path = Path();
-    Offset start;
-    Offset mid;
-    Offset end;
+    final Offset start;
+    final Offset mid;
+    final Offset end;
 
     switch (_designSpec!) {
       case _DesignSpec.cupertino:
@@ -776,9 +776,9 @@ class _CheckboxPainter extends ToggleablePainter {
   }
 
   void _drawDash(Canvas canvas, Offset origin, double t, Paint paint) {
-    Offset start;
-    Offset mid;
-    Offset end;
+    final Offset start;
+    final Offset mid;
+    final Offset end;
 
     switch (_designSpec!) {
       case _DesignSpec.cupertino:
