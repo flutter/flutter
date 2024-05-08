@@ -96,9 +96,10 @@ class ExpansionPanel {
   /// Defaults to false.
   final bool isExpanded;
 
-  /// Defines the splash color of the panel if [canTapOnHeader] is true, or the expand/collapse IconButton if [canTapOnHeader] is false.
+  /// Defines the splash color of the panel if [canTapOnHeader] is true, or the splash color of the expand/collapse IconButton if [canTapOnHeader] is false.
   ///
-  /// Defaults to [ThemeData.splashColor] if [canTapOnHeader] is true, or [ThemeData.highlightColor] if [canTapOnHeader] is false.
+  /// If this is null, then the icon button will use its default splash color [ThemeData.highlightColor], and the panel will
+  /// use its default splash color [ThemeData.splashColor] (if [canTapOnHeader] is true).
   final Color? splashColor;
 
   /// Whether tapping on the panel's header will expand/collapse it.

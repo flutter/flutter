@@ -97,7 +97,7 @@ class ExpandIcon extends StatefulWidget {
 
   /// Defines the splash color of the IconButton.
   ///
-  /// Defaults to the Theme's highlight color, [ThemeData.highlightColor].
+  /// Defaults to [ThemeData.highlightColor].
   final Color? splashColor;
 
   @override
