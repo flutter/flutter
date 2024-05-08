@@ -5199,11 +5199,11 @@ class Flexible extends ParentDataWidget<FlexParentData> {
 
   /// The flex factor to use for this child.
   ///
-  /// If null or zero, the child is inflexible and determines its own size. If
-  /// non-zero, the amount of space the child can occupy in the main axis is
-  /// determined by dividing the free space (after placing the inflexible
-  /// children) according to the flex factors of the flexible children.
-  final int flex;
+  /// If null the child is inflexible and determines its own size. If non-null,
+  /// the amount of space the child can occupy in the main axis is determined by
+  /// dividing the free space (after placing the inflexible children) according
+  /// to the flex factors of the flexible children.
+  final num? flex;
 
   /// How a flexible child is inscribed into the available space.
   ///
@@ -5244,7 +5244,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IntProperty('flex', flex));
+    properties.add(DiagnosticsProperty<num>('flex', flex));
   }
 }
 

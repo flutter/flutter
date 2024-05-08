@@ -113,11 +113,11 @@ enum FlexFit {
 class FlexParentData extends ContainerBoxParentData<RenderBox> {
   /// The flex factor to use for this child.
   ///
-  /// If null or zero, the child is inflexible and determines its own size. If
-  /// non-zero, the amount of space the child's can occupy in the main axis is
-  /// determined by dividing the free space (after placing the inflexible
-  /// children) according to the flex factors of the flexible children.
-  int? flex;
+  /// If null, the child is inflexible and determines its own size. If non-null,
+  /// the amount of space the child's can occupy in the main axis is determined
+  /// by dividing the free space (after placing the inflexible children)
+  /// according to the flex factors of the flexible children.
+  num? flex;
 
   /// How a flexible child is inscribed into the available space.
   ///
@@ -605,9 +605,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       double inflexibleSpace = 0.0;
       double maxFlexFractionSoFar = 0.0;
       for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
-        final int flex = _getFlex(child);
-        totalFlex += flex;
-        if (flex > 0) {
+        final num? flex = _getFlex(child);
+        totalFlex += flex ?? 0;
+        if (flex != null && flex > 0) {
           final double flexFraction = childSize(child, extent) / flex;
           maxFlexFractionSoFar = math.max(maxFlexFractionSoFar, flexFraction);
         } else {
@@ -628,7 +628,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       Size layoutChild(RenderBox child, BoxConstraints constraints) {
         final double mainAxisSizeFromConstraints = isHorizontal ? constraints.maxWidth : constraints.maxHeight;
         // A infinite mainAxisSizeFromConstraints means this child is flexible (or extent is double.infinity).
-        assert((_getFlex(child) != 0 && extent.isFinite) == mainAxisSizeFromConstraints.isFinite);
+        assert((_getFlex(child) != null && _getFlex(child)! > 0 && extent.isFinite) == mainAxisSizeFromConstraints.isFinite);
         final double maxMainAxisSize = mainAxisSizeFromConstraints.isFinite
           ? mainAxisSizeFromConstraints
           : (isHorizontal ? child.getMaxIntrinsicWidth(double.infinity) : child.getMaxIntrinsicHeight(double.infinity));
@@ -688,9 +688,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     };
   }
 
-  static int _getFlex(RenderBox child) {
+  static num? _getFlex(RenderBox child) {
     final FlexParentData childParentData = child.parentData! as FlexParentData;
-    return childParentData.flex ?? 0;
+    return childParentData.flex;
   }
 
   static FlexFit _getFit(RenderBox child) {
@@ -767,7 +767,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   BoxConstraints _constraintsForFlexChild(RenderBox child, BoxConstraints constraints, double maxChildExtent) {
-    assert(_getFlex(child) > 0.0);
+    assert(_getFlex(child)! > 0.0);
     assert(maxChildExtent >= 0.0);
     final double minChildExtent = switch (_getFit(child)) {
       FlexFit.tight => maxChildExtent,
@@ -811,10 +811,14 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     final BoxConstraints nonFlexConstraints = _constraintsForNonFlexChild(constraints);
     BoxConstraints constraintsForChild(RenderBox child) {
       final double? spacePerFlex = sizes.spacePerFlex;
-      final int flex;
-      return spacePerFlex != null && (flex = _getFlex(child)) > 0
-        ? _constraintsForFlexChild(child, constraints, flex * spacePerFlex)
-        : nonFlexConstraints;
+      if (spacePerFlex != null) {
+        final num? flex = _getFlex(child);
+        if (flex != null && flex > 0) {
+          return _constraintsForFlexChild(child, constraints, flex * spacePerFlex);
+        }
+      }
+      return nonFlexConstraints;
+
     }
 
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
@@ -878,8 +882,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       final bool canFlex = maxMainSize < double.infinity;
       RenderBox? child = firstChild;
       while (child != null) {
-        final int flex = _getFlex(child);
-        if (flex > 0) {
+        final num? flex = _getFlex(child);
+        if (flex != null && flex > 0) {
           final String identity = _direction == Axis.horizontal ? 'row' : 'column';
           final String axis = _direction == Axis.horizontal ? 'horizontal' : 'vertical';
           final String dimension = _direction == Axis.horizontal ? 'width' : 'height';
@@ -972,13 +976,16 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       : null;
 
     // The first pass lays out non-flex children and computes total flex.
-    int totalFlex = 0;
+    num totalFlex = 0;
     RenderBox? firstFlexChild;
     _AscentDescent accumulatedAscentDescent = _AscentDescent.none;
     _AxisSize accumulatedSize = _AxisSize.empty;
     for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
-      final int flex;
-      if (canFlex && (flex = _getFlex(child)) > 0) {
+      num? flex;
+      if (canFlex) {
+        flex = _getFlex(child);
+      }
+      if (flex != null && flex > 0) {
         totalFlex += flex;
         firstFlexChild ??= child;
       } else {
@@ -997,8 +1004,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     final double flexSpace = math.max(0.0, maxMainSize - accumulatedSize.mainAxisExtent);
     final double spacePerFlex = flexSpace / totalFlex;
     for (RenderBox? child = firstFlexChild; child != null && totalFlex > 0; child = childAfter(child)) {
-      final int flex = _getFlex(child);
-      if (flex == 0) {
+      final num? flex = _getFlex(child);
+      if (flex == null || flex <= 0) {
         continue;
       }
       totalFlex -= flex;
