@@ -1226,8 +1226,8 @@ class PipelineOwner with DiagnosticableTreeMixin {
   /// owner doesn't mean that semantics are actually produced.
   @Deprecated(
     'Use SemanticsBinding.debugOutstandingSemanticsHandles instead. '
-    'This API is broken, see ensureSemantics. '
-    'This feature was deprecated after 3.22.0-23.0.pre.'
+    'This API is broken (see ensureSemantics). '
+    'This feature was deprecated after v3.22.0-23.0.pre.'
   )
   int get debugOutstandingSemanticsHandles => _outstandingSemanticsHandles;
   int _outstandingSemanticsHandles = 0;
@@ -1239,8 +1239,8 @@ class PipelineOwner with DiagnosticableTreeMixin {
   /// it does not guarantee that semantics are produced.
   @Deprecated(
     'Call SemanticsBinding.ensureSemantics instead and optionally add a listener to PipelineOwner.semanticsOwner. '
-    'This API is broken. It does not guarantee that semantics are actually produced. '
-    'This feature was deprecated after 3.22.0-23.0.pre.'
+    'This API is broken; it does not guarantee that semantics are actually produced. '
+    'This feature was deprecated after v3.22.0-23.0.pre.'
   )
   SemanticsHandle ensureSemantics({ VoidCallback? listener }) {
     _outstandingSemanticsHandles += 1;
