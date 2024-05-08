@@ -3405,8 +3405,13 @@
 ../../../fuchsia/sdk/linux/obj/x64-api-20/sysroot/dist/lib/asan/ld.so.1
 ../../../fuchsia/sdk/linux/obj/x64-api-20/sysroot/dist/lib/ld.so.1
 ../../../fuchsia/sdk/linux/packages/blobs
+../../../fuchsia/sdk/linux/packages/cmd-buf-benchmark-test/meta.json
 ../../../fuchsia/sdk/linux/packages/heapdump-collector/meta.json
 ../../../fuchsia/sdk/linux/packages/magma_conformance_tests/meta.json
+../../../fuchsia/sdk/linux/packages/vkcopy-test/meta.json
+../../../fuchsia/sdk/linux/packages/vkext-test/meta.json
+../../../fuchsia/sdk/linux/packages/vkloop-test/meta.json
+../../../fuchsia/sdk/linux/packages/vkproto-driver-test/meta.json
 ../../../fuchsia/sdk/linux/packages/vkreadback_test/meta.json
 ../../../fuchsia/sdk/linux/pkg/async-cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/async-default/meta.json
