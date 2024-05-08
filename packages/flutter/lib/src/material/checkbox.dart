@@ -765,9 +765,6 @@ class _CheckboxPainter extends ToggleablePainter {
   }
 
   void _drawCheck(Canvas canvas, Offset origin, double t, Paint paint) {
-    assert(t >= 0.0 && t <= 1.0);
-    // As t goes from 0.0 to 1.0, animate the two check mark strokes from the
-    // short side to the long side.
     final Path path = Path();
     Offset start;
     Offset mid;
@@ -778,42 +775,55 @@ class _CheckboxPainter extends ToggleablePainter {
         start = const Offset(_kEdgeSize * 0.25, _kEdgeSize * 0.52);
         mid = const Offset(_kEdgeSize * 0.46, _kEdgeSize * 0.75);
         end = const Offset(_kEdgeSize * 0.72, _kEdgeSize * 0.29);
+        path.moveTo(origin.dx + start.dx, origin.dy + start.dy);
+        path.lineTo(origin.dx + mid.dx, origin.dy + mid.dy);
+        canvas.drawPath(path, paint);
+        path.moveTo(origin.dx + mid.dx, origin.dy + mid.dy);
+        path.lineTo(origin.dx + end.dx, origin.dy + end.dy);
       case _DesignSpec.material:
+        assert(t >= 0.0 && t <= 1.0);
         start = const Offset(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
         mid = const Offset(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
         end = const Offset(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
-    }
-    if (t < 0.5) {
-      final double strokeT = t * 2.0;
-      final Offset drawMid = Offset.lerp(start, mid, strokeT)!;
-      path.moveTo(origin.dx + start.dx, origin.dy + start.dy);
-      path.lineTo(origin.dx + drawMid.dx, origin.dy + drawMid.dy);
-    } else {
-      final double strokeT = (t - 0.5) * 2.0;
-      final Offset drawEnd = Offset.lerp(mid, end, strokeT)!;
-      path.moveTo(origin.dx + start.dx, origin.dy + start.dy);
-      path.lineTo(origin.dx + mid.dx, origin.dy + mid.dy);
-      path.lineTo(origin.dx + drawEnd.dx, origin.dy + drawEnd.dy);
+        // As t goes from 0.0 to 1.0, animate the two check mark strokes from the
+        // short side to the long side.
+        if (t < 0.5) {
+          final double strokeT = t * 2.0;
+          final Offset drawMid = Offset.lerp(start, mid, strokeT)!;
+          path.moveTo(origin.dx + start.dx, origin.dy + start.dy);
+          path.lineTo(origin.dx + drawMid.dx, origin.dy + drawMid.dy);
+        } else {
+          final double strokeT = (t - 0.5) * 2.0;
+          final Offset drawEnd = Offset.lerp(mid, end, strokeT)!;
+          path.moveTo(origin.dx + start.dx, origin.dy + start.dy);
+          path.lineTo(origin.dx + mid.dx, origin.dy + mid.dy);
+          path.lineTo(origin.dx + drawEnd.dx, origin.dy + drawEnd.dy);
+        }
     }
     canvas.drawPath(path, paint);
   }
 
   void _drawDash(Canvas canvas, Offset origin, double t, Paint paint) {
-    assert(t >= 0.0 && t <= 1.0);
-    // As t goes from 0.0 to 1.0, animate the horizontal line from the
-    // mid point outwards.
-    final Offset start = switch (_designSpec!) {
-      _DesignSpec.cupertino => const Offset(_kEdgeSize * 0.25, _kEdgeSize * 0.5),
-      _DesignSpec.material => const Offset(_kEdgeSize * 0.2, _kEdgeSize * 0.5),
-    };
-    const Offset mid = Offset(_kEdgeSize * 0.5, _kEdgeSize * 0.5);
-    final Offset end = switch (_designSpec!) {
-      _DesignSpec.cupertino => const Offset(_kEdgeSize * 0.75, _kEdgeSize * 0.5),
-      _DesignSpec.material => const Offset(_kEdgeSize * 0.8, _kEdgeSize * 0.5),
-    };
-    final Offset drawStart = Offset.lerp(start, mid, 1.0 - t)!;
-    final Offset drawEnd = Offset.lerp(mid, end, t)!;
-    canvas.drawLine(origin + drawStart, origin + drawEnd, paint);
+    Offset start;
+    Offset mid;
+    Offset end;
+
+    switch (_designSpec!) {
+      case _DesignSpec.cupertino:
+        start = const Offset(CupertinoCheckbox.width * 0.25, CupertinoCheckbox.width * 0.5);
+        end = const Offset(CupertinoCheckbox.width * 0.75, CupertinoCheckbox.width * 0.5);
+        canvas.drawLine(origin + start, origin + end, paint);
+      case _DesignSpec.material:
+        assert(t >= 0.0 && t <= 1.0);
+        // As t goes from 0.0 to 1.0, animate the horizontal line from the
+        // mid point outwards.
+        start = const Offset(_kEdgeSize * 0.2, _kEdgeSize * 0.5);
+        mid = const Offset(_kEdgeSize * 0.5, _kEdgeSize * 0.5);
+        end = const Offset(_kEdgeSize * 0.8, _kEdgeSize * 0.5);
+        final Offset drawStart = Offset.lerp(start, mid, 1.0 - t)!;
+        final Offset drawEnd = Offset.lerp(mid, end, t)!;
+        canvas.drawLine(origin + drawStart, origin + drawEnd, paint);
+    }
   }
 
   @override
