@@ -33,7 +33,7 @@ void main() {
     expect(find.text('count: 0'), findsOneWidget);
   });
 
-  testWidgets('LCtrl-C or C-LCtrl combination press updates counter', (WidgetTester tester) async {
+  testWidgets('CtrlLeft+C or C+CtrlLeft key combination updates counter', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.LogicalKeySetExampleApp(),
     );
@@ -57,7 +57,7 @@ void main() {
     }
   });
 
-  testWidgets('RCtrl-C combination press updates counter', (WidgetTester tester) async {
+  testWidgets('CtrlRight+C key combination updates counter', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.LogicalKeySetExampleApp(),
     );
@@ -76,7 +76,7 @@ void main() {
     }
   });
 
-  testWidgets('LCtrl-A-C combination press does not update counter', (WidgetTester tester) async {
+  testWidgets('CtrlLeft+A+C key combination does not update counter', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.LogicalKeySetExampleApp(),
     );
@@ -96,7 +96,7 @@ void main() {
     }
   });
 
-  testWidgets('RCtrl-A-C combination press does not update counter', (WidgetTester tester) async {
+  testWidgets('CtrlRight+A+C key combination does not update counter', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.LogicalKeySetExampleApp(),
     );
