@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -3628,6 +3629,55 @@ void main() {
 
     await tester.pumpAndSettle();
 
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('NavigationRail labels shall not overflow if longer texts provided - extended', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/110901.
+    // The navigation rail has a narrow width constraint. The text should wrap.
+    const String normalLabel = 'Abc';
+    const String longLabel = 'Very long bookmark text for navigation destination';
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(
+        builder: (BuildContext context) {
+          return Scaffold(
+            body: Row(
+              children: <Widget>[
+                SizedBox(
+                  width: 140.0,
+                  child: NavigationRail(
+                    selectedIndex: 1,
+                    extended: true,
+                    destinations: const <NavigationRailDestination>[
+                      NavigationRailDestination(
+                        icon: Icon(Icons.favorite_border),
+                        selectedIcon: Icon(Icons.favorite),
+                        label: Text(normalLabel),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.bookmark_border),
+                        selectedIcon: Icon(Icons.bookmark),
+                        label: Text(longLabel),
+                      ),
+                    ],
+                  ),
+                ),
+                const Expanded(
+                  child: Text('body'),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    ));
+
+    expect(find.byType(NavigationRail), findsOneWidget);
+    expect(find.text(normalLabel), findsOneWidget);
+    expect(find.text(longLabel), findsOneWidget);
+
+    // If the widget manages to layout without throwing an overflow exception,
+    // the test passes.
     expect(tester.takeException(), isNull);
   });
 
