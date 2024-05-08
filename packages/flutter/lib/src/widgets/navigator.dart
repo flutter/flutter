@@ -563,17 +563,20 @@ abstract class Route<T> extends _RoutePlaceholder {
   }
 
   bool _hasActiveParentRouteBelow(NavigatorState? parent) {
-    if (parent != null) {
-      for (final _RouteEntry entry in parent._history) {
+    if (parent == null) {
+      return false;
+    }
+
+    final _History history = parent._history;
+    if (history.length > 1) {
+      for (final _RouteEntry entry in history) {
         if (_RouteEntry.isPresentPredicate(entry)) {
           return true;
         }
       }
-
-      return _hasActiveParentRouteBelow(parent._parentNavigator);
     }
 
-    return false;
+    return _hasActiveParentRouteBelow(parent._parentNavigator);
   }
 
   /// Whether there is at least one active route underneath this route.
@@ -596,6 +599,7 @@ abstract class Route<T> extends _RoutePlaceholder {
         return true;
       }
     }
+
     return false;
   }
 
