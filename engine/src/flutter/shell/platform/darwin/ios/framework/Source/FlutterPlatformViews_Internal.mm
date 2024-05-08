@@ -172,9 +172,7 @@ static BOOL _preparedOnce = NO;
   visualEffectSubview.layer.backgroundColor = UIColor.clearColor.CGColor;
   visualEffectView.frame = _frame;
 
-  if (_backdropFilterView != visualEffectView) {
-    _backdropFilterView = [visualEffectView retain];
-  }
+  self.backdropFilterView = visualEffectView;
 }
 
 @end
