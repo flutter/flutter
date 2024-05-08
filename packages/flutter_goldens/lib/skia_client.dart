@@ -590,6 +590,7 @@ class SkiaGoldClient {
       'CI' : 'luci',
       'Platform' : platform.operatingSystem,
       // 'Abi': abi.toString(), workaround for https://g-issues.skia.org/issues/339508268
+      // Flutter tracking issue: https://github.com/flutter/flutter/issues/148022
       'name' : testName,
       'source_type' : 'flutter',
       if (_isImpeller)
