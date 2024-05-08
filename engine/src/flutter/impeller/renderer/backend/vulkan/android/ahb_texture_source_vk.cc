@@ -281,6 +281,9 @@ static TextureDescriptor ToTextureDescriptor(
   desc.mip_count = (ahb_desc.usage & AHARDWAREBUFFER_USAGE_GPU_MIPMAP_COMPLETE)
                        ? ahb_size.MipCount()
                        : 1u;
+  if (ahb_desc.usage & AHARDWAREBUFFER_USAGE_COMPOSER_OVERLAY) {
+    desc.usage = TextureUsage::kRenderTarget;
+  }
   return desc;
 }
 
