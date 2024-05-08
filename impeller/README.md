@@ -242,3 +242,4 @@ To your `Info.plist` file, add under the top-level `<dict>` tag:
 * [Threading in the Vulkan Backend](docs/vulkan_threading.md)
 * [Android Rendering Backend Selection](docs/android.md)
 * [Using Impeller as a Standalone Rendering Library (with OpenGL ES)](docs/standalone_gles.md)
+* [Glossary](docs/glossary.md)
