@@ -5,6 +5,7 @@
 #include "impeller/toolkit/android/surface_control.h"
 
 #include "impeller/base/validation.h"
+#include "impeller/toolkit/android/proc_table.h"
 #include "impeller/toolkit/android/surface_transaction.h"
 
 namespace impeller::android {
@@ -49,7 +50,8 @@ bool SurfaceControl::RemoveFromParent() const {
 
 bool SurfaceControl::IsAvailableOnPlatform() {
   return GetProcTable().IsValid() &&
-         GetProcTable().ASurfaceControl_createFromWindow.IsAvailable();
+         GetProcTable().ASurfaceControl_createFromWindow.IsAvailable() &&
+         GetProcTable().ASurfaceTransaction_setEnableBackPressure.IsAvailable();
 }
 
 }  // namespace impeller::android
