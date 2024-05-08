@@ -30,6 +30,7 @@ echo.
 echo  Want to run the "flutter" command from any Command Prompt or PowerShell window?
 echo  Add Flutter to your PATH: https://flutter.dev/setup-windows/#update-your-path
 echo.
+echo  Insert run "flutter"
 echo  ===============================================================================
 
 REM "%~dp0" is the directory of this file including trailing backslash
