@@ -289,6 +289,7 @@ class ExperimentalDlDispatcher : public DlDispatcherBase {
  public:
   ExperimentalDlDispatcher(ContentContext& renderer,
                            RenderTarget& render_target,
+                           bool requires_readback,
                            IRect cull_rect);
 
   ~ExperimentalDlDispatcher() = default;
