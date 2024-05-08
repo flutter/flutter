@@ -454,7 +454,11 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       if (kIsWeb) {
         PlatformSelectableRegionContextMenu.detach(_selectionDelegate);
       }
-      _clearSelection();
+      if (SchedulerBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+        // We should only clear the selection when this SelectableRegion loses
+        // focus while the application is currently running.
+        _clearSelection();
+      }
     }
     if (kIsWeb) {
       PlatformSelectableRegionContextMenu.attach(_selectionDelegate);
