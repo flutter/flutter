@@ -4,7 +4,7 @@
 
 #include "flutter/display_list/dl_vertices.h"
 
-#include "flutter/display_list/utils/dl_bounds_accumulator.h"
+#include "flutter/display_list/utils/dl_accumulation_rect.h"
 #include "flutter/fml/logging.h"
 
 namespace flutter {
@@ -86,7 +86,7 @@ size_t DlVertices::size() const {
 }
 
 static SkRect compute_bounds(const SkPoint* points, int count) {
-  RectBoundsAccumulator accumulator;
+  AccumulationRect accumulator;
   for (int i = 0; i < count; i++) {
     accumulator.accumulate(points[i]);
   }

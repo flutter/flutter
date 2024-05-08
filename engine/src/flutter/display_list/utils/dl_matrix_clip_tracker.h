@@ -8,9 +8,8 @@
 #include <vector>
 
 #include "flutter/display_list/dl_canvas.h"
+#include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/fml/logging.h"
-#include "flutter/impeller/geometry/matrix.h"
-#include "flutter/impeller/geometry/rect.h"
 
 #include "third_party/skia/include/core/SkM44.h"
 #include "third_party/skia/include/core/SkMatrix.h"
@@ -24,49 +23,11 @@ namespace flutter {
 class DisplayListMatrixClipState {
  private:
   using ClipOp = DlCanvas::ClipOp;
-  using DlRect = impeller::Rect;
-  using DlMatrix = impeller::Matrix;
-  using DlDegrees = impeller::Degrees;
-
-  static_assert(sizeof(SkRect) == sizeof(DlRect));
-
-  static const DlRect& ToDlRect(const SkRect& rect) {
-    return *reinterpret_cast<const DlRect*>(&rect);
-  }
-
-  static constexpr DlMatrix ToDlMatrix(const SkMatrix& matrix) {
-    // clang-format off
-    return DlMatrix::MakeColumn(
-        matrix[SkMatrix::kMScaleX], matrix[SkMatrix::kMSkewY],  0.0f, matrix[SkMatrix::kMPersp0],
-        matrix[SkMatrix::kMSkewX],  matrix[SkMatrix::kMScaleY], 0.0f, matrix[SkMatrix::kMPersp1],
-        0.0f,                       0.0f,                       1.0f, 0.0f,
-        matrix[SkMatrix::kMTransX], matrix[SkMatrix::kMTransY], 0.0f, matrix[SkMatrix::kMPersp2]
-    );
-    // clang-format on
-  }
-
-  static constexpr DlMatrix ToDlMatrix(const SkM44& matrix) {
-    DlMatrix dl_matrix;
-    matrix.getColMajor(dl_matrix.m);
-    return dl_matrix;
-  }
-
-  static const SkRect& ToSkRect(const DlRect& rect) {
-    return *reinterpret_cast<const SkRect*>(&rect);
-  }
-
-  static constexpr SkMatrix ToSkMatrix(const DlMatrix& matrix) {
-    return SkMatrix::MakeAll(matrix.m[0], matrix.m[4], matrix.m[12],
-                             matrix.m[1], matrix.m[5], matrix.m[13],
-                             matrix.m[3], matrix.m[7], matrix.m[15]);
-  }
-
-  static constexpr SkM44 ToSkM44(const DlMatrix& matrix) {
-    return SkM44::ColMajor(matrix.m);
-  }
 
  public:
-  DisplayListMatrixClipState(const DlRect& cull_rect, const DlMatrix& matrix);
+  explicit DisplayListMatrixClipState(const DlRect& cull_rect,
+                                      const DlMatrix& matrix = DlMatrix());
+  explicit DisplayListMatrixClipState(const SkRect& cull_rect);
   DisplayListMatrixClipState(const SkRect& cull_rect, const SkMatrix& matrix);
   DisplayListMatrixClipState(const SkRect& cull_rect, const SkM44& matrix);
   DisplayListMatrixClipState(const DisplayListMatrixClipState& other) = default;
