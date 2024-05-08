@@ -1306,6 +1306,10 @@ class SimpleDialog extends StatelessWidget {
   }
 }
 
+Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  return child;
+}
+
 /// Displays a Material dialog above the current contents of the app, with
 /// Material entrance and exit animations, modal barrier color, and modal
 /// barrier behavior (dialog is dismissible with a tap on the barrier).
@@ -1554,64 +1558,56 @@ class DialogRoute<T> extends RawDialogRoute<T> {
   /// A dialog route with Material entrance and exit animations,
   /// modal barrier color, and modal barrier behavior (dialog is dismissible
   /// with a tap on the barrier).
- factory DialogRoute({
+  DialogRoute({
     required BuildContext context,
     required WidgetBuilder builder,
     CapturedThemes? themes,
-    Color? barrierColor = Colors.black54,
-    bool barrierDismissible = true,
+    super.barrierColor = Colors.black54,
+    super.barrierDismissible,
     String? barrierLabel,
     bool useSafeArea = true,
-    RouteSettings? settings,
-    Offset? anchorPoint,
-    TraversalEdgeBehavior? traversalEdgeBehavior,
-  }) {
-    final _DialogRouteAnimation animation = _DialogRouteAnimation();
-    return DialogRoute<T>._(animation,
-    pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-       final Widget pageChild = Builder(builder: builder);
+    super.settings,
+    super.anchorPoint,
+    super.traversalEdgeBehavior,
+  }) : super(
+         pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
+           final Widget pageChild = Builder(builder: builder);
            Widget dialog = themes?.wrap(pageChild) ?? pageChild;
            if (useSafeArea) {
              dialog = SafeArea(child: dialog);
            }
            return dialog;
-    },
-    barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,
-    transitionDuration: const Duration(milliseconds: 150),
-    transitionBuilder: animation.buildMaterialDialogTransitions,
-    barrierColor: barrierColor,
-    barrierDismissible: barrierDismissible,
-    settings: settings,
-    anchorPoint: anchorPoint,
-    traversalEdgeBehavior: traversalEdgeBehavior,
+         },
+         barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,
+         transitionDuration: const Duration(milliseconds: 150),
+         transitionBuilder: _buildMaterialDialogTransitions,
+       );
+
+  CurvedAnimation? _curvedAnimation;
+
+  void _setAnimation(Animation<double> animation) {
+    if(_curvedAnimation?.parent.hashCode != animation.hashCode) {
+      _curvedAnimation?.dispose();
+      _curvedAnimation = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOut,
     );
+    }
   }
 
-  DialogRoute._(this._animation, {required super.pageBuilder, super.barrierLabel, super.transitionDuration,  super.transitionBuilder, super.barrierColor, super.anchorPoint, super.barrierDismissible, super.settings, super.traversalEdgeBehavior});
-
-  _DialogRouteAnimation _animation;
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    _setAnimation(animation);
+    return FadeTransition(
+      opacity: _curvedAnimation!,
+      child: super.buildTransitions(context, animation, secondaryAnimation, child),
+    );
+  }
 
   @override
   void dispose() {
-    _animation.dispose();
+    _curvedAnimation?.dispose();
     super.dispose();
-  }
-}
-/// Holds [DialogRoute] animation curves.
-class _DialogRouteAnimation {
-  _DialogRouteAnimation();
-   CurvedAnimation? _fadeCurve;
-
-  Widget buildMaterialDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    _fadeCurve ??= CurvedAnimation(parent: animation, curve: Curves.easeOut);
-    return FadeTransition(
-      opacity: _fadeCurve!,
-      child: child,
-    );
-  }
-
-  void dispose() {
-    _fadeCurve?.dispose();
   }
 }
 
