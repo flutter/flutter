@@ -104,8 +104,8 @@ class Checkbox extends StatefulWidget {
   /// or macOS, following Material design's
   /// [Cross-platform guidelines](https://material.io/design/platform-guidance/cross-platform-adaptation.html).
   ///
-  /// Creates a checkbox that looks and feels native when the [ThemeData.platform]
-  /// is iOS or macOS, otherwise a Material Design checkbox is created.
+  /// Creates a checkbox that adapts to the look and feel of [ThemeData.platform]
+  /// for iOS and macOS, and otherwise builds a Material Design checkbox.
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Checkbox.adaptive({
@@ -876,7 +876,7 @@ class _CheckboxPainter extends ToggleablePainter {
   }
 }
 
-// Hand coded defaults for iOS/macOS checkbox
+// Hand coded defaults for iOS/macOS checkbox.
 // TODO(victorsanni): Apply theme for widget state where app is open but inactive.
 class _CheckboxDefaultsCupertino extends CheckboxThemeData {
   _CheckboxDefaultsCupertino(BuildContext context)

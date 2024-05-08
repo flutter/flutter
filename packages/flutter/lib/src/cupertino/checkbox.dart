@@ -39,6 +39,8 @@ const double _kCupertinoFocusColorSaturation = 0.835;
 /// See also:
 ///
 ///  * [Checkbox], the Material Design equivalent.
+///  * [Checkbox.adaptive], which creats a checkbox that adapts to the look and feel of [ThemeData.platform]
+///    for iOS and macOS, and otherwise builds a Material Design checkbox.
 ///  * [CupertinoSwitch], a widget with semantics similar to [CupertinoCheckbox].
 ///  * [CupertinoSlider], for selecting a value in a range.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/components/selection-and-input/toggles/>

@@ -1115,15 +1115,9 @@ void main() {
       );
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
-      await tester.pumpWidget(buildApp(platform));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(CupertinoCheckbox), findsNothing);
-      expect(find.byType(Checkbox), findsOneWidget);
-    }
-
-    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
+    for (final TargetPlatform platform in <TargetPlatform>[
+      TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android,
+      TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
       await tester.pumpWidget(buildApp(platform));
       await tester.pumpAndSettle();
 

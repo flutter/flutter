@@ -2195,15 +2195,9 @@ void main() {
       );
     }
 
-    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
-      await tester.pumpWidget(buildApp(platform));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(CupertinoCheckbox), findsNothing);
-      expect(find.byType(Checkbox), findsOneWidget);
-    }
-
-    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
+    for (final TargetPlatform platform in <TargetPlatform>[
+      TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android,
+      TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
       await tester.pumpWidget(buildApp(platform));
       await tester.pumpAndSettle();
 
@@ -2318,7 +2312,7 @@ void main() {
     expect(getCheckboxRenderer(), paints..path(color: inactiveBackgroundColor));
   });
 
-  testWidgets('Checkbox.adaptive keeps default mouse cursor(Cupertino)', (WidgetTester tester) async {
+  testWidgets('Checkbox.adaptive keeps default mouse cursor (Cupertino)', (WidgetTester tester) async {
     for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
       await tester.pumpWidget(buildAdaptiveCheckbox(
         platform: platform,
