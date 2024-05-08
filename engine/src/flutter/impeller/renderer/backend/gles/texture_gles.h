@@ -5,6 +5,8 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_TEXTURE_GLES_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_TEXTURE_GLES_H_
 
+#include <bitset>
+
 #include "impeller/base/backend_cast.h"
 #include "impeller/core/texture.h"
 #include "impeller/renderer/backend/gles/handle_gles.h"
@@ -60,13 +62,18 @@ class TextureGLES final : public Texture,
 
   std::optional<GLuint> GetFBO() const { return wrapped_fbo_; }
 
-  void MarkContentsInitialized() const;
+  // For non cubemap textures, 0 indicates uninitialized and 1 indicates
+  // initialized. For cubemap textures, each face is initialized separately with
+  // each bit tracking the initialization of the corresponding slice.
+  void MarkSliceInitialized(size_t slice) const;
+
+  bool IsSliceInitialized(size_t slice) const;
 
  private:
   ReactorGLES::Ref reactor_;
   const Type type_;
   HandleGLES handle_;
-  mutable bool contents_initialized_ = false;
+  mutable std::bitset<6> slices_initialized_ = 0;
   const bool is_wrapped_;
   const std::optional<GLuint> wrapped_fbo_;
   bool is_valid_ = false;

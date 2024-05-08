@@ -82,7 +82,7 @@ class MockBlitPass : public BlitPass {
               OnCopyBufferToTextureCommand,
               (BufferView source,
                std::shared_ptr<Texture> destination,
-               IPoint destination_origin,
+               IRect destination_rect,
                std::string label,
                uint32_t slice),
               (override));

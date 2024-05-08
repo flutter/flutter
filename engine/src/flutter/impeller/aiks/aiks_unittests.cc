@@ -20,6 +20,7 @@
 #include "impeller/aiks/image_filter.h"
 #include "impeller/aiks/paint_pass_delegate.h"
 #include "impeller/aiks/testing/context_spy.h"
+#include "impeller/core/device_buffer.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
@@ -3148,6 +3149,39 @@ TEST_P(AiksTest, CanRenderTextWithLargePerspectiveTransform) {
 
   ASSERT_TRUE(RenderTextInCanvasSkia(GetContext(), canvas, "Hello world",
                                      "Roboto-Regular.ttf"));
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, SetContentsWithRegion) {
+  auto bridge = CreateTextureForFixture("bay_bridge.jpg");
+
+  // Replace part of the texture with a red rectangle.
+  std::vector<uint8_t> bytes(100 * 100 * 4);
+  for (auto i = 0u; i < bytes.size(); i += 4) {
+    bytes[i] = 255;
+    bytes[i + 1] = 0;
+    bytes[i + 2] = 0;
+    bytes[i + 3] = 255;
+  }
+  auto mapping =
+      std::make_shared<fml::NonOwnedMapping>(bytes.data(), bytes.size());
+  auto device_buffer =
+      GetContext()->GetResourceAllocator()->CreateBufferWithCopy(*mapping);
+  auto cmd_buffer = GetContext()->CreateCommandBuffer();
+  auto blit_pass = cmd_buffer->CreateBlitPass();
+  blit_pass->AddCopy(DeviceBuffer::AsBufferView(device_buffer), bridge,
+                     IRect::MakeLTRB(50, 50, 150, 150));
+
+  auto did_submit =
+      blit_pass->EncodeCommands(GetContext()->GetResourceAllocator()) &&
+      GetContext()->GetCommandQueue()->Submit({std::move(cmd_buffer)}).ok();
+  ASSERT_TRUE(did_submit);
+
+  auto image = std::make_shared<Image>(bridge);
+
+  Canvas canvas;
+  canvas.DrawImage(image, {0, 0}, {});
+
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 

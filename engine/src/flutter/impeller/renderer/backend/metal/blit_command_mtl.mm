@@ -114,22 +114,21 @@ bool BlitCopyBufferToTextureCommandMTL::Encode(
   }
 
   auto destination_origin_mtl =
-      MTLOriginMake(destination_origin.x, destination_origin.y, 0);
-
-  auto image_size = destination->GetTextureDescriptor().size;
-  auto source_size_mtl = MTLSizeMake(image_size.width, image_size.height, 1);
+      MTLOriginMake(destination_region.GetX(), destination_region.GetY(), 0);
+  auto source_size_mtl = MTLSizeMake(destination_region.GetWidth(),
+                                     destination_region.GetHeight(), 1);
 
   auto destination_bytes_per_pixel =
       BytesPerPixelForPixelFormat(destination->GetTextureDescriptor().format);
   auto destination_bytes_per_row =
-      source_size_mtl.width * destination_bytes_per_pixel;
-  auto destination_bytes_per_image =
-      source_size_mtl.height * destination_bytes_per_row;
+      destination_region.GetWidth() * destination_bytes_per_pixel;
 
   [encoder copyFromBuffer:source_mtl
              sourceOffset:source.range.offset
         sourceBytesPerRow:destination_bytes_per_row
-      sourceBytesPerImage:destination_bytes_per_image
+      sourceBytesPerImage:
+          0  // 0 for 2D textures according to
+             // https://developer.apple.com/documentation/metal/mtlblitcommandencoder/1400752-copyfrombuffer
                sourceSize:source_size_mtl
                 toTexture:destination_mtl
          destinationSlice:slice
