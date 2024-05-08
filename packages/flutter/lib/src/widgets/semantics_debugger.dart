@@ -60,6 +60,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
   void didChangeDependencies() {
     super.didChangeDependencies();
     final PipelineOwner newOwner = View.pipelineOwnerOf(context);
+    assert(newOwner.semanticsOwner != null);
     if (newOwner != _pipelineOwner) {
       _pipelineOwner?.semanticsOwner?.removeListener(_update);
       newOwner.semanticsOwner!.addListener(_update);
