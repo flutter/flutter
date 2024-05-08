@@ -819,7 +819,7 @@ class _SnackBarState extends State<SnackBar> {
           animation: heightM3Animation,
           builder: (BuildContext context, Widget? child) {
             return Align(
-              alignment: AlignmentDirectional.bottomStart,
+              alignment: Alignment.bottomLeft,
               heightFactor: heightM3Animation.value,
               child: child,
             );
