@@ -589,7 +589,7 @@ class SkiaGoldClient {
         'WebRenderer' : webRenderer,
       'CI' : 'luci',
       'Platform' : platform.operatingSystem,
-      'Abi': abi.toString(),
+      // 'Abi': abi.toString(), workaround for https://g-issues.skia.org/issues/339508268
       'name' : testName,
       'source_type' : 'flutter',
       if (_isImpeller)
