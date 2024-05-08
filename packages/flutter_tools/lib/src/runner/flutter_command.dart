@@ -1284,7 +1284,9 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
-    final String? flavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
+    final String? defaultFlavor = FlutterProject.current().manifest.defaultFlavor;
+    final String? cliFlavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
+    final String? flavor = cliFlavor ?? defaultFlavor;
     if (flavor != null) {
       if (globals.platform.environment['FLUTTER_APP_FLAVOR'] != null) {
         throwToolExit('FLUTTER_APP_FLAVOR is used by the framework and cannot be set in the environment.');
