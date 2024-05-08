@@ -1586,7 +1586,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
   CurvedAnimation? _curvedAnimation;
 
   void _setAnimation(Animation<double> animation) {
-    if(_curvedAnimation?.parent.hashCode != animation.hashCode) {
+    if (_curvedAnimation?.parent.hashCode != animation.hashCode) {
       _curvedAnimation?.dispose();
       _curvedAnimation = CurvedAnimation(
       parent: animation,
