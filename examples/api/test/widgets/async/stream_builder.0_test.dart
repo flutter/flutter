@@ -10,123 +10,101 @@ import 'package:flutter_api_samples/widgets/async/stream_builder.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('StreamBuilderExampleApp', () {
-    testWidgets(
-      'listens to the internal stream events and rebuilds according them',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          const example.StreamBuilderExampleApp(),
-        );
-
-        expect(find.byType(CircularProgressIndicator), findsOneWidget);
-        expect(find.text('Awaiting bids...'), findsOneWidget);
-
-        await tester.pump(example.StreamBuilderExampleApp.delay);
-
-        expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
-        expect(find.text(r'$1'), findsOneWidget);
-
-        await tester.pump(example.StreamBuilderExampleApp.delay);
-
-        expect(find.byIcon(Icons.info), findsOneWidget);
-        expect(find.text(r'$1 (closed)'), findsOneWidget);
-      },
+  testWidgets('StreamBuilder listens to internal stream', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const example.StreamBuilderExampleApp(),
     );
 
-    group('BidsStatus', () {
-      testWidgets(
-        'correctly displays error state',
-        (WidgetTester tester) async {
-          final StreamController<int> controller = StreamController<int>();
-          addTearDown(controller.close);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.text('Awaiting bids...'), findsOneWidget);
 
-          controller.onListen = () {
-            controller.addError('Unexpected error!', StackTrace.empty);
-          };
+    await tester.pump(example.StreamBuilderExampleApp.delay);
 
-          await tester.pumpWidget(
-            MaterialApp(
-              home: example.BidsStatus(bids: controller.stream),
-            ),
-          );
-          await tester.pump();
+    expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
+    expect(find.text(r'$1'), findsOneWidget);
 
-          expect(find.byIcon(Icons.error_outline), findsOneWidget);
-          expect(find.text('Error: Unexpected error!'), findsOneWidget);
-          expect(find.text('Stack trace: ${StackTrace.empty}'), findsOneWidget);
-        },
-      );
+    await tester.pump(example.StreamBuilderExampleApp.delay);
 
-      testWidgets(
-        'correctly displays none state',
-        (WidgetTester tester) async {
-          await tester.pumpWidget(
-            const MaterialApp(
-              home: example.BidsStatus(bids: null),
-            ),
-          );
+    expect(find.byIcon(Icons.info), findsOneWidget);
+    expect(find.text(r'$1 (closed)'), findsOneWidget);
+  });
 
-          expect(find.byIcon(Icons.info), findsOneWidget);
-          expect(find.text('Select a lot'), findsOneWidget);
-        },
-      );
+  testWidgets('BidsStatus correctly displays error state', (WidgetTester tester) async {
+    final StreamController<int> controller = StreamController<int>();
+    addTearDown(controller.close);
 
-      testWidgets(
-        'correctly displays waiting state',
-        (WidgetTester tester) async {
-          final StreamController<int> controller = StreamController<int>();
-          addTearDown(controller.close);
+    controller.onListen = () {
+      controller.addError('Unexpected error!', StackTrace.empty);
+    };
 
-          await tester.pumpWidget(
-            MaterialApp(
-              home: example.BidsStatus(bids: controller.stream),
-            ),
-          );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: example.BidsStatus(bids: controller.stream),
+      ),
+    );
+    await tester.pump();
 
-          expect(find.byType(CircularProgressIndicator), findsOneWidget);
-          expect(find.text('Awaiting bids...'), findsOneWidget);
-        },
-      );
+    expect(find.byIcon(Icons.error_outline), findsOneWidget);
+    expect(find.text('Error: Unexpected error!'), findsOneWidget);
+    expect(find.text('Stack trace: ${StackTrace.empty}'), findsOneWidget);
+  });
 
-      testWidgets(
-        'correctly displays active state',
-        (WidgetTester tester) async {
-          final StreamController<int> controller = StreamController<int>();
-          addTearDown(controller.close);
+  testWidgets('BidsStatus correctly displays none state', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: example.BidsStatus(bids: null),
+      ),
+    );
 
-          controller.onListen = () {
-            controller.add(1);
-          };
+    expect(find.byIcon(Icons.info), findsOneWidget);
+    expect(find.text('Select a lot'), findsOneWidget);
+  });
 
-          await tester.pumpWidget(
-            MaterialApp(
-              home: example.BidsStatus(bids: controller.stream),
-            ),
-          );
-          await tester.pump();
+  testWidgets('BidsStatus correctly displays waiting state', (WidgetTester tester) async {
+    final StreamController<int> controller = StreamController<int>();
+    addTearDown(controller.close);
 
-          expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
-          expect(find.text(r'$1'), findsOneWidget);
-        },
-      );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: example.BidsStatus(bids: controller.stream),
+      ),
+    );
 
-      testWidgets(
-        'correctly displays done state',
-        (WidgetTester tester) async {
-          final StreamController<int> controller = StreamController<int>();
-          controller.close();
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.text('Awaiting bids...'), findsOneWidget);
+  });
 
-          await tester.pumpWidget(
-            MaterialApp(
-              home: example.BidsStatus(bids: controller.stream),
-            ),
-          );
-          await tester.pump();
+  testWidgets('BidsStatus correctly displays active state', (WidgetTester tester) async {
+    final StreamController<int> controller = StreamController<int>();
+    addTearDown(controller.close);
 
-          expect(find.byIcon(Icons.info), findsOneWidget);
-          expect(find.text('(closed)'), findsOneWidget);
-        },
-      );
-    });
+    controller.onListen = () {
+      controller.add(1);
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: example.BidsStatus(bids: controller.stream),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
+    expect(find.text(r'$1'), findsOneWidget);
+  });
+
+  testWidgets('BidsStatus correctly displays done state', (WidgetTester tester) async {
+    final StreamController<int> controller = StreamController<int>();
+    controller.close();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: example.BidsStatus(bids: controller.stream),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byIcon(Icons.info), findsOneWidget);
+    expect(find.text('(closed)'), findsOneWidget);
   });
 }
