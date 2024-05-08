@@ -225,22 +225,28 @@ class _CarouselState extends State<Carousel> {
   @override
   void didUpdateWidget(covariant Carousel oldWidget) {
     super.didUpdateWidget(oldWidget);
-
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller?._detach(this);
+      if (widget.controller != null) {
+        _internalController?._detach(this);
+        _internalController = null;
+        widget.controller?._attach(this);
+      }
+    }
     if (widget.layoutWeights != oldWidget.layoutWeights) {
       weights = widget.layoutWeights;
     }
     if (widget.itemExtent != oldWidget.itemExtent) {
       itemExtent = getItemExtent();
     }
-    if (widget._layout != oldWidget._layout) {
-      allowFullyExpand = widget.allowFullyExpand;
-    }
   }
 
   @override
   void dispose() {
     _controller._detach(this);
-    _internalController = null;
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
@@ -1160,11 +1166,12 @@ class CarouselController extends ScrollController {
     this.initialItem = 0,
   });
 
-  /// The item that expands to full size when first creating the [PageView].
+  /// The item that expands to full size when first creating the [Carousel].
   final int initialItem;
 
   _CarouselState? _carouselState;
 
+  // ignore: use_setters_to_change_properties
   void _attach(_CarouselState anchor) {
     _carouselState = anchor;
   }
@@ -1205,7 +1212,6 @@ class CarouselController extends ScrollController {
 
   @override
   void attach(ScrollPosition position) {
-    assert(_carouselState != null);
     super.attach(position);
     final _CarouselPosition carouselPosition = position as _CarouselPosition;
     carouselPosition.layoutWeights = _carouselState!.weights;
