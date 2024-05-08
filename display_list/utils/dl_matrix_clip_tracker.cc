@@ -18,24 +18,37 @@ bool DisplayListMatrixClipTracker::is_3x3(const SkM44& m) {
   // clang-format on
 }
 
+static constexpr DlRect kEmpty = DlRect();
+
+static const DlRect& ProtectEmpty(const SkRect& rect) {
+  // isEmpty protects us against NaN while we normalize any empty cull rects
+  return rect.isEmpty() ? kEmpty : ToDlRect(rect);
+}
+
+static const DlRect& ProtectEmpty(const DlRect& rect) {
+  // isEmpty protects us against NaN while we normalize any empty cull rects
+  return rect.IsEmpty() ? kEmpty : rect;
+}
+
 DisplayListMatrixClipState::DisplayListMatrixClipState(const DlRect& cull_rect,
                                                        const DlMatrix& matrix)
-    : cull_rect_(cull_rect), matrix_(matrix) {}
+    : cull_rect_(ProtectEmpty(cull_rect)), matrix_(matrix) {}
+
+DisplayListMatrixClipState::DisplayListMatrixClipState(const SkRect& cull_rect)
+    : cull_rect_(ProtectEmpty(cull_rect)), matrix_(DlMatrix()) {}
 
 DisplayListMatrixClipState::DisplayListMatrixClipState(const SkRect& cull_rect,
                                                        const SkMatrix& matrix)
-    : cull_rect_(ToDlRect(cull_rect)), matrix_(ToDlMatrix(matrix)) {}
+    : cull_rect_(ProtectEmpty(cull_rect)), matrix_(ToDlMatrix(matrix)) {}
 
 DisplayListMatrixClipState::DisplayListMatrixClipState(const SkRect& cull_rect,
                                                        const SkM44& matrix)
-    : cull_rect_(ToDlRect(cull_rect)), matrix_(ToDlMatrix(matrix)) {}
+    : cull_rect_(ProtectEmpty(cull_rect)), matrix_(ToDlMatrix(matrix)) {}
 
 DisplayListMatrixClipTracker::DisplayListMatrixClipTracker(
     const DlRect& cull_rect,
     const DlMatrix& matrix) {
-  // isEmpty protects us against NaN as we normalize any empty cull rects
-  DlRect cull = cull_rect.IsEmpty() ? DlRect() : cull_rect;
-  saved_.emplace_back(cull, matrix);
+  saved_.emplace_back(cull_rect, matrix);
   current_ = &saved_.back();
   save();  // saved_[0] will always be the initial settings
 }
@@ -43,9 +56,7 @@ DisplayListMatrixClipTracker::DisplayListMatrixClipTracker(
 DisplayListMatrixClipTracker::DisplayListMatrixClipTracker(
     const SkRect& cull_rect,
     const SkMatrix& matrix) {
-  // isEmpty protects us against NaN as we normalize any empty cull rects
-  SkRect cull = cull_rect.isEmpty() ? SkRect::MakeEmpty() : cull_rect;
-  saved_.emplace_back(cull, matrix);
+  saved_.emplace_back(cull_rect, matrix);
   current_ = &saved_.back();
   save();  // saved_[0] will always be the initial settings
 }
@@ -53,9 +64,7 @@ DisplayListMatrixClipTracker::DisplayListMatrixClipTracker(
 DisplayListMatrixClipTracker::DisplayListMatrixClipTracker(
     const SkRect& cull_rect,
     const SkM44& m44) {
-  // isEmpty protects us against NaN as we normalize any empty cull rects
-  SkRect cull = cull_rect.isEmpty() ? SkRect::MakeEmpty() : cull_rect;
-  saved_.emplace_back(cull, m44);
+  saved_.emplace_back(cull_rect, m44);
   current_ = &saved_.back();
   save();  // saved_[0] will always be the initial settings
 }

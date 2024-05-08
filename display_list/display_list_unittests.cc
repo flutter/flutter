@@ -532,13 +532,13 @@ TEST_F(DisplayListTest, UnclippedSaveLayerContentAccountsForFilter) {
   builder.Restore();
   auto display_list = builder.Build();
 
-  ASSERT_EQ(display_list->op_count(), 6u);
+  EXPECT_EQ(display_list->op_count(), 6u);
   EXPECT_EQ(display_list->total_depth(), 2u);
 
   SkRect result_rect = draw_rect.makeOutset(30.0f, 30.0f);
   ASSERT_TRUE(result_rect.intersect(clip_rect));
   ASSERT_EQ(result_rect, SkRect::MakeLTRB(100.0f, 110.0f, 131.0f, 190.0f));
-  ASSERT_EQ(display_list->bounds(), result_rect);
+  EXPECT_EQ(display_list->bounds(), result_rect);
 }
 
 TEST_F(DisplayListTest, ClippedSaveLayerContentAccountsForFilter) {
@@ -565,13 +565,72 @@ TEST_F(DisplayListTest, ClippedSaveLayerContentAccountsForFilter) {
   builder.Restore();
   auto display_list = builder.Build();
 
-  ASSERT_EQ(display_list->op_count(), 6u);
+  EXPECT_EQ(display_list->op_count(), 6u);
   EXPECT_EQ(display_list->total_depth(), 2u);
 
   SkRect result_rect = draw_rect.makeOutset(30.0f, 30.0f);
   ASSERT_TRUE(result_rect.intersect(clip_rect));
   ASSERT_EQ(result_rect, SkRect::MakeLTRB(100.0f, 110.0f, 129.0f, 190.0f));
-  ASSERT_EQ(display_list->bounds(), result_rect);
+  EXPECT_EQ(display_list->bounds(), result_rect);
+}
+
+TEST_F(DisplayListTest, OOBSaveLayerContentCulledWithBlurFilter) {
+  SkRect cull_rect = SkRect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
+  SkRect draw_rect = SkRect::MakeLTRB(25.0f, 25.0f, 99.0f, 75.0f);
+  auto filter = DlBlurImageFilter::Make(10.0f, 10.0f, DlTileMode::kDecal);
+  DlPaint layer_paint = DlPaint().setImageFilter(filter);
+
+  // We want a draw rect that is outside the layer bounds even though its
+  // filtered output might be inside. The drawn rect should be culled by
+  // the expectations of the layer bounds even though it is close enough
+  // to be visible due to filtering.
+  ASSERT_FALSE(cull_rect.intersects(draw_rect));
+  SkRect mapped_rect;
+  ASSERT_TRUE(filter->map_local_bounds(draw_rect, mapped_rect));
+  ASSERT_TRUE(mapped_rect.intersects(cull_rect));
+
+  DisplayListBuilder builder;
+  builder.SaveLayer(&cull_rect, &layer_paint);
+  {  //
+    builder.DrawRect(draw_rect, DlPaint());
+  }
+  builder.Restore();
+  auto display_list = builder.Build();
+
+  EXPECT_EQ(display_list->op_count(), 2u);
+  EXPECT_EQ(display_list->total_depth(), 1u);
+
+  EXPECT_TRUE(display_list->bounds().isEmpty()) << display_list->bounds();
+}
+
+TEST_F(DisplayListTest, OOBSaveLayerContentCulledWithMatrixFilter) {
+  SkRect cull_rect = SkRect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
+  SkRect draw_rect = SkRect::MakeLTRB(25.0f, 125.0f, 75.0f, 175.0f);
+  auto filter = DlMatrixImageFilter::Make(SkMatrix::Translate(100.0f, 0.0f),
+                                          DlImageSampling::kLinear);
+  DlPaint layer_paint = DlPaint().setImageFilter(filter);
+
+  // We want a draw rect that is outside the layer bounds even though its
+  // filtered output might be inside. The drawn rect should be culled by
+  // the expectations of the layer bounds even though it is close enough
+  // to be visible due to filtering.
+  ASSERT_FALSE(cull_rect.intersects(draw_rect));
+  SkRect mapped_rect;
+  ASSERT_TRUE(filter->map_local_bounds(draw_rect, mapped_rect));
+  ASSERT_TRUE(mapped_rect.intersects(cull_rect));
+
+  DisplayListBuilder builder;
+  builder.SaveLayer(&cull_rect, &layer_paint);
+  {  //
+    builder.DrawRect(draw_rect, DlPaint());
+  }
+  builder.Restore();
+  auto display_list = builder.Build();
+
+  EXPECT_EQ(display_list->op_count(), 2u);
+  EXPECT_EQ(display_list->total_depth(), 1u);
+
+  EXPECT_TRUE(display_list->bounds().isEmpty()) << display_list->bounds();
 }
 
 TEST_F(DisplayListTest, SingleOpSizes) {
@@ -1144,12 +1203,31 @@ TEST_F(DisplayListTest, SingleOpsMightSupportGroupOpacityBlendMode) {
 
 TEST_F(DisplayListTest, OverlappingOpsDoNotSupportGroupOpacity) {
   DisplayListBuilder builder;
-  DlOpReceiver& receiver = ToReceiver(builder);
   for (int i = 0; i < 10; i++) {
-    receiver.drawRect(SkRect::MakeXYWH(i * 10, 0, 30, 30));
+    builder.DrawRect(SkRect::MakeXYWH(i * 10, 0, 30, 30), DlPaint());
   }
   auto display_list = builder.Build();
   EXPECT_FALSE(display_list->can_apply_group_opacity());
+}
+
+TEST_F(DisplayListTest, LineOfNonOverlappingOpsSupportGroupOpacity) {
+  DisplayListBuilder builder;
+  for (int i = 0; i < 10; i++) {
+    builder.DrawRect(SkRect::MakeXYWH(i * 30, 0, 30, 30), DlPaint());
+  }
+  auto display_list = builder.Build();
+  EXPECT_TRUE(display_list->can_apply_group_opacity());
+}
+
+TEST_F(DisplayListTest, CrossOfNonOverlappingOpsSupportGroupOpacity) {
+  DisplayListBuilder builder;
+  builder.DrawRect(SkRect::MakeLTRB(200, 200, 300, 300), DlPaint());  // center
+  builder.DrawRect(SkRect::MakeLTRB(100, 200, 200, 300), DlPaint());  // left
+  builder.DrawRect(SkRect::MakeLTRB(200, 100, 300, 200), DlPaint());  // above
+  builder.DrawRect(SkRect::MakeLTRB(300, 200, 400, 300), DlPaint());  // right
+  builder.DrawRect(SkRect::MakeLTRB(200, 300, 300, 400), DlPaint());  // below
+  auto display_list = builder.Build();
+  EXPECT_TRUE(display_list->can_apply_group_opacity());
 }
 
 TEST_F(DisplayListTest, SaveLayerFalseSupportsGroupOpacityOverlappingChidren) {
@@ -1248,7 +1326,8 @@ class SaveLayerOptionsExpector : public virtual DlOpReceiver,
   void saveLayer(const SkRect& bounds,
                  const SaveLayerOptions options,
                  const DlImageFilter* backdrop) override {
-    EXPECT_EQ(options, expected_[save_layer_count_]);
+    EXPECT_EQ(options, expected_[save_layer_count_])
+        << "index " << save_layer_count_;
     save_layer_count_++;
   }
 
@@ -3858,7 +3937,7 @@ TEST_F(DisplayListTest, SaveContentDepthTest) {
 
   builder.Save();  // covers depth 1->9
   {
-    builder.Translate(5, 5);
+    builder.Translate(5, 5);  // triggers deferred save at depth 1
     builder.DrawRect({10, 10, 20, 20}, DlPaint());  // depth 2
 
     builder.DrawDisplayList(child, 1.0f);  // depth 3 (content) + 4 (self)
@@ -3868,12 +3947,12 @@ TEST_F(DisplayListTest, SaveContentDepthTest) {
       builder.DrawRect({12, 12, 22, 22}, DlPaint());  // depth 5
       builder.DrawRect({14, 14, 24, 24}, DlPaint());  // depth 6
     }
-    builder.Restore();  // layer is restored with depth 7
+    builder.Restore();  // layer is restored with depth 6
 
     builder.DrawRect({16, 16, 26, 26}, DlPaint());  // depth 8
     builder.DrawRect({18, 18, 28, 28}, DlPaint());  // depth 9
   }
-  builder.Restore();
+  builder.Restore();  // save is restored with depth 9
 
   builder.DrawRect({16, 16, 26, 26}, DlPaint());  // depth 10
   builder.DrawRect({18, 18, 28, 28}, DlPaint());  // depth 11
