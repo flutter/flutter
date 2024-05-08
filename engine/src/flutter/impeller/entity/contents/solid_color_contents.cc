@@ -48,10 +48,11 @@ std::optional<Rect> SolidColorContents::GetCoverage(
 bool SolidColorContents::Render(const ContentContext& renderer,
                                 const Entity& entity,
                                 RenderPass& pass) const {
+  auto capture = entity.GetCapture().CreateChild("SolidColorContents");
   using VS = SolidFillPipeline::VertexShader;
 
   VS::FrameInfo frame_info;
-  frame_info.color = GetColor().Premultiply();
+  frame_info.color = capture.AddColor("Color", GetColor()).Premultiply();
 
   PipelineBuilderCallback pipeline_callback =
       [&renderer](ContentContextOptions options) {

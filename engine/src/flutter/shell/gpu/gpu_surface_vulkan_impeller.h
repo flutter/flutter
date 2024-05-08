@@ -12,7 +12,6 @@
 #include "flutter/impeller/aiks/aiks_context.h"
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/shell/gpu/gpu_surface_vulkan_delegate.h"
-#include "impeller/renderer/renderer.h"
 
 namespace flutter {
 
