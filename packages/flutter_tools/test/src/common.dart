@@ -17,7 +17,6 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:test/test.dart' as test_package show test;
 import 'package:test/test.dart' hide test;
-import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import 'fakes.dart';
@@ -319,31 +318,27 @@ class FileExceptionHandler {
 /// instance, then a second instance will be generated and returned. This second
 /// instance will be cleared to send events.
 FakeAnalytics getInitializedFakeAnalyticsInstance({
-  required FileSystem fs,
+  required MemoryFileSystem fs,
   required FakeFlutterVersion fakeFlutterVersion,
   String? clientIde,
   String? enabledFeatures,
 }) {
   final Directory homeDirectory = fs.directory('/');
-  final FakeAnalytics initialAnalytics = FakeAnalytics(
+  final FakeAnalytics initialAnalytics = Analytics.fake(
     tool: DashTool.flutterTool,
     homeDirectory: homeDirectory,
     dartVersion: fakeFlutterVersion.dartSdkVersion,
-    platform: DevicePlatform.linux,
     fs: fs,
-    surveyHandler: SurveyHandler(homeDirectory: homeDirectory, fs: fs),
     flutterChannel: fakeFlutterVersion.channel,
     flutterVersion: fakeFlutterVersion.getVersionString(),
   );
   initialAnalytics.clientShowedMessage();
 
-  return FakeAnalytics(
+  return Analytics.fake(
     tool: DashTool.flutterTool,
     homeDirectory: homeDirectory,
     dartVersion: fakeFlutterVersion.dartSdkVersion,
-    platform: DevicePlatform.linux,
     fs: fs,
-    surveyHandler: SurveyHandler(homeDirectory: homeDirectory, fs: fs),
     flutterChannel: fakeFlutterVersion.channel,
     flutterVersion: fakeFlutterVersion.getVersionString(),
     clientIde: clientIde,
