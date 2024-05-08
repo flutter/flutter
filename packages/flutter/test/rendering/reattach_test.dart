@@ -135,11 +135,10 @@ void main() {
   test('objects can be detached and re-attached: semantics (no change)', () {
     final TestTree testTree = TestTree();
     int semanticsUpdateCount = 0;
-    final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
-      listener: () {
-        ++semanticsUpdateCount;
-      },
-    );
+    final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.ensureSemantics();
+    TestRenderingFlutterBinding.instance.pipelineOwner.semanticsOwner!.addListener(() {
+      ++semanticsUpdateCount;
+    });
     // Lay out, composite, paint, and update semantics
     layout(testTree.root, phase: EnginePhase.flushSemantics);
     expect(semanticsUpdateCount, 1);
@@ -158,11 +157,10 @@ void main() {
   test('objects can be detached and re-attached: semantics (with change)', () {
     final TestTree testTree = TestTree();
     int semanticsUpdateCount = 0;
-    final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
-      listener: () {
-        ++semanticsUpdateCount;
-      },
-    );
+    final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.ensureSemantics();
+    TestRenderingFlutterBinding.instance.pipelineOwner.semanticsOwner!.addListener(() {
+      ++semanticsUpdateCount;
+    });
     // Lay out, composite, paint, and update semantics
     layout(testTree.root, phase: EnginePhase.flushSemantics);
     expect(semanticsUpdateCount, 1);
