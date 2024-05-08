@@ -8,68 +8,60 @@ import 'package:flutter_api_samples/material/scaffold/scaffold.of.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('OfExampleApp', () {
-    testWidgets('displays correct labels', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const example.OfExampleApp(),
-      );
-
-      expect(find.text('Scaffold.of Example'), findsOneWidget);
-      expect(find.text('SHOW BOTTOM SHEET'), findsOneWidget);
-    });
-
-    testWidgets(
-      'displays bottom sheet on ElevatedButton tap',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          const example.OfExampleApp(),
-        );
-
-        expect(find.text('BottomSheet'), findsNothing);
-        expect(
-          find.widgetWithText(ElevatedButton, 'Close BottomSheet'),
-          findsNothing,
-        );
-
-        // Tap the button to show the bottom sheet.
-        await tester.tap(
-          find.widgetWithText(ElevatedButton, 'SHOW BOTTOM SHEET'),
-        );
-        await tester.pumpAndSettle();
-
-        expect(find.text('BottomSheet'), findsOneWidget);
-        expect(
-          find.widgetWithText(ElevatedButton, 'Close BottomSheet'),
-          findsOneWidget,
-        );
-      },
+  testWidgets('Verify correct labels are displayed', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const example.OfExampleApp(),
     );
 
-    testWidgets(
-      'closes displayed bottom sheet on ElevatedButton tap',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          const example.OfExampleApp(),
-        );
+    expect(find.text('Scaffold.of Example'), findsOneWidget);
+    expect(find.text('SHOW BOTTOM SHEET'), findsOneWidget);
+  });
 
-        expect(find.text('BottomSheet'), findsNothing);
-
-        // Tap the button to show the bottom sheet.
-        await tester.tap(
-          find.widgetWithText(ElevatedButton, 'SHOW BOTTOM SHEET'),
-        );
-        await tester.pumpAndSettle();
-
-        expect(find.text('BottomSheet'), findsOneWidget);
-
-        // Tap the button to close the bottom sheet.
-        await tester.tap(
-          find.widgetWithText(ElevatedButton, 'Close BottomSheet'),
-        );
-        await tester.pumpAndSettle();
-
-        expect(find.text('BottomSheet'), findsNothing);
-      },
+  testWidgets('Bottom sheet can be shown', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const example.OfExampleApp(),
     );
+
+    expect(find.text('BottomSheet'), findsNothing);
+    expect(
+      find.widgetWithText(ElevatedButton, 'Close BottomSheet'),
+      findsNothing,
+    );
+
+    // Tap the button to show the bottom sheet.
+    await tester.tap(
+      find.widgetWithText(ElevatedButton, 'SHOW BOTTOM SHEET'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('BottomSheet'), findsOneWidget);
+    expect(
+      find.widgetWithText(ElevatedButton, 'Close BottomSheet'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('Bottom sheet can be closed', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const example.OfExampleApp(),
+    );
+
+    expect(find.text('BottomSheet'), findsNothing);
+
+    // Tap the button to show the bottom sheet.
+    await tester.tap(
+      find.widgetWithText(ElevatedButton, 'SHOW BOTTOM SHEET'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('BottomSheet'), findsOneWidget);
+
+    // Tap the button to close the bottom sheet.
+    await tester.tap(
+      find.widgetWithText(ElevatedButton, 'Close BottomSheet'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('BottomSheet'), findsNothing);
   });
 }
