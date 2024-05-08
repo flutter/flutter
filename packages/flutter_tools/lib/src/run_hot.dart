@@ -646,6 +646,14 @@ class HotRunner extends ResidentRunner {
         final Future<vm_service.Isolate?> reloadIsolate = device.vmService!
           .getIsolateOrNull(view.uiIsolate!.id!);
         operations.add(reloadIsolate.then((vm_service.Isolate? isolate) async {
+          // TODO(andrewkolos): this race is meant to assist in debugging
+          // https://github.com/flutter/flutter/issues/145812. When the issue
+          // is resolved, this trace (and probably all others added by
+          // the same PR) can be removed.
+          globals.logger.printTrace(
+            'Beginning of UI start paused handler. '
+            'uiIsolate = $isolate; isolate.pauseEvent.kind = ${isolate?.pauseEvent!.kind}',
+          );
           if ((isolate != null) && isPauseEvent(isolate.pauseEvent!.kind!)) {
             // The embedder requires that the isolate is unpaused, because the
             // runInView method requires interaction with dart engine APIs that
@@ -668,6 +676,7 @@ class HotRunner extends ResidentRunner {
             await Future.wait(breakpointAndExceptionRemoval);
             await device.vmService!.service.resume(view.uiIsolate!.id!);
           }
+          globals.logger.printTrace('End of UI start paused handler.');
         }));
       }
 
@@ -703,7 +712,7 @@ class HotRunner extends ResidentRunner {
       }
     }
     await Future.wait(operations);
-
+    globals.printTrace('Finished waiting on operations.');
     await _launchFromDevFS();
     restartTimer.stop();
     globals.printTrace('Hot restart performed in ${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
