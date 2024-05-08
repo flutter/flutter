@@ -17,7 +17,8 @@ void main() {
 
     final TextField filled = tester.widget<TextField>(find.descendant(
       of: find.byType(example.FilledTextFieldExample),
-      matching: find.byType(TextField)));
+      matching: find.byType(TextField),
+    ));
     expect(filled.decoration!.prefixIcon, isA<Icon>()
         .having((Icon icon) => icon.icon, 'icon', Icons.search));
     expect(filled.decoration!.suffixIcon, isA<Icon>()
@@ -29,7 +30,8 @@ void main() {
 
     final TextField outlined = tester.widget<TextField>(find.descendant(
       of: find.byType(example.OutlinedTextFieldExample),
-      matching: find.byType(TextField)));
+      matching: find.byType(TextField),
+    ));
     expect(outlined.decoration!.prefixIcon, isA<Icon>()
         .having((Icon icon) => icon.icon, 'icon', Icons.search));
     expect(outlined.decoration!.suffixIcon, isA<Icon>()
