@@ -385,14 +385,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
         // debugger we send this ourselves, to allow clients to connect to the
         // VM Service for things like starting DevTools, even if debugging is
         // not available.
-        // TODO(dantup): Switch this to call `sendDebuggerUris()` on the base
-        //   adapter once rolled into Flutter.
-        sendEvent(
-          RawEventBody(<String, Object?>{
-            'vmServiceUri': vmServiceUri.toString(),
-          }),
-          eventType: 'dart.debuggerUris',
-        );
+        sendDebuggerUris(vmServiceUri);
       }
   }
 
