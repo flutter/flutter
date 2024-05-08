@@ -61,7 +61,6 @@ class Carousel extends StatefulWidget {
     required this.itemExtent,
     required this.children,
   }) : allowFullyExpand = true,
-       _layout = _CarouselLayout.fixed,
        layoutWeights = null;
 
   const Carousel.weighted({
@@ -80,8 +79,7 @@ class Carousel extends StatefulWidget {
     this.onTap,
     required this.layoutWeights,
     required this.children,
-  }) : _layout = _CarouselLayout.weighted,
-       itemExtent = null;
+  }) : itemExtent = null;
 
   /// The amount of space to surround each carousel item with.
   ///
@@ -191,8 +189,6 @@ class Carousel extends StatefulWidget {
 
   /// The child widgets for carousel.
   final List<Widget> children;
-
-  final _CarouselLayout _layout;
 
   @override
   State<Carousel> createState() => _CarouselState();
@@ -350,7 +346,7 @@ class _CarouselState extends State<Carousel> {
               ),
             ),
             if (weights != null) _SliverWeightedCarousel(
-              allowFullyExpand: allowFullyExpand ?? false,
+              allowFullyExpand: allowFullyExpand,
               shrinkExtent: widget.shrinkExtent ?? 0.0,
               weights: weights!,
               delegate: SliverChildBuilderDelegate(
@@ -905,15 +901,6 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
   /// If this is null, the [itemExtent] must be non-null.
   @override
   ItemExtentBuilder? get itemExtentBuilder => _buildItemExtent;
-}
-
-enum _CarouselLayout {
-  /// Carousel items have same size.
-  fixed,
-
-  /// The extent of each carousel item is determined by the weight it occupied
-  /// on the viewport.
-  weighted,
 }
 
 class CarouselScrollPhysics extends ScrollPhysics {
