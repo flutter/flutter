@@ -179,7 +179,7 @@ class DialogDemoState extends State<DialogDemo> {
                 initialTime: _selectedTime!,
               )
               .then((TimeOfDay? value) {
-                if (!mounted) {
+                if (!context.mounted) {
                   return;
                 }
                 if (value != null && value != _selectedTime) {
