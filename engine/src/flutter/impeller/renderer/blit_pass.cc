@@ -122,28 +122,41 @@ bool BlitPass::AddCopy(std::shared_ptr<Texture> source,
 
 bool BlitPass::AddCopy(BufferView source,
                        std::shared_ptr<Texture> destination,
-                       IPoint destination_origin,
+                       std::optional<IRect> destination_region,
                        std::string label,
                        uint32_t slice) {
   if (!destination) {
     VALIDATION_LOG << "Attempted to add a texture blit with no destination.";
     return false;
   }
+  ISize destination_size = destination->GetSize();
+  IRect destination_region_value =
+      destination_region.value_or(IRect::MakeSize(destination_size));
+  if (destination_region_value.GetX() < 0 ||
+      destination_region_value.GetY() < 0 ||
+      destination_region_value.GetRight() > destination_size.width ||
+      destination_region_value.GetBottom() > destination_size.height) {
+    VALIDATION_LOG << "Blit region cannot be larger than destination texture.";
+    return false;
+  }
 
   auto bytes_per_pixel =
       BytesPerPixelForPixelFormat(destination->GetTextureDescriptor().format);
-  auto bytes_per_image =
-      destination->GetTextureDescriptor().size.Area() * bytes_per_pixel;
+  auto bytes_per_image = destination_region_value.Area() * bytes_per_pixel;
 
   if (source.range.length != bytes_per_image) {
     VALIDATION_LOG
         << "Attempted to add a texture blit with out of bounds access.";
     return false;
   }
+  if (slice > 5) {
+    VALIDATION_LOG << "Invalid value for slice: " << slice;
+    return false;
+  }
 
   return OnCopyBufferToTextureCommand(std::move(source), std::move(destination),
-                                      destination_origin, std::move(label),
-                                      slice);
+                                      destination_region_value,
+                                      std::move(label), slice);
 }
 
 bool BlitPass::GenerateMipmap(std::shared_ptr<Texture> texture,

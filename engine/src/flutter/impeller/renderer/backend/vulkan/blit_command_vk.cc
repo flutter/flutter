@@ -246,10 +246,12 @@ bool BlitCopyBufferToTextureCommandVK::Encode(CommandEncoderVK& encoder) const {
   image_copy.setBufferImageHeight(0);
   image_copy.setImageSubresource(
       vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1));
-  image_copy.setImageOffset(
-      vk::Offset3D(destination_origin.x, destination_origin.y, 0));
-  image_copy.setImageExtent(vk::Extent3D(destination->GetSize().width,
-                                         destination->GetSize().height, 1));
+  image_copy.imageOffset.x = destination_region.GetX();
+  image_copy.imageOffset.y = destination_region.GetY();
+  image_copy.imageOffset.z = 0u;
+  image_copy.imageExtent.width = destination_region.GetWidth();
+  image_copy.imageExtent.height = destination_region.GetHeight();
+  image_copy.imageExtent.depth = 1u;
 
   if (!dst.SetLayout(dst_barrier)) {
     VALIDATION_LOG << "Could not encode layout transition.";

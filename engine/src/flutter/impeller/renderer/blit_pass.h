@@ -89,8 +89,9 @@ class BlitPass {
   /// @param[in]  source              The buffer view to read for copying.
   /// @param[in]  destination         The texture to overwrite using the source
   ///                                 contents.
-  /// @param[in]  destination_offset  The offset to start writing to in the
-  ///                                 destination buffer.
+  /// @param[in]  destination_region  The offset to start writing to in the
+  ///                                 destination texture. If not provided, this
+  ///                                 defaults to the entire texture.
   /// @param[in]  label               The optional debug label to give the
   ///                                 command.
   /// @param[in]  slice               For cubemap textures, the slice to write
@@ -98,9 +99,17 @@ class BlitPass {
   ///
   /// @return     If the command was valid for subsequent commitment.
   ///
+  /// If a region smaller than the texture size is provided, the
+  /// contents are treated as containing tightly packed pixel data of
+  /// that region. Only the portion of the texture in this region is
+  /// replaced and existing data is preserved.
+  ///
+  /// For example, to replace the top left 10 x 10 region of a larger
+  /// 100 x 100 texture, the region is {0, 0, 10, 10} and the expected
+  /// buffer size in bytes is 100 x bpp.
   bool AddCopy(BufferView source,
                std::shared_ptr<Texture> destination,
-               IPoint destination_origin = {},
+               std::optional<IRect> destination_region = std::nullopt,
                std::string label = "",
                uint32_t slice = 0);
 
@@ -148,7 +157,7 @@ class BlitPass {
   virtual bool OnCopyBufferToTextureCommand(
       BufferView source,
       std::shared_ptr<Texture> destination,
-      IPoint destination_origin,
+      IRect destination_region,
       std::string label,
       uint32_t slice) = 0;
 

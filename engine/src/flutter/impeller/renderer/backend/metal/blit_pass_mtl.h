@@ -55,7 +55,7 @@ class BlitPassMTL final : public BlitPass {
   // |BlitPass|
   bool OnCopyBufferToTextureCommand(BufferView source,
                                     std::shared_ptr<Texture> destination,
-                                    IPoint destination_origin,
+                                    IRect destination_region,
                                     std::string label,
                                     uint32_t slice) override;
 

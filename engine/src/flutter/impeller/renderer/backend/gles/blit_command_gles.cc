@@ -219,7 +219,9 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
   }
 
   if (!tex_descriptor.IsValid() ||
-      source.range.length < tex_descriptor.GetByteSizeOfBaseMipLevel()) {
+      source.range.length !=
+          BytesPerPixelForPixelFormat(tex_descriptor.format) *
+              destination_region.Area()) {
     return false;
   }
 
@@ -263,9 +265,9 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
   const GLvoid* tex_data =
       data.buffer_view.buffer->OnGetContents() + data.buffer_view.range.offset;
 
-  {
-    TRACE_EVENT1("impeller", "TexImage2DUpload", "Bytes",
-                 std::to_string(data.buffer_view.range.length).c_str());
+  // GL_INVALID_OPERATION if the texture array has not been
+  // defined by a previous glTexImage2D operation.
+  if (!texture_gles.IsSliceInitialized(slice)) {
     gl.TexImage2D(texture_target,              // target
                   0u,                          // LOD level
                   data.internal_format,        // internal format
@@ -276,8 +278,24 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
                   data.type,                   // type
                   tex_data                     // data
     );
+    texture_gles.MarkSliceInitialized(slice);
   }
-  texture_gles.MarkContentsInitialized();
+
+  {
+    TRACE_EVENT1("impeller", "TexImage2DUpload", "Bytes",
+                 std::to_string(data.buffer_view.range.length).c_str());
+    gl.TexSubImage2D(texture_target,                  // target
+                     0u,                              // LOD level
+                     destination_region.GetX(),       // xoffset
+                     destination_region.GetY(),       // yoffset
+                     destination_region.GetWidth(),   // width
+                     destination_region.GetHeight(),  // height
+                     data.external_format,            // external format
+                     data.type,                       // type
+                     tex_data                         // data
+
+    );
+  }
   return true;
 }
 
