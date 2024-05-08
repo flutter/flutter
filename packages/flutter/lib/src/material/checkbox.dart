@@ -873,6 +873,13 @@ class _CheckboxPainter extends ToggleablePainter {
     }
     switch (_designSpec!) {
       case _DesignSpec.cupertino:
+        // Apply effect to darken checkbox when pressed.
+        if (!reaction.isDismissed){
+          final Paint paint = Paint()
+            ..color = Colors.transparent.withOpacity(0.05);
+          final Rect outer = _outerRectAt(origin, 1.0);
+          _drawBox(canvas, outer, paint, activeSide);
+        }
         if (isFocused) {
           final Rect focusOuter = _outerRectAt(origin, 1.0).inflate(1);
           final Paint borderPaint = Paint()
@@ -1012,7 +1019,7 @@ class _CheckboxDefaultsCupertino extends CheckboxThemeData {
   }
 
   @override
-  double get splashRadius => 0.0;
+  double get splashRadius => 40.0 / 2;
 
   @override
   MaterialTapTargetSize get materialTapTargetSize => _theme.materialTapTargetSize;
