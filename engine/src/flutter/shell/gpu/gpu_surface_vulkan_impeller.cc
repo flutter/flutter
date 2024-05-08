@@ -84,11 +84,12 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
 
         auto cull_rect =
             surface->GetTargetRenderPassDescriptor().GetRenderTargetSize();
+        [[maybe_unused]] auto supports_readback =
+            surface_frame.framebuffer_info().supports_readback;
 
         return renderer->Render(
             std::move(surface),
-            fml::MakeCopyable([aiks_context, cull_rect, display_list](
-                                  impeller::RenderTarget& render_target)
+            fml::MakeCopyable([&](impeller::RenderTarget& render_target)
                                   -> bool {
 #if ENABLE_EXPERIMENTAL_CANVAS
               impeller::TextFrameDispatcher collector(
@@ -98,6 +99,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
                   SkIRect::MakeWH(cull_rect.width, cull_rect.height));
               impeller::ExperimentalDlDispatcher impeller_dispatcher(
                   aiks_context->GetContentContext(), render_target,
+                  supports_readback,
                   impeller::IRect::RoundOut(
                       impeller::Rect::MakeSize(cull_rect)));
               display_list->Dispatch(
