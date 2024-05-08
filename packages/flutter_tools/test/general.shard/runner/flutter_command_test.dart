@@ -1217,6 +1217,46 @@ void main() {
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
       });
+
+      testUsingContext('tool loads default flavor from manifest', () async {
+        final File pubspec = fileSystem.file('pubspec.yaml');
+        await pubspec.create();
+        await pubspec.writeAsString('''
+name: test
+flutter:
+  default-flavor: foo
+        ''');
+
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+        final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.flavor, 'foo');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('tool loads default flavor from manifest, but cli overrides', () async {
+        // await fileSystem.file('example/pubspec.yaml').create(recursive: true);
+        final File pubspec = fileSystem.file('pubspec.yaml');
+        await pubspec.create();
+        await pubspec.writeAsString('''
+name: test
+flutter:
+  default-flavor: foo
+        ''');
+
+        final DummyFlutterCommand flutterCommand = DummyFlutterCommand(commandFunction: () async {
+          return FlutterCommandResult.success();
+        },);
+        flutterCommand.usesFlavorOption();
+        final CommandRunner<void> runner =  createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummy', '--flavor', 'bar']);
+        final BuildInfo buildInfo = await flutterCommand.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.flavor, 'bar');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
     });
   });
 }
