@@ -251,13 +251,38 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
 
 - (void)testReleasesBackdropFilterSubviewsOnChildClippingViewDealloc {
   __weak NSMutableArray<UIVisualEffectView*>* weakBackdropFilterSubviews = nil;
+  __weak UIVisualEffectView* weakVisualEffectView1 = nil;
+  __weak UIVisualEffectView* weakVisualEffectView2 = nil;
+
   @autoreleasepool {
-    ChildClippingView* clipping_view = [[ChildClippingView alloc] initWithFrame:CGRectZero];
-    weakBackdropFilterSubviews = clipping_view.backdropFilterSubviews;
+    ChildClippingView* clippingView = [[ChildClippingView alloc] initWithFrame:CGRectZero];
+    UIVisualEffectView* visualEffectView1 = [[UIVisualEffectView alloc]
+        initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
+    weakVisualEffectView1 = visualEffectView1;
+    PlatformViewFilter* platformViewFilter1 =
+        [[PlatformViewFilter alloc] initWithFrame:CGRectMake(0, 0, 10, 10)
+                                       blurRadius:5
+                                 visualEffectView:visualEffectView1];
+
+    [clippingView applyBlurBackdropFilters:@[ platformViewFilter1 ]];
+
+    // Replace the blur filter to validate the original and new UIVisualEffectView are released.
+    UIVisualEffectView* visualEffectView2 = [[UIVisualEffectView alloc]
+        initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleDark]];
+    weakVisualEffectView2 = visualEffectView2;
+    PlatformViewFilter* platformViewFilter2 =
+        [[PlatformViewFilter alloc] initWithFrame:CGRectMake(0, 0, 10, 10)
+                                       blurRadius:5
+                                 visualEffectView:visualEffectView2];
+    [clippingView applyBlurBackdropFilters:@[ platformViewFilter2 ]];
+
+    weakBackdropFilterSubviews = clippingView.backdropFilterSubviews;
     XCTAssertNotNil(weakBackdropFilterSubviews);
-    clipping_view = nil;
+    clippingView = nil;
   }
   XCTAssertNil(weakBackdropFilterSubviews);
+  XCTAssertNil(weakVisualEffectView1);
+  XCTAssertNil(weakVisualEffectView2);
 }
 
 - (void)testApplyBackdropFilter {
@@ -595,6 +620,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
     XCTAssertEqual(originalView, newView);
     id mockOrignalView = OCMPartialMock(originalView);
     OCMReject([mockOrignalView removeFromSuperview]);
+    [mockOrignalView stopMocking];
   }
 }
 
@@ -1302,20 +1328,26 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
 }
 
 - (void)testBackdropFilterVisualEffectSubviewBackgroundColor {
-  UIVisualEffectView* visualEffectView = [[UIVisualEffectView alloc]
-      initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
-  PlatformViewFilter* platformViewFilter =
-      [[PlatformViewFilter alloc] initWithFrame:CGRectMake(0, 0, 10, 10)
-                                     blurRadius:5
-                               visualEffectView:visualEffectView];
-  CGColorRef visualEffectSubviewBackgroundColor = nil;
-  for (UIView* view in [platformViewFilter backdropFilterView].subviews) {
-    if ([NSStringFromClass([view class]) hasSuffix:@"VisualEffectSubview"]) {
-      visualEffectSubviewBackgroundColor = view.layer.backgroundColor;
+  __weak UIVisualEffectView* weakVisualEffectView;
+
+  @autoreleasepool {
+    UIVisualEffectView* visualEffectView = [[UIVisualEffectView alloc]
+        initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
+    weakVisualEffectView = visualEffectView;
+    PlatformViewFilter* platformViewFilter =
+        [[PlatformViewFilter alloc] initWithFrame:CGRectMake(0, 0, 10, 10)
+                                       blurRadius:5
+                                 visualEffectView:visualEffectView];
+    CGColorRef visualEffectSubviewBackgroundColor = nil;
+    for (UIView* view in [platformViewFilter backdropFilterView].subviews) {
+      if ([NSStringFromClass([view class]) hasSuffix:@"VisualEffectSubview"]) {
+        visualEffectSubviewBackgroundColor = view.layer.backgroundColor;
+      }
     }
+    XCTAssertTrue(
+        CGColorEqualToColor(visualEffectSubviewBackgroundColor, UIColor.clearColor.CGColor));
   }
-  XCTAssertTrue(
-      CGColorEqualToColor(visualEffectSubviewBackgroundColor, UIColor.clearColor.CGColor));
+  XCTAssertNil(weakVisualEffectView);
 }
 
 - (void)testCompositePlatformView {
