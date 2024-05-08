@@ -29,30 +29,6 @@ uint8_t* DeviceBufferMTL::OnGetContents() const {
   return reinterpret_cast<uint8_t*>(buffer_.contents);
 }
 
-std::shared_ptr<Texture> DeviceBufferMTL::AsTexture(
-    Allocator& allocator,
-    const TextureDescriptor& descriptor,
-    uint16_t row_bytes) const {
-  auto mtl_texture_desc = ToMTLTextureDescriptor(descriptor);
-
-  if (!mtl_texture_desc) {
-    VALIDATION_LOG << "Texture descriptor was invalid.";
-    return nullptr;
-  }
-
-  if (@available(iOS 13.0, macos 10.15, *)) {
-    mtl_texture_desc.resourceOptions = buffer_.resourceOptions;
-  }
-
-  auto texture = [buffer_ newTextureWithDescriptor:mtl_texture_desc
-                                            offset:0
-                                       bytesPerRow:row_bytes];
-  if (!texture) {
-    return nullptr;
-  }
-  return TextureMTL::Create(descriptor, texture);
-}
-
 [[nodiscard]] bool DeviceBufferMTL::OnCopyHostBuffer(const uint8_t* source,
                                                      Range source_range,
                                                      size_t offset) {

@@ -20,6 +20,16 @@ struct BlitEncodeGLES : BackendCast<BlitEncodeGLES, BlitCommand> {
   [[nodiscard]] virtual bool Encode(const ReactorGLES& reactor) const = 0;
 };
 
+struct BlitCopyBufferToTextureCommandGLES
+    : public BlitEncodeGLES,
+      public BlitCopyBufferToTextureCommand {
+  ~BlitCopyBufferToTextureCommandGLES() override;
+
+  std::string GetLabel() const override;
+
+  [[nodiscard]] bool Encode(const ReactorGLES& reactor) const override;
+};
+
 struct BlitCopyTextureToTextureCommandGLES
     : public BlitEncodeGLES,
       public BlitCopyTextureToTextureCommand {

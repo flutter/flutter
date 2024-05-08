@@ -22,21 +22,6 @@ BufferView DeviceBuffer::AsBufferView(std::shared_ptr<DeviceBuffer> buffer) {
   return view;
 }
 
-std::shared_ptr<Texture> DeviceBuffer::AsTexture(
-    Allocator& allocator,
-    const TextureDescriptor& descriptor,
-    uint16_t row_bytes) const {
-  auto texture = allocator.CreateTexture(descriptor);
-  if (!texture) {
-    return nullptr;
-  }
-  if (!texture->SetContents(std::make_shared<fml::NonOwnedMapping>(
-          OnGetContents(), desc_.size))) {
-    return nullptr;
-  }
-  return texture;
-}
-
 const DeviceBufferDescriptor& DeviceBuffer::GetDeviceBufferDescriptor() const {
   return desc_;
 }

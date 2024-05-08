@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <algorithm>
-
 #include "impeller/entity/contents/gradient_generator.h"
 
 #include "flutter/fml/logging.h"
+#include "impeller/base/strings.h"
+#include "impeller/core/device_buffer.h"
+#include "impeller/core/formats.h"
 #include "impeller/core/texture.h"
-#include "impeller/entity/contents/content_context.h"
 #include "impeller/renderer/context.h"
-#include "impeller/renderer/render_pass.h"
 
 namespace impeller {
 
@@ -33,11 +32,20 @@ std::shared_ptr<Texture> CreateGradientTexture(
     return nullptr;
   }
 
-  auto mapping = std::make_shared<fml::DataMapping>(gradient_data.color_bytes);
-  if (!texture->SetContents(mapping)) {
-    FML_DLOG(ERROR) << "Could not copy contents into Impeller texture.";
+  auto data_mapping =
+      std::make_shared<fml::DataMapping>(gradient_data.color_bytes);
+  auto buffer =
+      context->GetResourceAllocator()->CreateBufferWithCopy(*data_mapping);
+
+  auto cmd_buffer = context->CreateCommandBuffer();
+  auto blit_pass = cmd_buffer->CreateBlitPass();
+  blit_pass->AddCopy(DeviceBuffer::AsBufferView(std::move(buffer)), texture);
+
+  if (!blit_pass->EncodeCommands(context->GetResourceAllocator()) ||
+      !context->GetCommandQueue()->Submit({std::move(cmd_buffer)}).ok()) {
     return nullptr;
   }
+
   texture->SetLabel(impeller::SPrintF("Gradient(%p)", texture.get()).c_str());
   return texture;
 }

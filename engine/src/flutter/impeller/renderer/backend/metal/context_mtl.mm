@@ -56,7 +56,6 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
   return CapabilitiesBuilder()
       .SetSupportsOffscreenMSAA(true)
       .SetSupportsSSBO(true)
-      .SetSupportsBufferToTextureBlits(true)
       .SetSupportsTextureToTextureBlits(true)
       .SetSupportsDecalSamplerAddressMode(true)
       .SetSupportsFramebufferFetch(DeviceSupportsFramebufferFetch(device))

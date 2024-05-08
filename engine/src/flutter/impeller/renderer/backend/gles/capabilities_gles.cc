@@ -153,10 +153,6 @@ bool CapabilitiesGLES::SupportsSSBO() const {
   return false;
 }
 
-bool CapabilitiesGLES::SupportsBufferToTextureBlits() const {
-  return false;
-}
-
 bool CapabilitiesGLES::SupportsTextureToTextureBlits() const {
   return false;
 }

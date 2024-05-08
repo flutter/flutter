@@ -239,7 +239,6 @@ impeller_component("entity_unittests") {
 
   sources = [
     "contents/clip_contents_unittests.cc",
-    "contents/content_context_unittests.cc",
     "contents/filters/gaussian_blur_filter_contents_unittests.cc",
     "contents/filters/inputs/filter_input_unittests.cc",
     "contents/host_buffer_unittests.cc",

@@ -132,7 +132,7 @@ bool BlitCopyBufferToTextureCommandMTL::Encode(
       sourceBytesPerImage:destination_bytes_per_image
                sourceSize:source_size_mtl
                 toTexture:destination_mtl
-         destinationSlice:0
+         destinationSlice:slice
          destinationLevel:0
         destinationOrigin:destination_origin_mtl];
 
