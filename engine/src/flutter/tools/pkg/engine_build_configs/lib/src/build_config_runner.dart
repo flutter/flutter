@@ -356,7 +356,7 @@ final class BuildRunner extends Runner {
     final List<String> bootstrapCommand = <String>[
       bootstrapPath,
       '--re_proxy=$reproxyPath',
-      '--automatic_auth=true',
+      '--use_application_default_credentials',
       if (shutdown) '--shutdown' else ...<String>['--cfg=$reclientConfigPath'],
     ];
     if (!processRunner.processManager.canRun(bootstrapPath)) {

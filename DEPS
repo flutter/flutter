@@ -44,7 +44,7 @@ vars = {
   # See https://github.com/flutter/flutter/wiki/Engine-pre‐submits-and-post‐submits#post-submit
   'clang_version': 'git_revision:725656bdd885483c39f482a01ea25d67acf39c46',
 
-  'reclient_version': 'git_revision:2c9285bdffcfd1b21afb028d57494ff78761af81',
+  'reclient_version': 'git_revision:29a9d3cb597b6a7d67fa3e9aa8a7cab1c81232ee',
 
   'gcloud_version': 'version:2@444.0.0.chromium.3',
 
@@ -277,7 +277,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'c5f0206b6fd70a85a41718f0bc6481b7c5348026',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'b55755acbe3d771f2c0f9da708af4bc9477b91d7',
 
   'src/flutter/third_party/depot_tools':
   Var('chromium_git') + '/chromium/tools/depot_tools.git' + '@' + '580b4ff3f5cd0dcaa2eacda28cefe0f45320e8f7',
@@ -946,7 +946,7 @@ deps = {
     'packages': [
       {
         'package': 'flutter_internal/rbe/reclient_cfgs',
-        'version': 'ZuU_165luvP45DTYUP6WlEXb5EXyVxEuAm45ZB1c3zoC',
+        'version': 'XIomtC8MFuQrF9qI5xYcFfcfKXZTbcY6nL6NgF-pSRIC',
       }
     ],
     'condition': 'use_rbe',
