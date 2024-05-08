@@ -60,9 +60,9 @@ class TextureGLES final : public Texture,
 
   std::optional<GLuint> GetFBO() const { return wrapped_fbo_; }
 
- private:
-  friend class AllocatorMTL;
+  void MarkContentsInitialized() const;
 
+ private:
   ReactorGLES::Ref reactor_;
   const Type type_;
   HandleGLES handle_;

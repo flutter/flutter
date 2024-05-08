@@ -9,10 +9,14 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
+#include "fml/closure.h"
+#include "fml/mapping.h"
 #include "impeller/base/allocation.h"
 #include "impeller/core/allocator.h"
+#include "impeller/renderer/command_buffer.h"
 #include "impeller/typographer/backends/skia/glyph_atlas_context_skia.h"
 #include "impeller/typographer/backends/skia/typeface_skia.h"
+#include "impeller/typographer/glyph_atlas.h"
 #include "impeller/typographer/rectangle_packer.h"
 #include "impeller/typographer/typographer_context.h"
 #include "include/core/SkColor.h"
@@ -257,8 +261,11 @@ static std::shared_ptr<SkBitmap> CreateAtlasBitmap(const GlyphAtlas& atlas,
   return bitmap;
 }
 
-static bool UpdateGlyphTextureAtlas(std::shared_ptr<SkBitmap> bitmap,
-                                    const std::shared_ptr<Texture>& texture) {
+static bool UpdateGlyphTextureAtlas(
+    std::shared_ptr<SkBitmap> bitmap,
+    const std::shared_ptr<Allocator>& allocator,
+    const std::shared_ptr<Texture>& texture,
+    const std::shared_ptr<BlitPass>& blit_pass) {
   TRACE_EVENT0("impeller", __FUNCTION__);
 
   FML_DCHECK(bitmap != nullptr);
@@ -270,12 +277,17 @@ static bool UpdateGlyphTextureAtlas(std::shared_ptr<SkBitmap> bitmap,
       [bitmap](auto, auto) mutable { bitmap.reset(); }          // proc
   );
 
-  return texture->SetContents(mapping);
+  std::shared_ptr<DeviceBuffer> device_buffer =
+      allocator->CreateBufferWithCopy(*mapping);
+  blit_pass->AddCopy(DeviceBuffer::AsBufferView(std::move(device_buffer)),
+                     texture);
+  return blit_pass->EncodeCommands(allocator);
 }
 
 static std::shared_ptr<Texture> UploadGlyphTextureAtlas(
     const std::shared_ptr<Allocator>& allocator,
     std::shared_ptr<SkBitmap> bitmap,
+    const std::shared_ptr<BlitPass>& blit_pass,
     const ISize& atlas_size,
     PixelFormat format) {
   TRACE_EVENT0("impeller", __FUNCTION__);
@@ -287,7 +299,7 @@ static std::shared_ptr<Texture> UploadGlyphTextureAtlas(
   const auto& pixmap = bitmap->pixmap();
 
   TextureDescriptor texture_descriptor;
-  texture_descriptor.storage_mode = StorageMode::kHostVisible;
+  texture_descriptor.storage_mode = StorageMode::kDevicePrivate;
   texture_descriptor.format = format;
   texture_descriptor.size = atlas_size;
 
@@ -296,21 +308,25 @@ static std::shared_ptr<Texture> UploadGlyphTextureAtlas(
     return nullptr;
   }
 
-  auto texture = allocator->CreateTexture(texture_descriptor);
+  std::shared_ptr<Texture> texture =
+      allocator->CreateTexture(texture_descriptor);
   if (!texture || !texture->IsValid()) {
     return nullptr;
   }
   texture->SetLabel("GlyphAtlas");
 
-  auto mapping = std::make_shared<fml::NonOwnedMapping>(
-      reinterpret_cast<const uint8_t*>(bitmap->getAddr(0, 0)),  // data
-      texture_descriptor.GetByteSizeOfBaseMipLevel(),           // size
-      [bitmap](auto, auto) mutable { bitmap.reset(); }          // proc
-  );
+  std::shared_ptr<fml::NonOwnedMapping> mapping =
+      std::make_shared<fml::NonOwnedMapping>(
+          reinterpret_cast<const uint8_t*>(bitmap->getAddr(0, 0)),  // data
+          texture_descriptor.GetByteSizeOfBaseMipLevel(),           // size
+          [bitmap](auto, auto) mutable { bitmap.reset(); }          // proc
+      );
+  std::shared_ptr<DeviceBuffer> device_buffer =
+      allocator->CreateBufferWithCopy(*mapping);
+  blit_pass->AddCopy(DeviceBuffer::AsBufferView(std::move(device_buffer)),
+                     texture);
+  blit_pass->EncodeCommands(allocator);
 
-  if (!texture->SetContents(mapping)) {
-    return nullptr;
-  }
   return texture;
 }
 
@@ -329,6 +345,12 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
   if (font_glyph_map.empty()) {
     return last_atlas;
   }
+  std::shared_ptr<CommandBuffer> cmd_buffer = context.CreateCommandBuffer();
+  std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
+
+  fml::ScopedCleanupClosure closure([&cmd_buffer, &context]() {
+    context.GetCommandQueue()->Submit({std::move(cmd_buffer)});
+  });
 
   // ---------------------------------------------------------------------------
   // Step 1: Determine if the atlas type and font glyph pairs are compatible
@@ -387,7 +409,8 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
     // ---------------------------------------------------------------------------
     // Step 5a: Update the existing texture with the updated bitmap.
     // ---------------------------------------------------------------------------
-    if (!UpdateGlyphTextureAtlas(bitmap, last_atlas->GetTexture())) {
+    if (!UpdateGlyphTextureAtlas(bitmap, context.GetResourceAllocator(),
+                                 last_atlas->GetTexture(), blit_pass)) {
       return nullptr;
     }
     return last_atlas;
@@ -407,8 +430,8 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
       font_glyph_pairs.push_back({scaled_font, glyph});
     }
   }
-  auto glyph_atlas = std::make_shared<GlyphAtlas>(type);
-  auto atlas_size = OptimumAtlasSizeForFontGlyphPairs(
+  std::shared_ptr<GlyphAtlas> glyph_atlas = std::make_shared<GlyphAtlas>(type);
+  ISize atlas_size = OptimumAtlasSizeForFontGlyphPairs(
       font_glyph_pairs,                                             //
       glyph_positions,                                              //
       atlas_context,                                                //
@@ -450,6 +473,21 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
   }
   atlas_context_skia.UpdateBitmap(bitmap);
 
+  // If the new atlas size is the same size as the previous texture, reuse the
+  // texture and treat this as an updated that replaces all glyphs.
+  if (last_atlas && last_atlas->GetTexture()) {
+    std::shared_ptr<Texture> last_texture = last_atlas->GetTexture();
+    if (atlas_size == last_texture->GetSize()) {
+      if (!UpdateGlyphTextureAtlas(bitmap, context.GetResourceAllocator(),
+                                   last_texture, blit_pass)) {
+        return nullptr;
+      }
+
+      glyph_atlas->SetTexture(last_texture);
+      return glyph_atlas;
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // Step 7b: Upload the atlas as a texture.
   // ---------------------------------------------------------------------------
@@ -462,8 +500,8 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
       format = PixelFormat::kR8G8B8A8UNormInt;
       break;
   }
-  auto texture = UploadGlyphTextureAtlas(context.GetResourceAllocator(), bitmap,
-                                         atlas_size, format);
+  std::shared_ptr<Texture> texture = UploadGlyphTextureAtlas(
+      context.GetResourceAllocator(), bitmap, blit_pass, atlas_size, format);
   if (!texture) {
     return nullptr;
   }

@@ -494,18 +494,10 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
                                                  gpu_disabled_switch]() {
           sk_sp<DlImage> image;
           std::string decode_error;
-          if (context->GetCapabilities()->SupportsBufferToTextureBlits()) {
-            std::tie(image, decode_error) = UploadTextureToPrivate(
-                context, bitmap_result.device_buffer, bitmap_result.image_info,
-                bitmap_result.sk_bitmap, gpu_disabled_switch);
-            result(image, decode_error);
-          } else {
-            std::tie(image, decode_error) = UploadTextureToStorage(
-                context, bitmap_result.sk_bitmap, gpu_disabled_switch,
-                impeller::StorageMode::kDevicePrivate,
-                /*create_mips=*/true);
-            result(image, decode_error);
-          }
+          std::tie(image, decode_error) = UploadTextureToPrivate(
+              context, bitmap_result.device_buffer, bitmap_result.image_info,
+              bitmap_result.sk_bitmap, gpu_disabled_switch);
+          result(image, decode_error);
         };
         if (context->GetBackendType() ==
             impeller::Context::BackendType::kOpenGLES) {

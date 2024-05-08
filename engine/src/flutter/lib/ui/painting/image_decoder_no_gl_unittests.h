@@ -44,12 +44,6 @@ class TestImpellerDeviceBuffer : public DeviceBuffer {
   ~TestImpellerDeviceBuffer() { free(bytes_); }
 
  private:
-  std::shared_ptr<Texture> AsTexture(Allocator& allocator,
-                                     const TextureDescriptor& descriptor,
-                                     uint16_t row_bytes) const override {
-    return nullptr;
-  }
-
   bool SetLabel(const std::string& label) override { return true; }
 
   bool SetLabel(const std::string& label, Range range) override { return true; }

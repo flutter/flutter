@@ -684,6 +684,8 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
     return std::nullopt;
   }
 
+  std::shared_ptr<Texture> foreground_texture;
+
   ContentContext::SubpassCallback subpass_callback = [&](const ContentContext&
                                                              renderer,
                                                          RenderPass& pass) {
@@ -736,20 +738,7 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
       // texture for the foreground color.
       std::shared_ptr<Texture> src_texture;
       if (foreground_color.has_value()) {
-        TextureDescriptor desc;
-        desc.size = {1, 1};
-        desc.format = PixelFormat::kR8G8B8A8UNormInt;
-        desc.storage_mode = StorageMode::kHostVisible;
-        src_texture =
-            renderer.GetContext()->GetResourceAllocator()->CreateTexture(desc);
-        if (!src_texture) {
-          return false;
-        }
-
-        if (!src_texture->SetContents(
-                foreground_color->Premultiply().ToR8G8B8A8().data(), 4u)) {
-          return false;
-        }
+        src_texture = foreground_texture;
       } else {
         auto src_snapshot =
             inputs[0]->GetSnapshot("ForegroundAdvancedBlend", renderer, entity);
@@ -864,6 +853,29 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
 
   std::shared_ptr<CommandBuffer> cmd_buffer =
       renderer.GetContext()->CreateCommandBuffer();
+
+  // Generate a 1x1 texture to implement foreground color blending.
+  if (foreground_color.has_value()) {
+    TextureDescriptor desc;
+    desc.size = {1, 1};
+    desc.format = PixelFormat::kR8G8B8A8UNormInt;
+    desc.storage_mode = StorageMode::kDevicePrivate;
+    foreground_texture =
+        renderer.GetContext()->GetResourceAllocator()->CreateTexture(desc);
+    if (!foreground_texture) {
+      return std::nullopt;
+    }
+    auto blit_pass = cmd_buffer->CreateBlitPass();
+    auto buffer_view = renderer.GetTransientsBuffer().Emplace(
+        foreground_color->Premultiply().ToR8G8B8A8());
+
+    blit_pass->AddCopy(std::move(buffer_view), foreground_texture);
+    if (!blit_pass->EncodeCommands(
+            renderer.GetContext()->GetResourceAllocator())) {
+      return std::nullopt;
+    }
+  }
+
   auto render_target =
       renderer.MakeSubpass("FramebufferBlend", dst_snapshot->texture->GetSize(),
                            cmd_buffer, subpass_callback);

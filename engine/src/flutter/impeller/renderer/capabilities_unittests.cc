@@ -20,7 +20,6 @@ namespace testing {
 
 CAPABILITY_TEST(SupportsOffscreenMSAA, false);
 CAPABILITY_TEST(SupportsSSBO, false);
-CAPABILITY_TEST(SupportsBufferToTextureBlits, false);
 CAPABILITY_TEST(SupportsTextureToTextureBlits, false);
 CAPABILITY_TEST(SupportsFramebufferFetch, false);
 CAPABILITY_TEST(SupportsCompute, false);

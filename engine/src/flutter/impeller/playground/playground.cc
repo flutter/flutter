@@ -414,27 +414,26 @@ static std::shared_ptr<Texture> CreateTextureForDecompressedImage(
     return nullptr;
   }
 
-  auto uploaded = texture->SetContents(decompressed_image.GetAllocation());
-  if (!uploaded) {
-    VALIDATION_LOG << "Could not upload texture to device memory for fixture.";
+  auto command_buffer = context->CreateCommandBuffer();
+  if (!command_buffer) {
+    FML_DLOG(ERROR) << "Could not create command buffer for mipmap generation.";
     return nullptr;
   }
+  command_buffer->SetLabel("Mipmap Command Buffer");
+
+  auto blit_pass = command_buffer->CreateBlitPass();
+  auto buffer_view = DeviceBuffer::AsBufferView(
+      context->GetResourceAllocator()->CreateBufferWithCopy(
+          *decompressed_image.GetAllocation()));
+  blit_pass->AddCopy(buffer_view, texture);
   if (enable_mipmapping) {
-    auto command_buffer = context->CreateCommandBuffer();
-    if (!command_buffer) {
-      FML_DLOG(ERROR)
-          << "Could not create command buffer for mipmap generation.";
-      return nullptr;
-    }
-    command_buffer->SetLabel("Mipmap Command Buffer");
-    auto blit_pass = command_buffer->CreateBlitPass();
     blit_pass->SetLabel("Mipmap Blit Pass");
     blit_pass->GenerateMipmap(texture);
-    blit_pass->EncodeCommands(context->GetResourceAllocator());
-    if (!context->GetCommandQueue()->Submit({command_buffer}).ok()) {
-      FML_DLOG(ERROR) << "Failed to submit blit pass command buffer.";
-      return nullptr;
-    }
+  }
+  blit_pass->EncodeCommands(context->GetResourceAllocator());
+  if (!context->GetCommandQueue()->Submit({command_buffer}).ok()) {
+    FML_DLOG(ERROR) << "Failed to submit blit pass command buffer.";
+    return nullptr;
   }
   return texture;
 }
@@ -492,14 +491,24 @@ std::shared_ptr<Texture> Playground::CreateTextureCubeForFixture(
   }
   texture->SetLabel("Texture cube");
 
+  auto cmd_buffer = renderer_->GetContext()->CreateCommandBuffer();
+  auto blit_pass = cmd_buffer->CreateBlitPass();
   for (size_t i = 0; i < fixture_names.size(); i++) {
-    auto uploaded =
-        texture->SetContents(images[i].GetAllocation()->GetMapping(),
-                             images[i].GetAllocation()->GetSize(), i);
-    if (!uploaded) {
-      VALIDATION_LOG << "Could not upload texture to device memory.";
-      return nullptr;
-    }
+    auto device_buffer =
+        renderer_->GetContext()->GetResourceAllocator()->CreateBufferWithCopy(
+            *images[i].GetAllocation());
+    blit_pass->AddCopy(DeviceBuffer::AsBufferView(device_buffer), texture, {},
+                       "", /*slice=*/i);
+  }
+
+  if (!blit_pass->EncodeCommands(
+          renderer_->GetContext()->GetResourceAllocator()) ||
+      !renderer_->GetContext()
+           ->GetCommandQueue()
+           ->Submit({std::move(cmd_buffer)})
+           .ok()) {
+    VALIDATION_LOG << "Could not upload texture to device memory.";
+    return nullptr;
   }
 
   return texture;

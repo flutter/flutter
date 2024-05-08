@@ -973,43 +973,6 @@ TEST_P(RendererTest, InactiveUniforms) {
   OpenPlaygroundHere(callback);
 }
 
-TEST_P(RendererTest, CanCreateCPUBackedTexture) {
-  if (GetParam() == PlaygroundBackend::kOpenGLES) {
-    GTEST_SKIP_("CPU backed textures are not supported on OpenGLES.");
-  }
-
-  auto context = GetContext();
-  auto allocator = context->GetResourceAllocator();
-  size_t dimension = 2;
-
-  do {
-    ISize size(dimension, dimension);
-    TextureDescriptor texture_descriptor;
-    texture_descriptor.storage_mode = StorageMode::kHostVisible;
-    texture_descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
-    texture_descriptor.size = size;
-    auto row_bytes =
-        std::max(static_cast<uint16_t>(size.width * 4),
-                 allocator->MinimumBytesPerRow(texture_descriptor.format));
-    auto buffer_size = size.height * row_bytes;
-
-    DeviceBufferDescriptor buffer_descriptor;
-    buffer_descriptor.storage_mode = StorageMode::kHostVisible;
-    buffer_descriptor.size = buffer_size;
-
-    auto buffer = allocator->CreateBuffer(buffer_descriptor);
-
-    ASSERT_TRUE(buffer);
-
-    auto texture = buffer->AsTexture(*allocator, texture_descriptor, row_bytes);
-
-    ASSERT_TRUE(texture);
-    ASSERT_TRUE(texture->IsValid());
-
-    dimension *= 2;
-  } while (dimension <= 8192);
-}
-
 TEST_P(RendererTest, DefaultIndexSize) {
   using VS = BoxFadeVertexShader;
 
