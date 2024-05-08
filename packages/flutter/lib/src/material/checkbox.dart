@@ -464,9 +464,12 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final CheckboxThemeData checkboxTheme = CheckboxTheme.of(context);
+    final _DesignSpec designSpec;
     final CheckboxThemeData defaults;
+
       switch (widget._checkboxType) {
         case _CheckboxType.material:
+          designSpec = _DesignSpec.material;
           defaults = Theme.of(context).useMaterial3
             ? _CheckboxDefaultsM3(context)
             : _CheckboxDefaultsM2(context);
@@ -477,12 +480,15 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
             case TargetPlatform.fuchsia:
             case TargetPlatform.linux:
             case TargetPlatform.windows:
+              designSpec = _DesignSpec.material;
               defaults = Theme.of(context).useMaterial3
                 ? _CheckboxDefaultsM3(context)
                 : _CheckboxDefaultsM2(context);
             case TargetPlatform.iOS:
             case TargetPlatform.macOS:
+              designSpec = _DesignSpec.cupertino;
               defaults = _CheckboxDefaultsCupertino(context);
+              positionController.duration = Duration.zero;
           }
       }
 
@@ -593,26 +599,6 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     final double effectiveSplashRadius = widget.splashRadius
       ?? checkboxTheme.splashRadius
       ?? defaults.splashRadius!;
-
-    _DesignSpec designSpec;
-
-    switch (widget._checkboxType) {
-      case _CheckboxType.material:
-        designSpec = _DesignSpec.material;
-      case _CheckboxType.adaptive:
-        final ThemeData theme = Theme.of(context);
-        switch (theme.platform) {
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
-          case TargetPlatform.linux:
-          case TargetPlatform.windows:
-            designSpec = _DesignSpec.material;
-          case TargetPlatform.iOS:
-          case TargetPlatform.macOS:
-            designSpec = _DesignSpec.cupertino;
-            positionController.duration = Duration.zero;
-        }
-    }
 
     return Semantics(
       label: widget.semanticLabel,
