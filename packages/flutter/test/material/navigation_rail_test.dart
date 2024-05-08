@@ -3635,6 +3635,8 @@ void main() {
   testWidgets('NavigationRail labels shall not overflow if longer texts provided - extended', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/110901.
     // The navigation rail has a narrow width constraint. The text should wrap.
+    const String normalLabel = 'Abc';
+    const String longLabel = 'Very long bookmark text for navigation destination';
     await tester.pumpWidget(MaterialApp(
       home: Builder(
         builder: (BuildContext context) {
@@ -3650,13 +3652,12 @@ void main() {
                       NavigationRailDestination(
                         icon: Icon(Icons.favorite_border),
                         selectedIcon: Icon(Icons.favorite),
-                        label: Text('Abc'),
+                        label: Text(normalLabel),
                       ),
                       NavigationRailDestination(
                         icon: Icon(Icons.bookmark_border),
                         selectedIcon: Icon(Icons.bookmark),
-                        label: Text(
-                            'Very long bookmark text for navigation destination'),
+                        label: Text(longLabel),
                       ),
                     ],
                   ),
@@ -3671,8 +3672,6 @@ void main() {
       ),
     ));
 
-    const String normalLabel = 'Abc';
-    const String longLabel = 'Very long bookmark text for navigation destination';
     expect(find.byType(NavigationRail), findsOneWidget);
     expect(find.text(normalLabel), findsOneWidget);
     expect(find.text(longLabel), findsOneWidget);
