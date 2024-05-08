@@ -466,32 +466,30 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     final CheckboxThemeData checkboxTheme = CheckboxTheme.of(context);
     final _DesignSpec designSpec;
     final CheckboxThemeData defaults;
-
-      switch (widget._checkboxType) {
-        case _CheckboxType.material:
-          designSpec = _DesignSpec.material;
-          defaults = Theme.of(context).useMaterial3
-            ? _CheckboxDefaultsM3(context)
-            : _CheckboxDefaultsM2(context);
-        case _CheckboxType.adaptive:
-          final ThemeData theme = Theme.of(context);
-          switch (theme.platform) {
-            case TargetPlatform.android:
-            case TargetPlatform.fuchsia:
-            case TargetPlatform.linux:
-            case TargetPlatform.windows:
-              designSpec = _DesignSpec.material;
-              defaults = Theme.of(context).useMaterial3
-                ? _CheckboxDefaultsM3(context)
-                : _CheckboxDefaultsM2(context);
-            case TargetPlatform.iOS:
-            case TargetPlatform.macOS:
-              designSpec = _DesignSpec.cupertino;
-              defaults = _CheckboxDefaultsCupertino(context);
-              positionController.duration = Duration.zero;
-          }
-      }
-
+    switch (widget._checkboxType) {
+      case _CheckboxType.material:
+        designSpec = _DesignSpec.material;
+        defaults = Theme.of(context).useMaterial3
+          ? _CheckboxDefaultsM3(context)
+          : _CheckboxDefaultsM2(context);
+      case _CheckboxType.adaptive:
+        final ThemeData theme = Theme.of(context);
+        switch (theme.platform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            designSpec = _DesignSpec.material;
+            defaults = Theme.of(context).useMaterial3
+              ? _CheckboxDefaultsM3(context)
+              : _CheckboxDefaultsM2(context);
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+            designSpec = _DesignSpec.cupertino;
+            defaults = _CheckboxDefaultsCupertino(context);
+            positionController.duration = Duration.zero;
+        }
+    }
     final MaterialTapTargetSize effectiveMaterialTapTargetSize = widget.materialTapTargetSize
       ?? checkboxTheme.materialTapTargetSize
       ?? defaults.materialTapTargetSize!;
@@ -505,23 +503,11 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     size += effectiveVisualDensity.baseSizeAdjustment;
 
     final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
-      MouseCursor defaultMouseCursor;
-        switch (widget._checkboxType) {
-          case _CheckboxType.material:
-            defaultMouseCursor = MaterialStateMouseCursor.clickable.resolve(states);
-          case _CheckboxType.adaptive:
-            final ThemeData theme = Theme.of(context);
-            switch (theme.platform) {
-              case TargetPlatform.android:
-              case TargetPlatform.fuchsia:
-              case TargetPlatform.linux:
-              case TargetPlatform.windows:
-                defaultMouseCursor = MaterialStateMouseCursor.clickable.resolve(states);
-              case TargetPlatform.iOS:
-              case TargetPlatform.macOS:
-                defaultMouseCursor = SystemMouseCursors.basic;
-            }
-        }
+      final MouseCursor defaultMouseCursor = switch (designSpec) {
+        _DesignSpec.cupertino => SystemMouseCursors.basic,
+        _DesignSpec.material => MaterialStateMouseCursor.clickable.resolve(states),
+      };
+
       return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
         ?? checkboxTheme.mouseCursor?.resolve(states)
         ?? defaultMouseCursor;
