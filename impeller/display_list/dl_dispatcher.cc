@@ -1168,8 +1168,9 @@ Canvas& DlDispatcher::GetCanvas() {
 
 ExperimentalDlDispatcher::ExperimentalDlDispatcher(ContentContext& renderer,
                                                    RenderTarget& render_target,
+                                                   bool requires_readback,
                                                    IRect cull_rect)
-    : canvas_(renderer, render_target, cull_rect) {}
+    : canvas_(renderer, render_target, requires_readback, cull_rect) {}
 
 Canvas& ExperimentalDlDispatcher::GetCanvas() {
   return canvas_;

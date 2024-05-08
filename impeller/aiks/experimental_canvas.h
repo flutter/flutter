@@ -20,14 +20,18 @@ namespace impeller {
 
 class ExperimentalCanvas : public Canvas {
  public:
-  ExperimentalCanvas(ContentContext& renderer, RenderTarget& render_target);
+  ExperimentalCanvas(ContentContext& renderer,
+                     RenderTarget& render_target,
+                     bool requires_readback);
 
   ExperimentalCanvas(ContentContext& renderer,
                      RenderTarget& render_target,
+                     bool requires_readback,
                      Rect cull_rect);
 
   ExperimentalCanvas(ContentContext& renderer,
                      RenderTarget& render_target,
+                     bool requires_readback,
                      IRect cull_rect);
 
   ~ExperimentalCanvas() override = default;
@@ -42,16 +46,7 @@ class ExperimentalCanvas : public Canvas {
 
   bool Restore() override;
 
-  void EndReplay() {
-    FML_DCHECK(inline_pass_contexts_.size() == 1u);
-    inline_pass_contexts_.back()->EndPass();
-    render_passes_.clear();
-    inline_pass_contexts_.clear();
-    renderer_.GetRenderTargetCache()->End();
-
-    Reset();
-    Initialize(initial_cull_rect_);
-  }
+  void EndReplay();
 
   void DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
                      Point position,
@@ -73,6 +68,7 @@ class ExperimentalCanvas : public Canvas {
 
   ContentContext& renderer_;
   RenderTarget& render_target_;
+  const bool requires_readback_;
   EntityPassClipStack clip_coverage_stack_;
   std::vector<std::unique_ptr<InlinePassContext>> inline_pass_contexts_;
   std::vector<std::unique_ptr<EntityPassTarget>> entity_pass_targets_;
@@ -83,6 +79,7 @@ class ExperimentalCanvas : public Canvas {
 
   void AddRenderEntityToCurrentPass(Entity entity, bool reuse_depth) override;
   void AddClipEntityToCurrentPass(Entity entity) override;
+  bool BlitToOnscreen();
 
   Point GetGlobalPassPosition() {
     if (save_layer_state_.empty()) {

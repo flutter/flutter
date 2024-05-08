@@ -114,10 +114,10 @@ bool EmbedderExternalView::Render(const EmbedderRenderTarget& render_target,
 
     impeller::TextFrameDispatcher collector(aiks_context->GetContentContext(),
                                             impeller::Matrix());
-    display_list->Dispatch(collector, sk_cull_rect);
 
     impeller::ExperimentalDlDispatcher impeller_dispatcher(
-        aiks_context->GetContentContext(), *impeller_target, cull_rect);
+        aiks_context->GetContentContext(), *impeller_target,
+        /*supports_readback=*/false, cull_rect);
     display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
     impeller_dispatcher.FinishRecording();
     aiks_context->GetContentContext().GetTransientsBuffer().Reset();

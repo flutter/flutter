@@ -12,6 +12,7 @@
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass_clip_stack.h"
 #include "impeller/geometry/color.h"
+#include "impeller/renderer/render_target.h"
 
 namespace impeller {
 
@@ -107,10 +108,12 @@ static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
 }
 
 ExperimentalCanvas::ExperimentalCanvas(ContentContext& renderer,
-                                       RenderTarget& render_target)
+                                       RenderTarget& render_target,
+                                       bool requires_readback)
     : Canvas(),
       renderer_(renderer),
       render_target_(render_target),
+      requires_readback_(requires_readback),
       clip_coverage_stack_(EntityPassClipStack(
           Rect::MakeSize(render_target.GetRenderTargetSize()))) {
   SetupRenderPass();
@@ -118,10 +121,12 @@ ExperimentalCanvas::ExperimentalCanvas(ContentContext& renderer,
 
 ExperimentalCanvas::ExperimentalCanvas(ContentContext& renderer,
                                        RenderTarget& render_target,
+                                       bool requires_readback,
                                        Rect cull_rect)
     : Canvas(cull_rect),
       renderer_(renderer),
       render_target_(render_target),
+      requires_readback_(requires_readback),
       clip_coverage_stack_(EntityPassClipStack(
           Rect::MakeSize(render_target.GetRenderTargetSize()))) {
   SetupRenderPass();
@@ -129,16 +134,19 @@ ExperimentalCanvas::ExperimentalCanvas(ContentContext& renderer,
 
 ExperimentalCanvas::ExperimentalCanvas(ContentContext& renderer,
                                        RenderTarget& render_target,
+                                       bool requires_readback,
                                        IRect cull_rect)
     : Canvas(cull_rect),
       renderer_(renderer),
       render_target_(render_target),
+      requires_readback_(requires_readback),
       clip_coverage_stack_(EntityPassClipStack(
           Rect::MakeSize(render_target.GetRenderTargetSize()))) {
   SetupRenderPass();
 }
 
 void ExperimentalCanvas::SetupRenderPass() {
+  renderer_.GetRenderTargetCache()->Start();
   auto color0 = render_target_.GetColorAttachments().find(0u)->second;
 
   auto& stencil_attachment = render_target_.GetStencilAttachment();
@@ -158,18 +166,27 @@ void ExperimentalCanvas::SetupRenderPass() {
   color0.clear_color = Color::BlackTransparent();
   render_target_.SetColorAttachment(color0, 0);
 
-  entity_pass_targets_.push_back(std::make_unique<EntityPassTarget>(
-      render_target_,
-      renderer_.GetDeviceCapabilities().SupportsReadFromResolve(),
-      renderer_.GetDeviceCapabilities().SupportsImplicitResolvingMSAA()));
+  // If requires_readback is true, then there is a backdrop filter or emulated
+  // advanced blend in the first save layer. This requires a readback, which
+  // isn't supported by onscreen textures. To support this, we immediately begin
+  // a second save layer with the same dimensions as the onscreen. When
+  // rendering is completed, we must blit this saveLayer to the onscreen.
+  if (requires_readback_) {
+    entity_pass_targets_.push_back(CreateRenderTarget(
+        renderer_, color0.texture->GetSize(), /*mip_count=*/1,
+        /*clear_color=*/Color::BlackTransparent()));
+  } else {
+    entity_pass_targets_.push_back(std::make_unique<EntityPassTarget>(
+        render_target_,
+        renderer_.GetDeviceCapabilities().SupportsReadFromResolve(),
+        renderer_.GetDeviceCapabilities().SupportsImplicitResolvingMSAA()));
+  }
 
   auto inline_pass = std::make_unique<InlinePassContext>(
       renderer_, *entity_pass_targets_.back(), 0);
   inline_pass_contexts_.emplace_back(std::move(inline_pass));
   auto result = inline_pass_contexts_.back()->GetRenderPass(0u);
   render_passes_.push_back(result.pass);
-
-  renderer_.GetRenderTargetCache()->Start();
 }
 
 void ExperimentalCanvas::Save(uint32_t total_content_depth) {
@@ -448,6 +465,82 @@ void ExperimentalCanvas::AddClipEntityToCurrentPass(Entity entity) {
   }
 
   entity.Render(renderer_, *render_passes_.back());
+}
+
+bool ExperimentalCanvas::BlitToOnscreen() {
+  auto command_buffer = renderer_.GetContext()->CreateCommandBuffer();
+  command_buffer->SetLabel("EntityPass Root Command Buffer");
+  auto offscreen_target = entity_pass_targets_.back()->GetRenderTarget();
+
+  if (renderer_.GetContext()
+          ->GetCapabilities()
+          ->SupportsTextureToTextureBlits()) {
+    auto blit_pass = command_buffer->CreateBlitPass();
+    blit_pass->AddCopy(offscreen_target.GetRenderTargetTexture(),
+                       render_target_.GetRenderTargetTexture());
+    if (!blit_pass->EncodeCommands(
+            renderer_.GetContext()->GetResourceAllocator())) {
+      VALIDATION_LOG << "Failed to encode root pass blit command.";
+      return false;
+    }
+    if (!renderer_.GetContext()
+             ->GetCommandQueue()
+             ->Submit({command_buffer})
+             .ok()) {
+      return false;
+    }
+  } else {
+    auto render_pass = command_buffer->CreateRenderPass(render_target_);
+    render_pass->SetLabel("EntityPass Root Render Pass");
+
+    {
+      auto size_rect = Rect::MakeSize(offscreen_target.GetRenderTargetSize());
+      auto contents = TextureContents::MakeRect(size_rect);
+      contents->SetTexture(offscreen_target.GetRenderTargetTexture());
+      contents->SetSourceRect(size_rect);
+      contents->SetLabel("Root pass blit");
+
+      Entity entity;
+      entity.SetContents(contents);
+      entity.SetBlendMode(BlendMode::kSource);
+
+      if (!entity.Render(renderer_, *render_pass)) {
+        VALIDATION_LOG << "Failed to render EntityPass root blit.";
+        return false;
+      }
+    }
+
+    if (!render_pass->EncodeCommands()) {
+      VALIDATION_LOG << "Failed to encode root pass command buffer.";
+      return false;
+    }
+    if (!renderer_.GetContext()
+             ->GetCommandQueue()
+             ->Submit({command_buffer})
+             .ok()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void ExperimentalCanvas::EndReplay() {
+  FML_DCHECK(inline_pass_contexts_.size() == 1u);
+  inline_pass_contexts_.back()->EndPass();
+
+  // If requires_readback_ was true, then we rendered to an offscreen texture
+  // instead of to the onscreen provided in the render target. Now we need to
+  // draw or blit the offscreen back to the onscreen.
+  if (requires_readback_) {
+    BlitToOnscreen();
+  }
+
+  render_passes_.clear();
+  inline_pass_contexts_.clear();
+  renderer_.GetRenderTargetCache()->End();
+
+  Reset();
+  Initialize(initial_cull_rect_);
 }
 
 }  // namespace impeller
