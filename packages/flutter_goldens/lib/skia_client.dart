@@ -586,10 +586,10 @@ class SkiaGoldClient {
       'Abi': abi.toString(),
       if (_isBrowserTest)
         'Browser' : _browserKey,
-      if (webRenderer != null)
-        'WebRenderer' : webRenderer,
       'CI' : 'luci',
       'Platform' : platform.operatingSystem,
+      if (webRenderer != null)
+        'WebRenderer' : webRenderer,
 
       // Lower case keys
       if (_isImpeller)
