@@ -254,6 +254,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       _testTextInput.register();
     }
     CustomSemanticsAction.resetForTests(); // ignore: invalid_use_of_visible_for_testing_member
+    _resetFocusManager();
+  }
+
+  void _resetFocusManager() {
+    if (buildOwner == null) {
+      return;
+    }
+    buildOwner!.focusManager.dispose();
+    buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
   }
 
   @override
