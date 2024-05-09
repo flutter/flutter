@@ -193,6 +193,77 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/127597
+  testWidgets(
+    'TapRegionSurface detects outside right click',
+        (WidgetTester tester) async {
+      String tappedOutside = '';
+      final GlobalKey keyA = GlobalKey();
+      final GlobalKey keyB = GlobalKey();
+      final GlobalKey keyC = GlobalKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: Column(
+              children: <Widget>[
+                const Text('Outside'),
+                Material(
+                  child: TextFormField(
+                    key: keyA,
+                    onTapOutside: (PointerDownEvent event) {
+                      tappedOutside = 'outside callback A';
+                    },
+                  ),
+                ),
+                Material(
+                  child: TextFormField(
+                    key: keyB,
+                    onTapOutside: (PointerDownEvent event) {
+                      tappedOutside = 'outside callback B';
+                    },
+                  ),
+                ),
+                Material(
+                  child: TextFormField(
+                    key: keyC,
+                    onTapOutside: (PointerDownEvent event) {
+                      tappedOutside = 'outside callback C';
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      Future<void> click(Finder finder) async {
+        await tester.tap(finder);
+        await tester.enterText(finder, 'Hello');
+        await tester.pump();
+      }
+
+      expect(tappedOutside, isEmpty);
+
+      await click(find.byKey(keyA));
+      await tester.showKeyboard(find.byKey(keyA));
+      await tester.idle();
+      expect(tappedOutside, isEmpty);
+
+      await click(find.byKey(keyB));
+      expect(tappedOutside == 'outside callback A', true);
+
+      await click(find.byKey(keyC));
+      expect(tappedOutside == 'outside callback B', true);
+
+      await tester.tap(find.text('Outside'));
+      expect(tappedOutside == 'outside callback C', true);
+    },
+  );
+
   // Regression test for https://github.com/flutter/flutter/issues/126312.
   testWidgets('when open input connection in didUpdateWidget, should not throw', (WidgetTester tester) async {
     final Key key = GlobalKey();
