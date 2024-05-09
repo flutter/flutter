@@ -44,6 +44,53 @@ Specifically:
     );
   });
 
+  test('trivial equal text content', () {
+    expectDom(
+      '<div>hello</div>',
+      hasHtml('<div>hello</div>'),
+    );
+  });
+
+  test('trivial unequal text content', () {
+    expectDom(
+      '<div>hello</div>',
+      expectMismatch(
+        hasHtml('<div>world</div>'),
+        '''
+The following DOM structure did not match the expected pattern:
+<div>hello</div>
+
+Specifically:
+ - @div: expected text content "world", but found "hello".''',
+      ),
+    );
+  });
+
+  test('white space between elements', () {
+    expectDom(
+      '<a> <b> </b> </a>',
+      hasHtml('<a><b> </b></a>'),
+    );
+
+    expectDom(
+      '<a><b> </b></a>',
+      hasHtml('<a> <b> </b> </a>'),
+    );
+
+    expectDom(
+      '<a><b> </b></a>',
+      expectMismatch(
+        hasHtml('<a><b>   </b></a>'),
+        '''
+The following DOM structure did not match the expected pattern:
+<a><b> </b></a>
+
+Specifically:
+ - @a > b: expected text content "   ", but found " ".''',
+      ),
+    );
+  });
+
   test('trivial equal attributes', () {
     expectDom(
       '<div id="hello"></div>',
@@ -192,7 +239,7 @@ The following DOM structure did not match the expected pattern:
 <div><span></span><p></p></div>
 
 Specifically:
- - @div: expected 3 children, but found 2.''',
+ - @div: expected 3 child nodes, but found 2.''',
       ),
     );
   });
@@ -207,7 +254,7 @@ The following DOM structure did not match the expected pattern:
 <div><span></span><waldo></waldo><p></p></div>
 
 Specifically:
- - @div: expected 2 children, but found 3.''',
+ - @div: expected 2 child nodes, but found 3.''',
       ),
     );
   });

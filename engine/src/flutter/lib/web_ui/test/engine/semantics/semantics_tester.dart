@@ -13,11 +13,6 @@ import 'package:ui/ui.dart' as ui;
 
 import '../../common/matchers.dart';
 
-/// CSS style applied to the root of the semantics tree.
-// TODO(yjbanov): this should be handled internally by [expectSemanticsTree].
-//                No need for every test to inject it.
-const String rootSemanticStyle = 'filter: opacity(0%); color: rgba(0, 0, 0, 0)';
-
 /// A convenience wrapper of the semantics API for building and inspecting the
 /// semantics tree in unit tests.
 class SemanticsTester {
