@@ -580,15 +580,17 @@ class SkiaGoldClient {
   /// the image keys.
   String getTraceID(String testName) {
     final String? webRenderer = _webRendererValue;
+    // Keys must be sorted alphabetically, after grouping by letter case.
     final Map<String, Object?> keys = <String, Object?>{
+      // Upper case keys
+      'Abi': abi.toString(),
       if (_isBrowserTest)
         'Browser' : _browserKey,
       if (webRenderer != null)
         'WebRenderer' : webRenderer,
       'CI' : 'luci',
       'Platform' : platform.operatingSystem,
-      // 'Abi': abi.toString(), workaround for https://g-issues.skia.org/issues/339508268
-      // Flutter tracking issue: https://github.com/flutter/flutter/issues/148022
+      // Lower case keys
       'name' : testName,
       'source_type' : 'flutter',
       if (_isImpeller)
