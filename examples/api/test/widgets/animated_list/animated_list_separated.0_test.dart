@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets(
-    'Items can be selected, added, and removed from AnimatedListSeparated',
+    'Items can be selected, added, and removed from AnimatedList.separated',
     (WidgetTester tester) async {
       await tester.pumpWidget(const example.AnimatedListSeparatedSample());
 
@@ -43,12 +43,14 @@ void main() {
       // Item animation is not completed.
       await tester.pump();
       expect(find.text('Item 1'), findsOneWidget);
-      expect(find.text('Separator 1'), findsOneWidget);
+      expect(find.text('Separator 1'), findsNothing);
+      expect(find.text('Removing separator'), findsOneWidget);
 
       // When the animation completes, Item 1 disappears.
       await tester.pumpAndSettle();
       expect(find.text('Item 1'), findsNothing);
       expect(find.text('Separator 1'), findsNothing);
+      expect(find.text('Removing separator'), findsNothing);
     },
   );
 }
