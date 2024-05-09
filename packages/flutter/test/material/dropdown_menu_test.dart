@@ -442,7 +442,7 @@ void main() {
       label: const Text('label'),
     ));
 
-    final Finder leadingIcon = find.widgetWithIcon(Container, Icons.search);
+    final Finder leadingIcon = find.widgetWithIcon(SizedBox, Icons.search).last;
     final double iconWidth = tester.getSize(leadingIcon).width;
     final Finder updatedLabel = find.text('label');
     final Offset updatedLabelTopLeft = tester.getTopLeft(updatedLabel);
@@ -465,7 +465,7 @@ void main() {
       label: const Text('label'),
     ));
 
-    final Finder largeLeadingIcon = find.widgetWithIcon(Container, Icons.search);
+    final Finder largeLeadingIcon = find.widgetWithIcon(SizedBox, Icons.search).last;
     final double largeIconWidth = tester.getSize(largeLeadingIcon).width;
     final Finder updatedLabel1 = find.text('label');
     final Offset updatedLabelTopLeft1 = tester.getTopLeft(updatedLabel1);
@@ -524,7 +524,7 @@ void main() {
     ));
     await tester.pump();
 
-    final Finder leadingIcon = find.widgetWithIcon(Container, Icons.search);
+    final Finder leadingIcon = find.widgetWithIcon(SizedBox, Icons.search).last;
     final double iconWidth = tester.getSize(leadingIcon).width;
     final Offset dropdownMenuTopRight = tester.getTopRight(find.byType(DropdownMenu<TestMenu>));
     final Finder updatedLabel = find.text('label');
@@ -556,7 +556,7 @@ void main() {
     ));
     await tester.pump();
 
-    final Finder largeLeadingIcon = find.widgetWithIcon(Container, Icons.search);
+    final Finder largeLeadingIcon = find.widgetWithIcon(SizedBox, Icons.search).last;
     final double largeIconWidth = tester.getSize(largeLeadingIcon).width;
     final Offset updatedDropdownMenuTopRight = tester.getTopRight(find.byType(DropdownMenu<TestMenu>));
     final Finder updatedLabel1 = find.text('label');

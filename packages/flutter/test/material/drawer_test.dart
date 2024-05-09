@@ -154,21 +154,18 @@ void main() {
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('Scaffold drawerScrimColor', (WidgetTester tester) async {
-    // The scrim is a Container within a Semantics node labeled "Dismiss",
+    // The scrim is a ColoredBox within a Semantics node labeled "Dismiss",
     // within a DrawerController. Sorry.
-    Container getScrim() {
-      return tester.widget<Container>(
+    Widget getScrim() {
+      return tester.widget<Semantics>(
         find.descendant(
-          of: find.descendant(
-            of: find.byType(DrawerController),
-            matching: find.byWidgetPredicate((Widget widget) {
-              return widget is Semantics
-                  && widget.properties.label == 'Dismiss';
-            }),
-          ),
-          matching: find.byType(Container),
+          of: find.byType(DrawerController),
+          matching: find.byWidgetPredicate((Widget widget) {
+            return widget is Semantics
+                && widget.properties.label == 'Dismiss';
+          }),
         ),
-      );
+      ).child!;
     }
 
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -196,7 +193,8 @@ void main() {
     scaffoldKey.currentState!.openDrawer();
     await tester.pumpAndSettle();
 
-    expect(getScrim().color, Colors.black54);
+    ColoredBox scrim = getScrim() as ColoredBox;
+    expect(scrim.color, Colors.black54);
 
     await tester.tap(find.byType(Drawer));
     await tester.pumpAndSettle();
@@ -208,7 +206,8 @@ void main() {
     scaffoldKey.currentState!.openDrawer();
     await tester.pumpAndSettle();
 
-    expect(getScrim().color, const Color(0xFF323232));
+    scrim = getScrim() as ColoredBox;
+    expect(scrim.color, const Color(0xFF323232));
 
     await tester.tap(find.byType(Drawer));
     await tester.pumpAndSettle();

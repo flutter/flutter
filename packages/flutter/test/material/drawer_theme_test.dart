@@ -312,8 +312,8 @@ Material _drawerMaterial(WidgetTester tester) {
 
 // The scrim is a Container within a Semantics node labeled "Dismiss",
 // within a DrawerController.
-Container _scrim(WidgetTester tester) {
-  return tester.widget<Container>(
+ColoredBox _scrim(WidgetTester tester) {
+  return tester.widget<ColoredBox>(
     find.descendant(
       of: find.descendant(
         of: find.byType(DrawerController),
@@ -322,7 +322,7 @@ Container _scrim(WidgetTester tester) {
               && widget.properties.label == 'Dismiss';
         }),
       ),
-      matching: find.byType(Container),
+      matching: find.byType(ColoredBox),
     ),
   );
 }
