@@ -19,30 +19,50 @@ import 'theme.dart';
 /// This is a scrollable list where the size of each item can change dynamically
 /// based on different layouts.
 ///
-/// By default, [Carousel] has an uncontained layout. This layout shows
-/// fixed-extent items that scroll to the edge of the container. The carousel
-/// list constructed by [Carousel.multibrowse] shows at least 3 sizes (large,
-/// medium and small) at a time. The carousel list constructed by [Carousel.hero]
-/// shows at least one large and one small item at a time.
+/// Material Design 3 introduces 4 layouts for [Carousel]:
+///  * Multi-browse: This layout shows at least one large, medium, and small
+/// carousel item at a time.
+///  * Uncontained: This layout show items that scroll to the edge of the container.
+///  * Hero: This layout shows at least one large and one small item at a time.
+///  * Full-screen: This layout shows one edge-to-edge large item at a time and
+/// scrolls vertically.
+///
+/// By default, [Carousel] has a uncontained layout. It shows like a [ListView]
+/// and its children are a single size. The carousel list constructed by
+/// [Carousel.weighted] shows dynamic sizes at a time. each item on screen has a
+/// weight. For example, if the layout weights is [3,2,1], it means the first
+/// visible item occupies 3/6 of the viewport; the second visible item occupies
+/// 2/6 of the viewport; the last visible item occupies 1/6 of the viewport.
+/// While scrolling, the extent of the latter one gradually changes to the
+/// extent of the former one. As a result, when the first visible item is
+/// completely off screen, the following items should stay the same layout as
+/// before. Using [Carousel.weighted] helps build the multi-browse, hero,
+/// center-aligned hero and full-screen layouts, as [Carousel sepcs](https://m3.material.io/components/carousel/specs)
+/// indicated.
 ///
 /// The [CarouselController] can be used to control the
-/// [CarouselController.initialPage], which determines which carousel item is
-/// shown when the [Carousel] is first constructed. [CarouselController.itemExtent]
-/// and [CarouselController.layoutWeights] are used to determines the size of
-/// the items; [CarouselController.itemExtent] is used when the Carousel has a
-/// uncontained layout and [CarouselController.layoutWeights] is used when the
-/// Carousel has weighted layouts (Multi-browse and hero).
+/// [CarouselController.initialItem], which determines the first fully expanded
+/// item when the [Carousel] is first constructed. For example, if the layout
+/// weights is [1,2,3,2,1] and the initial item is 4, the list will shows item 2,
+/// item 3, item 4, item 5, item 6 in the view. Their weights are 1, 2, 3, 2 and
+/// 1 respectively.
+///
+/// [Carousel.itemExtent] must be non-null. Even though the children [Carousel]
+/// have a single size, the first and last items can be squished a little while
+/// scrolling and the minimum squished size is determined by [shrinkExtent].
 ///
 /// {@tool dartpad}
-/// Here is an example of [Carousel]. It creates a list of [Carousel]s with
-/// different layouts.
+/// Here is an example of [Carousel]. This example shows different layouts that
+/// [Carousel] and [Carousel.weighted] can build.
 ///
-/// ** See code in examples/api/lib/widgets/page_view/page_view.0.dart **
+/// ** See code in examples/api/lib/material/carousel/carousel.0.dart **
 /// {@end-tool}
 ///
 /// See also:
 ///
-///  * [CarouselController], which controls which page is visible in the view.
+///  * [CarouselController], which controls which item is the first fully visible
+/// in the view.
+///  * [PageView], which is a scrollable list that works page by page.
 class Carousel extends StatefulWidget {
   /// Creates a Material Design carousel.
   const Carousel({
@@ -63,6 +83,18 @@ class Carousel extends StatefulWidget {
   }) : allowFullyExpand = true,
        layoutWeights = null;
 
+  /// Creates a scrollable list whose child widgets have dynamic size and these
+  /// sizes are determined by the [layoutWeights].
+  ///
+  /// The [layoutWeights] parameter is required in order to determine each
+  /// child's size.
+  ///
+  /// When [allowFullyExpand] is true, each child on the list can be expanded to
+  /// the max size. For example, when [layoutWeights] is [1,7,1], the initial
+  /// weight for item 0 is 1, but with [allowFullyExpand] setting to true,
+  /// keep scrolling to right can expand item 0 to have a weight of 7. In this
+  /// case, there will be some white space with a weight of 1 before item 0. This
+  /// is especially useful for "hero" and "center-aligned hero" layouts.
   const Carousel.weighted({
     super.key,
     this.padding,
@@ -903,7 +935,17 @@ class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
   ItemExtentBuilder? get itemExtentBuilder => _buildItemExtent;
 }
 
+/// Scroll physics used by a [Carousel].
+///
+/// These physics cause the carousel item to snap to item boundaries.
+///
+/// See also:
+///
+///  * [ScrollPhysics], the base class which defines the API for scrolling
+///    physics.
+///  * [PageScrollPhysics], scroll physics used by a [PageView].
 class CarouselScrollPhysics extends ScrollPhysics {
+  /// Creates physics for a [Carousel].
   const CarouselScrollPhysics({super.parent});
 
   @override
@@ -978,21 +1020,25 @@ class CarouselScrollPhysics extends ScrollPhysics {
   bool get allowImplicitScrolling => true;
 }
 
-class CarouselMetrics extends FixedScrollMetrics {
+/// Metrics for a [Carousel].
+///
+/// The metrics are available on [ScrollNotification]s generated from
+/// [PageView]s.
+class _CarouselMetrics extends FixedScrollMetrics {
   /// Creates an immutable snapshot of values associated with a [Carousel].
-  CarouselMetrics({
+  _CarouselMetrics({
     required super.minScrollExtent,
     required super.maxScrollExtent,
     required super.pixels,
     required super.viewportDimension,
     required super.axisDirection,
     this.itemExtent,
-    this.layoutWeights, // first item weight / total weight
+    this.layoutWeights,
     required super.devicePixelRatio,
   });
 
   @override
-  CarouselMetrics copyWith({
+  _CarouselMetrics copyWith({
     double? minScrollExtent,
     double? maxScrollExtent,
     double? pixels,
@@ -1002,7 +1048,7 @@ class CarouselMetrics extends FixedScrollMetrics {
     List<int>? layoutWeights,
     double? devicePixelRatio,
   }) {
-    return CarouselMetrics(
+    return _CarouselMetrics(
       minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
       maxScrollExtent: maxScrollExtent ?? (hasContentDimensions ? this.maxScrollExtent : null),
       pixels: pixels ?? (hasPixels ? this.pixels : null),
@@ -1024,7 +1070,7 @@ class CarouselMetrics extends FixedScrollMetrics {
 }
 
 
-class _CarouselPosition extends ScrollPositionWithSingleContext implements CarouselMetrics {
+class _CarouselPosition extends ScrollPositionWithSingleContext implements _CarouselMetrics {
   _CarouselPosition({
     required super.physics,
     required super.context,
@@ -1042,7 +1088,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements Carou
        );
 
   final int initialItem;
-  double _itemToShowOnStartup;
+  final double _itemToShowOnStartup;
   // When the viewport has a zero-size, the `page` can not
   // be retrieved by `getPageFromPixels`, so we need to cache the page
   // for use when resizing the viewport to non-zero next time.
@@ -1124,7 +1170,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements Carou
   }
 
   @override
-  CarouselMetrics copyWith({
+  _CarouselMetrics copyWith({
     double? minScrollExtent,
     double? maxScrollExtent,
     double? pixels,
@@ -1134,7 +1180,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements Carou
     List<int>? layoutWeights,
     double? devicePixelRatio,
   }) {
-    return CarouselMetrics(
+    return _CarouselMetrics(
       minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
       maxScrollExtent: maxScrollExtent ?? (hasContentDimensions ? this.maxScrollExtent : null),
       pixels: pixels ?? (hasPixels ? this.pixels : null),
@@ -1147,13 +1193,17 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements Carou
   }
 }
 
+/// A controller for [Carousel].
+///
+/// Using a carousel controller helps to show which item is fully expanded on
+/// the carousel list.
 class CarouselController extends ScrollController {
   /// Creates a carousel controller.
   CarouselController({
     this.initialItem = 0,
   });
 
-  /// The item that expands to full size when first creating the [Carousel].
+  /// The item that expands to the maximum size when first creating the [Carousel].
   final int initialItem;
 
   _CarouselState? _carouselState;
