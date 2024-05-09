@@ -176,7 +176,7 @@ class SnippetDartdocParser {
       }
       parseComment(element);
       for (final CodeSample sample in element.samples) {
-        switch (sample.runtimeType) {
+        switch (sample) {
           case DartpadSample _:
             dartpadCount++;
           case ApplicationSample _:

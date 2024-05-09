@@ -1415,11 +1415,10 @@ void main() {
     );
 
     int semanticsUpdateCount = 0;
-    TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics(
-      listener: () {
-        ++semanticsUpdateCount;
-      },
-    );
+    final SemanticsHandle semanticsHandle = TestRenderingFlutterBinding.instance.ensureSemantics();
+    TestRenderingFlutterBinding.instance.pipelineOwner.semanticsOwner!.addListener(() {
+      ++semanticsUpdateCount;
+    });
 
     layout(paragraph);
 
@@ -1453,6 +1452,8 @@ void main() {
     data = children.single.getSemanticsData();
     expect(data.hasAction(SemanticsAction.longPress), true);
     expect(data.hasAction(SemanticsAction.tap), false);
+
+    semanticsHandle.dispose();
   });
 }
 
