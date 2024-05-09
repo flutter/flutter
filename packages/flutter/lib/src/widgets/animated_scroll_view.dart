@@ -125,7 +125,7 @@ class AnimatedList extends _AnimatedScrollView {
   ///       },
   ///       separatorBuilder: (BuildContext context, int index, Animation<double> animation) {
   ///         return const Divider();
-  ///       }
+  ///       },
   ///       removedSeparatorBuilder: (BuildContext context, int index, Animation<double> animation) {
   ///         return const Divider();
   ///       }
