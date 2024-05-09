@@ -250,14 +250,13 @@ Future<void> main(List<String> args) async {
       'web_long_running_tests': () => webLongRunningTestsRunner(flutterRoot),
       'flutter_plugins': _runFlutterPackagesTests,
       'skp_generator': skpGeneratorTestsRunner,
-      'realm_checker': realmCheckerTestRunner,
-      'customer_testing': customerTestingRunner,
-      'analyze': analyzeRunner,
-      'fuchsia_precache': fuchsiaPrecacheRunner,
-      'snippets': _runSnippetsTests,
-      'docs': docsRunner,
-      'verify_binaries_codesigned': verifyCodesignedTestRunner,
-      kTestHarnessShardName: testHarnessTestsRunner, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
+      'realm_checker': _runRealmCheckerTest,
+      'customer_testing': _runCustomerTesting,
+      'analyze': _runAnalyze,
+      'fuchsia_precache': _runFuchsiaPrecache,
+      'docs': _runDocs,
+      'verify_binaries_codesigned': _runVerifyCodesigned,
+      kTestHarnessShardName: _runTestHarnessTests, // Used for testing this script; also run as part of SHARD=framework_tests, SUBSHARD=misc.
     });
   } catch (error, stackTrace) {
     foundError(<String>[
@@ -505,21 +504,6 @@ Future<void> _runToolTests() async {
     'general': _runGeneralToolTests,
     'commands': _runCommandsToolTests,
   });
-}
-
-Future<void> _runSnippetsTests() async {
-  final String snippetsPath = path.join(flutterRoot, 'dev', 'snippets');
-  final List<String> allTests = Directory(path.join(snippetsPath, 'test'))
-      .listSync(recursive: true).whereType<File>()
-      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
-      .where((String testPath) => path.basename(testPath).endsWith('_test.dart')).toList();
-
-  await runDartTest(
-    snippetsPath,
-    forceSingleCore: true,
-    testPaths: selectIndexOfTotalSubshard<String>(allTests),
-    collectMetrics: true,
-  );
 }
 
 Future<void> runForbiddenFromReleaseTests() async {
