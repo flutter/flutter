@@ -256,12 +256,12 @@ class AnimatedList extends _AnimatedScrollView {
 ///
 /// See also:
 ///
-/// * [AnimatedRemovedItemBuilder], a builder that is for removing items with
+/// * [AnimatedRemovedItemBuilder], a builder that is used for removing items with
 ///   animations instead of adding them.
 typedef AnimatedSeparatorBuilder = Widget Function(BuildContext context, int index, Animation<double> animation);
 
-/// The [AnimatedListState] for [AnimatedList], a scrolling list container that animates items when they are
-/// inserted or removed.
+/// The [AnimatedListState] for [AnimatedList], a scrolling list container that
+/// animates items when they are inserted or removed.
 ///
 /// When an item is inserted with [insertItem] an animation begins running. The
 /// animation is passed to [AnimatedList.itemBuilder] whenever the item's widget
@@ -269,13 +269,15 @@ typedef AnimatedSeparatorBuilder = Widget Function(BuildContext context, int ind
 ///
 /// When multiple items are inserted with [insertAllItems] an animation begins running.
 /// The animation is passed to [AnimatedList.itemBuilder] whenever the item's widget
-/// is needed. If using [AnimatedList.separated], the animation is also passed to
-/// [AnimatedList.separatorBuilder] whenever the separator's widget is needed.
+/// is needed.
+///
+/// If using [AnimatedList.separated], the animation is also passed to
+/// `AnimatedList.separatorBuilder` whenever the separator's widget is needed.
 ///
 /// When an item is removed with [removeItem] its animation is reversed.
 /// The removed item's animation is passed to the [removeItem] builder
 /// parameter. If using [AnimatedList.separated], the corresponding separator's
-/// animation is passed to the [AnimatedList.removedSeparatorBuilder] parameter.
+/// animation is also passed to the [AnimatedList.removedSeparatorBuilder] parameter.
 ///
 /// An app that needs to insert or remove items in response to an event
 /// can refer to the [AnimatedList]'s state with a global key:
@@ -573,12 +575,10 @@ abstract class _AnimatedScrollView extends StatefulWidget {
   /// Separators are only built when they're scrolled into view.
   ///
   /// The [AnimatedRemovedSeparatorBuilder] index parameter indicates the
-  /// separators's corresponding item's position in the scroll view. The value
+  /// separator's corresponding item's position in the scroll view. The value
   /// of the index parameter will be between 0 and [initialItemCount] plus the
-  /// total number of items that have been inserted with
-  /// [AnimatedListState.insertItem] or [AnimatedGridState.insertItem] and less
-  /// the total number of items that have been removed with
-  /// [AnimatedListState.removeItem] or [AnimatedGridState.removeItem].
+  /// total number of items that have been inserted with [AnimatedListState.insertItem]
+  /// and less the total number of items that have been removed with [AnimatedListState.removeItem].
   ///
   /// Implementations of this callback should assume that
   /// `removeItem` removes an item immediately.
@@ -673,7 +673,10 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
 
   /// Insert an item at [index] and start an animation that will be passed
   /// to [AnimatedGrid.itemBuilder] or [AnimatedList.itemBuilder] when the item
-  /// is visible, as well as the `separatorBuilder`, when using [AnimatedList.separated].
+  /// is visible.
+  ///
+  /// If using [AnimatedList.separated] the animation will also be passed
+  /// to `separatorBuilder`.
   ///
   /// This method's semantics are the same as Dart's [List.insert] method: it
   /// increases the length of the list of items by one and shifts
@@ -692,7 +695,9 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
 
   /// Insert multiple items at [index] and start an animation that will be passed
   /// to [AnimatedGrid.itemBuilder] or [AnimatedList.itemBuilder] when the items
-  /// are visible, as well as `separatorBuilder`, when using [AnimatedList.separated].
+  /// are visible.
+  ///
+  /// If using [AnimatedList.separated] the animation will also be passed to `separatorBuilder`.
   void insertAllItems(int index, int length, { Duration duration = _kDuration, bool isAsync = false }) {
     if (widget.removedSeparatorBuilder == null) {
       _sliverAnimatedMultiBoxKey.currentState!.insertAllItems(index, length, duration: duration);
@@ -704,9 +709,10 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   }
 
   /// Remove the item at [index] and start an animation that will be passed to
-  /// [builder] when the item is visible. If using [AnimatedList.separated],
-  /// the animation will also be passed to the corresponding separator's
-  /// [AnimatedList.removedSeparatorBuilder].
+  /// [builder] when the item is visible.
+  ///
+  /// If using [AnimatedList.separated], the animation will also be passed to the
+  /// corresponding separator's [AnimatedList.removedSeparatorBuilder].
   ///
   /// Items are removed immediately. After an item has been removed, its index
   /// will no longer be passed to the [builder]. However, the
@@ -722,29 +728,28 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   ///   * [AnimatedRemovedItemBuilder], which describes the arguments to the
   ///     [builder] argument.
   void removeItem(int index, AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
-    if (widget.removedSeparatorBuilder == null) {
+    final AnimatedRemovedSeparatorBuilder? removedSeparatorBuilder = widget.removedSeparatorBuilder;
+    if (removedSeparatorBuilder == null) {
       _sliverAnimatedMultiBoxKey.currentState!.removeItem(index, builder, duration: duration);
     } else {
       final int itemIndex = _computeItemIndex(index);
       _sliverAnimatedMultiBoxKey.currentState!.removeItem(itemIndex, builder, duration: duration);
       if (_itemsCount > 1) {
-        int separatorIndex;
         if (itemIndex == _itemsCount - 1) {
-          // Removing from the end of the list, so the separator to remove
-          // is the one at `last index` - 1.
-          _sliverAnimatedMultiBoxKey.currentState!.removeItem(itemIndex - 1, _toRemovedItemBuilder(widget.removedSeparatorBuilder!, index - 1), duration: duration);
+          // Removing from the end of the list, so the separator to remove is the one at `last index` - 1.
+          _sliverAnimatedMultiBoxKey.currentState!.removeItem(itemIndex - 1, _toRemovedItemBuilder(removedSeparatorBuilder, index - 1), duration: duration);
         } else {
-          separatorIndex = itemIndex;
-          _sliverAnimatedMultiBoxKey.currentState!.removeItem(separatorIndex, _toRemovedItemBuilder(widget.removedSeparatorBuilder!, index), duration: duration);
+          _sliverAnimatedMultiBoxKey.currentState!.removeItem(itemIndex, _toRemovedItemBuilder(removedSeparatorBuilder, index), duration: duration);
         }
       }
     }
   }
 
   /// Remove all the items and start an animation that will be passed to
-  /// [builder] when the items are visible. If using [AnimatedList.separated],
-  /// the animation will also be passed to the corresponding separator's
-  /// [AnimatedList.removedSeparatorBuilder].
+  /// [builder] when the items are visible.
+  ///
+  /// If using [AnimatedList.separated], the animation will also be passed
+  /// to the corresponding separator's [AnimatedList.removedSeparatorBuilder].
   ///
   /// Items are removed immediately. However, the
   /// items will still appear for [duration], and during that time
@@ -758,36 +763,44 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   ///   * [AnimatedRemovedItemBuilder], which describes the arguments to the
   ///     [builder] argument.
   void removeAllItems(AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
-    if (widget.removedSeparatorBuilder == null) {
+    final AnimatedRemovedSeparatorBuilder? removedSeparatorBuilder = widget.removedSeparatorBuilder;
+    if (removedSeparatorBuilder == null) {
+      // There are no separators. We can remove all items with the same builder.
       _sliverAnimatedMultiBoxKey.currentState!.removeAllItems(builder, duration: duration);
-    } else {
-      for (int index = _itemsCount - 1; index >= 0 ; index--) {
-        if (index.isEven) {
-          _sliverAnimatedMultiBoxKey.currentState!.removeItem(index, builder, duration: duration);
-        } else {
-          // The index of the separator's corresponding item
-          final int itemIndex = index ~/ 2;
-          _sliverAnimatedMultiBoxKey.currentState!.removeItem(index, _toRemovedItemBuilder(widget.removedSeparatorBuilder!, itemIndex), duration: duration);
-        }
-      }
+      return;
     }
 
+    // There are separators. We need to remove items and separators separately
+    // with the corresponding builders.
+    for (int index = _itemsCount - 1; index >= 0 ; index--) {
+      if (index.isEven) {
+        _sliverAnimatedMultiBoxKey.currentState!.removeItem(index, builder, duration: duration);
+      } else {
+        // The index of the separator's corresponding item
+        final int itemIndex = index ~/ 2;
+        _sliverAnimatedMultiBoxKey.currentState!.removeItem(index, _toRemovedItemBuilder(removedSeparatorBuilder, itemIndex), duration: duration);
+      }
+    }
   }
 
   int get _itemsCount => _sliverAnimatedMultiBoxKey.currentState!._itemsCount;
 
-  // Helper method to compute the index for the separated item considering the added separators.
+  // Helper method to compute the index for the item to insert or remove considering the separators in between.
   int _computeItemIndex(int index) {
     if (index == 0) {
       return index;
     }
-    final int indexSeparated = index * 2 - 1;
-    final bool isNewLastIndex = indexSeparated == _itemsCount;
-    return isNewLastIndex ? indexSeparated : indexSeparated + 1;
+    final int itemsAndSeparatorsCount = _itemsCount;
+    final int separatorsCount = itemsAndSeparatorsCount ~/ 2;
+    final int separatedItemsCount = _itemsCount - separatorsCount;
+
+    final bool isNewLastIndex = index == separatedItemsCount;
+    final int indexAdjustedForSeparators = index * 2;
+    return isNewLastIndex ? indexAdjustedForSeparators - 1 : indexAdjustedForSeparators;
   }
 
-  // Helper method to create a [AnimatedRemovedItemBuilder]
-  // from a [AnimatedRemovedSeparatorBuilder] for given [index].
+  // Helper method to create an [AnimatedRemovedItemBuilder]
+  // from an [AnimatedRemovedSeparatorBuilder] for given [index].
   AnimatedRemovedItemBuilder _toRemovedItemBuilder(AnimatedRemovedSeparatorBuilder builder, int index) {
     return (BuildContext context, Animation<double> animation) {
       return builder(context, index, animation);
@@ -839,9 +852,9 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
 /// Signature for the builder callback used by [AnimatedList] & [AnimatedGrid] to
 /// build their animated children.
 ///
-/// The `context` argument is the build context where the widget will be
-/// created, the `index` is the index of the item to be built, and the
-/// `animation` is an [Animation] that should be used to animate an entry
+/// The [context] argument is the build context where the widget will be
+/// created, the [index] is the index of the item to be built, and the
+/// [animation] is an [Animation] that should be used to animate an entry
 /// transition for the widget that is built.
 ///
 /// See also:
@@ -854,8 +867,8 @@ typedef AnimatedItemBuilder = Widget Function(BuildContext context, int index, A
 /// [AnimatedGridState.removeItem] to animate their children after they have
 /// been removed.
 ///
-/// The `context` argument is the build context where the widget will be
-/// created, and the `animation` is an [Animation] that should be used to
+/// The [context] argument is the build context where the widget will be
+/// created, and the [animation] is an [Animation] that should be used to
 /// animate an exit transition for the widget that is built.
 ///
 /// See also:
@@ -864,7 +877,7 @@ typedef AnimatedItemBuilder = Widget Function(BuildContext context, int index, A
 ///   instead of removing them.
 typedef AnimatedRemovedItemBuilder = Widget Function(BuildContext context, Animation<double> animation);
 
-/// Signature for the builder callback used in [AnimatedListSeparated]
+/// Signature for the builder callback used in [AnimatedList.separated]
 /// to animate its separators after they have been removed.
 ///
 /// The [context] argument is the build context where the widget will be

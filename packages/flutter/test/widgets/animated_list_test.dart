@@ -689,7 +689,7 @@ void main() {
     expect(innerMediaQueryPadding, const EdgeInsets.symmetric(horizontal: 30.0));
   });
 
-  testWidgets('AnimatedListSeparated', (WidgetTester tester) async {
+  testWidgets('AnimatedList.separated', (WidgetTester tester) async {
     tester.view.physicalSize = const Size(600, 1800);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
@@ -719,6 +719,9 @@ void main() {
       );
     }
 
+    // Helper function to wrap itemRemovalBuilder with index
+    // to allow testing removal of an item at the expected index.
+    // Null index is necessary for removeAllItems.
     AnimatedRemovedItemBuilder itemRemovalBuilderWrapper({int? index}) {
       return (BuildContext context, Animation<double> animation) {
         return itemRemovalBuilder(context, index, animation);
