@@ -49,29 +49,52 @@ impeller_component("display_list") {
   }
 }
 
-impeller_component("display_list_unittests") {
-  testonly = true
-
-  sources = [
+template("display_list_unittests_component") {
+  target_name = invoker.target_name
+  predefined_sources = [
+    "dl_golden_unittests.cc",
     "dl_playground.cc",
     "dl_playground.h",
     "dl_unittests.cc",
   ]
+  additional_sources = []
+  if (defined(invoker.sources)) {
+    additional_sources = invoker.sources
+  }
+  impeller_component(target_name) {
+    testonly = true
+    if (defined(invoker.defines)) {
+      defines = invoker.defines
+    } else {
+      defines = []
+    }
+    defines += [ "_USE_MATH_DEFINES" ]
+    if (impeller_enable_3d) {
+      defines += [ "IMPELLER_ENABLE_3D" ]
+    }
 
-  deps = [
-    ":display_list",
-    "../playground:playground_test",
-    "//flutter/impeller/scene",
-    "//flutter/impeller/typographer/backends/stb:typographer_stb_backend",
-    "//flutter/third_party/txt",
+    sources = predefined_sources + additional_sources
+    deps = [
+      ":display_list",
+      "../playground:playground_test",
+      "//flutter/impeller/scene",
+      "//flutter/impeller/typographer/backends/stb:typographer_stb_backend",
+      "//flutter/third_party/txt",
+    ]
+    if (defined(invoker.public_configs)) {
+      public_configs = invoker.public_configs
+    }
+  }
+}
+
+display_list_unittests_component("display_list_unittests") {
+}
+
+display_list_unittests_component("display_list_unittests_golden") {
+  defines = [
+    "IMPELLER_GOLDEN_TESTS",
+    "IMPELLER_ENABLE_VALIDATION=1",
   ]
-
-  if (!defined(defines)) {
-    defines = []
-  }
-  if (impeller_enable_3d) {
-    defines += [ "IMPELLER_ENABLE_3D" ]
-  }
 }
 
 impeller_component("skia_conversions_unittests") {
