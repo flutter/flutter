@@ -589,6 +589,14 @@ extension DomElementExtension on DomElement {
   external JSNumber get _clientWidth;
   double get clientWidth => _clientWidth.toDartDouble;
 
+  @JS('offsetHeight')
+  external JSNumber get _offsetHeight;
+  double get offsetHeight => _offsetHeight.toDartDouble;
+
+  @JS('offsetWidth')
+  external JSNumber get _offsetWidth;
+  double get offsetWidth => _offsetWidth.toDartDouble;
+
   @JS('id')
   external JSString get _id;
   String get id => _id.toDart;

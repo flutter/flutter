@@ -93,7 +93,7 @@ void testMain() {
     createTextFieldSemantics(value: 'hello');
 
     expectSemanticsTree(owner(), '''
-<sem style="$rootSemanticStyle">
+<sem>
   <input />
 </sem>''');
 

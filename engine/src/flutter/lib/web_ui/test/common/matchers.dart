@@ -398,18 +398,68 @@ class HtmlPatternMatcher extends Matcher {
     }
   }
 
+  // Removes nodes that are not interesting for comparison purposes.
+  //
+  // In particular, removes non-leaf white space Text nodes between elements, as
+  // these are typically not interesting to test for. It's strictly not correct
+  // to ignore it entirely. For example, in the presence of a <pre> tag or CSS
+  // `white-space: pre` white space does matter, but Flutter Web doesn't use
+  // them, at least not in tests, so it's OK to ignore.
+  List<html.Node> _cleanUpNodeList(html.NodeList nodeList) {
+    final List<html.Node> cleanNodes = <html.Node>[];
+    for (int i = 0; i < nodeList.length; i++) {
+      final html.Node node = nodeList[i];
+      assert(
+        node is html.Element || node is html.Text,
+        'Unsupported node type ${node.runtimeType}. Only Element and Text nodes are supported',
+      );
+
+      final bool hasSiblings = nodeList.length > 1;
+      final bool isWhitespace = node is html.Text && node.data.trim().isEmpty;
+
+      if (hasSiblings && isWhitespace) {
+        // Ignore white space between elements, e.g. <div> <div>   </div> </div>
+        //                                                |      |       |
+        //                                              ignore   |       |
+        //                                                       |       |
+        //                                                    compare    |
+        //                                                             ignore
+        continue;
+      }
+
+      cleanNodes.add(node);
+    }
+    return cleanNodes;
+  }
+
   void matchChildren(_Breadcrumbs parent, List<String> mismatches, html.Element element, html.Element pattern) {
-    if (element.children.length != pattern.children.length) {
+    final List<html.Node> actualChildNodes = _cleanUpNodeList(element.nodes);
+    final List<html.Node> expectedChildNodes = _cleanUpNodeList(pattern.nodes);
+
+    if (actualChildNodes.length != expectedChildNodes.length) {
       mismatches.add(
-        '$parent: expected ${pattern.children.length} children, but found ${element.children.length}.'
+        '$parent: expected ${expectedChildNodes.length} child nodes, but found ${actualChildNodes.length}.'
       );
       return;
     }
 
-    for (int i = 0; i < pattern.children.length; i++) {
-      final html.Element expectedChild = pattern.children[i];
-      final html.Element actualChild = element.children[i];
-      matchElements(parent, mismatches, actualChild, expectedChild);
+    for (int i = 0; i < expectedChildNodes.length; i++) {
+      final html.Node expectedChild = expectedChildNodes[i];
+      final html.Node actualChild = actualChildNodes[i];
+
+      if (expectedChild is html.Element && actualChild is html.Element) {
+        matchElements(parent, mismatches, actualChild, expectedChild);
+      } else if (expectedChild is html.Text && actualChild is html.Text) {
+        if (expectedChild.data != actualChild.data) {
+          mismatches.add(
+            '$parent: expected text content "${expectedChild.data}", but found "${actualChild.data}".'
+          );
+        }
+      } else {
+        mismatches.add(
+          '$parent: expected child type ${expectedChild.runtimeType}, but found ${actualChild.runtimeType}.'
+        );
+      }
     }
   }
 

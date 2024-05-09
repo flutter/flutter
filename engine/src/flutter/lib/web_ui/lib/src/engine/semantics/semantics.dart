@@ -434,12 +434,12 @@ abstract class PrimaryRoleManager {
   ///
   /// If `labelRepresentation` is true, configures the [LabelAndValue] role with
   /// [LabelAndValue.labelRepresentation] set to true.
-  PrimaryRoleManager.withBasics(this.role, this.semanticsObject, { required LeafLabelRepresentation labelRepresentation }) {
+  PrimaryRoleManager.withBasics(this.role, this.semanticsObject, { required LabelRepresentation preferredLabelRepresentation }) {
     element = _initElement(createElement(), semanticsObject);
     addFocusManagement();
     addLiveRegion();
     addRouteName();
-    addLabelAndValue(labelRepresentation: labelRepresentation);
+    addLabelAndValue(preferredRepresentation: preferredLabelRepresentation);
   }
 
   /// Initializes a blank role for a [semanticsObject].
@@ -475,7 +475,9 @@ abstract class PrimaryRoleManager {
   static DomElement _initElement(DomElement element, SemanticsObject semanticsObject) {
     // DOM nodes created for semantics objects are positioned absolutely using
     // transforms.
-    element.style.position = 'absolute';
+    element.style
+      ..position = 'absolute'
+      ..overflow = 'visible';
     element.setAttribute('id', 'flt-semantic-node-${semanticsObject.id}');
 
     // The root node has some properties that other nodes do not.
@@ -501,6 +503,20 @@ abstract class PrimaryRoleManager {
     }
     return element;
   }
+
+  /// A lifecycle method called after the DOM [element] for this role manager
+  /// is initialized, and the association with the corresponding
+  /// [SemanticsObject] established.
+  ///
+  /// Override this method to implement expensive one-time initialization of a
+  /// role manager's state. It is more efficient to do such work in this method
+  /// compared to [update], because [update] can be called many times during the
+  /// lifecycle of the semantic node.
+  ///
+  /// It is safe to access [element], [semanticsObject], [secondaryRoleManagers]
+  /// and all helper methods that access these fields, such as [append],
+  /// [focusable], etc.
+  void initState() {}
 
   /// Sets the `role` ARIA attribute.
   void setAriaRole(String ariaRoleName) {
@@ -541,9 +557,13 @@ abstract class PrimaryRoleManager {
     addSecondaryRole(RouteName(semanticsObject, this));
   }
 
+  /// Convenience getter for the [LabelAndValue] role manager, if any.
+  LabelAndValue? get labelAndValue => _labelAndValue;
+  LabelAndValue? _labelAndValue;
+
   /// Adds generic label features.
-  void addLabelAndValue({ required LeafLabelRepresentation labelRepresentation }) {
-    addSecondaryRole(LabelAndValue(semanticsObject, this, labelRepresentation: labelRepresentation));
+  void addLabelAndValue({ required LabelRepresentation preferredRepresentation }) {
+    addSecondaryRole(_labelAndValue = LabelAndValue(semanticsObject, this, preferredRepresentation: preferredRepresentation));
   }
 
   /// Adds generic functionality for handling taps and clicks.
@@ -624,7 +644,10 @@ final class GenericRole extends PrimaryRoleManager {
   GenericRole(SemanticsObject semanticsObject) : super.withBasics(
     PrimaryRole.generic,
     semanticsObject,
-    labelRepresentation: LeafLabelRepresentation.domText,
+    // Prefer sized span because if this is a leaf it is frequently a Text widget.
+    // But if it turns out to be a container, then LabelAndValue will automatically
+    // switch to `aria-label`.
+    preferredLabelRepresentation: LabelRepresentation.sizedSpan,
   ) {
     // Typically a tappable widget would have a more specific role, such as
     // "link", "button", "checkbox", etc. However, there are situations when a
@@ -639,42 +662,40 @@ final class GenericRole extends PrimaryRoleManager {
 
   @override
   void update() {
-    super.update();
-
     if (!semanticsObject.hasLabel) {
       // The node didn't get a more specific role, and it has no label. It is
       // likely that this node is simply there for positioning its children and
       // has no other role for the screen reader to be aware of. In this case,
       // the element does not need a `role` attribute at all.
+      super.update();
       return;
     }
 
-    // Assign one of three roles to the element: heading, group, text.
+    // Assign one of three roles to the element: group, heading, text.
     //
     // - "group" is used when the node has children, irrespective of whether the
     //   node is marked as a header or not. This is because marking a group
     //   as a "heading" will prevent the AT from reaching its children.
     // - "heading" is used when the framework explicitly marks the node as a
     //   heading and the node does not have children.
-    // - "text" is used by default.
-    //
-    // As of October 24, 2022, "text" only has effect on Safari. Other browsers
-    // ignore it. Setting role="text" prevents Safari from treating the element
-    // as a "group" or "empty group". Other browsers still announce it as
-    // "group" or "empty group". However, other options considered produced even
-    // worse results, such as:
-    //
-    // - Ignore the size of the element and size the focus ring to the text
-    //   content, which is wrong. The HTML text size is irrelevant because
-    //   Flutter renders into canvas, so the focus ring looks wrong.
-    // - Read out the same label multiple times.
+    // - If a node has a label and no children, assume is a paragraph of text.
+    //   In HTML text has no ARIA role. It's just a DOM node with text inside
+    //   it. Previously, role="text" was used, but it was only supported by
+    //   Safari, and it was removed starting Safari 17.
     if (semanticsObject.hasChildren) {
+      labelAndValue!.preferredRepresentation = LabelRepresentation.ariaLabel;
       setAriaRole('group');
     } else if (semanticsObject.hasFlag(ui.SemanticsFlag.isHeader)) {
+      labelAndValue!.preferredRepresentation = LabelRepresentation.domText;
       setAriaRole('heading');
     } else {
-      setAriaRole('text');
+      labelAndValue!.preferredRepresentation = LabelRepresentation.sizedSpan;
+      removeAttribute('role');
     }
+
+    // Call super.update last so the role is established before applying
+    // specific behaviors.
+    super.update();
   }
 
   @override
@@ -694,18 +715,9 @@ final class GenericRole extends PrimaryRoleManager {
       return false;
     }
 
-    // Case 3: current node is visual/informational. Move just the
-    // accessibility focus.
-
-    // Plain text nodes should not be focusable via keyboard or mouse. They are
-    // only focusable for the purposes of focusing the screen reader. To achieve
-    // this the -1 value is used.
-    //
-    // See also:
-    //
-    // https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/tabindex
-    element.tabIndex = -1;
-    element.focus();
+    // Case 3: current node is visual/informational. Move just the accessibility
+    // focus.
+    labelAndValue!.focusAsRouteDefault();
     return true;
   }
 }
@@ -1645,6 +1657,7 @@ class SemanticsObject {
     if (currentPrimaryRole == null) {
       currentPrimaryRole = _createPrimaryRole(roleId);
       primaryRole = currentPrimaryRole;
+      currentPrimaryRole.initState();
       currentPrimaryRole.update();
     }
 
