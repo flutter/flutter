@@ -1238,15 +1238,15 @@ Future<T?> showCupertinoModalPopup<T>({
   );
 }
 
-Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-  return child;
-}
 // The curve and initial scale values were mostly eyeballed from iOS, however
 // they reuse the same animation curve that was modeled after native page
 // transitions.
 final Animatable<double> _dialogScaleTween = Tween<double>(begin: 1.3, end: 1.0)
   .chain(CurveTween(curve: Curves.linearToEaseOut));
 
+Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  return child;
+}
 /// Displays an iOS-style dialog above the current contents of the app, with
 /// iOS-style entrance and exit animations, modal barrier color, and modal
 /// barrier behavior (by default, the dialog is not dismissible with a tap on
