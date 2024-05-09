@@ -363,6 +363,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         margin: const EdgeInsetsDirectional.only(end: 8.0),
         child: ExpandIcon(
           color: widget.expandIconColor,
+          disabledColor: child.canTapOnHeader ? widget.expandIconColor : null,
           isExpanded: _isChildExpanded(index),
           padding: _kExpandIconPadding,
           onPressed: !child.canTapOnHeader
@@ -370,6 +371,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
               : null,
         ),
       );
+
       if (!child.canTapOnHeader) {
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
         expandIconContainer = Semantics(
