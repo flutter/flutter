@@ -581,18 +581,8 @@ class _SnackBarState extends State<SnackBar> {
     _heightM3Animation = null;
   }
 
-  bool _debugDisposed = false;
-
   @override
   void dispose() {
-    assert(() {
-      print('Snackbar.dispose called. $this');
-      if (_debugDisposed) {
-        print('Snackbar.dispose is used after being disposed. $this');
-      }
-      _debugDisposed = true;
-      return true;
-    }());
     widget.animation!.removeStatusListener(_onAnimationStatusChanged);
     _disposeAnimations();
     super.dispose();
@@ -614,12 +604,6 @@ class _SnackBarState extends State<SnackBar> {
 
   @override
   Widget build(BuildContext context) {
-    assert(() {
-      if (_debugDisposed) {
-        print('Snackbar.dispose is used after being disposed. $this');
-      }
-      return true;
-    }());
     assert(debugCheckHasMediaQuery(context));
     final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
     assert(widget.animation != null);
@@ -875,15 +859,6 @@ class _SnackBarState extends State<SnackBar> {
       snackBarTransition = ValueListenableBuilder<double>(
         valueListenable: _heightAnimation!,
         builder: (BuildContext context, double value, Widget? child) {
-          assert(() {
-            if (_heightAnimation == null) {
-              print('SnackBar._heightAnimation in ValueListenableBuilder. $this');
-            }
-            if (_debugDisposed) {
-              print('SnackBar is disposed in ValueListenableBuilder. $this');
-            }
-            return true;
-          }());
           return Align(
             alignment: AlignmentDirectional.topStart,
             heightFactor: value,
