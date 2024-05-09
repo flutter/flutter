@@ -45,31 +45,33 @@ class SemanticsDebugger extends StatefulWidget {
 }
 
 class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindingObserver {
-  _SemanticsClient? _client;
   PipelineOwner? _pipelineOwner;
+  SemanticsHandle? _semanticsHandle;
+  int _generation = 0;
 
   @override
   void initState() {
     super.initState();
+    _semanticsHandle = SemanticsBinding.instance.ensureSemantics();
     WidgetsBinding.instance.addObserver(this);
   }
 
   @override
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final PipelineOwner newOwner = View.pipelineOwnerOf(context);
+    assert(newOwner.semanticsOwner != null);
     if (newOwner != _pipelineOwner) {
-      _client?.dispose();
-      _client = _SemanticsClient(newOwner)
-        ..addListener(_update);
+      _pipelineOwner?.semanticsOwner?.removeListener(_update);
+      newOwner.semanticsOwner!.addListener(_update);
       _pipelineOwner = newOwner;
     }
   }
 
   @override
   void dispose() {
-    _client?.dispose();
+    _pipelineOwner?.semanticsOwner?.removeListener(_update);
+    _semanticsHandle?.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -82,6 +84,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
   }
 
   void _update() {
+    _generation++;
     SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
       // Semantic information are only available at the end of a frame and our
       // only chance to paint them on the screen is the next frame. To achieve
@@ -157,7 +160,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
     return CustomPaint(
       foregroundPainter: _SemanticsDebuggerPainter(
         _pipelineOwner!,
-        _client!.generation,
+        _generation,
         _lastPointerDownLocation, // in physical pixels
         View.of(context).devicePixelRatio,
         widget.labelStyle,
@@ -177,42 +180,6 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
         ),
       ),
     );
-  }
-}
-
-class _SemanticsClient extends ChangeNotifier {
-  _SemanticsClient(PipelineOwner pipelineOwner) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/widgets.dart',
-        className: '$_SemanticsClient',
-        object: this,
-      );
-    }
-    _semanticsHandle = pipelineOwner.ensureSemantics(
-      listener: _didUpdateSemantics,
-    );
-  }
-
-  SemanticsHandle? _semanticsHandle;
-
-  @override
-  void dispose() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
-    _semanticsHandle!.dispose();
-    _semanticsHandle = null;
-    super.dispose();
-  }
-
-  int generation = 0;
-
-  void _didUpdateSemantics() {
-    generation += 1;
-    notifyListeners();
   }
 }
 

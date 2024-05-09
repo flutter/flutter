@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestIcon extends StatefulWidget {
   const TestIcon({super.key});
@@ -222,7 +223,10 @@ void main() {
     expect(iconColor(collapsedIconKey), foregroundColor);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('ExpansionTile subtitle', (WidgetTester tester) async {
+  testWidgets('ExpansionTile subtitle',
+  // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
+  experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
+  (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -1149,7 +1153,10 @@ void main() {
     await tester.pumpAndSettle();
 
     // Override the animation curve.
-    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle(curve: Easing.emphasizedDecelerate)));
+    await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle(
+      curve: Easing.emphasizedDecelerate,
+      reverseCurve: Easing.emphasizedAccelerate,
+    )));
     await tester.pumpAndSettle();
 
     // Test the overridden animation curve.
@@ -1167,8 +1174,20 @@ void main() {
 
     expect(getHeight(expansionTileKey), 158.0);
 
-    // Tap to collapse the ExpansionTile.
+    // Test the overridden reverse (collapse) animation curve.
     await tester.tap(find.text('title'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 1/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(98.6, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 50)); // Advance the animation by 2/4 of its duration.
+
+    expect(getHeight(expansionTileKey), closeTo(73.4, 0.1));
+
+    await tester.pumpAndSettle(); // Advance the animation to the end.
+
+    expect(getHeight(expansionTileKey), 58.0);
 
     // Test no animation.
     await tester.pumpWidget(buildExpansionTile(animationStyle: AnimationStyle.noAnimation));
