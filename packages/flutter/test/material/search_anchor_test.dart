@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -898,7 +899,10 @@ void main() {
     expect(textField.textCapitalization, TextCapitalization.none);
   });
 
-  testWidgets('SearchAnchor respects viewOnChanged and viewOnSubmitted properties', (WidgetTester tester) async {
+  testWidgets('SearchAnchor respects viewOnChanged and viewOnSubmitted properties',
+  // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
+  experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
+  (WidgetTester tester) async {
     final SearchController controller = SearchController();
     addTearDown(controller.dispose);
     int onChangedCalled = 0;

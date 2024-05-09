@@ -503,7 +503,6 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       return AnimatedPhysicalModel(
         curve: Curves.fastOutSlowIn,
         duration: widget.animationDuration,
-        shape: BoxShape.rectangle,
         clipBehavior: widget.clipBehavior,
         elevation: modelElevation,
         color: color,

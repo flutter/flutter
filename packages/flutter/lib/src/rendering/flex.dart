@@ -45,7 +45,7 @@ extension type const _AxisSize._(Size _size) {
 // The ascent and descent of a baseline-aligned child.
 //
 // Baseline-aligned children contributes to the cross axis extent of a [RenderFlex]
-// differently from chidren with other [CrossAxisAlignment]s.
+// differently from children with other [CrossAxisAlignment]s.
 extension type const _AscentDescent._((double ascent, double descent)? ascentDescent) {
   factory _AscentDescent({ required double? baselineOffset, required double crossSize }) {
     return baselineOffset == null ? none : _AscentDescent._((baselineOffset, crossSize - baselineOffset));
@@ -76,7 +76,7 @@ class _LayoutSizes {
   final _AxisSize axisSize;
 
   // The free space along the main axis. If the value is positive, the free space
-  // will be distributed according to the [MainAxisAliggnment] specified. A
+  // will be distributed according to the [MainAxisAlignment] specified. A
   // negative value indicates the RenderFlex overflows along the main axis.
   final double mainAxisFreeSpace;
 
@@ -680,10 +680,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    if (_direction == Axis.horizontal) {
-      return defaultComputeDistanceToHighestActualBaseline(baseline);
-    }
-    return defaultComputeDistanceToFirstActualBaseline(baseline);
+    return switch (_direction) {
+      Axis.horizontal => defaultComputeDistanceToHighestActualBaseline(baseline),
+      Axis.vertical   => defaultComputeDistanceToFirstActualBaseline(baseline),
+    };
   }
 
   static int _getFlex(RenderBox child) {
@@ -1060,7 +1060,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     final double? baselineOffset = sizes.baselineOffset;
     assert(baselineOffset == null || (crossAxisAlignment == CrossAxisAlignment.baseline && direction == Axis.horizontal));
 
-    // Position all chilren in visual order: starting from the top-left child and
+    // Position all children in visual order: starting from the top-left child and
     // work towards the child that's farthest away from the origin.
     double childMainPosition = leadingSpace;
     for (RenderBox? child = topLeftChild; child != null; child = nextChild(child)) {
