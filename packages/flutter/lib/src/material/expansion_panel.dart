@@ -361,14 +361,14 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
       Widget expandIconContainer = Container(
         margin: const EdgeInsetsDirectional.only(end: 8.0),
-        child: IgnorePointer(
-          ignoring: child.canTapOnHeader,
-          child: ExpandIcon(
-            color: widget.expandIconColor,
-            isExpanded: _isChildExpanded(index),
-            padding: _kExpandIconPadding,
-            onPressed: (bool isExpanded) => _handlePressed(isExpanded, index),
-          ),
+        child: ExpandIcon(
+          color: widget.expandIconColor,
+          disabledColor: child.canTapOnHeader ? widget.expandIconColor : null,
+          isExpanded: _isChildExpanded(index),
+          padding: _kExpandIconPadding,
+          onPressed: !child.canTapOnHeader
+              ? (bool isExpanded) => _handlePressed(isExpanded, index)
+              : null,
         ),
       );
 
