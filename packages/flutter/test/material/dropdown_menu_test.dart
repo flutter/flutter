@@ -835,6 +835,44 @@ void main() {
 
   }, variant: TargetPlatformVariant.desktop());
 
+  // Regression test for https://github.com/flutter/flutter/issues/147253.
+  testWidgets('Default search prioritises the current highlight on desktop platforms',
+      (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          dropdownMenuEntries: menuChildren,
+        ),
+      ),
+    ));
+
+    const String itemLabel = 'Item 2';
+    // Open the menu
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pumpAndSettle();
+    // Highlight the third item by exact search.
+    await tester.enterText(find.byType(TextField).first, itemLabel);
+    await tester.pumpAndSettle();
+    Finder button2Material = find.descendant(
+      of: find.widgetWithText(MenuItemButton, itemLabel).last,
+      matching: find.byType(Material),
+    );
+    Material item2material = tester.widget<Material>(button2Material);
+    expect(item2material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+    // Search something that matches multiple items.
+    await tester.enterText(find.byType(TextField).first, 'Item');
+    await tester.pumpAndSettle();
+    // The third item should still be highlighted.
+    button2Material = find.descendant(
+      of: find.widgetWithText(MenuItemButton, itemLabel).last,
+      matching: find.byType(Material),
+    );
+    item2material = tester.widget<Material>(button2Material);
+    expect(item2material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+  }, variant: TargetPlatformVariant.desktop());
   testWidgets('The text input should match the label of the menu item '
       'while pressing down key on desktop platforms', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
