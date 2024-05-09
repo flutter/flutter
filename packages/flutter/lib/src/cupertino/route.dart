@@ -1385,31 +1385,31 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
   CurvedAnimation? _fadeAnimation;
 
   void _setAnimation(Animation<double> animation) {
-    if (_fadeAnimation?.parent.hashCode != animation.hashCode) {
+    if (_fadeAnimation?.parent != animation) {
       _fadeAnimation?.dispose();
       _fadeAnimation = CurvedAnimation(
       parent: animation,
       curve: Curves.easeOut,
-    );
+      );
     }
   }
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-  _setAnimation(animation);
-  if (animation.status == AnimationStatus.reverse) {
+    _setAnimation(animation);
+    if (animation.status == AnimationStatus.reverse) {
+      return FadeTransition(
+        opacity: _fadeAnimation!,
+        child: super.buildTransitions(context, animation, secondaryAnimation, child),
+      );
+    }
     return FadeTransition(
       opacity: _fadeAnimation!,
-      child: super.buildTransitions(context, animation, secondaryAnimation, child),
+      child: ScaleTransition(
+        scale: animation.drive(_dialogScaleTween),
+        child: super.buildTransitions(context, animation, secondaryAnimation, child),
+      ),
     );
-  }
-  return FadeTransition(
-    opacity: _fadeAnimation!,
-    child: ScaleTransition(
-      scale: animation.drive(_dialogScaleTween),
-      child: super.buildTransitions(context, animation, secondaryAnimation, child),
-    ),
-  );
   }
 
   @override
