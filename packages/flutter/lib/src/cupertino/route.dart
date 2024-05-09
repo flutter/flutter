@@ -1396,7 +1396,7 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    _setAnimation(animation);
+  _setAnimation(animation);
   if (animation.status == AnimationStatus.reverse) {
     return FadeTransition(
       opacity: _fadeAnimation!,
