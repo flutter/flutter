@@ -350,7 +350,7 @@ void main() {
             ..path(
               style: PaintingStyle.fill,
               color: theme.colorScheme.surfaceContainerHighest,
-            )
+            ),
           );
         });
 
@@ -409,7 +409,7 @@ void main() {
             ..path(
               style: PaintingStyle.fill,
               color: theme.colorScheme.onSurface.withOpacity(0.04),
-            )
+            ),
           );
         });
 
@@ -470,7 +470,7 @@ void main() {
             ..path(
               style: PaintingStyle.fill,
               color: Color.alphaBlend(theme.hoverColor, theme.colorScheme.surfaceContainerHighest),
-            )
+            ),
           );
         });
 
@@ -530,7 +530,32 @@ void main() {
             ..path(
               style: PaintingStyle.fill,
               color: theme.colorScheme.surfaceContainerHighest,
-            )
+            ),
+          );
+        });
+
+        testWidgets('container has correct color when focused and hovered', (WidgetTester tester) async {
+          // Regression test for https://github.com/flutter/flutter/issues/146573.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              isFocused: true,
+              isHovering: true,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          final ThemeData theme = Theme.of(tester.element(findDecorator()));
+          final Color focusColor = theme.colorScheme.surfaceContainerHighest;
+          final Color hoverColor = theme.hoverColor;
+          expect(findBorderPainter(), paints
+            ..path(
+              style: PaintingStyle.fill,
+              color: Color.alphaBlend(hoverColor, focusColor),
+            ),
           );
         });
 
@@ -607,7 +632,7 @@ void main() {
             ..path(
               style: PaintingStyle.fill,
               color: theme.colorScheme.surfaceContainerHighest,
-            )
+            ),
           );
         });
 
@@ -729,7 +754,7 @@ void main() {
           expect(findBorderPainter(), paints
             ..path(
               style: PaintingStyle.stroke,
-            )
+            ),
           );
         });
 
@@ -784,7 +809,7 @@ void main() {
           expect(findBorderPainter(), paints
             ..path(
               style: PaintingStyle.stroke,
-            )
+            ),
           );
         });
 
@@ -840,7 +865,7 @@ void main() {
           expect(findBorderPainter(), paints
             ..path(
               style: PaintingStyle.stroke,
-            )
+            ),
           );
         });
 
@@ -896,7 +921,7 @@ void main() {
           expect(findBorderPainter(), paints
             ..path(
               style: PaintingStyle.stroke,
-            )
+            ),
           );
         });
 
@@ -969,7 +994,7 @@ void main() {
           expect(findBorderPainter(), paints
             ..path(
               style: PaintingStyle.stroke,
-            )
+            ),
           );
         });
 
@@ -2006,6 +2031,137 @@ void main() {
           expect(getLabelStyle(tester).color, theme.colorScheme.error);
         });
       });
+    });
+
+    testWidgets('floatingLabelStyle overrides default style', (WidgetTester tester) async {
+      const TextStyle floatingLabelStyle = TextStyle(color: Colors.indigo, fontSize: 16.0);
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          isFocused: true, // Label appears floating above input field.
+          decoration: const InputDecoration(
+            labelText: labelText,
+            floatingLabelStyle: floatingLabelStyle,
+          ),
+        ),
+      );
+
+      expect(getLabelStyle(tester).color, floatingLabelStyle.color);
+      expect(getLabelStyle(tester).fontSize, floatingLabelStyle.fontSize);
+    });
+
+    testWidgets('floatingLabelStyle defaults to labelStyle', (WidgetTester tester) async {
+      const TextStyle labelStyle = TextStyle(color: Colors.amber, fontSize: 16.0);
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          isFocused: true, // Label appears floating above input field.
+          decoration: const InputDecoration(
+            labelText: labelText,
+            labelStyle: labelStyle,
+          ),
+        ),
+      );
+
+      expect(getLabelStyle(tester).color, labelStyle.color);
+      expect(getLabelStyle(tester).fontSize, labelStyle.fontSize);
+    });
+
+    testWidgets('floatingLabelStyle takes precedence over labelStyle', (WidgetTester tester) async {
+      const TextStyle labelStyle = TextStyle(color: Colors.amber, fontSize: 16.0);
+      const TextStyle floatingLabelStyle = TextStyle(color: Colors.indigo, fontSize: 16.0);
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          isFocused: true, // Label appears floating above input field.
+          decoration: const InputDecoration(
+            labelText: labelText,
+            labelStyle: labelStyle,
+            floatingLabelStyle: floatingLabelStyle,
+          ),
+        ),
+      );
+
+      expect(getLabelStyle(tester).color, floatingLabelStyle.color);
+      expect(getLabelStyle(tester).fontSize, floatingLabelStyle.fontSize);
+    });
+
+    testWidgets('InputDecorationTheme labelStyle overrides default style', (WidgetTester tester) async {
+      const TextStyle labelStyle = TextStyle(color: Colors.amber, fontSize: 16.0);
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true, // Label appears inline, on top of the input field.
+          inputDecorationTheme: const InputDecorationTheme(
+            labelStyle: labelStyle,
+          ),
+          decoration: const InputDecoration(
+            labelText: labelText,
+          ),
+        ),
+      );
+
+      expect(getLabelStyle(tester).color, labelStyle.color);
+    });
+
+    testWidgets('InputDecorationTheme floatingLabelStyle overrides default style', (WidgetTester tester) async {
+      const TextStyle floatingLabelStyle = TextStyle(color: Colors.indigo, fontSize: 16.0);
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          isFocused: true, // Label appears floating above input field.
+          inputDecorationTheme: const InputDecorationTheme(
+            floatingLabelStyle: floatingLabelStyle,
+          ),
+          decoration: const InputDecoration(
+            labelText: labelText,
+          ),
+        ),
+      );
+
+      expect(getLabelStyle(tester).color, floatingLabelStyle.color);
+    });
+
+    testWidgets('floatingLabelStyle is always used when FloatingLabelBehavior.always', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/147231.
+      const TextStyle labelStyle = TextStyle(color: Colors.amber, fontSize: 16.0);
+      const TextStyle floatingLabelStyle = TextStyle(color: Colors.indigo, fontSize: 16.0);
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration(
+            labelText: labelText,
+            labelStyle: labelStyle,
+            floatingLabelStyle: floatingLabelStyle,
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+          ),
+        ),
+      );
+
+      expect(getLabelStyle(tester).color, floatingLabelStyle.color);
+      expect(getLabelStyle(tester).fontSize, floatingLabelStyle.fontSize);
+
+      // Focus the input decorator.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          isFocused: true,
+          decoration: const InputDecoration(
+            labelText: labelText,
+            labelStyle: labelStyle,
+            floatingLabelStyle: floatingLabelStyle,
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+          ),
+        ),
+      );
+
+      expect(getLabelStyle(tester).color, floatingLabelStyle.color);
+      expect(getLabelStyle(tester).fontSize, floatingLabelStyle.fontSize);
     });
   });
 
@@ -3881,6 +4037,23 @@ void main() {
         expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + errorHeight * numberOfLines, 0.25));
       });
 
+      testWidgets('Error height is not limited by default', (WidgetTester tester) async {
+        const int numberOfLines = 3;
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(
+              labelText: 'label',
+              errorText: threeLines,
+              filled: true,
+            ),
+          ),
+        );
+
+        final Rect errorRect = tester.getRect(find.text(threeLines));
+        expect(errorRect.height, closeTo(errorHeight * numberOfLines, 0.25));
+        expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + errorHeight * numberOfLines, 0.25));
+      });
+
       testWidgets('Helper height grows to accommodate helper text', (WidgetTester tester) async {
         const int maxLines = 3;
         await tester.pumpWidget(
@@ -3932,6 +4105,23 @@ void main() {
         );
 
         final Rect helperRect = tester.getRect(find.text(twoLines));
+        expect(helperRect.height, closeTo(helperHeight * numberOfLines, 0.25));
+        expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + helperHeight * numberOfLines, 0.25));
+      });
+
+      testWidgets('Helper height is not limited by default', (WidgetTester tester) async {
+        const int numberOfLines = 3;
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(
+              labelText: 'label',
+              helperText: threeLines,
+              filled: true,
+            ),
+          ),
+        );
+
+        final Rect helperRect = tester.getRect(find.text(threeLines));
         expect(helperRect.height, closeTo(helperHeight * numberOfLines, 0.25));
         expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + helperHeight * numberOfLines, 0.25));
       });
@@ -4854,6 +5044,49 @@ void main() {
     // hasn't had its width affected.
     expect(tester.getSize(find.text(labelText)).width, labelWidth);
     expect(getOpacity(tester, prefixText), 1.0);
+  });
+
+  testWidgets('Prefix and suffix are not visible when decorator is empty', (WidgetTester tester) async {
+    const String prefixText = 'Prefix';
+    const String suffixText = 'Suffix';
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        decoration: const InputDecoration(
+          filled: true,
+          labelText: labelText,
+          prefixText: prefixText,
+          suffixText: suffixText,
+        ),
+      ),
+    );
+
+    // Prefix and suffix are hidden.
+    expect(getOpacity(tester, prefixText), 0.0);
+    expect(getOpacity(tester, suffixText), 0.0);
+  });
+
+  testWidgets('Prefix and suffix are visible when decorator is empty and floating behavior is FloatingBehavior.always', (WidgetTester tester) async {
+    const String prefixText = 'Prefix';
+    const String suffixText = 'Suffix';
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        decoration: const InputDecoration(
+          filled: true,
+          labelText: labelText,
+          prefixText: prefixText,
+          suffixText: suffixText,
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+        ),
+      ),
+    );
+
+    // Prefix and suffix are visible.
+    expect(getOpacity(tester, prefixText), 1.0);
+    expect(getOpacity(tester, suffixText), 1.0);
   });
 
   testWidgets('OutlineInputBorder and InputDecorator long labels and in Floating, the width should ignore the icon width', (WidgetTester tester) async {
