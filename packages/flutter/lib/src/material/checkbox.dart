@@ -731,6 +731,19 @@ class _CheckboxPainter extends ToggleablePainter {
 
   void _drawBox(Canvas canvas, Rect outer, Paint paint, BorderSide? side) {
     canvas.drawPath(shape.getOuterPath(outer), paint);
+    switch (_designSpec!) {
+      case _DesignSpec.cupertino:
+        if (value == false){
+          // Add dropshadow effect when unselected.
+          // The color and values were eyeballed from examples in the HIG docs.
+          final Rect shadowRect = Rect.fromLTRB(
+            outer.left + 1, outer.top, outer.right - 1, outer.top + 3);
+          canvas.drawPath(shape.getInnerPath(shadowRect),
+            Paint()..color = CupertinoColors.extraLightBackgroundGray);
+        }
+      case _DesignSpec.material:
+      break;
+    }
     if (side != null) {
       shape.copyWith(side: side).paint(canvas, outer);
     }
@@ -745,8 +758,8 @@ class _CheckboxPainter extends ToggleablePainter {
     switch (_designSpec!) {
       case _DesignSpec.cupertino:
         start = const Offset(_kEdgeSize * 0.25, _kEdgeSize * 0.52);
-        mid = const Offset(_kEdgeSize * 0.46, _kEdgeSize * 0.75);
-        end = const Offset(_kEdgeSize * 0.72, _kEdgeSize * 0.29);
+        mid = const Offset(_kEdgeSize * 0.44, _kEdgeSize * 0.75);
+        end = const Offset(_kEdgeSize * 0.74, _kEdgeSize * 0.25);
         path.moveTo(origin.dx + start.dx, origin.dy + start.dy);
         path.lineTo(origin.dx + mid.dx, origin.dy + mid.dy);
         canvas.drawPath(path, paint);
@@ -891,7 +904,9 @@ class _CheckboxDefaultsCupertino extends CheckboxThemeData {
       .withSaturation(0.835)
       .toColor();
   final Color _activeColor = CupertinoColors.activeBlue;
-  final Color _inactiveColor = CupertinoColors.inactiveGray;
+  final Color _inactiveColor = CupertinoColors.white;
+  // Eyeballed border color from checkbox example in the HIG docs.
+  final Color _borderColor = CupertinoColors.systemGrey4;
 
   @override
   MaterialStateBorderSide? get side {
@@ -909,15 +924,15 @@ class _CheckboxDefaultsCupertino extends CheckboxThemeData {
         return BorderSide(color: _colors.error);
       }
       if (states.contains(MaterialState.pressed)) {
-        return BorderSide(color: _inactiveColor);
+        return BorderSide(color: _borderColor);
       }
       if (states.contains(MaterialState.hovered)) {
-        return BorderSide(color: _inactiveColor);
+        return BorderSide(color: _borderColor);
       }
       if (states.contains(MaterialState.focused)) {
         return BorderSide(color: _activeColor);
       }
-      return BorderSide(color: _inactiveColor);
+      return BorderSide(color: _borderColor);
     });
   }
 
@@ -928,7 +943,7 @@ class _CheckboxDefaultsCupertino extends CheckboxThemeData {
         if (states.contains(MaterialState.selected)) {
           return _activeColor;
         }
-        return Colors.transparent;
+        return _inactiveColor;
       }
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.error)) {
@@ -936,7 +951,7 @@ class _CheckboxDefaultsCupertino extends CheckboxThemeData {
         }
         return _activeColor;
       }
-      return Colors.transparent;
+      return _inactiveColor;
     });
   }
 
@@ -947,7 +962,7 @@ class _CheckboxDefaultsCupertino extends CheckboxThemeData {
         if (states.contains(MaterialState.selected)) {
           return CupertinoColors.white;
         }
-        return Colors.transparent; // No icons available when the checkbox is unselected.
+        return _inactiveColor;
       }
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.error)) {
@@ -955,7 +970,7 @@ class _CheckboxDefaultsCupertino extends CheckboxThemeData {
         }
         return CupertinoColors.white;
       }
-      return Colors.transparent; // No icons available when the checkbox is unselected.
+      return _inactiveColor;
     });
   }
 
