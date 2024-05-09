@@ -1,0 +1,3 @@
+tags:
+  version-verify:
+    skip: "Should only be run during pull request. Verifies if version file is updated."
