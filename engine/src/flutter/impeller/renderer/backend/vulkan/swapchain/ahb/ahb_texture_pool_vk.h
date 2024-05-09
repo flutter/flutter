@@ -9,7 +9,6 @@
 
 #include "flutter/fml/unique_fd.h"
 #include "impeller/base/thread.h"
-#include "impeller/base/timing.h"
 #include "impeller/renderer/backend/vulkan/android/ahb_texture_source_vk.h"
 
 namespace impeller {
@@ -30,14 +29,12 @@ namespace impeller {
 class AHBTexturePoolVK {
  public:
   struct PoolEntry {
-    TimePoint last_access_time;
     std::shared_ptr<AHBTextureSourceVK> texture;
     std::shared_ptr<fml::UniqueFD> render_ready_fence;
 
     explicit PoolEntry(std::shared_ptr<AHBTextureSourceVK> p_item,
                        fml::UniqueFD p_render_ready_fence = {})
-        : last_access_time(Clock::now()),
-          texture(std::move(p_item)),
+        : texture(std::move(p_item)),
           render_ready_fence(std::make_shared<fml::UniqueFD>(
               std::move(p_render_ready_fence))) {}
 

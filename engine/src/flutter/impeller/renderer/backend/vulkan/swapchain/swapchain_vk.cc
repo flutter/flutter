@@ -44,6 +44,17 @@ std::shared_ptr<SwapchainVK> SwapchainVK::Create(
     return nullptr;
   }
 
+  vk::AndroidSurfaceCreateInfoKHR surface_info;
+  surface_info.setWindow(window.GetHandle());
+  auto [result, surface] =
+      ContextVK::Cast(*context).GetInstance().createAndroidSurfaceKHRUnique(
+          surface_info);
+  if (result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Could not create KHR Android Surface: "
+                   << vk::to_string(result);
+    return nullptr;
+  }
+
   // TODO(147533): AHB swapchains on emulators are not functional.
   const auto emulator = ContextVK::Cast(*context).GetDriverInfo()->IsEmulator();
 
@@ -52,6 +63,7 @@ std::shared_ptr<SwapchainVK> SwapchainVK::Create(
     auto ahb_swapchain = std::shared_ptr<AHBSwapchainVK>(new AHBSwapchainVK(
         context,             //
         window.GetHandle(),  //
+        std::move(surface),  //
         window.GetSize(),    //
         enable_msaa          //
         ));
@@ -65,16 +77,6 @@ std::shared_ptr<SwapchainVK> SwapchainVK::Create(
   }
 
   // Fallback to KHR swapchains if AHB swapchains aren't available.
-  vk::AndroidSurfaceCreateInfoKHR surface_info;
-  surface_info.setWindow(window.GetHandle());
-  auto [result, surface] =
-      ContextVK::Cast(*context).GetInstance().createAndroidSurfaceKHRUnique(
-          surface_info);
-  if (result != vk::Result::eSuccess) {
-    VALIDATION_LOG << "Could not create KHR Android Surface: "
-                   << vk::to_string(result);
-    return nullptr;
-  }
   return Create(context, std::move(surface), window.GetSize(), enable_msaa);
 }
 #endif  // FML_OS_ANDROID

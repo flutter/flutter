@@ -44,9 +44,11 @@ std::shared_ptr<AHBSwapchainImplVK> AHBSwapchainImplVK::Create(
     const std::weak_ptr<Context>& context,
     std::weak_ptr<android::SurfaceControl> surface_control,
     const ISize& size,
-    bool enable_msaa) {
-  auto impl = std::shared_ptr<AHBSwapchainImplVK>(new AHBSwapchainImplVK(
-      context, std::move(surface_control), size, enable_msaa));
+    bool enable_msaa,
+    size_t swapchain_image_count) {
+  auto impl = std::shared_ptr<AHBSwapchainImplVK>(
+      new AHBSwapchainImplVK(context, std::move(surface_control), size,
+                             enable_msaa, swapchain_image_count));
   return impl->IsValid() ? impl : nullptr;
 }
 
@@ -54,11 +56,13 @@ AHBSwapchainImplVK::AHBSwapchainImplVK(
     const std::weak_ptr<Context>& context,
     std::weak_ptr<android::SurfaceControl> surface_control,
     const ISize& size,
-    bool enable_msaa)
+    bool enable_msaa,
+    size_t swapchain_image_count)
     : surface_control_(std::move(surface_control)),
       pending_presents_(std::make_shared<fml::Semaphore>(kMaxPendingPresents)) {
   desc_ = android::HardwareBufferDescriptor::MakeForSwapchainImage(size);
-  pool_ = std::make_shared<AHBTexturePoolVK>(context, desc_);
+  pool_ =
+      std::make_shared<AHBTexturePoolVK>(context, desc_, swapchain_image_count);
   if (!pool_->IsValid()) {
     return;
   }
@@ -245,7 +249,6 @@ vk::UniqueSemaphore AHBSwapchainImplVK::CreateRenderReadySemaphore(
   }
 
   const auto& context_vk = ContextVK::Cast(*context);
-
   const auto& device = context_vk.GetDevice();
 
   auto signal_wait = device.createSemaphoreUnique({});
