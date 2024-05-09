@@ -1,6 +1,5 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:cli_completion/cli_completion.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:shorebird_tools/src/commands/commands.dart';
 import 'package:shorebird_tools/src/version.dart';
@@ -16,7 +15,7 @@ const description = 'Shorebird tools for Flutter';
 /// $ shorebird_tools --version
 /// ```
 /// {@endtemplate}
-class ShorebirdToolsCommandRunner extends CompletionCommandRunner<int> {
+class ShorebirdToolsCommandRunner extends CommandRunner<int> {
   /// {@macro shorebird_tools_command_runner}
   ShorebirdToolsCommandRunner({
     Logger? logger,
@@ -74,12 +73,6 @@ class ShorebirdToolsCommandRunner extends CompletionCommandRunner<int> {
 
   @override
   Future<int?> runCommand(ArgResults topLevelResults) async {
-    // Fast track completion command
-    if (topLevelResults.command?.name == 'completion') {
-      await super.runCommand(topLevelResults);
-      return ExitCode.success.code;
-    }
-
     // Verbose logs
     _logger
       ..detail('Argument information:')
