@@ -3191,7 +3191,9 @@ abstract final class CupertinoIcons {
   /// This is the same icon as [create_solid] which is available in cupertino_icons 0.1.3.
   static const IconData square_pencil = IconData(0xf417, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// <i class='cupertino-icons md-36'>square_pencil_fill</i> &#x2014; Cupertino icon named "square_pencil_fill". Available on cupertino_icons package 1.0.0+ only.
-  static const IconData square_pencil_fill = IconData(0xf418, fontFamily: iconFont, fontPackage: iconFontPackage);
+  /// This is the same icon as [create] which is available in cupertino_icons 0.1.3.
+  /// This is the same icon as [create_solid] which is available in cupertino_icons 0.1.3.
+  static const IconData square_pencil_fill = IconData(0xf417, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// <i class='cupertino-icons md-36'>square_righthalf_fill</i> &#x2014; Cupertino icon named "square_righthalf_fill". Available on cupertino_icons package 1.0.0+ only.
   static const IconData square_righthalf_fill = IconData(0xf80e, fontFamily: iconFont, fontPackage: iconFontPackage);
   /// <i class='cupertino-icons md-36'>square_split_1x2</i> &#x2014; Cupertino icon named "square_split_1x2". Available on cupertino_icons package 1.0.0+ only.
