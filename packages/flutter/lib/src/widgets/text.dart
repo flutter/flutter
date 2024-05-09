@@ -677,6 +677,7 @@ class Text extends StatelessWidget {
       result = MouseRegion(
         cursor: DefaultSelectionStyle.of(context).mouseCursor ?? SystemMouseCursors.text,
         child: _SelectableTextContainer(
+          selectableId: key,
           textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
           textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
           locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
@@ -752,6 +753,7 @@ class Text extends StatelessWidget {
 
 class _SelectableTextContainer extends StatefulWidget {
   const _SelectableTextContainer({
+    this.selectableId,
     required this.text,
     required this.textAlign,
     this.textDirection,
@@ -766,7 +768,8 @@ class _SelectableTextContainer extends StatefulWidget {
     required this.selectionColor,
   });
 
-  final InlineSpan text;
+  final Object? selectableId;
+  final TextSpan text;
   final TextAlign textAlign;
   final TextDirection? textDirection;
   final bool softWrap;
@@ -790,7 +793,22 @@ class _SelectableTextContainerState extends State<_SelectableTextContainer> {
   @override
   void initState() {
     super.initState();
-    _selectionDelegate = _SelectableTextContainerDelegate(_textKey);
+    _selectionDelegate = _SelectableTextContainerDelegate(
+      _textKey,
+      textState: widget.text,
+      selectableId: widget.selectableId,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _SelectableTextContainer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.text != oldWidget.text) {
+      _selectionDelegate.textState = widget.text;
+    }
+    if (widget.selectableId != oldWidget.selectableId) {
+      _selectionDelegate.selectableId = widget.selectableId;
+    }
   }
 
   @override
@@ -884,9 +902,13 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 
 class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate {
   _SelectableTextContainerDelegate(
-    GlobalKey textKey,
-  ) : _textKey = textKey;
+    GlobalKey textKey, {
+    required this.textState,
+    this.selectableId,
+  }) : _textKey = textKey;
 
+  TextSpan textState;
+  Object? selectableId;
   final GlobalKey _textKey;
   RenderParagraph get paragraph => _textKey.currentContext!.findRenderObject()! as RenderParagraph;
 
@@ -1220,6 +1242,76 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
       return a.left > b.left ? 1 : -1;
     }
     return a.right > b.right ? 1 : -1;
+  }
+
+  /// Copies the selections of all [Selectable]s.
+  @override
+  List<SelectedContentRange> getSelections() {
+    if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
+      return <SelectedContentRange>[];
+    }
+    // Accurately find the selection endpoints, selections.first.startOffset and
+    // selections.last.endOffset are only accurate when the selections.first and
+    // selections.last are root selectables with regards to the text. When the
+    // selection begins or ends at a placeholder, one should consider that a
+    // placeholder signifies that a WidgetSpan is intertwined with the given text.
+    // A placeholder only spans one character unit in the text. So when the selection
+    // begins or ends on a placeholder, we should consider its position relative
+    // to the root text.
+    final int startOffset;
+    final int endOffset;
+    final List<SelectedContentRange> startingSelectableSelections = selectables[currentSelectionStartIndex].getSelections();
+    final List<SelectedContentRange> endingSelectableSelections = selectables[currentSelectionEndIndex].getSelections();
+    if (startingSelectableSelections.isEmpty || endingSelectableSelections.isEmpty) {
+      assert(
+        true,
+        'This selection container delegate has an active selection, indicated by its currentSelectionStartIndex and currentSelectionEndIndex, but it provides no SelectedContentRanges to represent this selection.',
+      );
+      return <SelectedContentRange>[];
+    }
+    if (paragraph.selectableBelongsToParagraph(selectables[currentSelectionStartIndex])) {
+      // A [_SelectableFragment] will only have one [SelectedContentRange].
+      startOffset = startingSelectableSelections.first.startOffset;
+    } else {
+      // TODO(Renzo-Olivares): Fix for rtl.
+      final bool localSelectionForward = startingSelectableSelections.first.endOffset >= startingSelectableSelections.first.startOffset;
+      final TextPosition positionBeforeStart = localSelectionForward
+                                             ? paragraph.getPositionForOffset(selectables[currentSelectionStartIndex].boundingBoxes.first.bottomLeft)
+                                             : paragraph.getPositionForOffset(selectables[currentSelectionStartIndex].boundingBoxes.last.bottomRight);
+      startOffset = positionBeforeStart.offset;
+    }
+    if (paragraph.selectableBelongsToParagraph(selectables[currentSelectionEndIndex])) {
+      // A [_SelectableFragment] will only have one [SelectedContentRange].
+      endOffset = endingSelectableSelections.first.endOffset;
+    } else {
+      // TODO(Renzo-Olivares): Fix for rtl.
+      final bool localSelectionForward = endingSelectableSelections.first.endOffset >= endingSelectableSelections.first.startOffset;
+      final TextPosition positionAfterEnd = localSelectionForward
+                                          ? paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].boundingBoxes.last.bottomRight)
+                                          : paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].boundingBoxes.first.bottomLeft);
+      endOffset = positionAfterEnd.offset;
+    }
+    // Collect any child ranges.
+    final int selectionStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
+    final int selectionEnd = max(currentSelectionStartIndex, currentSelectionEndIndex);
+    final List<SelectedContentRange> childSelections = <SelectedContentRange>[];
+    for (int index = selectionStart; index <= selectionEnd; index += 1) {
+      if (paragraph.selectableBelongsToParagraph(selectables[index])) {
+        continue;
+      }
+      final List<SelectedContentRange> selectedContentRanges = selectables[index].getSelections();
+      if (selectedContentRanges.isNotEmpty) {
+        childSelections.addAll(selectedContentRanges);
+      }
+    }
+    final SelectedContentRange range = SelectedContentRange(
+      contentLength: paragraph.text.toPlainText(includeSemanticsLabels: false).length,
+      selectableId: selectableId,
+      startOffset: startOffset,
+      endOffset: endOffset,
+      children: childSelections,
+    );
+    return <SelectedContentRange>[range];
   }
 
   // From [SelectableRegion].
