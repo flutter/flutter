@@ -571,7 +571,7 @@ void main() {
     expect(materialWidget.clipBehavior, dialogTheme.clipBehavior);
   });
 
-  testWidgets('Material3 - Dialog.clipBehavior takes priority over theme', (WidgetTester tester) async {
+  testWidgets('Dialog.clipBehavior takes priority over theme', (WidgetTester tester) async {
     const Dialog dialog = Dialog(
       clipBehavior: Clip.antiAlias,
       child: Placeholder(),
