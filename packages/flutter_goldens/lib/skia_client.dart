@@ -590,11 +590,12 @@ class SkiaGoldClient {
         'WebRenderer' : webRenderer,
       'CI' : 'luci',
       'Platform' : platform.operatingSystem,
+
       // Lower case keys
-      'name' : testName,
-      'source_type' : 'flutter',
       if (_isImpeller)
         'impeller': 'swiftshader',
+      'name' : testName,
+      'source_type' : 'flutter',
     };
     final String jsonTrace = json.encode(keys);
     final String md5Sum = md5.convert(utf8.encode(jsonTrace)).toString();
