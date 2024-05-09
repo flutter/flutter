@@ -267,7 +267,7 @@ class Drawer extends StatelessWidget {
           shadowColor: shadowColor ?? drawerTheme.shadowColor ?? defaults.shadowColor,
           surfaceTintColor: surfaceTintColor ?? drawerTheme.surfaceTintColor ?? defaults.surfaceTintColor,
           shape: effectiveShape,
-          clipBehavior: effectiveShape != null ? (clipBehavior ?? Clip.hardEdge) : Clip.none,
+          clipBehavior: effectiveShape != null ? (clipBehavior ?? drawerTheme.clipBehavior ?? defaults.clipBehavior!) : Clip.none,
           child: child,
         ),
       ),
@@ -769,7 +769,10 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
 class _DrawerDefaultsM2 extends DrawerThemeData {
   const _DrawerDefaultsM2(this.context)
-      : super(elevation: 16.0);
+      : super(
+        elevation: 16.0,
+        clipBehavior: Clip.hardEdge,
+      );
 
   final BuildContext context;
 
@@ -787,7 +790,10 @@ class _DrawerDefaultsM2 extends DrawerThemeData {
 
 class _DrawerDefaultsM3 extends DrawerThemeData {
   _DrawerDefaultsM3(this.context)
-      : super(elevation: 1.0);
+      : super(
+          elevation: 1.0,
+          clipBehavior: Clip.hardEdge,
+        );
 
   final BuildContext context;
   late final TextDirection direction = Directionality.of(context);
