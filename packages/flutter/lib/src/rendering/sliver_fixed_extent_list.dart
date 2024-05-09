@@ -82,7 +82,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         if (childCount != null && i > childCount - 1) {
           break;
         }
-        itemExtent = itemExtentBuilder!(i, _currentLayoutDimensions);
+        itemExtent = itemExtentBuilder!(i, currentLayoutDimensions);
         if (itemExtent == null) {
           break;
         }
@@ -226,7 +226,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       double offset = 0.0;
       double? itemExtent;
       for (int i = 0; i < childManager.childCount; i++) {
-        itemExtent = itemExtentBuilder!(i, _currentLayoutDimensions);
+        itemExtent = itemExtentBuilder!(i, currentLayoutDimensions);
         if (itemExtent == null) {
           break;
         }
@@ -248,7 +248,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       if (childCount != null && index > childCount - 1) {
         break;
       }
-      itemExtent = callback(index, _currentLayoutDimensions);
+      itemExtent = callback(index, currentLayoutDimensions);
       if (itemExtent == null) {
         break;
       }
@@ -263,7 +263,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     if (itemExtentBuilder == null) {
       extent = itemExtent!;
     } else {
-      extent = itemExtentBuilder!(index, _currentLayoutDimensions)!;
+      extent = itemExtentBuilder!(index, currentLayoutDimensions)!;
     }
     return constraints.asBoxConstraints(
       minExtent: extent,
@@ -271,7 +271,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     );
   }
 
-  late SliverLayoutDimensions _currentLayoutDimensions;
+  @protected
+  late SliverLayoutDimensions currentLayoutDimensions;
 
   @override
   void performLayout() {
@@ -289,7 +290,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     assert(remainingExtent >= 0.0);
     final double targetEndScrollOffset = scrollOffset + remainingExtent;
 
-    _currentLayoutDimensions = SliverLayoutDimensions(
+    currentLayoutDimensions = SliverLayoutDimensions(
         scrollOffset: constraints.scrollOffset,
         precedingScrollExtent: constraints.precedingScrollExtent,
         viewportMainAxisExtent: constraints.viewportMainAxisExtent,
