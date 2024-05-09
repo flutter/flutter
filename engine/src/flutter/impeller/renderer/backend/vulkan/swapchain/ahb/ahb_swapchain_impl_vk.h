@@ -51,7 +51,8 @@ class AHBSwapchainImplVK final
       const std::weak_ptr<Context>& context,
       std::weak_ptr<android::SurfaceControl> surface_control,
       const ISize& size,
-      bool enable_msaa);
+      bool enable_msaa,
+      size_t swapchain_image_count);
 
   ~AHBSwapchainImplVK();
 
@@ -107,7 +108,8 @@ class AHBSwapchainImplVK final
       const std::weak_ptr<Context>& context,
       std::weak_ptr<android::SurfaceControl> surface_control,
       const ISize& size,
-      bool enable_msaa);
+      bool enable_msaa,
+      size_t swapchain_image_count);
 
   bool Present(const AutoSemaSignaler& signaler,
                const std::shared_ptr<AHBTextureSourceVK>& texture);
