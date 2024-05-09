@@ -528,6 +528,43 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
   ItemExtentBuilder? get itemExtentBuilder => _buildItemExtent;
 }
 
+// A sliver that places its box children in a linear array and constrains them
+// to have the corresponding weight which is determined by [weights].
+//
+// _To learn more about slivers, see [CustomScrollView.slivers]._
+//
+// This sliver list arranges its children in a line along the main axis starting
+// at offset zero and without gaps. Each child is constrained to the
+// corresponding weight along the main axis and the [SliverConstraints.crossAxisExtent]
+// along the cross axis.
+//
+// While scrolling, the extent of each item in the view changes based on the scrolling
+// progress. When the first visible item is fully off screen, the following
+// item should become the first visible itme and have the same size as the
+// previously first item. And the rest of the following items should maintaint
+// the same layout.
+//
+// For example, the layout weights is [1,6,1]. The length of [weights] means
+// how many items should show in the view. The layout of items is:
+//  * first item: the extent will be (1 / (1 + 6 + 1)) * viewport extent.
+//  * second item: the extent will be (7 / (1 + 6 + 1)) * viewport extent.
+//  * third item: the extent will be (1 / (1 + 6 + 1)) * viewport extent.
+//
+// Assuming the viewport extent in the main axis is 800 and first item is item 0,
+// there should be three visible items in the view and their extents are:
+// 100, 600, 100. While item 0 is gratually scrolling off screen, the extent of
+// item 1 should decrease the extent from 600 to 100. So if item 0 is 30% off screen, it
+// means item 1 should have changed 30% from the difference of 600 and 100, and its extent
+// should be 600 - 0.3 * (600 - 100). Similarly, item 2 should increase the
+// extent from 100 to 600 and its extent should be 100 + 0.3 * (600 - 100).
+//
+// When the initially visible items change their sizes as scrolling, itme 3 will follow to
+// fill the remainig space and the extent of item 3 should start from max(shrinkExtent, 0),
+// and will end to the extent of last visible item(100).
+//
+// See also:
+//  * _SliverFixedExtentCarousel, whose children have the same size but the
+// first and the last visible item can be "squished" to [shrinkExtent].
 class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
   const _SliverWeightedCarousel({
     required super.delegate,
@@ -536,8 +573,26 @@ class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
     required this.weights,
   });
 
+  // Determine whether extra scroll offset should be calculate so that every
+  // item have a chance to scroll to the maximum extent.
+  //
+  // This is useful when the leading/trailing items has smaller weights than
+  // the middle items, such as [1,7], [3,2,1].
   final bool allowFullyExpand;
+
+  // The starting extent for items when they gradually show on/off screen.
+  //
+  // This is useful to avoid a hairline shape. This value should also smaller
+  // than the last item extent to make sure a smooth transition. So in calculation,
+  // this is limited to [0, weight for the last visible item].
   final double shrinkExtent;
+
+  // The layout arrangement.
+  //
+  // When items are laying out, each item will be arranged based on the order of
+  // the weights and the extent is based on the corresponding weight out of the
+  // sum of weights. The length of weights means how many items we can put in the
+  // view at a time.
   final List<int> weights;
 
   @override
@@ -559,6 +614,8 @@ class _SliverWeightedCarousel extends SliverMultiBoxAdaptorWidget {
   }
 }
 
+// A sliver that places its box children in a linear array and constrains them
+// to have the corresponding weight which is determined by [weights].
 class _RenderSliverWeightedCarousel extends RenderSliverFixedExtentBoxAdaptor {
   _RenderSliverWeightedCarousel({
     required super.childManager,
