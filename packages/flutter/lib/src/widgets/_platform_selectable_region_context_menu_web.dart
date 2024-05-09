@@ -14,7 +14,7 @@ import 'platform_view.dart';
 import 'selection_container.dart';
 
 const String _viewType = 'Browser__WebContextMenuViewType__';
-const String _kClassName = 'web-electable-region-context-menu';
+const String _kClassName = 'web-selectable-region-context-menu';
 // These css rules hides the dom element with the class name.
 const String _kClassSelectionRule = '.$_kClassName::selection { background: transparent; }';
 const String _kClassRule = '''
