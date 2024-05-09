@@ -1238,6 +1238,9 @@ Future<T?> showCupertinoModalPopup<T>({
   );
 }
 
+Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  return child;
+}
 // The curve and initial scale values were mostly eyeballed from iOS, however
 // they reuse the same animation curve that was modeled after native page
 // transitions.
@@ -1368,6 +1371,7 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
     String? barrierLabel,
     // This transition duration was eyeballed comparing with iOS
     super.transitionDuration = const Duration(milliseconds: 250),
+    super.transitionBuilder = _buildCupertinoDialogTransitions,
     super.settings,
     super.anchorPoint,
   }) : super(
@@ -1380,23 +1384,30 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
 
   CurvedAnimation? _fadeAnimation;
 
+  void _setAnimation(Animation<double> animation) {
+    if (_fadeAnimation?.parent.hashCode != animation.hashCode) {
+      _fadeAnimation?.dispose();
+      _fadeAnimation = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOut,
+    );
+    }
+  }
+
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    _fadeAnimation ??= CurvedAnimation(
-    parent: animation,
-    curve: Curves.easeInOut,
-  );
+    _setAnimation(animation);
   if (animation.status == AnimationStatus.reverse) {
     return FadeTransition(
       opacity: _fadeAnimation!,
-      child: child,
+      child: super.buildTransitions(context, animation, secondaryAnimation, child),
     );
   }
   return FadeTransition(
     opacity: _fadeAnimation!,
     child: ScaleTransition(
       scale: animation.drive(_dialogScaleTween),
-      child: child,
+      child: super.buildTransitions(context, animation, secondaryAnimation, child),
     ),
   );
   }

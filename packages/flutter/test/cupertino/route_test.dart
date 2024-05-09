@@ -2507,7 +2507,10 @@ void main() {
 
     // Push the route.
     await tester.tap(find.text('tap'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+
+    await tester.pumpWidget(Container());
+    await tester.pump();
 
     await tester.pumpWidget(MaterialApp(
       home: Navigator(
@@ -2532,7 +2535,7 @@ void main() {
 
     // Open the dialog.
     await tester.tap(find.text('tap'));
-    await tester.pumpAndSettle();
+    await tester.pump();
   });
 }
 
