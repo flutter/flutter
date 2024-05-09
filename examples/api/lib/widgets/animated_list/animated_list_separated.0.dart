@@ -79,7 +79,7 @@ class _AnimatedListSeparatedSampleState extends State<AnimatedListSeparatedSampl
   /// via the [AnimatedList.removedSeparatorBuilder] parameter and used
   /// in the [AnimatedListState.removeItem] method.
   ///
-  /// Note that the item parameter is null, because the corresponding item will
+  /// The item parameter is null, because the corresponding item will
   /// have been removed from the list model by the time this builder is called.
   Widget _buildRemovedSeparator(BuildContext context, int index, Animation<double> animation) => SizeTransition(
                 sizeFactor: animation,
