@@ -27,7 +27,7 @@ import 'fake_native_assets_build_runner.dart';
 void main() {
   group('native assets', () {
     late TestHotRunnerConfig testingConfig;
-    late FileSystem fileSystem;
+    late MemoryFileSystem fileSystem;
     late FakeAnalytics fakeAnalytics;
 
     setUp(() {

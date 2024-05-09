@@ -859,12 +859,12 @@ class _SnackBarState extends State<SnackBar> {
     } else if (isFloatingSnackBar && theme.useMaterial3) {
       snackBarTransition = FadeTransition(
         opacity: _fadeInM3Animation!,
-        child: AnimatedBuilder(
-          animation: _heightM3Animation!,
-          builder: (BuildContext context, Widget? child) {
+        child: ValueListenableBuilder<double>(
+          valueListenable: _heightM3Animation!,
+          builder: (BuildContext context, double value, Widget? child) {
             return Align(
-              alignment: AlignmentDirectional.bottomStart,
-              heightFactor: _heightM3Animation!.value,
+              alignment: Alignment.bottomLeft,
+              heightFactor: value,
               child: child,
             );
           },
@@ -877,10 +877,10 @@ class _SnackBarState extends State<SnackBar> {
         builder: (BuildContext context, double value, Widget? child) {
           assert(() {
             if (_heightAnimation == null) {
-              print('SnackBar._heightAnimation in AnimatedBuilder. $this');
+              print('SnackBar._heightAnimation in ValueListenableBuilder. $this');
             }
             if (_debugDisposed) {
-              print('SnackBar is disposed in AnimatedBuilder. $this');
+              print('SnackBar is disposed in ValueListenableBuilder. $this');
             }
             return true;
           }());

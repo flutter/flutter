@@ -59,137 +59,53 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
 
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
-    final List<ProjectValidatorResult> result = <ProjectValidatorResult>[];
-
-    result.add(ProjectValidatorResult(
-      name: 'FlutterProject.directory',
-      value: _toJsonValue(project.directory.absolute.path),
-      status: StatusProjectValidator.info,
-    ));
-    result.add(ProjectValidatorResult(
-      name: 'FlutterProject.metadataFile',
-      value: _toJsonValue(project.metadataFile.absolute.path),
-      status: StatusProjectValidator.info,
-    ));
-    result.add(ProjectValidatorResult(
-      name: 'FlutterProject.android.exists',
-      value: _toJsonValue(project.android.existsSync()),
-      status: StatusProjectValidator.info,
-    ));
-    result.add(ProjectValidatorResult(
-      name: 'FlutterProject.ios.exists',
-      value: _toJsonValue(project.ios.exists),
-      status: StatusProjectValidator.info,
-    ));
-    result.add(ProjectValidatorResult(
-      name: 'FlutterProject.web.exists',
-      value: _toJsonValue(project.web.existsSync()),
-      status: StatusProjectValidator.info,
-    ));
-    result.add(ProjectValidatorResult(
-      name: 'FlutterProject.macos.exists',
-      value: _toJsonValue(project.macos.existsSync()),
-      status: StatusProjectValidator.info,
-    ));
-    result.add(ProjectValidatorResult(
-      name: 'FlutterProject.linux.exists',
-      value: _toJsonValue(project.linux.existsSync()),
-      status: StatusProjectValidator.info,
-    ));
-    result.add(ProjectValidatorResult(
-      name: 'FlutterProject.windows.exists',
-      value: _toJsonValue(project.windows.existsSync()),
-      status: StatusProjectValidator.info,
-    ));
-    result.add(ProjectValidatorResult(
-      name: 'FlutterProject.fuchsia.exists',
-      value: _toJsonValue(project.fuchsia.existsSync()),
-      status: StatusProjectValidator.info,
-    ));
-
-    result.add(ProjectValidatorResult(
-      name: 'FlutterProject.android.isKotlin',
-      value: _toJsonValue(project.android.isKotlin),
-      status: StatusProjectValidator.info,
-    ));
-    result.add(ProjectValidatorResult(
-      name: 'FlutterProject.ios.isSwift',
-      value: _toJsonValue(project.ios.isSwift),
-      status: StatusProjectValidator.info,
-    ));
-
-    result.add(ProjectValidatorResult(
-      name: 'FlutterProject.isModule',
-      value: _toJsonValue(project.isModule),
-      status: StatusProjectValidator.info,
-    ));
-    result.add(ProjectValidatorResult(
-      name: 'FlutterProject.isPlugin',
-      value: _toJsonValue(project.isPlugin),
-      status: StatusProjectValidator.info,
-    ));
-
-    result.add(ProjectValidatorResult(
-      name: 'FlutterProject.manifest.appname',
-      value: _toJsonValue(project.manifest.appName),
-      status: StatusProjectValidator.info,
-    ));
-
-    // FlutterVersion
     final FlutterVersion version = FlutterVersion(
       flutterRoot: Cache.flutterRoot!,
       fs: fileSystem,
     );
-    result.add(ProjectValidatorResult(
-      name: 'FlutterVersion.frameworkRevision',
-      value: _toJsonValue(version.frameworkRevision),
-      status: StatusProjectValidator.info,
-    ));
+    final Map<String, Object?> result = <String, Object?>{
+      'FlutterProject.directory':         project.directory.absolute.path,
+      'FlutterProject.metadataFile':      project.metadataFile.absolute.path,
+      'FlutterProject.android.exists':    project.android.existsSync(),
+      'FlutterProject.ios.exists':        project.ios.exists,
+      'FlutterProject.web.exists':        project.web.existsSync(),
+      'FlutterProject.macos.exists':      project.macos.existsSync(),
+      'FlutterProject.linux.exists':      project.linux.existsSync(),
+      'FlutterProject.windows.exists':    project.windows.existsSync(),
+      'FlutterProject.fuchsia.exists':    project.fuchsia.existsSync(),
 
-    // Platform
-    result.add(ProjectValidatorResult(
-      name: 'Platform.operatingSystem',
-      value: _toJsonValue(platform.operatingSystem),
-      status: StatusProjectValidator.info,
-    ));
-    result.add(ProjectValidatorResult(
-      name: 'Platform.isAndroid',
-      value: _toJsonValue(platform.isAndroid),
-      status: StatusProjectValidator.info,
-    ));
-    result.add(ProjectValidatorResult(
-      name: 'Platform.isIOS',
-      value: _toJsonValue(platform.isIOS),
-      status: StatusProjectValidator.info,
-    ));
-    result.add(ProjectValidatorResult(
-      name: 'Platform.isWindows',
-      value: _toJsonValue(platform.isWindows),
-      status: StatusProjectValidator.info,
-    ));
-    result.add(ProjectValidatorResult(
-      name: 'Platform.isMacOS',
-      value: _toJsonValue(platform.isMacOS),
-      status: StatusProjectValidator.info,
-    ));
-    result.add(ProjectValidatorResult(
-      name: 'Platform.isFuchsia',
-      value: _toJsonValue(platform.isFuchsia),
-      status: StatusProjectValidator.info,
-    ));
-    result.add(ProjectValidatorResult(
-      name: 'Platform.pathSeparator',
-      value: _toJsonValue(platform.pathSeparator),
-      status: StatusProjectValidator.info,
-    ));
+      'FlutterProject.android.isKotlin':  project.android.isKotlin,
+      'FlutterProject.ios.isSwift':       project.ios.isSwift,
 
-    // Cache
-    result.add(ProjectValidatorResult(
-      name: 'Cache.flutterRoot',
-      value: _toJsonValue(Cache.flutterRoot),
-      status: StatusProjectValidator.info,
-    ));
-    return result;
+      'FlutterProject.isModule':          project.isModule,
+      'FlutterProject.isPlugin':          project.isPlugin,
+
+      'FlutterProject.manifest.appname':  project.manifest.appName,
+
+      // FlutterVersion
+      'FlutterVersion.frameworkRevision': version.frameworkRevision,
+
+      // Platform
+      'Platform.operatingSystem':         platform.operatingSystem,
+      'Platform.isAndroid':               platform.isAndroid,
+      'Platform.isIOS':                   platform.isIOS,
+      'Platform.isWindows':               platform.isWindows,
+      'Platform.isMacOS':                 platform.isMacOS,
+      'Platform.isFuchsia':               platform.isFuchsia,
+      'Platform.pathSeparator':           platform.pathSeparator,
+
+      // Cache
+      'Cache.flutterRoot':                Cache.flutterRoot,
+    };
+
+    return <ProjectValidatorResult>[
+      for (final String key in result.keys)
+        ProjectValidatorResult(
+          name: key,
+          value: _toJsonValue(result[key]),
+          status: StatusProjectValidator.info,
+        ),
+    ];
   }
 
   @override
