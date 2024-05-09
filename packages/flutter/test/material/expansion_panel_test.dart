@@ -2015,4 +2015,41 @@ void main() {
     expect(inkWell.splashColor, expectedSplashColor);
     expect(inkWell.highlightColor, expectedHighlightColor);
   });
+
+  testWidgets('ExpandIcon.disabledColor uses expandIconColor color when canTapOnHeader is true', (WidgetTester tester) async {
+    const Color expandIconColor = Color(0xff0000ff);
+
+    Widget buildWidget({ bool canTapOnHeader = false }) {
+      return MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
+            expandIconColor: expandIconColor,
+            children: <ExpansionPanel>[
+              ExpansionPanel(
+                canTapOnHeader: canTapOnHeader,
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const ListTile(title: Text('Panel'));
+                },
+                body: const ListTile(title: Text('Content for Panel')),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget());
+
+    await tester.tap(find.text('Panel'));
+    await tester.pumpAndSettle();
+
+    ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon));
+    expect(expandIcon.disabledColor, isNull);
+
+    await tester.pumpWidget(buildWidget(canTapOnHeader: true));
+    await tester.pumpAndSettle();
+
+    expandIcon = tester.widget(find.byType(ExpandIcon));
+    expect(expandIcon.disabledColor, expandIconColor);
+  });
 }
