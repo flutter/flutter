@@ -4,6 +4,9 @@
 
 part of dart.ui;
 
+// Examples can assume:
+// RSTransform rst;
+
 /// Base class for [Size] and [Offset], which are both ways to describe
 /// a distance as a two-dimensional axis-aligned vector.
 abstract class OffsetBase {
@@ -1749,6 +1752,17 @@ class RRect {
 ///
 /// Used by [Canvas.drawAtlas]. This is a more efficient way to represent these
 /// simple transformations than a full matrix.
+///
+/// It is equivalent to a [Matrix4] built using the following parameters (where
+/// `rst` is the corresponding `RSTransform` instance):
+///
+/// ```dart
+/// // Matrix4's constructor arguments are in column-major order.
+/// Matrix4(rst.scos, rst.ssin, 0, 0,
+///        -rst.ssin, rst.scos, 0, 0,
+///         0, 0, 1, 0,
+///         rst.tx, rst.ty, 0, 1);
+/// ```
 // Modeled after Skia's SkRSXform.
 class RSTransform {
   /// Creates an RSTransform.
