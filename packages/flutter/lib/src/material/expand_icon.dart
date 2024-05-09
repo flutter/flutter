@@ -40,6 +40,7 @@ class ExpandIcon extends StatefulWidget {
     this.disabledColor,
     this.expandedColor,
     this.splashColor,
+    this.highlightColor,
   });
 
   /// Whether the icon is in an expanded state.
@@ -97,8 +98,13 @@ class ExpandIcon extends StatefulWidget {
 
   /// Defines the splash color of the IconButton.
   ///
-  /// Defaults to [ThemeData.highlightColor].
+  /// Defaults to [ThemeData.splashColor].
   final Color? splashColor;
+
+  /// Defines the highlight color of the IconButton.
+  ///
+  /// Defaults to [ThemeData.highlightColor].
+  final Color? highlightColor;
 
   @override
   State<ExpandIcon> createState() => _ExpandIconState();
@@ -176,7 +182,8 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
       child: IconButton(
         padding: widget.padding,
         iconSize: widget.size,
-        highlightColor: widget.splashColor,
+        highlightColor: widget.highlightColor,
+        splashColor: widget.splashColor,
         color: _iconColor,
         disabledColor: widget.disabledColor,
         onPressed: widget.onPressed == null ? null : _handlePressed,

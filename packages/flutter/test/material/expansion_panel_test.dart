@@ -1947,4 +1947,72 @@ void main() {
       }
     }
   });
+
+  testWidgets('Ensure ExpandIcon splashColor and highlightColor are correctly set when canTapOnHeader is false', (WidgetTester tester) async {
+    const Color expectedSplashColor = Colors.green;
+    const Color expectedHighlightColor = Colors.yellow;
+
+    await tester.pumpWidget(MaterialApp(
+      home: SingleChildScrollView(
+        child: ExpansionPanelList(
+          children: <ExpansionPanel>[
+            ExpansionPanel(
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return const ListTile(title: Text('Panel 1'));
+              },
+              body: const ListTile(title: Text('Content for Panel 1')),
+              splashColor: expectedSplashColor,
+              highlightColor: expectedHighlightColor,
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('Panel 1'));
+    await tester.pumpAndSettle();
+
+    final ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon).first);
+    expect(expandIcon.splashColor, expectedSplashColor);
+    expect(expandIcon.highlightColor, expectedHighlightColor);
+  });
+
+  testWidgets('Ensure InkWell splashColor and highlightColor are correctly set when canTapOnHeader is true', (WidgetTester tester) async {
+    const Color expectedSplashColor = Colors.green;
+    const Color expectedHighlightColor = Colors.yellow;
+
+    await tester.pumpWidget(MaterialApp(
+      home: SingleChildScrollView(
+        child: ExpansionPanelList(
+          children: <ExpansionPanel>[
+            ExpansionPanel(
+              canTapOnHeader: true,
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  alignment: Alignment.centerLeft,
+                  child: const Text('Panel 1'),
+                );
+              },
+              body: const ListTile(title: Text('Content for Panel 1')),
+              splashColor: expectedSplashColor,
+              highlightColor: expectedHighlightColor,
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+
+    final Finder inkWellFinder = find.descendant(
+      of: find.byType(ExpansionPanelList),
+      matching: find.byWidgetPredicate((Widget widget) =>
+        widget is InkWell && widget.onTap != null)
+    );
+
+    final InkWell inkWell = tester.widget<InkWell>(inkWellFinder);
+    expect(inkWell.splashColor, expectedSplashColor);
+    expect(inkWell.highlightColor, expectedHighlightColor);
+  });
 }

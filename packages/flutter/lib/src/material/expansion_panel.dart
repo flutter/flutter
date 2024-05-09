@@ -81,6 +81,7 @@ class ExpansionPanel {
     this.canTapOnHeader = false,
     this.backgroundColor,
     this.splashColor,
+    this.highlightColor,
   });
 
   /// The widget builder that builds the expansion panels' header.
@@ -96,11 +97,21 @@ class ExpansionPanel {
   /// Defaults to false.
   final bool isExpanded;
 
-  /// Defines the splash color of the panel if [canTapOnHeader] is true, or the splash color of the expand/collapse IconButton if [canTapOnHeader] is false.
+  /// Defines the splash color of the panel if [canTapOnHeader] is true, or the
+  /// splash color of the expand/collapse IconButton if [canTapOnHeader] is false.
   ///
-  /// If this is null, then the icon button will use its default splash color [ThemeData.highlightColor], and the panel will
-  /// use its default splash color [ThemeData.splashColor] (if [canTapOnHeader] is true).
+  /// If this is null, then the icon button will use its default splash color
+  /// [ThemeData.splashColor], and the panel will use its default splash color
+  /// [ThemeData.splashColor] (if [canTapOnHeader] is true).
   final Color? splashColor;
+
+  /// Defines the highlight color of the panel if [canTapOnHeader] is true, or the
+  /// highlight color of the expand/collapse IconButton if [canTapOnHeader] is false.
+  ///
+  /// If this is null, then the icon button will use its default highlight color
+  /// [ThemeData.highlightColor], and the panel will use its default highlight color
+  /// [ThemeData.highlightColor] (if [canTapOnHeader] is true).
+  final Color? highlightColor;
 
   /// Whether tapping on the panel's header will expand/collapse it.
   ///
@@ -133,6 +144,7 @@ class ExpansionPanelRadio extends ExpansionPanel {
     super.canTapOnHeader,
     super.backgroundColor,
     super.splashColor,
+    super.highlightColor,
   });
 
   /// The value that uniquely identifies a radio panel so that the currently
@@ -374,6 +386,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           isExpanded: _isChildExpanded(index),
           padding: _kExpandIconPadding,
           splashColor: child.splashColor,
+          highlightColor: child.highlightColor,
           onPressed: !child.canTapOnHeader
               ? (bool isExpanded) => _handlePressed(isExpanded, index)
               : null,
@@ -407,6 +420,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         header = MergeSemantics(
           child: InkWell(
             splashColor: child.splashColor,
+            highlightColor: child.highlightColor,
             onTap: () => _handlePressed(_isChildExpanded(index), index),
             child: header,
           ),
