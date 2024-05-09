@@ -1948,58 +1948,40 @@ void main() {
     }
   });
 
-  testWidgets('Ensure ExpandIcon disabledColor becomes the expandIconColor when canTapOnHeader is set to true', (WidgetTester tester) async {
-    const Color expectedIconColor = Colors.blue;
+  testWidgets('ExpandIcon.disabledColor uses expandIconColor color when canTapOnHeader is true', (WidgetTester tester) async {
+    const Color expandIconColor = Color(0xff0000ff);
 
-    await tester.pumpWidget(MaterialApp(
-      home: SingleChildScrollView(
-        child: ExpansionPanelList(
-          expandIconColor: expectedIconColor,
-          children: <ExpansionPanel>[
-            ExpansionPanel(
-              canTapOnHeader: true,
-              headerBuilder: (BuildContext context, bool isExpanded) {
-                return const ListTile(title: Text('Panel 1'));
-              },
-              body: const ListTile(title: Text('Content for Panel 1')),
-            ),
-          ],
+    Widget buildWidget({ bool canTapOnHeader = false }) {
+      return MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
+            expandIconColor: expandIconColor,
+            children: <ExpansionPanel>[
+              ExpansionPanel(
+                canTapOnHeader: canTapOnHeader,
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return const ListTile(title: Text('Panel'));
+                },
+                body: const ListTile(title: Text('Content for Panel')),
+              ),
+            ],
+          ),
         ),
-      ),
-    ));
+      );
+    }
 
-    await tester.tap(find.text('Panel 1'));
+    await tester.pumpWidget(buildWidget());
+
+    await tester.tap(find.text('Panel'));
     await tester.pumpAndSettle();
 
-    final ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon).first);
-    expect(expandIcon.color, expectedIconColor);
-    expect(expandIcon.disabledColor, expectedIconColor);
-  });
+    ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon));
+    expect(expandIcon.disabledColor, isNull);
 
-  testWidgets('Ensure ExpandIcon does not set the disabled color if canTapOnHeader is not set to true', (WidgetTester tester) async {
-    const Color expandIconColor = Colors.blue;
-
-    await tester.pumpWidget(MaterialApp(
-      home: SingleChildScrollView(
-        child: ExpansionPanelList(
-          expandIconColor: expandIconColor,
-          children: <ExpansionPanel>[
-            ExpansionPanel(
-              headerBuilder: (BuildContext context, bool isExpanded) {
-                return const ListTile(title: Text('Panel 1'));
-              },
-              body: const ListTile(title: Text('Content for Panel 1')),
-            ),
-          ],
-        ),
-      ),
-    ));
-
-    await tester.tap(find.text('Panel 1'));
+    await tester.pumpWidget(buildWidget(canTapOnHeader: true));
     await tester.pumpAndSettle();
 
-    final ExpandIcon expandIcon = tester.widget(find.byType(ExpandIcon).first);
-    expect(expandIcon.disabledColor, isNot(expandIconColor));
-    expect(expandIcon.color, expandIconColor);
+    expandIcon = tester.widget(find.byType(ExpandIcon));
+    expect(expandIcon.disabledColor, expandIconColor);
   });
 }
