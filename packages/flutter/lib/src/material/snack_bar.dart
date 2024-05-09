@@ -872,9 +872,9 @@ class _SnackBarState extends State<SnackBar> {
         ),
       );
     } else {
-      snackBarTransition = AnimatedBuilder(
-        animation: _heightAnimation!,
-        builder: (BuildContext context, Widget? child) {
+      snackBarTransition = ValueListenableBuilder<double>(
+        valueListenable: _heightAnimation!,
+        builder: (BuildContext context, double value, Widget? child) {
           assert(() {
             if (_heightAnimation == null) {
               print('SnackBar._heightAnimation in AnimatedBuilder. $this');
@@ -886,7 +886,7 @@ class _SnackBarState extends State<SnackBar> {
           }());
           return Align(
             alignment: AlignmentDirectional.topStart,
-            heightFactor: _heightAnimation!.value,
+            heightFactor: value,
             child: child,
           );
         },
