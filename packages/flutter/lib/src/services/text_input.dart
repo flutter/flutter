@@ -2508,6 +2508,10 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///    this method is supported on the current platform.
   Future<void> show(Rect targetRect) {
     assert(!_isDisposed);
+    assert(
+      TextInput._instance._currentConnection != null,
+      'Currently, the system context menu can only be shown for an active text input connection',
+    );
 
     // Don't show the same thing that's already being shown.
     if (_lastShown != null && _lastShown!._isVisible && _lastShown!._lastTargetRect == targetRect) {
