@@ -2136,6 +2136,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   final RestorableBool _drawerOpened = RestorableBool(false);
   final RestorableBool _endDrawerOpened = RestorableBool(false);
 
+  /// The current position of [FloatingActionButton] in [Scaffold].
+  ///
+  /// defaults to [_kDefaultFloatingActionButtonLocation].
+  FloatingActionButtonLocation get floatingActionButtonLocation => _floatingActionButtonLocation!;
+
   /// Whether the [Scaffold.drawer] is opened.
   ///
   /// See also:
