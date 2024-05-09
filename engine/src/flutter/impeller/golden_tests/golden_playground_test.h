@@ -7,6 +7,8 @@
 
 #include <memory>
 
+#include "flutter/display_list/display_list.h"
+#include "flutter/display_list/image/dl_image.h"
 #include "flutter/impeller/aiks/aiks_context.h"
 #include "flutter/impeller/playground/playground.h"
 #include "flutter/impeller/renderer/render_target.h"
@@ -43,11 +45,17 @@ class GoldenPlaygroundTest
 
   bool OpenPlaygroundHere(AiksPlaygroundCallback callback);
 
+  bool OpenPlaygroundHere(const sk_sp<flutter::DisplayList>& list);
+
   static bool ImGuiBegin(const char* name,
                          bool* p_open,
                          ImGuiWindowFlags flags);
 
   std::shared_ptr<Texture> CreateTextureForFixture(
+      const char* fixture_name,
+      bool enable_mipmapping = false) const;
+
+  sk_sp<flutter::DlImage> CreateDlImageForFixture(
       const char* fixture_name,
       bool enable_mipmapping = false) const;
 

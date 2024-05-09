@@ -7,6 +7,7 @@
 #include "flutter/testing/testing.h"
 #include "impeller/aiks/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
+#include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "third_party/imgui/imgui.h"
 #include "third_party/skia/include/core/SkData.h"
@@ -80,6 +81,19 @@ SkFont DlPlayground::CreateTestFontOfSize(SkScalar scalar) {
 
 SkFont DlPlayground::CreateTestFont() {
   return CreateTestFontOfSize(50);
+}
+
+sk_sp<flutter::DlImage> DlPlayground::CreateDlImageForFixture(
+    const char* fixture_name,
+    bool enable_mipmapping) const {
+  std::shared_ptr<fml::Mapping> mapping =
+      flutter::testing::OpenFixtureAsMapping(fixture_name);
+  std::shared_ptr<Texture> texture = Playground::CreateTextureForMapping(
+      GetContext(), mapping, enable_mipmapping);
+  if (texture) {
+    texture->SetLabel(fixture_name);
+  }
+  return DlImageImpeller::Make(texture);
 }
 
 }  // namespace impeller

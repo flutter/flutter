@@ -14,6 +14,8 @@
 #include "flutter/impeller/golden_tests/vulkan_screenshotter.h"
 #include "flutter/third_party/abseil-cpp/absl/base/no_destructor.h"
 #include "fml/closure.h"
+#include "impeller/display_list/dl_dispatcher.h"
+#include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "impeller/typographer/typographer_context.h"
 
@@ -227,6 +229,14 @@ bool GoldenPlaygroundTest::OpenPlaygroundHere(
   return SaveScreenshot(std::move(screenshot));
 }
 
+bool GoldenPlaygroundTest::OpenPlaygroundHere(
+    const sk_sp<flutter::DisplayList>& list) {
+  DlDispatcher dispatcher;
+  list->Dispatch(dispatcher);
+  Picture picture = dispatcher.EndRecordingAsPicture();
+  return OpenPlaygroundHere(std::move(picture));
+}
+
 bool GoldenPlaygroundTest::ImGuiBegin(const char* name,
                                       bool* p_open,
                                       ImGuiWindowFlags flags) {
@@ -244,6 +254,14 @@ std::shared_ptr<Texture> GoldenPlaygroundTest::CreateTextureForFixture(
     result->SetLabel(fixture_name);
   }
   return result;
+}
+
+sk_sp<flutter::DlImage> GoldenPlaygroundTest::CreateDlImageForFixture(
+    const char* fixture_name,
+    bool enable_mipmapping) const {
+  std::shared_ptr<Texture> texture =
+      CreateTextureForFixture(fixture_name, enable_mipmapping);
+  return DlImageImpeller::Make(texture);
 }
 
 RuntimeStage::Map GoldenPlaygroundTest::OpenAssetAsRuntimeStage(

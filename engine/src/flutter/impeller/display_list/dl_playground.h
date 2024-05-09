@@ -31,6 +31,10 @@ class DlPlayground : public PlaygroundTest {
 
   SkFont CreateTestFont();
 
+  sk_sp<flutter::DlImage> CreateDlImageForFixture(
+      const char* fixture_name,
+      bool enable_mipmapping = false) const;
+
  private:
   DlPlayground(const DlPlayground&) = delete;
 
