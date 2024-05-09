@@ -3395,6 +3395,48 @@ void main() {
     // FAB is not visible.
     expect(find.byType(FloatingActionButton), findsNothing);
   });
+
+  testWidgets('Getter for floatingActionButtonLocation', (WidgetTester tester) async {
+    FloatingActionButtonLocation fabLocation = FloatingActionButtonLocation.endFloat;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              floatingActionButtonLocation: fabLocation,
+              body: Builder(
+                builder: (BuildContext context) {
+                  return Column(
+                    children: <Widget>[
+                      Text(Scaffold.of(context).floatingActionButtonLocation.toString()),
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            fabLocation = FloatingActionButtonLocation.centerFloat;
+                          });
+                        },
+                        child: const Text('Update FAB Location'),
+                      ),
+                    ],
+                  );
+                }
+              ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () {},
+                child: const Icon(Icons.add),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('FloatingActionButtonLocation.endFloat'), findsOneWidget);
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Update FAB Location'));
+    await tester.pump();
+    expect(find.text('FloatingActionButtonLocation.centerFloat'), findsOneWidget);
+  });
 }
 
 class _GeometryListener extends StatefulWidget {
