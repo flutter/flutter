@@ -165,10 +165,20 @@ class Logger {
     _emitLog(infoLevel, message, indent, newline, fit);
   }
 
-  /// Writes a number of spaces to stdout equal to the width of the terminal
-  /// and emits a carriage return.
+  /// Functionally ends and starts a new line.
+  ///
+  /// How that is done depends on the terminal capabilities:
+  ///
+  /// - If we are not in a terminal, just write a newline.
+  /// - If we are in a a terminal, any spinners are temporarily paused, the
+  ///   current line is cleared, and spinners are resumed. If ANSI escapes are
+  ///   supported, the cursor is moved to the start of the line and the line is
+  ///   cleared. Otherwise, the line is cleared by writing spaces to the width
+  ///   of the terminal, then moving the cursor back to the start of the line.
   void clearLine() {
     if (!io.stdout.hasTerminal || _test) {
+      // Just write a newline if we're not in a terminal.
+      _ioSinkWrite(io.stdout, '\n');
       return;
     }
     _status?.pause();
