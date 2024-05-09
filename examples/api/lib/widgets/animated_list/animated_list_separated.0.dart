@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [AnimatedListSeparated].
+/// Flutter code sample for [AnimatedList.separated].
 
 void main() {
   runApp(const AnimatedListSeparatedSample());
@@ -48,7 +48,7 @@ class _AnimatedListSeparatedSampleState extends State<AnimatedListSeparatedSampl
     );
   }
 
-  // Used to build separators that haven't been removed.
+  // Used to build separators for items that haven't been removed.
   Widget _buildSeparator(BuildContext context, int index, Animation<double> animation) {
     return ItemSeparator(
       animation: animation,
@@ -61,7 +61,7 @@ class _AnimatedListSeparatedSampleState extends State<AnimatedListSeparatedSampl
   /// Used to build an item after it has been removed from the list. This method
   /// is needed because a removed item remains visible until its animation has
   /// completed (even though it's gone as far as this ListModel is concerned).
-  /// The widget will be used by the [AnimatedListSeparatedState.removeSeparatedItem] method's
+  /// The widget will be used by the [AnimatedListState.removeItem] method's
   /// `itemBuilder` parameter.
   Widget _buildRemovedItem(int item, BuildContext context, Animation<double> animation) {
     return CardItem(
@@ -71,14 +71,21 @@ class _AnimatedListSeparatedSampleState extends State<AnimatedListSeparatedSampl
     );
   }
 
-  // Build a separator for items that have been removed from the list.
-  /// The widget will be used by the [AnimatedListSeparatedState.removeSeparatedItem] method's
-  /// `separatorBuilder` parameter.
-  Widget _buildRemovedSeparator(BuildContext context, int item, Animation<double> animation) => SizeTransition(
+  /// The builder function used to build a separator for an item that has been removed.
+  ///
+  /// Used to build a separator after the corresponding item has been removed from the list.
+  /// This method is needed because the separator of a removed item remains visible until its animation has completed.
+  /// The widget will be passed to [AnimatedList.separated]
+  /// via the [AnimatedList.removedSeparatorBuilder] parameter and used
+  /// in the [AnimatedListState.removeItem] method.
+  ///
+  /// Note that the item parameter is null, because the corresponding item will
+  /// have been removed from the list model by the time this builder is called.
+  Widget _buildRemovedSeparator(BuildContext context, int index, Animation<double> animation) => SizeTransition(
                 sizeFactor: animation,
                 child: ItemSeparator(
                   animation: animation,
-                  item: item,
+                  item: null,
                 )
               );
 
@@ -104,7 +111,7 @@ class _AnimatedListSeparatedSampleState extends State<AnimatedListSeparatedSampl
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('AnimatedListSeparated'),
+          title: const Text('AnimatedList.separated'),
           actions: <Widget>[
             IconButton(
               icon: const Icon(Icons.add_circle),
@@ -135,7 +142,7 @@ class _AnimatedListSeparatedSampleState extends State<AnimatedListSeparatedSampl
 
 typedef RemovedItemBuilder<T> = Widget Function(T item, BuildContext context, Animation<double> animation);
 
-/// Keeps a Dart [List] in sync with an [AnimatedListSeparated].
+/// Keeps a Dart [List] in sync with an [AnimatedList.separated].
 ///
 /// The [insert] and [removeAt] methods apply to both the internal list and
 /// the animated list that belongs to [listKey].
@@ -143,7 +150,7 @@ typedef RemovedItemBuilder<T> = Widget Function(T item, BuildContext context, An
 /// This class only exposes as much of the Dart List API as is needed by the
 /// sample app. More list methods are easily added, however methods that
 /// mutate the list must make the same changes to the animated list in terms
-/// of [AnimatedListSeparatedState.insertItem] and [AnimatedListSeparatedState.removeSeparatedItem].
+/// of [AnimatedListState.insertItem] and [AnimatedListState.removeItem].
 class ListModel<E> {
   ListModel({
     required this.listKey,
@@ -155,17 +162,17 @@ class ListModel<E> {
   final RemovedItemBuilder<E> removedItemBuilder;
   final List<E> _items;
 
-  AnimatedListState? get _animatedListSeparated => listKey.currentState;
+  AnimatedListState? get _animatedList => listKey.currentState;
 
   void insert(int index, E item) {
     _items.insert(index, item);
-    _animatedListSeparated!.insertItem(index);
+    _animatedList!.insertItem(index);
   }
 
   E removeAt(int index) {
     final E removedItem = _items.removeAt(index);
     if (removedItem != null) {
-      _animatedListSeparated!.removeItem(
+      _animatedList!.removeItem(
         index,
         (BuildContext context, Animation<double> animation) {
           return removedItemBuilder(removedItem, context, animation);
@@ -233,6 +240,8 @@ class CardItem extends StatelessWidget {
 /// Displays its integer item as 'separator N' on a Card whose color is based on
 /// the corresponding item's value.
 ///
+/// When the item parameter is null, the separator is displayed as 'Removing separator' with a default color.
+///
 /// This widget's height is based on the [animation] parameter, it
 /// varies from 0 to 40 as the animation varies from 0.0 to 1.0.
 class ItemSeparator extends StatelessWidget {
@@ -240,10 +249,10 @@ class ItemSeparator extends StatelessWidget {
     super.key,
     required this.animation,
     required this.item,
-  }) : assert(item >= 0);
+  }) : assert(item == null || item >= 0);
 
   final Animation<double> animation;
-  final int item;
+  final int? item;
 
   @override
   Widget build(BuildContext context) {
@@ -255,9 +264,9 @@ class ItemSeparator extends StatelessWidget {
         child: SizedBox(
           height: 40.0,
           child: Card(
-            color: Colors.primaries[item % Colors.primaries.length],
+            color: item == null ? Colors.grey : Colors.primaries[item! % Colors.primaries.length],
             child: Center(
-              child: Text('Separator $item', style: textStyle),
+              child: Text(item == null ? 'Removing separator' : 'Separator $item', style: textStyle),
             ),
           ),
         ),
