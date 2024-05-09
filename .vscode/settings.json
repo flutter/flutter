@@ -8,6 +8,7 @@
         "editor.formatOnSave": false,
         "editor.formatOnType": false,
         "editor.formatOnPaste": false,
+        "editor.formatOnClick": false,
     },
 
     "html.format.enable": false,
