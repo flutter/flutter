@@ -873,6 +873,7 @@ void main() {
     item2material = tester.widget<Material>(button2Material);
     expect(item2material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
   }, variant: TargetPlatformVariant.desktop());
+
   testWidgets('The text input should match the label of the menu item '
       'while pressing down key on desktop platforms', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
