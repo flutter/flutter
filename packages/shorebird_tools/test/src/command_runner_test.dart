@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:cli_completion/cli_completion.dart';
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shorebird_tools/src/command_runner.dart';
@@ -33,7 +32,6 @@ void main() {
         () {
       final commandRunner = ShorebirdToolsCommandRunner();
       expect(commandRunner, isNotNull);
-      expect(commandRunner, isA<CompletionCommandRunner<int>>());
     });
 
     test('handles FormatException', () async {
