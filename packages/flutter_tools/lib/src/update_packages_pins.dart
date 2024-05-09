@@ -36,4 +36,7 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
 /// of pinned packages added to each pubspec.yaml.
 const List<String> kExplicitlyExcludedPackages = <String>[
   '_macros', // Synthetic dependency for macros package, which isn't published.
+  // This is effectively pinned via the Dart SDK pin, see
+  // https://github.com/flutter/flutter/issues/148004 for more context.
+  'macros',
 ];
