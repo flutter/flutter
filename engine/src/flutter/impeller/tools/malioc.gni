@@ -71,7 +71,7 @@ template("malioc_analyze_shaders") {
                                        ])
 
                 script = "//build/gn_run_malioc.py"
-                pool = "//flutter/impeller/tools:malioc_pool"
+                pool = "//build/toolchain:toolchain_pool"
 
                 # Nest all malioc output under its own subdirectory of root_gen_dir
                 # so that it's easier to diff it against the state before any changes.

@@ -7,17 +7,6 @@ import("//flutter/common/config.gni")
 
 import("$dart_src/build/dart/copy_tree.gni")
 
-declare_args() {
-  # Maximum number of Dart processes to run in parallel.
-  #
-  # To avoid out-of-memory errors we explicitly reduce the number of jobs.
-  concurrent_dart_jobs = 1
-}
-
-pool("dart_pool") {
-  depth = concurrent_dart_jobs
-}
-
 if (build_engine_artifacts) {
   if (flutter_prebuilt_dart_sdk) {
     copy_trees("_copy_trees") {

@@ -20,7 +20,7 @@ template("sdk_rewriter") {
 
   prebuilt_dart_action(target_name) {
     packages = dart_sdk_package_config
-    pool = "//flutter/build/dart:dart_pool"
+    pool = "//build/toolchain:toolchain_pool"
 
     script = "//flutter/web_sdk/sdk_rewriter.dart"
 

@@ -119,7 +119,7 @@ template("_dartdevc") {
       inputs = invoker.inputs
       outputs = invoker.outputs
 
-      pool = "//flutter/build/dart:dart_pool"
+      pool = "//build/toolchain:toolchain_pool"
 
       ext = ""
       if (is_win) {
@@ -146,7 +146,7 @@ template("_dartdevc") {
 
       script = "$dart_src/pkg/dev_compiler/bin/dartdevc.dart"
 
-      pool = "//flutter/build/dart:dart_pool"
+      pool = "//build/toolchain:toolchain_pool"
     }
   }
 }
@@ -169,7 +169,7 @@ template("_kernel_worker") {
       inputs = invoker.inputs
       outputs = invoker.outputs
 
-      pool = "//flutter/build/dart:dart_pool"
+      pool = "//build/toolchain:toolchain_pool"
 
       ext = ""
       if (is_win) {
@@ -197,7 +197,7 @@ template("_kernel_worker") {
 
       script = "$dart_src/utils/bazel/kernel_worker.dart"
 
-      pool = "//flutter/build/dart:dart_pool"
+      pool = "//build/toolchain:toolchain_pool"
     }
   }
 }
