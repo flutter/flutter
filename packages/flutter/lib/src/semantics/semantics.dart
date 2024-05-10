@@ -551,8 +551,8 @@ class SemanticsData with Diagnosticable {
 
   /// Indicates that this subtree represents a heading.
   ///
-  /// The value should be a number between 1 and 6, indicating the hierarchical
-  /// level as a heading.
+  /// A value of 0 indicates that it is not a heading. The value should be a
+  /// number between 1 and 6, indicating the hierarchical level as a heading.
   final int headingLevel;
 
   /// The reading direction for the text in [label], [value],
@@ -961,7 +961,8 @@ class SemanticsProperties extends DiagnosticableTree {
        assert(value == null || attributedValue == null, 'Only one of value or attributedValue should be provided'),
        assert(increasedValue == null || attributedIncreasedValue == null, 'Only one of increasedValue or attributedIncreasedValue should be provided'),
        assert(decreasedValue == null || attributedDecreasedValue == null, 'Only one of decreasedValue or attributedDecreasedValue should be provided'),
-       assert(hint == null || attributedHint == null, 'Only one of hint or attributedHint should be provided');
+       assert(hint == null || attributedHint == null, 'Only one of hint or attributedHint should be provided'),
+       assert(headingLevel == null || (headingLevel > 0 && headingLevel <= 6), 'Heading level must be between 1 and 6');
 
   /// If non-null, indicates that this subtree represents something that can be
   /// in an enabled or disabled state.
