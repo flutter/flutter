@@ -187,7 +187,7 @@ class Dialog extends StatelessWidget {
   /// use cases.
   ///
   /// If null, then [DialogTheme.clipBehavior] is used. If that is also null,
-  /// the defaults to [Clip.none].
+  /// defaults to [Clip.none].
   /// {@endtemplate}
   final Clip? clipBehavior;
 
