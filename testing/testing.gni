@@ -108,7 +108,7 @@ template("dart_snapshot_aot") {
 
     tool = "$dart_src/runtime/bin:gen_snapshot"
 
-    pool = "//flutter/build/dart:dart_pool"
+    pool = "//build/toolchain:toolchain_pool"
 
     inputs = [ invoker.dart_kernel ]
 

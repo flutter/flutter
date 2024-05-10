@@ -84,7 +84,7 @@ template("flutter_frontend_server") {
                              ],
                              [ "pool" ])
       deps = common_deps
-      pool = "//flutter/build/dart:dart_pool"
+      pool = "//build/toolchain:toolchain_pool"
       script = "//build/gn_run_binary.py"
       inputs = [ invoker.main_dart ]
       outputs = [ invoker.kernel_output ]
@@ -110,7 +110,7 @@ template("flutter_frontend_server") {
                              ],
                              [ "pool" ])
       deps = common_deps
-      pool = "//flutter/build/dart:dart_pool"
+      pool = "//build/toolchain:toolchain_pool"
       script = "$dart_src/pkg/frontend_server/bin/frontend_server_starter.dart"
       inputs = [ invoker.main_dart ]
       outputs = [ invoker.kernel_output ]
@@ -359,7 +359,7 @@ template("application_snapshot") {
       inputs = extra_inputs
       outputs = [ output ]
       depfile = depfile
-      pool = "//flutter/build/dart:dart_pool"
+      pool = "//build/toolchain:toolchain_pool"
 
       ext = ""
       if (is_win) {
@@ -380,7 +380,7 @@ template("application_snapshot") {
                                "visibility",
                              ])
       script = main_dart
-      pool = "//flutter/build/dart:dart_pool"
+      pool = "//build/toolchain:toolchain_pool"
       deps = extra_deps
       inputs = extra_inputs
       outputs = [ output ]

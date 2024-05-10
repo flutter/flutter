@@ -532,7 +532,7 @@ def to_gn_args(args):
   else:
     gn_args['dart_runtime_mode'] = runtime_mode
 
-  gn_args['concurrent_dart_jobs'] = get_concurrent_jobs('1GB', '1GB')
+  gn_args['concurrent_toolchain_jobs'] = get_concurrent_jobs('1GB', '100MB')
 
   # Hardcoding this avoids invoking a relatively expensive python script from
   # GN, but removes the ability to use git-worktrees in the Dart checkout from
@@ -723,7 +723,6 @@ def to_gn_args(args):
     malioc_path = os.environ.get('MALIOC_PATH')
   if malioc_path:
     gn_args['impeller_malioc_path'] = malioc_path
-    gn_args['impeller_concurrent_malioc_jobs'] = get_concurrent_jobs('1GB', '100MB')
 
   if args.use_glfw_swiftshader:
     if get_host_os() == 'mac':

@@ -151,14 +151,23 @@ RBE builds can be slow for a few different reasons. The most common reason is
 likely to be that the remote caches are cold. When the caches are warm, a
 compile step consists only of downloading the compiled TU from the cache. When
 the caches are cold, the remote workers must run the compilation commands,
-which takes more time.
+which takes more time. If the worker pool is overloaded, compile commands may
+run locally instead, which will also be slower.
 
 RBE builds can also be slow if your network connection is bandwidth constrained.
 Anecdotally, even with a warm cache, I have noticed slow builds from home due
 to RBE saturating my low-tier Comcast Business connection.
 
+For Googlers on a corp macOS device, both RBE and non-RBE builds can be slow
+due to various background and monitoring processes running. See
+[here](https://buganizer.corp.google.com/issues/324404733#comment16) for how
+to disable some of them. You should also disable Spotlight scanning of the
+engine source directory as described
+[here](go/building-chrome-mac#add-the-source-directory-to-the-spotlight-privacy-list).
+
 When RBE builds are slow, non-RBE builds may be faster, especially incremental
-builds.
+builds. You can disable remote builds without invalidating your existing build
+by setting the environment variable `RBE_exec_strategy=local`.
 
 ### Proxy status and debug logs
 
