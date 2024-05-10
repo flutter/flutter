@@ -135,9 +135,7 @@ constexpr TSize<T> operator/(U s, const TSize<T>& p) {
 }
 
 using Size = TSize<Scalar>;
-using ISize32 = TSize<int32_t>;
-using ISize64 = TSize<int64_t>;
-using ISize = ISize64;
+using ISize = TSize<int64_t>;
 
 static_assert(sizeof(Size) == 2 * sizeof(Scalar));
 
