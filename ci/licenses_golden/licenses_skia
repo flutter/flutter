@@ -1,4 +1,4 @@
-Signature: eb5709d9b5ff79a6e649117744752d32
+Signature: 11c41be1530a268e74d1c43621b951d0
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9444,6 +9444,10 @@ ORIGIN: ../../../flutter/third_party/skia/include/ports/SkFontMgr_Fontations.h +
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/utils/PreshapeTool.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/utils/TextPreshape.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/skottie/utils/TextPreshape.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/svg/include/SkSVGFeComponentTransfer.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/svg/include/SkSVGFeMerge.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/svg/src/SkSVGFeComponentTransfer.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/svg/src/SkSVGFeMerge.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/modules/svg/src/SkSVGRectPriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkJpegMetadataDecoderImpl.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkJpegMetadataDecoderImpl.h + ../../../flutter/third_party/skia/LICENSE
@@ -9455,6 +9459,10 @@ FILE: ../../../flutter/third_party/skia/include/ports/SkFontMgr_Fontations.h
 FILE: ../../../flutter/third_party/skia/modules/skottie/utils/PreshapeTool.cpp
 FILE: ../../../flutter/third_party/skia/modules/skottie/utils/TextPreshape.cpp
 FILE: ../../../flutter/third_party/skia/modules/skottie/utils/TextPreshape.h
+FILE: ../../../flutter/third_party/skia/modules/svg/include/SkSVGFeComponentTransfer.h
+FILE: ../../../flutter/third_party/skia/modules/svg/include/SkSVGFeMerge.h
+FILE: ../../../flutter/third_party/skia/modules/svg/src/SkSVGFeComponentTransfer.cpp
+FILE: ../../../flutter/third_party/skia/modules/svg/src/SkSVGFeMerge.cpp
 FILE: ../../../flutter/third_party/skia/modules/svg/src/SkSVGRectPriv.h
 FILE: ../../../flutter/third_party/skia/src/codec/SkJpegMetadataDecoderImpl.cpp
 FILE: ../../../flutter/third_party/skia/src/codec/SkJpegMetadataDecoderImpl.h
