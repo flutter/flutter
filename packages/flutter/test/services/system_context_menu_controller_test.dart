@@ -5,10 +5,19 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import './text_input_utils.dart';
+
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
   test('showing and hiding one controller', () {
+    // Create an active connection, which is required to show the system menu.
+    final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test1'));
+    final TextInputConnection connection = TextInput.attach(client, client.configuration);
+    addTearDown(() {
+      connection.close();
+    });
+
     final List<Map<String, double>> targetRects = <Map<String, double>>[];
     int hideCount = 0;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -82,6 +91,13 @@ void main() {
   });
 
   test('the system can hide the menu with handleSystemHide', () async {
+    // Create an active connection, which is required to show the system menu.
+    final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test1'));
+    final TextInputConnection connection = TextInput.attach(client, client.configuration);
+    addTearDown(() {
+      connection.close();
+    });
+
     final List<Map<String, double>> targetRects = <Map<String, double>>[];
     int hideCount = 0;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -145,6 +161,13 @@ void main() {
   });
 
   test('showing a second controller while one is visible is an error', () {
+    // Create an active connection, which is required to show the system menu.
+    final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test1'));
+    final TextInputConnection connection = TextInput.attach(client, client.configuration);
+    addTearDown(() {
+      connection.close();
+    });
+
     final SystemContextMenuController controller1 = SystemContextMenuController();
     addTearDown(() {
       controller1.dispose();
@@ -163,6 +186,13 @@ void main() {
   });
 
   test('showing and hiding two controllers', () {
+    // Create an active connection, which is required to show the system menu.
+    final FakeTextInputClient client = FakeTextInputClient(const TextEditingValue(text: 'test1'));
+    final TextInputConnection connection = TextInput.attach(client, client.configuration);
+    addTearDown(() {
+      connection.close();
+    });
+
     final List<Map<String, double>> targetRects = <Map<String, double>>[];
     int hideCount = 0;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
