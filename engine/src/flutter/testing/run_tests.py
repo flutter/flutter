@@ -1156,7 +1156,8 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
       '--dart-filter',
       type=str,
       default='',
-      help='A list of Dart test scripts to run in flutter_tester.'
+      help='A list of Dart test script base file names to run in '
+      'flutter_tester (example: "image_filter_test.dart").'
   )
   parser.add_argument(
       '--dart-host-filter',
