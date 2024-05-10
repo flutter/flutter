@@ -2311,8 +2311,6 @@ void main() {
       ),
     ));
 
-    await tester.pump();
-
     final List<TextField> fields = tester.widgetList<TextField>(find.byType(TextField)).toList();
 
     expect(fields[0].textAlign, TextAlign.start);
