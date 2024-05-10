@@ -222,6 +222,7 @@ Future<List<BuildTarget>?> targetsFromCommandLine(
   Build build,
   List<String> commandLineTargets, {
   bool defaultToAll = false,
+  required bool enableRbe,
 }) async {
   // If there are no targets specified on the command line, then delegate to
   // the default targets specified in the Build object unless directed
@@ -240,7 +241,7 @@ Future<List<BuildTarget>?> targetsFromCommandLine(
     environment.logger.status(
       'Build output directory at ${buildDir.path} not found. Running GN.',
     );
-    final int gnResult = await runGn(environment, build);
+    final int gnResult = await runGn(environment, build, enableRbe: enableRbe);
     if (gnResult != 0 || !buildDir.existsSync()) {
       environment.logger.error(
         'The specified build did not produce the expected build '

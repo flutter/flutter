@@ -30,6 +30,11 @@ final class TestCommand extends CommandBase {
       argParser,
       builds,
     );
+    argParser.addFlag(
+      rbeFlag,
+      defaultsTo: environment.hasRbeConfigInTree(),
+      help: 'RBE is enabled by default when available.',
+    );
   }
 
   /// List of compatible builds.
@@ -48,6 +53,11 @@ et test //flutter/fml:fml_benchmarks  # Run a single test target in `//flutter/f
   @override
   Future<int> run() async {
     final String configName = argResults![configFlag] as String;
+    final bool useRbe = argResults![rbeFlag] as bool;
+    if (useRbe && !environment.hasRbeConfigInTree()) {
+      environment.logger.error('RBE was requested but no RBE config was found');
+      return 1;
+    }
     final String demangledName = demangleConfigName(environment, configName);
     final Build? build =
         builds.where((Build build) => build.name == demangledName).firstOrNull;
@@ -61,6 +71,7 @@ et test //flutter/fml:fml_benchmarks  # Run a single test target in `//flutter/f
       build,
       argResults!.rest,
       defaultToAll: true,
+      enableRbe: useRbe,
     );
     if (selectedTargets == null) {
       // The user typed something wrong and targetsFromCommandLine has already
@@ -90,8 +101,12 @@ et test //flutter/fml:fml_benchmarks  # Run a single test target in `//flutter/f
         .toList();
     // TODO(johnmccutchan): runBuild manipulates buildTargets and adds some
     // targets listed in Build. Fix this.
-    final int buildExitCode =
-        await runBuild(environment, build, targets: buildTargets);
+    final int buildExitCode = await runBuild(
+      environment,
+      build,
+      targets: buildTargets,
+      enableRbe: useRbe,
+    );
     if (buildExitCode != 0) {
       return buildExitCode;
     }

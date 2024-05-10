@@ -9,6 +9,7 @@ import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:engine_tool/src/build_utils.dart';
 import 'package:engine_tool/src/commands/command_runner.dart';
 import 'package:engine_tool/src/environment.dart';
+import 'package:engine_tool/src/logger.dart';
 import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
@@ -171,6 +172,33 @@ void main() {
       expect(testEnv.processHistory[0].command[2], equals('--rbe'));
       expect(testEnv.processHistory[1].command[0],
           contains(path.join('reclient', 'bootstrap')));
+    } finally {
+      testEnv.cleanup();
+    }
+  });
+
+  test('build command fails when rbe is enabled but not supported', () async {
+    final TestEnvironment testEnv = TestEnvironment.withTestEngine(
+      cannedProcesses: cannedProcesses,
+      // Intentionally omit withRbe: true.
+      // That means the //flutter/build/rbe directory will not be created.
+    );
+    try {
+      final ToolCommandRunner runner = ToolCommandRunner(
+        environment: testEnv.environment,
+        configs: configs,
+      );
+      final int result = await runner.run(<String>[
+        'build',
+        '--config',
+        'ci/android_debug_rbe_arm64',
+        '--rbe',
+      ]);
+      expect(result, equals(1));
+      expect(
+        testEnv.testLogs.map((LogRecord r) => r.message).join(),
+        contains('RBE was requested but no RBE config was found'),
+      );
     } finally {
       testEnv.cleanup();
     }

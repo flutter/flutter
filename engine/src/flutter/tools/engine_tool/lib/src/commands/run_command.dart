@@ -36,9 +36,8 @@ final class RunCommand extends CommandBase {
     );
     argParser.addFlag(
       rbeFlag,
-      defaultsTo: true,
-      help: 'RBE is enabled by default when available. Use --no-rbe to '
-          'disable it.',
+      defaultsTo: environment.hasRbeConfigInTree(),
+      help: 'RBE is enabled by default when available.',
     );
   }
 
@@ -152,19 +151,33 @@ See `flutter run --help` for a listing
     }
 
     final bool useRbe = argResults![rbeFlag] as bool;
+    if (useRbe && !environment.hasRbeConfigInTree()) {
+      environment.logger.error('RBE was requested but no RBE config was found');
+      return 1;
+    }
     final List<String> extraGnArgs = <String>[
       if (!useRbe) '--no-rbe',
     ];
 
     // First build the host.
-    int r = await runBuild(environment, hostBuild, extraGnArgs: extraGnArgs);
+    int r = await runBuild(
+      environment,
+      hostBuild,
+      extraGnArgs: extraGnArgs,
+      enableRbe: useRbe,
+    );
     if (r != 0) {
       return r;
     }
 
     // Now build the target if it isn't the same.
     if (hostBuild.name != build.name) {
-      r = await runBuild(environment, build, extraGnArgs: extraGnArgs);
+      r = await runBuild(
+        environment,
+        build,
+        extraGnArgs: extraGnArgs,
+        enableRbe: useRbe,
+      );
       if (r != 0) {
         return r;
       }
