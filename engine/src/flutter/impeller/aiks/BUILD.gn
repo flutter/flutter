@@ -4,18 +4,12 @@
 
 import("../tools/impeller.gni")
 
-config("impeller_canvas_recorder_config") {
-  defines = [ "IMPELLER_TRACE_CANVAS" ]
-}
-
 impeller_component("aiks") {
   sources = [
     "aiks_context.cc",
     "aiks_context.h",
     "canvas.cc",
     "canvas.h",
-    "canvas_recorder.h",
-    "canvas_type.h",
     "color_filter.cc",
     "color_filter.h",
     "color_source.cc",
@@ -34,7 +28,6 @@ impeller_component("aiks") {
     "picture.h",
     "picture_recorder.cc",
     "picture_recorder.h",
-    "trace_serializer.h",
   ]
 
   public_deps = [
@@ -44,11 +37,6 @@ impeller_component("aiks") {
   ]
 
   deps = [ "//flutter/fml" ]
-
-  if (impeller_trace_canvas) {
-    sources += [ "trace_serializer.cc" ]
-    public_configs = [ ":impeller_canvas_recorder_config" ]
-  }
 }
 
 impeller_component("aiks_playground") {
@@ -127,16 +115,7 @@ template("aiks_unittests_component") {
 }
 
 aiks_unittests_component("aiks_unittests") {
-  sources = [
-    # "canvas_recorder_unittests.cc",
-    "canvas_unittests.cc",
-    # "trace_serializer_unittests.cc",
-  ]
-
-  if (!impeller_trace_canvas) {
-    sources += [ "trace_serializer.cc" ]
-    public_configs = [ ":impeller_canvas_recorder_config" ]
-  }
+  sources = [ "canvas_unittests.cc" ]
 }
 
 aiks_unittests_component("aiks_unittests_golden") {
