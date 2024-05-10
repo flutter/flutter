@@ -154,7 +154,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.enableFilter = false,
     this.enableSearch = true,
     this.textStyle,
-    this.textAlign,
+    this.textAlign = TextAlign.start,
     this.inputDecorationTheme,
     this.menuStyle,
     this.controller,
@@ -268,7 +268,7 @@ class DropdownMenu<T> extends StatefulWidget {
   /// The text align for the [TextField] of the [DropdownMenu];
   ///
   /// Defaults to [TextAlign.start]
-  final TextAlign? textAlign;
+  final TextAlign textAlign;
 
   /// Defines the default appearance of [InputDecoration] to show around the text field.
   ///
@@ -760,7 +760,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           focusNode: widget.focusNode,
           canRequestFocus: canRequestFocus(),
           enableInteractiveSelection: canRequestFocus(),
-          textAlign: widget.textAlign ?? TextAlign.start,
+          textAlign: widget.textAlign,
           textAlignVertical: TextAlignVertical.center,
           style: effectiveTextStyle,
           controller: _localTextEditingController,
