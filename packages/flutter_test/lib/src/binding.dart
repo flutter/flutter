@@ -254,19 +254,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       _testTextInput.register();
     }
     CustomSemanticsAction.resetForTests(); // ignore: invalid_use_of_visible_for_testing_member
-    _resetFocusManager();
+    _enableFocusManagerLifecycleAwarenessIfSupported();
   }
 
-  void _resetFocusManager() {
+  void _enableFocusManagerLifecycleAwarenessIfSupported() {
     if (buildOwner == null) {
       return;
     }
-    // It's necessary to save the highlight strategy as it may have been changed
-    // in the setUp method.
-    final FocusHighlightStrategy savedFocusHighlightStrategy = buildOwner!.focusManager.highlightStrategy;
-    buildOwner!.focusManager.dispose();
-    buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
-    buildOwner!.focusManager.highlightStrategy = savedFocusHighlightStrategy;
+    buildOwner!.focusManager.listenToApplicationLifecycleChangesIfSupported();
   }
 
   @override
