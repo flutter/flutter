@@ -142,9 +142,9 @@ bool BlitPass::AddCopy(BufferView source,
 
   auto bytes_per_pixel =
       BytesPerPixelForPixelFormat(destination->GetTextureDescriptor().format);
-  auto bytes_per_image = destination_region_value.Area() * bytes_per_pixel;
+  auto bytes_per_region = destination_region_value.Area() * bytes_per_pixel;
 
-  if (source.range.length != bytes_per_image) {
+  if (source.range.length != bytes_per_region) {
     VALIDATION_LOG
         << "Attempted to add a texture blit with out of bounds access.";
     return false;

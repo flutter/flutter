@@ -38,8 +38,8 @@ TypographerContextSTB::TypographerContextSTB() : TypographerContext() {}
 TypographerContextSTB::~TypographerContextSTB() = default;
 
 std::shared_ptr<GlyphAtlasContext>
-TypographerContextSTB::CreateGlyphAtlasContext() const {
-  return std::make_shared<GlyphAtlasContextSTB>();
+TypographerContextSTB::CreateGlyphAtlasContext(GlyphAtlas::Type type) const {
+  return std::make_shared<GlyphAtlasContextSTB>(type);
 }
 
 // Function returns the count of "remaining pairs" not packed into rect of given
@@ -384,6 +384,7 @@ static std::shared_ptr<Texture> UploadGlyphTextureAtlas(
 std::shared_ptr<GlyphAtlas> TypographerContextSTB::CreateGlyphAtlas(
     Context& context,
     GlyphAtlas::Type type,
+    HostBuffer& host_buffer,
     const std::shared_ptr<GlyphAtlasContext>& atlas_context,
     const FontGlyphMap& font_glyph_map) const {
   TRACE_EVENT0("impeller", __FUNCTION__);

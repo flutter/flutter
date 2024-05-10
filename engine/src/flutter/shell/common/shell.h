@@ -40,6 +40,7 @@
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/resource_cache_limit_calculator.h"
 #include "flutter/shell/common/shell_io_manager.h"
+#include "impeller/renderer/context.h"
 #include "impeller/runtime_stage/runtime_stage.h"
 
 namespace flutter {

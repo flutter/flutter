@@ -73,7 +73,7 @@ bool TextContents::Render(const ContentContext& renderer,
   auto type = frame_->GetAtlasType();
   const std::shared_ptr<GlyphAtlas>& atlas =
       renderer.GetLazyGlyphAtlas()->CreateOrGetGlyphAtlas(
-          *renderer.GetContext(), type);
+          *renderer.GetContext(), renderer.GetTransientsBuffer(), type);
 
   if (!atlas || !atlas->IsValid()) {
     VALIDATION_LOG << "Cannot render glyphs without prepared atlas.";

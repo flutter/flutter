@@ -120,12 +120,12 @@ bool BlitCopyBufferToTextureCommandMTL::Encode(
 
   auto destination_bytes_per_pixel =
       BytesPerPixelForPixelFormat(destination->GetTextureDescriptor().format);
-  auto destination_bytes_per_row =
+  auto source_bytes_per_row =
       destination_region.GetWidth() * destination_bytes_per_pixel;
 
   [encoder copyFromBuffer:source_mtl
              sourceOffset:source.range.offset
-        sourceBytesPerRow:destination_bytes_per_row
+        sourceBytesPerRow:source_bytes_per_row
       sourceBytesPerImage:
           0  // 0 for 2D textures according to
              // https://developer.apple.com/documentation/metal/mtlblitcommandencoder/1400752-copyfrombuffer
