@@ -41,6 +41,9 @@ class StatefulWrapperState extends State<StatefulWrapper> {
 }
 
 void main() {
+  setUp(() { LayoutBuilder.applyDoubleRebuildFix = true; });
+  tearDown(() { LayoutBuilder.applyDoubleRebuildFix = false; });
+
   testWidgets('Moving global key inside a LayoutBuilder', (WidgetTester tester) async {
     final GlobalKey<StatefulWrapperState> key = GlobalKey<StatefulWrapperState>();
     await tester.pumpWidget(
@@ -60,7 +63,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('Moved GlobalKeys out of LayoutBuilder', (WidgetTester tester) async {
+  testWidgets('Moving GlobalKeys out of LayoutBuilder', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/146379.
     final GlobalKey widgetKey = GlobalKey(debugLabel: 'widget key');
     final Widget widgetWithKey = Builder(builder: (BuildContext context) {

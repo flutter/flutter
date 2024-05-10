@@ -2613,7 +2613,8 @@ abstract class BuildContext {
 /// A class that determines the scope of a [BuildOwner.buildScope] operation.
 ///
 /// The [BuildOwner.buildScope] method rebuilds all dirty [Element]s who share
-/// the same [Element.buildScope] as its `context` argument.
+/// the same [Element.buildScope] as its `context` argument, and skips those
+/// with a different [Element.buildScope].
 ///
 /// [Element]s by default have the same `buildScope` as their parents. Special
 /// [Element]s may override [Element.buildScope] to create an isolated build scope
@@ -2622,12 +2623,11 @@ abstract class BuildContext {
 /// until the incoming constraints are known.
 final class BuildScope {
   /// Creates a [BuildScope] with an optional [scheduleRebuild] callback.
-  BuildScope(this.scheduleRebuild);
+  BuildScope({ this.scheduleRebuild });
 
   // Whether [onBuildScheduled] is called.
   bool _buildScheduled = false;
-  // Whether [BuildOwner.buildScope] is actively updating dirty elements in this
-  // [BuildScope].
+  // Whether [BuildOwner.buildScope] is actively running in this [BuildScope].
   bool _building = false;
 
   /// An optional [VoidCallback] that will be called when [Element]s in this
@@ -3599,15 +3599,18 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// A [BuildScope] within which the [Element] tree should be updated together.
   ///
   /// The default implementation returns the parent [Element]'s [buildScope],
-  /// as in most cases an [Element] is ready to rebuild as soon as its parent is
-  /// no longer dirty. One notable exception is [LayoutBuilder] (and its
-  /// descendants), which must not rebuild until the incoming constraints become
+  /// as in most cases an [Element] is ready to rebuild as soon as its ancestors
+  /// are no longer dirty. One notable exception is [LayoutBuilder]'s
+  /// descendants, which must not rebuild until the incoming constraints become
   /// available. [LayoutBuilder]'s [Element] overrides [buildScope] to make none
   /// of its descendants can rebuild until the incoming constraints are known.
   ///
   /// The [updateChild] method ignores [buildScope]: if the parent [Element]
   /// calls [updateChild] on a child with a different [BuildScope], the child may
   /// still rebuild.
+  ///
+  /// Always return the same [BuildScope] if you override this getter, changing
+  /// the value returned by this getter at runtime is currently not supported.
   BuildScope get buildScope => _buildScope!;
 
   /// {@template flutter.widgets.Element.reassemble}
@@ -6796,7 +6799,7 @@ mixin RootElementMixin on Element {
   // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
   void assignOwner(BuildOwner owner) {
     _owner = owner;
-    _buildScope = BuildScope(null);
+    _buildScope = BuildScope();
   }
 
   @override

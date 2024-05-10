@@ -23,6 +23,9 @@ class _MyGlobalObjectKey<T extends State<StatefulWidget>> extends GlobalObjectKe
 }
 
 void main() {
+  setUp(() { LayoutBuilder.applyDoubleRebuildFix = true; });
+  tearDown(() { LayoutBuilder.applyDoubleRebuildFix = false; });
+
   testWidgets('UniqueKey control test', (WidgetTester tester) async {
     final Key key = UniqueKey();
     expect(key, hasOneLineDescription);
@@ -1852,6 +1855,96 @@ The findRenderObject() method was called for the following element:
     ));
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('BuildScope segregates dirty elements', (WidgetTester tester) async {
+    final BuildScope buildScope = BuildScope();
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter stateSetter) {
+          return _CustomBuildScopeWidget(
+            buildScope: buildScope,
+            child: const _NullLeaf(),
+          );
+        },
+      ),
+    );
+    final Element rootElement = tester.element(find.byType(StatefulBuilder));
+    final Element scopeElement = tester.element(find.byType(_CustomBuildScopeWidget));
+    final Element leafElement = tester.element(find.byType(_NullLeaf));
+    expect(rootElement.dirty, isFalse);
+    expect(scopeElement.dirty, isFalse);
+    expect(leafElement.dirty, isFalse);
+
+    rootElement.markNeedsBuild();
+    await tester.pump();
+    expect(rootElement.dirty, isFalse);
+    expect(scopeElement.dirty, isFalse);
+    expect(leafElement.dirty, isFalse);
+
+    scopeElement.markNeedsBuild();
+    await tester.pump();
+    expect(rootElement.dirty, isFalse);
+    expect(scopeElement.dirty, isTrue);
+    expect(leafElement.dirty, isFalse);
+
+    scopeElement.owner!.buildScope(scopeElement);
+    await tester.pump();
+    expect(rootElement.dirty, isFalse);
+    expect(scopeElement.dirty, isFalse);
+    expect(leafElement.dirty, isFalse);
+
+    leafElement.markNeedsBuild();
+    await tester.pump();
+    expect(rootElement.dirty, isFalse);
+    expect(scopeElement.dirty, isFalse);
+    expect(leafElement.dirty, isTrue);
+
+    scopeElement.owner!.buildScope(scopeElement);
+    await tester.pump();
+    expect(rootElement.dirty, isFalse);
+    expect(scopeElement.dirty, isFalse);
+    expect(leafElement.dirty, isFalse);
+  });
+
+
+  testWidgets('reparenting Element to another BuildScope', (WidgetTester tester) async {
+    final BuildScope buildScope = BuildScope();
+    final GlobalKey key = GlobalKey(debugLabel: 'key');
+    await tester.pumpWidget(
+      _DummyMultiChildWidget(
+        <Widget>[
+          _CustomBuildScopeWidget( // This widget does not call updateChild when rebuild.
+            buildScope: buildScope,
+            child: const _NullLeaf(),
+          ),
+          _NullLeaf(key: key),
+        ],
+      ),
+    );
+    final Element scopeElement = tester.element(find.byType(_CustomBuildScopeWidget));
+    final Element keyedWidget = tester.element(find.byKey(key));
+
+    expect(scopeElement.dirty, isFalse);
+    expect(keyedWidget.dirty, isFalse);
+
+    // Mark the Element with a GlobalKey dirty and reparent it to another BuildScope.
+    // the Element should not rebuild.
+    keyedWidget.markNeedsBuild();
+    await tester.pumpWidget(
+      _DummyMultiChildWidget(
+        <Widget>[
+          _CustomBuildScopeWidget( // This widget does not call updateChild when rebuild.
+            buildScope: buildScope,
+            child: _NullLeaf(key: key),
+          ),
+          const _NullLeaf(),
+        ],
+      ),
+    );
+
+    expect(scopeElement.dirty, isFalse);
+    expect(keyedWidget.dirty, isTrue);
+  });
 }
 
 class _TestInheritedElement extends InheritedElement {
@@ -2283,4 +2376,117 @@ class _RenderTestLeaderLayerWidget extends RenderProxyBox {
       context.pushLayer(LeaderLayer(link: _link!, offset: offset),(_, __){}, Offset.zero);
     }
   }
+}
+
+// This widget does not call updateChild when it rebuilds.
+class _CustomBuildScopeWidget extends ProxyWidget {
+  const _CustomBuildScopeWidget({this.buildScope, required super.child});
+
+  final BuildScope? buildScope;
+  @override
+  Element createElement() => _CustomBuildScopeElement(this);
+}
+
+class _CustomBuildScopeElement extends Element {
+  _CustomBuildScopeElement(super.widget);
+
+  @override
+  BuildScope get buildScope => (widget as _CustomBuildScopeWidget).buildScope ?? super.buildScope;
+  @override
+  bool get debugDoingBuild => throw UnimplementedError();
+
+  Element? _child;
+
+  @override
+  void mount(Element? parent, Object? newSlot) {
+    super.mount(parent, newSlot);
+    rebuild(force: true);
+    // Only does tree walk on mount.
+    _child = updateChild(_child, (widget as _CustomBuildScopeWidget).child, slot);
+  }
+
+  @override
+  void visitChildren(ElementVisitor visitor) {
+    final Element? child = _child;
+    if (child != null) {
+      visitor(child);
+    }
+  }
+}
+
+class _DummyMultiChildWidget extends Widget {
+  const _DummyMultiChildWidget(this.children);
+
+  final List<Widget> children;
+  @override
+  Element createElement() => _DummyMuitiChildElement(this);
+}
+
+class _DummyMuitiChildElement extends Element {
+  _DummyMuitiChildElement(super.widget);
+
+  @override
+  bool get debugDoingBuild => throw UnimplementedError();
+
+  late List<Element> _children;
+  final Set<Element> _forgottenChildren = <Element>{};
+
+  @override
+  void mount(Element? parent, Object? newSlot) {
+    super.mount(parent, newSlot);
+    final List<Widget> childWidgets = (widget as _DummyMultiChildWidget).children;
+
+    Element? previousChild;
+    final List<Element> children = List<Element>.generate(childWidgets.length, (int i) {
+      final Element child = previousChild = inflateWidget(childWidgets[i], IndexedSlot<Element?>(i, previousChild));
+      return child;
+    });
+    _children = children;
+  }
+
+  @override
+  void update(_DummyMultiChildWidget newWidget) {
+    super.update(newWidget);
+    _children = updateChildren(_children, newWidget.children, forgottenChildren: _forgottenChildren);
+    _forgottenChildren.clear();
+  }
+
+  @override
+  Element? get renderObjectAttachingChild => null;
+
+  @override
+  void visitChildren(ElementVisitor visitor) {
+    for (final Element child in _children) {
+      if (!_forgottenChildren.contains(child)) {
+        visitor(child);
+      }
+    }
+  }
+
+  @override
+  void forgetChild(Element child) {
+    assert(_children.contains(child));
+    assert(!_forgottenChildren.contains(child));
+    _forgottenChildren.add(child);
+    super.forgetChild(child);
+  }
+}
+
+class _NullLeaf extends Widget {
+  const _NullLeaf({super.key});
+  @override
+  Element createElement() => _NullElement(this);
+}
+
+class _NullElement extends Element {
+  _NullElement(super.widget);
+
+  @override
+  void mount(Element? parent, Object? newSlot) {
+    super.mount(parent, newSlot);
+    rebuild(force: true);
+  }
+
+  @override
+  bool get debugDoingBuild => throw UnimplementedError();
 }
