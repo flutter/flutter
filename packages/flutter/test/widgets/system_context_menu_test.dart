@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -292,5 +293,63 @@ void main() {
     await tester.pump();
     expect(find.byKey(menu1Key), findsNothing);
     expect(find.byKey(menu2Key), findsOneWidget);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+  testWidgets('asserts when built with no text input connection', (WidgetTester tester) async {
+    SystemContextMenu? systemContextMenu;
+    late StateSetter setState;
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          final MediaQueryData mediaQueryData = MediaQuery.of(context);
+          return MediaQuery(
+            data: mediaQueryData.copyWith(
+              supportsShowingSystemContextMenu: true,
+            ),
+            child: MaterialApp(
+              home: Scaffold(
+                body: StatefulBuilder(
+                  builder: (BuildContext context, StateSetter localSetState) {
+                    setState = localSetState;
+                    return Column(
+                      children: <Widget>[
+                        const TextField(),
+                        if (systemContextMenu != null)
+                          systemContextMenu!,
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    // No SystemContextMenu yet, so no assertion error.
+    expect(tester.takeException(), isNull);
+
+    // Add the SystemContextMenu and receive an assertion since there is no
+    // active text input connection.
+    setState(() {
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      systemContextMenu = SystemContextMenu.editableText(
+        editableTextState: state,
+      );
+    });
+
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    dynamic exception;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      exception ??= details.exception;
+    };
+    addTearDown(() {
+      FlutterError.onError = oldHandler;
+    });
+
+    await tester.pump();
+    expect(exception, isAssertionError);
+    expect(exception.toString(), contains('only be shown for an active text input connection'));
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 }
