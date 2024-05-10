@@ -9,6 +9,8 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #include "fml/platform/darwin/cf_utils.h"
 
+FLUTTER_ASSERT_ARC
+
 // This is mostly a duplication of FlutterView.
 // TODO(amirh): once GL support is in evaluate if we can merge this with FlutterView.
 @implementation FlutterOverlayView {

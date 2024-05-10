@@ -74,6 +74,7 @@
 		D2D361A52B234EAC0018964E /* FlutterMetalLayerTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterMetalLayerTest.mm; sourceTree = "<group>"; };
 		F7521D7226BB671E005F15C5 /* libios_test_flutter.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libios_test_flutter.dylib; path = "../../../../out/$(FLUTTER_ENGINE)/libios_test_flutter.dylib"; sourceTree = "<group>"; };
 		F7521D7526BB673E005F15C5 /* libocmock_shared.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libocmock_shared.dylib; path = "../../../../out/$(FLUTTER_ENGINE)/libocmock_shared.dylib"; sourceTree = "<group>"; };
+		F76A3A892BE48F2F00A654F1 /* FlutterPlatformViewsTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterPlatformViewsTest.mm; sourceTree = "<group>"; };
 		F77E081726FA9CE6003E6E4C /* Flutter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Flutter.framework; path = "../../../../out/$(FLUTTER_ENGINE)/Flutter.framework"; sourceTree = "<group>"; };
 		F7A3FDE026B9E0A300EADD61 /* FlutterAppDelegateTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterAppDelegateTest.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -99,6 +100,7 @@
 		0AC232E924BA71D300A85907 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				F76A3A892BE48F2F00A654F1 /* FlutterPlatformViewsTest.mm */,
 				689EC1E2281B30D3008FEB58 /* FlutterSpellCheckPluginTest.mm */,
 				68B6091227F62F990036AC78 /* VsyncWaiterIosTest.mm */,
 				3DD7D38C27D2B81000DA365C /* FlutterUndoManagerPluginTest.mm */,
