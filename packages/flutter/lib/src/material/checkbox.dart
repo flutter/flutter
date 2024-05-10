@@ -730,19 +730,33 @@ class _CheckboxPainter extends ToggleablePainter {
   }
 
   void _drawBox(Canvas canvas, Rect outer, Paint paint, BorderSide? side) {
-    canvas.drawPath(shape.getOuterPath(outer), paint);
     switch (_designSpec!) {
       case _DesignSpec.cupertino:
-        if (value == false){
+        if (value == false && reaction.isDismissed){
           // Add dropshadow effect when unselected.
-          // The color and values were eyeballed from examples in the HIG docs.
+          // The gradient colors were eyeballed from examples in the HIG docs.
+          canvas.clipPath(shape.getOuterPath(outer));
+          canvas.drawPath(shape.getOuterPath(outer), paint);
+          // The drop shadow has three layers.
           final Rect shadowRect = Rect.fromLTRB(
-            outer.left + 1, outer.top, outer.right - 1, outer.top + 3);
-          canvas.drawPath(shape.getInnerPath(shadowRect),
-            Paint()..color = CupertinoColors.extraLightBackgroundGray);
+            outer.left, outer.top, outer.right, outer.top + 3);
+          final LinearGradient topEdgeGradient = LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: <Color>[
+              Colors.black.withOpacity(0.1),
+              Colors.black.withOpacity(0.05),
+            ],
+          );
+          final Paint gradientPaint = Paint()
+            ..shader = topEdgeGradient.createShader(shadowRect);
+          canvas.drawPath(shape.getInnerPath(shadowRect), gradientPaint);
+        }
+        else{
+          canvas.drawPath(shape.getOuterPath(outer), paint);
         }
       case _DesignSpec.material:
-      break;
+        canvas.drawPath(shape.getOuterPath(outer), paint);
     }
     if (side != null) {
       shape.copyWith(side: side).paint(canvas, outer);
