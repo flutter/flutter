@@ -4,9 +4,11 @@
 
 import 'package:ui/ui.dart' as ui;
 
+import '../color_filter.dart';
 import '../vector_math.dart';
 import 'canvas.dart';
 import 'canvaskit_api.dart';
+import 'color_filter.dart';
 import 'embedded_views.dart';
 import 'image_filter.dart';
 import 'n_way_canvas.dart';
@@ -409,12 +411,23 @@ class ImageFilterEngineLayer extends ContainerLayer
     childMatrix.translate(_offset.dx, _offset.dy);
     prerollContext.mutatorsStack
         .pushTransform(Matrix4.translationValues(_offset.dx, _offset.dy, 0.0));
+    final CkManagedSkImageFilterConvertible convertible;
+    if (_filter is ui.ColorFilter) {
+      convertible = createCkColorFilter(_filter as EngineColorFilter)!;
+    } else {
+      convertible = _filter as CkManagedSkImageFilterConvertible;
+    }
     final ui.Rect childPaintBounds =
         prerollChildren(prerollContext, childMatrix);
-    (_filter as CkManagedSkImageFilterConvertible)
-        .imageFilter((SkImageFilter filter) {
-      paintBounds =
-          rectFromSkIRect(filter.getOutputBounds(toSkRect(childPaintBounds)));
+    convertible.imageFilter((SkImageFilter filter) {
+      // If the filter is a ColorFilter, the extended paint bounds will be the
+      // entire screen, which is not what we want.
+      if (_filter is ui.ColorFilter) {
+        paintBounds = childPaintBounds;
+      } else {
+        paintBounds =
+            rectFromSkIRect(filter.getOutputBounds(toSkRect(childPaintBounds)));
+      }
     });
     prerollContext.mutatorsStack.pop();
   }
@@ -424,6 +437,8 @@ class ImageFilterEngineLayer extends ContainerLayer
     assert(needsPainting);
     paintContext.internalNodesCanvas.save();
     paintContext.internalNodesCanvas.translate(_offset.dx, _offset.dy);
+    paintContext.internalNodesCanvas
+        .clipRect(paintBounds, ui.ClipOp.intersect, false);
     final CkPaint paint = CkPaint();
     paint.imageFilter = _filter;
     paintContext.internalNodesCanvas.saveLayer(paintBounds, paint);
@@ -518,10 +533,21 @@ class ColorFilterEngineLayer extends ContainerLayer
     final CkPaint paint = CkPaint();
     paint.colorFilter = filter;
 
+    // We need to clip because if the ColorFilter affects transparent black,
+    // then it will fill the entire `cullRect` of the picture, ignoring the
+    // `paintBounds` passed to `saveLayer`. See:
+    // https://github.com/flutter/flutter/issues/88866
+    paintContext.internalNodesCanvas.save();
+
+    // TODO(hterkelsen): Only clip if the ColorFilter affects transparent black.
+    paintContext.internalNodesCanvas
+        .clipRect(paintBounds, ui.ClipOp.intersect, false);
+
     paintContext.internalNodesCanvas.saveLayer(paintBounds, paint);
-    paint.dispose();
     paintChildren(paintContext);
     paintContext.internalNodesCanvas.restore();
+    paintContext.internalNodesCanvas.restore();
+    paint.dispose();
   }
 }
 

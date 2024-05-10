@@ -195,6 +195,90 @@ void testMain() {
       await matchSceneGolden('canvaskit_dst_colorfilter.png', builder.build(),
           region: region);
     });
+
+    test('ColorFilter only applies to child bounds', () async {
+      final LayerSceneBuilder builder = LayerSceneBuilder();
+
+      builder.pushOffset(0, 0);
+
+      // Draw a red circle and add it to the scene.
+      final CkPictureRecorder recorder = CkPictureRecorder();
+      final CkCanvas canvas = recorder.beginRecording(region);
+
+      canvas.drawCircle(
+        const ui.Offset(75, 125),
+        50,
+        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+      );
+      final CkPicture redCircle = recorder.endRecording();
+
+      builder.addPicture(ui.Offset.zero, redCircle);
+
+      // Apply a green color filter.
+      builder.pushColorFilter(
+          const ui.ColorFilter.mode(ui.Color(0xff00ff00), ui.BlendMode.color));
+      // Draw another red circle and apply it to the scene.
+      // This one should be green since we have the color filter.
+      final CkPictureRecorder recorder2 = CkPictureRecorder();
+      final CkCanvas canvas2 = recorder2.beginRecording(region);
+
+      canvas2.drawCircle(
+        const ui.Offset(425, 125),
+        50,
+        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+      );
+      final CkPicture greenCircle = recorder2.endRecording();
+
+      builder.addPicture(ui.Offset.zero, greenCircle);
+
+      await matchSceneGolden(
+        'canvaskit_colorfilter_bounds.png',
+        builder.build(),
+        region: region,
+      );
+    });
+
+    test('ColorFilter works as an ImageFilter', () async {
+      final LayerSceneBuilder builder = LayerSceneBuilder();
+
+      builder.pushOffset(0, 0);
+
+      // Draw a red circle and add it to the scene.
+      final CkPictureRecorder recorder = CkPictureRecorder();
+      final CkCanvas canvas = recorder.beginRecording(region);
+
+      canvas.drawCircle(
+        const ui.Offset(75, 125),
+        50,
+        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+      );
+      final CkPicture redCircle = recorder.endRecording();
+
+      builder.addPicture(ui.Offset.zero, redCircle);
+
+      // Apply a green color filter as an ImageFilter.
+      builder.pushImageFilter(
+          const ui.ColorFilter.mode(ui.Color(0xff00ff00), ui.BlendMode.color));
+      // Draw another red circle and apply it to the scene.
+      // This one should be green since we have the color filter.
+      final CkPictureRecorder recorder2 = CkPictureRecorder();
+      final CkCanvas canvas2 = recorder2.beginRecording(region);
+
+      canvas2.drawCircle(
+        const ui.Offset(425, 125),
+        50,
+        CkPaint()..color = const ui.Color.fromARGB(255, 255, 0, 0),
+      );
+      final CkPicture greenCircle = recorder2.endRecording();
+
+      builder.addPicture(ui.Offset.zero, greenCircle);
+
+      await matchSceneGolden(
+        'canvaskit_colorfilter_as_imagefilter.png',
+        builder.build(),
+        region: region,
+      );
+    });
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
   }, skip: isSafari || isFirefox);
 }

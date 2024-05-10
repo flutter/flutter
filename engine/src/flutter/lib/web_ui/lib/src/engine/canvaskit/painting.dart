@@ -24,7 +24,7 @@ import 'shader.dart';
 class CkPaint implements ui.Paint {
   CkPaint() : skiaObject = SkPaint() {
     skiaObject.setAntiAlias(_isAntiAlias);
-    skiaObject.setColorInt(_defaultPaintColor.toDouble());
+    skiaObject.setColorInt(_defaultPaintColor);
     _ref = UniqueRef<SkPaint>(this, skiaObject, 'Paint');
   }
 
@@ -127,7 +127,7 @@ class CkPaint implements ui.Paint {
       return;
     }
     _color = value.value;
-    skiaObject.setColorInt(value.value.toDouble());
+    skiaObject.setColorInt(value.value);
   }
 
   int _color = _defaultPaintColor;
