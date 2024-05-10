@@ -915,8 +915,8 @@ abstract class ResidentHandlers {
       isolateId: views.first.uiIsolate!.id!,
     );
     final Brightness next = switch (current) {
-      Brightness.light || null => Brightness.dark,
-      Brightness.dark => Brightness.light,
+      Brightness.light => Brightness.dark,
+      Brightness.dark || null => Brightness.light,
     };
     for (final FlutterDevice? device in flutterDevices) {
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
