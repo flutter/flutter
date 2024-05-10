@@ -840,7 +840,7 @@ void DlDispatcherBase::drawPath(const CacheablePath& cache) {
   SimplifyOrDrawPath(GetCanvas(), cache, paint_);
 }
 
-void DlDispatcherBase::SimplifyOrDrawPath(CanvasType& canvas,
+void DlDispatcherBase::SimplifyOrDrawPath(Canvas& canvas,
                                           const CacheablePath& cache,
                                           const Paint& paint) {
   SkRect rect;

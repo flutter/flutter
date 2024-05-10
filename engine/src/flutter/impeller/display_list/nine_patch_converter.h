@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "impeller/aiks/canvas_type.h"
+#include "impeller/aiks/canvas.h"
 #include "impeller/aiks/image.h"
 #include "impeller/aiks/paint.h"
 #include "impeller/core/sampler_descriptor.h"
@@ -25,7 +25,7 @@ class NinePatchConverter {
                      Rect center,
                      Rect dst,
                      const SamplerDescriptor& sampler,
-                     CanvasType* canvas,
+                     Canvas* canvas,
                      Paint* paint);
 
  private:
