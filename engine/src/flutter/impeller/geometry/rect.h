@@ -744,9 +744,7 @@ struct TRect {
 };
 
 using Rect = TRect<Scalar>;
-using IRect32 = TRect<int32_t>;
-using IRect64 = TRect<int64_t>;
-using IRect = IRect64;
+using IRect = TRect<int64_t>;
 
 #undef ONLY_ON_FLOAT
 #undef ONLY_ON_FLOAT_M
