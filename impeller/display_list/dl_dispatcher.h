@@ -8,7 +8,7 @@
 #include "display_list/utils/dl_receiver_utils.h"
 #include "flutter/display_list/dl_op_receiver.h"
 #include "fml/logging.h"
-#include "impeller/aiks/canvas_type.h"
+#include "impeller/aiks/canvas.h"
 #include "impeller/aiks/experimental_canvas.h"
 #include "impeller/aiks/paint.h"
 #include "impeller/entity/contents/content_context.h"
