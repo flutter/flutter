@@ -9,7 +9,8 @@ import 'package:flutter/material.dart';
 /// Flutter code sample for [Autocomplete] that demonstrates displaying an
 /// initial message when the field is focused for the first time, a message if
 /// no options were found, and a loading message while fetching the options
-/// asynchronously and debouncing the network calls.
+/// asynchronously and debouncing the network calls, including handling network
+/// errors.
 
 const Duration fakeAPIDuration = Duration(seconds: 2);
 const Duration debounceDuration = Duration(seconds: 1);
@@ -59,6 +60,12 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
 
   late final _Debounceable<Iterable<String>?, String> _debouncedSearch;
 
+  // Whether to consider the fake network to be offline.
+  bool _networkEnabled = true;
+
+  // A network error was received on the most recent query.
+  bool _networkError = false;
+
   // Check if the "remote" API's response is waiting to be received.
   bool _isLoading = false;
 
@@ -77,8 +84,18 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
   Future<Iterable<String>?> _search(String query) async {
     _currentQuery = query;
 
-    // In a real application, there should be some error handling here.
-    final Iterable<String> options = await _FakeAPI.search(_currentQuery!);
+    late final Iterable<String> options;
+    try {
+      options = await _FakeAPI.search(_currentQuery!, _networkEnabled);
+    } catch (error) {
+      if (error is _NetworkException) {
+        setState(() {
+          _networkError = true;
+        });
+        return <String>[];
+      }
+      rethrow;
+    }
 
     // If another search happened after this one, throw away these options.
     if (_currentQuery != query) {
@@ -97,46 +114,72 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
 
   @override
   Widget build(BuildContext context) {
-    return Autocomplete<String>(
-      showOptionsViewOnPendingOptions: true,
-      showOptionsViewOnEmptyOptions: true,
-      optionsBuilder: (TextEditingValue textEditingValue) async {
-        _isFieldEmpty = textEditingValue.text.isEmpty;
-        if ( _nothingFound && textEditingValue.text.length > _lastValue.length
-              || _isFieldEmpty ) {
-          return const Iterable<String>.empty();
-        }
-        _nothingFound = false;
-        _lastValue = textEditingValue.text;
-        _isLoading = true; // Begin options loading.
-
-        final Iterable<String>? options =
-            await _debouncedSearch(textEditingValue.text);
-
-        if (textEditingValue.text == _lastValue) {
-          _isLoading = false; // End options loading.
-        }
-        if (options == null) {
-          return _lastOptions;
-        }
-        _lastOptions = options;
-        _nothingFound = options.isEmpty;
-        return options;
-      },
-      onSelected: (String selection) {
-        debugPrint('You just selected $selection');
-      },
-      optionsViewBuilder: (BuildContext context,
-          AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
-        return _isLoading && !_isFieldEmpty && !_nothingFound
-            ? const Text('Loading...')
-            : _isFieldEmpty
-                ? const Text('Type something')
-                : _nothingFound
-                    ? const Text('No options found!')
-                    : AutocompleteOverlay(
-                        onSelected: onSelected, options: options);
-      },
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          _networkEnabled
+              ? 'Network is on, toggle to induce network errors.'
+              : 'Network is off, toggle to allow requests to go through.',
+        ),
+        Switch(
+          value: _networkEnabled,
+          onChanged: (bool? value) {
+            setState(() {
+              _networkEnabled = !_networkEnabled;
+            });
+          },
+        ),
+        const SizedBox(
+          height: 32.0,
+        ),
+        Autocomplete<String>(
+          showOptionsViewOnEmptyOptions: true,
+          showOptionsViewOnPendingOptions: true,
+          optionsBuilder: (TextEditingValue textEditingValue) async {
+            _isFieldEmpty = textEditingValue.text.isEmpty;
+            if (_isFieldEmpty ||
+                (_nothingFound &&
+                    textEditingValue.text.length > _lastValue.length)) {
+              return const Iterable<String>.empty();
+            }
+            setState(() {
+              _networkError = false;
+            });
+            _isLoading = true; // Begin options loading.
+            _nothingFound = false;
+            _lastValue = textEditingValue.text;
+            final Iterable<String>? options =
+                await _debouncedSearch(textEditingValue.text);
+            if (textEditingValue.text == _lastValue || _networkError) {
+              _isLoading = false; // End options loading.
+            }
+            if (options == null) {
+              return _lastOptions;
+            }
+            _lastOptions = options;
+            _nothingFound = options.isEmpty && !_networkError;
+            return options;
+          },
+          onSelected: (String selection) {
+            debugPrint('You just selected $selection');
+          },
+          optionsViewBuilder: (BuildContext context,
+              AutocompleteOnSelected<String> onSelected,
+              Iterable<String> options) {
+            return _networkError
+                ? const Text('Network error, please try again.')
+                : _isLoading && !_isFieldEmpty && !_nothingFound
+                    ? const Text('Loading...')
+                    : _isFieldEmpty
+                        ? const Text('Type something')
+                        : _nothingFound
+                            ? const Text('No options found!')
+                            : AutocompleteOverlay(
+                                onSelected: onSelected, options: options);
+          },
+        ),
+      ],
     );
   }
 }
@@ -150,8 +193,12 @@ class _FakeAPI {
   ];
 
   // Searches the options, but injects a fake "network" delay.
-  static Future<Iterable<String>> search(String query) async {
+  static Future<Iterable<String>> search(
+      String query, bool networkEnabled) async {
     await Future<void>.delayed(fakeAPIDuration); // Fake 1 second delay.
+    if (!networkEnabled) {
+      throw const _NetworkException();
+    }
     if (query == '') {
       return const Iterable<String>.empty();
     }
@@ -213,6 +260,11 @@ class _DebounceTimer {
 // An exception indicating that the timer was canceled.
 class _CancelException implements Exception {
   const _CancelException();
+}
+
+// An exception indicating that a network request has failed.
+class _NetworkException implements Exception {
+  const _NetworkException();
 }
 
 class AutocompleteOverlay extends StatelessWidget {

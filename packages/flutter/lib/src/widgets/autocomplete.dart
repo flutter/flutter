@@ -393,6 +393,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   // Called when _textEditingController changes.
   Future<void> _onChangedField() async {
     final TextEditingValue value = _textEditingController.value;
+    if (value.text == _lastFieldText) {
+      return;
+    }
     if (widget.showOptionsViewOnPendingOptions){
       _updateOptionsViewVisibility();
     }

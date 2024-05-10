@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets(
-      'can display initial, loading, and no options found messages',
+      'can display initial, loading, and no results found messages',
       (WidgetTester tester) async {
     await tester.pumpWidget(const example.AutocompleteExampleApp());
 
@@ -77,6 +77,28 @@ void main() {
     expect(find.text('Loading...'), findsNothing);
     expect(find.text('Type something'), findsNothing);
     expect(find.text('No options found!'), findsOneWidget);
+
+    // If extra characters are entered after no results are found, options view
+    // is shown with no results found message without making API calls.
+    await tester.enterText(find.byType(TextFormField), 'aaxx');
+    await tester.pump();
+    expect(find.text('aardvark'), findsNothing);
+    expect(find.text('bobcat'), findsNothing);
+    expect(find.text('chameleon'), findsNothing);
+    expect(find.text('Loading...'), findsNothing);
+    expect(find.text('Type something'), findsNothing);
+    expect(find.text('No options found!'), findsOneWidget);
+
+    // If field is emptied, options view is shown with initial message
+    // without making API calls.
+    await tester.enterText(find.byType(TextFormField), '');
+    await tester.pump();
+    expect(find.text('aardvark'), findsNothing);
+    expect(find.text('bobcat'), findsNothing);
+    expect(find.text('chameleon'), findsNothing);
+    expect(find.text('Loading...'), findsNothing);
+    expect(find.text('Type something'), findsOneWidget);
+    expect(find.text('No options found!'), findsNothing);
   });
 
 
@@ -174,5 +196,41 @@ void main() {
     expect(find.text('bobcat'), findsNothing);
     expect(find.text('chameleon'), findsNothing);
     expect(find.text('Loading...'), findsNothing);
+  });
+
+  testWidgets('shows an error message for network errors', (WidgetTester tester) async {
+    await tester.pumpWidget(const example.AutocompleteExampleApp());
+
+    await tester.enterText(find.byType(TextFormField), 'chame');
+    await tester.pump(example.debounceDuration + example.fakeAPIDuration);
+
+    expect(find.text('aardvark'), findsNothing);
+    expect(find.text('bobcat'), findsNothing);
+    expect(find.text('chameleon'), findsOneWidget);
+    expect(find.text('Network error, please try again.'), findsNothing);
+
+    // Turn the network off.
+    await tester.tap(find.byType(Switch));
+    await tester.pump();
+
+    await tester.enterText(find.byType(TextFormField), 'chamel');
+    await tester.pump(example.debounceDuration + example.fakeAPIDuration);
+
+    expect(find.text('aardvark'), findsNothing);
+    expect(find.text('bobcat'), findsNothing);
+    expect(find.text('chameleon'), findsNothing);
+    expect(find.text('Network error, please try again.'), findsOneWidget);
+
+    // Turn the network back on.
+    await tester.tap(find.byType(Switch));
+    await tester.pump();
+
+    await tester.enterText(find.byType(TextFormField), 'chamele');
+    await tester.pump(example.debounceDuration + example.fakeAPIDuration);
+
+    expect(find.text('aardvark'), findsNothing);
+    expect(find.text('bobcat'), findsNothing);
+    expect(find.text('chameleon'), findsOneWidget);
+    expect(find.text('Network error, please try again.'), findsNothing);
   });
 }
