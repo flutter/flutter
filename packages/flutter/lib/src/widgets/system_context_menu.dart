@@ -113,7 +113,6 @@ class _SystemContextMenuState extends State<SystemContextMenu> {
   @override
   void didUpdateWidget(SystemContextMenu oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // TODO(justinmc): Make sure you've tested moving the anchor.
     if (widget.anchor != oldWidget.anchor) {
       _systemContextMenuController.show(widget.anchor);
     }
