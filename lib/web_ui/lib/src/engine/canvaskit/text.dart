@@ -1187,7 +1187,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
       SkPaint? foreground = skStyle.foreground?.skiaObject;
       if (foreground == null) {
         _defaultTextForeground.setColorInt(
-          (skStyle.color?.value ?? 0xFF000000).toDouble(),
+          skStyle.color?.value ?? 0xFF000000,
         );
         foreground = _defaultTextForeground;
       }
