@@ -261,8 +261,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     if (buildOwner == null) {
       return;
     }
+    // It's necessary to save the highlight strategy as it may have been changed
+    // in the setUp method.
+    final FocusHighlightStrategy savedFocusHighlightStrategy = buildOwner!.focusManager.highlightStrategy;
     buildOwner!.focusManager.dispose();
     buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
+    buildOwner!.focusManager.highlightStrategy = savedFocusHighlightStrategy;
   }
 
   @override
