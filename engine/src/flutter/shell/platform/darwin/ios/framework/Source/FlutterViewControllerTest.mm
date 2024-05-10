@@ -15,6 +15,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEmbedderKeyResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFakeKeyEvents.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
@@ -1135,12 +1136,21 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 - (void)testViewControllerIsReleased {
   __weak FlutterViewController* weakViewController;
+  __weak UIView* weakView;
   @autoreleasepool {
-    FlutterViewController* viewController = [[FlutterViewController alloc] init];
+    FlutterEngine* engine = [[FlutterEngine alloc] init];
+
+    [engine runWithEntrypoint:nil];
+    FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                  nibName:nil
+                                                                                   bundle:nil];
     weakViewController = viewController;
     [viewController viewDidLoad];
+    weakView = viewController.view;
+    XCTAssertTrue([viewController.view isKindOfClass:[FlutterView class]]);
   }
   XCTAssertNil(weakViewController);
+  XCTAssertNil(weakView);
 }
 
 #pragma mark - Platform Brightness

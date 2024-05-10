@@ -6,8 +6,13 @@
 
 #include "flutter/fml/platform/darwin/cf_utils.h"
 
+FLUTTER_ASSERT_ARC
+
+@interface FlutterView ()
+@property(nonatomic, weak) id<FlutterViewEngineDelegate> delegate;
+@end
+
 @implementation FlutterView {
-  id<FlutterViewEngineDelegate> _delegate;
   BOOL _isWideGamutEnabled;
 }
 
@@ -45,7 +50,7 @@
   return MTLPixelFormatBGRA8Unorm;
 }
 - (BOOL)isWideGamutSupported {
-  if (![_delegate isUsingImpeller]) {
+  if (!self.delegate.isUsingImpeller) {
     return NO;
   }
 
@@ -62,7 +67,6 @@
                  enableWideGamut:(BOOL)isWideGamutEnabled {
   if (delegate == nil) {
     NSLog(@"FlutterView delegate was nil.");
-    [self release];
     return nil;
   }
 
@@ -224,7 +228,7 @@ static BOOL _forceSoftwareRendering;
   // TODO(chunhtai): Remove this workaround once iOS provides an
   // API to query whether voice control is enabled.
   // https://github.com/flutter/flutter/issues/76808.
-  [_delegate flutterViewAccessibilityDidCall];
+  [self.delegate flutterViewAccessibilityDidCall];
   return NO;
 }
 
