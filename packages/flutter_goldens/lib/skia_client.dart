@@ -44,15 +44,15 @@ class SkiaException implements Exception {
 /// A client for uploading image tests and making baseline requests to the
 /// Flutter Gold Dashboard.
 class SkiaGoldClient {
-  /// Creates a [SkiaGoldClient] with the given [workDirectory].
+  /// Creates a [SkiaGoldClient] with the given [workDirectory] and [Platform].
   ///
   /// All other parameters are optional. They may be provided in tests to
-  /// override the defaults for [fs], [process], [platform], and [httpClient].
+  /// override the defaults for [fs], [process], and [httpClient].
   SkiaGoldClient(
     this.workDirectory, {
     this.fs = const LocalFileSystem(),
     this.process = const LocalProcessManager(),
-    this.platform = const LocalPlatform(),
+    required this.platform,
     Abi? abi,
     io.HttpClient? httpClient,
     required this.log,
@@ -65,10 +65,8 @@ class SkiaGoldClient {
   /// replaced by a memory file system.
   final FileSystem fs;
 
-  /// A wrapper for the [dart:io.Platform] API.
-  ///
-  /// This is useful in tests, where the system platform (the default) can be
-  /// replaced by a mock platform instance.
+  /// The environment (current working directory, identity of the OS,
+  /// environment variables, etc).
   final Platform platform;
 
   /// A controller for launching sub-processes.
@@ -589,7 +587,8 @@ class SkiaGoldClient {
         'WebRenderer' : webRenderer,
       'CI' : 'luci',
       'Platform' : platform.operatingSystem,
-      'Abi': abi.toString(),
+      // 'Abi': abi.toString(), workaround for https://g-issues.skia.org/issues/339508268
+      // Flutter tracking issue: https://github.com/flutter/flutter/issues/148022
       'name' : testName,
       'source_type' : 'flutter',
       if (_isImpeller)
