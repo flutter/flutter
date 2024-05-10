@@ -62,7 +62,14 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
   // Check if the "remote" API's response is waiting to be received.
   bool _isLoading = false;
 
+  // Store the text last used in the "remote" API request to stop loading after
+  // the request and debounce durations have both elapsed.
   String _lastValue = '';
+
+  // Check if the text field is currently empty.
+  bool _isFieldEmpty = false;
+
+  // Check if no options were returned by the "remote" API.
   bool _nothingFound = false;
 
   // Calls the "remote" API to search with the given query. Returns null when
@@ -94,10 +101,12 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
       showOptionsViewOnPendingOptions: true,
       showOptionsViewOnEmptyOptions: true,
       optionsBuilder: (TextEditingValue textEditingValue) async {
-        _nothingFound = false;
-        if (textEditingValue.text.isEmpty) {
+        _isFieldEmpty = textEditingValue.text.isEmpty;
+        if ( _nothingFound && textEditingValue.text.length > _lastValue.length
+              || _isFieldEmpty ) {
           return const Iterable<String>.empty();
         }
+        _nothingFound = false;
         _lastValue = textEditingValue.text;
         _isLoading = true; // Begin options loading.
 
@@ -119,9 +128,9 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
       },
       optionsViewBuilder: (BuildContext context,
           AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
-        return _isLoading
+        return _isLoading && !_isFieldEmpty && !_nothingFound
             ? const Text('Loading...')
-            : options.isEmpty && !_nothingFound
+            : _isFieldEmpty
                 ? const Text('Type something')
                 : _nothingFound
                     ? const Text('No options found!')
