@@ -1352,7 +1352,7 @@ extension SkPaintExtension on SkPaint {
 
   @JS('setColorInt')
   external JSVoid _setColorInt(JSNumber color);
-  void setColorInt(double color) => _setColorInt(color.toJS);
+  void setColorInt(int color) => _setColorInt(color.toJS);
 
   external JSVoid setShader(SkShader? shader);
   external JSVoid setMaskFilter(SkMaskFilter? maskFilter);
