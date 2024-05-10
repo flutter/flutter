@@ -352,4 +352,64 @@ void main() {
     expect(exception, isAssertionError);
     expect(exception.toString(), contains('only be shown for an active text input connection'));
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+  testWidgets('does not assert when built with an active text input connection', (WidgetTester tester) async {
+    SystemContextMenu? systemContextMenu;
+    late StateSetter setState;
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          final MediaQueryData mediaQueryData = MediaQuery.of(context);
+          return MediaQuery(
+            data: mediaQueryData.copyWith(
+              supportsShowingSystemContextMenu: true,
+            ),
+            child: MaterialApp(
+              home: Scaffold(
+                body: StatefulBuilder(
+                  builder: (BuildContext context, StateSetter localSetState) {
+                    setState = localSetState;
+                    return Column(
+                      children: <Widget>[
+                        const TextField(),
+                        if (systemContextMenu != null)
+                          systemContextMenu!,
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    // No SystemContextMenu yet, so no assertion error.
+    expect(tester.takeException(), isNull);
+
+    // Tap the field to open a text input connection.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    // Add the SystemContextMenu and expect no error.
+    setState(() {
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      systemContextMenu = SystemContextMenu.editableText(
+        editableTextState: state,
+      );
+    });
+
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    dynamic exception;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      exception ??= details.exception;
+    };
+    addTearDown(() {
+      FlutterError.onError = oldHandler;
+    });
+
+    await tester.pump();
+    expect(exception, isNull);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 }
