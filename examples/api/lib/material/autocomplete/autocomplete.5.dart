@@ -31,7 +31,8 @@ class AutocompleteExampleApp extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
-                  'Type below to autocomplete the following possible results: ${_FakeAPI._kOptions}.'),
+                  'Type below to autocomplete the following possible results: ${_FakeAPI._kOptions}.',
+                  ),
               const _AsyncAutocomplete(),
             ],
           ),
@@ -62,7 +63,6 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
   bool _isLoading = false;
 
   String _lastValue = '';
-  bool _isFirstFocus = false;
   bool _nothingFound = false;
 
   // Calls the "remote" API to search with the given query. Returns null when
@@ -91,12 +91,11 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
   @override
   Widget build(BuildContext context) {
     return Autocomplete<String>(
-      showOptionsViewOnUncompletedOptions: true,
+      showOptionsViewOnPendingOptions: true,
       showOptionsViewOnEmptyOptions: true,
       optionsBuilder: (TextEditingValue textEditingValue) async {
-        _isFirstFocus = textEditingValue.text.isEmpty;
         _nothingFound = false;
-        if (_isFirstFocus) {
+        if (textEditingValue.text.isEmpty) {
           return const Iterable<String>.empty();
         }
         _lastValue = textEditingValue.text;
@@ -121,11 +120,11 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
       optionsViewBuilder: (BuildContext context,
           AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
         return _isLoading
-            ? const Text('loading...')
-            : _isFirstFocus
+            ? const Text('Loading...')
+            : options.isEmpty && !_nothingFound
                 ? const Text('Type something')
                 : _nothingFound
-                    ? const Text('no options found!')
+                    ? const Text('No options found!')
                     : AutocompleteOverlay(
                         onSelected: onSelected, options: options);
       },

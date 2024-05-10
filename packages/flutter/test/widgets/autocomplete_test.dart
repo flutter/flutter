@@ -762,6 +762,18 @@ void main() {
     expect(lastOptions.length, 2);
     expect(lastOptions.elementAt(0), 'chameleon');
     expect(lastOptions.elementAt(1), 'elephant');
+
+    // Enter more text so that no options are returned. The options view is
+    // still displayed because showOptionsViewOnEmptyOptions has been set to
+    // true.
+    textEditingController.value = const TextEditingValue(
+      text: 'elex',
+      selection: TextSelection(baseOffset: 4, extentOffset: 4),
+    );
+    await tester.pump();
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions.length, 0);
   });
 
   testWidgets('can create a field outside of fieldViewBuilder', (WidgetTester tester) async {
@@ -1001,7 +1013,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: RawAutocomplete<String>(
-            showOptionsViewOnUncompletedOptions: true,
+            showOptionsViewOnPendingOptions: true,
             optionsBuilder: (TextEditingValue textEditingValue) async {
               final Iterable<String> options = kOptions.where((String option) {
                 return option.contains(textEditingValue.text.toLowerCase());
@@ -1050,24 +1062,28 @@ void main() {
     //
     // However, the options view is now displayed in the interval between
     // the field being focused and the options being built since
-    // showOptionsViewOnUncompletedOptions is set to true.
+    // showOptionsViewOnPendingOptions is set to true.
     expect(find.byKey(optionsKey), findsNothing);
     expect(find.byKey(optionsLoadingKey), findsOneWidget);
     expect(lastOptions, isNull);
 
     // Await asynchronous options builder.
-    await tester.pumpAndSettle(delay);
-    expect(find.byKey(optionsKey), findsOneWidget);
+    await tester.pump(delay);
     expect(lastOptions, <String>['dingo', 'flamingo', 'goose']);
 
     // Loading view has been replaced with options results.
     expect(find.byKey(optionsLoadingKey), findsNothing);
+    expect(find.byKey(optionsKey), findsOneWidget);
 
     // Enter text to rebuild the options without delay.
     delay = null;
     await tester.enterText(find.byKey(fieldKey), 'ngo');
     await tester.pump();
     expect(lastOptions, <String>['dingo', 'flamingo']);
+
+    // Only options results are displayed.
+    expect(find.byKey(optionsLoadingKey), findsNothing);
+    expect(find.byKey(optionsKey), findsOneWidget);
   });
 
   testWidgets('can navigate options with the keyboard', (WidgetTester tester) async {

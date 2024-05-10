@@ -158,7 +158,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
     this.textEditingController,
     this.initialValue,
     this.showOptionsViewOnEmptyOptions = false,
-    this.showOptionsViewOnUncompletedOptions = false,
+    this.showOptionsViewOnPendingOptions = false,
   }) : assert(
          fieldViewBuilder != null
             || (key != null && focusNode != null && textEditingController != null),
@@ -271,13 +271,40 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// This parameter is ignored if [textEditingController] is defined.
   final TextEditingValue? initialValue;
 
-  /// If the options view overlay should be shown when no options were returned
-  /// from [optionsBuilder].
+  /// {@template flutter.widgets.RawAutocomplete.showOptionsViewOnEmptyOptions}
+  /// If the options view overlay should be shown when the options returned from
+  /// [optionsBuilder] is empty.
+  ///
+  /// Set to true to display a custom options view on first focus or to display
+  /// a message if no options are found.
+  ///
+  /// If not provided, will only display an options view when at least one
+  /// option has been returned from [optionsViewBuilder].
+  ///
+  /// See also:
+  ///
+  ///  * [showOptionsViewOnPendingOptions], which determines if the options view
+  ///    overlay should be shown while the [optionsBuilder] future waits to be
+  ///    resolved.
+  /// {@endtemplate}
   final bool showOptionsViewOnEmptyOptions;
 
+  /// {@template flutter.widgets.RawAutocomplete.showOptionsViewOnPendingOptions}
   /// If the options view overlay should be shown while the [optionsBuilder]
   /// future waits to be resolved.
-  final bool showOptionsViewOnUncompletedOptions;
+  ///
+  /// Set to true to display a loading message in the options view while waiting
+  /// for options to be fetched over the network, for example.
+  ///
+  /// Ignore if options are obtained synchronously.
+  ///
+  /// See also:
+  ///
+  ///  * [showOptionsViewOnEmptyOptions], which determines if the options view
+  ///    overlay should be shown when the options returned from [optionsBuilder]
+  ///    is empty.
+  /// {@endtemplate}
+  final bool showOptionsViewOnPendingOptions;
 
   /// Calls [AutocompleteFieldViewBuilder]'s onFieldSubmitted callback for the
   /// RawAutocomplete widget indicated by the given [GlobalKey].
@@ -353,7 +380,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   bool get _canShowOptionsView => _focusNode.hasFocus && _selection == null &&
     (_options.isNotEmpty
     || widget.showOptionsViewOnEmptyOptions
-    || widget.showOptionsViewOnUncompletedOptions);
+    || widget.showOptionsViewOnPendingOptions);
 
   void _updateOptionsViewVisibility() {
     if (_canShowOptionsView) {
@@ -366,7 +393,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   // Called when _textEditingController changes.
   Future<void> _onChangedField() async {
     final TextEditingValue value = _textEditingController.value;
-    if (widget.showOptionsViewOnUncompletedOptions){
+    if (widget.showOptionsViewOnPendingOptions){
       _updateOptionsViewVisibility();
     }
     final Iterable<T> options = await widget.optionsBuilder(value);

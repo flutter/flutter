@@ -16,9 +16,9 @@ void main() {
     expect(find.text('aardvark'), findsNothing);
     expect(find.text('bobcat'), findsNothing);
     expect(find.text('chameleon'), findsNothing);
-    expect(find.text('loading...'), findsNothing);
+    expect(find.text('Loading...'), findsNothing);
     expect(find.text('Type something'), findsNothing);
-    expect(find.text('no options found!'), findsNothing);
+    expect(find.text('No options found!'), findsNothing);
 
     // Field is focused for the first time.
     await tester.enterText(find.byType(TextFormField), '');
@@ -27,15 +27,15 @@ void main() {
     expect(find.text('aardvark'), findsNothing);
     expect(find.text('bobcat'), findsNothing);
     expect(find.text('chameleon'), findsNothing);
-    expect(find.text('loading...'), findsNothing);
+    expect(find.text('Loading...'), findsNothing);
     expect(find.text('Type something'), findsOneWidget);
-    expect(find.text('no options found!'), findsNothing);
+    expect(find.text('No options found!'), findsNothing);
 
     await tester.enterText(find.byType(TextFormField), 'a');
     await tester.pump();
 
     // Display loading message as text is entered.
-    expect(find.text('loading...'), findsOneWidget);
+    expect(find.text('Loading...'), findsOneWidget);
 
     await tester.pump(example.fakeAPIDuration);
 
@@ -44,18 +44,18 @@ void main() {
     expect(find.text('aardvark'), findsNothing);
     expect(find.text('bobcat'), findsNothing);
     expect(find.text('chameleon'), findsNothing);
-    expect(find.text('loading...'), findsOneWidget);
+    expect(find.text('Loading...'), findsOneWidget);
     expect(find.text('Type something'), findsNothing);
-    expect(find.text('no options found!'), findsNothing);
+    expect(find.text('No options found!'), findsNothing);
 
     await tester.pump(example.debounceDuration);
 
     expect(find.text('aardvark'), findsOneWidget);
     expect(find.text('bobcat'), findsOneWidget);
     expect(find.text('chameleon'), findsOneWidget);
-    expect(find.text('loading...'), findsNothing);
+    expect(find.text('Loading...'), findsNothing);
     expect(find.text('Type something'), findsNothing);
-    expect(find.text('no options found!'), findsNothing);
+    expect(find.text('No options found!'), findsNothing);
 
     await tester.enterText(find.byType(TextFormField), 'aa');
     await tester.pump(example.debounceDuration + example.fakeAPIDuration);
@@ -63,9 +63,9 @@ void main() {
     expect(find.text('aardvark'), findsOneWidget);
     expect(find.text('bobcat'), findsNothing);
     expect(find.text('chameleon'), findsNothing);
-    expect(find.text('loading...'), findsNothing);
+    expect(find.text('Loading...'), findsNothing);
     expect(find.text('Type something'), findsNothing);
-    expect(find.text('no options found!'), findsNothing);
+    expect(find.text('No options found!'), findsNothing);
 
     await tester.enterText(find.byType(TextFormField), 'aax');
     await tester.pump(example.debounceDuration + example.fakeAPIDuration);
@@ -74,9 +74,9 @@ void main() {
     expect(find.text('aardvark'), findsNothing);
     expect(find.text('bobcat'), findsNothing);
     expect(find.text('chameleon'), findsNothing);
-    expect(find.text('loading...'), findsNothing);
+    expect(find.text('Loading...'), findsNothing);
     expect(find.text('Type something'), findsNothing);
-    expect(find.text('no options found!'), findsOneWidget);
+    expect(find.text('No options found!'), findsOneWidget);
   });
 
 
@@ -86,7 +86,7 @@ void main() {
 
     await tester.enterText(find.byType(TextFormField), 'c');
     await tester.pump();
-    expect(find.text('loading...'), findsOneWidget);
+    expect(find.text('Loading...'), findsOneWidget);
     await tester
         .pump(example.debounceDuration - const Duration(milliseconds: 100));
 
@@ -96,7 +96,7 @@ void main() {
 
     await tester.enterText(find.byType(TextFormField), 'ch');
     await tester.pump();
-    expect(find.text('loading...'), findsOneWidget);
+    expect(find.text('Loading...'), findsOneWidget);
     await tester
         .pump(example.debounceDuration - const Duration(milliseconds: 100));
 
@@ -106,7 +106,7 @@ void main() {
 
     await tester.enterText(find.byType(TextFormField), 'cha');
     await tester.pump();
-    expect(find.text('loading...'), findsOneWidget);
+    expect(find.text('Loading...'), findsOneWidget);
     await tester
         .pump(example.debounceDuration - const Duration(milliseconds: 100));
 
@@ -116,7 +116,7 @@ void main() {
 
     await tester.enterText(find.byType(TextFormField), 'cham');
     await tester.pump();
-    expect(find.text('loading...'), findsOneWidget);
+    expect(find.text('Loading...'), findsOneWidget);
     await tester
         .pump(example.debounceDuration - const Duration(milliseconds: 100));
 
@@ -133,7 +133,7 @@ void main() {
     expect(find.text('aardvark'), findsNothing);
     expect(find.text('bobcat'), findsNothing);
     expect(find.text('chameleon'), findsOneWidget);
-    expect(find.text('loading...'), findsNothing);
+    expect(find.text('Loading...'), findsNothing);
   });
 
   testWidgets('can display loading message with multiple pending requests', (WidgetTester tester) async {
@@ -141,7 +141,7 @@ void main() {
 
     await tester.enterText(find.byType(TextFormField), 'a');
     await tester.pump();
-    expect(find.text('loading...'), findsOneWidget);
+    expect(find.text('Loading...'), findsOneWidget);
 
     // Wait until the debounce duration has expired, but the request is still
     // pending.
@@ -150,11 +150,11 @@ void main() {
     expect(find.text('aardvark'), findsNothing);
     expect(find.text('bobcat'), findsNothing);
     expect(find.text('chameleon'), findsNothing);
-    expect(find.text('loading...'), findsOneWidget);
+    expect(find.text('Loading...'), findsOneWidget);
 
     await tester.enterText(find.byType(TextFormField), 'aa');
     await tester.pump();
-    expect(find.text('loading...'), findsOneWidget);
+    expect(find.text('Loading...'), findsOneWidget);
 
     // Wait until the first request has completed.
     await tester.pump(example.fakeAPIDuration - example.debounceDuration);
@@ -164,7 +164,7 @@ void main() {
     expect(find.text('aardvark'), findsNothing);
     expect(find.text('bobcat'), findsNothing);
     expect(find.text('chameleon'), findsNothing);
-    expect(find.text('loading...'), findsOneWidget);
+    expect(find.text('Loading...'), findsOneWidget);
 
     // Wait until the second request has completed.
     await tester.pump(example.fakeAPIDuration);
@@ -173,6 +173,6 @@ void main() {
     expect(find.text('aardvark'), findsOneWidget);
     expect(find.text('bobcat'), findsNothing);
     expect(find.text('chameleon'), findsNothing);
-    expect(find.text('loading...'), findsNothing);
+    expect(find.text('Loading...'), findsNothing);
   });
 }
