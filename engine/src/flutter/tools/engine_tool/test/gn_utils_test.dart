@@ -91,7 +91,10 @@ void main() {
         (Build build) => build.name == 'linux/host_debug',
       ).firstOrNull;
       final List<BuildTarget>? selectedTargets = await targetsFromCommandLine(
-        env, build!, <String>[],
+        env,
+        build!,
+        <String>[],
+        enableRbe: false,
       );
       expect(selectedTargets, isNotNull);
       expect(selectedTargets, isEmpty);
@@ -111,7 +114,11 @@ void main() {
         (Build build) => build.name == 'linux/host_debug',
       ).firstOrNull;
       final List<BuildTarget>? selectedTargets = await targetsFromCommandLine(
-        env, build!, <String>[], defaultToAll: true,
+        env,
+        build!,
+        <String>[],
+        defaultToAll: true,
+        enableRbe: false,
       );
       expect(selectedTargets, isNotNull);
       expect(selectedTargets, isNotEmpty);
