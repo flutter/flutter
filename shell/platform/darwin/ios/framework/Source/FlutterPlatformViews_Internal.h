@@ -81,18 +81,18 @@
 
 // Determines the rect of the blur effect in the coordinate system of `backdropFilterView`'s
 // parentView.
-@property(assign, nonatomic, readonly) CGRect frame;
+@property(nonatomic, readonly) CGRect frame;
 
 // Determines the blur intensity.
 //
 // It is set as the value of `inputRadius` of the `gaussianFilter` that is internally used.
-@property(assign, nonatomic, readonly) CGFloat blurRadius;
+@property(nonatomic, readonly) CGFloat blurRadius;
 
 // This is the view to use to blur the PlatformView.
 //
 // It is a modified version of UIKit's `UIVisualEffectView`.
 // The inputRadius can be customized and it doesn't add any color saturation to the blurred view.
-@property(nonatomic, retain, readonly) UIVisualEffectView* backdropFilterView;
+@property(nonatomic, readonly) UIVisualEffectView* backdropFilterView;
 
 // For testing only.
 + (void)resetPreparation;
@@ -210,16 +210,19 @@ class FlutterPlatformViewsController {
 
   fml::WeakPtr<flutter::FlutterPlatformViewsController> GetWeakPtr();
 
-  void SetFlutterView(UIView* flutter_view);
+  void SetFlutterView(UIView* flutter_view) __attribute__((cf_audited_transfer));
 
-  void SetFlutterViewController(UIViewController<FlutterViewResponder>* flutter_view_controller);
+  void SetFlutterViewController(UIViewController<FlutterViewResponder>* flutter_view_controller)
+      __attribute__((cf_audited_transfer));
 
-  UIViewController<FlutterViewResponder>* getFlutterViewController();
+  UIViewController<FlutterViewResponder>* getFlutterViewController()
+      __attribute__((cf_audited_transfer));
 
   void RegisterViewFactory(
       NSObject<FlutterPlatformViewFactory>* factory,
       NSString* factoryId,
-      FlutterPlatformViewGestureRecognizersBlockingPolicy gestureRecognizerBlockingPolicy);
+      FlutterPlatformViewGestureRecognizersBlockingPolicy gestureRecognizerBlockingPolicy)
+      __attribute__((cf_audited_transfer));
 
   // Called at the beginning of each frame.
   void BeginFrame(SkISize frame_size);
@@ -266,7 +269,8 @@ class FlutterPlatformViewsController {
                    const std::shared_ptr<IOSContext>& ios_context,
                    std::unique_ptr<SurfaceFrame> frame);
 
-  void OnMethodCall(FlutterMethodCall* call, FlutterResult result);
+  void OnMethodCall(FlutterMethodCall* call, FlutterResult result)
+      __attribute__((cf_audited_transfer));
 
   // Returns the platform view id if the platform view (or any of its descendant view) is the first
   // responder. Returns -1 if no such platform view is found.
@@ -284,10 +288,13 @@ class FlutterPlatformViewsController {
 
   using LayersMap = std::map<int64_t, std::vector<std::shared_ptr<FlutterPlatformViewLayer>>>;
 
-  void OnCreate(FlutterMethodCall* call, FlutterResult result);
-  void OnDispose(FlutterMethodCall* call, FlutterResult result);
-  void OnAcceptGesture(FlutterMethodCall* call, FlutterResult result);
-  void OnRejectGesture(FlutterMethodCall* call, FlutterResult result);
+  void OnCreate(FlutterMethodCall* call, FlutterResult result) __attribute__((cf_audited_transfer));
+  void OnDispose(FlutterMethodCall* call, FlutterResult result)
+      __attribute__((cf_audited_transfer));
+  void OnAcceptGesture(FlutterMethodCall* call, FlutterResult result)
+      __attribute__((cf_audited_transfer));
+  void OnRejectGesture(FlutterMethodCall* call, FlutterResult result)
+      __attribute__((cf_audited_transfer));
   // Dispose the views in `views_to_dispose_`.
   void DisposeViews();
 
@@ -301,7 +308,7 @@ class FlutterPlatformViewsController {
   // Traverse the `mutators_stack` and return the number of clip operations.
   int CountClips(const MutatorsStack& mutators_stack);
 
-  void ClipViewSetMaskView(UIView* clipView);
+  void ClipViewSetMaskView(UIView* clipView) __attribute__((cf_audited_transfer));
 
   // Applies the mutators in the mutators_stack to the UIView chain that was constructed by
   // `ReconstructClipViewsChain`
@@ -314,7 +321,7 @@ class FlutterPlatformViewsController {
   // rect of the PlatformView, the clip mutator is not applied for performance optimization.
   void ApplyMutators(const MutatorsStack& mutators_stack,
                      UIView* embedded_view,
-                     const SkRect& bounding_rect);
+                     const SkRect& bounding_rect) __attribute__((cf_audited_transfer));
 
   void CompositeWithParams(int64_t view_id, const EmbeddedViewParams& params);
 

@@ -8,6 +8,8 @@
 #include "flutter/fml/platform/darwin/cf_utils.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 
+FLUTTER_ASSERT_ARC
+
 static constexpr int kMaxPointsInVerb = 4;
 static constexpr NSUInteger kFlutterClippingMaskViewPoolCapacity = 5;
 
@@ -75,7 +77,7 @@ BOOL BlurRadiusEqualToBlurRadius(CGFloat radius1, CGFloat radius2) {
 
 // `YES` if the backdropFilterView has been configured at least once.
 @property(nonatomic) BOOL backdropFilterViewConfigured;
-@property(nonatomic, retain) UIVisualEffectView* backdropFilterView;
+@property(nonatomic) UIVisualEffectView* backdropFilterView;
 
 // Updates the `visualEffectView` with the current filter parameters.
 // Also sets `self.backdropFilterView` to the updated visualEffectView.
@@ -102,10 +104,9 @@ static BOOL _preparedOnce = NO;
     if (![PlatformViewFilter isUIVisualEffectViewImplementationValid]) {
       FML_DLOG(ERROR) << "Apple's API for UIVisualEffectView changed. Update the implementation to "
                          "access the gaussianBlur CAFilter.";
-      [self release];
       return nil;
     }
-    _backdropFilterView = [visualEffectView retain];
+    _backdropFilterView = visualEffectView;
     _backdropFilterViewConfigured = NO;
   }
   return self;
@@ -113,7 +114,6 @@ static BOOL _preparedOnce = NO;
 
 + (void)resetPreparation {
   _preparedOnce = NO;
-  [_gaussianBlurFilter release];
   _gaussianBlurFilter = nil;
   _indexOfBackdropView = -1;
   _indexOfVisualEffectSubview = -1;
@@ -130,7 +130,7 @@ static BOOL _preparedOnce = NO;
       for (NSObject* filter in view.layer.filters) {
         if ([[filter valueForKey:@"name"] isEqual:@"gaussianBlur"] &&
             [[filter valueForKey:@"inputRadius"] isKindOfClass:[NSNumber class]]) {
-          _gaussianBlurFilter = [filter retain];
+          _gaussianBlurFilter = filter;
           break;
         }
       }
@@ -145,13 +145,6 @@ static BOOL _preparedOnce = NO;
   return _indexOfBackdropView > -1 && _indexOfVisualEffectSubview > -1 && _gaussianBlurFilter;
 }
 
-- (void)dealloc {
-  [_backdropFilterView release];
-  _backdropFilterView = nil;
-
-  [super dealloc];
-}
-
 - (UIVisualEffectView*)backdropFilterView {
   FML_DCHECK(_backdropFilterView);
   if (!self.backdropFilterViewConfigured) {
@@ -162,7 +155,7 @@ static BOOL _preparedOnce = NO;
 }
 
 - (void)updateVisualEffectView:(UIVisualEffectView*)visualEffectView {
-  NSObject* gaussianBlurFilter = [[_gaussianBlurFilter copy] autorelease];
+  NSObject* gaussianBlurFilter = [_gaussianBlurFilter copy];
   FML_DCHECK(gaussianBlurFilter);
   UIView* backdropView = visualEffectView.subviews[_indexOfBackdropView];
   [gaussianBlurFilter setValue:@(_blurRadius) forKey:@"inputRadius"];
@@ -179,8 +172,8 @@ static BOOL _preparedOnce = NO;
 
 @interface ChildClippingView ()
 
-@property(retain, nonatomic) NSArray<PlatformViewFilter*>* filters;
-@property(retain, nonatomic) NSMutableArray<UIVisualEffectView*>* backdropFilterSubviews;
+@property(nonatomic, copy) NSArray<PlatformViewFilter*>* filters;
+@property(nonatomic) NSMutableArray<UIVisualEffectView*>* backdropFilterSubviews;
 
 @end
 
@@ -220,16 +213,6 @@ static BOOL _preparedOnce = NO;
     [self.backdropFilterSubviews[i - 1] removeFromSuperview];
     [self.backdropFilterSubviews removeLastObject];
   }
-}
-
-- (void)dealloc {
-  [_filters release];
-  _filters = nil;
-
-  [_backdropFilterSubviews release];
-  _backdropFilterSubviews = nil;
-
-  [super dealloc];
 }
 
 - (NSMutableArray*)backdropFilterSubviews {
@@ -459,11 +442,11 @@ static BOOL _preparedOnce = NO;
 
 // The maximum number of `FlutterClippingMaskView` the pool can contain.
 // This prevents the pool to grow infinately and limits the maximum memory a pool can use.
-@property(assign, nonatomic) NSUInteger capacity;
+@property(nonatomic) NSUInteger capacity;
 
 // The pool contains the views that are available to use.
 // The number of items in the pool must not excceds `capacity`.
-@property(retain, nonatomic) NSMutableSet<FlutterClippingMaskView*>* pool;
+@property(nonatomic) NSMutableSet<FlutterClippingMaskView*>* pool;
 
 @end
 
@@ -483,11 +466,10 @@ static BOOL _preparedOnce = NO;
   FML_DCHECK(self.pool.count <= self.capacity);
   if (self.pool.count == 0) {
     // The pool is empty, alloc a new one.
-    return
-        [[[FlutterClippingMaskView alloc] initWithFrame:frame
-                                            screenScale:[UIScreen mainScreen].scale] autorelease];
+    return [[FlutterClippingMaskView alloc] initWithFrame:frame
+                                              screenScale:UIScreen.mainScreen.scale];
   }
-  FlutterClippingMaskView* maskView = [[[self.pool anyObject] retain] autorelease];
+  FlutterClippingMaskView* maskView = [self.pool anyObject];
   maskView.frame = frame;
   [maskView reset];
   [self.pool removeObject:maskView];
@@ -501,12 +483,6 @@ static BOOL _preparedOnce = NO;
     return;
   }
   [self.pool addObject:maskView];
-}
-
-- (void)dealloc {
-  [_pool release];
-
-  [super dealloc];
 }
 
 @end
