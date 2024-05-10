@@ -30,9 +30,8 @@ final class BuildCommand extends CommandBase {
     );
     argParser.addFlag(
       rbeFlag,
-      defaultsTo: true,
-      help: 'RBE is enabled by default when available. Use --no-rbe to '
-          'disable it.',
+      defaultsTo: environment.hasRbeConfigInTree(),
+      help: 'RBE is enabled by default when available.',
     );
     argParser.addFlag(
       ltoFlag,
@@ -57,6 +56,10 @@ et build //flutter/fml:fml_benchmarks  # Build a specific target in `//flutter/f
   Future<int> run() async {
     final String configName = argResults![configFlag] as String;
     final bool useRbe = argResults![rbeFlag] as bool;
+    if (useRbe && !environment.hasRbeConfigInTree()) {
+      environment.logger.error('RBE was requested but no RBE config was found');
+      return 1;
+    }
     final bool useLto = argResults![ltoFlag] as bool;
     final String demangledName = demangleConfigName(environment, configName);
     final Build? build =
@@ -76,6 +79,7 @@ et build //flutter/fml:fml_benchmarks  # Build a specific target in `//flutter/f
       environment,
       build,
       argResults!.rest,
+      enableRbe: useRbe,
     );
     if (selectedTargets == null) {
       // The user typed something wrong and targetsFromCommandLine has already
@@ -93,6 +97,7 @@ et build //flutter/fml:fml_benchmarks  # Build a specific target in `//flutter/f
       build,
       extraGnArgs: extraGnArgs,
       targets: ninjaTargets,
+      enableRbe: useRbe,
     );
   }
 }
