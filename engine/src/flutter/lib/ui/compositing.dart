@@ -367,10 +367,6 @@ abstract class SceneBuilder {
   /// The given color is applied to the objects' rasterization using the given
   /// blend mode.
   ///
-  /// This method is a strict subset of [pushImageFilter] (because [ColorFilter]
-  /// implements [ImageFilter]); it is always correct to use [pushImageFilter]
-  /// where one might have used [pushColorFilter].
-  ///
   /// {@macro dart.ui.sceneBuilder.oldLayer}
   ///
   /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
@@ -383,8 +379,8 @@ abstract class SceneBuilder {
 
   /// Pushes an image filter operation onto the operation stack.
   ///
-  /// The given filter is applied to the children's rasterization before
-  /// compositing them into the scene.
+  /// The given filter is applied to the children's rasterization before compositing them into
+  /// the scene.
   ///
   /// {@macro dart.ui.sceneBuilder.oldLayer}
   ///
