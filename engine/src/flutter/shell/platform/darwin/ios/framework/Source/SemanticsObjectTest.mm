@@ -994,19 +994,30 @@ FLUTTER_ASSERT_ARC
       new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::testing::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
   __weak FlutterTouchInterceptingView* weakPlatformView;
+  __weak FlutterPlatformViewSemanticsContainer* weakContainer;
   @autoreleasepool {
     FlutterTouchInterceptingView* platformView = [[FlutterTouchInterceptingView alloc] init];
     weakPlatformView = platformView;
-    FlutterPlatformViewSemanticsContainer* container =
-        [[FlutterPlatformViewSemanticsContainer alloc] initWithBridge:bridge
-                                                                  uid:1
-                                                         platformView:platformView];
-    XCTAssertEqualObjects(platformView.accessibilityContainer, container);
+
+    @autoreleasepool {
+      FlutterPlatformViewSemanticsContainer* container =
+          [[FlutterPlatformViewSemanticsContainer alloc] initWithBridge:bridge
+                                                                    uid:1
+                                                           platformView:platformView];
+      weakContainer = container;
+      XCTAssertEqualObjects(platformView.accessibilityContainer, container);
+      XCTAssertNotNil(weakPlatformView);
+      XCTAssertNotNil(weakContainer);
+    }
+    // Check the variables are still lived.
+    // `container` is `retain` in `platformView`, so it will not be nil here.
     XCTAssertNotNil(weakPlatformView);
+    XCTAssertNotNil(weakContainer);
   }
   // Check if there's no more strong references to `platformView` after container and platformView
   // are released.
   XCTAssertNil(weakPlatformView);
+  XCTAssertNil(weakContainer);
 }
 
 - (void)testTextInputSemanticsObject {

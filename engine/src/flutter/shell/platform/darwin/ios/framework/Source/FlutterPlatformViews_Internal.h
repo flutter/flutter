@@ -440,7 +440,7 @@ class FlutterPlatformViewsController {
 - (UIView*)embeddedView;
 
 // Sets flutterAccessibilityContainer as this view's accessibilityContainer.
-- (void)setFlutterAccessibilityContainer:(NSObject*)flutterAccessibilityContainer;
+@property(nonatomic, retain) id flutterAccessibilityContainer;
 @end
 
 @interface UIView (FirstResponder)

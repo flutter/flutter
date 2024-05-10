@@ -867,7 +867,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 @end
 
 @interface FlutterPlatformViewSemanticsContainer ()
-@property(nonatomic, retain) UIView* platformView;
+@property(nonatomic, assign) UIView* platformView;
 @end
 
 @implementation FlutterPlatformViewSemanticsContainer
@@ -876,14 +876,13 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
                            uid:(int32_t)uid
                   platformView:(nonnull FlutterTouchInterceptingView*)platformView {
   if (self = [super initWithBridge:bridge uid:uid]) {
-    _platformView = [platformView retain];
+    _platformView = platformView;
     [platformView setFlutterAccessibilityContainer:self];
   }
   return self;
 }
 
 - (void)dealloc {
-  [_platformView release];
   _platformView = nil;
   [super dealloc];
 }
