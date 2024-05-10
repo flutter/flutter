@@ -41,7 +41,7 @@ class GlyphAtlasContextSTB
     : public GlyphAtlasContext,
       public BackendCast<GlyphAtlasContextSTB, GlyphAtlasContext> {
  public:
-  GlyphAtlasContextSTB();
+  explicit GlyphAtlasContextSTB(GlyphAtlas::Type type);
 
   ~GlyphAtlasContextSTB() override;
 
