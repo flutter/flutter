@@ -406,7 +406,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/media_query/media_query_data.system_gesture_insets.0_test.dart',
   'examples/api/test/widgets/async/future_builder.0_test.dart',
   'examples/api/test/widgets/restoration_properties/restorable_value.0_test.dart',
-  'examples/api/test/widgets/animated_size/animated_size.0_test.dart',
   'examples/api/test/widgets/animated_switcher/animated_switcher.0_test.dart',
   'examples/api/test/widgets/transitions/relative_positioned_transition.0_test.dart',
   'examples/api/test/widgets/transitions/positioned_transition.0_test.dart',
