@@ -18,6 +18,13 @@
 
 namespace impeller {
 
+/// This Canvas attempts to translate from display lists to draw calls directly.
+///
+/// It's not fully implemented yet but if successful it will be replacing the
+/// aiks Canvas functionality.
+///
+/// See also:
+///   - go/impeller-canvas-efficiency
 class ExperimentalCanvas : public Canvas {
  public:
   ExperimentalCanvas(ContentContext& renderer,
