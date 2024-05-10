@@ -229,6 +229,7 @@ To your `Info.plist` file, add under the top-level `<dict>` tag:
 ## Documentation, References, and Additional Reading
 
 * [Frequently Asked Questions](docs/faq.md)
+* [Baby's First Triangle](docs/babys_first_triangle.md)
 * [Impellers Coordinate System](docs/coordinate_system.md)
 * [How to Setup Xcode for GPU Frame Captures with Metal.](docs/xcode_frame_capture.md)
 * [How to Setup RenderDoc Frame Captures with Vulkan.](docs/renderdoc_frame_capture.md)
