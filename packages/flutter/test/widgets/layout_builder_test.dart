@@ -334,6 +334,47 @@ void main() {
     expect(built, 2);
   });
 
+  testWidgets('LayoutBuilder can change size without rebuild', (WidgetTester tester) async {
+    int built = 0;
+    final Widget target = LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return Builder(builder: (BuildContext context) {
+          built += 1;
+          return const Text('A');
+        });
+      },
+    );
+    expect(built, 0);
+
+    await tester.pumpWidget(
+      Center(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: DefaultTextStyle(
+            style: const TextStyle(fontSize: 10),
+            child: target,
+          ),
+        ),
+      )
+    );
+    expect(built, 1);
+    expect(tester.getSize(find.byWidget(target)), const Size(10, 10));
+
+    await tester.pumpWidget(
+      Center(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: DefaultTextStyle(
+            style: const TextStyle(fontSize: 100),
+            child: target,
+          ),
+        ),
+      )
+    );
+    expect(built, 1);
+    expect(tester.getSize(find.byWidget(target)), const Size(100, 100));
+  });
+
   testWidgets('SliverLayoutBuilder and Inherited -- do not rebuild when not using inherited', (WidgetTester tester) async {
     int built = 0;
     final Widget target = Directionality(
