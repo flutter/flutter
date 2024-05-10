@@ -3,12 +3,15 @@
 // found in the LICENSE file.
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/time/time_point.h"
 #include "impeller/core/device_buffer_descriptor.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/fixtures/array.frag.h"
 #include "impeller/fixtures/array.vert.h"
+#include "impeller/fixtures/baby.frag.h"
+#include "impeller/fixtures/baby.vert.h"
 #include "impeller/fixtures/box_fade.frag.h"
 #include "impeller/fixtures/box_fade.vert.h"
 #include "impeller/fixtures/colors.frag.h"
@@ -110,6 +113,59 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
     FS::BindContents2(pass, bridge, sampler);
 
     host_buffer->Reset();
+    return pass.Draw().ok();
+  };
+  OpenPlaygroundHere(callback);
+}
+
+TEST_P(RendererTest, BabysFirstTriangle) {
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+
+  // Declare a shorthand for the shaders we are going to use.
+  using VS = BabyVertexShader;
+  using FS = BabyFragmentShader;
+
+  // Create a pipeline descriptor that uses the shaders together and default
+  // initializes the fixed function state.
+  //
+  // If the vertex shader outputs disagree with the fragment shader inputs, this
+  // will be a compile time error.
+  auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(desc.has_value());
+
+  // Modify the descriptor for our environment. This is specific to our test.
+  desc->SetSampleCount(SampleCount::kCount4);
+  desc->SetStencilAttachmentDescriptors(std::nullopt);
+
+  // Create a pipeline from our descriptor. This is expensive to do. So just do
+  // it once.
+  auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).Get();
+
+  // Create a host side buffer to build the vertex and uniform information.
+  auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
+
+  // Specify the vertex buffer information.
+  VertexBufferBuilder<VS::PerVertexData> vertex_buffer_builder;
+  vertex_buffer_builder.AddVertices({
+      {{-0.5, -0.5}, Color::Red(), Color::Green()},
+      {{0.0, 0.5}, Color::Green(), Color::Blue()},
+      {{0.5, -0.5}, Color::Blue(), Color::Red()},
+  });
+
+  auto vertex_buffer = vertex_buffer_builder.CreateVertexBuffer(
+      *context->GetResourceAllocator());
+
+  SinglePassCallback callback = [&](RenderPass& pass) {
+    pass.SetPipeline(pipeline);
+    pass.SetVertexBuffer(vertex_buffer);
+
+    FS::FragInfo frag_info;
+    frag_info.time = fml::TimePoint::Now().ToEpochDelta().ToSecondsF();
+
+    auto host_buffer = HostBuffer::Create(context->GetResourceAllocator());
+    FS::BindFragInfo(pass, host_buffer->EmplaceUniform(frag_info));
+
     return pass.Draw().ok();
   };
   OpenPlaygroundHere(callback);
