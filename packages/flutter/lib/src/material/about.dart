@@ -590,8 +590,8 @@ class _PackagesViewState extends State<_PackagesView> {
                       child: Material(
                         color: Theme.of(context).cardColor,
                         elevation: 4.0,
-                        child: Container(
-                          constraints: BoxConstraints.loose(const Size.fromWidth(600.0)),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 600.0),
                           child: _packagesList(context, selectedId, snapshot.data!, widget.isLateral),
                         ),
                       ),
@@ -887,8 +887,8 @@ class _PackageLicensePageState extends State<_PackageLicensePage> {
           child: Material(
             color: theme.cardColor,
             elevation: 4.0,
-            child: Container(
-              constraints: BoxConstraints.loose(const Size.fromWidth(600.0)),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600.0),
               child: Localizations.override(
                 locale: const Locale('en', 'US'),
                 context: context,
@@ -1361,17 +1361,19 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
               preferredSize: const Size.fromHeight(kToolbarHeight),
               child: Row(
                 children: <Widget>[
-                  ConstrainedBox(
-                    constraints: BoxConstraints.tightFor(width: masterViewWidth),
+                  SizedBox(
+                    width: masterViewWidth,
                     child: IconTheme(
                       data: Theme.of(context).primaryIconTheme,
-                      child: Container(
-                        alignment: AlignmentDirectional.centerEnd,
+                      child: Padding(
                         padding: const EdgeInsets.all(8),
-                        child: OverflowBar(
-                          spacing: 8,
-                          overflowAlignment: OverflowBarAlignment.end,
-                          children: widget.actionBuilder!(context, _ActionLevel.view),
+                        child: Align(
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: OverflowBar(
+                            spacing: 8,
+                            overflowAlignment: OverflowBarAlignment.end,
+                            children: widget.actionBuilder!(context, _ActionLevel.view),
+                          ),
                         ),
                       ),
                     ),
@@ -1405,9 +1407,8 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold>
                       child,
                     ),
                   duration: const Duration(milliseconds: 500),
-                  child: Container(
+                  child: SizedBox.expand(
                     key: ValueKey<Object?>(value ?? widget.initialArguments),
-                    constraints: const BoxConstraints.expand(),
                     child: _DetailView(
                       builder: widget.detailPageBuilder,
                       arguments: value ?? widget.initialArguments,
