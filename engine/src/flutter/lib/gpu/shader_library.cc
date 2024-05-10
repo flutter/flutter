@@ -14,6 +14,7 @@
 #include "flutter/lib/ui/window/platform_configuration.h"
 #include "fml/mapping.h"
 #include "fml/memory/ref_ptr.h"
+#include "impeller/base/validation.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/renderer/vertex_descriptor.h"
 #include "impeller/shader_bundle/shader_bundle_flatbuffers.h"

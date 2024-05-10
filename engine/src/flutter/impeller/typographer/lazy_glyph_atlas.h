@@ -25,6 +25,7 @@ class LazyGlyphAtlas {
 
   const std::shared_ptr<GlyphAtlas>& CreateOrGetGlyphAtlas(
       Context& context,
+      HostBuffer& host_buffer,
       GlyphAtlas::Type type) const;
 
  private:

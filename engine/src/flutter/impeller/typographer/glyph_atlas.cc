@@ -9,9 +9,8 @@
 
 namespace impeller {
 
-GlyphAtlasContext::GlyphAtlasContext()
-    : atlas_(std::make_shared<GlyphAtlas>(GlyphAtlas::Type::kAlphaBitmap)),
-      atlas_size_(ISize(0, 0)) {}
+GlyphAtlasContext::GlyphAtlasContext(GlyphAtlas::Type type)
+    : atlas_(std::make_shared<GlyphAtlas>(type)), atlas_size_(ISize(0, 0)) {}
 
 GlyphAtlasContext::~GlyphAtlasContext() {}
 

@@ -12,7 +12,6 @@
 
 #include "impeller/core/texture.h"
 #include "impeller/geometry/rect.h"
-#include "impeller/renderer/pipeline.h"
 #include "impeller/typographer/font_glyph_pair.h"
 #include "impeller/typographer/rectangle_packer.h"
 
@@ -145,6 +144,8 @@ class GlyphAtlas {
 ///
 class GlyphAtlasContext {
  public:
+  explicit GlyphAtlasContext(GlyphAtlas::Type type);
+
   virtual ~GlyphAtlasContext();
 
   //----------------------------------------------------------------------------
@@ -164,9 +165,6 @@ class GlyphAtlasContext {
   void UpdateGlyphAtlas(std::shared_ptr<GlyphAtlas> atlas, ISize size);
 
   void UpdateRectPacker(std::shared_ptr<RectanglePacker> rect_packer);
-
- protected:
-  GlyphAtlasContext();
 
  private:
   std::shared_ptr<GlyphAtlas> atlas_;

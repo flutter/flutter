@@ -6,8 +6,6 @@ import("//flutter/impeller/tools/impeller.gni")
 
 impeller_component("typographer_skia_backend") {
   sources = [
-    "glyph_atlas_context_skia.cc",
-    "glyph_atlas_context_skia.h",
     "text_frame_skia.cc",
     "text_frame_skia.h",
     "typeface_skia.cc",

@@ -43,7 +43,8 @@ size_t BitmapSTB::GetSize() const {
   return width_ * height_ * bytes_per_pixel_;
 }
 
-GlyphAtlasContextSTB::GlyphAtlasContextSTB() = default;
+GlyphAtlasContextSTB::GlyphAtlasContextSTB(GlyphAtlas::Type type)
+    : GlyphAtlasContext(type) {}
 
 GlyphAtlasContextSTB::~GlyphAtlasContextSTB() = default;
 
