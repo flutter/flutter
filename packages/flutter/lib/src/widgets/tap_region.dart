@@ -277,9 +277,6 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior implement
     for (final RenderTapRegion region in insideRegions) {
       assert(_tapRegionDebug('Calling onTapInside for $region'));
       region.onTapInside?.call(event);
-      if (!hitRegions.contains(region)) {
-        region.onTapOutside?.call(event);
-      }
     }
 
     // If any of the "outside" regions have consumeOutsideTaps set, then stop
