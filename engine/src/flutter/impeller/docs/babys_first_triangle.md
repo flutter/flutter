@@ -17,7 +17,7 @@ Shaders define the programmable stages of a pipeline. We are going to be define 
 
 The job of a vertex shader is to transform the vertices of our triangle into [normalized device coordinates](coordinate_system.md) (NDC). The rasterizer will then take these coordinates and convert them to 2D coordinates in the framebuffer.
 
-OTOH, the job of the fragment shader is to shade (color) the pixels covered by the triangle.
+On the other hand, the job of the fragment shader is to shade (color) the pixels covered by the triangle.
 
 #### Vertex Shader
 
@@ -62,9 +62,9 @@ struct PerVertexData {
 
 The compiler has detected that the shader expects one point position per vertex. It is going to be our job to fill this in during rendering.
 
-This struct is handy because as you tinker on your shader, the compiler will add, remove, and reorder the fields. If there are alignment considerations for the GPU, the compiler knows about these and it will add the appropriate padding between these fields so you all you have to worry about is filling in the position. You don't have to use this struct directly, but trusting the compiler will greatly simplify you experience.
+This struct is handy because as you tinker on your shader, the compiler will add, remove, and reorder the fields. If there are alignment considerations for the GPU, the compiler knows about these and it will add the appropriate padding between these fields so you all you have to worry about is filling in the position. You don't have to use this struct directly, but trusting the compiler will greatly simplify your experience.
 
-Notice that all these interfaces and metadata are in a struct called `BabyVertexShader`. Find a similar struct called `BabyFragmentShader` in `baby.frag.h`. [Tinker around with the shader in the compiler explorer](https://tinyurl.com/28fypq2b) to see what the compiler generates.
+All these interfaces and metadata are in a struct called `BabyVertexShader`. Find a similar struct called `BabyFragmentShader` in `baby.frag.h`. [Tinker around with the shader in the compiler explorer](https://tinyurl.com/28fypq2b) to see what the compiler generates.
 
 Now, let's put together a pipeline. First you need a pipeline descriptor.
 
@@ -119,7 +119,7 @@ If you change the vertex information in your shader, the `PerVertexData` struct 
 
 ### Draw
 
-You don't all the heavy lifting already. Per frame, you only need to set the pipeline and vertex buffer you've stashed in the render pass and invoke a draw call.
+You've done all the heavy lifting already. Per frame, you only need to set the pipeline and vertex buffer you've stashed in the render pass and invoke a draw call.
 
 ```c++
 pass.SetPipeline(pipeline);
@@ -162,7 +162,7 @@ And in the body, set the color of the fragment to the this input.
 frag_color = v_color;
 ```
 
-Notice we didn't do anything to perform the color mixing. That's because the rasterizer interpolates the values between stages. Since the varies depending on the pixel, we call these "varyings" and use the `v_` prefix for such variables.
+We didn't do anything to perform the color mixing. That's because the rasterizer interpolates the values between stages. Since the varies depending on the pixel, we call these "varyings" and use the `v_` prefix for such variables.
 
 We are done with the shaders. But the compiler now warns that the vertex buffer builder can no longer build our vertex buffer! And its right because each vertex now needs to be supplied a color as well. Patch this in.
 
