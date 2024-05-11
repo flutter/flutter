@@ -1381,7 +1381,7 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
         barrierColor: barrierColor ?? CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context),
       );
   /// Custom transition animation builder
-  RouteTransitionsBuilder? transitionBuilder;
+  final RouteTransitionsBuilder? transitionBuilder;
   CurvedAnimation? _fadeAnimation;
 
   void _setAnimation(Animation<double> animation) {
