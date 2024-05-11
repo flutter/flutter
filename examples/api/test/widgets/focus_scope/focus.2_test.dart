@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/widgets/focus_scope/focus.2.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('adds children through button', (WidgetTester tester) async {
+  testWidgets('Adds children through button', (WidgetTester tester) async {
     await tester.pumpWidget(const example.FocusExampleApp());
     expect(find.byIcon(Icons.add), findsOneWidget);
     expect(find.text('CHILD 0'), findsOneWidget);
@@ -21,7 +21,7 @@ void main() {
     }
   });
 
-  testWidgets('adds focus nodes', (WidgetTester tester) async {
+  testWidgets('Inserts focus nodes', (WidgetTester tester) async {
     await tester.pumpWidget(const example.FocusExampleApp());
     expect(find.byIcon(Icons.add), findsOneWidget);
 
