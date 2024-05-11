@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/material/banner/material_banner.1.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('shows all elements when needed', (WidgetTester tester) async {
+  testWidgets('Shows all elements when needed', (WidgetTester tester) async {
     await tester.pumpWidget(const example.MaterialBannerExampleApp());
     await tester.pumpAndSettle();
     expect(find.text('The MaterialBanner is below'), findsOneWidget);
@@ -28,7 +28,7 @@ void main() {
     expect(banner.backgroundColor, Colors.green);
   });
 
-  testWidgets('the banner is below the text saying so', (WidgetTester tester) async {
+  testWidgets('The banner is below the text saying so', (WidgetTester tester) async {
     await tester.pumpWidget(const example.MaterialBannerExampleApp());
     await tester.tap(find.text('Show MaterialBanner'));
     await tester.pumpAndSettle();

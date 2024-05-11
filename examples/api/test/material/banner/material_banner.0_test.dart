@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/material/banner/material_banner.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('shows all elements', (WidgetTester tester) async {
+  testWidgets('Shows all elements', (WidgetTester tester) async {
     await tester.pumpWidget(const example.MaterialBannerExampleApp());
     expect(find.byType(MaterialBanner), findsOneWidget);
     expect(find.byType(AppBar), findsOneWidget);
@@ -20,7 +20,7 @@ void main() {
     expect(find.byIcon(Icons.agriculture_outlined), findsOneWidget);
   });
 
-  testWidgets('the banner is below the text saying so', (WidgetTester tester) async {
+  testWidgets('The banner is below the text saying so', (WidgetTester tester) async {
     await tester.pumpWidget(const example.MaterialBannerExampleApp());
     expect(find.byType(MaterialBanner), findsOneWidget);
     expect(find.text('The MaterialBanner is below'), findsOneWidget);
