@@ -102,6 +102,7 @@ class TextFormField extends FormField<String> {
   TextFormField({
     super.key,
     this.controller,
+    this.groupId,
     String? initialValue,
     FocusNode? focusNode,
     InputDecoration? decoration = const InputDecoration(),
@@ -203,6 +204,7 @@ class TextFormField extends FormField<String> {
            return UnmanagedRestorationScope(
              bucket: field.bucket,
              child: TextField(
+               groupId: groupId,
                restorationId: restorationId,
                controller: state._effectiveController,
                focusNode: focusNode,
@@ -278,6 +280,15 @@ class TextFormField extends FormField<String> {
   /// If null, this widget will create its own [TextEditingController] and
   /// initialize its [TextEditingController.text] with [initialValue].
   final TextEditingController? controller;
+
+  /// An optional group ID that groups [TapRegion]s together so that they
+  /// operate as one region. If any member of a group is hit by a particular
+  /// tap, then the [onTapOutside] will not be called for any members of the
+  /// group. If any member of the group is hit, then all members will have their
+  /// [onTapInside] called.
+  ///
+  /// If the group id is null, then only this region is hit tested.
+  final Object? groupId;
 
   /// {@template flutter.material.TextFormField.onChanged}
   /// Called when the user initiates a change to the TextField's

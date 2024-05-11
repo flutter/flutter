@@ -260,6 +260,7 @@ class TextField extends StatefulWidget {
   ///    characters" and how it may differ from the intuitive meaning.
   const TextField({
     super.key,
+    this.groupId,
     this.controller,
     this.focusNode,
     this.undoController,
@@ -368,6 +369,15 @@ class TextField extends StatefulWidget {
   /// ** See code in examples/api/lib/widgets/text_magnifier/text_magnifier.0.dart **
   /// {@end-tool}
   final TextMagnifierConfiguration? magnifierConfiguration;
+
+  /// An optional group ID that groups [TapRegion]s together so that they
+  /// operate as one region. If any member of a group is hit by a particular
+  /// tap, then the [onTapOutside] will not be called for any members of the
+  /// group. If any member of the group is hit, then all members will have their
+  /// [onTapInside] called.
+  ///
+  /// If the group id is null, then only this region is hit tested.
+  final Object? groupId;
 
   /// Controls the text being edited.
   ///
@@ -1501,6 +1511,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           onSubmitted: widget.onSubmitted,
           onAppPrivateCommand: widget.onAppPrivateCommand,
           onSelectionHandleTapped: _handleSelectionHandleTapped,
+          groupId: widget.groupId,
           onTapOutside: widget.onTapOutside,
           inputFormatters: formatters,
           rendererIgnoresPointer: true,
