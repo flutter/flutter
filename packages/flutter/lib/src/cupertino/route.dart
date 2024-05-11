@@ -1367,33 +1367,38 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
     super.barrierDismissible,
     Color? barrierColor,
     String? barrierLabel,
+    this.transitionBuilder,
     // This transition duration was eyeballed comparing with iOS
     super.transitionDuration = const Duration(milliseconds: 250),
-    super.transitionBuilder = _buildCupertinoDialogTransitions,
     super.settings,
     super.anchorPoint,
   }) : super(
         pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
           return builder(context);
         },
+        transitionBuilder: transitionBuilder ?? _buildCupertinoDialogTransitions,
         barrierLabel: barrierLabel ?? CupertinoLocalizations.of(context).modalBarrierDismissLabel,
         barrierColor: barrierColor ?? CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context),
       );
-
+  /// Custom transition animation builder
+  RouteTransitionsBuilder? transitionBuilder;
   CurvedAnimation? _fadeAnimation;
 
   void _setAnimation(Animation<double> animation) {
-    if(_fadeAnimation != null) {
-      return;
+    if (_fadeAnimation?.parent != animation) {
+      _fadeAnimation?.dispose();
+      _fadeAnimation = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOut,
+      );
     }
-    _fadeAnimation = CurvedAnimation(
-    parent: animation,
-    curve: Curves.easeOut,
-    );
   }
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    if (transitionBuilder != null) {
+      return super.buildTransitions(context, animation, secondaryAnimation, child);
+    }
     _setAnimation(animation);
     if (animation.status == AnimationStatus.reverse) {
       return FadeTransition(
