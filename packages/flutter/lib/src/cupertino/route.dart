@@ -1383,13 +1383,13 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
   CurvedAnimation? _fadeAnimation;
 
   void _setAnimation(Animation<double> animation) {
-    if (_fadeAnimation?.parent != animation) {
-      _fadeAnimation?.dispose();
-      _fadeAnimation = CurvedAnimation(
-      parent: animation,
-      curve: Curves.easeOut,
-      );
+    if(_fadeAnimation != null) {
+      return;
     }
+    _fadeAnimation = CurvedAnimation(
+    parent: animation,
+    curve: Curves.easeOut,
+    );
   }
 
   @override
