@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/widgets/sliver_fill/sliver_fill_remaining.3.
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('shows all elements', (WidgetTester tester) async {
+  testWidgets('Shows all elements', (WidgetTester tester) async {
     await tester.pumpWidget(const example.SliverFillRemainingExampleApp());
     expect(find.text('SliverFillRemaining Sample'), findsOneWidget);
     expect(find.byType(ElevatedButton), findsOneWidget);

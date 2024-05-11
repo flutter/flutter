@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/widgets/sliver_fill/sliver_fill_remaining.1.
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('shows all elements', (WidgetTester tester) async {
+  testWidgets('Shows all elements', (WidgetTester tester) async {
     await tester.pumpWidget(const example.SliverFillRemainingExampleApp());
     expect(find.text('SliverFillRemaining Sample'), findsOneWidget);
     expect(find.byType(CustomScrollView), findsOneWidget);
@@ -28,7 +28,7 @@ void main() {
   testWidgets('Fills up all available space', (WidgetTester tester) async {
     await tester.pumpWidget(const example.SliverFillRemainingExampleApp());
 
-    final double listSpece = tester.getSize(find.byType(CustomScrollView)).height;
+    final double listSpace = tester.getSize(find.byType(CustomScrollView)).height;
     double contentHeight = 0.0;
     for (final Widget widget in tester.widgetList(find.byWidgetPredicate(
       (Widget widget) =>
@@ -38,6 +38,6 @@ void main() {
     ) {
       contentHeight += tester.getSize(find.byWidget(widget)).height;
     }
-    expectLater(contentHeight, equals(listSpece));
+    expectLater(contentHeight, equals(listSpace));
   });
 }
