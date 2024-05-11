@@ -499,7 +499,7 @@ void main() {
 
        expect(
          skiaClient.getTraceID('flutter.golden.1'),
-         equals('1937c1c93610cc0122a86a83d5bd38a4'),
+         equals('ae18c7a6aa48e0685525dfe8fdf79003'),
        );
      });
 
@@ -533,7 +533,7 @@ void main() {
 
        expect(
          skiaClient.getTraceID('flutter.golden.1'),
-         equals('bc44a50c01eb3bbaf72a80d76c1c2305'),
+         equals('e9d5c296c48e7126808520e9cc191243'),
        );
      });
 
@@ -561,7 +561,7 @@ void main() {
       );
       expect(
         skiaClient.getTraceID('flutter.golden.1'),
-        equals('8821f4896801fcdd7cd6d30f5a8e4284'),
+        equals('9968695b9ae78cdb77cbb2be621ca2d6'),
       );
     });
 
@@ -716,7 +716,7 @@ void main() {
       defaultComparator.basedir = flutterRoot.childDirectory('baz').uri;
       final Directory basedir = FlutterGoldenFileComparator.getBaseDirectory(
         defaultComparator,
-        platform,
+        platform: platform,
         fs: fs,
       );
       expect(
@@ -854,7 +854,7 @@ void main() {
         expect(fakeSkiaClient.initCalls, 0);
         FlutterPostSubmitFileComparator.fromLocalFileComparator(
           localFileComparator: LocalFileComparator(Uri.parse('/test'), pathStyle: path.Style.posix),
-          platform,
+          platform: platform,
           goldens: fakeSkiaClient,
           log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
           fs: fs,
@@ -940,7 +940,7 @@ void main() {
         expect(fakeSkiaClient.tryInitCalls, 0);
         FlutterPostSubmitFileComparator.fromLocalFileComparator(
           localFileComparator: LocalFileComparator(Uri.parse('/test'), pathStyle: path.Style.posix),
-          platform,
+          platform: platform,
           goldens: fakeSkiaClient,
           log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
           fs: fs,
@@ -1042,7 +1042,7 @@ void main() {
         fakeSkiaClient.getExpectationForTestThrowable = const OSError("Can't reach Gold");
         final FlutterGoldenFileComparator comparator1 = await FlutterLocalFileComparator.fromLocalFileComparator(
           localFileComparator: LocalFileComparator(Uri.parse('/test'), pathStyle: path.Style.posix),
-          platform,
+          platform: platform,
           goldens: fakeSkiaClient,
           baseDirectory: fakeDirectory,
           log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
@@ -1053,7 +1053,7 @@ void main() {
         fakeSkiaClient.getExpectationForTestThrowable =  const SocketException("Can't reach Gold");
         final FlutterGoldenFileComparator comparator2 = await FlutterLocalFileComparator.fromLocalFileComparator(
           localFileComparator: LocalFileComparator(Uri.parse('/test'), pathStyle: path.Style.posix),
-          platform,
+          platform: platform,
           goldens: fakeSkiaClient,
           baseDirectory: fakeDirectory,
           log: (String message) => fail('skia gold client printed unexpected output: "$message"'),
@@ -1064,7 +1064,7 @@ void main() {
         fakeSkiaClient.getExpectationForTestThrowable =  const FormatException("Can't reach Gold");
         final FlutterGoldenFileComparator comparator3 = await FlutterLocalFileComparator.fromLocalFileComparator(
           localFileComparator: LocalFileComparator(Uri.parse('/test'), pathStyle: path.Style.posix),
-          platform,
+          platform: platform,
           goldens: fakeSkiaClient,
           baseDirectory: fakeDirectory,
           log: (String message) => fail('skia gold client printed unexpected output: "$message"'),

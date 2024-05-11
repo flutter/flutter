@@ -123,13 +123,10 @@ class _SnackBarExampleState extends State<SnackBarExample> {
               const Text('Multi Line Text'),
               Switch(
                 value: _multiLine,
-                onChanged: _snackBarBehavior == SnackBarBehavior.fixed
-                    ? null
-                    : (bool value) {
-                        setState(() {
-                          _multiLine = !_multiLine;
-                        });
-                      },
+                onChanged: switch (_snackBarBehavior) {
+                  SnackBarBehavior.fixed || null => null,
+                  SnackBarBehavior.floating => (bool value) => setState(() { _multiLine = !_multiLine; }),
+                },
               ),
             ],
           ),
@@ -139,13 +136,10 @@ class _SnackBarExampleState extends State<SnackBarExample> {
               value: _sliderValue,
               divisions: 20,
               label: _sliderValue.toStringAsFixed(2),
-              onChanged: _snackBarBehavior == SnackBarBehavior.fixed
-                  ? null
-                  : (double value) {
-                      setState(() {
-                        _sliderValue = value;
-                      });
-                    },
+              onChanged: switch (_snackBarBehavior) {
+                SnackBarBehavior.fixed || null => null,
+                SnackBarBehavior.floating => (double value) => setState(() { _sliderValue = value; }),
+              },
             ),
           ]),
           const SizedBox(height: 16.0),
