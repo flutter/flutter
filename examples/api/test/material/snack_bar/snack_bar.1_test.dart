@@ -16,7 +16,7 @@ void main() {
     expect(find.widgetWithText(AppBar, 'SnackBar Sample'), findsOneWidget);
     expect(find.widgetWithText(ElevatedButton, 'Show Snackbar'), findsOneWidget);
     await tester.tap(find.widgetWithText(ElevatedButton, 'Show Snackbar'));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(find.text('Awesome SnackBar!'), findsOneWidget);
     expect(find.widgetWithText(SnackBarAction, 'Action'), findsOneWidget);
@@ -32,7 +32,7 @@ void main() {
       const example.SnackBarExampleApp(),
     );
     await tester.tap(find.byType(ElevatedButton));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(find.byType(SnackBar), findsOneWidget);
 
