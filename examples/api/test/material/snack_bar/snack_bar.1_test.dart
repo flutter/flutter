@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/snack_bar/snack_bar.1.dart' as exam
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('is shown', (WidgetTester tester) async {
+  testWidgets('Tapping on button shows snackbar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SnackBarExampleApp(),
     );
@@ -27,7 +27,7 @@ void main() {
     expect(bar.behavior, SnackBarBehavior.floating);
   });
 
-  testWidgets('is styled correctly', (WidgetTester tester) async {
+  testWidgets('Snackbar is styled correctly', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SnackBarExampleApp(),
     );
@@ -43,7 +43,7 @@ void main() {
         .having((RoundedRectangleBorder b) => b.borderRadius, 'radius', BorderRadius.circular(10.0)));
   });
 
-  testWidgets('should disappear', (WidgetTester tester) async {
+  testWidgets('Snackbar should disappear after timeout', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SnackBarExampleApp(),
     );

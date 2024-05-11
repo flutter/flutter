@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/snack_bar/snack_bar.2.dart' as exam
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('shows correct static elements', (WidgetTester tester) async {
+  testWidgets('Shows correct static elements', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SnackBarExampleApp(),
     );
@@ -30,7 +30,7 @@ void main() {
 
   });
 
-  testWidgets('configures snackbar', (WidgetTester tester) async {
+  testWidgets('Applies configurations to snackbar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SnackBarExampleApp(),
     );
@@ -128,7 +128,7 @@ void main() {
     expect(find.byIcon(Icons.close), findsNothing);
   });
 
-  testWidgets('disable unusable elements', (WidgetTester tester) async {
+  testWidgets('Disable unusable elements', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SnackBarExampleApp(),
     );
