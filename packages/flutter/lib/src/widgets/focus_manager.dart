@@ -1887,6 +1887,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// method after it has setup the test variant for a given test, so the
   /// [FocusManager] can accurately listen to application lifecycle changes if
   /// supported.
+  @visibleForTesting
   void listenToApplicationLifecycleChangesIfSupported() {
     if (_appLifecycleListener == null && (kIsWeb || defaultTargetPlatform != TargetPlatform.android)) {
       // It appears that some Android keyboard implementations can cause

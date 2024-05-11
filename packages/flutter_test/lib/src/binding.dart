@@ -261,7 +261,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     if (buildOwner == null) {
       return;
     }
-    buildOwner!.focusManager.listenToApplicationLifecycleChangesIfSupported();
+    buildOwner!.focusManager.listenToApplicationLifecycleChangesIfSupported(); // ignore: invalid_use_of_visible_for_testing_member
   }
 
   @override
