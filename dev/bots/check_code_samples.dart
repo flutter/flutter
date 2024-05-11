@@ -175,7 +175,7 @@ class SampleChecker {
 
     if (missingFilenames.isNotEmpty) {
       final StringBuffer buffer =
-      StringBuffer('The following examples are not linked from any source file API doc comments:\n');
+          StringBuffer('The following examples are not linked from any source file API doc comments:\n');
       for (final String name in missingFilenames) {
         buffer.writeln('  $name');
       }
@@ -185,13 +185,13 @@ class SampleChecker {
 
     if (malformedLinks.isNotEmpty) {
       final StringBuffer buffer =
-      StringBuffer('The following malformed links were found in API doc comments:\n');
+          StringBuffer('The following malformed links were found in API doc comments:\n');
       for (final LinkInfo link in malformedLinks) {
         buffer.writeln('  $link');
       }
       buffer.write(
-          'Correct the formatting of these links so that they match the exact pattern:\n'
-          r"  r'\*\* See code in (?<path>.+) \*\*'"
+        'Correct the formatting of these links so that they match the exact pattern:\n'
+        r"  r'\*\* See code in (?<path>.+) \*\*'"
       );
       foundError(buffer.toString().split('\n'));
     }
