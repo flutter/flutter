@@ -207,14 +207,14 @@ class SampleChecker {
     final List<File> filenames = directory
         .listSync(recursive: true)
         .map((FileSystemEntity entity) {
-      if (entity is File) {
-        return entity;
-      } else {
-        return null;
-      }
-    })
+          if (entity is File) {
+            return entity;
+          } else {
+            return null;
+          }
+        })
         .where((File? filename) =>
-    filename != null && (filenamePattern == null || filename.absolute.path.contains(filenamePattern)))
+            filename != null && (filenamePattern == null || filename.absolute.path.contains(filenamePattern)))
         .map<File>((File? s) => s!)
         .toList();
     return filenames;
@@ -293,7 +293,7 @@ class SampleChecker {
     }
     // Skip any that we know are missing.
     missingTests.removeWhere(
-          (File test) {
+      (File test) {
         final String name = path.relative(test.absolute.path, from: flutterRoot.absolute.path).replaceAll(r'\', '/');
         return _knownMissingTests.contains(name);
       },
