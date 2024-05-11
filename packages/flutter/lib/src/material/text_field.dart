@@ -370,13 +370,11 @@ class TextField extends StatefulWidget {
   /// {@end-tool}
   final TextMagnifierConfiguration? magnifierConfiguration;
 
-  /// An optional group ID that groups [TapRegion]s together so that they
-  /// operate as one region. If any member of a group is hit by a particular
-  /// tap, then the [onTapOutside] will not be called for any members of the
-  /// group. If any member of the group is hit, then all members will have their
-  /// [onTapInside] called.
+  /// {@template flutter.widgets.editableText.groupId}
+  /// Assign a separate click area to each text field, groupId object.
   ///
-  /// If the group id is null, then only this region is hit tested.
+  /// If this property is null, [EditableText] will be used.
+  /// {@endtemplate}
   final Object? groupId;
 
   /// Controls the text being edited.
