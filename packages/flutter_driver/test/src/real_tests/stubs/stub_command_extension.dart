@@ -23,9 +23,8 @@ class StubNestedCommandExtension extends CommandExtension {
   }
 
   @override
-  Command deserialize(Map<String, String> params, DeserializeFinderFactory finderFactory, DeserializeCommandFactory commandFactory) {
-    return StubNestedCommand.deserialize(params, finderFactory);
-  }
+  Command deserialize(Map<String, String> params, DeserializeFinderFactory finderFactory, DeserializeCommandFactory commandFactory) =>
+    StubNestedCommand.deserialize(params, finderFactory);
 }
 
 class StubProberCommandExtension extends CommandExtension {
@@ -44,7 +43,6 @@ class StubProberCommandExtension extends CommandExtension {
   }
 
   @override
-  Command deserialize(Map<String, String> params, DeserializeFinderFactory finderFactory, DeserializeCommandFactory commandFactory) {
-    return StubProberCommand.deserialize(params, finderFactory);
-  }
+  Command deserialize(Map<String, String> params, DeserializeFinderFactory finderFactory, DeserializeCommandFactory commandFactory) =>
+    StubProberCommand.deserialize(params, finderFactory);
 }
