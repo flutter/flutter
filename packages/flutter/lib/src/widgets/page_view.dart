@@ -6,8 +6,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show clampDouble, precisionErrorTolerance;
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/material.dart' show Durations, Easing;
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/material/motion.dart';
 
 import 'basic.dart';
 import 'debug.dart';
