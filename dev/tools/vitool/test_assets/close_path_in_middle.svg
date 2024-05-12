@@ -1,3 +1,1 @@
-<svg id="svg_build_00" xmlns="http://www.w3.org/2000/svg" width="100px" height="100px" >
-<path id="path_1" d="M 50.0 50.0 l 10.0 0 l 0.0 10.0 z l 0.0 -10.0 l -10.0 0.0 z " fill="#000000" />
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" id="svg_build_00" width="100" height="100"><path id="path_1" fill="#000" d="M 50.0 50.0 l 10.0 0 l 0.0 10.0 z l 0.0 -10.0 l -10.0 0.0 z"/></svg>
