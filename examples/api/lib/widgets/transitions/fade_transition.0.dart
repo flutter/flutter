@@ -54,6 +54,21 @@ class _FadeTransitionExampleState extends State<FadeTransitionExample>
   );
 
   @override
+  void didUpdateWidget(FadeTransitionExample oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.duration != widget.duration) {
+      _controller
+        ..duration = widget.duration
+        ..repeat(reverse: true);
+    }
+
+    if (oldWidget.curve != widget.curve) {
+      _animation.curve = widget.curve;
+    }
+  }
+
+  @override
   void dispose() {
     _animation.dispose();
     _controller.dispose();
