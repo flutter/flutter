@@ -187,7 +187,7 @@ class PageController extends ScrollController {
   /// The returned [Future] resolves when the animation completes.
   Future<void> animateToPage(
     int page, {
-    Duration duration = Durations.medium4,
+    Duration duration = Durations.medium2,
     Curve curve = Easing.standard,
   }) {
     final _PagePosition position = this.position as _PagePosition;
@@ -223,7 +223,7 @@ class PageController extends ScrollController {
   /// By default, [curve] is [Easing.standard] and [duration] is 400ms.
   /// The returned [Future] resolves when the animation completes.
   Future<void> nextPage({
-    Duration duration = Durations.medium4,
+    Duration duration = Durations.medium2,
     Curve curve = Easing.standard,
   }) {
     return animateToPage(page!.round() + 1, duration: duration, curve: curve);
@@ -235,7 +235,7 @@ class PageController extends ScrollController {
   /// By default, [curve] is [Easing.standard] and [duration] is 400ms.
   /// The returned [Future] resolves when the animation completes.
   Future<void> previousPage({
-    Duration duration = Durations.medium4,
+    Duration duration = Durations.medium2,
     Curve curve = Easing.standard,
   }) {
     return animateToPage(page!.round() - 1, duration: duration, curve: curve);
