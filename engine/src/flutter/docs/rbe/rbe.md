@@ -170,6 +170,9 @@ builds. You can disable remote builds without invalidating your existing build
 by setting the environment variable `RBE_exec_strategy=local`.
 
 ### Proxy status and debug logs
+> [!WARNING]
+> Since `et` will start and stop the local RBE proxy while performing a build,
+> the following command will only work when a build is running.
 
 The status of the local RBE proxy can be queried with the following command
 
@@ -179,6 +182,16 @@ buildtools/mac-arm64/reclient/reproxystatus
 
 It will give output describing the number of actions completed and in progress,
 and the number of remote executions, local executions, and remote cache hits.
+
+For example:
+
+```sh
+$ reproxystatus
+Reproxy(unix:///tmp/reproxy.sock) is OK
+Actions completed: 4405 (750 cache hits, 3075 racing locals, 580 racing remotes)
+Actions in progress: 11
+QPS: 12
+```
 
 The logs for RBE live under the system `/tmp` folder in the files `/tmp/reproxy.
 {INFO,WARNING,ERROR}` and `/tmp/bootstrap.{INFO,WARNING,ERROR}`.
