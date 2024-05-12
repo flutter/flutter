@@ -66,18 +66,14 @@ class AndroidDevices extends PollingDeviceDiscovery {
     if (_doesNotHaveAdb()) {
       return <AndroidDevice>[];
     }
-    String text;
-    try {
-      text = (await _processUtils.run(<String>[_androidSdk!.adbPath!, 'devices', '-l'],
-        throwOnError: true,
-      )).stdout.trim();
-    } on ProcessException catch (exception) {
-      throwToolExit(
-        'Unable to run "adb", check your Android SDK installation and '
-        '$kAndroidHome environment variable: ${exception.executable}\n'
-        'Error details: ${exception.message}',
-      );
-    }
+    // https://github.com/flutter/flutter/issues/148193.
+    await _runAdb(<String>['reconnect']);
+
+    final String text = (await _runAdb(
+      <String>['devices', '-l'],
+      throwToolExitOnError: true,
+    )).stdout
+      .trim();
     final List<AndroidDevice> devices = <AndroidDevice>[];
     _parseADBDeviceOutput(
       text,
@@ -92,7 +88,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
       return <String>[];
     }
 
-    final RunResult result = await _processUtils.run(<String>[_androidSdk!.adbPath!, 'devices', '-l']);
+    final RunResult result = await _runAdb(<String>['devices', '-l']);
     if (result.exitCode != 0) {
       return <String>[];
     }
@@ -108,6 +104,25 @@ class AndroidDevices extends PollingDeviceDiscovery {
     return _androidSdk == null ||
       _androidSdk.adbPath == null ||
       !_processManager.canRun(_androidSdk.adbPath);
+  }
+
+  Future<RunResult> _runAdb(List<String> args, {
+    bool throwToolExitOnError = false,
+  }) async {
+    final List<String> command = <String>[_androidSdk!.adbPath!, ...args];
+    try {
+      return await _processUtils.run(
+        command,
+        throwOnError: throwToolExitOnError,
+      );
+    } on ProcessException catch (exception) {
+      throwToolExit(
+        'Unable to run "adb", check your Android SDK installation and '
+        '$kAndroidHome environment variable: ${exception.executable}\n'
+        'Command: ${command.join(' ')}\n'
+        'Error details: ${exception.message}',
+      );
+    }
   }
 
   // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper

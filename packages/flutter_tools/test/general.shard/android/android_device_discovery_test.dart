@@ -85,6 +85,9 @@ void main() {
   testWithoutContext('AndroidDevices throwsToolExit on failing adb', () {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
+        command: <String>['adb', 'reconnect'],
+      ),
+      const FakeCommand(
         command: <String>['adb', 'devices', '-l'],
         exitCode: 1,
         stderr: '<stderr from adb>'
@@ -105,6 +108,7 @@ void main() {
       throwsToolExit(
         message:
           'Unable to run "adb", check your Android SDK installation and ANDROID_HOME environment variable: adb\n'
+          'Command: adb devices -l\n'
           'Error details: Process exited abnormally with exit code 1:\n'
           '<stderr from adb>',
       ),
@@ -138,6 +142,9 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
+          command: <String>['adb', 'reconnect'],
+        ),
+        const FakeCommand(
           command: <String>['adb', 'devices', '-l'],
           stdout: '''
 List of devices attached
@@ -166,6 +173,9 @@ List of devices attached
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
+          command: <String>['adb', 'reconnect'],
+        ),
+        const FakeCommand(
           command: <String>['adb', 'devices', '-l'],
           stdout: '''
 List of devices attached
@@ -193,6 +203,9 @@ List of devices attached
       androidSdk: FakeAndroidSdk(),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['adb', 'reconnect'],
+        ),
         const FakeCommand(
           command: <String>['adb', 'devices', '-l'],
           stdout: '''
@@ -223,6 +236,9 @@ emulator-5612          host features:shell_2
       androidSdk: FakeAndroidSdk(),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['adb', 'reconnect'],
+        ),
         const FakeCommand(
           command: <String>['adb', 'devices', '-l'],
           stdout: '''
