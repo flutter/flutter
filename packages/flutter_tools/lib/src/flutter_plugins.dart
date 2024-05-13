@@ -1385,18 +1385,20 @@ bool _isEligibleDartSelfImpl(Plugin plugin, String platformKey) {
   return !isDesktop || hasMinVersionForImplementsRequirement;
 }
 
+/// Determine if the plugin provides an inline implementation.
+bool _hasPluginInlineImpl(
+  Plugin plugin,
+  String platformKey, {
+  required bool selectDartPluginsOnly,
+}) {
+  return !selectDartPluginsOnly && plugin.platforms[platformKey] != null ||
+      selectDartPluginsOnly && _hasPluginInlineDartImpl(plugin, platformKey);
+}
+
 /// Determine if the plugin provides an inline dart implementation.
 bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
   return plugin.pluginDartClassPlatforms[platformKey] != null &&
       plugin.pluginDartClassPlatforms[platformKey] != 'none';
-}
-
-/// Determine if the plugin provides an inline implementation.
-bool _hasPluginInlineImpl(Plugin plugin, String platformKey, {
-  required bool selectDartPluginsOnly,
-}) {
-  return selectDartPluginsOnly && _hasPluginInlineDartImpl(plugin, platformKey) ||
-      !selectDartPluginsOnly && plugin.platforms[platformKey] != null;
 }
 
 /// Get the resolved plugin [resolution] from the [candidates] serving as implementation for
