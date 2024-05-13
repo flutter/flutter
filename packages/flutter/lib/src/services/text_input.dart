@@ -2503,7 +2503,7 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///
   /// See also:
   ///
-  ///  * [hideSystemContextMenu], which hides the menu shown by this method.
+  ///  * [hide], which hides the menu shown by this method.
   ///  * [MediaQuery.supportsShowingSystemContextMenu], which indicates whether
   ///    this method is supported on the current platform.
   Future<void> show(Rect targetRect) {
@@ -2548,7 +2548,7 @@ class SystemContextMenuController with SystemContextMenuClient {
   ///
   /// See also:
   ///
-  ///  * [showSystemContextMenu], which shows the menu hidden by this method.
+  ///  * [show], which shows the menu hidden by this method.
   ///  * [MediaQuery.supportsShowingSystemContextMenu], which indicates whether
   ///    the system context menu is supported on the current platform.
   Future<void> hide() async {
