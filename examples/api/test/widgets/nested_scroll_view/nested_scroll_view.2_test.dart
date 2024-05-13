@@ -14,7 +14,7 @@ void main() {
     expect(find.byType(NestedScrollView), findsOneWidget);
     expect(find.text('Item 0'), findsOneWidget);
 
-    while(find.text('Item 0').evaluate().isNotEmpty) {
+    while(find.text('Item 0').evaluate().isNotEmpty){
       await tester.sendEventToBinding(const PointerScrollEvent(scrollDelta: Offset(0.0, 1.0)));
       await tester.pump();
     }
