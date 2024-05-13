@@ -3864,24 +3864,6 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac_x64 module_test_ios
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/144680
-    recipe: devicelab/devicelab_drone
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
-      task_name: module_test_ios
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
   - name: Mac_arm64 module_test_ios
     recipe: devicelab/devicelab_drone
     timeout: 60
