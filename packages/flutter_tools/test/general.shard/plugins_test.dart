@@ -891,11 +891,12 @@ dependencies:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext("Registrant for web doesn't escape slashes in imports", () async {
-        flutterProject.isModule = true;
-        final Directory webPluginWithNestedFile =
-            fs.systemTempDirectory.createTempSync('flutter_web_plugin_with_nested.');
-        webPluginWithNestedFile.childFile('pubspec.yaml').writeAsStringSync('''
+      group('Build time plugin injection', () {
+        testUsingContext("Registrant for web doesn't escape slashes in imports", () async {
+          flutterProject.isModule = true;
+          final Directory webPluginWithNestedFile =
+          fs.systemTempDirectory.createTempSync('flutter_web_plugin_with_nested.');
+          webPluginWithNestedFile.childFile('pubspec.yaml').writeAsStringSync('''
   flutter:
     plugin:
       platforms:
@@ -903,40 +904,40 @@ dependencies:
           pluginClass: WebPlugin
           fileName: src/web_plugin.dart
   ''');
-        webPluginWithNestedFile
-          .childDirectory('lib')
-          .childDirectory('src')
-          .childFile('web_plugin.dart')
-          .createSync(recursive: true);
+          webPluginWithNestedFile
+              .childDirectory('lib')
+              .childDirectory('src')
+              .childFile('web_plugin.dart')
+              .createSync(recursive: true);
 
-        flutterProject.directory
-          .childFile('.packages')
-          .writeAsStringSync('''
+          flutterProject.directory
+              .childFile('.packages')
+              .writeAsStringSync('''
 web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri}
 ''');
 
-        final Directory destination = flutterProject.directory.childDirectory('lib');
-        await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: destination);
+          final Directory destination = flutterProject.directory.childDirectory('lib');
+          await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: destination);
 
-        final File registrant = flutterProject.directory
-            .childDirectory('lib')
-            .childFile('web_plugin_registrant.dart');
+          final File registrant = flutterProject.directory
+              .childDirectory('lib')
+              .childFile('web_plugin_registrant.dart');
 
-        expect(registrant.existsSync(), isTrue);
-        expect(registrant.readAsStringSync(), contains("import 'package:web_plugin_with_nested/src/web_plugin.dart';"));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
-      });
+          expect(registrant.existsSync(), isTrue);
+          expect(registrant.readAsStringSync(), contains("import 'package:web_plugin_with_nested/src/web_plugin.dart';"));
+        }, overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+        });
 
-      testUsingContext('Injects user selected implementation despite inline implementation on web', () async {
-        final List<Directory> directories = createFakePlugins(fs, <String>[
-          'user_selected_url_launcher_implementation',
-          'url_launcher',
-        ]);
+        testUsingContext('Injects user selected implementation despite inline implementation on web', () async {
+          final List<Directory> directories = createFakePlugins(fs, <String>[
+            'user_selected_url_launcher_implementation',
+            'url_launcher',
+          ]);
 
-        // Add inline native implementation to `user_selected_url_launcher_implementation`
-        directories[0].childFile('pubspec.yaml').writeAsStringSync('''
+          // Add inline web implementation to `user_selected_url_launcher_implementation`
+          directories[0].childFile('pubspec.yaml').writeAsStringSync('''
 flutter:
   plugin:
     implements: url_launcher
@@ -946,8 +947,8 @@ flutter:
         fileName: src/web_plugin.dart
     ''');
 
-        // Add inline native implementation to `url_launcher`
-        directories[1].childFile('pubspec.yaml').writeAsStringSync('''
+          // Add inline native implementation to `url_launcher`
+          directories[1].childFile('pubspec.yaml').writeAsStringSync('''
 flutter:
   plugin:
     platforms:
@@ -956,7 +957,7 @@ flutter:
         fileName: src/web_plugin.dart
     ''');
 
-        final FlutterManifest manifest = FlutterManifest.createFromString('''
+          final FlutterManifest manifest = FlutterManifest.createFromString('''
 name: test
 version: 1.0.0
 
@@ -965,22 +966,23 @@ dependencies:
   user_selected_url_launcher_implementation: ^1.0.0
     ''', logger: BufferLogger.test())!;
 
-        flutterProject.manifest = manifest;
-        flutterProject.isModule = true;
+          flutterProject.manifest = manifest;
+          flutterProject.isModule = true;
 
-        final Directory destination = flutterProject.directory.childDirectory('lib');
-        await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: destination);
+          final Directory destination = flutterProject.directory.childDirectory('lib');
+          await injectBuildTimePluginFiles(flutterProject, webPlatform: true, destination: destination);
 
-        final File registrant = flutterProject.directory
-            .childDirectory('lib')
-            .childFile('web_plugin_registrant.dart');
+          final File registrant = flutterProject.directory
+              .childDirectory('lib')
+              .childFile('web_plugin_registrant.dart');
 
-        expect(registrant.existsSync(), isTrue);
-        expect(registrant.readAsStringSync(), contains("import 'package:user_selected_url_launcher_implementation/src/web_plugin.dart';"));
-        expect(registrant.readAsStringSync(),  isNot(contains("import 'package:url_launcher/src/web_plugin.dart';")));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
+          expect(registrant.existsSync(), isTrue);
+          expect(registrant.readAsStringSync(), contains("import 'package:user_selected_url_launcher_implementation/src/web_plugin.dart';"));
+          expect(registrant.readAsStringSync(),  isNot(contains("import 'package:url_launcher/src/web_plugin.dart';")));
+        }, overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+        });
       });
 
       testUsingContext('Injecting creates generated Android registrant, but does not include Dart-only plugins', () async {
