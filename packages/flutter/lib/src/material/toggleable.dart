@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -29,7 +28,7 @@ const Duration _kReactionFadeDuration = Duration(milliseconds: 50);
 /// This mixin is used to implement the material components for [Switch],
 /// [Checkbox], and [Radio] controls.
 @optionalTypeArgs
-mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin<S> {
+abstract mixin class ToggleableStateMixin extends RawToggleableStateMixin {
   /// Used by subclasses to manipulate the visual value of the control.
   ///
   /// Some controls respond to user input by updating their visual value. For
@@ -94,47 +93,6 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   late CurvedAnimation _reactionFocusFade;
   late AnimationController _reactionFocusFadeController;
 
-  /// Whether [value] of this control can be changed by user interaction.
-  ///
-  /// The control is considered interactive if the [onChanged] callback is
-  /// non-null. If the callback is null, then the control is disabled, and
-  /// non-interactive. A disabled checkbox, for example, is displayed using a
-  /// grey color and its value cannot be changed.
-  bool get isInteractive => onChanged != null;
-
-  late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
-    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleTap),
-  };
-
-  /// Called when the control changes value.
-  ///
-  /// If the control is tapped, [onChanged] is called immediately with the new
-  /// value.
-  ///
-  /// The control is considered interactive (see [isInteractive]) if this
-  /// callback is non-null. If the callback is null, then the control is
-  /// disabled, and non-interactive. A disabled checkbox, for example, is
-  /// displayed using a grey color and its value cannot be changed.
-  ValueChanged<bool?>? get onChanged;
-
-  /// False if this control is "inactive" (not checked, off, or unselected).
-  ///
-  /// If value is true then the control "active" (checked, on, or selected). If
-  /// tristate is true and value is null, then the control is considered to be
-  /// in its third or "indeterminate" state.
-  ///
-  /// When the value changes, this object starts the [positionController] and
-  /// [position] animations to animate the visual appearance of the control to
-  /// the new value.
-  bool? get value;
-
-  /// If true, [value] can be true, false, or null, otherwise [value] must
-  /// be true or false.
-  ///
-  /// When [tristate] is true and [value] is null, then the control is
-  /// considered to be in its third or "indeterminate" state.
-  bool get tristate;
-
   @override
   void initState() {
     super.initState();
@@ -158,7 +116,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     );
     _reactionHoverFadeController = AnimationController(
       duration: _kReactionFadeDuration,
-      value: _hovering || _focused ? 1.0 : 0.0,
+      value: hovering || focused ? 1.0 : 0.0,
       vsync: this,
     );
     _reactionHoverFade = CurvedAnimation(
@@ -167,7 +125,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     );
     _reactionFocusFadeController = AnimationController(
       duration: _kReactionFadeDuration,
-      value: _hovering || _focused ? 1.0 : 0.0,
+      value: hovering || focused ? 1.0 : 0.0,
       vsync: this,
     );
     _reactionFocusFade = CurvedAnimation(
@@ -213,48 +171,24 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     super.dispose();
   }
 
-  /// The most recent [Offset] at which a pointer touched the Toggleable.
-  ///
-  /// This is null if currently no pointer is touching the Toggleable or if
-  /// [isInteractive] is false.
-  Offset? get downPosition => _downPosition;
-  Offset? _downPosition;
-
-  void _handleTapDown(TapDownDetails details) {
+  @override
+  void handleTapDown(TapDownDetails details) {
+    super.handleTapDown(details);
     if (isInteractive) {
-      setState(() {
-        _downPosition = details.localPosition;
-      });
       _reactionController.forward();
     }
   }
 
-  void _handleTap([Intent? _]) {
-    if (!isInteractive) {
-      return;
-    }
-    switch (value) {
-      case false:
-        onChanged!(true);
-      case true:
-        onChanged!(tristate ? null : false);
-      case null:
-        onChanged!(false);
-    }
-    context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
-  }
-
-  void _handleTapEnd([TapUpDetails? _]) {
-    if (_downPosition != null) {
-      setState(() { _downPosition = null; });
-    }
+  @override
+  void handleTapEnd([TapUpDetails? details]) {
+    super.handleTapEnd(details);
     _reactionController.reverse();
   }
 
-  bool _focused = false;
-  void _handleFocusHighlightChanged(bool focused) {
-    if (focused != _focused) {
-      setState(() { _focused = focused; });
+  @override
+  void handleFocusHighlightChanged(bool focused) {
+    super.handleFocusHighlightChanged(focused);
+    if (focused != super.focused) {
       if (focused) {
         _reactionFocusFadeController.forward();
       } else {
@@ -263,10 +197,10 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     }
   }
 
-  bool _hovering = false;
-  void _handleHoverChanged(bool hovering) {
-    if (hovering != _hovering) {
-      setState(() { _hovering = hovering; });
+  @override
+  void handleHoverChanged(bool hovering) {
+    super.handleHoverChanged(hovering);
+    if (hovering != super.hovering) {
       if (hovering) {
         _reactionHoverFadeController.forward();
       } else {
@@ -274,21 +208,6 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
       }
     }
   }
-
-  /// Describes the current [MaterialState] of the Toggleable.
-  ///
-  /// The returned set will include:
-  ///
-  ///  * [MaterialState.disabled], if [isInteractive] is false
-  ///  * [MaterialState.hovered], if a pointer is hovering over the Toggleable
-  ///  * [MaterialState.focused], if the Toggleable has input focus
-  ///  * [MaterialState.selected], if [value] is true or null
-  Set<MaterialState> get states => <MaterialState>{
-    if (!isInteractive) MaterialState.disabled,
-    if (_hovering) MaterialState.hovered,
-    if (_focused) MaterialState.focused,
-    if (value ?? true) MaterialState.selected,
-  };
 
   /// Typically wraps a `painter` that draws the actual visuals of the
   /// Toggleable with logic to toggle it.
@@ -312,29 +231,13 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     required Size size,
     required CustomPainter painter,
   }) {
-    return FocusableActionDetector(
-      actions: _actionMap,
+    return buildRawToggleable(
       focusNode: focusNode,
       autofocus: autofocus,
       onFocusChange: onFocusChange,
-      enabled: isInteractive,
-      onShowFocusHighlight: _handleFocusHighlightChanged,
-      onShowHoverHighlight: _handleHoverChanged,
-      mouseCursor: mouseCursor.resolve(states),
-      child: GestureDetector(
-        excludeFromSemantics: !isInteractive,
-        onTapDown: isInteractive ? _handleTapDown : null,
-        onTap: isInteractive ? _handleTap : null,
-        onTapUp: isInteractive ? _handleTapEnd : null,
-        onTapCancel: isInteractive ? _handleTapEnd : null,
-        child: Semantics(
-          enabled: isInteractive,
-          child: CustomPaint(
-            size: size,
-            painter: painter,
-          ),
-        ),
-      ),
+      mouseCursor: mouseCursor,
+      size: size,
+      painter: painter,
     );
   }
 }
@@ -346,7 +249,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
 /// Subclasses must implement the [paint] method to draw the actual visuals of
 /// the Toggleable. In their [paint] method subclasses may call
 /// [paintRadialReaction] to draw a radial ink reaction for this control.
-abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter {
+abstract class ToggleablePainter extends RawToggleablePainter {
   /// The visual value of the control.
   ///
   /// Usually set to [ToggleableStateMixin.position].
@@ -407,34 +310,6 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
     notifyListeners();
   }
 
-  /// The color that should be used in the active state (i.e., when
-  /// [ToggleableStateMixin.value] is true).
-  ///
-  /// For example, a checkbox should use this color when checked.
-  Color get activeColor => _activeColor!;
-  Color? _activeColor;
-  set activeColor(Color value) {
-    if (_activeColor == value) {
-      return;
-    }
-    _activeColor = value;
-    notifyListeners();
-  }
-
-  /// The color that should be used in the inactive state (i.e., when
-  /// [ToggleableStateMixin.value] is false).
-  ///
-  /// For example, a checkbox should use this color when unchecked.
-  Color get inactiveColor => _inactiveColor!;
-  Color? _inactiveColor;
-  set inactiveColor(Color value) {
-    if (_inactiveColor == value) {
-      return;
-    }
-    _inactiveColor = value;
-    notifyListeners();
-  }
-
   /// The color that should be used for the reaction when the toggleable is
   /// inactive.
   ///
@@ -479,20 +354,6 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
     notifyListeners();
   }
 
-  /// The color that should be used for the reaction when [isFocused] is true.
-  ///
-  /// Used when the toggleable needs to change the reaction color/transparency,
-  /// when it has focus.
-  Color get focusColor => _focusColor!;
-  Color? _focusColor;
-  set focusColor(Color value) {
-    if (value == _focusColor) {
-      return;
-    }
-    _focusColor = value;
-    notifyListeners();
-  }
-
   /// The splash radius for the radial reaction.
   double get splashRadius => _splashRadius!;
   double? _splashRadius;
@@ -501,43 +362,6 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
       return;
     }
     _splashRadius = value;
-    notifyListeners();
-  }
-
-  /// The [Offset] within the Toggleable at which a pointer touched the Toggleable.
-  ///
-  /// This is null if currently no pointer is touching the Toggleable.
-  ///
-  /// Usually set to [ToggleableStateMixin.downPosition].
-  Offset? get downPosition => _downPosition;
-  Offset? _downPosition;
-  set downPosition(Offset? value) {
-    if (value == _downPosition) {
-      return;
-    }
-    _downPosition = value;
-    notifyListeners();
-  }
-
-  /// True if this toggleable has the input focus.
-  bool get isFocused => _isFocused!;
-  bool? _isFocused;
-  set isFocused(bool? value) {
-    if (value == _isFocused) {
-      return;
-    }
-    _isFocused = value;
-    notifyListeners();
-  }
-
-  /// True if this toggleable is being hovered over by a pointer.
-  bool get isHovered => _isHovered!;
-  bool? _isHovered;
-  set isHovered(bool? value) {
-    if (value == _isHovered) {
-      return;
-    }
-    _isHovered = value;
     notifyListeners();
   }
 
@@ -575,7 +399,6 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
     }
   }
 
-
   @override
   void dispose() {
     _position?.removeListener(notifyListeners);
@@ -584,19 +407,4 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
     _reactionHoverFade?.removeListener(notifyListeners);
     super.dispose();
   }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-
-  @override
-  bool? hitTest(Offset position) => null;
-
-  @override
-  SemanticsBuilderCallback? get semanticsBuilder => null;
-
-  @override
-  bool shouldRebuildSemantics(covariant CustomPainter oldDelegate) => false;
-
-  @override
-  String toString() => describeIdentity(this);
 }
