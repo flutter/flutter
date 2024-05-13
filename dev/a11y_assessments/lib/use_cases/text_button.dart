@@ -41,11 +41,11 @@ class MainWidgetState extends State<MainWidget> {
           children: <Widget>[
             TextButton(
               onPressed: () {  },
-              child: const Text('Text button'),
+              child: const Text('Press me'),
             ),
             const TextButton(
               onPressed: null,
-              child: Text('Text button disabled'),
+              child: Text('Press me'),
             ),
           ],
         ),
