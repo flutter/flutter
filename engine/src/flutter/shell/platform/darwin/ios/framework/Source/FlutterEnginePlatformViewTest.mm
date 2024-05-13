@@ -96,38 +96,6 @@ flutter::FakeDelegate fake_delegate;
   return weak_factory->GetWeakPtr();
 }
 
-- (void)testMsaaSampleCount {
-  if (fake_delegate.settings_.enable_impeller) {
-    // Default should be 4 for Impeller.
-    XCTAssertEqual(platform_view->GetIosContext()->GetMsaaSampleCount(), MsaaSampleCount::kFour);
-  } else {
-    // Default should be 1 for Skia.
-    XCTAssertEqual(platform_view->GetIosContext()->GetMsaaSampleCount(), MsaaSampleCount::kNone);
-  }
-
-  // Verify the platform view creates a new context with updated msaa_samples.
-  // Need to use Metal, since this is ignored for Software/GL.
-  fake_delegate.settings_.msaa_samples = 4;
-
-  auto thread_task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
-  auto sync_switch = std::make_shared<fml::SyncSwitch>();
-  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
-                               /*platform=*/thread_task_runner,
-                               /*raster=*/thread_task_runner,
-                               /*ui=*/thread_task_runner,
-                               /*io=*/thread_task_runner);
-  auto msaa_4x_platform_view = std::make_unique<flutter::PlatformViewIOS>(
-      /*delegate=*/fake_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
-      /*platform_views_controller=*/nil,
-      /*task_runners=*/runners,
-      /*worker_task_runner=*/nil,
-      /*is_gpu_disabled_sync_switch=*/sync_switch);
-
-  XCTAssertEqual(msaa_4x_platform_view->GetIosContext()->GetMsaaSampleCount(),
-                 MsaaSampleCount::kFour);
-}
-
 - (void)testCallsNotifyLowMemory {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"tester"];
   XCTAssertNotNil(engine);

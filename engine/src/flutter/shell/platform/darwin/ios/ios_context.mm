@@ -14,14 +14,13 @@ FLUTTER_ASSERT_ARC
 
 namespace flutter {
 
-IOSContext::IOSContext(MsaaSampleCount msaa_samples) : msaa_samples_(msaa_samples) {}
+IOSContext::IOSContext() = default;
 
 IOSContext::~IOSContext() = default;
 
 std::unique_ptr<IOSContext> IOSContext::Create(
     IOSRenderingAPI api,
     IOSRenderingBackend backend,
-    MsaaSampleCount msaa_samples,
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch) {
   switch (api) {
     case IOSRenderingAPI::kSoftware:
@@ -35,8 +34,7 @@ std::unique_ptr<IOSContext> IOSContext::Create(
       switch (backend) {
         case IOSRenderingBackend::kSkia:
 #if !SLIMPELLER
-          return std::make_unique<IOSContextMetalSkia>(msaa_samples);
-
+          return std::make_unique<IOSContextMetalSkia>();
 #else   //  !SLIMPELLER
           FML_LOG(FATAL) << "Impeller opt-out unavailable.";
           return nullptr;

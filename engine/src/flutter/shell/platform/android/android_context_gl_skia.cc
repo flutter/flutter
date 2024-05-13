@@ -24,9 +24,7 @@ static EGLResult<EGLContext> CreateContext(EGLDisplay display,
   return {context != EGL_NO_CONTEXT, context};
 }
 
-static EGLResult<EGLConfig> ChooseEGLConfiguration(EGLDisplay display,
-                                                   uint8_t msaa_samples) {
-  EGLint sample_buffers = msaa_samples > 1 ? 1 : 0;
+static EGLResult<EGLConfig> ChooseEGLConfiguration(EGLDisplay display) {
   EGLint attributes[] = {
       // clang-format off
       EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
@@ -37,8 +35,6 @@ static EGLResult<EGLConfig> ChooseEGLConfiguration(EGLDisplay display,
       EGL_ALPHA_SIZE,      8,
       EGL_DEPTH_SIZE,      0,
       EGL_STENCIL_SIZE,    0,
-      EGL_SAMPLES,         static_cast<EGLint>(msaa_samples),
-      EGL_SAMPLE_BUFFERS,  sample_buffers,
       EGL_NONE,            // termination sentinel
       // clang-format on
   };
@@ -66,8 +62,7 @@ static bool TeardownContext(EGLDisplay display, EGLContext context) {
 
 AndroidContextGLSkia::AndroidContextGLSkia(
     fml::RefPtr<AndroidEnvironmentGL> environment,
-    const TaskRunners& task_runners,
-    uint8_t msaa_samples)
+    const TaskRunners& task_runners)
     : AndroidContext(AndroidRenderingAPI::kSkiaOpenGLES),
       environment_(std::move(environment)),
       task_runners_(task_runners) {
@@ -79,8 +74,7 @@ AndroidContextGLSkia::AndroidContextGLSkia(
   bool success = false;
 
   // Choose a valid configuration.
-  std::tie(success, config_) =
-      ChooseEGLConfiguration(environment_->Display(), msaa_samples);
+  std::tie(success, config_) = ChooseEGLConfiguration(environment_->Display());
   if (!success) {
     FML_LOG(ERROR) << "Could not choose an EGL configuration.";
     LogLastEGLError();

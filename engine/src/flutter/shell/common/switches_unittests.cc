@@ -69,24 +69,6 @@ TEST(SwitchesTest, RouteParsedFlag) {
   EXPECT_TRUE(settings.route.empty());
 }
 
-TEST(SwitchesTest, MsaaSamples) {
-  for (int samples : {0, 1, 2, 4, 8, 16}) {
-    fml::CommandLine command_line = fml::CommandLineFromInitializerList(
-        {"command", ("--msaa-samples=" + std::to_string(samples)).c_str()});
-    Settings settings = SettingsFromCommandLine(command_line);
-    EXPECT_EQ(settings.msaa_samples, samples);
-  }
-  fml::CommandLine command_line =
-      fml::CommandLineFromInitializerList({"command", "--msaa-samples=3"});
-  Settings settings = SettingsFromCommandLine(command_line);
-  EXPECT_EQ(settings.msaa_samples, 0);
-
-  command_line =
-      fml::CommandLineFromInitializerList({"command", "--msaa-samples=foobar"});
-  settings = SettingsFromCommandLine(command_line);
-  EXPECT_EQ(settings.msaa_samples, 0);
-}
-
 TEST(SwitchesTest, EnableEmbedderAPI) {
   {
     // enable

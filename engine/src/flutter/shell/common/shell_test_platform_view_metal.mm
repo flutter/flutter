@@ -116,8 +116,7 @@ std::unique_ptr<Surface> ShellTestPlatformViewMetal::CreateRenderingSurface() {
     return std::make_unique<GPUSurfaceMetalImpeller>(this,
                                                      [metal_context_->impeller_context() context]);
   }
-  return std::make_unique<GPUSurfaceMetalSkia>(this, [metal_context_->context() mainContext],
-                                               MsaaSampleCount::kNone);
+  return std::make_unique<GPUSurfaceMetalSkia>(this, [metal_context_->context() mainContext]);
 }
 
 // |PlatformView|
