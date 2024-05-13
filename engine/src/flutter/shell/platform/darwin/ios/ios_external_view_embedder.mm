@@ -6,6 +6,8 @@
 
 #include "flutter/common/constants.h"
 
+FLUTTER_ASSERT_ARC
+
 namespace flutter {
 
 IOSExternalViewEmbedder::IOSExternalViewEmbedder(
