@@ -347,6 +347,8 @@ class CupertinoPage<T> extends Page<T> {
     this.title,
     this.fullscreenDialog = false,
     this.allowSnapshotting = true,
+    super.canPop,
+    super.onPopInvoked,
     super.key,
     super.name,
     super.arguments,
