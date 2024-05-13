@@ -120,6 +120,8 @@ source_set("flutter_framework_source_arc") {
     "ios_context_software.mm",
     "ios_external_texture_metal.h",
     "ios_external_texture_metal.mm",
+    "ios_external_view_embedder.h",
+    "ios_external_view_embedder.mm",
     "ios_surface.h",
     "ios_surface.mm",
     "ios_surface_metal_impeller.h",
@@ -181,8 +183,6 @@ source_set("flutter_framework_source") {
     "framework/Source/accessibility_bridge.mm",
     "framework/Source/accessibility_text_entry.h",
     "framework/Source/accessibility_text_entry.mm",
-    "ios_external_view_embedder.h",
-    "ios_external_view_embedder.mm",
     "platform_view_ios.h",
     "platform_view_ios.mm",
   ]
