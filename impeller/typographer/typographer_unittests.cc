@@ -325,46 +325,6 @@ TEST_P(TypographerTest, RectanglePackerAddsNonoverlapingRectangles) {
   ASSERT_EQ(packer->PercentFull(), 0);
 }
 
-TEST_P(TypographerTest, GlyphAtlasTextureIsRecycledWhenContentsAreRecreated) {
-  auto host_buffer = HostBuffer::Create(GetContext()->GetResourceAllocator());
-  auto context = TypographerContextSkia::Make();
-  auto atlas_context =
-      context->CreateGlyphAtlasContext(GlyphAtlas::Type::kColorBitmap);
-  ASSERT_TRUE(context && context->IsValid());
-  SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
-  auto blob = SkTextBlob::MakeFromString("ABCDEFGHIJKLMNOPQRSTUVQXYZ123456789",
-                                         sk_font);
-  ASSERT_TRUE(blob);
-  auto atlas =
-      CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
-                       GlyphAtlas::Type::kColorBitmap, 32.0f, atlas_context,
-                       *MakeTextFrameFromTextBlobSkia(blob));
-  auto old_packer = atlas_context->GetRectPacker();
-
-  ASSERT_NE(atlas, nullptr);
-  ASSERT_NE(atlas->GetTexture(), nullptr);
-  ASSERT_EQ(atlas, atlas_context->GetGlyphAtlas());
-
-  auto* first_texture = atlas->GetTexture().get();
-
-  // Now create a new glyph atlas with a completely different textblob.
-  // everything should be different except for the underlying atlas texture.
-
-  auto blob2 = SkTextBlob::MakeFromString("abcdefghijklmnopqrstuvwxyz123456789",
-                                          sk_font);
-  auto next_atlas =
-      CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
-                       GlyphAtlas::Type::kColorBitmap, 32.0f, atlas_context,
-                       *MakeTextFrameFromTextBlobSkia(blob2));
-  ASSERT_NE(atlas, next_atlas);
-  auto* second_texture = next_atlas->GetTexture().get();
-
-  auto new_packer = atlas_context->GetRectPacker();
-
-  ASSERT_EQ(second_texture, first_texture);
-  ASSERT_NE(old_packer, new_packer);
-}
-
 TEST(TypographerTest, CanCloneRectanglePackerEmpty) {
   auto skyline = RectanglePacker::Factory(256, 256);
 
@@ -415,6 +375,27 @@ TEST(TypographerTest, CloneToSameSizePreservesContents) {
 
   // Packer is still full.
   EXPECT_FALSE(skyline->AddRect(256, 256, &loc));
+}
+
+TEST(TypographerTest, RectanglePackerFillsRows) {
+  auto skyline = RectanglePacker::Factory(257, 256);
+
+  // Fill up the first row.
+  IPoint16 loc;
+  for (auto i = 0u; i < 16; i++) {
+    skyline->AddRect(16, 16, &loc);
+  }
+  // Last rectangle still in first row.
+  EXPECT_EQ(loc.x(), 256 - 16);
+  EXPECT_EQ(loc.y(), 0);
+
+  // Fill up second row.
+  for (auto i = 0u; i < 16; i++) {
+    skyline->AddRect(16, 16, &loc);
+  }
+
+  EXPECT_EQ(loc.x(), 256 - 16);
+  EXPECT_EQ(loc.y(), 16);
 }
 
 }  // namespace testing

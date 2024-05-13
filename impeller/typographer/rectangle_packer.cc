@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <vector>
 
+#include "flutter/fml/logging.h"
+
 namespace impeller {
 
 // Pack rectangles and track the current silhouette
@@ -15,22 +17,20 @@ namespace impeller {
 // https://github.com/google/skia/blob/b5de4b8ae95c877a9ecfad5eab0765bc22550301/src/gpu/RectanizerSkyline.cpp
 class SkylineRectanglePacker final : public RectanglePacker {
  public:
-  SkylineRectanglePacker(int w, int h) : RectanglePacker(w, h) {
-    this->Reset();
-  }
+  SkylineRectanglePacker(int w, int h) : RectanglePacker(w, h) { Reset(); }
 
   ~SkylineRectanglePacker() final {}
 
   void Reset() final {
     area_so_far_ = 0;
     skyline_.clear();
-    skyline_.push_back(SkylineSegment{0, 0, this->width()});
+    skyline_.push_back(SkylineSegment{0, 0, width()});
   }
 
   bool AddRect(int w, int h, IPoint16* loc) final;
 
   Scalar PercentFull() const final {
-    return area_so_far_ / ((float)this->width() * this->height());
+    return area_so_far_ / ((float)width() * height());
   }
 
   std::unique_ptr<RectanglePacker> Clone(uint32_t scale) final;
@@ -47,29 +47,33 @@ class SkylineRectanglePacker final : public RectanglePacker {
   int32_t area_so_far_;
 
   // Can a width x height rectangle fit in the free space represented by
-  // the skyline segments >= 'skylineIndex'? If so, return true and fill in
+  // the skyline segments >= 'skyline_index'? If so, return true and fill in
   // 'y' with the y-location at which it fits (the x location is pulled from
-  // 'skylineIndex's segment.
-  bool rectangleFits(int skylineIndex, int width, int height, int* y) const;
+  // 'skyline_index's segment.
+  bool RectangleFits(size_t skyline_index, int width, int height, int* y) const;
   // Update the skyline structure to include a width x height rect located
   // at x,y.
-  void addSkylineLevel(int skylineIndex, int x, int y, int width, int height);
+  void AddSkylineLevel(size_t skylineIndex,
+                       int x,
+                       int y,
+                       int width,
+                       int height);
 };
 
-bool SkylineRectanglePacker::AddRect(int width, int height, IPoint16* loc) {
-  if ((unsigned)width > (unsigned)this->width() ||
-      (unsigned)height > (unsigned)this->height()) {
+bool SkylineRectanglePacker::AddRect(int p_width, int p_height, IPoint16* loc) {
+  if ((unsigned)p_width > (unsigned)width() ||
+      (unsigned)p_height > (unsigned)height()) {
     return false;
   }
 
   // find position for new rectangle
-  int bestWidth = this->width() + 1;
+  int bestWidth = width() + 1;
   int bestX = 0;
-  int bestY = this->height() + 1;
+  int bestY = height() + 1;
   int bestIndex = -1;
-  for (int i = 0; i < (int)skyline_.size(); ++i) {
+  for (auto i = 0u; i < skyline_.size(); ++i) {
     int y;
-    if (this->rectangleFits(i, width, height, &y)) {
+    if (RectangleFits(i, p_width, p_height, &y)) {
       // minimize y position first, then width of skyline
       if (y < bestY || (y == bestY && skyline_[i].width_ < bestWidth)) {
         bestIndex = i;
@@ -82,11 +86,11 @@ bool SkylineRectanglePacker::AddRect(int width, int height, IPoint16* loc) {
 
   // add rectangle to skyline
   if (-1 != bestIndex) {
-    this->addSkylineLevel(bestIndex, bestX, bestY, width, height);
+    AddSkylineLevel(bestIndex, bestX, bestY, p_width, p_height);
     loc->x_ = bestX;
     loc->y_ = bestY;
 
-    area_so_far_ += width * height;
+    area_so_far_ += p_width * p_height;
     return true;
   }
 
@@ -95,47 +99,48 @@ bool SkylineRectanglePacker::AddRect(int width, int height, IPoint16* loc) {
   return false;
 }
 
-bool SkylineRectanglePacker::rectangleFits(int skylineIndex,
-                                           int width,
-                                           int height,
+bool SkylineRectanglePacker::RectangleFits(size_t skyline_index,
+                                           int p_width,
+                                           int p_height,
                                            int* ypos) const {
-  int x = skyline_[skylineIndex].x_;
-  if (x + width > this->width()) {
+  int x = skyline_[skyline_index].x_;
+  if (x + p_width > width()) {
     return false;
   }
 
-  int widthLeft = width;
-  int i = skylineIndex;
-  int y = skyline_[skylineIndex].y_;
-  while (widthLeft > 0 && i < (int)skyline_.size()) {
+  int widthLeft = p_width;
+  size_t i = skyline_index;
+  int y = skyline_[skyline_index].y_;
+  while (widthLeft > 0) {
     y = std::max(y, skyline_[i].y_);
-    if (y + height > this->height()) {
+    if (y + p_height > height()) {
       return false;
     }
     widthLeft -= skyline_[i].width_;
-    ++i;
+    i++;
+    FML_CHECK(i < skyline_.size() || widthLeft <= 0);
   }
 
   *ypos = y;
   return true;
 }
 
-void SkylineRectanglePacker::addSkylineLevel(int skylineIndex,
+void SkylineRectanglePacker::AddSkylineLevel(size_t skyline_index,
                                              int x,
                                              int y,
-                                             int width,
-                                             int height) {
+                                             int p_width,
+                                             int p_height) {
   SkylineSegment newSegment;
   newSegment.x_ = x;
-  newSegment.y_ = y + height;
-  newSegment.width_ = width;
-  skyline_.insert(std::next(skyline_.begin(), skylineIndex), newSegment);
+  newSegment.y_ = y + p_height;
+  newSegment.width_ = p_width;
+  skyline_.insert(skyline_.begin() + skyline_index, newSegment);
 
-  FML_DCHECK(newSegment.x_ + newSegment.width_ <= this->width());
-  FML_DCHECK(newSegment.y_ <= this->height());
+  FML_DCHECK(newSegment.x_ + newSegment.width_ <= width());
+  FML_DCHECK(newSegment.y_ <= height());
 
   // delete width of the new skyline segment from following ones
-  for (int i = skylineIndex + 1; i < (int)skyline_.size(); ++i) {
+  for (auto i = skyline_index + 1; i < skyline_.size(); ++i) {
     // The new segment subsumes all or part of skyline_[i]
     FML_DCHECK(skyline_[i - 1].x_ <= skyline_[i].x_);
 
@@ -146,8 +151,8 @@ void SkylineRectanglePacker::addSkylineLevel(int skylineIndex,
       skyline_[i].width_ -= shrink;
 
       if (skyline_[i].width_ <= 0) {
-        // fully consumed, remove item at index i
-        skyline_.erase(std::next(skyline_.begin(), i));
+        // fully consumed
+        skyline_.erase(skyline_.begin() + i);
         --i;
       } else {
         // only partially consumed
@@ -158,11 +163,11 @@ void SkylineRectanglePacker::addSkylineLevel(int skylineIndex,
     }
   }
 
-  // merge skyline_s
-  for (int i = 0; i < ((int)skyline_.size()) - 1; ++i) {
+  // merge skylines
+  for (auto i = 0u; i < skyline_.size() - 1; ++i) {
     if (skyline_[i].y_ == skyline_[i + 1].y_) {
       skyline_[i].width_ += skyline_[i + 1].width_;
-      skyline_.erase(std::next(skyline_.begin(), i));
+      skyline_.erase(skyline_.begin() + i + 1);
       --i;
     }
   }
@@ -176,13 +181,12 @@ std::unique_ptr<RectanglePacker> SkylineRectanglePacker::Clone(uint32_t scale) {
     packer->skyline_.push_back(segment);
   }
   packer->area_so_far_ = area_so_far_;
-
   return packer;
 }
 
-std::unique_ptr<RectanglePacker> RectanglePacker::Factory(int width,
+std::shared_ptr<RectanglePacker> RectanglePacker::Factory(int width,
                                                           int height) {
-  return std::make_unique<SkylineRectanglePacker>(width, height);
+  return std::make_shared<SkylineRectanglePacker>(width, height);
 }
 
 }  // namespace impeller
