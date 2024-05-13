@@ -220,4 +220,18 @@ TEST(FlutterAppLifecycleDelegateTest, RespondsToDidChangeOcclusionState) {
   }
 }
 
+TEST(FlutterAppLifecycleDelegateTest, ReleasesDelegateOnDealloc) {
+  __weak FlutterAppLifecycleRegistrar* weakRegistrar;
+  __weak TestFlutterAppLifecycleDelegate* weakDelegate;
+  @autoreleasepool {
+    FlutterAppLifecycleRegistrar* registrar = [[FlutterAppLifecycleRegistrar alloc] init];
+    weakRegistrar = registrar;
+    TestFlutterAppLifecycleDelegate* delegate = [[TestFlutterAppLifecycleDelegate alloc] init];
+    weakDelegate = delegate;
+    [registrar addDelegate:delegate];
+  }
+  EXPECT_EQ(weakRegistrar, nil);
+  EXPECT_EQ(weakDelegate, nil);
+}
+
 }  // namespace flutter::testing

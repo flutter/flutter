@@ -13,23 +13,14 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
 
-@implementation FlutterAppLifecycleRegistrar {
-  NSMutableArray* _notificationUnsubscribers;
-}
+@implementation FlutterAppLifecycleRegistrar
 
 - (void)addObserverFor:(NSString*)name selector:(SEL)selector {
   [[NSNotificationCenter defaultCenter] addObserver:self selector:selector name:name object:nil];
-  __block NSObject* blockSelf = self;
-  dispatch_block_t unsubscribe = ^{
-    [[NSNotificationCenter defaultCenter] removeObserver:blockSelf name:name object:nil];
-  };
-  [_notificationUnsubscribers addObject:[unsubscribe copy]];
 }
 
 - (instancetype)init {
   if (self = [super init]) {
-    _notificationUnsubscribers = [[NSMutableArray alloc] init];
-
 // Using a macro to avoid errors where the notification doesn't match the
 // selector.
 #ifdef OBSERVE_NOTIFICATION
@@ -58,15 +49,6 @@
     _delegates = [NSPointerArray weakObjectsPointerArray];
   }
   return self;
-}
-
-- (void)dealloc {
-  for (dispatch_block_t unsubscribe in _notificationUnsubscribers) {
-    unsubscribe();
-  }
-  [_notificationUnsubscribers removeAllObjects];
-  _delegates = nil;
-  _notificationUnsubscribers = nil;
 }
 
 static BOOL IsPowerOfTwo(NSUInteger x) {
