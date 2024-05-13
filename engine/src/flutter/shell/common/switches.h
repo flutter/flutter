@@ -288,13 +288,6 @@ DEF_SWITCH(LeakVM,
            "When the last shell shuts down, the shared VM is leaked by default "
            "(the leak_vm in VM settings is true). To clean up the leak VM, set "
            "this value to false.")
-DEF_SWITCH(
-    MsaaSamples,
-    "msaa-samples",
-    "The minimum number of samples to require for multisampled anti-aliasing.  "
-    "Setting this value to 0 or 1 disables MSAA. If it is not 0 or 1, it must "
-    "be one of 2, 4, 8, or 16. However, if the GPU does not support the "
-    "requested sampling value, MSAA will be disabled.")
 DEF_SWITCH(EnableEmbedderAPI,
            "enable-embedder-api",
            "Enable the embedder api. Defaults to false. iOS only.")

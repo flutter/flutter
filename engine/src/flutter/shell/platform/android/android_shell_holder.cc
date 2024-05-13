@@ -118,8 +118,7 @@ AndroidShellHolder::AndroidShellHolder(
             shell.GetTaskRunners(),  // task runners
             jni_facade,              // JNI interop
             shell.GetSettings()
-                .enable_software_rendering,   // use software rendering
-            shell.GetSettings().msaa_samples  // msaa sample count
+                .enable_software_rendering  // use software rendering
         );
         weak_platform_view = platform_view_android->GetWeakPtr();
         return platform_view_android;
