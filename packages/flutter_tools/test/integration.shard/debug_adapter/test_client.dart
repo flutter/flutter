@@ -67,13 +67,6 @@ class DapTestClient {
   /// Returns a stream of the string output from [OutputEventBody] events with the category 'stdout'.
   Stream<String> get stdoutOutput => outputEvents
       .where((OutputEventBody output) => output.category == 'stdout')
-        // Skip empty output events. These are pointless (but harmless) events
-        // that started occurring with pkg:dds 4.2.0 because of how the stack
-        // trace parsing is done. This will be unnecessary once fixed in
-        // DDS/DAP.
-        // TODO(dantup): Remove this once we're updated to a version of DAP that
-        //  includes https://dart-review.googlesource.com/c/sdk/+/364340.
-      .where((OutputEventBody output) => output.output.isNotEmpty)
       .map((OutputEventBody output) => output.output);
 
   /// Sends a custom request to the server and waits for a response.

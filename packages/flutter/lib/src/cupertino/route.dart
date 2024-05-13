@@ -457,32 +457,28 @@ class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
   }
 
   void _setupAnimation() {
-    _primaryPositionAnimation =
-           (widget.linearTransition
-             ? widget.primaryRouteAnimation
-             : _primaryPositionCurve = CurvedAnimation(
-                 parent: widget.primaryRouteAnimation,
-                 curve: Curves.fastEaseInToSlowEaseOut,
-                 reverseCurve: Curves.fastEaseInToSlowEaseOut.flipped,
-               )
-           ).drive(_kRightMiddleTween);
-       _secondaryPositionAnimation =
-           (widget.linearTransition
-             ? widget.secondaryRouteAnimation
-             : _secondaryPositionCurve = CurvedAnimation(
-                 parent: widget.secondaryRouteAnimation,
-                 curve: Curves.linearToEaseOut,
-                 reverseCurve: Curves.easeInToLinear,
-               )
-           ).drive(_kMiddleLeftTween);
-       _primaryShadowAnimation =
-           (widget.linearTransition
-             ? widget.primaryRouteAnimation
-             : _secondaryPositionCurve = CurvedAnimation(
-                 parent: widget.primaryRouteAnimation,
-                 curve: Curves.linearToEaseOut,
-               )
-           ).drive(_CupertinoEdgeShadowDecoration.kTween);
+    if (!widget.linearTransition) {
+      _primaryPositionCurve = CurvedAnimation(
+        parent: widget.primaryRouteAnimation,
+        curve: Curves.fastEaseInToSlowEaseOut,
+        reverseCurve: Curves.fastEaseInToSlowEaseOut.flipped,
+      );
+      _secondaryPositionCurve = CurvedAnimation(
+        parent: widget.secondaryRouteAnimation,
+        curve: Curves.linearToEaseOut,
+        reverseCurve: Curves.easeInToLinear,
+      );
+      _primaryShadowCurve = CurvedAnimation(
+        parent: widget.primaryRouteAnimation,
+        curve: Curves.linearToEaseOut,
+      );
+    }
+    _primaryPositionAnimation = (_primaryPositionCurve ?? widget.primaryRouteAnimation)
+      .drive(_kRightMiddleTween);
+    _secondaryPositionAnimation = (_secondaryPositionCurve ?? widget.secondaryRouteAnimation)
+      .drive(_kMiddleLeftTween);
+    _primaryShadowAnimation = (_primaryShadowCurve ?? widget.primaryRouteAnimation)
+      .drive(_CupertinoEdgeShadowDecoration.kTween);
   }
 
   @override
