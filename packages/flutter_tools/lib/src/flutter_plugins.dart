@@ -1130,7 +1130,7 @@ bool hasPlugins(FlutterProject project) {
   return _readFileContent(project.flutterPluginsFile) != null;
 }
 
-/// Resolves the plugin implementations for all platforms (except Web).
+/// Resolves the plugin implementations for all platforms.
 ///
 ///   * If there is only one dependency on a package that implements the
 ///     frontend plugin for the current platform, use that.
@@ -1142,6 +1142,9 @@ bool hasPlugins(FlutterProject project) {
 ///   * Else fail.
 ///
 ///  For more details, https://flutter.dev/go/federated-plugins.
+///
+/// If [selectDartPluginsOnly] is enabled, only Dart plugin implementations are
+/// considered. Else, only native plugin implementations are considered.
 List<PluginInterfaceResolution> resolvePlatformImplementation(
   List<Plugin> plugins, {
   required bool selectDartPluginsOnly,
