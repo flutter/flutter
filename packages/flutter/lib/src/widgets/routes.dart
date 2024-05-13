@@ -2288,10 +2288,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     if (_transitionBuilder == null) {
       // Some default transition.
       return FadeTransition(
-        opacity: CurvedAnimation(
-          parent: animation,
-          curve: Curves.linear,
-        ),
+        opacity: animation,
         child: child,
       );
     }
