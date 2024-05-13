@@ -6,7 +6,6 @@
 #define FLUTTER_SHELL_PLATFORM_DARWIN_COMMON_FRAMEWORK_HEADERS_FLUTTERDARTPROJECT_H_
 
 #import <Foundation/Foundation.h>
-#import <TargetConditionals.h>
 
 #import "FlutterMacros.h"
 

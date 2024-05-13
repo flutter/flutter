@@ -7,8 +7,9 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
 #include "flutter/lib/ui/plugins/callback_cache.h"
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterCallbackCache_Internal.h"
+
+FLUTTER_ASSERT_ARC
 
 static const char* kCallbackCacheSubDir = "Library/Caches/";
 
@@ -43,7 +44,7 @@ static const SEL kSelectorsHandledByPlugins[] = {
   dispatch_block_t unsubscribe = ^{
     [[NSNotificationCenter defaultCenter] removeObserver:blockSelf name:name object:nil];
   };
-  [_notificationUnsubscribers addObject:[[unsubscribe copy] autorelease]];
+  [_notificationUnsubscribers addObject:[unsubscribe copy]];
 }
 
 - (instancetype)init {
@@ -63,7 +64,7 @@ static const SEL kSelectorsHandledByPlugins[] = {
     [self addObserverFor:UIApplicationWillTerminateNotification
                 selector:@selector(handleWillTerminate:)];
 #endif
-    _delegates = [[NSPointerArray weakObjectsPointerArray] retain];
+    _delegates = [NSPointerArray weakObjectsPointerArray];
     _debugBackgroundTask = UIBackgroundTaskInvalid;
   }
   return self;
@@ -73,9 +74,6 @@ static const SEL kSelectorsHandledByPlugins[] = {
   for (dispatch_block_t unsubscribe in _notificationUnsubscribers) {
     unsubscribe();
   }
-  [_notificationUnsubscribers release];
-  [_delegates release];
-  [super dealloc];
 }
 
 static BOOL IsPowerOfTwo(NSUInteger x) {
