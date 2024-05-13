@@ -1050,11 +1050,11 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
 
 class _ReorderableItem extends StatefulWidget {
   const _ReorderableItem({
-    required Key key,
+    required Key super.key,
     required this.index,
     required this.child,
     required this.capturedThemes,
-  }) : super(key: key);
+  });
 
   final int index;
   final Widget child;
