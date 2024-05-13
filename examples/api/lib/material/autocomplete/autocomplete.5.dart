@@ -116,7 +116,7 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
+      children: <Widget>[
         Text(
           _networkEnabled
               ? 'Network is on, toggle to induce network errors.'
