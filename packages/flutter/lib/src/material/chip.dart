@@ -27,7 +27,6 @@ import 'tooltip.dart';
 
 // Some design constants
 const double _kChipHeight = 32.0;
-const double _kDeleteIconSize = 18.0;
 
 const int _kCheckmarkAlpha = 0xde; // 87%
 const int _kDisabledAlpha = 0x61; // 38%
@@ -41,7 +40,7 @@ const Duration _kReverseDrawerDuration = Duration(milliseconds: 100);
 const Duration _kDisableDuration = Duration(milliseconds: 75);
 
 const Color _kSelectScrimColor = Color(0x60191919);
-const Icon _kDefaultDeleteIcon = Icon(Icons.cancel, size: _kDeleteIconSize);
+const Icon _kDefaultDeleteIcon = Icon(Icons.cancel);
 
 /// An interface defining the base attributes for a Material Design chip.
 ///
@@ -262,7 +261,17 @@ abstract interface class ChipAttributes {
 abstract interface class DeletableChipAttributes {
   /// The icon displayed when [onDeleted] is set.
   ///
-  /// Defaults to an [Icon] widget set to use [Icons.cancel].
+  /// If [deleteIconColor] is provided, it will be used as the color of the
+  /// delete icon. If [deleteIconColor] is null, then the icon will use the
+  /// color specified in the chip [IconTheme]. If the [IconTheme] is null, then
+  /// the icon will use the color specified in the [ThemeData.iconTheme].
+  ///
+  /// If a size is specified in the chip [IconTheme], then the delete icon will
+  /// use that size. Otherwise, defaults to 18 pixels.
+  ///
+  /// Defaults to an [Icon] widget set to use [Icons.clear].
+  /// If [ThemeData.useMaterial3] is false, then defaults to an [Icon] widget
+  /// set to use [Icons.cancel].
   Widget? get deleteIcon;
 
   /// Called when the user taps the [deleteIcon] to delete the chip.
@@ -1179,6 +1188,20 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     if (!hasDeleteButton) {
       return null;
     }
+    final IconThemeData iconTheme = widget.iconTheme
+      ?? chipTheme.iconTheme
+      ?? theme.chipTheme.iconTheme
+      ?? _ChipDefaultsM3(context, widget.isEnabled).iconTheme!;
+    final Color? effectiveDeleteIconColor = widget.deleteIconColor
+      ?? chipTheme.deleteIconColor
+      ?? theme.chipTheme.deleteIconColor
+      ?? widget.iconTheme?.color
+      ?? chipTheme.iconTheme?.color
+      ?? chipDefaults.deleteIconColor;
+    final double effectiveIconSize = widget.iconTheme?.size
+      ?? chipTheme.iconTheme?.size
+      ?? theme.chipTheme.iconTheme?.size
+      ?? _ChipDefaultsM3(context, widget.isEnabled).iconTheme!.size!;
     return Semantics(
       container: true,
       button: true,
@@ -1194,11 +1217,9 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
           customBorder: const CircleBorder(),
           onTap: widget.isEnabled ? widget.onDeleted : null,
           child: IconTheme(
-            data: theme.iconTheme.copyWith(
-              color: widget.deleteIconColor
-                ?? chipTheme.deleteIconColor
-                ?? theme.chipTheme.deleteIconColor
-                ?? chipDefaults.deleteIconColor,
+            data: iconTheme.copyWith(
+              color: effectiveDeleteIconColor,
+              size: effectiveIconSize,
             ),
             child: widget.deleteIcon,
           ),
@@ -1707,9 +1728,6 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   bool get isDrawingCheckmark => theme.showCheckmark && !checkmarkAnimation.isDismissed;
   bool get deleteIconShowing => !deleteDrawerAnimation.isDismissed;
 
-  @override
-  bool get sizedByParent => false;
-
   static Rect _boxRect(RenderBox box) => _boxParentData(box).offset & box.size;
 
   static BoxParentData _boxParentData(RenderBox box) => box.parentData! as BoxParentData;
@@ -1754,29 +1772,22 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     return (BaselineOffset(label.getDistanceToActualBaseline(baseline)) + _boxParentData(label).offset.dy).offset;
   }
 
-  Size _layoutLabel(BoxConstraints contentConstraints, double iconSizes, Size size, Size rawSize, [ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
+  BoxConstraints _labelConstraintsFrom(BoxConstraints contentConstraints, double iconWidth, double contentSize, Size rawLabelSize) {
     // Now that we know the label height and the width of the icons, we can
     // determine how much to shrink the width constraints for the "real" layout.
-    final double maxLabelWidth = contentConstraints.maxWidth.isFinite
-      ? math.max(
-          0.0,
-          contentConstraints.maxWidth - iconSizes - theme.labelPadding.horizontal - theme.padding.horizontal,
-        )
-      : size.width;
-    final BoxConstraints labelConstraints = BoxConstraints(
-      minHeight: rawSize.height,
-      maxHeight: size.height,
-      maxWidth: maxLabelWidth,
+    final double freeSpace = contentConstraints.maxWidth - iconWidth - theme.labelPadding.horizontal - theme.padding.horizontal;
+    final double maxLabelWidth = math.max(0.0, freeSpace);
+    return BoxConstraints(
+      minHeight: rawLabelSize.height,
+      maxHeight: contentSize,
+      maxWidth: maxLabelWidth.isFinite ? maxLabelWidth : rawLabelSize.width,
     );
-    final Size updatedSize = layoutChild(label, labelConstraints);
-    return theme.labelPadding.inflateSize(updatedSize);
   }
 
   Size _layoutAvatar(double contentSize, [ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
-    final double requestedSize = math.max(0.0, contentSize);
     final BoxConstraints avatarConstraints = avatarBoxConstraints ?? BoxConstraints.tightFor(
-      width: requestedSize,
-      height: requestedSize,
+      width: contentSize,
+      height: contentSize,
     );
     final Size avatarBoxSize = layoutChild(avatar, avatarConstraints);
     if (!theme.showCheckmark && !theme.showAvatar) {
@@ -1787,10 +1798,9 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   }
 
   Size _layoutDeleteIcon(double contentSize, [ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
-    final double requestedSize = math.max(0.0, contentSize);
     final BoxConstraints deleteIconConstraints = deleteIconBoxConstraints ?? BoxConstraints.tightFor(
-      width: requestedSize,
-      height: requestedSize,
+      width: contentSize,
+      height: contentSize,
     );
     final Size boxSize = layoutChild(deleteIcon, deleteIconConstraints);
     if (!deleteIconShowing) {
@@ -1830,25 +1840,36 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     return _computeSizes(constraints, ChildLayoutHelper.dryLayoutChild).size;
   }
 
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final _ChipSizes sizes = _computeSizes(constraints, ChildLayoutHelper.dryLayoutChild);
+    final BaselineOffset labelBaseline = BaselineOffset(label.getDryBaseline(sizes.labelConstraints, baseline))
+        + (sizes.content - sizes.label.height + sizes.densityAdjustment.dy) / 2
+        + theme.padding.top + theme.labelPadding.top;
+    return labelBaseline.offset;
+  }
+
   _ChipSizes _computeSizes(BoxConstraints constraints, ChildLayouter layoutChild) {
     final BoxConstraints contentConstraints = constraints.loosen();
     // Find out the height of the label within the constraints.
-    final Offset densityAdjustment = Offset(0.0, theme.visualDensity.baseSizeAdjustment.dy / 2.0);
-    final Size rawLabelSize = layoutChild(label, contentConstraints);
+    final Size rawLabelSize = label.getDryLayout(contentConstraints);
     final double contentSize = math.max(
       _kChipHeight - theme.padding.vertical + theme.labelPadding.vertical,
       rawLabelSize.height + theme.labelPadding.vertical,
     );
+    assert(contentSize >= rawLabelSize.height);
     final Size avatarSize = _layoutAvatar(contentSize, layoutChild);
     final Size deleteIconSize = _layoutDeleteIcon(contentSize, layoutChild);
-    final Size labelSize = _layoutLabel(
+
+    final BoxConstraints labelConstraints = _labelConstraintsFrom(
       contentConstraints,
       avatarSize.width + deleteIconSize.width,
-      Size(rawLabelSize.width, contentSize),
+      contentSize,
       rawLabelSize,
-      layoutChild,
     );
 
+    final Size labelSize = theme.labelPadding.inflateSize(layoutChild(label, labelConstraints));
+    final Offset densityAdjustment = Offset(0.0, theme.visualDensity.baseSizeAdjustment.dy / 2.0);
     // This is the overall size of the content: it doesn't include
     // theme.padding, that is added in at the end.
     final Size overallSize = Size(
@@ -1866,6 +1887,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
       content: contentSize,
       densityAdjustment: densityAdjustment,
       avatar: avatarSize,
+      labelConstraints: labelConstraints,
       label: labelSize,
       deleteIcon: deleteIconSize,
     );
@@ -2211,6 +2233,7 @@ class _ChipSizes {
     required this.overall,
     required this.content,
     required this.avatar,
+    required this.labelConstraints,
     required this.label,
     required this.deleteIcon,
     required this.densityAdjustment,
@@ -2219,6 +2242,7 @@ class _ChipSizes {
   final Size overall;
   final double content;
   final Size avatar;
+  final BoxConstraints labelConstraints;
   final Size label;
   final Size deleteIcon;
   final Offset densityAdjustment;

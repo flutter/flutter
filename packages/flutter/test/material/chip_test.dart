@@ -57,6 +57,13 @@ DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
   );
 }
 
+TextStyle? getIconStyle(WidgetTester tester, IconData icon) {
+  final RichText iconRichText = tester.widget<RichText>(
+    find.descendant(of: find.byIcon(icon).first, matching: find.byType(RichText)),
+  );
+  return iconRichText.text.style;
+}
+
 dynamic getRenderChip(WidgetTester tester) {
   if (!tester.any(findRenderChipElement())) {
     return null;
@@ -1794,7 +1801,7 @@ void main() {
     expect(Focus.of(labelKey.currentContext!).hasPrimaryFocus, isTrue);
   });
 
-  testWidgets('Material2 - Delete button creates non-centered, unique ripple when tapped', (WidgetTester tester) async {
+  testWidgets('Material2 - Delete button creates centered, unique ripple when tapped', (WidgetTester tester) async {
     final UniqueKey labelKey = UniqueKey();
     final UniqueKey deleteButtonKey = UniqueKey();
 
@@ -1820,8 +1827,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     // There should be one unique ink ripple.
-    expect(box, ripplePattern(const Offset(3.0, 3.0), 1.44));
-    expect(box, uniqueRipplePattern(const Offset(3.0, 3.0), 1.44));
+    expect(box, ripplePattern(Offset.zero, 1.44));
+    expect(box, uniqueRipplePattern(Offset.zero, 1.44));
 
     // There should be no tooltip.
     expect(findTooltipContainer('Delete'), findsNothing);
@@ -1832,8 +1839,8 @@ void main() {
 
     // The ripple should grow, but the center should move,
     // Towards the center of the delete icon.
-    expect(box, ripplePattern(const Offset(5.0, 5.0), 4.32));
-    expect(box, uniqueRipplePattern(const Offset(5.0, 5.0), 4.32));
+    expect(box, ripplePattern(const Offset(2.0, 2.0), 4.32));
+    expect(box, uniqueRipplePattern(const Offset(2.0, 2.0), 4.32));
 
     // There should be no tooltip.
     expect(findTooltipContainer('Delete'), findsNothing);
@@ -1925,8 +1932,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     // There should be one unique ink ripple.
-    expect(box, ripplePattern(const Offset(3.0, 3.0), 1.44));
-    expect(box, uniqueRipplePattern(const Offset(3.0, 3.0), 1.44));
+    expect(box, ripplePattern(Offset.zero, 1.44));
+    expect(box, uniqueRipplePattern(Offset.zero, 1.44));
 
     // There should be no tooltip.
     expect(findTooltipContainer('Delete'), findsNothing);
@@ -1937,8 +1944,8 @@ void main() {
 
     // The ripple should grow, but the center should move,
     // Towards the center of the delete icon.
-    expect(box, ripplePattern(const Offset(5.0, 5.0), 4.32));
-    expect(box, uniqueRipplePattern(const Offset(5.0, 5.0), 4.32));
+    expect(box, ripplePattern(const Offset(2.0, 2.0), 4.32));
+    expect(box, uniqueRipplePattern(const Offset(2.0, 2.0), 4.32));
 
     // There should be no tooltip.
     expect(findTooltipContainer('Delete'), findsNothing);
@@ -4476,7 +4483,7 @@ void main() {
     Rect avatarBox = tester.getRect(find.byKey(avatarKey));
     expect(box.size, equals(const Size(128, 32.0 + 16.0)));
     expect(textBox.size, equals(const Size(56, 14)));
-    expect(iconBox.size, equals(const Size(24, 24)));
+    expect(iconBox.size, equals(const Size(18, 18)));
     expect(avatarBox.size, equals(const Size(24, 24)));
     expect(textBox.top, equals(17));
     expect(box.bottom - textBox.bottom, equals(17));
@@ -4491,7 +4498,7 @@ void main() {
     avatarBox = tester.getRect(find.byKey(avatarKey));
     expect(box.size, equals(const Size(128, 60)));
     expect(textBox.size, equals(const Size(56, 14)));
-    expect(iconBox.size, equals(const Size(24, 24)));
+    expect(iconBox.size, equals(const Size(18, 18)));
     expect(avatarBox.size, equals(const Size(24, 24)));
     expect(textBox.top, equals(23));
     expect(box.bottom - textBox.bottom, equals(23));
@@ -4506,7 +4513,7 @@ void main() {
     avatarBox = tester.getRect(find.byKey(avatarKey));
     expect(box.size, equals(const Size(128, 36)));
     expect(textBox.size, equals(const Size(56, 14)));
-    expect(iconBox.size, equals(const Size(24, 24)));
+    expect(iconBox.size, equals(const Size(18, 18)));
     expect(avatarBox.size, equals(const Size(24, 24)));
     expect(textBox.top, equals(11));
     expect(box.bottom - textBox.bottom, equals(11));
@@ -4523,7 +4530,7 @@ void main() {
     avatarBox = tester.getRect(find.byKey(avatarKey));
     expect(box.size, equals(const Size(128, 36)));
     expect(textBox.size, equals(const Size(56, 14)));
-    expect(iconBox.size, equals(const Size(24, 24)));
+    expect(iconBox.size, equals(const Size(18, 18)));
     expect(avatarBox.size, equals(const Size(24, 24)));
     expect(textBox.top, equals(11));
     expect(box.bottom - textBox.bottom, equals(11));
@@ -4583,7 +4590,7 @@ void main() {
     expect(box.size.height, equals(32.0 + 16.0));
     expect(textBox.size.width, moreOrLessEquals(56.4, epsilon: 0.1));
     expect(textBox.size.height, equals(20.0));
-    expect(iconBox.size, equals(const Size(20, 20)));
+    expect(iconBox.size, equals(const Size(18, 18)));
     expect(avatarBox.size, equals(const Size(18, 18)));
     expect(textBox.top, equals(14));
     expect(box.bottom - textBox.bottom, equals(14));
@@ -4600,7 +4607,7 @@ void main() {
     expect(box.size.height, equals(60));
     expect(textBox.size.width, moreOrLessEquals(56.4, epsilon: 0.1));
     expect(textBox.size.height, equals(20.0));
-    expect(iconBox.size, equals(const Size(20, 20)));
+    expect(iconBox.size, equals(const Size(18, 18)));
     expect(avatarBox.size, equals(const Size(18, 18)));
     expect(textBox.top, equals(20));
     expect(box.bottom - textBox.bottom, equals(20));
@@ -4617,7 +4624,7 @@ void main() {
     expect(box.size.height, equals(36));
     expect(textBox.size.width, moreOrLessEquals(56.4, epsilon: 0.1));
     expect(textBox.size.height, equals(20.0));
-    expect(iconBox.size, equals(const Size(20, 20)));
+    expect(iconBox.size, equals(const Size(18, 18)));
     expect(avatarBox.size, equals(const Size(18, 18)));
     expect(textBox.top, equals(8));
     expect(box.bottom - textBox.bottom, equals(8));
@@ -4636,7 +4643,7 @@ void main() {
     expect(box.size.height, equals(36));
     expect(textBox.size.width, moreOrLessEquals(56.4, epsilon: 0.1));
     expect(textBox.size.height, equals(20.0));
-    expect(iconBox.size, equals(const Size(20, 20)));
+    expect(iconBox.size, equals(const Size(18, 18)));
     expect(avatarBox.size, equals(const Size(18, 18)));
     expect(textBox.top, equals(8));
     expect(box.bottom - textBox.bottom, equals(8));
@@ -5705,6 +5712,87 @@ void main() {
       tester.getTopLeft(find.text('A').last).dy,
     );
   });
+
+  testWidgets('ChipThemeData.iconTheme updates avatar and delete icons', (WidgetTester tester) async {
+    const Color iconColor = Color(0xffff00ff);
+    const double iconSize = 28.0;
+    const IconData avatarIcon = Icons.favorite;
+    const IconData deleteIcon = Icons.delete;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+          child: RawChip(
+            iconTheme: const IconThemeData(
+              color: iconColor,
+              size: iconSize,
+            ),
+            avatar: const Icon(Icons.favorite),
+            deleteIcon: const Icon(Icons.delete),
+            onDeleted: () { },
+            label: const SizedBox(height: 100),
+          ),
+        ),
+      ),
+    ));
+
+    // Test rendered icon size.
+    final RenderBox avatarIconBox = tester.renderObject(find.byIcon(avatarIcon));
+    final RenderBox deleteIconBox = tester.renderObject(find.byIcon(deleteIcon));
+    expect(avatarIconBox.size.width, equals(iconSize));
+    expect(deleteIconBox.size.width, equals(iconSize));
+
+    // Test rendered icon color.
+    expect(getIconStyle(tester, avatarIcon)?.color, iconColor);
+    expect(getIconStyle(tester, deleteIcon)?.color, iconColor);
+  });
+
+  testWidgets('RawChip.deleteIconColor overrides iconTheme color', (WidgetTester tester) async {
+    const Color iconColor = Color(0xffff00ff);
+    const Color deleteIconColor = Color(0xffff00ff);
+    const IconData deleteIcon = Icons.delete;
+
+    Widget buildChip({ Color? deleteIconColor, Color? iconColor }) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: RawChip(
+              deleteIconColor: deleteIconColor,
+              iconTheme: IconThemeData(color: iconColor),
+              deleteIcon: const Icon(Icons.delete),
+              onDeleted: () { },
+              label: const SizedBox(height: 100),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildChip(iconColor: iconColor));
+
+    // Test rendered icon color.
+    expect(getIconStyle(tester, deleteIcon)?.color, iconColor);
+
+    await tester.pumpWidget(buildChip(
+      deleteIconColor: deleteIconColor,
+      iconColor: iconColor,
+    ));
+
+    // Test rendered icon color.
+    expect(getIconStyle(tester, deleteIcon)?.color, deleteIconColor);
+  });
+
+  testWidgets('Chip label only does layout once', (WidgetTester tester) async {
+    final RenderLayoutCount renderLayoutCount = RenderLayoutCount();
+    final Widget layoutCounter = Center(
+      key: GlobalKey(),
+      child: WidgetToRenderBoxAdapter(renderBox: renderLayoutCount),
+    );
+
+    await tester.pumpWidget(wrapForChip(child: RawChip(label: layoutCounter)));
+
+    expect(renderLayoutCount.layoutCount, 1);
+  });
 }
 
 class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStateOutlinedBorder {
@@ -5723,4 +5811,17 @@ class _MaterialStateBorderSide extends MaterialStateBorderSide {
 
   @override
   BorderSide? resolve(Set<MaterialState> states) => resolver(states);
+}
+
+class RenderLayoutCount extends RenderBox {
+  int layoutCount = 0;
+
+  @override
+  Size computeDryLayout(covariant BoxConstraints constraints) => constraints.biggest;
+
+  @override
+  void performLayout() {
+    layoutCount += 1;
+    size = constraints.biggest;
+  }
 }
