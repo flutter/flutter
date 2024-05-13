@@ -48,7 +48,7 @@ void main() {
 }
 
 class TestWidget extends StatefulWidget {
-  const TestWidget(super.key);
+  const TestWidget(Key? key) : super(key: key);
 
   @override
   State<TestWidget> createState() => TestWidgetState();

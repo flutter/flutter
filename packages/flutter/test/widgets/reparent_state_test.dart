@@ -24,7 +24,7 @@ class StateMarkerState extends State<StateMarker> {
 }
 
 class DeactivateLogger extends StatefulWidget {
-  const DeactivateLogger({ required super.key, required this.log });
+  const DeactivateLogger({ required Key super.key, required this.log });
 
   final List<String> log;
 

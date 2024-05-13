@@ -273,7 +273,7 @@ class OverlayEntry implements Listenable {
 
 class _OverlayEntryWidget extends StatefulWidget {
   const _OverlayEntryWidget({
-    required super.key,
+    required Key super.key,
     required this.entry,
     required this.overlayState,
     this.tickerEnabled = true,
