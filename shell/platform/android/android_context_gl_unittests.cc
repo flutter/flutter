@@ -109,7 +109,7 @@ TEST(AndroidContextGl, Create) {
                         ThreadHost::Type::kIo));
   TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
   auto context =
-      std::make_unique<AndroidContextGLSkia>(environment, task_runners, 0);
+      std::make_unique<AndroidContextGLSkia>(environment, task_runners);
   context->SetMainSkiaContext(main_context);
   EXPECT_NE(context.get(), nullptr);
   context.reset();
@@ -141,7 +141,7 @@ TEST(AndroidContextGl, CreateSingleThread) {
       TaskRunners(thread_label, platform_runner, platform_runner,
                   platform_runner, platform_runner);
   auto context =
-      std::make_unique<AndroidContextGLSkia>(environment, task_runners, 0);
+      std::make_unique<AndroidContextGLSkia>(environment, task_runners);
   context->SetMainSkiaContext(main_context);
   EXPECT_NE(context.get(), nullptr);
   context.reset();
@@ -160,7 +160,7 @@ TEST(AndroidSurfaceGL, CreateSnapshopSurfaceWhenOnscreenSurfaceIsNotNull) {
                         ThreadHost::Type::kIo));
   TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
   auto android_context =
-      std::make_shared<AndroidContextGLSkia>(environment, task_runners, 0);
+      std::make_shared<AndroidContextGLSkia>(environment, task_runners);
   auto android_surface =
       std::make_unique<AndroidSurfaceGLSkia>(android_context);
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(
@@ -187,35 +187,12 @@ TEST(AndroidSurfaceGL, CreateSnapshopSurfaceWhenOnscreenSurfaceIsNull) {
   ThreadHost thread_host(host_config);
   TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
   auto android_context =
-      std::make_shared<AndroidContextGLSkia>(environment, task_runners, 0);
+      std::make_shared<AndroidContextGLSkia>(environment, task_runners);
   auto android_surface =
       std::make_unique<AndroidSurfaceGLSkia>(android_context);
   EXPECT_EQ(android_surface->GetOnscreenSurface(), nullptr);
   android_surface->CreateSnapshotSurface();
   EXPECT_NE(android_surface->GetOnscreenSurface(), nullptr);
-}
-
-// TODO(https://github.com/flutter/flutter/issues/104463): Flaky test.
-TEST(AndroidContextGl, DISABLED_MSAAx4) {
-  GrMockOptions main_context_options;
-  sk_sp<GrDirectContext> main_context =
-      GrDirectContext::MakeMock(&main_context_options);
-  auto environment = fml::MakeRefCounted<AndroidEnvironmentGL>();
-  std::string thread_label =
-      ::testing::UnitTest::GetInstance()->current_test_info()->name();
-
-  ThreadHost thread_host(ThreadHost::ThreadHostConfig(
-      thread_label, ThreadHost::Type::kUi | ThreadHost::Type::kRaster |
-                        ThreadHost::Type::kIo));
-  TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
-  auto context =
-      std::make_unique<AndroidContextGLSkia>(environment, task_runners, 4);
-  context->SetMainSkiaContext(main_context);
-
-  EGLint sample_count;
-  eglGetConfigAttrib(environment->Display(), context->Config(), EGL_SAMPLES,
-                     &sample_count);
-  EXPECT_EQ(sample_count, 4);
 }
 
 TEST(AndroidContextGl, EnsureMakeCurrentChecksCurrentContextStatus) {
@@ -231,7 +208,7 @@ TEST(AndroidContextGl, EnsureMakeCurrentChecksCurrentContextStatus) {
                         ThreadHost::Type::kIo));
   TaskRunners task_runners = MakeTaskRunners(thread_label, thread_host);
   auto context =
-      std::make_unique<AndroidContextGLSkia>(environment, task_runners, 0);
+      std::make_unique<AndroidContextGLSkia>(environment, task_runners);
 
   auto pbuffer_surface = context->CreatePbufferSurface();
   auto status = pbuffer_surface->MakeCurrent();

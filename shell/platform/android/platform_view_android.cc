@@ -63,7 +63,6 @@ std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
 static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
     bool use_software_rendering,
     const flutter::TaskRunners& task_runners,
-    uint8_t msaa_samples,
     AndroidRenderingAPI android_rendering_api,
     bool enable_vulkan_validation,
     bool enable_opengl_gpu_tracing,
@@ -81,8 +80,7 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
     case AndroidRenderingAPI::kSkiaOpenGLES:
       return std::make_unique<AndroidContextGLSkia>(
           fml::MakeRefCounted<AndroidEnvironmentGL>(),  //
-          task_runners,                                 //
-          msaa_samples                                  //
+          task_runners                                  //
       );
   }
   FML_UNREACHABLE();
@@ -92,8 +90,7 @@ PlatformViewAndroid::PlatformViewAndroid(
     PlatformView::Delegate& delegate,
     const flutter::TaskRunners& task_runners,
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-    bool use_software_rendering,
-    uint8_t msaa_samples)
+    bool use_software_rendering)
     : PlatformViewAndroid(
           delegate,
           task_runners,
@@ -101,7 +98,6 @@ PlatformViewAndroid::PlatformViewAndroid(
           CreateAndroidContext(
               use_software_rendering,
               task_runners,
-              msaa_samples,
               delegate.OnPlatformViewGetSettings().android_rendering_api,
               delegate.OnPlatformViewGetSettings().enable_vulkan_validation,
               delegate.OnPlatformViewGetSettings().enable_opengl_gpu_tracing,

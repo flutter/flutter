@@ -58,16 +58,14 @@ PlatformViewIOS::PlatformViewIOS(
     const flutter::TaskRunners& task_runners,
     const std::shared_ptr<fml::ConcurrentTaskRunner>& worker_task_runner,
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch)
-    : PlatformViewIOS(
-          delegate,
-          IOSContext::Create(
-              rendering_api,
-              delegate.OnPlatformViewGetSettings().enable_impeller ? IOSRenderingBackend::kImpeller
-                                                                   : IOSRenderingBackend::kSkia,
-              static_cast<MsaaSampleCount>(delegate.OnPlatformViewGetSettings().msaa_samples),
-              is_gpu_disabled_sync_switch),
-          platform_views_controller,
-          task_runners) {}
+    : PlatformViewIOS(delegate,
+                      IOSContext::Create(rendering_api,
+                                         delegate.OnPlatformViewGetSettings().enable_impeller
+                                             ? IOSRenderingBackend::kImpeller
+                                             : IOSRenderingBackend::kSkia,
+                                         is_gpu_disabled_sync_switch),
+                      platform_views_controller,
+                      task_runners) {}
 
 PlatformViewIOS::~PlatformViewIOS() = default;
 

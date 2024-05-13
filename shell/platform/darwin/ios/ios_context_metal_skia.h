@@ -20,7 +20,7 @@ namespace flutter {
 
 class IOSContextMetalSkia final : public IOSContext {
  public:
-  explicit IOSContextMetalSkia(MsaaSampleCount msaa_samples);
+  explicit IOSContextMetalSkia();
 
   ~IOSContextMetalSkia();
 

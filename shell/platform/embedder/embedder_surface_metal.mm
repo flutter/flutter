@@ -8,7 +8,6 @@
 
 #include "flutter/shell/platform/embedder/embedder_surface_metal.h"
 
-#include "flutter/common/graphics/msaa_sample_count.h"
 #include "flutter/fml/logging.h"
 #include "flutter/shell/gpu/gpu_surface_metal_delegate.h"
 #include "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.h"
@@ -50,8 +49,7 @@ std::unique_ptr<Surface> EmbedderSurfaceMetal::CreateGPUSurface() API_AVAILABLE(
   }
 
   const bool render_to_surface = !external_view_embedder_;
-  auto surface = std::make_unique<GPUSurfaceMetalSkia>(this, main_context_, MsaaSampleCount::kNone,
-                                                       render_to_surface);
+  auto surface = std::make_unique<GPUSurfaceMetalSkia>(this, main_context_, render_to_surface);
 
   if (!surface->IsValid()) {
     return nullptr;

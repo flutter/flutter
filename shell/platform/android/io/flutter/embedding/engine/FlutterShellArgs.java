@@ -65,8 +65,6 @@ public class FlutterShellArgs {
   public static final String ARG_KEY_OBSERVATORY_PORT = "observatory-port";
   public static final String ARG_KEY_DART_FLAGS = "dart-flags";
   public static final String ARG_DART_FLAGS = "--dart-flags";
-  public static final String ARG_KEY_MSAA_SAMPLES = "msaa-samples";
-  public static final String ARG_MSAA_SAMPLES = "--msaa-samples";
 
   @NonNull
   public static FlutterShellArgs fromIntent(@NonNull Intent intent) {
@@ -142,10 +140,6 @@ public class FlutterShellArgs {
     }
     if (intent.getBooleanExtra(ARG_KEY_VERBOSE_LOGGING, false)) {
       args.add(ARG_VERBOSE_LOGGING);
-    }
-    final int msaaSamples = intent.getIntExtra("msaa-samples", 0);
-    if (msaaSamples > 1) {
-      args.add("--msaa-samples=" + Integer.toString(msaaSamples));
     }
 
     // NOTE: all flags provided with this argument are subject to filtering

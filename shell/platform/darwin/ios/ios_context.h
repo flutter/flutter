@@ -8,7 +8,6 @@
 #include <memory>
 
 #include "flutter/common/graphics/gl_context_switch.h"
-#include "flutter/common/graphics/msaa_sample_count.h"
 #include "flutter/common/graphics/texture.h"
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/macros.h"
@@ -50,16 +49,12 @@ class IOSContext {
   ///                       engine/platform.
   /// @param[in]  backend   A client rendering backend supported by the
   ///                       engine/platform.
-  /// @param[in]  msaa_samples
-  ///                       The number of MSAA samples to use. Only supplied to
-  ///                       Skia, must be either 0, 1, 2, 4, or 8.
   ///
   /// @return     A valid context on success. `nullptr` on failure.
   ///
   static std::unique_ptr<IOSContext> Create(
       IOSRenderingAPI api,
       IOSRenderingBackend backend,
-      MsaaSampleCount msaa_samples,
       const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch);
 
   //----------------------------------------------------------------------------
@@ -145,13 +140,10 @@ class IOSContext {
 
   virtual std::shared_ptr<impeller::Context> GetImpellerContext() const;
 
-  MsaaSampleCount GetMsaaSampleCount() const { return msaa_samples_; }
-
  protected:
-  explicit IOSContext(MsaaSampleCount msaa_samples);
+  explicit IOSContext();
 
  private:
-  MsaaSampleCount msaa_samples_ = MsaaSampleCount::kNone;
   FML_DISALLOW_COPY_AND_ASSIGN(IOSContext);
 };
 
