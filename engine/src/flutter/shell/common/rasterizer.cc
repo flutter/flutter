@@ -47,7 +47,8 @@ namespace flutter {
 
 // The rasterizer will tell Skia to purge cached resources that have not been
 // used within this interval.
-static constexpr std::chrono::milliseconds kSkiaCleanupExpiration(15000);
+[[maybe_unused]] static constexpr std::chrono::milliseconds
+    kSkiaCleanupExpiration(15000);
 
 Rasterizer::Rasterizer(Delegate& delegate,
                        MakeGpuImageBehavior gpu_image_behavior)
@@ -121,9 +122,11 @@ void Rasterizer::Teardown() {
     auto context_switch = surface_->MakeRenderContextCurrent();
     if (context_switch->GetResult()) {
       compositor_context_->OnGrContextDestroyed();
+#if !SLIMPELLER
       if (auto* context = surface_->GetContext()) {
         context->purgeUnlockedResources(GrPurgeResourceOptions::kAllResources);
       }
+#endif  //  !SLIMPELLER
     }
     surface_.reset();
   }
@@ -165,6 +168,7 @@ void Rasterizer::DisableThreadMergerIfNeeded() {
 }
 
 void Rasterizer::NotifyLowMemoryWarning() const {
+#if !SLIMPELLER
   if (!surface_) {
     FML_DLOG(INFO)
         << "Rasterizer::NotifyLowMemoryWarning called with no surface.";
@@ -181,6 +185,7 @@ void Rasterizer::NotifyLowMemoryWarning() const {
     return;
   }
   context->performDeferredCleanup(std::chrono::milliseconds(0));
+#endif  //  !SLIMPELLER
 }
 
 void Rasterizer::CollectView(int64_t view_id) {
@@ -323,6 +328,7 @@ DrawStatus Rasterizer::ToDrawStatus(DoDrawStatus status) {
   FML_UNREACHABLE();
 }
 
+#if !SLIMPELLER
 namespace {
 std::unique_ptr<SnapshotDelegate::GpuImageResult> MakeBitmapImage(
     const sk_sp<DisplayList>& display_list,
@@ -352,10 +358,15 @@ std::unique_ptr<SnapshotDelegate::GpuImageResult> MakeBitmapImage(
       image ? "" : "Unable to create image");
 }
 }  // namespace
+#endif  //  !SLIMPELLER
 
 std::unique_ptr<Rasterizer::GpuImageResult> Rasterizer::MakeSkiaGpuImage(
     sk_sp<DisplayList> display_list,
     const SkImageInfo& image_info) {
+#if SLIMPELLER
+  FML_LOG(FATAL) << "Impeller opt-out unavailable.";
+  return nullptr;
+#else   // SLIMPELLER
   TRACE_EVENT0("flutter", "Rasterizer::MakeGpuImage");
   FML_DCHECK(display_list);
 
@@ -420,6 +431,7 @@ std::unique_ptr<Rasterizer::GpuImageResult> Rasterizer::MakeSkiaGpuImage(
                 texture, sk_ref_sp(context), nullptr, "");
           }));
   return result;
+#endif  //  !SLIMPELLER
 }
 
 void Rasterizer::MakeRasterSnapshot(
@@ -470,8 +482,10 @@ Rasterizer::DoDrawResult Rasterizer::DoDraw(
     return DoDrawResult{DoDrawStatus::kNotSetUp};
   }
 
+#if !SLIMPELLER
   PersistentCache* persistent_cache = PersistentCache::GetCacheForProcess();
   persistent_cache->ResetStoredNewShaders();
+#endif  //  !SLIMPELLER
 
   DoDrawResult result =
       DrawToSurfaces(*frame_timings_recorder, std::move(tasks));
@@ -481,12 +495,14 @@ Rasterizer::DoDrawResult Rasterizer::DoDraw(
     return DoDrawResult{DoDrawStatus::kGpuUnavailable};
   }
 
+#if !SLIMPELLER
   if (persistent_cache->IsDumpingSkp() &&
       persistent_cache->StoredNewShaders()) {
     auto screenshot =
         ScreenshotLastLayerTree(ScreenshotType::SkiaPicture, false);
     persistent_cache->DumpSkp(*screenshot.data);
   }
+#endif  //  !SLIMPELLER
 
   // TODO(liyuqian): in Fuchsia, the rasterization doesn't finish when
   // Rasterizer::DoDraw finishes. Future work is needed to adapt the timestamp
@@ -655,12 +671,16 @@ std::unique_ptr<FrameItem> Rasterizer::DrawToSurfacesUnsafe(
   }
   // TODO(dkwingsmt): Pass in raster cache(s) for all views.
   // See https://github.com/flutter/flutter/issues/135530, item 4.
-  frame_timings_recorder.RecordRasterEnd(&compositor_context_->raster_cache());
+  frame_timings_recorder.RecordRasterEnd(
+      NOT_SLIMPELLER(&compositor_context_->raster_cache()));
+
   FireNextFrameCallbackIfPresent();
 
+#if !SLIMPELLER
   if (surface_->GetContext()) {
     surface_->GetContext()->performDeferredCleanup(kSkiaCleanupExpiration);
   }
+#endif  //  !SLIMPELLER
 
   if (resubmitted_tasks.empty()) {
     return nullptr;
@@ -717,7 +737,7 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
       surface_->GetAiksContext().get()  // aiks context
   );
   if (compositor_frame) {
-    compositor_context_->raster_cache().BeginFrame();
+    NOT_SLIMPELLER(compositor_context_->raster_cache().BeginFrame());
 
     std::unique_ptr<FrameDamage> damage;
     // when leaf layer tracing is enabled we wish to repaint the whole frame
@@ -777,11 +797,13 @@ DrawSurfaceStatus Rasterizer::DrawToSurfaceUnsafe(
       frame->Submit();
     }
 
+#if !SLIMPELLER
     // Do not update raster cache metrics for kResubmit because that status
     // indicates that the frame was not actually painted.
     if (frame_status != RasterStatus::kResubmit) {
       compositor_context_->raster_cache().EndFrame();
     }
+#endif  //  !SLIMPELLER
 
     if (frame_status == RasterStatus::kResubmit) {
       return DrawSurfaceStatus::kRetry;
@@ -801,6 +823,9 @@ Rasterizer::ViewRecord& Rasterizer::EnsureViewRecord(int64_t view_id) {
 static sk_sp<SkData> ScreenshotLayerTreeAsPicture(
     flutter::LayerTree* tree,
     flutter::CompositorContext& compositor_context) {
+#if SLIMPELLER
+  return nullptr;
+#else  // SLIMPELLER
   FML_DCHECK(tree != nullptr);
   SkPictureRecorder recorder;
   recorder.beginRecording(
@@ -830,6 +855,7 @@ static sk_sp<SkData> ScreenshotLayerTreeAsPicture(
 #endif
 
   return recorder.finishRecordingAsPicture()->serialize(&procs);
+#endif  //  SLIMPELLER
 }
 
 static void RenderFrameForScreenshot(
@@ -955,6 +981,10 @@ Rasterizer::ScreenshotLayerTreeAsImage(
   }
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
+#if SLIMPELLER
+  FML_LOG(FATAL) << "Impeller opt-out unavailable.";
+  return {nullptr, ScreenshotFormat::kUnknown};
+#else   // SLIMPELLER
   GrDirectContext* surface_context = GetGrContext();
   // Attempt to create a snapshot surface depending on whether we have access
   // to a valid GPU rendering context.
@@ -984,6 +1014,7 @@ Rasterizer::ScreenshotLayerTreeAsImage(
 
   return std::make_pair(snapshot_surface->GetRasterData(compressed),
                         ScreenshotFormat::kUnknown);
+#endif  //  !SLIMPELLER
 }
 
 Rasterizer::Screenshot Rasterizer::ScreenshotLastLayerTree(
@@ -1080,6 +1111,7 @@ void Rasterizer::FireNextFrameCallbackIfPresent() {
 }
 
 void Rasterizer::SetResourceCacheMaxBytes(size_t max_bytes, bool from_user) {
+#if !SLIMPELLER
   user_override_resource_cache_bytes_ |= from_user;
 
   if (!from_user && user_override_resource_cache_bytes_) {
@@ -1102,9 +1134,13 @@ void Rasterizer::SetResourceCacheMaxBytes(size_t max_bytes, bool from_user) {
 
     context->setResourceCacheLimit(max_bytes);
   }
+#endif  //  !SLIMPELLER
 }
 
 std::optional<size_t> Rasterizer::GetResourceCacheMaxBytes() const {
+#if SLIMPELLER
+  return std::nullopt;
+#else   // SLIMPELLER
   if (!surface_) {
     return std::nullopt;
   }
@@ -1113,6 +1149,7 @@ std::optional<size_t> Rasterizer::GetResourceCacheMaxBytes() const {
     return context->getResourceCacheLimit();
   }
   return std::nullopt;
+#endif  //  SLIMPELLER
 }
 
 Rasterizer::Screenshot::Screenshot() {}

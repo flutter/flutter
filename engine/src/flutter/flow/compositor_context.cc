@@ -224,12 +224,16 @@ bool CompositorContext::ShouldPerformPartialRepaint(
 
 void CompositorContext::OnGrContextCreated() {
   texture_registry_->OnGrContextCreated();
+#if !SLIMPELLER
   raster_cache_.Clear();
+#endif  //  !SLIMPELLER
 }
 
 void CompositorContext::OnGrContextDestroyed() {
   texture_registry_->OnGrContextDestroyed();
+#if !SLIMPELLER
   raster_cache_.Clear();
+#endif  //  !SLIMPELLER
 }
 
 }  // namespace flutter

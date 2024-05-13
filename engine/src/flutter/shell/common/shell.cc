@@ -142,7 +142,9 @@ void PerformInitializationTasks(Settings& settings) {
     }
   });
 
+#if !SLIMPELLER
   PersistentCache::SetCacheSkSL(settings.cache_sksl);
+#endif  //  !SLIMPELLER
 }
 
 }  // namespace
@@ -525,8 +527,10 @@ Shell::Shell(DartVMRef vm,
 }
 
 Shell::~Shell() {
+#if !SLIMPELLER
   PersistentCache::GetCacheForProcess()->RemoveWorkerTaskRunner(
       task_runners_.GetIOTaskRunner());
+#endif  //  !SLIMPELLER
 
   vm_->GetServiceProtocol()->RemoveHandler(this);
 
@@ -779,6 +783,7 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
 
   is_set_up_ = true;
 
+#if !SLIMPELLER
   PersistentCache::GetCacheForProcess()->AddWorkerTaskRunner(
       task_runners_.GetIOTaskRunner());
 
@@ -788,6 +793,7 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
   if (settings_.purge_persistent_cache) {
     PersistentCache::GetCacheForProcess()->Purge();
   }
+#endif  //  !SLIMPELLER
 
   return true;
 }
@@ -1886,6 +1892,7 @@ bool Shell::OnServiceProtocolGetSkSLs(
   response->AddMember("type", "GetSkSLs", response->GetAllocator());
 
   rapidjson::Value shaders_json(rapidjson::kObjectType);
+#if !SLIMPELLER
   PersistentCache* persistent_cache = PersistentCache::GetCacheForProcess();
   std::vector<PersistentCache::SkSLCache> sksls = persistent_cache->LoadSkSLs();
   for (const auto& sksl : sksls) {
@@ -1904,6 +1911,7 @@ bool Shell::OnServiceProtocolGetSkSLs(
     rapidjson::Value shader_key(encode_result.second, response->GetAllocator());
     shaders_json.AddMember(shader_key, shader_value, response->GetAllocator());
   }
+#endif  //  !SLIMPELLER
   response->AddMember("SkSLs", shaders_json, response->GetAllocator());
   return true;
 }
@@ -1912,15 +1920,22 @@ bool Shell::OnServiceProtocolEstimateRasterCacheMemory(
     const ServiceProtocol::Handler::ServiceProtocolMap& params,
     rapidjson::Document* response) {
   FML_DCHECK(task_runners_.GetRasterTaskRunner()->RunsTasksOnCurrentThread());
+
+  uint64_t layer_cache_byte_size = 0u;
+  uint64_t picture_cache_byte_size = 0u;
+
+#if !SLIMPELLER
   const auto& raster_cache = rasterizer_->compositor_context()->raster_cache();
+  layer_cache_byte_size = raster_cache.EstimateLayerCacheByteSize();
+  picture_cache_byte_size = raster_cache.EstimatePictureCacheByteSize();
+#endif  //  !SLIMPELLER
+
   response->SetObject();
   response->AddMember("type", "EstimateRasterCacheMemory",
                       response->GetAllocator());
-  response->AddMember<uint64_t>("layerBytes",
-                                raster_cache.EstimateLayerCacheByteSize(),
+  response->AddMember<uint64_t>("layerBytes", layer_cache_byte_size,
                                 response->GetAllocator());
-  response->AddMember<uint64_t>("pictureBytes",
-                                raster_cache.EstimatePictureCacheByteSize(),
+  response->AddMember<uint64_t>("pictureBytes", picture_cache_byte_size,
                                 response->GetAllocator());
   return true;
 }

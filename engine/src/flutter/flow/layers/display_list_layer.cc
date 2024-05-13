@@ -22,8 +22,10 @@ DisplayListLayer::DisplayListLayer(const SkPoint& offset,
     : offset_(offset), display_list_(std::move(display_list)) {
   if (display_list_) {
     bounds_ = display_list_->bounds().makeOffset(offset_.x(), offset_.y());
+#if !SLIMPELLER
     display_list_raster_cache_item_ = DisplayListRasterCacheItem::Make(
         display_list_, offset_, is_complex, will_change);
+#endif  //  !SLIMPELLER
   }
 }
 
@@ -95,8 +97,10 @@ bool DisplayListLayer::Compare(DiffContext::Statistics& statistics,
 void DisplayListLayer::Preroll(PrerollContext* context) {
   DisplayList* disp_list = display_list();
 
+#if !SLIMPELLER
   AutoCache cache = AutoCache(display_list_raster_cache_item_.get(), context,
                               context->state_stack.transform_3x3());
+#endif  //  !SLIMPELLER
   if (disp_list->can_apply_group_opacity()) {
     context->renderable_state_flags = LayerStateStack::kCallerCanApplyOpacity;
   }
@@ -110,6 +114,7 @@ void DisplayListLayer::Paint(PaintContext& context) const {
   auto mutator = context.state_stack.save();
   mutator.translate(offset_.x(), offset_.y());
 
+#if !SLIMPELLER
   if (context.raster_cache) {
     // Always apply the integral transform in the presence of a raster cache
     // whether or not we successfully draw from the cache
@@ -124,9 +129,12 @@ void DisplayListLayer::Paint(PaintContext& context) const {
       }
     }
   }
+#endif  //  !SLIMPELLER
 
   SkScalar opacity = context.state_stack.outstanding_opacity();
 
+#if !SLIMPELLER
+  // Leaf layer tracing was never supported in the Impeller backend.
   if (context.enable_leaf_layer_tracing) {
     const auto canvas_size = context.canvas->GetBaseLayerSize();
     auto offscreen_surface =
@@ -156,6 +164,7 @@ void DisplayListLayer::Paint(PaintContext& context) const {
                                     raster_data, device_bounds);
     context.layer_snapshot_store->Add(snapshot_data);
   }
+#endif  //  !SLIMPELLER
 
   context.canvas->DrawDisplayList(display_list_, opacity);
 }

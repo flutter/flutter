@@ -147,9 +147,14 @@ void EncodeImageAndInvokeDataCallback(
     return;
   }
 #endif  // IMPELLER_SUPPORTS_RENDERING
+#if !SLIMPELLER
   ConvertImageToRasterSkia(image, encode_task, raster_task_runner,
                            io_task_runner, resource_context, snapshot_delegate,
                            is_gpu_disabled_sync_switch);
+
+#else   //  !SLIMPELLER
+  FML_LOG(FATAL) << "Unsupported renderer.";
+#endif  //  !SLIMPELLER
 }
 
 }  // namespace

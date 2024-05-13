@@ -24,16 +24,25 @@ class SnapshotDelegate {
   /// @brief      A data structure used by the Skia implementation of deferred
   ///             GPU based images.
   struct GpuImageResult {
-    GpuImageResult(const GrBackendTexture& p_texture,
-                   sk_sp<GrDirectContext> p_context,
-                   sk_sp<SkImage> p_image = nullptr,
-                   const std::string& p_error = "")
-        : texture(p_texture),
+    GpuImageResult(
+#if !SLIMPELLER
+        const GrBackendTexture& p_texture,
+#endif  //  !SLIMPELLER
+        sk_sp<GrDirectContext> p_context,
+        sk_sp<SkImage> p_image = nullptr,
+        const std::string& p_error = "")
+        :
+#if !SLIMPELLER
+          texture(p_texture),
+#endif  //  !SLIMPELLER
           context(std::move(p_context)),
           image(std::move(p_image)),
-          error(p_error) {}
+          error(p_error) {
+    }
 
+#if !SLIMPELLER
     const GrBackendTexture texture;
+#endif  //  !SLIMPELLER
     // If texture.isValid() == true, this is a pointer to a GrDirectContext that
     // can be used to create an image from the texture.
     sk_sp<GrDirectContext> context;

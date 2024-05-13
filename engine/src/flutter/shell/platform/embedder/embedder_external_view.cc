@@ -133,6 +133,10 @@ bool EmbedderExternalView::Render(const EmbedderRenderTarget& render_target,
   }
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
+#if SLIMPELLER
+  FML_LOG(FATAL) << "Impeller opt-out unavailable.";
+  return false;
+#else   // SLIMPELLER
   auto skia_surface = render_target.GetSkiaSurface();
   if (!skia_surface) {
     return false;
@@ -153,6 +157,7 @@ bool EmbedderExternalView::Render(const EmbedderRenderTarget& render_target,
   slice_->render_into(&dl_canvas);
   dl_canvas.RestoreToCount(restore_count);
   dl_canvas.Flush();
+#endif  //  !SLIMPELLER
 
   return true;
 }

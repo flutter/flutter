@@ -5,6 +5,8 @@
 #ifndef FLUTTER_FLOW_RASTER_CACHE_H_
 #define FLUTTER_FLOW_RASTER_CACHE_H_
 
+#if !SLIMPELLER
+
 #include <memory>
 #include <unordered_map>
 
@@ -273,5 +275,11 @@ class RasterCache {
 };
 
 }  // namespace flutter
+
+#else  //  !SLIMPELLER
+
+class RasterCache;
+
+#endif  //  !SLIMPELLER
 
 #endif  // FLUTTER_FLOW_RASTER_CACHE_H_

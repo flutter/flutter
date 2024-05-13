@@ -35,10 +35,12 @@ class LayerTree {
                bool ignore_raster_cache = false,
                SkRect cull_rect = kGiantRect);
 
+#if !SLIMPELLER
   static void TryToRasterCache(
       const std::vector<RasterCacheItem*>& raster_cached_entries,
       const PaintContext* paint_context,
       bool ignore_raster_cache = false);
+#endif  //  !SLIMPELLER
 
   void Paint(CompositorContext::ScopedFrame& frame,
              bool ignore_raster_cache = false) const;

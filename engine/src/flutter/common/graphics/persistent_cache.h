@@ -5,6 +5,8 @@
 #ifndef FLUTTER_COMMON_GRAPHICS_PERSISTENT_CACHE_H_
 #define FLUTTER_COMMON_GRAPHICS_PERSISTENT_CACHE_H_
 
+#if !SLIMPELLER
+
 #include <memory>
 #include <mutex>
 #include <set>
@@ -178,5 +180,7 @@ class PersistentCache : public GrContextOptions::PersistentCache {
 };
 
 }  // namespace flutter
+
+#endif  //  !SLIMPELLER
 
 #endif  // FLUTTER_COMMON_GRAPHICS_PERSISTENT_CACHE_H_
