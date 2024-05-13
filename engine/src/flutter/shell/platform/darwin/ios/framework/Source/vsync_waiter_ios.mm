@@ -14,6 +14,9 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/memory/task_runner_checker.h"
 #include "flutter/fml/trace_event.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+
+FLUTTER_ASSERT_ARC
 
 @interface VSyncClient ()
 @property(nonatomic, assign, readonly) double refreshRate;
