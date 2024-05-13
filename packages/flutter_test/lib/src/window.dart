@@ -308,18 +308,6 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  bool get supportsShowingSystemContextMenu => _supportsShowingSystemContextMenu ?? _platformDispatcher.supportsShowingSystemContextMenu;
-  bool? _supportsShowingSystemContextMenu;
-  set supportsShowingSystemContextMenu(bool value) { // ignore: avoid_setters_without_getters
-    _supportsShowingSystemContextMenu = value;
-  }
-
-  /// Resets [supportsShowingSystemContextMenu] to the default value.
-  void resetSupportsShowingSystemContextMenu() {
-    _supportsShowingSystemContextMenu = null;
-  }
-
-  @override
   bool get brieflyShowPassword => _brieflyShowPasswordTestValue ?? _platformDispatcher.brieflyShowPassword;
   bool? _brieflyShowPasswordTestValue;
   /// Hides the real [brieflyShowPassword] and reports the given
@@ -470,7 +458,6 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     clearTextScaleFactorTestValue();
     clearNativeSpellCheckServiceDefined();
     resetBrieflyShowPassword();
-    resetSupportsShowingSystemContextMenu();
     resetInitialLifecycleState();
     resetSystemFontFamily();
   }
