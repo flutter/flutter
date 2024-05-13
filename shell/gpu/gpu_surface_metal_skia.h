@@ -5,6 +5,8 @@
 #ifndef FLUTTER_SHELL_GPU_GPU_SURFACE_METAL_SKIA_H_
 #define FLUTTER_SHELL_GPU_GPU_SURFACE_METAL_SKIA_H_
 
+#if !SLIMPELLER
+
 #include "flutter/common/graphics/msaa_sample_count.h"
 #include "flutter/flow/surface.h"
 #include "flutter/fml/macros.h"
@@ -70,5 +72,7 @@ class SK_API_AVAILABLE_CA_METAL_LAYER GPUSurfaceMetalSkia : public Surface {
 };
 
 }  // namespace flutter
+
+#endif  //  !SLIMPELLER
 
 #endif  // FLUTTER_SHELL_GPU_GPU_SURFACE_METAL_SKIA_H_

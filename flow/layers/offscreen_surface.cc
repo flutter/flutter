@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#if !SLIMPELLER
+
 #include "flutter/flow/layers/offscreen_surface.h"
 
 #include "third_party/skia/include/core/SkColorSpace.h"
@@ -87,3 +89,5 @@ bool OffscreenSurface::IsValid() const {
 }
 
 }  // namespace flutter
+
+#endif  //  !SLIMPELLER

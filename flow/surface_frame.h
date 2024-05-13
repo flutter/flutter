@@ -102,7 +102,9 @@ class SurfaceFrame {
  private:
   bool submitted_ = false;
 
+#if !SLIMPELLER
   DlSkCanvasAdapter adapter_;
+#endif  //  !SLIMPELLER
   sk_sp<DisplayListBuilder> dl_builder_;
   sk_sp<SkSurface> surface_;
   DlCanvas* canvas_ = nullptr;

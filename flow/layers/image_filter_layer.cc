@@ -56,8 +56,10 @@ void ImageFilterLayer::Preroll(PrerollContext* context) {
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
 
+#if !SLIMPELLER
   AutoCache cache = AutoCache(layer_raster_cache_item_.get(), context,
                               context->state_stack.transform_3x3());
+#endif  //  !SLIMPELLER
 
   SkRect child_bounds = SkRect::MakeEmpty();
 
@@ -85,15 +87,20 @@ void ImageFilterLayer::Preroll(PrerollContext* context) {
 
   set_paint_bounds(child_bounds);
 
+#if !SLIMPELLER
   // CacheChildren only when the transformed_filter_ doesn't equal null.
   // So in here we reset the LayerRasterCacheItem cache state.
   layer_raster_cache_item_->MarkNotCacheChildren();
+#endif  //  !SLIMPELLER
 
   transformed_filter_ =
       filter_->makeWithLocalMatrix(context->state_stack.transform_3x3());
+
+#if !SLIMPELLER
   if (transformed_filter_) {
     layer_raster_cache_item_->MarkCacheChildren();
   }
+#endif  //  !SLIMPELLER
 }
 
 void ImageFilterLayer::Paint(PaintContext& context) const {
@@ -101,6 +108,7 @@ void ImageFilterLayer::Paint(PaintContext& context) const {
 
   auto mutator = context.state_stack.save();
 
+#if !SLIMPELLER
   if (context.raster_cache) {
     // Try drawing the layer cache item from the cache before applying the
     // image filter if it was cached with the filter applied.
@@ -112,10 +120,13 @@ void ImageFilterLayer::Paint(PaintContext& context) const {
       }
     }
   }
+#endif  //  !SLIMPELLER
 
   // Only apply the offset if not being raster-cached to avoid the offset being
   // applied twice.
   mutator.translate(offset_);
+
+#if !SLIMPELLER
   if (context.raster_cache) {
     mutator.integralTransform();
   }
@@ -132,6 +143,7 @@ void ImageFilterLayer::Paint(PaintContext& context) const {
       return;
     }
   }
+#endif  //  !SLIMPELLER
 
   // Now apply the image filter and then try rendering the children.
   mutator.applyImageFilter(child_paint_bounds(), filter_);

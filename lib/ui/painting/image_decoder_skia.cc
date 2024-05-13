@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#if !SLIMPELLER
+
 #include "flutter/lib/ui/painting/image_decoder_skia.h"
 
 #include <algorithm>
@@ -329,3 +331,5 @@ void ImageDecoderSkia::Decode(fml::RefPtr<ImageDescriptor> descriptor_ref_ptr,
 }
 
 }  // namespace flutter
+
+#endif  //  !SLIMPELLER

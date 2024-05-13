@@ -466,15 +466,18 @@ void EmbedderExternalViewEmbedder::SubmitFlutterView(
   auto deferred_cleanup_render_targets =
       render_target_cache.ClearAllRenderTargetsInCache();
 
+#if !SLIMPELLER
   // The OpenGL context could have been trampled by the embedder at this point
   // as it attempted to collect old render targets and create new ones. Tell
   // Skia to not rely on existing bindings.
   if (context) {
     context->resetContext(kAll_GrBackendState);
   }
+#endif  //  !SLIMPELLER
 
   builder.Render();
 
+#if !SLIMPELLER
   // We are going to be transferring control back over to the embedder there
   // the context may be trampled upon again. Flush all operations to the
   // underlying rendering API.
@@ -483,6 +486,7 @@ void EmbedderExternalViewEmbedder::SubmitFlutterView(
   if (context) {
     context->flushAndSubmit();
   }
+#endif  //  !SLIMPELLER
 
   {
     auto presentation_time_optional = frame->submit_info().presentation_time;

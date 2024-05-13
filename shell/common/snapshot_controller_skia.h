@@ -5,6 +5,8 @@
 #ifndef FLUTTER_SHELL_COMMON_SNAPSHOT_CONTROLLER_SKIA_H_
 #define FLUTTER_SHELL_COMMON_SNAPSHOT_CONTROLLER_SKIA_H_
 
+#if !SLIMPELLER
+
 #include "flutter/shell/common/snapshot_controller.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
@@ -37,5 +39,7 @@ class SnapshotControllerSkia : public SnapshotController {
 };
 
 }  // namespace flutter
+
+#endif  //  !SLIMPELLER
 
 #endif  // FLUTTER_SHELL_COMMON_SNAPSHOT_CONTROLLER_SKIA_H_

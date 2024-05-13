@@ -71,11 +71,16 @@ static sk_sp<DlImage> CreateDeferredImage(
   }
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
+#if SLIMPELLER
+  FML_LOG(FATAL) << "Impeller opt-out unavailable.";
+  return nullptr;
+#else   // SLIMPELLER
   const SkImageInfo image_info = SkImageInfo::Make(
       width, height, kRGBA_8888_SkColorType, kPremul_SkAlphaType);
   return DlDeferredImageGPUSkia::Make(
       image_info, std::move(display_list), std::move(snapshot_delegate),
       raster_task_runner, std::move(unref_queue));
+#endif  //  !SLIMPELLER
 }
 
 // static

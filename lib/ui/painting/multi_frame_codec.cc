@@ -154,6 +154,7 @@ MultiFrameCodec::State::GetNextFrameImage(
   }
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
+#if !SLIMPELLER
   sk_sp<SkImage> skImage;
   gpu_disable_sync_switch->Execute(
       fml::SyncSwitch::Handlers()
@@ -179,6 +180,9 @@ MultiFrameCodec::State::GetNextFrameImage(
 
   return std::make_pair(DlImageGPU::Make({skImage, std::move(unref_queue)}),
                         std::string());
+#else   //  !SLIMPELLER
+  return std::make_pair(nullptr, "Unsupported backend.");
+#endif  //  !SLIMPELLER
 }
 
 void MultiFrameCodec::State::GetNextFrameAndInvokeCallback(
