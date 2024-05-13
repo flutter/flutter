@@ -31,7 +31,6 @@ static const SEL kSelectorsHandledByPlugins[] = {
 @end
 
 @implementation FlutterPluginAppLifeCycleDelegate {
-  NSMutableArray* _notificationUnsubscribers;
   UIBackgroundTaskIdentifier _debugBackgroundTask;
 
   // Weak references to registered plugins.
@@ -40,16 +39,10 @@ static const SEL kSelectorsHandledByPlugins[] = {
 
 - (void)addObserverFor:(NSString*)name selector:(SEL)selector {
   [[NSNotificationCenter defaultCenter] addObserver:self selector:selector name:name object:nil];
-  __block NSObject* blockSelf = self;
-  dispatch_block_t unsubscribe = ^{
-    [[NSNotificationCenter defaultCenter] removeObserver:blockSelf name:name object:nil];
-  };
-  [_notificationUnsubscribers addObject:[unsubscribe copy]];
 }
 
 - (instancetype)init {
   if (self = [super init]) {
-    _notificationUnsubscribers = [[NSMutableArray alloc] init];
     std::string cachePath = fml::paths::JoinPaths({getenv("HOME"), kCallbackCacheSubDir});
     [FlutterCallbackCache setCachePath:[NSString stringWithUTF8String:cachePath.c_str()]];
 #if not APPLICATION_EXTENSION_API_ONLY
@@ -68,12 +61,6 @@ static const SEL kSelectorsHandledByPlugins[] = {
     _debugBackgroundTask = UIBackgroundTaskInvalid;
   }
   return self;
-}
-
-- (void)dealloc {
-  for (dispatch_block_t unsubscribe in _notificationUnsubscribers) {
-    unsubscribe();
-  }
 }
 
 static BOOL IsPowerOfTwo(NSUInteger x) {

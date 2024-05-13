@@ -10,6 +10,12 @@
 
 FLUTTER_ASSERT_ARC
 
+@interface FakePlugin : NSObject <FlutterApplicationLifeCycleDelegate>
+@end
+
+@implementation FakePlugin
+@end
+
 @interface FlutterPluginAppLifeCycleDelegateTest : XCTestCase
 @end
 
@@ -89,6 +95,21 @@ FLUTTER_ASSERT_ARC
   [self waitForExpectations:@[ expectation ] timeout:5.0];
   OCMVerify([plugin applicationWillTerminate:[UIApplication sharedApplication]]);
 }
+
+- (void)testReleasesPluginOnDealloc {
+  __weak id<FlutterApplicationLifeCycleDelegate> weakPlugin;
+  __weak FlutterPluginAppLifeCycleDelegate* weakDelegate;
+  @autoreleasepool {
+    FakePlugin* fakePlugin = [[FakePlugin alloc] init];
+    weakPlugin = fakePlugin;
+    FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+    [delegate addDelegate:fakePlugin];
+    weakDelegate = delegate;
+  }
+  XCTAssertNil(weakPlugin);
+  XCTAssertNil(weakDelegate);
+}
+
 #endif
 
 @end

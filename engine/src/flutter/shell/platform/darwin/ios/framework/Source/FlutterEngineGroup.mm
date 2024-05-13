@@ -38,8 +38,6 @@
 }
 
 - (void)dealloc {
-  NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
-  [center removeObserver:self];
   [_name release];
   [_engines release];
   [_project release];
