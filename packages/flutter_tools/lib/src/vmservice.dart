@@ -569,6 +569,7 @@ class FlutterVmService {
     required Uri main,
     required Uri assetsDirectory,
   }) async {
+    globals.printTrace('Running $main in view $viewId...');
     try {
       await service.streamListen(vm_service.EventStreams.kIsolate);
     } on vm_service.RPCError {
@@ -577,6 +578,7 @@ class FlutterVmService {
     final Future<void> onRunnable = service.onIsolateEvent.firstWhere((vm_service.Event event) {
       return event.kind == vm_service.EventKind.kIsolateRunnable;
     });
+    globals.printTrace('Calling $kRunInViewMethod...');
     await callMethodWrapper(
       kRunInViewMethod,
       args: <String, Object>{
@@ -585,7 +587,9 @@ class FlutterVmService {
         'assetDirectory': assetsDirectory.toString(),
       },
     );
+    globals.printTrace('Finished $kRunInViewMethod');
     await onRunnable;
+    globals.printTrace('Finished running $main in view $viewId');
   }
 
   /// Renders the last frame with additional raster tracing enabled.
@@ -905,9 +909,11 @@ class FlutterVmService {
     Duration delay = const Duration(milliseconds: 50),
   }) async {
     while (true) {
+      globals.printTrace('Calling _flutter.listViews...');
       final vm_service.Response? response = await callMethodWrapper(
         kListViewsMethod,
       );
+      globals.printTrace('Response from _flutter.listViews: ${json.encode(response?.json)}');
       if (response == null) {
         // The service may have disappeared mid-request.
         // Return an empty list now, and let the shutdown logic elsewhere deal
