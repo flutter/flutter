@@ -5,6 +5,8 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_DISPLAY_LIST_DEFERRED_IMAGE_GPU_SKIA_H_
 #define FLUTTER_LIB_UI_PAINTING_DISPLAY_LIST_DEFERRED_IMAGE_GPU_SKIA_H_
 
+#if !SLIMPELLER
+
 #include <memory>
 #include <mutex>
 
@@ -147,5 +149,7 @@ class DlDeferredImageGPUSkia final : public DlImage {
 };
 
 }  // namespace flutter
+
+#endif  //  !SLIMPELLER
 
 #endif  // FLUTTER_LIB_UI_PAINTING_DISPLAY_LIST_DEFERRED_IMAGE_GPU_SKIA_H_

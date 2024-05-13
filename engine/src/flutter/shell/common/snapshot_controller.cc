@@ -20,7 +20,13 @@ std::unique_ptr<SnapshotController> SnapshotController::Make(
     return std::make_unique<SnapshotControllerImpeller>(delegate);
   }
 #endif  // IMPELLER_SUPPORTS_RENDERING
+#if !SLIMPELLER
   return std::make_unique<SnapshotControllerSkia>(delegate);
+#else   //  !SLIMPELLER
+  FML_LOG(FATAL)
+      << "Cannot create a Skia snapshot controller in an Impeller build.";
+  return nullptr;
+#endif  //  !SLIMPELLER
 }
 
 SnapshotController::SnapshotController(const Delegate& delegate)

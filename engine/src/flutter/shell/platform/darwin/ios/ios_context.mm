@@ -34,7 +34,13 @@ std::unique_ptr<IOSContext> IOSContext::Create(
     case IOSRenderingAPI::kMetal:
       switch (backend) {
         case IOSRenderingBackend::kSkia:
+#if !SLIMPELLER
           return std::make_unique<IOSContextMetalSkia>(msaa_samples);
+
+#else   //  !SLIMPELLER
+          FML_LOG(FATAL) << "Impeller opt-out unavailable.";
+          return nullptr;
+#endif  //  !SLIMPELLER
         case IOSRenderingBackend::kImpeller:
           return std::make_unique<IOSContextMetalImpeller>(is_gpu_disabled_sync_switch);
       }

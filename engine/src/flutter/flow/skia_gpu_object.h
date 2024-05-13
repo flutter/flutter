@@ -8,6 +8,7 @@
 #include <mutex>
 #include <queue>
 
+#include "flutter/common/macros.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/task_runner.h"
@@ -40,6 +41,7 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
     }
   }
 
+#if !SLIMPELLER
   void DeleteTexture(const GrBackendTexture& texture) {
     // drain_immediate_ should only be used on Impeller.
     FML_DCHECK(!drain_immediate_);
@@ -51,6 +53,7 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
           [strong = fml::Ref(this)]() { strong->Drain(); }, drain_delay_);
     }
   }
+#endif  //  !SLIMPELLER
 
   // Usually, the drain is called automatically. However, during IO manager
   // shutdown (when the platform side reference to the OpenGL context is about
@@ -60,14 +63,20 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
   void Drain() {
     TRACE_EVENT0("flutter", "SkiaUnrefQueue::Drain");
     std::deque<SkRefCnt*> skia_objects;
-    std::deque<GrBackendTexture> textures;
+
+    NOT_SLIMPELLER(std::deque<GrBackendTexture> textures);
+
     {
       std::scoped_lock lock(mutex_);
       objects_.swap(skia_objects);
-      textures_.swap(textures);
+      NOT_SLIMPELLER(textures_.swap(textures));
       drain_pending_ = false;
     }
-    DoDrain(skia_objects, textures, context_);
+    DoDrain(skia_objects,
+#if !SLIMPELLER
+            textures,
+#endif  //  !SLIMPELLER
+            context_);
   }
 
   void UpdateResourceContext(sk_sp<ResourceContext> context) {
@@ -79,7 +88,7 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
   const fml::TimeDelta drain_delay_;
   std::mutex mutex_;
   std::deque<SkRefCnt*> objects_;
-  std::deque<GrBackendTexture> textures_;
+  NOT_SLIMPELLER(std::deque<GrBackendTexture> textures_);
   bool drain_pending_ = false;
   sk_sp<ResourceContext> context_;
   // Enabled when there is an impeller context, which removes the usage of
@@ -105,21 +114,31 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
     ResourceContext* raw_context = context_.release();
     fml::TaskRunner::RunNowOrPostTask(
         task_runner_, [objects = std::move(objects_),
-                       textures = std::move(textures_), raw_context]() mutable {
+#if !SLIMPELLER
+                       textures = std::move(textures_),
+#endif  //  !SLIMPELLER
+                       raw_context]() mutable {
           sk_sp<ResourceContext> context(raw_context);
-          DoDrain(objects, textures, context);
+          DoDrain(objects,
+#if !SLIMPELLER
+                  textures,
+#endif  //  !SLIMPELLER
+                  context);
           context.reset();
         });
   }
 
   // static
   static void DoDrain(const std::deque<SkRefCnt*>& skia_objects,
+#if !SLIMPELLER
                       const std::deque<GrBackendTexture>& textures,
+#endif  //  !SLIMPELLER
                       sk_sp<ResourceContext> context) {
     for (SkRefCnt* skia_object : skia_objects) {
       skia_object->unref();
     }
 
+#if !SLIMPELLER
     if (context) {
       for (const GrBackendTexture& texture : textures) {
         context->deleteBackendTexture(texture);
@@ -131,6 +150,7 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
 
       context->flushAndSubmit(GrSyncCpu::kYes);
     }
+#endif  //  !SLIMPELLER
   }
 
   FML_FRIEND_REF_COUNTED_THREAD_SAFE(UnrefQueue);
@@ -141,8 +161,7 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
 using SkiaUnrefQueue = UnrefQueue<GrDirectContext>;
 
 /// An object whose deallocation needs to be performed on an specific unref
-/// queue. The template argument U need to have a call operator that returns
-/// that unref queue.
+/// queue.
 template <class T>
 class SkiaGPUObject {
  public:

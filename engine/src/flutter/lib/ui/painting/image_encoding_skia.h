@@ -5,6 +5,8 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_IMAGE_ENCODING_SKIA_H_
 #define FLUTTER_LIB_UI_PAINTING_IMAGE_ENCODING_SKIA_H_
 
+#if !SLIMPELLER
+
 #include "flutter/common/task_runners.h"
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/fml/synchronization/sync_switch.h"
@@ -22,5 +24,7 @@ void ConvertImageToRasterSkia(
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch);
 
 }  // namespace flutter
+
+#endif  //  !SLIMPELLER
 
 #endif  // FLUTTER_LIB_UI_PAINTING_IMAGE_ENCODING_SKIA_H_

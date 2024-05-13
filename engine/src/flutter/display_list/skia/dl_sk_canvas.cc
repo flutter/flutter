@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#if !SLIMPELLER
+
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 
 #include "flutter/display_list/skia/dl_sk_conversions.h"
@@ -352,3 +354,5 @@ void DlSkCanvasAdapter::Flush() {
 }
 
 }  // namespace flutter
+
+#endif  //  !SLIMPELLER

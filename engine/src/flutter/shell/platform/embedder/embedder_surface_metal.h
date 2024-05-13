@@ -5,6 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_METAL_H_
 #define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_METAL_H_
 
+#if !SLIMPELLER
+
 #include "flutter/fml/macros.h"
 #include "flutter/shell/gpu/gpu_surface_metal_delegate.h"
 #include "flutter/shell/gpu/gpu_surface_metal_skia.h"
@@ -15,6 +17,9 @@
 
 namespace flutter {
 
+// TODO(148235): This class is Skia specific and there is another on
+// specifically for Impeller called EmbedderSurfaceMetalImpeller. Rename this to
+// EmbedderSurfaceMetalSkia to avoid confusion.
 class EmbedderSurfaceMetal final : public EmbedderSurface,
                                    public GPUSurfaceMetalDelegate {
  public:
@@ -66,5 +71,7 @@ class EmbedderSurfaceMetal final : public EmbedderSurface,
 };
 
 }  // namespace flutter
+
+#endif  //  !SLIMPELLER
 
 #endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_METAL_H_

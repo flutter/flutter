@@ -5,6 +5,8 @@
 #ifndef FLUTTER_DISPLAY_LIST_SKIA_DL_SK_CANVAS_H_
 #define FLUTTER_DISPLAY_LIST_SKIA_DL_SK_CANVAS_H_
 
+#if !SLIMPELLER
+
 #include "flutter/display_list/dl_canvas.h"
 #include "flutter/display_list/skia/dl_sk_types.h"
 #include "impeller/typographer/text_frame.h"
@@ -162,5 +164,7 @@ class DlSkCanvasAdapter final : public virtual DlCanvas {
 };
 
 }  // namespace flutter
+
+#endif  //  !SLIMPELLER
 
 #endif  // FLUTTER_DISPLAY_LIST_SKIA_DL_SK_CANVAS_H_

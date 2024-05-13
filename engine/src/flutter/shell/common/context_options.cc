@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#if !SLIMPELLER
+
 #include "flutter/shell/common/context_options.h"
 
 #include "flutter/common/graphics/persistent_cache.h"
@@ -41,3 +43,5 @@ GrContextOptions MakeDefaultContextOptions(ContextType type,
 };
 
 }  // namespace flutter
+
+#endif  //  !SLIMPELLER

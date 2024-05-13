@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#if !SLIMPELLER
+
 #include "flutter/flow/layers/display_list_raster_cache_item.h"
 
 #include <optional>
@@ -174,3 +176,5 @@ bool DisplayListRasterCacheItem::TryToPrepareRasterCache(
       display_list_->rtree());
 }
 }  // namespace flutter
+
+#endif  //  !SLIMPELLER

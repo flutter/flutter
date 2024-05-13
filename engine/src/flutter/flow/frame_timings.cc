@@ -206,12 +206,14 @@ FrameTiming FrameTimingsRecorder::RecordRasterEnd(const RasterCache* cache) {
   raster_end_ = fml::TimePoint::Now();
   raster_end_wall_time_ = fml::TimePoint::CurrentWallTime();
   if (cache) {
+#if !SLIMPELLER
     const RasterCacheMetrics& layer_metrics = cache->layer_metrics();
     const RasterCacheMetrics& picture_metrics = cache->picture_metrics();
     layer_cache_count_ = layer_metrics.total_count();
     layer_cache_bytes_ = layer_metrics.total_bytes();
     picture_cache_count_ = picture_metrics.total_count();
     picture_cache_bytes_ = picture_metrics.total_bytes();
+#endif  //  !SLIMPELLER
   } else {
     layer_cache_count_ = layer_cache_bytes_ = picture_cache_count_ =
         picture_cache_bytes_ = 0;

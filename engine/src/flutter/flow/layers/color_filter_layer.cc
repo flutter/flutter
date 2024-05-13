@@ -39,8 +39,10 @@ void ColorFilterLayer::Diff(DiffContext* context, const Layer* old_layer) {
 void ColorFilterLayer::Preroll(PrerollContext* context) {
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
+#if !SLIMPELLER
   AutoCache cache = AutoCache(layer_raster_cache_item_.get(), context,
                               context->state_stack.transform_3x3());
+#endif  //  !SLIMPELLER
 
   ContainerLayer::Preroll(context);
 
@@ -66,6 +68,7 @@ void ColorFilterLayer::Paint(PaintContext& context) const {
 
   auto mutator = context.state_stack.save();
 
+#if !SLIMPELLER
   if (context.raster_cache) {
     // Always apply the integral transform in the presence of a raster cache
     // whether or not we will draw from the cache
@@ -81,11 +84,13 @@ void ColorFilterLayer::Paint(PaintContext& context) const {
       }
     }
   }
+#endif  //  !SLIMPELLER
 
   // Now apply the color filter and then try rendering children either from
   // cache or directly.
   mutator.applyColorFilter(paint_bounds(), filter_);
 
+#if !SLIMPELLER
   if (context.raster_cache && layer_raster_cache_item_->IsCacheChildren()) {
     DlPaint paint;
     if (layer_raster_cache_item_->Draw(context,
@@ -93,6 +98,7 @@ void ColorFilterLayer::Paint(PaintContext& context) const {
       return;
     }
   }
+#endif  //  !SLIMPELLER
 
   PaintChildren(context);
 }

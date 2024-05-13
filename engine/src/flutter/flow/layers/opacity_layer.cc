@@ -39,8 +39,11 @@ void OpacityLayer::Preroll(PrerollContext* context) {
   mutator.translate(offset_);
   mutator.applyOpacity(SkRect(), DlColor::toOpacity(alpha_));
 
+#if !SLIMPELLER
   AutoCache auto_cache = AutoCache(layer_raster_cache_item_.get(), context,
                                    context->state_stack.transform_3x3());
+#endif  //  !SLIMPELLER
+
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
 
@@ -56,12 +59,14 @@ void OpacityLayer::Preroll(PrerollContext* context) {
 
   set_paint_bounds(paint_bounds().makeOffset(offset_.fX, offset_.fY));
 
+#if !SLIMPELLER
   if (children_can_accept_opacity()) {
     // For opacity layer, we can use raster_cache children only when the
     // children can't accept opacity so if the children_can_accept_opacity we
     // should tell the AutoCache object don't do raster_cache.
     auto_cache.ShouldNotBeCached();
   }
+#endif  //  !SLIMPELLER
 }
 
 void OpacityLayer::Paint(PaintContext& context) const {
@@ -69,12 +74,16 @@ void OpacityLayer::Paint(PaintContext& context) const {
 
   auto mutator = context.state_stack.save();
   mutator.translate(offset_.fX, offset_.fY);
+
+#if !SLIMPELLER
   if (context.raster_cache) {
     mutator.integralTransform();
   }
+#endif  //  !SLIMPELLER
 
   mutator.applyOpacity(child_paint_bounds(), opacity());
 
+#if !SLIMPELLER
   if (!children_can_accept_opacity()) {
     DlPaint paint;
     if (layer_raster_cache_item_->Draw(context,
@@ -82,6 +91,7 @@ void OpacityLayer::Paint(PaintContext& context) const {
       return;
     }
   }
+#endif  //  !SLIMPELLER
 
   PaintChildren(context);
 }

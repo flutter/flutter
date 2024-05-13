@@ -392,6 +392,9 @@ def to_gn_args(args):
     if args.target_os != 'ios':
       raise Exception('--simulator is only supported for iOS')
 
+  if args.slimpeller and args.target_os != 'ios':
+    raise Exception('--slimpeller is only supported for iOS.')
+
   runtime_mode = args.runtime_mode
 
   gn_args = {}
@@ -441,6 +444,10 @@ def to_gn_args(args):
     gn_args['is_clang'] = True
   else:
     gn_args['is_clang'] = args.clang
+  if args.slimpeller:
+    gn_args['skia_enable_graphite'] = False
+    gn_args['skia_enable_ganesh'] = False
+    gn_args['slimpeller'] = True
 
   if args.target_os == 'android' or args.target_os == 'ios':
     gn_args['skia_gl_standard'] = 'gles'

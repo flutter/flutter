@@ -27,8 +27,13 @@ SurfaceFrame::SurfaceFrame(sk_sp<SkSurface> surface,
       context_result_(std::move(context_result)) {
   FML_DCHECK(submit_callback_);
   if (surface_) {
+#if !SLIMPELLER
     adapter_.set_canvas(surface_->getCanvas());
     canvas_ = &adapter_;
+#else   //  !SLIMPELLER
+    FML_LOG(FATAL) << "Impeller opt-out unavailable.";
+    return;
+#endif  //  !SLIMPELLER
   } else if (display_list_fallback) {
     FML_DCHECK(!frame_size.isEmpty());
     // The root frame of a surface will be filled by the layer_tree which

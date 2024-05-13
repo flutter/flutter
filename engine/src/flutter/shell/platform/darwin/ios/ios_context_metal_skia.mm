@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#if !SLIMPELLER
+
 #import "flutter/shell/platform/darwin/ios/ios_context_metal_skia.h"
 
 #include "flutter/common/graphics/persistent_cache.h"
@@ -58,3 +60,5 @@ std::unique_ptr<Texture> IOSContextMetalSkia::CreateExternalTexture(
 }
 
 }  // namespace flutter
+
+#endif  //  !SLIMPELLER

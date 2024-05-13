@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#if !SLIMPELLER
+
 #import "flutter/shell/platform/darwin/ios/ios_surface_metal_skia.h"
 
 #include "flutter/shell/gpu/gpu_surface_metal_delegate.h"
@@ -117,3 +119,5 @@ bool IOSSurfaceMetalSkia::AllowsDrawingWhenGpuDisabled() const {
 }
 
 }  // namespace flutter
+
+#endif  //  !SLIMPELLER

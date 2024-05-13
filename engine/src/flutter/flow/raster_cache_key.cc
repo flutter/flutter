@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#if !SLIMPELLER
+
 #include "flutter/flow/raster_cache_key.h"
 #include <optional>
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/flow/layers/display_list_layer.h"
 #include "flutter/flow/layers/layer.h"
-namespace flutter {
 
-//
+namespace flutter {
 
 std::optional<std::vector<RasterCacheKeyID>> RasterCacheKeyID::LayerChildrenIds(
     const Layer* layer) {
@@ -27,3 +28,5 @@ std::optional<std::vector<RasterCacheKeyID>> RasterCacheKeyID::LayerChildrenIds(
 }
 
 }  // namespace flutter
+
+#endif  //  !SLIMPELLER

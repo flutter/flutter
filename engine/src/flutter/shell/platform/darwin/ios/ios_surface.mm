@@ -22,10 +22,15 @@ std::unique_ptr<IOSSurface> IOSSurface::Create(std::shared_ptr<IOSContext> conte
     if ([layer.get() isKindOfClass:[CAMetalLayer class]]) {
       switch (context->GetBackend()) {
         case IOSRenderingBackend::kSkia:
+#if !SLIMPELLER
           return std::make_unique<IOSSurfaceMetalSkia>(
               fml::scoped_nsobject<CAMetalLayer>((CAMetalLayer*)layer.get()),  // Metal layer
               std::move(context)                                               // context
           );
+#else   //  !SLIMPELLER
+          FML_LOG(FATAL) << "Impeller opt-out unavailable.";
+          return nullptr;
+#endif  //  !SLIMPELLER
           break;
         case IOSRenderingBackend::kImpeller:
           return std::make_unique<IOSSurfaceMetalImpeller>(

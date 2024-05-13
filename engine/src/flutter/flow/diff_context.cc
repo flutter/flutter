@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 #include "flutter/flow/diff_context.h"
+
 #include "flutter/flow/layers/layer.h"
+#include "flutter/flow/raster_cache_util.h"
 
 namespace flutter {
 

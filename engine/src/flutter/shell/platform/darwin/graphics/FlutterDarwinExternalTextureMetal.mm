@@ -295,6 +295,9 @@ FLUTTER_ASSERT_ARC
                         grContext:(nonnull GrDirectContext*)grContext
                             width:(size_t)width
                            height:(size_t)height {
+#if SLIMPELLER
+  return nullptr;
+#else   // SLIMPELLER
   GrMtlTextureInfo ySkiaTextureInfo;
   ySkiaTextureInfo.fTexture = sk_cfp<const void*>{(__bridge_retained const void*)yTex};
 
@@ -315,12 +318,17 @@ FLUTTER_ASSERT_ARC
   return SkImages::TextureFromYUVATextures(grContext, yuvaBackendTextures,
                                            /*imageColorSpace=*/nullptr,
                                            /*releaseProc*/ nullptr, /*releaseContext*/ nullptr);
+#endif  //  SLIMPELLER
 }
 
 + (sk_sp<SkImage>)wrapRGBATexture:(id<MTLTexture>)rgbaTex
                         grContext:(nonnull GrDirectContext*)grContext
                             width:(size_t)width
                            height:(size_t)height {
+#if SLIMPELLER
+  return nullptr;
+#else   // SLIMPELLER
+
   GrMtlTextureInfo skiaTextureInfo;
   skiaTextureInfo.fTexture = sk_cfp<const void*>{(__bridge_retained const void*)rgbaTex};
 
@@ -331,5 +339,6 @@ FLUTTER_ASSERT_ARC
                                      kBGRA_8888_SkColorType, kPremul_SkAlphaType,
                                      /*colorSpace=*/nullptr, /*releaseProc*/ nullptr,
                                      /*releaseContext*/ nullptr);
+#endif  //  SLIMPELLER
 }
 @end

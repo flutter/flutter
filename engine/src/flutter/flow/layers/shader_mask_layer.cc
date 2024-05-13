@@ -37,9 +37,10 @@ void ShaderMaskLayer::Diff(DiffContext* context, const Layer* old_layer) {
 void ShaderMaskLayer::Preroll(PrerollContext* context) {
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
+#if !SLIMPELLER
   AutoCache cache = AutoCache(layer_raster_cache_item_.get(), context,
                               context->state_stack.transform_3x3());
-
+#endif  //  !SLIMPELLER
   ContainerLayer::Preroll(context);
   // We always paint with a saveLayer (or a cached rendering),
   // so we can always apply opacity in any of those cases.
@@ -51,6 +52,7 @@ void ShaderMaskLayer::Paint(PaintContext& context) const {
 
   auto mutator = context.state_stack.save();
 
+#if !SLIMPELLER
   if (context.raster_cache) {
     mutator.integralTransform();
 
@@ -60,6 +62,7 @@ void ShaderMaskLayer::Paint(PaintContext& context) const {
       return;
     }
   }
+#endif  //  !SLIMPELLER
   auto shader_rect = SkRect::MakeWH(mask_rect_.width(), mask_rect_.height());
 
   mutator.saveLayer(paint_bounds());

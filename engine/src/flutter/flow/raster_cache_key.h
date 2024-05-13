@@ -5,6 +5,8 @@
 #ifndef FLUTTER_FLOW_RASTER_CACHE_KEY_H_
 #define FLUTTER_FLOW_RASTER_CACHE_KEY_H_
 
+#if !SLIMPELLER
+
 #include <optional>
 #include <unordered_map>
 #include <utility>
@@ -127,5 +129,7 @@ class RasterCacheKey {
 };
 
 }  // namespace flutter
+
+#endif  //  !SLIMPELLER
 
 #endif  // FLUTTER_FLOW_RASTER_CACHE_KEY_H_

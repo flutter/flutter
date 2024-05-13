@@ -28,11 +28,16 @@ std::unique_ptr<ImageDecoder> ImageDecoder::Make(
         gpu_disabled_switch);
   }
 #endif  // IMPELLER_SUPPORTS_RENDERING
+#if !SLIMPELLER
   return std::make_unique<ImageDecoderSkia>(
       runners,                            //
       std::move(concurrent_task_runner),  //
       std::move(io_manager)               //
   );
+#else   //  !SLIMPELLER
+  FML_LOG(FATAL) << "Could not setup an image decoder.";
+  return nullptr;
+#endif  //  !SLIMPELLER
 }
 
 ImageDecoder::ImageDecoder(

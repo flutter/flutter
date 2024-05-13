@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#if !SLIMPELLER
+
 #include "flutter/shell/common/snapshot_controller_skia.h"
 
 #include "display_list/image/dl_image.h"
@@ -171,3 +173,5 @@ void SnapshotControllerSkia::CacheRuntimeStage(
     const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) {}
 
 }  // namespace flutter
+
+#endif  //  !SLIMPELLER

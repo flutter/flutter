@@ -747,7 +747,7 @@ class Rasterizer final : public SnapshotDelegate,
 
   bool is_torn_down_ = false;
   Delegate& delegate_;
-  MakeGpuImageBehavior gpu_image_behavior_;
+  [[maybe_unused]] MakeGpuImageBehavior gpu_image_behavior_;
   std::weak_ptr<impeller::Context> impeller_context_;
   std::unique_ptr<Surface> surface_;
   std::unique_ptr<SnapshotSurfaceProducer> snapshot_surface_producer_;

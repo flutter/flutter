@@ -5,6 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_METAL_SKIA_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_METAL_SKIA_H_
 
+#if !SLIMPELLER
+
 #include "flutter/fml/macros.h"
 #include "flutter/shell/gpu/gpu_surface_metal_delegate.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
@@ -60,5 +62,7 @@ class SK_API_AVAILABLE_CA_METAL_LAYER IOSSurfaceMetalSkia final : public IOSSurf
 };
 
 }  // namespace flutter
+
+#endif  //  !SLIMPELLER
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_METAL_SKIA_H_

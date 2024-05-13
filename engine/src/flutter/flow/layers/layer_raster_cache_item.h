@@ -5,6 +5,8 @@
 #ifndef FLUTTER_FLOW_LAYERS_LAYER_RASTER_CACHE_ITEM_H_
 #define FLUTTER_FLOW_LAYERS_LAYER_RASTER_CACHE_ITEM_H_
 
+#if !SLIMPELLER
+
 #include <memory>
 #include <optional>
 
@@ -68,5 +70,7 @@ class LayerRasterCacheItem : public RasterCacheItem {
 };
 
 }  // namespace flutter
+
+#endif  //  !SLIMPELLER
 
 #endif  // FLUTTER_FLOW_LAYERS_LAYER_RASTER_CACHE_ITEM_H_

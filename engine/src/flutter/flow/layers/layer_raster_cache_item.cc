@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#if !SLIMPELLER
+
 #include "flutter/flow/layers/layer_raster_cache_item.h"
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/flow/raster_cache_item.h"
@@ -196,3 +198,5 @@ bool LayerRasterCacheItem::Draw(const PaintContext& context,
 }
 
 }  // namespace flutter
+
+#endif  //  !SLIMPELLER

@@ -5,6 +5,8 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_IMAGE_DECODER_SKIA_H_
 #define FLUTTER_LIB_UI_PAINTING_IMAGE_DECODER_SKIA_H_
 
+#if !SLIMPELLER
+
 #include "flutter/fml/macros.h"
 #include "flutter/lib/ui/painting/image_decoder.h"
 
@@ -36,5 +38,7 @@ class ImageDecoderSkia final : public ImageDecoder {
 };
 
 }  // namespace flutter
+
+#endif  //  !SLIMPELLER
 
 #endif  // FLUTTER_LIB_UI_PAINTING_IMAGE_DECODER_SKIA_H_
