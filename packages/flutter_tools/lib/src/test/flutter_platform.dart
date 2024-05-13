@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:async';
 
 import 'package:dds/dds.dart';
@@ -28,6 +26,7 @@ import '../test/test_wrapper.dart';
 import 'flutter_tester_device.dart';
 import 'font_config_manager.dart';
 import 'integration_test_device.dart';
+import 'prefix.dart';
 import 'test_compiler.dart';
 import 'test_config.dart';
 import 'test_device.dart';
@@ -167,7 +166,7 @@ import 'package:test_api/backend.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:stack_trace/stack_trace.dart';
 
-import '$testUrl' as test;
+import '$testUrl' as $testSuiteImportPrefix;
 ''');
   if (testConfigFile != null) {
     buffer.write('''
