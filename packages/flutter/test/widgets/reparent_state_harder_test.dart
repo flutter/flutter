@@ -49,7 +49,7 @@ class OrderSwitcherState extends State<OrderSwitcher> {
 }
 
 class DummyStatefulWidget extends StatefulWidget {
-  const DummyStatefulWidget(super.key);
+  const DummyStatefulWidget(Key? key) : super(key: key);
 
   @override
   DummyStatefulWidgetState createState() => DummyStatefulWidgetState();

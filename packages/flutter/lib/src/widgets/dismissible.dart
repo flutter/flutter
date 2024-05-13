@@ -356,7 +356,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   }
 
   double get _overallDragAxisExtent {
-    final Size size = context.size;
+    final Size size = context.size!;
     return _directionIsXAxis ? size.width : size.height;
   }
 

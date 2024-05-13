@@ -1209,14 +1209,15 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
       assert(!child.debugNeedsLayout);
       final StackParentData childParentData = child.parentData! as StackParentData;
       double? candidate = child.getDistanceToActualBaseline(baseline);
-      candidate += childParentData.offset.dy;
-      if (result != null) {
-        result = math.min(result, candidate);
-      } else {
-        result = candidate;
-      }
-          child = childParentData.nextSibling;
-    }
+      if (candidate != null) {
+         candidate += childParentData.offset.dy;
+         if (result != null) {
+           result = math.min(result, candidate);
+         } else {
+           result = candidate;
+         }
+       }
+      child = childParentData.nextSibling;
     return result;
   }
 
