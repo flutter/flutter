@@ -735,7 +735,7 @@ void main() {
       // Should not trigger assert in RenderTwoDimensionalViewport.performLayout
       // after child manager end layout. (https://github.com/flutter/flutter/issues/138977)
       final UniqueKey checkBoxKey = UniqueKey();
-      final Widget originCell = KeepAliveOnyWhenHovered(
+      final Widget originCell = KeepAliveOnlyWhenHovered(
         key: checkBoxKey,
         child: const SizedBox.square(dimension: 200),
       );
