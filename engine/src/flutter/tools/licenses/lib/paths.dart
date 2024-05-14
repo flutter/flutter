@@ -103,6 +103,11 @@ final Set<String> skippedPaths = <String>{
   r'flutter/third_party/inja/third_party/amalgamate', // only used at build time
   r'flutter/third_party/inja/third_party/include/doctest', // seems to be a unit test library
   r'flutter/third_party/json/docs',
+  r'flutter/third_party/libcxx/benchmarks',
+  r'flutter/third_party/libcxx/docs',
+  r'flutter/third_party/libcxx/src/support/solaris',
+  r'flutter/third_party/libcxx/utils',
+  r'flutter/third_party/libcxxabi/www',
   r'flutter/third_party/libpng/ci', // not linked in
   r'flutter/third_party/libpng/contrib', // not linked in
   r'flutter/third_party/libpng/loongarch', // not linked in
@@ -217,11 +222,6 @@ final Set<String> skippedPaths = <String>{
   r'third_party/android_tools', // excluded on advice
   r'third_party/gradle',
   r'third_party/java', // only used for Android builds
-  r'third_party/libcxx/benchmarks',
-  r'third_party/libcxx/docs',
-  r'third_party/libcxx/src/support/solaris',
-  r'third_party/libcxx/utils',
-  r'third_party/libcxxabi/www',
   r'third_party/libxml', // dependency of the testing system that we don't actually use
   r'third_party/web_dependencies/canvaskit', // redundant; covered by Skia dependencies
   r'tools', // not distributed in binary
