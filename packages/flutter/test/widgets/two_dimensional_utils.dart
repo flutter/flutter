@@ -511,3 +511,39 @@ class TestParentDataWidget extends ParentDataWidget<TestExtendedParentData> {
   @override
   Type get debugTypicalAncestorWidgetClass => SimpleBuilderTableViewport;
 }
+
+class KeepAliveOnyWhenHovered extends StatefulWidget {
+  const KeepAliveOnyWhenHovered({ required this.child, super.key });
+
+  final Widget child;
+
+  @override
+  KeepAliveOnyWhenHoveredWidgetState createState() => KeepAliveOnyWhenHoveredWidgetState();
+}
+
+class KeepAliveOnyWhenHoveredWidgetState extends State<KeepAliveOnyWhenHovered> with AutomaticKeepAliveClientMixin {
+  bool _hovered = false;
+
+  @override
+  bool get wantKeepAlive => _hovered;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return MouseRegion(
+      onEnter: (_) {
+        setState(() {
+          _hovered = true;
+          updateKeepAlive();
+        });
+      },
+      onExit: (_) {
+        setState(() {
+          _hovered = false;
+          updateKeepAlive();
+        });
+      },
+      child: widget.child,
+    );
+  }
+}
