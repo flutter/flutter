@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'package:process_runner/process_runner.dart';
 
 import 'environment.dart';
-import 'json_utils.dart';
+import 'typed_json.dart';
 
 const String _targetPlatformKey = 'targetPlatform';
 const String _nameKey = 'name';
@@ -17,16 +17,13 @@ const String _idKey = 'id';
 class RunTarget {
   /// Construct a RunTarget from a JSON map.
   factory RunTarget.fromJson(Map<String, Object> map) {
-    final List<String> errors = <String>[];
-    final String name = stringOfJson(map, _nameKey, errors)!;
-    final String id = stringOfJson(map, _idKey, errors)!;
-    final String targetPlatform =
-        stringOfJson(map, _targetPlatformKey, errors)!;
-
-    if (errors.isNotEmpty) {
-      throw FormatException('Failed to parse RunTarget: ${errors.join('\n')}');
-    }
-    return RunTarget._(name, id, targetPlatform);
+    return JsonObject(map).map((JsonObject json) => RunTarget._(
+      json.string(_nameKey),
+      json.string(_idKey),
+      json.string(_targetPlatformKey),
+    ), onError: (JsonObject source, JsonMapException e) {
+      throw FormatException('Failed to parse RunTarget: $e', source.toPrettyString());
+    });
   }
 
   RunTarget._(this.name, this.id, this.targetPlatform);
