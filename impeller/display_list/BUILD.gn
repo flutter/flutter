@@ -52,6 +52,7 @@ impeller_component("display_list") {
 template("display_list_unittests_component") {
   target_name = invoker.target_name
   predefined_sources = [
+    "aiks_dl_path_unittests.cc",
     "dl_golden_unittests.cc",
     "dl_playground.cc",
     "dl_playground.h",
@@ -74,7 +75,12 @@ template("display_list_unittests_component") {
     }
 
     sources = predefined_sources + additional_sources
-    deps = [
+    if (defined(invoker.deps)) {
+      deps = invoker.deps
+    } else {
+      deps = []
+    }
+    deps += [
       ":display_list",
       "../playground:playground_test",
       "//flutter/impeller/scene",
@@ -88,9 +94,11 @@ template("display_list_unittests_component") {
 }
 
 display_list_unittests_component("display_list_unittests") {
+  deps = [ "//flutter/impeller/aiks:aiks_unittests" ]
 }
 
 display_list_unittests_component("display_list_unittests_golden") {
+  deps = [ "//flutter/impeller/aiks:aiks_unittests_golden" ]
   defines = [
     "IMPELLER_GOLDEN_TESTS",
     "IMPELLER_ENABLE_VALIDATION=1",
