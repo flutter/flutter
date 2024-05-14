@@ -107,6 +107,19 @@ class Checkbox extends StatefulWidget {
   /// Creates a checkbox that adapts to the look and feel of [ThemeData.platform]
   /// for iOS and macOS, and otherwise builds a Material Design checkbox.
   ///
+  /// To provide a custom checkbox theme that's only used by this factory
+  /// constructor, add a custom `Adaptation<CheckboxThemeData>` class to
+  /// [ThemeData.adaptations]. This can be useful in situations where you don't
+  /// want the overall [ThemeData.checkboxTheme] to apply when this adaptive
+  /// constructor is used.
+  ///
+  /// {@tool dartpad}
+  /// This sample shows how to create and use subclasses of [Adaptation] that
+  /// define adaptive [CheckboxThemeData]s.
+  ///
+  /// ** See code in examples/api/lib/material/checkbox/checkbox.2.dart **
+  /// {@end-tool}
+  ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Checkbox.adaptive({
     super.key,
@@ -463,7 +476,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final CheckboxThemeData checkboxTheme = CheckboxTheme.of(context);
+    CheckboxThemeData checkboxTheme = CheckboxTheme.of(context);
     final _DesignSpec designSpec;
     final CheckboxThemeData defaults;
     switch (widget._checkboxType) {
@@ -474,6 +487,9 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
           : _CheckboxDefaultsM2(context);
       case _CheckboxType.adaptive:
         final ThemeData theme = Theme.of(context);
+        final Adaptation<CheckboxThemeData> checkboxAdaptation = theme.getAdaptation<CheckboxThemeData>()
+          ?? const _CheckboxThemeAdaptation();
+        checkboxTheme = checkboxAdaptation.adapt(theme, checkboxTheme);
         switch (theme.platform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
@@ -899,6 +915,24 @@ class _CheckboxPainter extends ToggleablePainter {
         }
       case _DesignSpec.material:
         break;
+    }
+  }
+}
+
+class _CheckboxThemeAdaptation extends Adaptation<CheckboxThemeData> {
+  const _CheckboxThemeAdaptation();
+
+  @override
+  CheckboxThemeData adapt(ThemeData theme, CheckboxThemeData defaultValue) {
+    switch (theme.platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return defaultValue;
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        return const CheckboxThemeData();
     }
   }
 }
