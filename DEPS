@@ -277,7 +277,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '7f832aed9b02b6da55756234b85e753d0411855e',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'ce4faea09e57ec2744b4956b6fe0fa72e38c2b2b',
 
   'src/flutter/third_party/depot_tools':
   Var('chromium_git') + '/chromium/tools/depot_tools.git' + '@' + '580b4ff3f5cd0dcaa2eacda28cefe0f45320e8f7',
