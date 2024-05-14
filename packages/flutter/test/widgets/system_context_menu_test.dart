@@ -43,6 +43,54 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
+  testWidgets('asserts when built on web', (WidgetTester tester) async {
+    // Disable the browser context menu so that contextMenuBuilder will be used.
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.contextMenu,
+      (MethodCall call) {
+        // Just complete successfully, so that BrowserContextMenu thinks that
+        // the engine successfully received its call.
+        return Future<void>.value();
+      },
+    );
+    await BrowserContextMenu.disableContextMenu();
+    addTearDown(() async {
+      await BrowserContextMenu.enableContextMenu();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, null);
+    });
+
+    final TextEditingController controller = TextEditingController(
+      text: 'one two three',
+    );
+    await tester.pumpWidget(
+      // By default, MediaQueryData.supportsShowingSystemContextMenu is false.
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: TextField(
+              controller: controller,
+              contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                return SystemContextMenu.editableText(
+                  editableTextState: editableTextState,
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.showToolbar(), true);
+    await tester.pump();
+
+    expect(tester.takeException(), isAssertionError);
+  },
+    skip: !kIsWeb, // [intended]
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
   testWidgets('can be shown and hidden like a normal context menu', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'one two three',
