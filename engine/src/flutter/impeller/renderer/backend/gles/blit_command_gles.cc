@@ -276,7 +276,7 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
                   0u,                          // border
                   data.external_format,        // external format
                   data.type,                   // type
-                  tex_data                     // data
+                  nullptr                      // data
     );
     texture_gles.MarkSliceInitialized(slice);
   }
