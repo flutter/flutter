@@ -130,7 +130,6 @@ TEST(GPUTracerVK, TracesWithPartialFrameOverlap) {
   auto cmd_buffer = context->CreateCommandBuffer();
   auto blit_pass = cmd_buffer->CreateBlitPass();
   blit_pass->EncodeCommands(context->GetResourceAllocator());
-  tracer->MarkFrameEnd();
 
   auto latch = std::make_shared<fml::CountDownLatch>(1u);
   if (!context->GetCommandQueue()
@@ -140,6 +139,7 @@ TEST(GPUTracerVK, TracesWithPartialFrameOverlap) {
            .ok()) {
     GTEST_FAIL() << "Failed to submit cmd buffer";
   }
+  tracer->MarkFrameEnd();
 
   latch->Wait();
 
