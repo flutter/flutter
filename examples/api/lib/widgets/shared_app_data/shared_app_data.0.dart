@@ -59,7 +59,7 @@ class _SharedAppDataExampleState extends State<SharedAppDataExample> {
                   context,
                   'foo',
                   'FOO $_fooVersion',
-                ); // no need to call setState()
+                ); // No need to call setState().
               },
             ),
             const SizedBox(height: 16),
@@ -73,7 +73,7 @@ class _SharedAppDataExampleState extends State<SharedAppDataExample> {
                   context,
                   'bar',
                   'BAR $_barVersion',
-                ); // no need to call setState()
+                ); // No need to call setState().
               },
             ),
           ],
