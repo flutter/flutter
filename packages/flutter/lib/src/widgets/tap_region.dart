@@ -636,5 +636,5 @@ class TextFieldTapRegion extends TapRegion {
     super.consumeOutsideTaps,
     super.debugLabel,
     super.groupId = EditableText,
-  }) : super();
+  });
 }
