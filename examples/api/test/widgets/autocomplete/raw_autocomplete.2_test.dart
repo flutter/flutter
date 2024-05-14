@@ -52,7 +52,7 @@ void main() {
     expect(find.text('This is a regular TextFormField'), findsOneWidget);
     await tester.enterText(
       find.ancestor(
-        of: find.text('This is a regular TextFormField'), 
+        of: find.text('This is a regular TextFormField'),
         matching: find.byType(TextFormField),
       ),
       'regular user input',
