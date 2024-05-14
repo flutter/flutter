@@ -349,9 +349,9 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
 /// Subclasses must implement the [paint] method to draw the actual visuals of
 /// the Toggleable.
 ///
-/// If drawing a radial ink reaction is desired (in material
-/// design for example),  subclasses may call [paintRadialReaction] in their
-/// [paint] method to draw a radial ink reaction for this control.
+/// If drawing a radial ink reaction is desired (in Material
+/// Design for example), subclasses may call [paintRadialReaction] in their
+/// [paint] method.
 abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter {
   /// The visual value of the control.
   ///
