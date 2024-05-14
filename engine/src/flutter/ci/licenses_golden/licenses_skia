@@ -1,4 +1,4 @@
-Signature: 284d8b2432e2eceadae2c07bec15fe63
+Signature: 8bd318478066be4923b5a1b3c83bdae1
 
 ====================================================================================================
 LIBRARY: etc1
@@ -397,13 +397,6 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
-FILE: ../../../flutter/third_party/skia/relnotes/ArrayASAN.md
-FILE: ../../../flutter/third_party/skia/relnotes/SkFloatBits.md
-FILE: ../../../flutter/third_party/skia/relnotes/SkSLIncDec.md
-FILE: ../../../flutter/third_party/skia/relnotes/SkScalarIsFiniteOrNaN.md
-FILE: ../../../flutter/third_party/skia/relnotes/ios_gl.md
-FILE: ../../../flutter/third_party/skia/relnotes/mac_gl.md
-FILE: ../../../flutter/third_party/skia/relnotes/moved_interfaces.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
