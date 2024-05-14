@@ -306,43 +306,6 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
   return true;
 }
 
-// The texture needs to be cleared to transparent black so that linearly
-// samplex rotated/skewed glyphs do not grab uninitialized data.
-bool ClearTextureToTransparentBlack(Context& context,
-                                    HostBuffer& host_buffer,
-                                    std::shared_ptr<CommandBuffer>& cmd_buffer,
-                                    std::shared_ptr<BlitPass>& blit_pass,
-                                    std::shared_ptr<Texture>& texture) {
-  // The R8/A8 textures used for certain glyphs is not supported as color
-  // attachments in most graphics drivers. To be safe, just do a CPU clear
-  // for these.
-  if (texture->GetTextureDescriptor().format ==
-      context.GetCapabilities()->GetDefaultGlyphAtlasFormat()) {
-    size_t byte_size =
-        texture->GetTextureDescriptor().GetByteSizeOfBaseMipLevel();
-    BufferView buffer_view =
-        host_buffer.Emplace(nullptr, byte_size, DefaultUniformAlignment());
-
-    ::memset(buffer_view.buffer->OnGetContents() + buffer_view.range.offset, 0,
-             byte_size);
-    buffer_view.buffer->Flush();
-    return blit_pass->AddCopy(buffer_view, texture);
-  }
-  // In all other cases, we can use a render pass to clear to a transparent
-  // color.
-  ColorAttachment attachment;
-  attachment.clear_color = Color::BlackTransparent();
-  attachment.load_action = LoadAction::kClear;
-  attachment.store_action = StoreAction::kStore;
-  attachment.texture = texture;
-
-  RenderTarget render_target;
-  render_target.SetColorAttachment(attachment, 0u);
-
-  auto render_pass = cmd_buffer->CreateRenderPass(render_target);
-  return render_pass->EncodeCommands();
-}
-
 std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
     Context& context,
     GlyphAtlas::Type type,
@@ -359,13 +322,6 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
   if (font_glyph_map.empty()) {
     return last_atlas;
   }
-  std::shared_ptr<CommandBuffer> cmd_buffer = context.CreateCommandBuffer();
-  std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
-
-  fml::ScopedCleanupClosure closure([&]() {
-    blit_pass->EncodeCommands(context.GetResourceAllocator());
-    context.GetCommandQueue()->Submit({std::move(cmd_buffer)});
-  });
 
   // ---------------------------------------------------------------------------
   // Step 1: Determine if the atlas type and font glyph pairs are compatible
@@ -394,8 +350,7 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
 
   // ---------------------------------------------------------------------------
   // Step 2: Determine if the additional missing glyphs can be appended to the
-  //         existing bitmap without recreating the atlas. This requires that
-  //         the type is identical.
+  //         existing bitmap without recreating the atlas.
   // ---------------------------------------------------------------------------
   std::vector<Rect> glyph_positions;
   if (CanAppendToExistingAtlas(last_atlas, new_glyphs, glyph_positions,
@@ -411,6 +366,14 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
     for (size_t i = 0, count = glyph_positions.size(); i < count; i++) {
       last_atlas->AddTypefaceGlyphPosition(new_glyphs[i], glyph_positions[i]);
     }
+
+    std::shared_ptr<CommandBuffer> cmd_buffer = context.CreateCommandBuffer();
+    std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
+
+    fml::ScopedCleanupClosure closure([&]() {
+      blit_pass->EncodeCommands(context.GetResourceAllocator());
+      context.GetCommandQueue()->Submit({std::move(cmd_buffer)});
+    });
 
     // ---------------------------------------------------------------------------
     // Step 4a: Draw new font-glyph pairs into the a host buffer and encode
@@ -502,8 +465,46 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
 
   new_texture->SetLabel("GlyphAtlas");
 
-  ClearTextureToTransparentBlack(context, host_buffer, cmd_buffer, blit_pass,
-                                 new_texture);
+  std::shared_ptr<CommandBuffer> cmd_buffer = context.CreateCommandBuffer();
+  std::shared_ptr<BlitPass> blit_pass;
+
+  // The R8/A8 textures used for certain glyphs is not supported as color
+  // attachments in most graphics drivers. To be safe, just do a CPU clear
+  // for these.
+  if (type == GlyphAtlas::Type::kAlphaBitmap) {
+    size_t byte_size =
+        new_texture->GetTextureDescriptor().GetByteSizeOfBaseMipLevel();
+    BufferView buffer_view =
+        host_buffer.Emplace(nullptr, byte_size, DefaultUniformAlignment());
+
+    ::memset(buffer_view.buffer->OnGetContents() + buffer_view.range.offset, 0,
+             byte_size);
+    buffer_view.buffer->Flush();
+    blit_pass = cmd_buffer->CreateBlitPass();
+    blit_pass->AddCopy(buffer_view, new_texture);
+  } else {
+    // In all other cases, we can use a render pass to clear to a transparent
+    // color.
+    ColorAttachment attachment;
+    attachment.clear_color = Color::BlackTransparent();
+    attachment.load_action = LoadAction::kClear;
+    attachment.store_action = StoreAction::kStore;
+    attachment.texture = new_texture;
+
+    RenderTarget render_target;
+    render_target.SetColorAttachment(attachment, 0u);
+
+    auto render_pass = cmd_buffer->CreateRenderPass(render_target);
+    render_pass->EncodeCommands();
+    blit_pass = cmd_buffer->CreateBlitPass();
+  }
+  FML_DCHECK(!!blit_pass);
+
+  fml::ScopedCleanupClosure closure([&]() {
+    blit_pass->EncodeCommands(context.GetResourceAllocator());
+    context.GetCommandQueue()->Submit({std::move(cmd_buffer)});
+  });
+
   if (!UpdateAtlasBitmap(*glyph_atlas, blit_pass, host_buffer, new_texture,
                          font_glyph_pairs)) {
     return nullptr;
