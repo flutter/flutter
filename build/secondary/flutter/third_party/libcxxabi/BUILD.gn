@@ -38,7 +38,7 @@ source_set("libcxxabi") {
   configs -= [ "//build/config/compiler:cxx_version_default" ]
   configs += [ "//build/config/compiler:cxx_version_20" ]
 
-  configs += [ "//third_party/libcxx:src_include" ]
+  configs += [ "//flutter/third_party/libcxx:src_include" ]
 
   # No translation units in the engine are built with exceptions. But, using
   # Objective-C exceptions requires some infrastructure setup for exceptions.

@@ -277,7 +277,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '7840a4af027fc21161d4ae14a3d4d9c9bab049a2',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '7f832aed9b02b6da55756234b85e753d0411855e',
 
   'src/flutter/third_party/depot_tools':
   Var('chromium_git') + '/chromium/tools/depot_tools.git' + '@' + '580b4ff3f5cd0dcaa2eacda28cefe0f45320e8f7',
@@ -288,10 +288,10 @@ deps = {
   'src/flutter/third_party/harfbuzz':
    Var('flutter_git') + '/third_party/harfbuzz' + '@' + 'ea8f97c615f0ba17dc25013ef67dbd6bfaaa76f2',
 
-  'src/third_party/libcxx':
+  'src/flutter/third_party/libcxx':
    Var('llvm_git') + '/llvm-project/libcxx' + '@' + '44079a4cc04cdeffb9cfe8067bfb3c276fb2bab0',
 
-  'src/third_party/libcxxabi':
+  'src/flutter/third_party/libcxxabi':
    Var('llvm_git') + '/llvm-project/libcxxabi' + '@' + '2ce528fb5e0f92e57c97ec3ff53b75359d33af12',
 
   'src/flutter/third_party/glfw':
