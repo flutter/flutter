@@ -576,5 +576,20 @@ TEST_P(AiksTest, ForegroundAdvancedBlendAppliesTransformCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, FramebufferAdvancedBlendCoverage) {
+  auto texture = CreateTextureForFixture("airplane.jpg",
+                                         /*enable_mipmapping=*/true);
+
+  // Draw with an advanced blend that can use FramebufferBlendContents and
+  // verify that the scale transform is correctly applied to the image.
+  Canvas canvas;
+  canvas.DrawPaint({.color = Color::DarkGray()});
+  canvas.Scale(Vector2(0.4, 0.4));
+  canvas.DrawImage(std::make_shared<Image>(texture), {20, 20},
+                   {.blend_mode = BlendMode::kMultiply});
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 }  // namespace testing
 }  // namespace impeller
