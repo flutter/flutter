@@ -17,6 +17,7 @@ Future<void> processPodsIfNeeded(
   String buildDirectory,
   BuildMode buildMode, {
   bool forceCocoaPodsOnly = false,
+  bool shouldUseBundler = false,
 }) async {
   final FlutterProject project = xcodeProject.parent;
 
@@ -51,6 +52,11 @@ Future<void> processPodsIfNeeded(
       await globals.cocoaPods?.setupPodfile(xcodeProject);
     }
 
+    // If Bundler has been deintegrated, add it back.
+    if (shouldUseBundler) {
+      await globals.cocoaPods?.setupGemfile(xcodeProject);
+    }
+
     // Delete Swift Package Manager manifest to invalidate fingerprinter
     ErrorHandlingFileSystem.deleteIfExists(
       xcodeProject.flutterPluginSwiftPackageManifest,
@@ -82,6 +88,7 @@ Future<void> processPodsIfNeeded(
     xcodeProject: xcodeProject,
     buildMode: buildMode,
     dependenciesChanged: !fingerprinter.doesFingerprintMatch(),
+    shouldUseBundler: shouldUseBundler,
   ) ?? false;
   if (didPodInstall) {
     fingerprinter.writeFingerprint();

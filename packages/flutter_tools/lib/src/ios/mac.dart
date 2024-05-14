@@ -276,7 +276,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       );
     }
   }
-  await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode);
+  await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode, shouldUseBundler: buildInfo.shouldUseBundler);
   if (configOnly) {
     return XcodeBuildResult(success: true);
   }

@@ -48,6 +48,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
     addNullSafetyModeOptions(hide: !verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
+    addXcodeSpecificBuildOptions();
 
     argParser
       ..addFlag('debug',
@@ -269,6 +270,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         getIosBuildDirectory(),
         buildInfo.mode,
         forceCocoaPodsOnly: true,
+        shouldUseBundler: buildInfo.shouldUseBundler,
       );
       if (boolArg('plugins') && hasPlugins(project)) {
         await _producePlugins(buildInfo.mode, xcodeBuildConfiguration, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory);

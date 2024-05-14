@@ -370,6 +370,7 @@ class FlutterProject {
     bool macOSPlatform = false,
     bool windowsPlatform = false,
     bool webPlatform = false,
+    bool shouldUseBundler = false,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     Iterable<String>? allowedPlugins,
   }) async {
@@ -403,6 +404,7 @@ class FlutterProject {
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
       allowedPlugins: allowedPlugins,
+      shouldUseBundler: shouldUseBundler,
     );
   }
 

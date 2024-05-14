@@ -106,6 +106,12 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
   /// The CocoaPods 'Manifest.lock'.
   File get podManifestLock => hostAppRoot.childDirectory('Pods').childFile('Manifest.lock');
 
+  /// The Ruby 'Gemfile'.
+  File get gemfile => hostAppRoot.childFile('Gemfile');
+
+  /// The Ruby 'Gemfile.lock'.
+  File get gemfileLock => hostAppRoot.childFile('Gemfile.lock');
+
   /// The CocoaPods generated 'Pods-Runner-frameworks.sh'.
   File get podRunnerFrameworksScript => podRunnerTargetSupportFiles
       .childFile('Pods-Runner-frameworks.sh');

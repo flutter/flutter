@@ -164,6 +164,7 @@ class CocoaPods {
     required XcodeBasedProject xcodeProject,
     required BuildMode buildMode,
     bool dependenciesChanged = true,
+    bool shouldUseBundler = false
   }) async {
     if (!xcodeProject.podfile.existsSync()) {
       // Swift Package Manager doesn't need Podfile, so don't error.
@@ -178,7 +179,11 @@ class CocoaPods {
       if (!await _checkPodCondition()) {
         throwToolExit('CocoaPods not installed or not in valid state.');
       }
-      await _runPodInstall(xcodeProject, buildMode);
+
+      if (shouldUseBundler) {
+        await _runBundleInstall(xcodeProject, buildMode);
+      }
+      await _runPodInstall(xcodeProject, buildMode, shouldUseBundler);
 
       // This migrator works around a CocoaPods bug, and should be run after `pod install` is run.
       final ProjectMigration postPodMigration = ProjectMigration(<ProjectMigrator>[
@@ -246,6 +251,29 @@ class CocoaPods {
   }
 
   /// Ensures the given Xcode-based sub-project of a parent Flutter project
+  /// contains a suitable `Gemfile`.
+  Future<void> setupGemfile(XcodeBasedProject xcodeProject) async {
+    if (!_xcodeProjectInterpreter.isInstalled) {
+      // Don't do anything for iOS when host platform doesn't support it.
+      return;
+    }
+    final Directory runnerProject = xcodeProject.xcodeProject;
+    if (!runnerProject.existsSync()) {
+      return;
+    }
+    final File gemfile = xcodeProject.gemfile;
+    if (gemfile.existsSync()) {
+      return;
+    }
+    final File gemfileTemplate = await getGemfileTemplate(
+      xcodeProject,
+      runnerProject,
+    );
+    gemfileTemplate.copySync(gemfile.path);
+    addPodsDependencyToFlutterXcconfig(xcodeProject);
+  }
+
+  /// Ensures the given Xcode-based sub-project of a parent Flutter project
   /// contains a suitable `Podfile` and that its `Flutter/Xxx.xcconfig` files
   /// include pods configuration.
   Future<void> setupPodfile(XcodeBasedProject xcodeProject) async {
@@ -268,6 +296,22 @@ class CocoaPods {
     );
     podfileTemplate.copySync(podfile.path);
     addPodsDependencyToFlutterXcconfig(xcodeProject);
+  }
+
+  Future<File> getGemfileTemplate(
+    XcodeBasedProject xcodeProject,
+    Directory runnerProject,
+  ) async {
+    const String gemfileTemplateName = 'Gemfile-ios';
+
+    return _fileSystem.file(_fileSystem.path.join(
+      Cache.flutterRoot!,
+      'packages',
+      'flutter_tools',
+      'templates',
+      'bundler',
+      gemfileTemplateName,
+    ));
   }
 
   Future<File> getPodfileTemplate(
@@ -332,6 +376,12 @@ class CocoaPods {
     ErrorHandlingFileSystem.deleteIfExists(manifestLock);
   }
 
+  /// Ensures that bundle install is deemed needed on next check.
+  void invalidateBundleInstallOutput(XcodeBasedProject xcodeProject) {
+    final File gemfileLock = xcodeProject.gemfileLock;
+    ErrorHandlingFileSystem.deleteIfExists(gemfileLock);
+  }
+
   // Check if you need to run pod install.
   // The pod install will run if any of below is true.
   // 1. Flutter dependencies have changed
@@ -353,10 +403,17 @@ class CocoaPods {
         || podfileLockFile.readAsStringSync() != manifestLockFile.readAsStringSync();
   }
 
-  Future<void> _runPodInstall(XcodeBasedProject xcodeProject, BuildMode buildMode) async {
+  Future<void> _runPodInstall(
+      XcodeBasedProject xcodeProject, BuildMode buildMode, bool shouldUseBundler) async {
     final Status status = _logger.startProgress('Running pod install...');
+    final List<String> command;
+    if (shouldUseBundler) {
+      command = <String>['bundle', 'exec', 'pod', 'install', '--verbose'];
+    } else {
+      command = <String>['pod', 'install', '--verbose'];
+    }
     final ProcessResult result = await _processManager.run(
-      <String>['pod', 'install', '--verbose'],
+      command,
       workingDirectory: _fileSystem.path.dirname(xcodeProject.podfile.path),
       environment: <String, String>{
         // See https://github.com/flutter/flutter/issues/10873.
@@ -393,7 +450,43 @@ class CocoaPods {
     }
   }
 
-  void _diagnosePodInstallFailure(ProcessResult result, XcodeBasedProject xcodeProject) {
+  Future<void> _runBundleInstall(
+      XcodeBasedProject xcodeProject, BuildMode buildMode) async {
+    final Status status = _logger.startProgress('Running bundle install...');
+    final ProcessResult result = await _processManager.run(
+      <String>['bundle', 'install'],
+      workingDirectory: _fileSystem.path.dirname(xcodeProject.gemfile.path),
+      environment: <String, String>{},
+    );
+    status.stop();
+    if (_logger.isVerbose || result.exitCode != 0) {
+      final String stdout = result.stdout as String;
+      if (stdout.isNotEmpty) {
+        _logger.printStatus("Bundler' output:\n↳");
+        _logger.printStatus(stdout, indent: 4);
+      }
+      final String stderr = result.stderr as String;
+      if (stderr.isNotEmpty) {
+        _logger.printStatus('Error output from Bundler:\n↳');
+        _logger.printStatus(stderr, indent: 4);
+      }
+    }
+
+    if (result.exitCode != 0) {
+      invalidateBundleInstallOutput(xcodeProject);
+      throwToolExit('Error running bundle install');
+    } else if (xcodeProject.gemfileLock.existsSync()) {
+      // Even if the Gemfile.lock didn't change, update its modified date to now
+      // so Gemfile.lock is newer than Gemfile.
+      _processManager.runSync(
+        <String>['touch', xcodeProject.gemfileLock.path],
+        workingDirectory: _fileSystem.path.dirname(xcodeProject.gemfile.path),
+      );
+    }
+  }
+
+  void _diagnosePodInstallFailure(
+      ProcessResult result, XcodeBasedProject xcodeProject) {
     final Object? stdout = result.stdout;
     final Object? stderr = result.stderr;
     if (stdout is! String || stderr is! String) {

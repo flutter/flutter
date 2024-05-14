@@ -22,12 +22,14 @@ class DarwinDependencyManagement {
     required SwiftPackageManager swiftPackageManager,
     required FileSystem fileSystem,
     required Logger logger,
+    bool shouldUseBundler = false,
   })  : _project = project,
         _plugins = plugins,
         _cocoapods = cocoapods,
         _swiftPackageManager = swiftPackageManager,
         _fileSystem = fileSystem,
-        _logger = logger;
+        _logger = logger,
+        _shouldUseBundler = shouldUseBundler;
 
   final FlutterProject _project;
   final List<Plugin> _plugins;
@@ -35,6 +37,7 @@ class DarwinDependencyManagement {
   final SwiftPackageManager _swiftPackageManager;
   final FileSystem _fileSystem;
   final Logger _logger;
+  final bool _shouldUseBundler;
 
   /// Generates/updates required files and project settings for Darwin
   /// Dependency Managers (CocoaPods and Swift Package Manager). Projects may
@@ -87,6 +90,10 @@ class DarwinDependencyManagement {
       platform: platform,
       xcodeProject: xcodeProject,
     );
+
+    if (_shouldUseBundler) {
+      await _cocoapods.setupGemfile(xcodeProject);
+    }
 
     final bool useCocoapods;
     if (_project.usesSwiftPackageManager) {

@@ -117,7 +117,7 @@ Future<void> buildMacOS({
   // using MACOSX_DEPLOYMENT_TARGET once https://github.com/flutter/flutter/issues/146204
   // is fixed.
 
-  await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode);
+  await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode, shouldUseBundler: buildInfo.shouldUseBundler);
   // If the xcfilelists do not exist, create empty version.
   if (!flutterProject.macos.inputFileList.existsSync()) {
     flutterProject.macos.inputFileList.createSync(recursive: true);

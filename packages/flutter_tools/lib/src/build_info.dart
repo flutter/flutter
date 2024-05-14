@@ -46,6 +46,7 @@ class BuildInfo {
     this.initializeFromDill,
     this.assumeInitializeFromDillUpToDate = false,
     this.buildNativeAssets = true,
+    this.shouldUseBundler = false,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
        fileSystemRoots = fileSystemRoots ?? const <String>[],
@@ -179,6 +180,10 @@ class BuildInfo {
 
   /// If set, builds native assets with `build.dart` from all packages.
   final bool buildNativeAssets;
+
+  /// If set, it will use the `bundler` tool to manage Gem dependencies, including Cocoapods,
+  /// and it will execute the `bundler` commands, `bundle install` before running the build, and using `bundle exec` to run the Cocoapods install command.
+  final bool shouldUseBundler;
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null, trackWidgetCreation: true, treeShakeIcons: false);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null, treeShakeIcons: kIconTreeShakerEnabledDefault);

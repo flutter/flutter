@@ -149,6 +149,7 @@
         "templates/cocoapods/Podfile-ios-objc",
         "templates/cocoapods/Podfile-ios-swift",
         "templates/cocoapods/Podfile-macos",
+        "templates/bundler/Gemfile-ios",
 
         "templates/module/android/deferred_component/build.gradle.tmpl",
         "templates/module/android/deferred_component/src/main/AndroidManifest.xml.tmpl",

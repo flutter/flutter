@@ -99,6 +99,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
         getMacOSBuildDirectory(),
         buildInfo.mode,
         forceCocoaPodsOnly: true,
+        shouldUseBundler: buildInfo.shouldUseBundler,
       );
       if (boolArg('plugins') && hasPlugins(project)) {
         await _producePlugins(xcodeBuildConfiguration, buildOutput, modeDirectory);

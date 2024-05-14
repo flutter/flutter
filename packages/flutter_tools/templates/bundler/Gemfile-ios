@@ -1,0 +1,4 @@
+source "https://rubygems.org"
+
+# Recommended version for `cocoapods` gem
+gem "cocoapods",  '1.13.0'

@@ -540,6 +540,7 @@ class FakeCocoaPods extends Fake implements CocoaPods {
     required XcodeBasedProject xcodeProject,
     required BuildMode buildMode,
     bool dependenciesChanged = true,
+    bool shouldUseBundler = false,
   }) async {
     processedPods = true;
     return true;

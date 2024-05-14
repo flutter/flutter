@@ -27,6 +27,7 @@ class BuildMacosCommand extends BuildSubCommand {
           'This can be used in CI/CD process that create an archive to avoid '
           'performing duplicate work.'
     );
+    addXcodeSpecificBuildOptions();
   }
 
   @override

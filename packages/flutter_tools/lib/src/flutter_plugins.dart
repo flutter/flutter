@@ -1077,6 +1077,7 @@ Future<void> injectPlugins(
   bool linuxPlatform = false,
   bool macOSPlatform = false,
   bool windowsPlatform = false,
+  bool shouldUseBundler = false,
   Iterable<String>? allowedPlugins,
   DarwinDependencyManagement? darwinDependencyManagement,
 }) async {
@@ -1109,6 +1110,7 @@ Future<void> injectPlugins(
       ),
       fileSystem: globals.fs,
       logger: globals.logger,
+      shouldUseBundler: shouldUseBundler,
     );
     if (iosPlatform) {
       await darwinDependencyManagerSetup.setUp(

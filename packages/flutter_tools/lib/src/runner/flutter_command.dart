@@ -157,6 +157,7 @@ abstract final class FlutterOptions {
   static const String kWebRendererFlag = 'web-renderer';
   static const String kWebResourcesCdnFlag = 'web-resources-cdn';
   static const String kWebWasmFlag = 'wasm';
+  static const String kUseBundler = 'use-bundler';
 }
 
 /// flutter command categories for usage.
@@ -989,6 +990,15 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void addXcodeSpecificBuildOptions({ bool hide = false }) {
+    argParser.addFlag(
+      FlutterOptions.kUseBundler,
+      help: 'Use Bundler to control your Gems versioning. '
+          'If this option enabled it will make sure you have a proper Gemfile in your iOS project directory, '
+          'and execute "bundle install" & "bundle exec" commands before and during Cocoapods process.'
+    );
+  }
+
   void addNativeNullAssertions({ bool hide = false }) {
     argParser.addFlag('native-null-assertions',
       defaultsTo: true,
@@ -1241,6 +1251,9 @@ abstract class FlutterCommand extends Command<void> {
       ? stringsArg(FlutterOptions.kAndroidProjectArgs)
       : <String>[];
 
+    final bool shouldUseBundler = !argParser.options.containsKey(FlutterOptions.kUseBundler)
+        || boolArg(FlutterOptions.kUseBundler);
+
     if (dartObfuscation && (splitDebugInfoPath == null || splitDebugInfoPath.isEmpty)) {
       throwToolExit(
         '"--${FlutterOptions.kDartObfuscationOption}" can only be used in '
@@ -1333,6 +1346,7 @@ abstract class FlutterCommand extends Command<void> {
           : null,
       assumeInitializeFromDillUpToDate: argParser.options.containsKey(FlutterOptions.kAssumeInitializeFromDillUpToDate)
           && boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
+      shouldUseBundler: shouldUseBundler,
     );
   }
 

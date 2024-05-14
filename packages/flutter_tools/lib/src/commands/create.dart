@@ -40,6 +40,7 @@ class CreateCommand extends CreateBase {
     super.verboseHelp = false,
   }) {
     addPlatformsOptions(customHelp: kPlatformHelp);
+    addXcodeSpecificBuildOptions();
     argParser.addOption(
       'template',
       abbr: 't',
@@ -71,6 +72,8 @@ class CreateCommand extends CreateBase {
       valueHelp: 'path',
     );
   }
+
+  bool get shouldUseBundler => boolArg('use-bundler');
 
   @override
   final String name = 'create';
@@ -448,6 +451,7 @@ class CreateCommand extends CreateBase {
           macOSPlatform: includeMacos,
           windowsPlatform: includeWindows,
           webPlatform: includeWeb,
+          shouldUseBundler: shouldUseBundler,
         );
       }
     }
