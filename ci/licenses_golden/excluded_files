@@ -1844,6 +1844,7 @@
 ../../../flutter/third_party/gn
 ../../../flutter/third_party/google_fonts_for_unit_tests
 ../../../flutter/third_party/googletest
+../../../flutter/third_party/gradle
 ../../../flutter/third_party/gtest-parallel/.git
 ../../../flutter/third_party/gtest-parallel/.gitignore
 ../../../flutter/third_party/gtest-parallel/CONTRIBUTING.md
