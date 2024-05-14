@@ -943,10 +943,8 @@ class _CheckboxThemeAdaptation extends Adaptation<CheckboxThemeData> {
 // TODO(victorsanni): Apply theme for widget state where app is open but inactive.
 class _CheckboxDefaultsCupertino extends CheckboxThemeData {
   _CheckboxDefaultsCupertino(BuildContext context)
-    : _theme = Theme.of(context),
-      _colors = Theme.of(context).colorScheme;
+    : _colors = Theme.of(context).colorScheme;
 
-  final ThemeData _theme;
   final ColorScheme _colors;
   final Color _effectiveFocusOverlayColor = HSLColor
       .fromColor(CupertinoColors.activeBlue.withOpacity(0.80))
@@ -965,7 +963,7 @@ class _CheckboxDefaultsCupertino extends CheckboxThemeData {
         if (states.contains(MaterialState.selected)) {
           return const BorderSide(color: Colors.transparent);
         }
-        return BorderSide(color: _colors.onSurface.withOpacity(0.38));
+        return BorderSide(color: _borderColor);
       }
       if (states.contains(MaterialState.selected)) {
         return const BorderSide(width: 0.0, color: Colors.transparent);
@@ -1016,7 +1014,7 @@ class _CheckboxDefaultsCupertino extends CheckboxThemeData {
       }
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.error)) {
-          return _colors.onError;
+          return _colors.error;
         }
         return CupertinoColors.white;
       }
@@ -1066,13 +1064,13 @@ class _CheckboxDefaultsCupertino extends CheckboxThemeData {
   }
 
   @override
-  double get splashRadius => 40.0 / 2;
+  double get splashRadius => 0.0;
 
   @override
-  MaterialTapTargetSize get materialTapTargetSize => _theme.materialTapTargetSize;
+  MaterialTapTargetSize get materialTapTargetSize => MaterialTapTargetSize.shrinkWrap;
 
   @override
-  VisualDensity get visualDensity => _theme.visualDensity;
+  VisualDensity get visualDensity => VisualDensity.adaptivePlatformDensity;
 
   @override
   OutlinedBorder get shape => const RoundedRectangleBorder(
