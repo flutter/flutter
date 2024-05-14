@@ -48,7 +48,7 @@ class _FadeUpwardsPageTransition extends StatelessWidget {
 }
 
 // This transition is intended to match the default for Android P.
-class _OpenUpwardsPageTransition extends StatelessWidget {
+class _OpenUpwardsPageTransition extends StatefulWidget {
   const _OpenUpwardsPageTransition({
     required this.animation,
     required this.secondaryAnimation,
@@ -82,36 +82,76 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
   final Widget child;
 
   @override
+  State<_OpenUpwardsPageTransition> createState() => _OpenUpwardsPageTransitionState();
+}
+
+class _OpenUpwardsPageTransitionState extends State<_OpenUpwardsPageTransition> {
+  late CurvedAnimation _primaryAnimation;
+  late CurvedAnimation _secondaryTranslationCurvedAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _setAnimations();
+  }
+
+  @override
+  void didUpdateWidget(covariant _OpenUpwardsPageTransition oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.animation != widget.animation ||
+        oldWidget.secondaryAnimation != widget.secondaryAnimation
+    ) {
+      _disposeAnimations();
+      _setAnimations();
+    }
+  }
+
+  void _setAnimations() {
+    _primaryAnimation = CurvedAnimation(
+      parent: widget.animation,
+      curve: _OpenUpwardsPageTransition._transitionCurve,
+      reverseCurve: _OpenUpwardsPageTransition._transitionCurve.flipped,
+    );
+    _secondaryTranslationCurvedAnimation = CurvedAnimation(
+      parent: widget.secondaryAnimation,
+      curve: _OpenUpwardsPageTransition._transitionCurve,
+      reverseCurve: _OpenUpwardsPageTransition._transitionCurve.flipped,
+    );
+  }
+
+  void _disposeAnimations() {
+    _primaryAnimation.dispose();
+    _secondaryTranslationCurvedAnimation.dispose();
+  }
+
+  @override
+  void dispose() {
+    _disposeAnimations();
+    super.dispose();
+  }
+
+
+  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final Size size = constraints.biggest;
 
-        final CurvedAnimation primaryAnimation = CurvedAnimation(
-          parent: animation,
-          curve: _transitionCurve,
-          reverseCurve: _transitionCurve.flipped,
-        );
-
         // Gradually expose the new page from bottom to top.
         final Animation<double> clipAnimation = Tween<double>(
           begin: 0.0,
           end: size.height,
-        ).animate(primaryAnimation);
+        ).animate(_primaryAnimation);
 
-        final Animation<double> opacityAnimation = _scrimOpacityTween.animate(primaryAnimation);
-        final Animation<Offset> primaryTranslationAnimation = _primaryTranslationTween.animate(primaryAnimation);
+        final Animation<double> opacityAnimation = _OpenUpwardsPageTransition._scrimOpacityTween.animate(_primaryAnimation);
+        final Animation<Offset> primaryTranslationAnimation = _OpenUpwardsPageTransition._primaryTranslationTween.animate(_primaryAnimation);
 
-        final Animation<Offset> secondaryTranslationAnimation = _secondaryTranslationTween.animate(
-          CurvedAnimation(
-            parent: secondaryAnimation,
-            curve: _transitionCurve,
-            reverseCurve: _transitionCurve.flipped,
-          ),
+        final Animation<Offset> secondaryTranslationAnimation = _OpenUpwardsPageTransition._secondaryTranslationTween.animate(
+          _secondaryTranslationCurvedAnimation,
         );
 
         return AnimatedBuilder(
-          animation: animation,
+          animation: widget.animation,
           builder: (BuildContext context, Widget? child) {
             return Container(
               color: Colors.black.withOpacity(opacityAnimation.value),
@@ -129,10 +169,10 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
             );
           },
           child: AnimatedBuilder(
-            animation: secondaryAnimation,
+            animation: widget.secondaryAnimation,
             child: FractionalTranslation(
               translation: primaryTranslationAnimation.value,
-              child: child,
+              child: widget.child,
             ),
             builder: (BuildContext context, Widget? child) {
               return FractionalTranslation(
