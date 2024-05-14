@@ -76,7 +76,7 @@ std::shared_ptr<BlitPass> CommandBufferVK::OnCreateBlitPass() {
   if (!IsValid()) {
     return nullptr;
   }
-  auto pass = std::shared_ptr<BlitPassVK>(new BlitPassVK(weak_from_this()));
+  auto pass = std::shared_ptr<BlitPassVK>(new BlitPassVK(shared_from_this()));
   if (!pass->IsValid()) {
     return nullptr;
   }
