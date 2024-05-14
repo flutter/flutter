@@ -378,7 +378,7 @@ update it, run:
 
 ```sh
 cd testing/scenario_app/android
-$ENGINE_SRC/third_party/gradle/bin/gradle app:dependencies --write-locks
+$ENGINE_SRC/flutter/third_party/gradle/bin/gradle app:dependencies --write-locks
 ```
 
 ## Getting Help
