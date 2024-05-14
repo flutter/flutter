@@ -306,6 +306,43 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
   return true;
 }
 
+// The texture needs to be cleared to transparent black so that linearly
+// samplex rotated/skewed glyphs do not grab uninitialized data.
+bool ClearTextureToTransparentBlack(Context& context,
+                                    HostBuffer& host_buffer,
+                                    std::shared_ptr<CommandBuffer>& cmd_buffer,
+                                    std::shared_ptr<BlitPass>& blit_pass,
+                                    std::shared_ptr<Texture>& texture) {
+  // The R8/A8 textures used for certain glyphs is not supported as color
+  // attachments in most graphics drivers. To be safe, just do a CPU clear
+  // for these.
+  if (texture->GetTextureDescriptor().format ==
+      context.GetCapabilities()->GetDefaultGlyphAtlasFormat()) {
+    size_t byte_size =
+        texture->GetTextureDescriptor().GetByteSizeOfBaseMipLevel();
+    BufferView buffer_view =
+        host_buffer.Emplace(nullptr, byte_size, DefaultUniformAlignment());
+
+    ::memset(buffer_view.buffer->OnGetContents() + buffer_view.range.offset, 0,
+             byte_size);
+    buffer_view.buffer->Flush();
+    return blit_pass->AddCopy(buffer_view, texture);
+  }
+  // In all other cases, we can use a render pass to clear to a transparent
+  // color.
+  ColorAttachment attachment;
+  attachment.clear_color = Color::BlackTransparent();
+  attachment.load_action = LoadAction::kClear;
+  attachment.store_action = StoreAction::kStore;
+  attachment.texture = texture;
+
+  RenderTarget render_target;
+  render_target.SetColorAttachment(attachment, 0u);
+
+  auto render_pass = cmd_buffer->CreateRenderPass(render_target);
+  return render_pass->EncodeCommands();
+}
+
 std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
     Context& context,
     GlyphAtlas::Type type,
@@ -455,28 +492,18 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
     }
     descriptor.size = atlas_size;
     descriptor.storage_mode = StorageMode::kDevicePrivate;
+    descriptor.usage = TextureUsage::kShaderRead | TextureUsage::kRenderTarget;
     new_texture = context.GetResourceAllocator()->CreateTexture(descriptor);
   }
 
   if (!new_texture) {
     return nullptr;
   }
-  // The texture needs to be cleared to transparent black so that linearly
-  // samplex rotated/skewed glyphs do not grab uninitialized data. We could
-  // instead use a render pass to clear to transparent black, but there are
-  // more restrictions on what kinds of textures can be bound on GLES.
-  {
-    auto bytes =
-        new_texture->GetTextureDescriptor().GetByteSizeOfBaseMipLevel();
-    BufferView buffer_view =
-        host_buffer.Emplace(nullptr, bytes, DefaultUniformAlignment());
-
-    ::memset(buffer_view.buffer->OnGetContents() + buffer_view.range.offset, 0,
-             bytes);
-    blit_pass->AddCopy(buffer_view, new_texture);
-  }
 
   new_texture->SetLabel("GlyphAtlas");
+
+  ClearTextureToTransparentBlack(context, host_buffer, cmd_buffer, blit_pass,
+                                 new_texture);
   if (!UpdateAtlasBitmap(*glyph_atlas, blit_pass, host_buffer, new_texture,
                          font_glyph_pairs)) {
     return nullptr;
