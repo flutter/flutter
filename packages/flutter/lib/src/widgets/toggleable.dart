@@ -13,12 +13,13 @@ const Duration _kToggleDuration = Duration(milliseconds: 200);
 const Duration _kReactionFadeDuration = Duration(milliseconds: 50);
 
 /// The amount of time a circular ink response should take to expand to its
-/// full size if a radial reaction is drawn.
+/// full size if a radial reaction is drawn using
+/// [ToggleablePainter.paintRadialReaction].
 const Duration _kRadialReactionDuration = Duration(milliseconds: 100);
 
 /// A mixin for [StatefulWidget]s that implement toggleable
-/// controls with toggle animations (e.g. [Switch]es, [Checkbox]es, and
-/// [Radio]s).
+/// controls with toggle animations (e.g. [Switch]es, [CupertinoSwitch]es,
+/// [Checkbox]es, [CupertinoCheckbox]es, [Radio]s, and [CupertinoRadio]s).
 ///
 /// The mixin implements the logic for toggling the control (e.g. when tapped)
 /// and provides a series of animation controllers to transition the control
@@ -26,9 +27,6 @@ const Duration _kRadialReactionDuration = Duration(milliseconds: 100);
 /// representation of the toggleable widget. The visuals are defined by a
 /// [CustomPainter] passed to the [buildToggleable]. [State] objects using this
 /// mixin should call that method from their [build] method.
-///
-/// This mixin is used to implement the components for [Switch],
-/// [Checkbox], and [Radio] controls.
 @optionalTypeArgs
 mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin<S> {
   /// Used by subclasses to manipulate the visual value of the control.
@@ -303,6 +301,12 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// Toggleable based on the current value of these animations. The animations
   /// are triggered by this mixin to transition the Toggleable from one state
   /// to another.
+  ///
+  /// Material Toggleables must provide a [mouseCursor] which resolves to a
+  /// [MouseCursor] based on the current [WidgetState] of the Toggleable.
+  /// Cupertino Toggleables may not provide a [mouseCursor]. If no [mouseCursor]
+  /// is provided, [SystemMouseCursors.basic] will be used as the [mouseCursor]
+  /// across all [WidgetState]s.
   ///
   /// This method must be called from the [build] method of the [State] class
   /// that uses this mixin. The returned [Widget] must be returned from the
