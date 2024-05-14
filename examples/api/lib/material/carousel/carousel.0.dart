@@ -32,7 +32,7 @@ class CarouselExample extends StatefulWidget {
   State<CarouselExample> createState() => _CarouselExampleState();
 }
 
-class _CarouselExampleState extends State<CarouselExample> with SingleTickerProviderStateMixin {
+class _CarouselExampleState extends State<CarouselExample> {
   @override
   Widget build(BuildContext context) {
     return Center(

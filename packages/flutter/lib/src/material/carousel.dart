@@ -219,8 +219,8 @@ class _CarouselState extends State<Carousel> {
   double? getItemExtent() {
     if (widget.itemExtent != null) {
       final double screenExtent = switch(widget.scrollDirection) {
-        Axis.horizontal => MediaQuery.of(context).size.width,
-        Axis.vertical => MediaQuery.of(context).size.height,
+        Axis.horizontal => MediaQuery.sizeOf(context).width,
+        Axis.vertical => MediaQuery.sizeOf(context).height,
       };
 
       return clampDouble(widget.itemExtent!, 0, screenExtent);
