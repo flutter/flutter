@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -11,8 +10,8 @@ import 'package:path/path.dart' as p;
 import 'package:process_runner/process_runner.dart';
 
 import 'environment.dart';
-import 'json_utils.dart';
 import 'logger.dart';
+import 'typed_json.dart';
 import 'worker_pool.dart';
 
 /// Artifacts from an exited sub-process.
@@ -33,18 +32,18 @@ final class ProcessArtifacts {
 
   /// Constructs an instance of ProcessArtifacts from serialized JSON text.
   factory ProcessArtifacts.fromJson(String serialized) {
-    final Map<String, dynamic> artifact =
-        jsonDecode(serialized) as Map<String, dynamic>;
-    final List<String> errors = <String>[];
-    final Directory cwd = Directory(stringOfJson(artifact, 'cwd', errors)!);
-    final List<String> commandLine =
-        stringListOfJson(artifact, 'commandLine', errors)!;
-    final int exitCode = intOfJson(artifact, 'exitCode', errors)!;
-    final String stdout = stringOfJson(artifact, 'stdout', errors)!;
-    final String stderr = stringOfJson(artifact, 'stderr', errors)!;
-    final int? pid = intOfJson(artifact, 'pid', errors);
-    return ProcessArtifacts(cwd, commandLine, exitCode, stdout, stderr,
-        pid: pid);
+    final JsonObject artifact = JsonObject.parse(serialized);
+    return artifact.map((JsonObject json) => ProcessArtifacts(
+        Directory(json.string('cwd')),
+        json.stringList('commandLine'),
+        json.integer('exitCode'),
+        json.string('stdout'),
+        json.string('stderr'),
+        pid: json.integer('pid'),
+      ), onError: (JsonObject source, JsonMapException e) {
+        throw FormatException('Failed to parse ProcessArtifacts: $e', source.toPrettyString());
+      },
+    );
   }
 
   /// Constructs an instance of ProcessArtifacts from a file containing JSON.
@@ -54,16 +53,14 @@ final class ProcessArtifacts {
 
   /// Saves ProcessArtifacts into file.
   void save(File file) {
-    final Map<String, Object> data = <String, Object>{};
-    if (pid != null) {
-      data['pid'] = pid!;
-    }
-    data['exitCode'] = exitCode;
-    data['stdout'] = stdout;
-    data['stderr'] = stderr;
-    data['cwd'] = cwd.absolute.path;
-    data['commandLine'] = commandLine;
-    file.writeAsStringSync(jsonEncodePretty(data));
+    file.writeAsStringSync(JsonObject(<String, Object?>{
+      if (pid != null) 'pid': pid,
+      'exitCode': exitCode,
+      'stdout': stdout,
+      'stderr': stderr,
+      'cwd': cwd.absolute.path,
+      'commandLine': commandLine,
+    }).toPrettyString());
   }
 
   /// Creates a temporary file and saves the artifacts into it.
