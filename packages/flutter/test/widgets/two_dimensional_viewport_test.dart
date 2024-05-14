@@ -733,7 +733,7 @@ void main() {
 
     testWidgets('ensure keep alive widget is not hold onto when it no longer should be kept alive offscreen', (WidgetTester tester) async {
       // Should not trigger assert in RenderTwoDimensionalViewport.performLayout
-      // after child manager end layout. https://github.com/flutter/flutter/issues/138977
+      // after child manager end layout. (https://github.com/flutter/flutter/issues/138977)
       final UniqueKey checkBoxKey = UniqueKey();
       final Widget originCell = KeepAliveOnyWhenHovered(
         key: checkBoxKey,
@@ -760,7 +760,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(checkBoxKey), findsOneWidget);
 
-      // Scroll away, should not be kept alive (disposed)
+      // Scroll away, should not be kept alive (disposed).
       verticalController.jumpTo(verticalController.position.maxScrollExtent);
       await tester.pump();
       expect(find.byKey(checkBoxKey), findsNothing);
@@ -770,7 +770,7 @@ void main() {
       await tester.pump();
       expect(find.byKey(checkBoxKey), findsOneWidget);
 
-      // Hover over widget to make it keep alive
+      // Hover over widget to make it keep alive.
       final TestGesture gesture = await tester.createGesture(
         kind: PointerDeviceKind.mouse,
       );
@@ -780,13 +780,13 @@ void main() {
       await gesture.moveTo(tester.getCenter(find.byKey(checkBoxKey)));
       await tester.pump();
 
-      // Scroll away, should be kept alive still
+      // Scroll away, should be kept alive still.
       verticalController.jumpTo(verticalController.position.maxScrollExtent);
       await tester.pump();
       expect(find.byKey(checkBoxKey), findsOneWidget);
 
-      // Move the pointer outside widgets bounds to trigger exit event
-      // And thus remove it from keep alive bucket
+      // Move the pointer outside the widget bounds to trigger exit event
+      // and remove it from keep alive bucket.
       await gesture.moveTo(const Offset(300, 300));
       await tester.pump();
       expect(find.byKey(checkBoxKey), findsNothing);
