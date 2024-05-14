@@ -13,29 +13,29 @@ void main() {
       const example.CheckboxExampleApp(),
     );
 
-    Checkbox checkbox = tester.widget(find.byType(Checkbox).first);
+    Checkbox checkbox = tester.widget(find.byType(Checkbox));
 
     // Verify the initial state of the checkboxes.
     expect(checkbox.value, isTrue);
     expect(checkbox.tristate, isTrue);
 
-    // Tap the first Checkbox and verify the state change.
-    await tester.tap(find.byType(Checkbox).first);
+    // Tap the Checkbox and verify the state change.
+    await tester.tap(find.byType(Checkbox));
     await tester.pump();
-    checkbox = tester.widget(find.byType(Checkbox).first);
+    checkbox = tester.widget(find.byType(Checkbox));
 
     expect(checkbox.value, isNull);
 
-    // Tap the first Checkbox and verify the state change.
-    await tester.tap(find.byType(Checkbox).first);
+    // Tap the Checkbox and verify the state change.
+    await tester.tap(find.byType(Checkbox));
     await tester.pump();
-    checkbox = tester.widget(find.byType(Checkbox).first);
+    checkbox = tester.widget(find.byType(Checkbox));
 
     expect(checkbox.value, isFalse);
 
-    await tester.tap(find.byType(Checkbox).first);
+    await tester.tap(find.byType(Checkbox));
     await tester.pump();
-    checkbox = tester.widget(find.byType(Checkbox).first);
+    checkbox = tester.widget(find.byType(Checkbox));
 
     expect(checkbox.value, isTrue);
   });
@@ -49,7 +49,7 @@ void main() {
     expect(find.text('Show cupertino style'), findsOneWidget);
     expect(find.text('Show material style'), findsNothing);
 
-    Finder adaptiveCheckbox = find.byType(Checkbox).first;
+    Finder adaptiveCheckbox = find.byType(Checkbox);
     expect(
       adaptiveCheckbox,
       paints
@@ -62,13 +62,13 @@ void main() {
     await tester.pumpAndSettle();
 
     // Theme adaptation does not affect material-style switch.
-    adaptiveCheckbox = find.byType(Checkbox).first;
+    adaptiveCheckbox = find.byType(Checkbox);
     expect(
       adaptiveCheckbox,
       paints
-        ..path(color: const Color(0xff6750a4)) // M3 primary color.
-        ..rrect(color: Colors.transparent) // Box color.
-        ..path(color: Colors.white), // Check color.
+        ..path(color: const Color(0xff6750a4))
+        ..rrect(color: Colors.transparent)
+        ..path(color: Colors.white),
     );
 
     await tester
@@ -76,14 +76,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-        adaptiveCheckbox,
-        paints
-          ..path(
-              color: const Color(0xfff44336)) // Customized color for cupertino.
-          ..rrect(color: Colors.transparent) // Box color
-          ..path(color: Colors.white) // Check color
-        );
-
+      adaptiveCheckbox,
+      paints
+        ..path(color: const Color(0xfff44336))
+        ..rrect(color: Colors.transparent)
+        ..path(color: Colors.white),
+    );
+    await tester.pump();
     await tester
         .tap(find.widgetWithText(OutlinedButton, 'Remove customization'));
     await tester.pumpAndSettle();
@@ -91,8 +90,8 @@ void main() {
     expect(
       adaptiveCheckbox,
       paints
-        ..path(color: const Color(0xff007aff)) // Cupertino system blud.
-        ..rrect(color: Colors.transparent) // Box color
+        ..path(color: const Color(0xff007aff)) // Cupertino design blue.
+        ..rrect(color: Colors.transparent)
         ..path(color: Colors.white),
     );
   });
