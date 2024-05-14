@@ -293,17 +293,15 @@ void main() {
 
 void expectDylibIsCodeSignedMacOS(Directory appDirectory, String buildMode) {
   final Directory appBundle = appDirectory.childDirectory('build/$hostOs/Build/Products/${buildMode.upperCaseFirst()}/$exampleAppName.app');
-    final Directory frameworksFolder =
-      appBundle.childDirectory('Contents/Frameworks');
+  final Directory frameworksFolder = appBundle.childDirectory('Contents/Frameworks');
   expect(frameworksFolder, exists);
   const String frameworkName = packageName;
-  final Directory frameworkDir =
-      frameworksFolder.childDirectory('$frameworkName.framework');
+  final Directory frameworkDir = frameworksFolder.childDirectory('$frameworkName.framework');
   final ProcessResult codesign =
       processManager.runSync(<String>['codesign', '-dv', frameworkDir.absolute.path]);
   expect(codesign.exitCode, 0);
 
-  // Expected adhoc signature, but not linker-signed (which means no code-signing happened after linking).
+  // Expect adhoc signature, but not linker-signed (which would mean no code-signing happened after linking).
   final List<String> lines = codesign.stdout.toString().split('\n');
   final bool isLinkerSigned = lines.any((String line) => line.contains('linker-signed'));
   final bool isAdhoc = lines.any((String line) => line.contains('Signature=adhoc'));
