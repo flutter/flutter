@@ -25,6 +25,7 @@
         {
             protocol: [
                 "fuchsia.sysmem.Allocator",
+                "fuchsia.sysmem2.Allocator",
                 "fuchsia.tracing.provider.Registry",
                 "fuchsia.ui.composition.Flatland",
                 "fuchsia.ui.test.input.MouseInputListener",
