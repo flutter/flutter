@@ -4,7 +4,14 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
+
+import 'actions.dart';
+import 'basic.dart';
+import 'focus_manager.dart';
+import 'framework.dart';
+import 'gesture_detector.dart';
+import 'ticker_provider.dart';
+import 'widget_state.dart';
 
 // Duration of the animation that moves the toggle from one state to another.
 const Duration _kToggleDuration = Duration(milliseconds: 200);
