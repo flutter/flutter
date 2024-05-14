@@ -294,7 +294,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// Typically wraps a `painter` that draws the actual visuals of the
   /// Toggleable with logic to toggle it.
   ///
-  /// If drawing a radial ink reaction is desired (in material design for
+  /// If drawing a radial ink reaction is desired (in Material Design for
   /// example), consider providing a subclass of [ToggleablePainter] as a
   /// `painter`, which implements logic to draw a radial ink reaction for this
   /// control. The painter is usually configured with the [reaction],
