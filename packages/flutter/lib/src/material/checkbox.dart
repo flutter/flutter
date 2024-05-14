@@ -443,6 +443,9 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
   @override
   bool? get value => widget.value;
 
+  @override
+  Duration? get reactionAnimationDuration => kRadialReactionDuration;
+
   MaterialStateProperty<Color?> get _widgetFillColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {

@@ -745,6 +745,9 @@ class _MaterialSwitchState extends State<_MaterialSwitch> with TickerProviderSta
   @override
   bool? get value => widget.value;
 
+  @override
+  Duration? get reactionAnimationDuration => kRadialReactionDuration;
+
   void updateCurve() {
     if (Theme.of(context).useMaterial3) {
       position

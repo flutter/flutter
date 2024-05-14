@@ -411,6 +411,9 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
   @override
   bool? get value => widget._selected;
 
+  @override
+  Duration? get reactionAnimationDuration => kRadialReactionDuration;
+
   MaterialStateProperty<Color?> get _widgetFillColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
