@@ -580,24 +580,24 @@ class SkiaGoldClient {
   /// the image keys.
   String getTraceID(String testName) {
     final String? webRenderer = _webRendererValue;
-    // Keys must be sorted alphabetically, after grouping by letter case.
-    final Map<String, Object?> keys = <String, Object?>{
-      // Upper case keys
-      'Abi': abi.toString(),
+    final Map<String, Object?> parameters = <String, Object?>{
       if (_isBrowserTest)
         'Browser' : _browserKey,
+      'Abi': abi.toString(),
       'CI' : 'luci',
       'Platform' : platform.operatingSystem,
       if (webRenderer != null)
         'WebRenderer' : webRenderer,
-
-      // Lower case keys
       if (_isImpeller)
         'impeller': 'swiftshader',
       'name' : testName,
       'source_type' : 'flutter',
     };
-    final String jsonTrace = json.encode(keys);
+    final Map<String, Object?> sorted = <String, Object?>{};
+    for (final String key in parameters.keys.toList()..sort()) {
+      sorted[key] = parameters[key];
+    }
+    final String jsonTrace = json.encode(sorted);
     final String md5Sum = md5.convert(utf8.encode(jsonTrace)).toString();
     return md5Sum;
   }
