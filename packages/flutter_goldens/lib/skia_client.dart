@@ -580,21 +580,24 @@ class SkiaGoldClient {
   /// the image keys.
   String getTraceID(String testName) {
     final String? webRenderer = _webRendererValue;
-    final Map<String, Object?> keys = <String, Object?>{
+    final Map<String, Object?> parameters = <String, Object?>{
       if (_isBrowserTest)
         'Browser' : _browserKey,
-      if (webRenderer != null)
-        'WebRenderer' : webRenderer,
+      'Abi': abi.toString(),
       'CI' : 'luci',
       'Platform' : platform.operatingSystem,
-      // 'Abi': abi.toString(), workaround for https://g-issues.skia.org/issues/339508268
-      // Flutter tracking issue: https://github.com/flutter/flutter/issues/148022
-      'name' : testName,
-      'source_type' : 'flutter',
+      if (webRenderer != null)
+        'WebRenderer' : webRenderer,
       if (_isImpeller)
         'impeller': 'swiftshader',
+      'name' : testName,
+      'source_type' : 'flutter',
     };
-    final String jsonTrace = json.encode(keys);
+    final Map<String, Object?> sorted = <String, Object?>{};
+    for (final String key in parameters.keys.toList()..sort()) {
+      sorted[key] = parameters[key];
+    }
+    final String jsonTrace = json.encode(sorted);
     final String md5Sum = md5.convert(utf8.encode(jsonTrace)).toString();
     return md5Sum;
   }
