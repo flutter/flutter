@@ -50,7 +50,6 @@ Future<List<double>> runBuildBenchmark(ValueGetter<Widget> buildApp) async {
       iterations += 1;
       elapsed += Duration(microseconds: watch.elapsedMicroseconds);
       values.add(watch.elapsedMicroseconds.toDouble());
-      print(values.last);
     }
 
     binding.framePolicy = defaultPolicy;
