@@ -230,6 +230,7 @@ void main() {
     expect(events[6].name, equals('$buildName: RBE shutdown'));
     expect(events[7] is RunnerResult, isTrue);
     expect(events[7].name, equals('$buildName: RBE shutdown'));
+    expect((events[7] as RunnerResult).okMessage, equals('OK'));
   });
 
   test('GlobalBuildRunner skips GN when runGn is false', () async {
