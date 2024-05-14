@@ -574,7 +574,11 @@ class FlutterVmService {
     _logger.printTrace('Running $main in view $viewId...');
     try {
       await service.streamListen(vm_service.EventStreams.kIsolate);
-    } on vm_service.RPCError {
+    } on vm_service.RPCError catch (e) {
+      _logger.printTrace(
+        'Unable to listen to VM service stream "${vm_service.EventStreams.kIsolate}".\n'
+        'Error: $e',
+      );
       // Do nothing, since the tool is already subscribed.
     }
     final Future<void> onRunnable = service.onIsolateEvent.firstWhere((vm_service.Event event) {
@@ -911,11 +915,9 @@ class FlutterVmService {
     Duration delay = const Duration(milliseconds: 50),
   }) async {
     while (true) {
-      _logger.printTrace('Calling _flutter.listViews...');
       final vm_service.Response? response = await callMethodWrapper(
         kListViewsMethod,
       );
-      _logger.printTrace('Response from _flutter.listViews: ${json.encode(response?.json)}');
       if (response == null) {
         // The service may have disappeared mid-request.
         // Return an empty list now, and let the shutdown logic elsewhere deal
