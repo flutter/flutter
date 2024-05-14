@@ -13,27 +13,29 @@ import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';
 
-/// A Material Design carousel.
+/// A Material Design carousel widget.
 ///
-/// This is a scrollable list where the size of each item can change dynamically
-/// based on different layouts.
+/// Carousels present a scrollable list of items, each of which can dynamically
+/// change size based on the chosen layout.
 ///
-/// Material Design 3 introduces 4 layouts for [Carousel]:
+/// Material Design 3 introduces 4 [Carousel] layouts:
 ///  * Multi-browse: This layout shows at least one large, medium, and small
 /// carousel item at a time.
-///  * Uncontained: This layout show items that scroll to the edge of the container.
+///  * Uncontained (default): This layout show items that scroll to the edge of
+/// the container.
 ///  * Hero: This layout shows at least one large and one small item at a time.
 ///  * Full-screen: This layout shows one edge-to-edge large item at a time and
 /// scrolls vertically.
 ///
-/// By default, [Carousel] has a uncontained layout. It shows like a [ListView]
-/// and its children are a single size.
+/// By default, `Carousel` uses the uncontained layout, behaving similarly to a
+/// `ListView` where all children are a uniform size.
 ///
-/// The [CarouselController] can be used to control the [CarouselController.initialItem].
+/// The [CarouselController] is used to control the [CarouselController.initialItem].
 ///
-/// [Carousel.itemExtent] must be non-null. Even though the children [Carousel]
-/// have a single size, the first and last items can be squished a little while
-/// scrolling and the minimum squished size is determined by [shrinkExtent].
+/// The `Carousel.itemExtent` property must be non-null and defines the base
+/// size of items. While items typically maintain this size, the first and last
+/// visible items may be slightly compressed during scrolling. The `shrinkExtent`
+/// property controls the minimum allowable size for these compressed items.
 ///
 /// {@tool dartpad}
 /// Here is an example of [Carousel].
@@ -97,17 +99,20 @@ class Carousel extends StatefulWidget {
   ///   * focused - Theme.colorScheme.onSurface(0.1)
   final WidgetStateProperty<Color?>? overlayColor;
 
-  /// The minimum extent that each carousel item can be.
+  /// The minimum allowable extent (size) for carousel items during scrolling
+  /// transitions.
   ///
-  /// While scrolling, the first visible item will be pinned and keep shrinking
-  /// until this extent, then it is scrolled off screen; the last visible item
-  /// will show on screen with this size and keep expanding until the
-  /// [itemExtent]. So if this is 0.0, then the item should shrink/expand to/from
-  /// 0.0 from/to the [itemExtent].
+  /// As the carousel scrolls, the first visible item is pinned and gradually
+  /// shrinks until it reaches this minimum extent before scrolling off-screen.
+  /// Similarly, the last visible item enters the viewport at this minimum size
+  /// and expands to its full `itemExtent`.
   ///
-  /// However, if the remaining extent of the viewport for the last visible item
-  /// is bigger than [shrinkExtent], [shrinkExtent] will be adjusted to be the
-  /// remaining extent for a smooth size transition during scrolling.
+  /// A `shrinkExtent` of 0.0 allows items to shrink/expand completely, transitioning
+  /// between 0.0 and the full `itemExtent`.
+  ///
+  /// In cases where the remaining viewport space for the last visible item is
+  /// larger than the defined `shrinkExtent`, the `shrinkExtent` is dynamically
+  /// adjusted to match this remaining space, ensuring a smooth size transition.
   ///
   /// Defaults to 0.0.
   final double? shrinkExtent;
@@ -305,17 +310,19 @@ class _CarouselState extends State<Carousel> {
   }
 }
 
-// A sliver that places its box children in a linear array and constrains them
-// to have a fixed extent.
-//
-// _To learn more about slivers, see [CustomScrollView.slivers]._
-//
-// This sliver list arranges its children in a line along the main axis starting
-// at offset zero and without gaps. Each child is constrained to a fixed extent
-// along the main axis and the [SliverConstraints.crossAxisExtent]
-// along the cross axis. The difference between this and a list view with a fixed
-// extent is the first item and last item can be squished a little based on the
-// value of [minExtent], as the [Carousel spces](https://m3.material.io/components/carousel/guidelines#96c5c157-fe5b-4ee3-a9b4-72bf8efab7e9) indicates.
+/// A sliver that displays its box children in a linear array with a fixed extent
+/// per item.
+///
+/// _To learn more about slivers, see [CustomScrollView.slivers]._
+///
+/// This sliver list arranges its children in a line along the main axis starting
+/// at offset zero and without gaps. Each child is constrained to a fixed extent
+/// along the main axis and the [SliverConstraints.crossAxisExtent]
+/// along the cross axis. The difference between this and a list view with a fixed
+/// extent is the first item and last item can be squished a little during scrolling
+/// transition.This compression is controlled by the `minExtent` property and
+/// aligns with the [Material Design Carousel specifications]
+/// (https://m3.material.io/components/carousel/guidelines#96c5c157-fe5b-4ee3-a9b4-72bf8efab7e9).
 class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
   const _SliverFixedExtentCarousel({
     required super.delegate,
