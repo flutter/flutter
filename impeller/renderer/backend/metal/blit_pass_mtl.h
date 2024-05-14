@@ -7,6 +7,7 @@
 
 #include <Metal/Metal.h>
 
+#include "impeller/renderer/backend/metal/blit_command_mtl.h"
 #include "impeller/renderer/blit_pass.h"
 
 namespace impeller {
@@ -19,14 +20,10 @@ class BlitPassMTL final : public BlitPass {
  private:
   friend class CommandBufferMTL;
 
-  id<MTLBlitCommandEncoder> encoder_ = nil;
+  std::vector<std::unique_ptr<BlitEncodeMTL>> commands_;
   id<MTLCommandBuffer> buffer_ = nil;
+  std::string label_;
   bool is_valid_ = false;
-  bool is_metal_trace_active_ = false;
-  // Many parts of the codebase will start writing to a render pass but
-  // never submit them. This boolean is used to track if a submit happened
-  // so that in the dtor we can always ensure the render pass is finished.
-  mutable bool did_finish_encoding_ = false;
 
   explicit BlitPassMTL(id<MTLCommandBuffer> buffer);
 
@@ -39,6 +36,8 @@ class BlitPassMTL final : public BlitPass {
   // |BlitPass|
   bool EncodeCommands(
       const std::shared_ptr<Allocator>& transients_allocator) const override;
+
+  bool EncodeCommands(id<MTLBlitCommandEncoder> pass) const;
 
   // |BlitPass|
   bool OnCopyTextureToTextureCommand(std::shared_ptr<Texture> source,
