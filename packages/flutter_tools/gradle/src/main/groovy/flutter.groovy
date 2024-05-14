@@ -693,7 +693,7 @@ class FlutterPlugin implements Plugin<Project> {
             if (pluginProject == null) {
                 // Plugin was not included in `settings.gradle`, but is listed in `.flutter-plugins`.
                 project.logger.error("Plugin project :${it.name} listed, but not found. Please fix your settings.gradle/settings.gradle.kts.")
-            } else if (doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path as String)) {
+            } else if (pluginSupportsAndroidPlatform(pluginProject)) {
                 // Plugin has a functioning `android` folder and is included successfully, although it's not supported.
                 // It must be configured nonetheless, to not throw an "Unresolved reference" exception.
                 configurePluginProject(it)
@@ -706,12 +706,23 @@ class FlutterPlugin implements Plugin<Project> {
 
     // TODO(54566): Can remove this function and its call sites once resolved.
     /**
-     * Returns `true` if the given path contains an `android` directory
+     * Returns `true` if the given project is a plugin project having an `android` directory
      * containing a `build.gradle` or `build.gradle.kts` file.
      */
-    private Boolean doesSupportAndroidPlatform(String path) {
-        File buildGradle = new File(path, 'android' + File.separator + 'build.gradle')
-        File buildGradleKts = new File(path, 'android' + File.separator + 'build.gradle.kts')
+    private Boolean pluginSupportsAndroidPlatform(Project project) {
+        File buildGradle = new File(project.projectDir.parentFile, "android" + File.separator + "build.gradle")
+        File buildGradleKts = new File(project.projectDir.parentFile, "android" + File.separator + "build.gradle.kts")
+        return buildGradle.exists() || buildGradleKts.exists()
+    }
+
+    /**
+     * Returns the Gradle build script for the build. When both Groovy and
+     * Kotlin variants exist, then Groovy (build.gradle) is preferred over
+     * Kotlin (build.gradle.kts). This is the same behavior as Gradle 8.5.
+     */
+    private File buildGradleFile(Project project) {
+        File buildGradle = new File(project.projectDir.parentFile, "app" + File.separator + "build.gradle")
+        File buildGradleKts = new File(project.projectDir.parentFile, "app" + File.separator + "build.gradle.kts")
         if (buildGradle.exists() && buildGradleKts.exists()) {
             project.logger.error(
                 "Both build.gradle and build.gradle.kts exist, so " +
@@ -719,7 +730,7 @@ class FlutterPlugin implements Plugin<Project> {
             )
         }
 
-        return buildGradle.exists() || buildGradleKts.exists()
+        return buildGradle.exists() ? buildGradle : buildGradleKts
     }
 
     /**
@@ -837,6 +848,8 @@ class FlutterPlugin implements Plugin<Project> {
             String projectNdkVersion = project.android.ndkVersion ?: ndkVersionIfUnspecified
             String maxPluginNdkVersion = projectNdkVersion
             int numProcessedPlugins = getPluginList(project).size()
+            List<Tuple2<String, String>> pluginsWithHigherSdkVersion = []
+            List<Tuple2<String, String>> pluginsWithDifferentNdkVersion = []
 
             getPluginList(project).each { pluginObject ->
                 assert(pluginObject.name instanceof String)
@@ -851,17 +864,49 @@ class FlutterPlugin implements Plugin<Project> {
                     if (getCompileSdkFromProject(pluginProject).isInteger()) {
                         pluginCompileSdkVersion = getCompileSdkFromProject(pluginProject) as int
                     }
+
                     maxPluginCompileSdkVersion = Math.max(pluginCompileSdkVersion, maxPluginCompileSdkVersion)
+                    if (pluginCompileSdkVersion > projectCompileSdkVersion) {
+                        pluginsWithHigherSdkVersion.add(new Tuple(pluginProject.name, pluginCompileSdkVersion))
+                    }
+
                     String pluginNdkVersion = pluginProject.android.ndkVersion ?: ndkVersionIfUnspecified
                     maxPluginNdkVersion = mostRecentSemanticVersion(pluginNdkVersion, maxPluginNdkVersion)
+                    if (pluginNdkVersion != projectNdkVersion) {
+                        pluginsWithDifferentNdkVersion.add(new Tuple(pluginProject.name, pluginNdkVersion))
+                    }
 
                     numProcessedPlugins--
                     if (numProcessedPlugins == 0) {
                         if (maxPluginCompileSdkVersion > projectCompileSdkVersion) {
-                            project.logger.error("One or more plugins require a higher Android SDK version.\nFix this issue by adding the following to ${project.projectDir}${File.separator}build.gradle:\nandroid {\n  compileSdkVersion ${maxPluginCompileSdkVersion}\n  ...\n}\n")
+                            project.logger.error("Your project is configured to compile against Android SDK $projectCompileSdkVersion, but the following plugin(s) require to be compiled against a higher Android SDK version:")
+                            for (Tuple2<String, String> pluginToCompileSdkVersion : pluginsWithHigherSdkVersion) {
+                                project.logger.error("- ${pluginToCompileSdkVersion.first} compiles against Android SDK ${pluginToCompileSdkVersion.second}")
+                            }
+                            project.logger.error("""\
+                                Fix this issue by compiling against the highest Android SDK version (they are backward compatible).
+                                Add the following to ${buildGradleFile(project).path}:
+
+                                    android {
+                                        compileSdk = ${maxPluginCompileSdkVersion}
+                                        ...
+                                    }
+                                """.stripIndent())
                         }
                         if (maxPluginNdkVersion != projectNdkVersion) {
-                            project.logger.error("One or more plugins require a higher Android NDK version.\nFix this issue by adding the following to ${project.projectDir}${File.separator}build.gradle:\nandroid {\n  ndkVersion \"${maxPluginNdkVersion}\"\n  ...\n}\n")
+                            project.logger.error("Your project is configured with Android NDK $projectNdkVersion, but the following plugin(s) depend on a different Android NDK version:")
+                            for (Tuple2<String, String> pluginToNdkVersion : pluginsWithDifferentNdkVersion) {
+                                project.logger.error("- ${pluginToNdkVersion.first} requires Android NDK ${pluginToNdkVersion.second}")
+                            }
+                            project.logger.error("""\
+                                Fix this issue by using the highest Android NDK version (they are backward compatible).
+                                Add the following to ${buildGradleFile(project).path}:
+
+                                    android {
+                                        ndkVersion = \"${maxPluginNdkVersion}\"
+                                        ...
+                                    }
+                                """.stripIndent())
                         }
                     }
                 }
@@ -1148,9 +1193,9 @@ class FlutterPlugin implements Plugin<Project> {
             bundleSkSLPathValue = project.property(propBundleSkslPath)
         }
         String performanceMeasurementFileValue
-        final String propPerformanceMesaurementFile = "performance-measurement-file"
-        if (project.hasProperty(propPerformanceMesaurementFile)) {
-            performanceMeasurementFileValue = project.property(propPerformanceMesaurementFile)
+        final String propPerformanceMeasurementFile = "performance-measurement-file"
+        if (project.hasProperty(propPerformanceMeasurementFile)) {
+            performanceMeasurementFileValue = project.property(propPerformanceMeasurementFile)
         }
         String codeSizeDirectoryValue
         final String propCodeSizeDirectory = "code-size-directory"

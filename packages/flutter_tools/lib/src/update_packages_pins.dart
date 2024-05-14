@@ -31,3 +31,12 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
       '2.2.1', // https://github.com/flutter/flutter/issues/140796
   'camera_android': '0.10.8+17', // https://github.com/flutter/flutter/issues/146004
 };
+
+/// These are packages that are explicitly excluded from appearing in the list
+/// of pinned packages added to each pubspec.yaml.
+const List<String> kExplicitlyExcludedPackages = <String>[
+  '_macros', // Synthetic dependency for macros package, which isn't published.
+  // This is effectively pinned via the Dart SDK pin, see
+  // https://github.com/flutter/flutter/issues/148004 for more context.
+  'macros',
+];

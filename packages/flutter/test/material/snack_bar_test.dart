@@ -2601,7 +2601,7 @@ void main() {
       },
     );
 
-    testWidgets('Floating snackbar with custom width is centered when text direction is rtl', (WidgetTester tester) async {
+    testWidgets('Material3 - Floating snackbar with custom width is centered when text direction is rtl', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/140125.
       const double customWidth = 400.0;
       await tester.pumpWidget(
@@ -2631,7 +2631,51 @@ void main() {
       );
 
       await tester.tap(find.text('X'));
-      await tester.pump(); // start animation
+      await tester.pump(); // Start animation.
+      await tester.pump(const Duration(milliseconds: 750));
+
+      final Finder materialFinder = find.descendant(
+        of: find.byType(SnackBar),
+        matching: find.byType(Material),
+      );
+      final Offset snackBarBottomLeft = tester.getBottomLeft(materialFinder);
+      final Offset snackBarBottomRight = tester.getBottomRight(materialFinder);
+      expect(snackBarBottomLeft.dx, (800 - customWidth) / 2); // Device width is 800.
+      expect(snackBarBottomRight.dx, (800 + customWidth) / 2); // Device width is 800.
+    });
+
+    testWidgets('Material2 - Floating snackbar with custom width is centered when text direction is rtl', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/147838.
+      const double customWidth = 400.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Scaffold(
+              body: Builder(
+                builder: (BuildContext context) {
+                  return GestureDetector(
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          behavior: SnackBarBehavior.floating,
+                          width: customWidth,
+                          content: Text('Feeling super snackish'),
+                        ),
+                      );
+                    },
+                    child: const Text('X'),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('X'));
+      await tester.pump(); // Start animation.
       await tester.pump(const Duration(milliseconds: 750));
 
       final Finder materialFinder = find.descendant(

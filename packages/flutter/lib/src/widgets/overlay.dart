@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
-import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -274,11 +273,11 @@ class OverlayEntry implements Listenable {
 
 class _OverlayEntryWidget extends StatefulWidget {
   const _OverlayEntryWidget({
-    required Key key,
+    required Key super.key,
     required this.entry,
     required this.overlayState,
     this.tickerEnabled = true,
-  }) : super(key: key);
+  });
 
   final OverlayEntry entry;
   final OverlayState overlayState;
@@ -967,6 +966,35 @@ mixin _RenderTheaterMixin on RenderBox {
     }
   }
 
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    assert(!debugNeedsLayout);
+    BaselineOffset baselineOffset = BaselineOffset.noBaseline;
+    for (final RenderBox child in _childrenInPaintOrder()) {
+      assert(!child.debugNeedsLayout);
+      final StackParentData childParentData = child.parentData! as StackParentData;
+      baselineOffset = baselineOffset.minOf(BaselineOffset(child.getDistanceToActualBaseline(baseline)) + childParentData.offset.dy);
+    }
+    return baselineOffset.offset;
+  }
+
+  static double? baselineForChild(RenderBox child, Size theaterSize, BoxConstraints nonPositionedChildConstraints, Alignment alignment, TextBaseline baseline) {
+    final StackParentData childParentData = child.parentData! as StackParentData;
+    final BoxConstraints childConstraints = childParentData.isPositioned
+      ? childParentData.positionedChildConstraints(theaterSize)
+      : nonPositionedChildConstraints;
+    final double? baselineOffset = child.getDryBaseline(childConstraints, baseline);
+    if (baselineOffset == null) {
+      return null;
+    }
+    final double y = switch (childParentData) {
+      StackParentData(:final double top?) => top,
+      StackParentData(:final double bottom?) => theaterSize.height - bottom - child.getDryLayout(childConstraints).height,
+      StackParentData() => alignment.alongOffset(theaterSize - child.getDryLayout(childConstraints) as Offset).dy,
+    };
+    return baselineOffset + y;
+  }
+
   void layoutChild(RenderBox child, BoxConstraints nonPositionedChildConstraints) {
     final StackParentData childParentData = child.parentData! as StackParentData;
     final Alignment alignment = theater._resolvedAlignment;
@@ -1201,25 +1229,20 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
   }
 
   @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    assert(!debugNeedsLayout);
-    double? result;
-    RenderBox? child = _firstOnstageChild;
-    while (child != null) {
-      assert(!child.debugNeedsLayout);
-      final StackParentData childParentData = child.parentData! as StackParentData;
-      double? candidate = child.getDistanceToActualBaseline(baseline);
-      if (candidate != null) {
-        candidate += childParentData.offset.dy;
-        if (result != null) {
-          result = math.min(result, candidate);
-        } else {
-          result = candidate;
-        }
-      }
-      child = childParentData.nextSibling;
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final Size size = constraints.biggest.isFinite
+      ? constraints.biggest
+      : _findSizeDeterminingChild().getDryLayout(constraints);
+    final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(size);
+    final Alignment alignment = theater._resolvedAlignment;
+
+    BaselineOffset baselineOffset = BaselineOffset.noBaseline;
+    for (final RenderBox child in _childrenInPaintOrder()) {
+      baselineOffset = baselineOffset.minOf(BaselineOffset(
+        _RenderTheaterMixin.baselineForChild(child, size, nonPositionedChildConstraints, alignment, baseline),
+      ));
     }
-    return result;
+    return baselineOffset.offset;
   }
 
   @override
@@ -1929,7 +1952,7 @@ final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation>
   //
   // Generally, `assert(_debugIsLocationValid())` should be used to prevent
   // invalid accesses to an invalid `_OverlayEntryLocation` object. Exceptions
-  // to this rule are _removeChild, _deactive, which will be called when the
+  // to this rule are _removeChild, _deactivate, which will be called when the
   // OverlayPortal is being removed from the widget tree and may use the
   // location information to perform cleanup tasks.
   //
@@ -2245,6 +2268,15 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
   void markNeedsLayout() {
     _needsLayout = true;
     super.markNeedsLayout();
+  }
+
+  @override
+  double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return null;
+    }
+    return _RenderTheaterMixin.baselineForChild(child, constraints.biggest, constraints, theater._resolvedAlignment, baseline);
   }
 
   @override
