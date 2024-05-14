@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'toggleable.dart';
 
 // Examples can assume:
 // late BuildContext context;

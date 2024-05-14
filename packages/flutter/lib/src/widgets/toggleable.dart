@@ -4,10 +4,14 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 
-import 'constants.dart';
-import 'material_state.dart';
+import 'actions.dart';
+import 'basic.dart';
+import 'focus_manager.dart';
+import 'framework.dart';
+import 'gesture_detector.dart';
+import 'ticker_provider.dart';
+import 'widget_state.dart';
 
 // Duration of the animation that moves the toggle from one state to another.
 const Duration _kToggleDuration = Duration(milliseconds: 200);
@@ -15,9 +19,9 @@ const Duration _kToggleDuration = Duration(milliseconds: 200);
 // Duration of the fade animation for the reaction when focus and hover occur.
 const Duration _kReactionFadeDuration = Duration(milliseconds: 50);
 
-/// A mixin for [StatefulWidget]s that implement material-themed toggleable
-/// controls with toggle animations (e.g. [Switch]es, [Checkbox]es, and
-/// [Radio]s).
+/// A mixin for [StatefulWidget]s that implement toggleable
+/// controls with toggle animations (e.g. [Switch]es, [CupertinoSwitch]es,
+/// [Checkbox]es, [CupertinoCheckbox]es, [Radio]s, and [CupertinoRadio]s).
 ///
 /// The mixin implements the logic for toggling the control (e.g. when tapped)
 /// and provides a series of animation controllers to transition the control
@@ -25,9 +29,6 @@ const Duration _kReactionFadeDuration = Duration(milliseconds: 50);
 /// representation of the toggleable widget. The visuals are defined by a
 /// [CustomPainter] passed to the [buildToggleable]. [State] objects using this
 /// mixin should call that method from their [build] method.
-///
-/// This mixin is used to implement the material components for [Switch],
-/// [Checkbox], and [Radio] controls.
 @optionalTypeArgs
 mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin<S> {
   /// Used by subclasses to manipulate the visual value of the control.
@@ -94,6 +95,12 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   late CurvedAnimation _reactionFocusFade;
   late AnimationController _reactionFocusFadeController;
 
+  /// The amount of time a circular ink response should take to expand to its
+  /// full size if a radial reaction is drawn using
+  /// [ToggleablePainter.paintRadialReaction].
+  Duration? get reactionAnimationDuration => _reactionAnimationDuration;
+  final Duration _reactionAnimationDuration = const Duration(milliseconds: 100);
+
   /// Whether [value] of this control can be changed by user interaction.
   ///
   /// The control is considered interactive if the [onChanged] callback is
@@ -149,7 +156,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
       reverseCurve: Curves.easeOut,
     );
     _reactionController = AnimationController(
-      duration: kRadialReactionDuration,
+      duration: _reactionAnimationDuration,
       vsync: this,
     );
     _reaction = CurvedAnimation(
@@ -275,31 +282,39 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     }
   }
 
-  /// Describes the current [MaterialState] of the Toggleable.
+  /// Describes the current [WidgetState] of the Toggleable.
   ///
   /// The returned set will include:
   ///
-  ///  * [MaterialState.disabled], if [isInteractive] is false
-  ///  * [MaterialState.hovered], if a pointer is hovering over the Toggleable
-  ///  * [MaterialState.focused], if the Toggleable has input focus
-  ///  * [MaterialState.selected], if [value] is true or null
-  Set<MaterialState> get states => <MaterialState>{
-    if (!isInteractive) MaterialState.disabled,
-    if (_hovering) MaterialState.hovered,
-    if (_focused) MaterialState.focused,
-    if (value ?? true) MaterialState.selected,
+  ///  * [WidgetState.disabled], if [isInteractive] is false
+  ///  * [WidgetState.hovered], if a pointer is hovering over the Toggleable
+  ///  * [WidgetState.focused], if the Toggleable has input focus
+  ///  * [WidgetState.selected], if [value] is true or null
+  Set<WidgetState> get states => <WidgetState>{
+    if (!isInteractive) WidgetState.disabled,
+    if (_hovering) WidgetState.hovered,
+    if (_focused) WidgetState.focused,
+    if (value ?? true) WidgetState.selected,
   };
 
   /// Typically wraps a `painter` that draws the actual visuals of the
   /// Toggleable with logic to toggle it.
   ///
-  /// Consider providing a subclass of [ToggleablePainter] as a `painter`, which
-  /// implements logic to draw a radial ink reaction for this control. The
-  /// painter is usually configured with the [reaction], [position],
-  /// [reactionHoverFade], and [reactionFocusFade] animation provided by this
-  /// mixin. It is expected to draw the visuals of the Toggleable based on the
-  /// current value of these animations. The animations are triggered by
-  /// this mixin to transition the Toggleable from one state to another.
+  /// If drawing a radial ink reaction is desired (in Material Design for
+  /// example), consider providing a subclass of [ToggleablePainter] as a
+  /// `painter`, which implements logic to draw a radial ink reaction for this
+  /// control. The painter is usually configured with the [reaction],
+  /// [position], [reactionHoverFade], and [reactionFocusFade] animation
+  /// provided by this mixin. It is expected to draw the visuals of the
+  /// Toggleable based on the current value of these animations. The animations
+  /// are triggered by this mixin to transition the Toggleable from one state
+  /// to another.
+  ///
+  /// Material Toggleables must provide a [mouseCursor] which resolves to a
+  /// [MouseCursor] based on the current [WidgetState] of the Toggleable.
+  /// Cupertino Toggleables may not provide a [mouseCursor]. If no [mouseCursor]
+  /// is provided, [SystemMouseCursors.basic] will be used as the [mouseCursor]
+  /// across all [WidgetState]s.
   ///
   /// This method must be called from the [build] method of the [State] class
   /// that uses this mixin. The returned [Widget] must be returned from the
@@ -308,7 +323,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     FocusNode? focusNode,
     ValueChanged<bool>? onFocusChange,
     bool autofocus = false,
-    required MaterialStateProperty<MouseCursor> mouseCursor,
+    WidgetStateProperty<MouseCursor>? mouseCursor,
     required Size size,
     required CustomPainter painter,
   }) {
@@ -320,7 +335,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
       enabled: isInteractive,
       onShowFocusHighlight: _handleFocusHighlightChanged,
       onShowHoverHighlight: _handleHoverChanged,
-      mouseCursor: mouseCursor.resolve(states),
+      mouseCursor: mouseCursor?.resolve(states) ?? SystemMouseCursors.basic,
       child: GestureDetector(
         excludeFromSemantics: !isInteractive,
         onTapDown: isInteractive ? _handleTapDown : null,
@@ -344,8 +359,11 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
 /// a Toggleable.
 ///
 /// Subclasses must implement the [paint] method to draw the actual visuals of
-/// the Toggleable. In their [paint] method subclasses may call
-/// [paintRadialReaction] to draw a radial ink reaction for this control.
+/// the Toggleable.
+///
+/// If drawing a radial ink reaction is desired (in Material
+/// Design for example), subclasses may call [paintRadialReaction] in their
+/// [paint] method.
 abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter {
   /// The visual value of the control.
   ///
@@ -541,6 +559,17 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
     notifyListeners();
   }
 
+  /// Determines whether the toggleable shows as active.
+  bool get isActive => _isActive!;
+  bool? _isActive;
+  set isActive(bool? value) {
+    if (value == _isActive) {
+      return;
+    }
+    _isActive = value;
+    notifyListeners();
+  }
+
   /// Used by subclasses to paint the radial ink reaction for this control.
   ///
   /// The reaction is painted on the given canvas at the given offset. The
@@ -574,7 +603,6 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
       }
     }
   }
-
 
   @override
   void dispose() {

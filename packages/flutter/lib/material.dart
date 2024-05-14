@@ -188,7 +188,6 @@ export 'src/material/time_picker.dart';
 export 'src/material/time_picker_theme.dart';
 export 'src/material/toggle_buttons.dart';
 export 'src/material/toggle_buttons_theme.dart';
-export 'src/material/toggleable.dart';
 export 'src/material/tooltip.dart';
 export 'src/material/tooltip_theme.dart';
 export 'src/material/tooltip_visibility.dart';
