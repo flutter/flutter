@@ -25,81 +25,81 @@
 // UIScrollView class, the base class.
 
 - (BOOL)isAccessibilityElement {
-  if (![_semanticsObject isAccessibilityBridgeAlive]) {
+  if (![self.semanticsObject isAccessibilityBridgeAlive]) {
     return NO;
   }
 
-  if ([_semanticsObject isAccessibilityElement]) {
+  if (self.semanticsObject.isAccessibilityElement) {
     return YES;
   }
   if (self.contentSize.width > self.frame.size.width ||
       self.contentSize.height > self.frame.size.height) {
     // In SwitchControl or VoiceControl, the isAccessibilityElement must return YES
     // in order to use scroll actions.
-    return ![_semanticsObject bridge]->isVoiceOverRunning();
+    return ![self.semanticsObject bridge]->isVoiceOverRunning();
   } else {
     return NO;
   }
 }
 
 - (NSString*)accessibilityLabel {
-  return [_semanticsObject accessibilityLabel];
+  return self.semanticsObject.accessibilityLabel;
 }
 
 - (NSAttributedString*)accessibilityAttributedLabel {
-  return [_semanticsObject accessibilityAttributedLabel];
+  return self.semanticsObject.accessibilityAttributedLabel;
 }
 
 - (NSString*)accessibilityValue {
-  return [_semanticsObject accessibilityValue];
+  return self.semanticsObject.accessibilityValue;
 }
 
 - (NSAttributedString*)accessibilityAttributedValue {
-  return [_semanticsObject accessibilityAttributedValue];
+  return self.semanticsObject.accessibilityAttributedValue;
 }
 
 - (NSString*)accessibilityHint {
-  return [_semanticsObject accessibilityHint];
+  return self.semanticsObject.accessibilityHint;
 }
 
 - (NSAttributedString*)accessibilityAttributedHint {
-  return [_semanticsObject accessibilityAttributedHint];
+  return self.semanticsObject.accessibilityAttributedHint;
 }
 
 - (BOOL)accessibilityActivate {
-  return [_semanticsObject accessibilityActivate];
+  return [self.semanticsObject accessibilityActivate];
 }
 
 - (void)accessibilityIncrement {
-  [_semanticsObject accessibilityIncrement];
+  [self.semanticsObject accessibilityIncrement];
 }
 
 - (void)accessibilityDecrement {
-  [_semanticsObject accessibilityDecrement];
+  [self.semanticsObject accessibilityDecrement];
 }
 
 - (BOOL)accessibilityScroll:(UIAccessibilityScrollDirection)direction {
-  return [_semanticsObject accessibilityScroll:direction];
+  return [self.semanticsObject accessibilityScroll:direction];
 }
 
 - (BOOL)accessibilityPerformEscape {
-  return [_semanticsObject accessibilityPerformEscape];
+  return [self.semanticsObject accessibilityPerformEscape];
 }
 
 - (void)accessibilityElementDidBecomeFocused {
-  [_semanticsObject accessibilityElementDidBecomeFocused];
+  [self.semanticsObject accessibilityElementDidBecomeFocused];
 }
 
 - (void)accessibilityElementDidLoseFocus {
-  [_semanticsObject accessibilityElementDidLoseFocus];
+  [self.semanticsObject accessibilityElementDidLoseFocus];
 }
 
 - (id)accessibilityContainer {
-  return [_semanticsObject accessibilityContainer];
+  return self.semanticsObject.accessibilityContainer;
 }
 
 - (NSInteger)accessibilityElementCount {
-  return [[_semanticsObject children] count];
+  return self.semanticsObject.children.count;
 }
 
 @end

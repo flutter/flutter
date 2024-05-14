@@ -14,6 +14,8 @@
 
 FLUTTER_ASSERT_ARC
 
+const float kFloatCompareEpsilon = 0.001;
+
 @interface SemanticsObjectTest : XCTestCase
 @end
 
@@ -314,14 +316,22 @@ FLUTTER_ASSERT_ARC
   [scrollable setSemanticsNode:&node];
   [scrollable accessibilityBridgeDidFinishUpdate];
   UIScrollView* scrollView = [scrollable nativeAccessibility];
-  XCTAssertTrue(
-      CGRectEqualToRect(scrollView.frame, CGRectMake(x * effectivelyScale, y * effectivelyScale,
-                                                     w * effectivelyScale, h * effectivelyScale)));
-  XCTAssertTrue(CGSizeEqualToSize(
-      scrollView.contentSize,
-      CGSizeMake(w * effectivelyScale, (h + scrollExtentMax) * effectivelyScale)));
-  XCTAssertTrue(CGPointEqualToPoint(scrollView.contentOffset,
-                                    CGPointMake(0, scrollPosition * effectivelyScale)));
+
+  XCTAssertEqualWithAccuracy(scrollView.frame.origin.x, x * effectivelyScale, kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.frame.origin.y, y * effectivelyScale, kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.frame.size.width, w * effectivelyScale,
+                             kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.frame.size.height, h * effectivelyScale,
+                             kFloatCompareEpsilon);
+
+  XCTAssertEqualWithAccuracy(scrollView.contentSize.width, w * effectivelyScale,
+                             kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.contentSize.height,
+                             (h + scrollExtentMax) * effectivelyScale, kFloatCompareEpsilon);
+
+  XCTAssertEqual(scrollView.contentOffset.x, 0);
+  XCTAssertEqualWithAccuracy(scrollView.contentOffset.y, scrollPosition * effectivelyScale,
+                             kFloatCompareEpsilon);
 }
 
 - (void)testVerticalFlutterScrollableSemanticsObjectNoWindowDoesNotCrash {
@@ -380,14 +390,22 @@ FLUTTER_ASSERT_ARC
   [scrollable setSemanticsNode:&node];
   [scrollable accessibilityBridgeDidFinishUpdate];
   UIScrollView* scrollView = [scrollable nativeAccessibility];
-  XCTAssertTrue(
-      CGRectEqualToRect(scrollView.frame, CGRectMake(x * effectivelyScale, y * effectivelyScale,
-                                                     w * effectivelyScale, h * effectivelyScale)));
-  XCTAssertTrue(CGSizeEqualToSize(
-      scrollView.contentSize,
-      CGSizeMake((w + scrollExtentMax) * effectivelyScale, h * effectivelyScale)));
-  XCTAssertTrue(CGPointEqualToPoint(scrollView.contentOffset,
-                                    CGPointMake(scrollPosition * effectivelyScale, 0)));
+
+  XCTAssertEqualWithAccuracy(scrollView.frame.origin.x, x * effectivelyScale, kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.frame.origin.y, y * effectivelyScale, kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.frame.size.width, w * effectivelyScale,
+                             kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.frame.size.height, h * effectivelyScale,
+                             kFloatCompareEpsilon);
+
+  XCTAssertEqualWithAccuracy(scrollView.contentSize.width, (w + scrollExtentMax) * effectivelyScale,
+                             kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.contentSize.height, h * effectivelyScale,
+                             kFloatCompareEpsilon);
+
+  XCTAssertEqualWithAccuracy(scrollView.contentOffset.x, scrollPosition * effectivelyScale,
+                             kFloatCompareEpsilon);
+  XCTAssertEqual(scrollView.contentOffset.y, 0);
 }
 
 - (void)testCanHandleInfiniteScrollExtent {
@@ -418,15 +436,22 @@ FLUTTER_ASSERT_ARC
   [scrollable setSemanticsNode:&node];
   [scrollable accessibilityBridgeDidFinishUpdate];
   UIScrollView* scrollView = [scrollable nativeAccessibility];
-  XCTAssertTrue(
-      CGRectEqualToRect(scrollView.frame, CGRectMake(x * effectivelyScale, y * effectivelyScale,
-                                                     w * effectivelyScale, h * effectivelyScale)));
-  XCTAssertTrue(CGSizeEqualToSize(
-      scrollView.contentSize,
-      CGSizeMake(w * effectivelyScale,
-                 (h + kScrollExtentMaxForInf + scrollPosition) * effectivelyScale)));
-  XCTAssertTrue(CGPointEqualToPoint(scrollView.contentOffset,
-                                    CGPointMake(0, scrollPosition * effectivelyScale)));
+  XCTAssertEqualWithAccuracy(scrollView.frame.origin.x, x * effectivelyScale, kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.frame.origin.y, y * effectivelyScale, kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.frame.size.width, w * effectivelyScale,
+                             kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.frame.size.height, h * effectivelyScale,
+                             kFloatCompareEpsilon);
+
+  XCTAssertEqualWithAccuracy(scrollView.contentSize.width, w * effectivelyScale,
+                             kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.contentSize.height,
+                             (h + kScrollExtentMaxForInf + scrollPosition) * effectivelyScale,
+                             kFloatCompareEpsilon);
+
+  XCTAssertEqual(scrollView.contentOffset.x, 0);
+  XCTAssertEqualWithAccuracy(scrollView.contentOffset.y, scrollPosition * effectivelyScale,
+                             kFloatCompareEpsilon);
 }
 
 - (void)testCanHandleNaNScrollExtentAndScrollPoisition {
@@ -457,13 +482,22 @@ FLUTTER_ASSERT_ARC
   [scrollable setSemanticsNode:&node];
   [scrollable accessibilityBridgeDidFinishUpdate];
   UIScrollView* scrollView = [scrollable nativeAccessibility];
-  XCTAssertTrue(
-      CGRectEqualToRect(scrollView.frame, CGRectMake(x * effectivelyScale, y * effectivelyScale,
-                                                     w * effectivelyScale, h * effectivelyScale)));
+
+  XCTAssertEqualWithAccuracy(scrollView.frame.origin.x, x * effectivelyScale, kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.frame.origin.y, y * effectivelyScale, kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.frame.size.width, w * effectivelyScale,
+                             kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.frame.size.height, h * effectivelyScale,
+                             kFloatCompareEpsilon);
+
   // Content size equal to the scrollable size.
-  XCTAssertTrue(CGSizeEqualToSize(scrollView.contentSize,
-                                  CGSizeMake(w * effectivelyScale, h * effectivelyScale)));
-  XCTAssertTrue(CGPointEqualToPoint(scrollView.contentOffset, CGPointMake(0, 0)));
+  XCTAssertEqualWithAccuracy(scrollView.contentSize.width, w * effectivelyScale,
+                             kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(scrollView.contentSize.height, h * effectivelyScale,
+                             kFloatCompareEpsilon);
+
+  XCTAssertEqual(scrollView.contentOffset.x, 0);
+  XCTAssertEqual(scrollView.contentOffset.y, 0);
 }
 
 - (void)testFlutterScrollableSemanticsObjectIsNotHittestable {
