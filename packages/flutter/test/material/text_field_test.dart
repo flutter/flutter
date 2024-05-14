@@ -1831,7 +1831,7 @@ void main() {
     expect(handle.opacity.value, equals(0.0));
   });
 
-  testWidgets('multiple text fields with prefix and suffix has correct semantics order.', (WidgetTester tester) async {
+  testWidgets('multiple text fields with prefix and suffix have correct semantics order.', (WidgetTester tester) async {
     final TextEditingController controller1 = _textEditingController(
       text: 'abc',
     );
