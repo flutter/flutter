@@ -1647,7 +1647,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
         _children.remove(slot);
       }
       assert(_debugTrackOrphans(noLongerOrphan: child));
-      if(_keepAliveBucket[childParentData.vicinity] == child) {
+      if (_keepAliveBucket[childParentData.vicinity] == child) {
         _keepAliveBucket.remove(childParentData.vicinity);
       }
       assert(_keepAliveBucket[childParentData.vicinity] != child);
