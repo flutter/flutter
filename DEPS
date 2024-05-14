@@ -729,7 +729,7 @@ deps = {
   'src/flutter/third_party/stb':
   Var('flutter_git') + '/third_party/stb.git' + '@' + '5736b15f7ea0ffb08dd38af21067c314d6a3aae9',
 
-  'src/third_party/gradle': {
+  'src/flutter/third_party/gradle': {
     'packages': [
       {
         # See tools/gradle/README.md for update instructions.
