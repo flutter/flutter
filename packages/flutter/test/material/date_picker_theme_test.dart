@@ -50,6 +50,7 @@ void main() {
     ),
     cancelButtonStyle: ButtonStyle(foregroundColor: MaterialStatePropertyAll<Color>(Color(0xffffff6f))),
     confirmButtonStyle: ButtonStyle(foregroundColor: MaterialStatePropertyAll<Color>(Color(0xffffff7f))),
+    locale: Locale('en'),
   );
 
   Material findDialogMaterial(WidgetTester tester) {
@@ -145,6 +146,7 @@ void main() {
     expect(theme.inputDecorationTheme, null);
     expect(theme.cancelButtonStyle, null);
     expect(theme.confirmButtonStyle, null);
+    expect(theme.locale, null);
   });
 
   testWidgets('DatePickerTheme.defaults M3 defaults', (WidgetTester tester) async {
@@ -223,6 +225,7 @@ void main() {
     expect(m3.inputDecorationTheme, null);
     expect(m3.cancelButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
     expect(m3.confirmButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
+    expect(m3.locale, null);
   });
 
   testWidgets('DatePickerTheme.defaults M2 defaults', (WidgetTester tester) async {
@@ -293,6 +296,7 @@ void main() {
     expect(m2.inputDecorationTheme, null);
     expect(m2.cancelButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
     expect(m2.confirmButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
+    expect(m2.locale, null);
   });
 
   testWidgets('Default DatePickerThemeData debugFillProperties', (WidgetTester tester) async {
@@ -354,7 +358,8 @@ void main() {
       'dividerColor: Color(0xffffff4f)',
       'inputDecorationTheme: InputDecorationTheme#00000(fillColor: Color(0xffffff5f), border: UnderlineInputBorder())',
       'cancelButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(Color(0xffffff6f)))',
-      'confirmButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(Color(0xffffff7f)))'
+      'confirmButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(Color(0xffffff7f)))',
+      'locale: en',
     ]));
   });
 
