@@ -15,12 +15,12 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
 #include "impeller/core/shader_types.h"
-#include "impeller/renderer/backend/metal/blit_command_mtl.h"
 #include "impeller/renderer/backend/metal/device_buffer_mtl.h"
 #include "impeller/renderer/backend/metal/formats_mtl.h"
 #include "impeller/renderer/backend/metal/pipeline_mtl.h"
 #include "impeller/renderer/backend/metal/sampler_mtl.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
+
 #include "impeller/renderer/blit_command.h"
 
 namespace impeller {
@@ -29,10 +29,19 @@ BlitPassMTL::BlitPassMTL(id<MTLCommandBuffer> buffer) : buffer_(buffer) {
   if (!buffer_) {
     return;
   }
+  encoder_ = [buffer_ blitCommandEncoder];
+#ifdef IMPELLER_DEBUG
+  is_metal_trace_active_ =
+      [[MTLCaptureManager sharedCaptureManager] isCapturing];
+#endif  // IMPELLER_DEBUG
   is_valid_ = true;
 }
 
-BlitPassMTL::~BlitPassMTL() = default;
+BlitPassMTL::~BlitPassMTL() {
+  if (!did_finish_encoding_) {
+    [encoder_ endEncoding];
+  }
+}
 
 bool BlitPassMTL::IsValid() const {
   return is_valid_;
@@ -42,49 +51,13 @@ void BlitPassMTL::OnSetLabel(std::string label) {
   if (label.empty()) {
     return;
   }
-  label_ = std::move(label);
+  [encoder_ setLabel:@(label.c_str())];
 }
 
 bool BlitPassMTL::EncodeCommands(
     const std::shared_ptr<Allocator>& transients_allocator) const {
-  TRACE_EVENT0("impeller", "BlitPassMTL::EncodeCommands");
-  if (!IsValid()) {
-    return false;
-  }
-
-  auto blit_command_encoder = [buffer_ blitCommandEncoder];
-
-  if (!blit_command_encoder) {
-    return false;
-  }
-
-  if (!label_.empty()) {
-    [blit_command_encoder setLabel:@(label_.c_str())];
-  }
-
-  // Success or failure, the pass must end. The buffer can only process one pass
-  // at a time.
-  fml::ScopedCleanupClosure auto_end(
-      [blit_command_encoder]() { [blit_command_encoder endEncoding]; });
-
-  return EncodeCommands(blit_command_encoder);
-}
-
-bool BlitPassMTL::EncodeCommands(id<MTLBlitCommandEncoder> encoder) const {
-  fml::closure pop_debug_marker = [encoder]() { [encoder popDebugGroup]; };
-  for (const auto& command : commands_) {
-    fml::ScopedCleanupClosure auto_pop_debug_marker(pop_debug_marker);
-    auto label = command->GetLabel();
-    if (!label.empty()) {
-      [encoder pushDebugGroup:@(label.c_str())];
-    } else {
-      auto_pop_debug_marker.Release();
-    }
-
-    if (!command->Encode(encoder)) {
-      return false;
-    }
-  }
+  [encoder_ endEncoding];
+  did_finish_encoding_ = true;
   return true;
 }
 
@@ -95,14 +68,44 @@ bool BlitPassMTL::OnCopyTextureToTextureCommand(
     IRect source_region,
     IPoint destination_origin,
     std::string label) {
-  auto command = std::make_unique<BlitCopyTextureToTextureCommandMTL>();
-  command->label = label;
-  command->source = std::move(source);
-  command->destination = std::move(destination);
-  command->source_region = source_region;
-  command->destination_origin = destination_origin;
+  auto source_mtl = TextureMTL::Cast(*source).GetMTLTexture();
+  if (!source_mtl) {
+    return false;
+  }
 
-  commands_.emplace_back(std::move(command));
+  auto destination_mtl = TextureMTL::Cast(*destination).GetMTLTexture();
+  if (!destination_mtl) {
+    return false;
+  }
+
+  auto source_origin_mtl =
+      MTLOriginMake(source_region.GetX(), source_region.GetY(), 0);
+  auto source_size_mtl =
+      MTLSizeMake(source_region.GetWidth(), source_region.GetHeight(), 1);
+  auto destination_origin_mtl =
+      MTLOriginMake(destination_origin.x, destination_origin.y, 0);
+
+#ifdef IMPELLER_DEBUG
+  if (is_metal_trace_active_) {
+    [encoder_ pushDebugGroup:@(label.c_str())];
+  }
+#endif  // IMPELLER_DEBUG
+  [encoder_ copyFromTexture:source_mtl
+                sourceSlice:0
+                sourceLevel:0
+               sourceOrigin:source_origin_mtl
+                 sourceSize:source_size_mtl
+                  toTexture:destination_mtl
+           destinationSlice:0
+           destinationLevel:0
+          destinationOrigin:destination_origin_mtl];
+
+#ifdef IMPELLER_DEBUG
+  if (is_metal_trace_active_) {
+    [encoder_ popDebugGroup];
+  }
+#endif  // IMPELLER_DEBUG
+
   return true;
 }
 
@@ -113,14 +116,48 @@ bool BlitPassMTL::OnCopyTextureToBufferCommand(
     IRect source_region,
     size_t destination_offset,
     std::string label) {
-  auto command = std::make_unique<BlitCopyTextureToBufferCommandMTL>();
-  command->label = label;
-  command->source = std::move(source);
-  command->destination = std::move(destination);
-  command->source_region = source_region;
-  command->destination_offset = destination_offset;
+  auto source_mtl = TextureMTL::Cast(*source).GetMTLTexture();
+  if (!source_mtl) {
+    return false;
+  }
 
-  commands_.emplace_back(std::move(command));
+  auto destination_mtl = DeviceBufferMTL::Cast(*destination).GetMTLBuffer();
+  if (!destination_mtl) {
+    return false;
+  }
+
+  auto source_origin_mtl =
+      MTLOriginMake(source_region.GetX(), source_region.GetY(), 0);
+  auto source_size_mtl =
+      MTLSizeMake(source_region.GetWidth(), source_region.GetHeight(), 1);
+
+  auto destination_bytes_per_pixel =
+      BytesPerPixelForPixelFormat(source->GetTextureDescriptor().format);
+  auto destination_bytes_per_row =
+      source_size_mtl.width * destination_bytes_per_pixel;
+  auto destination_bytes_per_image =
+      source_size_mtl.height * destination_bytes_per_row;
+
+#ifdef IMPELLER_DEBUG
+  if (is_metal_trace_active_) {
+    [encoder_ pushDebugGroup:@(label.c_str())];
+  }
+#endif  // IMPELLER_DEBUG
+  [encoder_ copyFromTexture:source_mtl
+                   sourceSlice:0
+                   sourceLevel:0
+                  sourceOrigin:source_origin_mtl
+                    sourceSize:source_size_mtl
+                      toBuffer:destination_mtl
+             destinationOffset:destination_offset
+        destinationBytesPerRow:destination_bytes_per_row
+      destinationBytesPerImage:destination_bytes_per_image];
+
+#ifdef IMPELLER_DEBUG
+  if (is_metal_trace_active_) {
+    [encoder_ popDebugGroup];
+  }
+#endif  // IMPELLER_DEBUG
   return true;
 }
 
@@ -130,26 +167,67 @@ bool BlitPassMTL::OnCopyBufferToTextureCommand(
     IRect destination_region,
     std::string label,
     uint32_t slice) {
-  auto command = std::make_unique<BlitCopyBufferToTextureCommandMTL>();
-  command->label = std::move(label);
-  command->source = std::move(source);
-  command->destination = std::move(destination);
-  command->destination_region = destination_region;
-  command->slice = slice;
+  auto source_mtl = DeviceBufferMTL::Cast(*source.buffer).GetMTLBuffer();
+  if (!source_mtl) {
+    return false;
+  }
 
-  commands_.emplace_back(std::move(command));
+  auto destination_mtl = TextureMTL::Cast(*destination).GetMTLTexture();
+  if (!destination_mtl) {
+    return false;
+  }
+
+  auto destination_origin_mtl =
+      MTLOriginMake(destination_region.GetX(), destination_region.GetY(), 0);
+  auto source_size_mtl = MTLSizeMake(destination_region.GetWidth(),
+                                     destination_region.GetHeight(), 1);
+
+  auto destination_bytes_per_pixel =
+      BytesPerPixelForPixelFormat(destination->GetTextureDescriptor().format);
+  auto source_bytes_per_row =
+      destination_region.GetWidth() * destination_bytes_per_pixel;
+
+#ifdef IMPELLER_DEBUG
+  if (is_metal_trace_active_) {
+    [encoder_ pushDebugGroup:@(label.c_str())];
+  }
+#endif  // IMPELLER_DEBUG
+  [encoder_
+           copyFromBuffer:source_mtl
+             sourceOffset:source.range.offset
+        sourceBytesPerRow:source_bytes_per_row
+      sourceBytesPerImage:
+          0  // 0 for 2D textures according to
+             // https://developer.apple.com/documentation/metal/mtlblitcommandencoder/1400752-copyfrombuffer
+               sourceSize:source_size_mtl
+                toTexture:destination_mtl
+         destinationSlice:slice
+         destinationLevel:0
+        destinationOrigin:destination_origin_mtl];
+
+#ifdef IMPELLER_DEBUG
+  if (is_metal_trace_active_) {
+    [encoder_ popDebugGroup];
+  }
+#endif  // IMPELLER_DEBUG
   return true;
 }
 
 // |BlitPass|
 bool BlitPassMTL::OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
                                           std::string label) {
-  auto command = std::make_unique<BlitGenerateMipmapCommandMTL>();
-  command->label = label;
-  command->texture = std::move(texture);
-
-  commands_.emplace_back(std::move(command));
-  return true;
+#ifdef IMPELLER_DEBUG
+  if (is_metal_trace_active_) {
+    [encoder_ pushDebugGroup:@(label.c_str())];
+  }
+#endif  // IMPELLER_DEBUG
+  auto result = TextureMTL::Cast(*texture).GenerateMipmap(encoder_);
+#ifdef IMPELLER_DEBUG
+  if (is_metal_trace_active_) {
+    [encoder_ popDebugGroup];
+  }
+#endif  // IMPELLER_DEBUG
+  return result;
 }
 
 }  // namespace impeller
