@@ -211,6 +211,7 @@ void main() {
                 Material(
                   child: TextFormField(
                     key: keyA,
+                    groupId: 'Group A',
                     onTapOutside: (PointerDownEvent event) {
                       tappedOutside = 'Outside Callback A';
                     },
@@ -219,6 +220,7 @@ void main() {
                 Material(
                   child: TextFormField(
                     key: keyB,
+                    groupId: 'Group B',
                     onTapOutside: (PointerDownEvent event) {
                       tappedOutside = 'Outside Callback B';
                     },
@@ -227,6 +229,7 @@ void main() {
                 Material(
                   child: TextFormField(
                     key: keyC,
+                    groupId: 'Group C',
                     onTapOutside: (PointerDownEvent event) {
                       tappedOutside = 'Outside Callback C';
                     },
