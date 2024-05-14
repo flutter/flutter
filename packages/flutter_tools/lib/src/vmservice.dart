@@ -417,7 +417,7 @@ Future<FlutterVmService> _connect(
   // This call is to ensure we are able to establish a connection instead of
   // keeping on trucking and failing farther down the process.
   await delegateService.getVersion();
-  return FlutterVmService(service, httpAddress: httpUri, wsAddress: wsUri);
+  return FlutterVmService(service, httpAddress: httpUri, wsAddress: wsUri, logger: logger);
 }
 
 String _validateRpcStringParam(String methodName, Map<String, Object?> params, String paramName) {
@@ -486,11 +486,13 @@ class FlutterVmService {
     this.service, {
     this.wsAddress,
     this.httpAddress,
-  });
+    required Logger logger,
+  }) : _logger = logger;
 
   final vm_service.VmService service;
   final Uri? wsAddress;
   final Uri? httpAddress;
+  final Logger _logger;
 
   Future<vm_service.Response?> callMethodWrapper(
     String method, {
@@ -569,6 +571,7 @@ class FlutterVmService {
     required Uri main,
     required Uri assetsDirectory,
   }) async {
+    _logger.printTrace('Running $main in view $viewId...');
     try {
       await service.streamListen(vm_service.EventStreams.kIsolate);
     } on vm_service.RPCError {
@@ -577,6 +580,7 @@ class FlutterVmService {
     final Future<void> onRunnable = service.onIsolateEvent.firstWhere((vm_service.Event event) {
       return event.kind == vm_service.EventKind.kIsolateRunnable;
     });
+    _logger.printTrace('Calling $kRunInViewMethod...');
     await callMethodWrapper(
       kRunInViewMethod,
       args: <String, Object>{
@@ -585,7 +589,9 @@ class FlutterVmService {
         'assetDirectory': assetsDirectory.toString(),
       },
     );
+    _logger.printTrace('Finished $kRunInViewMethod');
     await onRunnable;
+    _logger.printTrace('Finished running $main in view $viewId');
   }
 
   /// Renders the last frame with additional raster tracing enabled.
@@ -905,9 +911,11 @@ class FlutterVmService {
     Duration delay = const Duration(milliseconds: 50),
   }) async {
     while (true) {
+      _logger.printTrace('Calling _flutter.listViews...');
       final vm_service.Response? response = await callMethodWrapper(
         kListViewsMethod,
       );
+      _logger.printTrace('Response from _flutter.listViews: ${json.encode(response?.json)}');
       if (response == null) {
         // The service may have disappeared mid-request.
         // Return an empty list now, and let the shutdown logic elsewhere deal
