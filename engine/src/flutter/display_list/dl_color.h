@@ -30,6 +30,7 @@ struct DlColor {
   static constexpr DlColor kDarkGrey()           {return DlColor(0xFF3F3F3F);};
   static constexpr DlColor kMidGrey()            {return DlColor(0xFF808080);};
   static constexpr DlColor kLightGrey()          {return DlColor(0xFFC0C0C0);};
+  static constexpr DlColor kAliceBlue()          {return DlColor(0xFFF0F8FF);};
   // clang-format on
 
   constexpr bool isOpaque() const { return getAlpha() == 0xFF; }
