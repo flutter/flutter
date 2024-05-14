@@ -11,8 +11,8 @@ import 'package:process_runner/process_runner.dart';
 
 import 'build_utils.dart';
 import 'environment.dart';
-import 'json_utils.dart';
 import 'proc_utils.dart';
+import 'typed_json.dart';
 
 /// Canonicalized build targets start with this prefix.
 const String buildTargetPrefix = '//';
@@ -86,9 +86,8 @@ Future<Map<String, BuildTarget>> findTargets(
       environment.logger
           .fatal('gn desc output is malformed $label has no value.');
     }
-    final Map<String, Object?> properties =
-        targetEntry.value! as Map<String, Object?>;
-    final String? typeString = getString(properties, 'type');
+    final JsonObject properties = JsonObject(targetEntry.value! as Map<String, Object?>);
+    final String? typeString = properties.stringOrNull('type');
     if (typeString == null) {
       environment.logger.fatal('gn desc is missing target type: $properties');
     }
@@ -97,7 +96,7 @@ Future<Map<String, BuildTarget>> findTargets(
       // Target is a type that we don't support.
       continue;
     }
-    final bool testOnly = getBool(properties, 'testonly');
+    final bool testOnly = properties.boolean('testonly');
     final List<String> outputs =
         await _runGnOutputs(buildDir.path, label, environment);
     File? executable;
