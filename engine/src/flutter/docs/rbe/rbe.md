@@ -158,11 +158,16 @@ RBE builds can also be slow if your network connection is bandwidth constrained.
 Anecdotally, even with a warm cache, I have noticed slow builds from home due
 to RBE saturating my low-tier Comcast Business connection.
 
-For Googlers on a corp macOS device, both RBE and non-RBE builds can be slow
-due to various background and monitoring processes running. See
-[here](https://buganizer.corp.google.com/issues/324404733#comment16) for how
-to disable some of them. You should also disable Spotlight scanning of the
-engine source directory as described
+For developers on a macOS host device, ensure that you're using the same version
+of Xcode as is in use on the bots. The value of "Build version" returned by
+`xcodebuild -version` should match the `sdk_version` value set in
+`ci/builders/local_engine.json` for the build you're running.
+
+For Googlers on a corp macOS device, both RBE and non-RBE builds can be slow due
+to various background and monitoring processes running. See
+[here](https://buganizer.corp.google.com/issues/324404733#comment16) for how to
+disable some of them. You should also disable Spotlight scanning of the engine
+source directory as described
 [here](go/building-chrome-mac#add-the-source-directory-to-the-spotlight-privacy-list).
 
 When RBE builds are slow, non-RBE builds may be faster, especially incremental
