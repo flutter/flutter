@@ -518,10 +518,10 @@ class KeepAliveOnyWhenHovered extends StatefulWidget {
   final Widget child;
 
   @override
-  KeepAliveOnyWhenHoveredWidgetState createState() => KeepAliveOnyWhenHoveredWidgetState();
+  KeepAliveOnyWhenHoveredState createState() => KeepAliveOnyWhenHoveredState();
 }
 
-class KeepAliveOnyWhenHoveredWidgetState extends State<KeepAliveOnyWhenHovered> with AutomaticKeepAliveClientMixin {
+class KeepAliveOnyWhenHoveredState extends State<KeepAliveOnyWhenHovered> with AutomaticKeepAliveClientMixin {
   bool _hovered = false;
 
   @override
