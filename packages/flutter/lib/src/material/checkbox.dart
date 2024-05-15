@@ -908,7 +908,7 @@ class _CheckboxPainter extends ToggleablePainter {
           final Paint paint = Paint()
             ..color = Colors.transparent.withOpacity(0.05);
           final Rect outer = _outerRectAt(origin, 1.0);
-          _drawBox(canvas, outer, paint, activeSide);
+          canvas.drawPath(shape.getOuterPath(outer), paint);
         }
         if (isFocused) {
           final Rect focusOuter = _outerRectAt(origin, 1.0).inflate(1);
@@ -916,7 +916,7 @@ class _CheckboxPainter extends ToggleablePainter {
             ..color = focusColor
             ..style = PaintingStyle.stroke
             ..strokeWidth = 3.5;
-          _drawBox(canvas, focusOuter, borderPaint, activeSide);
+          canvas.drawPath(shape.getOuterPath(focusOuter), borderPaint);
         }
       case _DesignSpec.material:
         break;

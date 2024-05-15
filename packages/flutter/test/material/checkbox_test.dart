@@ -991,7 +991,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
-    // On web, switches don't respond to the enter key.
+    // On web, checkboxes don't respond to the enter key.
     expect(value, kIsWeb ? isTrue : isFalse);
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
@@ -1212,7 +1212,7 @@ void main() {
       return activeEnabledFillColor;
     }
 
-    final MaterialStateProperty<Color> fillColor =
+    final WidgetStateProperty<Color> fillColor =
       MaterialStateColor.resolveWith(getFillColor);
 
     Widget buildFrame({required bool enabled}) {
@@ -1263,7 +1263,7 @@ void main() {
       return Colors.transparent;
     }
 
-    final MaterialStateProperty<Color> fillColor =
+    final WidgetStateProperty<Color> fillColor =
       MaterialStateColor.resolveWith(getFillColor);
 
     Widget buildFrame() {
@@ -1529,8 +1529,8 @@ void main() {
             autofocus: focused,
             value: active,
             onChanged: (_) { },
-            fillColor: const MaterialStatePropertyAll<Color>(fillColor),
-            overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+            fillColor: const WidgetStatePropertyAll<Color>(fillColor),
+            overlayColor: useOverlay ? WidgetStateProperty.resolveWith(getOverlayColor) : null,
             hoverColor: hoverColor,
             focusColor: focusColor,
             splashRadius: splashRadius,
@@ -1665,7 +1665,7 @@ void main() {
                     value = v;
                   });
                 },
-                overlayColor: MaterialStateProperty.resolveWith(getOverlayColor),
+                overlayColor: WidgetStateProperty.resolveWith(getOverlayColor),
                 splashRadius: splashRadius,
               );
             },
@@ -2217,7 +2217,7 @@ void main() {
         home: Material(
           child: Center(
             child: Checkbox(
-              fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              fillColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
                 if (states.contains(MaterialState.selected)) {
                   return activeBackgroundColor;
                 }
@@ -2270,7 +2270,7 @@ void main() {
         home: Material(
           child: Center(
             child: Checkbox(
-              fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              fillColor: WidgetStateProperty.resolveWith((Set<MaterialState> states) {
                 if (states.contains(MaterialState.selected)) {
                   return activeBackgroundColor;
                 }
@@ -2367,6 +2367,7 @@ void main() {
         paints
         ..path(color: activeFillColor)
         ..rrect(color: activeBorderColor)
+        ..path(color: enabledCheckColor)
         ..path(color: enabledCheckColor),
         reason: 'Active enabled checkbox should have default fill and border colors',
       );
@@ -2403,6 +2404,270 @@ void main() {
       );
     }
   });
+
+  testWidgets('Checkbox.adaptive defaults are not affected by '
+    'ThemeData.checkboxThemeData on iOS/macOS', (WidgetTester tester) async {
+    const Color defaultCheckColor = Colors.white;
+    const Color defaultInactiveFillColor = Colors.white;
+    const Color defaultActiveFillColor = Color(0xff007aff);
+    const Color updatedCheckColor = Colors.red;
+    const Color updatedFillColor = Colors.green;
+    const Color defaultDisabledFillColor = Colors.white;
+    const CheckboxThemeData overallCheckboxTheme = CheckboxThemeData(
+      fillColor: WidgetStatePropertyAll<Color>(updatedFillColor),
+      checkColor: WidgetStatePropertyAll<Color>(updatedCheckColor),
+    );
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(
+        buildAdaptiveCheckbox(
+          platform: platform,
+          overallCheckboxThemeData: overallCheckboxTheme
+        )
+      );
+      expect(
+        Material.of(tester.element(find.byType(Checkbox))),
+        paints
+        ..path(color: defaultActiveFillColor)
+        ..rrect()
+        ..path(color: defaultCheckColor)
+        ..path(color: defaultCheckColor),
+        reason: 'Active enabled checkbox should still have default fill and check color',
+      );
+
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(
+          buildAdaptiveCheckbox(
+              platform: platform,
+              value: false,
+              overallCheckboxThemeData: overallCheckboxTheme
+          )
+      );
+      expect(
+        Material.of(tester.element(find.byType(Checkbox))),
+        paints
+        ..path(color: defaultInactiveFillColor)
+        ..drrect(),
+        reason: 'Inactive enabled checkbox should have default fill and check color',
+      );
+
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(
+          buildAdaptiveCheckbox(
+              platform: platform,
+              enabled: false,
+              value: false,
+              overallCheckboxThemeData: overallCheckboxTheme
+          )
+      );
+      expect(
+        Material.of(tester.element(find.byType(Checkbox))),
+        paints
+        ..path(color: defaultDisabledFillColor)
+        ..drrect(),
+        reason: 'Inactive disabled checkbox should have default fill and check color',
+      );
+    }
+
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(
+      buildAdaptiveCheckbox(
+        platform: TargetPlatform.android,
+        overallCheckboxThemeData: overallCheckboxTheme
+      )
+    );
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints
+        ..path(color: Color(updatedFillColor.value))
+        ..rrect()
+        ..path(color: Color(updatedCheckColor.value)),
+      reason: 'Checkbox.adaptive is affected by CheckboxTheme on other platforms',
+    );
+  });
+
+  testWidgets('Checkbox.adaptive defaults are not affected by '
+      'CheckboxThemeData on iOS/macOS', (WidgetTester tester) async {
+    const Color defaultCheckColor = Colors.white;
+    const Color defaultInactiveFillColor = Colors.white;
+    const Color defaultActiveFillColor = Color(0xff007aff);
+    const Color updatedCheckColor = Colors.red;
+    const Color updatedFillColor = Colors.green;
+    const Color defaultDisabledFillColor = Colors.white;
+    const CheckboxThemeData checkboxTheme = CheckboxThemeData(
+      fillColor: WidgetStatePropertyAll<Color>(updatedFillColor),
+      checkColor: WidgetStatePropertyAll<Color>(updatedCheckColor),
+    );
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(
+        buildAdaptiveCheckbox(
+          platform: platform,
+          checkboxThemeData: checkboxTheme
+        )
+      );
+      expect(
+        Material.of(tester.element(find.byType(Checkbox))),
+        paints
+        ..path(color: defaultActiveFillColor)
+        ..rrect()
+        ..path(color: defaultCheckColor)
+        ..path(color: defaultCheckColor),
+        reason: 'Active enabled checkbox should still have default fill and check color',
+      );
+
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(
+        buildAdaptiveCheckbox(
+          platform: platform,
+          value: false,
+          checkboxThemeData: checkboxTheme
+        )
+      );
+      expect(
+        Material.of(tester.element(find.byType(Checkbox))),
+        paints
+        ..path(color: defaultInactiveFillColor)
+        ..drrect(),
+        reason: 'Inactive enabled checkbox should have default fill and check color',
+      );
+
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(
+        buildAdaptiveCheckbox(
+          platform: platform,
+          enabled: false,
+          value: false,
+          checkboxThemeData: checkboxTheme
+        )
+      );
+      expect(
+        Material.of(tester.element(find.byType(Checkbox))),
+        paints
+        ..path(color: defaultDisabledFillColor)
+        ..drrect(),
+        reason: 'Inactive disabled checkbox should have default fill and check color',
+      );
+    }
+
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(
+      buildAdaptiveCheckbox(
+        platform: TargetPlatform.android,
+        checkboxThemeData: checkboxTheme
+      )
+    );
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints
+        ..path(color: Color(updatedFillColor.value))
+        ..rrect()
+        ..path(color: Color(updatedCheckColor.value)),
+      reason: 'Checkbox.adaptive is affected by CheckboxTheme on other platforms',
+    );
+  });
+
+  testWidgets('Override default adaptive CheckboxThemeData on iOS/macOS', (WidgetTester tester) async {
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(
+        buildAdaptiveCheckbox(
+          platform: platform,
+          checkboxThemeData: const CheckboxThemeData(
+            fillColor: WidgetStatePropertyAll<Color>(Colors.yellow),
+            checkColor: WidgetStatePropertyAll<Color>(Colors.brown),
+          ),
+          checkboxThemeAdaptation: const _CheckboxThemeAdaptation(),
+        )
+      );
+
+      expect(
+        Material.of(tester.element(find.byType(Checkbox))),
+        paints
+          ..path(
+            color: Color(Colors.lightGreen.value),
+          )..rrect()
+          ..path(
+            color: Color(Colors.deepPurple.value),
+          ),
+      );
+    }
+
+    // Other platforms should not be affected by the adaptive checkbox theme.
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(
+        buildAdaptiveCheckbox(
+          platform: platform,
+          checkboxThemeData: const CheckboxThemeData(
+            fillColor: WidgetStatePropertyAll<Color>(Colors.yellow),
+            checkColor: WidgetStatePropertyAll<Color>(Colors.brown),
+          ),
+          checkboxThemeAdaptation: const _CheckboxThemeAdaptation(),
+        )
+      );
+
+      expect(
+        Material.of(tester.element(find.byType(Checkbox))),
+        paints
+          ..path(
+            color: Color(Colors.yellow.value),
+          )..rrect()
+          ..path(
+            color: Color(Colors.brown.value),
+          ),
+      );
+    }
+  });
+
+  testWidgets('Checkbox.adaptive configures focus color(Cupertino)', (WidgetTester tester) async {
+    const Color defaultCheckColor = Colors.white;
+    const Color defaultActiveFillColor = Color(0xff007aff);
+    const Color defaultFocusColor = Color(0xcc6eadf2);
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final FocusNode node = FocusNode();
+    addTearDown(node.dispose);
+    await tester.pumpWidget(
+      buildAdaptiveCheckbox(
+        platform: TargetPlatform.macOS,
+        autofocus: true,
+        focusNode: node,
+      )
+    );
+    await tester.pumpAndSettle();
+    expect(node.hasPrimaryFocus, isTrue);
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints
+        ..path(color: defaultActiveFillColor)
+        ..rrect()
+        ..path(color: defaultCheckColor)
+        ..path(color: defaultCheckColor)
+        ..path(color: defaultFocusColor, strokeWidth: 3.5, style: PaintingStyle.stroke), // Focused outline
+      reason: 'Checkbox shows the correct focus color',
+    );
+
+    await tester.pumpWidget(
+      buildAdaptiveCheckbox(
+        platform: TargetPlatform.macOS,
+        autofocus: true,
+        focusNode: node,
+        focusColor: Colors.red,
+      )
+    );
+    await tester.pumpAndSettle();
+    expect(node.hasPrimaryFocus, isTrue);
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints
+        ..path(color: defaultActiveFillColor)
+        ..rrect()
+        ..path(color: defaultCheckColor)
+        ..path(color: defaultCheckColor)
+        ..path(color: Color(Colors.red.value), strokeWidth: 3.5, style: PaintingStyle.stroke), // Focused outline
+        reason: 'Checkbox can configure a focus color',
+    );
+  });
 }
 
 class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
@@ -2426,8 +2691,17 @@ Widget buildAdaptiveCheckbox({
   BorderSide side = const BorderSide(),
   bool value = true,
   bool enabled = true,
+  bool autofocus = false,
+  FocusNode? focusNode,
+  Color? focusColor,
+  CheckboxThemeData? overallCheckboxThemeData,
+  CheckboxThemeData? checkboxThemeData,
+  Adaptation<CheckboxThemeData>? checkboxThemeAdaptation,
 }) {
   final Widget adaptiveCheckbox = Checkbox.adaptive(
+    focusNode: focusNode,
+    autofocus: autofocus,
+    focusColor: focusColor,
     value: value,
     onChanged: enabled ? (_) {} : null,
     shape: shape,
@@ -2435,15 +2709,47 @@ Widget buildAdaptiveCheckbox({
   );
 
   return MaterialApp(
-    theme: ThemeData(platform: platform),
+    theme: ThemeData(
+      platform: platform,
+      checkboxTheme: overallCheckboxThemeData,
+      adaptations: checkboxThemeAdaptation == null ? null : <Adaptation<Object>>[
+        checkboxThemeAdaptation
+      ],
+    ),
     home: StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
         return Material(
           child: Center(
-            child: adaptiveCheckbox,
+            child: checkboxThemeData == null
+              ? adaptiveCheckbox
+              : CheckboxTheme(
+                data: checkboxThemeData,
+                child: adaptiveCheckbox,
+            ),
           ),
         );
       },
     ),
   );
+}
+
+class _CheckboxThemeAdaptation extends Adaptation<CheckboxThemeData> {
+  const _CheckboxThemeAdaptation();
+
+  @override
+  CheckboxThemeData adapt(ThemeData theme, CheckboxThemeData defaultValue) {
+    switch (theme.platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.windows:
+      case TargetPlatform.linux:
+        return defaultValue;
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        return const CheckboxThemeData(
+          fillColor: WidgetStatePropertyAll<Color>(Colors.lightGreen),
+          checkColor: WidgetStatePropertyAll<Color>(Colors.deepPurple),
+        );
+    }
+  }
 }
