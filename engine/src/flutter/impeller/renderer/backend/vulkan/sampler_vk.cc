@@ -7,6 +7,7 @@
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/yuv_conversion_vk.h"
+#include "vulkan/vulkan_core.h"
 
 namespace impeller {
 
@@ -14,8 +15,6 @@ static vk::UniqueSampler CreateSampler(
     const vk::Device& device,
     const SamplerDescriptor& desc,
     const std::shared_ptr<YUVConversionVK>& yuv_conversion) {
-  const auto mip_map = ToVKSamplerMipmapMode(desc.mip_filter);
-
   const auto min_filter = ToVKSamplerMinMagFilter(desc.min_filter);
   const auto mag_filter = ToVKSamplerMinMagFilter(desc.mag_filter);
 
@@ -36,8 +35,21 @@ static vk::UniqueSampler CreateSampler(
   sampler_info.addressModeV = address_mode_v;
   sampler_info.addressModeW = address_mode_w;
   sampler_info.borderColor = vk::BorderColor::eFloatTransparentBlack;
-  sampler_info.mipmapMode = mip_map;
   sampler_info.maxLod = VK_LOD_CLAMP_NONE;
+
+  // https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSamplerCreateInfo.html#_description
+  switch (desc.mip_filter) {
+    case MipFilter::kBase:
+      sampler_info.mipmapMode = vk::SamplerMipmapMode::eNearest;
+      sampler_info.minLod = sampler_info.maxLod = 0.0f;
+      break;
+    case MipFilter::kNearest:
+      sampler_info.mipmapMode = vk::SamplerMipmapMode::eNearest;
+      break;
+    case MipFilter::kLinear:
+      sampler_info.mipmapMode = vk::SamplerMipmapMode::eLinear;
+      break;
+  }
 
   if (yuv_conversion && yuv_conversion->IsValid()) {
     sampler_chain.get<vk::SamplerYcbcrConversionInfo>().conversion =

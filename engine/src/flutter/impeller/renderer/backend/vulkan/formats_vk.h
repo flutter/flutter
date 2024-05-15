@@ -222,6 +222,7 @@ constexpr vk::Filter ToVKSamplerMinMagFilter(MinMagFilter filter) {
 
 constexpr vk::SamplerMipmapMode ToVKSamplerMipmapMode(MipFilter filter) {
   switch (filter) {
+    case MipFilter::kBase:
     case MipFilter::kNearest:
       return vk::SamplerMipmapMode::eNearest;
     case MipFilter::kLinear:
