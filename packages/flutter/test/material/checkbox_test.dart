@@ -2338,6 +2338,71 @@ void main() {
       await tester.pump();
     }
   });
+  testWidgets('Checkbox.adaptive default shadows, colors, and size(Cupertino)', (WidgetTester tester) async {
+    const Color enabledCheckColor = Colors.white;
+    const Color disabledCheckColor = Colors.black;
+    const Color inactiveFillColor = Colors.white;
+    const Color activeFillColor = Color(0xff007aff);
+    const Color disabledFillColor = Colors.white;
+    const Color activeBorderColor = Colors.transparent;
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(buildAdaptiveCheckbox(
+        platform: platform,
+        value: false
+      ));
+      expect(
+        Material.of(tester.element(find.byType(Checkbox))),
+        paints
+        ..path(color: inactiveFillColor)
+        ..drrect(),
+        reason: 'Inactive enabled checkbox should have default fill color and shadow',
+      );
+
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(buildAdaptiveCheckbox(platform: platform));
+      await tester.pump();
+      expect(
+        Material.of(tester.element(find.byType(Checkbox))),
+        paints
+        ..path(color: activeFillColor)
+        ..rrect(color: activeBorderColor)
+        ..path(color: enabledCheckColor),
+        reason: 'Active enabled checkbox should have default fill and border colors',
+      );
+
+      // Test disabled checkbox.
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(buildAdaptiveCheckbox(
+          platform: platform,
+          enabled: false,
+          value: false,
+      ));
+      await tester.pump();
+      expect(
+        Material.of(tester.element(find.byType(Checkbox))),
+        paints
+        ..path(color: disabledFillColor)
+        ..drrect(),
+        reason: 'Inactive disabled checkbox should have default shadow and fill colors',
+      );
+
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(buildAdaptiveCheckbox(
+        platform: platform,
+        enabled: false,
+      ));
+      await tester.pump();
+      expect(
+        Material.of(tester.element(find.byType(Checkbox))),
+        paints
+        ..path(color: disabledFillColor)
+        ..drrect()
+        ..path(color: disabledCheckColor),
+        reason: 'Active disabled checkbox should have default shadow and fill colors',
+      );
+    }
+  });
 }
 
 class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {

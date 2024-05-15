@@ -750,9 +750,12 @@ class _CheckboxPainter extends ToggleablePainter {
   void _drawBox(Canvas canvas, Rect outer, Paint paint, BorderSide? side) {
     switch (_designSpec!) {
       case _DesignSpec.cupertino:
-        if (value == false && reaction.isDismissed){
-          // Add dropshadow effect when unselected.
-          // The gradient colors were eyeballed from examples in the HIG docs.
+        // Add dropshadow effect when unselected.
+        // The gradient colors were eyeballed from examples in the HIG docs.
+        //
+        // Since the focus outline is drawn around the outer border,
+        // only clip to the outer border when not in focus.
+        if (value == false && reaction.isDismissed && !isFocused){
           canvas.clipPath(shape.getOuterPath(outer));
           canvas.drawPath(shape.getOuterPath(outer), paint);
           // The drop shadow has three layers.
@@ -961,7 +964,7 @@ class _CheckboxDefaultsCupertino extends CheckboxThemeData {
     return MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         if (states.contains(MaterialState.selected)) {
-          return const BorderSide(color: Colors.transparent);
+          return BorderSide(color: _borderColor);
         }
         return BorderSide(color: _borderColor);
       }
@@ -988,9 +991,6 @@ class _CheckboxDefaultsCupertino extends CheckboxThemeData {
   MaterialStateProperty<Color> get fillColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
-        if (states.contains(MaterialState.selected)) {
-          return _activeColor;
-        }
         return _inactiveColor;
       }
       if (states.contains(MaterialState.selected)) {
@@ -1008,7 +1008,7 @@ class _CheckboxDefaultsCupertino extends CheckboxThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         if (states.contains(MaterialState.selected)) {
-          return CupertinoColors.white;
+          return CupertinoColors.black;
         }
         return _inactiveColor;
       }
