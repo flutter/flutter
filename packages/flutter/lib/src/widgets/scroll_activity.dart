@@ -13,7 +13,6 @@ import 'basic.dart';
 import 'framework.dart';
 import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
-import 'scroll_position.dart';
 
 /// A backend for a [ScrollActivity].
 ///
