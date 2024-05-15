@@ -1,4 +1,4 @@
-Signature: 0ecf3ab697d80834e8321391e07a34c3
+Signature: d689d2242f043dcdaa3e04e1189b3117
 
 ====================================================================================================
 LIBRARY: etc1
@@ -9527,6 +9527,7 @@ ORIGIN: ../../../flutter/third_party/skia/src/base/SkFixedArray.h + ../../../flu
 ORIGIN: ../../../flutter/third_party/skia/src/codec/SkGainmapInfo.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkKnownRuntimeEffects.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkKnownRuntimeEffects.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/effects/imagefilters/SkMatrixConvolutionImageFilter.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/DataUtils.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/DataUtils.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/SwizzlePriv.h + ../../../flutter/third_party/skia/LICENSE
@@ -9586,6 +9587,7 @@ FILE: ../../../flutter/third_party/skia/src/base/SkFixedArray.h
 FILE: ../../../flutter/third_party/skia/src/codec/SkGainmapInfo.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkKnownRuntimeEffects.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkKnownRuntimeEffects.h
+FILE: ../../../flutter/third_party/skia/src/effects/imagefilters/SkMatrixConvolutionImageFilter.h
 FILE: ../../../flutter/third_party/skia/src/gpu/DataUtils.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/DataUtils.h
 FILE: ../../../flutter/third_party/skia/src/gpu/SwizzlePriv.h
