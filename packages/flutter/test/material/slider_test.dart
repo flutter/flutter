@@ -49,7 +49,7 @@ class LoggingThumbShape extends SliderComponentShape {
   }
 }
 
-// A thumb shape that also logs its repaint center.
+// A value indicator shape to log labelPainter text.
 class LoggingValueIndicatorShape extends SliderComponentShape {
   LoggingValueIndicatorShape(this.logLabel);
 
