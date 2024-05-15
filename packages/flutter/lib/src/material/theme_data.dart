@@ -455,8 +455,8 @@ class ThemeData with Diagnosticable {
       materialTapTargetSize: materialTapTargetSize,
     );
     disabledColor ??= isDark ? Colors.white38 : Colors.black38;
-    highlightColor ??= isDark ? Color(0x40CCCCCC) : Color(0x66BCBCBC);
-    splashColor ??= isDark ? Color(0x40CCCCCC) : Color(0x66C8C8C8);
+    highlightColor ??= isDark ? const Color(0x40CCCCCC) : const Color(0x66BCBCBC);
+    splashColor ??= isDark ? const Color(0x40CCCCCC) : const Color(0x66C8C8C8);
 
     // TYPOGRAPHY & ICONOGRAPHY
     typography ??= useMaterial3
