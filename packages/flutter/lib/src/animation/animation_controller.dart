@@ -463,6 +463,9 @@ class AnimationController extends Animation<double>
   ///
   /// Returns a [TickerFuture] that completes when the animation is complete.
   ///
+  /// If [from] is non-null, it will be set as the current [value] before running
+  /// the animation.
+  ///
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
@@ -496,6 +499,9 @@ class AnimationController extends Animation<double>
   /// Starts running this animation in reverse (towards the beginning).
   ///
   /// Returns a [TickerFuture] that completes when the animation is dismissed.
+  ///
+  /// If [from] is non-null, it will be set as the current [value] before running
+  /// the animation.
   ///
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
@@ -532,6 +538,9 @@ class AnimationController extends Animation<double>
   /// Specifically, this function acts the same way as [reverse] if the [status] is
   /// either [AnimationStatus.forward] or [AnimationStatus.completed], and acts as
   /// [forward] for [AnimationStatus.reverse] or [AnimationStatus.dismissed].
+  ///
+  /// If [from] is non-null, it will be set as the current [value] before running
+  /// the animation.
   ///
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
