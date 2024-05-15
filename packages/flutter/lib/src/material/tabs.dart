@@ -864,6 +864,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.splashFactory,
     this.splashBorderRadius,
     this.tabAlignment,
+    this.textScaler,
   }) : _isPrimary = true,
        assert(indicator != null || (indicatorWeight > 0.0));
 
@@ -915,6 +916,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.splashFactory,
     this.splashBorderRadius,
     this.tabAlignment,
+    this.textScaler,
   }) : _isPrimary = false,
        assert(indicator != null || (indicatorWeight > 0.0));
 
@@ -1245,6 +1247,16 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// then [TabAlignment.center] is used if [isScrollable] is true,
   /// otherwise [TabAlignment.fill] is used.
   final TabAlignment? tabAlignment;
+
+  /// Specifies the text scaling behavior for the [Tab] label.
+  ///
+  /// If this is null, then the value of [TabBarTheme.textScaler] is used. If that is
+  /// also null, then the text scaling behavior is determined by the [MediaQueryData.textScaler]
+  /// from the ambient [MediaQuery], or 1.0 if there is no [MediaQuery] in scope.
+  ///
+  /// See also:
+  ///   * [TextScaler], which is used to scale text based on the device's text scale factor.
+  final TextScaler? textScaler;
 
   /// A size whose height depends on if the tabs have both icons and text.
   ///
@@ -1828,7 +1840,10 @@ class _TabBarState extends State<TabBar> {
       );
     }
 
-    return tabBar;
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaler: widget.textScaler ?? tabBarTheme.textScaler),
+      child: tabBar,
+    );
   }
 }
 
@@ -2219,7 +2234,7 @@ class TabPageSelectorIndicator extends StatelessWidget {
 ///
 /// If a [TabController] is not provided, then there must be a
 /// [DefaultTabController] ancestor.
-class TabPageSelector extends StatelessWidget {
+class TabPageSelector extends StatefulWidget {
   /// Creates a compact widget that indicates which tab has been selected.
   const TabPageSelector({
     super.key,
@@ -2256,6 +2271,67 @@ class TabPageSelector extends StatelessWidget {
   /// Defaults to [BorderStyle.solid] if value is not specified.
   final BorderStyle? borderStyle;
 
+  @override
+  State<TabPageSelector> createState() => _TabPageSelectorState();
+}
+
+class _TabPageSelectorState extends State<TabPageSelector> {
+  TabController? _previousTabController;
+  TabController get _tabController {
+    final TabController? tabController = widget.controller ?? DefaultTabController.maybeOf(context);
+    assert(() {
+      if (tabController == null) {
+        throw FlutterError(
+          'No TabController for $runtimeType.\n'
+          'When creating a $runtimeType, you must either provide an explicit TabController '
+          'using the "controller" property, or you must ensure that there is a '
+          'DefaultTabController above the $runtimeType.\n'
+          'In this case, there was neither an explicit controller nor a default controller.',
+        );
+      }
+      return true;
+    }());
+    return tabController!;
+  }
+
+  CurvedAnimation? _animation;
+
+  @override
+  void didUpdateWidget (TabPageSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_previousTabController?.animation != _tabController.animation) {
+      _setAnimation();
+    }
+    if (_previousTabController != _tabController) {
+      _previousTabController = _tabController;
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_animation == null || _previousTabController?.animation != _tabController.animation) {
+      _setAnimation();
+    }
+    if (_previousTabController != _tabController) {
+      _previousTabController = _tabController;
+    }
+  }
+
+  void _setAnimation() {
+    _animation?.dispose();
+    _animation = CurvedAnimation(
+      parent: _tabController.animation!,
+      curve: Curves.fastOutSlowIn,
+    );
+  }
+
+  @override
+  void dispose() {
+    _animation?.dispose();
+    super.dispose();
+  }
+
   Widget _buildTabIndicator(
     int tabIndex,
     TabController tabController,
@@ -2290,44 +2366,27 @@ class TabPageSelector extends StatelessWidget {
     return TabPageSelectorIndicator(
       backgroundColor: background,
       borderColor: selectedColorTween.end!,
-      size: indicatorSize,
-      borderStyle: borderStyle ?? BorderStyle.solid,
+      size: widget.indicatorSize,
+      borderStyle: widget.borderStyle ?? BorderStyle.solid,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final Color fixColor = color ?? Colors.transparent;
-    final Color fixSelectedColor = selectedColor ?? Theme.of(context).colorScheme.secondary;
+    final Color fixColor = widget.color ?? Colors.transparent;
+    final Color fixSelectedColor = widget.selectedColor ?? Theme.of(context).colorScheme.secondary;
     final ColorTween selectedColorTween = ColorTween(begin: fixColor, end: fixSelectedColor);
     final ColorTween previousColorTween = ColorTween(begin: fixSelectedColor, end: fixColor);
-    final TabController? tabController = controller ?? DefaultTabController.maybeOf(context);
 	  final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    assert(() {
-      if (tabController == null) {
-        throw FlutterError(
-          'No TabController for $runtimeType.\n'
-          'When creating a $runtimeType, you must either provide an explicit TabController '
-          'using the "controller" property, or you must ensure that there is a '
-          'DefaultTabController above the $runtimeType.\n'
-          'In this case, there was neither an explicit controller nor a default controller.',
-        );
-      }
-      return true;
-    }());
-    final Animation<double> animation = CurvedAnimation(
-      parent: tabController!.animation!,
-      curve: Curves.fastOutSlowIn,
-    );
     return AnimatedBuilder(
-      animation: animation,
+      animation: _animation!,
       builder: (BuildContext context, Widget? child) {
         return Semantics(
-          label: localizations.tabLabel(tabIndex: tabController.index + 1, tabCount: tabController.length),
+          label: localizations.tabLabel(tabIndex: _tabController.index + 1, tabCount: _tabController.length),
           child: Row(
             mainAxisSize: MainAxisSize.min,
-            children: List<Widget>.generate(tabController.length, (int tabIndex) {
-              return _buildTabIndicator(tabIndex, tabController, selectedColorTween, previousColorTween);
+            children: List<Widget>.generate(_tabController.length, (int tabIndex) {
+              return _buildTabIndicator(tabIndex, _tabController, selectedColorTween, previousColorTween);
             }).toList(),
           ),
         );
