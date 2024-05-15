@@ -104,6 +104,8 @@ source_set("flutter_framework_source_arc") {
     "framework/Source/KeyCodeMap_Internal.h",
     "framework/Source/SemanticsObject.h",
     "framework/Source/SemanticsObject.mm",
+    "framework/Source/TextInputSemanticsObject.h",
+    "framework/Source/TextInputSemanticsObject.mm",
     "framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h",
     "framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.mm",
     "framework/Source/connection_collection.h",
@@ -181,8 +183,6 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterViewController_Internal.h",
     "framework/Source/accessibility_bridge.h",
     "framework/Source/accessibility_bridge.mm",
-    "framework/Source/accessibility_text_entry.h",
-    "framework/Source/accessibility_text_entry.mm",
     "platform_view_ios.h",
     "platform_view_ios.mm",
   ]
@@ -195,7 +195,6 @@ source_set("flutter_framework_source") {
   }
 
   deps += [
-    "//flutter/common",
     "//flutter/fml",
     "//flutter/runtime",
     "//flutter/shell/common",

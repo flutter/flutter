@@ -10,7 +10,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTouchInterceptingView_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObjectTestMocks.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/TextInputSemanticsObject.h"
 
 FLUTTER_ASSERT_ARC
 
