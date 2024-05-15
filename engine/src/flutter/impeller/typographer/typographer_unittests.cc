@@ -151,8 +151,8 @@ TEST_P(TypographerTest, GlyphAtlasWithOddUniqueGlyphSize) {
   ASSERT_NE(atlas, nullptr);
   ASSERT_NE(atlas->GetTexture(), nullptr);
 
-  ASSERT_EQ(atlas->GetTexture()->GetSize().width,
-            atlas->GetTexture()->GetSize().height);
+  EXPECT_EQ(atlas->GetTexture()->GetSize().width, 4096u);
+  EXPECT_EQ(atlas->GetTexture()->GetSize().height, 1024u);
 }
 
 TEST_P(TypographerTest, GlyphAtlasIsRecycledIfUnchanged) {
