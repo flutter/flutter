@@ -397,6 +397,7 @@ class FakeDoctor extends Fake implements Doctor {
     List<ValidatorTask>? startedValidatorTasks,
     bool sendEvent = true,
     FlutterVersion? version,
+    Map<ValidatorType, bool>? filters,
   }) async {
     return diagnoseSucceeds;
   }

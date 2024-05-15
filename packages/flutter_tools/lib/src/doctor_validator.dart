@@ -45,6 +45,21 @@ enum ValidationMessageType {
   information,
 }
 
+enum ValidatorType implements Enum {
+  android,
+  ios,
+  web,
+  linux,
+  macos,
+  windows,
+  intellij,
+  vscode,
+  xcode,
+  flutter,
+  devices,
+  http
+}
+
 abstract class DoctorValidator {
   const DoctorValidator(this.title);
 

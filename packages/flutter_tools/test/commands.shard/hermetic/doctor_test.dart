@@ -21,10 +21,13 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/http_host_validator.dart';
+import 'package:flutter_tools/src/linux/linux_doctor.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
+import 'package:flutter_tools/src/web/web_validator.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -653,7 +656,7 @@ void main() {
     });
 
     testUsingContext('validate merging assigns statusInfo and title', () async {
-      // There are two subvalidators. Only the second contains statusInfo.
+      // There are two sub validators. Only the second contains statusInfo.
       expect(await FakeGroupedDoctorWithStatus(logger).diagnose(), isTrue);
       expect(logger.statusText, equals(
               '[✓] First validator title (A status message)\n'
@@ -789,7 +792,7 @@ void main() {
       final List<DoctorValidator> validators = DoctorValidatorsProvider.test(
         featureFlags: featureFlags,
         platform: FakePlatform(),
-      ).validators;
+      ).getValidators();
       final FlutterValidator flutterValidator = validators.whereType<FlutterValidator>().first;
       final ValidationResult result = await flutterValidator.validate();
       expect(
@@ -809,12 +812,105 @@ void main() {
       TestFeatureFlags: () => featureFlags,
     });
   });
+
+  group('Filtering', () {
+    testUsingContext('All validators', () async {
+      final DoctorValidatorsProvider provider = DoctorValidatorsProvider.test(
+        featureFlags: TestFeatureFlags(
+            isLinuxEnabled: true,
+            isMacOSEnabled: true,
+            isWebEnabled: true,
+            isWindowsEnabled: true,
+            areCustomDevicesEnabled: true,
+        ),
+      );
+      expect(provider.getValidators(), contains(isA<FlutterValidator>()));
+      expect(provider.getValidators(), contains(isA<LinuxDoctorValidator>()));
+      expect(provider.getValidators(), contains(isA<HttpHostValidator>()));
+      expect(provider.getValidators(), contains(isA<DeviceValidator>()));
+      expect(provider.getValidators(), contains(isA<ChromeValidator>()));
+      expect(provider.getValidators(), contains(isA<NoAndroidStudioValidator>()));
+    }, overrides: <Type, Generator>{
+      AndroidWorkflow: () => FakeAndroidWorkflow(),
+    });
+
+    testUsingContext('No validators', () async {
+      final DoctorValidatorsProvider provider = DoctorValidatorsProvider.test(
+        featureFlags: TestFeatureFlags(
+        ),
+      );
+      final Map<ValidatorType, bool> filters = <ValidatorType, bool>{for (final ValidatorType e in ValidatorType.values) e : false};
+      expect(provider.getValidators(filters), hasLength(0));
+    });
+
+    testUsingContext('Only flutter validator', () async {
+      final DoctorValidatorsProvider provider = DoctorValidatorsProvider.test(
+        featureFlags: TestFeatureFlags(),
+      );
+      final Map<ValidatorType, bool> filters = <ValidatorType, bool>{for (final ValidatorType e in ValidatorType.values) e : false};
+      filters.update(ValidatorType.flutter, (_) => true);
+      expect(provider.getValidators(filters), contains(isA<FlutterValidator>()));
+      expect(provider.getValidators(filters), hasLength(1));
+    });
+
+    testUsingContext('Only linux validator with workflow applied', () async {
+      final DoctorValidatorsProvider provider = DoctorValidatorsProvider.test(
+        featureFlags: TestFeatureFlags(isLinuxEnabled: true),
+      );
+      final Map<ValidatorType, bool> filters = <ValidatorType, bool>{for (final ValidatorType e in ValidatorType.values) e : false};
+      filters.update(ValidatorType.linux, (_) => true);
+      expect(provider.getValidators(filters), contains(isA<LinuxDoctorValidator>()));
+      expect(provider.getValidators(filters), hasLength(1));
+    });
+
+    testUsingContext('Only linux validator with workflow not applied', () async {
+      final DoctorValidatorsProvider provider = DoctorValidatorsProvider.test(
+        featureFlags: TestFeatureFlags(),
+      );
+      final Map<ValidatorType, bool> filters = <ValidatorType, bool>{for (final ValidatorType e in ValidatorType.values) e : false};
+      filters.update(ValidatorType.linux, (_) => true);
+      expect(provider.getValidators(filters), isNot(contains(isA<LinuxDoctorValidator>())));
+      expect(provider.getValidators(filters), hasLength(0));
+    });
+
+
+    testUsingContext('Only device validator with canListAnything', () async {
+      final DoctorValidatorsProvider provider = DoctorValidatorsProvider.test(
+        featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
+      );
+      final Map<ValidatorType, bool> filters = <ValidatorType, bool>{for (final ValidatorType e in ValidatorType.values) e : false};
+      filters.update(ValidatorType.devices, (_) => true);
+      expect(provider.getValidators(filters), contains(isA<DeviceValidator>()));
+      expect(provider.getValidators(filters), hasLength(1));
+    });
+
+    testUsingContext('Only linux validator with workflow not applied', () async {
+      final DoctorValidatorsProvider provider = DoctorValidatorsProvider.test(
+        featureFlags: TestFeatureFlags(),
+      );
+      final Map<ValidatorType, bool> filters = <ValidatorType, bool>{for (final ValidatorType e in ValidatorType.values) e : false};
+      filters.update(ValidatorType.linux, (_) => true);
+      expect(provider.getValidators(filters), isNot(contains(isA<LinuxDoctorValidator>())));
+      expect(provider.getValidators(filters), hasLength(0));
+    });
+
+    testUsingContext('Only http validator', () async {
+      final DoctorValidatorsProvider provider = DoctorValidatorsProvider.test(
+        featureFlags: TestFeatureFlags(),
+      );
+      final Map<ValidatorType, bool> filters = <ValidatorType, bool>{for (final ValidatorType e in ValidatorType.values) e : false};
+      filters.update(ValidatorType.http, (_) => true);
+      expect(provider.getValidators(filters), contains(isA<HttpHostValidator>()));
+      expect(provider.getValidators(filters), hasLength(1));
+    });
+  });
+
   testUsingContext('If android workflow is disabled, AndroidStudio validator is not included', () {
     final DoctorValidatorsProvider provider = DoctorValidatorsProvider.test(
       featureFlags: TestFeatureFlags(isAndroidEnabled: false),
     );
-    expect(provider.validators, isNot(contains(isA<AndroidStudioValidator>())));
-    expect(provider.validators, isNot(contains(isA<NoAndroidStudioValidator>())));
+    expect(provider.getValidators(), isNot(contains(isA<AndroidStudioValidator>())));
+    expect(provider.getValidators(), isNot(contains(isA<NoAndroidStudioValidator>())));
   }, overrides: <Type, Generator>{
     AndroidWorkflow: () => FakeAndroidWorkflow(appliesToHostPlatform: false),
   });
@@ -972,12 +1068,12 @@ void main() {
       Analytics: () => fakeAnalytics,
     });
 
-    testUsingContext('grouped validator subresult and subvalidators different lengths', () async {
+    testUsingContext('grouped validator sub result and sub validators different lengths', () async {
       final FakeGroupedDoctorWithCrash fakeDoctor = FakeGroupedDoctorWithCrash(logger, clock: fakeSystemClock);
       await fakeDoctor.diagnose(verbose: false);
 
-      expect(fakeDoctor.validators, hasLength(1));
-      expect(fakeDoctor.validators.first.runtimeType == FakeGroupedValidatorWithCrash, true);
+      expect(fakeDoctor.getValidators(), hasLength(1));
+      expect(fakeDoctor.getValidators().first.runtimeType == FakeGroupedValidatorWithCrash, true);
       expect(fakeAnalytics.sentEvents, hasLength(0));
 
       // Attempt to send a random event to ensure that the
@@ -1135,7 +1231,7 @@ class FakeDoctor extends Doctor {
       : super(logger: logger);
 
   @override
-  late final List<DoctorValidator> validators = <DoctorValidator>[
+  List<DoctorValidator> getValidators([Map<ValidatorType, bool>? filters]) => <DoctorValidator>[
     PassingValidator('Passing Validator'),
     MissingValidator(),
     NotAvailableValidator(),
@@ -1150,7 +1246,7 @@ class FakePassingDoctor extends Doctor {
       : super(logger: logger);
 
   @override
-  late final List<DoctorValidator> validators = <DoctorValidator>[
+  List<DoctorValidator> getValidators([Map<ValidatorType, bool>? filters]) => <DoctorValidator>[
     PassingValidator('Passing Validator'),
     PartialValidatorWithHintsOnly(),
     PartialValidatorWithErrors(),
@@ -1165,7 +1261,7 @@ class FakeSinglePassingDoctor extends Doctor {
       : super(logger: logger);
 
   @override
-  late final List<DoctorValidator> validators = <DoctorValidator>[
+  List<DoctorValidator> getValidators([Map<ValidatorType, bool>? filters]) => <DoctorValidator>[
     PartialValidatorWithHintsOnly(),
   ];
 }
@@ -1176,7 +1272,7 @@ class FakeQuietDoctor extends Doctor {
       : super(logger: logger);
 
   @override
-  late final List<DoctorValidator> validators = <DoctorValidator>[
+  List<DoctorValidator> getValidators([Map<ValidatorType, bool>? filters]) => <DoctorValidator>[
     PassingValidator('Passing Validator'),
     PassingValidator('Another Passing Validator'),
     PassingValidator('Validators are fun'),
@@ -1190,7 +1286,7 @@ class FakePiiDoctor extends Doctor {
       : super(logger: logger);
 
   @override
-  late final List<DoctorValidator> validators = <DoctorValidator>[
+  List<DoctorValidator> getValidators([Map<ValidatorType, bool>? filters]) => <DoctorValidator>[
     PiiValidator(),
   ];
 }
@@ -1201,7 +1297,7 @@ class FakeCrashingDoctor extends Doctor {
       : super(logger: logger);
 
   @override
-  late final List<DoctorValidator> validators = <DoctorValidator>[
+  List<DoctorValidator> getValidators([Map<ValidatorType, bool>? filters]) => <DoctorValidator>[
     PassingValidator('Passing Validator'),
     PassingValidator('Another Passing Validator'),
     CrashingValidator(),
@@ -1216,7 +1312,7 @@ class FakeAsyncStuckDoctor extends Doctor {
       : super(logger: logger);
 
   @override
-  late final List<DoctorValidator> validators = <DoctorValidator>[
+  List<DoctorValidator> getValidators([Map<ValidatorType, bool>? filters]) => <DoctorValidator>[
     PassingValidator('Passing Validator'),
     PassingValidator('Another Passing Validator'),
     StuckValidator(),
@@ -1234,7 +1330,7 @@ class FakeAsyncCrashingDoctor extends Doctor {
   final FakeAsync _time;
 
   @override
-  late final List<DoctorValidator> validators = <DoctorValidator>[
+  List<DoctorValidator> getValidators([Map<ValidatorType, bool>? filters]) => <DoctorValidator>[
     PassingValidator('Passing Validator'),
     PassingValidator('Another Passing Validator'),
     AsyncCrashingValidator(_time),
@@ -1247,16 +1343,16 @@ class FakeAsyncCrashingDoctor extends Doctor {
 /// overriding the doctor.
 class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
   @override
-  List<DoctorValidator> get validators {
+  List<Workflow> get workflows => <Workflow>[];
+
+  @override
+  List<DoctorValidator> getValidators([Map<ValidatorType, bool>? filters]) {
     return <DoctorValidator>[
       PassingValidator('Passing Validator'),
       PassingValidator('Another Passing Validator'),
       PassingValidator('Providing validators is fun'),
     ];
   }
-
-  @override
-  List<Workflow> get workflows => <Workflow>[];
 }
 
 class PassingGroupedValidator extends DoctorValidator {
@@ -1313,7 +1409,7 @@ class FakeGroupedDoctor extends Doctor {
       : super(logger: logger);
 
   @override
-  late final List<DoctorValidator> validators = <DoctorValidator>[
+  List<DoctorValidator> getValidators([Map<ValidatorType, bool>? filters]) => <DoctorValidator>[
     GroupedValidator(<DoctorValidator>[
       PassingGroupedValidator('Category 1'),
       PassingGroupedValidator('Category 1'),
@@ -1331,7 +1427,7 @@ class FakeGroupedDoctorWithCrash extends Doctor {
       : super(logger: logger);
 
   @override
-  late final List<DoctorValidator> validators = <DoctorValidator>[
+  List<DoctorValidator> getValidators([Map<ValidatorType, bool>? filters]) => <DoctorValidator>[
     FakeGroupedValidatorWithCrash(<DoctorValidator>[
       PassingGroupedValidator('Category 1'),
       PassingGroupedValidator('Category 1'),
@@ -1362,7 +1458,7 @@ class FakeGroupedDoctorWithStatus extends Doctor {
       : super(logger: logger);
 
   @override
-  late final List<DoctorValidator> validators = <DoctorValidator>[
+  List<DoctorValidator> getValidators([Map<ValidatorType, bool>? filters]) => <DoctorValidator>[
     GroupedValidator(<DoctorValidator>[
       PassingGroupedValidator('First validator title'),
       PassingGroupedValidatorWithStatus('Second validator title'),
@@ -1376,11 +1472,12 @@ class FakeSmallGroupDoctor extends Doctor {
   FakeSmallGroupDoctor(
       Logger logger, DoctorValidator val1, DoctorValidator val2,
       {super.clock = const SystemClock()})
-    : validators = <DoctorValidator>[GroupedValidator(<DoctorValidator>[val1, val2])],
+    : _validators = <DoctorValidator>[GroupedValidator(<DoctorValidator>[val1, val2])],
       super(logger: logger);
+  final List<DoctorValidator> _validators;
 
   @override
-  final List<DoctorValidator> validators;
+  List<DoctorValidator> getValidators([Map<ValidatorType, bool>? filters]) => _validators;
 }
 
 class VsCodeValidatorTestTargets extends VsCodeValidator {

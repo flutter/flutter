@@ -229,8 +229,8 @@ void main() {
 
 class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
   @override
-  List<DoctorValidator> get validators => <DoctorValidator>[];
+  List<Workflow> get workflows => <Workflow>[];
 
   @override
-  List<Workflow> get workflows => <Workflow>[];
+  List<DoctorValidator> getValidators([Map<ValidatorType, bool>? filters]) => <DoctorValidator>[];
 }

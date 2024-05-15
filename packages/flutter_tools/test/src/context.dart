@@ -323,8 +323,8 @@ class FakeDoctor extends Doctor {
   /// Replaces the android workflow with a version that overrides licensesAccepted,
   /// to prevent individual tests from having to mock out the process for
   /// the Doctor.
-  List<DoctorValidator> get validators {
-    final List<DoctorValidator> superValidators = super.validators;
+  List<DoctorValidator> getValidators([Map<ValidatorType, bool>? filters]) {
+    final List<DoctorValidator> superValidators = super.getValidators();
     return superValidators.map<DoctorValidator>((DoctorValidator v) {
       if (v is AndroidLicenseValidator) {
         return FakeAndroidLicenseValidator();

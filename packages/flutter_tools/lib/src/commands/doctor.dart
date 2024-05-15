@@ -4,6 +4,7 @@
 
 import '../android/android_workflow.dart';
 import '../base/common.dart';
+import '../doctor_validator.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
@@ -16,8 +17,17 @@ class DoctorCommand extends FlutterCommand {
     argParser.addOption('check-for-remote-artifacts',
       hide: !verbose,
       help: 'Used to determine if Flutter engine artifacts for all platforms '
-            'are available for download.',
-      valueHelp: 'engine revision git hash',);
+          'are available for download.',
+      valueHelp: 'engine revision git hash',
+    );
+    argParser.addMultiOption(
+      'filter',
+      help: 'Used to filter sub-systems to run diagnostics for. '
+          'Values are sub-system labels (e.g. "flutter" or "android").',
+      allowed: ValidatorType.values.map((ValidatorType e) =>
+        e.toString().split('.').last),
+      abbr: 'f',
+    );
   }
 
   final bool verbose;
@@ -46,10 +56,19 @@ class DoctorCommand extends FlutterCommand {
             'git hash.');
       }
     }
+    List<String> filtersString = <String>[];
+    if (argResults?.wasParsed('filter') ?? false) {
+      filtersString = stringsArg('filter');
+    }
+
     final bool success = await globals.doctor?.diagnose(
       androidLicenses: boolArg('android-licenses'),
       verbose: verbose,
       androidLicenseValidator: androidLicenseValidator,
+      filters: filtersString.isNotEmpty ? <ValidatorType, bool>{
+        for (final ValidatorType e in ValidatorType.values)
+          e : filtersString.contains(e.toString().split('.').last)
+      } : null,
     ) ?? false;
     return FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
   }

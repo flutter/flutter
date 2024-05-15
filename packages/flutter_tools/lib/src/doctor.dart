@@ -71,8 +71,8 @@ abstract class DoctorValidatorsProvider {
     featureFlags: featureFlags,
   );
 
-  List<DoctorValidator> get validators;
   List<Workflow> get workflows;
+  List<DoctorValidator> getValidators([Map<ValidatorType, bool>? filters]);
 }
 
 class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
@@ -108,27 +108,40 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   );
 
   @override
-  List<DoctorValidator> get validators {
+  List<DoctorValidator> getValidators([Map<ValidatorType, bool>? filters]) {
     if (_validators != null) {
       return _validators!;
     }
+    filters ??= <ValidatorType, bool>{for (final ValidatorType e in ValidatorType.values) e : true};
+    final List<DoctorValidator> validators = <DoctorValidator>[];
 
     final List<DoctorValidator> ideValidators = <DoctorValidator>[
-      if (androidWorkflow!.appliesToHostPlatform)
-        ...AndroidStudioValidator.allValidators(globals.config, platform, globals.fs, globals.userMessages),
-      ...IntelliJValidator.installedValidators(
-        fileSystem: globals.fs,
-        platform: platform,
-        userMessages: globals.userMessages,
-        plistParser: globals.plistParser,
-        processManager: globals.processManager,
-        logger: _logger,
-      ),
-      ...VsCodeValidator.installedValidators(globals.fs, platform, globals.processManager),
+      if (androidWorkflow!.appliesToHostPlatform && filters[ValidatorType.android]!)
+        ...AndroidStudioValidator.allValidators(
+            globals.config,
+            platform,
+            globals.fs,
+            globals.userMessages
+        ),
+      if (filters[ValidatorType.intellij]!)
+        ...IntelliJValidator.installedValidators(
+          fileSystem: globals.fs,
+          platform: platform,
+          userMessages: globals.userMessages,
+          plistParser: globals.plistParser,
+          processManager: globals.processManager,
+          logger: _logger,
+        ),
+      if (filters[ValidatorType.vscode]!)
+        ...VsCodeValidator.installedValidators(
+            globals.fs,
+            platform,
+            globals.processManager
+        ),
     ];
-    final ProxyValidator proxyValidator = ProxyValidator(platform: platform);
-    _validators = <DoctorValidator>[
-      FlutterValidator(
+
+    if (filters[ValidatorType.flutter]!) {
+      validators.add(FlutterValidator(
         fileSystem: globals.fs,
         platform: globals.platform,
         flutterVersion: () => globals.flutterVersion.fetchTagsAndGetVersion(clock: globals.systemClock),
@@ -138,60 +151,86 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         artifacts: globals.artifacts!,
         flutterRoot: () => Cache.flutterRoot!,
         operatingSystemUtils: globals.os,
-      ),
-      if (platform.isWindows)
-        WindowsVersionValidator(
+      ));
+    }
+
+    if (platform.isWindows && filters[ValidatorType.windows]!) {
+      validators.add(WindowsVersionValidator(
+        operatingSystemUtils: globals.os,
+        processLister: ProcessLister(globals.processManager),
+      ));
+    }
+
+    if (androidWorkflow!.appliesToHostPlatform && filters[ValidatorType.android]!) {
+      validators.add(GroupedValidator(
+          <DoctorValidator>[androidValidator!, androidLicenseValidator!]));
+    }
+
+    if ((globals.iosWorkflow!.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform) && filters[ValidatorType.xcode]!) {
+      validators.add(GroupedValidator(<DoctorValidator>[
+        XcodeValidator(
+          xcode: globals.xcode!,
+          userMessages: globals.userMessages,
+          iosSimulatorUtils: globals.iosSimulatorUtils!,
+        ),
+        globals.cocoapodsValidator!,
+      ]));
+    }
+
+    if (webWorkflow.appliesToHostPlatform && filters[ValidatorType.web]!) {
+      validators.add(ChromeValidator(
+        chromiumLauncher: ChromiumLauncher(
+          browserFinder: findChromeExecutable,
+          fileSystem: globals.fs,
           operatingSystemUtils: globals.os,
-          processLister: ProcessLister(globals.processManager),
-        ),
-      if (androidWorkflow!.appliesToHostPlatform)
-        GroupedValidator(<DoctorValidator>[androidValidator!, androidLicenseValidator!]),
-      if (globals.iosWorkflow!.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
-        GroupedValidator(<DoctorValidator>[
-          XcodeValidator(
-            xcode: globals.xcode!,
-            userMessages: globals.userMessages,
-            iosSimulatorUtils: globals.iosSimulatorUtils!,
-          ),
-          globals.cocoapodsValidator!,
-        ]),
-      if (webWorkflow.appliesToHostPlatform)
-        ChromeValidator(
-          chromiumLauncher: ChromiumLauncher(
-            browserFinder: findChromeExecutable,
-            fileSystem: globals.fs,
-            operatingSystemUtils: globals.os,
-            platform:  globals.platform,
-            processManager: globals.processManager,
-            logger: globals.logger,
-          ),
-          platform: globals.platform,
-        ),
-      if (linuxWorkflow.appliesToHostPlatform)
-        LinuxDoctorValidator(
+          platform:  globals.platform,
           processManager: globals.processManager,
-          userMessages: globals.userMessages,
+          logger: globals.logger,
         ),
-      if (windowsWorkflow!.appliesToHostPlatform)
-        visualStudioValidator!,
-      if (ideValidators.isNotEmpty)
-        ...ideValidators
-      else
-        NoIdeValidator(),
-      if (proxyValidator.shouldShow)
-        proxyValidator,
-      if (globals.deviceManager?.canListAnything ?? false)
-        DeviceValidator(
-          deviceManager: globals.deviceManager,
-          userMessages: globals.userMessages,
-        ),
-      HttpHostValidator(
+        platform: globals.platform,
+      ));
+    }
+
+    if (linuxWorkflow.appliesToHostPlatform && filters[ValidatorType.linux]!) {
+      validators.add(LinuxDoctorValidator(
+        processManager: globals.processManager,
+        userMessages: globals.userMessages,
+      ));
+    }
+
+    if (windowsWorkflow!.appliesToHostPlatform && filters[ValidatorType.windows]!) {
+      validators.add(visualStudioValidator!);
+    }
+
+    if (ideValidators.isNotEmpty) {
+      validators.addAll(ideValidators);
+      // if any filters are false, it means we are only interested in a subset of the
+      // validators, so we should not add the NoIdeValidator
+    } else if (filters.values.every((bool value) => value )) {
+      validators.add(NoIdeValidator());
+    }
+
+    final ProxyValidator proxyValidator = ProxyValidator(platform: platform);
+    if (proxyValidator.shouldShow) {
+      validators.add(proxyValidator);
+    }
+
+    if ((globals.deviceManager?.canListAnything ?? false) && filters[ValidatorType.devices]!) {
+      validators.add(DeviceValidator(
+        deviceManager: globals.deviceManager,
+        userMessages: globals.userMessages,
+      ));
+    }
+
+    if (filters[ValidatorType.http]!) {
+      validators.add(HttpHostValidator(
         platform: globals.platform,
         featureFlags: featureFlags,
         httpClient: globals.httpClientFactory?.call() ?? HttpClient(),
-      ),
-    ];
-    return _validators!;
+      ));
+    }
+
+    return _validators = validators;
   }
 
   @override
@@ -222,14 +261,14 @@ class Doctor {
   final SystemClock _clock;
   final Analytics _analytics;
 
-  List<DoctorValidator> get validators {
-    return DoctorValidatorsProvider._instance.validators;
+  List<DoctorValidator> getValidators([Map<ValidatorType, bool>? filters]) {
+    return DoctorValidatorsProvider._instance.getValidators(filters);
   }
 
   /// Return a list of [ValidatorTask] objects and starts validation on all
   /// objects in [validators].
-  List<ValidatorTask> startValidatorTasks() => <ValidatorTask>[
-    for (final DoctorValidator validator in validators)
+  List<ValidatorTask> startValidatorTasks([Map<ValidatorType, bool>? filters]) => <ValidatorTask>[
+    for (final DoctorValidator validator in getValidators(filters))
       ValidatorTask(
         validator,
         // We use an asyncGuard() here to be absolutely certain that
@@ -276,7 +315,7 @@ class Doctor {
     bool missingComponent = false;
     bool sawACrash = false;
 
-    for (final DoctorValidator validator in validators) {
+    for (final DoctorValidator validator in getValidators()) {
       final StringBuffer lineBuffer = StringBuffer();
       ValidationResult result;
       try {
@@ -352,6 +391,7 @@ class Doctor {
     bool showPii = true,
     List<ValidatorTask>? startedValidatorTasks,
     bool sendEvent = true,
+    Map<ValidatorType, bool>? filters,
   }) async {
     final bool showColor = globals.terminal.supportsColor;
     if (androidLicenses && androidLicenseValidator != null) {
@@ -368,7 +408,7 @@ class Doctor {
     // were sent for each doctor validator and its result
     final int analyticsTimestamp = _clock.now().millisecondsSinceEpoch;
 
-    for (final ValidatorTask validatorTask in startedValidatorTasks ?? startValidatorTasks()) {
+    for (final ValidatorTask validatorTask in startedValidatorTasks ?? startValidatorTasks(filters)) {
       final DoctorValidator validator = validatorTask.validator;
       final Status status = _logger.startSpinner(
         timeout: validator.slowWarningDuration,
