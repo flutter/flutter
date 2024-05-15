@@ -79,7 +79,7 @@ Future<void> main() async {
   );
   printer.addResult(
     description: 'const speed-up (vs. non-const)',
-    value: (1.0 - (constMean / nonConstMean)) * 100,
+    value: ((nonConstMean - constMean) / constMean) * 100,
     unit: '%',
     name: 'const_speed_up',
   );
