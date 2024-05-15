@@ -3635,7 +3635,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
   bool get _usingPagesAPI => widget.pages != const <Page<dynamic>>[];
 
-  NavigatorState? _parentNavigator;
+  NavigatorState? get _parentNavigator => context.findAncestorStateOfType<NavigatorState>();
 
   void _handleHistoryChanged() {
     final bool navigatorCanPop = canPop();
@@ -3816,10 +3816,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final NavigatorState? parentNavigator = context.findAncestorStateOfType<NavigatorState>();
-    if (_parentNavigator != parentNavigator) {
-      _parentNavigator = parentNavigator;
-    }
 
     _updateHeroController(HeroControllerScope.maybeOf(context));
     for (final _RouteEntry entry in _history) {
