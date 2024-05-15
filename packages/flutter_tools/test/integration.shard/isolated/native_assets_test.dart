@@ -474,6 +474,11 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
   await pinDependencies(packageDirectory.childFile('pubspec.yaml'));
   await pinDependencies(
       packageDirectory.childDirectory('example').childFile('pubspec.yaml'));
+  await addDepdendencyOverrides(packageDirectory.childFile('pubspec.yaml'));
+  await addDepdendencyOverrides(
+      packageDirectory.childDirectory('example').childFile('pubspec.yaml'));
+
+  await addLinkHookDepedendency(packageDirectory);
 
   final ProcessResult result2 = await processManager.run(
     <String>[
@@ -486,6 +491,74 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
   expect(result2, const ProcessResultMatcher());
 
   return packageDirectory;
+}
+
+Future<void> addLinkHookDepedendency(Directory packageDirectory) async {
+  final Directory flutterDirectory = fileSystem.currentDirectory.parent.parent;
+  final Directory linkHookDirectory = flutterDirectory
+      .childDirectory('dev')
+      .childDirectory('integration_tests')
+      .childDirectory('link_hook');
+  expect(linkHookDirectory, exists);
+
+  final File pubspecFile = packageDirectory.childFile('pubspec.yaml');
+  final String pubspecOld = await pubspecFile.readAsString();
+  final String pubspecNew = pubspecOld.replaceFirst('''
+dependencies:
+''', '''
+dependencies:
+  link_hook:
+    path: ${linkHookDirectory.path}
+''');
+  expect(pubspecNew, isNot(pubspecOld));
+  await pubspecFile.writeAsString(pubspecNew);
+
+  final File dartFile =
+      packageDirectory.childDirectory('lib').childFile('$packageName.dart');
+  final String dartFileOld = await dartFile.readAsString();
+  // Replace with something that results in the same resulting int, so that the
+  // tests don't have to be updated.
+  final String dartFileNew = dartFileOld.replaceFirst(
+    '''
+import '${packageName}_bindings_generated.dart' as bindings;
+''',
+    '''
+import 'package:link_hook/link_hook.dart' as l;
+
+import '${packageName}_bindings_generated.dart' as bindings;
+''',
+  );
+  expect(dartFileNew, isNot(dartFileOld));
+  final String dartFileNew2 = dartFileNew.replaceFirst(
+    'int sum(int a, int b) => bindings.sum(a, b);',
+    'int sum(int a, int b) => bindings.sum(a, b) + l.difference(2, 1) - 1;',
+  );
+  expect(dartFileNew2, isNot(dartFileNew));
+  await dartFile.writeAsString(dartFileNew2);
+}
+
+Future<void> addDepdendencyOverrides(File pubspecFile) async {
+  expect(pubspecFile, exists);
+  final String oldPubspec = await pubspecFile.readAsString();
+  final String newPubspec = '''
+$oldPubspec
+
+# TODO(dacoharkes): Publish versions and don't use git dep.
+dependency_overrides:
+  native_assets_cli:
+    git:
+      url: git@github.com:dart-lang/native.git
+      ref: c1b13c3f77f7602e3875f84e2051b8ff8e94ec4c
+      path: pkgs/native_assets_cli/
+  native_toolchain_c:
+    git:
+      url: git@github.com:dart-lang/native.git
+      ref: c1b13c3f77f7602e3875f84e2051b8ff8e94ec4c
+      path: pkgs/native_toolchain_c/
+
+''';
+  expect(newPubspec, isNot(oldPubspec));
+  await pubspecFile.writeAsString(newPubspec);
 }
 
 Future<void> pinDependencies(File pubspecFile) async {
