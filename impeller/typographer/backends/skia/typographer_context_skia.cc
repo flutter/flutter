@@ -194,16 +194,12 @@ static ISize OptimumAtlasSizeForFontGlyphPairs(
     const std::vector<FontGlyphPair>& pairs,
     std::vector<Rect>& glyph_positions,
     const std::shared_ptr<GlyphAtlasContext>& atlas_context,
-    GlyphAtlas::Type type,
     const ISize& max_texture_size) {
-  static constexpr auto kMinAtlasSize = 8u;
-  static constexpr auto kMinAlphaBitmapSize = 1024u;
+  static constexpr ISize kMinAtlasSize = ISize{4096, 1024};
 
   TRACE_EVENT0("impeller", __FUNCTION__);
 
-  ISize current_size = type == GlyphAtlas::Type::kAlphaBitmap
-                           ? ISize(kMinAlphaBitmapSize, kMinAlphaBitmapSize)
-                           : ISize(kMinAtlasSize, kMinAtlasSize);
+  ISize current_size = kMinAtlasSize;
   size_t total_pairs = pairs.size() + 1;
   do {
     auto rect_packer = std::shared_ptr<RectanglePacker>(
@@ -406,7 +402,6 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
       font_glyph_pairs,                                             //
       glyph_positions,                                              //
       atlas_context,                                                //
-      type,                                                         //
       context.GetResourceAllocator()->GetMaxTextureSizeSupported()  //
   );
 
