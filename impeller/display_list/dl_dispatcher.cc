@@ -119,6 +119,7 @@ static impeller::SamplerDescriptor ToSamplerDescriptor(
   switch (options) {
     case flutter::DlImageSampling::kNearestNeighbor:
       desc.min_filter = desc.mag_filter = impeller::MinMagFilter::kNearest;
+      desc.mip_filter = impeller::MipFilter::kBase;
       desc.label = "Nearest Sampler";
       break;
     case flutter::DlImageSampling::kLinear:
