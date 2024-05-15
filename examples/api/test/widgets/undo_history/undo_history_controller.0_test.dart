@@ -12,20 +12,23 @@ void main() {
       const example.UndoHistoryControllerExampleApp(),
     );
 
+    // Equals to UndoHistoryState._kThrottleDuration.
+    const Duration kThrottleDuration = Duration(milliseconds: 500);
+
     expect(find.byType(TextField), findsOne);
     expect(find.widgetWithText(TextButton, 'Undo'), findsOne);
     expect(find.widgetWithText(TextButton, 'Redo'), findsOne);
 
     await tester.enterText(find.byType(TextField), '1st change');
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(kThrottleDuration);
     expect(find.text('1st change'), findsOne);
 
     await tester.enterText(find.byType(TextField), '2nd change');
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(kThrottleDuration);
     expect(find.text('2nd change'), findsOne);
 
     await tester.enterText(find.byType(TextField), '3rd change');
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(kThrottleDuration);
     expect(find.text('3rd change'), findsOne);
 
     await tester.tap(find.text('Undo'));
