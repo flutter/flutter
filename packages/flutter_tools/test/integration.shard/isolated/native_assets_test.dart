@@ -302,7 +302,7 @@ void expectDylibIsCodeSignedMacOS(Directory appDirectory, String buildMode) {
   expect(codesign.exitCode, 0);
 
   // Expect adhoc signature, but not linker-signed (which would mean no code-signing happened after linking).
-  final List<String> lines = codesign.stdout.toString().split('\n');
+  final List<String> lines = codesign.stderr.toString().split('\n');
   final bool isLinkerSigned = lines.any((String line) => line.contains('linker-signed'));
   final bool isAdhoc = lines.any((String line) => line.contains('Signature=adhoc'));
   expect(isAdhoc, isTrue);
