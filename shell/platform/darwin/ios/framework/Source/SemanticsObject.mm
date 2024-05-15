@@ -7,6 +7,8 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSemanticsScrollView.h"
 
+FLUTTER_ASSERT_ARC
+
 namespace {
 
 flutter::SemanticsAction GetSemanticsActionForScrollDirection(
@@ -107,11 +109,6 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   return self;
 }
 
-- (void)dealloc {
-  [_nativeSwitch release];
-  [super dealloc];
-}
-
 - (NSMethodSignature*)methodSignatureForSelector:(SEL)sel {
   NSMethodSignature* result = [super methodSignatureForSelector:sel];
   if (!result) {
@@ -145,7 +142,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 @end  // FlutterSwitchSemanticsObject
 
 @interface FlutterScrollableSemanticsObject ()
-@property(nonatomic, retain) FlutterSemanticsScrollView* scrollView;
+@property(nonatomic) FlutterSemanticsScrollView* scrollView;
 @end
 
 @implementation FlutterScrollableSemanticsObject
@@ -164,9 +161,6 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 - (void)dealloc {
   [_scrollView removeFromSuperview];
-  _scrollView.semanticsObject = nil;
-  [_scrollView release];
-  [super dealloc];
 }
 
 - (void)accessibilityBridgeDidFinishUpdate {
@@ -249,25 +243,16 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 @end
 
 @interface SemanticsObject ()
-@property(nonatomic, retain) SemanticsObjectContainer* container;
+@property(nonatomic) SemanticsObjectContainer* container;
 
 /** Should only be called in conjunction with setting child/parent relationship. */
-@property(nonatomic, assign, readwrite) SemanticsObject* parent;
+@property(nonatomic, weak, readwrite) SemanticsObject* parent;
 
 @end
 
 @implementation SemanticsObject {
   NSMutableArray<SemanticsObject*>* _children;
   BOOL _inDealloc;
-}
-
-#pragma mark - Override base class designated initializers
-
-// Method declared as unavailable in the interface
-- (instancetype)init {
-  [self release];
-  [super doesNotRecognizeSelector:_cmd];
-  return nil;
 }
 
 #pragma mark - Designated initializers
@@ -293,17 +278,19 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (void)dealloc {
+  // Set parent and children parents to nil explicitly in dealloc.
+  // -[UIAccessibilityElement dealloc] has in the past called into -accessibilityContainer
+  // and self.children. There have also been crashes related to iOS
+  // accessing methods during dealloc, and there's a lag before the tree changes.
+  // See https://github.com/flutter/engine/pull/4602 and
+  // https://github.com/flutter/engine/pull/27786.
   for (SemanticsObject* child in _children) {
     child.parent = nil;
   }
   [_children removeAllObjects];
-  [_children release];
-  [_childrenInHitTestOrder release];
 
   _parent = nil;
-  [_container release];
   _inDealloc = YES;
-  [super dealloc];
 }
 
 #pragma mark - Semantic object property accesser
@@ -312,7 +299,6 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   for (SemanticsObject* child in _children) {
     child.parent = nil;
   }
-  [_children release];
   _children = [children mutableCopy];
   for (SemanticsObject* child in _children) {
     child.parent = self;
@@ -323,7 +309,6 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   for (SemanticsObject* child in _childrenInHitTestOrder) {
     child.parent = nil;
   }
-  [_childrenInHitTestOrder release];
   _childrenInHitTestOrder = [childrenInHitTestOrder copy];
   for (SemanticsObject* child in _childrenInHitTestOrder) {
     child.parent = self;
@@ -416,7 +401,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
                                          withAttributes:
                                              (const flutter::StringAttributes&)attributes {
   NSMutableAttributedString* attributedString =
-      [[[NSMutableAttributedString alloc] initWithString:string] autorelease];
+      [[NSMutableAttributedString alloc] initWithString:string];
   for (const auto& attribute : attributes) {
     NSRange range = NSMakeRange(attribute->start, attribute->end - attribute->start);
     switch (attribute->type) {
@@ -686,9 +671,8 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
   if ([self hasChildren] || self.uid == kRootNodeId) {
     if (self.container == nil) {
-      self.container =
-          [[[SemanticsObjectContainer alloc] initWithSemanticsObject:self
-                                                              bridge:self.bridge] autorelease];
+      self.container = [[SemanticsObjectContainer alloc] initWithSemanticsObject:self
+                                                                          bridge:self.bridge];
     }
     return self.container;
   }
@@ -787,17 +771,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 @end
 
-@implementation FlutterSemanticsObject {
-}
-
-#pragma mark - Override base class designated initializers
-
-// Method declared as unavailable in the interface
-- (instancetype)init {
-  [self release];
-  [super doesNotRecognizeSelector:_cmd];
-  return nil;
-}
+@implementation FlutterSemanticsObject
 
 #pragma mark - Designated initializers
 
@@ -853,7 +827,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 @end
 
 @interface FlutterPlatformViewSemanticsContainer ()
-@property(nonatomic, assign) UIView* platformView;
+@property(nonatomic, weak) UIView* platformView;
 @end
 
 @implementation FlutterPlatformViewSemanticsContainer
@@ -868,11 +842,6 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   return self;
 }
 
-- (void)dealloc {
-  _platformView = nil;
-  [super dealloc];
-}
-
 - (id)nativeAccessibility {
   return self.platformView;
 }
@@ -884,13 +853,6 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 #pragma mark - initializers
-
-// Method declared as unavailable in the interface
-- (instancetype)init {
-  [self release];
-  [super doesNotRecognizeSelector:_cmd];
-  return nil;
-}
 
 - (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject
                                  bridge:(fml::WeakPtr<flutter::AccessibilityBridgeIos>)bridge {
