@@ -268,14 +268,14 @@ class ThemeData with Diagnosticable {
     bool? useMaterial3,
     VisualDensity? visualDensity,
     // COLOR
-    // [colorScheme] is the preferred way to configure colors. The color properties
+    ColorScheme? colorScheme,
+    Brightness? brightness,
+    Color? colorSchemeSeed,
+    // [colorScheme] is the preferred way to configure colors. The [Color] properties
     // listed below (as well as primarySwatch) will gradually be phased out, see
     // https://github.com/flutter/flutter/issues/91772.
-    Brightness? brightness,
     Color? canvasColor,
     Color? cardColor,
-    ColorScheme? colorScheme,
-    Color? colorSchemeSeed,
     Color? dialogBackgroundColor,
     Color? disabledColor,
     Color? dividerColor,
@@ -650,12 +650,12 @@ class ThemeData with Diagnosticable {
     required this.useMaterial3,
     required this.visualDensity,
     // COLOR
-    // [colorScheme] is the preferred way to configure colors. The other color
-    // properties will gradually be phased out, see
+    required this.colorScheme,
+    // [colorScheme] is the preferred way to configure colors. The [Color] properties
+    // listed below (as well as primarySwatch) will gradually be phased out, see
     // https://github.com/flutter/flutter/issues/91772.
     required this.canvasColor,
     required this.cardColor,
-    required this.colorScheme,
     required this.dialogBackgroundColor,
     required this.disabledColor,
     required this.dividerColor,
@@ -1415,13 +1415,13 @@ class ThemeData with Diagnosticable {
     InteractiveInkFeatureFactory? splashFactory,
     VisualDensity? visualDensity,
     // COLOR
-    // [colorScheme] is the preferred way to configure colors. The other color
-    // properties will gradually be phased out, see
-    // https://github.com/flutter/flutter/issues/91772.
+    ColorScheme? colorScheme,
     Brightness? brightness,
+    // [colorScheme] is the preferred way to configure colors. The [Color] properties
+    // listed below (as well as primarySwatch) will gradually be phased out, see
+    // https://github.com/flutter/flutter/issues/91772.
     Color? canvasColor,
     Color? cardColor,
-    ColorScheme? colorScheme,
     Color? dialogBackgroundColor,
     Color? disabledColor,
     Color? dividerColor,
