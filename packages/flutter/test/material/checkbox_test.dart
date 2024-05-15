@@ -2319,17 +2319,17 @@ void main() {
         value: false,
       ));
       final Size checkboxSize = tester.getSize(find.byType(Checkbox));
-      expect(checkboxSize, const Size(48.0, 48.0));
+      expect(checkboxSize, const Size(40.0, 40.0));
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
       await gesture.addPointer(location: tester.getCenter(find.byType(Checkbox)));
       await tester.pump();
       await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
       expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-          kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic);
+          SystemMouseCursors.basic);
 
       await tester.pumpWidget(buildAdaptiveCheckbox(platform: platform));
       expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-          kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic);
+          SystemMouseCursors.basic);
 
       // Test disabled checkbox.
       await tester.pumpWidget(buildAdaptiveCheckbox(platform: platform, enabled: false, value: false));
