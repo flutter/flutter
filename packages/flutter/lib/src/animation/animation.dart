@@ -29,6 +29,12 @@ enum AnimationStatus {
   /// The animation is stopped at the end.
   completed;
 
+  /// Whether the animation is stopped at the beginning.
+  bool get isDismissed => this == dismissed;
+
+  /// Whether the animation is stopped at the end.
+  bool get isCompleted => this == completed;
+
   /// Whether the animation is running in either direction.
   bool get running => switch (this) {
     forward   || reverse   => true,
@@ -166,10 +172,10 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   T get value;
 
   /// Whether this animation is stopped at the beginning.
-  bool get isDismissed => status == AnimationStatus.dismissed;
+  bool get isDismissed => status.isDismissed;
 
   /// Whether this animation is stopped at the end.
-  bool get isCompleted => status == AnimationStatus.completed;
+  bool get isCompleted => status.isCompleted;
 
   /// Whether this animation is running in either direction.
   bool get running => status.running;
