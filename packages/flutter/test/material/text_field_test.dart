@@ -1875,6 +1875,27 @@ void main() {
     expect(find.text('Paste'), findsOneWidget);
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
+  testWidgets('hint text is not ellipsized by default', (WidgetTester tester) async {
+    const String kLongString =
+      'Enter your email Enter your email Enter your '
+      'email Enter your email Enter your email Enter '
+      'your email Enter your email';
+    const double defaultLineHeight = 24;
+    await tester.pumpWidget(overlay(
+      child: const TextField(
+        maxLines: null,
+        decoration: InputDecoration(
+          labelText: 'Email',
+          hintText: kLongString,
+        ),
+      ),
+    ));
+    final Text hintText = tester.widget<Text>(find.text(kLongString));
+    expect(hintText.overflow, isNull);
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.text(kLongString));
+    expect(paragraph.size.height > defaultLineHeight * 2, isTrue);
+  }); // [intended] only applies to platforms where we supply the context menu.
+
   testWidgets('Entering text hides selection handle caret', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
