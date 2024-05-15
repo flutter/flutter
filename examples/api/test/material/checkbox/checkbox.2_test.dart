@@ -61,7 +61,7 @@ void main() {
     await tester.tap(find.widgetWithText(OutlinedButton, 'Add customization'));
     await tester.pumpAndSettle();
 
-    // Theme adaptation does not affect material-style switch.
+    // Theme adaptation does not affect the material-style checkbox.
     adaptiveCheckbox = find.byType(Checkbox);
     expect(
       adaptiveCheckbox,
