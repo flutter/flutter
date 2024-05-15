@@ -125,7 +125,9 @@ bool TextContents::Render(const ContentContext& renderer,
     sampler_desc.min_filter = MinMagFilter::kLinear;
     sampler_desc.mag_filter = MinMagFilter::kLinear;
   }
-  sampler_desc.mip_filter = MipFilter::kNearest;
+
+  // No mipmaps for glyph atlas (glyphs are generated at exact scales).
+  sampler_desc.mip_filter = MipFilter::kBase;
 
   FS::BindGlyphAtlasSampler(
       pass,                 // command
