@@ -160,12 +160,30 @@ void main() {
         'targets',
       ]);
       expect(result, equals(0));
+
+      final List<String> expected = <String>[
+        '//flutter/display_list:display_list_unittests',
+        '//flutter/flow:flow_unittest',
+        '//flutter/fml:fml_arc_unittests',
+      ];
+
+      final List<String> testLogs = stringsFromLogs(testEnvironment.testLogs);
+      for (final String testLog in testLogs) {
+        // Expect one of the expected targets to be in the output.
+        // Then remove it from the list of expected targets.
+        for (final String target in expected) {
+          if (testLog.contains(target)) {
+            expected.remove(target);
+            break;
+          }
+        }
+      }
+
       expect(
-        testEnvironment.testLogs.length,
-        equals(4),
+        expected.isEmpty,
+        isTrue,
+        reason: 'All expected targets were found',
       );
-      expect(testEnvironment.testLogs[1].message,
-          startsWith('//flutter/display_list:display_list_unittests'));
     } finally {
       testEnvironment.cleanup();
     }

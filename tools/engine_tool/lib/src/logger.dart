@@ -115,7 +115,7 @@ class Logger {
   /// Record a log message level [Logger.error] and throw a FatalError.
   /// This should only be called when the program has entered an impossible
   /// to recover from state or when something isn't implemented yet.
-  void fatal(
+  Never fatal(
     Object? message, {
     int indent = 0,
     bool newline = true,
