@@ -1005,8 +1005,7 @@ void main() {
     }
   });
 
-  testWidgets('Slider value indicator respects bold text  ', (WidgetTester tester) async {
-
+  testWidgets('Slider value indicator respects bold text', (WidgetTester tester) async {
       final Key sliderKey = UniqueKey();
       double value = 0.0;
       final List<InlineSpan> log = <InlineSpan>[];
