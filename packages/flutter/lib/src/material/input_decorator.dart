@@ -1865,9 +1865,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   late final CurvedAnimation _floatingLabelAnimation;
   late final AnimationController _shakingLabelController;
   final _InputBorderGap _borderGap = _InputBorderGap();
-  static const OrdinalSortKey _kPrefixSemanticsSortOrder = OrdinalSortKey(0);
-  static const OrdinalSortKey _kInputSemanticsSortOrder = OrdinalSortKey(1);
-  static const OrdinalSortKey _kSuffixSemanticsSortOrder = OrdinalSortKey(2);
+  // Provide a unique name to avoid mixing up sort order with sibling input
+  // decorators.
+  late final OrdinalSortKey _prefixSemanticsSortOrder = OrdinalSortKey(0, name: hashCode.toString());
+  late final OrdinalSortKey _inputSemanticsSortOrder = OrdinalSortKey(1, name: hashCode.toString());
+  late final OrdinalSortKey _suffixSemanticsSortOrder = OrdinalSortKey(2, name: hashCode.toString());
   static const SemanticsTag _kPrefixSemanticsTag = SemanticsTag('_InputDecoratorState.prefix');
   static const SemanticsTag _kSuffixSemanticsTag = SemanticsTag('_InputDecoratorState.suffix');
 
@@ -2219,7 +2221,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           labelIsFloating: widget._labelShouldWithdraw,
           text: decoration.prefixText,
           style: MaterialStateProperty.resolveAs(decoration.prefixStyle, materialState) ?? hintStyle,
-          semanticsSortKey: needsSemanticsSortOrder ? _kPrefixSemanticsSortOrder : null,
+          semanticsSortKey: needsSemanticsSortOrder ? _prefixSemanticsSortOrder : null,
           semanticsTag: _kPrefixSemanticsTag,
           child: decoration.prefix,
         )
@@ -2230,7 +2232,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           labelIsFloating: widget._labelShouldWithdraw,
           text: decoration.suffixText,
           style: MaterialStateProperty.resolveAs(decoration.suffixStyle, materialState) ?? hintStyle,
-          semanticsSortKey: needsSemanticsSortOrder ? _kSuffixSemanticsSortOrder : null,
+          semanticsSortKey: needsSemanticsSortOrder ? _suffixSemanticsSortOrder : null,
           semanticsTag: _kSuffixSemanticsTag,
           child: decoration.suffix,
         )
@@ -2238,7 +2240,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     if (input != null && needsSemanticsSortOrder) {
       input = Semantics(
-        sortKey: _kInputSemanticsSortOrder,
+        sortKey: _inputSemanticsSortOrder,
         child: input,
       );
     }

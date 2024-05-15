@@ -151,6 +151,7 @@ export 'src/widgets/text_selection_toolbar_layout_delegate.dart';
 export 'src/widgets/texture.dart';
 export 'src/widgets/ticker_provider.dart';
 export 'src/widgets/title.dart';
+export 'src/widgets/toggleable.dart';
 export 'src/widgets/transitions.dart';
 export 'src/widgets/tween_animation_builder.dart';
 export 'src/widgets/two_dimensional_scroll_view.dart';

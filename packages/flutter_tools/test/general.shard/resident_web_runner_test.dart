@@ -63,6 +63,9 @@ const List<VmServiceExpectation> kAttachLogExpectations =
 const List<VmServiceExpectation> kAttachIsolateExpectations =
     <VmServiceExpectation>[
   FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+    'streamId': 'Service',
+  }),
+  FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
     'streamId': 'Isolate',
   }),
   FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
