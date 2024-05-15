@@ -5,6 +5,7 @@
 import 'package:engine_build_configs/engine_build_configs.dart';
 
 import 'environment.dart';
+import 'label.dart';
 import 'logger.dart';
 
 /// A function that returns true or false when given a [BuilderConfig] and its
@@ -121,7 +122,7 @@ Future<int> runBuild(
   Build build, {
   required bool enableRbe,
   List<String> extraGnArgs = const <String>[],
-  List<String> targets = const <String>[],
+  List<Label> targets = const <Label>[],
 }) async {
   final List<String> gnArgs = <String>[
     if (!enableRbe) '--no-rbe',
@@ -138,7 +139,7 @@ Future<int> runBuild(
     extraGnArgs: gnArgs,
     runTests: false,
     extraNinjaArgs: <String>[
-      ...targets,
+      ...targets.map((Label label) => label.toNinjaLabel()),
       // If the environment is verbose, pass the verbose flag to ninja.
       if (environment.verbose) '--verbose',
     ],

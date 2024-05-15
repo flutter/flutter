@@ -383,7 +383,11 @@ void main() {
             command[0].contains('ninja') &&
             command[1].contains('-C') &&
             command[2].endsWith('/host_debug') &&
-            command[3] == 'flutter/fml:fml_arc_unittests';
+            // TODO(matanlurey): Tighten this up to be more specific.
+            // The reason we need a broad check is because the test fixture
+            // always returns multiple targets for gn desc, even though that is
+            // not the actual behavior.
+            command.sublist(3).contains('flutter/fml:fml_arc_unittests');
       }));
     } finally {
       testEnv.cleanup();

@@ -84,7 +84,6 @@ final class LintCommand extends CommandBase {
     if (environment.platform.isWindows) {
       environment.logger
           .fatal('lint command is not supported on Windows (for now).');
-      return 1;
     }
     final WorkerPool wp =
         WorkerPool(environment, ProcessTaskProgressReporter(environment));

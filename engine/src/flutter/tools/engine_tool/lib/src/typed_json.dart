@@ -287,6 +287,13 @@ extension type const JsonObject(Map<String, Object?> _object) {
     }
   }
 
+  /// Returns the underlying JSON object as a [Map].
+  ///
+  /// This method is useful for passing the JSON object to APIs that expect a
+  /// [Map] type, but it is generally recommended to use the provided methods
+  /// for type-safe access to the JSON values.
+  Map<String, Object?> asMap() => _object;
+
   /// Returns a "pretty" JSON representation of this object.
   String toPrettyString() {
     return const JsonEncoder.withIndent('  ').convert(_object);
