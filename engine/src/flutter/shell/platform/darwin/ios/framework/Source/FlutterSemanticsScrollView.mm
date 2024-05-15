@@ -4,7 +4,10 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSemanticsScrollView.h"
 
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
+
+FLUTTER_ASSERT_ARC
 
 @implementation FlutterSemanticsScrollView
 

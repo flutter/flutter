@@ -38,7 +38,7 @@ constexpr float kScrollExtentMaxForInf = 1000;
  * The parent of this node in the node tree. Will be nil for the root node and
  * during transient state changes.
  */
-@property(nonatomic, assign, readonly) SemanticsObject* parent;
+@property(nonatomic, weak, readonly) SemanticsObject* parent;
 
 /**
  * The accessibility bridge that this semantics object is attached to. This
@@ -231,7 +231,7 @@ constexpr float kScrollExtentMaxForInf = 1000;
                                  bridge:(fml::WeakPtr<flutter::AccessibilityBridgeIos>)bridge
     NS_DESIGNATED_INITIALIZER;
 
-@property(nonatomic, assign) SemanticsObject* semanticsObject;
+@property(nonatomic, weak) SemanticsObject* semanticsObject;
 
 @end
 
