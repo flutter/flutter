@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
@@ -14,6 +15,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'one two three',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       // By default, MediaQueryData.supportsShowingSystemContextMenu is false.
       MaterialApp(
@@ -62,6 +64,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'one two three',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       // By default, MediaQueryData.supportsShowingSystemContextMenu is false.
       MaterialApp(
@@ -95,6 +98,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'one two three',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
@@ -160,6 +164,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'one two three',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
@@ -214,6 +219,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'one two three',
     );
+    addTearDown(controller.dispose);
     late StateSetter setState;
     await tester.pumpWidget(
       Builder(
@@ -265,9 +271,11 @@ void main() {
     final TextEditingController controller1 = TextEditingController(
       text: 'one two three',
     );
+    addTearDown(controller1.dispose);
     final TextEditingController controller2 = TextEditingController(
       text: 'four five six',
     );
+    addTearDown(controller2.dispose);
     final GlobalKey field1Key = GlobalKey();
     final GlobalKey field2Key = GlobalKey();
     final GlobalKey menu1Key = GlobalKey();
@@ -358,7 +366,9 @@ void main() {
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
-  testWidgets('asserts when built with no text input connection', (WidgetTester tester) async {
+  testWidgets('asserts when built with no text input connection',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     SystemContextMenu? systemContextMenu;
     late StateSetter setState;
     await tester.pumpWidget(
