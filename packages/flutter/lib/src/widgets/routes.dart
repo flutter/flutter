@@ -604,7 +604,7 @@ abstract interface class PredictiveBackRoute {
   /// Handles a predictive back gesture ending successfully.
   void handleCommitBackGesture();
 
-  /// Handles a predictive back gesture ending in cancelation.
+  /// Handles a predictive back gesture ending in cancellation.
   void handleCancelBackGesture();
 }
 
@@ -1022,6 +1022,8 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
 
   @override
   Widget build(BuildContext context) {
+    // Only top most route can participate in focus traversal.
+    focusScopeNode.skipTraversal = !widget.route.isCurrent;
     return AnimatedBuilder(
       animation: widget.route.restorationScopeId,
       builder: (BuildContext context, Widget? child) {
@@ -1048,24 +1050,22 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
                   },
                   child: PrimaryScrollController(
                     controller: primaryScrollController,
-                    child: FocusScope(
-                      node: focusScopeNode, // immutable
-                      // Only top most route can participate in focus traversal.
-                      skipTraversal: !widget.route.isCurrent,
+                    child: FocusScope.withExternalFocusNode(
+                      focusScopeNode: focusScopeNode, // immutable
                       child: RepaintBoundary(
-                        child: AnimatedBuilder(
-                          animation: _listenable, // immutable
+                        child: ListenableBuilder(
+                          listenable: _listenable, // immutable
                           builder: (BuildContext context, Widget? child) {
                             return widget.route.buildTransitions(
                               context,
                               widget.route.animation!,
                               widget.route.secondaryAnimation!,
-                              // This additional AnimatedBuilder is include because if the
+                              // This additional ListenableBuilder is include because if the
                               // value of the userGestureInProgressNotifier changes, it's
                               // only necessary to rebuild the IgnorePointer widget and set
                               // the focus node's ability to focus.
-                              AnimatedBuilder(
-                                animation: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
+                              ListenableBuilder(
+                                listenable: widget.route.navigator?.userGestureInProgressNotifier ?? ValueNotifier<bool>(false),
                                 builder: (BuildContext context, Widget? child) {
                                   final bool ignoreEvents = _shouldIgnoreFocusRequest;
                                   focusScopeNode.canRequestFocus = !ignoreEvents;
@@ -1669,7 +1669,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   final List<WillPopCallback> _willPopCallbacks = <WillPopCallback>[];
 
-  final Set<PopEntry> _popEntries = <PopEntry>{};
+  // Holding as Object? instead of T so that PopScope in this route can be
+  // declared with any supertype of T.
+  final Set<PopEntry<Object?>> _popEntries = <PopEntry<Object?>>{};
 
   /// Returns [RoutePopDisposition.doNotPop] if any of callbacks added with
   /// [addScopedWillPopCallback] returns either false or null. If they all
@@ -1717,14 +1719,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// See also:
   ///
-  ///  * [Form], which provides an `onPopInvoked` callback that is similar.
+  ///  * [Form], which provides an `onPopInvokedWithResult` callback that is similar.
   ///  * [registerPopEntry], which adds a [PopEntry] to the list this method
   ///    checks.
   ///  * [unregisterPopEntry], which removes a [PopEntry] from the list this
   ///    method checks.
   @override
   RoutePopDisposition get popDisposition {
-    for (final PopEntry popEntry in _popEntries) {
+    for (final PopEntry<Object?> popEntry in _popEntries) {
       if (!popEntry.canPopNotifier.value) {
         return RoutePopDisposition.doNotPop;
       }
@@ -1734,10 +1736,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   @override
-  void onPopInvoked(bool didPop) {
-    for (final PopEntry popEntry in _popEntries) {
-      popEntry.onPopInvoked?.call(didPop);
+  void onPopInvokedWithResult(bool didPop, T? result) {
+    for (final PopEntry<Object?> popEntry in _popEntries) {
+      popEntry.onPopInvokedWithResult(didPop, result);
     }
+    super.onPopInvokedWithResult(didPop, result);
   }
 
   /// Enables this route to veto attempts by the user to dismiss it.
@@ -1786,17 +1789,17 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// Registers the existence of a [PopEntry] in the route.
   ///
   /// [PopEntry] instances registered in this way will have their
-  /// [PopEntry.onPopInvoked] callbacks called when a route is popped or a pop
+  /// [PopEntry.onPopInvokedWithResult] callbacks called when a route is popped or a pop
   /// is attempted. They will also be able to block pop operations with
   /// [PopEntry.canPopNotifier] through this route's [popDisposition] method.
   ///
   /// See also:
   ///
   ///  * [unregisterPopEntry], which performs the opposite operation.
-  void registerPopEntry(PopEntry popEntry) {
+  void registerPopEntry(PopEntry<Object?> popEntry) {
     _popEntries.add(popEntry);
-    popEntry.canPopNotifier.addListener(_handlePopEntryChange);
-    _handlePopEntryChange();
+    popEntry.canPopNotifier.addListener(_maybeDispatchNavigationNotification);
+    _maybeDispatchNavigationNotification();
   }
 
   /// Unregisters a [PopEntry] in the route's widget subtree.
@@ -1804,13 +1807,13 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// See also:
   ///
   ///  * [registerPopEntry], which performs the opposite operation.
-  void unregisterPopEntry(PopEntry popEntry) {
+  void unregisterPopEntry(PopEntry<Object?> popEntry) {
     _popEntries.remove(popEntry);
-    popEntry.canPopNotifier.removeListener(_handlePopEntryChange);
-    _handlePopEntryChange();
+    popEntry.canPopNotifier.removeListener(_maybeDispatchNavigationNotification);
+    _maybeDispatchNavigationNotification();
   }
 
-  void _handlePopEntryChange() {
+  void _maybeDispatchNavigationNotification() {
     if (!isCurrent) {
       return;
     }
@@ -1879,6 +1882,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void didPopNext(Route<dynamic> nextRoute) {
     super.didPopNext(nextRoute);
     changedInternalState();
+    _maybeDispatchNavigationNotification();
   }
 
   @override
@@ -2284,10 +2288,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     if (_transitionBuilder == null) {
       // Some default transition.
       return FadeTransition(
-        opacity: CurvedAnimation(
-          parent: animation,
-          curve: Curves.linear,
-        ),
+        opacity: animation,
         child: child,
       );
     }
@@ -2413,11 +2414,13 @@ typedef RouteTransitionsBuilder = Widget Function(BuildContext context, Animatio
 ///
 /// Accepts a didPop boolean indicating whether or not back navigation
 /// succeeded.
-typedef PopInvokedCallback = void Function(bool didPop);
+///
+/// The `result` contains the pop result.
+typedef PopInvokedWithResultCallback<T> = void Function(bool didPop, T? result);
 
 /// Allows listening to and preventing pops.
 ///
-/// Can be registered in [ModalRoute] to listen to pops with [onPopInvoked] or
+/// Can be registered in [ModalRoute] to listen to pops with [onPopInvokedWithResult] or
 /// to enable/disable them with [canPopNotifier].
 ///
 /// See also:
@@ -2425,15 +2428,23 @@ typedef PopInvokedCallback = void Function(bool didPop);
 ///  * [PopScope], which provides similar functionality in a widget.
 ///  * [ModalRoute.registerPopEntry], which unregisters instances of this.
 ///  * [ModalRoute.unregisterPopEntry], which unregisters instances of this.
-abstract class PopEntry {
-  /// {@macro flutter.widgets.PopScope.onPopInvoked}
-  PopInvokedCallback? get onPopInvoked;
+abstract class PopEntry<T> {
+
+  /// {@macro flutter.widgets.PopScope.onPopInvokedWithResult}
+  @Deprecated(
+    'Use onPopInvokedWithResult instead. '
+    'This feature was deprecated after v3.22.0-12.0.pre.',
+  )
+  void onPopInvoked(bool didPop) { }
+
+  /// {@macro flutter.widgets.PopScope.onPopInvokedWithResult}
+  void onPopInvokedWithResult(bool didPop, T? result) => onPopInvoked(didPop);
 
   /// {@macro flutter.widgets.PopScope.canPop}
   ValueListenable<bool> get canPopNotifier;
 
   @override
   String toString() {
-    return 'PopEntry canPop: ${canPopNotifier.value}, onPopInvoked: $onPopInvoked';
+    return 'PopEntry canPop: ${canPopNotifier.value}, onPopInvoked: $onPopInvokedWithResult';
   }
 }

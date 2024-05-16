@@ -84,6 +84,7 @@ class SimpleBuilderTableView extends TwoDimensionalScrollView {
     this.applyDimensions = true,
     this.forgetToLayoutChild = false,
     this.setLayoutOffset = true,
+    super.hitTestBehavior,
   }) : super(delegate: delegate);
 
   // Piped through for testing in RenderTwoDimensionalViewport

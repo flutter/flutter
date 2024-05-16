@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
+import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart' show templateAndroidGradlePluginVersion, templateAndroidGradlePluginVersionForModule, templateDefaultGradleVersion;
@@ -704,6 +705,7 @@ void main() {
         'example/ios/Runner/Runner-Bridging-Header.h',
         'example/lib/main.dart',
         'ios/Classes/FlutterProjectPlugin.swift',
+        'ios/Resources/PrivacyInfo.xcprivacy',
         'lib/flutter_project.dart',
       ],
       unexpectedPaths: <String>[
@@ -716,6 +718,55 @@ void main() {
         'ios/Classes/FlutterProjectPlugin.m',
       ],
     );
+  });
+
+  testUsingContext('swift plugin project with Swift Package Manager', () async {
+    return _createProject(
+      projectDir,
+      <String>['--no-pub', '--template=plugin', '--ios-language', 'swift', '--platforms', 'ios,macos'],
+      <String>[
+        'ios/flutter_project/Package.swift',
+        'ios/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
+        'ios/flutter_project/Sources/flutter_project/PrivacyInfo.xcprivacy',
+        'macos/flutter_project/Package.swift',
+        'macos/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
+        'macos/flutter_project/Sources/flutter_project/Resources/.gitkeep',
+      ],
+      unexpectedPaths: <String>[
+        'ios/Classes/FlutterProjectPlugin.swift',
+        'macos/Classes/FlutterProjectPlugin.swift',
+        'ios/Classes/FlutterProjectPlugin.h',
+        'ios/Classes/FlutterProjectPlugin.m',
+        'ios/Assets/.gitkeep',
+        'macos/Assets/.gitkeep',
+      ],
+    );
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(
+      isSwiftPackageManagerEnabled: true,
+      isMacOSEnabled: true,
+    ),
+  });
+
+  testUsingContext('objc plugin project with Swift Package Manager', () async {
+    return _createProject(
+      projectDir,
+      <String>['--no-pub', '--template=plugin', '--ios-language', 'objc', '--platforms', 'ios'],
+      <String>[
+        'ios/flutter_project/Package.swift',
+        'ios/flutter_project/Sources/flutter_project/include/flutter_project/FlutterProjectPlugin.h',
+        'ios/flutter_project/Sources/flutter_project/FlutterProjectPlugin.m',
+        'ios/flutter_project/Sources/flutter_project/PrivacyInfo.xcprivacy',
+      ],
+      unexpectedPaths: <String>[
+        'ios/Classes/FlutterProjectPlugin.swift',
+        'ios/Classes/FlutterProjectPlugin.h',
+        'ios/Classes/FlutterProjectPlugin.m',
+        'ios/Assets/.gitkeep',
+      ],
+    );
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
   });
 
   testUsingContext('plugin project with custom org', () async {
@@ -3699,6 +3750,40 @@ void main() {
     const String expectedDescription = '"description": "A new Flutter project."';
 
     expect(rawManifestJson.contains(expectedDescription), isTrue);
+  });
+
+  testUsingContext('flutter create should tool exit if the template manifest cannot be read', () async {
+    globals.fs.file(globals.fs.path.join(
+      Cache.flutterRoot!,
+      'packages',
+      'flutter_tools',
+      'templates',
+      'template_manifest.json',
+    )).createSync(recursive: true);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await expectLater(
+      runner.run(<String>[
+        'create',
+        '--no-pub',
+        '--template=plugin',
+        '--project-name=test',
+        projectDir.path,
+      ]),
+      throwsToolExit(message: 'Unable to read the template manifest at path'),
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem.test(
+      opHandle: (String context, FileSystemOp operation) {
+        if (operation == FileSystemOp.read && context.contains('template_manifest.json')) {
+          throw io.PathNotFoundException(
+              context, const OSError(), 'Cannot open file');
+        }
+      },
+    ),
+    ProcessManager: () => fakeProcessManager,
   });
 }
 

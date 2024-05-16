@@ -1217,13 +1217,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
           : contentBottom;
       }
 
-      double xOffset = 0.0;
-      if (hasCustomWidth) {
-        xOffset = switch (textDirection) {
-          TextDirection.rtl => (snackBarWidth! - size.width) / 2,
-          TextDirection.ltr => (size.width - snackBarWidth!) / 2,
-        };
-      }
+      final double xOffset = hasCustomWidth ? (size.width - snackBarWidth!) / 2 : 0.0;
       positionChild(_ScaffoldSlot.snackBar, Offset(xOffset, snackBarYOffsetBase - snackBarSize.height));
 
       assert((){
@@ -1436,13 +1430,19 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     final Animation<double> moveRotationAnimation = widget.fabMotionAnimator.getRotationAnimation(parent: widget.fabMoveAnimation);
 
     // Aggregate the animations.
-    _previousScaleAnimation = AnimationMin<double>(moveScaleAnimation, _previousExitScaleAnimation!);
-    _currentScaleAnimation = AnimationMin<double>(moveScaleAnimation, _currentEntranceScaleAnimation!);
+    if (widget.fabMotionAnimator == FloatingActionButtonAnimator.noAnimation) {
+      _previousScaleAnimation = moveScaleAnimation;
+      _currentScaleAnimation = moveScaleAnimation;
+      _previousRotationAnimation = TrainHoppingAnimation(moveRotationAnimation, null);
+      _currentRotationAnimation = TrainHoppingAnimation(moveRotationAnimation, null);
+    } else {
+      _previousScaleAnimation = AnimationMin<double>(moveScaleAnimation, _previousExitScaleAnimation!);
+      _currentScaleAnimation = AnimationMin<double>(moveScaleAnimation, _currentEntranceScaleAnimation!);
+      _previousRotationAnimation = TrainHoppingAnimation(previousExitRotationAnimation, moveRotationAnimation);
+      _currentRotationAnimation = TrainHoppingAnimation(currentEntranceRotationAnimation, moveRotationAnimation);
+    }
+
     _extendedCurrentScaleAnimation = _currentScaleAnimation.drive(CurveTween(curve: const Interval(0.0, 0.1)));
-
-    _previousRotationAnimation = TrainHoppingAnimation(previousExitRotationAnimation, moveRotationAnimation);
-    _currentRotationAnimation = TrainHoppingAnimation(currentEntranceRotationAnimation, moveRotationAnimation);
-
     _currentScaleAnimation.addListener(_onProgressChanged);
     _previousScaleAnimation.addListener(_onProgressChanged);
   }

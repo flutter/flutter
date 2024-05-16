@@ -572,7 +572,7 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
   }
 }
 
-class _PopupMenu<T> extends StatelessWidget {
+class _PopupMenu<T> extends StatefulWidget {
   const _PopupMenu({
     super.key,
     required this.itemKeys,
@@ -589,22 +589,68 @@ class _PopupMenu<T> extends StatelessWidget {
   final Clip clipBehavior;
 
   @override
+  State<_PopupMenu<T>> createState() => _PopupMenuState<T>();
+}
+
+class _PopupMenuState<T> extends State<_PopupMenu<T>> {
+  List<CurvedAnimation> _opacities = const <CurvedAnimation>[];
+
+  @override
+  void initState() {
+    super.initState();
+    _setOpacities();
+  }
+
+  @override
+  void didUpdateWidget(covariant _PopupMenu<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (
+      oldWidget.route.items.length != widget.route.items.length ||
+      oldWidget.route.animation != widget.route.animation
+    ) {
+      _setOpacities();
+    }
+
+  }
+
+  void _setOpacities() {
+    for (final CurvedAnimation opacity in _opacities) {
+      opacity.dispose();
+    }
+    final List<CurvedAnimation> newOpacities = <CurvedAnimation>[];
+    final double unit = 1.0 / (widget.route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
+    for (int i = 0; i < widget.route.items.length; i += 1) {
+      final double start = (i + 1) * unit;
+      final double end = clampDouble(start + 1.5 * unit, 0.0, 1.0);
+      final CurvedAnimation opacity = CurvedAnimation(
+        parent: widget.route.animation!,
+        curve: Interval(start, end),
+      );
+      newOpacities.add(opacity);
+    }
+    _opacities = newOpacities;
+  }
+
+  @override
+  void dispose() {
+    for (final CurvedAnimation opacity in _opacities) {
+      opacity.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final double unit = 1.0 / (route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
+    final double unit = 1.0 / (widget.route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
     final List<Widget> children = <Widget>[];
     final ThemeData theme = Theme.of(context);
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final PopupMenuThemeData defaults = theme.useMaterial3 ? _PopupMenuDefaultsM3(context) : _PopupMenuDefaultsM2(context);
 
-    for (int i = 0; i < route.items.length; i += 1) {
-      final double start = (i + 1) * unit;
-      final double end = clampDouble(start + 1.5 * unit, 0.0, 1.0);
-      final CurvedAnimation opacity = CurvedAnimation(
-        parent: route.animation!,
-        curve: Interval(start, end),
-      );
-      Widget item = route.items[i];
-      if (route.initialValue != null && route.items[i].represents(route.initialValue)) {
+    for (int i = 0; i < widget.route.items.length; i += 1) {
+      final CurvedAnimation opacity = _opacities[i];
+      Widget item = widget.route.items[i];
+      if (widget.route.initialValue != null && widget.route.items[i].represents(widget.route.initialValue)) {
         item = ColoredBox(
           color: Theme.of(context).highlightColor,
           child: item,
@@ -613,10 +659,10 @@ class _PopupMenu<T> extends StatelessWidget {
       children.add(
         _MenuItem(
           onLayout: (Size size) {
-            route.itemSizes[i] = size;
+            widget.route.itemSizes[i] = size;
           },
           child: FadeTransition(
-            key: itemKeys[i],
+            key: widget.itemKeys[i],
             opacity: opacity,
             child: item,
           ),
@@ -626,10 +672,10 @@ class _PopupMenu<T> extends StatelessWidget {
 
     final CurveTween opacity = CurveTween(curve: const Interval(0.0, 1.0 / 3.0));
     final CurveTween width = CurveTween(curve: Interval(0.0, unit));
-    final CurveTween height = CurveTween(curve: Interval(0.0, unit * route.items.length));
+    final CurveTween height = CurveTween(curve: Interval(0.0, unit * widget.route.items.length));
 
     final Widget child = ConstrainedBox(
-      constraints: constraints ?? const BoxConstraints(
+      constraints: widget.constraints ?? const BoxConstraints(
         minWidth: _kMenuMinWidth,
         maxWidth: _kMenuMaxWidth,
       ),
@@ -639,7 +685,7 @@ class _PopupMenu<T> extends StatelessWidget {
           scopesRoute: true,
           namesRoute: true,
           explicitChildNodes: true,
-          label: semanticLabel,
+          label: widget.semanticLabel,
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(
               vertical: _kMenuVerticalPadding,
@@ -651,22 +697,22 @@ class _PopupMenu<T> extends StatelessWidget {
     );
 
     return AnimatedBuilder(
-      animation: route.animation!,
+      animation: widget.route.animation!,
       builder: (BuildContext context, Widget? child) {
         return FadeTransition(
-          opacity: opacity.animate(route.animation!),
+          opacity: opacity.animate(widget.route.animation!),
           child: Material(
-            shape: route.shape ?? popupMenuTheme.shape ?? defaults.shape,
-            color: route.color ?? popupMenuTheme.color ?? defaults.color,
-            clipBehavior: clipBehavior,
+            shape: widget.route.shape ?? popupMenuTheme.shape ?? defaults.shape,
+            color: widget.route.color ?? popupMenuTheme.color ?? defaults.color,
+            clipBehavior: widget.clipBehavior,
             type: MaterialType.card,
-            elevation: route.elevation ?? popupMenuTheme.elevation ?? defaults.elevation!,
-            shadowColor: route.shadowColor ?? popupMenuTheme.shadowColor ?? defaults.shadowColor,
-            surfaceTintColor: route.surfaceTintColor ?? popupMenuTheme.surfaceTintColor ?? defaults.surfaceTintColor,
+            elevation: widget.route.elevation ?? popupMenuTheme.elevation ?? defaults.elevation!,
+            shadowColor: widget.route.shadowColor ?? popupMenuTheme.shadowColor ?? defaults.shadowColor,
+            surfaceTintColor: widget.route.surfaceTintColor ?? popupMenuTheme.surfaceTintColor ?? defaults.surfaceTintColor,
             child: Align(
               alignment: AlignmentDirectional.topEnd,
-              widthFactor: width.evaluate(route.animation!),
-              heightFactor: height.evaluate(route.animation!),
+              widthFactor: width.evaluate(widget.route.animation!),
+              heightFactor: height.evaluate(widget.route.animation!),
               child: child,
             ),
           ),
@@ -834,10 +880,12 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final Clip clipBehavior;
   final AnimationStyle? popUpAnimationStyle;
 
+  CurvedAnimation? _animation;
+
   @override
   Animation<double> createAnimation() {
     if (popUpAnimationStyle != AnimationStyle.noAnimation) {
-      return CurvedAnimation(
+      return _animation ??= CurvedAnimation(
         parent: super.createAnimation(),
         curve: popUpAnimationStyle?.curve ?? Curves.linear,
         reverseCurve: popUpAnimationStyle?.reverseCurve ?? const Interval(0.0, _kMenuCloseIntervalEnd),
@@ -915,6 +963,12 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 
   Set<Rect> _avoidBounds(MediaQueryData mediaQuery) {
     return DisplayFeatureSubScreen.avoidBounds(mediaQuery).toSet();
+  }
+
+  @override
+  void dispose() {
+    _animation?.dispose();
+    super.dispose();
   }
 }
 

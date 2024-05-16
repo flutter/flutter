@@ -830,13 +830,14 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// {@endtemplate}
   @protected
   @visibleForTesting
-  Future<void> handlePopRoute() async {
+  Future<bool> handlePopRoute() async {
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPopRoute()) {
-        return;
+        return true;
       }
     }
     SystemNavigator.pop();
+    return false;
   }
 
   // The observer that is currently handling an active predictive back gesture.
@@ -870,7 +871,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       // back gesture occurs but no predictive back route transition exists to
       // handle it. The back gesture should still cause normal pop even if it
       // doesn't cause a predictive transition.
-      return handlePopRoute();
+      await handlePopRoute();
+      return;
     }
     _backGestureObserver?.handleCommitBackGesture();
   }
@@ -896,33 +898,36 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   @visibleForTesting
-  Future<void> handlePushRoute(String route) async {
+  Future<bool> handlePushRoute(String route) async {
     final RouteInformation routeInformation = RouteInformation(uri: Uri.parse(route));
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPushRouteInformation(routeInformation)) {
-        return;
+        return true;
       }
     }
+    return false;
   }
 
-  Future<void> _handlePushRouteInformation(Map<dynamic, dynamic> routeArguments) async {
+  Future<bool> _handlePushRouteInformation(Map<dynamic, dynamic> routeArguments) async {
     final RouteInformation routeInformation = RouteInformation(
       uri: Uri.parse(routeArguments['location'] as String),
       state: routeArguments['state'] as Object?,
     );
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPushRouteInformation(routeInformation)) {
-        return;
+        return true;
       }
     }
+    return false;
   }
 
-  Future<dynamic> _handleNavigationInvocation(MethodCall methodCall) {
+  Future<bool> _handleNavigationInvocation(MethodCall methodCall) {
     return switch (methodCall.method) {
       'popRoute' => handlePopRoute(),
       'pushRoute' => handlePushRoute(methodCall.arguments as String),
       'pushRouteInformation' => _handlePushRouteInformation(methodCall.arguments as Map<dynamic, dynamic>),
-      _ => Future<dynamic>.value(),
+      // Return false for unhandled method.
+      _ => Future<bool>.value(false),
     };
   }
 
