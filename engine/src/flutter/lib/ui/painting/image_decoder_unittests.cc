@@ -198,7 +198,7 @@ TEST_F(ImageDecoderFixtureTest, CanCreateImageDecoder) {
 /// An Image generator that pretends it can't recognize the data it was given.
 class UnknownImageGenerator : public ImageGenerator {
  public:
-  UnknownImageGenerator() : info_(SkImageInfo::MakeUnknown()){};
+  UnknownImageGenerator() : info_(SkImageInfo::MakeUnknown()) {};
   ~UnknownImageGenerator() = default;
   const SkImageInfo& GetInfo() { return info_; }
 

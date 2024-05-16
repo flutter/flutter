@@ -43,8 +43,8 @@ class PipelineLibraryVK final
   Mutex pipelines_mutex_;
   PipelineMap pipelines_ IPLR_GUARDED_BY(pipelines_mutex_);
   Mutex compute_pipelines_mutex_;
-  ComputePipelineMap compute_pipelines_ IPLR_GUARDED_BY(
-      compute_pipelines_mutex_);
+  ComputePipelineMap compute_pipelines_
+      IPLR_GUARDED_BY(compute_pipelines_mutex_);
   std::atomic_size_t frames_acquired_ = 0u;
   bool is_valid_ = false;
   bool cache_dirty_ = false;

@@ -36,7 +36,7 @@ template <typename T, typename U>
 struct CheckSameSignature : std::false_type {};
 
 template <typename Ret, typename... Args>
-struct CheckSameSignature<Ret(Args...), Ret(Args...)> : std::true_type {};
+struct CheckSameSignature<Ret(Args...), Ret(Args...)> : std::true_type{};
 
 // This is a stub function that does nothing/records nothing.
 void doNothing() {}

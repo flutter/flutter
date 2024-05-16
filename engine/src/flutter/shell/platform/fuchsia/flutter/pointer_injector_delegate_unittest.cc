@@ -108,9 +108,11 @@ class PlatformMessageBuilder {
 
   rapidjson::Value Build() {
     std::ostringstream message;
-    message << "{" << "    \"method\":\""
+    message << "{"
+            << "    \"method\":\""
             << PointerInjectorDelegate::kPointerInjectorMethodPrefix << "\","
-            << "    \"args\": {" << "        \"viewId\":" << view_id_ << ","
+            << "    \"args\": {"
+            << "        \"viewId\":" << view_id_ << ","
             << "        \"x\":" << pointer_x_ << ","
             << "        \"y\":" << pointer_y_ << ","
             << "        \"phase\":" << phase_ << ","
@@ -119,7 +121,8 @@ class PlatformMessageBuilder {
             << "        \"viewRef\":" << view_ref_.reference.get() << ","
             << "        \"logicalWidth\":" << width_ << ","
             << "        \"logicalHeight\":" << height_ << ","
-            << "        \"timestamp\":" << timestamp_ << "   }" << "}";
+            << "        \"timestamp\":" << timestamp_ << "   }"
+            << "}";
     return ParsePlatformMessage(message.str());
   }
 

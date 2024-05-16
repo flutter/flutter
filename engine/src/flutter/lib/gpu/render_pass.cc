@@ -24,7 +24,7 @@ IMPLEMENT_WRAPPERTYPEINFO(flutter_gpu, RenderPass);
 
 RenderPass::RenderPass()
     : vertex_buffer_(
-          impeller::VertexBuffer{.index_type = impeller::IndexType::kNone}){};
+          impeller::VertexBuffer{.index_type = impeller::IndexType::kNone}) {};
 
 RenderPass::~RenderPass() = default;
 

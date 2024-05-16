@@ -86,24 +86,24 @@ class DirectManipulationEventHandler
   ULONG STDMETHODCALLTYPE Release() override;
 
   // |IDirectManipulationViewportEventHandler|
-  HRESULT STDMETHODCALLTYPE OnViewportStatusChanged(
-      IDirectManipulationViewport* viewport,
-      DIRECTMANIPULATION_STATUS current,
-      DIRECTMANIPULATION_STATUS previous) override;
+  HRESULT STDMETHODCALLTYPE
+  OnViewportStatusChanged(IDirectManipulationViewport* viewport,
+                          DIRECTMANIPULATION_STATUS current,
+                          DIRECTMANIPULATION_STATUS previous) override;
 
   // |IDirectManipulationViewportEventHandler|
-  HRESULT STDMETHODCALLTYPE OnViewportUpdated(
-      IDirectManipulationViewport* viewport) override;
+  HRESULT STDMETHODCALLTYPE
+  OnViewportUpdated(IDirectManipulationViewport* viewport) override;
 
   // |IDirectManipulationViewportEventHandler|
-  HRESULT STDMETHODCALLTYPE OnContentUpdated(
-      IDirectManipulationViewport* viewport,
-      IDirectManipulationContent* content) override;
+  HRESULT STDMETHODCALLTYPE
+  OnContentUpdated(IDirectManipulationViewport* viewport,
+                   IDirectManipulationContent* content) override;
 
   // |IDirectManipulationInteractionEventHandler|
-  HRESULT STDMETHODCALLTYPE OnInteraction(
-      IDirectManipulationViewport2* viewport,
-      DIRECTMANIPULATION_INTERACTION_TYPE interaction) override;
+  HRESULT STDMETHODCALLTYPE
+  OnInteraction(IDirectManipulationViewport2* viewport,
+                DIRECTMANIPULATION_INTERACTION_TYPE interaction) override;
 
  private:
   struct GestureData {

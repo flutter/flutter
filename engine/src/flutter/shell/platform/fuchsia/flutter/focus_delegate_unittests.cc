@@ -143,7 +143,8 @@ TEST_F(FocusDelegateTest, RequestFocusTest) {
 
   // Create the platform message request.
   std::ostringstream message;
-  message << "{" << "    \"method\":\"View.focus.request\","
+  message << "{"
+          << "    \"method\":\"View.focus.request\","
           << "    \"args\": {"
           << "       \"viewRef\":" << view_ref.reference.get() << "    }"
           << "}";
@@ -175,7 +176,8 @@ TEST_F(FocusDelegateTest, RequestFocusFailTest) {
   focuser_->fail_request_focus();
   // Create the platform message request.
   std::ostringstream message;
-  message << "{" << "    \"method\":\"View.focus.request\","
+  message << "{"
+          << "    \"method\":\"View.focus.request\","
           << "    \"args\": {"
           << "       \"viewRef\":" << view_ref.reference.get() << "    }"
           << "}";
