@@ -1567,7 +1567,6 @@ String generateFakePubspec(
     }
   }
   result.write(overrides.toString());
-  
   return result.toString();
 }
 
