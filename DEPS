@@ -42,7 +42,7 @@ vars = {
   # updates to Clang Tidy will not turn the tree red.
   #
   # See https://github.com/flutter/flutter/wiki/Engine-pre‐submits-and-post‐submits#post-submit
-  'clang_version': 'git_revision:145176dc0c93566ce4aef721044d49ab8ba50f87',
+  'clang_version': 'git_revision:725656bdd885483c39f482a01ea25d67acf39c46',
 
   'reclient_version': 'git_revision:29a9d3cb597b6a7d67fa3e9aa8a7cab1c81232ee',
 
@@ -943,7 +943,7 @@ deps = {
     'packages': [
       {
         'package': 'flutter_internal/rbe/reclient_cfgs',
-        'version': '_crQLRWl_tm9uDdPtihkx_9vvdMe-OYBdQ0_ih51y7QC',
+        'version': 'XIomtC8MFuQrF9qI5xYcFfcfKXZTbcY6nL6NgF-pSRIC',
       }
     ],
     'condition': 'use_rbe',

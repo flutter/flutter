@@ -38,9 +38,8 @@ static std::string GetGoldenFilePath(int refresh_rate, bool is_new) {
   std::stringstream ss;
   // This unit test should only be run on Linux (not even on Mac since it's a
   // golden test). Hence we don't have to worry about the "/" vs. "\".
-  ss << flutter::GetGoldenDir() << "/"
-     << "performance_overlay_gold_" << refresh_rate << "fps"
-     << (is_new ? "_new" : "") << ".png";
+  ss << flutter::GetGoldenDir() << "/" << "performance_overlay_gold_"
+     << refresh_rate << "fps" << (is_new ? "_new" : "") << ".png";
   return ss.str();
 }
 
@@ -118,9 +117,9 @@ static void TestPerformanceOverlayLayerGold(int refresh_rate) {
     b64_char[b64_size] = 0;  // make it null terminated for printing
 
     EXPECT_TRUE(golden_data_matches)
-        << "Golden file mismatch. Please check "
-        << "the difference between " << golden_file_path << " and "
-        << new_golden_file_path << ", and  replace the former "
+        << "Golden file mismatch. Please check " << "the difference between "
+        << golden_file_path << " and " << new_golden_file_path
+        << ", and  replace the former "
         << "with the latter if the difference looks good.\nS\n"
         << "See also the base64 encoded " << new_golden_file_path << ":\n"
         << b64_char;

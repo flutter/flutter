@@ -23,7 +23,7 @@ FlutterPlatformViewLayer::FlutterPlatformViewLayer(
     : overlay_view(overlay_view),
       overlay_view_wrapper(overlay_view_wrapper),
       ios_surface(std::move(ios_surface)),
-      surface(std::move(surface)) {};
+      surface(std::move(surface)){};
 
 FlutterPlatformViewLayer::~FlutterPlatformViewLayer() = default;
 
