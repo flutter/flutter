@@ -172,7 +172,7 @@ class ResidentWebRunner extends ResidentRunner {
     final vmservice.VmService? service = _connectionResult?.vmService;
     final Uri websocketUri = Uri.parse(_connectionResult!.debugConnection!.uri);
     final Uri httpUri = _httpUriFromWebsocketUri(websocketUri);
-    return _instance ??= FlutterVmService(service!, wsAddress: websocketUri, httpAddress: httpUri);
+    return _instance ??= FlutterVmService(service!, wsAddress: websocketUri, httpAddress: httpUri, logger: _logger);
   }
 
   FlutterVmService? _instance;

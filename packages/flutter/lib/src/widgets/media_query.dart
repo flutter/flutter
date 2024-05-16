@@ -574,8 +574,9 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [TextInput.showSystemContextMenu], which may be used to show the system
-  ///    context menu when this flag indicates it's supported.
+  ///  * [SystemContextMenuController] and [SystemContextMenu], which may be
+  ///    used to show the system context menu when this flag indicates it's
+  ///    supported.
   final bool supportsShowingSystemContextMenu;
 
   /// The orientation of the media (e.g., whether the device is in landscape or
