@@ -1,4 +1,4 @@
-Signature: d4e2604c7484577e1348f32635a89d0b
+Signature: 2e085f38fb0e96b92c6d89c11387e841
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -13070,7 +13070,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.legacy/legacy_types.fidl 
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.legacy/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.registrar/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.element/graphical_presenter.fidl + ../../../fuchsia/sdk/linux/LICENSE
-ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio.signalprocessing/endpoint.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio.signalprocessing/dai_interconnect.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/clock.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/common.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/composite.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -13170,7 +13170,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.legacy/legacy_types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.legacy/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.driver.registrar/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.element/graphical_presenter.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio.signalprocessing/endpoint.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio.signalprocessing/dai_interconnect.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/clock.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/common.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/composite.fidl
