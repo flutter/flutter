@@ -18,7 +18,6 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../project_test.dart';
 
 const String otherGradleVersionWrapper = r'''
 distributionBase=GRADLE_USER_HOME
@@ -470,7 +469,7 @@ tasks.register("clean", Delete) {
 
         await migration.migrate();
         expect(bufferLogger.traceText, contains(MultidexRemovalMigration.deletionMessage));
-        expectNotExists(flutterMultiDexApplication);
+        expect(flutterMultiDexApplication.existsSync(), false);
       });
     });
   });
