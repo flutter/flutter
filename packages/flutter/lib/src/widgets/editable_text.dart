@@ -2786,7 +2786,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   /// Gets the line heights at the start and end of the selection for the given
   /// [EditableTextState].
-  _GlyphHeights _getGlyphHeights() {
+  ///
+  /// See also:
+  ///
+  /// * [TextSelectionToolbarAnchors.getSelectionRect], which depends on this
+  ///   information.
+  ({double startGlyphHeight, double endGlyphHeight}) getGlyphHeights() {
     final TextSelection selection = textEditingValue.selection;
 
     // Only calculate handle rects if the text in the previous frame
@@ -2800,9 +2805,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final String prevText = span.toPlainText();
     final String currText = textEditingValue.text;
     if (prevText != currText || !selection.isValid || selection.isCollapsed) {
-      return _GlyphHeights(
-        start: renderEditable.preferredLineHeight,
-        end: renderEditable.preferredLineHeight,
+      return (
+        startGlyphHeight: renderEditable.preferredLineHeight,
+        endGlyphHeight: renderEditable.preferredLineHeight,
       );
     }
 
@@ -2817,9 +2822,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       start: selection.end - lastSelectedGraphemeExtent,
       end: selection.end,
     ));
-    return _GlyphHeights(
-      start: startCharacterRect?.height ?? renderEditable.preferredLineHeight,
-      end: endCharacterRect?.height ?? renderEditable.preferredLineHeight,
+    return (
+      startGlyphHeight: startCharacterRect?.height ?? renderEditable.preferredLineHeight,
+      endGlyphHeight: endCharacterRect?.height ?? renderEditable.preferredLineHeight,
     );
   }
 
@@ -2838,14 +2843,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       );
     }
 
-    final _GlyphHeights glyphHeights = _getGlyphHeights();
+    final (startGlyphHeight: double startGlyphHeight, endGlyphHeight: double endGlyphHeight) = getGlyphHeights();
     final TextSelection selection = textEditingValue.selection;
     final List<TextSelectionPoint> points =
         renderEditable.getEndpointsForSelection(selection);
     return TextSelectionToolbarAnchors.fromSelection(
       renderBox: renderEditable,
-      startGlyphHeight: glyphHeights.start,
-      endGlyphHeight: glyphHeights.end,
+      startGlyphHeight: startGlyphHeight,
+      endGlyphHeight: endGlyphHeight,
       selectionEndpoints: points,
     );
   }
@@ -6024,21 +6029,6 @@ class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
 
   @override
   bool get isActionEnabled => state._value.selection.isValid && !state._value.selection.isCollapsed;
-}
-
-/// The start and end glyph heights of some range of text.
-@immutable
-class _GlyphHeights {
-  const _GlyphHeights({
-    required this.start,
-    required this.end,
-  });
-
-  /// The glyph height of the first line.
-  final double start;
-
-  /// The glyph height of the last line.
-  final double end;
 }
 
 /// A [ClipboardStatusNotifier] whose [value] is hardcoded to
