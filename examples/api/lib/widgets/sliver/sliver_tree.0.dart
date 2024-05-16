@@ -4,91 +4,91 @@
 
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [SliverTreeList].
+/// Flutter code sample for [TreeSliver].
 
-void main() => runApp(const SliverTreeExampleApp());
+void main() => runApp(const TreeSliverExampleApp());
 
-class SliverTreeExampleApp extends StatelessWidget {
-  const SliverTreeExampleApp({super.key});
+class TreeSliverExampleApp extends StatelessWidget {
+  const TreeSliverExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: SliverTreeExample(),
+      home: TreeSliverExample(),
     );
   }
 }
 
-class SliverTreeExample extends StatefulWidget {
-  const SliverTreeExample({super.key});
+class TreeSliverExample extends StatefulWidget {
+  const TreeSliverExample({super.key});
 
   @override
-  State<SliverTreeExample> createState() => _SliverTreeExampleState();
+  State<TreeSliverExample> createState() => _TreeSliverExampleState();
 }
 
-class _SliverTreeExampleState extends State<SliverTreeExample> {
-  SliverTreeNode<String>? _selectedNode;
-  final SliverTreeController controller = SliverTreeController();
-  final List<SliverTreeNode<String>> _tree = <SliverTreeNode<String>>[
-    SliverTreeNode<String>('First'),
-    SliverTreeNode<String>(
+class _TreeSliverExampleState extends State<TreeSliverExample> {
+  TreeSliverNode<String>? _selectedNode;
+  final TreeSliverController controller = TreeSliverController();
+  final List<TreeSliverNode<String>> _tree = <TreeSliverNode<String>>[
+    TreeSliverNode<String>('First'),
+    TreeSliverNode<String>(
       'Second',
-      children: <SliverTreeNode<String>>[
-        SliverTreeNode<String>(
+      children: <TreeSliverNode<String>>[
+        TreeSliverNode<String>(
           'alpha',
-          children: <SliverTreeNode<String>>[
-            SliverTreeNode<String>('uno'),
-            SliverTreeNode<String>('dos'),
-            SliverTreeNode<String>('tres'),
+          children: <TreeSliverNode<String>>[
+            TreeSliverNode<String>('uno'),
+            TreeSliverNode<String>('dos'),
+            TreeSliverNode<String>('tres'),
           ],
         ),
-        SliverTreeNode<String>('beta'),
-        SliverTreeNode<String>('kappa'),
+        TreeSliverNode<String>('beta'),
+        TreeSliverNode<String>('kappa'),
       ],
     ),
-    SliverTreeNode<String>(
+    TreeSliverNode<String>(
       'Third',
       expanded: true,
-      children: <SliverTreeNode<String>>[
-        SliverTreeNode<String>('gamma'),
-        SliverTreeNode<String>('delta'),
-        SliverTreeNode<String>('epsilon'),
+      children: <TreeSliverNode<String>>[
+        TreeSliverNode<String>('gamma'),
+        TreeSliverNode<String>('delta'),
+        TreeSliverNode<String>('epsilon'),
       ],
     ),
-    SliverTreeNode<String>('Fourth'),
+    TreeSliverNode<String>('Fourth'),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SliverTree demo'),
+        title: const Text('TreeSliver Demo'),
       ),
       body: CustomScrollView(
         slivers: <Widget>[
-          SliverTreeList<String>(
+          TreeSliver<String>(
             tree: _tree,
             controller: controller,
             treeNodeBuilder: (
               BuildContext context,
-              SliverTreeNode<dynamic> node, {
-              AnimationStyle? animationStyle,
-            }) {
+              TreeSliverNode<Object?> node,
+              AnimationStyle animationStyle,
+            ) {
               Widget child = GestureDetector(
                 behavior: HitTestBehavior.translucent,
                 onTap: () {
                   setState(() {
                     controller.toggleNode(node);
-                    _selectedNode = node as SliverTreeNode<String>;
+                    _selectedNode = node as TreeSliverNode<String>;
                   });
                 },
-                child: SliverTreeList.defaultTreeNodeBuilder(
+                child: TreeSliver.defaultTreeNodeBuilder(
                   context,
                   node,
-                  animationStyle: animationStyle,
+                  animationStyle,
                 ),
               );
-              if (_selectedNode == node as SliverTreeNode<String>) {
+              if (_selectedNode == node as TreeSliverNode<String>) {
                 child = ColoredBox(
                   color: Colors.purple[100]!,
                   child: child,

@@ -5,65 +5,65 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-/// Flutter code sample for [SliverTreeList].
+/// Flutter code sample for [TreeSliver].
 
-void main() => runApp(const SliverTreeExampleApp());
+void main() => runApp(const TreeSliverExampleApp());
 
-class SliverTreeExampleApp extends StatelessWidget {
-  const SliverTreeExampleApp({super.key});
+class TreeSliverExampleApp extends StatelessWidget {
+  const TreeSliverExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: SliverTreeExample(),
+      home: TreeSliverExample(),
     );
   }
 }
 
-class SliverTreeExample extends StatefulWidget {
-  const SliverTreeExample({super.key});
+class TreeSliverExample extends StatefulWidget {
+  const TreeSliverExample({super.key});
 
   @override
-  State<SliverTreeExample> createState() => _SliverTreeExampleState();
+  State<TreeSliverExample> createState() => _TreeSliverExampleState();
 }
 
-class _SliverTreeExampleState extends State<SliverTreeExample> {
-  SliverTreeNode<String>? _selectedNode;
-  final List<SliverTreeNode<String>> tree = <SliverTreeNode<String>>[
-    SliverTreeNode<String>('README.md'),
-    SliverTreeNode<String>('analysis_options.yaml'),
-    SliverTreeNode<String>(
+class _TreeSliverExampleState extends State<TreeSliverExample> {
+  TreeSliverNode<String>? _selectedNode;
+  final List<TreeSliverNode<String>> tree = <TreeSliverNode<String>>[
+    TreeSliverNode<String>('README.md'),
+    TreeSliverNode<String>('analysis_options.yaml'),
+    TreeSliverNode<String>(
       'lib',
-      children: <SliverTreeNode<String>>[
-        SliverTreeNode<String>(
+      children: <TreeSliverNode<String>>[
+        TreeSliverNode<String>(
           'src',
-          children: <SliverTreeNode<String>>[
-            SliverTreeNode<String>(
+          children: <TreeSliverNode<String>>[
+            TreeSliverNode<String>(
               'widgets',
-              children: <SliverTreeNode<String>>[
-                SliverTreeNode<String>('about.dart.dart'),
-                SliverTreeNode<String>('app.dart'),
-                SliverTreeNode<String>('basic.dart'),
-                SliverTreeNode<String>('constants.dart'),
+              children: <TreeSliverNode<String>>[
+                TreeSliverNode<String>('about.dart.dart'),
+                TreeSliverNode<String>('app.dart'),
+                TreeSliverNode<String>('basic.dart'),
+                TreeSliverNode<String>('constants.dart'),
               ],
             ),
           ],
         ),
-        SliverTreeNode<String>('widgets.dart'),
+        TreeSliverNode<String>('widgets.dart'),
       ],
     ),
-    SliverTreeNode<String>('pubspec.lock'),
-    SliverTreeNode<String>('pubspec.yaml'),
-    SliverTreeNode<String>(
+    TreeSliverNode<String>('pubspec.lock'),
+    TreeSliverNode<String>('pubspec.yaml'),
+    TreeSliverNode<String>(
       'test',
-      children: <SliverTreeNode<String>>[
-        SliverTreeNode<String>(
+      children: <TreeSliverNode<String>>[
+        TreeSliverNode<String>(
           'widgets',
-          children: <SliverTreeNode<String>>[
-            SliverTreeNode<String>('about_test.dart'),
-            SliverTreeNode<String>('app_test.dart'),
-            SliverTreeNode<String>('basic_test.dart'),
-            SliverTreeNode<String>('constants_test.dart'),
+          children: <TreeSliverNode<String>>[
+            TreeSliverNode<String>('about_test.dart'),
+            TreeSliverNode<String>('app_test.dart'),
+            TreeSliverNode<String>('basic_test.dart'),
+            TreeSliverNode<String>('constants_test.dart'),
           ],
         ),
       ],
@@ -72,15 +72,15 @@ class _SliverTreeExampleState extends State<SliverTreeExample> {
 
   Widget _treeNodeBuilder(
     BuildContext context,
-    SliverTreeNode<dynamic> node, {
-    AnimationStyle? animationStyle,
-  }) {
+    TreeSliverNode<Object?> node,
+    AnimationStyle toggleAnimationStyle,
+  ) {
     final bool isParentNode = node.children.isNotEmpty;
     final BorderSide border = BorderSide(
       width: 2,
       color: Colors.purple[300]!,
     );
-    return SliverTreeList.toggleNodeWith(
+    return TreeSliver.wrapChildToToggleNode(
       node: node,
       child: Row(
         children: <Widget>[
@@ -117,19 +117,17 @@ class _SliverTreeExampleState extends State<SliverTreeExample> {
 
   Widget _getTree() {
     return DecoratedSliver(
-      decoration: BoxDecoration(
-        border: Border.all(),
-      ),
-      sliver: SliverTreeList<String>(
+      decoration: BoxDecoration( border: Border.all()),
+      sliver: TreeSliver<String>(
         tree: tree,
-        onNodeToggle: (SliverTreeNode<dynamic> node) {
+        onNodeToggle: (TreeSliverNode<Object?> node) {
           setState(() {
-            _selectedNode = node as SliverTreeNode<String>;
+            _selectedNode = node as TreeSliverNode<String>;
           });
         },
         treeNodeBuilder: _treeNodeBuilder,
         treeRowExtentBuilder: (
-          SliverTreeNode<dynamic> node,
+          TreeSliverNode<Object?> node,
           SliverLayoutDimensions layoutDimensions,
         ) {
           // This gives more space to parent nodes.
@@ -137,17 +135,17 @@ class _SliverTreeExampleState extends State<SliverTreeExample> {
         },
         // No internal indentation, the custom treeNodeBuilder applies its
         // own indentation to decorate in the indented space.
-        indentation: SliverTreeIndentationType.none,
+        indentation: TreeSliverIndentationType.none,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    // This example is assumes the full screen is available.
     final Size screenSize = MediaQuery.sizeOf(context);
     final List<Widget> selectedChildren = <Widget>[];
     if (_selectedNode != null) {
-      selectedChildren.clear();
       selectedChildren.addAll(<Widget>[
         const Spacer(),
         Icon(
@@ -155,7 +153,7 @@ class _SliverTreeExampleState extends State<SliverTreeExample> {
               ? Icons.file_open_outlined
               : Icons.folder_outlined,
         ),
-        const SizedBox(height: 25.0),
+        const SizedBox(height: 16.0),
         Text(_selectedNode!.content),
         const Spacer(),
       ]);
