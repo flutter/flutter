@@ -18,10 +18,12 @@ import '../../../globals.dart' as globals;
 /// The framework must be named [name].framework and the dylib [name].
 Future<void> createInfoPlist(
   String name,
-  Directory target,
-) async {
+  Directory target, {
+  String? minimumIOSVersion,
+}) async {
   final File infoPlistFile = target.childFile('Info.plist');
-  await infoPlistFile.writeAsString('''
+  await infoPlistFile.writeAsString(<String>[
+    '''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -44,9 +46,16 @@ Future<void> createInfoPlist(
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
+''',
+    if (minimumIOSVersion != null)
+      '''
+	<key>MinimumOSVersion</key>
+	<string>$minimumIOSVersion</string>
+''',
+    '''
 </dict>
-</plist>
-  ''');
+</plist>'''
+  ].join());
 }
 
 /// Combines dylibs from [sources] into a fat binary at [targetFullPath].

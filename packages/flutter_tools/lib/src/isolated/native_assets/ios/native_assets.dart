@@ -230,7 +230,7 @@ Future<void> _copyNativeAssetsIOS(
       }
       await lipoDylibs(dylibFile, sources);
       await setInstallNameDylib(dylibFile);
-      await createInfoPlist(targetUri.pathSegments.last, frameworkDir);
+      await createInfoPlist(targetUri.pathSegments.last, frameworkDir, minimumIOSVersion: '12.0');
       await codesignDylib(codesignIdentity, buildMode, frameworkDir);
     }
     globals.logger.printTrace('Copying native assets done.');
