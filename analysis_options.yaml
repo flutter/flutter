@@ -2,7 +2,8 @@
 #
 # This file is a copy of analysis_options.yaml from flutter repo
 # as of 2023-12-18, but with some modifications marked with
-# "DIFFERENT FROM FLUTTER/FLUTTER" below.
+# "DIFFERENT FROM FLUTTER/FLUTTER" below:
+# - Rem
 
 analyzer:
   language:
@@ -29,7 +30,7 @@ linter:
     - always_declare_return_types
     - always_put_control_body_on_new_line
     # - always_put_required_named_parameters_first # we prefer having parameters in the same order as fields https://github.com/flutter/flutter/issues/10219
-    - always_specify_types
+    # - always_specify_types # DIFFERENT FROM FLUTTER/FLUTTER; see https://github.com/flutter/engine/blob/main/CONTRIBUTING.md#dart
     # - always_use_package_imports # we do this commonly
     - annotate_overrides
     # - avoid_annotating_with_dynamic # conflicts with always_specify_types
