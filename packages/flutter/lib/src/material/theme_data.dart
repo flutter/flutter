@@ -2328,7 +2328,6 @@ class VisualDensity with Diagnosticable {
     this.horizontal = 0.0,
     this.vertical = 0.0,
   }) : assert(vertical <= maximumDensity),
-       assert(vertical <= maximumDensity),
        assert(vertical >= minimumDensity),
        assert(horizontal <= maximumDensity),
        assert(horizontal >= minimumDensity);

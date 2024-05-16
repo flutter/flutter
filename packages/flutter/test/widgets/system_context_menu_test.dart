@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
@@ -14,6 +15,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'one two three',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       // By default, MediaQueryData.supportsShowingSystemContextMenu is false.
       MaterialApp(
@@ -38,12 +40,65 @@ void main() {
     await tester.pump();
 
     expect(tester.takeException(), isAssertionError);
-  }, variant: TargetPlatformVariant.all());
+  },
+    skip: kIsWeb, // [intended]
+    variant: TargetPlatformVariant.all(),
+  );
+
+  testWidgets('asserts when built on web', (WidgetTester tester) async {
+    // Disable the browser context menu so that contextMenuBuilder will be used.
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.contextMenu,
+      (MethodCall call) {
+        // Just complete successfully, so that BrowserContextMenu thinks that
+        // the engine successfully received its call.
+        return Future<void>.value();
+      },
+    );
+    await BrowserContextMenu.disableContextMenu();
+    addTearDown(() async {
+      await BrowserContextMenu.enableContextMenu();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, null);
+    });
+
+    final TextEditingController controller = TextEditingController(
+      text: 'one two three',
+    );
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      // By default, MediaQueryData.supportsShowingSystemContextMenu is false.
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: TextField(
+              controller: controller,
+              contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                return SystemContextMenu.editableText(
+                  editableTextState: editableTextState,
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.showToolbar(), true);
+    await tester.pump();
+
+    expect(tester.takeException(), isAssertionError);
+  },
+    skip: !kIsWeb, // [intended]
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 
   testWidgets('can be shown and hidden like a normal context menu', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'one two three',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
@@ -82,7 +137,10 @@ void main() {
     state.hideToolbar();
     await tester.pump();
     expect(find.byType(SystemContextMenu), findsNothing);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+  },
+    skip: kIsWeb, // [intended]
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 
   testWidgets('can be updated.', (WidgetTester tester) async {
     final List<Map<String, double>> targetRects = <Map<String, double>>[];
@@ -106,6 +164,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'one two three',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       Builder(
         builder: (BuildContext context) {
@@ -151,12 +210,16 @@ void main() {
 
     expect(targetRects, hasLength(2));
     expect(targetRects.last['width'], greaterThan(0.0));
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+  },
+    skip: kIsWeb, // [intended]
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 
   testWidgets('can be rebuilt', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'one two three',
     );
+    addTearDown(controller.dispose);
     late StateSetter setState;
     await tester.pumpWidget(
       Builder(
@@ -199,15 +262,20 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+  },
+    skip: kIsWeb, // [intended]
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 
   testWidgets('can handle multiple instances', (WidgetTester tester) async {
     final TextEditingController controller1 = TextEditingController(
       text: 'one two three',
     );
+    addTearDown(controller1.dispose);
     final TextEditingController controller2 = TextEditingController(
       text: 'four five six',
     );
+    addTearDown(controller2.dispose);
     final GlobalKey field1Key = GlobalKey();
     final GlobalKey field2Key = GlobalKey();
     final GlobalKey menu1Key = GlobalKey();
@@ -293,9 +361,14 @@ void main() {
     await tester.pump();
     expect(find.byKey(menu1Key), findsNothing);
     expect(find.byKey(menu2Key), findsOneWidget);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+  },
+    skip: kIsWeb, // [intended]
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 
-  testWidgets('asserts when built with no text input connection', (WidgetTester tester) async {
+  testWidgets('asserts when built with no text input connection',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     SystemContextMenu? systemContextMenu;
     late StateSetter setState;
     await tester.pumpWidget(
@@ -351,7 +424,10 @@ void main() {
     await tester.pump();
     expect(exception, isAssertionError);
     expect(exception.toString(), contains('only be shown for an active text input connection'));
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+  },
+    skip: kIsWeb, // [intended]
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 
   testWidgets('does not assert when built with an active text input connection', (WidgetTester tester) async {
     SystemContextMenu? systemContextMenu;
@@ -411,5 +487,8 @@ void main() {
 
     await tester.pump();
     expect(exception, isNull);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+  },
+    skip: kIsWeb, // [intended]
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 }
