@@ -22,8 +22,8 @@ void main() {
     expect(find.text('bobcat'), findsNothing);
     expect(find.text('chameleon'), findsNothing);
     expect(find.ancestor(
-        matching: find.byType(AppBar),
-        of: find.byType(RawAutocomplete)
+      matching: find.byType(AppBar),
+      of: find.byType(RawAutocomplete)
     ), findsNothing);
   });
 

@@ -45,7 +45,7 @@ void main() {
     ), findsOneWidget);
   });
 
-  testWidgets('Finds users by mail address', (WidgetTester tester) async {
+  testWidgets('Finds users by email address', (WidgetTester tester) async {
     await tester.pumpWidget(const example.AutocompleteExampleApp());
 
     await tester.enterText(find.byType(TextFormField), '@');
