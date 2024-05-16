@@ -533,7 +533,7 @@ class AnimationController extends Animation<double>
     return _animateToInternal(lowerBound);
   }
 
-  /// Toggles the direction of this animation, based on whether it's [aimedForward].
+  /// Toggles the direction of this animation, based on whether it [isForwardOrComplete].
   ///
   /// Specifically, this function acts the same way as [reverse] if the [status] is
   /// either [AnimationStatus.forward] or [AnimationStatus.completed], and acts as
@@ -548,7 +548,7 @@ class AnimationController extends Animation<double>
   TickerFuture toggle({ double? from }) {
     assert(() {
       Duration? duration = this.duration;
-      if (aimedForward) {
+      if (isForwardOrComplete) {
         duration ??= reverseDuration;
       }
       if (duration == null) {
@@ -565,7 +565,7 @@ class AnimationController extends Animation<double>
       'AnimationController.toggle() called after AnimationController.dispose()\n'
       'AnimationController methods should not be used after calling dispose.',
     );
-    _direction = aimedForward ? _AnimationDirection.reverse : _AnimationDirection.forward;
+    _direction = isForwardOrComplete ? _AnimationDirection.reverse : _AnimationDirection.forward;
     if (from != null) {
       value = from;
     }
