@@ -6,33 +6,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-List<SliverTreeNode<String>> simpleNodeSet = <SliverTreeNode<String>>[
-  SliverTreeNode<String>('Root 0'),
-  SliverTreeNode<String>(
+List<TreeSliverNode<String>> simpleNodeSet = <TreeSliverNode<String>>[
+  TreeSliverNode<String>('Root 0'),
+  TreeSliverNode<String>(
     'Root 1',
     expanded: true,
-    children: <SliverTreeNode<String>>[
-      SliverTreeNode<String>('Child 1:0'),
-      SliverTreeNode<String>('Child 1:1'),
+    children: <TreeSliverNode<String>>[
+      TreeSliverNode<String>('Child 1:0'),
+      TreeSliverNode<String>('Child 1:1'),
     ],
   ),
-  SliverTreeNode<String>(
+  TreeSliverNode<String>(
     'Root 2',
-    children: <SliverTreeNode<String>>[
-      SliverTreeNode<String>('Child 2:0'),
-      SliverTreeNode<String>('Child 2:1'),
+    children: <TreeSliverNode<String>>[
+      TreeSliverNode<String>('Child 2:0'),
+      TreeSliverNode<String>('Child 2:1'),
     ],
   ),
-  SliverTreeNode<String>('Root 3'),
+  TreeSliverNode<String>('Root 3'),
 ];
 
 void main() {
-  group('SliverTreeNode', () {
+  group('TreeSliverNode', () {
     test('getters, toString', () {
-      final List<SliverTreeNode<String>> children = <SliverTreeNode<String>>[
-        SliverTreeNode<String>('child'),
+      final List<TreeSliverNode<String>> children = <TreeSliverNode<String>>[
+        TreeSliverNode<String>('child'),
       ];
-      final SliverTreeNode<String> node = SliverTreeNode<String>(
+      final TreeSliverNode<String> node = TreeSliverNode<String>(
         'parent',
         children: children,
         expanded: true,
@@ -43,7 +43,7 @@ void main() {
       expect(node.children.first.content, 'child');
       expect(node.children.first.children.isEmpty, isTrue);
       expect(node.children.first.isExpanded, isFalse);
-      // Set by SliverTree when built for tree integrity
+      // Set by TreeSliver when built for tree integrity
       expect(node.depth, isNull);
       expect(node.parent, isNull);
       expect(node.children.first.depth, isNull);
@@ -51,19 +51,19 @@ void main() {
 
       expect(
         node.toString(),
-        'SliverTreeNode: parent, depth: null, parent, expanded: true',
+        'TreeSliverNode: parent, depth: null, parent, expanded: true',
       );
       expect(
         node.children.first.toString(),
-        'SliverTreeNode: child, depth: null, leaf',
+        'TreeSliverNode: child, depth: null, leaf',
       );
     });
 
-    testWidgets('SliverTreeNode sets ups parent and depth properties', (WidgetTester tester) async {
-      final List<SliverTreeNode<String>> children = <SliverTreeNode<String>>[
-        SliverTreeNode<String>('child'),
+    testWidgets('TreeSliverNode sets ups parent and depth properties', (WidgetTester tester) async {
+      final List<TreeSliverNode<String>> children = <TreeSliverNode<String>>[
+        TreeSliverNode<String>('child'),
       ];
-      final SliverTreeNode<String> node = SliverTreeNode<String>(
+      final TreeSliverNode<String> node = TreeSliverNode<String>(
         'parent',
         children: children,
         expanded: true,
@@ -71,8 +71,8 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
-            SliverTreeList<String>(
-              tree: <SliverTreeNode<String>>[node],
+            TreeSliver<String>(
+              tree: <TreeSliverNode<String>>[node],
             ),
           ],
         )
@@ -83,7 +83,7 @@ void main() {
       expect(node.children.first.content, 'child');
       expect(node.children.first.children.isEmpty, isTrue);
       expect(node.children.first.isExpanded, isFalse);
-      // Set by SliverTree when built for tree integrity
+      // Set by TreeSliver when built for tree integrity
       expect(node.depth, 0);
       expect(node.parent, isNull);
       expect(node.children.first.depth, 1);
@@ -91,11 +91,11 @@ void main() {
 
       expect(
         node.toString(),
-        'SliverTreeNode: parent, depth: root, parent, expanded: true',
+        'TreeSliverNode: parent, depth: root, parent, expanded: true',
       );
       expect(
         node.children.first.toString(),
-        'SliverTreeNode: child, depth: 1, leaf',
+        'TreeSliverNode: child, depth: 1, leaf',
       );
     });
   });
@@ -103,41 +103,45 @@ void main() {
   group('TreeController', () {
     setUp(() {
       // Reset node conditions for each test.
-      simpleNodeSet = <SliverTreeNode<String>>[
-        SliverTreeNode<String>('Root 0'),
-        SliverTreeNode<String>(
+      simpleNodeSet = <TreeSliverNode<String>>[
+        TreeSliverNode<String>('Root 0'),
+        TreeSliverNode<String>(
           'Root 1',
           expanded: true,
-          children: <SliverTreeNode<String>>[
-            SliverTreeNode<String>('Child 1:0'),
-            SliverTreeNode<String>('Child 1:1'),
+          children: <TreeSliverNode<String>>[
+            TreeSliverNode<String>('Child 1:0'),
+            TreeSliverNode<String>('Child 1:1'),
           ],
         ),
-        SliverTreeNode<String>(
+        TreeSliverNode<String>(
           'Root 2',
-          children: <SliverTreeNode<String>>[
-            SliverTreeNode<String>('Child 2:0'),
-            SliverTreeNode<String>('Child 2:1'),
+          children: <TreeSliverNode<String>>[
+            TreeSliverNode<String>('Child 2:0'),
+            TreeSliverNode<String>('Child 2:1'),
           ],
         ),
-        SliverTreeNode<String>('Root 3'),
+        TreeSliverNode<String>('Root 3'),
       ];
     });
-    testWidgets('Can set controller on SliverTree', (WidgetTester tester) async {
-      final SliverTreeController controller = SliverTreeController();
-      SliverTreeController? returnedController;
+    testWidgets('Can set controller on TreeSliver', (WidgetTester tester) async {
+      final TreeSliverController controller = TreeSliverController();
+      TreeSliverController? returnedController;
       await tester.pumpWidget(MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
-            SliverTreeList<String>(
+            TreeSliver<String>(
               tree: simpleNodeSet,
               controller: controller,
-              treeNodeBuilder: (BuildContext context, SliverTreeNode<dynamic> node, {AnimationStyle? animationStyle}) {
-                returnedController ??= SliverTreeController.of(context);
-                return SliverTreeList.defaultTreeNodeBuilder(
+              treeNodeBuilder: (
+                BuildContext context,
+                TreeSliverNode<Object?> node,
+                AnimationStyle toggleAnimationStyle,
+              ) {
+                returnedController ??= TreeSliverController.of(context);
+                return TreeSliver.defaultTreeNodeBuilder(
                   context,
                   node,
-                  animationStyle: animationStyle,
+                  toggleAnimationStyle,
                 );
               },
             ),
@@ -147,23 +151,23 @@ void main() {
       expect(controller, returnedController);
     });
 
-    testWidgets('Can get default controller on SliverTree', (WidgetTester tester) async {
-      SliverTreeController? returnedController;
+    testWidgets('Can get default controller on TreeSliver', (WidgetTester tester) async {
+      TreeSliverController? returnedController;
       await tester.pumpWidget(MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
-            SliverTreeList<String>(
+            TreeSliver<String>(
               tree: simpleNodeSet,
               treeNodeBuilder: (
                 BuildContext context,
-                SliverTreeNode<dynamic> node, {
-                AnimationStyle? animationStyle,
-              }) {
-                returnedController ??= SliverTreeController.maybeOf(context);
-                return SliverTreeList.defaultTreeNodeBuilder(
+                TreeSliverNode<Object?> node,
+                AnimationStyle toggleAnimationStyle,
+              ) {
+                returnedController ??= TreeSliverController.maybeOf(context);
+                return TreeSliver.defaultTreeNodeBuilder(
                   context,
                   node,
-                  animationStyle: animationStyle,
+                  toggleAnimationStyle,
                 );
               },
             ),
@@ -173,12 +177,12 @@ void main() {
       expect(returnedController, isNotNull);
     });
 
-    testWidgets('Can get node for SliverTreeNode.content', (WidgetTester tester) async {
-      final SliverTreeController controller = SliverTreeController();
+    testWidgets('Can get node for TreeSliverNode.content', (WidgetTester tester) async {
+      final TreeSliverController controller = TreeSliverController();
       await tester.pumpWidget(MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
-            SliverTreeList<String>(
+            TreeSliver<String>(
               tree: simpleNodeSet,
               controller: controller,
             ),
@@ -190,11 +194,11 @@ void main() {
     });
 
     testWidgets('Can get isExpanded for a node', (WidgetTester tester) async {
-      final SliverTreeController controller = SliverTreeController();
+      final TreeSliverController controller = TreeSliverController();
       await tester.pumpWidget(MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
-            SliverTreeList<String>(
+            TreeSliver<String>(
               tree: simpleNodeSet,
               controller: controller,
             ),
@@ -212,11 +216,11 @@ void main() {
     });
 
     testWidgets('Can get isActive for a node', (WidgetTester tester) async {
-      final SliverTreeController controller = SliverTreeController();
+      final TreeSliverController controller = TreeSliverController();
       await tester.pumpWidget(MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
-            SliverTreeList<String>(
+            TreeSliver<String>(
               tree: simpleNodeSet,
               controller: controller,
             ),
@@ -243,11 +247,11 @@ void main() {
     });
 
     testWidgets('Can toggleNode, to collapse or expand', (WidgetTester tester) async {
-      final SliverTreeController controller = SliverTreeController();
+      final TreeSliverController controller = TreeSliverController();
       await tester.pumpWidget(MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
-            SliverTreeList<String>(
+            TreeSliver<String>(
               tree: simpleNodeSet,
               controller: controller,
             ),
@@ -309,11 +313,11 @@ void main() {
 
     testWidgets('Can expandNode, then collapseAll',
         (WidgetTester tester) async {
-      final SliverTreeController controller = SliverTreeController();
+      final TreeSliverController controller = TreeSliverController();
       await tester.pumpWidget(MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
-            SliverTreeList<String>(
+            TreeSliver<String>(
               tree: simpleNodeSet,
               controller: controller,
             ),
@@ -357,11 +361,11 @@ void main() {
     });
 
     testWidgets('Can collapseNode, then expandAll', (WidgetTester tester) async {
-      final SliverTreeController controller = SliverTreeController();
+      final TreeSliverController controller = TreeSliverController();
       await tester.pumpWidget(MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
-            SliverTreeList<String>(
+            TreeSliver<String>(
               tree: simpleNodeSet,
               controller: controller,
             ),
@@ -411,31 +415,31 @@ void main() {
     });
   });
 
-  test('SliverTreeIndentationType values are properly reflected', () {
-    double value = SliverTreeIndentationType.standard.value;
+  test('TreeSliverIndentationType values are properly reflected', () {
+    double value = TreeSliverIndentationType.standard.value;
     expect(value, 10.0);
 
-    value = SliverTreeIndentationType.none.value;
+    value = TreeSliverIndentationType.none.value;
     expect(value, 0.0);
 
-    value = SliverTreeIndentationType.custom(50.0).value;
+    value = TreeSliverIndentationType.custom(50.0).value;
     expect(value, 50.0);
   });
 
   testWidgets('.toggleNodeWith, onNodeToggle', (WidgetTester tester) async {
-    final SliverTreeController controller = SliverTreeController();
+    final TreeSliverController controller = TreeSliverController();
     // The default node builder wraps the leading icon with toggleNodeWith.
     bool toggled = false;
-    SliverTreeNode<String>? toggledNode;
+    TreeSliverNode<String>? toggledNode;
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
         slivers: <Widget>[
-          SliverTreeList<String>(
+          TreeSliver<String>(
             tree: simpleNodeSet,
             controller: controller,
-            onNodeToggle: (SliverTreeNode<dynamic> node) {
+            onNodeToggle: (TreeSliverNode<Object?> node) {
               toggled = true;
-              toggledNode = node as SliverTreeNode<String>;
+              toggledNode = node as TreeSliverNode<String>;
             },
           ),
         ],
@@ -455,24 +459,24 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
         slivers: <Widget>[
-          SliverTreeList<String>(
+          TreeSliver<String>(
             tree: simpleNodeSet,
             controller: controller,
-            onNodeToggle: (SliverTreeNode<dynamic> node) {
+            onNodeToggle: (TreeSliverNode<Object?> node) {
               toggled = true;
-              toggledNode = node as SliverTreeNode<String>;
+              toggledNode = node as TreeSliverNode<String>;
             },
             treeNodeBuilder: (
               BuildContext context,
-              SliverTreeNode<dynamic> node, {
-              AnimationStyle? animationStyle,
-            }) {
+              TreeSliverNode<Object?> node,
+              AnimationStyle toggleAnimationStyle,
+            ) {
               final Duration animationDuration =
-                animationStyle?.duration ?? SliverTreeList.defaultAnimationDuration;
+                toggleAnimationStyle.duration ?? TreeSliver.defaultAnimationDuration;
               final Curve animationCurve =
-                animationStyle?.curve ?? SliverTreeList.defaultAnimationCurve;
+                toggleAnimationStyle.curve ?? TreeSliver.defaultAnimationCurve;
               // This makes the whole row trigger toggling.
-              return SliverTreeList.toggleNodeWith(
+              return TreeSliver.wrapChildToToggleNode(
                 node: node,
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -516,14 +520,14 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
         slivers: <Widget>[
-          SliverTreeList<String>(
+          TreeSliver<String>(
             tree: simpleNodeSet,
             treeNodeBuilder: (
               BuildContext context,
-              SliverTreeNode<dynamic> node, {
-              AnimationStyle? animationStyle,
-            }) {
-              style ??= animationStyle;
+              TreeSliverNode<Object?> node,
+              AnimationStyle toggleAnimationStyle,
+            ) {
+              style ??= toggleAnimationStyle;
               return Text(node.content.toString());
             },
           ),
@@ -531,20 +535,20 @@ void main() {
       ),
     ));
     // Default
-    expect(style, isNull);
+    expect(style, TreeSliver.defaultToggleAnimationStyle);
 
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
         slivers: <Widget>[
-          SliverTreeList<String>(
+          TreeSliver<String>(
             tree: simpleNodeSet,
-            animationStyle: AnimationStyle.noAnimation,
+            toggleAnimationStyle: AnimationStyle.noAnimation,
             treeNodeBuilder: (
               BuildContext context,
-              SliverTreeNode<dynamic> node, {
-              AnimationStyle? animationStyle,
-            }) {
-              style ??= animationStyle;
+              TreeSliverNode<Object?> node,
+              AnimationStyle toggleAnimationStyle,
+            ) {
+              style = toggleAnimationStyle;
               return Text(node.content.toString());
             },
           ),
@@ -552,25 +556,25 @@ void main() {
       ),
     ));
     expect(style, isNotNull);
-    expect(style!.curve, null);
+    expect(style!.curve, isNull);
     expect(style!.duration, Duration.zero);
     style = null;
 
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
         slivers: <Widget>[
-          SliverTreeList<String>(
+          TreeSliver<String>(
             tree: simpleNodeSet,
-            animationStyle: AnimationStyle(
+            toggleAnimationStyle: AnimationStyle(
               curve: Curves.easeIn,
               duration: const Duration(milliseconds: 200),
             ),
             treeNodeBuilder: (
               BuildContext context,
-              SliverTreeNode<dynamic> node, {
-              AnimationStyle? animationStyle,
-            }) {
-              style ??= animationStyle;
+              TreeSliverNode<Object?> node,
+              AnimationStyle toggleAnimationStyle,
+            ) {
+              style ??= toggleAnimationStyle;
               return Text(node.content.toString());
             },
           ),
@@ -580,5 +584,144 @@ void main() {
     expect(style, isNotNull);
     expect(style!.curve, Curves.easeIn);
     expect(style!.duration, const Duration(milliseconds: 200));
+  });
+
+  testWidgets('Adding more root TreeViewNodes are reflected in the tree', (WidgetTester tester) async {
+    simpleNodeSet = <TreeSliverNode<String>>[
+      TreeSliverNode<String>('Root 0'),
+      TreeSliverNode<String>(
+        'Root 1',
+        expanded: true,
+        children: <TreeSliverNode<String>>[
+          TreeSliverNode<String>('Child 1:0'),
+          TreeSliverNode<String>('Child 1:1'),
+        ],
+      ),
+      TreeSliverNode<String>(
+        'Root 2',
+        children: <TreeSliverNode<String>>[
+          TreeSliverNode<String>('Child 2:0'),
+          TreeSliverNode<String>('Child 2:1'),
+        ],
+      ),
+      TreeSliverNode<String>('Root 3'),
+    ];
+    final TreeSliverController controller = TreeSliverController();
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Scaffold(
+            body: CustomScrollView(
+              slivers: <Widget>[
+                TreeSliver<String>(
+                  tree: simpleNodeSet,
+                  controller: controller,
+                ),
+              ],
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                setState(() {
+                  simpleNodeSet.add(TreeSliverNode<String>('Added root'));
+                });
+              },
+            ),
+          );
+        },
+      ),
+    ));
+    await tester.pump();
+
+    expect(find.text('Root 0'), findsOneWidget);
+    expect(find.text('Root 1'), findsOneWidget);
+    expect(find.text('Child 1:0'), findsOneWidget);
+    expect(find.text('Child 1:1'), findsOneWidget);
+    expect(find.text('Root 2'), findsOneWidget);
+    expect(find.text('Child 2:0'), findsNothing);
+    expect(find.text('Child 2:1'), findsNothing);
+    expect(find.text('Root 3'), findsOneWidget);
+    expect(find.text('Added root'), findsNothing);
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pump();
+
+    expect(find.text('Root 0'), findsOneWidget);
+    expect(find.text('Root 1'), findsOneWidget);
+    expect(find.text('Child 1:0'), findsOneWidget);
+    expect(find.text('Child 1:1'), findsOneWidget);
+    expect(find.text('Root 2'), findsOneWidget);
+    expect(find.text('Child 2:0'), findsNothing);
+    expect(find.text('Child 2:1'), findsNothing);
+    expect(find.text('Root 3'), findsOneWidget);
+    // Node was added
+    expect(find.text('Added root'), findsOneWidget);
+  });
+
+  testWidgets('Adding more TreeViewNodes below the root are reflected in the tree', (WidgetTester tester) async {
+    simpleNodeSet = <TreeSliverNode<String>>[
+      TreeSliverNode<String>('Root 0'),
+      TreeSliverNode<String>(
+        'Root 1',
+        expanded: true,
+        children: <TreeSliverNode<String>>[
+          TreeSliverNode<String>('Child 1:0'),
+          TreeSliverNode<String>('Child 1:1'),
+        ],
+      ),
+      TreeSliverNode<String>(
+        'Root 2',
+        children: <TreeSliverNode<String>>[
+          TreeSliverNode<String>('Child 2:0'),
+          TreeSliverNode<String>('Child 2:1'),
+        ],
+      ),
+      TreeSliverNode<String>('Root 3'),
+    ];
+    final TreeSliverController controller = TreeSliverController();
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Scaffold(
+            body: CustomScrollView(
+              slivers: <Widget>[
+                TreeSliver<String>(
+                  tree: simpleNodeSet,
+                  controller: controller,
+                ),
+              ],
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                setState(() {
+                  simpleNodeSet[1].children.add(TreeSliverNode<String>('Added child'));
+                });
+              },
+            ),
+          );
+        },
+      ),
+    ));
+    await tester.pump();
+    expect(find.text('Root 0'), findsOneWidget);
+    expect(find.text('Root 1'), findsOneWidget);
+    expect(find.text('Child 1:0'), findsOneWidget);
+    expect(find.text('Child 1:1'), findsOneWidget);
+    expect(find.text('Added child'), findsNothing);
+    expect(find.text('Root 2'), findsOneWidget);
+    expect(find.text('Child 2:0'), findsNothing);
+    expect(find.text('Child 2:1'), findsNothing);
+    expect(find.text('Root 3'), findsOneWidget);
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pump();
+    expect(find.text('Root 0'), findsOneWidget);
+    expect(find.text('Root 1'), findsOneWidget);
+    expect(find.text('Child 1:0'), findsOneWidget);
+    expect(find.text('Child 1:1'), findsOneWidget);
+    // Child node was added
+    expect(find.text('Added child'), findsOneWidget);
+    expect(find.text('Root 2'), findsOneWidget);
+    expect(find.text('Child 2:0'), findsNothing);
+    expect(find.text('Child 2:1'), findsNothing);
+    expect(find.text('Root 3'), findsOneWidget);
   });
 }

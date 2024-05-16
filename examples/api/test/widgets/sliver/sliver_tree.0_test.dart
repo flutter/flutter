@@ -7,13 +7,13 @@ import 'package:flutter_api_samples/widgets/sliver/sliver_tree.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('SliverTree example', (WidgetTester tester) async {
+  testWidgets('Can toggle nodes in TreeSliver', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.SliverTreeExampleApp(),
+      const example.TreeSliverExampleApp(),
     );
     expect(find.text('Second'), findsOneWidget);
     expect(find.text('alpha'), findsNothing);
-    // Toggle tree node
+    // Toggle tree node.
     await tester.tap(find.text('Second'));
     await tester.pumpAndSettle();
     expect(find.text('alpha'), findsOneWidget);

@@ -7,42 +7,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-List<SliverTreeNode<String>> _setUpNodes() {
-  return <SliverTreeNode<String>>[
-    SliverTreeNode<String>('First'),
-    SliverTreeNode<String>(
+List<TreeSliverNode<String>> _setUpNodes() {
+  return <TreeSliverNode<String>>[
+    TreeSliverNode<String>('First'),
+    TreeSliverNode<String>(
       'Second',
-      children: <SliverTreeNode<String>>[
-        SliverTreeNode<String>(
+      children: <TreeSliverNode<String>>[
+        TreeSliverNode<String>(
           'alpha',
-          children: <SliverTreeNode<String>>[
-            SliverTreeNode<String>('uno'),
-            SliverTreeNode<String>('dos'),
-            SliverTreeNode<String>('tres'),
+          children: <TreeSliverNode<String>>[
+            TreeSliverNode<String>('uno'),
+            TreeSliverNode<String>('dos'),
+            TreeSliverNode<String>('tres'),
           ],
         ),
-        SliverTreeNode<String>('beta'),
-        SliverTreeNode<String>('kappa'),
+        TreeSliverNode<String>('beta'),
+        TreeSliverNode<String>('kappa'),
       ],
     ),
-    SliverTreeNode<String>(
+    TreeSliverNode<String>(
       'Third',
       expanded: true,
-      children: <SliverTreeNode<String>>[
-        SliverTreeNode<String>('gamma'),
-        SliverTreeNode<String>('delta'),
-        SliverTreeNode<String>('epsilon'),
+      children: <TreeSliverNode<String>>[
+        TreeSliverNode<String>('gamma'),
+        TreeSliverNode<String>('delta'),
+        TreeSliverNode<String>('epsilon'),
       ],
     ),
-    SliverTreeNode<String>('Fourth'),
+    TreeSliverNode<String>('Fourth'),
   ];
 }
 
-List<SliverTreeNode<String>> treeNodes = _setUpNodes();
+List<TreeSliverNode<String>> treeNodes = _setUpNodes();
 
 void main() {
   testWidgets('asserts proper axis directions', (WidgetTester tester) async {
-    final List<dynamic> exceptions = <dynamic>[];
+    final List<Object?> exceptions = <Object?>[];
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       exceptions.add(details.exception);
@@ -55,7 +55,7 @@ void main() {
       home: CustomScrollView(
         reverse: true,
         slivers: <Widget>[
-          SliverTreeList<String>(tree: treeNodes),
+          TreeSliver<String>(tree: treeNodes),
         ],
       ),
     ));
@@ -64,7 +64,7 @@ void main() {
     expect(exceptions.isNotEmpty, isTrue);
     expect(
       exceptions[0].toString(),
-      contains('SliverTree is only supported in Viewports with an AxisDirection.down.'),
+      contains('TreeSliver is only supported in Viewports with an AxisDirection.down.'),
     );
 
     exceptions.clear();
@@ -78,7 +78,7 @@ void main() {
         scrollDirection: Axis.horizontal,
         reverse: true,
         slivers: <Widget>[
-          SliverTreeList<String>(tree: treeNodes),
+          TreeSliver<String>(tree: treeNodes),
         ],
       ),
     ));
@@ -87,7 +87,7 @@ void main() {
     expect(exceptions.isNotEmpty, isTrue);
     expect(
       exceptions[0].toString(),
-      contains('SliverTree is only supported in Viewports with an AxisDirection.down.'),
+      contains('TreeSliver is only supported in Viewports with an AxisDirection.down.'),
     );
 
     exceptions.clear();
@@ -100,7 +100,7 @@ void main() {
       home: CustomScrollView(
         scrollDirection: Axis.horizontal,
         slivers: <Widget>[
-          SliverTreeList<String>(tree: treeNodes),
+          TreeSliver<String>(tree: treeNodes),
         ],
       ),
     ));
@@ -109,24 +109,24 @@ void main() {
     expect(exceptions.isNotEmpty, isTrue);
     expect(
       exceptions[0].toString(),
-      contains('SliverTree is only supported in Viewports with an AxisDirection.down.'),
+      contains('TreeSliver is only supported in Viewports with an AxisDirection.down.'),
     );
   });
 
   testWidgets('Basic layout', (WidgetTester tester) async {
     treeNodes = _setUpNodes();
     // Default layout, custom indentation values, row extents.
-    SliverTreeList<String> sliverTree = SliverTreeList<String>(
+    TreeSliver<String> treeSliver = TreeSliver<String>(
       tree: treeNodes,
     );
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
-        slivers: <Widget>[ sliverTree ],
+        slivers: <Widget>[ treeSliver ],
       ),
     ));
     await tester.pump();
     expect(
-      find.byType(SliverTreeList<String>),
+      find.byType(TreeSliver<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph() // Icon
@@ -174,18 +174,18 @@ void main() {
       const Rect.fromLTRB(46.0, 248.0, 334.0, 272.0),
     );
 
-    sliverTree = SliverTreeList<String>(
+    treeSliver = TreeSliver<String>(
       tree: treeNodes,
-      indentation: SliverTreeIndentationType.none,
+      indentation: TreeSliverIndentationType.none,
     );
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
-        slivers: <Widget>[ sliverTree ],
+        slivers: <Widget>[ treeSliver ],
       ),
     ));
     await tester.pump();
     expect(
-      find.byType(SliverTreeList<String>),
+      find.byType(TreeSliver<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph() // Icon
@@ -233,18 +233,18 @@ void main() {
       const Rect.fromLTRB(46.0, 248.0, 334.0, 272.0),
     );
 
-    sliverTree = SliverTreeList<String>(
+    treeSliver = TreeSliver<String>(
       tree: treeNodes,
-      indentation: SliverTreeIndentationType.custom(50.0),
+      indentation: TreeSliverIndentationType.custom(50.0),
     );
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
-        slivers: <Widget>[ sliverTree ],
+        slivers: <Widget>[ treeSliver ],
       ),
     ));
     await tester.pump();
     expect(
-      find.byType(SliverTreeList<String>),
+      find.byType(TreeSliver<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph() // Icon
@@ -292,18 +292,18 @@ void main() {
       const Rect.fromLTRB(46.0, 248.0, 334.0, 272.0),
     );
 
-    sliverTree = SliverTreeList<String>(
+    treeSliver = TreeSliver<String>(
       tree: treeNodes,
       treeRowExtentBuilder: (_, __) => 100,
     );
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
-        slivers: <Widget>[ sliverTree ],
+        slivers: <Widget>[ treeSliver ],
       ),
     ));
     await tester.pump();
     expect(
-      find.byType(SliverTreeList<String>),
+      find.byType(TreeSliver<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 26.0))
         ..paragraph() // Icon
@@ -349,15 +349,15 @@ void main() {
 
   testWidgets('Animating node segment', (WidgetTester tester) async {
     treeNodes = _setUpNodes();
-    SliverTreeList<String> sliverTree = SliverTreeList<String>(tree: treeNodes);
+    TreeSliver<String> treeSliver = TreeSliver<String>(tree: treeNodes);
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
-        slivers: <Widget>[ sliverTree ],
+        slivers: <Widget>[ treeSliver ],
       ),
     ));
     await tester.pump();
     expect(
-      find.byType(SliverTreeList<String>),
+      find.byType(TreeSliver<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph() // Icon
@@ -373,7 +373,7 @@ void main() {
     await tester.tap(find.byType(Icon).first);
     await tester.pump();
     expect(
-      find.byType(SliverTreeList<String>),
+      find.byType(TreeSliver<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph() // Icon
@@ -403,7 +403,7 @@ void main() {
     // Progress the animation.
     await tester.pump(const Duration(milliseconds: 50));
     expect(
-      find.byType(SliverTreeList<String>),
+      find.byType(TreeSliver<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph() // Icon
@@ -436,7 +436,7 @@ void main() {
     // Complete the animation
     await tester.pumpAndSettle();
     expect(
-      find.byType(SliverTreeList<String>),
+      find.byType(TreeSliver<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))   // First
         ..paragraph() // Icon
@@ -469,21 +469,21 @@ void main() {
     );
 
     // Customize the animation
-    sliverTree = SliverTreeList<String>(
+    treeSliver = TreeSliver<String>(
       tree: treeNodes,
-      animationStyle: AnimationStyle(
+      toggleAnimationStyle: AnimationStyle(
         duration: const Duration(milliseconds: 500),
         curve: Curves.bounceIn,
       ),
     );
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
-        slivers: <Widget>[ sliverTree ],
+        slivers: <Widget>[ treeSliver ],
       ),
     ));
     await tester.pump();
     expect(
-      find.byType(SliverTreeList<String>),
+      find.byType(TreeSliver<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))   // First
         ..paragraph() // Icon
@@ -544,7 +544,7 @@ void main() {
     // Complete the animation
     await tester.pumpAndSettle();
     expect(
-      find.byType(SliverTreeList<String>),
+      find.byType(TreeSliver<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph() // Icon
@@ -559,18 +559,18 @@ void main() {
     expect(find.text('alpha'), findsNothing);
 
     // Disable the animation
-    sliverTree = SliverTreeList<String>(
+    treeSliver = TreeSliver<String>(
       tree: treeNodes,
-      animationStyle: AnimationStyle.noAnimation,
+      toggleAnimationStyle: AnimationStyle.noAnimation,
     );
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
-        slivers: <Widget>[ sliverTree ],
+        slivers: <Widget>[ treeSliver ],
       ),
     ));
     await tester.pump();
     expect(
-      find.byType(SliverTreeList<String>),
+      find.byType(TreeSliver<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph() // Icon
@@ -589,7 +589,7 @@ void main() {
     await tester.pump();
     // No animating, straight to positions.
     expect(
-      find.byType(SliverTreeList<String>),
+      find.byType(TreeSliver<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))   // First
         ..paragraph() // Icon
@@ -624,15 +624,15 @@ void main() {
 
   testWidgets('Multiple animating node segments', (WidgetTester tester) async {
     treeNodes = _setUpNodes();
-    final SliverTreeList<String> sliverTree =  SliverTreeList<String>(tree: treeNodes);
+    final TreeSliver<String> treeSliver =  TreeSliver<String>(tree: treeNodes);
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
-        slivers: <Widget>[ sliverTree ],
+        slivers: <Widget>[ treeSliver ],
       ),
     ));
     await tester.pump();
     expect(
-      find.byType(SliverTreeList<String>),
+      find.byType(TreeSliver<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph() // Icon
@@ -669,7 +669,7 @@ void main() {
     await tester.tap(find.byType(Icon).first);
     await tester.pump(const Duration(milliseconds: 15));
     expect(
-      find.byType(SliverTreeList<String>),
+      find.byType(TreeSliver<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph() // Icon
@@ -704,7 +704,7 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 15));
     expect(
-      find.byType(SliverTreeList<String>),
+      find.byType(TreeSliver<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph() // Icon
@@ -748,7 +748,7 @@ void main() {
     // Progress the animation further
     await tester.pump(const Duration(milliseconds: 15));
     expect(
-      find.byType(SliverTreeList<String>),
+      find.byType(TreeSliver<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph() // Icon
@@ -792,7 +792,7 @@ void main() {
     // Complete the animations
     await tester.pumpAndSettle();
     expect(
-      find.byType(SliverTreeList<String>),
+      find.byType(TreeSliver<String>),
       paints
         ..paragraph(offset: const Offset(46.0, 8.0))
         ..paragraph() // Icon
@@ -827,14 +827,14 @@ void main() {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     treeNodes = _setUpNodes();
-    final SliverTreeList<String> sliverTree = SliverTreeList<String>(
+    final TreeSliver<String> treeSliver = TreeSliver<String>(
       treeRowExtentBuilder: (_, __) => 200,
       tree: treeNodes,
     );
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
         controller: scrollController,
-        slivers: <Widget>[ sliverTree ],
+        slivers: <Widget>[ treeSliver ],
       ),
     ));
     await tester.pump();
