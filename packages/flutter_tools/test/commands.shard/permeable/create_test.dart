@@ -705,6 +705,7 @@ void main() {
         'example/ios/Runner/Runner-Bridging-Header.h',
         'example/lib/main.dart',
         'ios/Classes/FlutterProjectPlugin.swift',
+        'ios/Resources/PrivacyInfo.xcprivacy',
         'lib/flutter_project.dart',
       ],
       unexpectedPaths: <String>[
@@ -726,7 +727,7 @@ void main() {
       <String>[
         'ios/flutter_project/Package.swift',
         'ios/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
-        'ios/flutter_project/Sources/flutter_project/Resources/.gitkeep',
+        'ios/flutter_project/Sources/flutter_project/PrivacyInfo.xcprivacy',
         'macos/flutter_project/Package.swift',
         'macos/flutter_project/Sources/flutter_project/FlutterProjectPlugin.swift',
         'macos/flutter_project/Sources/flutter_project/Resources/.gitkeep',
@@ -755,7 +756,7 @@ void main() {
         'ios/flutter_project/Package.swift',
         'ios/flutter_project/Sources/flutter_project/include/flutter_project/FlutterProjectPlugin.h',
         'ios/flutter_project/Sources/flutter_project/FlutterProjectPlugin.m',
-        'ios/flutter_project/Sources/flutter_project/Resources/.gitkeep',
+        'ios/flutter_project/Sources/flutter_project/PrivacyInfo.xcprivacy',
       ],
       unexpectedPaths: <String>[
         'ios/Classes/FlutterProjectPlugin.swift',
