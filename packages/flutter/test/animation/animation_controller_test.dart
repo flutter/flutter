@@ -297,19 +297,19 @@ void main() {
 
     controller.forward();
     expect(controller.status, AnimationStatus.forward);
-    expect(controller.isForwardOrComplete, true);
+    expect(controller.isForwardOrCompleted, true);
     tick(const Duration(milliseconds: 10));
     tick(const Duration(milliseconds: 60));
     expect(controller.value, moreOrLessEquals(0.5));
-    expect(controller.isForwardOrComplete, true);
+    expect(controller.isForwardOrCompleted, true);
     controller.toggle();
     tick(const Duration(milliseconds: 10));
     expect(controller.status, AnimationStatus.reverse);
-    expect(controller.isForwardOrComplete, false);
+    expect(controller.isForwardOrCompleted, false);
     tick(const Duration(milliseconds: 110));
     expect(controller.value, moreOrLessEquals(0));
     expect(controller.status, AnimationStatus.dismissed);
-    expect(controller.isForwardOrComplete, false);
+    expect(controller.isForwardOrCompleted, false);
 
     controller.dispose();
   });
