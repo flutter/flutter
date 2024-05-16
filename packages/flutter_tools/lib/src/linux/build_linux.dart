@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
+import 'package:process/src/interface/common.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
@@ -146,6 +149,47 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
   if (!globals.processManager.canRun('cmake')) {
     throwToolExit(globals.userMessages.cmakeMissing);
   }
+
+  final String? cc = Platform.environment['CC'];
+  final String? cxx = Platform.environment['CXX'];
+
+  final String? clang = getExecutablePath(cc ?? 'clang', null);
+  if (clang == null) {
+    if (cc != null) {
+      throwToolExit('Unable to locate $cc for CC environment variable.'
+          ' Please ensure that $cc is installed and in your PATH.');
+    } else {
+      throwToolExit('Unable to locate clang');
+    }
+  }
+  final String? clangPlusPlus = getExecutablePath(cxx ?? 'clang++', null);
+  if (clangPlusPlus == null) {
+    if (cxx != null) {
+      throwToolExit('Unable to locate $cxx for CXX environment variable.'
+          ' Please ensure that $cxx is installed and in your PATH.');
+    } else {
+      throwToolExit('Unable to locate clang++');
+    }
+  }
+  // Warn user if C/C++ compilers are not the system default clang/clang++.
+  if (!clang.startsWith('/usr/bin/clang')) {
+    globals.printStatus(
+      'Warning: C compiler is set to $clang.${(cc != null) ?
+      ' CC environment variable is set to $cc.' : ''} '
+      'Please consider using the distribution-provided clang',
+      color: TerminalColor.yellow,
+    );
+  }
+
+  if (!clangPlusPlus.startsWith('/usr/bin/clang++')) {
+    globals.printStatus(
+      'Warning: C++ compiler is set to $clangPlusPlus.${(cxx != null) ?
+      ' CXX environment variable is set to $cxx.' : ''} '
+      'Please consider using the distribution-provided clang++',
+      color: TerminalColor.yellow,
+    );
+  }
+
   result = await globals.processUtils.stream(
     <String>[
       'cmake',
@@ -165,8 +209,8 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
     ],
     workingDirectory: buildDir.path,
     environment: <String, String>{
-      'CC': 'clang',
-      'CXX': 'clang++',
+      'CC': clang,
+      'CXX': clangPlusPlus,
     },
     trace: true,
   );
