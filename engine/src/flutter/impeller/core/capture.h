@@ -42,7 +42,7 @@ template <typename Type>
 struct CaptureCursorListElement {
   std::string label;
 
-  explicit CaptureCursorListElement(const std::string& label) : label(label) {};
+  explicit CaptureCursorListElement(const std::string& label) : label(label){};
 
   virtual ~CaptureCursorListElement() = default;
 

@@ -517,30 +517,75 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
        }},
       {"DrawLine",
        {
-           {1, 24, 1, [](DlOpReceiver& r) { r.drawLine({0, 0}, {10, 10}); }},
-           {1, 24, 1, [](DlOpReceiver& r) { r.drawLine({0, 1}, {10, 10}); }},
-           {1, 24, 1, [](DlOpReceiver& r) { r.drawLine({0, 0}, {20, 10}); }},
-           {1, 24, 1, [](DlOpReceiver& r) { r.drawLine({0, 0}, {10, 20}); }},
+           {1, 24, 1,
+            [](DlOpReceiver& r) {
+              r.drawLine({0, 0}, {10, 10});
+            }},
+           {1, 24, 1,
+            [](DlOpReceiver& r) {
+              r.drawLine({0, 1}, {10, 10});
+            }},
+           {1, 24, 1,
+            [](DlOpReceiver& r) {
+              r.drawLine({0, 0}, {20, 10});
+            }},
+           {1, 24, 1,
+            [](DlOpReceiver& r) {
+              r.drawLine({0, 0}, {10, 20});
+            }},
        }},
       {"DrawRect",
        {
-           {1, 24, 1, [](DlOpReceiver& r) { r.drawRect({0, 0, 10, 10}); }},
-           {1, 24, 1, [](DlOpReceiver& r) { r.drawRect({0, 1, 10, 10}); }},
-           {1, 24, 1, [](DlOpReceiver& r) { r.drawRect({0, 0, 20, 10}); }},
-           {1, 24, 1, [](DlOpReceiver& r) { r.drawRect({0, 0, 10, 20}); }},
+           {1, 24, 1,
+            [](DlOpReceiver& r) {
+              r.drawRect({0, 0, 10, 10});
+            }},
+           {1, 24, 1,
+            [](DlOpReceiver& r) {
+              r.drawRect({0, 1, 10, 10});
+            }},
+           {1, 24, 1,
+            [](DlOpReceiver& r) {
+              r.drawRect({0, 0, 20, 10});
+            }},
+           {1, 24, 1,
+            [](DlOpReceiver& r) {
+              r.drawRect({0, 0, 10, 20});
+            }},
        }},
       {"DrawOval",
        {
-           {1, 24, 1, [](DlOpReceiver& r) { r.drawOval({0, 0, 10, 10}); }},
-           {1, 24, 1, [](DlOpReceiver& r) { r.drawOval({0, 1, 10, 10}); }},
-           {1, 24, 1, [](DlOpReceiver& r) { r.drawOval({0, 0, 20, 10}); }},
-           {1, 24, 1, [](DlOpReceiver& r) { r.drawOval({0, 0, 10, 20}); }},
+           {1, 24, 1,
+            [](DlOpReceiver& r) {
+              r.drawOval({0, 0, 10, 10});
+            }},
+           {1, 24, 1,
+            [](DlOpReceiver& r) {
+              r.drawOval({0, 1, 10, 10});
+            }},
+           {1, 24, 1,
+            [](DlOpReceiver& r) {
+              r.drawOval({0, 0, 20, 10});
+            }},
+           {1, 24, 1,
+            [](DlOpReceiver& r) {
+              r.drawOval({0, 0, 10, 20});
+            }},
        }},
       {"DrawCircle",
        {
-           {1, 16, 1, [](DlOpReceiver& r) { r.drawCircle({0, 0}, 10); }},
-           {1, 16, 1, [](DlOpReceiver& r) { r.drawCircle({0, 5}, 10); }},
-           {1, 16, 1, [](DlOpReceiver& r) { r.drawCircle({0, 0}, 20); }},
+           {1, 16, 1,
+            [](DlOpReceiver& r) {
+              r.drawCircle({0, 0}, 10);
+            }},
+           {1, 16, 1,
+            [](DlOpReceiver& r) {
+              r.drawCircle({0, 5}, 10);
+            }},
+           {1, 16, 1,
+            [](DlOpReceiver& r) {
+              r.drawCircle({0, 0}, 20);
+            }},
        }},
       {"DrawRRect",
        {

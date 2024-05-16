@@ -2314,9 +2314,7 @@ TEST_F(DisplayListTest, RemoveUnnecessarySaveRestorePairs) {
     receiver2.drawRect({10, 10, 20, 20});
     receiver2.save();
     receiver2.translate(1.0, 1.0);
-    {
-      receiver2.drawRect({50, 50, 60, 60});
-    }
+    { receiver2.drawRect({50, 50, 60, 60}); }
     receiver2.restore();
     ASSERT_TRUE(DisplayListsEQ_Verbose(builder.Build(), builder2.Build()));
   }

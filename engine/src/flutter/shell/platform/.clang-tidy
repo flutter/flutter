@@ -1,6 +1,0 @@
-InheritParentConfig: true
-
-# EnumCastOutOfRange warns about some common usages of GTK macros and some
-# Flutter embedder API enums that are used to create combinations of bit fields
-Checks: >-
-  -clang-analyzer-optin.core.EnumCastOutOfRange

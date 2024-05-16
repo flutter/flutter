@@ -122,8 +122,9 @@ G_MODULE_EXPORT gboolean fl_method_call_respond_error(FlMethodCall* self,
                                    response, error);
 }
 
-G_MODULE_EXPORT gboolean
-fl_method_call_respond_not_implemented(FlMethodCall* self, GError** error) {
+G_MODULE_EXPORT gboolean fl_method_call_respond_not_implemented(
+    FlMethodCall* self,
+    GError** error) {
   g_return_val_if_fail(FL_IS_METHOD_CALL(self), FALSE);
 
   g_autoptr(FlMethodResponse) response =

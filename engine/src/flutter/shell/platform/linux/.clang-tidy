@@ -1,0 +1,5 @@
+InheritParentConfig: true
+
+# EnumCastOutOfRange warns about some common usages of GTK macros
+Checks: >-
+  -clang-analyzer-optin.core.EnumCastOutOfRange
