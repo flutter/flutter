@@ -345,7 +345,7 @@
         "templates/plugin_swift_package_manager/ios-objc.tmpl/projectName.tmpl/Package.swift.tmpl",
         "templates/plugin_swift_package_manager/ios-swift.tmpl/projectName.tmpl/Sources/projectName.tmpl/pluginClass.swift.tmpl",
         "templates/plugin_swift_package_manager/ios-swift.tmpl/projectName.tmpl/Package.swift.tmpl",
-        "templates/plugin_swift_package_manager/ios.tmpl/projectName.tmpl/Sources/projectName.tmpl/Resources/PrivacyInfo.xcprivacy",
+        "templates/plugin_swift_package_manager/ios.tmpl/projectName.tmpl/Sources/projectName.tmpl/PrivacyInfo.xcprivacy",
         "templates/plugin_swift_package_manager/macos.tmpl/projectName.tmpl/Sources/projectName.tmpl/Resources/.gitkeep",
         "templates/plugin_swift_package_manager/macos.tmpl/projectName.tmpl/Sources/projectName.tmpl/pluginClass.swift.tmpl",
         "templates/plugin_swift_package_manager/macos.tmpl/projectName.tmpl/Package.swift.tmpl",

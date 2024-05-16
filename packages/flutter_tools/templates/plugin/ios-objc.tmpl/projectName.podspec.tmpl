@@ -32,7 +32,7 @@ Pod::Spec.new do |s|
   # plugin's privacy impact, and then uncomment this line. For more information,
   # see https://developer.apple.com/documentation/bundleresources/privacy_manifest_files
   {{#withSwiftPackageManager}}
-  # s.resource_bundles = {'{{projectName}}_privacy' => ['{{projectName}}/Sources/{{projectName}}/Resources/PrivacyInfo.xcprivacy']}
+  # s.resource_bundles = {'{{projectName}}_privacy' => ['{{projectName}}/Sources/{{projectName}}/PrivacyInfo.xcprivacy']}
   {{/withSwiftPackageManager}}
   {{^withSwiftPackageManager}}
   # s.resource_bundles = {'{{projectName}}_privacy' => ['Resources/PrivacyInfo.xcprivacy']}
