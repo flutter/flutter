@@ -95,8 +95,7 @@ sk_sp<SkTextBlob> PerformanceOverlayLayer::MakeStatisticsText(
   std::stringstream stream;
   stream.setf(std::ios::fixed | std::ios::showpoint);
   stream << std::setprecision(1);
-  stream << label_prefix << "  "
-         << "max " << max_ms_per_frame << " ms/frame, "
+  stream << label_prefix << "  " << "max " << max_ms_per_frame << " ms/frame, "
          << "avg " << average_ms_per_frame << " ms/frame";
   auto text = stream.str();
   return SkTextBlob::MakeFromText(text.c_str(), text.size(), font,

@@ -84,8 +84,7 @@ ProcTableGLES::ProcTableGLES(  // NOLINT(google-readability-function-size)
 
   auto error_fn = reinterpret_cast<PFNGLGETERRORPROC>(resolver("glGetError"));
   if (!error_fn) {
-    VALIDATION_LOG << "Could not resolve "
-                   << "glGetError";
+    VALIDATION_LOG << "Could not resolve " << "glGetError";
     return;
   }
 

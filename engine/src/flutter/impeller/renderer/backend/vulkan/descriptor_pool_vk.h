@@ -78,8 +78,8 @@ class DescriptorPoolRecyclerVK final
   std::weak_ptr<ContextVK> context_;
 
   Mutex recycled_mutex_;
-  std::vector<vk::UniqueDescriptorPool> recycled_
-      IPLR_GUARDED_BY(recycled_mutex_);
+  std::vector<vk::UniqueDescriptorPool> recycled_ IPLR_GUARDED_BY(
+      recycled_mutex_);
 
   /// @brief      Creates a new |vk::CommandPool|.
   ///

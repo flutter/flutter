@@ -39,7 +39,7 @@ void putStringAttributesIntoBuffer(
 
 PlatformViewAndroidDelegate::PlatformViewAndroidDelegate(
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
-    : jni_facade_(std::move(jni_facade)) {};
+    : jni_facade_(std::move(jni_facade)){};
 
 void PlatformViewAndroidDelegate::UpdateSemantics(
     const flutter::SemanticsNodeUpdates& update,

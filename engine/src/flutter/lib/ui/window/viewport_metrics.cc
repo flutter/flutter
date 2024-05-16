@@ -95,15 +95,14 @@ bool operator==(const ViewportMetrics& a, const ViewportMetrics& b) {
 }
 
 std::ostream& operator<<(std::ostream& os, const ViewportMetrics& a) {
-  os << "DPR: " << a.device_pixel_ratio << " "
-     << "Size: [" << a.physical_width << "W " << a.physical_height << "H] "
-     << "Padding: [" << a.physical_padding_top << "T "
-     << a.physical_padding_right << "R " << a.physical_padding_bottom << "B "
-     << a.physical_padding_left << "L] "
+  os << "DPR: " << a.device_pixel_ratio << " " << "Size: [" << a.physical_width
+     << "W " << a.physical_height << "H] " << "Padding: ["
+     << a.physical_padding_top << "T " << a.physical_padding_right << "R "
+     << a.physical_padding_bottom << "B " << a.physical_padding_left << "L] "
      << "Insets: [" << a.physical_view_inset_top << "T "
      << a.physical_view_inset_right << "R " << a.physical_view_inset_bottom
-     << "B " << a.physical_view_inset_left << "L] "
-     << "Gesture Insets: [" << a.physical_system_gesture_inset_top << "T "
+     << "B " << a.physical_view_inset_left << "L] " << "Gesture Insets: ["
+     << a.physical_system_gesture_inset_top << "T "
      << a.physical_system_gesture_inset_right << "R "
      << a.physical_system_gesture_inset_bottom << "B "
      << a.physical_system_gesture_inset_left << "L] "

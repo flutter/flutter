@@ -7,8 +7,7 @@
 namespace flutter {
 namespace testing {
 
-MockWindowBindingHandler::MockWindowBindingHandler()
-    : WindowBindingHandler() {};
+MockWindowBindingHandler::MockWindowBindingHandler() : WindowBindingHandler(){};
 
 MockWindowBindingHandler::~MockWindowBindingHandler() = default;
 

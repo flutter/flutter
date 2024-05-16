@@ -63,8 +63,8 @@ class PipelineVK final
   vk::UniqueDescriptorSetLayout descriptor_set_layout_;
   std::shared_ptr<SamplerVK> immutable_sampler_;
   mutable Mutex immutable_sampler_variants_mutex_;
-  mutable ImmutableSamplerVariants immutable_sampler_variants_
-      IPLR_GUARDED_BY(immutable_sampler_variants_mutex_);
+  mutable ImmutableSamplerVariants immutable_sampler_variants_ IPLR_GUARDED_BY(
+      immutable_sampler_variants_mutex_);
   bool is_valid_ = false;
 
   PipelineVK(std::weak_ptr<DeviceHolderVK> device_holder,

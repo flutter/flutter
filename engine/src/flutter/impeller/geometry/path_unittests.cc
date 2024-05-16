@@ -608,17 +608,29 @@ TEST(PathTest, PathBuilderDoesNotMutateCopiedPaths) {
       },
       true, {}, "Close");
 
-  test_isolation([](PathBuilder& builder) { builder.MoveTo({20, 30}, false); },
-                 false, {}, "Absolute MoveTo");
+  test_isolation(
+      [](PathBuilder& builder) {
+        builder.MoveTo({20, 30}, false);
+      },
+      false, {}, "Absolute MoveTo");
 
-  test_isolation([](PathBuilder& builder) { builder.MoveTo({20, 30}, true); },
-                 false, {}, "Relative MoveTo");
+  test_isolation(
+      [](PathBuilder& builder) {
+        builder.MoveTo({20, 30}, true);
+      },
+      false, {}, "Relative MoveTo");
 
-  test_isolation([](PathBuilder& builder) { builder.LineTo({20, 30}, false); },
-                 false, {}, "Absolute LineTo");
+  test_isolation(
+      [](PathBuilder& builder) {
+        builder.LineTo({20, 30}, false);
+      },
+      false, {}, "Absolute LineTo");
 
-  test_isolation([](PathBuilder& builder) { builder.LineTo({20, 30}, true); },
-                 false, {}, "Relative LineTo");
+  test_isolation(
+      [](PathBuilder& builder) {
+        builder.LineTo({20, 30}, true);
+      },
+      false, {}, "Relative LineTo");
 
   test_isolation(
       [](PathBuilder& builder) {  //
@@ -669,7 +681,9 @@ TEST(PathTest, PathBuilderDoesNotMutateCopiedPaths) {
       false, {}, "Relative CubicCurveTo");
 
   test_isolation(
-      [](PathBuilder& builder) { builder.AddLine({100, 100}, {150, 100}); },
+      [](PathBuilder& builder) {
+        builder.AddLine({100, 100}, {150, 100});
+      },
       false, {}, "AddLine");
 
   test_isolation(
@@ -685,8 +699,10 @@ TEST(PathTest, PathBuilderDoesNotMutateCopiedPaths) {
       false, {}, "AddOval");
 
   test_isolation(
-      [](PathBuilder& builder) { builder.AddCircle({100, 100}, 20); }, false,
-      {}, "AddCircle");
+      [](PathBuilder& builder) {
+        builder.AddCircle({100, 100}, 20);
+      },
+      false, {}, "AddCircle");
 
   test_isolation(
       [](PathBuilder& builder) {
@@ -707,8 +723,11 @@ TEST(PathTest, PathBuilderDoesNotMutateCopiedPaths) {
       },
       false, {}, "AddCubicCurve");
 
-  test_isolation([](PathBuilder& builder) { builder.Shift({23, 42}); }, false,
-                 {23, 42}, "Shift");
+  test_isolation(
+      [](PathBuilder& builder) {
+        builder.Shift({23, 42});
+      },
+      false, {23, 42}, "Shift");
 }
 
 }  // namespace testing
