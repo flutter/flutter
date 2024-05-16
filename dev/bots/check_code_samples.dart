@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 // To run this, from the root of the Flutter repository:
-//   bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/check_code_sample_links.dart
+//   bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/check_code_samples.dart
 
 import 'dart:io';
 
@@ -315,8 +315,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/material_state/material_state_outlined_border.0_test.dart',
   'examples/api/test/material/material_state/material_state_property.0_test.dart',
   'examples/api/test/material/selectable_region/selectable_region.0_test.dart',
-  'examples/api/test/material/text_field/text_field.2_test.dart',
-  'examples/api/test/material/text_field/text_field.1_test.dart',
   'examples/api/test/material/range_slider/range_slider.0_test.dart',
   'examples/api/test/material/selection_container/selection_container_disabled.0_test.dart',
   'examples/api/test/material/selection_container/selection_container.0_test.dart',
@@ -352,7 +350,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/selection_area/selection_area.0_test.dart',
   'examples/api/test/material/scaffold/scaffold.end_drawer.0_test.dart',
   'examples/api/test/material/scaffold/scaffold.drawer.0_test.dart',
-  'examples/api/test/material/scaffold/scaffold.1_test.dart',
   'examples/api/test/material/scaffold/scaffold.of.0_test.dart',
   'examples/api/test/material/scaffold/scaffold_messenger.of.0_test.dart',
   'examples/api/test/material/scaffold/scaffold_messenger.0_test.dart',
@@ -396,7 +393,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/inherited_theme/inherited_theme.0_test.dart',
   'examples/api/test/widgets/sliver/decorated_sliver.0_test.dart',
   'examples/api/test/widgets/autofill/autofill_group.0_test.dart',
-  'examples/api/test/widgets/drag_target/draggable.0_test.dart',
   'examples/api/test/widgets/shared_app_data/shared_app_data.1_test.dart',
   'examples/api/test/widgets/shared_app_data/shared_app_data.0_test.dart',
   'examples/api/test/widgets/nested_scroll_view/nested_scroll_view_state.0_test.dart',
@@ -405,10 +401,8 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/nested_scroll_view/nested_scroll_view.0_test.dart',
   'examples/api/test/widgets/scroll_position/scroll_metrics_notification.0_test.dart',
   'examples/api/test/widgets/media_query/media_query_data.system_gesture_insets.0_test.dart',
-  'examples/api/test/widgets/async/stream_builder.0_test.dart',
   'examples/api/test/widgets/async/future_builder.0_test.dart',
   'examples/api/test/widgets/restoration_properties/restorable_value.0_test.dart',
-  'examples/api/test/widgets/animated_size/animated_size.0_test.dart',
   'examples/api/test/widgets/animated_switcher/animated_switcher.0_test.dart',
   'examples/api/test/widgets/transitions/relative_positioned_transition.0_test.dart',
   'examples/api/test/widgets/transitions/positioned_transition.0_test.dart',
@@ -437,10 +431,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/scrollbar/raw_scrollbar.desktop.0_test.dart',
   'examples/api/test/widgets/scrollbar/raw_scrollbar.shape.0_test.dart',
   'examples/api/test/widgets/scrollbar/raw_scrollbar.0_test.dart',
-  'examples/api/test/widgets/sliver_fill/sliver_fill_remaining.2_test.dart',
-  'examples/api/test/widgets/sliver_fill/sliver_fill_remaining.1_test.dart',
-  'examples/api/test/widgets/sliver_fill/sliver_fill_remaining.3_test.dart',
-  'examples/api/test/widgets/sliver_fill/sliver_fill_remaining.0_test.dart',
   'examples/api/test/widgets/interactive_viewer/interactive_viewer.constrained.0_test.dart',
   'examples/api/test/widgets/interactive_viewer/interactive_viewer.transformation_controller.0_test.dart',
   'examples/api/test/widgets/interactive_viewer/interactive_viewer.0_test.dart',

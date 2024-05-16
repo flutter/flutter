@@ -126,9 +126,14 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// disposed.
 /// {@endtemplate}
 ///
-/// Remember to call [TextEditingController.dispose] of the [TextEditingController]
+/// Remember to call [TextEditingController.dispose] on the [TextEditingController]
 /// when it is no longer needed. This will ensure we discard any resources used
 /// by the object.
+///
+/// If this field is part of a scrolling container that lazily constructs its
+/// children, like a [ListView] or a [CustomScrollView], then a [controller]
+/// should be specified. The controller's lifetime should be managed by a
+/// stateful widget ancestor of the scrolling container.
 ///
 /// ## Obscured Input
 ///
