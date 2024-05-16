@@ -427,6 +427,24 @@ class CocoaPods {
       final ({String failingPod, String sourcePlugin, String podPluginSubdir})?
           podInfo = _parseMinDeploymentFailureInfo(stdout);
       if (podInfo != null) {
+        final Directory symlinksDir;
+        final String podPlatformString;
+        final String platformName;
+        final String docsLink;
+        if (xcodeProject is IosProject) {
+          symlinksDir = xcodeProject.symlinks;
+          podPlatformString = 'ios';
+          platformName = 'iOS';
+          docsLink = 'https://docs.flutter.dev/deployment/ios';
+        } else if (xcodeProject is MacOSProject) {
+          symlinksDir = xcodeProject.ephemeralDirectory.childDirectory('.symlinks');
+          podPlatformString = 'osx';
+          platformName = 'macOS';
+          docsLink = 'https://docs.flutter.dev/deployment/macos';
+        } else {
+          return;
+        }
+
         final String sourcePlugin = podInfo.sourcePlugin;
         // If the plugin's podfile has set its own minimum version correctly
         // based on the requirements of its dependencies the failing pod should
@@ -435,23 +453,6 @@ class CocoaPods {
         // with a minimum version of 12, then building for 11 will report that
         // pod as failing.)
         if (podInfo.failingPod == podInfo.sourcePlugin) {
-          final Directory symlinksDir;
-          final String podPlatformString;
-          final String platformName;
-          final String docsLink;
-          if (xcodeProject is IosProject) {
-            symlinksDir = xcodeProject.symlinks;
-            podPlatformString = 'ios';
-            platformName = 'iOS';
-            docsLink = 'https://docs.flutter.dev/deployment/ios';
-          } else if (xcodeProject is MacOSProject) {
-            symlinksDir = xcodeProject.ephemeralDirectory.childDirectory('.symlinks');
-            podPlatformString = 'osx';
-            platformName = 'macOS';
-            docsLink = 'https://docs.flutter.dev/deployment/macos';
-          } else {
-            return;
-          }
           final File podspec = symlinksDir
               .childDirectory('plugins')
               .childDirectory(sourcePlugin)
@@ -493,8 +494,8 @@ class CocoaPods {
           // with the plugin developer.
           _logger.printError(
             'Error: The pod "${podInfo.failingPod}" required by the plugin '
-            '"$sourcePlugin" requires a higher minimum iOS deployment version '
-            "than the plugin's reported minimum version.\n"
+            '"$sourcePlugin" requires a higher minimum $platformName deployment '
+            "version than the plugin's reported minimum version.\n"
             'To build, remove the plugin "$sourcePlugin", or contact the plugin\'s '
             'developers for assistance.',
             emphasis: true,
