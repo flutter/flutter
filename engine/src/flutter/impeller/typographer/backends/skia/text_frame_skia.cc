@@ -36,7 +36,7 @@ static Rect ToRect(const SkRect& rect) {
   return Rect::MakeLTRB(rect.fLeft, rect.fTop, rect.fRight, rect.fBottom);
 }
 
-static constexpr Scalar kScaleSize = 100000.0f;
+static constexpr Scalar kScaleSize = 64.0f;
 
 std::shared_ptr<TextFrame> MakeTextFrameFromTextBlobSkia(
     const sk_sp<SkTextBlob>& blob) {
@@ -59,7 +59,8 @@ std::shared_ptr<TextFrame> MakeTextFrameFromTextBlobSkia(
         // For some platforms (including Android), `SkFont::getBounds()` snaps
         // the computed bounds to integers. And so we scale up the font size
         // prior to fetching the bounds to ensure that the returned bounds are
-        // always precise enough.
+        // always precise enough. Scaling too large will cause Skia to use
+        // path rendering and potentially inaccurate glyph sizes.
         font.setSize(kScaleSize);
         font.getBounds(glyphs, glyph_count, glyph_bounds.data(), nullptr);
 
