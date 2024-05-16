@@ -474,9 +474,6 @@ Future<Directory> createTestProject(String packageName, Directory tempDirectory)
   await pinDependencies(packageDirectory.childFile('pubspec.yaml'));
   await pinDependencies(
       packageDirectory.childDirectory('example').childFile('pubspec.yaml'));
-  await addDepdendencyOverrides(packageDirectory.childFile('pubspec.yaml'));
-  await addDepdendencyOverrides(
-      packageDirectory.childDirectory('example').childFile('pubspec.yaml'));
 
   await addLinkHookDepedendency(packageDirectory);
 
@@ -535,30 +532,6 @@ import '${packageName}_bindings_generated.dart' as bindings;
   );
   expect(dartFileNew2, isNot(dartFileNew));
   await dartFile.writeAsString(dartFileNew2);
-}
-
-Future<void> addDepdendencyOverrides(File pubspecFile) async {
-  expect(pubspecFile, exists);
-  final String oldPubspec = await pubspecFile.readAsString();
-  final String newPubspec = '''
-$oldPubspec
-
-# TODO(dacoharkes): Publish versions and don't use git dep.
-dependency_overrides:
-  native_assets_cli:
-    git:
-      url: https://dart.googlesource.com/native
-      ref: c1b13c3f77f7602e3875f84e2051b8ff8e94ec4c
-      path: pkgs/native_assets_cli/
-  native_toolchain_c:
-    git:
-      url: https://dart.googlesource.com/native
-      ref: c1b13c3f77f7602e3875f84e2051b8ff8e94ec4c
-      path: pkgs/native_toolchain_c/
-
-''';
-  expect(newPubspec, isNot(oldPubspec));
-  await pubspecFile.writeAsString(newPubspec);
 }
 
 Future<void> pinDependencies(File pubspecFile) async {

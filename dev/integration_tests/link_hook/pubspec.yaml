@@ -8,17 +8,8 @@ environment:
 dependencies:
   cli_config: 0.2.0
   logging: 1.2.0
-  # TODO(dacoharkes): Publish versions and don't use git dep.
-  native_assets_cli:
-    git:
-      url: https://dart.googlesource.com/native
-      ref: c1b13c3f77f7602e3875f84e2051b8ff8e94ec4c
-      path: pkgs/native_assets_cli/
-  native_toolchain_c:
-    git:
-      url: https://dart.googlesource.com/native
-      ref: c1b13c3f77f7602e3875f84e2051b8ff8e94ec4c
-      path: pkgs/native_toolchain_c/
+  native_assets_cli: 0.6.0
+  native_toolchain_c: 0.4.2
 
 dev_dependencies:
   ffi: 2.1.2
