@@ -1145,7 +1145,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     super.requestFocus,
     this.filter,
     this.traversalEdgeBehavior,
-    this.delegatedTransition,
   });
 
   /// The filter to add to the barrier.
@@ -1476,9 +1475,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [ModalBarrier], the widget that implements this feature.
   /// {@endtemplate}
   bool get barrierDismissible;
-
-  /// The delegated transition provided to the previous route.
-  final DelegatedTransitionBuilder? delegatedTransition;
 
   /// Whether the semantics of the modal barrier are included in the
   /// semantics tree.
@@ -2103,7 +2099,6 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
     super.requestFocus,
     super.filter,
     super.traversalEdgeBehavior,
-    super.delegatedTransition,
   });
 
   @override
@@ -2306,7 +2301,6 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     super.requestFocus,
     this.anchorPoint,
     super.traversalEdgeBehavior,
-    super.delegatedTransition,
   }) : _pageBuilder = pageBuilder,
        _barrierDismissible = barrierDismissible,
        _barrierLabel = barrierLabel,
@@ -2513,4 +2507,11 @@ abstract class PopEntry<T> {
   String toString() {
     return 'PopEntry canPop: ${canPopNotifier.value}, onPopInvoked: $onPopInvokedWithResult';
   }
+}
+
+/// Mixin for a route that can provide a delegated secondary transition to the
+/// outgoing route.
+abstract mixin class FlexibleTransitionRouteMixin<T> {
+  /// The delegated transition provided to the previous route.
+  late DelegatedTransitionBuilder? delegatedTransition;
 }
