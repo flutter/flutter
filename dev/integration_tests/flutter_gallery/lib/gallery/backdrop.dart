@@ -246,13 +246,11 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
     }
 
     final double flingVelocity = details.velocity.pixelsPerSecond.dy / _backdropHeight;
-    if (flingVelocity < 0.0) {
-      _controller!.fling(velocity: math.max(2.0, -flingVelocity));
-    } else if (flingVelocity > 0.0) {
-      _controller!.fling(velocity: math.min(-2.0, -flingVelocity));
-    } else {
-      _controller!.fling(velocity: _controller!.value < 0.5 ? -2.0 : 2.0);
-    }
+    _controller!.fling(velocity: switch (flingVelocity) {
+      < 0.0 => math.max(2.0, -flingVelocity),
+      > 0.0 => math.min(-2.0, -flingVelocity),
+      _ => _controller!.value < 0.5 ? -2.0 : 2.0,
+    });
   }
 
   void _toggleFrontLayer() {

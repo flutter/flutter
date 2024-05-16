@@ -244,11 +244,12 @@ class ButtonBar extends StatelessWidget {
           child: child,
         );
       case ButtonBarLayoutBehavior.constrained:
-        return Container(
-          padding: EdgeInsets.symmetric(horizontal: paddingUnit),
+        return ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 52.0),
-          alignment: Alignment.center,
-          child: child,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: paddingUnit),
+            child: Center(child: child),
+          ),
         );
     }
   }
