@@ -174,8 +174,7 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
   // Warn user if C/C++ compilers are not the system default clang/clang++.
   if (!clang.startsWith('/usr/bin/clang')) {
     globals.printStatus(
-      'Warning: C compiler is set to $clang.${(cc != null) ?
-      ' CC environment variable is set to $cc.' : ''} '
+      'Warning: C compiler is set to $clang.${(cc != null) ? ' CC environment variable is set to $cc.' : ''} '
       'Please consider using the distribution-provided clang',
       color: TerminalColor.yellow,
     );
@@ -183,8 +182,7 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
 
   if (!clangPlusPlus.startsWith('/usr/bin/clang++')) {
     globals.printStatus(
-      'Warning: C++ compiler is set to $clangPlusPlus.${(cxx != null) ?
-      ' CXX environment variable is set to $cxx.' : ''} '
+      'Warning: C++ compiler is set to $clangPlusPlus.${(cxx != null) ? ' CXX environment variable is set to $cxx.' : ''} '
       'Please consider using the distribution-provided clang++',
       color: TerminalColor.yellow,
     );
