@@ -41,8 +41,7 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
     super.fullscreenDialog,
     super.allowSnapshotting = true,
     super.barrierDismissible = false,
-    super.delegatedTransition,
-  }) {
+  })  {
     assert(opaque);
   }
 
@@ -81,7 +80,7 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
 ///    by the [PageTransitionsTheme].
 ///  * [CupertinoPageTransitionsBuilder], which is the default page transition
 ///    for iOS and macOS.
-mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
+mixin MaterialRouteTransitionMixin<T> on PageRoute<T> implements FlexibleTransitionRouteMixin<T>{
   /// Builds the primary contents of the route.
   @protected
   Widget buildContent(BuildContext context);
@@ -95,17 +94,27 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   @override
   String? get barrierLabel => null;
 
+  DelegatedTransitionBuilder? _delegatedTransition;
+
+  @override
+  DelegatedTransitionBuilder? get delegatedTransition => _delegatedTransition;
+
+  @override
+  set delegatedTransition(DelegatedTransitionBuilder? newTransition) {
+    _delegatedTransition = newTransition;
+  }
+
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
     return (nextRoute is MaterialRouteTransitionMixin && !nextRoute.fullscreenDialog)
       || (nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog)
-      || (nextRoute is PageRoute);
+      || (nextRoute is FlexibleTransitionRouteMixin<T>);
   }
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
-    if (previousRoute is ModalRoute<T> && navigator != null) {
+    if (previousRoute is FlexibleTransitionRouteMixin<T> && navigator != null) {
       previousRoute.navigator!.delegateTransitionBuilder = delegatedTransition;
     }
     return previousRoute is PageRoute;
@@ -128,6 +137,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
+    delegatedTransition = theme.delegatedTransition(context);
     return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
 }
