@@ -58,6 +58,7 @@ dependencies:
   graphs: 2.3.1
   native_assets_builder: 0.7.0
   native_assets_cli: 0.6.0
+
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
   # this, make sure the tests are still running correctly.
