@@ -140,7 +140,7 @@ struct HalfVector2 {
   constexpr HalfVector2(const Vector2& a)
       : x(ScalarToHalf(a.x)), y(ScalarToHalf(a.y)) {}
 
-  constexpr HalfVector2(InternalHalf x, InternalHalf y) : x(x), y(y){};
+  constexpr HalfVector2(InternalHalf x, InternalHalf y) : x(x), y(y) {};
 
   constexpr bool operator==(const HalfVector2& v) const {
     return v.x == x && v.y == y;

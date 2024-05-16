@@ -111,7 +111,9 @@ TEST(WeakPtrTest, MultipleStaged) {
     int data = 0;
     WeakPtrFactory<int> factory(&data);
     a = factory.GetWeakPtr();
-    { WeakPtr<int> b = factory.GetWeakPtr(); }
+    {
+      WeakPtr<int> b = factory.GetWeakPtr();
+    }
     EXPECT_NE(a.get(), nullptr);
   }
   EXPECT_EQ(nullptr, a.get());

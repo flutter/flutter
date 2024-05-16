@@ -67,7 +67,8 @@ bool GoldenDigest::Write(WorkingDirectory* working_directory) {
     }
     is_first = false;
 
-    fout << "    { " << "\"testName\" : \"" << entry.test_name << "\", "
+    fout << "    { "
+         << "\"testName\" : \"" << entry.test_name << "\", "
          << "\"filename\" : \"" << entry.filename << "\", "
          << "\"width\" : " << entry.width << ", "
          << "\"height\" : " << entry.height << ", ";

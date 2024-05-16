@@ -6,13 +6,13 @@
 
 namespace flutter {
 namespace testing {
-MockWindow::MockWindow() : FlutterWindow(1, 1){};
+MockWindow::MockWindow() : FlutterWindow(1, 1) {};
 MockWindow::MockWindow(std::unique_ptr<WindowsProcTable> window_proc_table,
                        std::unique_ptr<TextInputManager> text_input_manager)
     : FlutterWindow(1,
                     1,
                     std::move(window_proc_table),
-                    std::move(text_input_manager)){};
+                    std::move(text_input_manager)) {};
 
 MockWindow::~MockWindow() = default;
 
