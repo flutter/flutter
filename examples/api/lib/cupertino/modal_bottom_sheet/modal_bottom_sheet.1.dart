@@ -315,15 +315,18 @@ class MBSTransition extends StatelessWidget {
   }
 }
 
-class MBSPageRoute<T> extends PageRoute<T> with MBSRouteTransitionMixin<T> {
+class MBSPageRoute<T> extends PageRoute<T> with MBSRouteTransitionMixin<T>,FlexibleTransitionRouteMixin<T> {
   /// Creates a page route for use in an iOS designed app.
   MBSPageRoute({
     required BuildContext context,
     this.firstRoute,
-  }) : super(
-    delegatedTransition: (Navigator.of(context).widget is MBSNavigator) ?
-      MBSTransition.secondaryDelegateTransition : MBSTransition.delegateTransition,
-  );
+  }) : _delegatedTransition = (Navigator.of(context).widget is MBSNavigator) ?
+      MBSTransition.secondaryDelegateTransition : MBSTransition.delegateTransition;
+
+  @override
+  DelegatedTransitionBuilder? get delegatedTransition => _delegatedTransition;
+
+  final DelegatedTransitionBuilder _delegatedTransition;
 
   final String? firstRoute;
 

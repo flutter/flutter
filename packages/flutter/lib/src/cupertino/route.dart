@@ -83,7 +83,7 @@ final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
 ///  * [MaterialRouteTransitionMixin], which is a mixin that provides
 ///    platform-appropriate transitions for a [PageRoute].
 ///  * [CupertinoPageRoute], which is a [PageRoute] that leverages this mixin.
-mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
+mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> implements FlexibleTransitionRouteMixin<T> {
   /// Builds the primary contents of the route.
   @protected
   Widget buildContent(BuildContext context);
@@ -156,15 +156,15 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
     // For MBS: we need to allow for transitioning to a route that will provide a secondary animation to use.
     // This always plays the transition, but it would be better to check if the next route provides a delegated
     // transition.
-    return nextRoute is ModalRoute || nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog;
+    return nextRoute is FlexibleTransitionRouteMixin<T> || nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog;
   }
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
-    if (previousRoute is ModalRoute<T> && navigator != null) {
+    if (previousRoute is FlexibleTransitionRouteMixin<T> && navigator != null) {
       previousRoute.navigator!.delegateTransitionBuilder = delegatedTransition;
     }
-    return previousRoute is ModalRoute || previousRoute is CupertinoRouteTransitionMixin && !previousRoute.fullscreenDialog;
+    return previousRoute is FlexibleTransitionRouteMixin<T> || previousRoute is CupertinoRouteTransitionMixin && !previousRoute.fullscreenDialog;
   }
 
   /// True if an iOS-style back swipe pop gesture is currently underway for [route].
@@ -357,10 +357,12 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
     super.fullscreenDialog,
     super.allowSnapshotting = true,
     super.barrierDismissible = false,
-    super.delegatedTransition = CupertinoPageTransition.delegateTransition,
   }) {
     assert(opaque);
   }
+
+  @override
+  DelegatedTransitionBuilder? delegatedTransition = CupertinoPageTransition.delegateTransition;
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
@@ -389,6 +391,9 @@ class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTr
   }) : super(settings: page) {
     assert(opaque);
   }
+
+  @override
+  DelegatedTransitionBuilder? delegatedTransition = CupertinoPageTransition.delegateTransition;
 
   CupertinoPage<T> get _page => settings as CupertinoPage<T>;
 

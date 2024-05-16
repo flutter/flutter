@@ -25,7 +25,6 @@ abstract class PageRoute<T> extends ModalRoute<T> {
     this.fullscreenDialog = false,
     this.allowSnapshotting = true,
     bool barrierDismissible = false,
-    super.delegatedTransition,
   }) : _barrierDismissible = barrierDismissible;
 
   /// {@template flutter.widgets.PageRoute.fullscreenDialog}
