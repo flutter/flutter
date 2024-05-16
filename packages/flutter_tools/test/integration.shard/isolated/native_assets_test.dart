@@ -499,7 +499,8 @@ Future<void> addLinkHookDepedendency(Directory packageDirectory) async {
   expect(linkHookDirectory, exists);
 
   final File pubspecFile = packageDirectory.childFile('pubspec.yaml');
-  final String pubspecOld = await pubspecFile.readAsString();
+  final String pubspecOld =
+      (await pubspecFile.readAsString()).replaceAll('\r\n', '\n');
   final String pubspecNew = pubspecOld.replaceFirst('''
 dependencies:
 ''', '''
@@ -512,7 +513,8 @@ dependencies:
 
   final File dartFile =
       packageDirectory.childDirectory('lib').childFile('$packageName.dart');
-  final String dartFileOld = await dartFile.readAsString();
+  final String dartFileOld =
+      (await dartFile.readAsString()).replaceAll('\r\n', '\n');
   // Replace with something that results in the same resulting int, so that the
   // tests don't have to be updated.
   final String dartFileNew = dartFileOld.replaceFirst(
