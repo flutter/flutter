@@ -67,7 +67,7 @@ interface class Gn {
       result = JsonObject.parse(process.stdout);
     } on FormatException catch (e) {
       _environment.logger.fatal(
-        'Failed to parse JSON output from `gn desc`:\n$e',
+        'Failed to parse JSON output from `gn desc`:\n$e\n${process.stdout}',
       );
     }
 
@@ -136,6 +136,10 @@ sealed class BuildTarget {
   @mustBeOverridden
   @override
   int get hashCode;
+
+  @mustBeOverridden
+  @override
+  String toString();
 }
 
 /// A build target that produces a [shared library][] or [static library][].
@@ -158,6 +162,9 @@ final class LibraryBuildTarget extends BuildTarget {
 
   @override
   int get hashCode => Object.hash(label, testOnly);
+
+  @override
+  String toString() => 'LibraryBuildTarget($label, testOnly=$testOnly)';
 }
 
 /// A build target that produces an [executable][] program.
@@ -184,4 +191,7 @@ final class ExecutableBuildTarget extends BuildTarget {
 
   @override
   int get hashCode => Object.hash(label, testOnly, executable);
+
+  @override
+  String toString() => 'ExecutableBuildTarget($label, testOnly=$testOnly, executable=$executable)';
 }
