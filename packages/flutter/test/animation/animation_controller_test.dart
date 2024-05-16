@@ -187,6 +187,8 @@ void main() {
     expect(controller.value, moreOrLessEquals(0.0));
     controller.stop();
 
+    controller.dispose();
+
     // Swap which duration is longer.
     controller = AnimationController(
       duration: const Duration(milliseconds: 50),
@@ -217,6 +219,98 @@ void main() {
     tick(const Duration(milliseconds: 310));
     expect(controller.value, moreOrLessEquals(0.0));
     controller.stop();
+    controller.dispose();
+  });
+
+  test('toggle() with different durations', () {
+    AnimationController controller = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      reverseDuration: const Duration(milliseconds: 50),
+      vsync: const TestVSync(),
+    );
+
+    controller.toggle();
+    tick(const Duration(milliseconds: 10));
+    tick(const Duration(milliseconds: 30));
+    expect(controller.value, moreOrLessEquals(0.2));
+    tick(const Duration(milliseconds: 60));
+    expect(controller.value, moreOrLessEquals(0.5));
+    tick(const Duration(milliseconds: 90));
+    expect(controller.value, moreOrLessEquals(0.8));
+    tick(const Duration(milliseconds: 120));
+    expect(controller.value, moreOrLessEquals(1.0));
+    controller.stop();
+
+    controller.toggle();
+    tick(const Duration(milliseconds: 210));
+    tick(const Duration(milliseconds: 220));
+    expect(controller.value, moreOrLessEquals(0.8));
+    tick(const Duration(milliseconds: 230));
+    expect(controller.value, moreOrLessEquals(0.6));
+    tick(const Duration(milliseconds: 240));
+    expect(controller.value, moreOrLessEquals(0.4));
+    tick(const Duration(milliseconds: 260));
+    expect(controller.value, moreOrLessEquals(0.0));
+    controller.stop();
+
+    controller.dispose();
+
+    // Swap which duration is longer.
+    controller = AnimationController(
+      duration: const Duration(milliseconds: 50),
+      reverseDuration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
+    );
+
+    controller.toggle();
+    tick(const Duration(milliseconds: 10));
+    tick(const Duration(milliseconds: 30));
+    expect(controller.value, moreOrLessEquals(0.4));
+    tick(const Duration(milliseconds: 60));
+    expect(controller.value, moreOrLessEquals(1.0));
+    tick(const Duration(milliseconds: 90));
+    expect(controller.value, moreOrLessEquals(1.0));
+    controller.stop();
+
+    controller.toggle();
+    tick(const Duration(milliseconds: 210));
+    tick(const Duration(milliseconds: 220));
+    expect(controller.value, moreOrLessEquals(0.9));
+    tick(const Duration(milliseconds: 230));
+    expect(controller.value, moreOrLessEquals(0.8));
+    tick(const Duration(milliseconds: 240));
+    expect(controller.value, moreOrLessEquals(0.7));
+    tick(const Duration(milliseconds: 260));
+    expect(controller.value, moreOrLessEquals(0.5));
+    tick(const Duration(milliseconds: 310));
+    expect(controller.value, moreOrLessEquals(0.0));
+    controller.stop();
+    controller.dispose();
+  });
+
+  test('toggle() acts correctly based on the animation state', () {
+    final AnimationController controller = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      reverseDuration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
+    );
+
+    controller.forward();
+    expect(controller.status, AnimationStatus.forward);
+    expect(controller.isForwardOrCompleted, true);
+    tick(const Duration(milliseconds: 10));
+    tick(const Duration(milliseconds: 60));
+    expect(controller.value, moreOrLessEquals(0.5));
+    expect(controller.isForwardOrCompleted, true);
+    controller.toggle();
+    tick(const Duration(milliseconds: 10));
+    expect(controller.status, AnimationStatus.reverse);
+    expect(controller.isForwardOrCompleted, false);
+    tick(const Duration(milliseconds: 110));
+    expect(controller.value, moreOrLessEquals(0));
+    expect(controller.status, AnimationStatus.dismissed);
+    expect(controller.isForwardOrCompleted, false);
+
     controller.dispose();
   });
 
