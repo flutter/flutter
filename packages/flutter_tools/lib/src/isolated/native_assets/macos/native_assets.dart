@@ -67,7 +67,7 @@ Future<Iterable<KernelAsset>> dryRunNativeAssetsMacOSInternal(
     buildDryRunResult: buildDryRunResult,
   );
   ensureNativeAssetsLinkDryRunSucceed(linkDryRunResult);
-  final List<AssetImpl> nativeAssets = [
+  final List<AssetImpl> nativeAssets = <AssetImpl>[
     ...buildDryRunResult.assets,
     ...linkDryRunResult.assets,
   ];

@@ -653,7 +653,7 @@ Future<Iterable<KernelAsset>> dryRunNativeAssetsSingleArchitectureInternal(
     buildDryRunResult: buildDryRunResult,
   );
   ensureNativeAssetsLinkDryRunSucceed(linkDryRunResult);
-  final List<AssetImpl> nativeAssets = [
+  final List<AssetImpl> nativeAssets = <AssetImpl>[
     ...buildDryRunResult.assets,
     ...linkDryRunResult.assets,
   ];
