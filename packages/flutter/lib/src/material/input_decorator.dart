@@ -1828,8 +1828,11 @@ class InputDecorator extends StatefulWidget {
   /// Whether the label needs to get out of the way of the input, either by
   /// floating or disappearing.
   ///
-  /// Will withdraw when not empty, or when focused while enabled.
-  bool get _labelShouldWithdraw => !isEmpty || (isFocused && decoration.enabled);
+  /// Will withdraw when not empty, when focused while enabled, or when
+  /// floating behavior is [FloatingLabelBehavior.always].
+  bool get _labelShouldWithdraw => !isEmpty
+      || (isFocused && decoration.enabled)
+      || decoration.floatingLabelBehavior == FloatingLabelBehavior.always;
 
   @override
   State<InputDecorator> createState() => _InputDecoratorState();
@@ -1862,9 +1865,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   late final CurvedAnimation _floatingLabelAnimation;
   late final AnimationController _shakingLabelController;
   final _InputBorderGap _borderGap = _InputBorderGap();
-  static const OrdinalSortKey _kPrefixSemanticsSortOrder = OrdinalSortKey(0);
-  static const OrdinalSortKey _kInputSemanticsSortOrder = OrdinalSortKey(1);
-  static const OrdinalSortKey _kSuffixSemanticsSortOrder = OrdinalSortKey(2);
+  // Provide a unique name to avoid mixing up sort order with sibling input
+  // decorators.
+  late final OrdinalSortKey _prefixSemanticsSortOrder = OrdinalSortKey(0, name: hashCode.toString());
+  late final OrdinalSortKey _inputSemanticsSortOrder = OrdinalSortKey(1, name: hashCode.toString());
+  late final OrdinalSortKey _suffixSemanticsSortOrder = OrdinalSortKey(2, name: hashCode.toString());
   static const SemanticsTag _kPrefixSemanticsTag = SemanticsTag('_InputDecoratorState.prefix');
   static const SemanticsTag _kSuffixSemanticsTag = SemanticsTag('_InputDecoratorState.suffix');
 
@@ -1872,9 +1877,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   void initState() {
     super.initState();
 
-    final bool labelIsInitiallyFloating = widget.decoration.floatingLabelBehavior == FloatingLabelBehavior.always
-        || (widget.decoration.floatingLabelBehavior != FloatingLabelBehavior.never &&
-            widget._labelShouldWithdraw);
+    final bool labelIsInitiallyFloating = widget.decoration.floatingLabelBehavior != FloatingLabelBehavior.never
+        && widget._labelShouldWithdraw;
 
     _floatingLabelController = AnimationController(
       duration: _kTransitionDuration,
@@ -1937,8 +1941,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final bool floatBehaviorChanged = widget.decoration.floatingLabelBehavior != old.decoration.floatingLabelBehavior;
 
     if (widget._labelShouldWithdraw != old._labelShouldWithdraw || floatBehaviorChanged) {
-      if (_floatingLabelEnabled
-          && (widget._labelShouldWithdraw || widget.decoration.floatingLabelBehavior == FloatingLabelBehavior.always)) {
+      if (_floatingLabelEnabled && widget._labelShouldWithdraw) {
         _floatingLabelController.forward();
       } else {
         _floatingLabelController.reverse();
@@ -2028,8 +2031,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // hint would.
   bool get _hasInlineLabel {
     return !widget._labelShouldWithdraw
-        && (decoration.labelText != null || decoration.label != null)
-        && decoration.floatingLabelBehavior != FloatingLabelBehavior.always;
+        && (decoration.labelText != null || decoration.label != null);
   }
 
   // If the label is a floating placeholder, it's always shown.
@@ -2219,7 +2221,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           labelIsFloating: widget._labelShouldWithdraw,
           text: decoration.prefixText,
           style: MaterialStateProperty.resolveAs(decoration.prefixStyle, materialState) ?? hintStyle,
-          semanticsSortKey: needsSemanticsSortOrder ? _kPrefixSemanticsSortOrder : null,
+          semanticsSortKey: needsSemanticsSortOrder ? _prefixSemanticsSortOrder : null,
           semanticsTag: _kPrefixSemanticsTag,
           child: decoration.prefix,
         )
@@ -2230,7 +2232,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           labelIsFloating: widget._labelShouldWithdraw,
           text: decoration.suffixText,
           style: MaterialStateProperty.resolveAs(decoration.suffixStyle, materialState) ?? hintStyle,
-          semanticsSortKey: needsSemanticsSortOrder ? _kSuffixSemanticsSortOrder : null,
+          semanticsSortKey: needsSemanticsSortOrder ? _suffixSemanticsSortOrder : null,
           semanticsTag: _kSuffixSemanticsTag,
           child: decoration.suffix,
         )
@@ -2238,7 +2240,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     if (input != null && needsSemanticsSortOrder) {
       input = Semantics(
-        sortKey: _kInputSemanticsSortOrder,
+        sortKey: _inputSemanticsSortOrder,
         child: input,
       );
     }

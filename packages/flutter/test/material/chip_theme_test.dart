@@ -1483,6 +1483,44 @@ void main() {
     expect(getIconStyle(tester, deleteIcon)?.color, deleteIconColor);
   });
 
+   // This is a regression test for https://github.com/flutter/flutter/issues/135136.
+  testWidgets('MaterialStateBorderSide properly lerp in ChipThemeData.side', (WidgetTester tester) async {
+    late ColorScheme colorScheme;
+
+    Widget buildChip({ required  Color seedColor }) {
+      colorScheme = ColorScheme.fromSeed(seedColor: seedColor);
+      return MaterialApp(
+        theme: ThemeData(
+          colorScheme: colorScheme,
+          chipTheme: ChipThemeData(
+            side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
+              return BorderSide(
+                color: colorScheme.primary,
+                width: 4.0,
+              );
+            }),
+          ),
+        ),
+        home: const Scaffold(
+          body: RawChip(label: Text('Chip')),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildChip(seedColor: Colors.red));
+    await tester.pumpAndSettle();
+
+    RenderBox getChipRenderBox() {
+      return tester.renderObject<RenderBox>(find.byType(RawChip));
+    }
+
+    expect(getChipRenderBox(), paints..drrect(color: colorScheme.primary));
+
+    await tester.pumpWidget(buildChip(seedColor: Colors.blue));
+    await tester.pump(kPressTimeout);
+
+    expect(getChipRenderBox(), paints..drrect(color: colorScheme.primary));
+  });
 }
 
 class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStateOutlinedBorder {
