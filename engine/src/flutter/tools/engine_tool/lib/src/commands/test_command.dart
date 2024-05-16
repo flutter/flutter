@@ -68,6 +68,10 @@ et test //flutter/fml:fml_benchmarks  # Run a single test target in `//flutter/f
       return 1;
     }
 
+    if (!await ensureBuildDir(environment, build, enableRbe: useRbe)) {
+      return 1;
+    }
+
     // Builds only accept labels as arguments, so convert patterns to labels.
     final Gn gn = Gn.fromEnvironment(environment);
 

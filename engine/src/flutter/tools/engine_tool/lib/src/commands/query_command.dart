@@ -195,6 +195,10 @@ et query targets //flutter/fml/...  # List all targets under `//flutter/fml`
       return 1;
     }
 
+    if (!await ensureBuildDir(environment, build, enableRbe: useRbe)) {
+      return 1;
+    }
+
     // Builds only accept labels as arguments, so convert patterns to labels.
     // TODO(matanlurey): Can be optimized in cases where wildcards are not used.
     final Gn gn = Gn.fromEnvironment(environment);
