@@ -1308,13 +1308,7 @@ class SimpleDialog extends StatelessWidget {
 }
 
 Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-  return FadeTransition(
-    opacity: CurvedAnimation(
-      parent: animation,
-      curve: Curves.easeOut,
-    ),
-    child: child,
-  );
+  return child;
 }
 
 /// Displays a Material dialog above the current contents of the app, with
@@ -1589,6 +1583,33 @@ class DialogRoute<T> extends RawDialogRoute<T> {
          transitionDuration: const Duration(milliseconds: 150),
          transitionBuilder: _buildMaterialDialogTransitions,
        );
+
+  CurvedAnimation? _curvedAnimation;
+
+  void _setAnimation(Animation<double> animation) {
+    if (_curvedAnimation?.parent != animation) {
+      _curvedAnimation?.dispose();
+      _curvedAnimation = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOut,
+      );
+    }
+  }
+
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    _setAnimation(animation);
+    return FadeTransition(
+      opacity: _curvedAnimation!,
+      child: super.buildTransitions(context, animation, secondaryAnimation, child),
+    );
+  }
+
+  @override
+  void dispose() {
+    _curvedAnimation?.dispose();
+    super.dispose();
+  }
 }
 
 double _scalePadding(double textScaleFactor) {
