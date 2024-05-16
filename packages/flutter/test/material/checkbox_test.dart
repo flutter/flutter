@@ -2312,32 +2312,6 @@ void main() {
     expect(getCheckboxRenderer(), paints..path(color: inactiveBackgroundColor));
   });
 
-  testWidgets('Checkbox.adaptive keeps default mouse cursor (Cupertino)', (WidgetTester tester) async {
-    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
-      await tester.pumpWidget(buildAdaptiveCheckbox(
-        platform: platform,
-        value: false,
-      ));
-      final Size checkboxSize = tester.getSize(find.byType(Checkbox));
-      expect(checkboxSize, const Size(40.0, 40.0));
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
-      await gesture.addPointer(location: tester.getCenter(find.byType(Checkbox)));
-      await tester.pump();
-      await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
-      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-          SystemMouseCursors.basic);
-
-      await tester.pumpWidget(buildAdaptiveCheckbox(platform: platform));
-      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-          SystemMouseCursors.basic);
-
-      // Test disabled checkbox.
-      await tester.pumpWidget(buildAdaptiveCheckbox(platform: platform, enabled: false, value: false));
-      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
-      await gesture.removePointer(location: tester.getCenter(find.byType(Checkbox)));
-      await tester.pump();
-    }
-  });
   testWidgets('Checkbox.adaptive default shadows, colors, and size(Cupertino)', (WidgetTester tester) async {
     const Color enabledCheckColor = Colors.white;
     const Color disabledCheckColor = Colors.black;
@@ -2668,6 +2642,49 @@ void main() {
         reason: 'Checkbox can configure a focus color',
     );
   });
+
+  testWidgets('Checkbox.adaptive configures mouse cursor (Cupertino)', (WidgetTester tester) async {
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      await tester.pumpWidget(buildAdaptiveCheckbox(
+        platform: platform,
+        value: false,
+        ),
+      );
+      final Size checkboxSize = tester.getSize(find.byType(Checkbox));
+      expect(checkboxSize, const Size(40.0, 40.0));
+      final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+        pointer: 1
+      );
+      await gesture.addPointer(location: tester.getCenter(find.byType(Checkbox)));
+      await tester.pump();
+      await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+          SystemMouseCursors.basic);
+
+      await tester.pumpWidget(buildAdaptiveCheckbox(platform: platform));
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+          SystemMouseCursors.basic);
+
+      // Test disabled checkbox.
+      await tester.pumpWidget(buildAdaptiveCheckbox(
+        platform: platform,
+        enabled: false,
+        value: false
+        ),
+      );
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+      // Test mouse cursor can be configured.
+      await tester.pumpWidget(buildAdaptiveCheckbox(
+        platform: platform,
+        mouseCursor: SystemMouseCursors.click,
+      ));
+      expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+      await gesture.removePointer(location: tester.getCenter(find.byType(Checkbox)));
+      await tester.pump();
+    }
+  });
 }
 
 class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
@@ -2694,6 +2711,7 @@ Widget buildAdaptiveCheckbox({
   bool autofocus = false,
   FocusNode? focusNode,
   Color? focusColor,
+  MouseCursor? mouseCursor,
   CheckboxThemeData? overallCheckboxThemeData,
   CheckboxThemeData? checkboxThemeData,
   Adaptation<CheckboxThemeData>? checkboxThemeAdaptation,
@@ -2703,6 +2721,7 @@ Widget buildAdaptiveCheckbox({
     autofocus: autofocus,
     focusColor: focusColor,
     value: value,
+    mouseCursor: mouseCursor,
     onChanged: enabled ? (_) {} : null,
     shape: shape,
     side: side,
