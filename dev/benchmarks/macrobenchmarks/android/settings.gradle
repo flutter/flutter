@@ -26,11 +26,20 @@ pluginManagement {
 }
 
 buildscript {
+      repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "gradle.plugin.com.google.cloud.artifactregistry:artifactregistry-gradle-plugin:2.2.1"
+  }
     dependencyLocking {
         lockFile = file("${rootProject.projectDir}/buildscript-gradle.lockfile")
         lockAllConfigurations()
     }
 }
+apply plugin: "com.google.cloud.artifactregistry.gradle-plugin"
 
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
