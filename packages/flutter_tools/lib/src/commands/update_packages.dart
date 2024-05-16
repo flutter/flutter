@@ -1557,11 +1557,17 @@ String generateFakePubspec(
     }
   }
   for (final PubspecDependency dependency in dependencies) {
+    // TODO(dacoharkes): Publish versions and don't use git dep.
+    if (dependency.name == 'native_assets_cli' ||
+        dependency.name == 'native_assets_builder') {
+      continue;
+    }
     if (!dependency.pointsToSdk) {
       dependency.describeForFakePubspec(result, overrides, allowUpgrade: doUpgrade);
     }
   }
   result.write(overrides.toString());
+  
   return result.toString();
 }
 

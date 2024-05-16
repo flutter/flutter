@@ -6,8 +6,8 @@ environment:
   sdk: '>=3.5.0-154.0.dev <4.0.0'
 
 dependencies:
-  cli_config: ^0.2.0
-  logging: ^1.2.0
+  cli_config: 0.2.0
+  logging: 1.2.0
   # TODO(dacoharkes): Publish versions and don't use git dep.
   native_assets_cli:
     git:
@@ -21,7 +21,7 @@ dependencies:
       path: pkgs/native_toolchain_c/
 
 dev_dependencies:
-  ffi: ^2.1.0
+  ffi: 2.1.2
   ffigen: ^12.0.0
   flutter_lints: ^4.0.0
-  test: ^1.24.9
+  test: 1.25.5
