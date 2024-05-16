@@ -31,16 +31,13 @@ typedef TreeSliverNodesAnimation = ({
 });
 
 /// Used to pass information down to [RenderTreeSliver].
-///
-/// The depth is used for breadth first traversal, where as depth first
-/// traversal follows the indexed order.
 class TreeSliverNodeParentData extends SliverMultiBoxAdaptorParentData {
-  /// The depth of the node, used by [RenderTreeSliver] to traverse nodes in the
-  /// designated [TreeSliverTraversalOrder].
+  /// The depth of the node, used by [RenderTreeSliver] to offset children by
+  /// by the [TreeSliverIndentationType].
   int depth = 0;
 }
 
-/// The style of indentation for [TreeSliverNode]s in a [TreeSliverList], as
+/// The style of indentation for [TreeSliverNode]s in a [TreeSliver], as
 /// handled by [RenderTreeSliver].
 ///
 /// {@template flutter.rendering.TreeSliverIndentationType}
@@ -48,18 +45,18 @@ class TreeSliverNodeParentData extends SliverMultiBoxAdaptorParentData {
 /// are offset by the indentation specified by
 /// [TreeSliverIndentationType.value] in the cross axis of the viewport. This
 /// means the space allotted to the indentation will not be part of the space
-/// made available to the Widget returned by [TreeSliverList.treeNodeBuilder].
+/// made available to the Widget returned by [TreeSliver.treeNodeBuilder].
 ///
 /// Alternatively, the indentation can be implemented in
-/// [TreeSliverList.treeNodeBuilder], with the depth of the given tree row
+/// [TreeSliver.treeNodeBuilder], with the depth of the given tree row
 /// accessed by [TreeSliverNode.depth]. This allows for more customization in
 /// building tree rows, such as filling the indented area with decorations or
 /// ink effects.
 ///
 /// {@tool dartpad}
-/// This example shows a highly customized [TreeSliverList] configured to
+/// This example shows a highly customized [TreeSliver] configured to
 /// [TreeSliverIndentationType.none]. This allows the indentation to be handled
-/// by the developer in [TreeSliverList.treeNodeBuilder], where a decoration is
+/// by the developer in [TreeSliver.treeNodeBuilder], where a decoration is
 /// used to fill the indented space.
 ///
 /// ** See code in examples/api/lib/widgets/sliver/sliver_tree.1.dart **
@@ -74,21 +71,21 @@ class TreeSliverIndentationType {
   double get value => _value;
   final double _value;
 
-  /// The default indentation of child [TreeSliverNode]s in a [TreeSliverList].
+  /// The default indentation of child [TreeSliverNode]s in a [TreeSliver].
   ///
   /// Child nodes will be offset by 10 pixels for each level in the tree.
   static const TreeSliverIndentationType standard = TreeSliverIndentationType._internal(10.0);
 
-  /// Configures no offsetting of child nodes in a [TreeSliverList].
+  /// Configures no offsetting of child nodes in a [TreeSliver].
   ///
   /// Useful if the indentation is implemented in the
-  /// [TreeSliverList.treeNodeBuilder] instead for more customization options.
+  /// [TreeSliver.treeNodeBuilder] instead for more customization options.
   ///
   /// Child nodes will not be offset in the tree.
   static const TreeSliverIndentationType none = TreeSliverIndentationType._internal(0.0);
 
   /// Configures a custom offset for indenting child nodes in a
-  /// [TreeSliverList].
+  /// [TreeSliver].
   ///
   /// Child nodes will be offset by the provided number of pixels in the tree.
   /// The [value] must be a non negative number.
@@ -108,11 +105,11 @@ typedef _PaintSegment = ({int leadingIndex, int trailingIndex});
 ///
 /// See also:
 ///
-///   * [TreeSliverList], the widget that creates and manages this render
+///   * [TreeSliver], the widget that creates and manages this render
 ///     object.
 class RenderTreeSliver extends RenderSliverVariedExtentList {
   /// Creates the render object that lays out the [TreeSliverNode]s of a
-  /// [TreeSliverList].
+  /// [TreeSliver].
   RenderTreeSliver({
     required super.childManager,
     required super.itemExtentBuilder,
@@ -143,7 +140,7 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
   /// based on their [TreeSliverNodeParentData.depth].
   ///
   /// If zero, can alternatively offset children in
-  /// [TreeSliverList.treeNodeBuilder] for more options to customize the
+  /// [TreeSliver.treeNodeBuilder] for more options to customize the
   /// indented space.
   double get indentation => _indentation;
   double _indentation;

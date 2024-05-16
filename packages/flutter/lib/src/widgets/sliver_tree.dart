@@ -20,8 +20,8 @@ const double _kDefaultRowExtent = 40.0;
 
 /// A data structure for configuring children of a [TreeSliver].
 ///
-/// A [TreeViewNode.content] can be of any type [T], but must correspond with
-/// the same type of the [TreeView].
+/// A [TreeSliverNode.content] can be of any type [T], but must correspond with
+/// the same type of the [TreeSliver].
 ///
 /// The values returned by [depth], [parent] and [isExpanded] getters are
 /// managed by the [TreeSliver]'s state.
@@ -41,9 +41,9 @@ class TreeSliverNode<T> {
   T get content => _content;
   final T _content;
 
-  /// Other [TreeViewNode]s that this node will be [parent] to.
+  /// Other [TreeSliverNode]s that this node will be [parent] to.
   ///
-  /// Modifying the children of nodes in a [TreeView] will cause the tree to be
+  /// Modifying the children of nodes in a [TreeSliver] will cause the tree to be
   /// rebuilt so that newly added active nodes are reflected in the tree.
   List<TreeSliverNode<T>> get children => _children;
   final List<TreeSliverNode<T>> _children;
