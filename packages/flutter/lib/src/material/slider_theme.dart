@@ -3485,7 +3485,10 @@ class _DropSliderValueIndicatorPathPainter {
       return;
     }
     assert(!sizeWithOverflow.isEmpty);
-
+    if (labelPainter.text == null) {
+      // labelPainter.text is null do not draw anything, so it's safe to just return.
+      return;
+    }
     final double rectangleWidth = _upperRectangleWidth(labelPainter, scale);
     final double horizontalShift = getHorizontalShift(
       parentBox: parentBox,
