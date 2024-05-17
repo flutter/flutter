@@ -2054,6 +2054,8 @@ void main() {
         ),
       );
       final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+      final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
+      final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 9), kind: PointerDeviceKind.mouse);
       addTearDown(gesture.removePointer);
