@@ -433,16 +433,11 @@ class _GalleryDemoPageState extends State<GalleryDemoPage>
       page = AnimatedBuilder(
           animation: _codeBackgroundColorController,
           builder: (BuildContext context, Widget? child) {
-            Brightness themeBrightness;
-
-            switch (GalleryOptions.of(context).themeMode) {
-              case ThemeMode.system:
-                themeBrightness = MediaQuery.of(context).platformBrightness;
-              case ThemeMode.light:
-                themeBrightness = Brightness.light;
-              case ThemeMode.dark:
-                themeBrightness = Brightness.dark;
-            }
+            final Brightness themeBrightness = switch (GalleryOptions.of(context).themeMode) {
+              ThemeMode.system => MediaQuery.of(context).platformBrightness,
+              ThemeMode.light => Brightness.light,
+              ThemeMode.dark => Brightness.dark,
+            };
 
             Widget contents = Container(
               padding: EdgeInsets.symmetric(horizontal: horizontalPadding),

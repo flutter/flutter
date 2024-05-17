@@ -174,10 +174,7 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
             : CupertinoColors.inactiveGray,
       ),
     );
-    if (widget.buttonItem == null) {
-      return textWidget;
-    }
-    switch (widget.buttonItem!.type) {
+    switch (widget.buttonItem?.type) {
       case ContextMenuButtonType.cut:
       case ContextMenuButtonType.copy:
       case ContextMenuButtonType.paste:
@@ -187,6 +184,7 @@ class _CupertinoTextSelectionToolbarButtonState extends State<CupertinoTextSelec
       case ContextMenuButtonType.searchWeb:
       case ContextMenuButtonType.share:
       case ContextMenuButtonType.custom:
+      case null:
         return textWidget;
       case ContextMenuButtonType.liveTextInput:
         return SizedBox(

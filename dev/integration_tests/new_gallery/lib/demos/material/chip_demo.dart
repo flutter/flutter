@@ -16,16 +16,12 @@ class ChipDemo extends StatelessWidget {
 
   String _title(BuildContext context) {
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
-    switch (type) {
-      case ChipDemoType.action:
-        return localizations.demoActionChipTitle;
-      case ChipDemoType.choice:
-        return localizations.demoChoiceChipTitle;
-      case ChipDemoType.filter:
-        return localizations.demoFilterChipTitle;
-      case ChipDemoType.input:
-        return localizations.demoInputChipTitle;
-    }
+    return switch (type) {
+      ChipDemoType.action => localizations.demoActionChipTitle,
+      ChipDemoType.choice => localizations.demoChoiceChipTitle,
+      ChipDemoType.filter => localizations.demoFilterChipTitle,
+      ChipDemoType.input  => localizations.demoInputChipTitle,
+    };
   }
 
   @override

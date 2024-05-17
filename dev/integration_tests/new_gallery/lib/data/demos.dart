@@ -50,15 +50,11 @@ enum GalleryDemoCategory {
   }
 
   String? displayTitle(GalleryLocalizations localizations) {
-    switch (this) {
-      case GalleryDemoCategory.other:
-        return localizations.homeCategoryReference;
-      case GalleryDemoCategory.material:
-      case GalleryDemoCategory.cupertino:
-        return toString();
-      case GalleryDemoCategory.study:
-    }
-    return null;
+    return switch (this) {
+      study => null,
+      material || cupertino => toString(),
+      other => localizations.homeCategoryReference,
+    };
   }
 }
 

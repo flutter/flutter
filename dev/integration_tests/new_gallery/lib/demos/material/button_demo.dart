@@ -13,18 +13,13 @@ class ButtonDemo extends StatelessWidget {
 
   String _title(BuildContext context) {
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
-    switch (type) {
-      case ButtonDemoType.text:
-        return localizations.demoTextButtonTitle;
-      case ButtonDemoType.elevated:
-        return localizations.demoElevatedButtonTitle;
-      case ButtonDemoType.outlined:
-        return localizations.demoOutlinedButtonTitle;
-      case ButtonDemoType.toggle:
-        return localizations.demoToggleButtonTitle;
-      case ButtonDemoType.floating:
-        return localizations.demoFloatingButtonTitle;
-    }
+    return switch (type) {
+      ButtonDemoType.text     => localizations.demoTextButtonTitle,
+      ButtonDemoType.elevated => localizations.demoElevatedButtonTitle,
+      ButtonDemoType.outlined => localizations.demoOutlinedButtonTitle,
+      ButtonDemoType.toggle   => localizations.demoToggleButtonTitle,
+      ButtonDemoType.floating => localizations.demoFloatingButtonTitle,
+    };
   }
 
   @override
