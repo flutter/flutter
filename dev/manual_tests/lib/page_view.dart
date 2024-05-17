@@ -70,7 +70,9 @@ class PageViewAppState extends State<PageViewApp> {
 
   void switchScrollDirection() {
     setState(() {
-      scrollDirection = flipAxis(scrollDirection);
+      scrollDirection = (scrollDirection == Axis.vertical)
+        ? Axis.horizontal
+        : Axis.vertical;
     });
   }
 
@@ -111,7 +113,9 @@ class PageViewAppState extends State<PageViewApp> {
   AppBar _buildAppBar() {
     return AppBar(
       title: const Text('PageView'),
-      actions: <Widget>[Text(scrollDirection.name)],
+      actions: <Widget>[
+        Text(scrollDirection == Axis.horizontal ? 'horizontal' : 'vertical'),
+      ],
     );
   }
 
