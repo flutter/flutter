@@ -287,11 +287,14 @@ void PlatformViewAndroid::RegisterExternalTexture(
           texture_id, surface_texture, jni_facade_));
       break;
     case AndroidRenderingAPI::kSoftware:
-    case AndroidRenderingAPI::kImpellerVulkan:
-      FML_LOG(INFO)
-          << "Attempted to use a SurfaceTextureExternalTexture with an "
-             "unsupported rendering API.";
+      FML_LOG(INFO) << "Software rendering does not support external textures.";
       break;
+    case AndroidRenderingAPI::kImpellerVulkan:
+      FML_LOG(ERROR) << "Impeller requires migrating plugins that create and "
+                        "register surface textures to the new surface producer "
+                        "API. See "
+                        "https://docs.flutter.dev/release/breaking-changes/"
+                        "android-surface-plugins";
   }
 }
 
@@ -319,9 +322,7 @@ void PlatformViewAndroid::RegisterImageTexture(
           texture_id, image_texture_entry, jni_facade_));
       break;
     case AndroidRenderingAPI::kSoftware:
-      FML_LOG(INFO)
-          << "Attempted to use a SurfaceTextureExternalTexture with an "
-             "unsupported rendering API.";
+      FML_LOG(INFO) << "Software rendering does not support external textures.";
       break;
   }
 }
