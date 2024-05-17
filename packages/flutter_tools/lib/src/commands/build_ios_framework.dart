@@ -330,10 +330,6 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
           'See https://flutter.dev/docs/development/add-to-app/ios/add-flutter-screen#create-a-flutterengine for more information.');
     }
 
-    globals.printWarning(
-        'Bitcode support has been deprecated. Turn off the "Enable Bitcode" build setting in your Xcode project or you may encounter compilation errors.\n'
-        'See https://developer.apple.com/documentation/xcode-release-notes/xcode-14-release-notes for details.');
-
     return FlutterCommandResult.success();
   }
 
