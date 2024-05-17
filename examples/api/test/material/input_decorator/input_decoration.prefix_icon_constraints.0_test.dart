@@ -43,23 +43,23 @@ void main() {
     );
 
     final Finder normalIcon = find.descendant(
-        of: find.ancestor(
-            of: find.text('Normal Icon Constraints'),
-            matching: find.byType(TextField)
-        ),
-        matching: find.byIcon(Icons.search)
+      of: find.ancestor(
+        of: find.text('Normal Icon Constraints'),
+        matching: find.byType(TextField)
+      ),
+      matching: find.byIcon(Icons.search)
     );
     final Finder smallerIcon = find.descendant(
-        of: find.ancestor(
-            of: find.text('Smaller Icon Constraints'),
-            matching: find.byType(TextField)
-        ),
-        matching: find.byIcon(Icons.search)
+      of: find.ancestor(
+        of: find.text('Smaller Icon Constraints'),
+        matching: find.byType(TextField)
+      ),
+      matching: find.byIcon(Icons.search)
     );
 
     expect(tester.getCenter(find.text('Normal Icon Constraints')).dx,
-        greaterThan(tester.getCenter(normalIcon).dx));
+      greaterThan(tester.getCenter(normalIcon).dx));
     expect(tester.getCenter(find.text('Smaller Icon Constraints')).dx,
-        greaterThan(tester.getCenter(smallerIcon).dx));
+      greaterThan(tester.getCenter(smallerIcon).dx));
   });
 }
