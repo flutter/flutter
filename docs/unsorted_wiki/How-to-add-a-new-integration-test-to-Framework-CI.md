@@ -93,4 +93,3 @@ Add any additional properties/dependencies your test may need.
 You will notice that `task_name` is new and the `tags` are new. The `task_name` is the name of your test script (minus the .dart suffix) and the tags allow infra to perform statistical analysis based on these in order to monitor SLO for task times, execution time as well as many other metrics.
 
 The above target can be added and run assuming there exists a ·new_test_to_add.dart· file in the Flutter repo.
-

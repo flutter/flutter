@@ -80,4 +80,3 @@ If we manage to remove the need for shader warm-up entirely, we will close issue
 ## [OpenContainer jank due to multiple frames of shader compilation](https://github.com/flutter/flutter/issues/76180) (#76180)
 
 A huge area of focus for us right now is our new graphics backend, [Impeller](https://docs.flutter.dev/perf/impeller), which should remove all runtime shader compilation, thus entirely removing this source of jank.
-

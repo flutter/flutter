@@ -19,9 +19,3 @@ Sometimes you need to update a single dependency as a [cherrypick to a release c
 In that case, you can run:
 
 `flutter update-packages --cherry-pick-package=[pub package name] --cherry-pick-version='[pub package version]'`
-
-
-
-
-
-

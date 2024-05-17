@@ -81,5 +81,3 @@ Generally, if the stable is relatively fresh, such as we recently shipped the ne
 Generally, we ship every third beta to stable, and prioritize fixes to those branches as those are soon to be stable. We have no official comms planned around this yet, but will encourage developers on Discord to try out this beta.
 
 In the last few weeks of a stable, we may opt to only release hotfixes to the beta instead of stable. At end of 2023, we're planning to have more automation around releases, which will allow us to ship hotfixes to both channels easily, and this will be less of a concern.
-
-
