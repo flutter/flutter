@@ -29,7 +29,7 @@ Future<void> createInfoPlist(
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
-	 <string>en</string>
+	<string>en</string>
 	<key>CFBundleExecutable</key>
 	<string>$name</string>
 	<key>CFBundleIdentifier</key>
