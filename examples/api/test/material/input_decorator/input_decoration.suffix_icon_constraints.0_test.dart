@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/input_decorator/input_decoration.prefix_icon_constraints.0.dart' as example;
+import 'package:flutter_api_samples/material/input_decorator/input_decoration.suffix_icon_constraints.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Shows all decorations', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.PrefixIconConstraintsExampleApp(),
+      const example.SuffixIconConstraintsExampleApp(),
     );
     expect(find.text('InputDecoration Sample'), findsOneWidget);
 
@@ -37,9 +37,9 @@ void main() {
       greaterThan(tester.getSize(smallerIcon).longestSide));
   });
 
-  testWidgets('Is prefix icon', (WidgetTester tester) async {
+  testWidgets('Is suffix icon', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.PrefixIconConstraintsExampleApp(),
+      const example.SuffixIconConstraintsExampleApp(),
     );
 
     final Finder normalIcon = find.descendant(
@@ -58,8 +58,8 @@ void main() {
     );
 
     expect(tester.getCenter(find.text('Normal Icon Constraints')).dx,
-        greaterThan(tester.getCenter(normalIcon).dx));
+      lessThan(tester.getCenter(normalIcon).dx));
     expect(tester.getCenter(find.text('Smaller Icon Constraints')).dx,
-        greaterThan(tester.getCenter(smallerIcon).dx));
+        lessThan(tester.getCenter(smallerIcon).dx));
   });
 }
