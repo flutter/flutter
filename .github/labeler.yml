@@ -116,6 +116,11 @@ framework:
     - any-glob-to-any-file:
       - packages/integration_test/**/*
 
+platform-android:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/platform/android
+
 platform-ios:
   - changed-files:
     - any-glob-to-any-file:
@@ -137,6 +142,12 @@ platform-web:
       - '**/fix_data.yaml'
       - '**/*.expect'
       - '**/*test_fixes*'
+
+team-android:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/platform/android
+
 
 tool:
   - changed-files:
