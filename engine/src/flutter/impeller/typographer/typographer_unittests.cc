@@ -325,58 +325,6 @@ TEST_P(TypographerTest, RectanglePackerAddsNonoverlapingRectangles) {
   ASSERT_EQ(packer->PercentFull(), 0);
 }
 
-TEST(TypographerTest, CanCloneRectanglePackerEmpty) {
-  auto skyline = RectanglePacker::Factory(256, 256);
-
-  EXPECT_EQ(skyline->PercentFull(), 0);
-
-  auto skyline_2 = skyline->Clone(/*scale=*/2);
-
-  EXPECT_EQ(skyline->PercentFull(), 0);
-}
-
-TEST(TypographerTest, CanCloneRectanglePackerAndPreservePositions) {
-  auto skyline = RectanglePacker::Factory(256, 256);
-  IPoint16 loc;
-  EXPECT_TRUE(skyline->AddRect(100, 100, &loc));
-
-  EXPECT_EQ(loc.x(), 0);
-  EXPECT_EQ(loc.y(), 0);
-  auto percent = skyline->PercentFull();
-
-  auto skyline_2 = skyline->Clone(/*scale=*/2);
-
-  EXPECT_LT(skyline_2->PercentFull(), percent);
-}
-
-TEST(TypographerTest, CanCloneRectanglePackerWhileFull) {
-  auto skyline = RectanglePacker::Factory(256, 256);
-  IPoint16 loc;
-  // Add a rectangle the size of the entire area.
-  EXPECT_TRUE(skyline->AddRect(256, 256, &loc));
-  // Packer is now full.
-  EXPECT_FALSE(skyline->AddRect(256, 256, &loc));
-
-  auto skyline_2 = skyline->Clone(/*scale=*/2);
-
-  // Can now fit one more
-  EXPECT_TRUE(skyline_2->AddRect(256, 256, &loc));
-}
-
-TEST(TypographerTest, CloneToSameSizePreservesContents) {
-  auto skyline = RectanglePacker::Factory(256, 256);
-  IPoint16 loc;
-  // Add a rectangle the size of the entire area.
-  EXPECT_TRUE(skyline->AddRect(256, 256, &loc));
-  // Packer is now full.
-  EXPECT_FALSE(skyline->AddRect(256, 256, &loc));
-
-  auto skyline_2 = skyline->Clone(/*scale=*/1);
-
-  // Packer is still full.
-  EXPECT_FALSE(skyline->AddRect(256, 256, &loc));
-}
-
 TEST(TypographerTest, RectanglePackerFillsRows) {
   auto skyline = RectanglePacker::Factory(257, 256);
 
@@ -396,6 +344,57 @@ TEST(TypographerTest, RectanglePackerFillsRows) {
 
   EXPECT_EQ(loc.x(), 256 - 16);
   EXPECT_EQ(loc.y(), 16);
+}
+
+TEST_P(TypographerTest, GlyphAtlasTextureWillGrowTilMaxTextureSize) {
+  if (GetBackend() == PlaygroundBackend::kOpenGLES) {
+    GTEST_SKIP() << "Atlas growth isn't supported for OpenGLES currently.";
+  }
+
+  auto host_buffer = HostBuffer::Create(GetContext()->GetResourceAllocator());
+  auto context = TypographerContextSkia::Make();
+  auto atlas_context =
+      context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
+  ASSERT_TRUE(context && context->IsValid());
+  SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
+  auto blob = SkTextBlob::MakeFromString("A", sk_font);
+  ASSERT_TRUE(blob);
+  auto atlas =
+      CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
+                       GlyphAtlas::Type::kAlphaBitmap, 1.0f, atlas_context,
+                       *MakeTextFrameFromTextBlobSkia(blob));
+  // Continually append new glyphs until the glyph size grows to the maximum.
+  // Note that the sizes here are more or less experimentally determined, but
+  // the important expectation is that the atlas size will shrink again after
+  // growing to the maximum size.
+  constexpr ISize expected_sizes[13] = {
+      {4096, 4096},   //
+      {4096, 4096},   //
+      {4096, 8192},   //
+      {4096, 8192},   //
+      {4096, 8192},   //
+      {4096, 8192},   //
+      {4096, 16384},  //
+      {4096, 16384},  //
+      {4096, 16384},  //
+      {4096, 16384},  //
+      {4096, 16384},  //
+      {4096, 16384},  //
+      {4096, 4096}    // Shrinks!
+  };
+
+  for (int i = 0; i < 13; i++) {
+    SkFont sk_font = flutter::testing::CreateTestFontOfSize(50 + i);
+    auto blob = SkTextBlob::MakeFromString("A", sk_font);
+
+    atlas =
+        CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
+                         GlyphAtlas::Type::kAlphaBitmap, 50 + i, atlas_context,
+                         *MakeTextFrameFromTextBlobSkia(blob));
+    ASSERT_TRUE(!!atlas);
+    EXPECT_EQ(atlas->GetTexture()->GetTextureDescriptor().size,
+              expected_sizes[i]);
+  }
 }
 
 }  // namespace testing
