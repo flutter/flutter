@@ -2312,7 +2312,7 @@ void main() {
     expect(getCheckboxRenderer(), paints..path(color: inactiveBackgroundColor));
   });
 
-  testWidgets('Checkbox.adaptive default shadows, colors, and size(Cupertino)', (WidgetTester tester) async {
+  testWidgets('Checkbox.adaptive default shadows, colors, and size (Cupertino)', (WidgetTester tester) async {
     const Color enabledCheckColor = Colors.white;
     const Color disabledCheckColor = Colors.black;
     const Color inactiveFillColor = Colors.white;
@@ -2594,7 +2594,7 @@ void main() {
     }
   });
 
-  testWidgets('Checkbox.adaptive configures focus color(Cupertino)', (WidgetTester tester) async {
+  testWidgets('Checkbox.adaptive configures focus color (Cupertino)', (WidgetTester tester) async {
     const Color defaultCheckColor = Colors.white;
     const Color defaultActiveFillColor = Color(0xff007aff);
     const Color defaultFocusColor = Color(0xcc6eadf2);

@@ -942,7 +942,7 @@ class _CheckboxThemeAdaptation extends Adaptation<CheckboxThemeData> {
   }
 }
 
-// Hand coded defaults for iOS/macOS checkbox.
+// Eyeballed defaults for iOS/macOS checkbox.
 // TODO(victorsanni): Apply theme for widget state where app is open but inactive.
 class _CheckboxDefaultsCupertino extends CheckboxThemeData {
   _CheckboxDefaultsCupertino(BuildContext context)
