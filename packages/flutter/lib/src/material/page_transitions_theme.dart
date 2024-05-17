@@ -965,10 +965,7 @@ mixin _ZoomTransitionBase<S extends StatefulWidget> on State<S> {
   }
 
   void onAnimationStatusChange(AnimationStatus status) {
-    controller.allowSnapshotting = switch (status) {
-      AnimationStatus.dismissed || AnimationStatus.completed => false,
-      AnimationStatus.forward   || AnimationStatus.reverse   => useSnapshot,
-    };
+    controller.allowSnapshotting = status.isAnimating && useSnapshot;
   }
 
   @override
@@ -1016,7 +1013,7 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
     // instead of checking that it is `forward` is that this allows
     // the interrupted reversal of the forward transition to smoothly fade
     // the scrim away. This prevents a disjointed removal of the scrim.
-    if (!reverse && animation.status != AnimationStatus.completed) {
+    if (!reverse && !animation.isCompleted) {
       scrimOpacity = _ZoomEnterTransitionState._scrimOpacityTween.evaluate(animation)!;
     }
     assert(!reverse || scrimOpacity == 0.0);
@@ -1030,12 +1027,8 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
 
   @override
   void paint(PaintingContext context, ui.Offset offset, Size size, PaintingContextCallback painter) {
-    switch (animation.status) {
-      case AnimationStatus.completed:
-      case AnimationStatus.dismissed:
-        return painter(context, offset);
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
+    if (!animation.isAnimating) {
+      return painter(context, offset);
     }
 
     _drawScrim(context, offset, size);
@@ -1102,13 +1095,8 @@ class _ZoomExitTransitionPainter extends SnapshotPainter {
 
   @override
   void paint(PaintingContext context, ui.Offset offset, Size size, PaintingContextCallback painter) {
-    switch (animation.status) {
-      case AnimationStatus.completed:
-      case AnimationStatus.dismissed:
-        return painter(context, offset);
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        break;
+    if (!animation.isAnimating) {
+      return painter(context, offset);
     }
 
     _updateScaledTransform(_transform, scale.value, size);
@@ -1254,7 +1242,7 @@ class _ZoomEnterTransitionNoCache extends StatelessWidget {
     // instead of checking that it is `forward` is that this allows
     // the interrupted reversal of the forward transition to smoothly fade
     // the scrim away. This prevents a disjointed removal of the scrim.
-    if (!reverse && animation.status != AnimationStatus.completed) {
+    if (!reverse && !animation.isCompleted) {
       opacity = _ZoomEnterTransitionState._scrimOpacityTween.evaluate(animation)!;
     }
 

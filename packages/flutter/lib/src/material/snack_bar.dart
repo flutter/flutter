@@ -589,16 +589,11 @@ class _SnackBarState extends State<SnackBar> {
   }
 
   void _onAnimationStatusChanged(AnimationStatus animationStatus) {
-    switch (animationStatus) {
-      case AnimationStatus.dismissed:
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        break;
-      case AnimationStatus.completed:
-        if (widget.onVisible != null && !_wasVisible) {
-          widget.onVisible!();
-        }
-        _wasVisible = true;
+    if (animationStatus.isCompleted) {
+      if (widget.onVisible != null && !_wasVisible) {
+        widget.onVisible!();
+      }
+      _wasVisible = true;
     }
   }
 
