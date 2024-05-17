@@ -116,6 +116,11 @@ framework:
     - any-glob-to-any-file:
       - packages/integration_test/**/*
 
+package:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/ecosystem/**/*
+
 platform-ios:
   - changed-files:
     - any-glob-to-any-file:
@@ -137,6 +142,11 @@ platform-web:
       - '**/fix_data.yaml'
       - '**/*.expect'
       - '**/*test_fixes*'
+
+team-ecosystem:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/ecosystem/**/*
 
 tool:
   - changed-files:
