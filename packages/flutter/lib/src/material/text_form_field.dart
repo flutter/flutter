@@ -101,7 +101,7 @@ class TextFormField extends FormField<String> {
   /// and [TextField.new], the constructor.
   TextFormField({
     super.key,
-    this.groupId,
+    this.groupId = EditableText,
     this.controller,
     String? initialValue,
     FocusNode? focusNode,
@@ -281,11 +281,7 @@ class TextFormField extends FormField<String> {
   /// initialize its [TextEditingController.text] with [initialValue].
   final TextEditingController? controller;
 
-  /// {@template flutter.widgets.editableText.groupId}
-  /// Assign a separate click area to each text field, groupId object.
-  ///
-  /// If this property is null, [EditableText] will be used.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.editableText.groupId}
   final Object? groupId;
 
   /// {@template flutter.material.TextFormField.onChanged}

@@ -1472,9 +1472,10 @@ class EditableText extends StatefulWidget {
   final VoidCallback? onSelectionHandleTapped;
 
   /// {@template flutter.widgets.editableText.groupId}
-  /// Assign a separate click area to each text field, groupId object.
+  /// The group identifier for the [TextFieldTapRegion] of this text field.
   ///
-  /// If this property is null, [EditableText] will be used.
+  /// Text fields with the same group identifier share the same tap region.
+  /// Defaults to the type of [EditableText].
   /// {@endtemplate}
   final Object? groupId;
 

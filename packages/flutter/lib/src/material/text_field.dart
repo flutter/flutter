@@ -259,7 +259,7 @@ class TextField extends StatefulWidget {
   ///    characters" and how it may differ from the intuitive meaning.
   const TextField({
     super.key,
-    this.groupId,
+    this.groupId = EditableText,
     this.controller,
     this.focusNode,
     this.undoController,
@@ -369,11 +369,7 @@ class TextField extends StatefulWidget {
   /// {@end-tool}
   final TextMagnifierConfiguration? magnifierConfiguration;
 
-  /// {@template flutter.widgets.editableText.groupId}
-  /// Assign a separate click area to each text field, groupId object.
-  ///
-  /// If this property is null, [EditableText] will be used.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.editableText.groupId}
   final Object? groupId;
 
   /// Controls the text being edited.

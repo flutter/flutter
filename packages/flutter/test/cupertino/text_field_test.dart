@@ -910,6 +910,81 @@ void main() {
   );
 
   testWidgets(
+    'The second CupertinoTextField is clicked, triggers the onTapOutside callback of the previous CupertinoTextField',
+        (WidgetTester tester) async {
+      final GlobalKey keyA = GlobalKey();
+      final GlobalKey keyB = GlobalKey();
+      final GlobalKey keyC = GlobalKey();
+      bool outsideClickA = false;
+      bool outsideClickB = false;
+      bool outsideClickC = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: Column(
+              children: <Widget>[
+                const Text('Outside'),
+                Material(
+                  child: CupertinoTextField(
+                    key: keyA,
+                    groupId: 'Group A',
+                    onTapOutside: (PointerDownEvent event) {
+                      outsideClickA = true;
+                    },
+                  ),
+                ),
+                Material(
+                  child: CupertinoTextField(
+                    key: keyB,
+                    groupId: 'Group B',
+                    onTapOutside: (PointerDownEvent event) {
+                      outsideClickB = true;
+                    },
+                  ),
+                ),
+                Material(
+                  child: CupertinoTextField(
+                    key: keyC,
+                    groupId: 'Group C',
+                    onTapOutside: (PointerDownEvent event) {
+                      outsideClickC = true;
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      Future<void> click(Finder finder) async {
+        await tester.tap(finder);
+        await tester.enterText(finder, 'Hello');
+        await tester.pump();
+      }
+
+      expect(outsideClickA, false);
+
+      await click(find.byKey(keyA));
+      await tester.showKeyboard(find.byKey(keyA));
+      await tester.idle();
+      expect(outsideClickA, false);
+
+      await click(find.byKey(keyB));
+      expect(outsideClickA, true);
+
+      await click(find.byKey(keyC));
+      expect(outsideClickB, true);
+
+      await tester.tap(find.text('Outside'));
+      expect(outsideClickC, true);
+    },
+  );
+
+  testWidgets(
     'decoration can be overridden',
     (WidgetTester tester) async {
       await tester.pumpWidget(
