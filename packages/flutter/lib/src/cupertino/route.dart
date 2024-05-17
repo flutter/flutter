@@ -347,6 +347,8 @@ class CupertinoPage<T> extends Page<T> {
     this.title,
     this.fullscreenDialog = false,
     this.allowSnapshotting = true,
+    super.canPop,
+    super.onPopInvoked,
     super.key,
     super.name,
     super.arguments,
@@ -435,7 +437,7 @@ class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.primaryRouteAnimation != widget.primaryRouteAnimation
     || oldWidget.secondaryRouteAnimation != widget.secondaryRouteAnimation
-    || oldWidget.child != widget.child || oldWidget.linearTransition != widget.linearTransition) {
+    || oldWidget.linearTransition != widget.linearTransition) {
     _disposeCurve();
     _setupAnimation();
     }
@@ -443,43 +445,42 @@ class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
 
   @override
   void dispose() {
-    super.dispose();
     _disposeCurve();
+    super.dispose();
   }
 
   void _disposeCurve() {
     _primaryPositionCurve?.dispose();
     _secondaryPositionCurve?.dispose();
     _primaryShadowCurve?.dispose();
+    _primaryPositionCurve = null;
+    _secondaryPositionCurve = null;
+    _primaryShadowCurve = null;
   }
 
   void _setupAnimation() {
-    _primaryPositionAnimation =
-           (widget.linearTransition
-             ? widget.primaryRouteAnimation
-             : _primaryPositionCurve = CurvedAnimation(
-                 parent: widget.primaryRouteAnimation,
-                 curve: Curves.fastEaseInToSlowEaseOut,
-                 reverseCurve: Curves.fastEaseInToSlowEaseOut.flipped,
-               )
-           ).drive(_kRightMiddleTween);
-       _secondaryPositionAnimation =
-           (widget.linearTransition
-             ? widget.secondaryRouteAnimation
-             : _secondaryPositionCurve = CurvedAnimation(
-                 parent: widget.secondaryRouteAnimation,
-                 curve: Curves.linearToEaseOut,
-                 reverseCurve: Curves.easeInToLinear,
-               )
-           ).drive(_kMiddleLeftTween);
-       _primaryShadowAnimation =
-           (widget.linearTransition
-             ? widget.primaryRouteAnimation
-             : _secondaryPositionCurve = CurvedAnimation(
-                 parent: widget.primaryRouteAnimation,
-                 curve: Curves.linearToEaseOut,
-               )
-           ).drive(_CupertinoEdgeShadowDecoration.kTween);
+    if (!widget.linearTransition) {
+      _primaryPositionCurve = CurvedAnimation(
+        parent: widget.primaryRouteAnimation,
+        curve: Curves.fastEaseInToSlowEaseOut,
+        reverseCurve: Curves.fastEaseInToSlowEaseOut.flipped,
+      );
+      _secondaryPositionCurve = CurvedAnimation(
+        parent: widget.secondaryRouteAnimation,
+        curve: Curves.linearToEaseOut,
+        reverseCurve: Curves.easeInToLinear,
+      );
+      _primaryShadowCurve = CurvedAnimation(
+        parent: widget.primaryRouteAnimation,
+        curve: Curves.linearToEaseOut,
+      );
+    }
+    _primaryPositionAnimation = (_primaryPositionCurve ?? widget.primaryRouteAnimation)
+      .drive(_kRightMiddleTween);
+    _secondaryPositionAnimation = (_secondaryPositionCurve ?? widget.secondaryRouteAnimation)
+      .drive(_kMiddleLeftTween);
+    _primaryShadowAnimation = (_primaryShadowCurve ?? widget.primaryRouteAnimation)
+      .drive(_CupertinoEdgeShadowDecoration.kTween);
   }
 
   @override
@@ -506,44 +507,95 @@ class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
 ///
 /// For example, used when creating a new calendar event by bringing in the next
 /// screen from the bottom.
-class CupertinoFullscreenDialogTransition extends StatelessWidget {
+class CupertinoFullscreenDialogTransition extends StatefulWidget {
   /// Creates an iOS-style transition used for summoning fullscreen dialogs.
   ///
+  const CupertinoFullscreenDialogTransition({
+    super.key,
+    required this.primaryRouteAnimation,
+    required this.secondaryRouteAnimation,
+    required this.child,
+    required this.linearTransition,
+  });
+
   ///  * `primaryRouteAnimation` is a linear route animation from 0.0 to 1.0
   ///    when this screen is being pushed.
+  final Animation<double> primaryRouteAnimation;
+
   ///  * `secondaryRouteAnimation` is a linear route animation from 0.0 to 1.0
   ///    when another screen is being pushed on top of this one.
-  ///  * `linearTransition` is whether to perform the secondary transition linearly.
+  final Animation<double> secondaryRouteAnimation;
+
+  ///  * `linearTransition` is whether to perform the transitions linearly.
   ///    Used to precisely track back gesture drags.
-  CupertinoFullscreenDialogTransition({
-    super.key,
-    required Animation<double> primaryRouteAnimation,
-    required Animation<double> secondaryRouteAnimation,
-    required this.child,
-    required bool linearTransition,
-  }) : _positionAnimation = CurvedAnimation(
-         parent: primaryRouteAnimation,
+  final bool linearTransition;
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  @override
+  State<CupertinoFullscreenDialogTransition> createState() => _CupertinoFullscreenDialogTransitionState();
+}
+
+class _CupertinoFullscreenDialogTransitionState extends State<CupertinoFullscreenDialogTransition> {
+  /// When this page is coming in to cover another page.
+  late Animation<Offset> _primaryPositionAnimation;
+  /// When this page is becoming covered by another page.
+  late Animation<Offset> _secondaryPositionAnimation;
+  /// Curve of primary page which is coming in to cover another page.
+  CurvedAnimation? _primaryPositionCurve;
+  /// Curve of secondary page which is becoming covered by another page.
+  CurvedAnimation? _secondaryPositionCurve;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupAnimation();
+  }
+
+  @override
+  void didUpdateWidget(covariant CupertinoFullscreenDialogTransition oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.primaryRouteAnimation != widget.primaryRouteAnimation ||
+        oldWidget.secondaryRouteAnimation != widget.secondaryRouteAnimation ||
+        oldWidget.linearTransition != widget.linearTransition) {
+        _disposeCurve();
+        _setupAnimation();
+    }
+  }
+
+   @override
+  void dispose() {
+    _disposeCurve();
+    super.dispose();
+  }
+
+  void _disposeCurve() {
+    _primaryPositionCurve?.dispose();
+    _secondaryPositionCurve?.dispose();
+    _primaryPositionCurve = null;
+    _secondaryPositionCurve = null;
+  }
+
+  void _setupAnimation() {
+    _primaryPositionAnimation =  (_primaryPositionCurve = CurvedAnimation(
+         parent: widget.primaryRouteAnimation,
          curve: Curves.linearToEaseOut,
          // The curve must be flipped so that the reverse animation doesn't play
          // an ease-in curve, which iOS does not use.
          reverseCurve: Curves.linearToEaseOut.flipped,
-       ).drive(_kBottomUpTween),
+       )).drive(_kBottomUpTween);
        _secondaryPositionAnimation =
-           (linearTransition
-             ? secondaryRouteAnimation
-             : CurvedAnimation(
-                 parent: secondaryRouteAnimation,
+           (widget.linearTransition
+             ? widget.secondaryRouteAnimation
+             : _secondaryPositionCurve = CurvedAnimation(
+                 parent: widget.secondaryRouteAnimation,
                  curve: Curves.linearToEaseOut,
                  reverseCurve: Curves.easeInToLinear,
                )
            ).drive(_kMiddleLeftTween);
+  }
 
-  final Animation<Offset> _positionAnimation;
-  // When this page is becoming covered by another page.
-  final Animation<Offset> _secondaryPositionAnimation;
-
-  /// The widget below this widget in the tree.
-  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -554,8 +606,8 @@ class CupertinoFullscreenDialogTransition extends StatelessWidget {
       textDirection: textDirection,
       transformHitTests: false,
       child: SlideTransition(
-        position: _positionAnimation,
-        child: child,
+        position: _primaryPositionAnimation,
+        child: widget.child,
       ),
     );
   }
@@ -666,17 +718,17 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
     assert(debugCheckHasDirectionality(context));
     // For devices with notches, the drag area needs to be larger on the side
     // that has the notch.
-    double dragAreaWidth = Directionality.of(context) == TextDirection.ltr ?
-                           MediaQuery.paddingOf(context).left :
-                           MediaQuery.paddingOf(context).right;
-    dragAreaWidth = max(dragAreaWidth, _kBackGestureWidth);
+    final double dragAreaWidth = switch (Directionality.of(context)) {
+      TextDirection.rtl => MediaQuery.paddingOf(context).right,
+      TextDirection.ltr => MediaQuery.paddingOf(context).left,
+    };
     return Stack(
       fit: StackFit.passthrough,
       children: <Widget>[
         widget.child,
         PositionedDirectional(
           start: 0.0,
-          width: dragAreaWidth,
+          width: max(dragAreaWidth, _kBackGestureWidth),
           top: 0.0,
           bottom: 0.0,
           child: Listener(

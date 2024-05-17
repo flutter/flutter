@@ -267,7 +267,7 @@ class Drawer extends StatelessWidget {
           shadowColor: shadowColor ?? drawerTheme.shadowColor ?? defaults.shadowColor,
           surfaceTintColor: surfaceTintColor ?? drawerTheme.surfaceTintColor ?? defaults.surfaceTintColor,
           shape: effectiveShape,
-          clipBehavior: effectiveShape != null ? (clipBehavior ?? Clip.hardEdge) : Clip.none,
+          clipBehavior: effectiveShape != null ? (clipBehavior ?? drawerTheme.clipBehavior ?? defaults.clipBehavior!) : Clip.none,
           child: child,
         ),
       ),
@@ -682,7 +682,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
             behavior: HitTestBehavior.translucent,
             excludeFromSemantics: true,
             dragStartBehavior: widget.dragStartBehavior,
-            child: Container(width: dragAreaWidth),
+            child: LimitedBox(maxHeight: 0.0, child: SizedBox(width: dragAreaWidth, height: double.infinity)),
           ),
         );
       } else {
@@ -701,6 +701,11 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           platformHasBackButton = false;
       }
 
+      Widget drawerScrim = const LimitedBox(maxWidth: 0.0, maxHeight: 0.0, child: SizedBox.expand());
+      if (_scrimColorTween.evaluate(_controller) case final Color color) {
+        drawerScrim = ColoredBox(color: color, child: drawerScrim);
+      }
+
       final Widget child = _DrawerControllerScope(
         controller: widget,
         child: RepaintBoundary(
@@ -714,9 +719,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                     onTap: close,
                     child: Semantics(
                       label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-                      child: Container( // The drawer's "scrim"
-                        color: _scrimColorTween.evaluate(_controller),
-                      ),
+                      child: drawerScrim,
                     ),
                   ),
                 ),
@@ -769,7 +772,10 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
 class _DrawerDefaultsM2 extends DrawerThemeData {
   const _DrawerDefaultsM2(this.context)
-      : super(elevation: 16.0);
+      : super(
+        elevation: 16.0,
+        clipBehavior: Clip.hardEdge,
+      );
 
   final BuildContext context;
 
@@ -787,7 +793,10 @@ class _DrawerDefaultsM2 extends DrawerThemeData {
 
 class _DrawerDefaultsM3 extends DrawerThemeData {
   _DrawerDefaultsM3(this.context)
-      : super(elevation: 1.0);
+      : super(
+          elevation: 1.0,
+          clipBehavior: Clip.hardEdge,
+        );
 
   final BuildContext context;
   late final TextDirection direction = Directionality.of(context);

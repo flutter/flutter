@@ -698,16 +698,19 @@ class _RailDestinationState extends State<_RailDestination> {
               ),
               child: ClipRect(
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     iconPart,
-                    Align(
-                      heightFactor: 1.0,
-                      widthFactor: widget.extendedTransitionAnimation.value,
-                      alignment: AlignmentDirectional.centerStart,
-                      child: FadeTransition(
-                        alwaysIncludeSemantics: true,
-                        opacity: labelFadeAnimation,
-                        child: styledLabel,
+                    Flexible(
+                      child: Align(
+                        heightFactor: 1.0,
+                        widthFactor: widget.extendedTransitionAnimation.value,
+                        alignment: AlignmentDirectional.centerStart,
+                        child: FadeTransition(
+                          alwaysIncludeSemantics: true,
+                          opacity: labelFadeAnimation,
+                          child: styledLabel,
+                        ),
                       ),
                     ),
                     SizedBox(width: _horizontalDestinationPadding * widget.extendedTransitionAnimation.value),

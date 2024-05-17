@@ -29,7 +29,7 @@ enum _StdioStream {
 }
 
 void main() {
-  late FileSystem fileSystem;
+  late MemoryFileSystem fileSystem;
   late FakeProcessManager fakeProcessManager;
   late CocoaPods cocoaPodsUnderTest;
   late BufferLogger logger;
@@ -821,6 +821,75 @@ Specs satisfying the `GoogleMaps (~> 8.0)` dependency were found, but they requi
         contains(
           'The pod "GoogleMaps" required by the plugin "google_maps_flutter_ios" '
           "requires a higher minimum iOS deployment version than the plugin's "
+          'reported minimum version.'
+        ),
+      );
+      // The error should tell the user to contact the plugin author, as this
+      // case is hard for us to give exact advice on, and should only be
+      // possible if there's a mistake in the plugin's podspec.
+      expect(
+        logger.errorText,
+        contains(
+          'To build, remove the plugin "google_maps_flutter_ios", or contact '
+          "the plugin's developers for assistance.",
+        ),
+      );
+    });
+
+    testUsingContext('throws if plugin has a dependency that requires a higher minimum macOS version', () async {
+      final FlutterProject projectUnderTest = setupProjectUnderTest();
+      pretendPodIsInstalled();
+      pretendPodVersionIs('100.0.0');
+      fileSystem.file(fileSystem.path.join('project', 'macos', 'Podfile'))
+        ..createSync()
+        ..writeAsStringSync('Existing Podfile');
+
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <String>['pod', 'install', '--verbose'],
+          workingDirectory: 'project/macos',
+          environment: <String, String>{
+            'COCOAPODS_DISABLE_STATS': 'true',
+            'LANG': 'en_US.UTF-8',
+          },
+          exitCode: 1,
+          // This is the (very slightly abridged) output from updating the
+          // minimum version of the GoogleMaps dependency in
+          // google_maps_flutter_ios without updating the minimum iOS version to
+          // match, as an example of a misconfigured plugin, but with the paths
+          // modified to simulate a macOS plugin.
+          stdout: '''
+Analyzing dependencies
+
+Inspecting targets to integrate
+  Using `ARCHS` setting to build architectures of target `Pods-Runner`: (``)
+  Using `ARCHS` setting to build architectures of target `Pods-RunnerTests`: (``)
+
+Fetching external sources
+-> Fetching podspec for `Flutter` from `Flutter`
+-> Fetching podspec for `google_maps_flutter_ios` from `.symlinks/plugins/google_maps_flutter_ios/macos`
+
+Resolving dependencies of `Podfile`
+  CDN: trunk Relative path: CocoaPods-version.yml exists! Returning local because checking is only performed in repo update
+  CDN: trunk Relative path: Specs/a/d/d/GoogleMaps/8.0.0/GoogleMaps.podspec.json exists! Returning local because checking is only performed in repo update
+[!] CocoaPods could not find compatible versions for pod "GoogleMaps":
+  In Podfile:
+    google_maps_flutter_ios (from `.symlinks/plugins/google_maps_flutter_ios/macos`) was resolved to 0.0.1, which depends on
+      GoogleMaps (~> 8.0)
+
+Specs satisfying the `GoogleMaps (~> 8.0)` dependency were found, but they required a higher minimum deployment target.''',
+        ),
+      );
+
+      await expectLater(cocoaPodsUnderTest.processPods(
+        xcodeProject: projectUnderTest.macos,
+        buildMode: BuildMode.debug,
+      ), throwsToolExit());
+      expect(
+        logger.errorText,
+        contains(
+          'The pod "GoogleMaps" required by the plugin "google_maps_flutter_ios" '
+          "requires a higher minimum macOS deployment version than the plugin's "
           'reported minimum version.'
         ),
       );
