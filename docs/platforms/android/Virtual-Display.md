@@ -1,6 +1,6 @@
 # Background
 
-Virtual Display is one of several modes for displaying platform views on Android. See [[Android Platform Views]] for an overview of modes.
+Virtual Display is one of several modes for displaying platform views on Android. See [Android Platform Views](Android-Platform-Views.md) for an overview of modes.
 
 # The approach
 
