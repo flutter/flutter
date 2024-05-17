@@ -9,7 +9,7 @@ These tests consist of two parts:
 
 The recipe supports three properties: **physical\_devices** to specify actual hardware connected to firebase infra to run tests, **virtual\_devices** to specify the virtual devices(avd) to use and **task\_name** for selecting the integration test to build.
 
-physical\_device and virtual\_device are strings that take the **MODEL\_ID** format defined by firebase. Use `gcloud firebase test android models list` (assuming you have [gcloud](https://cloud.google.com/sdk/gcloud) installed) for a list of possible model id’s. 
+physical\_device and virtual\_device are strings that take the **MODEL\_ID** format defined by firebase. Use `gcloud firebase test android models list` (assuming you have [gcloud](https://cloud.google.com/sdk/gcloud) installed) for a list of possible model id’s.
 
 Task name is the subdirectory of [dev/integration\_tests](https://github.com/flutter/flutter/tree/master/dev/integration_tests) (e.g. android\_views, channels, etc ) that contains the integration test to build.
 
@@ -58,7 +58,7 @@ This is only required for manually running the steps
 *   Step 5: Wait for the change to propagate.
 *   Step 6: Fix any potential issues and remove `bringup: true` to validate the changes end to end in presubmit.
 
-The following is an example of a full target: **Linux firebase_oriol33_abstract_method_smoke_test**. By convention the name should follow the format “&lt;host os> firebase\_&lt;model id>\_&lt;taskname>”  
+The following is an example of a full target: **Linux firebase_oriol33_abstract_method_smoke_test**. By convention the name should follow the format “&lt;host os> firebase\_&lt;model id>\_&lt;taskname>”
 
 In the example below `recipe: firebaselab/firebaselab` refers to the recipe to use to run the test and should probably always be the same, `dependencies` refers to the android sdk to use for the test, in general all tests should use the same android sdk unless specifically testing something that changes across android sdk versions, `task_name` refers to the integration test to use see the definition above for where to find the code that is run, `physical_devices` `virtual_devices` are defined above.
 

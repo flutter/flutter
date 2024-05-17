@@ -73,7 +73,7 @@ What constitutes a single behavior? The answer to that question can vary. In mos
 
 ## Only include relevant details in a test
 
-Tests often involve some amount of setup before the behavior-under-test can be executed. Some of these setup details are critical to the behavior-under-test, but many of these details are completely irrelevant. 
+Tests often involve some amount of setup before the behavior-under-test can be executed. Some of these setup details are critical to the behavior-under-test, but many of these details are completely irrelevant.
 
 Including irrelevant details in a test can only confuse the issue in the mind of the developer reading the test. The developer may become confused about which parts are relevant to him/her, and which are not. In such a scenario, the developer is likely to copy and paste the entire test without fully understanding what the code is doing, which is a recipe for disaster in a production app.
 

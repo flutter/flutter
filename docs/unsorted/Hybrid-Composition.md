@@ -32,7 +32,7 @@ Widget build(BuildContext context) {
   final Map<String, dynamic> creationParams = <String, dynamic>{};
 
   return PlatformViewLink(
-    viewType: viewType, 
+    viewType: viewType,
     surfaceFactory:
         (BuildContext context, PlatformViewController controller) {
       return AndroidViewSurface(

@@ -102,13 +102,13 @@ Flutter provides multiple functionality through self-service services. Most of t
    </td>
    <td><a href="https://github.com/flutter/flutter/wiki/flutter-firebaselab-tests">Link</a>
    </td>
-   <td>These configurations go directly in the .ci.yaml file of <a href="https://github.com/flutter/flutter">flutter/flutter</a> repository. 
+   <td>These configurations go directly in the .ci.yaml file of <a href="https://github.com/flutter/flutter">flutter/flutter</a> repository.
    </td>
   </tr>
   <tr>
    <td>Codesigning
    </td>
-   <td>Add metadata to engine artifacts for code signing infrastructure to sign them.  
+   <td>Add metadata to engine artifacts for code signing infrastructure to sign them.
    </td>
    <td>Flutter contributors
    </td>

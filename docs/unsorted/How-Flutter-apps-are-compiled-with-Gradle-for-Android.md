@@ -27,7 +27,7 @@ Time is relative.
 ## Plugins are compiled as subprojects (usually)
 
 Flutter plugins are typically included in Flutter apps as source code and
-compiled by Gradle, the same as the rest of the code in the Flutter app. 
+compiled by Gradle, the same as the rest of the code in the Flutter app.
 
 This is done by using the Gradle concept of
 ["subprojects"](https://docs.gradle.org/current/userguide/multi_project_builds.html#sec:subproject_configuration),

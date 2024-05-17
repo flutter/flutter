@@ -1,4 +1,4 @@
-A loose catalog of resources for casual game development with Flutter. 
+A loose catalog of resources for casual game development with Flutter.
 
 ## Game engines and tools
 

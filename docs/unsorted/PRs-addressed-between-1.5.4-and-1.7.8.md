@@ -1,7 +1,7 @@
 # PRs addressed in `flutter/flutter` between `b593f5167bce84fb3cad5c258477bf3abc1b14eb` and `d51fd86`
 
 
-## framework - 235 PRs 
+## framework - 235 PRs
 
 [#21896](https://github.com/flutter/flutter/pull/21896) Bottom sheet scrolling
 
@@ -23,7 +23,7 @@
 
 [#30076](https://github.com/flutter/flutter/pull/30076) Implements FocusTraversalPolicy and DefaultFocusTraversal features.
 
-[#30129](https://github.com/flutter/flutter/pull/30129) Fix refresh control in the gallery demo, update comments 
+[#30129](https://github.com/flutter/flutter/pull/30129) Fix refresh control in the gallery demo, update comments
 
 [#30224](https://github.com/flutter/flutter/pull/30224) Cupertino localization step 10: update the flutter_localizations README
 
@@ -143,7 +143,7 @@
 
 [#31761](https://github.com/flutter/flutter/pull/31761) Support clipBehavior changes in hot reload
 
-[#31763](https://github.com/flutter/flutter/pull/31763) Fix ScrollbarPainter thumbExtent calculation and add padding 
+[#31763](https://github.com/flutter/flutter/pull/31763) Fix ScrollbarPainter thumbExtent calculation and add padding
 
 [#31798](https://github.com/flutter/flutter/pull/31798) Fix tab indentation
 
@@ -347,7 +347,7 @@
 
 [#33634](https://github.com/flutter/flutter/pull/33634) Let there be scroll bars
 
-[#33653](https://github.com/flutter/flutter/pull/33653) Include advice about dispose in TextEditingController api 
+[#33653](https://github.com/flutter/flutter/pull/33653) Include advice about dispose in TextEditingController api
 
 [#33662](https://github.com/flutter/flutter/pull/33662) Prep for engine roll
 
@@ -473,7 +473,7 @@
 
 [#35046](https://github.com/flutter/flutter/pull/35046) Add generated Icon diagram to api docs
 
-## tool - 140 PRs 
+## tool - 140 PRs
 
 [#28808](https://github.com/flutter/flutter/pull/28808)  updated tearDownAll function
 
@@ -755,7 +755,7 @@
 
 [#35092](https://github.com/flutter/flutter/pull/35092) Add FlutterProjectFactory so that it can be overridden internally.
 
-## f: material design - 76 PRs 
+## f: material design - 76 PRs
 
 [#21896](https://github.com/flutter/flutter/pull/21896) Bottom sheet scrolling
 
@@ -817,7 +817,7 @@
 
 [#31699](https://github.com/flutter/flutter/pull/31699) Re-land: Add support for Tooltip hover
 
-[#31763](https://github.com/flutter/flutter/pull/31763) Fix ScrollbarPainter thumbExtent calculation and add padding 
+[#31763](https://github.com/flutter/flutter/pull/31763) Fix ScrollbarPainter thumbExtent calculation and add padding
 
 [#31852](https://github.com/flutter/flutter/pull/31852) Text selection handles are sometimes not interactive
 
@@ -881,7 +881,7 @@
 
 [#33634](https://github.com/flutter/flutter/pull/33634) Let there be scroll bars
 
-[#33653](https://github.com/flutter/flutter/pull/33653) Include advice about dispose in TextEditingController api 
+[#33653](https://github.com/flutter/flutter/pull/33653) Include advice about dispose in TextEditingController api
 
 [#33665](https://github.com/flutter/flutter/pull/33665) [Trivial] Move dropdownValue into State in DropdownButton sample docs
 
@@ -909,7 +909,7 @@
 
 [#34932](https://github.com/flutter/flutter/pull/34932) Added onChanged property to TextFormField
 
-## a: tests - 38 PRs 
+## a: tests - 38 PRs
 
 [#30942](https://github.com/flutter/flutter/pull/30942) rectMoreOrLess equals, prep for 64bit rects
 
@@ -987,7 +987,7 @@
 
 [#35130](https://github.com/flutter/flutter/pull/35130) pass new users for release_smoke_tests
 
-## waiting for tree to go green - 35 PRs 
+## waiting for tree to go green - 35 PRs
 
 [#28808](https://github.com/flutter/flutter/pull/28808)  updated tearDownAll function
 
@@ -1027,7 +1027,7 @@
 
 [#33461](https://github.com/flutter/flutter/pull/33461) Various code cleanup improvements
 
-[#33653](https://github.com/flutter/flutter/pull/33653) Include advice about dispose in TextEditingController api 
+[#33653](https://github.com/flutter/flutter/pull/33653) Include advice about dispose in TextEditingController api
 
 [#33865](https://github.com/flutter/flutter/pull/33865) Correct version name for BottomNavigationBar golden test
 
@@ -1059,7 +1059,7 @@
 
 [#34919](https://github.com/flutter/flutter/pull/34919) Remove duplicate error parts
 
-## d: api docs - 34 PRs 
+## d: api docs - 34 PRs
 
 [#31294](https://github.com/flutter/flutter/pull/31294) Improve Radio Documentation with Example
 
@@ -1077,7 +1077,7 @@
 
 [#31693](https://github.com/flutter/flutter/pull/31693) Adds a note to Radio's/RadioListTile's onChange
 
-[#31763](https://github.com/flutter/flutter/pull/31763) Fix ScrollbarPainter thumbExtent calculation and add padding 
+[#31763](https://github.com/flutter/flutter/pull/31763) Fix ScrollbarPainter thumbExtent calculation and add padding
 
 [#31902](https://github.com/flutter/flutter/pull/31902) Updated primaryColor docs to refer to colorScheme properties
 
@@ -1105,7 +1105,7 @@
 
 [#33620](https://github.com/flutter/flutter/pull/33620) Document that offsets are returned in logical pixels
 
-[#33653](https://github.com/flutter/flutter/pull/33653) Include advice about dispose in TextEditingController api 
+[#33653](https://github.com/flutter/flutter/pull/33653) Include advice about dispose in TextEditingController api
 
 [#33665](https://github.com/flutter/flutter/pull/33665) [Trivial] Move dropdownValue into State in DropdownButton sample docs
 
@@ -1129,7 +1129,7 @@
 
 [#35046](https://github.com/flutter/flutter/pull/35046) Add generated Icon diagram to api docs
 
-## team - 28 PRs 
+## team - 28 PRs
 
 [#28808](https://github.com/flutter/flutter/pull/28808)  updated tearDownAll function
 
@@ -1187,7 +1187,7 @@
 
 [#35130](https://github.com/flutter/flutter/pull/35130) pass new users for release_smoke_tests
 
-## f: cupertino - 27 PRs 
+## f: cupertino - 27 PRs
 
 [#29809](https://github.com/flutter/flutter/pull/29809) Fix text selection toolbar appearing under obstructions
 
@@ -1195,7 +1195,7 @@
 
 [#29954](https://github.com/flutter/flutter/pull/29954) Cupertino localization step 9: add tests
 
-[#30129](https://github.com/flutter/flutter/pull/30129) Fix refresh control in the gallery demo, update comments 
+[#30129](https://github.com/flutter/flutter/pull/30129) Fix refresh control in the gallery demo, update comments
 
 [#30224](https://github.com/flutter/flutter/pull/30224) Cupertino localization step 10: update the flutter_localizations README
 
@@ -1211,7 +1211,7 @@
 
 [#31644](https://github.com/flutter/flutter/pull/31644) Cupertino localization step 12: push translation for all supported languages
 
-[#31763](https://github.com/flutter/flutter/pull/31763) Fix ScrollbarPainter thumbExtent calculation and add padding 
+[#31763](https://github.com/flutter/flutter/pull/31763) Fix ScrollbarPainter thumbExtent calculation and add padding
 
 [#31852](https://github.com/flutter/flutter/pull/31852) Text selection handles are sometimes not interactive
 
@@ -1233,17 +1233,17 @@
 
 [#33634](https://github.com/flutter/flutter/pull/33634) Let there be scroll bars
 
-[#33653](https://github.com/flutter/flutter/pull/33653) Include advice about dispose in TextEditingController api 
+[#33653](https://github.com/flutter/flutter/pull/33653) Include advice about dispose in TextEditingController api
 
 [#33739](https://github.com/flutter/flutter/pull/33739) fixed cupertinoTextField placeholder textAlign
 
-[#34095](https://github.com/flutter/flutter/pull/34095) Cupertino text edit tooltip, reworked 
+[#34095](https://github.com/flutter/flutter/pull/34095) Cupertino text edit tooltip, reworked
 
 [#34163](https://github.com/flutter/flutter/pull/34163) update CupertinoDialogAction docs
 
 [#34964](https://github.com/flutter/flutter/pull/34964) CupertinoTextField.onTap
 
-## severe: API break - 17 PRs 
+## severe: API break - 17 PRs
 
 [#29188](https://github.com/flutter/flutter/pull/29188) Fix 25807: implement move in sliver multibox widget
 
@@ -1275,11 +1275,11 @@
 
 [#34051](https://github.com/flutter/flutter/pull/34051) Reland "Text inline widgets, TextSpan rework (#30069)" with improved backwards compatibility
 
-[#34095](https://github.com/flutter/flutter/pull/34095) Cupertino text edit tooltip, reworked 
+[#34095](https://github.com/flutter/flutter/pull/34095) Cupertino text edit tooltip, reworked
 
 [#34501](https://github.com/flutter/flutter/pull/34501) [Material] Fix TextDirection and selected thumb for RangeSliderThumbShape and RangeSliderValueIndicatorShape
 
-## a: text input - 15 PRs 
+## a: text input - 15 PRs
 
 [#29683](https://github.com/flutter/flutter/pull/29683) Show/hide toolbar and handles based on device kind
 
@@ -1305,13 +1305,13 @@
 
 [#34068](https://github.com/flutter/flutter/pull/34068) fix empty selection arrow when double clicked on empty read only text…
 
-[#34095](https://github.com/flutter/flutter/pull/34095) Cupertino text edit tooltip, reworked 
+[#34095](https://github.com/flutter/flutter/pull/34095) Cupertino text edit tooltip, reworked
 
 [#34515](https://github.com/flutter/flutter/pull/34515) OutlineInputBorder adjusts for borderRadius that is too large
 
 [#34859](https://github.com/flutter/flutter/pull/34859) Fix Vertical Alignment Regression
 
-## ☸ platform-web - 15 PRs 
+## ☸ platform-web - 15 PRs
 
 [#33197](https://github.com/flutter/flutter/pull/33197) Wire up hot restart and incremental rebuilds for web
 
@@ -1343,7 +1343,7 @@
 
 [#34159](https://github.com/flutter/flutter/pull/34159) Use product define for flutter web and remove extra asset server
 
-## a: desktop - 14 PRs 
+## a: desktop - 14 PRs
 
 [#29683](https://github.com/flutter/flutter/pull/29683) Show/hide toolbar and handles based on device kind
 
@@ -1373,7 +1373,7 @@
 
 [#33868](https://github.com/flutter/flutter/pull/33868) Game controller button support
 
-## t: gradle - 11 PRs 
+## t: gradle - 11 PRs
 
 [#32787](https://github.com/flutter/flutter/pull/32787) Support 32 and 64 bit
 
@@ -1395,13 +1395,13 @@
 
 [#34592](https://github.com/flutter/flutter/pull/34592) Config lib dependencies for flavors
 
-[#34668](https://github.com/flutter/flutter/pull/34668) Re-land config lib dependencies for flavors 
+[#34668](https://github.com/flutter/flutter/pull/34668) Re-land config lib dependencies for flavors
 
-## f: scrolling - 9 PRs 
+## f: scrolling - 9 PRs
 
 [#31485](https://github.com/flutter/flutter/pull/31485) Prevent exception being thrown on hasScrolledBody
 
-[#31763](https://github.com/flutter/flutter/pull/31763) Fix ScrollbarPainter thumbExtent calculation and add padding 
+[#31763](https://github.com/flutter/flutter/pull/31763) Fix ScrollbarPainter thumbExtent calculation and add padding
 
 [#31832](https://github.com/flutter/flutter/pull/31832) Allow DSS to be dragged when its children do not fill extent
 
@@ -1417,7 +1417,7 @@
 
 [#34175](https://github.com/flutter/flutter/pull/34175) Don't show scrollbar if there isn't enough content
 
-## engine - 6 PRs 
+## engine - 6 PRs
 
 [#31520](https://github.com/flutter/flutter/pull/31520) Don't add empty OpacityLayer to the engine
 
@@ -1431,7 +1431,7 @@
 
 [#34870](https://github.com/flutter/flutter/pull/34870) Add test case for Flutter Issue #27677 as a benchmark.
 
-## severe: new feature - 6 PRs 
+## severe: new feature - 6 PRs
 
 [#33148](https://github.com/flutter/flutter/pull/33148) ExpandIcon Custom Colors
 
@@ -1445,7 +1445,7 @@
 
 [#34051](https://github.com/flutter/flutter/pull/34051) Reland "Text inline widgets, TextSpan rework (#30069)" with improved backwards compatibility
 
-## t: flutter driver - 5 PRs 
+## t: flutter driver - 5 PRs
 
 [#28808](https://github.com/flutter/flutter/pull/28808)  updated tearDownAll function
 
@@ -1457,7 +1457,7 @@
 
 [#33786](https://github.com/flutter/flutter/pull/33786) Add a real-er web restart, doctor, workflow
 
-## a: images - 5 PRs 
+## a: images - 5 PRs
 
 [#32853](https://github.com/flutter/flutter/pull/32853) Add onBytesReceived callback to consolidateHttpClientResponseBytes()
 
@@ -1469,7 +1469,7 @@
 
 [#33814](https://github.com/flutter/flutter/pull/33814) Added a benchmark for ImageCache
 
-## a: animation - 4 PRs 
+## a: animation - 4 PRs
 
 [#21896](https://github.com/flutter/flutter/pull/21896) Bottom sheet scrolling
 
@@ -1479,7 +1479,7 @@
 
 [#32842](https://github.com/flutter/flutter/pull/32842) Allow "from" hero state to survive hero animation in a push transition
 
-## ▣ platform-android - 4 PRs 
+## ▣ platform-android - 4 PRs
 
 [#31491](https://github.com/flutter/flutter/pull/31491) Allow adb stdout to contain the port number without failing
 
@@ -1489,7 +1489,7 @@
 
 [#33696](https://github.com/flutter/flutter/pull/33696) Generate ELF shared libraries and allow multi-abi libs in APKs and App bundles
 
-## d: examples - 4 PRs 
+## d: examples - 4 PRs
 
 [#31634](https://github.com/flutter/flutter/pull/31634) Improve canvas example in sample dart ui app
 
@@ -1499,7 +1499,7 @@
 
 [#35046](https://github.com/flutter/flutter/pull/35046) Add generated Icon diagram to api docs
 
-## a: typography - 4 PRs 
+## a: typography - 4 PRs
 
 [#31987](https://github.com/flutter/flutter/pull/31987) Text wrap width
 
@@ -1509,7 +1509,7 @@
 
 [#34051](https://github.com/flutter/flutter/pull/34051) Reland "Text inline widgets, TextSpan rework (#30069)" with improved backwards compatibility
 
-## t: xcode - 4 PRs 
+## t: xcode - 4 PRs
 
 [#32266](https://github.com/flutter/flutter/pull/32266) Add reference to Runner-Bridging-Header.h to iOS profile config
 
@@ -1519,7 +1519,7 @@
 
 [#34738](https://github.com/flutter/flutter/pull/34738) Update Xcode projects to recommended Xcode 10 project settings
 
-## severe: crash - 3 PRs 
+## severe: crash - 3 PRs
 
 [#31228](https://github.com/flutter/flutter/pull/31228) Fix ExpansionPanelList Duplicate Global Keys Exception
 
@@ -1527,7 +1527,7 @@
 
 [#34460](https://github.com/flutter/flutter/pull/34460) Add back ability to override the local engine in Gradle
 
-## ⌺‬ platform-ios - 3 PRs 
+## ⌺‬ platform-ios - 3 PRs
 
 [#31332](https://github.com/flutter/flutter/pull/31332) iOS selection handles are invisible
 
@@ -1535,7 +1535,7 @@
 
 [#33684](https://github.com/flutter/flutter/pull/33684) Disable CocoaPods input and output paths in Xcode build phase and adopt new Xcode build system
 
-## a: internationalization - 3 PRs 
+## a: internationalization - 3 PRs
 
 [#31644](https://github.com/flutter/flutter/pull/31644) Cupertino localization step 12: push translation for all supported languages
 
@@ -1543,7 +1543,7 @@
 
 [#32513](https://github.com/flutter/flutter/pull/32513) Cupertino localization step 12 try 2: push translation for all supported languages
 
-## ○ platform-fuchsia - 3 PRs 
+## ○ platform-fuchsia - 3 PRs
 
 [#32849](https://github.com/flutter/flutter/pull/32849) [flutter_tool] Adds support for 'run' for Fuchsia devices
 
@@ -1551,7 +1551,7 @@
 
 [#34276](https://github.com/flutter/flutter/pull/34276) [flutter_tool,fuchsia] Prefetch tiles when starting an app
 
-## a: existing-apps - 3 PRs 
+## a: existing-apps - 3 PRs
 
 [#33297](https://github.com/flutter/flutter/pull/33297) Instrument add to app flows
 
@@ -1559,7 +1559,7 @@
 
 [#34189](https://github.com/flutter/flutter/pull/34189) Instrument usage of include_flutter.groovy and xcode_backend.sh
 
-## a: accessibility - 3 PRs 
+## a: accessibility - 3 PRs
 
 [#33808](https://github.com/flutter/flutter/pull/33808) fix ExpansionPanelList merge the header semantics when it is not nece…
 
@@ -1567,93 +1567,93 @@
 
 [#34434](https://github.com/flutter/flutter/pull/34434) Semantics fixes
 
-## customer: solaris - 2 PRs 
+## customer: solaris - 2 PRs
 
 [#29677](https://github.com/flutter/flutter/pull/29677) Fix calculation of hero rectTween when Navigator isn't fullscreen
 
 [#34298](https://github.com/flutter/flutter/pull/34298) Preserving SafeArea : Part 2
 
-## e: desktop - 2 PRs 
+## e: desktop - 2 PRs
 
 [#31329](https://github.com/flutter/flutter/pull/31329) Add Xcode build script for macOS target
 
 [#31567](https://github.com/flutter/flutter/pull/31567) Remove need for build/name scripts on Linux desktop
 
-## ⌘‬ platform-mac - 2 PRs 
+## ⌘‬ platform-mac - 2 PRs
 
 [#31329](https://github.com/flutter/flutter/pull/31329) Add Xcode build script for macOS target
 
 [#33636](https://github.com/flutter/flutter/pull/33636) Implement plugin tooling support for macOS
 
-## a: fidelity - 2 PRs 
+## a: fidelity - 2 PRs
 
 [#31464](https://github.com/flutter/flutter/pull/31464) CupertinoPicker fidelity revision
 
 [#33634](https://github.com/flutter/flutter/pull/33634) Let there be scroll bars
 
-## f: date/time picker - 2 PRs 
+## f: date/time picker - 2 PRs
 
 [#31464](https://github.com/flutter/flutter/pull/31464) CupertinoPicker fidelity revision
 
 [#32843](https://github.com/flutter/flutter/pull/32843) Added a missing dispose of an AnimationController that was leaking a ticker.
 
-## team: gallery - 2 PRs 
+## team: gallery - 2 PRs
 
 [#31486](https://github.com/flutter/flutter/pull/31486) fix precedence issue
 
 [#33634](https://github.com/flutter/flutter/pull/33634) Let there be scroll bars
 
-## dependency: dart - 2 PRs 
+## dependency: dart - 2 PRs
 
 [#32787](https://github.com/flutter/flutter/pull/32787) Support 32 and 64 bit
 
 [#34295](https://github.com/flutter/flutter/pull/34295) Prepare for Uint8List SDK breaking changes
 
-## team: flakes - 2 PRs 
+## team: flakes - 2 PRs
 
 [#33932](https://github.com/flutter/flutter/pull/33932) More removing of timeouts.
 
 [#34199](https://github.com/flutter/flutter/pull/34199) make sure this test doesn't run for real
 
-## customer: espresso - 2 PRs 
+## customer: espresso - 2 PRs
 
 [#34012](https://github.com/flutter/flutter/pull/34012) Extract DiagnosticsNode serializer from WidgetInspector
 
 [#34440](https://github.com/flutter/flutter/pull/34440) Add Driver command to get diagnostics tree
 
-## severe: customer critical - 2 PRs 
+## severe: customer critical - 2 PRs
 
 [#34298](https://github.com/flutter/flutter/pull/34298) Preserving SafeArea : Part 2
 
 [#34519](https://github.com/flutter/flutter/pull/34519) fix page scroll position rounding error
 
-## t: flutter doctor - 2 PRs 
+## t: flutter doctor - 2 PRs
 
 [#34624](https://github.com/flutter/flutter/pull/34624) Break down flutter doctor validations and results
 
 [#34755](https://github.com/flutter/flutter/pull/34755) Add linux doctor implementation
 
-## f: routes - 1 PRs 
+## f: routes - 1 PRs
 
 [#21896](https://github.com/flutter/flutter/pull/21896) Bottom sheet scrolling
 
-## p: framework - 1 PRs 
+## p: framework - 1 PRs
 
 [#30406](https://github.com/flutter/flutter/pull/30406) Add binaryMessenger constructor argument to platform channels
 
-## ❖ platform-windows - 1 PRs 
+## ❖ platform-windows - 1 PRs
 
 [#33443](https://github.com/flutter/flutter/pull/33443) Wrap Windows build invocation in a batch script
 
-## a: size - 1 PRs 
+## a: size - 1 PRs
 
 [#34474](https://github.com/flutter/flutter/pull/34474) Release diagnostics
 
-## customer: google - 1 PRs 
+## customer: google - 1 PRs
 
 [#34474](https://github.com/flutter/flutter/pull/34474) Release diagnostics
 
-## severe: performance - 1 PRs 
+## severe: performance - 1 PRs
 
 [#34870](https://github.com/flutter/flutter/pull/34870) Add test case for Flutter Issue #27677 as a benchmark.
 
@@ -1665,39 +1665,39 @@ Not all may be shown; some PRs such as those generated by autorollers are omitte
 # PRs addressed in `flutter/engine` between `b593f5167bce84fb3cad5c258477bf3abc1b14eb` and `d004bcd4d619fc3574761d63d7cf7b7291332c79`
 
 
-## affects: text input - 2 PRs 
+## affects: text input - 2 PRs
 
 [#9322](https://github.com/flutter/engine/pull/9322) Check for invalid indexes when performing InputAdpator backspace.
 
 [#9406](https://github.com/flutter/engine/pull/9406) Update harfbuzz to 2.5.2
 
-## platform-android - 1 PRs 
+## platform-android - 1 PRs
 
 [#9172](https://github.com/flutter/engine/pull/9172) Use shared library when libapp.so is found
 
-## affects: dev experience - 1 PRs 
+## affects: dev experience - 1 PRs
 
 [#9304](https://github.com/flutter/engine/pull/9304) Decorate UIApplicationDelegate wrappers with matching UIKit deprecation
 
-## platform-ios - 1 PRs 
+## platform-ios - 1 PRs
 
 [#9304](https://github.com/flutter/engine/pull/9304) Decorate UIApplicationDelegate wrappers with matching UIKit deprecation
 
-## accessibility - 1 PRs 
+## accessibility - 1 PRs
 
 [#9321](https://github.com/flutter/engine/pull/9321) Fix a11y in embedded Android views post O
 
-## crash - 1 PRs 
+## crash - 1 PRs
 
 [#9322](https://github.com/flutter/engine/pull/9322) Check for invalid indexes when performing InputAdpator backspace.
 
-## affects: framework - 1 PRs 
+## affects: framework - 1 PRs
 
 [#9452](https://github.com/flutter/engine/pull/9452) Convert RRect.scaleRadii to public method
 
-## affects: tests - 1 PRs 
+## affects: tests - 1 PRs
 
-[#9458](https://github.com/flutter/engine/pull/9458) Test cleanup geometry_test.dart 
+[#9458](https://github.com/flutter/engine/pull/9458) Test cleanup geometry_test.dart
 
 
 This release included 605 PRs.

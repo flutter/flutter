@@ -115,7 +115,7 @@ We also plan to expand Dart's compilation toolchain to support compiling to Wasm
 
 ## Planned deprecations
 
-We plan to [drop support for 32bit iOS](https://flutter.dev/go/rfc-32-bit-ios-support) in 2022. 
+We plan to [drop support for 32bit iOS](https://flutter.dev/go/rfc-32-bit-ios-support) in 2022.
 
 ## Infrastructure
 
@@ -190,7 +190,7 @@ Our goal for this year is that you should be able to run `flutter create; flutte
 
 _We don't intend to provide desktop-equivalents of the Cupertino widget library in 2020._
 
-### Quality 
+### Quality
 
 Our other main goal is to improve Flutter's quality, fixing bugs and addressing a few of the most-highly requested features. This covers a wide range of areas but we have a particular focus on our Cupertino library and iOS fidelity, our support for the long tail of Android devices, and the development experience.
 

@@ -43,13 +43,13 @@ cp -r <existing-app-dir>/assets <appname>/
 
 **Note:** This step is only required if you made any changes to<br>`<existing-app-dir>android/AndroidManifest.xml`
 
-If that is the case, apply those changes to the new manifest,<br> `<appname>/android/app/src/main/AndroidManifest.xml` 
+If that is the case, apply those changes to the new manifest,<br> `<appname>/android/app/src/main/AndroidManifest.xml`
 
 ### Step 4: Synchronize pubspec.yaml
 
 **Note:** This step is only required if you made any changes to<br>`<existing-app-dir>/pubspec.yaml`
 
-If that is the case, apply those changes to the new manifest,<br>`<appname>/pubspec.yaml` 
+If that is the case, apply those changes to the new manifest,<br>`<appname>/pubspec.yaml`
 
 ### Step 5: Move icon resources, and other resources as applicable
 

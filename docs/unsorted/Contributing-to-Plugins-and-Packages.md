@@ -125,7 +125,7 @@ If you are considering adding an external dependency:
 - Consider other options, and discuss with #hackers-ecosystem in Discord.
 - If you add a `dev_dependency` on an external package, pin it to a specific version if at all possible.
 - If you add a `dependency` on an external package in an `example/`, pin it to a specific version if at all possible.
-- Some dependencies should only be linked as dev_dependencies like integration_test 
+- Some dependencies should only be linked as dev_dependencies like integration_test
 
 ### Native dependencies
 
@@ -140,7 +140,7 @@ Given that, we welcome PRs that only implement a feature for a subset of platfor
   - API for features that will be permanently platform-specific may structured in ways that make that limitation more clear, so knowing if other platforms can support it will affect the review process.
   - We want to avoid over-fitting the plugin APIs to a single platform's API. It is often the case that several platforms can implement a feature, but the behavior is different enough across platforms that we need to design the API in a way that covers those variations in a cohesive way. This means that knowing at a high level what the implementation on other platform also affects the review process.
   - Features that are missing implementations on some platforms need to be clearly documented as such in the API, and those comments should clearly express whether those platform are temporarily missing implementations, or are not expected to ever have implementations due to platform limitations.
-  
+
   The PR author isn't necessarily responsible for answering these questions. These cases will be noted in comments during PR triage; if the PR author, or others in the community, can contribute that information, that will certainly help. If not, that investigation will be part of the review process (in which case the review will likely take longer).
 - In some cases, a reviewer may wait on approving a PR for landing until there is a plan in place for landing implementations for other platforms. This is not a hard rule, and will be up to reviewer judgement. This could take a number of forms:
   - Waiting for other PRs from the community that implement the feature for other platforms, and then moving forward with all of them at once.
@@ -404,23 +404,23 @@ Regions are maximally unindented before being injected into the markdown files (
 
 ### Preparation
 
-1. Read the [Swift migration design doc](https://docs.google.com/document/d/1XsaulkJA6_ZSpM7chkQLhQY25sQqhEMiqHMYzw8H85o/edit?resourcekey=0-_cUjF1c0iBvRLKfV-3gK5A), which covers several important topics such as the ["top down approach"](https://docs.google.com/document/d/1XsaulkJA6_ZSpM7chkQLhQY25sQqhEMiqHMYzw8H85o/edit?resourcekey=0-_cUjF1c0iBvRLKfV-3gK5A#heading=h.reauq7bq8vak). Feel free to leave any comments and feedback in the doc. 
+1. Read the [Swift migration design doc](https://docs.google.com/document/d/1XsaulkJA6_ZSpM7chkQLhQY25sQqhEMiqHMYzw8H85o/edit?resourcekey=0-_cUjF1c0iBvRLKfV-3gK5A), which covers several important topics such as the ["top down approach"](https://docs.google.com/document/d/1XsaulkJA6_ZSpM7chkQLhQY25sQqhEMiqHMYzw8H85o/edit?resourcekey=0-_cUjF1c0iBvRLKfV-3gK5A#heading=h.reauq7bq8vak). Feel free to leave any comments and feedback in the doc.
 
-2. Read Google's [Swift Style Guide](https://google.github.io/swift/) and Apple's [API Design Guidelines](https://www.swift.org/documentation/api-design-guidelines/) (which is endorsed by Google's Swift Style Guide). 
+2. Read Google's [Swift Style Guide](https://google.github.io/swift/) and Apple's [API Design Guidelines](https://www.swift.org/documentation/api-design-guidelines/) (which is endorsed by Google's Swift Style Guide).
 
-3. Pick a plugin that you are interested in from the [umbrella GitHub issue](https://github.com/flutter/flutter/issues/119015). This is for multiple contributors to coordinate with each other, and to avoid duplicate or conflicting work. 
+3. Pick a plugin that you are interested in from the [umbrella GitHub issue](https://github.com/flutter/flutter/issues/119015). This is for multiple contributors to coordinate with each other, and to avoid duplicate or conflicting work.
 
 ### Project Settings
 
-1. Remove custom modulemap ([example](https://github.com/flutter/plugins/pull/6229/files)). This is due to a limitation in Cocoapods ([details](https://github.com/flutter/plugins/pull/6369#issue-1363961940)). This unfortunately means that we cannot use `Test` submodules, and all ObjC headers are exposed publicly during the migration. 
+1. Remove custom modulemap ([example](https://github.com/flutter/plugins/pull/6229/files)). This is due to a limitation in Cocoapods ([details](https://github.com/flutter/plugins/pull/6369#issue-1363961940)). This unfortunately means that we cannot use `Test` submodules, and all ObjC headers are exposed publicly during the migration.
 
-2. Add Swift dependency information to the podspec ([example](https://github.com/flutter/packages/blob/617f9d99954fe394dc91258c431c9a2626921e08/packages/quick_actions/quick_actions_ios/ios/quick_actions_ios.podspec#L17-L22)). Note that `.h` and `.m` should be removed from the `spec.source_files` after migration is done. 
+2. Add Swift dependency information to the podspec ([example](https://github.com/flutter/packages/blob/617f9d99954fe394dc91258c431c9a2626921e08/packages/quick_actions/quick_actions_ios/ios/quick_actions_ios.podspec#L17-L22)). Note that `.h` and `.m` should be removed from the `spec.source_files` after migration is done.
 
-3. After the plugin class is migrated to Swift, update `pluginClass` in `pubspec.yaml` ([example](https://github.com/flutter/packages/blob/617f9d99954fe394dc91258c431c9a2626921e08/packages/quick_actions/quick_actions_ios/pubspec.yaml#L16)). 
+3. After the plugin class is migrated to Swift, update `pluginClass` in `pubspec.yaml` ([example](https://github.com/flutter/packages/blob/617f9d99954fe394dc91258c431c9a2626921e08/packages/quick_actions/quick_actions_ios/pubspec.yaml#L16)).
 
 ### Format your Swift code
 
-1. Install [swift-format](https://github.com/apple/swift-format). If you also contribute to the flutter engine, there is [an issue](https://github.com/flutter/flutter/issues/41129#issuecomment-1400812109) with the swift-format under `depot_tools`. Make sure to set up the export PATH properly to run your own copy of `swift-format`. 
+1. Install [swift-format](https://github.com/apple/swift-format). If you also contribute to the flutter engine, there is [an issue](https://github.com/flutter/flutter/issues/41129#issuecomment-1400812109) with the swift-format under `depot_tools`. Make sure to set up the export PATH properly to run your own copy of `swift-format`.
 
 2. Run `./script/tool_runner.sh format`
 
@@ -428,6 +428,6 @@ Regions are maximally unindented before being injected into the markdown files (
 
 To reduce the risk of regression, it is important to backfill unit tests to full coverage before the migration, and maintain full coverage during the migration. If possible (i.e., if adding testing does not require refactoring the plugin to make it testable), adding test coverage should be done in a separate PR before the conversion of the implementation.
 
-We do not report code coverage on the CI, since the number can actually be misleading (for example, a 100% coverage may make PR reviewers think that everything is fine, which is not necessarily true). Instead, you (and your PR reviewer) should evaluate whether the test is complete, by actually reading the test code (rather than just looking at the coverage). You may well want to use a coverage tool as part of your evaluation. 
+We do not report code coverage on the CI, since the number can actually be misleading (for example, a 100% coverage may make PR reviewers think that everything is fine, which is not necessarily true). Instead, you (and your PR reviewer) should evaluate whether the test is complete, by actually reading the test code (rather than just looking at the coverage). You may well want to use a coverage tool as part of your evaluation.
 
 During the migration, especially when backfilling tests, it is possible to discover existing bugs. Migration PRs should just focus on migration and should not contain bug fixes. You can either (1) fix the bug in ObjC first in a separate PR, or (2) if the bug is too hard to fix, just acknowledge the bug in a comment so that someone can fix it in the future.

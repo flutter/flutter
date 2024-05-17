@@ -47,7 +47,7 @@ In total closed 3 issues during the week.
 
 | Reason for closing  |  |
 | -- | -- |
-| invalid | 100% | 
+| invalid | 100% |
 
 #### Flutterfire
 
@@ -113,7 +113,7 @@ In total closed 5 issues during the week.
 
 | Reason for closing  |  |
 | -- | -- |
-| invalid | 100% | 
+| invalid | 100% |
 
 #### Flutterfire
 
@@ -181,7 +181,7 @@ In total closed 2 issues during the week.
 
 | Reason for closing  |  |
 | -- | -- |
-| invalid | 100% | 
+| invalid | 100% |
 
 #### Flutterfire
 
@@ -232,7 +232,7 @@ In total closed 3 issues during the week.
 
 | Reason for closing  |  |
 | -- | -- |
-| invalid| 33.3% | 
+| invalid| 33.3% |
 | duplicate | 33.3% |
 | fixed | 33.3% |
 
@@ -251,7 +251,7 @@ In total closed 5 issues during the week.
 | -- | -- |
 | duplicate | 20% |
 | fixed | 20% |
-| invalid | 40% | 
+| invalid | 40% |
 | wont fix - infeasible | 20% |
 
 #### Flutterfire
@@ -302,7 +302,7 @@ In total closed 2 issues during the week.
 
 | Reason for closing  |  |
 | -- | -- |
-| invalid| 50% | 
+| invalid| 50% |
 | duplicate | 50% |
 
 
@@ -365,7 +365,7 @@ In total closed 1 issue during the week.
 
 | Reason for closing  |  |
 | -- | -- |
-| invalid| 100% | 
+| invalid| 100% |
 
 
 #### dart-lang/site-www
@@ -426,8 +426,8 @@ In total closed 2 issues during the week.
 
 | Reason for closing  |  |
 | -- | -- |
-| duplicate | 50% | 
-| invalid| 50% | 
+| duplicate | 50% |
+| invalid| 50% |
 
 
 #### dart-lang/site-www
@@ -491,8 +491,8 @@ In total closed 3 issues during the week.
 
 | Reason for closing  |  |
 | -- | -- |
-| duplicate | 33.3% | 
-| invalid| 66.7% | 
+| duplicate | 33.3% |
+| invalid| 66.7% |
 
 
 #### dart-lang/site-www
@@ -558,7 +558,7 @@ In total closed 1 issue during the week.
 
 | Reason for closing  |  |
 | -- | -- |
-| invalid| 100.0% | 
+| invalid| 100.0% |
 
 #### dart-lang/site-www
 
@@ -623,7 +623,7 @@ In total closed 7 issues during the week.
 | -- | -- |
 | Duplicate | 14.3% |
 | Fixed | 57.1% |
-| invalid| 28.6% | 
+| invalid| 28.6% |
 
 #### dart-lang/site-www
 
@@ -787,7 +787,7 @@ In total closed 5 issues during the week.
 
 New Flutter issues triaged 173, closed 69 (39.88%)
 
-In total closed 137 issues during the week 
+In total closed 137 issues during the week
 
 | Reason for closing  |  |
 | -- | -- |
@@ -849,7 +849,7 @@ In total closed 13 issues during the week
 
 New Flutter issues triaged 223, closed 77 (34.53%)
 
-In total closed 176 issues during the week 
+In total closed 176 issues during the week
 
 | Reason for closing  |  |
 | -- | -- |
@@ -908,7 +908,7 @@ In total closed 10 issues during the week
 
 New Flutter issues triaged 206, closed 79 (38.35%)
 
-In total closed 190 issues during the week 
+In total closed 190 issues during the week
 
 | Reason for closing  |  |
 | -- | -- |
@@ -969,7 +969,7 @@ In total closed 6 issues during the week
 
 New Flutter issues triaged 244, closed 75 (30.74%)
 
-In total closed 182 issues during the week 
+In total closed 182 issues during the week
 
 | Reason for closing  |  |
 | -- | -- |
@@ -1041,7 +1041,7 @@ In total closed 160 issues during the week.
 
 #### Flutter/website
 
-New Flutter website issues triaged 6, closed 2 (33%). 
+New Flutter website issues triaged 6, closed 2 (33%).
 
 In total closed 3 issues during the week.
 
@@ -1095,7 +1095,7 @@ In total closed 14 issues during the week.
 
 New Flutter issues triaged 176, closed 55 (31%)
 
-In total closed 150 issues during the week 
+In total closed 150 issues during the week
 
 | Reason for closing  |  |
 | -- | -- |
@@ -1161,7 +1161,7 @@ In total closed 11 issues during the week
 
 New Flutter issues triaged 251, closed 80 (32%)
 
-In total closed 179 issues during the week 
+In total closed 179 issues during the week
 
 | Reason for closing  |  |
 | -- | -- |
@@ -1223,7 +1223,7 @@ In total closed 20 issues during the week
 
 New Flutter issues triaged 151, closed 71 (47%)
 
-In total closed 153 issues during the week 
+In total closed 153 issues during the week
 
 | Reason for closing  |  |
 | -- | -- |
@@ -1284,7 +1284,7 @@ In total closed 7 issues during the week
 
 New Flutter issues triaged 184, closed 64 (35%)
 
-In total closed 99 issues during the week 
+In total closed 99 issues during the week
 
 | Reason for closing  |  |
 | -- | -- |
@@ -1339,7 +1339,7 @@ In total closed 15 issues during the week
 
 New Flutter issues triaged 195, closed 73 (37%)
 
-In total closed 138 issues during the week 
+In total closed 138 issues during the week
 
 | Reason for closing  |  |
 | -- | -- |
@@ -1400,7 +1400,7 @@ In total closed 5 issues during the week
 
 New Flutter issues triaged 157, closed 58 (37%)
 
-In total closed 149 issues during the week 
+In total closed 149 issues during the week
 
 | Reason for closing  |  |
 | -- | -- |
@@ -1452,7 +1452,7 @@ In total closed 13 issues during the week
 
 New Flutter issues triaged 170, closed 66 (39%)
 
-In total closed 147 issues during the week 
+In total closed 147 issues during the week
 
 | Reason for closing  |  |
 | -- | -- |
@@ -1484,7 +1484,7 @@ In total closed 16 issues during the week
 
 New Flutter issues triaged 179, closed 66 (37%)
 
-In total closed 155 issues during the week 
+In total closed 155 issues during the week
 
 | Reason for closing  |  |
 | -- | -- |
@@ -1518,7 +1518,7 @@ In total closed 19 issues during the week
 
 New Flutter issues triaged 199, closed 70 (35%)
 
-In total closed 242 issues during the week 
+In total closed 242 issues during the week
 
 | Reason for closing  |  |
 | -- | -- |
@@ -1552,7 +1552,7 @@ In total closed 12 issues during the week
 
 New Flutter issues triaged 203, closed 70 (34%)
 
-In total closed 137 issues during the week 
+In total closed 137 issues during the week
 
 | Reason for closing  |  |
 | -- | -- |
@@ -1585,7 +1585,7 @@ In total closed 15 issues during the week
 
 New Flutter issues triaged 166, closed 61 (37%)
 
-In total closed 90 issues during the week 
+In total closed 90 issues during the week
 
 Finished checking the [p: maps](https://github.com/flutter/flutter/issues?q=is%3Aopen+label%3A%22p%3A+maps%22+sort%3Acreated-asc+-label%3A%22found+in+release%3A+2.0%22+-label%3A%22found+in+release%3A+2.1%22+-label%3A%22found+in+release%3A+2.2%22+-label%3A%22found+in+release%3A+2.3%22+-label%3A%22waiting+for+customer+response%22+) issues and started reworking the [p: video_player](https://github.com/flutter/flutter/issues?q=is%3Aopen+label%3A%22p%3A+video_player%22+sort%3Acreated-asc+-label%3A%22found+in+release%3A+2.0%22+-label%3A%22found+in+release%3A+2.1%22+-label%3A%22found+in+release%3A+2.2%22+-label%3A%22found+in+release%3A+2.3%22+-label%3A%22waiting+for+customer+response%22++-label%3A%22severe%3A+new+feature%22+-label%3A%22proposal%22+-label%3A%22passed+first+triage%22) issues.
 

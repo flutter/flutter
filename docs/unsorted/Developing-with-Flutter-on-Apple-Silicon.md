@@ -17,7 +17,7 @@ You can use Apple Silicon-based Mac devices as a developer workstation (host) fo
 
 As we build more Apple Silicon support into the tooling, and depending on your tolerance for risk, [you may want to experiment with the `beta` channel](https://flutter.dev/docs/development/tools/sdk/upgrading#switching-flutter-channels). (This was previously also available on the dev channel, but [it has been retired](https://medium.com/flutter/whats-new-in-flutter-2-8-d085b763d181#34c4).)
 
-[Issue 60118](https://github.com/flutter/flutter/issues/60118) tracks the full set of work to support this feature. 
+[Issue 60118](https://github.com/flutter/flutter/issues/60118) tracks the full set of work to support this feature.
 
 ## Developing Flutter apps for macOS running on Apple Silicon (target)
 

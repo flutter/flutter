@@ -13,7 +13,7 @@ The Flutter team currently maintains the following codelabs:
 * [Build a Photo Sharing App with Google Photos and Flutter](https://codelabs.developers.google.com/codelabs/google-photos-sharing/#0)
   * Build a field trip app that allows you and other members of the trip to share photos.
 * [Building a Cupertino app with Flutter](https://codelabs.developers.google.com/codelabs/flutter-cupertino/#0)
-  * Build a version of the Shrine shopping app (used in the Material Design codelabs) using the Cupertino package to create an iOS style look and feel. Create multiple tabs and navigate between them. 
+  * Build a version of the Shrine shopping app (used in the Material Design codelabs) using the Cupertino package to create an iOS style look and feel. Create multiple tabs and navigate between them.
 * [Firebase for Flutter](https://codelabs.developers.google.com/codelabs/flutter-firebase/#0)
   * Connect a Flutter app to a Firebase database, and use a transaction to update shared information.
 * [MDC 101 Flutter: Material Components (MDC) Basics](https://codelabs.developers.google.com/codelabs/mdc-101-flutter/#0)

@@ -1,7 +1,7 @@
 _If you've already built the engine and have the configuration set up but merely need a refresher on
 actually compiling the code, see [[Compiling the engine]]._
 
-_If you are checking these instructions to refresh your memory and your fork of the engine is stale, 
+_If you are checking these instructions to refresh your memory and your fork of the engine is stale,
 make sure to merge up to HEAD before doing a `gclient sync`._
 
 # Getting dependencies
@@ -23,7 +23,7 @@ Make sure you have the following dependencies available:
  * On Windows:
    - Visual Studio 2017 or later (required for non-Googlers only).
    - [Windows 10 SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/) (required for non-Googlers only). Be sure to install the "Debugging Tools for Windows" feature.
- * On macOS: 
+ * On macOS:
    - Install the latest Xcode.
    - On Apple Silicon arm64 Macs, install the Rosetta translation environment by running `softwareupdate --install-rosetta`.
    - Install Oracle's Java JDK, version 1.8 or later.
@@ -134,15 +134,15 @@ For adding IDE support to the Java code in the engine with VSCode, see ["Using V
 
 ### cquery/ccls (multiple editors) [C/C++/Objective-C++]
 
-Alternatively, [cquery](https://github.com/cquery-project/cquery) and a derivative [ccls](https://github.com/MaskRay/ccls) are highly scalable C/C++/Objective-C language server that supports IDE features like go-to-definition, call hierarchy, autocomplete, find reference etc that works reasonably well with our engine repo. 
+Alternatively, [cquery](https://github.com/cquery-project/cquery) and a derivative [ccls](https://github.com/MaskRay/ccls) are highly scalable C/C++/Objective-C language server that supports IDE features like go-to-definition, call hierarchy, autocomplete, find reference etc that works reasonably well with our engine repo.
 
-They(https://github.com/cquery-project/cquery/wiki/Editor-configuration) [supports](https://github.com/MaskRay/ccls/wiki/Editor-Configuration) editors like VSCode, emacs, vim etc. 
+They(https://github.com/cquery-project/cquery/wiki/Editor-configuration) [supports](https://github.com/MaskRay/ccls/wiki/Editor-Configuration) editors like VSCode, emacs, vim etc.
 
 To set up:
 1. Install cquery
     1. `brew install cquery` or `brew install ccls` on osx; or
     1. [Build from source](https://github.com/cquery-project/cquery/wiki/Getting-started)
-1. Generate compile_commands.json which our GN tool already does such as via `src/flutter/tools/gn --ios --unoptimized` 
+1. Generate compile_commands.json which our GN tool already does such as via `src/flutter/tools/gn --ios --unoptimized`
 1. Install an editor extension such as [VSCode-cquery](https://marketplace.visualstudio.com/items?itemName=cquery-project.cquery) or [vscode-ccls](https://marketplace.visualstudio.com/items?itemName=ccls-project.ccls)
     1. VSCode-query and vscode-ccls requires the compile_commands.json to be at the project root. Copy or symlink `src/out/compile_commands.json` to `src/` or `src/flutter` depending on which folder you want to open.
     1. Follow [Setting up the extension](https://github.com/cquery-project/cquery/wiki/Visual-Studio-Code#setting-up-the-extension) to configure VSCode-query.
@@ -151,15 +151,15 @@ To set up:
 
 ### Using VSCode as an IDE for the Android Embedding [Java]
 
-1. Install the extensions vscjava.vscode-java-pack (Extension Pack for Java) and vscjava.vscode-java-dependency (Project Manager for Java). 
+1. Install the extensions vscjava.vscode-java-pack (Extension Pack for Java) and vscjava.vscode-java-dependency (Project Manager for Java).
 
-1. Right click on the `shell/platform/android` folder in the engine source and click on `Add Folder to Java Source Path`. This creates an anonymous workspace and turns those files from ["syntax mode"](https://code.visualstudio.com/docs/java/java-project#_syntax-mode) to "compile mode". At this point, you should see a lot of errors since none of the external imports are found. 
+1. Right click on the `shell/platform/android` folder in the engine source and click on `Add Folder to Java Source Path`. This creates an anonymous workspace and turns those files from ["syntax mode"](https://code.visualstudio.com/docs/java/java-project#_syntax-mode) to "compile mode". At this point, you should see a lot of errors since none of the external imports are found.
 
-1. Find the "Java Dependencies" pane in your Explorer view. Use the "Explorer: Focus on Java Dependencies View" command if hidden. 
+1. Find the "Java Dependencies" pane in your Explorer view. Use the "Explorer: Focus on Java Dependencies View" command if hidden.
 
-1. Refresh the view and find the "flutter_*" project. There should be a "_/shell/platform/android" source folder there. 
+1. Refresh the view and find the "flutter_*" project. There should be a "_/shell/platform/android" source folder there.
 
-1. In the "Referenced Libraries" sibling node, click the + button, navigate to `engine/src/third_party/android_embedding_dependencies` and add the entire folder. This is the equivalent of adding 
+1. In the "Referenced Libraries" sibling node, click the + button, navigate to `engine/src/third_party/android_embedding_dependencies` and add the entire folder. This is the equivalent of adding
     ```
     "java.project.referencedLibraries": [
       "{path to engine}/src/third_party/android_embedding_dependencies/lib/**/*.jar"
@@ -167,7 +167,7 @@ To set up:
     ```
     to your VSCode's settings.json for your user or for your workspace.
 
-1. If you previously had a `shell/platform/android/.classpath`, delete it. 
+1. If you previously had a `shell/platform/android/.classpath`, delete it.
 
 ## VSCode Additional Useful Configuration
 

@@ -221,7 +221,7 @@ using a dedicated API, then that is where we would create a dedicated API.
 
 ### Avoid the lowest common denominator
 
-It is common for SDKs that target multiple platforms (or meta-platforms that 
+It is common for SDKs that target multiple platforms (or meta-platforms that
 themselves run on multiple platforms, like the Web) to provide APIs that
 work on all their target platforms. Unfortunately, this usually means that
 features that are unique to one platform or another are unavailable.
@@ -341,7 +341,7 @@ Put yourself in the shoes of whoever sees that error message. Why did they see i
 
 Template defaults should focus on providing the best developer experience. Templates should help developers understand the code, be easy to run now and support in the future. Help developers by picking dependencies that are broadly used and/or broadly supported and by leaving https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#leave-breadcrumbs-in-the-comments[comments that are helpful].
 
-See flutter create's templates for an example. 
+See flutter create's templates for an example.
 
 Policies
 --------
@@ -628,7 +628,7 @@ Our UX research has shown that developers prefer to see examples that are in the
 
 An application sample can be created using the `{@tool dartpad}` ... `{@end-tool}` or `{@tool sample}` ... `{@end-tool}` dartdoc indicators. See https://github.com/flutter/flutter/blob/master/examples/api/README.md#authoring[here] for more details about writing these kinds of examples.
 
-Dartpad examples (those using the dartdoc `{@tool dartpad}` indicator) will be presented on the https://api.flutter.dev[API documentation website] as an in-page executable and editable example. This allows developers to interact with the example right there on the page, and is the preferred form of example. Here is https://api.flutter.dev/flutter/widgets/AnimatedSwitcher-class.html#widgets.AnimatedSwitcher.1[one such example]. 
+Dartpad examples (those using the dartdoc `{@tool dartpad}` indicator) will be presented on the https://api.flutter.dev[API documentation website] as an in-page executable and editable example. This allows developers to interact with the example right there on the page, and is the preferred form of example. Here is https://api.flutter.dev/flutter/widgets/AnimatedSwitcher-class.html#widgets.AnimatedSwitcher.1[one such example].
 
 For examples that don't make sense in a web page (for example, code that interacts with a particular platform feature), application examples (using the dartdoc `{@tool sample}` indicator) are preferred, and will be presented on the API documentation website along with information about how to instantiate the example as an application that can be run.
 
@@ -974,7 +974,7 @@ we use the following style for these methods:
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is Foo 
+    return other is Foo
         && other.bar == bar
         && other.baz == baz
         && other.quux == quux;
@@ -1042,7 +1042,7 @@ It should not be used in place of building and returning a `List`, particularly 
 that only yield a small number of members or when callers will evaluate the whole collection
 anyway. It should also be avoided in very large functions.
 
-It incurs runtime overhead in maintaining and using an iterator, and space overhead for the compiler 
+It incurs runtime overhead in maintaining and using an iterator, and space overhead for the compiler
 to actually desugar the generator into something that uses an iterator class.
 
 Writing tests
@@ -1186,8 +1186,8 @@ documented top-level library intended to be imported by users.
 
 The definition of "New" changes as code grows and time passes. If the code
 needed a replacement version the odds of needing another replacement in the
-future is higher. Instead find a name that represents the idea being being used 
-or replaced. 
+future is higher. Instead find a name that represents the idea being being used
+or replaced.
 
 
 Comments
@@ -1325,7 +1325,7 @@ If no particular order is obvious, then the following order is suggested, with b
 7. Members for mutable properties, without new lines separating the members of a property, each property in the order:
     - getter
     - private field
-    - setter 
+    - setter
 8. Read-only properties (other than `hashCode`).
 9. Operators (other than `==`).
 10. Methods (other than `toString` and `build`).
@@ -1645,13 +1645,13 @@ final List<String> args = <String>[
 
 ### Put spread inside collection-if or collection-for on the same line
 
-Spreads inside collection-if or collection-for are used to insert several elements. It's easier to read to have spread on the line of `if`, `else`, or `for`. 
+Spreads inside collection-if or collection-for are used to insert several elements. It's easier to read to have spread on the line of `if`, `else`, or `for`.
 
 ```dart
 // BAD
 final List<String> args = <String>[
   'test',
-  if (condA) 
+  if (condA)
     ...<String>[
       'b',
       'c',
@@ -1887,7 +1887,7 @@ When developing new features in Flutter packages, one should follow the philosop
 Since the private classes in dart language are file-bound, this may often result in
 large file sizes. In Flutter, this is considered to be more preferable than creating
 multiple smaller files but exposing intermediate classes that are not needed to use
-the features. 
+the features.
 
 
 ### Import conventions
@@ -1919,7 +1919,7 @@ The `dart:math` library is always imported `as math`.
 
 ### Deciding where to put code
 
-As a general rule, if a feature is entirely self-contained (not requiring low-level integration into the Flutter framework) and is not something with universal appeal, we would encourage that that feature be provided as a package. 
+As a general rule, if a feature is entirely self-contained (not requiring low-level integration into the Flutter framework) and is not something with universal appeal, we would encourage that that feature be provided as a package.
 
 We try to be very conservative with what we put in the core framework, because there's a high cost to having anything there. We have to commit to supporting it for years to come, we have to document it, test it, create samples, we have to consider everyone's varied desires which they may have as they use the feature, we have to fix bugs. If there's design problems, we may not find out for a long time but then once we do we then have to figure out how to fix them without breaking people, or we have to migrate all our existing widgets to the new architecture, etc.
 

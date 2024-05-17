@@ -1,8 +1,8 @@
-In general, our philosophy is to update the `stable` channel on a quarterly basis with feature updates. In the intervening period, occasionally we may decide a bug or regression warrants a hotfix. We tend to be extremely conservative with these hotfixes, since there's always a risk that fixing one bug introduces a new one, and we want the `stable` channel to always represent our most tested builds. 
+In general, our philosophy is to update the `stable` channel on a quarterly basis with feature updates. In the intervening period, occasionally we may decide a bug or regression warrants a hotfix. We tend to be extremely conservative with these hotfixes, since there's always a risk that fixing one bug introduces a new one, and we want the `stable` channel to always represent our most tested builds.
 
-We intend to announce hotfixes to the [flutter-announce](https://groups.google.com/forum/#!forum/flutter-announce) group, and we recommend that you subscribe to that list if you publish an application using Flutter. 
+We intend to announce hotfixes to the [flutter-announce](https://groups.google.com/forum/#!forum/flutter-announce) group, and we recommend that you subscribe to that list if you publish an application using Flutter.
 
-Note that we only hotfix the latest version -- if you see bugs on older versions of the `stable` channel, please consider moving to the latest `stable` channel version. 
+Note that we only hotfix the latest version -- if you see bugs on older versions of the `stable` channel, please consider moving to the latest `stable` channel version.
 
 To ensure that you have the latest stable version with the hotfixes listed below, use the flutter tool at the command line as follows:
 
@@ -11,19 +11,19 @@ $ flutter channel stable
 $ flutter upgrade
 ```
 
-<!-- 
-INTERNAL NOTE: PLEASE DON'T JUST PASTE ISSUE TITLES! 
+<!--
+INTERNAL NOTE: PLEASE DON'T JUST PASTE ISSUE TITLES!
 
-Make sure that the text here helps customers understand 
-whether they are likely to be affected by the issue, 
-without them needing to read each issue individually. 
+Make sure that the text here helps customers understand
+whether they are likely to be affected by the issue,
+without them needing to read each issue individually.
 Our goal is to make the list easy for them to scan.
 
-More information and tips: 
-https://github.com/flutter/flutter/wiki/Hotfix-Documentation-Best-Practices 
+More information and tips:
+https://github.com/flutter/flutter/wiki/Hotfix-Documentation-Best-Practices
 
 INTERNAL NOTE
---> 
+-->
 ## Flutter 3.22 Changes
 
 ### [3.22.0](https://github.com/flutter/flutter/releases/tag/3.22.0) (May 14, 2024)
@@ -43,9 +43,9 @@ Initial stable release.
 * [flutter/144211](https://github.com/flutter/flutter/issues/144211) - Reverts a clipping optimization that is broken when multiple clips are applied with a backdrop filter.
 * [flutter/144213](https://github.com/flutter/flutter/issues/144213) - Fix flickering of gaussian blurs in scrolling containers.
 * [dart/55158](https://github.com/dart-lang/sdk/issues/55158) - Fixes an exception when executing hot reload after making compilation-successful changes.
-* [dart/55194](https://github.com/dart-lang/sdk/issues/55194) - ​​Fix crashes on web platforms that contains an extension type declaration where the extension type constructor invokes a redirecting factory in its initializer. 
+* [dart/55194](https://github.com/dart-lang/sdk/issues/55194) - ​​Fix crashes on web platforms that contains an extension type declaration where the extension type constructor invokes a redirecting factory in its initializer.
 * [dart/55184](https://github.com/dart-lang/sdk/issues/55184) - Fix issues where it is unable to run commit queue and post-submit testing on beta and stable when Goma is shut down.
-* [dart/55240](https://github.com/dart-lang/sdk/issues/55240) - ​​Fix DateTime.timeZoneName on Windows. 
+* [dart/55240](https://github.com/dart-lang/sdk/issues/55240) - ​​Fix DateTime.timeZoneName on Windows.
 
 ### [3.19.3](https://github.com/flutter/flutter/releases/tag/3.16.3) (March 07, 2024)
 * [flutter/144565](https://github.com/flutter/flutter/issues/144565) - Fixes a tool crash when attempting to render a frame with raster stats on an application with the Impeller backend.
@@ -53,7 +53,7 @@ Initial stable release.
 * [dart/55095](https://github.com/dart-lang/sdk/issues/55095) - ​​Disallows certain types involving extension types from being used as the operand of an `await` expression, unless the extension type itself implements`Future`.
 
 ### [3.19.2](https://github.com/flutter/flutter/releases/tag/3.19.2) (February 28, 2024)
-* [flutter/143886](https://github.com/flutter/flutter/issues/143886) - Fixes a parsing issue that caused the Flutter tool to crash in some circumstances. 
+* [flutter/143886](https://github.com/flutter/flutter/issues/143886) - Fixes a parsing issue that caused the Flutter tool to crash in some circumstances.
 
 ### [3.19.1](https://github.com/flutter/flutter/releases/tag/3.19.1) (February 21, 2024)
 * [flutter/143574](https://github.com/flutter/flutter/issues/143574) - Fixes an issue in Flutter web builds that disallowed the use of`--flavor` while launching.
@@ -136,9 +136,9 @@ Initial stable release.
 
 ### [3.13.4](https://github.com/flutter/flutter/releases/tag/3.13.4) (September 13, 2023)
 * [dart/53449](https://github.com/dart-lang/sdk/issues/53449) - Fixes a dart2js issue causing a compiler crash when using a typed record pattern outside of the scope of a function body.
-* [dart/53450](https://github.com/dart-lang/sdk/issues/53450) - Fixes a pause in the debugger when reaching an unhandled exception. 
+* [dart/53450](https://github.com/dart-lang/sdk/issues/53450) - Fixes a pause in the debugger when reaching an unhandled exception.
 * [flutter/133658](https://github.com/flutter/flutter/issues/133658) - Fixes crash when using the --analyze-size argument.
-* [flutter/133890](https://github.com/flutter/flutter/issues/133890) - Fixes incorrect autocorrect highlights in text fields in iOS 17. 
+* [flutter/133890](https://github.com/flutter/flutter/issues/133890) - Fixes incorrect autocorrect highlights in text fields in iOS 17.
 * [flutter/134468](https://github.com/flutter/flutter/issues/134468) - Fixes an issue where users are not able to input text for IME language in iOS 17.
 * [flutter/45742](https://github.com/flutter/engine/pull/45742) - Fixes CVE-2023-4863 - Security vulnerability in WebP.
 
@@ -152,14 +152,14 @@ Initial stable release.
 
 ### [3.13.2](https://github.com/flutter/flutter/releases/tag/3.13.2) (August 30, 2023)
 
-* [flutter/132764](https://github.com/flutter/flutter/pull/132764) - Fixes lower bound of children from TwoDimensionalChildBuilderDelegate. 
+* [flutter/132764](https://github.com/flutter/flutter/pull/132764) - Fixes lower bound of children from TwoDimensionalChildBuilderDelegate.
 
 ### [3.13.1](https://github.com/flutter/flutter/releases/tag/3.13.1) (August 23, 2023)
 
 * [flutter/132883](https://github.com/flutter/flutter/issues/132883) - Fixes an issue where Flutter apps would not compile when using custom icon fonts that contain spaces.
 * [flutter/132959](https://github.com/flutter/flutter/issues/132959) - Fixes an issue where macOS applications using plugins with Xcode 15 would not compile.
 * [flutter/132763](https://github.com/flutter/flutter/issues/132763) - Fixes auto-correction position in iOS 17.
-* [flutter/132982](https://github.com/flutter/flutter/issues/132982) - [Impeller] Fixes an issue where applications would freeze if the app was minimized while an animation was occurring. 
+* [flutter/132982](https://github.com/flutter/flutter/issues/132982) - [Impeller] Fixes an issue where applications would freeze if the app was minimized while an animation was occurring.
 
 ## Flutter 3.10 Changes
 
@@ -176,7 +176,7 @@ Initial stable release.
 
 * [flutter/127628](https://github.com/flutter/flutter/pull/127628) -  Fixes an issue preventing the use of `integration_test` when using AGP 8.0.
 * [flutter/126043](https://github.com/flutter/flutter/issues/126403) - Fixes an error encountered when attempting to use `add-to-app` on Android when generating Flutter modules.
-* [flutter/127090](https://github.com/flutter/flutter/issues/127090) - Fixes an issue preventing assets from being displayed properly on low pixel density devices. 
+* [flutter/127090](https://github.com/flutter/flutter/issues/127090) - Fixes an issue preventing assets from being displayed properly on low pixel density devices.
 * [flutter/128320](https://github.com/flutter/flutter/issues/128230) - Fixes an issue where image assets are not displayed when serving with Microsoft IIS.
 * [dart/52403](https://github.com/dart-lang/sdk/issues/52403) - Fixes a bad cast in the frontend which can manifest as a crash in the dart2js
 `ListFactorySpecializer` during Flutter web builds.
@@ -191,7 +191,7 @@ Initial stable release.
 ### [3.10.3](https://github.com/flutter/flutter/releases/tag/3.10.3) (June 02, 2023)
 
 * [flutter/126435](https://github.com/flutter/flutter/issues/126435) - Fixes the position of `SearchAnchor` when used in a nested navigator.
-* [flutter/127486](https://github.com/flutter/flutter/issues/127486) - [Impeller] Fixes an issue causing noise when using combinations of UV mapping and color blending. 
+* [flutter/127486](https://github.com/flutter/flutter/issues/127486) - [Impeller] Fixes an issue causing noise when using combinations of UV mapping and color blending.
 * [flutter/126878](https://github.com/flutter/flutter/issues/126878) - [Impeller] Fixes an issue where images do not appear on iOS devices.
 * [flutter/1127587](https://github.com/flutter/flutter/issues/124612) - [Impeller] Fixes a crash when applying backdrop blurs to platform views.
 * [flutter/127103](https://github.com/flutter/flutter/issues/127103) - [Impeller] Fixes an issue where text is not rendered correctly when a transform is applied.
@@ -224,8 +224,8 @@ This hotfix release addresses the following issues:
 * [flutter/126510](https://github.com/flutter/flutter/issues/125276) - [Impeller] Fixes errors in text transformation when using impeller.
 * [flutter/126854](https://github.com/flutter/flutter/issues/126854) - [Impeller] Fixes visual glitches and crashes when using wide gamut color support on iOS.
 * [flutter/124883](https://github.com/flutter/flutter/issues/124883) - Fixes an issue where images do not render on Flutter web apps when the host machine has Internet Download Manager installed.
-* [flutter/126491](https://github.com/flutter/flutter/issues/126491) - Fixes an issue where `CupertinoPicker` and `ListWheelViewport` crash with certain configurations on development builds. 
-* [flutter/124529](https://github.com/flutter/flutter/issues/124529) - Fixes an issue where iOS and macOS apps will not build when using Xcode 14.3 and adding dependencies with low iOS target versions. 
+* [flutter/126491](https://github.com/flutter/flutter/issues/126491) - Fixes an issue where `CupertinoPicker` and `ListWheelViewport` crash with certain configurations on development builds.
+* [flutter/124529](https://github.com/flutter/flutter/issues/124529) - Fixes an issue where iOS and macOS apps will not build when using Xcode 14.3 and adding dependencies with low iOS target versions.
 * [flutter/122376](https://github.com/flutter/flutter/issues/122376) - Adds a migrator to update the Gradle version when it conflicts with the Android Studio version of Java is detected.
 * [dart/124369](https://github.com/flutter/flutter/issues/124369) - Fixes a compiler crash involving redirecting factories and FFI.
 * [dart/51899](https://github.com/dart-lang/sdk/issues/51899) - Fixes a dart2js crash when using a combination of local functions, generics, and records.
@@ -278,7 +278,7 @@ Cached DisplayList opacity inheritance fix.
 
 ### [3.7.6](https://github.com/flutter/flutter/releases/tag/3.7.6) (Mar 01, 2023)
 This hotfix release addresses the following issues:
-* [dart/50981](https://github.com/dart-lang/sdk/issues/50981) - Improve performance of Dart Analysis Server by limiting the analysis context to 1. 
+* [dart/50981](https://github.com/dart-lang/sdk/issues/50981) - Improve performance of Dart Analysis Server by limiting the analysis context to 1.
 * [dart/51481](https://github.com/dart-lang/sdk/issues/51481) - Update DDC test and builder configuration
 * [flutter/114031](https://github.com/flutter/flutter/issues/114031) - Fixes a crash when using `flutter doctor --android-licenses` on macOS.
 * [flutter/106674](https://github.com/flutter/flutter/issues/106674) - Fixes an issue where Flutter is unable to find the current JDK in specific versions of Android Studio.
@@ -286,11 +286,11 @@ This hotfix release addresses the following issues:
 ### [3.7.5](https://github.com/flutter/flutter/releases/tag/3.7.5) (Feb 22, 2023)
 This hotfix release addresses the following issues:
 * [flutter/119180](https://github.com/flutter/flutter/issues/119180) - Apple Pencil writes on Flutter apps instead of scrolling when outside of a text field.
-* [flutter/120220](https://github.com/flutter/flutter/issues/120220) - [Impeller] Flutter apps may crash when some clip operations are used. 
+* [flutter/120220](https://github.com/flutter/flutter/issues/120220) - [Impeller] Flutter apps may crash when some clip operations are used.
 
 ### [3.7.4](https://github.com/flutter/flutter/releases/tag/3.7.4) (Feb 21, 2023)
 This hotfix release addresses the following issues:
-* [flutter/116360](https://github.com/flutter/flutter/issues/116360) - Flutter web apps will not load if accessed through any other path than `/`. 
+* [flutter/116360](https://github.com/flutter/flutter/issues/116360) - Flutter web apps will not load if accessed through any other path than `/`.
 * [flutter/119557](https://github.com/flutter/flutter/issues/119557) - Localization files incorrectly overridden stopping Flutter applications from running.
 * [flutter/116459](https://github.com/flutter/flutter/issues/116459) - Localization files do not parse when using numbers as select cases.
 
@@ -312,7 +312,7 @@ This hotfix release addresses the following issues:
 * [flutter/119261](https://github.com/flutter/flutter/issues/119261) - Flutter tool crashes when attempting to update the artifact cache.
 * [flutter/117420](https://github.com/flutter/flutter/issues/117420) - Ink ripple is rendered incorrectly inside of the `NavigationBar` widget when using Material 3.
 * [dart/50622](https://github.com/dart-lang/sdk/issues/50622) - VM crashes when mixing the use of double and float calculations in debug/JIT configuration.
-* [flutter/119220](https://github.com/flutter/flutter/issues/119220) - Compiler may crash when attempting to inline a method with lots of optional parameters with distinct default values. 
+* [flutter/119220](https://github.com/flutter/flutter/issues/119220) - Compiler may crash when attempting to inline a method with lots of optional parameters with distinct default values.
 * [dart/51087](https://github.com/dart-lang/sdk/issues/51087) - `part_of_different_library` error may be encountered when using `PackageBuildWorkspace`.
 
 ### [3.7.1](https://github.com/flutter/flutter/releases/tag/3.7.1) (Feb 1, 2023)
@@ -413,8 +413,8 @@ This hotfix release addresses the following issues:
 * [flutter/102451](https://github.com/flutter/flutter/issues/102451) - `flutter doctor` crashes for Windows users using Visual Studio 2022.
 * [flutter/103846](https://github.com/flutter/flutter/issues/103846) - Unexpected line breaks occur when using new text renderer.
 * [flutter/104569](https://github.com/flutter/flutter/pull/104569) - Ink Sparkle slows down applications using Material 3.
-* [flutter/103404](https://github.com/flutter/flutter/issues/103404) - SliverReorderableList does not drag on Android devices.  
-* [flutter/103556](https://github.com/flutter/flutter/issues/103566) - Nested horizontal sliders in widgets with horizontal drag gestures do not work in Android applications. 
+* [flutter/103404](https://github.com/flutter/flutter/issues/103404) - SliverReorderableList does not drag on Android devices.
+* [flutter/103556](https://github.com/flutter/flutter/issues/103566) - Nested horizontal sliders in widgets with horizontal drag gestures do not work in Android applications.
  * [flutter/100375](https://github.com/flutter/flutter/issues/100375) - Build process fails when building Windows applications.
  * [dart/49027](https://github.com/dart-lang/sdk/issues/49027) - Code suggestion for initState/dispose/setState no longer work on intellij.
 * [dart/3424](https://github.com/dart-lang/pub/issues/3424) - `dart pub login` fails when attempting to publish a package.
@@ -427,7 +427,7 @@ Initial stable release.
 ## Flutter 2.10 Changes
 ### [2.10.5](https://github.com/flutter/flutter/releases/tag/2.10.5) (April 18, 2022)
 This hotfix release addresses the following issues:
- * [flutter/101224](https://github.com/flutter/flutter/issues/101224) - Flutter web debugger fails when using chrome 100 or greater. 
+ * [flutter/101224](https://github.com/flutter/flutter/issues/101224) - Flutter web debugger fails when using chrome 100 or greater.
 ### [2.10.4](https://github.com/flutter/flutter/releases/tag/2.10.4) (March 28, 2022)
 This hotfix release addresses the following issues:
  * [flutter/93871](https://github.com/flutter/flutter/issues/93871) - Custom embedders fail to build when using default sysroot (GCC 11).
@@ -487,7 +487,7 @@ This hotfix release addresses the following issues:
  * [flutter/83632](https://github.com/flutter/flutter/issues/83632) - Scroll view velocity too high
 
 ### 2.5.0 (September 8, 2021)
-Initial stable release. 
+Initial stable release.
 
 ## Flutter 2.2 Changes
 ### [2.2.3](https://github.com/flutter/flutter/pull/85719) (July 2, 2021)
@@ -524,7 +524,7 @@ Initial stable release.
 ### [2.0.6](https://github.com/flutter/flutter/pull/81508) (April 29, 2021)
 This hotfix release addresses the following issue:
  - [flutter/81326](https://github.com/flutter/flutter/issues/81326) - macOS binaries not codesigned
- 
+
 ### [2.0.5](https://github.com/flutter/flutter/pull/80570) (April 16, 2021)
 This hotfix release addresses the following issue:
  - [dart/45306](https://github.com/dart-lang/sdk/issues/45306) - Segmentation fault on specific code
@@ -544,7 +544,7 @@ This hotfix release addresses the following issues:
 
 ### [2.0.2](https://github.com/flutter/flutter/pull/77850) (March 12, 2021)
 This hotfix release addresses the following issues:
-  - [flutter/77251](https://github.com/flutter/flutter/issues/77251) - Flutter may show multiple snackbars when Scaffold is nested 
+  - [flutter/77251](https://github.com/flutter/flutter/issues/77251) - Flutter may show multiple snackbars when Scaffold is nested
   - [flutter/75473](https://github.com/flutter/flutter/issues/75473) - CanvasKit throws error when using Path.from
   - [flutter/76597](https://github.com/flutter/flutter/issues/76597) - When multiple Flutter engines are active, destroying one engine causes crash
   - [flutter/75061](https://github.com/flutter/flutter/issues/75061) - '_initialButtons == kPrimaryButton': is not true

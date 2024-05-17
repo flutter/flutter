@@ -2,7 +2,7 @@
 ### Notable issues
 
 - [Linux][Web]: Bug while pressing Numeric Keypad keys [#148447](https://github.com/flutter/flutter/issues/148447)
-- [Web][HTML]: cursor offset is incorrect when typing CJK [#148271](https://github.com/flutter/flutter/issues/148271) 
+- [Web][HTML]: cursor offset is incorrect when typing CJK [#148271](https://github.com/flutter/flutter/issues/148271)
 - Software keyboard flickers when focus moves between TextFields [#148530](https://github.com/flutter/flutter/issues/148530)
 - Import app_localizations fails after build_runner [#148333](https://github.com/flutter/flutter/issues/148333)
 - Autofill Hints not populating in text fields on iOS with Flutter 3.22.0 [#148475](https://github.com/flutter/flutter/issues/148475)
@@ -29,7 +29,7 @@ Size of backlog: 94
 ## 2024-05-10
 ### Notable issues
 
-No major issues to be reported for this week. 
+No major issues to be reported for this week.
 
 ### Issue counts
 
@@ -53,7 +53,7 @@ Issues closed due to inactivity: 18
 ## 2024-05-03
 ### Notable issues
 
-No major issues to be reported for this week. 
+No major issues to be reported for this week.
 
 ### Issue counts
 
@@ -151,7 +151,7 @@ Size of backlog: 75
 
 ### Notable issues
 
-- [webview_flutter] [iOS] WebviewWidget lost drag response, when some widgets on it use Stack layout [#121960](https://github.com/flutter/flutter/issues/121960). Some users are reporting this as affecting their development workflow. 
+- [webview_flutter] [iOS] WebviewWidget lost drag response, when some widgets on it use Stack layout [#121960](https://github.com/flutter/flutter/issues/121960). Some users are reporting this as affecting their development workflow.
 - Shadow animation using Impeller causing rendering issues [#145969](https://github.com/flutter/flutter/issues/145969). This regressed in 3.19.4, it was fine in 3.19.0 up until 3.19.3
 
 ### Issue counts
@@ -224,7 +224,7 @@ Size of backlog: 86
 ## 2024-03-15
 ### Notable issues
 
-- Regression: Pointer position shifts in scaled Platform Views in Flutter 3.19.[(https://github.com/flutter/flutter/issues/144278)](https://github.com/flutter/flutter/issues/144278)).  
+- Regression: Pointer position shifts in scaled Platform Views in Flutter 3.19.[(https://github.com/flutter/flutter/issues/144278)](https://github.com/flutter/flutter/issues/144278)).
 - Regression: Navigator.Pop cause most recent focus node to regain focus even if not focused when new page was opened (https://github.com/flutter/flutter/issues/145155)
 ### Issue counts
 
@@ -250,7 +250,7 @@ Size of backlog: 82
 ## 2024-03-08
 ### Notable issues
 
-- Integration test TimeoutException after 0:12:00.000000: Test timed out after 12 minutes. [#105913](https://github.com/flutter/flutter/issues/105913). It appears more people are experiencing this issue. 
+- Integration test TimeoutException after 0:12:00.000000: Test timed out after 12 minutes. [#105913](https://github.com/flutter/flutter/issues/105913). It appears more people are experiencing this issue.
 - DropdownMenu experiences screen jitter issues when used within TabBarView alongside nested navigation [#139113](https://github.com/flutter/flutter/issues/139113) Some users would like to know the status of this issue.
 
 ### Issue counts
@@ -276,8 +276,8 @@ Size of backlog: 86
 ### Notable issues
 
 - [Impeller] CupertinoDatePicker might cause text on screen to glitch. [#144331](https://github.com/flutter/flutter/issues/144331)
-- Font weight is too light in light mode and too heavy in dark mode [#120857](https://github.com/flutter/flutter/issues/120857). 
-Some users are requesting that this be looked at again and re-prioritized (with a higher priority) if possible. 
+- Font weight is too light in light mode and too heavy in dark mode [#120857](https://github.com/flutter/flutter/issues/120857).
+Some users are requesting that this be looked at again and re-prioritized (with a higher priority) if possible.
 
 ### Issue counts
 
@@ -333,7 +333,7 @@ In total closed 24 issues during the week.
 
 New FirebaseUI-Flutter issues triaged 1, closed 0 (0%).
 
-In total, closed 0 issues during the week 
+In total, closed 0 issues during the week
 
 
 ## 2024-02-23
@@ -531,7 +531,7 @@ In total closed 2 issues during the week.
 ## 2024-02-02
 ### Notable issues
 
-No major issues to report for this week 
+No major issues to report for this week
 
 ### Issue counts
 
@@ -729,7 +729,7 @@ In total closed 2 issue during the week.
 ## 2024-01-12
 ### Notable issues
 
-No major issues to report for this week 
+No major issues to report for this week
 
 ### Issue counts
 
@@ -798,7 +798,7 @@ In total closed 1 issues during the week.
 ## 2024-01-05
 ### Notable issues
 
-No major issues to report for this week 
+No major issues to report for this week
 
 ### Issue counts
 

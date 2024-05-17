@@ -43,7 +43,7 @@ Where in doubt, please consult https://developer.android.com/studio/build/gradle
        classpath 'com.android.tools.build:gradle:3.0.1'
    }
    ```
-   
+
    Finally, replace
    ```gradle
    subprojects {
@@ -129,7 +129,7 @@ Where in doubt, please consult https://developer.android.com/studio/build/gradle
        classpath 'com.android.tools.build:gradle:3.0.1'
    }
    ```
-   
+
    Replace version `25` by `27` and `25.0.3` by `27.0.3`.
 
    Lastly, replace configurations named `compile` by `api` (or `implementation`) and `provided` by `compileOnly`

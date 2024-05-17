@@ -24,7 +24,7 @@ To find the published Flutter versions that contain any given commit in `flutter
 
 1. Navigate to the page for that commit.  You can do this by either:
   - clicking on the merged commit on a PR page
-    
+
     <img width="583" alt="merge commit message" src="https://user-images.githubusercontent.com/6655696/224098265-dd368be5-ae2c-4cb0-a30c-efc8c0503d6f.png">
 
   - clicking on the commit from https://github.com/flutter/flutter/commits

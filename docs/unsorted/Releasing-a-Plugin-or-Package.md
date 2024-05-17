@@ -8,11 +8,11 @@ _See also: [[Package migration to 1.0.0]]_
 The packages in flutter/packages are automatically released with a Github Action workflow named [“release”](https://github.com/flutter/packages/blob/main/.github/workflows/release.yml). If a commit on master branch contains version updates to one or more packages, the “release” CI will publish the new versions to pub.dev and push the release tag to GitHub. The “release” CI passes if
 1. the release process is successful, or
 2. there are no version updates in the commit, or
-3. the new versions have already been published.  
+3. the new versions have already been published.
 
 If you are a Flutter team member at Google and you need access to the publisher account, please see b/191674407.
 
-The “release” CI only runs on post-submit, and waits until all the other CI jobs have passed before starting. Like any other CI job, The “release” CI blocks future PRs if failed. 
+The “release” CI only runs on post-submit, and waits until all the other CI jobs have passed before starting. Like any other CI job, The “release” CI blocks future PRs if failed.
 
 _Note: the “release” CI does not automatically publish the `flutter_plugin_tools` package._
 

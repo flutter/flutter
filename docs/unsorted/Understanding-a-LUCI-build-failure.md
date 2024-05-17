@@ -15,9 +15,9 @@ An example build: [Linux color_filter_and_fade_perf__e2e_summary](https://ci.chr
 <img src="https://raw.githubusercontent.com/wiki/flutter/flutter/images/luci_infra_failure_overview.png" align="center" height="450" width="800"/>
 
 *  (i) Link to the historical build list of this builder
-*  (ii) A quick glimpse of the infra failure 
+*  (ii) A quick glimpse of the infra failure
 *  (iii) The step list of this builder, defined by the recipe on the right
-*  (iv) The real failed step causing the build failure 
+*  (iv) The real failed step causing the build failure
 *  (v) Check `stdout` for detailed log
 ### What to do
 1. Check if the infra failure has happened on earlier builds by clicking (i)

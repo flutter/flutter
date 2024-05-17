@@ -5,8 +5,8 @@ While the breaking commit landed in the engine tree but the manual engine roll h
 Therefore, for the author of the breaking commit that needs a manual roll, please notify others in
 * Flutter engine,
 * Flutter & Dart,
-* Flutter & Skia chat rooms, 
-* and anyone who's rolling into the Flutter engine tree. 
+* Flutter & Skia chat rooms,
+* and anyone who's rolling into the Flutter engine tree.
 
 Feel free to @all to grab attentions as many people probably will skip any message without a red dot.
 

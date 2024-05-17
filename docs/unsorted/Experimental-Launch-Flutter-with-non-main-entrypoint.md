@@ -73,7 +73,7 @@ public class MyFlutterFragment extends FlutterFragment {
 
 When manually initializing a `FlutterEngine`, you take on the responsibility of
 invoking the desired Dart entrypoint, even if you want the standard `main()` method.
-The following examples illustrate how to execute a Dart entrypoint with a 
+The following examples illustrate how to execute a Dart entrypoint with a
 `FlutterEngine`.
 
 Example using standard entrypoint:

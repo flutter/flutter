@@ -104,16 +104,16 @@ Check [framework benchmarks] for regressions. File issues and escalate.
 Review [engine benchmarks] for any regressions. Choose the _Triage_ item on the left, and walk through new issues. For each commit that caused a regression you'll see marks in columns corresponding to the regression --- those marks indicate whether the results at that commit are low or high.
 
 Click a mark, and you'll be taken to a popup with the plot of recent data around the commit in question. From here you can:
-1. Choose _View Dashboard_ to see long term trends around the commit. (When in the dashboard you can use the WASD keys to zoom in and out). 
+1. Choose _View Dashboard_ to see long term trends around the commit. (When in the dashboard you can use the WASD keys to zoom in and out).
 1. Click the commit to get a sub-popup with a link that can take you to the commit in question.
 
 If there is a new regression not deemed to be noise in a benchmark:
 1. [Add a new issue to Github][new issue]
-1. Label the issue with `team: benchmark`, and `severe:regression` labels. Label it with the `severe:performance` label if the benchmark is a performance one. 
+1. Label the issue with `team: benchmark`, and `severe:regression` labels. Label it with the `severe:performance` label if the benchmark is a performance one.
 1. Paste a link to the performance plot from skia-perf into the bug. This is a "permalink", and will help others see what you're seeing.
-1. Determine the CL at which the regression started and label with which part of the codebase might be causing the problem and whoever submitted the CL if possible. 
+1. Determine the CL at which the regression started and label with which part of the codebase might be causing the problem and whoever submitted the CL if possible.
 1. Attempt to determine the team who should receive the issue. Usually the suspect roll is a clue.
-1. Assign an initial priority. 
+1. Assign an initial priority.
    1. Reserve `P0` for regressions significantly (1.5x or more) above the noted baselines, or with regular spikes that suggests a possible issue with the device lab.
    1. Reserve `P2` for issues where slow creep appears to be happening.
 1. Note the bug ID in the comment where you address the regression in skia-perf and reject the benchmark (click the _X_).

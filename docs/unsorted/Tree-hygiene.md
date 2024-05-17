@@ -35,7 +35,7 @@ The general process for submitting code to a Flutter repository is as follows:
    You can put the label "proposal" on your issue to indicate that you have a design
    up for discussion in the issue.
 
-4. If the work you are doing affects our privacy surface, such as modifying how 
+4. If the work you are doing affects our privacy surface, such as modifying how
    we collect analytics, crash logs, or the like, then please reach out to a Googler
    to discuss your changes (you'll want to start a Google Doc to
    solicit feedback, use the template at [flutter.dev/go/template](https://flutter.dev/go/template)),
@@ -214,7 +214,7 @@ lower-level issues like how readable the code is and adherence to the
 Use [these best practices](https://mtlynch.io/human-code-reviews-1/)
 when reviewing code and providing comments.
 
-As a reviewer, you are the last line of defense. 
+As a reviewer, you are the last line of defense.
 
 0. Did the author sign the CLA? If not, ask them to do so and don't look at the code.
 1. Take a step back. What problem is the PR trying to solve? Is it a real problem?
@@ -353,7 +353,7 @@ commits. That makes the next roll very hard to manage: it's difficult to triage 
 or a new performance regression caused by the next roll, since that roll will include all the commits
 in the paused period.
 
-Therefore, reverting a roller commit or pausing the auto-roller is 
+Therefore, reverting a roller commit or pausing the auto-roller is
 *NOT* the default action if it causes a performance regression.
 The default action should be to file an issue with labels "performance", "regression", and `P0`
 immediately, and start investigating which leaf-commit caused the regression. Once the leaf-commit
@@ -420,10 +420,10 @@ During this process, each individual PR does not break any tests, so it should n
 
 Once everything has landed:
 
-* update your migration guide based on your experience migrating everyone, 
+* update your migration guide based on your experience migrating everyone,
 * update the timeline on the guide, and push it to [the flutter.dev Web site](https://flutter.dev/docs/release/breaking-changes) (don't forget to update the [index](https://github.com/flutter/website/blob/main/src/release/breaking-changes/index.md) of that directory as well),
 * e-mail a copy to [flutter-announce@](https://groups.google.com/g/flutter-announce),
-* notify the `#announcements` channel on our [[Chat]], and 
+* notify the `#announcements` channel on our [[Chat]], and
 * add the [**c: API break** label](https://github.com/flutter/flutter/labels/c%3A%20API%20break) to the relevant issues, so they get listed in the upcoming Release notes.
 
 ### Deprecations

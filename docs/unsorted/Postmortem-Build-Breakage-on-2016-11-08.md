@@ -81,4 +81,4 @@ None.
 
 ### What didn't work
 
-* There were indications of the breakage as early as 2016/11/07 21:30, yet the team didn’t start looking into it in earnest until 2016/11/08 11:00. Once we get to the point where our build is hermetic (so we control our own stability) and we separate production artifacts from development artifacts (e.g., have a release branch), then we should consider providing an SLA, at which time we’d have to create processes around how to maintain that SLA. 
+* There were indications of the breakage as early as 2016/11/07 21:30, yet the team didn’t start looking into it in earnest until 2016/11/08 11:00. Once we get to the point where our build is hermetic (so we control our own stability) and we separate production artifacts from development artifacts (e.g., have a release branch), then we should consider providing an SLA, at which time we’d have to create processes around how to maintain that SLA.

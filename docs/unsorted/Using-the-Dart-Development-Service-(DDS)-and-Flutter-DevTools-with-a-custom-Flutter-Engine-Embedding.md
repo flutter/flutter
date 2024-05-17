@@ -58,4 +58,4 @@ Serving DevTools at http://127.0.0.1:9101.
           Hit ctrl-c to terminate the server.
 ```
 
-As with the `dart development-service` command, the lifecycle of DDS is tied directly to the lifecycle of the application it's connected to. However, using the `dart devtools` command does not cause DevTools to be served by DDS, meaning that DevTools will not be available if the `dart devtools` process is killed, even though DDS will remain attached to the target application. 
+As with the `dart development-service` command, the lifecycle of DDS is tied directly to the lifecycle of the application it's connected to. However, using the `dart devtools` command does not cause DevTools to be served by DDS, meaning that DevTools will not be available if the `dart devtools` process is killed, even though DDS will remain attached to the target application.

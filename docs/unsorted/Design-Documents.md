@@ -4,7 +4,7 @@ We recommend you use that template so that people can immediately recognize that
 
 Don't forget to configure your document's Sharing settings so that everyone has comment access. The idea of sharing the document in this way is not necessarily to proactively obtain feedback from the entire community; it is to make it _possible_ for people to share the document with anyone in the community, whether they work for your employer or not, and whether you have personally shared the document with them yet or not.
 
-The template discusses how to create a shortlink for your design doc (flutter.dev/go/...). When creating the shortlink, remember to test the URL you are publishing in an incognito window! 
+The template discusses how to create a shortlink for your design doc (flutter.dev/go/...). When creating the shortlink, remember to test the URL you are publishing in an incognito window!
 
 Googlers: Design docs must be created by non-corp accounts! See [Contributor Access](https://github.com/flutter/flutter/wiki/Contributor-access#fcontriborg-accounts) for details on getting `fcontrib.org` accounts if you don't want to use your personal GMail account.
 

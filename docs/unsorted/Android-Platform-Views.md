@@ -67,7 +67,7 @@ Usually Android platform views are created with one of the `init*` methods:
 - `initAndroidView` creates a [`TextureAndroidViewController`](https://api.flutter.dev/flutter/services/TextureAndroidViewController-class.html), which will use TLHC mode if possible, and fall back to VD if not. The fallback is triggered if:
     - the current SDK version is <23, or
     - the platform view hierarchy contains a `SurfaceView` (or subclass) **at creation time**.
-  
+
   There is [a known issue](https://github.com/flutter/flutter/issues/109690) where if the view hierarchy does not contain a `SurfaceView` at creation time, but one is added later, rendering will not work correctly. Until that issue is resolved, plugin authors can work around this by either:
     - including a 0x0 `SurfaceView` in the view hierarchy at creation time, to trigger fallback to VD, or
     - switching to `initExpensiveAndroidView` to require HC.

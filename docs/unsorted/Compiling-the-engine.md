@@ -16,7 +16,7 @@ Depending on the platform you are making changes for, you may be interested in a
 
 ## General Compilation Tips
 
-- For local development and testing, it's generally preferable to use `--unopt` builds. 
+- For local development and testing, it's generally preferable to use `--unopt` builds.
   These builds will have additional logging and checks enabled, and generally use build
   and link flags that lead to faster compilation and better debugging symbols.
   If you are trying to do performance testing with a local build, do not use the `--unopt`
@@ -86,7 +86,7 @@ You will typically use the `android_debug_unopt` build to debug the engine on a 
 require adding a `dependency_override` section in you app's `pubspec.yaml` as detailed
 [here](https://github.com/flutter/flutter/wiki/The-flutter-tool#using-a-locally-built-engine-with-the-flutter-tool).
 
-Note that if you use particular android or ios engine build, you will need to have corresponding 
+Note that if you use particular android or ios engine build, you will need to have corresponding
 host build available next to it: if you use `android_debug_unopt`, you should have built `host_debug_unopt`,
 `android_profile` -> `host_profile`, etc. One caveat concerns cpu-flavored builds like `android_debug_unopt_x86`: you won't be able to build `host_debug_unopt_x86` as that configuration is not supported. What you are expected to do is to build `host_debug_unopt` and symlink `host_debug_unopt_x86` to it.
 
@@ -269,7 +269,7 @@ Compiling the web engine might take a few extra steps on Windows. Use cmd.exe an
    * `DEPOT_TOOLS_WIN_TOOLCHAIN = 0`
    * Tip: if you get a python error try to use Python 2 instead of 3
 3. `git pull upstream main` in `src/flutter` to update the Flutter Engine repo.
-4. `gclient sync` to update your dependencies. 
+4. `gclient sync` to update your dependencies.
    * Tip: If you get a git authentication errors on this step try Git Bash instead
 5. `python .\flutter\tools\gn --unoptimized --full-dart-sdk` to prepare your build files.
 6. `ninja -C .\out\<dir created by previous step>` to build.
@@ -281,7 +281,7 @@ flutter run --local-web-sdk=wasm_release -d chrome
 flutter test --local-web-sdk=wasm_release test/path/to/your_test.dart
 ```
 
-For testing the engine again use [felt](https://github.com/flutter/engine/blob/main/lib/web_ui/README.md) tool 
+For testing the engine again use [felt](https://github.com/flutter/engine/blob/main/lib/web_ui/README.md) tool
 this time with felt_windows.bat.
 
 ```

@@ -26,12 +26,12 @@ The word `DeviceLab` initially was used to represent targets running in Flutter'
 
 `Shard` tests are using the test harness `test.dart`, which supports targets that are shardable to run in parallel. Additionally it supports tests with a single shard, which means these tests are not feasible to run in parallel. These tests have only a single shard running a block of scripts.
 
-There is an overlap happens between `DeviceLab` and `Shard`: a single shard test can also run under the `DeviceLab` test harness. 
+There is an overlap happens between `DeviceLab` and `Shard`: a single shard test can also run under the `DeviceLab` test harness.
 
 ## Where to add an integration test
 Most likely, we can fit a new integration test to existing types, like `DeviceLab`, `Shard` or other case-by-case tests that use their own **`recipes`** in addition to `DeviceLab` and `Shard`, e.g. firebaselab, packaging, docs, etc. If your new test doesn't fit in any of these (very rarely), it may need a new recipe.
 
-> [!NOTE]  
+> [!NOTE]
 > **`Recipes`** are just python scripts detailing steps to setup env. and execute corresponding test harness. Different recipes basically mean different test harness with different environment setup.
 
 For the two main types (`DeviceLab`/`Shard`):
@@ -93,4 +93,4 @@ Add any additional properties/dependencies your test may need.
 You will notice that `task_name` is new and the `tags` are new. The `task_name` is the name of your test script (minus the .dart suffix) and the tags allow infra to perform statistical analysis based on these in order to monitor SLO for task times, execution time as well as many other metrics.
 
 The above target can be added and run assuming there exists a ·new_test_to_add.dart· file in the Flutter repo.
- 
+

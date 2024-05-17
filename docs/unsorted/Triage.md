@@ -46,7 +46,7 @@ When closing the duplicate bug, the github issue tracker does not copy the list 
 
 ### Requests for help (documentation issues)
 
-If the bug report is a question, then it probably belongs in Stack Overflow or on our #help channel or some other forum for getting help. However, if it appears that the reporter did try to read our documentation to find the answer, and failed, or, if you look in our documentation and find it is inadequate here, then please consider it a documentation bug (and update the summary accordingly). 
+If the bug report is a question, then it probably belongs in Stack Overflow or on our #help channel or some other forum for getting help. However, if it appears that the reporter did try to read our documentation to find the answer, and failed, or, if you look in our documentation and find it is inadequate here, then please consider it a documentation bug (and update the summary accordingly).
 
 If you are confident our official documentation (on flutter.dev or api.flutter.dev) fully answers their question, then provide a link to the relevant page and close the issue, being very polite and asking them to reopen if the documentation is not sufficiently clear for them.
 
@@ -237,7 +237,7 @@ In addition, consider these issues that fall under another team's triage, but ar
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-engine+label%3AP0+sort%3Aupdated-asc)
 - [Buildroot PRs](https://github.com/flutter/buildroot/pulls)
 - [Approved PRs that have not yet landed](https://github.com/flutter/engine/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+-label%3A%22Work+in+progress+%28WIP%29%22+review%3Aapproved+NOT+%22Roll+Skia%22+-label%3Aplatform-web+sort%3Acreated-asc)
-- [PRs awaiting review](https://github.com/flutter/engine/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+-label%3A%22Work+in+progress+%28WIP%29%22+-label%3A%22waiting+for+tree+to+go+green%22+-label%3A%22platform-web%22+-review%3Aapproved+-label%3A%22waiting+for+customer+response%22+NOT+%22Roll+Skia%22+NOT+%22Roll+Dart%22+NOT+%22Roll+Fuchsia%22+sort%3Aupdated-asc++-label%3A%22platform-web%22+) 
+- [PRs awaiting review](https://github.com/flutter/engine/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+-label%3A%22Work+in+progress+%28WIP%29%22+-label%3A%22waiting+for+tree+to+go+green%22+-label%3A%22platform-web%22+-review%3Aapproved+-label%3A%22waiting+for+customer+response%22+NOT+%22Roll+Skia%22+NOT+%22Roll+Dart%22+NOT+%22Roll+Fuchsia%22+sort%3Aupdated-asc++-label%3A%22platform-web%22+)
 - [Draft PRs](https://github.com/flutter/engine/pulls?q=is%3Aopen+is%3Apr+label%3A%22Work+in+progress+%28WIP%29%22+-label%3A%22waiting+for+tree+to+go+green%22+-label%3A%22platform-web%22+-review%3Aapproved+-label%3A%22waiting+for+customer+response%22+NOT+%22Roll+Skia%22+sort%3Aupdated-asc++-label%3A%22platform-web%22+)
 
 ### Framework team (`team-framework`)

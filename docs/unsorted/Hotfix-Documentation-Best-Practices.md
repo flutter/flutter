@@ -1,6 +1,6 @@
-Production customers care a lot about hotfixes, since they may address issues that fix crashes on specific devices or platforms. We want customers to adopt hotfix releases quickly, and it’s therefore important that they understand what’s in them and what risks they may accept by adopting them. 
+Production customers care a lot about hotfixes, since they may address issues that fix crashes on specific devices or platforms. We want customers to adopt hotfix releases quickly, and it’s therefore important that they understand what’s in them and what risks they may accept by adopting them.
 
-As a result, it’s important that Flutter customers can quickly scan through our hotfixes and identify whether they’re relevant to them. We can do that by making sure that each hotfix is described carefully. 
+As a result, it’s important that Flutter customers can quickly scan through our hotfixes and identify whether they’re relevant to them. We can do that by making sure that each hotfix is described carefully.
 
 Our goal is that each hotfix summary:
 
@@ -12,7 +12,7 @@ Our goal is that each hotfix summary:
    - In what context it may occur
    - How likely it is to occur
 
-The goal is not to exhaustively document the issue, but to provide enough information that an educated user can quickly scan and determine whether they need to read through the bug itself to understand its applicability to their scenario. 
+The goal is not to exhaustively document the issue, but to provide enough information that an educated user can quickly scan and determine whether they need to read through the bug itself to understand its applicability to their scenario.
 
 A good approach for hotfix messages is to describe the problem in terms of the current state prior to the fix. For example:
 

@@ -8,12 +8,12 @@ Because of the complexities of having native code, plugins have many more types 
   - The Dart code in an app-facing plugin package (using a mock implementation of the platform interface).
   - The Dart code in a platform interface package that contains a shared method channel implementation (using a mock method channel).
   - The Dart code of an implementation package, if any. Some federated implementations are pure Dart, and would be largely tested via unit tests, and some have Dart code binding to a package-internal method channel.
-  
+
   These should live in `test/`
 - **Integration tests**. These use [the `integration_test` package](https://flutter.dev/docs/testing/integration-tests). Unlike Dart unit tests, integration tests run in the context of a Flutter application (the `example/` app), and can therefore load and exercise native plugin code. Almost all plugin packages other than the platform interface package should have these. The only exceptions would be:
   - Plugins that need native UI tests (see below)
   - Plugins that have pure Dart implementations which can be comprehensively tested with Dart unit tests.
-  
+
   These should live in `example/integration_tests/`
 - **Native unit tests**. Most plugins that have native code should have unit tests for that native code. (Currently, many do not; fixing that is currently a priority for plugins work.) They are written as:
   - Android: **JUnit** - These should live in `android/src/test/`
@@ -100,7 +100,7 @@ To run web integration tests:
 1. Check what version of Chrome is running on the machine you're running tests on.
 2. Download and install the ChromeDriver for that version from here:
     * https://chromedriver.chromium.org/downloads
-3. Start ChromeDriver with: 
+3. Start ChromeDriver with:
 ```sh
 chromedriver --port=4444
 ```
@@ -108,7 +108,7 @@ chromedriver --port=4444
     * **All:** from the root `plugins` directory, run:
     ```sh
     dart run script/tool/bin/flutter_plugin_tools.dart drive-examples --packages=<plugin_name>/<plugin_name_web> --web
-    ``` 
+    ```
     * **One:** `cd` into the `example` directory of the package, then run:
     ```sh
     flutter drive -d web-server --web-port 7357 --browser-name chrome --driver test_driver/integration_test.dart --target integration_test/NAME_OF_YOUR_test.dart
@@ -131,7 +131,7 @@ flutter pub run build_runner build
 
 ## Adding tests
 
-A PR changing a plugin [should add tests](https://github.com/flutter/flutter/wiki/Tree-hygiene#tests). Which type(s) of tests you should add will depend on what exactly you are changing. See below for some high-level guidance, but if you're not sure please ask in your PR or in `#hackers-ecosystem` [on Discord](https://github.com/flutter/flutter/wiki/Chat). 
+A PR changing a plugin [should add tests](https://github.com/flutter/flutter/wiki/Tree-hygiene#tests). Which type(s) of tests you should add will depend on what exactly you are changing. See below for some high-level guidance, but if you're not sure please ask in your PR or in `#hackers-ecosystem` [on Discord](https://github.com/flutter/flutter/wiki/Chat).
 Hopefully the scaffolding to run the necessary kinds of tests are already in place for that plugin, in which case you just add tests to the existing files in the locations referenced above. If not, see below for more information about adding test scaffolding.
 
 ### FAQ: Do I need to add tests even if the part of the code I'm changing isn't already tested?

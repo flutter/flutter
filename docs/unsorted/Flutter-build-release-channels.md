@@ -31,7 +31,7 @@ We recommend using this channel for new users and for production app releases.
 
 In case of high severity, high impact or security issues, we may do a hotfix release for the `stable` channel just like we do for `beta`. This will follow the same [cherrypick](https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process) process.
 
-The `stable` version of Flutter is the one documented by our API documentation at: <https://api.flutter.dev> 
+The `stable` version of Flutter is the one documented by our API documentation at: <https://api.flutter.dev>
 
 The Flutter team's plugins and packages are continually tested against the latest `stable` branch.
 

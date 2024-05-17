@@ -64,7 +64,7 @@ Below are descriptions of many of the less self-evident CI tests, and common sol
     - There is a known issue that sometimes causes the status of this check to be stale; the causes is unknown. If this happens (i.e., the check in red but the tree state as described in the Infrastructure section above is actually green), you an either update your PR by merging in the latest `main` to force updates, or you can reach out to a Flutter team member (in a comment on the PR, or in Discord) to override the incorrect check.
 - **`*_platform_tests`**: This runs each package's integration tests on the given target platform, as well as any [native plugin tests](https://github.com/flutter/flutter/wiki/Plugin-Tests) for that platform. This can also include native-language-specific analysis or lint checks.
 - **`analyze`**: The initial `analyze` step is a straightforward Dart `analyze` run, but the `pathified_analyze` step is more complicated; it is intended to find issues that will cause out-of-band breakage in our own repository when the change being tested is published (most commonly with federated plugins). It does this by finding all packages that have non-breaking-version changes in the PR, and then rewriting all references to those packages in the repository to be `path:` dependencies, then re-running analysis.
-  
+
   A failure here does not necessarily mean that the PR is wrong; because we use very strict analysis options, changes that are not considered breaking by Dart semver conventions can break our CI. Common sources of failures here include:
     - Accidentally making a breaking change without making a major version change to the plugin.
         - **Solution**: Fix the versioning.
@@ -119,7 +119,7 @@ LUCI tasks are run on Flutter-infrastructure-managed VMs, using an [out-of-repo 
 Integration tests on Android are run in real devices through the Firebase Test Lab infrastructure by [the `firebase-test-lab` command in the repository tooling](https://github.com/flutter/packages/blob/main/script/tool/lib/src/firebase_test_lab_command.dart). From time to time, the Firebase Test Lab will change what devices are available for testing, and tests will start timing out.
 
 #### Distinguishing features
-- `firebase_test_lab` task starts timing out. The output is normally just: `Timed out!` ([Example](https://github.com/flutter/plugins/runs/3930255308).) 
+- `firebase_test_lab` task starts timing out. The output is normally just: `Timed out!` ([Example](https://github.com/flutter/plugins/runs/3930255308).)
   - These timeouts will start as "flake" tests, and get progressively worse, until no amount of "retries" helps them pass (as devices are phased out / less available).
   - `firebase_test_lab` timing out is almost always related to this. Either because of devices becoming unavailable, or by a temporary lack of resource availability.
 

@@ -20,7 +20,7 @@ When `find_sdk.py` return 10.13, the ninja build will succeed for gen_snapshot (
 
 ## Build Flutter engine for 32bit iOS simulator on modern Mac(x86_64)
 
-To build the Flutter engine for iOS simulator on a modern Mac(x86_64), the gn command will generate a `target_cpu` value with x64. Henceforth, the Flutter.framework and gen_snapshot will be x86_64. 
+To build the Flutter engine for iOS simulator on a modern Mac(x86_64), the gn command will generate a `target_cpu` value with x64. Henceforth, the Flutter.framework and gen_snapshot will be x86_64.
 However, sometimes you may want to develop Flutter on a 32bit simulator(like iPhone5), you will need both Flutter.framework and gen_snapshot to be i386.
 
 Follow instruction below to change the default behavior in gn command:

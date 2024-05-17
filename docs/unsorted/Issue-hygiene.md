@@ -1,5 +1,5 @@
 ## tl;dr
-                           
+
 - Avoid asking about the status of an issue; if we have an update, we'll post it.
 - If you have permission, assign bugs to yourself if you're working on them.
 - Unassign bugs that you are not working on soon.
@@ -54,11 +54,11 @@ Issues are never an appropriate venue for asking for help with your code. Issues
 
 ### Comments providing workarounds
 
-Providing workarounds for issues can be helpful for developers using Flutter and finding a bug, 
+Providing workarounds for issues can be helpful for developers using Flutter and finding a bug,
 but please keep such comments to a minimum so as to avoid disrupting the engineers trying to
 fix the issue. Rather than discussing workarounds, provide a pointer to another forum
-(e.g. Stack Overflow) where workarounds and temporary solutions are more appropriate. Thanks. 
-However, when a workaround has been identified, consider applying the `workaround available` label to make that info readily available. 
+(e.g. Stack Overflow) where workarounds and temporary solutions are more appropriate. Thanks.
+However, when a workaround has been identified, consider applying the `workaround available` label to make that info readily available.
 
 ### Avoid posting screenshots of text
 
@@ -106,7 +106,7 @@ on old ones.
 Under normal circumstances, open issues should not regularly be locked. The most
 common reason for manually locking an open issue is that issue is well
 understood by the engineers working on it,
-is believed to be appropriately prioritized, has a clear 
+is believed to be appropriately prioritized, has a clear
 path to being fixed, and is otherwise attracting
 a lot of off-topic or distracting comments like "me too" or
 "when will this be fixed" or "I have a similar issue that might
@@ -121,7 +121,7 @@ If you have a similar issue and are not sure if it is the same,
 it is fine to file a new issue and linking it to the other issue.
 Please avoid intentionally filing duplicates.
 
-Very rarely, an issue gets locked because discussion has become 
+Very rarely, an issue gets locked because discussion has become
 unproductive and has repeatedly violated the [Code of Conduct](https://github.com/flutter/flutter/blob/master/CODE_OF_CONDUCT.md).
 
 
@@ -318,7 +318,7 @@ Do _not_ file bugs that meet the following criteria:
 - Asking meta-questions like "why was bug #XYZ closed?" Instead, post
   on the original issue or raise the actual problem that is still not
   resolved.
-- Intentional duplicates like  "This is the same as bug #ABC but that 
+- Intentional duplicates like  "This is the same as bug #ABC but that
   one is not getting enough attention." Instead, upvote the original
   issue or add a comment that provides new details that are not already
   captured or (best of all) assign it to yourself and start working on it!

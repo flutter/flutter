@@ -51,9 +51,9 @@ _The tool is now awaiting your input, so let's feed it a memory address_:
 0x00000000006a26ec
 /b/s/w/ir/cache/builder/src/out/android_release_arm64/../../third_party/dart/runtime/vm/dart_api_impl.cc:1366
 ```
-This revealed address `0x00000000006a26ec` to correspond with `dart_api_impl.cc:1366`. 
+This revealed address `0x00000000006a26ec` to correspond with `dart_api_impl.cc:1366`.
 
-#### Making sure you got the right libflutter.so 
+#### Making sure you got the right libflutter.so
 
 The build system sets a build id for each `libflutter.so` file. In the tombstones, you would see the ID like so:
 
@@ -92,7 +92,7 @@ The dSYM file for `Flutter.framework` (which is the Flutter Engine) for ios-rele
 
 #### Symbolicating local builds
 
-If you built your local engine in debug or profile Dart modes, the framework's dylib's symbols aren't stripped and are available by default. 
+If you built your local engine in debug or profile Dart modes, the framework's dylib's symbols aren't stripped and are available by default.
 
 #### Crashes in Dart AOT code
 

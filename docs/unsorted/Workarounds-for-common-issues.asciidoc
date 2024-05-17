@@ -1,5 +1,5 @@
 ////
-Enable icons for admonitions 
+Enable icons for admonitions
 From https://gist.github.com/dcode/0cfbf2699a1fe9b46ff04c41721dda74#admonitions
 ////
 ifdef::env-github[]
@@ -20,24 +20,24 @@ toc::[]
 
 = Flutter Recipes
 
-== Flutter installation  
+== Flutter installation
 
 === Flutter installation corrupted
 
 The Flutter install directory is in an inconsistent state and that causes all kinds of troubles.
 
-==== Symptoms 
+==== Symptoms
 
 // TODO
 
-==== Causes 
+==== Causes
 
 Unclear
 
 ==== Ways to fix
 
 - Run the following commands in the Flutter install directory:
-[source,sh] 
+[source,sh]
 ----
 git clean -xfd
 git stash save --keep-index
@@ -47,7 +47,7 @@ flutter doctor
 ----
 
 [CAUTION]
-==== 
+====
 The `git stash drop` command drops customizations you might have made to the Flutter installation.
 ====
 
@@ -55,27 +55,27 @@ The `git stash drop` command drops customizations you might have made to the Flu
 - https://github.com/flutter/flutter/issues/25220
 - https://github.com/flutter/flutter/issues/1963
 
-== Flutter project files  
+== Flutter project files
 
 === Generated project files outdated
 
-==== Symptoms 
+==== Symptoms
 // TODO
 
-==== Causes 
+==== Causes
 
 When a project is created with `flutter create foo` several files in the `ios/` and `android/` sub-directories are created.
 
-Newer Flutter versions might generate these files a bit differently and projects created with older Flutter versions might cause issues.  
+Newer Flutter versions might generate these files a bit differently and projects created with older Flutter versions might cause issues.
 
 ==== Ways to fix
 
 - Delete the `ios/` and `android/` directories and run `flutter create .` to re-generate these directories.
 
 [CAUTION]
-==== 
+====
 Custom changes will be lost and need to be re-applied.
-This is easiest if the project is committed to a version control system like Git.  
+This is easiest if the project is committed to a version control system like Git.
 ====
 
 
@@ -92,10 +92,10 @@ This is easiest if the project is committed to a version control system like Git
 
 Especially with plugin packages it was seen several times that the package in the pub cache was corrupted.
 
-==== Symptoms 
+==== Symptoms
 Usually syntax errors at build time about code in dependencies.
 
-==== Causes 
+==== Causes
 
 Unknown.
 IDEs or editors used by developers might not prevent editing plugin files and when they navigate into plugin code they might accidentally modify the code.
@@ -108,7 +108,7 @@ This might take quite some time and re-downloads every package in the cache, eve
 - Delete `~/.pub-cache/hosted` and/or `~/.pub-cache/git` (for Git dependencies).
 This requires to run `flutter packages get` in all active projects on your machine afterwards.
 
-- Delete a specific package or package version. 
+- Delete a specific package or package version.
 Look up the exact path in cache for a specific package in the `.packages` file of your project.
 For example for `firebase_auth`
 ```
@@ -129,7 +129,7 @@ In a network where the Internet can only be reached through a proxy and Flutter 
 ==== Symtoms
 
 // TODO
-   
+
 ==== Causes
 
 Proxy setting incomplete or invalid.
@@ -145,13 +145,13 @@ Proxy setting incomplete or invalid.
 
 When a proxy is configured hot-reload does often not work.
 
-==== Symptoms 
+==== Symptoms
 
 // TODO
 
-==== Causes 
+==== Causes
 
-Proxy setting incomplete or invalid. 
+Proxy setting incomplete or invalid.
 Localhost is redirected to the proxy.
 
 ==== Ways to fix
@@ -170,16 +170,16 @@ Localhost is redirected to the proxy.
 
 Copy from the following line down
 
-== Topic name  
+== Topic name
 
 === Issue title
 
 Issue description
 
-==== Symptoms 
+==== Symptoms
 Explain seen symptoms
 
-==== Causes 
+==== Causes
 
 Explain what causes this issue
 
@@ -199,6 +199,6 @@ Explain what causes this issue
 
 ==== GitHub Flavored AsciiDoc
 
-Some workarounds for common issues with AsciiDoc on GitHub 
+Some workarounds for common issues with AsciiDoc on GitHub
 
 - https://gist.github.com/dcode/0cfbf2699a1fe9b46ff04c41721dda74

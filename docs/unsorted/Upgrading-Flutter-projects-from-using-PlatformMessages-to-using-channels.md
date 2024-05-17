@@ -121,13 +121,13 @@ See [platform_channel](https://github.com/flutter/flutter/blob/master/examples/p
 Similar to Flutter side, using `FlutterMessageChannel` and `FlutterMethodChannel` from `io.flutter.plugin.common`.
 
     FlutterView view = ...
-    FlutterMessageChannel<String> fooChannel = 
+    FlutterMessageChannel<String> fooChannel =
       new FlutterMessageChannel<>(view, "foo", StringCodec.INSTANCE);
-    
+
     fooChannel.send(myString);
-    
+
     // or if you need to handle a reply:
-    
+
     fooChannel.send(myString, new ReplyHandler<String>() {
       public void onReply(String reply) {
         // do something with reply
@@ -145,14 +145,14 @@ Similar to Flutter side, using `FlutterMessageChannel` and `FlutterMethodChannel
       [FlutterMessageChannel messageChannelWithName:@"foo"
                                     binaryMessenger:controller
                                               codec:[FlutterStringCodec sharedInstance]];
-    
+
     [fooChannel sendMessage:myString];
-    
+
     // or if you need to handle a reply:
-    
+
     [fooChannel sendMessage:myString replyHandler:^(id reply) {
       // do something with (NSString*)reply
     }];
-    
+
 
 [API documentation](https://github.com/flutter/engine/blob/master/shell/platform/darwin/ios/framework/Headers). See [platform_channel](https://github.com/flutter/flutter/blob/master/examples/platform_channel/ios/Runner/AppDelegate.m) for another example.

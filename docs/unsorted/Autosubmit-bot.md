@@ -1,5 +1,5 @@
 # What is the Autosubmit Bot
-The Flutter autosubmit bot is a tool that helps developers submit changes to the Flutter codebase. It automates the process of validating pull requests, test validation, and merging changes. This frees up developers to focus on writing code, and makes it easier to contribute to the Flutter project. 
+The Flutter autosubmit bot is a tool that helps developers submit changes to the Flutter codebase. It automates the process of validating pull requests, test validation, and merging changes. This frees up developers to focus on writing code, and makes it easier to contribute to the Flutter project.
 
 # The Autosubmit Workflow
 ## Submitting a Pull Request
@@ -39,9 +39,9 @@ If an empty reason is supplied then the 'revert' label will be removed and a com
 ## Basic Design
 The Autosubmit bot is a service hosted within GCP that listens to GitHub's webhook events utilizing PubSub to store the messages it is interested in for further processing. A cron job calls the service every two minutes to look for new events from GitHub to see if any new pull requests need to be processed.
 
-If an event contains a new pull request we look at it for the 'autosubmit' label. If the pull request is valid, i.e. it came from GitHub then we send it in a message to our PubSub topic. 
+If an event contains a new pull request we look at it for the 'autosubmit' label. If the pull request is valid, i.e. it came from GitHub then we send it in a message to our PubSub topic.
 
-A cron job will then call the Autosubmit service which will pull messages from the topic for processing and validation. If the pull request has passed the validations outlined above then the it will be merged and the PubSub message acknowledged. Autosubmit will no longer process that pull request. 
+A cron job will then call the Autosubmit service which will pull messages from the topic for processing and validation. If the pull request has passed the validations outlined above then the it will be merged and the PubSub message acknowledged. Autosubmit will no longer process that pull request.
 
 {TODO add a diagram of the components}
 

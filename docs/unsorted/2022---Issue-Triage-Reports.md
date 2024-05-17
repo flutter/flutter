@@ -110,9 +110,9 @@ New Google Ads Flutter issues triaged 3, closed 1 (33.33%).
 
 In total closed 1 issue during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
-| Invalid | 100% | 
+| Invalid | 100% |
 
 
 #### Flutterfire
@@ -180,10 +180,10 @@ New Google Ads Flutter issues triaged 0, closed 0 (0.0%).
 
 In total closed 2 issues during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | Duplicate | 50% |
-| Solved | 50% | 
+| Solved | 50% |
 
 
 #### Flutterfire
@@ -251,9 +251,9 @@ New Google Ads Flutter issues triaged 6, closed 1 (16.67%).
 
 In total closed 1 issue during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
-| Invalid | 100% | 
+| Invalid | 100% |
 
 
 #### Flutterfire
@@ -321,9 +321,9 @@ New Google Ads Flutter issues triaged 4, closed 1 (25%).
 
 In total closed 1 issues during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
-| Invalid | 100% | 
+| Invalid | 100% |
 
 
 #### Flutterfire
@@ -394,9 +394,9 @@ New Google Ads Flutter issues triaged 5, closed 1 (20%).
 
 In total closed 4 issues during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
-| Invalid | 75% | 
+| Invalid | 75% |
 | Solved | 25% |
 
 #### Flutterfire
@@ -606,8 +606,8 @@ New Google Ads Flutter issues triaged 5, closed 1  (20%).
 
 In total closed 2 issues during the week
 
-| Reason for closing | | 
-| -- | -- | 
+| Reason for closing | |
+| -- | -- |
 | solved | 100% |
 
 #### Flutterfire
@@ -678,8 +678,8 @@ New Google Ads Flutter issues triaged 5, closed 2 (40%).
 
 In total closed 2 issues during the week
 
-| Reason for closing | | 
-| -- | -- | 
+| Reason for closing | |
+| -- | -- |
 | duplicate | 100% |
 
 #### Flutterfire
@@ -747,8 +747,8 @@ New Google Ads Flutter issues triaged 4, closed 0 (0%).
 
 In total closed 2 issues during the week
 
-| Reason for closing | | 
-| -- | -- | 
+| Reason for closing | |
+| -- | -- |
 | invalid | 100% |
 
 #### Flutterfire
@@ -817,8 +817,8 @@ New Google Ads Flutter issues triaged 1, closed 1 (100%).
 
 In total closed 2 issues during the week
 
-| Reason for closing | | 
-| -- | -- | 
+| Reason for closing | |
+| -- | -- |
 | duplicate | 50% |
 | solved | 50% |
 
@@ -888,8 +888,8 @@ New Google Ads Flutter issues triaged 4, closed 2 (50%).
 
 In total closed 2 issues during the week
 
-| Reason for closing | | 
-| -- | -- | 
+| Reason for closing | |
+| -- | -- |
 | duplicate | 100% |
 
 #### Flutterfire
@@ -959,8 +959,8 @@ New Google Ads Flutter issues triaged 1, closed 1 (100%).
 
 In total closed 2 issues during the week
 
-| Reason for closing | | 
-| -- | -- | 
+| Reason for closing | |
+| -- | -- |
 | solved | 100% |
 
 #### Flutterfire
@@ -1030,8 +1030,8 @@ New Google Ads Flutter issues triaged 4, closed 1 (25%).
 
 In total closed 3 issues during the week
 
-| Reason for closing | | 
-| -- | -- | 
+| Reason for closing | |
+| -- | -- |
 | solved | 100% |
 
 #### Flutterfire
@@ -1097,7 +1097,7 @@ New Dart site issues triaged 2, closed 1 (50%).
 
 In total closed 1 issue during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | duplicate | 100% |
 
@@ -1362,7 +1362,7 @@ In total closed 5 issues during the week
 | Reason for closing  |  |
 | -- | -- |
 | Duplicate | 20% |
-| Fixed | 60% | 
+| Fixed | 60% |
 | WontFix | 20% |
 
 
@@ -1427,7 +1427,7 @@ In total closed 13 issues during the week
 | Reason for closing  |  |
 | -- | -- |
 | Duplicate | 7.69% |
-| Fixed | 84.62% | 
+| Fixed | 84.62% |
 | WontFix | 7.69% |
 
 
@@ -1442,7 +1442,7 @@ New Google Ads Flutter issues triaged 3, closed 1 (33.33%).
 In total closed 1 issues during the week
 
 | Reason for closing | |
-| -- | -- | 
+| -- | -- |
 | Duplicate | 100% |
 
 
@@ -1508,11 +1508,11 @@ New Google Ads Flutter issues triaged 6, closed 4 (66.67%).
 In total closed 7 issues during the week
 
 | Reason for closing | |
-| -- | -- | 
+| -- | -- |
 | Duplicate | 14.3% |
 | Fixed | 14.3% |
 | Invalid | 42.9% |
-| Solved | 28.6% | 
+| Solved | 28.6% |
 
 
 #### Flutterfire
@@ -1581,9 +1581,9 @@ New Google Ads Flutter issues triaged 6, closed 1 (16.67%).
 In total closed 2 issues during the week
 
 | Reason for closing | |
-| -- | -- | 
+| -- | -- |
 | Fixed | 50% |
-| Solved | 50% | 
+| Solved | 50% |
 
 
 #### Flutterfire
@@ -1651,8 +1651,8 @@ New Google Ads Flutter issues triaged 0, closed 0 (0%).
 In total closed 1 issues during the week
 
 | Reason for closing | |
-| -- | -- | 
-| Solved | 100% | 
+| -- | -- |
+| Solved | 100% |
 
 
 #### Flutterfire
@@ -1719,8 +1719,8 @@ New Google Ads Flutter issues triaged 4, closed 1 (25%).
 In total closed 5 issues during the week
 
 | Reason for closing | |
-| -- | -- | 
-| Fixed | 20% | 
+| -- | -- |
+| Fixed | 20% |
 |Invalid  | 80% |
 
 
@@ -1789,7 +1789,7 @@ New Google Ads Flutter issues triaged 11, closed 2 (18.18%).
 In total closed 2 issues during the week
 
 | Reason for closing | |
-| -- | -- | 
+| -- | -- |
 | Duplicate | 100% |
 
 #### Flutterfire
@@ -1937,14 +1937,14 @@ In total closed 4 issues during the week.
 ## 2022-06-10
 
 ### Notable issues
-- CupertinoPageRoute affecting color of Scaffold beneath transparent Widget 
- [#105738](https://github.com/flutter/flutter/issues/105738) 
-- Text Shadows are not working after upgrading to flutter 3 [#105546](https://github.com/flutter/flutter/issues/105546) 
-- [ios] Multiple Rebuild issue on opening a keyboard [#105184](https://github.com/flutter/flutter/issues/105184) 
+- CupertinoPageRoute affecting color of Scaffold beneath transparent Widget
+ [#105738](https://github.com/flutter/flutter/issues/105738)
+- Text Shadows are not working after upgrading to flutter 3 [#105546](https://github.com/flutter/flutter/issues/105546)
+- [ios] Multiple Rebuild issue on opening a keyboard [#105184](https://github.com/flutter/flutter/issues/105184)
 - Broken or Corrupted image cause runtime error [#105184](https://github.com/flutter/flutter/issues/105184)
 
 ### Old Issues receiving attention lately
-- [Web] No autofill suggestions for new or existing save passwords and selected suggested password is not filled [#87735](https://github.com/flutter/flutter/issues/87735) 
+- [Web] No autofill suggestions for new or existing save passwords and selected suggested password is not filled [#87735](https://github.com/flutter/flutter/issues/87735)
 
 ### Issue counts
 
@@ -2001,13 +2001,13 @@ In total closed 16 issues during the week.
 | invalid | 12.50%|
 | no response | 18.75% |
 | solution provided | 6.25% |
-| user issue | 18.75% | 
+| user issue | 18.75% |
 
 
 ## 2022-06-03
 
 ### Notable issues
-- There have been several reports on this issue on various community channels. Platform views are drawn at the wrong position and don't fill the parent [#103630](https://github.com/flutter/flutter/issues/103630) 
+- There have been several reports on this issue on various community channels. Platform views are drawn at the wrong position and don't fill the parent [#103630](https://github.com/flutter/flutter/issues/103630)
 
 ### Issue counts
 
@@ -2122,7 +2122,7 @@ In total closed 10 issues during the week.
 | invalid | 20%|
 | no response | 10% |
 | solution provided | 20% |
-| user issue| 10% | 
+| user issue| 10% |
 
 ## 2022-05-20
 
@@ -2132,7 +2132,7 @@ In total closed 10 issues during the week.
 - [Flutter 3] Arabic text renders incorrectly in TextSpan [#104092](https://github.com/flutter/flutter/issues/104092)
 - Spellcheck on Flutter Web [#40682](https://github.com/flutter/flutter/issues/40682)
   - This is an old issue, but it has been getting some attention recently
-- Dart 2.17's enums are causing issues on the web when the `name` variable is added as a property. 
+- Dart 2.17's enums are causing issues on the web when the `name` variable is added as a property.
   - Dart-lang issue [#49021](https://github.com/dart-lang/sdk/issues/49021)
   - Reports in flutter [#104189](https://github.com/flutter/flutter/issues/104189),[#103874](https://github.com/flutter/flutter/issues/103874)
 
@@ -2189,7 +2189,7 @@ In total closed 17 issues during the week.
 | fixed | 17.6% |
 | invalid | 23.5%|
 | no response | 11.8% |
-| user issue| 11.8% | 
+| user issue| 11.8% |
 
 ## 2022-05-13
 
@@ -2243,14 +2243,14 @@ In total closed 12 issues during the week.
 | fixed | 25.00% |
 | invalid | 16.67%|
 | no response | 16.67% |
-| solution provided | 8.33% | 
-| user issue| 8.33% | 
+| solution provided | 8.33% |
+| user issue| 8.33% |
 
 ## 2022-05-06
 
 ### Notable issues
 
-- [windows] Camera Plugin Fails to show preview with Error `Could not create external texture` [#102925](https://github.com/flutter/flutter/issues/102925) 
+- [windows] Camera Plugin Fails to show preview with Error `Could not create external texture` [#102925](https://github.com/flutter/flutter/issues/102925)
 
 ### Issue counts
 
@@ -2311,7 +2311,7 @@ In total closed 11 issues during the week.
 | fixed | 36.36% |
 | invalid | 18.18%|
 | no-response | 9.09% |
-| solution-provided | 9.09% | 
+| solution-provided | 9.09% |
 
 ## 2022-04-22
 
@@ -2367,7 +2367,7 @@ In total closed 10 issues during the week.
 | duplicate | 20% |
 | invalid | 20%|
 | no-response | 20% |
-| solution-provided | 40% | 
+| solution-provided | 40% |
 
 ## 2022-04-22
 
@@ -2376,7 +2376,7 @@ In total closed 10 issues during the week.
 - [Regression][iOS]: os.activity library is broken in Flutter 2.13 [#102330](https://github.com/flutter/flutter/issues/102330)
 - Can't paste into TextField when copying from Samsung Notes, MS Word, and MS Excel on Android
 [#74320](https://github.com/flutter/flutter/issues/74320)
-- [WEB] TextField actions are not triggered on Android [#89384](https://github.com/flutter/flutter/issues/89384) 
+- [WEB] TextField actions are not triggered on Android [#89384](https://github.com/flutter/flutter/issues/89384)
 
 ### Issue counts
 
@@ -2425,7 +2425,7 @@ In total closed 21 issues during the week.
 | fixed  | 14.29% |
 | invalid | 19.05%|
 | no-response | 23.81% |
-| solution-provided | 19.05% | 
+| solution-provided | 19.05% |
 | user | 14.29% |
 
 ## 2022-04-14
@@ -2473,8 +2473,8 @@ In total closed 3 issues during the week.
 
 | Reason for closing | |
 | -- | -- |
-| duplicate | 33.3% | 
-| fixed | 33.3% | 
+| duplicate | 33.3% |
+| fixed | 33.3% |
 | solved | 33.3% |
 
 #### Flutterfire
@@ -2488,7 +2488,7 @@ In total closed 13 issues during the week.
 | duplicate | 23.08% |
 | invalid | 23.08%|
 | no-response | 38.46% |
-| solution-provided | 7.69% | 
+| solution-provided | 7.69% |
 | user | 7.69% |
 
 ## 2022-04-08
@@ -2544,7 +2544,7 @@ In total closed 29 issues during the week.
 | fixed | 31.03% |
 | invalid | 24.14%|
 | no-response | 10.34% |
-| solution-provided | 24.14% | 
+| solution-provided | 24.14% |
 | user | 3.45% |
 
 ## 2022-04-01
@@ -2599,7 +2599,7 @@ In total closed 26 issues during the week.
 | fixed | 26.92% |
 | invalid | 7.69%|
 | no-response | 34.62% |
-| solution-provided | 15.38% | 
+| solution-provided | 15.38% |
 | user | 11.54% |
 
 
@@ -2665,7 +2665,7 @@ In total closed 18 issues during the week.
 | fixed | 11.1% |
 | invalid | 16.7%|
 | no-response | 27.8% |
-| solution-provided | 11.1% | 
+| solution-provided | 11.1% |
 | user | 11.1% |
 
 
@@ -2729,7 +2729,7 @@ In total closed 25 issues during the week.
 | fixed | 16% |
 | invalid | 24%|
 | no-response | 40% |
-| solution-provided | 8% | 
+| solution-provided | 8% |
 | user | 4% |
 
 
@@ -2798,7 +2798,7 @@ In total closed 25 issues during the week.
 | fixed | 20% |
 | invalid | 36%|
 | no-response | 16% |
-| solution-provided | 16% | 
+| solution-provided | 16% |
 | user | 4% |
 
 
@@ -2863,7 +2863,7 @@ In total closed 24 issues during the week.
 | fixed | 25.00% |
 | invalid | 20.83%|
 | no-response | 33.33% |
-| solution-provided | 16.67% | 
+| solution-provided | 16.67% |
 
 
 ## 2022-02-25
@@ -2927,7 +2927,7 @@ In total closed 10 issues during the week.
 | fixed | 10% |
 | invalid | 40%|
 | no-response | 10% |
-| solution-provided | 20% | 
+| solution-provided | 20% |
 
 ## 2022-02-18
 
@@ -2984,7 +2984,7 @@ In total closed 14 issues during the week.
 | fixed | 7.14% |
 | invalid | 35.71%|
 | no-response | 14.29% |
-| solution-provided | 21.43% | 
+| solution-provided | 21.43% |
 
 ## 2022-02-11
 
@@ -3048,7 +3048,7 @@ In total closed 26 issues during the week.
 | fixed | 7.69% |
 | invalid | 15.38%|
 | no-response | 34.62% |
-| solution-provided | 11.54% | 
+| solution-provided | 11.54% |
 | user | 11.54% |
 
 
@@ -3114,7 +3114,7 @@ In total closed 16 issues during the week.
 | fixed | 12.5% |
 | invalid | 25.0%|
 | no-response | 18.8% |
-| solution-provided | 18.8% | 
+| solution-provided | 18.8% |
 | user | 12.5% |
 
 
@@ -3179,7 +3179,7 @@ In total closed 28 issues during the week.
 | fixed | 25.00% |
 | invalid | 14.29%|
 | no-response | 14.29% |
-| solution-provided | 10.71% | 
+| solution-provided | 10.71% |
 | user | 17.86% |
 | wontfix | 3.57% |
 
@@ -3229,7 +3229,7 @@ In total closed 2 issues during the week.
 | Reason for closing  |  |
 | -- | -- |
 | duplicate | 50% |
-| solved | 50% | 
+| solved | 50% |
 
 #### Flutterfire
 
@@ -3292,7 +3292,7 @@ In total closed 5 issues during the week.
 | Reason for closing  |  |
 | -- | -- |
 | duplicate | 80% |
-| solved | 20% | 
+| solved | 20% |
 
 #### Flutterfire
 
@@ -3355,7 +3355,7 @@ In total closed 1 issue during the week.
 
 | Reason for closing  |  |
 | -- | -- |
-| Invalid | 100% | 
+| Invalid | 100% |
 
 #### Flutterfire
 

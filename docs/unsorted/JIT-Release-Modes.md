@@ -6,7 +6,7 @@ JIT release mode can be used with a local engine configuration. For example, to 
 ```shell
 ./flutter/tools/gn --runtime-mode=jit_release --android --android-cpu=x86
 ninja -C out/android_jit_release_x86
-./flutter/tools/gn --runtime-mode=jit_release 
+./flutter/tools/gn --runtime-mode=jit_release
 ninja -C out/host_jit_release
 ```
 

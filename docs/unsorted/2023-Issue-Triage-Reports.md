@@ -1,7 +1,7 @@
 ## 2023-12-29
 ### Notable issues
 
-No major issues to report for this week 
+No major issues to report for this week
 
 ### Issue counts
 
@@ -62,7 +62,7 @@ In total closed 1 issue during the week.
 ## 2023-12-22
 ### Notable issues
 
-No major issues to report for this week 
+No major issues to report for this week
 
 ### Issue counts
 
@@ -130,7 +130,7 @@ In total closed 3 issues during the week.
 ## 2023-12-15
 ### Notable issues
 
-No major issues to report for this week 
+No major issues to report for this week
 
 ### Issue counts
 
@@ -186,7 +186,7 @@ In total closed 22 issues during the week.
 
 New FirebaseUI-Flutter issues triaged 1, closed 0 (0%).
 
-No issue closed during the week 
+No issue closed during the week
 
 
 ## 2023-12-08
@@ -248,9 +248,9 @@ In total closed 20 issues during the week.
 
 New FirebaseUI-Flutter issues triaged 0, closed 0 (0%).
 
-In total, closed 1 issue during the week 
+In total, closed 1 issue during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | solution-provided | 100% |
 
@@ -298,8 +298,8 @@ New dart-lang/site-www issues triaged 1, closed 1 (100%)
 
 In total closed 1 issue during the week.
 
-| Reason for closing | | 
-| -- | -- | 
+| Reason for closing | |
+| -- | -- |
 | fixed | 100% |
 
 
@@ -324,8 +324,8 @@ New FirebaseUI-Flutter issues triaged 2, closed 0 (0%).
 
 In total closed 3 issue during the week
 
-| Reason for closing | | 
-| -- | -- | 
+| Reason for closing | |
+| -- | -- |
 | fixed | 33.3% |
 | no-response | 33.3% |
 | solution-provided | 33.3% |
@@ -453,8 +453,8 @@ New FirebaseUI-Flutter issues triaged 2, closed 0 (0%).
 
 In total closed 3 issues during the week
 
-| Reason for closing | | 
-| -- | -- | 
+| Reason for closing | |
+| -- | -- |
 | user | 50.00% |
 | solution-provided | 50.00% |
 
@@ -462,7 +462,7 @@ In total closed 3 issues during the week
 ## 2023-11-10
 ### Notable issues
 
-No major issues to report for this week 
+No major issues to report for this week
 
 ### Issue counts
 
@@ -502,7 +502,7 @@ No issue closed during the week.
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 5, closed 1 (20%) 
+New GoogleAds Flutter issues triaged 5, closed 1 (20%)
 
 In total closed 2 issues during the week
 
@@ -531,8 +531,8 @@ New FirebaseUI-Flutter issues triaged 0, closed 0 (0%).
 
 In total closed 3 issues during the week
 
-| Reason for closing | | 
-| -- | -- | 
+| Reason for closing | |
+| -- | -- |
 | fixed | 100% |
 
 
@@ -540,7 +540,7 @@ In total closed 3 issues during the week
 ## 2023-11-03
 ### Notable issues
 
-No major issues to report for this week 
+No major issues to report for this week
 
 ### Issue counts
 
@@ -578,13 +578,13 @@ New dart-lang/site-www issues triaged 1, closed 1 (100%)
 
 In total closed 1 issue during the week.
 
-| Reason for closing | | 
-| -- | -- | 
+| Reason for closing | |
+| -- | -- |
 | invalid | 100% |
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 2, closed 1 (50%) 
+New GoogleAds Flutter issues triaged 2, closed 1 (50%)
 
 In total closed 1 issue during the week
 
@@ -613,15 +613,15 @@ New FirebaseUI-Flutter issues triaged 2, closed 0 (0%).
 
 In total closed 1 issue during the week
 
-| Reason for closing | | 
-| -- | -- | 
+| Reason for closing | |
+| -- | -- |
 | fixed | 100% |
 
 
 ## 2023-10-27
 ### Notable issues
 
-No major issues to report for this week 
+No major issues to report for this week
 
 ### Issue counts
 
@@ -660,7 +660,7 @@ No issue closed during the week
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 3, closed 1 (33.33%) 
+New GoogleAds Flutter issues triaged 3, closed 1 (33.33%)
 
 In total closed 1 issue during the week
 
@@ -692,7 +692,7 @@ No issue closed during the week
 ## 2023-10-20
 ### Notable issues
 
-No major issues to report for this week 
+No major issues to report for this week
 
 ### Issue counts
 
@@ -727,7 +727,7 @@ No issue closed during the week
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 2, closed 1 (50%) 
+New GoogleAds Flutter issues triaged 2, closed 1 (50%)
 
 In total closed 1 issue during the week
 
@@ -765,7 +765,7 @@ In total closed 3 issues during the week.
 ## 2023-10-13
 ### Notable issues
 
-No major issues to report for this week 
+No major issues to report for this week
 
 ### Issue counts
 
@@ -804,7 +804,7 @@ No issue closed during the week
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 5, closed 5 (100%) 
+New GoogleAds Flutter issues triaged 5, closed 5 (100%)
 
 In total closed 6 issues during the week
 
@@ -845,7 +845,7 @@ In total closed 6 issues during the week.
 ## 2023-10-06
 ### Notable issues
 
-No major issues to report for this week 
+No major issues to report for this week
 
 ### Issue counts
 
@@ -885,7 +885,7 @@ No issue closed during the week
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 0, closed 0 (0%) 
+New GoogleAds Flutter issues triaged 0, closed 0 (0%)
 
 In total closed 1 issue during the week
 
@@ -917,7 +917,7 @@ No issue closed during the week
 ## 2023-09-30
 ### Notable issues
 
-No major issues to report for this week 
+No major issues to report for this week
 
 ### Issue counts
 
@@ -957,7 +957,7 @@ No issue closed during the week
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 0, closed 0 (0%) 
+New GoogleAds Flutter issues triaged 0, closed 0 (0%)
 
 No issue closed during the week
 
@@ -985,7 +985,7 @@ No issue closed during the week
 ## 2023-09-22
 ### Notable issues
 
-No major issues to report for this week 
+No major issues to report for this week
 
 ### Issue counts
 
@@ -1022,13 +1022,13 @@ New dart-lang/site-www issues triaged 3, closed 1 (33.3%)
 
 1 issue closed during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | invalid | 100% |
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 2, closed 1 (50%) 
+New GoogleAds Flutter issues triaged 2, closed 1 (50%)
 
 In total closed 1 issues during the week.
 
@@ -1048,7 +1048,7 @@ In total closed 19 issues during the week.
 | fixed | 21% |
 | invalid | 16% |
 | no-response | 26% |
-| solution-provided | 16% | 
+| solution-provided | 16% |
 | user issue | 11% |
 
 
@@ -1096,7 +1096,7 @@ No issues  closed during the week
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 5, closed 2 (40.00%) 
+New GoogleAds Flutter issues triaged 5, closed 2 (40.00%)
 
 In total closed 3 issues during the week.
 
@@ -1160,7 +1160,7 @@ No issues  closed during the week
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 2, closed 1 (50.00%) 
+New GoogleAds Flutter issues triaged 2, closed 1 (50.00%)
 
 In total closed 2 issues during the week.
 
@@ -1225,7 +1225,7 @@ No issues  closed during the week
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 1, closed 0 (0%) 
+New GoogleAds Flutter issues triaged 1, closed 0 (0%)
 
 In total closed 1 issues during the week.
 
@@ -1290,7 +1290,7 @@ No issues  closed during the week
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 4, closed 1 (25.00%) 
+New GoogleAds Flutter issues triaged 4, closed 1 (25.00%)
 
 In total closed 2 issues during the week.
 
@@ -1354,7 +1354,7 @@ No issues  closed during the week
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 3, closed 0 (0%) 
+New GoogleAds Flutter issues triaged 3, closed 0 (0%)
 
 In total closed 1 issue during the week.
 
@@ -1419,7 +1419,7 @@ No issues  closed during the week
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 6, closed 4 (66.67%) 
+New GoogleAds Flutter issues triaged 6, closed 4 (66.67%)
 
 In total closed 5 issues during the week.
 
@@ -1486,7 +1486,7 @@ No issues  closed during the week
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 2, closed 0 (0%) 
+New GoogleAds Flutter issues triaged 2, closed 0 (0%)
 
 In total closed 1 issue during the week.
 
@@ -1549,7 +1549,7 @@ No issues  closed during the week
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 5, closed 2 (40.00%) 
+New GoogleAds Flutter issues triaged 5, closed 2 (40.00%)
 
 In total closed 2 issues during the week.
 
@@ -1612,7 +1612,7 @@ No issues  closed during the week
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 4, closed 1 (25.00%) 
+New GoogleAds Flutter issues triaged 4, closed 1 (25.00%)
 
 In total closed 2 issues during the week.
 
@@ -1682,7 +1682,7 @@ In total closed 2 issues during the week
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 3, closed 0 (0%) 
+New GoogleAds Flutter issues triaged 3, closed 0 (0%)
 
 No issues  closed during the week
 
@@ -1737,7 +1737,7 @@ No issues closed during the week.
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 2, closed 0 (0%) 
+New GoogleAds Flutter issues triaged 2, closed 0 (0%)
 
 No issues  closed during the week
 
@@ -1783,7 +1783,7 @@ New website issues triaged 0, closed 0 (0%).
 
 In total closed 3 issue during the week.
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | Fixed | 100% |
 
@@ -1795,11 +1795,11 @@ No issues closed during the week.
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 3, closed 0 (0%) 
+New GoogleAds Flutter issues triaged 3, closed 0 (0%)
 
 In total closed 1 issue during the week.
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | Duplicate | 100% |
 
@@ -1855,11 +1855,11 @@ No issues closed during the week.
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 2, closed 1 (50%) 
+New GoogleAds Flutter issues triaged 2, closed 1 (50%)
 
 In total closed 2 issue during the week.
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | Duplicate | 50% |
 | Solved | 50% |
@@ -1913,11 +1913,11 @@ No issues closed during the week.
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 3, closed 1 (33%) 
+New GoogleAds Flutter issues triaged 3, closed 1 (33%)
 
 In total closed 1 issue during the week.
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | Invalid | 100% |
 
@@ -1964,7 +1964,7 @@ New website issues triaged 5, closed 1 (20%)
 
 In total closed 4 issues during the week.
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | Fixed | 25% |
 | Duplicate | 50% |
@@ -1978,7 +1978,7 @@ No issues closed during the week.
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 4, closed 0 (100%) 
+New GoogleAds Flutter issues triaged 4, closed 0 (100%)
 
 No issues closed during the week.
 
@@ -2025,7 +2025,7 @@ New website issues triaged 5, closed 1 (20%)
 
 In total closed 7 issues during the week.
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | Fixed | 57.14% |
 | Duplicate | 28.57% |
@@ -2039,11 +2039,11 @@ No issues closed during the week.
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 2, closed 2 (100%) 
+New GoogleAds Flutter issues triaged 2, closed 2 (100%)
 
 In total closed 2 issues during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | duplicate | 100% |
 
@@ -2092,7 +2092,7 @@ New website issues triaged 5, closed 0 (0%)
 
 In total closed 13 issues during the week.
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | Fixed | 92.31% |
 | Duplicate | 7.69% |
@@ -2105,11 +2105,11 @@ No issues closed during the week.
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 6, closed 2 (33.33%) 
+New GoogleAds Flutter issues triaged 6, closed 2 (33.33%)
 
 In total closed 2 issues during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | invalid | 50% |
 | solved | 50% |
@@ -2184,7 +2184,7 @@ New website issues triaged 3, closed 1 (33.33%)
 
 In total closed 8 issues during the week.
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | Fixed | 62.5% |
 | Invalid | 37.5% |
@@ -2197,11 +2197,11 @@ No issues closed during the week.
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 3, closed 0 (0%) 
+New GoogleAds Flutter issues triaged 3, closed 0 (0%)
 
 In total closed 2 issues during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | invalid | 50% |
 | solved | 50% |
@@ -2251,7 +2251,7 @@ New website issues triaged 10, closed 1(10%)
 
 In total closed 4 issues during the week.
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | Fixed | 75% |
 | Invalid | 25% |
@@ -2264,11 +2264,11 @@ No issues closed during the week.
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 8, closed 4 (50%) 
+New GoogleAds Flutter issues triaged 8, closed 4 (50%)
 
 In total closed 6 issues during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | duplicate | 33 % |
 | invalid | 50% |
@@ -2319,17 +2319,17 @@ No issues closed during the week
 
 New dart-lang/site-www issues triaged 2, closed 1 (50%)
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | invalid | 100% |
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 2, closed 0 (0%) 
+New GoogleAds Flutter issues triaged 2, closed 0 (0%)
 
 In total closed 2 issues during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | invalid | 50% |
 | solved | 50% |
@@ -2391,11 +2391,11 @@ No issues closed during the week
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 2, closed 0 (0%) 
+New GoogleAds Flutter issues triaged 2, closed 0 (0%)
 
 In total closed 2 issues during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | invalid | 50% |
 | solved | 50% |
@@ -2456,11 +2456,11 @@ No issues closed during the week
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 5, closed 1 (20%) 
+New GoogleAds Flutter issues triaged 5, closed 1 (20%)
 
 In total closed 2 issues during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | invalid | 100% |
 
@@ -2477,7 +2477,7 @@ In total closed 19 issues during the week.
 | invalid | 11% |
 | no-response |11% |
 | solution-provided | 16% |
-| user issue | 16% | 
+| user issue | 16% |
 
 ## 2023-04-14
 
@@ -2520,11 +2520,11 @@ No issues closed during the week
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 3, closed 1 (33.33%) 
+New GoogleAds Flutter issues triaged 3, closed 1 (33.33%)
 
 In total closed 1 issues during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | invalid | 100% |
 
@@ -2541,7 +2541,7 @@ In total closed 16 issues during the week.
 | invalid | 12.5% |
 | no-response | 31.3% |
 | solution-provided | 18.8% |
-| user issue | 6.3% | 
+| user issue | 6.3% |
 
 ## 2023-04-07
 
@@ -2586,11 +2586,11 @@ No issues closed during the week
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 1, closed 1 (100%) 
+New GoogleAds Flutter issues triaged 1, closed 1 (100%)
 
 In total closed 1 issue during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | invalid | 100% |
 
@@ -2607,7 +2607,7 @@ In total closed 15 issues during the week.
 | invalid | 13.3% |
 | no-response | 26.7% |
 | solution-provided | 20.0% |
-| user issue | 6.7% | 
+| user issue | 6.7% |
 
 ## 2023-03-31
 
@@ -2652,11 +2652,11 @@ No issues closed during the week
 
 #### Googleads-mobile-flutter
 
-New GoogleAds Flutter issues triaged 6, closed 4 (66.67%) 
+New GoogleAds Flutter issues triaged 6, closed 4 (66.67%)
 
 In total closed 4 issues during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | duplicate | 25% |
 | invalid | 75% |
@@ -2674,7 +2674,7 @@ In total closed 13 issues during the week.
 | invalid | 23.1% |
 | no-response | 15.4% |
 | solution-provided | 15.4% |
-| user issue | 30.8% | 
+| user issue | 30.8% |
 
 ## 2023-03-24
 
@@ -2723,7 +2723,7 @@ No issues triage during the week
 
 In total closed 1 issue during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | invalid | 100% |
 
@@ -2784,7 +2784,7 @@ New googleads issue triaged 4, closed 3 (75%)
 
 In total closed 3 issue during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | invalid | 100% |
 
@@ -2849,7 +2849,7 @@ New googleads issue triaged 4, closed 2 (50%)
 
 In total closed 3 issues during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | duplicate | 33% |
 | invalid | 33% |
@@ -2914,7 +2914,7 @@ New googleads issue triaged 2, closed 0 (0%)
 
 In total closed 1 issue during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | solved | 100% |
 
@@ -3172,7 +3172,7 @@ New googleads issue triaged 1, closed 0 (0%)
 
 In total closed 2 issues during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | invalid | 100% |
 
@@ -3198,7 +3198,7 @@ In total closed 23 issues during the week.
 - Pubspec.lock is ignored when upgrading to flutter 3.7.0 [#119091](https://github.com/flutter/flutter/issues/119091)
 - [3.7][Android] Animation for modal bottom sheet stops working on some devices [#119094](https://github.com/flutter/flutter/issues/119094)
 
-The following issues might need some attention: 
+The following issues might need some attention:
 - CircularProgessIndicator causes CPU spike [#17793](https://github.com/flutter/flutter/issues/17793)
 - Constant Animation Jank in Simple Flutter App [#103847](https://github.com/flutter/flutter/issues/103847)
 - Linux Desktop: high CPU usage when running an animation [#101591](https://github.com/flutter/flutter/issues/101591)
@@ -3242,7 +3242,7 @@ New googleads issue triaged 7, closed 3 (42.86%)
 
 In total closed 4 issues during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | duplicate | 25% |
 | invalid | 50% |
@@ -3266,7 +3266,7 @@ In total closed 17 issues during the week.
 
 ### Notable issues
 
-No major issues to report for this week. 
+No major issues to report for this week.
 
 ### Old Issues receiving attention lately
 
@@ -3314,7 +3314,7 @@ New googleads issue triaged 3, closed 3 (100%)
 
 In total closed 3 issues during the week
 
-| Reason for closing | | 
+| Reason for closing | |
 | -- | -- |
 | duplicate | 33% |
 | invalid | 33% |
@@ -3458,7 +3458,7 @@ New googleads issue triaged 3, closed 1 (33.33%)
 In total closed 1 issue during the week
 
 | Reason for closing | |
-| -- | -- | 
+| -- | -- |
 | solved | 100% |
 
 #### Flutterfire

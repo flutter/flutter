@@ -41,7 +41,7 @@ If the Flutter build is broken due to a golden file test failure, this typically
   https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter
 ```
 
-To resolve, visit the [Flutter Gold dashboard](https://flutter-gold.skia.org/) to view the batch of images in question. If they are intended changes, approve them by clicking the checkmark, and re-run the failing test to resolve. If the image changes are not intended, revert the associated change. 
+To resolve, visit the [Flutter Gold dashboard](https://flutter-gold.skia.org/) to view the batch of images in question. If they are intended changes, approve them by clicking the checkmark, and re-run the failing test to resolve. If the image changes are not intended, revert the associated change.
 
 Notice, Gold may wrongly attribute blame for image changes on the dashboard. Post-submit testing for flutter/flutter is not executed in the order that commits land. Commits are tested by order of the most recent change. If older commits have not completed testing yet, Gold may assign blame incorrectly until all image results have been processed for pending commits.
 
@@ -60,15 +60,15 @@ Add an expectation along the following lines:
   );
 ```
 
-The argument to `matchesGoldenFile` is the filename for the screen shot. The part up to the first dot should exactly match the test filename (e.g. if your test is `widgets/foo_bar_test.dart`, use `foo_bar`). The `subtest` part should be unique to this `testWidgets` entry, and the part after that should be unique within the `testWidgets` entry. This allows each file to have multiple `testWidgets` tests each with their own namespace for the images, and then allows for disambiguation within each test in case there are multiple screen shots per test. 
+The argument to `matchesGoldenFile` is the filename for the screen shot. The part up to the first dot should exactly match the test filename (e.g. if your test is `widgets/foo_bar_test.dart`, use `foo_bar`). The `subtest` part should be unique to this `testWidgets` entry, and the part after that should be unique within the `testWidgets` entry. This allows each file to have multiple `testWidgets` tests each with their own namespace for the images, and then allows for disambiguation within each test in case there are multiple screen shots per test.
 
-Golden tests may be executed locally on Linux, MacOS, and Windows platforms. All reference images can be found at [Flutter Gold baselines](https://flutter-gold.skia.org/list?fdiffmax=-1&fref=false&frgbamax=255&frgbamin=0&head=true&include=false&limit=50&master=false&match=name&metric=combined&neg=false&new_clstore=true&offset=0&pos=true&query=source_type%3Dflutter&sort=desc&unt=true). Some tests may have multiple golden masters for a given test, to account for rendering differences across platforms. The parameter set for each image is listed in each image digest to differentiate renderings. 
+Golden tests may be executed locally on Linux, MacOS, and Windows platforms. All reference images can be found at [Flutter Gold baselines](https://flutter-gold.skia.org/list?fdiffmax=-1&fref=false&frgbamax=255&frgbamin=0&head=true&include=false&limit=50&master=false&match=name&metric=combined&neg=false&new_clstore=true&offset=0&pos=true&query=source_type%3Dflutter&sort=desc&unt=true). Some tests may have multiple golden masters for a given test, to account for rendering differences across platforms. The parameter set for each image is listed in each image digest to differentiate renderings.
 
 Once you have written your test, run `flutter test --update-goldens test/foo/bar_test.dart` in the `flutter` package directory (where the filename is the relative path to your new test). This will update the images in `bin/cache/pkg/skia_goldens/packages/flutter/test/`; the directories below that will match the hierarchy of the directories in the `test` directory of the `flutter` package. Verify that the images are what you expect; update your test and repeat this step until you are happy with the image.
 
 When running `flutter test` locally without the `--update-goldens` flag, your test will pass, as it does not yet have a baseline for comparison on the [Flutter Gold](https://flutter-gold.skia.org/?query=source_type%3Dflutter) dashboard. The test will be recognized as new, and provide output for validation.
 
-When you are happy with your image, you are ready to submit your PR for review. The reviewer should also verify your golden image(s), so make sure to include the golden(s) in your PR description. 
+When you are happy with your image, you are ready to submit your PR for review. The reviewer should also verify your golden image(s), so make sure to include the golden(s) in your PR description.
 
 New test results will be compiled into a tryjob on the Flutter Gold dashboard, under [ChangeLists](https://flutter-gold.skia.org/changelists). There you will see your pull request and the associated golden files that were generated. Gold will also leave a comment on your pull request linking to your image results.
 
@@ -96,7 +96,7 @@ Once you have been added as an authorized user for Flutter Gold, you can log in 
 
 ## `flutter gold` Check
 
-The `flutter-gold` check is applied to pull requests in flutter/flutter that execute golden file tests and are ready for review. 
+The `flutter-gold` check is applied to pull requests in flutter/flutter that execute golden file tests and are ready for review.
 
 As golden file tests are run across multiple test shards, this check waits for all other tests to complete before checking to see if Gold received new images. While awaiting test completion, and in the event there are image changes, the `flutter-gold` check will hold a pending state. This is primarily due to how the auto-roller used by flutter/engine works (context: https://github.com/flutter/flutter/issues/48744).
 

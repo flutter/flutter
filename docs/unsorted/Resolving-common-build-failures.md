@@ -8,7 +8,7 @@ This page collects such errors and the standard procedure to work around them.
 ## Android
 
 Android builds are handled by the Gradle tool, which is configured using .gradle files.
-Android Apps themselves are packaged, compiled & optimized by a variety of tools - all being orchestrated by the Android Gradle Plugin (AGP). 
+Android Apps themselves are packaged, compiled & optimized by a variety of tools - all being orchestrated by the Android Gradle Plugin (AGP).
 
 Usually, Android Studio and AGP are aligned in their versions. Android Studio also contains a few assistants to smoothen the upgrade process for existing projects.
 
@@ -29,7 +29,7 @@ To fix it, open `android/gradle/wrapper/gradle-wrapper.properties` (`example/and
 
 With the steps above, only AGP and the wrapper got upgraded. The Kotlin compiler infrastructure is a secondary dependency which is also dependent on certain AGP/Gradle versions.
 To resolve it:
- - Scan your build.gradle files for a placeholder like `ext.kotlin_version = '1.2.71'` and replace it with the latest Kotlin version (or the version named in the error message). 
+ - Scan your build.gradle files for a placeholder like `ext.kotlin_version = '1.2.71'` and replace it with the latest Kotlin version (or the version named in the error message).
   - Android Studio can recommend the latest version, if you open the build.gradle file in it
  - New Kotlin versions introduce language & syntax optimizations; it is therefore recommended to use Android Studio again and open the native part of the App (see above) and let it run a full compilation, including a clean operation. Android Studio will report build failures and suggestions to optimize your code.
 

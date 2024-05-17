@@ -1039,8 +1039,8 @@ From Fri Jun 21 22:31:55 2019 -0400 to Sun Aug 18 12:22:00 2019 -0700
 
 
 
-670 PRs were closed in flutter/flutter. 
-We omitted 154 PRs in this report because they were 
+670 PRs were closed in flutter/flutter.
+We omitted 154 PRs in this report because they were
 automated PRs, such as autoroller commits.
 
 
@@ -1895,6 +1895,6 @@ From Fri Jun 21 22:31:55 2019 -0400 to Sun Aug 18 12:22:00 2019 -0700
 
 
 
-858 PRs were closed in flutter/engine. 
-We omitted 436 PRs in this report because they were 
+858 PRs were closed in flutter/engine.
+We omitted 436 PRs in this report because they were
 automated PRs, such as autoroller commits.

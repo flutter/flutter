@@ -57,11 +57,11 @@ Once all tickets have been triaged, on-call's job is to service them. Apply judg
 From the top of the priority queue down, on-call makes sure that someone is working on each ticket. It's important to keep things moving if you see that they're stuck; try CC'ing people with more information and making it clear what a given ticket is blocked on.
 
 1. Set the assignee. Read the [guideline](https://github.com/flutter/flutter/wiki/Issue-hygiene#assigning-issues) first. In addition:
-    *   All tickets must be assigned to someone who is working on them. 
+    *   All tickets must be assigned to someone who is working on them.
 2. Start working on the ticket
     *   Set the status to "in progress", typically by dragging its card to the **In progress** column.
     *   Add a comment, if you think it helps.
-3. P0 issue should be updated daily and P1 issue should be updated weekly, since many people may be blocked and will be waiting for updates. 
+3. P0 issue should be updated daily and P1 issue should be updated weekly, since many people may be blocked and will be waiting for updates.
 4. Update the ticket's workflow state when you reach a stopping point
     *   If it's closed, move it to **Done**.
     *   If it's blocked on something else, make it clear in the comments.

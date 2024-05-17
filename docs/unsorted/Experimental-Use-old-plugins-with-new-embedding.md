@@ -8,9 +8,9 @@ First, construct a `FlutterEngine` either as a [cached `FlutterEngine`](https://
 
 ```java
 FlutterEngine flutterEngine = new FlutterEngine(
-  context, 
-  FlutterLoader.getInstance(), 
-  new FlutterJNI(), 
+  context,
+  FlutterLoader.getInstance(),
+  new FlutterJNI(),
   dartVmArgs, // or an empty array if no args needed
   false // this arg instructs the FlutterEngine NOT to register plugins automatically
 );
@@ -22,7 +22,7 @@ Second, register the plugins that you want. If you overrode `provideFlutterEngin
 public void configureFlutterEngine(FlutterEngine engine) {
   // The ShimPluginRegistry is how the v2 embedding works with v1 plugins.
   ShimPluginRegistry shimPluginRegistry = new ShimPluginRegistry(
-    flutterEngine, 
+    flutterEngine,
     new PlatformViewsController()
   );
 
@@ -41,9 +41,9 @@ If you went with the cached `FlutterEngine` approach instead of `FlutterActivity
 ```java
 // Instantiate cached FlutterEngine.
 FlutterEngine flutterEngine = new FlutterEngine(
-  context, 
-  FlutterLoader.getInstance(), 
-  new FlutterJNI(), 
+  context,
+  FlutterLoader.getInstance(),
+  new FlutterJNI(),
   dartVmArgs, // or an empty array if no args needed
   false // this arg instructs the FlutterEngine NOT to register plugins automatically
 );
@@ -51,7 +51,7 @@ FlutterEngine flutterEngine = new FlutterEngine(
 // Immediately add plugins to the cached FlutterEngine.
 // The ShimPluginRegistry is how the v2 embedding works with v1 plugins.
 ShimPluginRegistry shimPluginRegistry = new ShimPluginRegistry(
-  flutterEngine, 
+  flutterEngine,
   new PlatformViewsController()
 );
 

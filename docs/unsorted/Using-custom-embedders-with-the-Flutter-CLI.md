@@ -2,7 +2,7 @@
 
 The experimental "custom device" feature of the Flutter CLI allows you to make custom or third-party embedders such as [flutter-pi](https://github.com/ardera/flutter-pi) or the [sony embedder](https://github.com/sony/flutter-embedded-linux) work with the Flutter CLI and use features such as hot-reload, hot-restart, debugging and DevTools. Profile/release mode and plugins are not supported right now.
 
-Currently, `custom-devices` support is only available in the master channel. 
+Currently, `custom-devices` support is only available in the master channel.
 
 ### Enabling custom-devices for your Flutter SDK
 
@@ -36,7 +36,7 @@ raspberrypi)
 hpi4
 Please enter the username used for ssh-ing into the remote device. (example: pi,
 empty for no username)
-  
+
 Please enter the command executed on the remote device for starting the app.
 "/tmp/${appName}" is the path to the asset bundle. (example: flutter-pi
 /tmp/${appName})
@@ -45,7 +45,7 @@ Should the device use port forwarding? Using port forwarding is the default
 because it works in all cases, however if your remote device has a static IP
 address and you have a way of specifying the "--observatory-host=<ip>" engine
 option, you might prefer not using port forwarding. [Y/n] (empty for default)
- 
+
 Enter the command executed on the remote device for taking a screenshot.
 (example: fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d
 ' \n\t', empty for no screenshotting support)
@@ -63,4 +63,4 @@ If your device is a little more complicated to setup, for example if your device
 
 After that, the device is configured and if you run `flutter devices`, it should show your custom device there (if it is reachable).
 
-You should be able to run apps on your device using `flutter run -d devicename` or using your IDE. 
+You should be able to run apps on your device using `flutter run -d devicename` or using your IDE.

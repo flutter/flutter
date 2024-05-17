@@ -38,7 +38,7 @@
       - HTTPS: `git remote add upstream https://github.com/flutter/flutter.git`
       - SSH: `git remote add upstream git@github.com:flutter/flutter.git`
    1. Verify the new upstream repository you've specified for your fork.
-      
+
       - `git remote -v`
 
 1. Add the repo's `bin` directory to your [PATH](https://en.wikipedia.org/wiki/PATH_(variable)): e.g. on UNIX, using `export PATH="$PATH:$HOME/<path to flutter repository>/bin"`

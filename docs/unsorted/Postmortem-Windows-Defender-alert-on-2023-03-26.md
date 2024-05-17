@@ -158,7 +158,7 @@ Add documentation on how Flutter infra can triage these issues quicker through a
 [2:33 PM]Greg Spencer (gspencergoog): What is the "windows-x64.zip" file from?  Is that from a Dart distro?
 [2:33 PM]Drewroen: Maybe there's a simpler way, but I found the release commit for flutter/flutter for 3.7.7, then got the engine version from https://github.com/flutter/flutter/blob/2ad6cd72c040113b47ee9055e722606a490ef0da/bin/internal/engine.version and used that hash in the storage.googleapis url
 
-Long story short, this should be the engine artifact for the 3.7.7 windows stable: https://storage.googleapis.com/flutter_infra_release/flutter/1837b5be5f0f1376a1ccf383950e83a80177fb4e/android-x64-release/windows-x64.zip 
+Long story short, this should be the engine artifact for the 3.7.7 windows stable: https://storage.googleapis.com/flutter_infra_release/flutter/1837b5be5f0f1376a1ccf383950e83a80177fb4e/android-x64-release/windows-x64.zip
 [2:33 PM]Greg Spencer (gspencergoog): The Flutter version seems to be windows-x64-flutter.zip, and doesn't appear to have the problem (at least in the latest master build)
 [2:34 PM]Greg Spencer (gspencergoog): Ahh, so it's in an Engine build.
 [2:36 PM]Greg Spencer (gspencergoog): OK, so that 3.7.7 binary doesn't seem to trigger the quarantine.
@@ -179,7 +179,7 @@ Long story short, this should be the engine artifact for the 3.7.7 windows stabl
 [3:15 PM]Greg Spencer (gspencergoog): I haven't closed the issue yet. :-)
 [3:16 PM]Hixie: @Godofredo Contreras (godofredoc)  if we rerun the build, do we get the same bits? it'd be a good test of our reproducible builds logic if we have it yet :-)
 [3:18 PM]Godofredo Contreras (godofredoc): not sure, but let me give it a try
-[4:40 PM]Hixie: @Godofredo Contreras (godofredoc) any luck? 
+[4:40 PM]Hixie: @Godofredo Contreras (godofredoc) any luck?
 [4:56 PM]Godofredo Contreras (godofredoc): The build has not finished yet, I'm using https://ci.chromium.org/p/flutter/builders/prod/Windows%20Host%20Engine/21257
 [4:58 PM]Godofredo Contreras (godofredoc): I'll validate using this artifact https://storage.cloud.google.com/flutter_infra_release/flutter/8cb080365fb189a1e5d1e33a991518f2422e319b/dart-sdk-windows-x64.zip
 [4:59 PM]Greg Spencer (gspencergoog): Can anyone else with a Windows machine reproduce the quarantine that used to happen if you download and unpack https://storage.googleapis.com/flutter_infra_release/flutter/685fbc6f4d9db8026c56ee1a177bb10cc09f884b/android-x64-release/windows-x64.zip ?

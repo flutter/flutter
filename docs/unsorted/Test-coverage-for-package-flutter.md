@@ -9,7 +9,7 @@ When you run `flutter update-packages`, we download the latest coverage data for
 Here is how to show test coverage information in Visual Studio Code:
 
 1. Install the [Coverage Gutters](https://marketplace.visualstudio.com/items?itemName=ryanluker.vscode-coverage-gutters) extension.
-2. Open a `dart` file in `packages/flutter/lib/src`. You should see green and red highlights next to line numbers in the gutter. The green lines mean this line was executed in a test. The red line means that this line is a candidate for execution but was not executed in a test. The status bar at the bottom should also report the current file's code coverage percentage. 
+2. Open a `dart` file in `packages/flutter/lib/src`. You should see green and red highlights next to line numbers in the gutter. The green lines mean this line was executed in a test. The red line means that this line is a candidate for execution but was not executed in a test. The status bar at the bottom should also report the current file's code coverage percentage.
 
 If you run into issues, check for errors in the `Output` pane under the `coverage-gutters` output stream.
 
@@ -45,6 +45,6 @@ Each time you run `--merge-coverage`, the tool goes back to the original `lcov.b
 
 ## How recompute test coverage slowly
 
-If you want to recompute coverage data from scratch, you can use the `--coverage` flag.  For example, `cd packages/flutter && flutter test --coverage`.  
+If you want to recompute coverage data from scratch, you can use the `--coverage` flag.  For example, `cd packages/flutter && flutter test --coverage`.
 
 The `lcov.base.info` file is generated automatically by bots and recomputing from scratch is unnecessary. It is fetched when you run `flutter update-packages`.

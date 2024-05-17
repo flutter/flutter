@@ -13,7 +13,7 @@ If the issue is not listed in Flutter bad builds [tracker](http://go/flutter-bad
 3. Add following information to Flutter bad builds visibility [tracker](http://go/flutter-bad-builds)
    * Issue create date - this can be either buganizer or github issue create date
    * Triaged by - your LDAP
-   * Github issue id  
+   * Github issue id
    * Begin bad build commit hash URL (Commit hash URL can be from dart, engine, flutter and skia repos)
    * Impacted platform
 

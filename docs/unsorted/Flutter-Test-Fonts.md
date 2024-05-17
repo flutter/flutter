@@ -1,21 +1,21 @@
 Flutter tests run via the `flutter test` command have access to several readily available test fonts, including [FlutterTest](#the-fluttertest-test-font) and [Ahem](https://www.w3.org/Style/CSS/Test/Fonts/Ahem/).
 
-In tests, if [`fontFamily`](https://master-api.flutter.dev/flutter/painting/TextStyle/fontFamily.html) isn't specified or the specified font families are not available, the default test font `FlutterTest` will be used. 
+In tests, if [`fontFamily`](https://master-api.flutter.dev/flutter/painting/TextStyle/fontFamily.html) isn't specified or the specified font families are not available, the default test font `FlutterTest` will be used.
 If you wish to use a custom font in tests, check out the [`FontLoader`](https://master-api.flutter.dev/flutter/services/FontLoader-class.html) class, and [this example](https://github.com/flutter/flutter/blob/6ec444506375cfa94535a45c2320e01094c295e0/packages/flutter/test/material/icons_test.dart#L149-L172).
 
 ## The `FlutterTest` test font
 
 ### Font Metrics (in design units)
 
-| | Ascent | Descent | Line Gap (Leading) | Units Per EM | Underline Position | 
+| | Ascent | Descent | Line Gap (Leading) | Units Per EM | Underline Position |
 | :-- | :---: | :---: | :---: | :---: | :---: |
 | `FlutterTest` | 768 (0.75 em) above the baseline | 256 (0.25 em) below the baseline | 0 | 1024 | 146 under the baseline |
 | `Ahem` | 800 (0.8 em) above the baseline | 200 (0.2 em) below the baseline | 0 | 1000 | 142 under the baseline |
 
-The `FlutterTest` font's `1024 units-per-em` is a power of 2, making it less likely to introduce precision loss in metrics calculations, when used as a divisor.  
+The `FlutterTest` font's `1024 units-per-em` is a power of 2, making it less likely to introduce precision loss in metrics calculations, when used as a divisor.
 Thanks to that, the `FlutterTest` font generally provides more precise and font-engine-agnostic font/glyph metrics than `Ahem`.
 
-**Example** 
+**Example**
 
 You can expect this test to pass on all platforms (currently with the exception of the web HTML renderer):
 ```dart
@@ -31,7 +31,7 @@ final lineMetrics = textPainer.computeLineMetrics().first;
 
 expect(lineMetrics.height, 14.0);
 expect(lineMetrics.ascent, 10.5); // 0.75em * 14.0pt
-expect(lineMetrics.descent, 3.5); // 0.25em * 14.0pt 
+expect(lineMetrics.descent, 3.5); // 0.25em * 14.0pt
 // 'text' is 4 glyphs. Most glyphs are as wide as they are tall.
 expect(lineMetrics.width, 14.0 * 4);
 ```
@@ -39,7 +39,7 @@ While with the `Ahem` font you would get [slightly different metrics on differen
 
 ### Glyphs
 
-(images to be added) 
+(images to be added)
 
 The font covers most types of glyphs defined in the `Ahem` font.
 
@@ -68,7 +68,7 @@ Unmapped codepoints will be mapped to the **.notdef** glyph in the test environm
 | 1/10 Advance | **codepoint(s):** 0x200a<br />**character(s):** `<HAIR SPACE>` |  |  |  |
 | Zero Advance | **codepoint(s):** 0xfeff<br />**character(s):** `<ZERO WIDTH NO-BREAK SPACE>` |  |  |  |
 
-### Caveats 
+### Caveats
 
 To disable FreeType auto-hinter, the family name defined within the font is not `FlutterTest` but `MingLiU`. This typically doesn't affect framework tests as the font is registered under the name `FlutterTest`.
 

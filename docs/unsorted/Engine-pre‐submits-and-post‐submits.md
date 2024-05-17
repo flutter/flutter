@@ -1,6 +1,6 @@
 The Flutter engine repo runs both pre-submit (before merging) and post-submit (after merging) suites of tests and checks, defined in [`.ci.yaml`](https://github.com/flutter/engine/blob/main/.ci.yaml).
 
-> [!TIP]  
+> [!TIP]
 > See [Cocoon Scheduler](https://github.com/flutter/cocoon/blob/main/CI_YAML.md) for details.
 
 Failure to run appropriate tests for changes can (and do) result in the engine tree turning red, which in turn causes an expensive cascade of developers being blocked, investigative work, reverts, and roll-forwards. Where possible, all attempts should be made to run any/all tests _before_ merging a PR. See nuances (below) for exceptional cases.
@@ -28,7 +28,7 @@ Typically, pre-submits _always_ run on every PR, and don't need any special atte
 1. Targets that provide a `runIf: ...` configuration
 2. Changes that impact Clang Tidy
 
-> [!WARNING]  
+> [!WARNING]
 >
 > `runIf: ...` is a powerful (but dangerous) feature that trades predictability for speed.
 >

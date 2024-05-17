@@ -69,7 +69,7 @@ $ ./out/host_debug_unopt/embedder_unittests
 
 ## Address Sanitizer
 
-Address sanitizer detects memory errors. Official documentation is at [https://github.com/google/sanitizers/wiki/AddressSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizer). Enable using the `--asan` flag. Enabling address sanitizer also implicitly enables 
+Address sanitizer detects memory errors. Official documentation is at [https://github.com/google/sanitizers/wiki/AddressSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizer). Enable using the `--asan` flag. Enabling address sanitizer also implicitly enables
 Leak Sanitizer. The  `./flutter/testing/sanitizer_suppressions.sh` script enables leak sanitization in Address Sanitizer builds.
 
 

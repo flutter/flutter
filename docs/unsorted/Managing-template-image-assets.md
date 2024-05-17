@@ -4,7 +4,7 @@ Flutter's presubmit checks prevent binaries from being checked in to the reposit
 
 ## Adding/Updating template image assets
 
-In order to add or update image assets, two patches are required: one to the `flutter/packages` repository and one to the `flutter/flutter` repository. 
+In order to add or update image assets, two patches are required: one to the `flutter/packages` repository and one to the `flutter/flutter` repository.
 
 The [flutter_template_images][fti_repo] package repository contains a [`templates`][package_templates_dir] directory laid out identically to the [`templates`][tools_templates_dir] directory in the [flutter_tools][tools_repo] package in the main repository. Assets are first added to the flutter_template_images repo, which is then rolled into the main repository, where the template files and manifest must be updated.
 

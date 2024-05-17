@@ -568,7 +568,7 @@ This is the list of services with their descriptions:
    </td>
    <td>Configuration management
    </td>
-   <td>Configuration service to provision, spin up and tear down virtual machines. 
+   <td>Configuration service to provision, spin up and tear down virtual machines.
    </td>
   </tr>
   <tr>
