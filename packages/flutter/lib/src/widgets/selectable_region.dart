@@ -552,8 +552,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           ),
           (TapAndPanGestureRecognizer instance) {
         instance
-          ..onTapTrackStart = onTapTrackStart
-          ..onTapTrackReset = onTapTrackReset
+          ..onTapTrackStart = _onTapTrackStart
+          ..onTapTrackReset = _onTapTrackReset
           ..onTapDown = _startNewMouseSelectionGesture
           ..onTapUp = _handleMouseTapUp
           ..onDragStart = _handleMouseDragStart
@@ -565,13 +565,13 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     );
   }
 
-  void onTapTrackStart() {
+  void _onTapTrackStart() {
     _isShiftPressed = HardwareKeyboard.instance.logicalKeysPressed
         .intersection(<LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight})
         .isNotEmpty;
   }
 
-  void onTapTrackReset() {
+  void _onTapTrackReset() {
     _isShiftPressed = false;
   }
 
