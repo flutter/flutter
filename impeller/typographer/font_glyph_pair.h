@@ -20,6 +20,7 @@ namespace impeller {
 struct ScaledFont {
   Font font;
   Scalar scale;
+  Color color;
 };
 
 using FontGlyphMap = std::unordered_map<ScaledFont, std::unordered_set<Glyph>>;
@@ -40,7 +41,7 @@ struct FontGlyphPair {
 template <>
 struct std::hash<impeller::ScaledFont> {
   constexpr std::size_t operator()(const impeller::ScaledFont& sf) const {
-    return fml::HashCombine(sf.font.GetHash(), sf.scale);
+    return fml::HashCombine(sf.font.GetHash(), sf.scale, sf.color.ToARGB());
   }
 };
 
@@ -48,7 +49,8 @@ template <>
 struct std::equal_to<impeller::ScaledFont> {
   constexpr bool operator()(const impeller::ScaledFont& lhs,
                             const impeller::ScaledFont& rhs) const {
-    return lhs.font.IsEqual(rhs.font) && lhs.scale == rhs.scale;
+    return lhs.font.IsEqual(rhs.font) && lhs.scale == rhs.scale &&
+           lhs.color == rhs.color;
   }
 };
 
