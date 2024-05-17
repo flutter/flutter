@@ -106,6 +106,14 @@ class Checkbox extends StatefulWidget {
   /// Creates a checkbox that adapts to the look and feel of [ThemeData.platform]
   /// for iOS and macOS, and otherwise builds a Material Design checkbox.
   ///
+  /// If [Checkbox.adaptive] is used to create an adaptive [Checkbox] on iOS and
+  /// macOS, the following parameters are ignored: [hoverColor], [overlayColor],
+  /// [splashRadius], [materialTapTargetSize], [visualDensity], [isError].
+  /// [hoverColor], [overlayColor] and [splashRadius] are ignored because
+  /// a Cupertino checkbox does not have a radial reaction overlay.
+  /// [materialTapTargetSize], [visualDensity], and [isError] are ignored
+  /// because those parameters only apply to a Material checkbox.
+  ///
   /// To provide a custom checkbox theme that's only used by this factory
   /// constructor, add a custom `Adaptation<CheckboxThemeData>` class to
   /// [ThemeData.adaptations]. This can be useful in situations where you don't

@@ -884,6 +884,7 @@ void main() {
 
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
 
     await tester.pumpWidget(buildApp());
@@ -891,6 +892,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
+        ..circle(color: Colors.orange[500])
         ..path(color: const Color(0xff2196f3))
         ..path(color: const Color(0xffffffff), style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
@@ -941,6 +943,7 @@ void main() {
 
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
 
     await tester.pumpWidget(buildApp());
@@ -948,6 +951,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox))),
       paints
+        ..circle(color: Colors.orange[500])
         ..path(color: const Color(0xff6750a4))
         ..path(color: theme.colorScheme.onPrimary, style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
@@ -1297,6 +1301,7 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
@@ -1404,6 +1409,7 @@ void main() {
     await tester.pumpWidget(buildCheckbox());
     final TestGesture gesture3 = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture3.addPointer();
+    addTearDown(gesture3.removePointer);
     await gesture3.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
@@ -1475,6 +1481,7 @@ void main() {
     await tester.pumpWidget(buildCheckbox());
     final TestGesture gesture3 = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture3.addPointer();
+    addTearDown(gesture3.removePointer);
     await gesture3.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
@@ -1613,6 +1620,7 @@ void main() {
     // Start hovering
     final TestGesture gesture5 = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture5.addPointer();
+    addTearDown(gesture5.removePointer);
     await gesture5.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
@@ -2041,6 +2049,7 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
 
@@ -2132,6 +2141,7 @@ void main() {
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
     await tester.pumpAndSettle();
     expectBorder();
@@ -2685,6 +2695,107 @@ void main() {
       await tester.pump();
     }
   });
+
+  testWidgets('Checkbox.adaptive fill color resolves in widget states (Cupertino)', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Checkbox');
+    addTearDown(focusNode.dispose);
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    const Color hoverColor = Color(0xFF000005);
+    const Color focusColor = Color(0xFF000006);
+    const Color checkColor = Colors.white;
+    const Color defaultActiveFillColor = Color(0xff007aff);
+    const Color defaultInactiveFillColor = Colors.white;
+    const Color pressedDarkShadow = Color(0x0d000000);
+
+    Color getFillColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.hovered)) {
+        return hoverColor;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return focusColor;
+      }
+      if (states.contains(WidgetState.selected)){
+        return defaultActiveFillColor;
+      }
+      return defaultInactiveFillColor;
+    }
+
+    await tester.pumpWidget(buildAdaptiveCheckbox(platform: TargetPlatform.macOS, value: false, fillColor: WidgetStateProperty.resolveWith(getFillColor)));
+    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints
+        ..path(color: defaultInactiveFillColor)
+        ..drrect()
+        ..path(color: pressedDarkShadow),
+      reason: 'Inactive pressed Checkbox is slightly darkened',
+    );
+
+    await tester.pumpWidget(buildAdaptiveCheckbox(platform: TargetPlatform.macOS, fillColor: WidgetStateProperty.resolveWith(getFillColor)));
+    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byType(Checkbox)));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints
+        ..path(color: defaultActiveFillColor)
+        ..rrect()
+        ..path(color: checkColor)
+        ..path(color: checkColor)
+        ..path(color: pressedDarkShadow),
+      reason: 'Active pressed Checkbox is slightly darkened',
+    );
+
+    await tester.pumpWidget(Container()); // reset test
+    await tester.pumpWidget(buildAdaptiveCheckbox(platform: TargetPlatform.macOS, autofocus: true, focusNode: focusNode, fillColor: WidgetStateProperty.resolveWith(getFillColor)));
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints
+        ..path(color: focusColor),
+      reason: 'Focused Checkbox should use $focusColor',
+    );
+
+    // Start hovering
+    final TestGesture gesture5 = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture5.addPointer();
+    addTearDown(gesture5.removePointer);
+    await gesture5.moveTo(tester.getCenter(find.byType(Checkbox)));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints
+        ..path(color: hoverColor),
+      reason: 'Hovered Checkbox should use $hoverColor',
+    );
+
+    // Finish gestures to release resources.
+    await gesture1.up();
+    await gesture2.up();
+    await tester.pumpAndSettle();
+});
+
+  testWidgets('Checkbox.adaptive has dropshadow when unchecked (Cupertino)', (WidgetTester tester) async {
+    const Color defaultInactiveFillColor = Colors.white;
+
+    await tester.pumpWidget(buildAdaptiveCheckbox(platform: TargetPlatform.macOS, value: false));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Checkbox))),
+      paints
+        ..clipPath()
+        ..path(color: defaultInactiveFillColor)
+        ..path()  // dropshadow path
+        ..drrect(),
+    );
+  });
 }
 
 class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
@@ -2712,6 +2823,7 @@ Widget buildAdaptiveCheckbox({
   FocusNode? focusNode,
   Color? focusColor,
   MouseCursor? mouseCursor,
+  WidgetStateProperty<Color>? fillColor,
   CheckboxThemeData? overallCheckboxThemeData,
   CheckboxThemeData? checkboxThemeData,
   Adaptation<CheckboxThemeData>? checkboxThemeAdaptation,
@@ -2720,6 +2832,7 @@ Widget buildAdaptiveCheckbox({
     focusNode: focusNode,
     autofocus: autofocus,
     focusColor: focusColor,
+    fillColor: fillColor,
     value: value,
     mouseCursor: mouseCursor,
     onChanged: enabled ? (_) {} : null,
