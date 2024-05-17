@@ -2722,11 +2722,13 @@ void main() {
               addAutomaticKeepAlives: false,
               addRepaintBoundaries: false,
               builder: (BuildContext context, ChildVicinity vicinity) {
-                final ValueKey<int>? key = switch (vicinity) {
-                  ChildVicinity(xIndex: 1, yIndex: 1) => const ValueKey<int>(1),
-                  ChildVicinity(xIndex: 1, yIndex: 2) => const ValueKey<int>(2),
-                  _ => null,
-                };
+                ValueKey<int>? key;
+                if (vicinity == const ChildVicinity(xIndex: 1, yIndex: 1)) {
+                  key = const ValueKey<int>(1);
+                } else if (vicinity ==
+                    const ChildVicinity(xIndex: 1, yIndex: 2)) {
+                  key = const ValueKey<int>(2);
+                }
                 return SizedBox.square(key: key, dimension: 200);
               });
       final TwoDimensionalChildBuilderDelegate delegate2 =
@@ -2768,11 +2770,13 @@ void main() {
               addAutomaticKeepAlives: false,
               addRepaintBoundaries: false,
               builder: (BuildContext context, ChildVicinity vicinity) {
-                final ValueKey<int>? key = switch (vicinity) {
-                  ChildVicinity(xIndex: 0, yIndex: 0) => const ValueKey<int>(1),
-                  ChildVicinity(xIndex: 1, yIndex: 1) => const ValueKey<int>(2),
-                  _ => null,
-                };
+                ValueKey<int>? key;
+                if (vicinity == const ChildVicinity(xIndex: 1, yIndex: 1)) {
+                  key = const ValueKey<int>(1);
+                } else if (vicinity ==
+                    const ChildVicinity(xIndex: 1, yIndex: 2)) {
+                  key = const ValueKey<int>(2);
+                }
                 return Checkbox(key: key, value: false, onChanged: (_) {});
               });
       final TwoDimensionalChildBuilderDelegate delegate2 =

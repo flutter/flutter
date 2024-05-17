@@ -209,11 +209,13 @@ class ListItem extends StatelessWidget {
   }
 
   String _convertCountToStr(int count) {
-    return switch (count) {
-      < 10000  => count.toString(),
-      < 100000 => '${(count / 10000).toStringAsPrecision(2)}w',
-      _        => '${(count / 10000).floor()}w',
-    };
+    if (count < 10000) {
+      return count.toString();
+    } else if (count < 100000) {
+      return '${(count / 10000).toStringAsPrecision(2)}w';
+    } else {
+      return '${(count / 10000).floor()}w';
+    }
   }
 
   Widget _buildUserInfo() {
