@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/input_decorator/input_decoration.material_state.0.dart' as example;
+import 'package:flutter_api_samples/material/input_decorator/input_decoration.widget_state.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
