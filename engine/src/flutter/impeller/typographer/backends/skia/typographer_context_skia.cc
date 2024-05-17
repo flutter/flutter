@@ -242,7 +242,7 @@ static void DrawGlyph(SkCanvas* canvas,
   sk_font.setHinting(SkFontHinting::kSlight);
   sk_font.setEmbolden(metrics.embolden);
 
-  auto glyph_color = has_color ? SK_ColorWHITE : SK_ColorBLACK;
+  auto glyph_color = has_color ? scaled_font.color.ToARGB() : SK_ColorBLACK;
 
   SkPaint glyph_paint;
   glyph_paint.setColor(glyph_color);
@@ -331,8 +331,8 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
   std::vector<FontGlyphPair> new_glyphs;
   for (const auto& font_value : font_glyph_map) {
     const ScaledFont& scaled_font = font_value.first;
-    const FontGlyphAtlas* font_glyph_atlas =
-        last_atlas->GetFontGlyphAtlas(scaled_font.font, scaled_font.scale);
+    const FontGlyphAtlas* font_glyph_atlas = last_atlas->GetFontGlyphAtlas(
+        scaled_font.font, scaled_font.scale, scaled_font.color);
     if (font_glyph_atlas) {
       for (const Glyph& glyph : font_value.second) {
         if (!font_glyph_atlas->FindGlyphBounds(glyph)) {

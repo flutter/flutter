@@ -166,7 +166,7 @@ bool TextContents::Render(const ContentContext& renderer,
           Scalar rounded_scale = TextFrame::RoundScaledFontSize(
               scale_, font.GetMetrics().point_size);
           const FontGlyphAtlas* font_atlas =
-              atlas->GetFontGlyphAtlas(font, rounded_scale);
+              atlas->GetFontGlyphAtlas(font, rounded_scale, frame_->GetColor());
           if (!font_atlas) {
             VALIDATION_LOG << "Could not find font in the atlas.";
             continue;

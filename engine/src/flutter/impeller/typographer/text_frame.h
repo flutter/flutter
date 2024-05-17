@@ -20,7 +20,10 @@ class TextFrame {
  public:
   TextFrame();
 
-  TextFrame(std::vector<TextRun>& runs, Rect bounds, bool has_color);
+  TextFrame(std::vector<TextRun>& runs,
+            Rect bounds,
+            bool has_color,
+            Color color);
 
   ~TextFrame();
 
@@ -61,6 +64,15 @@ class TextFrame {
   bool MaybeHasOverlapping() const;
 
   //----------------------------------------------------------------------------
+  /// @brief      Returns the paint color this text frame was recorded with.
+  ///
+  ///             Non-bitmap/COLR fonts always use a black text color here, but
+  ///             COLR fonts can potentially use the paint color in the glyph
+  ///             atlas, so this color must be considered as part of the cache
+  ///             key.
+  Color GetColor() const;
+
+  //----------------------------------------------------------------------------
   /// @brief      The type of atlas this run should be emplaced in.
   GlyphAtlas::Type GetAtlasType() const;
 
@@ -71,7 +83,8 @@ class TextFrame {
  private:
   std::vector<TextRun> runs_;
   Rect bounds_;
-  bool has_color_ = false;
+  bool has_color_;
+  Color color_;
 };
 
 }  // namespace impeller
