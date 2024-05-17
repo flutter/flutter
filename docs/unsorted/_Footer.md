@@ -1,1 +1,0 @@
-Flutter • [Write test, find bug](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#write-test-find-bug) • [Embrace the yak shave](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#lazy-programming) • [Black Lives Matter](https://about.google/commitments/racialequity/) • https://flutter.dev/
