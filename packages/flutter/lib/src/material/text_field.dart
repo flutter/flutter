@@ -370,7 +370,7 @@ class TextField extends StatefulWidget {
   final TextMagnifierConfiguration? magnifierConfiguration;
 
   /// {@macro flutter.widgets.editableText.groupId}
-  final Object? groupId;
+  final Object groupId;
 
   /// Controls the text being edited.
   ///

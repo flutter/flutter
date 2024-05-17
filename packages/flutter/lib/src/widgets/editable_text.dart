@@ -841,7 +841,7 @@ class EditableText extends StatefulWidget {
     this.onAppPrivateCommand,
     this.onSelectionChanged,
     this.onSelectionHandleTapped,
-    this.groupId,
+    this.groupId = EditableText,
     this.onTapOutside,
     List<TextInputFormatter>? inputFormatters,
     this.mouseCursor,
@@ -1477,7 +1477,7 @@ class EditableText extends StatefulWidget {
   /// Text fields with the same group identifier share the same tap region.
   /// Defaults to the type of [EditableText].
   /// {@endtemplate}
-  final Object? groupId;
+  final Object groupId;
 
   /// {@template flutter.widgets.editableText.onTapOutside}
   /// Called for each tap that occurs outside of the[TextFieldTapRegion] group
@@ -5180,7 +5180,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       compositeCallback: _compositeCallback,
       enabled: _hasInputConnection,
       child: TextFieldTapRegion(
-        groupId: _hasFocus ? widget.groupId ?? EditableText : null,
+        groupId: _hasFocus ? widget.groupId : null,
         onTapOutside: _hasFocus ? widget.onTapOutside ?? _defaultOnTapOutside : null,
         debugLabel: kReleaseMode ? null : 'EditableText',
         child: MouseRegion(

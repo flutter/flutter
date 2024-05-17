@@ -282,7 +282,7 @@ class TextFormField extends FormField<String> {
   final TextEditingController? controller;
 
   /// {@macro flutter.widgets.editableText.groupId}
-  final Object? groupId;
+  final Object groupId;
 
   /// {@template flutter.material.TextFormField.onChanged}
   /// Called when the user initiates a change to the TextField's

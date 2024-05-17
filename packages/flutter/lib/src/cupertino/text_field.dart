@@ -449,7 +449,7 @@ class CupertinoTextField extends StatefulWidget {
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText);
 
   /// {@macro flutter.widgets.editableText.groupId}
-  final Object? groupId;
+  final Object groupId;
 
   /// Controls the text being edited.
   ///
