@@ -942,11 +942,12 @@ enum ImpellerStatus {
 
   const ImpellerStatus._(this.asBool);
 
-  factory ImpellerStatus.fromBool(bool? b) => switch (b) {
-    true  => enabled,
-    false => disabled,
-    null  => platformDefault,
-  };
+  factory ImpellerStatus.fromBool(bool? b) {
+    if (b == null) {
+      return platformDefault;
+    }
+    return b ? enabled : disabled;
+  }
 
   final bool? asBool;
 }
