@@ -48,6 +48,11 @@
     - any-glob-to-any-file:
       - examples/api/**/*
 
+'d: docs/':
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/**/*
+
 'd: examples':
   - changed-files:
     - any-glob-to-any-file:
@@ -119,7 +124,7 @@ framework:
 platform-android:
   - changed-files:
     - any-glob-to-any-file:
-      - docs/platform/android
+      - docs/platform/android/**/*
 
 platform-ios:
   - changed-files:
@@ -146,8 +151,7 @@ platform-web:
 team-android:
   - changed-files:
     - any-glob-to-any-file:
-      - docs/platform/android
-
+      - docs/platform/android/**/*
 
 tool:
   - changed-files:
