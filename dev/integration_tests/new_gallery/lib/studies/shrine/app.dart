@@ -116,8 +116,7 @@ class _ShrineAppState extends State<ShrineApp>
 
   // Closes the bottom sheet if it is open.
   Future<bool> _onWillPop() async {
-    final AnimationStatus status = _expandingController.status;
-    if (status.isForwardOrCompleted) {
+    if (_expandingController.isForwardOrCompleted) {
       await _expandingController.reverse();
       return false;
     }
