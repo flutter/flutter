@@ -1,0 +1,1 @@
+The flutter/plugins repository is no longer in use. See [Setting up the Packages development environment](https://github.com/flutter/flutter/wiki/Setting-up-the-Packages-development-environment) instead.
