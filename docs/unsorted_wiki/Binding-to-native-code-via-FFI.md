@@ -1,0 +1,1 @@
+Please see [Binding to native code using dart:ffi](https://flutter.dev/docs/development/platform-integration/c-interop) on [flutter.dev](https://flutter.dev/)
