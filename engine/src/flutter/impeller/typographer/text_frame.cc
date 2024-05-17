@@ -3,13 +3,20 @@
 // found in the LICENSE file.
 
 #include "impeller/typographer/text_frame.h"
+#include "impeller/typographer/font_glyph_pair.h"
 
 namespace impeller {
 
 TextFrame::TextFrame() = default;
 
-TextFrame::TextFrame(std::vector<TextRun>& runs, Rect bounds, bool has_color)
-    : runs_(std::move(runs)), bounds_(bounds), has_color_(has_color) {}
+TextFrame::TextFrame(std::vector<TextRun>& runs,
+                     Rect bounds,
+                     bool has_color,
+                     Color color)
+    : runs_(std::move(runs)),
+      bounds_(bounds),
+      has_color_(has_color),
+      color_(color) {}
 
 TextFrame::~TextFrame() = default;
 
@@ -28,6 +35,10 @@ const std::vector<TextRun>& TextFrame::GetRuns() const {
 GlyphAtlas::Type TextFrame::GetAtlasType() const {
   return has_color_ ? GlyphAtlas::Type::kColorBitmap
                     : GlyphAtlas::Type::kAlphaBitmap;
+}
+
+Color TextFrame::GetColor() const {
+  return color_;
 }
 
 bool TextFrame::MaybeHasOverlapping() const {
@@ -78,7 +89,7 @@ void TextFrame::CollectUniqueFontGlyphPairs(FontGlyphMap& glyph_map,
     const Font& font = run.GetFont();
     auto rounded_scale =
         RoundScaledFontSize(scale, font.GetMetrics().point_size);
-    auto& set = glyph_map[{font, rounded_scale}];
+    auto& set = glyph_map[ScaledFont{font, rounded_scale, color_}];
     for (const TextRun::GlyphPosition& glyph_position :
          run.GetGlyphPositions()) {
 #if false

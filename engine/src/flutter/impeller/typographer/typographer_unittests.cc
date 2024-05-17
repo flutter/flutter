@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "display_list/dl_color.h"
 #include "flutter/display_list/testing/dl_test_snippets.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
@@ -10,6 +11,7 @@
 #include "impeller/playground/playground_test.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
+#include "impeller/typographer/font_glyph_pair.h"
 #include "impeller/typographer/lazy_glyph_atlas.h"
 #include "impeller/typographer/rectangle_packer.h"
 #include "third_party/skia/include/core/SkFont.h"
@@ -38,6 +40,22 @@ static std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
     const TextFrame& frame) {
   FontGlyphMap font_glyph_map;
   frame.CollectUniqueFontGlyphPairs(font_glyph_map, scale);
+  return typographer_context->CreateGlyphAtlas(context, type, host_buffer,
+                                               atlas_context, font_glyph_map);
+}
+
+static std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
+    Context& context,
+    const TypographerContext* typographer_context,
+    HostBuffer& host_buffer,
+    GlyphAtlas::Type type,
+    Scalar scale,
+    const std::shared_ptr<GlyphAtlasContext>& atlas_context,
+    const std::vector<std::shared_ptr<TextFrame>>& frames) {
+  FontGlyphMap font_glyph_map;
+  for (auto& frame : frames) {
+    frame->CollectUniqueFontGlyphPairs(font_glyph_map, scale);
+  }
   return typographer_context->CreateGlyphAtlas(context, type, host_buffer,
                                                atlas_context, font_glyph_map);
 }
@@ -279,6 +297,61 @@ TEST_P(TypographerTest, MaybeHasOverlapping) {
   auto frame_2 = MakeTextFrameFromTextBlobSkia(
       SkTextBlob::MakeFromString("123456789", sk_font));
   ASSERT_FALSE(frame_2->MaybeHasOverlapping());
+}
+
+TEST_P(TypographerTest, GlyphColorIsPartOfCacheKey) {
+  auto host_buffer = HostBuffer::Create(GetContext()->GetResourceAllocator());
+#if FML_OS_MACOSX
+  auto mapping = flutter::testing::OpenFixtureAsSkData("Apple Color Emoji.ttc");
+#else
+  auto mapping = flutter::testing::OpenFixtureAsSkData("NotoColorEmoji.ttf");
+#endif
+  ASSERT_TRUE(mapping);
+  sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
+  SkFont emoji_font(font_mgr->makeFromData(mapping), 50.0);
+
+  auto context = TypographerContextSkia::Make();
+  auto atlas_context =
+      context->CreateGlyphAtlasContext(GlyphAtlas::Type::kColorBitmap);
+
+  // Create two frames with the same character and a different color, expect
+  // that it adds a character.
+  auto frame = MakeTextFrameFromTextBlobSkia(
+      SkTextBlob::MakeFromString("😂", emoji_font), flutter::DlColor::kCyan());
+  auto frame_2 = MakeTextFrameFromTextBlobSkia(
+      SkTextBlob::MakeFromString("😂", emoji_font),
+      flutter::DlColor::kMagenta());
+
+  auto next_atlas = CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
+                                     GlyphAtlas::Type::kColorBitmap, 1.0f,
+                                     atlas_context, {frame, frame_2});
+
+  EXPECT_EQ(next_atlas->GetGlyphCount(), 2u);
+}
+
+TEST_P(TypographerTest, GlyphColorIsIgnoredForNonEmojiFonts) {
+  auto host_buffer = HostBuffer::Create(GetContext()->GetResourceAllocator());
+  sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
+  sk_sp<SkTypeface> typeface =
+      font_mgr->matchFamilyStyle("Arial", SkFontStyle::Normal());
+  SkFont sk_font(typeface, 0.5f);
+
+  auto context = TypographerContextSkia::Make();
+  auto atlas_context =
+      context->CreateGlyphAtlasContext(GlyphAtlas::Type::kColorBitmap);
+
+  // Create two frames with the same character and a different color, but as a
+  // non-emoji font the text frame constructor will ignore it.
+  auto frame = MakeTextFrameFromTextBlobSkia(
+      SkTextBlob::MakeFromString("A", sk_font), flutter::DlColor::kCyan());
+  auto frame_2 = MakeTextFrameFromTextBlobSkia(
+      SkTextBlob::MakeFromString("A", sk_font), flutter::DlColor::kMagenta());
+
+  auto next_atlas = CreateGlyphAtlas(*GetContext(), context.get(), *host_buffer,
+                                     GlyphAtlas::Type::kColorBitmap, 1.0f,
+                                     atlas_context, {frame, frame_2});
+
+  EXPECT_EQ(next_atlas->GetGlyphCount(), 1u);
 }
 
 TEST_P(TypographerTest, RectanglePackerAddsNonoverlapingRectangles) {
