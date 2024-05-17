@@ -750,7 +750,7 @@ class _SelectableTextContainer extends StatefulWidget {
     required this.selectionColor,
   });
 
-  final InlineSpan text;
+  final TextSpan text;
   final TextAlign textAlign;
   final TextDirection? textDirection;
   final bool softWrap;
@@ -769,16 +769,25 @@ class _SelectableTextContainer extends StatefulWidget {
 
 class _SelectableTextContainerState extends State<_SelectableTextContainer> {
   late final _SelectableTextContainerDelegate _selectionDelegate;
+  late final _TextSpanContentController _textContentController;
   final GlobalKey _textKey = GlobalKey();
+
+  void contentsChanged() {
+    setState(() {});
+  }
 
   @override
   void initState() {
     super.initState();
-    _selectionDelegate = _SelectableTextContainerDelegate(_textKey);
+    _textContentController = _TextSpanContentController(widget.text);
+    _textContentController.addListener(contentsChanged);
+    _selectionDelegate = _SelectableTextContainerDelegate(_textKey, _textContentController);
   }
 
   @override
   void dispose() {
+    _textContentController.removeListener(contentsChanged);
+    _textContentController.dispose();
     _selectionDelegate.dispose();
     super.dispose();
   }
@@ -802,7 +811,7 @@ class _SelectableTextContainerState extends State<_SelectableTextContainer> {
         textWidthBasis: widget.textWidthBasis,
         textHeightBehavior: widget.textHeightBehavior,
         selectionColor: widget.selectionColor,
-        text: widget.text,
+        text: _textContentController.buildContents(),
       ),
     );
   }
@@ -869,8 +878,10 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainerDelegate {
   _SelectableTextContainerDelegate(
     GlobalKey textKey,
+    this.textContentController,
   ) : _textKey = textKey;
 
+  final _TextSpanContentController textContentController;
   final GlobalKey _textKey;
   RenderParagraph get paragraph => _textKey.currentContext!.findRenderObject()! as RenderParagraph;
 
@@ -1212,6 +1223,44 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     return a.right > b.right ? 1 : -1;
   }
 
+  @override
+  SelectedContent? getSelectedContent() {
+    final List<SelectedContent> selections = <SelectedContent>[
+      for (final Selectable selectable in selectables)
+        if (selectable.getSelectedContent() case final SelectedContent data) data,
+    ];
+    if (selections.isEmpty) {
+      return null;
+    }
+    // A [_SelectableFragment] does not typically provide a [SelectedContentController],
+    // so this pass should collect all [PlaceholderSpan] child controllers.
+    final List<SelectedContentController> childControllers = <SelectedContentController>[
+      for (final SelectedContent selectedContent in selections)
+        if (selectedContent.controllers case final List<SelectedContentController> data) ...data,
+    ];
+    textContentController.children.clear(); // To prevent from adding duplicate controllers to children list.
+    childControllers.forEach((SelectedContentController childController) {
+      textContentController.addChild(childController);
+    });
+    debugPrint('inside text ${childControllers.length}');
+    /// TODO(Renzo-Olivares): Accurately find the selection endpoints.
+    /// For example in the case of a Column, it is a [SelectionContainer] itself,
+    /// so when we do something like Column.SelectionContainer.getSelectedContent,
+    /// it does not accurately return the expected selection offsets. What should Column.SelectionContainer,getSelectedContent retain?
+    final bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
+    textContentController.startOffset = forwardSelection ? selections.first.startOffset : selections.last.endOffset;
+    textContentController.endOffset = forwardSelection ? selections.last.endOffset : selections.first.endOffset;
+    final StringBuffer buffer = StringBuffer();
+    for (final SelectedContent selection in selections) {
+      buffer.write(selection.plainText);
+    }
+    return SelectedContent(
+      plainText: buffer.toString(),
+      geometry: value,
+      controllers: <SelectedContentController>[textContentController],
+    );
+  }
+
   // From [SelectableRegion].
 
   // Clears the selection on all selectables not in the range of
@@ -1399,5 +1448,34 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     _hasReceivedEndEvent.removeWhere((Selectable selectable) => !selectableSet.contains(selectable));
     _hasReceivedStartEvent.removeWhere((Selectable selectable) => !selectableSet.contains(selectable));
     super.didChangeSelectables();
+  }
+}
+
+class _TextSpanContentController extends SelectedContentController<TextSpan> {
+  _TextSpanContentController(super.value);
+
+  @override
+  TextSpan buildContents() {
+    return value;
+  }
+
+  @override
+  int get startOffset => _start;
+  int _start = -1;
+  set startOffset(int newValue) {
+    if (_start== newValue) {
+      return;
+    }
+    _start = newValue; 
+  }
+
+  @override
+  int get endOffset => _end;
+  int _end = -1;
+  set endOffset(int newValue) {
+    if (_end == newValue) {
+      return;
+    }
+    _end = newValue; 
   }
 }

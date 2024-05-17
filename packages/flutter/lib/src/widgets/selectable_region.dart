@@ -2386,12 +2386,25 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     if (selections.isEmpty) {
       return null;
     }
+    // final List<SelectedContentController> childControllers = <SelectedContentController>[];
+    // for (final SelectedContent selectedContent in selections) {
+    //   if (selectedContent.controllers != null) {
+    //     childControllers.addAll(selectedContent.controllers!);
+    //   }
+    // }
+    final List<SelectedContentController> childControllers = <SelectedContentController>[
+      for (final SelectedContent selectedContent in selections)
+        if (selectedContent.controllers case final List<SelectedContentController> data) ...data,
+    ];
+    debugPrint('inside region ${childControllers.length} ${childControllers[0].children.length}');
     final StringBuffer buffer = StringBuffer();
     for (final SelectedContent selection in selections) {
       buffer.write(selection.plainText);
     }
     return SelectedContent(
       plainText: buffer.toString(),
+      geometry: value,
+      controllers: childControllers,
     );
   }
 
