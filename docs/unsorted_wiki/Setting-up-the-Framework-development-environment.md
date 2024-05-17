@@ -21,24 +21,21 @@
 
 ## Set up your environment
 
-1. [Fork the flutter/flutter repo](https://github.com/flutter/flutter/fork) into your own GitHub account. If
-   you already have a fork, and are now installing a development environment on
-   a new machine, make sure you've updated your fork so that you don't use stale
-   configuration options.
+1. Clone the flutter/flutter repo using either SSH or HTTPS (SSH is recommended, but requires a working [SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/about-ssh) on your GitHub account):
+      - SSH: `git clone git@github.com:flutter/flutter.git`
+      - HTTPS: `git clone https://github.com/flutter/flutter.git`
 
-1. Clone the forked repo locally using the method of your choice. GitHub Desktop is simplest. SSH [reportedly](https://github.com/flutter/flutter/issues/148000) has issues if you're not part of the [Flutter org](https://github.com/orgs/flutter/people).
+1. Change into the directory of the cloned repository and rename the origin remote to upstream:
+     1. `cd flutter`
+     1. `git remote rename origin upstream`
 
-   <img width="391" alt="GitHub cloning options" src="https://user-images.githubusercontent.com/6655696/189104233-7db05feb-1543-4f8b-8a2b-cc34cd18c6b8.png">
+1. [Fork the flutter/flutter repo](https://github.com/flutter/flutter/fork) into your own GitHub account.
 
-   If you cloned the repo using HTTPS or SSH, you'll need to configure the upstream remote for `flutter/flutter`. This will allow you to sync changes made in `flutter/flutter` with the fork:
+1. Add your fork as the origin remote to your local clone either using SSH or HTTPS (SSH is recommended, but requires a working [SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/about-ssh) on your GitHub account) by replacing ████████ with your GitHub account name:
+     - SSH: `git remote add origin git@github.com:████████/flutter.git`
+     - HTTPS: `git remote add origin https://github.com/████████/flutter.git`
 
-   1. `cd flutter`
-
-   1. Specify a new remote upstream repository (`flutter/flutter`) that will be synced with the fork.
-      - HTTPS: `git remote add upstream https://github.com/flutter/flutter.git`
-      - SSH: `git remote add upstream git@github.com:flutter/flutter.git`
-   1. Verify the new upstream repository you've specified for your fork.
-
+1. Verify the upstream and origin repository you've specified for your clone.
       - `git remote -v`
 
 1. Add the repo's `bin` directory to your [PATH](https://en.wikipedia.org/wiki/PATH_(variable)): e.g. on UNIX, using `export PATH="$PATH:$HOME/<path to flutter repository>/bin"`
