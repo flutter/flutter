@@ -22,14 +22,20 @@ const ISize& GlyphAtlasContext::GetAtlasSize() const {
   return atlas_size_;
 }
 
+int64_t GlyphAtlasContext::GetHeightAdjustment() const {
+  return height_adjustment_;
+}
+
 std::shared_ptr<RectanglePacker> GlyphAtlasContext::GetRectPacker() const {
   return rect_packer_;
 }
 
 void GlyphAtlasContext::UpdateGlyphAtlas(std::shared_ptr<GlyphAtlas> atlas,
-                                         ISize size) {
+                                         ISize size,
+                                         int64_t height_adjustment) {
   atlas_ = std::move(atlas);
   atlas_size_ = size;
+  height_adjustment_ = height_adjustment;
 }
 
 void GlyphAtlasContext::UpdateRectPacker(

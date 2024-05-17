@@ -493,7 +493,7 @@ std::shared_ptr<GlyphAtlas> TypographerContextSTB::CreateGlyphAtlas(
       context.GetResourceAllocator()->GetMaxTextureSizeSupported()  //
   );
 
-  atlas_context->UpdateGlyphAtlas(glyph_atlas, atlas_size);
+  atlas_context->UpdateGlyphAtlas(glyph_atlas, atlas_size, 0);
   if (atlas_size.IsEmpty()) {
     return nullptr;
   }
