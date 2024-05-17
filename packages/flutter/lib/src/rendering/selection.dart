@@ -100,6 +100,32 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   SelectionResult dispatchSelectionEvent(SelectionEvent event);
 }
 
+/// A controller for the content of a [Selectable].
+abstract class SelectedContentController<T> extends ValueNotifier {
+  SelectedContentController(super.value);
+
+  List<SelectedContentController> children = <SelectedContentController>[];
+
+  int get startOffset;
+  int get endOffset;
+
+  T buildContents();
+
+  void addChild(SelectedContentController childController) {
+    children.add(childController);
+  }
+
+  @override
+  String toString() {
+    return 'SelectedContentController(\n'
+           '  value: $value,\n'
+           '  startOffset: $startOffset,\n'
+           '  endOffset: $endOffset,\n'
+           '  children: $children,\n'
+           ')';
+  }
+}
+
 /// The selected content in a [Selectable] or [SelectionHandler].
 // TODO(chunhtai): Add more support for rich content.
 // https://github.com/flutter/flutter/issues/104206.
@@ -107,10 +133,47 @@ class SelectedContent {
   /// Creates a selected content object.
   ///
   /// Only supports plain text.
-  const SelectedContent({required this.plainText});
+  const SelectedContent({
+    required this.plainText,
+    required this.geometry,
+    this.startOffset = -1,
+    this.endOffset = -1,
+    this.controllers,
+  });
 
   /// The selected content in plain text format.
   final String plainText;
+
+  /// The [SelectionGeometry] of the [Selectable] or [SelectionHandler] containing
+  /// the selection.
+  final SelectionGeometry geometry;
+
+  /// The value representing the beginning of the selection, defaults to -1.
+  ///
+  /// If the [Selectable] contains mutable text, then the offset represents
+  /// character offsets.
+  final int startOffset;
+
+  /// The value representing the end of the selection, defaults to -1.
+  ///
+  /// If the [Selectable] contains mutable text, then the offset represents
+  /// character offsets.
+  final int endOffset;
+
+  /// A list of [SelectedContentController]s that represent the selection, and
+  /// can be used to modify the contents of the selection.
+  final List<SelectedContentController>? controllers;
+
+  @override
+  String toString() {
+    return 'SelectedContent(\n'
+           '  plainText: $plainText,\n'
+           '  geometry: $geometry,\n'
+           '  startOffset: $startOffset,\n'
+           '  endOffset: $endOffset,\n'
+           '  controllers: $controllers,\n'
+           ')';
+  }
 }
 
 /// A mixin that can be selected by users when under a [SelectionArea] widget.
