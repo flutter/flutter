@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(jsimmons): Remove this tag when the test's ordering dependencies
+// have been fixed.
+// Fails with "flutter test --test-randomize-ordering-seed=20240518"
+@Tags(<String>['no-shuffle'])
+library;
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
