@@ -2623,7 +2623,7 @@ void main() {
   testWidgets(
   // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
   experimentalLeakTesting: LeakTesting.settings.withTracked(classes: <String>['CurvedAnimation']),
-  'Fullscreen route does not leak CurveAnimation', (WidgetTester tester) async {
+  'On fullscreen route does not leak CurveAnimation', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
@@ -2665,13 +2665,6 @@ void main() {
     await tester.pump();
 
     await tester.pump(const Duration(milliseconds: 400));
-  });
-
-  testWidgets('CupertinoModalPopupRoute does not leak CurveAnimation',
-  // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-  experimentalLeakTesting: LeakTesting.settings.withTracked(classes: <String>['CurvedAnimation']),
-  (WidgetTester tester) async {
-
   });
 }
 
