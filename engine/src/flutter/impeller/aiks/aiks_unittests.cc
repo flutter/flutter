@@ -2772,19 +2772,29 @@ TEST_P(AiksTest, VerticesGeometryColorUVPositionDataAdvancedBlend) {
 }
 
 TEST_P(AiksTest, MatrixImageFilterMagnify) {
-  Canvas canvas;
-  canvas.Scale(GetContentScale());
-  auto image = std::make_shared<Image>(CreateTextureForFixture("airplane.jpg"));
-  canvas.Translate({600, -200});
-  canvas.SaveLayer({
-      .image_filter = std::make_shared<MatrixImageFilter>(
-          Matrix::MakeScale({2, 2, 2}), SamplerDescriptor{}),
-  });
-  canvas.DrawImage(image, {0, 0},
-                   Paint{.color = Color::White().WithAlpha(0.5)});
-  canvas.Restore();
+  Scalar scale = 2.0;
+  auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("Scale", &scale, 1, 2);
+      ImGui::End();
+    }
+    Canvas canvas;
+    canvas.Scale(GetContentScale());
+    auto image =
+        std::make_shared<Image>(CreateTextureForFixture("airplane.jpg"));
+    canvas.Translate({600, -200});
+    canvas.SaveLayer({
+        .image_filter = std::make_shared<MatrixImageFilter>(
+            Matrix::MakeScale({scale, scale, 1}), SamplerDescriptor{}),
+    });
+    canvas.DrawImage(image, {0, 0},
+                     Paint{.color = Color::White().WithAlpha(0.5)});
+    canvas.Restore();
+    return canvas.EndRecordingAsPicture();
+  };
 
-  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 // Render a white circle at the top left corner of the screen.
