@@ -26,11 +26,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
+import '../widgets/feedback_tester.dart';
 import '../widgets/live_text_utils.dart';
 import '../widgets/process_text_utils.dart';
 import '../widgets/semantics_tester.dart';
 import '../widgets/text_selection_toolbar_utils.dart';
-import 'feedback_tester.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(jsimmons): Remove this tag when the test's ordering dependencies
+// have been fixed.
+// Fails with "flutter test --test-randomize-ordering-seed=20240518"
+@Tags(<String>['no-shuffle'])
+library;
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
@@ -3770,7 +3776,7 @@ void main() {
         '--no-pub',
         '--template=plugin',
         '--project-name=test',
-        projectDir.path,
+        'dev/test',
       ]),
       throwsToolExit(message: 'Unable to read the template manifest at path'),
     );
@@ -3778,8 +3784,7 @@ void main() {
     FileSystem: () => MemoryFileSystem.test(
       opHandle: (String context, FileSystemOp operation) {
         if (operation == FileSystemOp.read && context.contains('template_manifest.json')) {
-          throw io.PathNotFoundException(
-              context, const OSError(), 'Cannot open file');
+          throw io.PathNotFoundException(context, const OSError(), 'Cannot open file');
         }
       },
     ),
