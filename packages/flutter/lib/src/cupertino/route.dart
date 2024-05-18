@@ -1096,7 +1096,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   @override
   Duration get transitionDuration => _kModalPopupTransitionDuration;
 
-  CurvedAnimation? _animation;
+  Animation<double>? _animation;
 
   late Tween<Offset> _offsetTween;
 
@@ -1141,12 +1141,6 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
         child: child,
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _animation?.dispose();
-    super.dispose();
   }
 }
 
