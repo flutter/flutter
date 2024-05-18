@@ -2692,6 +2692,7 @@ void main() {
       ),
     ));
 
+    await tester.pump();
     // Push the route.
     await tester.tap(find.text('tap'));
     await tester.pump();
