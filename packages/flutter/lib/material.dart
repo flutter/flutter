@@ -84,7 +84,6 @@ export 'src/material/expand_icon.dart';
 export 'src/material/expansion_panel.dart';
 export 'src/material/expansion_tile.dart';
 export 'src/material/expansion_tile_theme.dart';
-export 'src/material/feedback.dart';
 export 'src/material/filled_button.dart';
 export 'src/material/filled_button_theme.dart';
 export 'src/material/filter_chip.dart';

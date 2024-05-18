@@ -11,7 +11,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'feedback.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'tooltip_theme.dart';

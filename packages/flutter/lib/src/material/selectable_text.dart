@@ -11,7 +11,6 @@ import 'package:flutter/rendering.dart';
 
 import 'adaptive_text_selection_toolbar.dart';
 import 'desktop_text_selection.dart';
-import 'feedback.dart';
 import 'magnifier.dart';
 import 'text_selection.dart';
 import 'theme.dart';
