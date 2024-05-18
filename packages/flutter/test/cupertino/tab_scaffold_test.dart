@@ -688,6 +688,8 @@ void main() {
 
     // Tapping the tabs should still work.
     expect(tabsPainted, const <int>[0, 0, 18]);
+
+    await tester.runAsync(() async =>Future<void>.delayed(const Duration(milliseconds: 10)));
   });
 
   testWidgets(
