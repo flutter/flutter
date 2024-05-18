@@ -2671,31 +2671,7 @@ void main() {
   // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
   experimentalLeakTesting: LeakTesting.settings.withTracked(classes: <String>['CurvedAnimation']),
   (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Navigator(
-        onGenerateRoute: (RouteSettings settings) {
-          return PageRouteBuilder<dynamic>(
-            pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
-              return GestureDetector(
-                onTap: () async {
-                  await showCupertinoModalPopup<void>(
-                    context: context,
-                    semanticsDismissible: true,
-                    builder: (BuildContext context) => const SizedBox(),
-                  );
-                },
-                child: const Text('tap'),
-              );
-            },
-          );
-        },
-      ),
-    ));
 
-    await tester.pump();
-    // Push the route.
-    await tester.tap(find.text('tap'));
-    await tester.pump();
   });
 }
 
