@@ -106,7 +106,8 @@ const double _kMaxTextScaleFactor = 1.3;
 ///   * [fieldLabelText], label for the date text input field.
 ///
 /// An optional [locale] argument can be used to set the locale for the date
-/// picker. It defaults to the ambient locale provided by [Localizations].
+/// picker. If not provided [DatePickerThemeData.locale] will be used. It
+/// defaults to the ambient locale provided by [Localizations].
 ///
 /// An optional [textDirection] argument can be used to set the text direction
 /// ([TextDirection.ltr] or [TextDirection.rtl]) for the date picker. It
@@ -207,6 +208,8 @@ Future<DateTime?> showDatePicker({
   );
   assert(debugCheckHasMaterialLocalizations(context));
 
+  final Locale? resolvedLocale = locale ?? DatePickerTheme.of(context).locale;
+
   Widget dialog = DatePickerDialog(
     initialDate: initialDate,
     firstDate: firstDate,
@@ -235,10 +238,10 @@ Future<DateTime?> showDatePicker({
     );
   }
 
-  if (locale != null) {
+  if (resolvedLocale != null) {
     dialog = Localizations.override(
       context: context,
-      locale: locale,
+      locale: resolvedLocale,
       child: dialog,
     );
   }

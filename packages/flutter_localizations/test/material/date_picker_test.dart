@@ -372,6 +372,162 @@ void main() {
     await tester.tap(find.text('Annuler'));
   });
 
+  testWidgets('locale theme overrides ambient locale', (WidgetTester tester) async {
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: ThemeData(
+          useMaterial3: true,
+          datePickerTheme: const DatePickerThemeData(
+            locale: Locale('fr', 'CA'),
+          ),
+        ),
+        locale: const Locale('en', 'US'),
+        supportedLocales: const <Locale>[
+          Locale('en', 'US'),
+          Locale('fr', 'CA'),
+        ],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return TextButton(
+                onPressed: () async {
+                  await showDatePicker(
+                    context: context,
+                    initialDate: initialDate,
+                    firstDate: firstDate,
+                    lastDate: lastDate,
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    Element getPicker() => tester.element(find.byType(CalendarDatePicker));
+
+    await tester.pumpWidget(buildFrame());
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(
+      Localizations.localeOf(getPicker()),
+      const Locale('fr', 'CA'),
+    );
+    expect(
+      Directionality.of(getPicker()),
+      TextDirection.ltr,
+    );
+
+    await tester.tap(find.text('Annuler'));
+  });
+
+  testWidgets('locale parameter overrides locale theme', (WidgetTester tester) async {
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: ThemeData(
+          useMaterial3: true,
+          datePickerTheme: const DatePickerThemeData(
+            locale: Locale('fr', 'CA'),
+          ),
+        ),
+        locale: const Locale('en', 'US'),
+        supportedLocales: const <Locale>[
+          Locale('en', 'US'),
+          Locale('fr', 'CA'),
+          Locale('hi', 'IN'),
+        ],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return TextButton(
+                onPressed: () async {
+                  await showDatePicker(
+                    context: context,
+                    initialDate: initialDate,
+                    firstDate: firstDate,
+                    lastDate: lastDate,
+                    locale: const Locale('hi', 'IN')
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    Element getPicker() => tester.element(find.byType(CalendarDatePicker));
+
+    await tester.pumpWidget(buildFrame());
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(
+      Localizations.localeOf(getPicker()),
+      const Locale('hi', 'IN'),
+    );
+    expect(
+      Directionality.of(getPicker()),
+      TextDirection.ltr,
+    );
+
+    await tester.tap(find.text('रद्द करें'));
+  });
+
+  testWidgets('ambient locale is respected when both locale parameter and locale theme are missing', (WidgetTester tester) async {
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        locale: const Locale('fr', 'CA'),
+        supportedLocales: const <Locale>[
+          Locale('en', 'US'),
+          Locale('fr', 'CA'),
+        ],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return TextButton(
+                onPressed: () async {
+                  await showDatePicker(
+                    context: context,
+                    initialDate: initialDate,
+                    firstDate: firstDate,
+                    lastDate: lastDate,
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    Element getPicker() => tester.element(find.byType(CalendarDatePicker));
+
+    await tester.pumpWidget(buildFrame());
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(
+      Localizations.localeOf(getPicker()),
+      const Locale('fr', 'CA'),
+    );
+    expect(
+      Directionality.of(getPicker()),
+      TextDirection.ltr,
+    );
+
+    await tester.tap(find.text('Annuler'));
+  });
+
   group("locale fonts don't overflow layout", () {
     // Test screen layouts in various locales to ensure the fonts used
     // don't overflow the layout
