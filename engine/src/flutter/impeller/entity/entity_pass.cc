@@ -185,7 +185,7 @@ std::optional<Rect> EntityPass::GetElementsCoverage(
         std::shared_ptr<FilterContents> backdrop_filter =
             subpass.backdrop_filter_proc_(
                 FilterInput::Make(accumulated_coverage.value()),
-                subpass.transform_, Entity::RenderingMode::kBackdropSubpass);
+                subpass.transform_, Entity::RenderingMode::kSubpass);
         if (backdrop_filter) {
           auto backdrop_coverage = backdrop_filter->GetCoverage({});
           unfiltered_coverage =
@@ -585,9 +585,9 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
       auto texture = pass_context.GetTexture();
       // Render the backdrop texture before any of the pass elements.
       const auto& proc = subpass->backdrop_filter_proc_;
-      subpass_backdrop_filter_contents = proc(
-          FilterInput::Make(std::move(texture)), subpass->transform_.Basis(),
-          Entity::RenderingMode::kBackdropSubpass);
+      subpass_backdrop_filter_contents =
+          proc(FilterInput::Make(std::move(texture)),
+               subpass->transform_.Basis(), Entity::RenderingMode::kSubpass);
 
       // If the very first thing we render in this EntityPass is a subpass that
       // happens to have a backdrop filter, than that backdrop filter will end

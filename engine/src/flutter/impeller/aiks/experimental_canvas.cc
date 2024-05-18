@@ -230,7 +230,7 @@ void ExperimentalCanvas::SaveLayer(
       << entry.clip_depth << " <=? " << transform_stack_.back().clip_depth
       << " after allocating " << total_content_depth;
   entry.clip_height = transform_stack_.back().clip_height;
-  entry.rendering_mode = Entity::RenderingMode::kBackdropSubpass;
+  entry.rendering_mode = Entity::RenderingMode::kSubpass;
   transform_stack_.emplace_back(entry);
 
   auto inline_pass = std::make_unique<InlinePassContext>(
@@ -272,9 +272,7 @@ bool ExperimentalCanvas::Restore() {
   current_depth_ = transform_stack_.back().clip_depth;
 
   if (transform_stack_.back().rendering_mode ==
-          Entity::RenderingMode::kBackdropSubpass ||
-      transform_stack_.back().rendering_mode ==
-          Entity::RenderingMode::kImageFilterSubpass) {
+      Entity::RenderingMode::kSubpass) {
     auto inline_pass = std::move(inline_pass_contexts_.back());
 
     SaveLayerState save_layer_state = save_layer_state_.back();
