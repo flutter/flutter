@@ -1476,6 +1476,10 @@ class EditableText extends StatefulWidget {
   ///
   /// Text fields with the same group identifier share the same tap region.
   /// Defaults to the type of [EditableText].
+  ///
+  /// See also:
+  ///
+  ///  * [TextFieldTapRegion], for the provision of a separate tap region.
   /// {@endtemplate}
   final Object groupId;
 
