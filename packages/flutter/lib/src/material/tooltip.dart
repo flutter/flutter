@@ -505,11 +505,9 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       !(_timer?.isActive ?? false) || _controller.status != AnimationStatus.reverse,
       'timer must not be active when the tooltip is fading out',
     );
-    if (_controller.isDismissed) {
-      if (withDelay.inMicroseconds > 0) {
-        _timer?.cancel();
-        _timer = Timer(withDelay, show);
-      }
+    if (_controller.isDismissed && withDelay.inMicroseconds > 0) {
+      _timer?.cancel();
+      _timer = Timer(withDelay, show);
     } else {
       show(); // If the tooltip is already fading in or fully visible, skip the
               // animation and show the tooltip immediately.
