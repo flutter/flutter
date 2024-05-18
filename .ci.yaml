@@ -2821,6 +2821,17 @@ targets:
         ["devicelab", "android", "linux", "mokey"]
       task_name: new_gallery_impeller__transition_perf
 
+  # Mokey, Impeller (OpenGL)
+  - name: Linux_mokey new_gallery_opengles_impeller__transition_perf
+    recipe: devicelab/devicelab_drone
+    bringup: true # Device exists only in staging.
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "mokey"]
+      task_name: new_gallery_opengles_impeller__transition_perf
+
   # Mokey, Skia
   - name: Linux_mokey new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
@@ -2856,6 +2867,7 @@ targets:
   # Moto G4, Impeller (OpenGL)
   - name: Linux_android new_gallery_opengles_impeller__transition_perf
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -3864,27 +3876,8 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Mac_x64 module_test_ios
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/144680
-    recipe: devicelab/devicelab_drone
-    timeout: 60
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
-        ]
-      tags: >
-        ["devicelab", "hostonly", "mac"]
-      task_name: module_test_ios
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
   - name: Mac_arm64 module_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -3893,20 +3886,6 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
-      task_name: module_test_ios
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-
-  - name: Mac_arm64_ios module_test_ios # Must be run on devicelab bot for codesigning https://github.com/flutter/flutter/issues/112033
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac", "arm64"]
       task_name: module_test_ios
     runIf:
       - dev/**
@@ -4346,6 +4325,7 @@ targets:
       task_name: microbenchmarks
 
   - name: Mac_pixel_7pro native_assets_android
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/148402
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -4835,7 +4815,6 @@ targets:
   - name: Mac_ios platform_views_scroll_perf_ad_banners__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
