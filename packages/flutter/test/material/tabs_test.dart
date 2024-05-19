@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
-import 'feedback_tester.dart';
 import 'tabs_utils.dart';
 
 Widget boilerplate({
@@ -7119,4 +7120,42 @@ void main() {
     expect(config.textDirection, TextDirection.rtl);
     expect(config.devicePixelRatio, 2.33);
   });
+
+  testWidgets('TabBar.textScaler overrides tab label text scale, textScaleFactor = noScaling, 1.75, 2.0', (WidgetTester tester) async {
+    final List<String> tabs = <String>['Tab 1', 'Tab 2'];
+
+    Widget buildTabs({ TextScaler? textScaler }) {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(3.0)),
+          child: DefaultTabController(
+            length: tabs.length,
+            child: Scaffold(
+              appBar: AppBar(
+                bottom: TabBar(
+                  textScaler: textScaler,
+                  tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabs(textScaler: TextScaler.noScaling));
+
+    Size labelSize = tester.getSize(find.text('Tab 1'));
+    expect(labelSize, equals(const Size(70.5, 20.0)));
+
+    await tester.pumpWidget(buildTabs(textScaler: const TextScaler.linear(1.75)));
+
+    labelSize = tester.getSize(find.text('Tab 1'));
+    expect(labelSize, equals(const Size(123.0, 35.0)));
+
+    await tester.pumpWidget(buildTabs(textScaler: const TextScaler.linear(2.0)));
+
+    labelSize = tester.getSize(find.text('Tab 1'));
+    expect(labelSize, equals(const Size(140.5, 40.0)));
+  }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/87543
 }

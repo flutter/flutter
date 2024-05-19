@@ -207,18 +207,12 @@ class _ListDemoState extends State<ListDemo> {
   @override
   Widget build(BuildContext context) {
     final String layoutText = _dense != null ? ' \u2013 Dense' : '';
-    String? itemTypeText;
-    switch (_itemType) {
-      case _MaterialListType.oneLine:
-      case _MaterialListType.oneLineWithAvatar:
-        itemTypeText = 'Single-line';
-      case _MaterialListType.twoLine:
-        itemTypeText = 'Two-line';
-      case _MaterialListType.threeLine:
-        itemTypeText = 'Three-line';
-      case null:
-        break;
-    }
+    final String? itemTypeText = switch (_itemType) {
+      _MaterialListType.oneLine || _MaterialListType.oneLineWithAvatar => 'Single-line',
+      _MaterialListType.twoLine => 'Two-line',
+      _MaterialListType.threeLine => 'Three-line',
+      null => null,
+    };
 
     Iterable<Widget> listTiles = items.map<Widget>((String item) => buildListTile(context, item));
     if (_showDividers != null) {

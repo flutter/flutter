@@ -1724,16 +1724,14 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     // Determines the scroll direction.
     final AxisDirection scrollDirection;
 
-    switch (position.axisDirection) {
-      case AxisDirection.up:
-      case AxisDirection.down:
+    switch (axisDirectionToAxis(position.axisDirection)) {
+      case Axis.vertical:
         if (details.localPosition.dy > scrollbarPainter._thumbOffset) {
           scrollDirection = AxisDirection.down;
         } else {
           scrollDirection = AxisDirection.up;
         }
-      case AxisDirection.left:
-      case AxisDirection.right:
+      case Axis.horizontal:
         if (details.localPosition.dx > scrollbarPainter._thumbOffset) {
           scrollDirection = AxisDirection.right;
         } else {

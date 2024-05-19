@@ -11,7 +11,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'feedback.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'tooltip_theme.dart';
@@ -273,8 +272,8 @@ class Tooltip extends StatefulWidget {
   ///
   /// The tooltip shape defaults to a rounded rectangle with a border radius of
   /// 4.0. Tooltips will also default to an opacity of 90% and with the color
-  /// [Colors.grey]\[700\] if [ThemeData.brightness] is [Brightness.dark], and
-  /// [Colors.white] if it is [Brightness.light].
+  /// [Colors.grey]\[700\] if [ThemeData.brightness] is [Brightness.light], and
+  /// [Colors.white] if it is [Brightness.dark].
   final Decoration? decoration;
 
   /// The style to use for the message of the tooltip.

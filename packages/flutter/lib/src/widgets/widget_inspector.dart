@@ -1669,30 +1669,26 @@ mixin WidgetInspectorService {
 
   List<Object?> _getParentChain(String? id, String groupName) {
     final Object? value = toObject(id);
-    List<_DiagnosticsPathNode> path;
-    if (value is RenderObject) {
-      path = _getRenderObjectParentChain(value, groupName)!;
-    } else if (value is Element) {
-      path = _getElementParentChain(value, groupName);
-    } else {
-      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Cannot get parent chain for node of type ${value.runtimeType}')]);
-    }
-
-    return path.map<Object?>((_DiagnosticsPathNode node) => _pathNodeToJson(
-      node,
-      InspectorSerializationDelegate(groupName: groupName, service: this),
-    )).toList();
-  }
-
-  Map<String, Object?>? _pathNodeToJson(_DiagnosticsPathNode? pathNode, InspectorSerializationDelegate delegate) {
-    if (pathNode == null) {
-      return null;
-    }
-    return <String, Object?>{
-      'node': _nodeToJson(pathNode.node, delegate),
-      'children': _nodesToJson(pathNode.children, delegate, parent: pathNode.node),
-      'childIndex': pathNode.childIndex,
+    final List<_DiagnosticsPathNode> path = switch (value) {
+      RenderObject() => _getRenderObjectParentChain(value, groupName)!,
+      Element() => _getElementParentChain(value, groupName),
+      _ => throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('Cannot get parent chain for node of type ${value.runtimeType}'),
+      ]),
     };
+
+    InspectorSerializationDelegate createDelegate() =>
+        InspectorSerializationDelegate(groupName: groupName, service: this);
+
+    return <Object?>[
+      for (final _DiagnosticsPathNode pathNode in path)
+        if (createDelegate() case final InspectorSerializationDelegate delegate)
+          <String, Object?>{
+            'node': _nodeToJson(pathNode.node, delegate),
+            'children': _nodesToJson(pathNode.children, delegate, parent: pathNode.node),
+            'childIndex': pathNode.childIndex,
+          },
+    ];
   }
 
   List<Element> _getRawElementParentChain(Element element, { required int? numLocalParents }) {

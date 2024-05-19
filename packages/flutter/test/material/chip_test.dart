@@ -13,8 +13,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
-import 'feedback_tester.dart';
 
 Finder findRenderChipElement() {
   return find.byElementPredicate((Element e) => '${e.renderObject.runtimeType}' == '_RenderChip');
@@ -5781,6 +5781,18 @@ void main() {
     // Test rendered icon color.
     expect(getIconStyle(tester, deleteIcon)?.color, deleteIconColor);
   });
+
+  testWidgets('Chip label only does layout once', (WidgetTester tester) async {
+    final RenderLayoutCount renderLayoutCount = RenderLayoutCount();
+    final Widget layoutCounter = Center(
+      key: GlobalKey(),
+      child: WidgetToRenderBoxAdapter(renderBox: renderLayoutCount),
+    );
+
+    await tester.pumpWidget(wrapForChip(child: RawChip(label: layoutCounter)));
+
+    expect(renderLayoutCount.layoutCount, 1);
+  });
 }
 
 class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStateOutlinedBorder {
@@ -5799,4 +5811,17 @@ class _MaterialStateBorderSide extends MaterialStateBorderSide {
 
   @override
   BorderSide? resolve(Set<MaterialState> states) => resolver(states);
+}
+
+class RenderLayoutCount extends RenderBox {
+  int layoutCount = 0;
+
+  @override
+  Size computeDryLayout(covariant BoxConstraints constraints) => constraints.biggest;
+
+  @override
+  void performLayout() {
+    layoutCount += 1;
+    size = constraints.biggest;
+  }
 }

@@ -2894,8 +2894,8 @@ void main() {
         error.toStringDeep(),
         equalsIgnoringHashCodes(
           'FlutterError\n'
-          '   The Navigator.onPopPage must be provided to use the\n'
-          '   Navigator.pages API\n',
+          '   Either onDidRemovePage or onPopPage must be provided to use the\n'
+          '   Navigator.pages API but not both.\n',
         ),
       );
     });
@@ -2989,7 +2989,7 @@ void main() {
       const List<Page<void>> myPages = <Page<void>>[
         MaterialPage<void>(child: Text('page1')),
         MaterialPage<void>(
-          child: PopScope(
+          child: PopScope<void>(
             canPop: false,
             child: Text('page2'),
           ),
@@ -4908,9 +4908,9 @@ void main() {
             home: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 builderSetState = setState;
-                return PopScope(
+                return PopScope<Object?>(
                   canPop: canPop(),
-                  onPopInvoked: (bool success) {
+                  onPopInvokedWithResult: (bool success, Object? result) {
                     if (success || pages.last == _Page.noPop) {
                       return;
                     }
@@ -5024,9 +5024,9 @@ void main() {
           MaterialApp(
             home: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-                return PopScope(
+                return PopScope<Object?>(
                   canPop: canPop(),
-                  onPopInvoked: (bool success) {
+                  onPopInvokedWithResult: (bool success, Object? result) {
                     if (success || pages.last == _Page.noPop) {
                       return;
                     }
@@ -5117,9 +5117,9 @@ void main() {
           MaterialApp(
             home: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-                return PopScope(
+                return PopScope<Object?>(
                   canPop: canPop(),
-                  onPopInvoked: (bool success) {
+                  onPopInvokedWithResult: (bool success, Object? result) {
                     if (success || pages.last == _PageWithYesPop.noPop) {
                       return;
                     }
@@ -5189,7 +5189,7 @@ void main() {
                             child: _LinksPage(
                               title: 'Can pop page',
                               canPop: true,
-                              onPopInvoked: (bool didPop) {
+                              onPopInvoked: (bool didPop, void result) {
                                 onPopInvokedCallCount += 1;
                               },
                             ),
@@ -5556,7 +5556,7 @@ class _LinksPage extends StatelessWidget {
   final bool? canPop;
   final VoidCallback? onBack;
   final String title;
-  final PopInvokedCallback? onPopInvoked;
+  final PopInvokedWithResultCallback<Object?>? onPopInvoked;
 
   @override
   Widget build(BuildContext context) {
@@ -5575,9 +5575,9 @@ class _LinksPage extends StatelessWidget {
                 child: const Text('Go back'),
               ),
             if (canPop != null)
-              PopScope(
+              PopScope<void>(
                 canPop: canPop!,
-                onPopInvoked: onPopInvoked,
+                onPopInvokedWithResult: onPopInvoked,
                 child: const SizedBox.shrink(),
               ),
           ],

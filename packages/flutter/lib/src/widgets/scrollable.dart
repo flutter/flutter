@@ -116,6 +116,7 @@ class Scrollable extends StatefulWidget {
     this.restorationId,
     this.scrollBehavior,
     this.clipBehavior = Clip.hardEdge,
+    this.hitTestBehavior = HitTestBehavior.opaque,
     this.copyInterceptor,
   }) : assert(semanticChildCount == null || semanticChildCount >= 0);
 
@@ -225,6 +226,18 @@ class Scrollable extends StatefulWidget {
   ///  * [GestureDetector.excludeFromSemantics], which is used to accomplish the
   ///    exclusion.
   final bool excludeFromSemantics;
+
+  /// {@template flutter.widgets.scrollable.hitTestBehavior}
+  /// Defines the behavior of gesture detector used in this [Scrollable].
+  ///
+  /// This defaults to [HitTestBehavior.opaque] which means it prevents targets
+  /// behind this [Scrollable] from receiving events.
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [HitTestBehavior], for an explanation on different behaviors.
+  final HitTestBehavior hitTestBehavior;
 
   /// The number of children that will contribute semantic information.
   ///
@@ -977,7 +990,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
         child: RawGestureDetector(
           key: _gestureDetectorKey,
           gestures: _gestureRecognizers,
-          behavior: HitTestBehavior.opaque,
+          behavior: widget.hitTestBehavior,
           excludeFromSemantics: widget.excludeFromSemantics,
           child: Semantics(
             explicitChildNodes: !widget.excludeFromSemantics,
@@ -1743,6 +1756,7 @@ class TwoDimensionalScrollable extends StatefulWidget {
     this.excludeFromSemantics = false,
     this.diagonalDragBehavior = DiagonalDragBehavior.none,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.hitTestBehavior = HitTestBehavior.opaque,
   });
 
   /// How scrolling gestures should lock to one axis, or allow free movement
@@ -1788,6 +1802,11 @@ class TwoDimensionalScrollable extends StatefulWidget {
   ///
   /// This value applies to both axes.
   final bool excludeFromSemantics;
+
+  /// {@macro flutter.widgets.scrollable.hitTestBehavior}
+  ///
+  /// This value applies to both axes.
+  final HitTestBehavior hitTestBehavior;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   ///
@@ -1991,6 +2010,7 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
         restorationId: 'OuterVerticalTwoDimensionalScrollable',
         dragStartBehavior: widget.dragStartBehavior,
         diagonalDragBehavior: widget.diagonalDragBehavior,
+        hitTestBehavior: widget.hitTestBehavior,
         viewportBuilder: (BuildContext context, ViewportOffset verticalOffset) {
           return _HorizontalInnerDimension(
             key: _horizontalInnerScrollableKey,
@@ -2007,6 +2027,7 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
             restorationId: 'InnerHorizontalTwoDimensionalScrollable',
             dragStartBehavior: widget.dragStartBehavior,
             diagonalDragBehavior: widget.diagonalDragBehavior,
+            hitTestBehavior: widget.hitTestBehavior,
             viewportBuilder: (BuildContext context, ViewportOffset horizontalOffset) {
               return widget.viewportBuilder(context, verticalOffset, horizontalOffset);
             },
@@ -2062,6 +2083,7 @@ class _VerticalOuterDimension extends Scrollable {
     super.excludeFromSemantics,
     super.dragStartBehavior,
     super.restorationId,
+    super.hitTestBehavior,
     this.diagonalDragBehavior = DiagonalDragBehavior.none,
   }) : assert(axisDirection == AxisDirection.up || axisDirection == AxisDirection.down);
 
@@ -2326,6 +2348,7 @@ class _HorizontalInnerDimension extends Scrollable {
     super.excludeFromSemantics,
     super.dragStartBehavior,
     super.restorationId,
+    super.hitTestBehavior,
     this.diagonalDragBehavior = DiagonalDragBehavior.none,
   }) : assert(axisDirection == AxisDirection.left || axisDirection == AxisDirection.right);
 

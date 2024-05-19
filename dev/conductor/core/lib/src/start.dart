@@ -387,23 +387,12 @@ class StartContext extends Context {
 
   /// Determine this release's version number from the [lastVersion] and the [incrementLetter].
   Version calculateNextVersion(Version lastVersion, ReleaseType releaseType) {
-    late final Version nextVersion;
-    switch (releaseType) {
-      case ReleaseType.STABLE_INITIAL:
-        nextVersion = Version(
-          x: lastVersion.x,
-          y: lastVersion.y,
-          z: 0,
-          type: VersionType.stable,
-        );
-      case ReleaseType.STABLE_HOTFIX:
-        nextVersion = Version.increment(lastVersion, 'z');
-      case ReleaseType.BETA_INITIAL:
-        nextVersion = Version.fromCandidateBranch(candidateBranch);
-      case ReleaseType.BETA_HOTFIX:
-        nextVersion = Version.increment(lastVersion, 'n');
-    }
-    return nextVersion;
+    return switch (releaseType) {
+      ReleaseType.STABLE_INITIAL   => Version(x: lastVersion.x, y: lastVersion.y, z: 0, type: VersionType.stable),
+      ReleaseType.STABLE_HOTFIX    => Version.increment(lastVersion, 'z'),
+      ReleaseType.BETA_INITIAL     => Version.fromCandidateBranch(candidateBranch),
+      ReleaseType.BETA_HOTFIX || _ => Version.increment(lastVersion, 'n'),
+    };
   }
 
   /// Ensures the branch point [candidateBranch] and `master` has a version tag.
