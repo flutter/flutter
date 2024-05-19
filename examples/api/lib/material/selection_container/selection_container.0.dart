@@ -46,7 +46,7 @@ class SelectionAllOrNoneContainer extends StatefulWidget {
 }
 
 class _SelectionAllOrNoneContainerState extends State<SelectionAllOrNoneContainer> {
-  final SelectAllOrNoneContainerDelegate delegate = SelectAllOrNoneContainerDelegate(copyInterceptor: CopyInterceptor.newline);
+  final SelectAllOrNoneContainerDelegate delegate = SelectAllOrNoneContainerDelegate(copyIntercept: CopyIntercept.newline);
 
   @override
   void dispose() {
@@ -64,7 +64,7 @@ class _SelectionAllOrNoneContainerState extends State<SelectionAllOrNoneContaine
 }
 
 class SelectAllOrNoneContainerDelegate extends MultiSelectableSelectionContainerDelegate {
-  SelectAllOrNoneContainerDelegate({required super.copyInterceptor});
+  SelectAllOrNoneContainerDelegate({required super.copyIntercept});
 
   Offset? _adjustedStartEdge;
   Offset? _adjustedEndEdge;

@@ -2075,18 +2075,18 @@ void main() {
       expect(clipboardData['text'], 'w are you?Good, and you?Fine, ');
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
 
-    testWidgets('can change copyInterceptor with CopyInterceptorContainer', (WidgetTester tester) async {
+    testWidgets('can change copyIntercept with CopyInterceptor', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
-            copyInterceptor: CopyInterceptor.newline,
+            copyIntercept: CopyIntercept.newline,
             child: const Column(
               children: <Widget>[
                 Text('How are you?'),
-                CopyInterceptContainer(
-                  copyInterceptor: CopyInterceptor.space,
+                CopyInterceptor(
+                  intercept: CopyIntercept.space,
                   child: Column(
                     children: <Widget>[
                       Text('Good, and you?'),
@@ -4279,7 +4279,7 @@ void main() {
                   ],
                 ),
                 key: outerText,
-                copyInterceptor: CopyInterceptor.none,
+                copyIntercept: CopyIntercept.none,
               ),
             ),
           ),
