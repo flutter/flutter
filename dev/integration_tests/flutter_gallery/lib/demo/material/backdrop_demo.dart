@@ -277,8 +277,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
   }
 
   void _toggleBackdropPanelVisibility() {
-    final bool backdropPanelVisible = _controller.isForwardOrCompleted;
-    _controller.fling(velocity: backdropPanelVisible ? -2.0 : 2.0);
+    _controller.fling(velocity: _controller.isForwardOrCompleted ? -2.0 : 2.0);
   }
 
   double get _backdropHeight {
@@ -290,7 +289,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
   // the user must either tap its heading or the backdrop's menu icon.
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    if (_controller.isAnimating || _controller.isCompleted) {
+    if (!_controller.isDismissed) {
       return;
     }
 
