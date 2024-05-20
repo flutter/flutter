@@ -12,8 +12,8 @@ import 'package:flutter/material.dart';
 /// asynchronously and debouncing the network calls, including handling network
 /// errors.
 
-const Duration fakeAPIDuration = Duration(seconds: 2);
-const Duration debounceDuration = Duration(seconds: 1);
+const Duration fakeAPIDuration = Duration(seconds: 1);
+const Duration debounceDuration = Duration(milliseconds: 500);
 
 void main() => runApp(const AutocompleteExampleApp());
 
@@ -152,7 +152,9 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
             final Iterable<String>? options =
                 await _debouncedSearch(textEditingValue.text);
             if (textEditingValue.text == _lastValue || _networkError) {
-              _isLoading = false; // End options loading.
+              setState(() {
+                _isLoading = false; // End options loading.
+              });
             }
             if (options == null) {
               return _lastOptions;
