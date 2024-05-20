@@ -124,7 +124,8 @@ bool BlitPass::AddCopy(BufferView source,
                        std::shared_ptr<Texture> destination,
                        std::optional<IRect> destination_region,
                        std::string label,
-                       uint32_t slice) {
+                       uint32_t slice,
+                       bool convert_to_read) {
   if (!destination) {
     VALIDATION_LOG << "Attempted to add a texture blit with no destination.";
     return false;
@@ -156,7 +157,12 @@ bool BlitPass::AddCopy(BufferView source,
 
   return OnCopyBufferToTextureCommand(std::move(source), std::move(destination),
                                       destination_region_value,
-                                      std::move(label), slice);
+                                      std::move(label), slice, convert_to_read);
+}
+
+bool BlitPass::ConvertTextureToShaderRead(
+    const std::shared_ptr<Texture>& texture) {
+  return true;
 }
 
 bool BlitPass::GenerateMipmap(std::shared_ptr<Texture> texture,

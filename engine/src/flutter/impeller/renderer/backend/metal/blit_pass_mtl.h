@@ -58,7 +58,8 @@ class BlitPassMTL final : public BlitPass {
                                     std::shared_ptr<Texture> destination,
                                     IRect destination_region,
                                     std::string label,
-                                    uint32_t slice) override;
+                                    uint32_t slice,
+                                    bool convert_to_read) override;
 
   // |BlitPass|
   bool OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,

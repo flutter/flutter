@@ -132,7 +132,8 @@ bool BlitPassGLES::OnCopyBufferToTextureCommand(
     std::shared_ptr<Texture> destination,
     IRect destination_region,
     std::string label,
-    uint32_t slice) {
+    uint32_t slice,
+    bool convert_to_read) {
   auto command = std::make_unique<BlitCopyBufferToTextureCommandGLES>();
   command->label = label;
   command->source = std::move(source);
