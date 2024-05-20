@@ -172,11 +172,11 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
   }
 
   String get _labelText {
-    final String Function(DateTime) format = DateFormat.yMMMd().format;
+    final DateFormat yMMMd = DateFormat.yMMMd();
     return switch (widget.type) {
-      PickerDemoType.date  => format(_fromDate.value),
+      PickerDemoType.date  => yMMMd.format(_fromDate.value),
       PickerDemoType.time  => _fromTime.value.format(context),
-      PickerDemoType.range => '${format(_startDate.value)} - ${format(_endDate.value)}',
+      PickerDemoType.range => '${yMMMd.format(_startDate.value)} - ${yMMMd.format(_endDate.value)}',
     };
   }
 
