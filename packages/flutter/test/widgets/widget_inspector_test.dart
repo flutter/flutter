@@ -3765,6 +3765,44 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(), // [intended] Test requires --track-widget-creation flag.
     );
 
+    testWidgets('ext.flutter.inspector.widgetLocationIdMap', (WidgetTester tester) async {
+      service.rebuildCount = 0;
+
+      await tester.pumpWidget(const ClockDemo());
+
+      final Element clockDemoElement = find.byType(ClockDemo).evaluate().first;
+
+      service.setSelection(clockDemoElement, 'my-group');
+      final Map<String, Object?> jsonObject = (await service.testExtension(
+        WidgetInspectorServiceExtensions.getSelectedWidget.name,
+        <String, String>{'objectGroup': 'my-group'},
+      ))! as Map<String, Object?>;
+      final Map<String, Object?> creationLocation =
+      jsonObject['creationLocation']! as Map<String, Object?>;
+      final String file = creationLocation['file']! as String;
+      expect(file, endsWith('widget_inspector_test.dart'));
+
+      final Map<String, Object?> locationMapJson = (await service.testExtension(
+        WidgetInspectorServiceExtensions.widgetLocationIdMap.name,
+        {},
+      ))! as Map<String, Object?>;
+
+      final Map<String, Object?> widgetTestLocations = locationMapJson[file]! as Map<String, Object?>;
+      expect(widgetTestLocations, isNotNull);
+
+      final List<dynamic> ids = widgetTestLocations['ids']! as List<dynamic>;
+      expect(ids.length, 9);
+      final List<dynamic> lines = widgetTestLocations['lines']! as List<dynamic>;
+      expect(lines.length, 9);
+      final List<dynamic> columns = widgetTestLocations['columns']! as List<dynamic>;
+      expect(columns.length, 9);
+      final List<dynamic> names = widgetTestLocations['names']! as List<dynamic>;
+      expect(names.length, 9);
+      expect(names, contains('ClockDemo'));
+      expect(names, contains('Directionality'));
+      expect(names, contains('ClockText'));
+    });
+
     testWidgets('ext.flutter.inspector.trackRebuildDirtyWidgets', (WidgetTester tester) async {
       service.rebuildCount = 0;
 
@@ -3951,6 +3989,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(rebuildEvents.length, equals(1));
       event = removeLastEvent(rebuildEvents);
       expect(event['startTime'], isA<int>());
+      expect(event['frameNumber'], isA<int>());
       data = event['events']! as List<int>;
       newLocations = event['newLocations']! as Map<String, List<int>>;
       fileLocationsMap = event['locations']! as Map<String, Map<String, List<Object?>>>;
@@ -3983,44 +4022,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       // Verify that rebuild events are not fired once the extension is disabled.
       expect(rebuildEvents, isEmpty);
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
-
-    testWidgets('ext.flutter.inspector.widgetLocationIdMap', (WidgetTester tester) async {
-      service.rebuildCount = 0;
-
-      await tester.pumpWidget(const ClockDemo());
-
-      final Element clockDemoElement = find.byType(ClockDemo).evaluate().first;
-
-      service.setSelection(clockDemoElement, 'my-group');
-      final Map<String, Object?> jsonObject = (await service.testExtension(
-        WidgetInspectorServiceExtensions.getSelectedWidget.name,
-        <String, String>{'objectGroup': 'my-group'},
-      ))! as Map<String, Object?>;
-      final Map<String, Object?> creationLocation =
-      jsonObject['creationLocation']! as Map<String, Object?>;
-      final String file = creationLocation['file']! as String;
-      expect(file, endsWith('widget_inspector_test.dart'));
-
-      final Map<String, Object?> locationMapJson = (await service.testExtension(
-        WidgetInspectorServiceExtensions.widgetLocationIdMap.name,
-        {},
-      ))! as Map<String, Object?>;
-
-      final Map<String, Object?> widgetTestLocations = locationMapJson[file]! as Map<String, Object?>;
-      expect(widgetTestLocations, isNotNull);
-
-      final List<dynamic> ids = widgetTestLocations['ids']! as List<dynamic>;
-      expect(ids.length, 9);
-      final List<dynamic> lines = widgetTestLocations['lines']! as List<dynamic>;
-      expect(lines.length, 9);
-      final List<dynamic> columns = widgetTestLocations['columns']! as List<dynamic>;
-      expect(columns.length, 9);
-      final List<dynamic> names = widgetTestLocations['names']! as List<dynamic>;
-      expect(names.length, 9);
-      expect(names, contains('ClockDemo'));
-      expect(names, contains('Directionality'));
-      expect(names, contains('ClockText'));
-    });
 
     testWidgets('ext.flutter.inspector.trackRepaintWidgets', (WidgetTester tester) async {
       service.rebuildCount = 0;
@@ -4118,6 +4119,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(repaintEvents.length, equals(1));
       event = removeLastEvent(repaintEvents);
       expect(event['startTime'], isA<int>());
+      expect(event['frameNumber'], isA<int>());
       data = event['events']! as List<int>;
       // No new locations were rebuilt.
       expect(event, isNot(contains('newLocations')));
