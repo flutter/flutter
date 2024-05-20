@@ -164,17 +164,8 @@ void main() {
         ),
       );
 
-      final File flutterMacOSFramework = fileSystem.file(
-        fileSystem.path.join(
-          outputApp.path,
-          'Contents',
-          'Frameworks',
-          'FlutterMacOS.framework',
-        ),
-      );
-
       // Check read/write permissions are being correctly set
-      final String rawStatString = flutterMacOSFramework.statSync().modeString();
+      final String rawStatString = outputFlutterFramework.statSync().modeString();
       final String statString = rawStatString.substring(rawStatString.length - 9);
       expect(statString, 'rwxr-xr-x');
 

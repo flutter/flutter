@@ -422,7 +422,7 @@ void main() {
           .whereType<Directory>()
           .singleWhere((Directory directory) => fileSystem.path.extension(directory.path) == '.app');
 
-      final String flutterFramework = fileSystem.path.join(
+      final String flutterFrameworkPath = fileSystem.path.join(
         appBundle.path,
         'Frameworks',
         'Flutter.framework',
@@ -435,7 +435,7 @@ void main() {
           'xcrun',
           'codesign',
           '--verify',
-          flutterFramework,
+          flutterFrameworkPath,
         ],
       );
       expect(flutterCodesign, const ProcessResultMatcher());
@@ -457,16 +457,10 @@ void main() {
       );
       expect(appCodesign, const ProcessResultMatcher());
 
-      final File flutterIOSFramework = fileSystem.file(
-        fileSystem.path.join(
-          appBundle.path,
-          'Frameworks',
-          'Flutter.framework',
-        ),
-      );
+      final Directory flutterFramework = fileSystem.directory(flutterFrameworkPath);
 
       // Check read/write permissions are being correctly set
-      final String rawStatString = flutterIOSFramework.statSync().modeString();
+      final String rawStatString = flutterFramework.statSync().modeString();
       final String statString = rawStatString.substring(rawStatString.length - 9);
       expect(statString, 'rwxr-xr-x');
     });
