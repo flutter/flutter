@@ -1187,10 +1187,8 @@ Future<void> _runInteractive({
       case 'q':
         checker.cleanupTempDirectory();
         exit(0);
-      case 'r':
-        if (!busy) {
-          rerun();
-        }
+      case 'r' when !busy:
+        rerun();
     }
   });
   Watcher(file.absolute.path).events.listen((_) => rerun());
