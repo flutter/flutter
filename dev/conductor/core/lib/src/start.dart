@@ -255,16 +255,14 @@ class StartContext extends Context {
     if (atBranchPoint) {
       return ReleaseType.BETA_INITIAL;
     }
-
-    if (releaseChannel == 'stable') {
-      if (lastVersion.type == VersionType.stable) {
-        return ReleaseType.STABLE_HOTFIX;
-      } else {
-        return ReleaseType.STABLE_INITIAL;
-      }
+    if (releaseChannel != 'stable') {
+      return ReleaseType.BETA_HOTFIX;
     }
 
-    return ReleaseType.BETA_HOTFIX;
+    return switch (lastVersion.type) {
+      VersionType.stable => ReleaseType.STABLE_HOTFIX,
+      VersionType.development || VersionType.gitDescribe || VersionType.latest => ReleaseType.STABLE_INITIAL,
+    };
   }
 
   Future<void> run() async {
