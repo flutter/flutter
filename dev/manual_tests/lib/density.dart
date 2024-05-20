@@ -163,12 +163,14 @@ class _OptionsState extends State<Options> {
   double sliderValue = 0.0;
 
   String _densityToProfile(VisualDensity density) {
-    return switch (density) {
-      VisualDensity.standard    => 'standard',
-      VisualDensity.compact     => 'compact',
-      VisualDensity.comfortable => 'comfortable',
-      _ => 'custom',
-    };
+    if (density == VisualDensity.standard) {
+      return 'standard';
+    } else if (density == VisualDensity.compact) {
+      return 'compact';
+    } else if (density == VisualDensity.comfortable) {
+      return 'comfortable';
+    }
+    return 'custom';
   }
 
   VisualDensity _profileToDensity(String? profile) {

@@ -290,11 +290,13 @@ class FakeDeviceManager implements DeviceManager {
   Device? getSingleEphemeralDevice(List<Device> devices) => null;
 
   List<Device> filteredDevices(DeviceDiscoveryFilter? filter) {
-    return switch (filter?.deviceConnectionInterface) {
-      DeviceConnectionInterface.attached => attachedDevices,
-      DeviceConnectionInterface.wireless => wirelessDevices,
-      null => attachedDevices + wirelessDevices,
-    };
+    if (filter?.deviceConnectionInterface == DeviceConnectionInterface.attached) {
+      return attachedDevices;
+    }
+    if (filter?.deviceConnectionInterface == DeviceConnectionInterface.wireless) {
+      return wirelessDevices;
+    }
+    return attachedDevices + wirelessDevices;
   }
 }
 
