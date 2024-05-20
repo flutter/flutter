@@ -49,7 +49,7 @@ For example, to generate a description from hash deadbeef to beefdead:
 $ ./tools/engine_roll_pr_desc.sh deadbeef..beefdead
 ```
 
-_See also: [[Debugging the engine]], which includes instructions on bisecting a roll failure._
+_See also: [Debugging the engine](https://github.com/flutter/flutter/wiki/Debugging-the-engine), which includes instructions on bisecting a roll failure._
 
 
 ## Dart to Engine

@@ -14,7 +14,7 @@ This allows the team to separate their engineering work from ["toil" work](https
 
 IMPORTANT: Whenever you have a request for the infra team, please file a ticket instead of contacting team members directly, even for seemingly trivial things or even if an individual has done the same thing for you in the past. Infra on-call will be there to handle your request, and it lets non on-call team members focus on their engineering tasks.
 
-When in doubt, ask on the `#hackers-infra` channel in [[Chat]].
+When in doubt, ask on the `#hackers-infra` channel in [Chat](https://github.com/flutter/flutter/wiki/Chat).
 
 # How to File a Ticket as an Infra Customer
 1. Open a [new infra issue](https://github.com/flutter/flutter/issues/new?assignees=&labels=team-infra&projects=&template=6_infrastructure.yml). (That template summarizes the information on this page.)

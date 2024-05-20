@@ -28,10 +28,10 @@ An example build: [Linux color_filter_and_fade_perf__e2e_summary](https://ci.chr
 6. If this is an infra flake, and a retry is needed
    *  For pre-submit test, click `Re-run` in the [check run page](https://github.com/flutter/flutter/pull/83894/checks?check_run_id=2738146673). [[/images/luci_pre_submit_rerun.png|alt=""]]
       * Limited to `flutter-hackers` group.
-      * Ask a team member to re-run in [[Chat]] channel `#hackers-infra` if you don't have access.
+      * Ask a team member to re-run in [Chat](https://github.com/flutter/flutter/wiki/Chat) channel `#hackers-infra` if you don't have access.
    *  For post-submit test, login to [framework build dashboard](https://flutter-dashboard.appspot.com/#/build), click the task box, and click `RERUN`. [[/images/luci_post_submit_rerun.png|alt=""]]
       * Limited to Googlers currently due to some technical limitations of our infrastructure.
-      * Ask a Googler to re-run in [[Chat]] channel `#hackers-infra`.
+      * Ask a Googler to re-run in [Chat](https://github.com/flutter/flutter/wiki/Chat) channel `#hackers-infra`.
 
 ## Test Failure
 A test failure shows up as a red box in the dashboards:
