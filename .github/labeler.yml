@@ -57,6 +57,7 @@ engine:
   - changed-files:
     - any-glob-to-any-file:
       - bin/internal/engine.version
+      - docs/engine/**/*
 
 'f: cupertino':
   - changed-files:
@@ -137,6 +138,11 @@ platform-web:
       - '**/fix_data.yaml'
       - '**/*.expect'
       - '**/*test_fixes*'
+
+team-engine:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/engine/**/*
 
 tool:
   - changed-files:
