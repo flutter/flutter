@@ -21,7 +21,7 @@ At the start of every month, Flutter aims to ship a new beta to users. We prefer
 
 ## Conducting releases
 
-[Conductor](https://github.com/flutter/flutter/tree/master/dev/conductor) is a release tool written in Dart to drive Flutter releases. It's the source of truth for what's needed to ship a release. Generally, it can promote candidate branches to betas, betas to stable, and hotfix releases. It handles the nuances of git, such as pushes, cherrypicks, and tagging, and the complexities of Flutter, such as rolling and release infra.
+[Conductor](https://github.com/flutter/flutter/tree/main/dev/conductor) is a release tool written in Dart to drive Flutter releases. It's the source of truth for what's needed to ship a release. Generally, it can promote candidate branches to betas, betas to stable, and hotfix releases. It handles the nuances of git, such as pushes, cherrypicks, and tagging, and the complexities of Flutter, such as rolling and release infra.
 
 A Flutter release is very similar to what would be seen on the master branch, with some exceptions:
 1. Ensure all builds and tests are green
