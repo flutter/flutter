@@ -30,12 +30,10 @@ void main() {
     while (counter < 10) {
       counter++;
 
-      await tester.tap(
-        find.ancestor(
-          of: find.text('change foo'),
-          matching: find.byType(ElevatedButton),
-        ),
-      );
+      await tester.tap(find.ancestor(
+        of: find.text('change foo'),
+        matching: find.byType(ElevatedButton),
+      ));
       await tester.pump();
 
       expect(find.text('foo: FOO $counter'), findsOneWidget);
