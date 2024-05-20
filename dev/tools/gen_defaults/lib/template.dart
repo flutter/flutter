@@ -169,16 +169,13 @@ abstract class TokenTemplate {
   }
 
   String? _numToString(Object? value, [int? digits]) {
-    if (value == null) {
-      return null;
-    }
-    if (value is num) {
-      if (value == double.infinity) {
-        return 'double.infinity';
-      }
-      return digits == null ? value.toString() : value.toStringAsFixed(digits);
-    }
-    return getToken(value as String).toString();
+    return switch (value) {
+      null => null,
+      double.infinity => 'double.infinity',
+      num() when digits == null => value.toString(),
+      num() => value.toStringAsFixed(digits!),
+      _ => getToken(value as String).toString(),
+    };
   }
 
   /// Generate an elevation value for the given component token.

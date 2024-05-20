@@ -69,13 +69,10 @@ class TwoPaneDemoState extends State<TwoPaneDemo> with RestorationMixin {
         ),
         endPane: DetailsPane(
           selectedIndex: _currentIndex.value,
-          onClose: widget.type == TwoPaneDemoType.smallScreen
-              ? () {
-                  setState(() {
-                    _currentIndex.value = -1;
-                  });
-                }
-              : null,
+          onClose: switch (widget.type) {
+            TwoPaneDemoType.smallScreen => () => setState(() { _currentIndex.value = -1; }),
+            TwoPaneDemoType.foldable || TwoPaneDemoType.tablet => null,
+          },
         ),
       ),
     );
@@ -190,11 +187,11 @@ class SimulateScreen extends StatelessWidget {
         ),
         padding: const EdgeInsets.all(14),
         child: AspectRatio(
-          aspectRatio: type == TwoPaneDemoType.foldable
-              ? foldableAspectRatio
-              : type == TwoPaneDemoType.tablet
-                  ? tabletAspectRatio
-                  : singleScreenAspectRatio,
+          aspectRatio: switch (type) {
+            TwoPaneDemoType.foldable    => foldableAspectRatio,
+            TwoPaneDemoType.tablet      => tabletAspectRatio,
+            TwoPaneDemoType.smallScreen => singleScreenAspectRatio,
+          },
           child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
             final Size size = Size(constraints.maxWidth, constraints.maxHeight);
             final Size hingeSize = Size(size.width * hingeProportion, size.height);

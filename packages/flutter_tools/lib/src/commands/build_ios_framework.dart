@@ -429,22 +429,17 @@ end
     Directory simulatorBuildOutput,
   ) async {
     const String appFrameworkName = 'App.framework';
-
     final Status status = globals.logger.startProgress(
       ' ├─Building App.xcframework...',
     );
-    final List<EnvironmentType> environmentTypes = <EnvironmentType>[
-      EnvironmentType.physical,
-      EnvironmentType.simulator,
-    ];
     final List<Directory> frameworks = <Directory>[];
 
     try {
-      for (final EnvironmentType sdkType in environmentTypes) {
-        final Directory outputBuildDirectory =
-            sdkType == EnvironmentType.physical
-                ? iPhoneBuildOutput
-                : simulatorBuildOutput;
+      for (final EnvironmentType sdkType in EnvironmentType.values) {
+        final Directory outputBuildDirectory = switch (sdkType) {
+          EnvironmentType.physical  => iPhoneBuildOutput,
+          EnvironmentType.simulator => simulatorBuildOutput,
+        };
         frameworks.add(outputBuildDirectory.childDirectory(appFrameworkName));
         final Environment environment = Environment(
           projectDir: globals.fs.currentDirectory,
