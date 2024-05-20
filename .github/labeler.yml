@@ -63,7 +63,7 @@ engine:
     - any-glob-to-any-file:
       - '**/cupertino/*'
       - '**/*cupertino*'
-      - docs/libraries/**/*
+      - docs/libraries/cupertino/**/*
 
 'f: focus':
   - changed-files:
@@ -82,7 +82,7 @@ engine:
     - any-glob-to-any-file:
       - '**/material/*'
       - '**/*material*'
-      - docs/libraries/**/*
+      - docs/libraries/material/**/*
 
 'f: routes':
   - changed-files:
