@@ -1,7 +1,7 @@
 Any PR that changes a package's version (which should be most PRs) should be published
 to pub.dev.
 
-_See also: [[Package migration to 1.0.0]]_
+_See also: [Package migration to 1.0.0](../Package-migration-to-1.0.0.md)
 
 ## Automatic release
 

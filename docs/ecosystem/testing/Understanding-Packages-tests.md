@@ -16,7 +16,7 @@ flutter/packages uses the same LUCI infrastructure as most of the rest of Flutte
 
 ### LUCI
 
-This is the CI system used by flutter/flutter and flutter/engine. For information about LUCI results pages, see [[Understanding a LUCI build failure]].
+This is the CI system used by flutter/flutter and flutter/engine. For information about LUCI results pages, see [Understanding a LUCI build failure](https://github.com/flutter/flutter/wiki/Understanding-a-LUCI-build-failure).
 
 #### Results
 
