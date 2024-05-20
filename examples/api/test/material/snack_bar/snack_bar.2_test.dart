@@ -27,7 +27,6 @@ void main() {
     await tester.scrollUntilVisible(find.byType(Slider), 30);
     expect(find.text('Action new-line overflow threshold'), findsOneWidget);
     expect(find.byType(Slider), findsOneWidget);
-
   });
 
   testWidgets('Applies configurations to snackbar', (WidgetTester tester) async {
