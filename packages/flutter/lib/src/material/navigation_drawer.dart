@@ -265,7 +265,7 @@ class NavigationDrawerDestination extends StatelessWidget {
           child: icon,
         );
 
-        return _isForwardOrCompleted(animation)
+        return animation.isForwardOrCompleted
             ? selectedIconWidget
             : unselectedIconWidget;
       },
@@ -278,7 +278,7 @@ class NavigationDrawerDestination extends StatelessWidget {
             defaults.labelTextStyle!.resolve(enabled ? unselectedState : disabledState);
 
         return DefaultTextStyle(
-          style: _isForwardOrCompleted(animation)
+          style: animation.isForwardOrCompleted
             ? effectiveSelectedLabelTextStyle!
             : effectiveUnselectedLabelTextStyle!,
           child: label,
@@ -419,7 +419,7 @@ class _NavigationDestinationSemantics extends StatelessWidget {
       animation: destinationInfo.selectedAnimation,
       builder: (BuildContext context, Widget? child) {
         return Semantics(
-          selected: _isForwardOrCompleted(destinationInfo.selectedAnimation),
+          selected: destinationInfo.selectedAnimation.isForwardOrCompleted,
           container: true,
           child: child,
         );
@@ -683,12 +683,6 @@ class _SelectableAnimatedBuilderState extends State<_SelectableAnimatedBuilder>
       _controller,
     );
   }
-}
-
-/// Returns `true` if this animation is ticking forward, or has completed,
-/// based on [status].
-bool _isForwardOrCompleted(Animation<double> animation) {
-  return animation.status == AnimationStatus.forward || animation.status == AnimationStatus.completed;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - NavigationDrawer

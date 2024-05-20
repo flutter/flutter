@@ -1319,7 +1319,7 @@ class _RefreshProgressIndicatorGoldenState extends State<_RefreshProgressIndicat
         setState(() {});
       })
     ..addStatusListener((AnimationStatus status) {
-        if (status == AnimationStatus.completed) {
+        if (status.isCompleted) {
           indeterminate = true;
         }
       });

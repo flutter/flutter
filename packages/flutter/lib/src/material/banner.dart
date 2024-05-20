@@ -312,17 +312,12 @@ class _MaterialBannerState extends State<MaterialBanner> {
     super.dispose();
   }
 
-  void _onAnimationStatusChanged(AnimationStatus animationStatus) {
-    switch (animationStatus) {
-      case AnimationStatus.dismissed:
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        break;
-      case AnimationStatus.completed:
-        if (widget.onVisible != null && !_wasVisible) {
-          widget.onVisible!();
-        }
-        _wasVisible = true;
+  void _onAnimationStatusChanged(AnimationStatus status) {
+    if (status.isCompleted) {
+      if (widget.onVisible != null && !_wasVisible) {
+        widget.onVisible!();
+      }
+      _wasVisible = true;
     }
   }
 

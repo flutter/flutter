@@ -453,7 +453,7 @@ class _GlowController extends ChangeNotifier {
   }
 
   void _changePhase(AnimationStatus status) {
-    if (status != AnimationStatus.completed) {
+    if (!status.isCompleted) {
       return;
     }
     switch (_state) {
@@ -901,7 +901,7 @@ class _StretchController extends ChangeNotifier {
   }
 
   void _changePhase(AnimationStatus status) {
-    if (status != AnimationStatus.completed) {
+    if (!status.isCompleted) {
       return;
     }
     switch (_state) {
