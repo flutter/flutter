@@ -8,7 +8,6 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 
 import '../engine_canvas.dart';
-import '../picture.dart';
 import '../rrect_renderer.dart';
 import '../shadow.dart';
 import '../text/canvas_paragraph.dart';
@@ -17,6 +16,7 @@ import '../vector_math.dart';
 import 'painting.dart';
 import 'path/path.dart';
 import 'path/path_utils.dart';
+import 'picture.dart';
 import 'render_vertices.dart';
 import 'shaders/image_shader.dart';
 
@@ -24,7 +24,7 @@ import 'shaders/image_shader.dart';
 const bool _debugDumpPaintCommands = false;
 
 // Returns the squared length of the x, y (of a border radius).
-double _measureBorderRadius(double x, double y) => x*x + y*y;
+double _measureBorderRadius(double x, double y) => x * x + y * y;
 
 /// Records canvas commands to be applied to a [EngineCanvas].
 ///
@@ -314,7 +314,8 @@ class RecordingCanvas {
     _commands.add(command);
   }
 
-  ui.Rect? getDestinationClipBounds() => _paintBounds.getDestinationClipBounds();
+  ui.Rect? getDestinationClipBounds() =>
+      _paintBounds.getDestinationClipBounds();
 
   void drawColor(ui.Color color, ui.BlendMode blendMode) {
     assert(!_recordingEnded);
@@ -539,7 +540,8 @@ class RecordingCanvas {
     _didDraw = true;
     final double left = offset.dx;
     final double top = offset.dy;
-    final PaintDrawImage command = PaintDrawImage(image, offset, paint.paintData);
+    final PaintDrawImage command =
+        PaintDrawImage(image, offset, paint.paintData);
     _paintBounds.growLTRB(
         left, top, left + image.width, top + image.height, command);
     _commands.add(command);
@@ -845,7 +847,8 @@ class PaintTransform extends PaintCommand {
   String toString() {
     String result = super.toString();
     assert(() {
-      result = 'transform(Matrix4.fromFloat32List(Float32List.fromList(<double>[${matrix4.join(', ')}])))';
+      result =
+          'transform(Matrix4.fromFloat32List(Float32List.fromList(<double>[${matrix4.join(', ')}])))';
       return true;
     }());
     return result;
@@ -1421,7 +1424,8 @@ class Ellipse extends PathCommand {
         anticlockwise ? startAngle - endAngle : endAngle - startAngle,
         matrix4,
         bezierPath);
-    targetPath.addPathWithMode(bezierPath, 0, 0, matrix4, SPathAddPathMode.kAppend);
+    targetPath.addPathWithMode(
+        bezierPath, 0, 0, matrix4, SPathAddPathMode.kAppend);
   }
 
   void _drawArcWithBezier(
@@ -1680,7 +1684,8 @@ class RRectCommand extends PathCommand {
   void transform(Float32List matrix4, SurfacePath targetPath) {
     final ui.Path roundRectPath = ui.Path();
     RRectToPathRenderer(roundRectPath).render(rrect);
-    targetPath.addPathWithMode(roundRectPath, 0, 0, matrix4, SPathAddPathMode.kAppend);
+    targetPath.addPathWithMode(
+        roundRectPath, 0, 0, matrix4, SPathAddPathMode.kAppend);
   }
 
   @override

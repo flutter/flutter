@@ -7,11 +7,11 @@ import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
 
-import '../picture.dart';
 import '../util.dart';
 import '../validators.dart';
 import '../vector_math.dart';
 import 'painting.dart';
+import 'picture.dart';
 import 'recording_canvas.dart';
 import 'render_vertices.dart';
 
