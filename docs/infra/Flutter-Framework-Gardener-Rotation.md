@@ -157,10 +157,10 @@ The bulk of communication happens on [Discord].
 
 [flutter/flutter]: https://github.com/flutter/flutter
 [Flutter issues]: https://github.com/flutter/flutter/issues
-[TESTOWNERS]: https://github.com/flutter/flutter/blob/master/TESTOWNERS
+[TESTOWNERS]: https://github.com/flutter/flutter/blob/main/TESTOWNERS
 [flutter-hackers]: https://github.com/orgs/flutter/teams/flutter-hackers
-[new issue]: https://github.com/flutter/flutter/issues/new
-[new infra issue]: https://github.com/flutter/flutter/issues/new
+[new issue]: https://github.com/flutter/flutter/issues/new/choose
+[new infra issue]: https://github.com/flutter/flutter/issues/new?template=6_infrastructure.yml
 
 [Framework build dashboard]: https://flutter-dashboard.appspot.com/#/build
 [framework benchmarks]: https://flutter-flutter-perf.skia.org/e/
