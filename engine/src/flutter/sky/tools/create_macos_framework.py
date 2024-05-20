@@ -86,6 +86,8 @@ def main():
   subprocess.check_call([
       'lipo', arm64_dylib, x64_dylib, '-create', '-output', fat_framework_binary
   ])
+  # Make the framework readable and executable: u=rwx,go=rx.
+  subprocess.check_call(['chmod', '755', fat_framework_binary])
 
   # Add group and other readability to all files.
   versions_path = os.path.join(fat_framework, 'Versions')
