@@ -404,7 +404,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/transitions/positioned_transition.0_test.dart',
   'examples/api/test/widgets/transitions/sliver_fade_transition.0_test.dart',
   'examples/api/test/widgets/transitions/align_transition.0_test.dart',
-  'examples/api/test/widgets/transitions/fade_transition.0_test.dart',
   'examples/api/test/widgets/transitions/animated_builder.0_test.dart',
   'examples/api/test/widgets/transitions/rotation_transition.0_test.dart',
   'examples/api/test/widgets/transitions/animated_widget.0_test.dart',
