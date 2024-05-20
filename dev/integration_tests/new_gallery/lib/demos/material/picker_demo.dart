@@ -172,14 +172,12 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
   }
 
   String get _labelText {
-    switch (widget.type) {
-      case PickerDemoType.date:
-        return DateFormat.yMMMd().format(_fromDate.value);
-      case PickerDemoType.time:
-        return _fromTime.value.format(context);
-      case PickerDemoType.range:
-        return '${DateFormat.yMMMd().format(_startDate.value)} - ${DateFormat.yMMMd().format(_endDate.value)}';
-    }
+    final String Function(DateTime) format = DateFormat.yMMMd().format;
+    return switch (widget.type) {
+      PickerDemoType.date  => format(_fromDate.value),
+      PickerDemoType.time  => _fromTime.value.format(context),
+      PickerDemoType.range => '${format(_startDate.value)} - ${format(_endDate.value)}',
+    };
   }
 
   @override
@@ -199,16 +197,11 @@ class _PickerDemoState extends State<PickerDemo> with RestorationMixin {
                   Text(_labelText),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () {
-                      switch (widget.type) {
-                        case PickerDemoType.date:
-                          _restorableDatePickerRouteFuture.present();
-                        case PickerDemoType.time:
-                          _restorableTimePickerRouteFuture.present();
-                        case PickerDemoType.range:
-                          _restorableDateRangePickerRouteFuture.present();
-                      }
-                    },
+                    onPressed: () => switch (widget.type) {
+                      PickerDemoType.date  => _restorableDatePickerRouteFuture,
+                      PickerDemoType.time  => _restorableTimePickerRouteFuture,
+                      PickerDemoType.range => _restorableDateRangePickerRouteFuture,
+                    }.present(),
                     child: Text(
                       GalleryLocalizations.of(context)!.demoPickersShowPicker,
                     ),
