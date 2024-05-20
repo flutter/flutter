@@ -3,11 +3,11 @@ Flakiness issue has caused a large portion of the [Flutter tree](https://flutter
 From [Flutter tree dashboard](https://flutter-dashboard.appspot.com/#/build), a flake is identified as a box with an exclamation icon. There are two types that will result in same flaky box.
 * Multiple reruns on the same commit and same task (earlier run fails, but the last run succeeds). For this case, check logs by clicking different build runs.
 
-[[/images/task_flake_multiple_builds.png|width=300px]]
+![Task flakes](https://github.com/flutter/assets-for-api-docs/blob/main/assets/wiki/task_flake_multiple_builds.png)
 
 * A single run on the same commit and same task, but multiple reruns from test runner. For this case, check logs by clicking `stdout` of the test step: it shows data about failed or succeeded runs in the end ([example](https://logs.chromium.org/logs/flutter/buildbucket/cr-buildbucket.appspot.com/8841146512187805536/+/u/run_build_aar_module_test/stdout)). See https://github.com/flutter/flutter/wiki/Understanding-a-LUCI-build-failure for how to locate the test step and `stdout`.
 
-[[/images/task_flake_test_runner.png|width=300px]]
+![Flake test runner](https://github.com/flutter/assets-for-api-docs/blob/main/assets/wiki/task_flake_test_runner.png)
 
 # Preventing flaky tests
 ## [Adding a new DeviceLab test](https://github.com/flutter/flutter/tree/main/dev/devicelab#writing-tests)
