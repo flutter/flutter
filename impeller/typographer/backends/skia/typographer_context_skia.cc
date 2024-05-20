@@ -298,13 +298,21 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
 
     DrawGlyph(canvas, pair.scaled_font, pair.glyph, has_color);
 
-    if (!blit_pass->AddCopy(allocator.TakeBufferView(), texture,
+    // convert_to_read is set to false so that the texture remains in a transfer
+    // dst layout until we finish writing to it below. This only has an impact
+    // on Vulkan where we are responsible for managing image layouts.
+    if (!blit_pass->AddCopy(allocator.TakeBufferView(),  //
+                            texture,                     //
                             IRect::MakeXYWH(pos->GetLeft(), pos->GetTop(),
-                                            size.width, size.height))) {
+                                            size.width, size.height),  //
+                            /*label=*/"",                              //
+                            /*slice=*/0,                               //
+                            /*convert_to_read=*/false                  //
+                            )) {
       return false;
     }
   }
-  return true;
+  return blit_pass->ConvertTextureToShaderRead(texture);
 }
 
 std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(

@@ -166,7 +166,8 @@ bool BlitPassMTL::OnCopyBufferToTextureCommand(
     std::shared_ptr<Texture> destination,
     IRect destination_region,
     std::string label,
-    uint32_t slice) {
+    uint32_t slice,
+    bool convert_to_read) {
   auto source_mtl = DeviceBufferMTL::Cast(*source.buffer).GetMTLBuffer();
   if (!source_mtl) {
     return false;
