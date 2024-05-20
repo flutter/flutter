@@ -2623,7 +2623,7 @@ void main() {
   testWidgets(
   // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
   experimentalLeakTesting: LeakTesting.settings.withTracked(classes: <String>['CurvedAnimation']),
-  'On fullscreen route does not leak CurveAnimation', (WidgetTester tester) async {
+  'Fullscreen route does not leak CurveAnimation', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
