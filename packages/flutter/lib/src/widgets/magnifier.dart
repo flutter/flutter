@@ -216,12 +216,7 @@ class MagnifierController {
   /// either the [animationController] is null, in the
   /// [AnimationStatus.completed] state, or in the [AnimationStatus.forward]
   /// state.
-  bool get shown {
-    return overlayEntry != null && switch (animationController?.status) {
-      AnimationStatus.forward || AnimationStatus.completed || null => true,
-      AnimationStatus.reverse || AnimationStatus.dismissed => false,
-    };
-  }
+  bool get shown => overlayEntry != null && (animationController?.isForwardOrCompleted ?? true);
 
   /// Displays the magnifier.
   ///
