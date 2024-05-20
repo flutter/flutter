@@ -219,8 +219,8 @@ class FocusAttachment {
       _node._manager?._markDetached(_node);
       _node._parent?._removeChild(_node);
       _node._attachment = null;
-      assert(!_node.hasPrimaryFocus);
-      assert(_node._manager?._markedForFocus != _node);
+      assert(!_node.hasPrimaryFocus, 'Node ${_node.debugLabel ?? _node} still has primary focus while being detached.');
+      assert(_node._manager?._markedForFocus != _node, 'Node ${_node.debugLabel ?? _node} still marked for focus while being detached.');
     }
     assert(!isAttached);
   }
@@ -1296,8 +1296,10 @@ class FocusScopeNode extends FocusNode {
   ///
   /// Returns null if there is no currently focused child.
   FocusNode? get focusedChild {
-    assert(_focusedChildren.isEmpty || _focusedChildren.last.enclosingScope == this, 'Focused child does not have the same idea of its enclosing scope as the scope does.');
-    return _focusedChildren.isNotEmpty ? _focusedChildren.last : null;
+    assert(_focusedChildren.isEmpty || _focusedChildren.last.enclosingScope == this,
+      '$debugLabel: Focused child does not have the same idea of its enclosing scope '
+      '(${_focusedChildren.lastOrNull?.enclosingScope}) as the scope does.');
+    return _focusedChildren.lastOrNull;
   }
 
   // A stack of the children that have been set as the focusedChild, most recent
@@ -1377,11 +1379,20 @@ class FocusScopeNode extends FocusNode {
     _manager?._markNeedsUpdate();
   }
 
+  /// Requests that the scope itself receive focus, without trying to find
+  /// a descendant that should receive focus.
+  ///
+  /// This is used only if you want to park the focus on a scope itself.
+  void requestScopeFocus() {
+    _doRequestFocus(findFirstFocus: false);
+  }
+
   @override
   void _doRequestFocus({required bool findFirstFocus}) {
-
-    // It is possible that a previously focused child is no longer focusable.
-    while (this.focusedChild != null && !this.focusedChild!.canRequestFocus) {
+    // It is possible that a previously focused child is no longer focusable, so
+    // clean out the list if so.
+    while (_focusedChildren.isNotEmpty &&
+           (!_focusedChildren.last.canRequestFocus || _focusedChildren.last.enclosingScope == null)) {
       _focusedChildren.removeLast();
     }
 
