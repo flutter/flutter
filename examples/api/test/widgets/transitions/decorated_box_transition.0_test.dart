@@ -43,7 +43,6 @@ void main() {
         ),
     );
 
-    await tester.pump();
     await tester.pump(const Duration(seconds: 3));
     await tester.pump();
 

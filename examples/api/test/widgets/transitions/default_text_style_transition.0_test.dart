@@ -29,7 +29,6 @@ void main() {
         ),
     );
 
-    await tester.pump();
     await tester.pump(const Duration(seconds: 2));
     await tester.pump();
 
@@ -42,7 +41,6 @@ void main() {
         ),
     );
 
-    await tester.pump();
     await tester.pump(const Duration(seconds: 2));
     await tester.pump();
 

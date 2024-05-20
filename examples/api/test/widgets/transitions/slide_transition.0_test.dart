@@ -24,7 +24,6 @@ void main() {
       tester.getCenter(find.byType(Center)),
     );
 
-    await tester.pump();
     await tester.pump(const Duration(seconds: 2));
     await tester.pump();
 
@@ -34,7 +33,6 @@ void main() {
       tester.getCenter(find.byType(Center)).dx + 1.5 * width,
     );
 
-    await tester.pump();
     await tester.pump(const Duration(seconds: 2));
     await tester.pump();
 

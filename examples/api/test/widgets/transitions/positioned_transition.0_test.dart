@@ -20,7 +20,6 @@ void main() {
     expect(tester.getSize(find.byType(FlutterLogo)), const Size(100.0 - 2.0 * 8.0, 100.0 - 2.0 * 8.0));
     expect(tester.getTopLeft(find.byType(FlutterLogo)), const Offset(8.0, 8.0));
 
-    await tester.pump();
     await tester.pump(const Duration(seconds: 2));
     await tester.pump();
 
@@ -28,14 +27,12 @@ void main() {
     expect(tester.getSize(find.byType(FlutterLogo)), const Size(200.0 - 2.0 * 8.0, 200.0 - 2.0 * 8.0));
     expect(tester.getBottomRight(find.byType(FlutterLogo)), Offset(canvasSize.width - 8.0, canvasSize.height - 8.0));
 
-    await tester.pump();
     await tester.pump(const Duration(seconds: 2));
     await tester.pump();
 
     expect(tester.getSize(find.byType(FlutterLogo)), const Size(100.0 - 2.0 * 8.0, 100.0 - 2.0 * 8.0));
     expect(tester.getTopLeft(find.byType(FlutterLogo)), const Offset(8.0, 8.0));
 
-    await tester.pump();
     await tester.pump(const Duration(seconds: 2));
     await tester.pump();
 

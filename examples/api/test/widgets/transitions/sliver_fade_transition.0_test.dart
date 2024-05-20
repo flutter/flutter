@@ -32,7 +32,6 @@ void main() {
         .having((RenderSliverAnimatedOpacity obj) => obj.opacity.value, 'opacity', 0.0)
     );
 
-    await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     await tester.pump();
 
