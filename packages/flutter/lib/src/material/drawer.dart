@@ -489,15 +489,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     if (widget.scrimColor != oldWidget.scrimColor) {
       _scrimColorTween = _buildScrimColorTween();
     }
-    if (widget.isDrawerOpen != oldWidget.isDrawerOpen) {
-      switch (_controller.status) {
-        case AnimationStatus.completed:
-        case AnimationStatus.dismissed:
-          _controller.value = widget.isDrawerOpen ? 1.0 : 0.0;
-        case AnimationStatus.forward:
-        case AnimationStatus.reverse:
-          break;
-      }
+    if (widget.isDrawerOpen != oldWidget.isDrawerOpen && !_controller.isAnimating) {
+      _controller.value = widget.isDrawerOpen ? 1.0 : 0.0;
     }
   }
 
@@ -529,7 +522,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         _historyEntry?.remove();
         _historyEntry = null;
       case AnimationStatus.dismissed:
-        break;
       case AnimationStatus.completed:
         break;
     }
@@ -671,7 +663,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         (DrawerAlignment.end,   TextDirection.ltr) => MediaQuery.paddingOf(context).right,
       };
 
-    if (_controller.status == AnimationStatus.dismissed) {
+    if (_controller.isDismissed) {
       if (widget.enableOpenDragGesture && !isDesktop) {
         return Align(
           alignment: _drawerOuterAlignment,
