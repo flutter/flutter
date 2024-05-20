@@ -12,10 +12,13 @@ void main() {
     expect(find.text('Split RawAutocomplete App'), findsOneWidget);
     expect(find.byType(AppBar), findsOneWidget);
     expect(find.byType(TextFormField), findsOneWidget);
-    expect(find.descendant(
-      of: find.byType(AppBar),
-      matching: find.byType(TextFormField)
-    ), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byType(TextFormField)
+      ),
+      findsOneWidget,
+    );
 
     expect(find.byType(RawAutocomplete<String>), findsOneWidget);
     expect(find.text('aardvark'), findsNothing);
