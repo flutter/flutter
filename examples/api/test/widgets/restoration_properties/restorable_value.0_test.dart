@@ -13,7 +13,7 @@ void main() {
       const example.RestorableValueExampleApp(),
     );
 
-    // The initial answer value in the example equals 42.
+    // Verify that the initial answer value in the example equals 42.
     expect(find.text('42'), findsOneWidget);
 
     // Tap the button to increment the answer value by 1.
