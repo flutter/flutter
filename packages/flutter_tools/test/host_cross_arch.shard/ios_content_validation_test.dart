@@ -431,7 +431,6 @@ void main() {
       );
 
       final String flutterFramework = fileSystem.path.join(
-        appBundle.path,
         flutterFrameworkDir.path,
         'Flutter',
       );
