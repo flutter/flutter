@@ -22,6 +22,7 @@ Future<void> createInfoPlist(
   String? minimumIOSVersion,
 }) async {
   final File infoPlistFile = target.childFile('Info.plist');
+  final String bundleIdentifier = 'io.flutter.flutter.native_assets.$name'.replaceAll('_', '-');
   await infoPlistFile.writeAsString(<String>[
     '''
 <?xml version="1.0" encoding="UTF-8"?>
@@ -33,7 +34,7 @@ Future<void> createInfoPlist(
 	<key>CFBundleExecutable</key>
 	<string>$name</string>
 	<key>CFBundleIdentifier</key>
-	<string>io.flutter.flutter.native_assets.$name</string>
+	<string>$bundleIdentifier</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

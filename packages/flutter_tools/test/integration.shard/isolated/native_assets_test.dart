@@ -356,7 +356,7 @@ void expectDylibIsBundledMacOS(Directory appDirectory, String buildMode) {
 	<key>CFBundleExecutable</key>
 	<string>package_with_native_assets</string>
 	<key>CFBundleIdentifier</key>
-	<string>io.flutter.flutter.native_assets.package_with_native_assets</string>
+	<string>io.flutter.flutter.native-assets.package-with-native-assets</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -396,7 +396,7 @@ void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
 	<key>CFBundleExecutable</key>
 	<string>package_with_native_assets</string>
 	<key>CFBundleIdentifier</key>
-	<string>io.flutter.flutter.native_assets.package_with_native_assets</string>
+	<string>io.flutter.flutter.native-assets.package-with-native-assets</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
