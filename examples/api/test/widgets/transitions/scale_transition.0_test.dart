@@ -32,7 +32,6 @@ void main() {
     Transform transform = tester.widget(transformFinder);
     expect(transform.transform[0], 0);
 
-    await tester.pump();
     await tester.pump(const Duration(seconds: 2));
     await tester.pump();
 

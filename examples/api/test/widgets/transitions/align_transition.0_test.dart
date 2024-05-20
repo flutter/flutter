@@ -10,8 +10,11 @@ void main() {
   testWidgets('Shows flutter logo in transition', (WidgetTester tester) async {
     await tester.pumpWidget(const example.AlignTransitionExampleApp());
     expect(find.byType(ColoredBox), findsOneWidget);
-    expect(find.byWidgetPredicate((Widget padding) => padding is Padding
-        && padding.padding == const EdgeInsets.all(8.0)), findsOneWidget);
+    expect(
+      find.byWidgetPredicate((Widget padding) => padding is Padding
+        && padding.padding == const EdgeInsets.all(8.0)),
+      findsOneWidget,
+    );
     expect(find.byType(FlutterLogo), findsOneWidget);
     expect(find.byType(AlignTransition), findsOneWidget);
   });
@@ -27,7 +30,6 @@ void main() {
       tester.getBottomLeft(find.byType(AlignTransition)),
     );
 
-    await tester.pump();
     await tester.pump(const Duration(seconds: 2));
     await tester.pump();
 
@@ -36,7 +38,6 @@ void main() {
       tester.getCenter(find.byType(AlignTransition)),
     );
 
-    await tester.pump();
     await tester.pump(const Duration(seconds: 2));
     await tester.pump();
 

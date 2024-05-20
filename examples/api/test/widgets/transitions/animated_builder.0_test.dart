@@ -20,7 +20,6 @@ void main() {
         && widget.transform == Transform.rotate(angle: 0.0).transform),
       findsOneWidget);
 
-    await tester.pump();
     await tester.pump(const Duration(seconds: 5));
     await tester.pump();
 
