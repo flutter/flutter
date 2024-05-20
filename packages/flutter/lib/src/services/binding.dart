@@ -47,6 +47,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     SystemChannels.accessibility.setMessageHandler((dynamic message) => _handleAccessibilityMessage(message as Object));
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     SystemChannels.platform.setMethodCallHandler(_handlePlatformMessage);
+    platformDispatcher.onViewFocusChange = handleViewFocusChanged;
     TextInput.ensureInitialized();
     readInitialLifecycleStateFromNativeWindow();
     initializationComplete();
@@ -354,6 +355,19 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     }
     return;
   }
+
+  /// Called whenever the [PlatformDispatcher] receives a notification that the
+  /// focus state on a view has changed.
+  ///
+  /// The [event] contains the view ID for the view that changed its focus
+  /// state.
+  ///
+  /// See also:
+  ///
+  /// * [PlatformDispatcher.onViewFocusChange], which calls this method.
+  @protected
+  @mustCallSuper
+  void handleViewFocusChanged(ui.ViewFocusEvent event) {}
 
   Future<dynamic> _handlePlatformMessage(MethodCall methodCall) async {
     final String method = methodCall.method;

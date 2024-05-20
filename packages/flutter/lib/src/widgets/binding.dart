@@ -4,7 +4,8 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' show AccessibilityFeatures, AppExitResponse, AppLifecycleState, FrameTiming, Locale, PlatformDispatcher, TimingsCallback;
+import 'dart:ui' show AccessibilityFeatures, AppExitResponse, AppLifecycleState,
+  FrameTiming, Locale, PlatformDispatcher, TimingsCallback, ViewFocusEvent;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -320,6 +321,18 @@ abstract mixin class WidgetsBindingObserver {
   ///  * [AppLifecycleListener], an alternative API for responding to
   ///    application lifecycle changes.
   void didChangeAppLifecycleState(AppLifecycleState state) { }
+
+  /// Called whenever the [PlatformDispatcher] receives a notification that the
+  /// focus state on a view has changed.
+  ///
+  /// The [event] contains the view ID for the view that changed its focus
+  /// state.
+  ///
+  /// The view ID of the [FlutterView] in which a particular [BuildContext]
+  /// resides can be retrieved with `View.of(context).viewId`, so that it may be
+  /// compared with the view ID in the `event` to see if the event pertains to
+  /// the given context.
+  void didChangeViewFocus(ViewFocusEvent event) { }
 
   /// Called when a request is received from the system to exit the application.
   ///
@@ -948,6 +961,14 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     super.handleAppLifecycleStateChanged(state);
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeAppLifecycleState(state);
+    }
+  }
+
+  @override
+  void handleViewFocusChanged(ViewFocusEvent event) {
+    super.handleViewFocusChanged(event);
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+      observer.didChangeViewFocus(event);
     }
   }
 

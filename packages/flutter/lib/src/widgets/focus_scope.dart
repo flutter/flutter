@@ -757,6 +757,9 @@ class FocusScope extends Focus {
     super.onKeyEvent,
     super.onKey,
     super.debugLabel,
+    super.includeSemantics,
+    super.descendantsAreFocusable,
+    super.descendantsAreTraversable,
   })  : super(
           focusNode: node,
         );
@@ -770,6 +773,7 @@ class FocusScope extends Focus {
     required FocusScopeNode focusScopeNode,
     FocusNode? parentNode,
     bool autofocus,
+    bool includeSemantics,
     ValueChanged<bool>? onFocusChange,
   })  = _FocusScopeWithExternalFocusNode;
 
@@ -798,6 +802,7 @@ class _FocusScopeWithExternalFocusNode extends FocusScope {
     required FocusScopeNode focusScopeNode,
     super.parentNode,
     super.autofocus,
+    super.includeSemantics,
     super.onFocusChange,
   }) : super(
     node: focusScopeNode,
@@ -834,13 +839,17 @@ class _FocusScopeState extends _FocusState {
   @override
   Widget build(BuildContext context) {
     _focusAttachment!.reparent(parent: widget.parentNode);
-    return Semantics(
-      explicitChildNodes: true,
-      child: _FocusInheritedScope(
-        node: focusNode,
-        child: widget.child,
-      ),
+    Widget result = _FocusInheritedScope(
+      node: focusNode,
+      child: widget.child,
     );
+    if (widget.includeSemantics) {
+      result = Semantics(
+        explicitChildNodes: true,
+        child: result,
+      );
+    }
+    return result;
   }
 }
 
