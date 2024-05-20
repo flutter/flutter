@@ -10,7 +10,6 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 import '../../engine.dart' show FrameTimingRecorder, kProfileApplyFrame, kProfilePrerollFrame;
 import '../display.dart';
 import '../dom.dart';
-import '../picture.dart';
 import '../profiler.dart';
 import '../util.dart';
 import '../vector_math.dart';

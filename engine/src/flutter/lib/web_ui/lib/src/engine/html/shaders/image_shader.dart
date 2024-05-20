@@ -8,9 +8,9 @@ import 'package:ui/ui.dart' as ui;
 
 import '../../browser_detection.dart';
 import '../../dom.dart';
-import '../../html_image_codec.dart';
 import '../../safe_browser_api.dart';
 import '../../vector_math.dart';
+import '../image.dart';
 import '../render_vertices.dart';
 import 'vertex_shaders.dart';
 
@@ -83,7 +83,8 @@ class EngineImageShader implements ui.ImageShader {
     final int imageHeight = image.height;
     final int newWidth = imageWidth * mirrorX;
     final int newHeight = imageHeight * mirrorY;
-    final OffScreenCanvas offscreenCanvas = OffScreenCanvas(newWidth, newHeight);
+    final OffScreenCanvas offscreenCanvas =
+        OffScreenCanvas(newWidth, newHeight);
     final Object renderContext = offscreenCanvas.getContext2d()!;
     for (int y = 0; y < mirrorY; y++) {
       for (int x = 0; x < mirrorX; x++) {
@@ -151,7 +152,8 @@ class EngineImageShader implements ui.ImageShader {
 
     const int vertexCount = 6;
     final Float32List vertices = Float32List(vertexCount * 2);
-    final ui.Rect vRect = shaderBounds.translate(-shaderBounds.left, -shaderBounds.top);
+    final ui.Rect vRect =
+        shaderBounds.translate(-shaderBounds.left, -shaderBounds.top);
     vertices[0] = vRect.left;
     vertices[1] = vRect.top;
     vertices[2] = vRect.right;
@@ -168,20 +170,15 @@ class EngineImageShader implements ui.ImageShader {
     final Object positionAttributeLocation =
         gl.getAttributeLocation(glProgram.program, 'position');
 
-    setupVertexTransforms(gl, glProgram, 0, 0,
-        widthInPixels.toDouble(), heightInPixels.toDouble(), transform);
+    setupVertexTransforms(gl, glProgram, 0, 0, widthInPixels.toDouble(),
+        heightInPixels.toDouble(), transform);
 
-    requiresTileOffset = shaderBounds.left !=0 || shaderBounds.top != 0;
+    requiresTileOffset = shaderBounds.left != 0 || shaderBounds.top != 0;
 
     /// To map from vertex position to texture coordinate in 0..1 range,
     /// we setup scalar to be used in vertex shader.
-    setupTextureTransform(
-        gl,
-        glProgram,
-        shaderBounds.left,
-        shaderBounds.top,
-        1.0 / image.width.toDouble(),
-        1.0 / image.height.toDouble());
+    setupTextureTransform(gl, glProgram, shaderBounds.left, shaderBounds.top,
+        1.0 / image.width.toDouble(), 1.0 / image.height.toDouble());
 
     /// Setup geometry.
     ///
@@ -192,12 +189,14 @@ class EngineImageShader implements ui.ImageShader {
     if (isWebGl2) {
       /// Create a vertex array object.
       vao = gl.createVertexArray();
+
       /// Set vertex array object as active one.
       gl.bindVertexArray(vao!);
     }
 
     /// Turn on position attribute.
     gl.enableVertexAttribArray(positionAttributeLocation);
+
     /// Bind buffer as position buffer and transfer data.
     gl.bindArrayBuffer(positionsBuffer);
     bufferVertexData(gl, vertices, ui.window.devicePixelRatio);
@@ -215,6 +214,7 @@ class EngineImageShader implements ui.ImageShader {
 
     /// Copy image to the texture.
     final Object? texture = gl.createTexture();
+
     /// Texture units are a global array of references to the textures.
     /// By setting activeTexture, we associate the bound texture to a unit.
     /// Every time we call a texture function such as texImage2D with a target
@@ -230,11 +230,11 @@ class EngineImageShader implements ui.ImageShader {
     if (isWebGl2) {
       /// Texture REPEAT and MIRROR is only supported in WebGL 2, for
       /// WebGL 1.0 we let shader compute correct uv coordinates.
-      gl.texParameteri(gl.kTexture2D, gl.kTextureWrapS,
-          tileModeToGlWrapping(gl, tileModeX));
+      gl.texParameteri(
+          gl.kTexture2D, gl.kTextureWrapS, tileModeToGlWrapping(gl, tileModeX));
 
-      gl.texParameteri(gl.kTexture2D, gl.kTextureWrapT,
-          tileModeToGlWrapping(gl, tileModeY));
+      gl.texParameteri(
+          gl.kTexture2D, gl.kTextureWrapT, tileModeToGlWrapping(gl, tileModeY));
 
       /// Mipmapping saves your texture in different resolutions
       /// so the graphics card can choose which resolution is optimal
