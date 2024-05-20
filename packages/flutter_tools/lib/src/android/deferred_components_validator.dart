@@ -131,11 +131,12 @@ abstract class DeferredComponentsValidator {
           if (line.startsWith('Only in android')) {
             continue;
           }
-          final TerminalColor color = switch (line[0]) {
-            '+' => TerminalColor.green,
-            '-' => TerminalColor.red,
-            _   => TerminalColor.grey,
-          };
+          TerminalColor color = TerminalColor.grey;
+          if (line.startsWith('+')) {
+            color = TerminalColor.green;
+          } else if (line.startsWith('-')) {
+            color = TerminalColor.red;
+          }
           logger.printStatus(line, color: color);
         }
         logger.printStatus('');

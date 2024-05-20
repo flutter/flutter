@@ -105,18 +105,13 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo>
 
   String _title(BuildContext context) {
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
-    switch (widget.type) {
-      case AlertDemoType.alert:
-        return localizations.demoCupertinoAlertTitle;
-      case AlertDemoType.alertTitle:
-        return localizations.demoCupertinoAlertWithTitleTitle;
-      case AlertDemoType.alertButtons:
-        return localizations.demoCupertinoAlertButtonsTitle;
-      case AlertDemoType.alertButtonsOnly:
-        return localizations.demoCupertinoAlertButtonsOnlyTitle;
-      case AlertDemoType.actionSheet:
-        return localizations.demoCupertinoActionSheetTitle;
-    }
+    return switch (widget.type) {
+      AlertDemoType.alert            => localizations.demoCupertinoAlertTitle,
+      AlertDemoType.alertTitle       => localizations.demoCupertinoAlertWithTitleTitle,
+      AlertDemoType.alertButtons     => localizations.demoCupertinoAlertButtonsTitle,
+      AlertDemoType.alertButtonsOnly => localizations.demoCupertinoAlertButtonsOnlyTitle,
+      AlertDemoType.actionSheet      => localizations.demoCupertinoActionSheetTitle,
+    };
   }
 
   static Route<String> _alertDemoDialog(
