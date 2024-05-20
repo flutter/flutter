@@ -16,7 +16,7 @@ void main() {
     HttpOverrides.global = null;
   });
 
-  testWidgets('has nonexistent url', (WidgetTester tester) async {
+  testWidgets('Has nonexistent url', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ErrorBuilderExampleApp(),
     );
