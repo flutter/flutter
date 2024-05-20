@@ -164,6 +164,11 @@ void main() {
         ),
       );
 
+      // Check read/write permissions are being correctly set
+      final String rawStatString = outputFlutterFramework.statSync().modeString();
+      final String statString = rawStatString.substring(rawStatString.length - 9);
+      expect(statString, 'rwxr-xr-x');
+
       // Check complicated macOS framework symlink structure.
       final Link current = outputFlutterFramework.childDirectory('Versions').childLink('Current');
 
