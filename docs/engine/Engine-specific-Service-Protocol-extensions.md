@@ -1,4 +1,4 @@
-The Flutter engine adds several extensions to the [Dart VM Service Protocol](https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md). The Flutter Engine specific extensions are documented here. Applications may also choose to register their [own extensions](https://api.dartlang.org/stable/1.24.3/dart-developer/registerExtension.html).
+The Flutter engine adds several extensions to the [Dart VM Service Protocol](https://github.com/dart-lang/sdk/blob/main/runtime/vm/service/service.md). The Flutter Engine specific extensions are documented here. Applications may also choose to register their [own extensions](https://api.dartlang.org/stable/1.24.3/dart-developer/registerExtension.html).
 
 ## List views: `_flutter.listViews`
 
