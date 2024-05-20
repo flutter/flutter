@@ -67,7 +67,7 @@ std::shared_ptr<SwapchainVK> SwapchainVK::Create(
       auto ahb_swapchain = std::shared_ptr<AHBSwapchainVK>(new AHBSwapchainVK(
           context,             //
           window.GetHandle(),  //
-          std::move(surface),  //
+          surface,             //
           window.GetSize(),    //
           enable_msaa          //
           ));

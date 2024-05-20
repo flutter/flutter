@@ -19,7 +19,7 @@ bool AHBSwapchainVK::IsAvailableOnPlatform() {
 
 AHBSwapchainVK::AHBSwapchainVK(const std::shared_ptr<Context>& context,
                                ANativeWindow* window,
-                               vk::UniqueSurfaceKHR surface,
+                               const vk::UniqueSurfaceKHR& surface,
                                const ISize& size,
                                bool enable_msaa)
     : context_(context),
