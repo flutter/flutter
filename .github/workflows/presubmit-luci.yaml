@@ -1,0 +1,19 @@
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#about-yaml-syntax-for-workflows
+
+name: trigger-luci-presubmits
+run-name: test run-name
+on: [pull_request]
+
+permissions: read-all
+
+jobs:
+  foo:
+    name: foo-job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Bar Step
+        run: echo 'Hello, world!' ; false
