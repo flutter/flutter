@@ -1,4 +1,4 @@
-Most tests have been running in Flutter CI [LUCI](https://github.com/flutter/flutter/tree/master/dev/bots#luci-layered-universal-continuous-integration) for multiple flutter repositories, including [post-submit framework](https://flutter-dashboard.appspot.com/#/build), [pre-submit framework](https://ci.chromium.org/p/flutter/g/framework-try/builders), etc. This page uses framework as an example, and talks about what to do when a LUCI build failure happens.
+Most tests have been running in Flutter CI [LUCI](https://github.com/flutter/flutter/tree/main/dev/bots#luci-layered-universal-continuous-integration) for multiple flutter repositories, including [post-submit framework](https://flutter-dashboard.appspot.com/#/build), [pre-submit framework](https://ci.chromium.org/p/flutter/g/framework-try/builders), etc. This page uses framework as an example, and talks about what to do when a LUCI build failure happens.
 
 ## Build dashboards
 * [Flutter build dashboard](https://flutter-dashboard.appspot.com/#/build)

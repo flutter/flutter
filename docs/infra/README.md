@@ -8,7 +8,7 @@ This is an index of team-facing documentation for topics relating to Engineering
 - [Flutter Installation Bundles](Flutter-Installation-Bundles.md)
 - [Flutter Self Service Index](https://github.com/flutter/flutter/wiki/Flutter-Self-Service-Index)
 - [Flutter Test Fonts](https://github.com/flutter/flutter/wiki/Flutter-Test-Fonts)
-- [Flutter's Build Infrastructure](https://github.com/flutter/flutter/blob/master/dev/bots/README.md)
+- [Flutter's Build Infrastructure](../../dev/bots/README.md)
 - [Flutter's repository architecture](https://github.com/flutter/flutter/wiki/Flutter%27s-repository-architecture)
 - [GitHub Action Workflows](GitHub-Action-Workflows.md)
 - [Infra Ticket Queue](Infra-Ticket-Queue.md)

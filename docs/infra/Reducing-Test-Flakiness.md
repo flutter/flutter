@@ -10,10 +10,10 @@ From [Flutter tree dashboard](https://flutter-dashboard.appspot.com/#/build), a 
 [[/images/task_flake_test_runner.png|width=300px]]
 
 # Preventing flaky tests
-## [Adding a new DeviceLab test](https://github.com/flutter/flutter/tree/master/dev/devicelab#writing-tests)
-DeviceLab tests are located under [`/dev/devicelab/bin/tasks`](https://github.com/flutter/flutter/tree/master/dev/devicelab/bin/tasks). If you plan to add a new DeviceLab test, please follow
+## [Adding a new DeviceLab test](https://github.com/flutter/flutter/tree/main/dev/devicelab#writing-tests)
+DeviceLab tests are located under [`/dev/devicelab/bin/tasks`](https://github.com/flutter/flutter/tree/main/dev/devicelab/bin/tasks). If you plan to add a new DeviceLab test, please follow
 * Create a PR to add test files
-  * Make sure an ownership entry is created for the test in [TESTOWNERS](https://github.com/flutter/flutter/blob/master/TESTOWNERS) file
+  * Make sure an ownership entry is created for the test in [TESTOWNERS](https://github.com/flutter/flutter/blob/main/TESTOWNERS) file
 * Enable the test in staging pool first
   * Use `bringup: true` in .ci.yaml
   * Monitor the test execution in the [flutter dashboard](https://flutter-dashboard.appspot.com/#/build)
@@ -26,7 +26,7 @@ On a weekly basis, [an automation script](https://github.com/flutter/cocoon/blob
   * Create a tracking bug if not existing in the [bug pool](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+project%3Aflutter%2Fflutter%2F189+label%3A%22team%3A+flakes%22).
     * The sub-team TL will be assigned by default for further triage/re-assign.
     * P0 will be labeled
-  * If it is not a shard test, the script marks the tests as flaky by updating the entry in [.ci.yaml](https://github.com/flutter/flutter/blob/master/.ci.yaml).
+  * If it is not a shard test, the script marks the tests as flaky by updating the entry in [.ci.yaml](https://github.com/flutter/flutter/blob/main/.ci.yaml).
     * Add a `# TODO(username): github issue url` above the `bringup: true` line
 
 If an issue is closed, there will be a grace period of 15 days before the automation script refile the issue if the same flakiness persists.
@@ -104,6 +104,6 @@ Sometimes it can be easier to identify patterns of what's different between test
 # Fixing flaky tests
 The TL will help triage, reassign, and attempt to fix the flakiness.
 
-If the test was marked flaky in CI and then fixed, the test can be re-enabled after being validated for 50 consecutive runs without flakiness issues (task without exclamation point in flutter build dashboard and task not failed due to the same flaky failure). This can be done by updating the test entry in [.ci.yaml](https://github.com/flutter/flutter/blob/master/.ci.yaml) to remove the `bringup: true` entry for that target.
+If the test was marked flaky in CI and then fixed, the test can be re-enabled after being validated for 50 consecutive runs without flakiness issues (task without exclamation point in flutter build dashboard and task not failed due to the same flaky failure). This can be done by updating the test entry in [.ci.yaml](https://github.com/flutter/flutter/blob/main/.ci.yaml) to remove the `bringup: true` entry for that target.
 
 If not fixable, the test will be removed from the flutter build dashboard or deleted from CI completely depending on specific cases.
