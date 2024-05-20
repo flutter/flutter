@@ -148,6 +148,11 @@ team-ecosystem:
     - any-glob-to-any-file:
       - docs/ecosystem/**/*
 
+team-infra:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/infra/**/*
+
 tool:
   - changed-files:
     - any-glob-to-any-file:
