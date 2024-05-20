@@ -29,8 +29,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('CHILD $i'), findsOneWidget);
       final ActionChip chip = tester.widget<ActionChip>(find.ancestor(
-          of: find.text('CHILD $i'),
-          matching: find.byType(ActionChip)
+        of: find.text('CHILD $i'),
+        matching: find.byType(ActionChip)
       ));
       expect(chip.focusNode, isNotNull);
       expect(chip.focusNode!.hasPrimaryFocus, isTrue);
