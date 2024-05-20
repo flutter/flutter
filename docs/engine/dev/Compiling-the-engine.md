@@ -73,14 +73,14 @@ Run the following steps, from the `src` directory created in [Setting up the Eng
     * For MacOS, you will need older version of XCode(9.4 or below) to compile android_debug_unopt and android_debug_unopt_x86. If you only care about x64, you can ignore this
 
 This builds a debug-enabled ("unoptimized") binary configured to run Dart in
-checked mode ("debug"). There are other versions, see [[Flutter's modes]].
+checked mode ("debug"). There are other versions, see [Flutter's modes](../Flutter's-modes.md).
 
 If you're going to be debugging crashes in the engine, make sure you add
 `android:debuggable="true"` to the `<application>` element in the
 `android/AndroidManifest.xml` file for the Flutter app you are using
 to test the engine.
 
-See [[The flutter tool]] for instructions on how to use the `flutter` tool with a local engine.
+See [The flutter tool](https://github.com/flutter/flutter/wiki/The-flutter-tool) for instructions on how to use the `flutter` tool with a local engine.
 You will typically use the `android_debug_unopt` build to debug the engine on a device, and
 `android_debug_unopt_x64` to debug in on a simulator. Modifying dart sources in the engine will
 require adding a `dependency_override` section in you app's `pubspec.yaml` as detailed
@@ -125,7 +125,7 @@ Run the following steps, from the `src` directory created in the steps above:
 
 3. `./flutter/tools/gn --ios --unoptimized` to prepare build files for device-side executables (or `--ios --simulator --unoptimized` for simulator).
    * This also produces an Xcode project for working with the engine source code at `out/ios_debug_unopt/flutter_engine.xcodeproj`
-   * For a discussion on the various flags and modes, see [[Flutter's modes]].
+   * For a discussion on the various flags and modes, see [Flutter's modes](../Flutter's-modes.md).
    * Add the `--simulator-cpu=arm64` argument for an arm64 Mac simulator to output to `out/ios_debug_sim_unopt_arm64`.
 
 4. `./flutter/tools/gn --unoptimized` to prepare the build files for host-side executables.
@@ -133,7 +133,7 @@ Run the following steps, from the `src` directory created in the steps above:
 
 5. `ninja -C out/ios_debug_unopt && ninja -C out/host_debug_unopt` to build all artifacts (use `out/ios_debug_sim_unopt` for Simulator).
 
-See [[The flutter tool]] for instructions on how to use the `flutter` tool with a local engine.
+See [The flutter tool](https://github.com/flutter/flutter/wiki/The-flutter-tool) for instructions on how to use the `flutter` tool with a local engine.
 You will typically use the `ios_debug_unopt` build to debug the engine on a device, and
 `ios_debug_sim_unopt` to debug in on a simulator. Modifying dart sources in the engine will
 require adding a `dependency_override` section in you app's `pubspec.yaml` as detailed
@@ -155,7 +155,7 @@ These steps build the desktop embedding, and the engine used by `flutter test` o
 4. `ninja -C out/host_debug_unopt` to build a desktop unoptimized binary.
     * If you skipped `--unoptimized`, use `ninja -C out/host_debug` instead.
 
-See [[The flutter tool]] for instructions on how to use the `flutter` tool with a local engine.
+See [The flutter tool](https://github.com/flutter/flutter/wiki/The-flutter-tool) for instructions on how to use the `flutter` tool with a local engine.
 You will typically use the `host_debug_unopt` build in this setup. Modifying dart sources in the engine will
 require adding a `dependency_override` section in you app's `pubspec.yaml` as detailed
 [here](https://github.com/flutter/flutter/wiki/The-flutter-tool#using-a-locally-built-engine-with-the-flutter-tool).
@@ -327,4 +327,4 @@ Running `gclient sync` does not update the tags, there are two solutions:
 1. under `engine/src/third_party/dart` run `git fetch --tags origin`
 2. or run gclient sync with with tags parameter: `gclient sync --with_tags`
 
-_See also: [[Debugging the engine]], which includes instructions on running a Flutter app with a local engine._
+_See also: [Debugging the engine](../Debugging-the-engine.md), which includes instructions on running a Flutter app with a local engine._

@@ -13,7 +13,7 @@ The following diagram gives an overview of the pieces that make up a regular Flu
 * Implements business logic.
 * Owned by app developer.
 
-#### Framework ([source code](https://github.com/flutter/flutter/tree/master/packages/flutter/lib))
+#### Framework ([source code](https://github.com/flutter/flutter/tree/main/packages/flutter/lib))
 * Provides higher-level API to build high-quality apps (e.g. widgets, hit-testing, gesture detection, accessibility, text input, etc.).
 * Composites the app's widget tree into a scene.
 
@@ -34,7 +34,7 @@ The following diagram gives an overview of the pieces that make up a regular Flu
 
 ## Architecture overview
 
-Flutter's engine takes core technologies, Skia, a 2D graphics rendering library, and Dart, a VM for a garbage-collected object-oriented language, and hosts them in a shell. Different platforms have different shells, for example we have shells for [Android](https://github.com/flutter/engine/tree/main/shell/platform/android) and [iOS](https://github.com/flutter/engine/tree/main/shell/platform/darwin). We also have an [embedder API](https://github.com/flutter/engine/tree/main/shell/platform/embedder) which allows Flutter's engine to be used as a library (see [[Custom Flutter Engine Embedders]]).
+Flutter's engine takes core technologies, Skia, a 2D graphics rendering library, and Dart, a VM for a garbage-collected object-oriented language, and hosts them in a shell. Different platforms have different shells, for example we have shells for [Android](https://github.com/flutter/engine/tree/main/shell/platform/android) and [iOS](https://github.com/flutter/engine/tree/main/shell/platform/darwin). We also have an [embedder API](https://github.com/flutter/engine/tree/main/shell/platform/embedder) which allows Flutter's engine to be used as a library (see [Custom Flutter Engine Embedders](../engine/Custom-Flutter-Engine-Embedders.md)).
 
 The shells implement platform-specific code such as communicating with IMEs (on-screen keyboards) and the system's application lifecycle events.
 

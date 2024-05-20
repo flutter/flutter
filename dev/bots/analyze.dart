@@ -1304,6 +1304,8 @@ Future<void> verifyRepositoryLinks(String workingDirectory) async {
 
   // Repos whose default branch is still 'master'
   const Set<String> repoExceptions = <String>{
+    'bdero/flutter-gpu-examples',
+    'chromium/chromium',
     'clojure/clojure',
     'dart-lang/test', // TODO(guidezpl): remove when https://github.com/dart-lang/test/issues/2209 is closed
     'eseidelGoogle/bezier_perf',

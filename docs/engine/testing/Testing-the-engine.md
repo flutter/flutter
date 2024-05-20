@@ -100,7 +100,7 @@ containing the test runner and dependencies. Then it uses the system `java`
 runtime to execute the .jar. JDK v8 must be set as your `$JAVA_HOME` to run
 the Robolectric tests.
 
-See [[Setting-up-the-Engine-development-environment#using-vscode-as-an-ide-for-the-android-embedding-java]]
+See [Setting-up-the-Engine-development-environment#using-vscode-as-an-ide-for-the-android-embedding-java](../dev/Setting-up-the-Engine-development-environment.md)
 for tips on setting up Java code completion and syntax highlighting in Visual
 Studio when working on the engine and tests.
 
@@ -230,7 +230,7 @@ into a single `.dylib`. Then it uses Xcode and the Xcode project at
 
 If you get an `AssertionError: libios_test_flutter.dylib doesn't exist` error, you may need to manually run the ninja command that is printed to the terminal. e.g. `ninja -C $FLUTTER_ENGINE/out/ios_debug_sim_unopt_arm64 ios_test_flutter`
 
-See [[Setting-up-the-Engine-development-environment#editor-autocomplete-support]]
+See [Setting-up-the-Engine-development-environment#editor-autocomplete-support](../dev/Setting-up-the-Engine-development-environment.md)
 for tips on setting up C/C++/Objective-C code completion and syntax highlighting
 when working on the engine and tests.
 
@@ -329,7 +329,7 @@ Xcode and hit CMD+U.
 Dart unit tests are executed during pre-submit on our CI system when submitting
 PRs to the `flutter/engine` repository.
 
-_See also: [[Flutter Test Fonts]]_
+_See also: [Flutter Test Fonts](https://github.com/flutter/flutter/wiki/Flutter-Test-Fonts)_
 
 ### Framework tests
 

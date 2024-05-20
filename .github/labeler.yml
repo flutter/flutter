@@ -57,6 +57,7 @@ engine:
   - changed-files:
     - any-glob-to-any-file:
       - bin/internal/engine.version
+      - docs/engine/**/*
 
 'f: cupertino':
   - changed-files:
@@ -151,6 +152,11 @@ team-ecosystem:
   - changed-files:
     - any-glob-to-any-file:
       - docs/ecosystem/**/*
+
+team-engine:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/engine/**/*
 
 tool:
   - changed-files:
