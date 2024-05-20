@@ -17,7 +17,7 @@ IMPORTANT: Whenever you have a request for the infra team, please file a ticket 
 When in doubt, ask on the `#hackers-infra` channel in [Chat](https://github.com/flutter/flutter/wiki/Chat).
 
 # How to File a Ticket as an Infra Customer
-1. Open a [new infra issue](https://github.com/flutter/flutter/issues/new?assignees=&labels=team-infra&projects=&template=6_infrastructure.yml). (That template summarizes the information on this page.)
+1. Open a [new infra issue](https://github.com/flutter/flutter/issues/new?template=6_infrastructure.yml). (That template summarizes the information on this page.)
 2. Add a descriptive **title**. A message like "Add a LUCI builder for linux web engine" or "Debug gallery startup" is much more helpful than "quick request" or "test doesn't work?".
 3. Clearly describe the issue or request in the description field. For example, if a ticket is requesting running several commands on the bots, the ticket should explain why, what commands are needed, on which bots and how to verify the results.
 4. Skip the priority label which infra on-call will add after triaging.
