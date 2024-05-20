@@ -26,7 +26,6 @@ void main() {
     expect(find.byIcon(Icons.add), findsOneWidget);
 
     for (int i = 0; i <= 10; i += 1) {
-      await tester.pumpAndSettle();
       expect(find.text('CHILD $i'), findsOneWidget);
       final ActionChip chip = tester.widget<ActionChip>(find.ancestor(
         of: find.text('CHILD $i'),
@@ -37,6 +36,7 @@ void main() {
       expect(chip.focusNode!.debugLabel, 'Child $i');
 
       await tester.tap(find.byIcon(Icons.add));
+      await tester.pumpAndSettle();
     }
   });
 }
