@@ -24,10 +24,13 @@ void main() {
     expect(find.text('aardvark'), findsNothing);
     expect(find.text('bobcat'), findsNothing);
     expect(find.text('chameleon'), findsNothing);
-    expect(find.ancestor(
-      matching: find.byType(AppBar),
-      of: find.byType(RawAutocomplete)
-    ), findsNothing);
+    expect(
+      find.ancestor(
+        matching: find.byType(AppBar),
+        of: find.byType(RawAutocomplete)
+      ),
+      findsNothing,
+    );
   });
 
   testWidgets('Options are shown correctly and selectable', (WidgetTester tester) async {
