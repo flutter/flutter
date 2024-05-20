@@ -44,14 +44,14 @@ void main() {
       await sendKeyCombination(
         tester,
         counter.isEven
-            ? <LogicalKeyboardKey>[
-                LogicalKeyboardKey.controlLeft,
-                LogicalKeyboardKey.keyC,
-              ]
-            : <LogicalKeyboardKey>[
-                LogicalKeyboardKey.keyC,
-                LogicalKeyboardKey.controlLeft,
-              ],
+          ? <LogicalKeyboardKey>[
+              LogicalKeyboardKey.controlLeft,
+              LogicalKeyboardKey.keyC,
+            ]
+          : <LogicalKeyboardKey>[
+              LogicalKeyboardKey.keyC,
+              LogicalKeyboardKey.controlLeft,
+            ],
       );
       await tester.pump();
     }
