@@ -1884,8 +1884,8 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// a test environment where the [BuildOwner] which initializes its own
   /// [FocusManager], may not have the accurate platform context during its
   /// initialization. In this case it is necessary for the test framework to call
-  /// method after it has setup the test variant for a given test, so the
-  /// [FocusManager] can accurately listen to application lifecycle changes if
+  /// this method after it has set up the test variant for a given test, so the
+  /// [FocusManager] can accurately listen to application lifecycle changes, if
   /// supported.
   @visibleForTesting
   void listenToApplicationLifecycleChangesIfSupported() {
