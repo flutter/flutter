@@ -548,6 +548,54 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
   group('SelectionArea integration', () {
+    testWidgets('selection is not cleared when app loses focus on desktop', (WidgetTester tester) async {
+      Future<void> setAppLifecycleState(AppLifecycleState state) async {
+        final ByteData? message = const StringCodec().encodeMessage(state.toString());
+        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .handlePlatformMessage('flutter/lifecycle', message, (_) {});
+      }
+      final FocusNode focusNode = FocusNode();
+      final GlobalKey selectableKey = GlobalKey();
+      addTearDown(focusNode.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            key: selectableKey,
+            focusNode: focusNode,
+            selectionControls: materialTextSelectionControls,
+            child: const Center(
+              child: Text('How are you'),
+            ),
+          ),
+        ),
+      );
+      await setAppLifecycleState(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(paragraph, 2));
+      await tester.pumpAndSettle();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
+      expect(focusNode.hasFocus, isTrue);
+
+      // Setting the app lifecycle state to AppLifecycleState.inactive to simulate
+      // a lose of window focus.
+      await setAppLifecycleState(AppLifecycleState.inactive);
+      await tester.pumpAndSettle();
+      expect(focusNode.hasFocus, isFalse);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
+    }, variant: TargetPlatformVariant.desktop());
+
     testWidgets('mouse can select single text on desktop platforms', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);

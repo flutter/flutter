@@ -1862,6 +1862,34 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     }());
   }
 
+  /// Enables this [FocusManager] to listen to changes of the application
+  /// lifecycle if it does not already have an application lifecycle listener
+  /// active, and the current platform is detected as [kIsWeb] or non-Android.
+  ///
+  /// Typically, the application lifecycle listener for this [FocusManager] is
+  /// setup at construction, but sometimes it is necessary to manually initialize
+  /// it when the [FocusManager] does not have the relevant platform context in
+  /// [defaultTargetPlatform] at the time of construction. This can happen in
+  /// a test environment where the [BuildOwner] which initializes its own
+  /// [FocusManager], may not have the accurate platform context during its
+  /// initialization. In this case it is necessary for the test framework to call
+  /// this method after it has set up the test variant for a given test, so the
+  /// [FocusManager] can accurately listen to application lifecycle changes, if
+  /// supported.
+  @visibleForTesting
+  void listenToApplicationLifecycleChangesIfSupported() {
+    if (_appLifecycleListener == null && (kIsWeb || defaultTargetPlatform != TargetPlatform.android)) {
+      // It appears that some Android keyboard implementations can cause
+      // app lifecycle state changes: adding this listener would cause the
+      // text field to unfocus as the user is trying to type.
+      //
+      // Until this is resolved, we won't be adding the listener to Android apps.
+      // https://github.com/flutter/flutter/pull/142930#issuecomment-1981750069
+      _appLifecycleListener = _AppLifecycleListener(_appLifecycleChange);
+      WidgetsBinding.instance.addObserver(_appLifecycleListener!);
+    }
+  }
+
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
     return <DiagnosticsNode>[
