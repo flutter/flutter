@@ -18,7 +18,7 @@ Once released, Flutter GPU will be shipped as part of the Flutter SDK in the for
 Flutter GPU is currently unfinished, extremely experimental, and not well documented. [bdero](https://github.com/bdero) is actively developing and testing Flutter GPU against the MacOS desktop embedder; shader compilation and import likely don't function correctly on other platforms yet. However, if you wish to experiment with Flutter GPU, it is possible to do so without a custom Engine build:
 
 1. Update your Flutter checkout to the latest version in the [master channel](https://docs.flutter.dev/release/upgrade#other-channels).
-1. Clone [Flutter Engine](https://github.com/flutter/engine) and checkout the Engine commit that the Flutter master channel is currently pinned to. This can be found in the [`bin/internal/engine.version` file](https://github.com/flutter/flutter/blob/master/bin/internal/engine.version) of the main Flutter repository.
+1. Clone [Flutter Engine](https://github.com/flutter/engine) and checkout the Engine commit that the Flutter master channel is currently pinned to. This can be found in the [`bin/internal/engine.version` file](https://github.com/flutter/flutter/blob/main/bin/internal/engine.version) of the main Flutter repository.
     ```sh
     git clone https://github.com/flutter/engine.git
     cd engine
@@ -40,7 +40,7 @@ Flutter GPU is currently unfinished, extremely experimental, and not well docume
 
 ## Reporting bugs
 
-If you run into issues while using Flutter GPU, please file a bug using the standard [bug report template](https://github.com/flutter/flutter/issues/new?assignees=&labels=&projects=&template=2_bug.yml). Additionally, mention "Flutter GPU" in the title, label the bug with the `e: impeller` label, and tag [bdero](https://github.com/bdero) in the issue description.
+If you run into issues while using Flutter GPU, please file a bug using the standard [bug report template](https://github.com/flutter/flutter/issues/new?template=2_bug.yml). Additionally, mention "Flutter GPU" in the title, label the bug with the `e: impeller` label, and tag [bdero](https://github.com/bdero) in the issue description.
 
 ## Questions or feedback?
 

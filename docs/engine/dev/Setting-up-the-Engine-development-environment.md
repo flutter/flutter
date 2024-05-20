@@ -1,5 +1,5 @@
 _If you've already built the engine and have the configuration set up but merely need a refresher on
-actually compiling the code, see [[Compiling the engine]]._
+actually compiling the code, see [Compiling the engine](Compiling-the-engine.md)._
 
 _If you are checking these instructions to refresh your memory and your fork of the engine is stale,
 make sure to merge up to HEAD before doing a `gclient sync`._
@@ -91,9 +91,9 @@ gclient sync
 
 ## Next steps:
 
- * [[Compiling the engine]] explains how to actually get builds, now that you have the code.
- * [[The flutter tool]] has a section explaining how to use custom engine builds.
- * [[Signing commits]], to configure your environment to securely sign your commits.
+ * [Compiling the engine](Compiling-the-engine.md) explains how to actually get builds, now that you have the code.
+ * [The flutter tool](https://github.com/flutter/flutter/wiki/The-flutter-tool) has a section explaining how to use custom engine builds.
+ * [Signing commits](https://github.com/flutter/flutter/wiki/Signing-commits), to configure your environment to securely sign your commits.
 
 ## Editor autocomplete support
 

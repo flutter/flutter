@@ -1,10 +1,10 @@
 This page has some hints about debugging the engine.
 
-See also [[Crashes]] for advice on handling engine crashes (specifically around obtaining stack traces, and reporting crashes in AOT Dart code).
+See also [Crashes](Crashes.md) for advice on handling engine crashes (specifically around obtaining stack traces, and reporting crashes in AOT Dart code).
 
 ## Running a Flutter app with a local engine
 
-First, make sure the appropriate version of the engine is built (see [[Compiling the engine]]).
+First, make sure the appropriate version of the engine is built (see [Compiling the engine](./dev/Compiling-the-engine.md)).
 
 ### Using the Flutter tool
 
@@ -47,7 +47,7 @@ You will need to add a new [launch configuration](https://code.visualstudio.com/
 
 ## Bisecting a roll failure
 
-If the engine roll is failing (see [[Autorollers]]), you can use `git bisect` on the engine repo to track down the offending commit, using the `--local-engine` and `--local-engine-host` arguments as described above to run the failing framework test with each version of the engine.
+If the engine roll is failing (see [Autorollers](https://github.com/flutter/flutter/wiki/Autorollers)), you can use `git bisect` on the engine repo to track down the offending commit, using the `--local-engine` and `--local-engine-host` arguments as described above to run the failing framework test with each version of the engine.
 
 ## Tracing OpenGL calls in Skia
 
@@ -77,7 +77,7 @@ You can also set a breakpoint directly with [lldb](https://lldb.llvm.org/tutoria
 
 ## Debugging Android builds with gdb
 
-See https://github.com/flutter/engine/blob/master/sky/tools/flutter_gdb#L13
+See https://github.com/flutter/engine/blob/main/sky/tools/flutter_gdb#L13
 
 ## Debugging native engine code on Android with Android Studio
 

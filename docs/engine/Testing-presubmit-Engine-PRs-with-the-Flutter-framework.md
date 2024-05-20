@@ -39,7 +39,7 @@ Any other failures are possibly due to the changes to flutter/engine, so deflake
 
 # 5. Devicelab tests
 
-A subset of devicelab tests are available for optionally running in presubmit on flutter/flutter PRs. They are the tests listed in the flutter/flutter [.ci.yaml](https://github.com/flutter/flutter/blob/master/.ci.yaml) file that are prefixed with `Linux_android`, `Mac_android`, and `Mac_ios`.
+A subset of devicelab tests are available for optionally running in presubmit on flutter/flutter PRs. They are the tests listed in the flutter/flutter [.ci.yaml](https://github.com/flutter/flutter/blob/main/.ci.yaml) file that are prefixed with `Linux_android`, `Mac_android`, and `Mac_ios`.
 
 To run one of these tests, remove the line `presubmit: false` from the `.ci.yaml` file under the test you'd like to run. For an example, see the PR [here](https://github.com/flutter/flutter/pull/135254).
 
