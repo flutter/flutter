@@ -253,11 +253,11 @@ class _PosixUtils extends OperatingSystemUtils {
     );
   }
 
-  // tar -xzf tarball -C dest
+  // tar --no-same-owner -xzf tarball -C dest
   @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
     _processUtils.runSync(
-      <String>['tar', '-xzf', gzippedTarFile.path, '-C', targetDirectory.path],
+      <String>['tar', '--no-same-owner', '-xzf', gzippedTarFile.path, '-C', targetDirectory.path],
       throwOnError: true,
     );
   }
