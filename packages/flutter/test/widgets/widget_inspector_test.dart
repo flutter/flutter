@@ -3784,7 +3784,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       final Map<String, Object?> locationMapJson = (await service.testExtension(
         WidgetInspectorServiceExtensions.widgetLocationIdMap.name,
-        {},
+        <String, String>{},
       ))! as Map<String, Object?>;
 
       final Map<String, Object?> widgetTestLocations = locationMapJson[file]! as Map<String, Object?>;
