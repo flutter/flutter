@@ -84,7 +84,8 @@ class MockBlitPass : public BlitPass {
                std::shared_ptr<Texture> destination,
                IRect destination_rect,
                std::string label,
-               uint32_t slice),
+               uint32_t slice,
+               bool convert_to_read),
               (override));
   MOCK_METHOD(bool,
               OnGenerateMipmapCommand,

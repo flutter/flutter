@@ -221,13 +221,37 @@ bool BlitPassVK::OnCopyTextureToBufferCommand(
   return true;
 }
 
+bool BlitPassVK::ConvertTextureToShaderRead(
+    const std::shared_ptr<Texture>& texture) {
+  auto& encoder = *command_buffer_->GetEncoder();
+  const auto& cmd_buffer = encoder.GetCommandBuffer();
+
+  BarrierVK barrier;
+  barrier.cmd_buffer = cmd_buffer;
+  barrier.src_access = vk::AccessFlagBits::eTransferWrite;
+  barrier.src_stage = vk::PipelineStageFlagBits::eTransfer;
+  barrier.dst_access = vk::AccessFlagBits::eShaderRead;
+  barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
+
+  barrier.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+
+  const auto& texture_vk = TextureVK::Cast(*texture);
+
+  if (!encoder.Track(texture)) {
+    return false;
+  }
+
+  return texture_vk.SetLayout(barrier);
+}
+
 // |BlitPass|
 bool BlitPassVK::OnCopyBufferToTextureCommand(
     BufferView source,
     std::shared_ptr<Texture> destination,
     IRect destination_region,
     std::string label,
-    uint32_t slice) {
+    uint32_t slice,
+    bool convert_to_read) {
   auto& encoder = *command_buffer_->GetEncoder();
   const auto& cmd_buffer = encoder.GetCommandBuffer();
 
@@ -262,6 +286,9 @@ bool BlitPassVK::OnCopyBufferToTextureCommand(
   image_copy.imageExtent.height = destination_region.GetHeight();
   image_copy.imageExtent.depth = 1u;
 
+  // Note: this barrier should do nothing if we're already in the transfer dst
+  // optimal state. This is important for performance of repeated blit pass
+  // encoding.
   if (!dst.SetLayout(dst_barrier)) {
     VALIDATION_LOG << "Could not encode layout transition.";
     return false;
@@ -274,7 +301,7 @@ bool BlitPassVK::OnCopyBufferToTextureCommand(
   );
 
   // Transition to shader-read.
-  {
+  if (convert_to_read) {
     BarrierVK barrier;
     barrier.cmd_buffer = cmd_buffer;
     barrier.src_access = vk::AccessFlagBits::eTransferWrite;
