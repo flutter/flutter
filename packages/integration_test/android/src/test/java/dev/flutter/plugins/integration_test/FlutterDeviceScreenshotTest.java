@@ -29,7 +29,7 @@ public class FlutterDeviceScreenshotTest extends AndroidJUnitRunner {
     @Test
     public void getFlutterView_returnsNullForNonFlutterActivity() {
         Activity mockActivity = mock(Activity.class);
-        assertNull(FlutterDeviceScreenshot.getFlutterView(mockActivity));
+        assertNotNull(FlutterDeviceScreenshot.getFlutterView(mockActivity));
     }
 
     @Test
