@@ -237,6 +237,7 @@ class _DropdownMenu<T> extends StatefulWidget {
     required this.enableFeedback,
     this.borderRadius,
     required this.scrollController,
+    this.menuWidth,
   });
 
   final _DropdownRoute<T> route;
@@ -247,6 +248,7 @@ class _DropdownMenu<T> extends StatefulWidget {
   final bool enableFeedback;
   final BorderRadius? borderRadius;
   final ScrollController scrollController;
+  final double? menuWidth;
 
   @override
   _DropdownMenuState<T> createState() => _DropdownMenuState<T>();
@@ -371,11 +373,13 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     required this.buttonRect,
     required this.route,
     required this.textDirection,
+    this.menuWidth,
   });
 
   final Rect buttonRect;
   final _DropdownRoute<T> route;
   final TextDirection? textDirection;
+  final double? menuWidth;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
@@ -389,7 +393,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     }
     // The width of a menu should be at most the view width. This ensures that
     // the menu does not extend past the left and right edges of the screen.
-    final double width = math.min(constraints.maxWidth, buttonRect.width);
+    final double width = math.min(constraints.maxWidth, menuWidth ?? buttonRect.width);
     return BoxConstraints(
       minWidth: width,
       maxWidth: width,
@@ -465,6 +469,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     required this.style,
     this.barrierLabel,
     this.itemHeight,
+    this.menuWidth,
     this.dropdownColor,
     this.menuMaxHeight,
     required this.enableFeedback,
@@ -479,6 +484,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final CapturedThemes capturedThemes;
   final TextStyle style;
   final double? itemHeight;
+  final double? menuWidth;
   final Color? dropdownColor;
   final double? menuMaxHeight;
   final bool enableFeedback;
@@ -515,6 +521,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
           dropdownColor: dropdownColor,
           enableFeedback: enableFeedback,
           borderRadius: borderRadius,
+          menuWidth: menuWidth,
         );
       },
     );
@@ -624,6 +631,7 @@ class _DropdownRoutePage<T> extends StatefulWidget {
     required this.dropdownColor,
     required this.enableFeedback,
     this.borderRadius,
+    this.menuWidth,
   });
 
   final _DropdownRoute<T> route;
@@ -638,6 +646,7 @@ class _DropdownRoutePage<T> extends StatefulWidget {
   final Color? dropdownColor;
   final bool enableFeedback;
   final BorderRadius? borderRadius;
+  final double? menuWidth;
 
   @override
   State<_DropdownRoutePage<T>> createState() => _DropdownRoutePageState<T>();
@@ -690,6 +699,7 @@ class _DropdownRoutePageState<T> extends State<_DropdownRoutePage<T>> {
               buttonRect: widget.buttonRect,
               route: widget.route,
               textDirection: textDirection,
+              menuWidth: widget.menuWidth,
             ),
             child: widget.capturedThemes.wrap(menu),
           );
@@ -966,6 +976,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.isDense = false,
     this.isExpanded = false,
     this.itemHeight = kMinInteractiveDimension,
+    this.menuWidth,
     this.focusColor,
     this.focusNode,
     this.autofocus = false,
@@ -1010,6 +1021,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.isDense = false,
     this.isExpanded = false,
     this.itemHeight = kMinInteractiveDimension,
+    this.menuWidth,
     this.focusColor,
     this.focusNode,
     this.autofocus = false,
@@ -1189,6 +1201,12 @@ class DropdownButton<T> extends StatefulWidget {
   /// offset is computed as if all of the menu item heights were
   /// [kMinInteractiveDimension].
   final double? itemHeight;
+
+  /// The width of the menu.
+  ///
+  /// If it is not provided, the width of the menu is the width of the
+  /// dropdown button.
+  final double? menuWidth;
 
   /// The color for the button's [Material] when it has the input focus.
   final Color? focusColor;
@@ -1381,6 +1399,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       style: _textStyle!,
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       itemHeight: widget.itemHeight,
+      menuWidth: widget.menuWidth,
       dropdownColor: widget.dropdownColor,
       menuMaxHeight: widget.menuMaxHeight,
       enableFeedback: widget.enableFeedback ?? true,
