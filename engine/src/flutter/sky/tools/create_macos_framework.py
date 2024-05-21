@@ -48,7 +48,7 @@ def main():
       if os.path.isabs(args.x64_out_dir) else os.path.join(buildroot_dir, args.x64_out_dir)
   )
 
-  fat_framework = os.path.join(dst, 'FlutterMacOS.framework')
+  fat_framework_bundle = os.path.join(dst, 'FlutterMacOS.framework')
   arm64_framework = os.path.join(arm64_out_dir, 'FlutterMacOS.framework')
   x64_framework = os.path.join(x64_out_dir, 'FlutterMacOS.framework')
 
@@ -75,22 +75,22 @@ def main():
     print('Cannot find dsymutil at %s' % DSYMUTIL)
     return 1
 
-  shutil.rmtree(fat_framework, True)
-  shutil.copytree(arm64_framework, fat_framework, symlinks=True)
+  shutil.rmtree(fat_framework_bundle, True)
+  shutil.copytree(arm64_framework, fat_framework_bundle, symlinks=True)
 
-  regenerate_symlinks(fat_framework)
+  regenerate_symlinks(fat_framework_bundle)
 
-  fat_framework_binary = os.path.join(fat_framework, 'Versions', 'A', 'FlutterMacOS')
+  fat_framework_binary = os.path.join(fat_framework_bundle, 'Versions', 'A', 'FlutterMacOS')
 
   # Create the arm64/x64 fat framework.
   subprocess.check_call([
       'lipo', arm64_dylib, x64_dylib, '-create', '-output', fat_framework_binary
   ])
   # Make the framework readable and executable: u=rwx,go=rx.
-  subprocess.check_call(['chmod', '755', fat_framework_binary])
+  subprocess.check_call(['chmod', '755', fat_framework_bundle])
 
   # Add group and other readability to all files.
-  versions_path = os.path.join(fat_framework, 'Versions')
+  versions_path = os.path.join(fat_framework_bundle, 'Versions')
   subprocess.check_call(['chmod', '-R', 'og+r', versions_path])
   # Find all the files below the target dir with owner execute permission
   find_subprocess = subprocess.Popen(['find', versions_path, '-perm', '-100', '-print0'],
@@ -101,10 +101,10 @@ def main():
   find_subprocess.wait()
   xargs_subprocess.wait()
 
-  process_framework(dst, args, fat_framework, fat_framework_binary)
+  process_framework(dst, args, fat_framework_bundle, fat_framework_binary)
 
   # Create XCFramework from the arm64 and x64 fat framework.
-  xcframeworks = [fat_framework]
+  xcframeworks = [fat_framework_bundle]
   create_xcframework(location=dst, name='FlutterMacOS', frameworks=xcframeworks)
 
   zip_framework(dst, args)
@@ -112,29 +112,34 @@ def main():
   return 0
 
 
-def regenerate_symlinks(fat_framework):
+def regenerate_symlinks(fat_framework_bundle):
   """Regenerates the symlinks structure.
 
   Recipes V2 upload artifacts in CAS before integration and CAS follows symlinks.
   This logic regenerates the symlinks in the expected structure.
   """
-  if os.path.islink(os.path.join(fat_framework, 'FlutterMacOS')):
+  if os.path.islink(os.path.join(fat_framework_bundle, 'FlutterMacOS')):
     return
-  os.remove(os.path.join(fat_framework, 'FlutterMacOS'))
-  shutil.rmtree(os.path.join(fat_framework, 'Headers'), True)
-  shutil.rmtree(os.path.join(fat_framework, 'Modules'), True)
-  shutil.rmtree(os.path.join(fat_framework, 'Resources'), True)
-  current_version_path = os.path.join(fat_framework, 'Versions', 'Current')
+  os.remove(os.path.join(fat_framework_bundle, 'FlutterMacOS'))
+  shutil.rmtree(os.path.join(fat_framework_bundle, 'Headers'), True)
+  shutil.rmtree(os.path.join(fat_framework_bundle, 'Modules'), True)
+  shutil.rmtree(os.path.join(fat_framework_bundle, 'Resources'), True)
+  current_version_path = os.path.join(fat_framework_bundle, 'Versions', 'Current')
   shutil.rmtree(current_version_path, True)
   os.symlink('A', current_version_path)
   os.symlink(
       os.path.join('Versions', 'Current', 'FlutterMacOS'),
-      os.path.join(fat_framework, 'FlutterMacOS')
+      os.path.join(fat_framework_bundle, 'FlutterMacOS')
   )
-  os.symlink(os.path.join('Versions', 'Current', 'Headers'), os.path.join(fat_framework, 'Headers'))
-  os.symlink(os.path.join('Versions', 'Current', 'Modules'), os.path.join(fat_framework, 'Modules'))
   os.symlink(
-      os.path.join('Versions', 'Current', 'Resources'), os.path.join(fat_framework, 'Resources')
+      os.path.join('Versions', 'Current', 'Headers'), os.path.join(fat_framework_bundle, 'Headers')
+  )
+  os.symlink(
+      os.path.join('Versions', 'Current', 'Modules'), os.path.join(fat_framework_bundle, 'Modules')
+  )
+  os.symlink(
+      os.path.join('Versions', 'Current', 'Resources'),
+      os.path.join(fat_framework_bundle, 'Resources')
   )
 
 
@@ -143,9 +148,9 @@ def embed_codesign_configuration(config_path, content):
     file.write(content)
 
 
-def process_framework(dst, args, fat_framework, fat_framework_binary):
+def process_framework(dst, args, fat_framework_bundle, fat_framework_binary):
   if args.dsym:
-    dsym_out = os.path.splitext(fat_framework)[0] + '.dSYM'
+    dsym_out = os.path.splitext(fat_framework_bundle)[0] + '.dSYM'
     subprocess.check_call([DSYMUTIL, '-o', dsym_out, fat_framework_binary])
     if args.zip:
       dsym_dst = os.path.join(dst, 'FlutterMacOS.dSYM')
