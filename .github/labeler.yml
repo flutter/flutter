@@ -152,7 +152,6 @@ team-ecosystem:
   - changed-files:
     - any-glob-to-any-file:
       - docs/ecosystem/**/*
-
 team-engine:
   - changed-files:
     - any-glob-to-any-file:
@@ -162,6 +161,11 @@ team-infra:
   - changed-files:
     - any-glob-to-any-file:
       - docs/infra/**/*
+
+team-release:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/releases/**/*
 
 tool:
   - changed-files:

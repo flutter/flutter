@@ -23,7 +23,7 @@ refer to the FAQ section below
 ## Frequently asked questions
 
 ### How do I request a cherry-pick?
-To request a cherry-pick, utilize the [issue template](https://github.com/flutter/flutter/issues/new?assignees=&labels=cp%3A+review&template=7_cherry_pick.yml&title=%5BCP%5D+%3Ctitle%3E).
+To request a cherry-pick, utilize the [issue template](https://github.com/flutter/flutter/issues/new?template=7_cherry_pick.yml).
 
 ### Who can request a cherry-pick?
 
@@ -41,7 +41,7 @@ The release engineering team will assign a cherry-pick reviewer who is an expert
 ### Lifecycle of a cherry-pick
 
 1. The cherry-pick requester opens a cherry-pick pull request to the [beta](https://github.com/flutter/flutter/blob/beta/bin/internal/release-candidate-branch.version) or [stable](https://github.com/flutter/flutter/blob/stable/bin/internal/release-candidate-branch.version) **candidate** branch (follow the respective link to find the branch name)
-2. A cherry-pick issue is filled out completely and created utilizing the [cherry-pick template](https://github.com/flutter/flutter/issues/new?assignees=&labels=cp%3A+review&template=7_cherry_pick.yml&title=%5BCP%5D+%3Ctitle%3E) in the [flutter/flutter](https://github.com/flutter/flutter) repository.
+2. A cherry-pick issue is filled out completely and created utilizing the [cherry-pick template](https://github.com/flutter/flutter/issues/new?template=7_cherry_pick.yml) in the [flutter/flutter](https://github.com/flutter/flutter) repository.
 3. The release engineering team is notified that a cherry-pick request is in queue and assigns an appropriate reviewer who is an expert in the area who will review the cherry-pick issue and associated cherry-pick pull request.
 4. The release engineering team applies the `merge-to-beta` or `merge-to-stable` label.
 5. The cherry-pick request then enters one of the following states.
