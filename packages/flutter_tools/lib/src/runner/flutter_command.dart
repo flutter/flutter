@@ -1094,7 +1094,8 @@ abstract class FlutterCommand extends Command<void> {
       'flavor',
       help: 'Build a custom app flavor as defined by platform-specific build setup.\n'
             'Supports the use of product flavors in Android Gradle scripts, and '
-            'the use of custom Xcode schemes.',
+            'the use of custom Xcode schemes. Overrides the value of the "default-flavor" '
+            'entry in the flutter pubspec.',
     );
   }
 

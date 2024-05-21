@@ -1218,7 +1218,7 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('tool loads default flavor from manifest', () async {
+      testUsingContext('CLI option overrides default flavor from manifest', () async {
         final File pubspec = fileSystem.file('pubspec.yaml');
         await pubspec.create();
         await pubspec.writeAsString('''
@@ -1232,11 +1232,10 @@ flutter:
         expect(buildInfo.flavor, 'foo');
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
+        ProcessManager: () => FakeProcessManager.empty(),
       });
 
       testUsingContext('tool loads default flavor from manifest, but cli overrides', () async {
-        // await fileSystem.file('example/pubspec.yaml').create(recursive: true);
         final File pubspec = fileSystem.file('pubspec.yaml');
         await pubspec.create();
         await pubspec.writeAsString('''
@@ -1255,7 +1254,7 @@ flutter:
         expect(buildInfo.flavor, 'bar');
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
+        ProcessManager: () => FakeProcessManager.empty(),
       });
     });
   });

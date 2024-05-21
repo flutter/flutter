@@ -1465,7 +1465,7 @@ flutter:
     expect(flutterManifest!.defaultFlavor, 'prod');
   });
 
-  testWithoutContext('FlutterManifest fails on invalid flavor', () async {
+  testWithoutContext('FlutterManifest fails on invalid default flavor', () async {
     const String manifest = '''
 name: test
 flutter:
