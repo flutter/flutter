@@ -1225,6 +1225,9 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
 
   @override
   SelectedContent? getSelectedContent() {
+    if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
+      return null;
+    }
     final List<SelectedContent> selections = <SelectedContent>[
       for (final Selectable selectable in selectables)
         if (selectable.getSelectedContent() case final SelectedContent data) data,
@@ -1242,14 +1245,28 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     childControllers.forEach((SelectedContentController childController) {
       textContentController.addChild(childController);
     });
-    debugPrint('inside text ${childControllers.length}');
-    /// TODO(Renzo-Olivares): Accurately find the selection endpoints.
-    /// For example in the case of a Column, it is a [SelectionContainer] itself,
-    /// so when we do something like Column.SelectionContainer.getSelectedContent,
-    /// it does not accurately return the expected selection offsets. What should Column.SelectionContainer,getSelectedContent retain?
-    final bool forwardSelection = currentSelectionEndIndex >= currentSelectionStartIndex;
-    textContentController.startOffset = forwardSelection ? selections.first.startOffset : selections.last.endOffset;
-    textContentController.endOffset = forwardSelection ? selections.last.endOffset : selections.first.endOffset;
+    // Accurately find the selection endpoints, selections.first.startOffset and
+    // selections.last.endOffset are only accurate when the selections.first and
+    // selections.last are root selectables with regards to the text. When the
+    // selection begins or ends at a placeholder, one should consider that a
+    // placeholder signifies that a WidgetSpan is intertwined with the given text.
+    // A placeholder only spans one character unit in the text. So when the selection
+    // begins or ends on a placeholder, we should consider its position relative
+    // to the root text.
+    if (paragraph.selectableBelongsToParagraph(selectables[currentSelectionStartIndex])) {
+      textContentController.startOffset = selections.first.startOffset;
+    } else {
+      // TODO: Determine inverted selection?
+      final TextPosition positionBeforeStart = paragraph.getPositionForOffset(selectables[currentSelectionStartIndex].boundingBoxes.first.bottomLeft);
+      textContentController.startOffset = positionBeforeStart.offset;
+    }
+    if (paragraph.selectableBelongsToParagraph(selectables[currentSelectionEndIndex])) {
+      textContentController.endOffset = selections.last.endOffset;
+    } else {
+      // TODO: Determine inverted selection?
+      final TextPosition positionAfterEnd = paragraph.getPositionForOffset(selectables[currentSelectionEndIndex].boundingBoxes.last.bottomRight);
+      textContentController.endOffset = positionAfterEnd.offset;
+    }
     final StringBuffer buffer = StringBuffer();
     for (final SelectedContent selection in selections) {
       buffer.write(selection.plainText);
@@ -1257,6 +1274,8 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
     return SelectedContent(
       plainText: buffer.toString(),
       geometry: value,
+      startOffset: textContentController.startOffset,
+      endOffset: textContentController.endOffset,
       controllers: <SelectedContentController>[textContentController],
     );
   }
