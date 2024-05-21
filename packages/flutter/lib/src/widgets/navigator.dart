@@ -4853,9 +4853,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @optionalTypeArgs
   Future<T?> push<T extends Object?>(Route<T> route) {
     _pushEntry(_RouteEntry(route, pageBased: false, initialState: _RouteLifecycle.push));
-    if (route is FlexibleTransitionRouteMixin<T>) {
-      delegateTransitionBuilder = (route as FlexibleTransitionRouteMixin<T>).delegatedTransition;
-    }
+    // if (route is FlexibleTransitionRouteMixin<T>) {
+    //   delegateTransitionBuilder = (route as FlexibleTransitionRouteMixin<T>).delegatedTransition;
+    // }
     return route.popped;
   }
 

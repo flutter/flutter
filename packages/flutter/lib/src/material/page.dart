@@ -106,6 +106,12 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> implements FlexibleTransit
 
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
+    if (controller != null && controller!.isAnimating) {
+      return false;
+    }
+    if (nextRoute is FlexibleTransitionRouteMixin<T> && navigator != null) {
+      navigator!.delegateTransitionBuilder = (nextRoute as FlexibleTransitionRouteMixin<T>).delegatedTransition;
+    }
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
     return (nextRoute is MaterialRouteTransitionMixin && !nextRoute.fullscreenDialog)
       || (nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog)
@@ -114,7 +120,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> implements FlexibleTransit
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
-    if (previousRoute is FlexibleTransitionRouteMixin<T> && navigator != null) {
+    if (previousRoute is FlexibleTransitionRouteMixin<T> && navigator != null && previousRoute.controller?.isAnimating != true) {
       previousRoute.navigator!.delegateTransitionBuilder = delegatedTransition;
     }
     return previousRoute is PageRoute;

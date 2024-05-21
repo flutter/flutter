@@ -152,16 +152,19 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> implements FlexibleTransi
 
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
+    if (controller != null && controller!.isAnimating) {
+      return false;
+    }
+    if (nextRoute is FlexibleTransitionRouteMixin<T> && navigator != null) {
+      navigator!.delegateTransitionBuilder = (nextRoute as FlexibleTransitionRouteMixin<T>).delegatedTransition;
+    }
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
-    // For MBS: we need to allow for transitioning to a route that will provide a secondary animation to use.
-    // This always plays the transition, but it would be better to check if the next route provides a delegated
-    // transition.
     return nextRoute is FlexibleTransitionRouteMixin<T> || nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog;
   }
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
-    if (previousRoute is FlexibleTransitionRouteMixin<T> && navigator != null) {
+    if (previousRoute is FlexibleTransitionRouteMixin<T> && navigator != null && previousRoute.controller?.isAnimating != true) {
       previousRoute.navigator!.delegateTransitionBuilder = delegatedTransition;
     }
     return previousRoute is FlexibleTransitionRouteMixin<T> || previousRoute is CupertinoRouteTransitionMixin && !previousRoute.fullscreenDialog;
