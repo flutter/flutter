@@ -345,6 +345,32 @@ void expectDylibIsBundledMacOS(Directory appDirectory, String buildMode) {
   final Link dylibLink = frameworkDir.childLink(frameworkName);
   expect(dylibLink, exists);
   expect(dylibLink.resolveSymbolicLinksSync(), dylibFile.path);
+  final String infoPlist = resourcesDir.childFile('Info.plist').readAsStringSync();
+  expect(infoPlist, '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>package_with_native_assets</string>
+	<key>CFBundleIdentifier</key>
+	<string>io.flutter.flutter.native-assets.package-with-native-assets</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>package_with_native_assets</string>
+	<key>CFBundlePackageType</key>
+	<string>FMWK</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+</dict>
+</plist>''');
 }
 
 void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
@@ -357,6 +383,36 @@ void expectDylibIsBundledIos(Directory appDirectory, String buildMode) {
       .childDirectory('$frameworkName.framework')
       .childFile(frameworkName);
   expect(dylib, exists);
+  final String infoPlist = frameworksFolder
+      .childDirectory('$frameworkName.framework')
+      .childFile('Info.plist').readAsStringSync();
+  expect(infoPlist, '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>package_with_native_assets</string>
+	<key>CFBundleIdentifier</key>
+	<string>io.flutter.flutter.native-assets.package-with-native-assets</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>package_with_native_assets</string>
+	<key>CFBundlePackageType</key>
+	<string>FMWK</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>MinimumOSVersion</key>
+	<string>12.0</string>
+</dict>
+</plist>''');
 }
 
 /// Checks that dylibs are bundled.

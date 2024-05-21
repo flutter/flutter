@@ -293,6 +293,7 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
       baseDirectory,
       log: log,
       platform: platform,
+      fs: fs,
     );
     await goldens.auth();
     return FlutterPostSubmitFileComparator(
@@ -384,6 +385,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
       baseDirectory,
       platform: platform,
       log: log,
+      fs: fs,
     );
 
     await goldens.auth();
@@ -470,6 +472,7 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
       fs.directory(basedir),
       platform: platform,
       log: log,
+      fs: fs,
     );
     return FlutterSkippingFileComparator(
       basedir,
@@ -571,6 +574,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       baseDirectory,
       platform: platform,
       log: log,
+      fs: fs,
     );
     try {
       // Check if we can reach Gold.

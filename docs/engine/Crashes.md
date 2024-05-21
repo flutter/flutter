@@ -8,7 +8,7 @@ The easiest way to symbolicate stack traces for Android and iOS is running the [
 
 1. Get the Flutter Framework or Flutter Engine revision from the report. If you have the Engine revision, skip to step 3.
 
-2. Get the Engine revision from the Framework (this could be automated). https://github.com/flutter/flutter/blob/master/bin/internal/engine.version is the file which contains the information. Substitute the framework hash for `master` in that url.
+2. Get the Engine revision from the Framework (this could be automated). https://github.com/flutter/flutter/blob/main/bin/internal/engine.version is the file which contains the information. Substitute the framework hash for `main` in that url.
 
 3. With the full engine revision (e.g. cea5ed2b9be42a981eac762af3664e4a17d0a53f), you can now get the proper symbol files:
 
