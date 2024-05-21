@@ -32,7 +32,7 @@ import 'theme.dart';
 ///  * [MaterialRouteTransitionMixin], which provides the material transition
 ///    for this route.
 ///  * [MaterialPage], which is a [Page] of this class.
-class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T> {
+class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T>, FlexibleTransitionRouteMixin<T> {
   /// Construct a MaterialPageRoute whose contents are defined by [builder].
   MaterialPageRoute({
     required this.builder,
@@ -99,7 +99,6 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> implements FlexibleTransit
   @override
   DelegatedTransitionBuilder? get delegatedTransition => _delegatedTransition;
 
-  @override
   set delegatedTransition(DelegatedTransitionBuilder? newTransition) {
     _delegatedTransition = newTransition;
   }
@@ -109,10 +108,6 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> implements FlexibleTransit
     if (controller != null && controller!.isAnimating) {
       return false;
     }
-    if (nextRoute is FlexibleTransitionRouteMixin<T> && navigator != null) {
-      navigator!.delegateTransitionBuilder = (nextRoute as FlexibleTransitionRouteMixin<T>).delegatedTransition;
-    }
-    // Don't perform outgoing animation if the next route is a fullscreen dialog.
     return (nextRoute is MaterialRouteTransitionMixin && !nextRoute.fullscreenDialog)
       || (nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog)
       || (nextRoute is FlexibleTransitionRouteMixin<T>);
@@ -120,9 +115,6 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> implements FlexibleTransit
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
-    if (previousRoute is FlexibleTransitionRouteMixin<T> && navigator != null && previousRoute.controller?.isAnimating != true) {
-      previousRoute.navigator!.delegateTransitionBuilder = delegatedTransition;
-    }
     return previousRoute is PageRoute;
   }
 
