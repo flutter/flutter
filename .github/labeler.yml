@@ -158,8 +158,14 @@ team-engine:
     - any-glob-to-any-file:
       - docs/engine/**/*
 
+team-tool:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/tool/**/*
+
 tool:
   - changed-files:
     - any-glob-to-any-file:
       - packages/flutter_tools/**/*
       - packages/fuchsia_remote_debug_protocol/**/*
+      - docs/tool/**/*
