@@ -3629,7 +3629,7 @@ bool _debugMenuInfo(String message, [Iterable<String>? details]) {
 }
 
 /// Whether [defaultTargetPlatform] is an Apple platform (Mac or iOS).
-bool get _isApple {
+bool get _isCupertino {
   switch (defaultTargetPlatform) {
     case TargetPlatform.iOS:
     case TargetPlatform.macOS:
@@ -3648,7 +3648,7 @@ bool get _isApple {
 /// render them in a particular order defined by Apple's human interface
 /// guidelines, and format them so that the modifier keys always align.
 bool get _usesSymbolicModifiers {
-  return _isApple;
+  return _isCupertino;
 }
 
 
@@ -3657,7 +3657,7 @@ bool get _platformSupportsAccelerators {
   // different set of characters to be generated, and the native menus don't
   // support accelerators anyhow, so we just disable accelerators on these
   // platforms.
-  return !_isApple;
+  return !_isCupertino;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Menu
