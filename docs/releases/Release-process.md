@@ -21,7 +21,7 @@ At the start of every month, Flutter aims to ship a new beta to users. We prefer
 
 ## Conducting releases
 
-[Conductor](https://github.com/flutter/flutter/tree/master/dev/conductor) is a release tool written in Dart to drive Flutter releases. It's the source of truth for what's needed to ship a release. Generally, it can promote candidate branches to betas, betas to stable, and hotfix releases. It handles the nuances of git, such as pushes, cherrypicks, and tagging, and the complexities of Flutter, such as rolling and release infra.
+[Conductor](https://github.com/flutter/flutter/tree/main/dev/conductor) is a release tool written in Dart to drive Flutter releases. It's the source of truth for what's needed to ship a release. Generally, it can promote candidate branches to betas, betas to stable, and hotfix releases. It handles the nuances of git, such as pushes, cherrypicks, and tagging, and the complexities of Flutter, such as rolling and release infra.
 
 A Flutter release is very similar to what would be seen on the master branch, with some exceptions:
 1. Ensure all builds and tests are green
@@ -73,9 +73,9 @@ Since `stable` and `beta` are branches, new Y releases require a force push. Thi
 
 ## See also
 
-- [[Cherrypicks|Flutter Cherrypick Process]]
-- [[Quality Assurance]]
-- [[Release channels|Flutter build release channels]]
-- [[Release versioning]]
+- [Flutter Cherrypick Process](Flutter-Cherrypick-Process.md)
+- [Quality Assurance](Quality-Assurance.md)
+- [Flutter build release channels](Flutter-build-release-channels.md)
+- [Release versioning](Release-versioning.md)
 - [SDK Releases](https://docs.flutter.dev/development/tools/sdk/releases?tab=linux)
-- [[Where's my Commit?]]
+- [Where's my Commit?](Where's-my-commit.md)

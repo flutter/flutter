@@ -5,7 +5,7 @@ Flutter has the following channels, in increasing order of stability.
 ### `master` (aka `main`)
 
 The current tip-of-tree, absolute latest cutting edge build. Usually functional, though sometimes we accidentally break things. We do not run the entirety of our testing before allowing patches to land on this branch. We do not
-recommend using this branch unless [you are contributing to Flutter](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md).
+recommend using this branch unless [you are contributing to Flutter](https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md).
 
 The API documentation for the most recent commit on `master` is staged at: <https://master-api.flutter.dev>
 
@@ -58,6 +58,6 @@ If you really need a particular patch and it's a fix to the flutter/flutter repo
 
 ## See also
 
-* [[Release process]], which describes the details for how we push builds from channel to channel.
+* [Release process](Release-process.md), which describes the details for how we push builds from channel to channel.
 * [Cherrypick process](https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process), where we cover how to request an issue for cherrypicking.
 * [Release notes](https://flutter.dev/docs/development/tools/sdk/release-notes), where we document changes to each version of the stable channel.
