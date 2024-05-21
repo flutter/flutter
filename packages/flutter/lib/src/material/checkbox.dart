@@ -111,7 +111,7 @@ class Checkbox extends StatefulWidget {
   /// [visualDensity]. [hoverColor], [overlayColor] and [splashRadius] are
   /// ignored because a Cupertino-design checkbox does not have a radial reaction
   /// overlay. [materialTapTargetSize] and [visualDensity] are ignored because
-  /// they are Material-design-specific configurations.
+  /// both are Material-design-specific configurations.
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   const Checkbox.adaptive({

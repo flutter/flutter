@@ -350,7 +350,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
-    // Colors need to be resolved in selected and non selected states separately
+    // Colors need to be resolved in selected and non selected states separately.
     final Set<WidgetState> activeStates = states..add(WidgetState.selected);
     final Set<WidgetState> inactiveStates = states..remove(WidgetState.selected);
 
