@@ -5,13 +5,13 @@ Flutter FirebaseLab tests are used to build flutter applications and to run them
 These tests consist of two parts:
 
 *   [Firebaselab recipe](https://flutter.googlesource.com/recipes/+/refs/heads/main/recipes/firebaselab/firebaselab.py)
-*   [.ci.yaml](https://github.com/flutter/flutter/blob/master/.ci.yaml#L413) configuration file
+*   [.ci.yaml](https://github.com/flutter/flutter/blob/main/.ci.yaml#L413) configuration file
 
 The recipe supports three properties: **physical\_devices** to specify actual hardware connected to firebase infra to run tests, **virtual\_devices** to specify the virtual devices(avd) to use and **task\_name** for selecting the integration test to build.
 
 physical\_device and virtual\_device are strings that take the **MODEL\_ID** format defined by firebase. Use `gcloud firebase test android models list` (assuming you have [gcloud](https://cloud.google.com/sdk/gcloud) installed) for a list of possible model id’s.
 
-Task name is the subdirectory of [dev/integration\_tests](https://github.com/flutter/flutter/tree/master/dev/integration_tests) (e.g. android\_views, channels, etc ) that contains the integration test to build.
+Task name is the subdirectory of [dev/integration\_tests](https://github.com/flutter/flutter/tree/main/dev/integration_tests) (e.g. android\_views, channels, etc ) that contains the integration test to build.
 
 The following is an example of the properties format:
 
@@ -51,9 +51,9 @@ This is only required for manually running the steps
 
 ## Adding a Firebaselab Test
 
-*   Step 1: Select the integration test to use from [dev/integration\_tests](https://github.com/flutter/flutter/tree/master/dev/integration_tests)
+*   Step 1: Select the integration test to use from [dev/integration\_tests](https://github.com/flutter/flutter/tree/main/dev/integration_tests)
 *   Step 2: Select the physical and virtual devices to run the test on. You can use `gcloud firebase test android models list` and `gcloud firebase test ios models list` to find the available devices.
-*   Step 3: Write a .ci.yaml target configuration in the [flutter/flutter .ci.yaml](https://github.com/flutter/flutter/blob/master/.ci.yaml) file providing the task\_name, virtual\_devices, physical\_devices and recipe properties.
+*   Step 3: Write a .ci.yaml target configuration in the [flutter/flutter .ci.yaml](https://github.com/flutter/flutter/blob/main/.ci.yaml) file providing the task\_name, virtual\_devices, physical\_devices and recipe properties.
 *   Step 4: Create a PR with the new target. The presubmit checks will run basic validations on yaml format.
 *   Step 5: Wait for the change to propagate.
 *   Step 6: Fix any potential issues and remove `bringup: true` to validate the changes end to end in presubmit.
