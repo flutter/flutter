@@ -20,10 +20,6 @@ declare_args() {
   impeller_enable_vulkan = (is_linux || is_win || is_android || is_mac ||
                             enable_unittests) && target_os != "fuchsia"
 
-  # If enabled, all OpenGL calls will be traced. Because additional trace
-  # overhead may be substantial, this is not enabled by default.
-  impeller_trace_all_gl_calls = false
-
   # Enable experimental 3D scene rendering.
   impeller_enable_3d = false
 }

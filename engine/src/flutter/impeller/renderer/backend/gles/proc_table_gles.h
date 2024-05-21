@@ -85,9 +85,6 @@ struct GLProc {
     FML_CHECK(IsAvailable()) << "GL function " << name << " is not available. "
                              << "This is likely due to a missing extension.";
 #endif  // IMPELLER_DEBUG
-#ifdef IMPELLER_TRACE_ALL_GL_CALLS
-    TRACE_EVENT0("impeller", name);
-#endif  // IMPELLER_TRACE_ALL_GL_CALLS
     return function(std::forward<Args>(args)...);
   }
 
