@@ -3656,12 +3656,12 @@ int _toLocationId(_Location location) {
   return id;
 }
 
-const idsKey = 'ids';
-const linesKey = 'lines';
-const columnsKey = 'columns';
-const namesKey = 'names';
-
 Map<String, dynamic> _locationIdMapToJson() {
+  const String idsKey = 'ids';
+  const String linesKey = 'lines';
+  const String columnsKey = 'columns';
+  const String namesKey = 'names';
+
   final Map<String, Map<String, List<Object?>>> fileLocationsMap =
       <String, Map<String, List<Object?>>>{};
   for (final MapEntry<_Location, int> entry in _locationToId.entries) {

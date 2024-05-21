@@ -3792,17 +3792,18 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           locationMapJson[file]! as Map<String, Object?>;
       expect(widgetTestLocations, isNotNull);
 
+      const expectedCount = 9;
       final List<dynamic> ids = widgetTestLocations['ids']! as List<dynamic>;
-      expect(ids.length, 9);
+      expect(ids.length, expectedCount);
       final List<dynamic> lines =
           widgetTestLocations['lines']! as List<dynamic>;
-      expect(lines.length, 9);
+      expect(lines.length, expectedCount);
       final List<dynamic> columns =
           widgetTestLocations['columns']! as List<dynamic>;
-      expect(columns.length, 9);
+      expect(columns.length, expectedCount);
       final List<dynamic> names =
           widgetTestLocations['names']! as List<dynamic>;
-      expect(names.length, 9);
+      expect(names.length, expectedCount);
       expect(names, contains('ClockDemo'));
       expect(names, contains('Directionality'));
       expect(names, contains('ClockText'));
