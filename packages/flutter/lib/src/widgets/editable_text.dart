@@ -5723,6 +5723,7 @@ class _ScribeState extends State<_Scribe> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO(justinmc): This should be bigger than the EditableText! Probably need to move it in the widget tree too? It should add 40dp of vertical padding and 10dp of horizontal padding.
     return Listener(
       onPointerDown: _handlePointerDown,
       child: widget.child,
