@@ -75,7 +75,7 @@ void main() {
       );
       // Check read/write permissions are set correctly in the framework engine artifact.
       final String artifactStat = frameworkArtifact.statSync().mode.toRadixString(8);
-      expect(artifactStat, '4755');
+      expect(artifactStat, '40755');
 
       final String workingDirectory = fileSystem.path.join(
         getFlutterRoot(),
