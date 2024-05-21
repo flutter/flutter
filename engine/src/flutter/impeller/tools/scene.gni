@@ -1,42 +1,27 @@
-# Dispatches to the build or prebuilt scenec depending on the value of
-# the impeller_use_prebuilt_scenec argument. Forwards all variables to
-# compiled_action_foreach or action_foreach as appropriate.
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
 import("//build/compiled_action.gni")
 import("//flutter/impeller/tools/args.gni")
-
-template("_scenec") {
-  if (impeller_use_prebuilt_scenec == "") {
-    compiled_action_foreach(target_name) {
-      forward_variables_from(invoker, "*")
-      tool = "//flutter/impeller/scene/importer:scenec"
-    }
-  } else {
-    action_foreach(target_name) {
-      forward_variables_from(invoker, "*", [ "args" ])
-      script = "//build/gn_run_binary.py"
-      scenec_path = rebase_path(impeller_use_prebuilt_scenec, root_build_dir)
-      args = [ scenec_path ] + invoker.args
-    }
-  }
-}
 
 template("scenec") {
   assert(defined(invoker.geometry), "Geometry input files must be specified.")
   assert(defined(invoker.type),
          "The type of geometry to be parsed (gltf, etc..).")
 
-  _scenec(target_name) {
-    sources = invoker.geometry
-    generated_dir = "$target_gen_dir"
+  compiled_action_foreach(target_name) {
+    tool = "//flutter/impeller/scene/importer:scenec"
 
+    sources = invoker.geometry
     input_type = invoker.type
+
     args = [
       "--input={{source}}",
       "--input-type=$input_type",
     ]
 
-    output = "$generated_dir/{{source_file_part}}.ipscene"
+    output = "$target_gen_dir/{{source_file_part}}.ipscene"
     output_path = rebase_path(output, root_build_dir)
 
     args += [ "--output=$output_path" ]

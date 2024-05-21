@@ -14,34 +14,14 @@ import("//flutter/impeller/tools/args.gni")
 #   invoked once via `compiled_action` or `action`.
 template("_impellerc") {
   if (invoker.single_invocation) {
-    if (impeller_use_prebuilt_impellerc == "") {
-      compiled_action(target_name) {
-        forward_variables_from(invoker, "*")
-        tool = "//flutter/impeller/compiler:impellerc"
-      }
-    } else {
-      action(target_name) {
-        forward_variables_from(invoker, "*", [ "args" ])
-        script = "//build/gn_run_binary.py"
-        impellerc_path =
-            rebase_path(impeller_use_prebuilt_impellerc, root_build_dir)
-        args = [ impellerc_path ] + invoker.args
-      }
+    compiled_action(target_name) {
+      forward_variables_from(invoker, "*")
+      tool = "//flutter/impeller/compiler:impellerc"
     }
   } else {
-    if (impeller_use_prebuilt_impellerc == "") {
-      compiled_action_foreach(target_name) {
-        forward_variables_from(invoker, "*")
-        tool = "//flutter/impeller/compiler:impellerc"
-      }
-    } else {
-      action_foreach(target_name) {
-        forward_variables_from(invoker, "*", [ "args" ])
-        script = "//build/gn_run_binary.py"
-        impellerc_path =
-            rebase_path(impeller_use_prebuilt_impellerc, root_build_dir)
-        args = [ impellerc_path ] + invoker.args
-      }
+    compiled_action_foreach(target_name) {
+      forward_variables_from(invoker, "*")
+      tool = "//flutter/impeller/compiler:impellerc"
     }
   }
 }
