@@ -65,8 +65,8 @@ String? _createIOSSimulator() {
     'xcrun',
     'simctl',
     'create',
-    'test-simulator',
-    'com.apple.CoreSimulator.SimDeviceType.iPhone-11',
+    'native-assets-test-simulator',
+    'com.apple.CoreSimulator.SimDeviceType.iPhone-15',
     'com.apple.CoreSimulator.SimRuntime.iOS-17-0',
   ]);
   if (result.exitCode != 0) {
