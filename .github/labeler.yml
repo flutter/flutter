@@ -57,12 +57,14 @@ engine:
   - changed-files:
     - any-glob-to-any-file:
       - bin/internal/engine.version
+      - docs/engine/**/*
 
 'f: cupertino':
   - changed-files:
     - any-glob-to-any-file:
       - '**/cupertino/*'
       - '**/*cupertino*'
+      - docs/libraries/cupertino/**/*
 
 'f: focus':
   - changed-files:
@@ -81,6 +83,7 @@ engine:
     - any-glob-to-any-file:
       - '**/material/*'
       - '**/*material*'
+      - docs/libraries/material/**/*
 
 'f: routes':
   - changed-files:
@@ -110,11 +113,18 @@ framework:
       - packages/flutter_test/**/*
       - packages/integration_test/**/*
       - examples/api/**/*
+      - docs/contributing/**/*
+      - docs/libraries/**/*
 
 'f: integration_test':
   - changed-files:
     - any-glob-to-any-file:
       - packages/integration_test/**/*
+
+package:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/ecosystem/**/*
 
 platform-ios:
   - changed-files:
@@ -137,6 +147,16 @@ platform-web:
       - '**/fix_data.yaml'
       - '**/*.expect'
       - '**/*test_fixes*'
+
+team-ecosystem:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/ecosystem/**/*
+
+team-engine:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/engine/**/*
 
 tool:
   - changed-files:

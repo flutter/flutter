@@ -407,7 +407,6 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
         });
         _updateScaffolds();
       case AnimationStatus.forward:
-        break;
       case AnimationStatus.reverse:
         break;
     }
@@ -436,7 +435,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   ///
   /// The closed completer is called after the animation is complete.
   void hideCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.hide }) {
-    if (_snackBars.isEmpty || _snackBarController!.status == AnimationStatus.dismissed) {
+    if (_snackBars.isEmpty || _snackBarController!.isDismissed) {
       return;
     }
     final Completer<SnackBarClosedReason> completer = _snackBars.first._completer;
@@ -458,7 +457,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// Removes all the snackBars currently in queue by clearing the queue
   /// and running normal exit animation on the current snackBar.
   void clearSnackBars() {
-    if (_snackBars.isEmpty || _snackBarController!.status == AnimationStatus.dismissed) {
+    if (_snackBars.isEmpty || _snackBarController!.isDismissed) {
       return;
     }
     final ScaffoldFeatureController<SnackBar, SnackBarClosedReason> currentSnackbar = _snackBars.first;
@@ -538,7 +537,6 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
       case AnimationStatus.completed:
         _updateScaffolds();
       case AnimationStatus.forward:
-        break;
       case AnimationStatus.reverse:
         break;
     }
@@ -566,7 +564,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   ///
   /// The closed completer is called after the animation is complete.
   void hideCurrentMaterialBanner({ MaterialBannerClosedReason reason = MaterialBannerClosedReason.hide }) {
-    if (_materialBanners.isEmpty || _materialBannerController!.status == AnimationStatus.dismissed) {
+    if (_materialBanners.isEmpty || _materialBannerController!.isDismissed) {
       return;
     }
     final Completer<MaterialBannerClosedReason> completer = _materialBanners.first._completer;
@@ -586,7 +584,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// Removes all the [MaterialBanner]s currently in queue by clearing the queue
   /// and running normal exit animation on the current [MaterialBanner].
   void clearMaterialBanners() {
-    if (_materialBanners.isEmpty || _materialBannerController!.status == AnimationStatus.dismissed) {
+    if (_materialBanners.isEmpty || _materialBannerController!.isDismissed) {
       return;
     }
     final ScaffoldFeatureController<MaterialBanner, MaterialBannerClosedReason> currentMaterialBanner = _materialBanners.first;
@@ -606,10 +604,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
         if (_snackBarController!.isCompleted && _snackBarTimer == null) {
           final SnackBar snackBar = _snackBars.first._widget;
           _snackBarTimer = Timer(snackBar.duration, () {
-            assert(
-              _snackBarController!.status == AnimationStatus.forward ||
-                _snackBarController!.status == AnimationStatus.completed,
-            );
+            assert(_snackBarController!.isForwardOrCompleted);
             // Look up MediaQuery again in case the setting changed.
             if (snackBar.action != null && MediaQuery.accessibleNavigationOf(context)) {
               return;
@@ -1369,7 +1364,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     if (oldChildIsNull == newChildIsNull && oldWidget.child?.key == widget.child?.key) {
       return;
     }
-    if (_previousController.status == AnimationStatus.dismissed) {
+    if (_previousController.isDismissed) {
       final double currentValue = widget.currentController.value;
       if (currentValue == 0.0 || oldWidget.child == null) {
         // The current child hasn't started its entrance animation yet. We can
@@ -1449,8 +1444,8 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 
   void _handlePreviousAnimationStatusChanged(AnimationStatus status) {
     setState(() {
-      if (widget.child != null && status == AnimationStatus.dismissed) {
-        assert(widget.currentController.status == AnimationStatus.dismissed);
+      if (widget.child != null && status.isDismissed) {
+        assert(widget.currentController.isDismissed);
         widget.currentController.forward();
       }
     });
@@ -1466,7 +1461,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     return Stack(
       alignment: Alignment.centerRight,
       children: <Widget>[
-        if (_previousController.status != AnimationStatus.dismissed)
+        if (!_previousController.isDismissed)
           if (_isExtendedFloatingActionButton(_previousChild))
             FadeTransition(
               opacity: _previousScaleAnimation,
@@ -2407,7 +2402,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         _currentBottomSheet = null;
       });
 
-      if (animationController.status != AnimationStatus.dismissed) {
+      if (!animationController.isDismissed) {
         _dismissedBottomSheets.add(bottomSheet);
       }
       completer.complete();
@@ -3196,10 +3191,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   @override
   void initState() {
     super.initState();
-    assert(
-      widget.animationController.status == AnimationStatus.forward
-        || widget.animationController.status == AnimationStatus.completed,
-    );
+    assert(widget.animationController.isForwardOrCompleted);
     widget.animationController.addStatusListener(_handleStatusChange);
   }
 
@@ -3234,7 +3226,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   }
 
   void _handleStatusChange(AnimationStatus status) {
-    if (status == AnimationStatus.dismissed) {
+    if (status.isDismissed) {
       widget.onDismissed?.call();
     }
   }

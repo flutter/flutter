@@ -167,7 +167,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   //
   // This situation arises when dealing with the Cupertino dismiss gesture.
   @override
-  bool get finishedWhenPopped => _controller!.status == AnimationStatus.dismissed && !_popFinalized;
+  bool get finishedWhenPopped => _controller!.isDismissed && !_popFinalized;
 
   bool _popFinalized = false;
 
@@ -342,11 +342,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
       if (current != null) {
         final Animation<double> currentTrain = (current is TrainHoppingAnimation ? current.currentTrain : current)!;
         final Animation<double> nextTrain = nextRoute._animation!;
-        if (
-          currentTrain.value == nextTrain.value ||
-          nextTrain.status == AnimationStatus.completed ||
-          nextTrain.status == AnimationStatus.dismissed
-        ) {
+        if (currentTrain.value == nextTrain.value || !nextTrain.isAnimating) {
           _setSecondaryAnimation(nextTrain, nextRoute.completed);
         } else {
           // Two trains animate at different values. We have to do train hopping.
@@ -361,20 +357,15 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
           //     properly clean up the existing train hopping.
           TrainHoppingAnimation? newAnimation;
           void jumpOnAnimationEnd(AnimationStatus status) {
-            switch (status) {
-              case AnimationStatus.completed:
-              case AnimationStatus.dismissed:
-                // The nextTrain has stopped animating without train hopping.
-                // Directly sets the secondary animation and disposes the
-                // TrainHoppingAnimation.
-                _setSecondaryAnimation(nextTrain, nextRoute.completed);
-                if (_trainHoppingListenerRemover != null) {
-                  _trainHoppingListenerRemover!();
-                  _trainHoppingListenerRemover = null;
-                }
-              case AnimationStatus.forward:
-              case AnimationStatus.reverse:
-                break;
+            if (!status.isAnimating) {
+              // The nextTrain has stopped animating without train hopping.
+              // Directly sets the secondary animation and disposes the
+              // TrainHoppingAnimation.
+              _setSecondaryAnimation(nextTrain, nextRoute.completed);
+              if (_trainHoppingListenerRemover != null) {
+                _trainHoppingListenerRemover!();
+                _trainHoppingListenerRemover = null;
+              }
             }
           }
           _trainHoppingListenerRemover = () {
@@ -1605,18 +1596,17 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     }
     // If attempts to dismiss this route might be vetoed such as in a page
     // with forms, then do not allow the user to dismiss the route with a swipe.
-    if (hasScopedWillPopCallback ||
-        popDisposition == RoutePopDisposition.doNotPop) {
+    if (hasScopedWillPopCallback || popDisposition == RoutePopDisposition.doNotPop) {
       return false;
     }
     // If we're in an animation already, we cannot be manually swiped.
-    if (animation!.status != AnimationStatus.completed) {
+    if (!animation!.isCompleted) {
       return false;
     }
     // If we're being popped into, we also cannot be swiped until the pop above
     // it completes. This translates to our secondary animation being
     // dismissed.
-    if (secondaryAnimation!.status != AnimationStatus.dismissed) {
+    if (!secondaryAnimation!.isDismissed) {
       return false;
     }
     // If we're in a gesture already, we cannot start another.
@@ -1940,9 +1930,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       );
     }
     barrier = IgnorePointer(
-      ignoring: animation!.status == AnimationStatus.reverse || // changedInternalState is called when animation.status updates
-                animation!.status == AnimationStatus.dismissed, // dismissed is possible when doing a manual pop gesture
-      child: barrier,
+      ignoring: !animation!.isForwardOrCompleted, // changedInternalState is called when animation.status updates
+      child: barrier,                             // dismissed is possible when doing a manual pop gesture
     );
     if (semanticsDismissible && barrierDismissible) {
       // To be sorted after the _modalScope.

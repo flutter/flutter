@@ -531,7 +531,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   }
 
   Future<void> _handleDismissStatusChanged(AnimationStatus status) async {
-    if (status == AnimationStatus.completed && !_dragUnderway) {
+    if (status.isCompleted && !_dragUnderway) {
       await _handleMoveCompleted();
     }
     if (mounted) {
@@ -623,7 +623,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       // we've been dragged aside, and are now resizing.
       assert(() {
         if (_resizeAnimation!.status != AnimationStatus.forward) {
-          assert(_resizeAnimation!.status == AnimationStatus.completed);
+          assert(_resizeAnimation!.isCompleted);
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('A dismissed Dismissible widget is still part of the tree.'),
             ErrorHint(
