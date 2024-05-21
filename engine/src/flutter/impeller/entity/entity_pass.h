@@ -53,8 +53,6 @@ class EntityPass {
   /// `GetEntityForElement()`.
   using Element = std::variant<Entity, std::unique_ptr<EntityPass>>;
 
-  static const std::string kCaptureDocumentName;
-
   using BackdropFilterProc = std::function<std::shared_ptr<FilterContents>(
       FilterInput::Ref,
       const Matrix& effect_transform,
@@ -238,7 +236,6 @@ class EntityPass {
 
   EntityResult GetEntityForElement(const EntityPass::Element& element,
                                    ContentContext& renderer,
-                                   Capture& capture,
                                    InlinePassContext& pass_context,
                                    ISize root_pass_size,
                                    Point global_pass_position,
@@ -304,7 +301,6 @@ class EntityPass {
   ///                                      parent pass.
   ///
   bool OnRender(ContentContext& renderer,
-                Capture& capture,
                 ISize root_pass_size,
                 EntityPassTarget& pass_target,
                 Point global_pass_position,

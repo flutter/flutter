@@ -4,13 +4,11 @@
 
 #include "impeller/renderer/context.h"
 
-#include "impeller/core/capture.h"
-
 namespace impeller {
 
 Context::~Context() = default;
 
-Context::Context() : capture(CaptureContext::MakeInactive()) {}
+Context::Context() = default;
 
 bool Context::UpdateOffscreenLayerPixelFormat(PixelFormat format) {
   return false;
