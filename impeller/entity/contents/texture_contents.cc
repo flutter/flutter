@@ -109,8 +109,6 @@ std::optional<Snapshot> TextureContents::RenderToSnapshot(
 bool TextureContents::Render(const ContentContext& renderer,
                              const Entity& entity,
                              RenderPass& pass) const {
-  auto capture = entity.GetCapture().CreateChild("TextureContents");
-
   using VS = TextureFillVertexShader;
   using FS = TextureFillFragmentShader;
   using FSStrict = TextureFillStrictSrcFragmentShader;
@@ -124,18 +122,15 @@ bool TextureContents::Render(const ContentContext& renderer,
       texture_->GetTextureDescriptor().type == TextureType::kTextureExternalOES;
   FML_DCHECK(!is_external_texture);
 
-  auto source_rect = capture.AddRect("Source rect", source_rect_);
   auto texture_coords =
-      Rect::MakeSize(texture_->GetSize()).Project(source_rect);
+      Rect::MakeSize(texture_->GetSize()).Project(source_rect_);
 
   VertexBufferBuilder<VS::PerVertexData> vertex_builder;
-  auto destination_rect =
-      capture.AddRect("Destination rect", destination_rect_);
   vertex_builder.AddVertices({
-      {destination_rect.GetLeftTop(), texture_coords.GetLeftTop()},
-      {destination_rect.GetRightTop(), texture_coords.GetRightTop()},
-      {destination_rect.GetLeftBottom(), texture_coords.GetLeftBottom()},
-      {destination_rect.GetRightBottom(), texture_coords.GetRightBottom()},
+      {destination_rect_.GetLeftTop(), texture_coords.GetLeftTop()},
+      {destination_rect_.GetRightTop(), texture_coords.GetRightTop()},
+      {destination_rect_.GetLeftBottom(), texture_coords.GetLeftBottom()},
+      {destination_rect_.GetRightBottom(), texture_coords.GetRightBottom()},
   });
 
   auto& host_buffer = renderer.GetTransientsBuffer();
@@ -170,11 +165,11 @@ bool TextureContents::Render(const ContentContext& renderer,
     // texel to ensure that linear filtering does not sample anything outside
     // the source rect bounds.
     auto strict_texture_coords =
-        Rect::MakeSize(texture_->GetSize()).Project(source_rect.Expand(-0.5));
+        Rect::MakeSize(texture_->GetSize()).Project(source_rect_.Expand(-0.5));
 
     FSStrict::FragInfo frag_info;
     frag_info.source_rect = Vector4(strict_texture_coords.GetLTRB());
-    frag_info.alpha = capture.AddScalar("Alpha", GetOpacity());
+    frag_info.alpha = GetOpacity();
     FSStrict::BindFragInfo(pass, host_buffer.EmplaceUniform((frag_info)));
     FSStrict::BindTextureSampler(
         pass, texture_,
@@ -182,7 +177,7 @@ bool TextureContents::Render(const ContentContext& renderer,
             sampler_descriptor_));
   } else {
     FS::FragInfo frag_info;
-    frag_info.alpha = capture.AddScalar("Alpha", GetOpacity());
+    frag_info.alpha = GetOpacity();
     FS::BindFragInfo(pass, host_buffer.EmplaceUniform((frag_info)));
     FS::BindTextureSampler(
         pass, texture_,

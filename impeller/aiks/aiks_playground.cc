@@ -5,6 +5,7 @@
 #include "impeller/aiks/aiks_playground.h"
 
 #include <memory>
+#include <optional>
 
 #include "impeller/aiks/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
@@ -24,14 +25,24 @@ void AiksPlayground::SetTypographerContext(
 }
 
 void AiksPlayground::TearDown() {
-  inspector_.HackResetDueToTextureLeaks();
   PlaygroundTest::TearDown();
 }
 
 bool AiksPlayground::OpenPlaygroundHere(Picture picture) {
-  return OpenPlaygroundHere([&picture](AiksContext& renderer) -> Picture {
-    return std::move(picture);
-  });
+  if (!switches_.enable_playground) {
+    return true;
+  }
+
+  AiksContext renderer(GetContext(), typographer_context_);
+
+  if (!renderer.IsValid()) {
+    return false;
+  }
+
+  return Playground::OpenPlaygroundHere(
+      [&renderer, &picture](RenderTarget& render_target) -> bool {
+        return renderer.Render(picture, render_target, true);
+      });
 }
 
 bool AiksPlayground::OpenPlaygroundHere(AiksPlaygroundCallback callback) {
@@ -46,10 +57,8 @@ bool AiksPlayground::OpenPlaygroundHere(AiksPlaygroundCallback callback) {
   }
 
   return Playground::OpenPlaygroundHere(
-      [this, &renderer, &callback](RenderTarget& render_target) -> bool {
-        const std::optional<Picture>& picture = inspector_.RenderInspector(
-            renderer, [&]() { return callback(renderer); });
-
+      [&renderer, &callback](RenderTarget& render_target) -> bool {
+        std::optional<Picture> picture = callback(renderer);
         if (!picture.has_value()) {
           return false;
         }
