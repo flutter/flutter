@@ -5263,6 +5263,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                               _updateSelectionRects(force: true);
                             },
                             child: _Scribe(
+                              focusNode: widget.focusNode,
                               child: SizeChangedLayoutNotifier(
                                 child: _Editable(
                                   key: _editableKey,
@@ -5702,9 +5703,11 @@ class _ScribbleFocusableState extends State<_ScribbleFocusable> implements Scrib
 class _Scribe extends StatefulWidget {
   const _Scribe({
     required this.child,
+    required this.focusNode,
   });
 
   final Widget child;
+  final FocusNode focusNode;
 
   @override
   State<_Scribe> createState() => _ScribeState();
@@ -5712,7 +5715,9 @@ class _Scribe extends StatefulWidget {
 
 class _ScribeState extends State<_Scribe> {
   void _handlePointerDown(PointerDownEvent event) {
-    print('justin pointer down. $event');
+    if (!widget.focusNode.hasFocus) {
+      widget.focusNode.requestFocus();
+    }
     Scribe.startStylusHandwriting();
   }
 
