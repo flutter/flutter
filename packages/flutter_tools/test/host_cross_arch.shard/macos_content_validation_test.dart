@@ -74,8 +74,8 @@ void main() {
         ]),
       );
       // Check read/write permissions are set correctly in the framework engine artifact.
-      final String statString = frameworkArtifact.statSync().mode.toRadixString(8);
-      expect(statString, '4755');
+      final String artifactStat = frameworkArtifact.statSync().mode.toRadixString(8);
+      expect(artifactStat, '4755');
 
       final String workingDirectory = fileSystem.path.join(
         getFlutterRoot(),
@@ -182,8 +182,8 @@ void main() {
       );
 
       // Check read/write permissions are being correctly set.
-      final String statString = outputFlutterFramework.statSync().mode.toRadixString(8);
-      expect(statString, '40755');
+      final String outputFrameworkStat = outputFlutterFramework.statSync().mode.toRadixString(8);
+      expect(outputFrameworkStat, '40755');
 
       // Check complicated macOS framework symlink structure.
       final Link current = outputFlutterFramework.childDirectory('Versions').childLink('Current');

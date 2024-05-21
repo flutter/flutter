@@ -152,8 +152,8 @@ void main() {
 
         testWithoutContext('flutter build ios builds a valid app', () {
           // Check read/write permissions are set correctly in the framework engine artifact.
-          final String statString = frameworkArtifact.statSync().mode.toRadixString(8);
-          expect(statString, '4755');
+          final String artifactStat = frameworkArtifact.statSync().mode.toRadixString(8);
+          expect(artifactStat, '4755');
 
           printOnFailure('Output of flutter build ios:');
           printOnFailure(buildResult.stdout.toString());
