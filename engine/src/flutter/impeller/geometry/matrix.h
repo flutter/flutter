@@ -331,6 +331,8 @@ struct Matrix {
     return m[3] != 0 || m[7] != 0 || m[11] != 0 || m[15] != 1;
   }
 
+  constexpr bool HasTranslation() const { return m[12] != 0 || m[13] != 0; }
+
   constexpr bool IsAligned2D(Scalar tolerance = 0) const {
     if (HasPerspective2D()) {
       return false;

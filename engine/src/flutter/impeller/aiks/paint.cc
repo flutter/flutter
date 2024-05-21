@@ -68,7 +68,8 @@ std::shared_ptr<Contents> Paint::WithFiltersForSubpassTarget(
     std::shared_ptr<Contents> input,
     const Matrix& effect_transform) const {
   auto image_filter =
-      WithImageFilter(input, effect_transform, Entity::RenderingMode::kSubpass);
+      WithImageFilter(input, effect_transform,
+                      Entity::RenderingMode::kSubpassPrependSnapshotTransform);
   if (image_filter) {
     input = image_filter;
   }

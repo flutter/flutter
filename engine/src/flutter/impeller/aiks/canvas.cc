@@ -225,7 +225,8 @@ void Canvas::Save(bool create_subpass,
   entry.cull_rect = transform_stack_.back().cull_rect;
   entry.clip_height = transform_stack_.back().clip_height;
   if (create_subpass) {
-    entry.rendering_mode = Entity::RenderingMode::kSubpass;
+    entry.rendering_mode =
+        Entity::RenderingMode::kSubpassAppendSnapshotTransform;
     auto subpass = std::make_unique<EntityPass>();
     if (backdrop_filter) {
       EntityPass::BackdropFilterProc backdrop_filter_proc =
@@ -261,7 +262,9 @@ bool Canvas::Restore() {
   current_pass_->PopClips(num_clips, current_depth_);
 
   if (transform_stack_.back().rendering_mode ==
-      Entity::RenderingMode::kSubpass) {
+          Entity::RenderingMode::kSubpassAppendSnapshotTransform ||
+      transform_stack_.back().rendering_mode ==
+          Entity::RenderingMode::kSubpassPrependSnapshotTransform) {
     current_pass_->SetClipDepth(++current_depth_);
     current_pass_ = GetCurrentPass().GetSuperpass();
     FML_DCHECK(current_pass_);

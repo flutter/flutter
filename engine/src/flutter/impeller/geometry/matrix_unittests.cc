@@ -60,6 +60,13 @@ TEST(MatrixTest, HasPerspective) {
   // clang-format on
 }
 
+TEST(MatrixTest, HasTranslation) {
+  EXPECT_TRUE(Matrix::MakeTranslation({100, 100, 0}).HasTranslation());
+  EXPECT_TRUE(Matrix::MakeTranslation({0, 100, 0}).HasTranslation());
+  EXPECT_TRUE(Matrix::MakeTranslation({100, 0, 0}).HasTranslation());
+  EXPECT_FALSE(Matrix().HasTranslation());
+}
+
 TEST(MatrixTest, IsAligned2D) {
   EXPECT_TRUE(Matrix().IsAligned2D());
   EXPECT_TRUE(Matrix::MakeScale({1.0f, 1.0f, 2.0f}).IsAligned2D());
