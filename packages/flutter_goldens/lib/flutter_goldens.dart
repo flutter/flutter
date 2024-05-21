@@ -10,6 +10,7 @@ import 'package:file/local.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 
 import 'skia_client.dart';
 export 'skia_client.dart';
@@ -56,6 +57,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
   );
   const Platform platform = LocalPlatform();
   const FileSystem fs = LocalFileSystem();
+  const ProcessManager process = LocalProcessManager();
   if (FlutterPostSubmitFileComparator.isForEnvironment(platform)) {
     goldenFileComparator = await FlutterPostSubmitFileComparator.fromLocalFileComparator(
       localFileComparator: goldenFileComparator as LocalFileComparator,
@@ -63,6 +65,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
       namePrefix: namePrefix,
       log: print,
       fs: fs,
+      process: process,
     );
   } else if (FlutterPreSubmitFileComparator.isForEnvironment(platform)) {
     goldenFileComparator = await FlutterPreSubmitFileComparator.fromLocalFileComparator(
@@ -71,6 +74,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
       namePrefix: namePrefix,
       log: print,
       fs: fs,
+      process: process,
     );
   } else if (FlutterSkippingFileComparator.isForEnvironment(platform)) {
     goldenFileComparator = FlutterSkippingFileComparator.fromLocalFileComparator(
@@ -82,6 +86,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
       namePrefix: namePrefix,
       log: print,
       fs: fs,
+      process: process,
     );
   } else {
     goldenFileComparator = await FlutterLocalFileComparator.fromLocalFileComparator(
@@ -89,6 +94,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain, {String? namePre
       platform: platform,
       log: print,
       fs: fs,
+      process: process,
     );
   }
   await testMain();
@@ -280,6 +286,7 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
     String? namePrefix,
     required LogCallback log,
     required FileSystem fs,
+    required ProcessManager process,
   }) async {
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
       localFileComparator,
@@ -294,6 +301,7 @@ class FlutterPostSubmitFileComparator extends FlutterGoldenFileComparator {
       log: log,
       platform: platform,
       fs: fs,
+      process: process,
     );
     await goldens.auth();
     return FlutterPostSubmitFileComparator(
@@ -369,6 +377,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     String? namePrefix,
     required LogCallback log,
     required FileSystem fs,
+    required ProcessManager process,
   }) async {
     final Directory baseDirectory = testBasedir ?? FlutterGoldenFileComparator.getBaseDirectory(
       localFileComparator,
@@ -386,6 +395,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
       platform: platform,
       log: log,
       fs: fs,
+      process: process,
     );
 
     await goldens.auth();
@@ -466,6 +476,7 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
     required Platform platform,
     required LogCallback log,
     required FileSystem fs,
+    required ProcessManager process,
   }) {
     final Uri basedir = localFileComparator.basedir;
     final SkiaGoldClient skiaClient = SkiaGoldClient(
@@ -473,6 +484,7 @@ class FlutterSkippingFileComparator extends FlutterGoldenFileComparator {
       platform: platform,
       log: log,
       fs: fs,
+      process: process,
     );
     return FlutterSkippingFileComparator(
       basedir,
@@ -559,6 +571,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     Directory? baseDirectory,
     required LogCallback log,
     required FileSystem fs,
+    required ProcessManager process,
   }) async {
     baseDirectory ??= FlutterGoldenFileComparator.getBaseDirectory(
       localFileComparator,
@@ -575,6 +588,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       platform: platform,
       log: log,
       fs: fs,
+      process: process,
     );
     try {
       // Check if we can reach Gold.

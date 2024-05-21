@@ -50,7 +50,7 @@ class SkiaGoldClient {
   SkiaGoldClient(
     this.workDirectory, {
     required this.fs,
-    this.process = const LocalProcessManager(),
+    required this.process,
     required this.platform,
     Abi? abi,
     io.HttpClient? httpClient,
