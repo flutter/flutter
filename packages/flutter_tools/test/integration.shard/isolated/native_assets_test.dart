@@ -13,6 +13,7 @@
 @Timeout(Duration(minutes: 10))
 library;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/file.dart';
@@ -60,10 +61,56 @@ const String packageName = 'package_with_native_assets';
 
 const String exampleAppName = '${packageName}_example';
 
+String? iOSSimulatorId() {
+  String? findSimulator() {
+    final ProcessResult res = processManager.runSync(<String>[
+      'flutter',
+      'devices',
+      '--machine',
+      '--device-connection=attached',
+    ]);
+    if (res.exitCode != 0) {
+      throw Exception(
+          'flutter devices failed: ${res.exitCode}\n${res.stderr}\n${res.stdout}');
+    }
+    final List<Map<dynamic, dynamic>> devices =
+        (json.decode(res.stdout as String) as List<dynamic>)
+            .cast<Map<dynamic, dynamic>>();
+    for (final Map<dynamic, dynamic> device in devices) {
+      if (device['emulator'] == true && device['targetPlatform'] == 'ios') {
+        return device['id'] as String;
+      }
+    }
+    return null;
+  }
+
+  final String? res = findSimulator();
+  if (res != null) {
+    return res;
+  }
+  processManager.runSync([
+    'flutter',
+    'emulators',
+    '--launch',
+    'apple_ios_simulator',
+  ]);
+  return findSimulator();
+}
+
 void main() {
   if (!platform.isMacOS && !platform.isLinux && !platform.isWindows) {
     // TODO(dacoharkes): Implement Fuchsia. https://github.com/flutter/flutter/issues/129757
     return;
+  }
+
+  final List<String> testDevices = List<String>.of(devices);
+  if (platform.isMacOS) {
+    final String ? simulator = iOSSimulatorId();
+    if (simulator != null) {
+      testDevices.add(simulator);
+    } else {
+      throw Exception('No running iOS simulator found');
+    }
   }
 
   setUpAll(() {
@@ -74,7 +121,7 @@ void main() {
     ]);
   });
 
-  for (final String device in devices) {
+  for (final String device in testDevices) {
     for (final String buildMode in buildModes) {
       if (device == 'flutter-tester' && buildMode != 'debug') {
         continue;
