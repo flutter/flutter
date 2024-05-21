@@ -184,21 +184,18 @@ class _ListDemoState extends State<ListDemo> {
   }
 
   Widget buildListTile(BuildContext context, String item) {
-    Widget? secondary;
-    if (_itemType == _MaterialListType.twoLine) {
-      secondary = const Text('Additional item information.');
-    } else if (_itemType == _MaterialListType.threeLine) {
-      secondary = const Text(
-        'Even more additional list item information appears on line three.',
-      );
-    }
+    final String? subtitle = switch (_itemType) {
+      _MaterialListType.oneLine || _MaterialListType.oneLineWithAvatar || null => null,
+      _MaterialListType.twoLine   => 'Additional item information.',
+      _MaterialListType.threeLine => 'Even more additional list item information appears on line three.',
+    };
     return MergeSemantics(
       child: ListTile(
         isThreeLine: _itemType == _MaterialListType.threeLine,
         dense: _dense,
         leading: _showAvatars != null ? ExcludeSemantics(child: CircleAvatar(child: Text(item))) : null,
         title: Text('This item represents $item.'),
-        subtitle: secondary,
+        subtitle: subtitle != null ? Text(subtitle) : null,
         trailing: _showIcons != null ? Icon(Icons.info, color: Theme.of(context).disabledColor) : null,
       ),
     );

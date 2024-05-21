@@ -26,24 +26,17 @@ class ChipDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget? buttons;
-    switch (type) {
-      case ChipDemoType.action:
-        buttons = _ActionChipDemo();
-      case ChipDemoType.choice:
-        buttons = _ChoiceChipDemo();
-      case ChipDemoType.filter:
-        buttons = _FilterChipDemo();
-      case ChipDemoType.input:
-        buttons = _InputChipDemo();
-    }
-
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(_title(context)),
       ),
-      body: buttons,
+      body: switch (type) {
+        ChipDemoType.action => _ActionChipDemo(),
+        ChipDemoType.choice => _ChoiceChipDemo(),
+        ChipDemoType.filter => _FilterChipDemo(),
+        ChipDemoType.input  => _InputChipDemo(),
+      },
     );
   }
 }

@@ -230,7 +230,9 @@ Future<void> _copyNativeAssetsIOS(
       }
       await lipoDylibs(dylibFile, sources);
       await setInstallNameDylib(dylibFile);
-      await createInfoPlist(targetUri.pathSegments.last, frameworkDir);
+      // TODO(knopp): Wire the value once there is a way to configure that in the hook.
+      // https://github.com/dart-lang/native/issues/1133
+      await createInfoPlist(targetUri.pathSegments.last, frameworkDir, minimumIOSVersion: '12.0');
       await codesignDylib(codesignIdentity, buildMode, frameworkDir);
     }
     globals.logger.printTrace('Copying native assets done.');
