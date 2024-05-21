@@ -113,6 +113,7 @@ framework:
       - packages/flutter_test/**/*
       - packages/integration_test/**/*
       - examples/api/**/*
+      - docs/about/**/*
       - docs/contributing/**/*
       - docs/libraries/**/*
 
@@ -148,10 +149,16 @@ platform-web:
       - '**/*.expect'
       - '**/*test_fixes*'
 
+team:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/about/**/*
+
 team-ecosystem:
   - changed-files:
     - any-glob-to-any-file:
       - docs/ecosystem/**/*
+
 team-engine:
   - changed-files:
     - any-glob-to-any-file:
