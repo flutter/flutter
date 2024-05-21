@@ -5,7 +5,7 @@ We aspire to reach a state where `flutter run` has the following modes:
 - `flutter run --profile`: builds a profile version of the app and starts it directly, then shows the console UI to manipulate the running instance.
 - `flutter run --release`: builds a release version of the app and starts it directly, then shows the console UI to manipulate the running instance.
 
-Adding `--machine` in any of the situations above spawns a [flutter daemon](https://github.com/flutter/flutter/blob/master/packages/flutter_tools/doc/daemon.md#flutter-run---machine) which:
+Adding `--machine` in any of the situations above spawns a [flutter daemon](https://github.com/flutter/flutter/blob/main/packages/flutter_tools/doc/daemon.md#flutter-run---machine) which:
 * changes the output to JSON so that it can be more easily consumed by IDEs, and
 * allows the use of JSON commands to interact with the running application (e.g. stopping the application).
 
