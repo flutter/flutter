@@ -12,17 +12,16 @@ Future<void> main() async {
     String.fromEnvironment('test.valueB');
   if (combined == 'Example,AValue') {
     output.write('--- TEST SUCCEEDED ---');
-    print('--- TEST SUCCEEDED ---');
   } else {
     output.write('--- TEST FAILED ---');
-    print('--- TEST FAILED ---');
   }
 
-  web.window.fetch(
+  await web.window.fetch(
     '/test-result'.toJS,
     web.RequestInit(
       method: 'POST',
       body: '$output'.toJS,
     )
-  );
+  ).toDart;
+  print(output);
 }
