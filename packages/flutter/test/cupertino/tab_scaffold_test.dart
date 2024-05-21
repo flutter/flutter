@@ -47,7 +47,7 @@ void main() {
     selectedTabs = <int>[];
   });
 
-  tearDownAll(() {
+  tearDown(() {
     imageCache.clear();
   });
 
