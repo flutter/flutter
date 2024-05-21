@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../image_data.dart';
 import '../rendering/rendering_tester.dart' show TestCallbackPainter;
@@ -39,12 +40,11 @@ class MockCupertinoTabController extends CupertinoTabController {
 }
 
 void main() {
+  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
+  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
+
   setUp(() {
     selectedTabs = <int>[];
-  });
-
-  tearDownAll(() {
-    imageCache.clear();
   });
 
   BottomNavigationBarItem tabGenerator(int index) {
@@ -248,7 +248,9 @@ void main() {
     );
   });
 
-  testWidgets('Programmatic tab switching by changing the index of an existing controller', (WidgetTester tester) async {
+  testWidgets('Programmatic tab switching by changing the index of an existing controller',
+    experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
+  (WidgetTester tester) async {
     final CupertinoTabController controller = CupertinoTabController(initialIndex: 1);
     addTearDown(controller.dispose);
     final List<int> tabsPainted = <int>[];
@@ -630,7 +632,9 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/33455
-  testWidgets('Adding new tabs does not crash the app', (WidgetTester tester) async {
+  testWidgets('Adding new tabs does not crash the app',
+  experimentalLeakTesting: LeakTesting.settings.withTrackedAll(),
+  (WidgetTester tester) async {
     final List<int> tabsPainted = <int>[];
     final CupertinoTabController controller = CupertinoTabController();
     addTearDown(controller.dispose);
@@ -683,6 +687,8 @@ void main() {
 
     // Tapping the tabs should still work.
     expect(tabsPainted, const <int>[0, 0, 18]);
+
+    imageCache.clear();
   });
 
   testWidgets(
@@ -1098,7 +1104,9 @@ void main() {
     expect(find.text("don't lose me"), findsOneWidget);
   });
 
-  testWidgets('textScaleFactor is set to 1.0', (WidgetTester tester) async {
+  testWidgets('textScaleFactor is set to 1.0',
+  experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
+  (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(builder: (BuildContext context) {
