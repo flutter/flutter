@@ -1313,6 +1313,7 @@ Future<void> verifyRepositoryLinks(String workingDirectory) async {
     'flutter/flutter_gallery_assets', // TODO(guidezpl): remove when subtask in https://github.com/flutter/flutter/issues/121564 is complete
     'flutter/flutter-intellij', // TODO(guidezpl): remove when https://github.com/flutter/flutter-intellij/issues/7342 is closed
     'flutter/platform_tests', // TODO(guidezpl): remove when subtask in https://github.com/flutter/flutter/issues/121564 is complete
+    'flutter/web_installers',
     'glfw/glfw',
     'GoogleCloudPlatform/artifact-registry-maven-tools',
     'material-components/material-components-android', // TODO(guidezpl): remove when https://github.com/material-components/material-components-android/issues/4144 is closed

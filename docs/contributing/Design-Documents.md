@@ -26,7 +26,7 @@ If you wish to get feedback on your design doc, you have many options for doing 
 
 * If there is an issue already filed on the topic, definitely put a link to the design doc there. People who have found the issue and want to get updates on the topic will have subscribed to the issue, so this is the most effective way to communicate with them.
 
-* File a new issue to track the design doc using [the design doc issue template](https://github.com/flutter/flutter/issues/new?labels=design+doc&template=8_design_doc.yml). Assign it to yourself.
+* File a new issue to track the design doc using [the design doc issue template](https://github.com/flutter/flutter/issues/new?template=8_design_doc.yml). Assign it to yourself.
 
 * Post the link on Discord. You can post it to #hidden-chat to just get feedback from team members. You can post it to one or more of the #hackers-* channels if you want feedback from people who are interested in the general area. You can post it to the global #hackers channel if you want feedback from anyone interested in working on Flutter. If you really want feedback, you can post a request to #announcements and publish it to any server that is following ours.
 
