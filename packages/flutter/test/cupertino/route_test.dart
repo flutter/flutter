@@ -2718,7 +2718,8 @@ void main() {
               );
             },
           );
-        },),
+        },
+      ),
     ));
 
     // Open the dialog.
