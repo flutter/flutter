@@ -57,8 +57,8 @@
 
 Next steps:
 
- * [[Running examples]], to see if your setup works.
- * [[The flutter tool]], to learn about how the `flutter` command line tool works.
- * [[Style guide for Flutter repo]], to learn how to write code for Flutter.
- * [[Tree hygiene]], to learn about how to submit patches.
- * [[Signing commits]], to configure your environment to securely sign your commits.
+ * [Running examples](https://github.com/flutter/flutter/wiki/Running-examples), to see if your setup works.
+ * [The flutter tool](https://github.com/flutter/flutter/wiki/The-flutter-tool), to learn about how the `flutter` command line tool works.
+ * [Style guide for Flutter repo](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo), to learn how to write code for Flutter.
+ * [Tree hygiene](https://github.com/flutter/flutter/wiki/Tree-hygiene), to learn about how to submit patches.
+ * [Signing commits](https://github.com/flutter/flutter/wiki/Signing-commits), to configure your environment to securely sign your commits.

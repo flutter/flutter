@@ -10,7 +10,7 @@ Alternatively, a link to a treemap can be constructed as follows:
 
 ## Benchmarks
 
-In [devicelab](https://github.com/flutter/flutter/tree/master/dev/devicelab) we run various benchmarks to track the APK/IPA sizes and various (engine) artifacts contained within. These benchmarks run for every commit to [flutter/flutter](https://github.com/flutter/flutter) and are visible on our [build dashboard](https://flutter-dashboard.appspot.com/). The most relevant benchmarks for engine size are:
+In [devicelab](https://github.com/flutter/flutter/tree/main/dev/devicelab) we run various benchmarks to track the APK/IPA sizes and various (engine) artifacts contained within. These benchmarks run for every commit to [flutter/flutter](https://github.com/flutter/flutter) and are visible on our [build dashboard](https://flutter-dashboard.appspot.com/). The most relevant benchmarks for engine size are:
 
 * APK/IPA size of Flutter Gallery
   * Android: `flutter_gallery_android__compile/release_size_bytes`
