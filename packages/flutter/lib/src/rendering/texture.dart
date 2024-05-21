@@ -41,7 +41,7 @@ class TextureBox extends RenderBox {
   TextureBox({
     required int textureId,
     bool freeze = false,
-    FilterQuality filterQuality = FilterQuality.low,
+    FilterQuality filterQuality = FilterQuality.medium,
   }) : _textureId = textureId,
       _freeze = freeze,
       _filterQuality = filterQuality;

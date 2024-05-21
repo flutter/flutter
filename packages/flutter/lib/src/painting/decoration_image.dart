@@ -51,7 +51,7 @@ class DecorationImage {
     this.matchTextDirection = false,
     this.scale = 1.0,
     this.opacity = 1.0,
-    this.filterQuality = FilterQuality.low,
+    this.filterQuality = FilterQuality.medium,
     this.invertColors = false,
     this.isAntiAlias = false,
   });
@@ -531,7 +531,7 @@ void paintImage({
   ImageRepeat repeat = ImageRepeat.noRepeat,
   bool flipHorizontally = false,
   bool invertColors = false,
-  FilterQuality filterQuality = FilterQuality.low,
+  FilterQuality filterQuality = FilterQuality.medium,
   bool isAntiAlias = false,
   BlendMode blendMode = BlendMode.srcOver,
 }) {

@@ -43,7 +43,7 @@ class RenderImage extends RenderBox {
     TextDirection? textDirection,
     bool invertColors = false,
     bool isAntiAlias = false,
-    FilterQuality filterQuality = FilterQuality.low,
+    FilterQuality filterQuality = FilterQuality.medium,
   }) : _image = image,
        _width = width,
        _height = height,
