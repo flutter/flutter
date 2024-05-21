@@ -25,10 +25,9 @@ void main() {
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.tap(find.byIcon(Icons.add));
+    for (int i = 0; i < 4; i++) {
+      await tester.tap(find.byIcon(Icons.add));
+    }
     await tester.pump();
     expect(find.text('5'), findsOneWidget);
   });

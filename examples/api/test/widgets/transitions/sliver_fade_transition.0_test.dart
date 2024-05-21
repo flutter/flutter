@@ -18,8 +18,8 @@ void main() {
         widget.color == Colors.indigo[200]
     ), findsNWidgets(3));
     expect(find.byWidgetPredicate(
-            (Widget widget) => widget is Container &&
-            widget.color == Colors.orange[200]
+      (Widget widget) => widget is Container &&
+        widget.color == Colors.orange[200]
     ), findsNWidgets(2));
   });
 
