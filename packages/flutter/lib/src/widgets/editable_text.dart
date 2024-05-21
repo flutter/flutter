@@ -1479,7 +1479,8 @@ class EditableText extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [TextFieldTapRegion], for the provision of a separate tap region.
+  ///  * [TextFieldTapRegion], to give a [groupId] to a widget that is to be
+  ///    included in a [EditableText]'s tap region that has [groupId] set.
   /// {@endtemplate}
   final Object groupId;
 

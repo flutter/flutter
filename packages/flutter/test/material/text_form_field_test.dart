@@ -883,19 +883,29 @@ void main() {
       }
 
       expect(outsideClickA, false);
+      expect(outsideClickB, false);
+      expect(outsideClickC, false);
 
       await click(find.byKey(keyA));
       await tester.showKeyboard(find.byKey(keyA));
       await tester.idle();
       expect(outsideClickA, false);
+      expect(outsideClickB, false);
+      expect(outsideClickC, false);
 
       await click(find.byKey(keyB));
       expect(outsideClickA, true);
+      expect(outsideClickB, false);
+      expect(outsideClickC, false);
 
       await click(find.byKey(keyC));
+      expect(outsideClickA, true);
       expect(outsideClickB, true);
+      expect(outsideClickC, false);
 
       await tester.tap(find.text('Outside'));
+      expect(outsideClickA, true);
+      expect(outsideClickB, true);
       expect(outsideClickC, true);
     },
   );
