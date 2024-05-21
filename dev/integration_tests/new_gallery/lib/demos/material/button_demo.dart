@@ -24,26 +24,18 @@ class ButtonDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget? buttons;
-    switch (type) {
-      case ButtonDemoType.text:
-        buttons = _TextButtonDemo();
-      case ButtonDemoType.elevated:
-        buttons = _ElevatedButtonDemo();
-      case ButtonDemoType.outlined:
-        buttons = _OutlinedButtonDemo();
-      case ButtonDemoType.toggle:
-        buttons = _ToggleButtonsDemo();
-      case ButtonDemoType.floating:
-        buttons = _FloatingActionButtonDemo();
-    }
-
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(_title(context)),
       ),
-      body: buttons,
+      body: switch (type) {
+        ButtonDemoType.text     => _TextButtonDemo(),
+        ButtonDemoType.elevated => _ElevatedButtonDemo(),
+        ButtonDemoType.outlined => _OutlinedButtonDemo(),
+        ButtonDemoType.toggle   => _ToggleButtonsDemo(),
+        ButtonDemoType.floating => _FloatingActionButtonDemo(),
+      },
     );
   }
 }

@@ -400,17 +400,12 @@ $factoryDeclaration
 ///
 /// Used by [generateGetter] below.
 String generateType(Map<String, dynamic>? attributes) {
-  bool optional = false;
-  String type = 'String';
-  if (attributes != null) {
-    optional = attributes.containsKey('optional');
-    switch (attributes['x-flutter-type'] as String?) {
-      case 'icuShortTimePattern':
-        type = 'TimeOfDayFormat';
-      case 'scriptCategory':
-        type = 'ScriptCategory';
-    }
-  }
+  final bool optional = attributes?.containsKey('optional') ?? false;
+  final String type = switch (attributes?['x-flutter-type']) {
+    'icuShortTimePattern' => 'TimeOfDayFormat',
+    'scriptCategory' => 'ScriptCategory',
+    _ => 'String',
+  };
   return type + (optional ? '?' : '');
 }
 
