@@ -77,30 +77,6 @@ class _OpenUpwardsPageTransition extends StatefulWidget {
   // Used by all of the transition animations.
   static const Curve _transitionCurve = Cubic(0.20, 0.00, 0.00, 1.00);
 
-  static Widget delegateTransition(BuildContext context, Widget? child, Animation<double> secondaryAnimation) {
-    final Animation<Offset> secondaryTranslationAnimation = _secondaryTranslationTween.animate(
-      CurvedAnimation(
-        parent: secondaryAnimation,
-        curve: _transitionCurve,
-        reverseCurve: _transitionCurve.flipped,
-      ),
-    );
-
-    return AnimatedBuilder(
-      animation: secondaryAnimation,
-      child: FractionalTranslation(
-        translation: secondaryTranslationAnimation.value,
-        child: child,
-      ),
-      builder: (BuildContext context, Widget? child) {
-        return FractionalTranslation(
-          translation: secondaryTranslationAnimation.value,
-          child: child,
-        );
-      },
-    );
-  }
-
   final Animation<double> animation;
   final Animation<double> secondaryAnimation;
   final Widget child;
