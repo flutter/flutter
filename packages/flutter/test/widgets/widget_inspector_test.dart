@@ -3806,7 +3806,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(names, contains('ClockDemo'));
       expect(names, contains('Directionality'));
       expect(names, contains('ClockText'));
-    });
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // [intended] Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector.trackRebuildDirtyWidgets', (WidgetTester tester) async {
       service.rebuildCount = 0;
