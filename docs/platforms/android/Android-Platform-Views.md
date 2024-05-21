@@ -29,9 +29,9 @@ within their Flutter UI.
 # Approaches
 
 There are currently three different implementations of Android platform views:
-- [[Virtual Display]] (VD)
-- [[Hybrid Composition]] (HC)
-- [[Texture Layer Hybrid Composition]] (TLHC)
+- [Virtual Display](Virtual_Display.md) (VD)
+- [Hybrid Composition](https://github.com/flutter/flutter/wiki/Hybrid-Composition) (HC)
+- [Texture Layer Hybrid Composition](Texture-Layer-Hybrid-Composition.md) (TLHC)
 
 Each has a different set of limitations and tradeoffs, as discussed below. The pages linked above give details about each implementation.
 
@@ -39,7 +39,7 @@ Each has a different set of limitations and tradeoffs, as discussed below. The p
 
 This mode works by rendering the platform view into [a `VirtualDisplay`](https://developer.android.com/reference/android/hardware/display/VirtualDisplay), whose contents are connected to [a Flutter `Texture`](https://api.flutter.dev/flutter/widgets/Texture-class.html).
 
-Because this renders to a `Texture`, it integrates well into the Flutter drawing system. However, the use of `VirtualDisplay` introduces a number of compatibility issues, including with text input, accessibility, and secondary views (see [[the Virtual Display page|Virtual Display]] for details).
+Because this renders to a `Texture`, it integrates well into the Flutter drawing system. However, the use of `VirtualDisplay` introduces a number of compatibility issues, including with text input, accessibility, and secondary views (see [the Virtual Display page](Virtual-Display.md) for details).
 
 This display mode requires SDK 20 or later.
 

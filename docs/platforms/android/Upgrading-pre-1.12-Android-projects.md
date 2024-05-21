@@ -2,7 +2,7 @@ _If you `flutter create`d your project prior to version 1.12, this may apply to 
 
 # Background
 
-In order to better support the execution environments of adding Flutter to an existing project, the old Android platform-side wrappers hosting the Flutter runtime at [`io.flutter.app.FlutterActivity`](https://github.com/flutter/engine/blob/master/shell/platform/android/io/flutter/app/FlutterActivity.java) and their associated classes are now deprecated. New wrappers at [`io.flutter.embedding.android.FlutterActivity`](https://github.com/flutter/engine/blob/master/shell/platform/android/io/flutter/embedding/android/FlutterActivity.java) and associated classes now replace them.
+In order to better support the execution environments of adding Flutter to an existing project, the old Android platform-side wrappers hosting the Flutter runtime at [`io.flutter.app.FlutterActivity`](https://github.com/flutter/engine/blob/main/shell/platform/android/io/flutter/app/FlutterActivity.java) and their associated classes are now deprecated. New wrappers at [`io.flutter.embedding.android.FlutterActivity`](https://github.com/flutter/engine/blob/main/shell/platform/android/io/flutter/embedding/android/FlutterActivity.java) and associated classes now replace them.
 
 Those classes better support real world scenarios where the FlutterActivity isn't the first and only Android Activity in an application.
 
