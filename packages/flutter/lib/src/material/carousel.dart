@@ -152,7 +152,7 @@ class Carousel extends StatefulWidget {
   /// The extent the children are forced to have in the main axis.
   final double? itemExtent;
 
-  /// The child widgets for carousel.
+  /// The child widgets for the carousel.
   final List<Widget> children;
 
   @override
@@ -596,12 +596,11 @@ class _CarouselMetrics extends FixedScrollMetrics {
     );
   }
 
-  /// Extent for carousel item.
+  /// Extent for the carousel item.
   ///
   /// Used to compute the first item from the current [pixels].
   final double? itemExtent;
 }
-
 
 class _CarouselPosition extends ScrollPositionWithSingleContext implements _CarouselMetrics {
   _CarouselPosition({

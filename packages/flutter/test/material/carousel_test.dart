@@ -40,7 +40,7 @@ void main() {
     ));
   });
 
-    testWidgets('Carousel items customization', (WidgetTester tester) async {
+  testWidgets('Carousel items customization', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final ThemeData theme = ThemeData();
 
@@ -145,8 +145,6 @@ void main() {
       ),
     );
 
-    // await tester.tap(find.text('Item 1'));
-    // await tester.tap(find.byKey(keys.elementAt(1)));
     final Finder item1 = find.byKey(keys.elementAt(1));
     await tester.tap(find.ancestor(of: item1, matching: find.byType(Stack)));
     await tester.pump();
@@ -174,7 +172,7 @@ void main() {
       )
     );
 
-    final Size viewportSize = MediaQuery.of(tester.element(find.byType(Carousel))).size;
+    final Size viewportSize = MediaQuery.sizeOf(tester.element(find.byType(Carousel)));
     expect(viewportSize, const Size(800, 600));
 
     expect(find.text('Item 0'), findsOneWidget);
@@ -213,7 +211,7 @@ void main() {
       )
     );
 
-    final Size viewportSize = MediaQuery.of(tester.element(find.byType(Carousel))).size;
+    final Size viewportSize = MediaQuery.sizeOf(tester.element(find.byType(Carousel)));
     expect(viewportSize, const Size(800, 600));
 
     expect(find.text('Item 5'), findsOneWidget);
@@ -229,6 +227,7 @@ void main() {
     expect(find.text('Item 4'), findsNothing);
     expect(find.text('Item 7'), findsNothing);
   });
+
   testWidgets('Carousel respects itemSnapping', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
