@@ -347,6 +347,8 @@ class CupertinoPage<T> extends Page<T> {
     this.title,
     this.fullscreenDialog = false,
     this.allowSnapshotting = true,
+    super.canPop,
+    super.onPopInvoked,
     super.key,
     super.name,
     super.arguments,
@@ -1094,7 +1096,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   @override
   Duration get transitionDuration => _kModalPopupTransitionDuration;
 
-  Animation<double>? _animation;
+  CurvedAnimation? _animation;
 
   late Tween<Offset> _offsetTween;
 
@@ -1139,6 +1141,12 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
         child: child,
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _animation?.dispose();
+    super.dispose();
   }
 }
 

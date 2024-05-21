@@ -1,0 +1,1 @@
+See https://docs.flutter.dev/development/platform-integration/android/plugin-api-migration for the final version of this document.
