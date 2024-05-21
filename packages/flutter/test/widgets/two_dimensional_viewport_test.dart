@@ -732,8 +732,7 @@ void main() {
     });
 
     testWidgets('Ensure KeepAlive widget is not held onto when it no longer should be kept alive offscreen', (WidgetTester tester) async {
-      // Should not trigger assert in RenderTwoDimensionalViewport.performLayout
-      // after child manager end layout. (https://github.com/flutter/flutter/issues/138977)
+      // Regression test for https://github.com/flutter/flutter/issues/138977
       final UniqueKey checkBoxKey = UniqueKey();
       final Widget originCell = KeepAliveOnlyWhenHovered(
         key: checkBoxKey,
