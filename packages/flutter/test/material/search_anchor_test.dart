@@ -3233,6 +3233,42 @@ void main() {
 
     expect(suggestionsBuilderCalledCount, 2);
   });
+
+  testWidgets('Suggestions gets refreshed after long API call', (WidgetTester tester) async {
+    Timer? debounceTimer;
+    const apiCallDuration = Duration(seconds: 1);
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: SearchAnchor(
+            builder: (BuildContext context, SearchController controller) {
+              return const Icon(Icons.search);
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) async {
+              Completer<List<String>> completer = Completer();
+              debounceTimer?.cancel();
+              debounceTimer = Timer(apiCallDuration, () {
+                completer.complete(List.generate(10, (index) => 'Item - $index'));
+              });
+              List<String> options = await completer.future;
+
+              final suggestions = List<ListTile>.generate(options.length, (int index) {
+                final String item = options[index];
+                return ListTile(
+                  title: Text(item),
+                );
+              });
+              return suggestions;
+            },
+          ),
+        ),
+      ),
+    ));
+    // await tester.pump();
+    await tester.tap(find.byIcon(Icons.search)); // Open search view.
+    await tester.pumpAndSettle(apiCallDuration);
+    expect(find.text('Item - 1'), findsOneWidget);
+  });
 }
 
 Future<void> checkSearchBarDefaults(WidgetTester tester, ColorScheme colorScheme, Material material) async {
