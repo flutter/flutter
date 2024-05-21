@@ -247,6 +247,13 @@ void testMain() {
       ]);
     });
 
+    // https://github.com/flutter/flutter/issues/148797
+    test('can find Tibetan script glyphs (Dzongkha)', () async {
+      await checkDownloadedFamiliesForString('འཛམ་གླིང་སྤྱི་ཚོགས', <String>[
+        'Noto Serif Tibetan',
+      ]);
+    });
+
     test('findMinimumFontsForCodePoints for all supported code points',
         () async {
       // Collect all supported code points from all fallback fonts in the Noto
@@ -418,6 +425,7 @@ void testMain() {
             'Noto Sans Warang Citi',
             'Noto Sans Yi',
             'Noto Sans Zanabazar Square',
+            'Noto Serif Tibetan',
           }));
 
       // Construct random paragraphs out of supported code points.

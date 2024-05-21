@@ -473,6 +473,7 @@ const List<String> fallbackFonts = <String>[
   'Noto Sans Warang Citi',
   'Noto Sans Yi',
   'Noto Sans Zanabazar Square',
+  'Noto Serif Tibetan',
 ];
 
 bool _checkForLicenseAttribution(Uint8List fontBytes) {
