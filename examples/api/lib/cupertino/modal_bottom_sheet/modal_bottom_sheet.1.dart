@@ -418,6 +418,11 @@ mixin MBSRouteTransitionMixin<T> on PageRoute<T> {
   }
 
   @override
+  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
+    return nextRoute is MBSRouteTransitionMixin;
+  }
+
+  @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     return buildPageTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
