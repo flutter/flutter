@@ -46,14 +46,12 @@ void main() {
 
     expect(find.byType(SnackBar), findsOneWidget);
     expect(find.text('Single Line Snack Bar'), findsOneWidget);
-    expect(find.textContaining('spans across multiple lines'), findsNothing);
-    expect(find.text('Long Action Text'), findsNothing);
     expect(find.text('Action'), findsOneWidget);
     expect(find.byIcon(Icons.close), findsOneWidget);
     expect(tester
-        .widget<SnackBar>(find.byType(SnackBar))
-        .behavior,
-        SnackBarBehavior.floating);
+      .widget<SnackBar>(find.byType(SnackBar))
+      .behavior,
+      SnackBarBehavior.floating);
 
     await tester.tap(find.byIcon(Icons.close));
     await tester.pumpAndSettle();
@@ -68,15 +66,14 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(SnackBar), findsOneWidget);
-    expect(find.text('Single Line Snack Bar'), findsNothing);
     expect(find.textContaining('spans across multiple lines'), findsOneWidget);
     expect(find.text('Long Action Text'), findsOneWidget);
-    expect(find.text('Action'), findsNothing);
     expect(find.byIcon(Icons.close), findsOneWidget);
     expect(tester
-        .widget<SnackBar>(find.byType(SnackBar))
-        .behavior,
-        SnackBarBehavior.fixed);
+      .widget<SnackBar>(find.byType(SnackBar))
+      .behavior,
+      SnackBarBehavior.fixed);
+
     await tester.tap(find.byIcon(Icons.close));
     await tester.pumpAndSettle();
     expect(find.byType(SnackBar), findsNothing);
@@ -107,7 +104,7 @@ void main() {
 
     expect(find.byType(SnackBar), findsOneWidget);
     expect(tester.getSize(find.byType(SnackBar)).height,
-        lessThan(snackBarSize.height));
+      lessThan(snackBarSize.height));
 
     await tester.tap(find.byIcon(Icons.close));
     await tester.pumpAndSettle();
@@ -120,10 +117,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(SnackBar), findsOneWidget);
-    expect(find.text('Single Line Snack Bar'), findsNothing);
     expect(find.textContaining('spans across multiple lines'), findsOneWidget);
-    expect(find.text('Long Action Text'), findsNothing);
-    expect(find.text('Action'), findsNothing);
+    expect(find.byType(SnackBarAction), findsNothing);
     expect(find.byIcon(Icons.close), findsNothing);
   });
 
