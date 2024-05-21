@@ -1,8 +1,8 @@
-_See also: [[Hybrid Composition|Hybrid Composition#Android]]_
+_See also: [Hybrid Composition|Hybrid Composition#Android](https://github.com/flutter/flutter/wiki/Hybrid-Composition)_
 
 # Background
 
-Texture Layer Hybrid Composition (TLHC) is one of several modes for displaying platform views on Android. See [Android Platform Views](https://github.com/flutter/flutter/wiki/Android-Platform-Views) for an overview of modes.
+Texture Layer Hybrid Composition (TLHC) is one of several modes for displaying platform views on Android. See [Android Platform Views](Android-Platform-Views.md) for an overview of modes.
 
 It was introduced in Flutter 3.0 to combine the best aspects of Virtual Display and Hybrid Composition while addressing their most significant issues. While it was originally intended to replace both, it turned out to have some limitations that prevented serving as a complete replacement, so is now a third option.
 
