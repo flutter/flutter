@@ -183,7 +183,7 @@ void main() {
     // framework, excluding any that are for the widget inspector (see
     // widget_inspector_test.dart for tests of the ext.flutter.inspector service
     // extensions). Any test counted here must be tested in this file!
-    const int serviceExtensionCount = 31;
+    const int serviceExtensionCount = 30;
 
     expect(binding.extensions.length, serviceExtensionCount + widgetInspectorExtensionCount - disabledExtensions);
     expect(testedExtensions, hasLength(serviceExtensionCount));
