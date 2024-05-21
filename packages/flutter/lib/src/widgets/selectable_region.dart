@@ -211,11 +211,12 @@ class SelectableRegion extends StatefulWidget {
   const SelectableRegion({
     super.key,
     this.contextMenuBuilder,
+    this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
+    this.onSelectionChanged,
+    this.controller,
     required this.focusNode,
     required this.selectionControls,
     required this.child,
-    this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
-    this.onSelectionChanged,
   });
 
   /// The configuration for the magnifier used with selections in this region.
@@ -247,6 +248,10 @@ class SelectableRegion extends StatefulWidget {
 
   /// Called when the selected content changes.
   final ValueChanged<SelectedContent?>? onSelectionChanged;
+
+  /// An optional controller to clear or select all contents under this
+  /// [SelectableRegion].
+  final SelectionController? controller;
 
   /// Returns the [ContextMenuButtonItem]s representing the buttons in this
   /// platform's default selection menu.
@@ -370,6 +375,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void initState() {
     super.initState();
     widget.focusNode.addListener(_handleFocusChanged);
+    widget.controller?.addListener(_handleSelectionEventReceived);
     _initMouseGestureRecognizer();
     _initTouchGestureRecognizer();
     // Right clicks.
@@ -380,6 +386,26 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       },
     );
     _initProcessTextActions();
+  }
+
+  void _handleSelectionEventReceived() {
+    final SelectionEvent? event = widget.controller?._lastSelectionEvent;
+    if (event == null) {
+      return;
+    }
+    switch (event.type) {
+      case SelectionEventType.clear:
+        _clearSelection();
+      case SelectionEventType.selectAll:
+        selectAll();
+      case SelectionEventType.startEdgeUpdate:
+      case SelectionEventType.endEdgeUpdate:
+      case SelectionEventType.selectWord:
+      case SelectionEventType.selectParagraph:
+      case SelectionEventType.granularlyExtendSelection:
+      case SelectionEventType.directionallyExtendSelection:
+        break;
+    }
   }
 
   /// Query the engine to initialize the list of text processing actions to show
@@ -2847,3 +2873,27 @@ typedef SelectableRegionContextMenuBuilder = Widget Function(
   BuildContext context,
   SelectableRegionState selectableRegionState,
 );
+
+/// A controller for a [SelectionArea] or [SelectableRegion].
+///
+/// Utilize this controller to programatically clear the content of a
+/// [SelectionArea] or [SelectableRegion], or select all the contents under it.
+class SelectionController with ChangeNotifier {
+  /// The last [SelectionEvent] provided to this controller.
+  SelectionEvent? _lastSelectionEvent;
+
+  /// Call this method to clear the selection under the [SelectionArea] or
+  /// [SelectableRegion].
+  void clear() {
+    _lastSelectionEvent = const ClearSelectionEvent();
+    notifyListeners();
+  }
+
+  /// Call this method to select all content under the [SelectionArea] or
+  /// [SelectableRegion].
+  void selectAll() {
+    _lastSelectionEvent = const SelectAllSelectionEvent();
+    notifyListeners();
+  }
+}
+
