@@ -63,6 +63,7 @@ void main() {
               if (states.contains(WidgetState.focused)) {
                 return Colors.purple;
               }
+              return null;
             }),
             itemExtent: 200,
             children: List<Widget>.generate(10, (int index) {

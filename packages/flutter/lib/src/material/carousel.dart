@@ -378,7 +378,7 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
   }
 
   // This implements the [itemExtentBuilder] callback.
-  double _buildItemExtent(int index, SliverLayoutDimensions currentLayoutDimensions) {
+  double _buildItemExtent(int index, SliverLayoutDimensions _currentLayoutDimensions) {
     final int firstVisibleIndex = (constraints.scrollOffset / maxExtent).floor();
 
     // Calculate how many items have been completely scroll off screen.
@@ -409,6 +409,8 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
     return maxExtent;
   }
 
+  late SliverLayoutDimensions _currentLayoutDimensions;
+
   /// The layout offset for the child with the given index.
   @override
   double indexToLayoutOffset(
@@ -426,7 +428,7 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
     // least the remaining extent to make sure a smooth size transition.
     final double effectiveMinExtent = math.max(constraints.remainingPaintExtent % maxExtent, minExtent);
     if (index == firstVisibleIndex) {
-      final double firstVisibleItemExtent = _buildItemExtent(index, currentLayoutDimensions);
+      final double firstVisibleItemExtent = _buildItemExtent(index, _currentLayoutDimensions);
 
       // If the first item is squished to be less than `effectievMinExtent`,
       // then it should stop changinng its size and should start to scroll off screen.
@@ -731,12 +733,11 @@ class CarouselController extends ScrollController {
   ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition) {
     assert(_carouselState != null);
     final double? itemExtent = _carouselState!.itemExtent;
-    int expandedItem = initialItem;
 
     return _CarouselPosition(
       physics: physics,
       context: context,
-      initialItem: expandedItem,
+      initialItem: initialItem,
       itemExtent: itemExtent!,
       oldPosition: oldPosition,
     );
