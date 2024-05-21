@@ -731,7 +731,7 @@ void main() {
       );
     });
 
-    testWidgets('ensure keep alive widget is not hold onto when it no longer should be kept alive offscreen', (WidgetTester tester) async {
+    testWidgets('Ensure KeepAlive widget is not held onto when it no longer should be kept alive offscreen', (WidgetTester tester) async {
       // Should not trigger assert in RenderTwoDimensionalViewport.performLayout
       // after child manager end layout. (https://github.com/flutter/flutter/issues/138977)
       final UniqueKey checkBoxKey = UniqueKey();
