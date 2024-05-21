@@ -88,7 +88,7 @@ String? iOSSimulatorId() {
   if (res != null) {
     return res;
   }
-  processManager.runSync([
+  processManager.runSync(<String>[
     'flutter',
     'emulators',
     '--launch',
@@ -105,7 +105,7 @@ void main() {
 
   final List<String> testDevices = List<String>.of(devices);
   if (platform.isMacOS) {
-    final String ? simulator = iOSSimulatorId();
+    final String? simulator = iOSSimulatorId();
     if (simulator != null) {
       testDevices.add(simulator);
     } else {
