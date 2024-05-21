@@ -39,9 +39,6 @@ class MockCupertinoTabController extends CupertinoTabController {
 }
 
 void main() {
-  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
-  // LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
-
   setUp(() {
     selectedTabs = <int>[];
   });
