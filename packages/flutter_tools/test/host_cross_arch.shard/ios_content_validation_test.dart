@@ -80,6 +80,7 @@ void main() {
 
     for (final BuildMode buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
       group('build in ${buildMode.cliName} mode', () {
+        late Directory frameworkArtifact;
         late Directory outputPath;
         late Directory outputApp;
         late Directory frameworkDirectory;
@@ -94,6 +95,20 @@ void main() {
         late ProcessResult buildResult;
 
         setUpAll(() {
+          frameworkArtifact = fileSystem.directory(
+            fileSystem.path.joinAll(<String>[
+              flutterRoot,
+              'bin',
+              'cache',
+              'artifacts',
+              'engine',
+              if (buildMode == BuildMode.debug) 'ios' else 'ios-release',
+              'Flutter.xcframework',
+              'ios-arm64',
+              'Flutter.framework',
+            ]),
+          );
+
           buildResult = processManager.runSync(<String>[
             flutterBin,
             ...getLocalEngineArguments(),
@@ -136,6 +151,10 @@ void main() {
         });
 
         testWithoutContext('flutter build ios builds a valid app', () {
+          // Check read/write permissions are set correctly in the framework engine artifact.
+          final String statString = frameworkArtifact.statSync().mode.toRadixString(8);
+          expect(statString, '4755');
+
           printOnFailure('Output of flutter build ios:');
           printOnFailure(buildResult.stdout.toString());
           printOnFailure(buildResult.stderr.toString());
@@ -463,10 +482,9 @@ void main() {
       );
       expect(appCodesign, const ProcessResultMatcher());
 
-      // Check read/write permissions are being correctly set
-      final String rawStatString = flutterFrameworkDir.statSync().modeString();
-      final String statString = rawStatString.substring(rawStatString.length - 9);
-      expect(statString, 'rwxr-xr-x');
+      // Check read/write permissions are being correctly set.
+      final String statString = flutterFrameworkDir.statSync().mode.toRadixString(8);
+      expect(statString, '40755');
     });
   }, skip: !platform.isMacOS, // [intended] only makes sense for macos platform.
      timeout: const Timeout(Duration(minutes: 10))

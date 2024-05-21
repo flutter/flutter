@@ -60,6 +60,23 @@ void main() {
     final String buildModeLower = buildMode.toLowerCase();
 
     test('flutter build macos --$buildModeLower builds a valid app', () {
+      final Directory frameworkArtifact = fileSystem.directory(
+        fileSystem.path.joinAll(<String>[
+          getFlutterRoot(),
+          'bin',
+          'cache',
+          'artifacts',
+          'engine',
+          if (buildMode == 'Debug') 'darwin-x64' else 'darwin-x64-release',
+          'FlutterMacOS.xcframework',
+          'macos-arm64_x86_64',
+          'FlutterMacOS.framework',
+        ]),
+      );
+      // Check read/write permissions are set correctly in the framework engine artifact.
+      final String statString = frameworkArtifact.statSync().mode.toRadixString(8);
+      expect(statString, '4755');
+
       final String workingDirectory = fileSystem.path.join(
         getFlutterRoot(),
         'dev',
@@ -164,10 +181,9 @@ void main() {
         ),
       );
 
-      // Check read/write permissions are being correctly set
-      final String rawStatString = outputFlutterFramework.statSync().modeString();
-      final String statString = rawStatString.substring(rawStatString.length - 9);
-      expect(statString, 'rwxr-xr-x');
+      // Check read/write permissions are being correctly set.
+      final String statString = outputFlutterFramework.statSync().mode.toRadixString(8);
+      expect(statString, '40755');
 
       // Check complicated macOS framework symlink structure.
       final Link current = outputFlutterFramework.childDirectory('Versions').childLink('Current');
