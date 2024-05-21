@@ -47,7 +47,6 @@ import 'package:gen_defaults/radio_template.dart';
 import 'package:gen_defaults/search_bar_template.dart';
 import 'package:gen_defaults/search_view_template.dart';
 import 'package:gen_defaults/segmented_button_template.dart';
-import 'package:gen_defaults/slider_template.dart';
 import 'package:gen_defaults/snackbar_template.dart';
 import 'package:gen_defaults/surface_tint.dart';
 import 'package:gen_defaults/switch_template.dart';
