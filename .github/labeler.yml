@@ -152,7 +152,6 @@ team-ecosystem:
   - changed-files:
     - any-glob-to-any-file:
       - docs/ecosystem/**/*
-      
 team-engine:
   - changed-files:
     - any-glob-to-any-file:
