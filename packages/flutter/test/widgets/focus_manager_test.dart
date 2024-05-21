@@ -1499,7 +1499,9 @@ void main() {
 
     testWidgets('Scopes can be focused without sending focus to descendants.', (WidgetTester tester) async {
       final FocusScopeNode scopeNode = FocusScopeNode(debugLabel: 'Scope1',);
+      addTearDown(scopeNode.dispose);
       final FocusNode childFocusNode = FocusNode(debugLabel: 'Child1',);
+      addTearDown(childFocusNode.dispose);
       await tester.pumpWidget(
         FocusScope.withExternalFocusNode(
           focusScopeNode: scopeNode,
