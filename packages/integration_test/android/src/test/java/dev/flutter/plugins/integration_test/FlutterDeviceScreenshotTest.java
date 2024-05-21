@@ -8,7 +8,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import org.mockito.MockedStatic;
@@ -24,12 +23,11 @@ import io.flutter.embedding.android.FlutterFragment;
 import io.flutter.embedding.android.FlutterFragmentActivity;
 import io.flutter.embedding.android.FlutterView;
 
-//@RunWith(AndroidJUnit4.class)
 public class FlutterDeviceScreenshotTest extends AndroidJUnitRunner {
     @Test
     public void getFlutterView_returnsNullForNonFlutterActivity() {
         Activity mockActivity = mock(Activity.class);
-        assertNotNull(FlutterDeviceScreenshot.getFlutterView(mockActivity));
+        assertNull(FlutterDeviceScreenshot.getFlutterView(mockActivity));
     }
 
     @Test
