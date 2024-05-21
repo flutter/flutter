@@ -207,6 +207,7 @@ void main() {
           switch (buildSubcommand) {
             case 'macos':
               expectDylibIsBundledMacOS(exampleDirectory, buildMode);
+              expectDylibIsCodeSignedMacOS(exampleDirectory, buildMode);
             case 'ios':
               expectDylibIsBundledIos(exampleDirectory, buildMode);
             case 'linux':
@@ -288,6 +289,24 @@ void main() {
       });
     });
   }
+}
+
+void expectDylibIsCodeSignedMacOS(Directory appDirectory, String buildMode) {
+  final Directory appBundle = appDirectory.childDirectory('build/$hostOs/Build/Products/${buildMode.upperCaseFirst()}/$exampleAppName.app');
+  final Directory frameworksFolder = appBundle.childDirectory('Contents/Frameworks');
+  expect(frameworksFolder, exists);
+  const String frameworkName = packageName;
+  final Directory frameworkDir = frameworksFolder.childDirectory('$frameworkName.framework');
+  final ProcessResult codesign =
+      processManager.runSync(<String>['codesign', '-dv', frameworkDir.absolute.path]);
+  expect(codesign.exitCode, 0);
+
+  // Expect adhoc signature, but not linker-signed (which would mean no code-signing happened after linking).
+  final List<String> lines = codesign.stderr.toString().split('\n');
+  final bool isLinkerSigned = lines.any((String line) => line.contains('linker-signed'));
+  final bool isAdhoc = lines.any((String line) => line.contains('Signature=adhoc'));
+  expect(isAdhoc, isTrue);
+  expect(isLinkerSigned, isFalse);
 }
 
 /// For `flutter build` we can't easily test whether running the app works.

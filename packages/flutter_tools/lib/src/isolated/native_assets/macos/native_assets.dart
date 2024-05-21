@@ -304,7 +304,12 @@ Future<void> _copyNativeAssetsMacOS(
       ));
       await setInstallNameDylib(dylibFile);
       await createInfoPlist(name, resourcesDir);
-      await codesignDylib(codesignIdentity, buildMode, frameworkDir);
+      // Do not code-sign the libraries here with identity. Code-signing
+      // for bundled dylibs is done in `macos_assemble.sh embed` because the
+      // "Flutter Assemble" target does not have access to the signing identity.
+      if (codesignIdentity != null) {
+        await codesignDylib(codesignIdentity, buildMode, frameworkDir);
+      }
     }
     globals.logger.printTrace('Copying native assets done.');
   }

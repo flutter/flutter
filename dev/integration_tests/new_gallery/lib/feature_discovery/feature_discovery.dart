@@ -287,10 +287,14 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery>
         setState(() {});
       })
       ..addStatusListener((AnimationStatus animationStatus) {
-        if (animationStatus == AnimationStatus.forward) {
-          setState(() => status = FeatureDiscoveryStatus.open);
-        } else if (animationStatus == AnimationStatus.completed) {
-          rippleController.forward(from: 0.0);
+        switch (animationStatus) {
+          case AnimationStatus.forward:
+            setState(() => status = FeatureDiscoveryStatus.open);
+          case AnimationStatus.completed:
+            rippleController.forward(from: 0.0);
+          case AnimationStatus.reverse:
+          case AnimationStatus.dismissed:
+            break;
         }
       });
 
@@ -302,10 +306,14 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery>
         setState(() {});
       })
       ..addStatusListener((AnimationStatus animationStatus) {
-        if (animationStatus == AnimationStatus.forward) {
-          setState(() => status = FeatureDiscoveryStatus.ripple);
-        } else if (animationStatus == AnimationStatus.completed) {
-          rippleController.forward(from: 0.0);
+        switch (animationStatus) {
+          case AnimationStatus.forward:
+            setState(() => status = FeatureDiscoveryStatus.ripple);
+          case AnimationStatus.completed:
+            rippleController.forward(from: 0.0);
+          case AnimationStatus.reverse:
+          case AnimationStatus.dismissed:
+            break;
         }
       });
 
@@ -317,11 +325,15 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery>
         setState(() {});
       })
       ..addStatusListener((AnimationStatus animationStatus) {
-        if (animationStatus == AnimationStatus.forward) {
-          setState(() => status = FeatureDiscoveryStatus.tap);
-        } else if (animationStatus == AnimationStatus.completed) {
-          widget.onTap?.call();
-          cleanUponOverlayClose();
+        switch (animationStatus) {
+          case AnimationStatus.forward:
+            setState(() => status = FeatureDiscoveryStatus.tap);
+          case AnimationStatus.completed:
+            widget.onTap?.call();
+            cleanUponOverlayClose();
+          case AnimationStatus.reverse:
+          case AnimationStatus.dismissed:
+            break;
         }
       });
 
@@ -333,11 +345,15 @@ class _FeatureDiscoveryState extends State<FeatureDiscovery>
         setState(() {});
       })
       ..addStatusListener((AnimationStatus animationStatus) {
-        if (animationStatus == AnimationStatus.forward) {
-          setState(() => status = FeatureDiscoveryStatus.dismiss);
-        } else if (animationStatus == AnimationStatus.completed) {
-          widget.onDismiss?.call();
-          cleanUponOverlayClose();
+        switch (animationStatus) {
+          case AnimationStatus.forward:
+            setState(() => status = FeatureDiscoveryStatus.dismiss);
+          case AnimationStatus.completed:
+            widget.onDismiss?.call();
+            cleanUponOverlayClose();
+          case AnimationStatus.reverse:
+          case AnimationStatus.dismissed:
+            break;
         }
       });
   }
