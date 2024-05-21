@@ -378,7 +378,7 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
   }
 
   // This implements the [itemExtentBuilder] callback.
-  double _buildItemExtent(int index, SliverLayoutDimensions _currentLayoutDimensions) {
+  double _buildItemExtent(int index, SliverLayoutDimensions currentLayoutDimensions) {
     final int firstVisibleIndex = (constraints.scrollOffset / maxExtent).floor();
 
     // Calculate how many items have been completely scroll off screen.
