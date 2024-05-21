@@ -3656,23 +3656,30 @@ int _toLocationId(_Location location) {
   return id;
 }
 
+const idsKey = 'ids';
+const linesKey = 'lines';
+const columnsKey = 'columns';
+const namesKey = 'names';
+
 Map<String, dynamic> _locationIdMapToJson() {
-  final Map<String, Map<String, List<Object?>>> fileLocationsMap = <String, Map<String, List<Object?>>>{};
+  final Map<String, Map<String, List<Object?>>> fileLocationsMap =
+      <String, Map<String, List<Object?>>>{};
   for (final MapEntry<_Location, int> entry in _locationToId.entries) {
     final _Location location = entry.key;
     final Map<String, List<Object?>> locations = fileLocationsMap.putIfAbsent(
-      location.file, () => <String, List<Object?>>{
-      'ids': <int>[],
-      'lines': <int>[],
-      'columns': <int>[],
-      'names': <String?>[],
-    },
+      location.file,
+      () => <String, List<Object?>>{
+        idsKey: <int>[],
+        linesKey: <int>[],
+        columnsKey: <int>[],
+        namesKey: <String?>[],
+      },
     );
 
-    locations['ids']!.add(entry.value);
-    locations['lines']!.add(location.line);
-    locations['columns']!.add(location.column);
-    locations['names']!.add(location.name);
+    locations[idsKey]!.add(entry.value);
+    locations[linesKey]!.add(location.line);
+    locations[columnsKey]!.add(location.column);
+    locations[namesKey]!.add(location.name);
   }
   return fileLocationsMap;
 }
