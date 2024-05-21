@@ -47,6 +47,10 @@ void main() {
     selectedTabs = <int>[];
   });
 
+  tearDownAll(() {
+    imageCache.clear();
+  });
+
   BottomNavigationBarItem tabGenerator(int index) {
     return BottomNavigationBarItem(
       icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
@@ -687,8 +691,6 @@ void main() {
 
     // Tapping the tabs should still work.
     expect(tabsPainted, const <int>[0, 0, 18]);
-
-    imageCache.clear();
   });
 
   testWidgets(
