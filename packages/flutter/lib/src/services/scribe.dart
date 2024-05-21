@@ -55,8 +55,8 @@ class Scribe {
   /// This is typically called after detecting the start of stylus input.
   ///
   /// Supported on Android API 33 and above.
-  static void startStylusHandwriting() {
-    _instance._channel.invokeMethod<void>(
+  static Future<void> startStylusHandwriting() {
+    return _instance._channel.invokeMethod<void>(
       'Scribe.startStylusHandwriting',
     );
   }
