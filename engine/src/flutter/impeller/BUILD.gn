@@ -30,10 +30,6 @@ config("impeller_public_config") {
     defines += [ "IMPELLER_ENABLE_VULKAN=1" ]
   }
 
-  if (impeller_trace_all_gl_calls) {
-    defines += [ "IMPELLER_TRACE_ALL_GL_CALLS" ]
-  }
-
   if (is_win) {
     defines += [
       # TODO(dnfield): https://github.com/flutter/flutter/issues/50053
