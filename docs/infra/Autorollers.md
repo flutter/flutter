@@ -20,7 +20,7 @@ The rollers work by updating a [CIPD](https://chrome-infra-packages.appspot.com/
 
 We use an auto-roller for Skia rolls. It's status can be viewed at <https://skia-flutter-roll.skia.org/>. In case of  build failures or other errors, ping the Flutter-Skia chat channel. In case you get no response, you can login with an @google.com account and pause the roller (or ask someone with an @google.com account to do so). Please specify a descriptive reason and file a bug to re-enable the rollers as soon as possible.
 
-The bot updates the `skia_revision` line of <https://github.com/flutter/engine/blob/master/DEPS>.
+The bot updates the `skia_revision` line of <https://github.com/flutter/engine/blob/main/DEPS>.
 
 Skia also uses an auto-roller for Fuchsia; see <https://autoroll-internal.skia.org/r/fuchsia-autoroll>.
 
@@ -28,7 +28,7 @@ Skia also uses an auto-roller for Fuchsia; see <https://autoroll-internal.skia.o
 
 The engine is automatically rolled to the framework. It is configured by <https://skia.googlesource.com/skia-autoroll-internal-config.git/+/main/skia-infra-public/flutter-engine-flutter.cfg>.
 
-The bot updates <https://github.com/flutter/flutter/blob/master/bin/internal/engine.version> to point to the latest revision of the engine *whose artifacts built successfully*, as determined by looking at the [Engine Console](https://ci.chromium.org/p/flutter/g/engine/console).
+The bot updates <https://github.com/flutter/flutter/blob/main/bin/internal/engine.version> to point to the latest revision of the engine *whose artifacts built successfully*, as determined by looking at the [Engine Console](https://ci.chromium.org/p/flutter/g/engine/console).
 
 
 ### Making a breaking change
@@ -41,7 +41,7 @@ To roll the engine manually in the case you have a breaking change exemption, yo
 
 When you change the `engine.version` file locally, you should delete `$FLUTTER_ROOT/bin/cache` and then run `flutter precache` to ensure that all your local artifacts and snapshots are updated. You can then run tests and be sure that they are running against the latest version of the assets you need.
 
-You may find it helpful to use the [`$ENGINE_ROOT/src/flutter/tools/engine_roll_pr_desc.sh`](https://github.com/flutter/engine/blob/master/tools/engine_roll_pr_desc.sh) to create a PR description. Doing this helps us track down what commits have rolled in more quickly, and properly link to other commits and pull requests for commenting and tracking.
+You may find it helpful to use the [`$ENGINE_ROOT/src/flutter/tools/engine_roll_pr_desc.sh`](https://github.com/flutter/engine/blob/main/tools/engine_roll_pr_desc.sh) to create a PR description. Doing this helps us track down what commits have rolled in more quickly, and properly link to other commits and pull requests for commenting and tracking.
 
 For example, to generate a description from hash deadbeef to beefdead:
 
@@ -49,7 +49,7 @@ For example, to generate a description from hash deadbeef to beefdead:
 $ ./tools/engine_roll_pr_desc.sh deadbeef..beefdead
 ```
 
-_See also: [[Debugging the engine]], which includes instructions on bisecting a roll failure._
+_See also: [Debugging the engine](https://github.com/flutter/flutter/wiki/Debugging-the-engine), which includes instructions on bisecting a roll failure._
 
 
 ## Dart to Engine
@@ -61,6 +61,6 @@ If there are any issues with this process or the autoroller dashboard, contact b
 ## Flutter Pub Roller
 
 The bot account [flutter-pub-roller-bot](https://github.com/flutter-pub-roller-bot) runs the script at
-https://github.com/flutter/flutter/blob/master/dev/conductor/bin/packages_autoroller on post-submit of
+https://github.com/flutter/flutter/blob/main/dev/conductor/bin/packages_autoroller on post-submit of
 every framework commit to keep the pub dependencies in the [framework](https://github.com/flutter/flutter)
 up to date.
