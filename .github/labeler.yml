@@ -157,6 +157,11 @@ team-engine:
     - any-glob-to-any-file:
       - docs/engine/**/*
 
+team-infra:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/infra/**/*
+
 team-release:
   - changed-files:
     - any-glob-to-any-file:
