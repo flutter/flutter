@@ -47,6 +47,10 @@ void main() {
     selectedTabs = <int>[];
   });
 
+  tearDown(() {
+    imageCache.clear();
+  });
+
   BottomNavigationBarItem tabGenerator(int index) {
     return BottomNavigationBarItem(
       icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
@@ -632,7 +636,9 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/33455
-  testWidgets('Adding new tabs does not crash the app', (WidgetTester tester) async {
+  testWidgets('Adding new tabs does not crash the app',
+  experimentalLeakTesting: LeakTesting.settings.withTrackedAll(),
+  (WidgetTester tester) async {
     final List<int> tabsPainted = <int>[];
     final CupertinoTabController controller = CupertinoTabController();
     addTearDown(controller.dispose);
