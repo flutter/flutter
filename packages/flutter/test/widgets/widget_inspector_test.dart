@@ -3792,7 +3792,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
           locationMapJson[file]! as Map<String, Object?>;
       expect(widgetTestLocations, isNotNull);
 
-      const expectedCount = 9;
+      const int expectedCount = 9;
       final List<dynamic> ids = widgetTestLocations['ids']! as List<dynamic>;
       expect(ids.length, expectedCount);
       final List<dynamic> lines =
