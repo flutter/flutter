@@ -32,7 +32,8 @@ class Entity {
     /// rather than local space, and so some filters (namely,
     /// MatrixFilterContents) need to interpret the given EffectTransform as the
     /// current transform matrix.
-    kSubpass,
+    kSubpassAppendSnapshotTransform,
+    kSubpassPrependSnapshotTransform,
   };
 
   /// An enum to define how to repeat, fold, or omit colors outside of the
