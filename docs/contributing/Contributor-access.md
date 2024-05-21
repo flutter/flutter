@@ -2,29 +2,29 @@ For people who make the occasional contribution to Flutter (filing an issue, sub
 
 We grant commit access (which includes full rights to the issue database, such as being able to edit labels, and grants access to our internal chat channels) to people who have gained our trust and demonstrated a commitment to Flutter.
 
-Specifically, if you meet one of the following criteria and you have a sponsor (someone who already has contributor access and agrees that you should be granted access), then please ask your sponsor to propose, on the #server-support [[chat]] channel, that you be made a member of the team, and then reply to that message explaining which criteria below you are claiming to meet. The possible criteria are:
+Specifically, if you meet one of the following criteria and you have a sponsor (someone who already has contributor access and agrees that you should be granted access), then please ask your sponsor to propose, on the #server-support [Chat](Chat.md) channel, that you be made a member of the team, and then reply to that message explaining which criteria below you are claiming to meet. The possible criteria are:
 
-* You have a long history of participating productively, e.g. in our [[chat]] channels, helping with [[Triage]], helping other contributors track down problems, finding meaningful issues in submitted PRs, helping people in our #help channel, etc, all while demonstrating exemplary behavior that closely aligns with our [code of conduct](https://github.com/flutter/flutter/blob/master/CODE_OF_CONDUCT.md).
+* You have a long history of participating productively, e.g. in our [Chat](Chat.md) channels, helping with [Triage](https://github.com/flutter/flutter/wiki/Triage), helping other contributors track down problems, finding meaningful issues in submitted PRs, helping people in our #help channel, etc, all while demonstrating exemplary behavior that closely aligns with our [code of conduct](https://github.com/flutter/flutter/blob/main/CODE_OF_CONDUCT.md).
 * You have recently submitted several PRs that have landed successfully (received an LGTM, PR was merged, no regressions reported, PR was not reverted), without needing extensive tutoring in the process.
 * You are employed by a company with a history of contributing to Flutter, for the purpose of yourself regularly contributing to Flutter.
-* You represent a development team that creates applications, plugins, or packages using Flutter and have a close relationship with our developer relations team, including having a customer label, and have a great need to regularly update labels on issues (see [Issue hygiene, Customers](https://github.com/flutter/flutter/wiki/Issue-hygiene#customers)). (This is rare.)
+* You represent a development team that creates applications, plugins, or packages using Flutter and have a close relationship with our developer relations team, including having a customer label, and have a great need to regularly update labels on issues (see [Issue hygiene, Customers](./issue_hygiene/README.md#customers)). (This is rare.)
 
-Being granted access means that you will be added to the "flutter-hackers" group on GitHub and the "team" role on Discord. This privilege is granted with some expectation of responsibility: contributors are people who care about Flutter and want to help Flutter along our [[roadmap]]. A contributor is not just someone who can make changes or comment on issues, but someone who has demonstrated their ability to collaborate with the team, get the most knowledgeable people to review code, contribute high-quality code, follow through to fix bugs (in code or tests), and provide meaningful insights on issues.
+Being granted access means that you will be added to the "flutter-hackers" group on GitHub and the "team" role on Discord. This privilege is granted with some expectation of responsibility: contributors are people who care about Flutter and want to help Flutter along our [roadmap](https://github.com/flutter/flutter/wiki/Roadmap). A contributor is not just someone who can make changes or comment on issues, but someone who has demonstrated their ability to collaborate with the team, get the most knowledgeable people to review code, contribute high-quality code, follow through to fix bugs (in code or tests), and provide meaningful insights on issues.
 
-We grant access optimistically based on a reasonably small volume of evidence of good faith. Correspondingly, we will remove access quickly if we find our trust has been violated. Contributors with commit access must still follow all our processes and policies, and must follow our [code of conduct](https://github.com/flutter/flutter/blob/master/CODE_OF_CONDUCT.md) rigorously. (Please read it, it's stricter than most.)
+We grant access optimistically based on a reasonably small volume of evidence of good faith. Correspondingly, we will remove access quickly if we find our trust has been violated. Contributors with commit access must still follow all our processes and policies, and must follow our [code of conduct](https://github.com/flutter/flutter/blob/main/CODE_OF_CONDUCT.md) rigorously. (Please read it, it's stricter than most.)
 
 
 ### Responsibilities
 
 #### Code of conduct
 
-If you have commit access or "team" access on the Discord server, you are responsible for enforcing our [code of conduct](https://github.com/flutter/flutter/blob/master/CODE_OF_CONDUCT.md).
+If you have commit access or "team" access on the Discord server, you are responsible for enforcing our [code of conduct](https://github.com/flutter/flutter/blob/main/CODE_OF_CONDUCT.md).
 
 Our code of conduct is much, much stricter than most. We do not wait until someone has been actively rude or insulting. Being disrespectful in any way is grounds for action. For example, passive-aggressive whining and general unconstructive negativity are all violations of the code of conduct. If someone is in a bad mood, we would rather they avoided contributing to Flutter on that day.
 
 When you see something that might be described as unwelcoming or is in some other way a violation of our code of conduct, promptly contact the offender and ask them to read the code of conduct and consider how they might more effectively espouse its philosophy. Most people react very positively to this.
 
-If they react negatively, or if they continue to make the environment unpleasant, they should be removed from the environment. On Discord, this would be kicking them from the channel. Repeat offenders should be banned. On GitHub, they can be blocked from our organisation (you may need to ask @Hixie or another admin of our GitHub org to do this). Please let the #server-support [[chat]] channel know when you do anything like this, so that we can keep an eye on how common it is.
+If they react negatively, or if they continue to make the environment unpleasant, they should be removed from the environment. On Discord, this would be kicking them from the channel. Repeat offenders should be banned. On GitHub, they can be blocked from our organisation (you may need to ask @Hixie or another admin of our GitHub org to do this). Please let the #server-support [Chat](Chat.md) channel know when you do anything like this, so that we can keep an eye on how common it is.
 
 #### Maintaining documentation
 
@@ -36,9 +36,9 @@ For the wiki specifically, since there's no code review, it's good to mention on
 
 Being in the GitHub "flutter-hackers" group gives you the following:
 
-* The ability to merge your own PRs once they are reviewed (see [[Tree Hygiene]]).
+* The ability to merge your own PRs once they are reviewed (see [Tree Hygiene](Tree-hygiene.md)).
 
-* The ability to add labels, milestones, etc, on issues on GitHub (see [[Issue Hygiene]]).
+* The ability to add labels, milestones, etc, on issues on GitHub (see [Issue Hygiene](./issue_hygiene/README.md)).
 
 * PRs will run their tests slightly faster.
 
@@ -69,7 +69,7 @@ The actual process (as followed by Flutter repo admins) is as follows:
 
 We occasionally check for account with commit access that have not been used for a while. It takes very little to count as "active" (e.g. commenting on an issue, even adding an emoji reaction to an issue). If your account has been inactive for over a year we will try to reach out (e.g. by e-mail or on Discord) before removing access.
 
-If your account access was removed but you wish to return to contributing to Flutter, you are most welcome to do so; just reach out on the Discord (see [[Chat]]) and ask someone to renominate you according to the process described above.
+If your account access was removed but you wish to return to contributing to Flutter, you are most welcome to do so; just reach out on the Discord (see [Chat](Chat.md)) and ask someone to renominate you according to the process described above.
 
 
 # Access rights to Flutter dashboard
@@ -105,7 +105,7 @@ This repository is also [mirrored on GitHub.](https://github.com/google/skia-bui
 
 # fcontrib.org accounts
 
-If you are a team member who wants to share design docs (see [[Chat]]) but you don't want to use your own personal account, you can ask a Flutter admin for an fcontrib.org account. Ping @Hixie or another admin in the #server-support channel on Discord.
+If you are a team member who wants to share design docs (see [Chat](Chat.md)) but you don't want to use your own personal account, you can ask a Flutter admin for an fcontrib.org account. Ping @Hixie or another admin in the #server-support channel on Discord.
 
 ## Process
 

@@ -6,7 +6,7 @@ Don't forget to configure your document's Sharing settings so that everyone has 
 
 The template discusses how to create a shortlink for your design doc (flutter.dev/go/...). When creating the shortlink, remember to test the URL you are publishing in an incognito window!
 
-Googlers: Design docs must be created by non-corp accounts! See [Contributor Access](https://github.com/flutter/flutter/wiki/Contributor-access#fcontriborg-accounts) for details on getting `fcontrib.org` accounts if you don't want to use your personal GMail account.
+Googlers: Design docs must be created by non-corp accounts! See [Contributor Access](Contributor-access.md#fcontriborg-accounts) for details on getting `fcontrib.org` accounts if you don't want to use your personal GMail account.
 
 When you implement a design, document it in the source code in detail. The API documentation is the usual place where we document our designs. It's perfectly reasonable for API docs to be multiple pages long with subheadings (e.g. see the docs for [RenderBox](https://master-api.flutter.dev/flutter/rendering/RenderBox-class.html)!). Do not assume that anyone will ever read your design doc after the discussion has finished. Similarly, do not assume that anyone will look at closed GitHub issues or PR discussions.
 
