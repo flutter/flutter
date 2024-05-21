@@ -89,7 +89,7 @@ void batch1() {
     await breakInBuildMethod(flutter);
     await evaluateComplexReturningExpressions(flutter);
     await cleanProject();
-  });
+  }, skip: true);  // https://github.com/flutter/flutter/issues/148704
 }
 
 void batch2() {
