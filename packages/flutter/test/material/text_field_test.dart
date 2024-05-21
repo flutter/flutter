@@ -6232,22 +6232,14 @@ void main() {
     expect(controller.selection.start, lessThanOrEqualTo(0));
     expect(controller.selection.end, lessThanOrEqualTo(0));
 
-    late FlutterError error;
-    try {
-      controller.selection = const TextSelection.collapsed(offset: 10);
-    } on FlutterError catch (e) {
-      error = e;
-    } finally {
-      expect(error.diagnostics.length, 1);
-      expect(
-        error.toStringDeep(),
-        equalsIgnoringHashCodes(
-          'FlutterError\n'
-          '   invalid text selection: TextSelection.collapsed(offset: 10,\n'
-          '   affinity: TextAffinity.downstream, isDirectional: false)\n',
-        ),
-      );
-    }
+    expect(
+      () { controller.selection = const TextSelection.collapsed(offset: 10); },
+      throwsA(isAssertionError.having(
+        (AssertionError error) => error.toString(),
+        'description',
+        contains('exceeds the current text length.'),
+      ))
+    );
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/35848
