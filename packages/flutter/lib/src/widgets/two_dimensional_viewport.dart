@@ -1318,7 +1318,9 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
         }
     }
     _lastChild = previousChild;
-    parentDataOf(_lastChild!)._nextSibling = null;
+    if (_lastChild != null) {
+      parentDataOf(_lastChild!)._nextSibling = null;
+    }
     // Reset for next layout pass.
     _leadingXIndex = null;
     _trailingXIndex = null;
