@@ -2697,7 +2697,6 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-
   testWidgets('CupertinoDialogRoute does not leak CurveAnimation',
   // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
   experimentalLeakTesting: LeakTesting.settings.withTracked(classes: <String>['CurvedAnimation']),
@@ -2719,8 +2718,7 @@ void main() {
               );
             },
           );
-        },
-      ),
+        },),
     ));
 
     // Open the dialog.
