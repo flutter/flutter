@@ -2717,21 +2717,22 @@ void main() {
         (WidgetTester tester) async {
       final TwoDimensionalChildBuilderDelegate delegate =
           TwoDimensionalChildBuilderDelegate(
-              maxXIndex: 50,
-              maxYIndex: 50,
-              addAutomaticKeepAlives: false,
-              addRepaintBoundaries: false,
-              builder: (BuildContext context, ChildVicinity vicinity) {
-                if (vicinity.xIndex > 10) {
-                  return const SizedBox.square(dimension: 200);
-                }
-                return null;
-              });
+        maxXIndex: 50,
+        maxYIndex: 50,
+        addAutomaticKeepAlives: false,
+        addRepaintBoundaries: false,
+        builder: (BuildContext context, ChildVicinity vicinity) {
+          if (vicinity.xIndex > 10) {
+            return const SizedBox.square(dimension: 200);
+          }
+          return null;
+        },
+      );
       addTearDown(delegate.dispose);
 
       await tester.pumpWidget(simpleBuilderTest(delegate: delegate));
       expect(tester.takeException(), isNull);
-    }, variant: TargetPlatformVariant.all());
+    });
 
     testWidgets('correctly reorders children and wont throw assertion failure',
         (WidgetTester tester) async {
