@@ -411,6 +411,17 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
 
   late SliverLayoutDimensions _currentLayoutDimensions;
 
+  @override
+  void performLayout() {
+    _currentLayoutDimensions = SliverLayoutDimensions(
+      scrollOffset: constraints.scrollOffset,
+      precedingScrollExtent: constraints.precedingScrollExtent,
+      viewportMainAxisExtent: constraints.viewportMainAxisExtent,
+      crossAxisExtent: constraints.crossAxisExtent,
+    );
+    super.performLayout();
+  }
+
   /// The layout offset for the child with the given index.
   @override
   double indexToLayoutOffset(
