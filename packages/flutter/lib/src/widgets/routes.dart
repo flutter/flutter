@@ -2496,7 +2496,6 @@ mixin FlexibleTransitionRouteMixin<T> on TransitionRoute<T> {
   @override
   void didChangeNext(Route<dynamic>? nextRoute) {
     if (nextRoute is FlexibleTransitionRouteMixin<T> && canTransitionTo(nextRoute) && navigator != null) {
-      debugPrint('Ping the navigator state');
       navigator!.delegateTransitionBuilder = nextRoute.delegatedTransition;
     }
     super.didChangeNext(nextRoute);
