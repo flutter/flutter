@@ -2489,7 +2489,24 @@ abstract class PopEntry<T> {
 
 /// Mixin for a route that can provide a delegated secondary transition to the
 /// outgoing route.
-abstract mixin class FlexibleTransitionRouteMixin<T> {
+mixin FlexibleTransitionRouteMixin<T> on TransitionRoute<T> {
   /// The delegated transition provided to the previous route.
-  late DelegatedTransitionBuilder? delegatedTransition;
+  DelegatedTransitionBuilder? get delegatedTransition;
+
+  @override
+  void didChangeNext(Route<dynamic>? nextRoute) {
+    if (nextRoute is FlexibleTransitionRouteMixin<T> && canTransitionTo(nextRoute) && navigator != null) {
+      debugPrint('Ping the navigator state');
+      navigator!.delegateTransitionBuilder = nextRoute.delegatedTransition;
+    }
+    super.didChangeNext(nextRoute);
+  }
+
+  @override
+  void didPopNext(Route<dynamic> nextRoute) {
+    if (nextRoute is FlexibleTransitionRouteMixin<T> && canTransitionTo(nextRoute) && navigator != null) {
+      navigator!.delegateTransitionBuilder = nextRoute.delegatedTransition;
+    }
+    super.didPopNext(nextRoute);
+  }
 }

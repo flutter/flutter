@@ -83,7 +83,7 @@ final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
 ///  * [MaterialRouteTransitionMixin], which is a mixin that provides
 ///    platform-appropriate transitions for a [PageRoute].
 ///  * [CupertinoPageRoute], which is a [PageRoute] that leverages this mixin.
-mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> implements FlexibleTransitionRouteMixin<T> {
+mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   /// Builds the primary contents of the route.
   @protected
   Widget buildContent(BuildContext context);
@@ -155,18 +155,12 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> implements FlexibleTransi
     if (controller != null && controller!.isAnimating) {
       return false;
     }
-    if (nextRoute is FlexibleTransitionRouteMixin<T> && navigator != null) {
-      navigator!.delegateTransitionBuilder = (nextRoute as FlexibleTransitionRouteMixin<T>).delegatedTransition;
-    }
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
     return nextRoute is FlexibleTransitionRouteMixin<T> || nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog;
   }
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
-    if (previousRoute is FlexibleTransitionRouteMixin<T> && navigator != null && previousRoute.controller?.isAnimating != true) {
-      previousRoute.navigator!.delegateTransitionBuilder = delegatedTransition;
-    }
     return previousRoute is FlexibleTransitionRouteMixin<T> || previousRoute is CupertinoRouteTransitionMixin && !previousRoute.fullscreenDialog;
   }
 
@@ -286,7 +280,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> implements FlexibleTransi
 ///  * [CupertinoTabScaffold], for applications that have a tab bar at the
 ///    bottom with multiple pages.
 ///  * [CupertinoPage], for a [Page] version of this class.
-class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T> {
+class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T>, FlexibleTransitionRouteMixin<T> {
   /// Creates a page route for use in an iOS designed app.
   ///
   /// The [builder], [maintainState], and [fullscreenDialog] arguments must not
@@ -326,7 +320,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
 //
 // This route uses the builder from the page to build its content. This ensures
 // the content is up to date after page updates.
-class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T> {
+class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMixin<T>, FlexibleTransitionRouteMixin<T> {
   _PageBasedCupertinoPageRoute({
     required CupertinoPage<T> page,
     super.allowSnapshotting = true,
