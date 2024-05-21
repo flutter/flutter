@@ -158,6 +158,11 @@ team-engine:
     - any-glob-to-any-file:
       - docs/engine/**/*
 
+team-web:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/platforms/web/**/*
+
 tool:
   - changed-files:
     - any-glob-to-any-file:
