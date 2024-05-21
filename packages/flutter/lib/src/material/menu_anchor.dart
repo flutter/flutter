@@ -3351,8 +3351,10 @@ class _MenuPanel extends StatefulWidget {
   /// The menu style that has all the attributes for this menu panel.
   final MenuStyle? menuStyle;
 
+  /// The animation driving the size of the menu panel.
   final Animation<double>? menuSize;
 
+  /// The animation driving the opacity of the menu panel.
   final Animation<double>? menuOpacity;
 
   /// {@macro flutter.material.Material.clipBehavior}
