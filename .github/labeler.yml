@@ -48,6 +48,11 @@
     - any-glob-to-any-file:
       - examples/api/**/*
 
+'d: docs/':
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/**/*
+
 'd: examples':
   - changed-files:
     - any-glob-to-any-file:
@@ -127,6 +132,11 @@ package:
     - any-glob-to-any-file:
       - docs/ecosystem/**/*
 
+platform-android:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/platform/android/**/*
+
 platform-ios:
   - changed-files:
     - any-glob-to-any-file:
@@ -154,6 +164,11 @@ team:
     - any-glob-to-any-file:
       - docs/about/**/*
 
+team-android:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/platform/android/**/*
+
 team-ecosystem:
   - changed-files:
     - any-glob-to-any-file:
@@ -163,6 +178,11 @@ team-engine:
   - changed-files:
     - any-glob-to-any-file:
       - docs/engine/**/*
+
+team-infra:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/infra/**/*
 
 team-release:
   - changed-files:
