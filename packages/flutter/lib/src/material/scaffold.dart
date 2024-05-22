@@ -3249,7 +3249,9 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
         _kMaxBottomSheetScrimOpacity - scaffold._floatingActionButtonVisibilityValue,
       ));
     } else {
-      scaffold._floatingActionButtonVisibilityValue = 1.0;
+      if (scaffold.widget.floatingActionButton != null) {
+        scaffold._floatingActionButtonVisibilityValue = 1.0;
+      }
       scaffold.showBodyScrim(false, 0.0);
     }
     // If the Scaffold.bottomSheet != null, we're a persistent bottom sheet.
