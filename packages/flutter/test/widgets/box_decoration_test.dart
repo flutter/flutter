@@ -39,9 +39,9 @@ Future<void> main() async {
   TestImageProvider.image = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
 
   testWidgets('DecoratedBox handles loading images',
-  experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
+  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
   (WidgetTester tester) async {
-    addTearDown(imageCache.clear);
     final GlobalKey key = GlobalKey();
     final Completer<void> completer = Completer<void>();
     await tester.pumpWidget(
@@ -63,6 +63,23 @@ Future<void> main() async {
     await tester.pump();
     expect(tester.binding.hasScheduledFrame, isFalse);
   });
+
+  testWidgets('Reduced copy of DecoratedBox handles loading images',
+  experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
+  (WidgetTester tester) async {
+    addTearDown(imageCache.clear); // added to fix leaks, but it is failing
+    final Completer<void> completer = Completer<void>();
+    await tester.pumpWidget(
+      DecoratedBox(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: TestImageProvider(completer.future),
+          ),
+        ),
+      ),
+    );
+  });
+
 
   testWidgets('Moving a DecoratedBox',
   // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
