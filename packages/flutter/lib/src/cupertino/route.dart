@@ -1245,23 +1245,7 @@ final Animatable<double> _dialogScaleTween = Tween<double>(begin: 1.3, end: 1.0)
   .chain(CurveTween(curve: Curves.linearToEaseOut));
 
 Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-  final CurvedAnimation fadeAnimation = CurvedAnimation(
-    parent: animation,
-    curve: Curves.easeInOut,
-  );
-  if (animation.status == AnimationStatus.reverse) {
-    return FadeTransition(
-      opacity: fadeAnimation,
-      child: child,
-    );
-  }
-  return FadeTransition(
-    opacity: fadeAnimation,
-    child: ScaleTransition(
-      scale: animation.drive(_dialogScaleTween),
-      child: child,
-    ),
-  );
+  return child;
 }
 
 /// Displays an iOS-style dialog above the current contents of the app, with
@@ -1388,14 +1372,58 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
     String? barrierLabel,
     // This transition duration was eyeballed comparing with iOS
     super.transitionDuration = const Duration(milliseconds: 250),
-    super.transitionBuilder = _buildCupertinoDialogTransitions,
+    this.transitionBuilder,
     super.settings,
     super.anchorPoint,
   }) : super(
         pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
           return builder(context);
         },
+        transitionBuilder: transitionBuilder ?? _buildCupertinoDialogTransitions,
         barrierLabel: barrierLabel ?? CupertinoLocalizations.of(context).modalBarrierDismissLabel,
         barrierColor: barrierColor ?? CupertinoDynamicColor.resolve(kCupertinoModalBarrierColor, context),
       );
+
+  /// Custom transition builder
+  RouteTransitionsBuilder? transitionBuilder;
+
+  CurvedAnimation? _fadeAnimation;
+
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+
+    if (transitionBuilder != null) {
+      return super.buildTransitions(context, animation, secondaryAnimation, child);
+    }
+
+    if (_fadeAnimation?.parent != animation) {
+      _fadeAnimation?.dispose();
+      _fadeAnimation = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeInOut,
+      );
+    }
+
+    final CurvedAnimation fadeAnimation = _fadeAnimation!;
+
+    if (animation.status == AnimationStatus.reverse) {
+      return FadeTransition(
+        opacity: fadeAnimation,
+        child: super.buildTransitions(context, animation, secondaryAnimation, child),
+      );
+    }
+    return FadeTransition(
+      opacity: fadeAnimation,
+      child: ScaleTransition(
+        scale: animation.drive(_dialogScaleTween),
+        child: super.buildTransitions(context, animation, secondaryAnimation, child),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _fadeAnimation?.dispose();
+    super.dispose();
+  }
 }
