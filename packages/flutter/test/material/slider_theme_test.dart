@@ -2652,7 +2652,7 @@ void main() {
       (WidgetTester tester) async {
     debugDisableShadows = false;
     try {
-      final List<SliderComponentShape> shapes = [
+      final List<SliderComponentShape> shapes = <SliderComponentShape>[
         const PaddleSliderValueIndicatorShape(),
         const DropSliderValueIndicatorShape(),
         const RectangularSliderValueIndicatorShape(),
