@@ -127,8 +127,9 @@ abstract final class Feedback {
 
   /// Provides platform-specific feedback for a long press.
   ///
-  /// On Android the platform-typical vibration is triggered. On iOS this is a
-  /// no-op as that platform usually doesn't provide feedback for long presses.
+  /// On Android the platform-typical vibration is triggered. On iOS a
+  /// heavy-impact haptic feedback is triggered, alongside the click system
+  /// sound.
   ///
   /// See also:
   ///
@@ -141,6 +142,9 @@ abstract final class Feedback {
       case TargetPlatform.fuchsia:
         return HapticFeedback.vibrate();
       case TargetPlatform.iOS:
+        SystemSound.play(SystemSoundType.click);
+        HapticFeedback.heavyImpact();
+        return Future<void>.value();
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
@@ -151,9 +155,9 @@ abstract final class Feedback {
   /// Wraps a [GestureLongPressCallback] to provide platform specific feedback
   /// for a long press before the provided callback is executed.
   ///
-  /// On Android the platform-typical vibration is triggered. On iOS this
-  /// is a no-op as that platform usually doesn't provide feedback for a long
-  /// press.
+  /// On Android the platform-typical vibration is triggered. On iOS a
+  /// heavy-impact haptic feedback is triggered, alongside the click system
+  /// sound.
   ///
   /// See also:
   ///
