@@ -118,7 +118,10 @@ abstract class SliverPersistentHeaderDelegate {
   bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate);
 }
 
+/// An inline version of [SliverPersistentHeaderDelegate.build]
 typedef PersistentHeaderBuilder = Widget Function(BuildContext context, double shrinkOffset, bool overlapsContent);
+
+/// An inline version of [SliverPersistentHeaderDelegate.shouldRebuild]
 typedef PersistentHeaderShouldRebuild = bool Function(SliverPersistentHeaderDelegate oldDelegate);
 
 class _InlineSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
