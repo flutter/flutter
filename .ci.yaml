@@ -4670,6 +4670,7 @@ targets:
       task_name: macos_chrome_dev_mode
 
   - name: Mac_ios microbenchmarks_ios
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/148845
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
