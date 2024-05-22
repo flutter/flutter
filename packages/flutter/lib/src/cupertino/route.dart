@@ -1404,14 +1404,16 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
       );
     }
 
+    final CurvedAnimation fadeAnimation = _fadeAnimation!;
+
     if (animation.status == AnimationStatus.reverse) {
       return FadeTransition(
-        opacity: _fadeAnimation!,
+        opacity: fadeAnimation,
         child: super.buildTransitions(context, animation, secondaryAnimation, child),
       );
     }
     return FadeTransition(
-      opacity: _fadeAnimation!,
+      opacity: fadeAnimation,
       child: ScaleTransition(
         scale: animation.drive(_dialogScaleTween),
         child: super.buildTransitions(context, animation, secondaryAnimation, child),
