@@ -651,7 +651,7 @@ class _RenderMagnification extends RenderProxyBox {
           magnificationScale * ((focalPointOffset.dx * -1) - thisCenter.dx) + thisCenter.dx,
           magnificationScale * ((focalPointOffset.dy * -1) - thisCenter.dy) + thisCenter.dy)
       ..scale(magnificationScale);
-    final ImageFilter filter = ImageFilter.matrix(matrix.storage, filterQuality: FilterQuality.medium);
+    final ImageFilter filter = ImageFilter.matrix(matrix.storage, filterQuality: FilterQuality.high);
 
     if (layer == null) {
       layer = BackdropFilterLayer(
