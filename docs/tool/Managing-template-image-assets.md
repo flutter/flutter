@@ -1,3 +1,5 @@
+# Managing template image assets
+
 Image assets used in templates in the `flutter` tool are maintained in the [flutter_template_images][fti_pkg] package on [Pub.dev][pub] and are not checked into the main [flutter/flutter][flutter_repo] repository.
 
 Flutter's presubmit checks prevent binaries from being checked in to the repository. Binary files add significant size to the repository and produce large diffs when updated. This negatively impacts Flutter users when running `flutter upgrade`. Downloading a pub package does not involve a full sync of the git history, and is therefore significantly lighter weight.

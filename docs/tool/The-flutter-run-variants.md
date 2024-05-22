@@ -1,3 +1,5 @@
+# The `flutter run` variants
+
 We aspire to reach a state where `flutter run` has the following modes:
 
 - `flutter run`: builds a debug version of the app and starts it in "hot reload" mode, then shows the console UI to manipulate the running instance.
