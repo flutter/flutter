@@ -2696,6 +2696,36 @@ void main() {
     await tester.tap(find.text('tap'));
     await tester.pumpAndSettle();
   });
+
+  testWidgets('CupertinoDialogRoute does not leak CurveAnimation',
+  // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
+  experimentalLeakTesting: LeakTesting.settings.withTracked(classes: <String>['CurvedAnimation']),
+  (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Navigator(
+        onGenerateRoute: (RouteSettings settings) {
+          return PageRouteBuilder<dynamic>(
+            pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
+              return GestureDetector(
+                onTap: () async {
+                  await showCupertinoDialog<void>(
+                    context: context,
+                    useRootNavigator: false,
+                    builder: (BuildContext context) => const SizedBox(),
+                  );
+                },
+                child: const Text('tap'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.text('tap'));
+    await tester.pumpAndSettle();
+  });
 }
 
 class MockNavigatorObserver extends NavigatorObserver {
