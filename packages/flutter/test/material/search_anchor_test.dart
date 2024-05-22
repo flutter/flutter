@@ -3237,7 +3237,7 @@ void main() {
 
   testWidgets('Suggestions gets refreshed after long API call', (WidgetTester tester) async {
     Timer? debounceTimer;
-    const apiCallDuration = Duration(seconds: 1);
+    const Duration apiCallDuration = Duration(seconds: 1);
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Center(
@@ -3246,14 +3246,14 @@ void main() {
               return const Icon(Icons.search);
             },
             suggestionsBuilder: (BuildContext context, SearchController controller) async {
-              Completer<List<String>> completer = Completer();
+              final Completer<List<String>> completer = Completer<List<String>>();
               debounceTimer?.cancel();
               debounceTimer = Timer(apiCallDuration, () {
-                completer.complete(List.generate(10, (index) => 'Item - $index'));
+                completer.complete(List<String>.generate(10, (int index) => 'Item - $index'));
               });
-              List<String> options = await completer.future;
+              final List<String> options = await completer.future;
 
-              final suggestions = List<ListTile>.generate(options.length, (int index) {
+              final List<Widget> suggestions = List<Widget>.generate(options.length, (int index) {
                 final String item = options[index];
                 return ListTile(
                   title: Text(item),
