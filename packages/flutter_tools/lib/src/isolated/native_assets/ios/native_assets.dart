@@ -48,14 +48,25 @@ Future<Iterable<KernelAsset>> dryRunNativeAssetsIOSInternal(
 ) async {
   const OSImpl targetOS = OSImpl.iOS;
   globals.logger.printTrace('Dry running native assets for $targetOS.');
-  final DryRunResult dryRunResult = await buildRunner.dryRun(
+  final BuildDryRunResult buildDryRunResult = await buildRunner.buildDryRun(
     linkModePreference: LinkModePreferenceImpl.dynamic,
     targetOS: targetOS,
     workingDirectory: projectUri,
     includeParentEnvironment: true,
   );
-  ensureNativeAssetsBuildSucceed(dryRunResult);
-  final List<AssetImpl> nativeAssets = dryRunResult.assets;
+  ensureNativeAssetsBuildDryRunSucceed(buildDryRunResult);
+  final LinkDryRunResult linkDryRunResult = await buildRunner.linkDryRun(
+    linkModePreference: LinkModePreferenceImpl.dynamic,
+    targetOS: targetOS,
+    workingDirectory: projectUri,
+    includeParentEnvironment: true,
+    buildDryRunResult: buildDryRunResult,
+  );
+  ensureNativeAssetsLinkDryRunSucceed(linkDryRunResult);
+  final List<AssetImpl> nativeAssets = <AssetImpl>[
+    ...buildDryRunResult.assets,
+    ...linkDryRunResult.assets,
+  ];
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Dry running native assets for $targetOS done.');
   return _assetTargetLocations(nativeAssets).values;
@@ -88,7 +99,7 @@ Future<List<Uri>> buildNativeAssetsIOS({
   final List<AssetImpl> nativeAssets = <AssetImpl>[];
   final Set<Uri> dependencies = <Uri>{};
   for (final Target target in targets) {
-    final BuildResult result = await buildRunner.build(
+    final BuildResult buildResult = await buildRunner.build(
       linkModePreference: LinkModePreferenceImpl.dynamic,
       target: target,
       targetIOSSdkImpl: iosSdk,
@@ -97,9 +108,22 @@ Future<List<Uri>> buildNativeAssetsIOS({
       includeParentEnvironment: true,
       cCompilerConfig: await buildRunner.cCompilerConfig,
     );
-    ensureNativeAssetsBuildSucceed(result);
-    nativeAssets.addAll(result.assets);
-    dependencies.addAll(result.dependencies);
+    ensureNativeAssetsBuildSucceed(buildResult);
+    nativeAssets.addAll(buildResult.assets);
+    dependencies.addAll(buildResult.dependencies);
+    final LinkResult linkResult = await buildRunner.link(
+      linkModePreference: LinkModePreferenceImpl.dynamic,
+      target: target,
+      targetIOSSdkImpl: iosSdk,
+      buildMode: buildModeCli,
+      workingDirectory: projectUri,
+      includeParentEnvironment: true,
+      cCompilerConfig: await buildRunner.cCompilerConfig,
+      buildResult: buildResult,
+    );
+    ensureNativeAssetsLinkSucceed(linkResult);
+    nativeAssets.addAll(linkResult.assets);
+    dependencies.addAll(linkResult.dependencies);
   }
   ensureNoLinkModeStatic(nativeAssets);
   globals.logger.printTrace('Building native assets for $targets done.');
