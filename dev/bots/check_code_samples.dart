@@ -393,7 +393,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/async/future_builder.0_test.dart',
   'examples/api/test/widgets/restoration_properties/restorable_value.0_test.dart',
   'examples/api/test/widgets/animated_switcher/animated_switcher.0_test.dart',
-  'examples/api/test/widgets/transitions/fade_transition.0_test.dart',
   'examples/api/test/widgets/animated_list/animated_list.0_test.dart',
   'examples/api/test/widgets/focus_traversal/focus_traversal_group.0_test.dart',
   'examples/api/test/widgets/focus_traversal/ordered_traversal_policy.0_test.dart',
