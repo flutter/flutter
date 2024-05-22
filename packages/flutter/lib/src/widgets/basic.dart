@@ -6002,8 +6002,7 @@ class RawImage extends LeafRenderObjectWidget {
 
   /// Used to set the filterQuality of the image.
   ///
-  /// Defaults to [FilterQuality.low] to scale the image, which corresponds to
-  /// bilinear interpolation.
+  /// Defaults to [FilterQuality.medium].
   final FilterQuality filterQuality;
 
   /// Used to combine [color] with this image.
