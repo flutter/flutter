@@ -4,8 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'two_dimensional_utils.dart';
@@ -386,6 +386,55 @@ void main() {
       Scrollable.ensureVisible(findContext('3, 2'), alignment: 0.5);
       await tester.pump();
       expect(tester.getTopLeft(findKey('3, 2')), const Offset(300.0, 200.0));
+    });
+
+    // This test is a regression test for https://github.com/flutter/flutter/issues/146764.
+    testWidgets('Nested SingleChildScrollView ensureVisible in an OverlayPortal does not throw an error', (WidgetTester tester) async {
+      final OverlayPortalController controller = OverlayPortalController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SingleChildScrollView(
+            child: SizedBox(
+              width: 600.0,
+              height: 400.0,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    ElevatedButton(
+                      onPressed: controller.toggle,
+                      child: OverlayPortal(
+                        controller: controller,
+                        overlayChildBuilder: (BuildContext context) {
+                          return Center(
+                            child: FilledButton(
+                              onPressed: () {
+                                Scrollable.ensureVisible(
+                                  context,
+                                  duration: const Duration(seconds: 1),
+                                );
+                              },
+                              child: const Text('ensureVisible'),
+                            ),
+                          );
+                        },
+                        child: const Text('Open Overlay Portal'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open Overlay Portal'));
+      await tester.pump();
+
+      await tester.tap(find.text('ensureVisible'));
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
     });
   });
 
