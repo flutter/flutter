@@ -2137,6 +2137,7 @@ targets:
 
   # linux motog4 benchmark
   - name: Linux_android color_filter_with_unstable_child_perf__e2e_summary
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/148847
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
