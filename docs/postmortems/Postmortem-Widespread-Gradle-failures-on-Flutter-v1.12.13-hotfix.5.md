@@ -1,5 +1,3 @@
-This document is published in our wiki on: https://github.com/flutter/flutter/wiki/Postmortem:-Widespread-Gradle-failures-on-Flutter-v1.12.13-hotfix.5
-
 # Flutter postmortem: Widespread Gradle failures on Flutter v1.12.13+hotfix.5
 
 Status: final<br>
@@ -19,7 +17,7 @@ User impact: Users of the following plugins: url_launcher, google_sign_in, video
 stuartmorgan@ notices that Flutter applications that are using non-Android plugins are failing to build for Android (same for iOS) and files https://github.com/flutter/flutter/issues/39657. The root cause is that the Flutter gradle plugin assumes that all plugins include an Android implementation and tries to build it.
 
 ### 2019-09-16
-stuargmorgan@ prototypes [a fix](https://github.com/flutter/flutter/compare/master...stuartmorgan:wip-platform-plugin-files?expand=1). That fix requires migration of existing plugins.
+stuargmorgan@ prototypes [a fix](https://github.com/flutter/flutter/compare/main...stuartmorgan:wip-platform-plugin-files?expand=1). That fix requires migration of existing plugins.
 
 ### 2019-09-18
 As a temporary workaround for the issue above (Android only), amirh@ lands https://github.com/flutter/flutter/pull/40640 which makes `flutter.gradle` skip packages that do not have an `android/build.gradle` file, this workaround lives in the Flutter SDK and does not require plugin migration.
