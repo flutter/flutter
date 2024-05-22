@@ -155,13 +155,12 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
   /// See [TextSelectionControls.getHandleAnchor].
   @override
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
-    final Size handleSize;
+    final Size handleSize = getHandleSize(textLineHeight);
 
     switch (type) {
       // The circle is at the top for the left handle, and the anchor point is
       // all the way at the bottom of the line.
       case TextSelectionHandleType.left:
-        handleSize = getHandleSize(textLineHeight);
         return Offset(
           handleSize.width / 2,
           handleSize.height,
@@ -169,14 +168,12 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
       // The right handle is vertically flipped, and the anchor point is near
       // the top of the circle to give slight overlap.
       case TextSelectionHandleType.right:
-        handleSize = getHandleSize(textLineHeight);
         return Offset(
           handleSize.width / 2,
           handleSize.height - 2 * _kSelectionHandleRadius + _kSelectionHandleOverlap,
         );
       // A collapsed handle anchors itself so that it's centered.
       case TextSelectionHandleType.collapsed:
-        handleSize = getHandleSize(textLineHeight);
         return Offset(
           handleSize.width / 2,
           textLineHeight + (handleSize.height - textLineHeight) / 2,
