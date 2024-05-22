@@ -874,7 +874,7 @@ class Image extends StatefulWidget {
   /// with the screen pixels as a result of transforms or scaling.
   ///
   /// Defaults to [FilterQuality.medium].
-  /// 
+  ///
   /// See also:
   ///
   ///  * [FilterQuality], the enum containing all possible filter quality
