@@ -193,6 +193,81 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
+  group('Check the passed groupId value', () {
+    testWidgets(
+      'The value of the passed-in groupId should match the groupId of the EditableText',
+          (WidgetTester tester) async {
+        final List<String> groupIds = <String>['Group A', 'Group B', 'Group C'];
+        final List<GlobalKey> keys =
+        List<GlobalKey>.generate(3, (_) => GlobalKey());
+        final List<Widget> inputFields = <Widget>[
+          TextFormField(key: keys[0], groupId: groupIds[0]),
+          CupertinoTextField(key: keys[1], groupId: groupIds[1]),
+          TextField(key: keys[2], groupId: groupIds[2]),
+        ];
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Align(
+              alignment: Alignment.topLeft,
+              child: Column(
+                children: inputFields.map((Widget child) {
+                  return Material(child: child);
+                }).toList(),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pump();
+
+        for (int i = 0; i < 3; i++) {
+          final EditableText editableText = tester.widget(find.descendant(
+            of: find.byKey(keys[i]),
+            matching: find.byType(EditableText),
+          ));
+          expect(editableText.groupId, groupIds[i]);
+        }
+      },
+    );
+
+    testWidgets(
+      'When the value of groupId is not passed in, the default type should be EditableText',
+          (WidgetTester tester) async {
+        final List<GlobalKey> keys =
+        List<GlobalKey>.generate(3, (_) => GlobalKey());
+        final List<Widget> inputFields = <Widget>[
+          TextFormField(key: keys[0]),
+          CupertinoTextField(key: keys[1]),
+          TextField(key: keys[2]),
+        ];
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Align(
+              alignment: Alignment.topLeft,
+              child: Column(
+                children: inputFields.map((Widget child) {
+                  return Material(child: child);
+                }).toList(),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pump();
+
+        for (int i = 0; i < 3; i++) {
+          final EditableText editableText = tester.widget(find.descendant(
+            of: find.byKey(keys[i]),
+            matching: find.byType(EditableText),
+          ));
+          expect(editableText.groupId == EditableText, true);
+        }
+      },
+    );
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/126312.
   testWidgets('when open input connection in didUpdateWidget, should not throw', (WidgetTester tester) async {
     final Key key = GlobalKey();
