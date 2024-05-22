@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+import 'package:meta/meta.dart';
 
 import '../image_data.dart';
 
@@ -37,7 +38,10 @@ Future<void> main() async {
   AutomatedTestWidgetsFlutterBinding();
   TestImageProvider.image = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
 
-  testWidgets('DecoratedBox handles loading images', (WidgetTester tester) async {
+  testWidgets('DecoratedBox handles loading images',
+  experimentalLeakTesting: LeakTesting.settings.withCreationStackTrace(),
+  (WidgetTester tester) async {
+    addTearDown(imageCache.clear);
     final GlobalKey key = GlobalKey();
     final Completer<void> completer = Completer<void>();
     await tester.pumpWidget(
