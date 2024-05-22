@@ -121,7 +121,7 @@ native-assets:
         '--output-dill',
         '$build/program.dill',
         '--depfile',
-        '$build/kernel_snapshot.d',
+        '$build/kernel_snapshot_program.d',
         '--verbosity=error',
         'file:///lib/main.dart',
       ], exitCode: 1),
@@ -161,7 +161,7 @@ native-assets:
         '--output-dill',
         '$build/program.dill',
         '--depfile',
-        '$build/kernel_snapshot.d',
+        '$build/kernel_snapshot_program.d',
         '--verbosity=error',
         'file:///lib/main.dart',
       ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/program.dill 0\n'),
@@ -202,7 +202,7 @@ native-assets:
         '--output-dill',
         '$build/program.dill',
         '--depfile',
-        '$build/kernel_snapshot.d',
+        '$build/kernel_snapshot_program.d',
         '--verbosity=error',
         'file:///lib/main.dart',
       ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/program.dill 0\n'),
@@ -244,7 +244,7 @@ native-assets:
         '--output-dill',
         '$build/program.dill',
         '--depfile',
-        '$build/kernel_snapshot.d',
+        '$build/kernel_snapshot_program.d',
         '--verbosity=error',
         'file:///lib/main.dart',
       ], stdout: 'result $kBoundaryKey\n$kBoundaryKey\n$kBoundaryKey $build/program.dill 0\n'),
@@ -286,7 +286,7 @@ native-assets:
         '--output-dill',
         '$build/program.dill',
         '--depfile',
-        '$build/kernel_snapshot.d',
+        '$build/kernel_snapshot_program.d',
         '--verbosity=error',
         'foo',
         'bar',
@@ -327,7 +327,7 @@ native-assets:
         '--output-dill',
         '$build/program.dill',
         '--depfile',
-        '$build/kernel_snapshot.d',
+        '$build/kernel_snapshot_program.d',
         '--incremental',
         '--initialize-from-dill',
         '$build/program.dill',
@@ -368,7 +368,7 @@ native-assets:
         '--output-dill',
         '$build/program.dill',
         '--depfile',
-        '$build/kernel_snapshot.d',
+        '$build/kernel_snapshot_program.d',
         '--incremental',
         '--initialize-from-dill',
         '$build/program.dill',
@@ -424,7 +424,7 @@ native-assets:
         '--output-dill',
         '$build/program.dill',
         '--depfile',
-        '$build/kernel_snapshot.d',
+        '$build/kernel_snapshot_program.d',
         '--incremental',
         '--initialize-from-dill',
         '$build/program.dill',
@@ -486,6 +486,27 @@ native-assets:
         expect(processManager, hasNoRemainingExpectations);
       });
     }
+  }
+
+  for (final bool empty in <bool>[true, false]) {
+    final String testName = empty ? 'empty' : 'non empty';
+    testWithoutContext('KernelSnapshot native assets $testName', () async {
+      const List<int> programDillBytes = <int>[1, 2, 3, 4];
+      androidEnvironment.buildDir.childFile('program.dill')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(programDillBytes);
+      final List<int> nativeAssetsDillBytes = empty ? <int>[] : <int>[5, 6, 7, 8];
+      androidEnvironment.buildDir.childFile('native_assets.dill')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(nativeAssetsDillBytes);
+
+      await const KernelSnapshot().build(androidEnvironment);
+
+      expect(
+        androidEnvironment.buildDir.childFile('app.dill').readAsBytesSync(),
+        equals(<int>[...programDillBytes, ...nativeAssetsDillBytes]),
+      );
+    });
   }
 
   testUsingContext('AotElfProfile Produces correct output directory', () async {

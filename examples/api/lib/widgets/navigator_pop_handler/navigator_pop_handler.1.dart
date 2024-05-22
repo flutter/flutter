@@ -168,14 +168,10 @@ class _BottomNavTabState extends State<_BottomNavTab> {
       },
       child: Navigator(
         key: _navigatorKey,
-        onPopPage: (Route<void> route, void result) {
-          if (!route.didPop(null)) {
-            return false;
-          }
+        onDidRemovePage: (Page<Object?> page) {
           widget.onChangedPages(<_TabPage>[
             ...widget.pages,
           ]..removeLast());
-          return true;
         },
         pages: widget.pages.map((_TabPage page) {
           switch (page) {

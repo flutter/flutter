@@ -356,7 +356,7 @@ class _DirectiveInfo implements Comparable<_DirectiveInfo> {
     if (priority == other.priority) {
       return _compareUri(uri, other.uri);
     }
-    return priority.ordinal - other.priority.ordinal;
+    return priority.index - other.priority.index;
   }
 
   @override
@@ -387,23 +387,15 @@ class _DirectiveInfo implements Comparable<_DirectiveInfo> {
 }
 
 enum _DirectivePriority {
-  IMPORT_SDK('IMPORT_SDK', 0),
-  IMPORT_PKG('IMPORT_PKG', 1),
-  IMPORT_OTHER('IMPORT_OTHER', 2),
-  IMPORT_REL('IMPORT_REL', 3),
-  EXPORT_SDK('EXPORT_SDK', 4),
-  EXPORT_PKG('EXPORT_PKG', 5),
-  EXPORT_OTHER('EXPORT_OTHER', 6),
-  EXPORT_REL('EXPORT_REL', 7),
-  PART('PART', 8);
-
-  const _DirectivePriority(this.name, this.ordinal);
-
-  final String name;
-  final int ordinal;
-
-  @override
-  String toString() => name;
+  IMPORT_SDK,
+  IMPORT_PKG,
+  IMPORT_OTHER,
+  IMPORT_REL,
+  EXPORT_SDK,
+  EXPORT_PKG,
+  EXPORT_OTHER,
+  EXPORT_REL,
+  PART
 }
 
 /// SourceEdit

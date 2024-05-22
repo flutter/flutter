@@ -27,12 +27,6 @@ void main() {
           matches(RegExp(
               r'[/\\]flutter sdk[/\\]dev[/\\]snippets[/\\]config[/\\]skeletons')));
     });
-    test('templates directory is correct', () async {
-      expect(
-          config.templatesDirectory.path,
-          matches(RegExp(
-              r'[/\\]flutter sdk[/\\]dev[/\\]snippets[/\\]config[/\\]templates')));
-    });
     test('html skeleton file for sample is correct', () async {
       expect(
           config.getHtmlSkeletonFile('snippet').path,
