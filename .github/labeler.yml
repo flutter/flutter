@@ -118,6 +118,7 @@ framework:
       - packages/flutter_test/**/*
       - packages/integration_test/**/*
       - examples/api/**/*
+      - docs/about/**/*
       - docs/contributing/**/*
       - docs/libraries/**/*
 
@@ -158,6 +159,12 @@ platform-web:
       - '**/*.expect'
       - '**/*test_fixes*'
 
+team:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/about/**/*
+      - docs/postmortems/**/*
+
 team-android:
   - changed-files:
     - any-glob-to-any-file:
@@ -167,6 +174,7 @@ team-ecosystem:
   - changed-files:
     - any-glob-to-any-file:
       - docs/ecosystem/**/*
+
 team-engine:
   - changed-files:
     - any-glob-to-any-file:
@@ -182,8 +190,14 @@ team-release:
     - any-glob-to-any-file:
       - docs/releases/**/*
 
+team-tool:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/tool/**/*
+
 tool:
   - changed-files:
     - any-glob-to-any-file:
       - packages/flutter_tools/**/*
       - packages/fuchsia_remote_debug_protocol/**/*
+      - docs/tool/**/*
