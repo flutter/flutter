@@ -2865,7 +2865,7 @@ class BuildOwner {
   /// when [WidgetsBinding.drawFrame] calls [buildScope].
   void scheduleBuildFor(Element element) {
     assert(element.owner == this);
-    assert(element._buildScope != null);
+    assert(element._parentBuildScope != null);
     assert(() {
       if (debugPrintScheduleBuildForStacks) {
         debugPrintStack(label: 'scheduleBuildFor() called for $element${element.buildScope._dirtyElements.contains(element) ? " (ALREADY IN LIST)" : ""}');
@@ -3626,8 +3626,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// See also:
   ///
   ///  * [LayoutBuilder], a widget that establishes a custom [BuildScope].
-  BuildScope get buildScope => _buildScope!;
-  BuildScope? _buildScope;
+  BuildScope get buildScope => _parentBuildScope!;
+  // The cached value of the parent Element's build scope. The cache is updated
+  // when this Element mounts or reparents.
+  BuildScope? _parentBuildScope;
 
   /// {@template flutter.widgets.Element.reassemble}
   /// Called whenever the application is reassembled during debugging, for
@@ -4216,7 +4218,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       // (the root node), the owner should have already been assigned.
       // See RootRenderObjectElement.assignOwner().
       _owner = parent.owner;
-      _buildScope = parent.buildScope;
+      _parentBuildScope = parent.buildScope;
     }
     assert(owner != null);
     final Key? key = widget.key;
@@ -4305,8 +4307,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     if (identical(buildScope, _parent?.buildScope)) {
       return;
     }
+    // Unset the _inDirtyList flag so this Element can be added to the dirty list
+    // of the new build scope if it's dirty.
     _inDirtyList = false;
-    _buildScope = _parent?.buildScope;
+    _parentBuildScope = _parent?.buildScope;
     visitChildren((Element child) {
       child._updateBuildScopeRecursively();
     });
@@ -6815,7 +6819,7 @@ mixin RootElementMixin on Element {
   // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
   void assignOwner(BuildOwner owner) {
     _owner = owner;
-    _buildScope = BuildScope();
+    _parentBuildScope = BuildScope();
   }
 
   @override
