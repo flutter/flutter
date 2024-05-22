@@ -8,7 +8,6 @@ import 'dart:io' as io;
 
 import 'package:crypto/crypto.dart';
 import 'package:file/file.dart';
-import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -50,8 +49,8 @@ class SkiaGoldClient {
   /// override the defaults for [fs], [process], and [httpClient].
   SkiaGoldClient(
     this.workDirectory, {
-    this.fs = const LocalFileSystem(),
-    this.process = const LocalProcessManager(),
+    required this.fs,
+    required this.process,
     required this.platform,
     Abi? abi,
     io.HttpClient? httpClient,
