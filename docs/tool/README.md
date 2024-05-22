@@ -1,3 +1,5 @@
+# The `flutter` tool
+
 The `flutter` command-line tool is how developers (or IDEs on behalf of developers) interact
 with Flutter.
 
@@ -10,7 +12,7 @@ These include:
 
 - `flutter update-packages`, which downloads all the Dart dependencies for all
   Dart packages in the Flutter repository.
-- `flutter analyze --flutter-repo`, as described on [[Using the Dart analyzer]].
+- `flutter analyze --flutter-repo`, as described on [Using the Dart analyzer](../contributing/Using-the-Dart-analyzer.md).
 
 When contributing to Flutter, use `git pull --rebase` or `git rebase upstream/main`
 rather than `flutter upgrade`.
@@ -21,12 +23,12 @@ you run `git pull --rebase` (or `flutter upgrade`, or anything that changes the 
 ## Documentation
 
 The rest of this document assumes that `flutter` and `dart` on your path resolve
-to the scripts inside [`/path/to/flutter/bin`](https://github.com/flutter/flutter/tree/master/bin). If either `flutter` or `dart`
+to the scripts inside [`/path/to/flutter/bin`](https://github.com/flutter/flutter/tree/main/bin). If either `flutter` or `dart`
 on your path resolves to another binary, you should either prepend the Flutter SDK
 `bin` dir to the _front_ of your `$PATH`, or ensure each invocation uses the path
 to the Flutter SDK controlled `flutter` and `dart` binaries.
 
-Markdown documentation can be found for some commands in [flutter/packages/flutter_tools/doc/](https://github.com/flutter/flutter/tree/master/packages/flutter_tools/doc).
+Markdown documentation can be found for some commands in [flutter/packages/flutter_tools/doc/](https://github.com/flutter/flutter/tree/main/packages/flutter_tools/doc).
 
 ## Analysis
 
@@ -102,7 +104,7 @@ The following `launch.json` config will allow you to debug the Flutter tool:
 
 Note that:
 
-1. The current workspace directory is assumed to be the [root of the flutter_tools package](https://github.com/flutter/flutter/tree/master/packages/flutter_tools).
+1. The current workspace directory is assumed to be the [root of the flutter_tools package](https://github.com/flutter/flutter/tree/main/packages/flutter_tools).
 2. Update `args` to be whatever arguments you want passed to the tool (i.e. which sub-command you want to debug).
 3. To debug the `flutter` command-line tool while running a `flutter` project, add `cwd` to the configuration with the path of the project.
 
@@ -206,7 +208,7 @@ Similar to the [dwds debugging workflow](https://github.com/dart-lang/webdev/blo
 
 Each dependency we add to Flutter and the Flutter Tool makes the repo more difficult to update and requires additional work from our clients to update.
 
-Only packages which are developed by the Dart and/or Flutter teams should be permitted into the Flutter Tool. Any third party packages that are currently in use are exempt for historical reasons, but their versions must be pinned in [update_packages.dart](https://github.com/flutter/flutter/blob/master/packages/flutter_tools/lib/src/commands/update_packages.dart#L23) . These packages should only be updated after a human review of the new version. If a Dart and/or Flutter team package depends transitively on an un-maintained or unknown package, we should work with the owners to remove or replace that transitive dependency.
+Only packages which are developed by the Dart and/or Flutter teams should be permitted into the Flutter Tool. Any third party packages that are currently in use are exempt for historical reasons, but their versions must be pinned in [update_packages.dart](https://github.com/flutter/flutter/blob/main/packages/flutter_tools/lib/src/commands/update_packages.dart#L23) . These packages should only be updated after a human review of the new version. If a Dart and/or Flutter team package depends transitively on an un-maintained or unknown package, we should work with the owners to remove or replace that transitive dependency.
 
 Instead of adding a new package, ask yourself the following questions:
 
