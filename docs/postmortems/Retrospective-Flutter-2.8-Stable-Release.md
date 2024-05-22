@@ -64,7 +64,7 @@ Xcode/Mac/iOS were force updated in between the beta to stable time window
     * ~6 days
 * Create a solid release playbook on the wiki to be followed.
   * Should be clear enough that two interns (meaning, two inexperienced people new to the team who have the appropriate permissions) should be able to make a release without supervision while everyone else is on vacation. (It has to be two because you need two people to authorize a release).
-  * https://github.com/flutter/flutter/wiki/Release-process should be (or point to) that process doc; other pages on the wiki should be up to date also.
+  * [Release Process](../releases/Release-process.md) should be (or point to) that process doc; other pages on the wiki should be up to date also.
 * Align beta and stable release processes.
 * Practice release dry runs.
   * Have people who have never followed the steps before practice the steps, to find where the documentation is missing important details.
