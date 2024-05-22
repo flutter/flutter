@@ -16,6 +16,18 @@ abstract class SliverPersistentHeaderDelegate {
   /// const constructors so that they can be used in const expressions.
   const SliverPersistentHeaderDelegate();
 
+  /// Create a [SliverPersistentHeaderDelegate] inline
+  const factory SliverPersistentHeaderDelegate.inline({
+    required PersistentHeaderBuilder buildInline,
+    required double minExtent,
+    required double maxExtent,
+    TickerProvider? vsync,
+    FloatingHeaderSnapConfiguration? snapConfiguration,
+    OverScrollHeaderStretchConfiguration? stretchConfiguration,
+    PersistentHeaderShowOnScreenConfiguration? showOnScreenConfiguration,
+    required PersistentHeaderShouldRebuild shouldRebuild,
+  }) = _InlineSliverPersistentHeaderDelegate;
+
   /// The widget to place inside the [SliverPersistentHeader].
   ///
   /// The `context` is the [BuildContext] of the sliver.
@@ -104,6 +116,51 @@ abstract class SliverPersistentHeaderDelegate {
   /// would return a meaningfully different widget tree from [build] for the
   /// same arguments.
   bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate);
+}
+
+typedef PersistentHeaderBuilder = Widget Function(BuildContext context, double shrinkOffset, bool overlapsContent);
+typedef PersistentHeaderShouldRebuild = bool Function(SliverPersistentHeaderDelegate oldDelegate);
+
+class _InlineSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
+  const _InlineSliverPersistentHeaderDelegate({
+    required PersistentHeaderBuilder buildInline,
+    required this.minExtent,
+    required this.maxExtent,
+    this.vsync,
+    this.snapConfiguration,
+    this.stretchConfiguration,
+    this.showOnScreenConfiguration,
+    required PersistentHeaderShouldRebuild shouldRebuild,
+  }): _buildInline = buildInline,
+      _shouldRebuild = shouldRebuild;
+
+  final PersistentHeaderBuilder _buildInline;
+
+  @override
+  final double minExtent;
+
+  @override
+  final double maxExtent;
+
+  @override
+  final TickerProvider? vsync;
+
+  @override
+  final FloatingHeaderSnapConfiguration? snapConfiguration;
+
+  @override
+  final OverScrollHeaderStretchConfiguration? stretchConfiguration;
+
+  @override
+  final PersistentHeaderShowOnScreenConfiguration? showOnScreenConfiguration;
+
+  final PersistentHeaderShouldRebuild _shouldRebuild;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => _buildInline(context, shrinkOffset, overlapsContent);
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => _shouldRebuild(oldDelegate);
 }
 
 /// A sliver whose size varies when the sliver is scrolled to the edge

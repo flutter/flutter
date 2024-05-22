@@ -116,6 +116,7 @@ class SearchAnchor extends StatefulWidget {
     this.isFullScreen,
     this.searchController,
     this.viewBuilder,
+    this.sliverViewBuilder,
     this.viewLeading,
     this.viewTrailing,
     this.viewHintText,
@@ -136,7 +137,7 @@ class SearchAnchor extends StatefulWidget {
     required this.suggestionsBuilder,
     this.textInputAction,
     this.keyboardType,
-  });
+  }): assert(viewBuilder == null || sliverViewBuilder == null);
 
   /// Create a [SearchAnchor] that has a [SearchBar] which opens a search view.
   ///
@@ -164,6 +165,8 @@ class SearchAnchor extends StatefulWidget {
     MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
     MaterialStateProperty<TextStyle?>? barTextStyle,
     MaterialStateProperty<TextStyle?>? barHintStyle,
+    ViewBuilder? viewBuilder,
+    ViewBuilder? sliverViewBuilder,
     Widget? viewLeading,
     Iterable<Widget>? viewTrailing,
     String? viewHintText,
@@ -203,8 +206,14 @@ class SearchAnchor extends StatefulWidget {
   /// Optional callback to obtain a widget to lay out the suggestion list of the
   /// search view.
   ///
-  /// Default view uses a [ListView] with a vertical scroll direction.
+  /// Default view uses a [SliverList] with a vertical scroll direction.
   final ViewBuilder? viewBuilder;
+
+  /// Optional callback to obtain a sliver to lay out the suggestion list of the
+  /// search view.
+  ///
+  /// Default view uses a [SliverList] with a vertical scroll direction.
+  final ViewBuilder? sliverViewBuilder;
 
   /// An optional widget to display before the text input field when the search
   /// view is open.
@@ -417,6 +426,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
       toggleVisibility: toggleVisibility,
       textDirection: Directionality.of(context),
       viewBuilder: widget.viewBuilder,
+      sliverViewBuilder: widget.sliverViewBuilder,
       anchorKey: _anchorKey,
       searchController: _searchController,
       suggestionsBuilder: widget.suggestionsBuilder,
@@ -469,6 +479,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     this.toggleVisibility,
     this.textDirection,
     this.viewBuilder,
+    this.sliverViewBuilder,
     this.viewLeading,
     this.viewTrailing,
     this.viewHintText,
@@ -497,6 +508,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final ValueGetter<bool>? toggleVisibility;
   final TextDirection? textDirection;
   final ViewBuilder? viewBuilder;
+  final ViewBuilder? sliverViewBuilder;
   final Widget? viewLeading;
   final Iterable<Widget>? viewTrailing;
   final String? viewHintText;
@@ -670,6 +682,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
                 viewMaxWidth: _rectTween.end!.width,
                 viewRect: viewRect,
                 viewBuilder: viewBuilder,
+                sliverViewBuilder: sliverViewBuilder,
                 searchController: searchController,
                 suggestionsBuilder: suggestionsBuilder,
                 textCapitalization: textCapitalization,
@@ -692,6 +705,7 @@ class _ViewContent extends StatefulWidget {
     this.viewOnChanged,
     this.viewOnSubmitted,
     this.viewBuilder,
+    this.sliverViewBuilder,
     this.viewLeading,
     this.viewTrailing,
     this.viewHintText,
@@ -719,6 +733,7 @@ class _ViewContent extends StatefulWidget {
   final ValueChanged<String>? viewOnChanged;
   final ValueChanged<String>? viewOnSubmitted;
   final ViewBuilder? viewBuilder;
+  final ViewBuilder? sliverViewBuilder;
   final Widget? viewLeading;
   final Iterable<Widget>? viewTrailing;
   final String? viewHintText;
@@ -833,16 +848,18 @@ class _ViewContentState extends State<_ViewContent> {
   }
 
   Widget viewBuilder(Iterable<Widget> suggestions) {
-    if (widget.viewBuilder == null) {
-      return MediaQuery.removePadding(
-        context: context,
-        removeTop: true,
-        child: ListView(
-          children: suggestions.toList()
-        ),
+    final ViewBuilder? builder = widget.viewBuilder;
+    final ViewBuilder? sliverBuilder = widget.sliverViewBuilder;
+    if (builder != null) {
+      return SliverToBoxAdapter(child: builder(suggestions));
+    } else if (sliverBuilder != null) {
+      return sliverBuilder(suggestions);
+    } else {
+      return SliverList.builder(
+        itemCount: suggestions.length,
+        itemBuilder: (BuildContext context, int index) => suggestions.elementAt(index),
       );
     }
-    return widget.viewBuilder!(suggestions);
   }
 
   Future<void> updateSuggestions() async {
@@ -920,71 +937,79 @@ class _ViewContentState extends State<_ViewContent> {
       child: const Divider(height: 1),
     );
 
+    final SearchBarThemeData barDefaults = _SearchBarDefaultsM3(context);
+    final SearchBarThemeData barTheme = SearchBarTheme.of(context);
+    final BoxConstraints barConstraints = headerConstraints ?? (widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null) ?? barTheme.constraints ?? barDefaults.constraints!;
+
     return Align(
       alignment: Alignment.topLeft,
       child: Transform.translate(
         offset: _viewRect.topLeft,
-        child: SizedBox(
-          width: _viewRect.width,
-          height: _viewRect.height,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: _viewRect.width,
+            maxHeight: _viewRect.height,
+          ),
           child: Material(
             clipBehavior: Clip.antiAlias,
             shape: effectiveShape,
             color: effectiveBackgroundColor,
             surfaceTintColor: effectiveSurfaceTint,
             elevation: effectiveElevation,
-            child: ClipRect(
-              clipBehavior: Clip.antiAlias,
-              child: OverflowBox(
-                alignment: Alignment.topLeft,
-                maxWidth: math.min(widget.viewMaxWidth, _screenSize!.width),
-                minWidth: 0,
-                child: FadeTransition(
-                  opacity: viewIconsFadeCurve,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.only(top: widget.topPadding),
-                        child: SafeArea(
-                          top: false,
-                          bottom: false,
-                          child: SearchBar(
-                            autoFocus: true,
-                            constraints: headerConstraints ?? (widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null),
-                            leading: widget.viewLeading ?? defaultLeading,
-                            trailing: widget.viewTrailing ?? defaultTrailing,
-                            hintText: widget.viewHintText,
-                            backgroundColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
-                            overlayColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
-                            elevation: const MaterialStatePropertyAll<double>(0.0),
-                            textStyle: MaterialStatePropertyAll<TextStyle?>(effectiveTextStyle),
-                            hintStyle: MaterialStatePropertyAll<TextStyle?>(effectiveHintStyle),
-                            controller: _controller,
-                            onChanged: (String value) {
-                              widget.viewOnChanged?.call(value);
-                              updateSuggestions();
-                            },
-                            onSubmitted: widget.viewOnSubmitted,
-                            textCapitalization: widget.textCapitalization,
-                            textInputAction: widget.textInputAction,
-                            keyboardType: widget.keyboardType,
+            child: CustomScrollView(
+              shrinkWrap: true,
+              slivers: <Widget>[
+                SliverPadding(
+                  padding: EdgeInsets.only(top: widget.topPadding),
+                  sliver: SliverSafeArea(
+                    top: false,
+                    bottom: false,
+                    sliver: SliverFadeTransition(
+                      opacity: viewIconsFadeCurve,
+                      sliver: SliverPersistentHeader(
+                        pinned: true,
+                        delegate:
+                          SliverPersistentHeaderDelegate.inline(
+                            buildInline: (BuildContext context, double shrinkOffset, bool overlapsContent) => SearchBar(
+                              autoFocus: true,
+                              constraints: barConstraints,
+                              leading: widget.viewLeading ?? defaultLeading,
+                              trailing: widget.viewTrailing ?? defaultTrailing,
+                              hintText: widget.viewHintText,
+                              backgroundColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
+                              overlayColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
+                              elevation: const MaterialStatePropertyAll<double>(0.0),
+                              textStyle: MaterialStatePropertyAll<TextStyle?>(effectiveTextStyle),
+                              hintStyle: MaterialStatePropertyAll<TextStyle?>(effectiveHintStyle),
+                              controller: _controller,
+                              onChanged: (String value) {
+                                widget.viewOnChanged?.call(value);
+                                updateSuggestions();
+                              },
+                              onSubmitted: widget.viewOnSubmitted,
+                              textCapitalization: widget.textCapitalization,
+                              textInputAction: widget.textInputAction,
+                              keyboardType: widget.keyboardType,
+                            ),
+                            minExtent: barConstraints.minHeight,
+                            maxExtent: barConstraints.minHeight,
+                            shouldRebuild:(SliverPersistentHeaderDelegate oldDelegate) => false,
                           ),
                         ),
                       ),
-                      FadeTransition(
-                        opacity: viewDividerFadeCurve,
-                        child: viewDivider),
-                      Expanded(
-                        child: FadeTransition(
-                          opacity: viewListFadeOnIntervalCurve,
-                          child: viewBuilder(result),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
+                  if (result.isNotEmpty) ...<Widget>[
+                    SliverFadeTransition(
+                      opacity: viewDividerFadeCurve,
+                      sliver: SliverToBoxAdapter(child: viewDivider),
+                    ),
+                    SliverFadeTransition(
+                      opacity: viewListFadeOnIntervalCurve,
+                      sliver: viewBuilder(result),
+                    ),
+                  ],
+              ],
             ),
           ),
         ),
@@ -1007,6 +1032,8 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
     MaterialStateProperty<TextStyle?>? barTextStyle,
     MaterialStateProperty<TextStyle?>? barHintStyle,
+    super.viewBuilder,
+    super.sliverViewBuilder,
     super.viewLeading,
     super.viewTrailing,
     String? viewHintText,
