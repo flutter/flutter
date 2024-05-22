@@ -772,15 +772,14 @@ abstract class FlutterCommand extends Command<void> {
     return null;
   }();
 
-  DeviceConnectionInterface? get deviceConnectionInterface  {
+  DeviceConnectionInterface? get deviceConnectionInterface {
     if ((argResults?.options.contains(FlutterOptions.kDeviceConnection) ?? false)
         && (argResults?.wasParsed(FlutterOptions.kDeviceConnection) ?? false)) {
-      final String? connectionType = stringArg(FlutterOptions.kDeviceConnection);
-      if (connectionType == 'attached') {
-        return DeviceConnectionInterface.attached;
-      } else if (connectionType == 'wireless') {
-        return DeviceConnectionInterface.wireless;
-      }
+      return switch (stringArg(FlutterOptions.kDeviceConnection)) {
+        'attached' => DeviceConnectionInterface.attached,
+        'wireless' => DeviceConnectionInterface.wireless,
+        _ => null,
+      };
     }
     return null;
   }
@@ -1095,7 +1094,8 @@ abstract class FlutterCommand extends Command<void> {
       'flavor',
       help: 'Build a custom app flavor as defined by platform-specific build setup.\n'
             'Supports the use of product flavors in Android Gradle scripts, and '
-            'the use of custom Xcode schemes.',
+            'the use of custom Xcode schemes.\n'
+            'Overrides the value of the "default-flavor" entry in the flutter pubspec.',
     );
   }
 
@@ -1284,7 +1284,9 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
-    final String? flavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
+    final String? defaultFlavor = FlutterProject.current().manifest.defaultFlavor;
+    final String? cliFlavor = argParser.options.containsKey('flavor') ? stringArg('flavor') : null;
+    final String? flavor = cliFlavor ?? defaultFlavor;
     if (flavor != null) {
       if (globals.platform.environment['FLUTTER_APP_FLAVOR'] != null) {
         throwToolExit('FLUTTER_APP_FLAVOR is used by the framework and cannot be set in the environment.');

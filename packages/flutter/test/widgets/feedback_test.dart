@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
+import 'semantics_tester.dart';
 
 void main () {
   const Duration kWaitDuration = Duration(seconds: 1);
@@ -166,36 +166,34 @@ void main () {
 
   group('Feedback on iOS', () {
     testWidgets('forTap', (WidgetTester tester) async {
-      await tester.pumpWidget(Theme(
-        data: ThemeData(platform: TargetPlatform.iOS),
-        child: TestWidget(
+      await tester.pumpWidget(TestWidget(
           tapHandler: (BuildContext context) {
             return () => Feedback.forTap(context);
           },
         ),
-      ));
+      );
 
       await tester.tap(find.text('X'));
       await tester.pumpAndSettle(kWaitDuration);
       expect(feedback.hapticCount, 0);
       expect(feedback.clickSoundCount, 0);
-    });
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
     testWidgets('forLongPress', (WidgetTester tester) async {
-      await tester.pumpWidget(Theme(
-        data: ThemeData(platform: TargetPlatform.iOS),
-        child: TestWidget(
+      await tester.pumpWidget(TestWidget(
           longPressHandler: (BuildContext context) {
             return () => Feedback.forLongPress(context);
           },
         ),
-      ));
+      );
 
       await tester.longPress(find.text('X'));
       await tester.pumpAndSettle(kWaitDuration);
       expect(feedback.hapticCount, 0);
       expect(feedback.clickSoundCount, 0);
-    });
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS));
   });
 }
 

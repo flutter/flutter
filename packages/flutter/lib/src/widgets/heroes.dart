@@ -583,7 +583,7 @@ class _HeroFlight {
   }
 
   void _performAnimationUpdate(AnimationStatus status) {
-    if (status == AnimationStatus.completed || status == AnimationStatus.dismissed) {
+    if (!status.isAnimating) {
       _proxyAnimation.parent = null;
 
       assert(overlayEntry != null);
@@ -595,8 +595,8 @@ class _HeroFlight {
       // fromHero hidden. If [AnimationStatus.dismissed], the animation is
       // triggered but canceled before it finishes. In this case, we keep toHero
       // hidden instead.
-      manifest.fromHero.endFlight(keepPlaceholder: status == AnimationStatus.completed);
-      manifest.toHero.endFlight(keepPlaceholder: status == AnimationStatus.dismissed);
+      manifest.fromHero.endFlight(keepPlaceholder: status.isCompleted);
+      manifest.toHero.endFlight(keepPlaceholder: status.isDismissed);
       onFlightEnded(this);
       _proxyAnimation.removeListener(onTick);
     }
