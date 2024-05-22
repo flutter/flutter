@@ -118,6 +118,7 @@ framework:
       - packages/flutter_test/**/*
       - packages/integration_test/**/*
       - examples/api/**/*
+      - docs/about/**/*
       - docs/contributing/**/*
       - docs/libraries/**/*
 
@@ -161,6 +162,7 @@ platform-web:
 team:
   - changed-files:
     - any-glob-to-any-file:
+      - docs/about/**/*
       - docs/postmortems/**/*
 
 team-android:

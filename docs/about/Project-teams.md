@@ -2,15 +2,15 @@ The Flutter project has many teams, including, but not limited to:
 
 * Design languages, covering:
 
-  * The material library ([flutter/flutter packages/flutter/lib/src/material](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material); label ["f: material design"](https://github.com/flutter/flutter/labels/f%3A%20material%20design))
+  * The material library ([flutter/flutter packages/flutter/lib/src/material](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/material); label ["f: material design"](https://github.com/flutter/flutter/labels/f%3A%20material%20design))
 
-  * The cupertino library ([flutter/flutter packages/flutter/lib/src/cupertino](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/cupertino); label ["f: cupertino"](https://github.com/flutter/flutter/labels/f%3A%20cupertino))
+  * The cupertino library ([flutter/flutter packages/flutter/lib/src/cupertino](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/cupertino); label ["f: cupertino"](https://github.com/flutter/flutter/labels/f%3A%20cupertino))
 
-* The Flutter framework (code in [flutter/flutter packages/flutter/lib/src/widgets](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/widgets),  [...rendering/](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/rendering),  [...painting/](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting), etc; label ["framework"](https://github.com/flutter/flutter/labels/framework))
+* The Flutter framework (code in [flutter/flutter packages/flutter/lib/src/widgets](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/widgets),  [...rendering/](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/rendering),  [...painting/](https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/painting), etc; label ["framework"](https://github.com/flutter/flutter/labels/framework))
 
-* The Flutter command line tool ([flutter/flutter packages/flutter_tools](https://github.com/flutter/flutter/blob/master/packages/flutter_tools/), label ["tool"](https://github.com/flutter/flutter/labels/tool))
+* The Flutter command line tool ([flutter/flutter packages/flutter_tools](https://github.com/flutter/flutter/blob/main/packages/flutter_tools/), label ["tool"](https://github.com/flutter/flutter/labels/tool))
 
-* Ecosystem ([flutter/plugins](https://github.com/flutter/plugins), [flutter/packages](https://github.com/flutter/packages), [the plugin infrastructure in flutter/flutter](https://github.com/flutter/flutter/tree/master/packages/flutter/lib/src/services); labels ["plugins"](https://github.com/flutter/flutter/labels/plugins), and ["packages"](https://github.com/flutter/flutter/labels/packages))
+* Ecosystem ([flutter/plugins](https://github.com/flutter/plugins), [flutter/packages](https://github.com/flutter/packages), [the plugin infrastructure in flutter/flutter](https://github.com/flutter/flutter/tree/main/packages/flutter/lib/src/services); labels ["plugins"](https://github.com/flutter/flutter/labels/plugins), and ["packages"](https://github.com/flutter/flutter/labels/packages))
 
 * The Engine ([flutter/engine](https://github.com/flutter/engine) and [flutter/buildroot](https://github.com/flutter/buildroot/); label ["engine"](https://github.com/flutter/flutter/labels/engine))
 
@@ -26,7 +26,7 @@ The Flutter project has many teams, including, but not limited to:
 
 * Developer Relations (e.g. [the samples repo](https://github.com/flutter/samples/), [docs.flutter.dev](https://docs.flutter.dev/))
 
-* Infrastructure (mainly [flutter/cocoon](https://github.com/flutter/cocoon) and [flutter/flutter dev/devicelab](https://github.com/flutter/flutter/tree/master/dev), label ["team: infra"](https://github.com/flutter/flutter/labels/team%3A%20infra))
+* Infrastructure (mainly [flutter/cocoon](https://github.com/flutter/cocoon) and [flutter/flutter dev/devicelab](https://github.com/flutter/flutter/tree/main/dev), label ["team: infra"](https://github.com/flutter/flutter/labels/team%3A%20infra))
 
 There are also specific cross-cutting areas of work that may have their own subteam and that affect multiple subteams (e.g. accessibility, performance, etc).
 
@@ -37,7 +37,7 @@ We also work closely with other projects, such as [Dart](https://dart.dev) and [
 Subteams are responsible for reviewing PRs in their area, triaging issues, and scheduling work.
 How subteams organize themselves is not defined by this document. This document does not attempt to impose a process, merely a set of responsibilities.
 
-See the [[Roadmap]] and [[What should I work on?]] pages for details on how to prioritize work.
+See the [Roadmap](https://github.com/flutter/flutter/wiki/Roadmap) and [What should I work on?](https://github.com/flutter/flutter/wiki/What-should-I-work-on%3F) pages for details on how to prioritize work.
 
 ### Reviewing PRs
 

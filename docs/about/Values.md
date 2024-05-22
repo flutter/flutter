@@ -45,7 +45,7 @@ We may sometimes gate features behind flags until we are confident of their qual
 
 ## 🤣‬ Have fun doing it
 
-Last, but definitely not least, we want to make sure that our work environment is pleasant for everyone involved. Your health and the health of your family and friends is more important than Flutter. Our community [is welcoming](https://github.com/flutter/flutter/blob/master/CODE_OF_CONDUCT.md). We don't know everything; all of us can make mistakes.
+Last, but definitely not least, we want to make sure that our work environment is pleasant for everyone involved. Your health and the health of your family and friends is more important than Flutter. Our community [is welcoming](https://github.com/flutter/flutter/blob/main/CODE_OF_CONDUCT.md). We don't know everything; all of us can make mistakes.
 
 We want team members to feel empowered to make changes to the code and to our processes.
 
@@ -89,7 +89,7 @@ For each area, we consider the level to which we provide support:
 
 _See also:_
 
-* [Code of Conduct](https://github.com/flutter/flutter/blob/master/CODE_OF_CONDUCT.md)
-* [Contributor Guide](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
+* [Code of Conduct](https://github.com/flutter/flutter/blob/main/CODE_OF_CONDUCT.md)
+* [Contributor Guide](https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md)
 * [Flutter's Culture of Inclusivity](https://flutter.dev/culture)
 * [Flutter culture and how to preserve it](https://medium.com/flutter/flutter-culture-and-how-to-preserve-it-436b4ed1031d)
