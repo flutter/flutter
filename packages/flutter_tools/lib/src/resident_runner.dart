@@ -914,12 +914,10 @@ abstract class ResidentHandlers {
     final Brightness? current = await flutterDevices.first!.vmService!.flutterBrightnessOverride(
       isolateId: views.first.uiIsolate!.id!,
     );
-    Brightness next;
-    if (current == Brightness.light) {
-      next = Brightness.dark;
-    } else {
-      next = Brightness.light;
-    }
+    final Brightness next = switch (current) {
+      Brightness.light => Brightness.dark,
+      Brightness.dark || null => Brightness.light,
+    };
     for (final FlutterDevice? device in flutterDevices) {
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       for (final FlutterView view in views) {
@@ -1452,17 +1450,12 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   Future<void> enableObservatory() async {
     assert(debuggingOptions.serveObservatory);
-    final List<Future<vm_service.Response?>> serveObservatoryRequests = <Future<vm_service.Response?>>[];
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device == null) {
-        continue;
-      }
-      // Notify the VM service if the user wants Observatory to be served.
-      serveObservatoryRequests.add(
-        device.vmService?.callMethodWrapper('_serveObservatory') ??
-          Future<vm_service.Response?>.value(),
-      );
-    }
+    final List<Future<vm_service.Response?>> serveObservatoryRequests = <Future<vm_service.Response?>>[
+      for (final FlutterDevice? device in flutterDevices)
+        if (device != null)
+          // Notify the VM service if the user wants Observatory to be served.
+          device.vmService?.callMethodWrapper('_serveObservatory') ?? Future<vm_service.Response?>.value(),
+    ];
     try {
       await Future.wait(serveObservatoryRequests);
     } on vm_service.RPCError catch (e) {

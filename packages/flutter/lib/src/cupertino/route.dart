@@ -347,6 +347,8 @@ class CupertinoPage<T> extends Page<T> {
     this.title,
     this.fullscreenDialog = false,
     this.allowSnapshotting = true,
+    super.canPop,
+    super.onPopInvoked,
     super.key,
     super.name,
     super.arguments,
@@ -435,7 +437,7 @@ class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.primaryRouteAnimation != widget.primaryRouteAnimation
     || oldWidget.secondaryRouteAnimation != widget.secondaryRouteAnimation
-    || oldWidget.child != widget.child || oldWidget.linearTransition != widget.linearTransition) {
+    || oldWidget.linearTransition != widget.linearTransition) {
     _disposeCurve();
     _setupAnimation();
     }
@@ -443,43 +445,42 @@ class _CupertinoPageTransitionState extends State<CupertinoPageTransition> {
 
   @override
   void dispose() {
-    super.dispose();
     _disposeCurve();
+    super.dispose();
   }
 
   void _disposeCurve() {
     _primaryPositionCurve?.dispose();
     _secondaryPositionCurve?.dispose();
     _primaryShadowCurve?.dispose();
+    _primaryPositionCurve = null;
+    _secondaryPositionCurve = null;
+    _primaryShadowCurve = null;
   }
 
   void _setupAnimation() {
-    _primaryPositionAnimation =
-           (widget.linearTransition
-             ? widget.primaryRouteAnimation
-             : _primaryPositionCurve = CurvedAnimation(
-                 parent: widget.primaryRouteAnimation,
-                 curve: Curves.fastEaseInToSlowEaseOut,
-                 reverseCurve: Curves.fastEaseInToSlowEaseOut.flipped,
-               )
-           ).drive(_kRightMiddleTween);
-       _secondaryPositionAnimation =
-           (widget.linearTransition
-             ? widget.secondaryRouteAnimation
-             : _secondaryPositionCurve = CurvedAnimation(
-                 parent: widget.secondaryRouteAnimation,
-                 curve: Curves.linearToEaseOut,
-                 reverseCurve: Curves.easeInToLinear,
-               )
-           ).drive(_kMiddleLeftTween);
-       _primaryShadowAnimation =
-           (widget.linearTransition
-             ? widget.primaryRouteAnimation
-             : _secondaryPositionCurve = CurvedAnimation(
-                 parent: widget.primaryRouteAnimation,
-                 curve: Curves.linearToEaseOut,
-               )
-           ).drive(_CupertinoEdgeShadowDecoration.kTween);
+    if (!widget.linearTransition) {
+      _primaryPositionCurve = CurvedAnimation(
+        parent: widget.primaryRouteAnimation,
+        curve: Curves.fastEaseInToSlowEaseOut,
+        reverseCurve: Curves.fastEaseInToSlowEaseOut.flipped,
+      );
+      _secondaryPositionCurve = CurvedAnimation(
+        parent: widget.secondaryRouteAnimation,
+        curve: Curves.linearToEaseOut,
+        reverseCurve: Curves.easeInToLinear,
+      );
+      _primaryShadowCurve = CurvedAnimation(
+        parent: widget.primaryRouteAnimation,
+        curve: Curves.linearToEaseOut,
+      );
+    }
+    _primaryPositionAnimation = (_primaryPositionCurve ?? widget.primaryRouteAnimation)
+      .drive(_kRightMiddleTween);
+    _secondaryPositionAnimation = (_secondaryPositionCurve ?? widget.secondaryRouteAnimation)
+      .drive(_kMiddleLeftTween);
+    _primaryShadowAnimation = (_primaryShadowCurve ?? widget.primaryRouteAnimation)
+      .drive(_CupertinoEdgeShadowDecoration.kTween);
   }
 
   @override
@@ -557,7 +558,6 @@ class _CupertinoFullscreenDialogTransitionState extends State<CupertinoFullscree
     super.didUpdateWidget(oldWidget);
     if (oldWidget.primaryRouteAnimation != widget.primaryRouteAnimation ||
         oldWidget.secondaryRouteAnimation != widget.secondaryRouteAnimation ||
-        oldWidget.child != widget.child ||
         oldWidget.linearTransition != widget.linearTransition) {
         _disposeCurve();
         _setupAnimation();
@@ -1096,7 +1096,7 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   @override
   Duration get transitionDuration => _kModalPopupTransitionDuration;
 
-  Animation<double>? _animation;
+  CurvedAnimation? _animation;
 
   late Tween<Offset> _offsetTween;
 
@@ -1141,6 +1141,12 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
         child: child,
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _animation?.dispose();
+    super.dispose();
   }
 }
 

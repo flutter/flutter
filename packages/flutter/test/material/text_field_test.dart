@@ -26,11 +26,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
+import '../widgets/feedback_tester.dart';
 import '../widgets/live_text_utils.dart';
 import '../widgets/process_text_utils.dart';
 import '../widgets/semantics_tester.dart';
 import '../widgets/text_selection_toolbar_utils.dart';
-import 'feedback_tester.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -1831,6 +1831,56 @@ void main() {
     expect(handle.opacity.value, equals(0.0));
   });
 
+  testWidgets('multiple text fields with prefix and suffix have correct semantics order.', (WidgetTester tester) async {
+    final TextEditingController controller1 = _textEditingController(
+      text: 'abc',
+    );
+    final TextEditingController controller2 = _textEditingController(
+      text: 'def',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              TextField(
+                decoration: const InputDecoration(
+                  prefixText: 'prefix1',
+                  suffixText: 'suffix1',
+                ),
+                enabled: false,
+                controller: controller1,
+              ),
+              TextField(
+                decoration: const InputDecoration(
+                  prefixText: 'prefix2',
+                  suffixText: 'suffix2',
+                ),
+                enabled: false,
+                controller: controller2,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    final List<String> orders = tester.semantics.simulatedAccessibilityTraversal(
+      startNode: find.semantics.byLabel('prefix1'),
+    ).map((SemanticsNode node) => node.label + node.value).toList();
+
+    expect(
+      orders,
+      <String>[
+        'prefix1',
+        'abc',
+        'suffix1',
+        'prefix2',
+        'def',
+        'suffix2',
+      ],
+    );
+  });
+
   testWidgets('selection handles are excluded from the semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final TextEditingController controller = _textEditingController();
@@ -2511,6 +2561,7 @@ void main() {
     // https://github.com/flutter/flutter/issues/142624.
     final TextEditingController controller = _textEditingController();
     final PageController pageController = PageController();
+    addTearDown(pageController.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
