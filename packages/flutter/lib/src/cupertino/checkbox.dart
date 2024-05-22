@@ -455,9 +455,9 @@ class _CheckboxPainter extends ToggleablePainter {
     notifyListeners();
   }
 
-  BorderSide? get side => _side!;
+  BorderSide get side => _side!;
   BorderSide? _side;
-  set side(BorderSide? value) {
+  set side(BorderSide value) {
     if (_side == value) {
       return;
     }
