@@ -1493,6 +1493,18 @@ extension SkImageFilterNamespaceExtension on SkImageFilterNamespace {
     SkImageFilter outer,
     SkImageFilter inner,
   );
+
+  external SkImageFilter MakeDilate(
+    double radiusX,
+    double radiusY,
+    void input, // we don't use this yet
+  );
+
+  external SkImageFilter MakeErode(
+    double radiusX,
+    double radiusY,
+    void input, // we don't use this yet
+  );
 }
 
 @JS()

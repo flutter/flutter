@@ -529,6 +529,20 @@ void _imageFilterTests() {
       isNotNull,
     );
   });
+
+  test('MakeDilate', () {
+    expect(
+      canvasKit.ImageFilter.MakeDilate(1, 2, null),
+      isNotNull,
+    );
+  });
+
+  test('MakeErode', () {
+    expect(
+      canvasKit.ImageFilter.MakeErode(1, 2, null),
+      isNotNull,
+    );
+  });
 }
 
 void _mallocTests() {

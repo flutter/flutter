@@ -42,6 +42,8 @@ void testMain() {
       CkImageFilter.blur(sigmaX: 5, sigmaY: 6, tileMode: ui.TileMode.clamp),
       CkImageFilter.blur(sigmaX: 6, sigmaY: 5, tileMode: ui.TileMode.clamp),
       CkImageFilter.blur(sigmaX: 6, sigmaY: 5, tileMode: ui.TileMode.decal),
+      CkImageFilter.dilate(radiusX: 5, radiusY: 6),
+      CkImageFilter.erode(radiusX: 7, radiusY: 8),
       for (final CkColorFilter colorFilter in createColorFilters()) CkImageFilter.color(colorFilter: colorFilter),
     ];
     filters.add(CkImageFilter.compose(outer: filters[0], inner: filters[1]));
