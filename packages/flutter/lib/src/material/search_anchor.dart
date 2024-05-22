@@ -968,47 +968,37 @@ class _ViewContentState extends State<_ViewContent> {
                       opacity: viewIconsFadeCurve,
                       sliver: SliverPersistentHeader(
                         pinned: true,
-                        delegate:
-                          SliverPersistentHeaderDelegate.inline(
-                            buildInline: (BuildContext context, double shrinkOffset, bool overlapsContent) => SearchBar(
-                              autoFocus: true,
-                              constraints: barConstraints,
-                              leading: widget.viewLeading ?? defaultLeading,
-                              trailing: widget.viewTrailing ?? defaultTrailing,
-                              hintText: widget.viewHintText,
-                              backgroundColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
-                              overlayColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
-                              elevation: const MaterialStatePropertyAll<double>(0.0),
-                              textStyle: MaterialStatePropertyAll<TextStyle?>(effectiveTextStyle),
-                              hintStyle: MaterialStatePropertyAll<TextStyle?>(effectiveHintStyle),
-                              controller: _controller,
-                              onChanged: (String value) {
-                                widget.viewOnChanged?.call(value);
-                                updateSuggestions();
-                              },
-                              onSubmitted: widget.viewOnSubmitted,
-                              textCapitalization: widget.textCapitalization,
-                              textInputAction: widget.textInputAction,
-                              keyboardType: widget.keyboardType,
-                            ),
-                            minExtent: barConstraints.minHeight,
-                            maxExtent: barConstraints.minHeight,
-                            shouldRebuild:(SliverPersistentHeaderDelegate oldDelegate) => false,
-                          ),
+                        delegate: _SearchBarHeaderDelegate(
+                          constraints: barConstraints,
+                          leading: widget.viewLeading ?? defaultLeading,
+                          trailing: widget.viewTrailing ?? defaultTrailing,
+                          hintText: widget.viewHintText,
+                          textStyle: effectiveTextStyle,
+                          hintStyle: effectiveHintStyle,
+                          controller: _controller,
+                          onChanged: (String value) {
+                            widget.viewOnChanged?.call(value);
+                            updateSuggestions();
+                          },
+                          onSubmitted: widget.viewOnSubmitted,
+                          textCapitalization: widget.textCapitalization,
+                          textInputAction: widget.textInputAction,
+                          keyboardType: widget.keyboardType,
                         ),
                       ),
                     ),
                   ),
-                  if (result.isNotEmpty) ...<Widget>[
-                    SliverFadeTransition(
-                      opacity: viewDividerFadeCurve,
-                      sliver: SliverToBoxAdapter(child: viewDivider),
-                    ),
-                    SliverFadeTransition(
-                      opacity: viewListFadeOnIntervalCurve,
-                      sliver: viewBuilder(result),
-                    ),
-                  ],
+                ),
+                if (result.isNotEmpty) ...<Widget>[
+                  SliverFadeTransition(
+                    opacity: viewDividerFadeCurve,
+                    sliver: SliverToBoxAdapter(child: viewDivider),
+                  ),
+                  SliverFadeTransition(
+                    opacity: viewListFadeOnIntervalCurve,
+                    sliver: viewBuilder(result),
+                  ),
+                ],
               ],
             ),
           ),
@@ -1016,6 +1006,82 @@ class _ViewContentState extends State<_ViewContent> {
       ),
     );
   }
+}
+
+class _SearchBarHeaderDelegate extends SliverPersistentHeaderDelegate {
+  const _SearchBarHeaderDelegate({
+    required this.constraints,
+    this.leading,
+    this.trailing,
+    this.hintText,
+    this.textStyle,
+    this.hintStyle,
+    this.controller,
+    this.onChanged,
+    this.onSubmitted,
+    this.textCapitalization,
+    this.textInputAction,
+    this.keyboardType,
+
+  });
+
+  final BoxConstraints constraints;
+  final Widget? leading;
+  final Iterable<Widget>? trailing;
+  final String? hintText;
+  final TextStyle? textStyle;
+  final TextStyle? hintStyle;
+  final TextEditingController? controller;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
+  final TextCapitalization? textCapitalization;
+  final TextInputAction? textInputAction;
+  final TextInputType? keyboardType;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return  SearchBar(
+      autoFocus: true,
+      constraints: constraints,
+      leading: leading,
+      trailing: trailing,
+      hintText: hintText,
+      backgroundColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
+      overlayColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
+      elevation: const MaterialStatePropertyAll<double>(0.0),
+      textStyle: MaterialStatePropertyAll<TextStyle?>(textStyle),
+      hintStyle: MaterialStatePropertyAll<TextStyle?>(hintStyle),
+      controller: controller,
+      onChanged: (String value) => onChanged?.call(value),
+      onSubmitted: onSubmitted,
+      textCapitalization: textCapitalization,
+      textInputAction: textInputAction,
+      keyboardType: keyboardType,
+    );
+  }
+
+  @override
+  double get maxExtent => constraints.minHeight;
+
+  @override
+  double get minExtent => constraints.minHeight;
+
+  @override
+  bool shouldRebuild(covariant _SearchBarHeaderDelegate oldDelegate) {
+    return constraints != oldDelegate.constraints ||
+      leading != oldDelegate.leading ||
+      trailing != oldDelegate.trailing ||
+      hintText != oldDelegate.hintText ||
+      textStyle != oldDelegate.textStyle ||
+      hintStyle != oldDelegate.hintStyle ||
+      controller != oldDelegate.controller ||
+      onChanged != oldDelegate.onChanged ||
+      onSubmitted != oldDelegate.onSubmitted ||
+      textCapitalization != oldDelegate.textCapitalization ||
+      textInputAction != oldDelegate.textInputAction ||
+      keyboardType != oldDelegate.keyboardType;
+  }
+
 }
 
 class _SearchAnchorWithSearchBar extends SearchAnchor {
