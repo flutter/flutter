@@ -2802,7 +2802,6 @@ targets:
   # Mokey, Impeller
   - name: Linux_mokey new_gallery_impeller__transition_perf
     recipe: devicelab/devicelab_drone
-    bringup: true # Device exists only in staging.
     presubmit: false
     timeout: 60
     properties:
