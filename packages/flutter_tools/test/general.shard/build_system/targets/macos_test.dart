@@ -73,6 +73,7 @@ void main() {
         '--delete',
         '--filter',
         '- .DS_Store/',
+        '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
         'Artifact.flutterMacOSFramework.debug',
         environment.outputDir.path,
       ],
@@ -133,6 +134,7 @@ void main() {
           '--delete',
           '--filter',
           '- .DS_Store/',
+          '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
           // source
           'Artifact.flutterMacOSFramework.debug',
           // destination

@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
-import 'theme.dart';
+import 'framework.dart';
+import 'gesture_detector.dart';
 
 /// Provides platform-specific acoustic and/or haptic feedback for certain
 /// actions.
@@ -92,7 +93,7 @@ abstract final class Feedback {
   ///    [GestureTapCallback].
   static Future<void> forTap(BuildContext context) async {
     context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
-    switch (_platform(context)) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         return SystemSound.play(SystemSoundType.click);
@@ -119,7 +120,7 @@ abstract final class Feedback {
       return null;
     }
     return () {
-      Feedback.forTap(context);
+      forTap(context);
       callback();
     };
   }
@@ -135,7 +136,7 @@ abstract final class Feedback {
   ///    executing a [GestureLongPressCallback].
   static Future<void> forLongPress(BuildContext context) {
     context.findRenderObject()!.sendSemanticsEvent(const LongPressSemanticsEvent());
-    switch (_platform(context)) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         return HapticFeedback.vibrate();
@@ -167,6 +168,4 @@ abstract final class Feedback {
       callback();
     };
   }
-
-  static TargetPlatform _platform(BuildContext context) => Theme.of(context).platform;
 }

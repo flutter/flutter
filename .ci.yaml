@@ -88,17 +88,6 @@ platform_properties:
       os: Linux
       device_type: "Pixel 7 Pro"
 
-  linux_samsung_a02:
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:34v3"},
-          {"dependency": "open_jdk", "version": "version:17"},
-          {"dependency": "curl", "version": "version:7.64.0"}
-        ]
-      os: Linux
-      device_type: "SM-A025V"
-
   linux_mokey:
     properties:
       dependencies: >-
@@ -2712,16 +2701,16 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: list_text_layout_perf__e2e_summary
 
-  # linux a02s benchmark
-  - name: Linux_samsung_a02 list_text_layout_impeller_perf__e2e_summary
+  # linux mokey benchmark
+  - name: Linux_mokey list_text_layout_impeller_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
+    bringup: true # Device exists only in staging.
     timeout: 60
     properties:
       ignore_flakiness: "true"
       tags: >
-        ["devicelab", "android", "linux", "samsung", "a02"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: list_text_layout_impeller_perf__e2e_summary
 
   - name: Linux_pixel_7pro native_assets_android
@@ -2821,6 +2810,17 @@ targets:
         ["devicelab", "android", "linux", "mokey"]
       task_name: new_gallery_impeller__transition_perf
 
+  # Mokey, Impeller (OpenGL)
+  - name: Linux_mokey new_gallery_opengles_impeller__transition_perf
+    recipe: devicelab/devicelab_drone
+    bringup: true # Device exists only in staging.
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "mokey"]
+      task_name: new_gallery_opengles_impeller__transition_perf
+
   # Mokey, Skia
   - name: Linux_mokey new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
@@ -2842,20 +2842,11 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: new_gallery__transition_perf
 
-  # Samsung A02, Skia
-  - name: Linux_samsung_a02 new_gallery__transition_perf
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux", "samsung", "a02"]
-      task_name: new_gallery__transition_perf
-
   # linux motog4 benchmark
   # Moto G4, Impeller (OpenGL)
   - name: Linux_android new_gallery_opengles_impeller__transition_perf
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -2882,16 +2873,6 @@ targets:
     properties:
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
-      task_name: new_gallery_impeller__transition_perf
-
-  # Samsung A02, Impeller (Vulkan)
-  - name: Linux_samsung_a02 new_gallery_impeller__transition_perf
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux", "samsung", "a02"]
       task_name: new_gallery_impeller__transition_perf
 
   # Pixel 7 Pro, Impeller (OpenGL)
@@ -2999,16 +2980,16 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: platform_views_scroll_perf__timeline_summary
 
-  # linux a02s benchmark
-  - name: Linux_samsung_a02 platform_views_scroll_perf_impeller__timeline_summary
-    bringup: true
+  # linux mokey benchmark
+  - name: Linux_mokey platform_views_scroll_perf_impeller__timeline_summary
+    bringup: true # Device exists only in staging.
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       ignore_flakiness: "true"
       tags: >
-        ["devicelab", "android", "linux", "samsung", "a02"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: platform_views_scroll_perf_impeller__timeline_summary
 
   - name: Linux_pixel_7pro platform_views_scroll_perf_impeller__timeline_summary
@@ -3199,16 +3180,16 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: android_choreographer_do_frame_test
 
-  # linux a02s benchmark
-  - name: linux_samsung_a02 animated_blur_backdrop_filter_perf__timeline_summary
+  # linux mokey benchmark
+  - name: Linux_mokey animated_blur_backdrop_filter_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
+    bringup: true # Device exists only in staging.
     timeout: 60
     properties:
       ignore_flakiness: "true"
       tags: >
-        ["devicelab", "android", "linux", "samsung", "a02"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: animated_blur_backdrop_filter_perf__timeline_summary
 
   # Uses Impeller.
