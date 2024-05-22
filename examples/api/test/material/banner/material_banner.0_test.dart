@@ -11,7 +11,7 @@ void main() {
     await tester.pumpWidget(
       const example.MaterialBannerExampleApp()
     );
-    
+
     expect(find.byType(MaterialBanner), findsOneWidget);
     expect(find.byType(AppBar), findsOneWidget);
     expect(find.byType(TextButton), findsNWidgets(2));
@@ -21,7 +21,7 @@ void main() {
     expect(find.text('DISMISS'), findsOneWidget);
     expect(find.byIcon(Icons.agriculture_outlined), findsOneWidget);
   });
-  
+
   testWidgets('BottomNavigationBar Updates Screen Content', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.MaterialBannerExampleApp(),
@@ -38,7 +38,7 @@ void main() {
     await tester.pumpWidget(
       const example.MaterialBannerExampleApp()
     );
-    
+
     expect(find.byType(MaterialBanner), findsOneWidget);
     expect(find.text('The MaterialBanner is below'), findsOneWidget);
     final double bannerY = tester.getCenter(find.byType(MaterialBanner)).dy;

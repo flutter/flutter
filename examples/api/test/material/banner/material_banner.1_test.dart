@@ -32,7 +32,7 @@ void main() {
         find.byType(MaterialBanner));
     expect(banner.backgroundColor, Colors.green);
   });
-  
+
   testWidgets('BottomNavigationBar Updates Screen Content', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.MaterialBannerExampleApp(),
@@ -47,7 +47,7 @@ void main() {
     expect(find.byIcon(Icons.agriculture_outlined), findsOne);
     expect(find.widgetWithText(TextButton, 'DISMISS'), findsOne);
   });
-  
+
   testWidgets('The banner is below the text saying so', (WidgetTester tester) async {
     await tester.pumpWidget(const example.MaterialBannerExampleApp());
     await tester.tap(find.text('Show MaterialBanner'));
