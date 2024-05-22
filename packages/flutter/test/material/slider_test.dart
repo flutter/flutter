@@ -1011,9 +1011,7 @@ void main() {
       final List<InlineSpan> log = <InlineSpan>[];
       final LoggingValueIndicatorShape loggingValueIndicatorShape = LoggingValueIndicatorShape(log);
 
-      Widget buildSlider({
-        bool boldText = false,
-      }) {
+      Widget buildSlider({ bool boldText = false }) {
         return MaterialApp(
           theme: ThemeData(useMaterial3: false),
           home: Directionality(
