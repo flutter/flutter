@@ -1013,7 +1013,6 @@ void main() {
 
       Widget buildSlider({ bool boldText = false }) {
         return MaterialApp(
-          theme: ThemeData(useMaterial3: false),
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: StatefulBuilder(
