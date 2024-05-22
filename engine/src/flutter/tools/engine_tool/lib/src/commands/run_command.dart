@@ -8,6 +8,7 @@ import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:process_runner/process_runner.dart';
 
 import '../build_utils.dart';
+import '../label.dart';
 import '../run_utils.dart';
 import 'command.dart';
 import 'flags.dart';
@@ -112,14 +113,15 @@ See `flutter run --help` for a listing
     return mode;
   }
 
+  late final Future<RunTarget?> _runTarget =
+      detectAndSelectRunTarget(environment, _getDeviceId());
+
   Future<String?> _selectTargetConfig() async {
     final String configName = argResults![configFlag] as String;
     if (configName.isNotEmpty) {
       return demangleConfigName(environment, configName);
     }
-    final String deviceId = _getDeviceId();
-    final RunTarget? target =
-        await detectAndSelectRunTarget(environment, deviceId);
+    final RunTarget? target = await _runTarget;
     if (target == null) {
       return demangleConfigName(environment, 'host_debug');
     }
@@ -158,6 +160,9 @@ See `flutter run --help` for a listing
     final List<String> extraGnArgs = <String>[
       if (!useRbe) '--no-rbe',
     ];
+    final RunTarget? target = await _runTarget;
+    final List<Label> buildTargetsForShell =
+        target?.buildTargetsForShell() ?? <Label>[];
 
     // First build the host.
     int r = await runBuild(
@@ -172,12 +177,10 @@ See `flutter run --help` for a listing
 
     // Now build the target if it isn't the same.
     if (hostBuild.name != build.name) {
-      r = await runBuild(
-        environment,
-        build,
-        extraGnArgs: extraGnArgs,
-        enableRbe: useRbe,
-      );
+      r = await runBuild(environment, build,
+          extraGnArgs: extraGnArgs,
+          enableRbe: useRbe,
+          targets: buildTargetsForShell);
       if (r != 0) {
         return r;
       }

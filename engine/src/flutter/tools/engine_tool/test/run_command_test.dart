@@ -10,6 +10,7 @@ import 'package:engine_build_configs/engine_build_configs.dart';
 import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:engine_tool/src/commands/command_runner.dart';
 import 'package:engine_tool/src/environment.dart';
+import 'package:engine_tool/src/label.dart';
 import 'package:engine_tool/src/logger.dart';
 import 'package:engine_tool/src/run_utils.dart';
 import 'package:litetest/litetest.dart';
@@ -109,6 +110,19 @@ void main() {
     final RunTarget android = targets[0];
     expect(android.name, contains('gphone64'));
     expect(android.buildConfigFor('debug'), equals('android_debug_arm64'));
+  });
+
+  test('target specific shell build', () async {
+    final Logger logger = Logger.test((_) {});
+    final (Environment env, _) = linuxEnv(logger);
+    final List<RunTarget> targets =
+        parseDevices(env, fixtures.attachedDevices());
+    final RunTarget android = targets[0];
+    expect(android.name, contains('gphone64'));
+    final List<Label> shellLabels = <Label>[
+      Label.parseGn('//flutter/shell/platform/android:android_jar')
+    ];
+    expect(android.buildTargetsForShell(), equals(shellLabels));
   });
 
   test('default device', () async {
