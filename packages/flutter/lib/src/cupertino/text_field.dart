@@ -221,7 +221,6 @@ class CupertinoTextField extends StatefulWidget {
   ///    characters" and how it may differ from the intuitive meaning.
   const CupertinoTextField({
     super.key,
-    this.groupId = EditableText,
     this.controller,
     this.focusNode,
     this.undoController,
@@ -352,7 +351,6 @@ class CupertinoTextField extends StatefulWidget {
   ///    characters" and how it may differ from the intuitive meaning.
   const CupertinoTextField.borderless({
     super.key,
-    this.groupId = EditableText,
     this.controller,
     this.focusNode,
     this.undoController,
@@ -447,9 +445,6 @@ class CupertinoTextField extends StatefulWidget {
        ),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText);
-
-  /// {@macro flutter.widgets.editableText.groupId}
-  final Object groupId;
 
   /// Controls the text being edited.
   ///
@@ -1392,7 +1387,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             selectionColor: _effectiveFocusNode.hasFocus ? selectionColor : null,
             selectionControls: widget.selectionEnabled
               ? textSelectionControls : null,
-            groupId: widget.groupId,
             onChanged: widget.onChanged,
             onSelectionChanged: _handleSelectionChanged,
             onEditingComplete: widget.onEditingComplete,
