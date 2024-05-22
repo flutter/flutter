@@ -1365,7 +1365,7 @@ void main() {
               },);
             },
             suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return <Widget>[];
+              return const <Widget>[ListTile(title: Text('test'))];
             },
           ),
         ),
@@ -1375,17 +1375,52 @@ void main() {
     await tester.pumpWidget(buildAnchor());
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
-    // Default is a ListView.
-    expect(find.byType(ListView), findsOneWidget);
+    // Default is a SliverList.
+    expect(find.byType(SliverList), findsOneWidget);
 
     await tester.pumpWidget(Container());
     await tester.pumpWidget(buildAnchor(viewBuilder: (Iterable<Widget> suggestions)
-      => GridView.count(crossAxisCount: 5, children: suggestions.toList(),)
+      => GridView.count(crossAxisCount: 5, shrinkWrap: true, children: suggestions.toList())
+    ));
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
+    await tester.pumpAndSettle();
+    expect(find.byType(SliverList), findsNothing);
+    expect(find.byType(GridView), findsOneWidget);
+  });
+
+  testWidgets('SearchAnchor respects sliverViewBuilder property', (WidgetTester tester) async {
+    Widget buildAnchor({ViewBuilder? sliverViewBuilder}) {
+      return MaterialApp(
+        home: Material(
+          child: SearchAnchor(
+            sliverViewBuilder: sliverViewBuilder,
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(icon: const Icon(Icons.search), onPressed: () {
+                controller.openView();
+              },);
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return const <Widget>[ListTile(title: Text('test'))];
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildAnchor());
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
+    await tester.pumpAndSettle();
+    // Default is a SliverList.
+    expect(find.byType(SliverList), findsOneWidget);
+
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(buildAnchor(sliverViewBuilder: (Iterable<Widget> suggestions)
+      => SliverGrid.count(crossAxisCount: 5, children: suggestions.toList())
     ));
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
     expect(find.byType(ListView), findsNothing);
-    expect(find.byType(GridView), findsOneWidget);
+    expect(find.byType(SliverGrid), findsOneWidget);
   });
 
   testWidgets('SearchAnchor respects viewLeading property', (WidgetTester tester) async {
