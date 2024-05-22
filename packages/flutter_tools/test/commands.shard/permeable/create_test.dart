@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(jsimmons): Remove this tag when the test's ordering dependencies
-// have been fixed.
-// Fails with "flutter test --test-randomize-ordering-seed=20240518"
-@Tags(<String>['no-shuffle'])
-library;
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
@@ -2113,6 +2107,52 @@ void main() {
       throwsToolExit(
         message: 'The --empty flag is only supported for the app template.',
     ));
+  });
+
+  testUsingContext('does not remove an existing test/ directory when recreating an application project with the --empty flag', () async {
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--empty'],
+      <String>[],
+    );
+
+    projectDir.childDirectory('test').childFile('example_test.dart').createSync(recursive: true);
+
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--empty'],
+      <String>['test/example_test.dart'],
+    );
+
+    expect(projectDir.childDirectory('test').childFile('example_test.dart'), exists);
+  });
+
+  testUsingContext('does not create a test/ directory when creating a new application project with the --empty flag', () async {
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--empty'],
+      <String>[],
+      unexpectedPaths: <String>['test'],
+    );
+
+    expect(projectDir.childDirectory('test'), isNot(exists));
+  });
+
+  testUsingContext("does not create a test/ directory, if it doesn't already exist, when recreating an application project with the --empty flag", () async {
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--empty'],
+      <String>[],
+    );
+
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--empty'],
+      <String>[],
+      unexpectedPaths: <String>['test'],
+    );
+
+    expect(projectDir.childDirectory('test'), isNot(exists));
   });
 
   testUsingContext('can create a sample-based project', () async {
