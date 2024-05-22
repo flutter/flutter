@@ -581,7 +581,23 @@ class FlutterVmService {
       );
       // Do nothing, since the tool is already subscribed.
     }
+
+    // TODO(andrewkolos): this is to assist in troubleshooting https://github.com/flutter/flutter/issues/146879
+    // and should be reverted once this issue is resolved.
+    unawaited(service.onReceive.firstWhere((String message) {
+      _logger.printTrace('runInView VM service onReceive listener received "$message"');
+      final dynamic messageAsJson = jsonDecode(message);
+      // ignore: avoid_dynamic_calls -- Temporary code.
+      final dynamic messageKind = messageAsJson['params']?['event']?['kind'];
+      if (messageKind == 'IsolateRunnable') {
+        _logger.printTrace('Received IsolateRunnable event from onReceive.');
+        return true;
+      }
+      return false;
+    }));
+
     final Future<void> onRunnable = service.onIsolateEvent.firstWhere((vm_service.Event event) {
+      _logger.printTrace('runInView VM service onIsolateEvent listener received $event');
       return event.kind == vm_service.EventKind.kIsolateRunnable;
     });
     _logger.printTrace('Calling $kRunInViewMethod...');

@@ -416,7 +416,7 @@ void main() {
 
       await setAppLifecycleState(AppLifecycleState.resumed);
       expect(focusNode.hasPrimaryFocus, isTrue);
-    });
+    }, variant: TargetPlatformVariant.desktop());
 
     testWidgets('Node is removed completely even if app is paused.', (WidgetTester tester) async {
       Future<void> setAppLifecycleState(AppLifecycleState state) async {
@@ -1499,7 +1499,9 @@ void main() {
 
     testWidgets('Scopes can be focused without sending focus to descendants.', (WidgetTester tester) async {
       final FocusScopeNode scopeNode = FocusScopeNode(debugLabel: 'Scope1',);
+      addTearDown(scopeNode.dispose);
       final FocusNode childFocusNode = FocusNode(debugLabel: 'Child1',);
+      addTearDown(childFocusNode.dispose);
       await tester.pumpWidget(
         FocusScope.withExternalFocusNode(
           focusScopeNode: scopeNode,
