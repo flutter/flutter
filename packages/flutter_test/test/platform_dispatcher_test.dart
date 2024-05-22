@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show AccessibilityFeatures, Brightness, Display, FlutterView, Locale, PlatformDispatcher, VoidCallback;
+import 'dart:ui' show AccessibilityFeatures, Brightness, Display, FlutterView,
+  Locale, PlatformDispatcher, ViewFocusChangeCallback, VoidCallback;
 
 import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver;
 import 'package:flutter_test/flutter_test.dart';
@@ -303,4 +304,7 @@ class _FakePlatformDispatcher extends Fake implements PlatformDispatcher {
 
   @override
   VoidCallback? onMetricsChanged;
+
+  @override
+  ViewFocusChangeCallback? onViewFocusChange;
 }

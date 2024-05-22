@@ -51,6 +51,7 @@ export 'src/widgets/draggable_scrollable_sheet.dart';
 export 'src/widgets/dual_transition_builder.dart';
 export 'src/widgets/editable_text.dart';
 export 'src/widgets/fade_in_image.dart';
+export 'src/widgets/feedback.dart';
 export 'src/widgets/focus_manager.dart';
 export 'src/widgets/focus_scope.dart';
 export 'src/widgets/focus_traversal.dart';

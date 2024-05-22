@@ -425,10 +425,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   bool isDisposed = false;
 
   void _updateCurveDirection(AnimationStatus status) {
-    _curveDirection = switch (status) {
-      AnimationStatus.dismissed || AnimationStatus.completed => null,
-      AnimationStatus.forward || AnimationStatus.reverse => _curveDirection ?? status,
-    };
+    _curveDirection = status.isAnimating ? _curveDirection ?? status : null;
   }
 
   bool get _useForwardCurve {
@@ -684,12 +681,7 @@ abstract class CompoundAnimation<T> extends Animation<T>
   /// The default is that if the [next] animation is moving, use its status.
   /// Otherwise, default to [first].
   @override
-  AnimationStatus get status {
-    if (next.status == AnimationStatus.forward || next.status == AnimationStatus.reverse) {
-      return next.status;
-    }
-    return first.status;
-  }
+  AnimationStatus get status => next.status.isAnimating ? next.status : first.status;
 
   @override
   String toString() {

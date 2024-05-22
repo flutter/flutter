@@ -3770,7 +3770,7 @@ void main() {
         '--no-pub',
         '--template=plugin',
         '--project-name=test',
-        projectDir.path,
+        'dev/test',
       ]),
       throwsToolExit(message: 'Unable to read the template manifest at path'),
     );
@@ -3778,8 +3778,7 @@ void main() {
     FileSystem: () => MemoryFileSystem.test(
       opHandle: (String context, FileSystemOp operation) {
         if (operation == FileSystemOp.read && context.contains('template_manifest.json')) {
-          throw io.PathNotFoundException(
-              context, const OSError(), 'Cannot open file');
+          throw io.PathNotFoundException(context, const OSError(), 'Cannot open file');
         }
       },
     ),
