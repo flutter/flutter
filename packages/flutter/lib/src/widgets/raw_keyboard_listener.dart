@@ -91,7 +91,7 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> {
     super.didUpdateWidget(oldWidget);
     if (widget.focusNode != oldWidget.focusNode) {
       oldWidget.focusNode.removeListener(_handleFocusChanged);
-      widget.focusNode.addListener(_handleFocusChanged);
+      widget._widget!.addListener(_handleFocusChanged);
     }
   }
 
