@@ -1906,7 +1906,6 @@ The findRenderObject() method was called for the following element:
     expect(leafElement.dirty, isFalse);
   });
 
-
   testWidgets('reparenting Element to another BuildScope', (WidgetTester tester) async {
     final BuildScope buildScope = BuildScope();
     final GlobalKey key = GlobalKey(debugLabel: 'key');

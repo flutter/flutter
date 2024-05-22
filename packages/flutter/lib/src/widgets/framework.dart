@@ -2625,13 +2625,13 @@ final class BuildScope {
   /// Creates a [BuildScope] with an optional [scheduleRebuild] callback.
   BuildScope({ this.scheduleRebuild });
 
-  // Whether [onBuildScheduled] is called.
+  // Whether `scheduleRebuild` is called.
   bool _buildScheduled = false;
   // Whether [BuildOwner.buildScope] is actively running in this [BuildScope].
   bool _building = false;
 
   /// An optional [VoidCallback] that will be called when [Element]s in this
-  /// [BuildScope] is marked as dirty for the first time.
+  /// [BuildScope] are marked as dirty for the first time.
   ///
   /// This callback usually signifies that the [BuildOwner.buildScope] method
   /// must be called at a later time in this frame to rebuild dirty elements in
@@ -2654,7 +2654,7 @@ final class BuildScope {
   @pragma('vm:prefer-inline')
   @pragma('wasm:prefer-inline')
   void _scheduleBuildFor(Element element) {
-    assert(element.buildScope == this);
+    assert(identical(element.buildScope, this));
     if (!element._inDirtyList) {
       _dirtyElements.add(element);
       element._inDirtyList = true;
@@ -2673,7 +2673,7 @@ final class BuildScope {
   @pragma('wasm:prefer-inline')
   void _tryRebuild(Element element) {
     assert(element._inDirtyList);
-    assert(element.buildScope == this);
+    assert(identical(element.buildScope, this));
     final bool isTimelineTracked = !kReleaseMode && _isProfileBuildsEnabledFor(element.widget);
     if (isTimelineTracked) {
       Map<String, String>? debugTimelineArguments;
@@ -2750,9 +2750,20 @@ final class BuildScope {
           _tryRebuild(element);
         }
       }
+      assert(() {
+        final Iterable<Element> missedElements = _dirtyElements.where((Element element) => element.debugIsActive && element.dirty && identical(element.buildScope, this));
+        if (missedElements.isNotEmpty) {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('buildScope missed some dirty elements.'),
+            ErrorHint('This probably indicates that the dirty list should have been resorted but was not.'),
+            Element.describeElements('The list of missed elements at the end of the buildScope call was', missedElements),
+          ]);
+        }
+        return true;
+      }());
     } finally {
       for (final Element element in _dirtyElements) {
-        if (element.buildScope == this) {
+        if (identical(element.buildScope, this)) {
           element._inDirtyList = false;
         }
       }
@@ -2882,11 +2893,11 @@ class BuildOwner {
         debugPrintStack(
           label: 'BuildOwner.scheduleBuildFor() called; '
                   '_dirtyElementsNeedsResorting was ${buildScope._dirtyElementsNeedsResorting} (now true); '
-                  'dirty list is: ${buildScope._dirtyElements}',
+                  'The dirty list for the current build scope is: ${buildScope._dirtyElements}',
         );
       }
       // When reactivating an inactivate Element, _scheduleBuildFor should only be
-      // called within _flushDirtyElements
+      // called within _flushDirtyElements.
       if (!_debugBuilding && element._inDirtyList) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('BuildOwner.scheduleBuildFor() called inappropriately.'),
@@ -2905,7 +2916,7 @@ class BuildOwner {
     buildScope._scheduleBuildFor(element);
     assert(() {
       if (debugPrintScheduleBuildForStacks) {
-        debugPrint('...dirty list is now: $buildScope._dirtyElements');
+        debugPrint("...the build scope's dirty list is now: $buildScope._dirtyElements");
       }
       return true;
     }());
@@ -2980,7 +2991,7 @@ class BuildOwner {
       if (debugPrintBuildScope) {
         debugPrint(
           'buildScope called with context $context; '
-          'dirty list is: ${buildScope._dirtyElements}',
+          "its build scope's dirty list is: ${buildScope._dirtyElements}",
         );
       }
       _debugStateLockLevel += 1;
@@ -2992,8 +3003,8 @@ class BuildOwner {
       assert(() {
         if (debugEnhanceBuildTimelineArguments) {
           debugTimelineArguments = <String, String>{
-            'dirty count': '${buildScope._dirtyElements.length}',
-            'dirty list': '${buildScope._dirtyElements}',
+            'build scope dirty count': '${buildScope._dirtyElements.length}',
+            'build scope dirty list': '${buildScope._dirtyElements}',
             'lock level': '$_debugStateLockLevel',
             'scope context': '$context',
           };
@@ -3028,16 +3039,6 @@ class BuildOwner {
         }
       }
       buildScope._flushDirtyElements(debugBuildRoot: context);
-      assert(() {
-        if (buildScope._dirtyElements.any((Element element) => element.debugIsActive && element.dirty)) {
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('buildScope missed some dirty elements.'),
-            ErrorHint('This probably indicates that the dirty list should have been resorted but was not.'),
-            Element.describeElements('The list of dirty elements at the end of the buildScope call was', buildScope._dirtyElements),
-          ]);
-        }
-        return true;
-      }());
     } finally {
       buildScope._building = false;
       _scheduledFlushDirtyElements = false;
@@ -3595,8 +3596,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   BuildOwner? get owner => _owner;
   BuildOwner? _owner;
 
-  BuildScope? _buildScope;
-  /// A [BuildScope] within which the [Element] tree should be updated together.
+  /// A [BuildScope] whose dirty [Element]s can only be rebuilt by
+  /// [BuildOwner.buildScope] calls whose `context` argument is an [Element]
+  /// within this [BuildScope].
+  ///
+  /// The getter typically is only safe to access when this [Element] is [mounted].
   ///
   /// The default implementation returns the parent [Element]'s [buildScope],
   /// as in most cases an [Element] is ready to rebuild as soon as its ancestors
@@ -3605,13 +3609,25 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// available. [LayoutBuilder]'s [Element] overrides [buildScope] to make none
   /// of its descendants can rebuild until the incoming constraints are known.
   ///
+  /// If you choose to override this getter to establish your own [BuildScope],
+  /// to flush the dirty [Element]s in the [BuildScope] you need to manually call
+  /// [BuildOwner.buildScope] with the root [Element] of your [BuildScope] when
+  /// appropriate, as the Flutter framework does not try to register or manage
+  /// custom [BuildScope]s.
+  ///
+  /// Always return the same [BuildScope] instance if you override this getter.
+  /// Changing the value returned by this getter at runtime is currently not
+  /// supported.
+  ///
   /// The [updateChild] method ignores [buildScope]: if the parent [Element]
   /// calls [updateChild] on a child with a different [BuildScope], the child may
   /// still rebuild.
   ///
-  /// Always return the same [BuildScope] if you override this getter, changing
-  /// the value returned by this getter at runtime is currently not supported.
+  /// See also:
+  ///
+  ///  * [LayoutBuilder], a widget that establishes a custom [BuildScope].
   BuildScope get buildScope => _buildScope!;
+  BuildScope? _buildScope;
 
   /// {@template flutter.widgets.Element.reassemble}
   /// Called whenever the application is reassembled during debugging, for
@@ -4286,7 +4302,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   void _updateBuildScopeRecursively() {
-    if (buildScope == _parent?.buildScope) {
+    if (identical(buildScope, _parent?.buildScope)) {
       return;
     }
     _inDirtyList = false;
