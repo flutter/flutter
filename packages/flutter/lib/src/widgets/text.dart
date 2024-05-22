@@ -1241,6 +1241,30 @@ class _SelectableTextContainerDelegate extends MultiSelectableSelectionContainer
       for (final SelectedContent selectedContent in selections)
         if (selectedContent.controllers case final List<SelectedContentController> data) ...data,
     ];
+    // Question: Should we add the root text controller, if only the children
+    // are selected? For example, say we have the following:
+    // Text.rich(
+    //   TextSpan(
+    //     text: 'This is some bulleted list:\n',
+    //     children: <InlineSpan>[
+    //       WidgetSpan(
+    //         child: Column(
+    //           children: <Widget>[
+    //             for (int i = 1; i <= 7; i += 1)
+    //               Padding(
+    //                 padding: const EdgeInsets.only(left: 20.0),
+    //                 child: Text('• Bullet $i'),
+    //               )
+    //           ],
+    //         ),
+    //       ),
+    //     ],
+    //   ),
+    // ),
+    // and we select only text inside the widgetspan, should we return the
+    // root text controller in this case, as well as the children controllers
+    // that are selected? Or should we only return the selected children controllers.
+    // The former might be more confusing to the user?
     textContentController.children.clear(); // To prevent from adding duplicate controllers to children list.
     childControllers.forEach((SelectedContentController childController) {
       textContentController.addChild(childController);
