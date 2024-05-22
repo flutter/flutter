@@ -3317,14 +3317,19 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   }
 
   /// {@template flutter.rendering.RenderObject.getTransformTo}
-  /// Applies the paint transform up the tree to `target`.
+  /// Applies the paint transform from this [RenderObject] to the `target`
+  /// [RenderObject].
   ///
   /// Returns a matrix that maps the local paint coordinate system to the
   /// coordinate system of `target`, or a [Matrix4.zero] if the paint transform
   /// can not be computed.
   ///
-  /// The method throws an exception when the `target` is not in the same render
+  /// This method throws an exception when the `target` is not in the same render
   /// tree as this [RenderObject], as the behavior is undefined.
+  ///
+  /// This method ignores [RenderObject.paintsChild]. This means it will still
+  /// try to compute the paint transform even if [this] or `target` is currently
+  /// not visible.
   ///
   /// If `target` is null, this method returns a matrix that maps from the
   /// local paint coordinate system to the coordinate system of the
@@ -3336,10 +3341,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// the global coordinate system in logical pixels. To get physical pixels,
   /// use [applyPaintTransform] from the [RenderView] to further transform the
   /// coordinate.
-  ///
-  /// This method currently ignores [RenderObject.paintsChild]. This means this
-  /// method will still try to compute the paint transform even if [this] or
-  /// `target` is currently not visible.
   Matrix4 getTransformTo(RenderObject? target) {
     assert(attached);
     // The paths from to fromRenderObject and toRenderObject's common ancestor.
