@@ -26,6 +26,12 @@ INTERNAL NOTE
 -->
 ## Flutter 3.22 Changes
 
+### [3.22.1](https://github.com/flutter/flutter/releases/tag/3.22.1) (May 22, 2024)
+* [dart/55714](https://github.com/dart-lang/sdk/issues/55714) Fixes a bug in the CFE which could manifest as compilation errors of Flutter
+  web apps when compiled with dart2wasm.
+* [dart/55758](https://github.com/dart-lang/sdk/issues/55758) Fixes a bug in the pub client, such that `dart run` will not interfere with
+  Flutter l10n (at least for most cases).
+
 ### [3.22.0](https://github.com/flutter/flutter/releases/tag/3.22.0) (May 14, 2024)
 Initial stable release.
 
