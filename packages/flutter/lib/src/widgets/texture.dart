@@ -39,7 +39,7 @@ class Texture extends LeafRenderObjectWidget {
     super.key,
     required this.textureId,
     this.freeze = false,
-    this.filterQuality = FilterQuality.medium,
+    this.filterQuality = FilterQuality.low,
   });
 
   /// The identity of the backend texture.
@@ -51,9 +51,9 @@ class Texture extends LeafRenderObjectWidget {
   /// {@template flutter.widgets.Texture.filterQuality}
   /// The quality of sampling the texture and rendering it on screen.
   ///
-  /// When the texture is scaled, a default [FilterQuality.medium] is used for a higher quality but slower
+  /// When the texture is scaled, a default [FilterQuality.low] is used for a higher quality but slower
   /// interpolation (typically bilinear). It can be changed to [FilterQuality.none] for a lower quality but
-  /// faster interpolation (typically nearest-neighbor). See also [FilterQuality.low] and
+  /// faster interpolation (typically nearest-neighbor). See also [FilterQuality.medium] and
   /// [FilterQuality.high] for more options.
   /// {@endtemplate}
   final FilterQuality filterQuality;

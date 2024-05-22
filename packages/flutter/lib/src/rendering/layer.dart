@@ -933,7 +933,7 @@ class TextureLayer extends Layer {
     required this.rect,
     required this.textureId,
     this.freeze = false,
-    this.filterQuality = ui.FilterQuality.medium,
+    this.filterQuality = ui.FilterQuality.low,
   });
 
   /// Bounding rectangle of this layer.

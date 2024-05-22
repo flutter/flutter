@@ -44,14 +44,14 @@ void main() {
     final Texture texture = tester.firstWidget(find.byType(Texture));
     expect(texture, isNotNull);
     expect(texture.textureId, 1);
-    expect(texture.filterQuality, FilterQuality.medium);
+    expect(texture.filterQuality, FilterQuality.low);
 
     final RenderObject renderObject = tester.firstRenderObject(find.byType(Texture));
     expect(renderObject, isNotNull);
     final TextureBox textureBox = renderObject as TextureBox;
     expect(textureBox, isNotNull);
     expect(textureBox.textureId, 1);
-    expect(textureBox.filterQuality, FilterQuality.medium);
+    expect(textureBox.filterQuality, FilterQuality.low);
 
     final ContainerLayer containerLayer = ContainerLayer();
     addTearDown(containerLayer.dispose);
@@ -62,7 +62,7 @@ void main() {
     final TextureLayer textureLayer = layer as TextureLayer;
     expect(textureLayer, isNotNull);
     expect(textureLayer.textureId, 1);
-    expect(textureLayer.filterQuality, FilterQuality.medium);
+    expect(textureLayer.filterQuality, FilterQuality.low);
   });
 
 
@@ -97,12 +97,7 @@ void main() {
 
   testWidgets('Texture with FilterQuality.low', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Center(
-        child: Texture(
-          textureId: 1,
-          filterQuality: FilterQuality.low,
-        ),
-      ),
+        const Center(child: Texture(textureId: 1)),
     );
 
     final Texture texture = tester.firstWidget(find.byType(Texture));
