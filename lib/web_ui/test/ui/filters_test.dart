@@ -61,7 +61,7 @@ Future<void> testMain() async {
         radiusY: 5.0,
     ));
     await matchGoldenFile('ui_filter_dilate_imagefilter.png', region: region);
-  }, skip: !isSkwasm); // Only skwasm supports dilate filter right now
+  }, skip: isHtml); // HTML renderer does not support the dilate filter
 
   test('erode filter', () async {
     await drawTestImageWithPaint(ui.Paint()..imageFilter = ui.ImageFilter.erode(
@@ -69,7 +69,7 @@ Future<void> testMain() async {
         radiusY: 5.0,
     ));
     await matchGoldenFile('ui_filter_erode_imagefilter.png', region: region);
-  }, skip: !isSkwasm); // Only skwasm supports erode filter
+  }, skip: isHtml); // HTML renderer does not support the erode filter
 
   test('matrix filter', () async {
     await drawTestImageWithPaint(ui.Paint()..imageFilter = ui.ImageFilter.matrix(
