@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:process_runner/process_runner.dart';
 
 import 'environment.dart';
+import 'label.dart';
 import 'typed_json.dart';
 
 const String _targetPlatformKey = 'targetPlatform';
@@ -17,12 +18,14 @@ const String _idKey = 'id';
 class RunTarget {
   /// Construct a RunTarget from a JSON map.
   factory RunTarget.fromJson(Map<String, Object> map) {
-    return JsonObject(map).map((JsonObject json) => RunTarget._(
-      json.string(_nameKey),
-      json.string(_idKey),
-      json.string(_targetPlatformKey),
-    ), onError: (JsonObject source, JsonMapException e) {
-      throw FormatException('Failed to parse RunTarget: $e', source.toPrettyString());
+    return JsonObject(map).map(
+        (JsonObject json) => RunTarget._(
+              json.string(_nameKey),
+              json.string(_idKey),
+              json.string(_targetPlatformKey),
+            ), onError: (JsonObject source, JsonMapException e) {
+      throw FormatException(
+          'Failed to parse RunTarget: $e', source.toPrettyString());
     });
   }
 
@@ -49,6 +52,37 @@ class RunTarget {
       default:
         throw UnimplementedError('No mapping for $targetPlatform');
     }
+  }
+
+  /// Returns the minimum set of build targets needed to build the shell for
+  /// this target platform.
+  List<Label> buildTargetsForShell() {
+    final List<Label> labels = <Label>[];
+    switch (targetPlatform) {
+      case 'android-arm64':
+      case 'android-arm32':
+        {
+          labels.add(
+              Label.parseGn('//flutter/shell/platform/android:android_jar'));
+          break;
+        }
+      // TODO(cbracken): iOS and MacOS share the same target platform but
+      // have different build targets. For now hard code iOS.
+      case 'darwin':
+        {
+          labels.add(Label.parseGn(
+              '//flutter/shell/platform/darwin/ios:flutter_framework'));
+          break;
+        }
+      default:
+        throw UnimplementedError('No mapping for $targetPlatform');
+      // For the future:
+      // //flutter/shell/platform/darwin/macos:flutter_framework
+      // //flutter/shell/platform/linux:flutter_linux_gtk
+      // //flutter/shell/platform/windows
+      // //flutter/web_sdk:flutter_web_sdk_archive
+    }
+    return labels;
   }
 }
 
