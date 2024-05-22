@@ -20,12 +20,12 @@ interface class Gn {
   final Environment _environment;
 
   String get _gnPath => p.join(
-    _environment.engine.srcDir.path,
-    'flutter',
-    'third_party',
-    'gn',
-    _environment.platform.isWindows ? 'gn.exe' : 'gn',
-  );
+        _environment.engine.srcDir.path,
+        'flutter',
+        'third_party',
+        'gn',
+        _environment.platform.isWindows ? 'gn.exe' : 'gn',
+      );
 
   /// Returns a list of build targets that match the given [pattern].
   ///
@@ -48,7 +48,8 @@ interface class Gn {
       outDir,
       pattern.toGnPattern(),
     ];
-    final ProcessRunnerResult process = await _environment.processRunner.runProcess(
+    final ProcessRunnerResult process =
+        await _environment.processRunner.runProcess(
       command,
       workingDirectory: _environment.engine.srcDir,
       failOk: true,
@@ -71,21 +72,26 @@ interface class Gn {
       );
     }
 
-    return result.asMap().entries.map((MapEntry<String, Object?> entry) {
-      final String label = entry.key;
-      final Object? properties = entry.value;
-      if (properties is! Map<String, Object?>) {
-        return null;
-      }
-      final BuildTarget? target = BuildTarget._fromJson(
-        label,
-        JsonObject(properties),
-      );
-      if (target == null) {
-        return null;
-      }
-      return target;
-    }).whereType<BuildTarget>().toList();
+    return result
+        .asMap()
+        .entries
+        .map((MapEntry<String, Object?> entry) {
+          final String label = entry.key;
+          final Object? properties = entry.value;
+          if (properties is! Map<String, Object?>) {
+            return null;
+          }
+          final BuildTarget? target = BuildTarget._fromJson(
+            label,
+            JsonObject(properties),
+          );
+          if (target == null) {
+            return null;
+          }
+          return target;
+        })
+        .whereType<BuildTarget>()
+        .toList();
   }
 }
 
@@ -105,9 +111,9 @@ sealed class BuildTarget {
       String type,
       bool testOnly,
     ) = json.map((JsonObject json) => (
-      json.string('type'),
-      json.boolean('testonly'),
-    ));
+          json.string('type'),
+          json.boolean('testonly'),
+        ));
     return switch (type) {
       'executable' => ExecutableBuildTarget(
           label: Label.parseGn(label),
@@ -119,6 +125,8 @@ sealed class BuildTarget {
           label: Label.parseGn(label),
           testOnly: testOnly,
         ),
+      'action' =>
+        ActionBuildTarget(label: Label.parseGn(label), testOnly: testOnly),
       _ => null,
     };
   }
@@ -140,6 +148,30 @@ sealed class BuildTarget {
   @mustBeOverridden
   @override
   String toString();
+}
+
+/// A build target that performs some [action][].
+///
+/// [action]: https://gn.googlesource.com/gn/+/main/docs/reference.md#func_action
+final class ActionBuildTarget extends BuildTarget {
+  /// Construct an action build target.
+  const ActionBuildTarget({
+    required super.label,
+    required super.testOnly,
+  });
+
+  @override
+  bool operator ==(Object other) {
+    return other is LibraryBuildTarget &&
+        label == other.label &&
+        testOnly == other.testOnly;
+  }
+
+  @override
+  int get hashCode => Object.hash(label, testOnly);
+
+  @override
+  String toString() => 'ActionBuildTarget($label, testOnly=$testOnly)';
 }
 
 /// A build target that produces a [shared library][] or [static library][].
@@ -193,5 +225,6 @@ final class ExecutableBuildTarget extends BuildTarget {
   int get hashCode => Object.hash(label, testOnly, executable);
 
   @override
-  String toString() => 'ExecutableBuildTarget($label, testOnly=$testOnly, executable=$executable)';
+  String toString() =>
+      'ExecutableBuildTarget($label, testOnly=$testOnly, executable=$executable)';
 }
