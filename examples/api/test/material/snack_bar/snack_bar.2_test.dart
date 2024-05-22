@@ -29,11 +29,11 @@ void main() {
     expect(find.byType(Slider), findsOneWidget);
   });
 
-  testWidgets('Applies configurations to snackbar', (WidgetTester tester) async {
+  testWidgets('Applies default configuration to snackbar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SnackBarExampleApp(),
     );
-    // Test default configuration
+
     expect(find.byType(SnackBar), findsNothing);
     expect(find.text('Single Line Snack Bar'), findsNothing);
     expect(find.textContaining('spans across multiple lines'), findsNothing);
@@ -56,12 +56,16 @@ void main() {
     await tester.tap(find.byIcon(Icons.close));
     await tester.pumpAndSettle();
     expect(find.byType(SnackBar), findsNothing);
+  });
 
-    // Test options
+  testWidgets('Can configure fixed snack bar with long text', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const example.SnackBarExampleApp(),
+    );
+
     await tester.tap(find.text('Fixed'));
     await tester.tap(find.text('Multi Line Text'));
     await tester.tap(find.text('Long Action Label'));
-    await tester.pumpAndSettle();
     await tester.tap(find.text('Show Snackbar'));
     await tester.pumpAndSettle();
 
@@ -77,49 +81,55 @@ void main() {
     await tester.tap(find.byIcon(Icons.close));
     await tester.pumpAndSettle();
     expect(find.byType(SnackBar), findsNothing);
+  });
 
-    // Test Action new-line overflow threshold
-    // First moves the slider to the value null
+  testWidgets('Can configure to remove action and close icon', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const example.SnackBarExampleApp(),
+    );
+
+    await tester.tap(find.text('Include close Icon'));
+    await tester.tap(find.text('Include Action'));
+    await tester.tap(find.text('Show Snackbar'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SnackBar), findsOneWidget);
+    expect(find.byType(SnackBarAction), findsNothing);
+    expect(find.byIcon(Icons.close), findsNothing);
+  });
+
+  testWidgets('Higher overflow threshold leads to smaller snack bars', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const example.SnackBarExampleApp(),
+    );
+
+    await tester.tap(find.text('Fixed'));
+    await tester.tap(find.text('Multi Line Text'));
+    await tester.tap(find.text('Long Action Label'));
+
+    // Establish max size with low threshold (causes overflow)
     await tester.scrollUntilVisible(find.byType(Slider), 30);
     TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Slider)));
     await gesture.moveTo(tester.getBottomLeft(find.byType(Slider)));
     await gesture.up();
     await tester.tapAt(tester.getBottomLeft(find.byType(Slider)));
-    await tester.pumpAndSettle();
     await tester.tap(find.text('Show Snackbar'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(SnackBar), findsOneWidget);
-    final Size snackBarSize = tester.getSize(find.byType(SnackBar));
+    final double highSnackBar = tester.getSize(find.byType(SnackBar)).height;
     await tester.tap(find.byIcon(Icons.close));
     await tester.pumpAndSettle();
-    expect(find.byType(SnackBar), findsNothing);
 
+    // Configure high threshold (everything is in one row)
     gesture = await tester.startGesture(tester.getCenter(find.byType(Slider)));
     await gesture.moveTo(tester.getTopRight(find.byType(Slider)));
     await gesture.up();
-    await tester.pumpAndSettle();
+    await tester.tapAt(tester.getTopRight(find.byType(Slider)));
     await tester.tap(find.text('Show Snackbar'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(SnackBar), findsOneWidget);
     expect(tester.getSize(find.byType(SnackBar)).height,
-      lessThan(snackBarSize.height));
-
-    await tester.tap(find.byIcon(Icons.close));
-    await tester.pumpAndSettle();
-
-    // Test removing the action and close icon
-    await tester.tap(find.text('Include close Icon'));
-    await tester.tap(find.text('Include Action'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Show Snackbar'));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(SnackBar), findsOneWidget);
-    expect(find.textContaining('spans across multiple lines'), findsOneWidget);
-    expect(find.byType(SnackBarAction), findsNothing);
-    expect(find.byIcon(Icons.close), findsNothing);
+      lessThan(highSnackBar));
   });
 
   testWidgets('Disable unusable elements', (WidgetTester tester) async {
