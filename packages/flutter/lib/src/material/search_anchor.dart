@@ -989,7 +989,7 @@ class _ViewContentState extends State<_ViewContent> {
                     ),
                   ),
                 ),
-                if (result.isNotEmpty) ...<Widget>[
+                if (_controller.isOpen && result.isNotEmpty) ...<Widget>[
                   SliverFadeTransition(
                     opacity: viewDividerFadeCurve,
                     sliver: SliverToBoxAdapter(child: viewDivider),
