@@ -387,8 +387,8 @@ class SnackBar extends StatefulWidget {
 
   /// Defines how the snack bar area, including margin, will behave during hit testing.
   ///
-  /// If this property is null, and [margin] is not null or [snackBarTheme.insetPadding]
-  /// is not null, then [HitTestBehavior.deferToChild] is used by default.
+  /// If this property is null, and [margin] is not null or [SnackBarThemeData.insetPadding] of
+  /// [ThemeData.snackBarTheme] is not null, then [HitTestBehavior.deferToChild] is used by default.
   ///
   /// Please refer to [HitTestBehavior] for a detailed explanation of every behavior.
   final HitTestBehavior? hitTestBehavior;
