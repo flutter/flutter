@@ -37,10 +37,8 @@ Future<void> main() async {
   AutomatedTestWidgetsFlutterBinding();
   TestImageProvider.image = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
 
-  testWidgets('DecoratedBox handles loading images',
-  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('DecoratedBox handles loading images', (WidgetTester tester) async {
+    addTearDown(imageCache.clear);
     final GlobalKey key = GlobalKey();
     final Completer<void> completer = Completer<void>();
     await tester.pumpWidget(
@@ -63,10 +61,8 @@ Future<void> main() async {
     expect(tester.binding.hasScheduledFrame, isFalse);
   });
 
-  testWidgets('Moving a DecoratedBox',
-  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
-  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
-  (WidgetTester tester) async {
+  testWidgets('Moving a DecoratedBox', (WidgetTester tester) async {
+    addTearDown(imageCache.clear);
     final Completer<void> completer = Completer<void>();
     final Widget subtree = KeyedSubtree(
       key: GlobalKey(),
