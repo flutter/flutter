@@ -31,7 +31,7 @@ INTERNAL NOTE
   web apps when compiled with dart2wasm.
 * [dart/55758](https://github.com/dart-lang/sdk/issues/55758) Fixes a bug in the pub client, such that `dart run` will not interfere with
   Flutter l10n (at least for most cases).
-  
+
 ### [3.22.0](https://github.com/flutter/flutter/releases/tag/3.22.0) (May 14, 2024)
 Initial stable release.
 
