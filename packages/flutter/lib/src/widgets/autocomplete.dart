@@ -393,6 +393,8 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   // Called when _textEditingController changes.
   Future<void> _onChangedField() async {
     final TextEditingValue value = _textEditingController.value;
+    if (value.text == _lastFieldText) return;
+    _lastFieldText = value.text;
     if (widget.showOptionsViewOnPendingOptions){
       _updateOptionsViewVisibility();
     }
@@ -403,13 +405,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     if (selection != null && value.text != widget.displayStringForOption(selection)) {
       _selection = null;
     }
-
-    // Make sure the options are no longer hidden if the content of the field
-    // changes (ignore selection changes).
-    if (value.text != _lastFieldText) {
-      _lastFieldText = value.text;
-      _updateOptionsViewVisibility();
-    }
+    _updateOptionsViewVisibility();
   }
 
   // Called from fieldViewBuilder when the user submits the field.
