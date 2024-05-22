@@ -1028,7 +1028,7 @@ void main() {
                         sliderTheme: Theme.of(context).sliderTheme.copyWith(
                           showValueIndicator: ShowValueIndicator.always,
                           valueIndicatorShape: loggingValueIndicatorShape,
-                          ),
+                        ),
                       ),
                       child: Center(
                         child: OverflowBox(
