@@ -9,6 +9,7 @@ import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.DEFAULT_
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -645,6 +646,12 @@ import java.util.List;
     // See https://github.com/flutter/flutter/issues/93276
     previousVisibility = flutterView.getVisibility();
     flutterView.setVisibility(View.GONE);
+      if (flutterEngine != null) {
+        // When an Activity is stopped it won't have its onTrimMemory callback invoked. Normally,
+        // this isn't a problem but because of a bug in some builds of Android 14 we must act as
+        // if the onTrimMemory callback has been called.
+        flutterEngine.getRenderer().onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
+      }
   }
 
   /**
