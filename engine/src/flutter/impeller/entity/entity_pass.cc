@@ -694,12 +694,28 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
       // right thing.
       return EntityPass::EntityResult::Failure();
     }
+
+    // Round the subpass texture position for pixel alignment with the parent
+    // pass render target. By default, we draw subpass textures with nearest
+    // sampling, so aligning here is important for avoiding visual nearest
+    // sampling errors caused by limited floating point precision when
+    // straddling a half pixel boundary.
+    //
+    // We do this in lieu of expanding/rounding out the subpass coverage in
+    // order to keep the bounds wrapping consistently tight around subpass
+    // elements. Which is necessary to avoid intense flickering in cases
+    // where a subpass texture has a large blur filter with clamp sampling.
+    //
+    // See also this bug: https://github.com/flutter/flutter/issues/144213
+    Point subpass_texture_position =
+        (subpass_coverage->GetOrigin() - global_pass_position).Round();
+
     Entity element_entity;
     element_entity.SetClipDepth(subpass->clip_depth_);
     element_entity.SetContents(std::move(offscreen_texture_contents));
     element_entity.SetBlendMode(subpass->blend_mode_);
-    element_entity.SetTransform(Matrix::MakeTranslation(
-        Vector3(subpass_coverage->GetOrigin() - global_pass_position)));
+    element_entity.SetTransform(
+        Matrix::MakeTranslation(Vector3(subpass_texture_position)));
 
     return EntityPass::EntityResult::Success(std::move(element_entity));
   }
