@@ -53,10 +53,9 @@ class SkiaGoldClient {
     required this.process,
     required this.platform,
     Abi? abi,
-    io.HttpClient? httpClient,
+    required this.httpClient,
     required this.log,
-  }) : httpClient = httpClient ?? io.HttpClient(),
-       abi = abi ?? Abi.current();
+  }) : abi = abi ?? Abi.current();
 
   /// The file system to use for storing the local clone of the repository.
   ///
