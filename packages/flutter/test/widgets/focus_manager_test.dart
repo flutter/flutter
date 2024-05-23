@@ -355,12 +355,7 @@ void main() {
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('FocusManager ignores app lifecycle changes on Android and iOS.', (WidgetTester tester) async {
-      final bool mobileDevice = switch (defaultTargetPlatform) {
-        TargetPlatform.android || TargetPlatform.iOS => false,
-        TargetPlatform.fuchsia || TargetPlatform.linux => true,
-        TargetPlatform.windows || TargetPlatform.macOS => true,
-      };
-      if (kIsWeb || mobileDevice) {
+      if (kIsWeb) {
         return;
       }
 
@@ -388,18 +383,9 @@ void main() {
 
       await setAppLifecycleState(AppLifecycleState.resumed);
       expect(focusNode.hasPrimaryFocus, isTrue);
-    });
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS, TargetPlatform.android));
 
     testWidgets('FocusManager responds to app lifecycle changes.', (WidgetTester tester) async {
-      final bool mobileDevice = switch (defaultTargetPlatform) {
-        TargetPlatform.android || TargetPlatform.iOS => false,
-        TargetPlatform.fuchsia || TargetPlatform.linux => true,
-        TargetPlatform.windows || TargetPlatform.macOS => true,
-      };
-      if (!kIsWeb && !mobileDevice) {
-        return;
-      }
-
       Future<void> setAppLifecycleState(AppLifecycleState state) async {
         final ByteData? message = const StringCodec().encodeMessage(state.toString());
         await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger

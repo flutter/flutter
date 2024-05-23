@@ -1532,29 +1532,27 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }
-    if (kIsWeb || !_mobileDevice) {
-      // It appears that some Android keyboard implementations can cause
-      // app lifecycle state changes: adding this listener would cause the
-      // text field to unfocus as the user is trying to type.
-      //
-      // Additionally, on iOS, input fields aren't automatically populated
-      // with relevant data when using autofill.
-      //
-      // Until these are resolved, we won't be adding the listener to mobile platforms.
-      // https://github.com/flutter/flutter/issues/148475#issuecomment-2118407411
-      // https://github.com/flutter/flutter/pull/142930#issuecomment-1981750069
+    if (_respondToWindowFocus) {
       _appLifecycleListener = _AppLifecycleListener(_appLifecycleChange);
       WidgetsBinding.instance.addObserver(_appLifecycleListener!);
     }
     rootScope._manager = this;
   }
 
-  // Used in the constructor and in [listenToApplicationLifecycleChangesIfSupported]
-  // to check if the app is running on a native mobile platform.
-  static final bool _mobileDevice = switch (defaultTargetPlatform) {
-    TargetPlatform.android || TargetPlatform.iOS => true,
-    TargetPlatform.fuchsia || TargetPlatform.linux => false,
-    TargetPlatform.windows || TargetPlatform.macOS => false,
+  /// It appears that some Android keyboard implementations can cause
+  /// app lifecycle state changes: adding this listener would cause the
+  /// text field to unfocus as the user is trying to type.
+  ///
+  /// Additionally, on iOS, input fields aren't automatically populated
+  /// with relevant data when using autofill.
+  ///
+  /// Until these are resolved, we won't be adding the listener to mobile platforms.
+  /// https://github.com/flutter/flutter/issues/148475#issuecomment-2118407411
+  /// https://github.com/flutter/flutter/pull/142930#issuecomment-1981750069
+  bool get _respondToWindowFocus => kIsWeb || switch (defaultTargetPlatform) {
+    TargetPlatform.android || TargetPlatform.iOS => false,
+    TargetPlatform.fuchsia || TargetPlatform.linux => true,
+    TargetPlatform.windows || TargetPlatform.macOS => true,
   };
 
   /// Registers global input event handlers that are needed to manage focus.
@@ -1901,17 +1899,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// supported.
   @visibleForTesting
   void listenToApplicationLifecycleChangesIfSupported() {
-    if (_appLifecycleListener == null && (kIsWeb || !_mobileDevice)) {
-      // It appears that some Android keyboard implementations can cause
-      // app lifecycle state changes: adding this listener would cause the
-      // text field to unfocus as the user is trying to type.
-      //
-      // Additionally, on iOS, input fields aren't automatically populated
-      // with relevant data when using autofill.
-      //
-      // Until these are resolved, we won't be adding the listener to mobile platforms.
-      // https://github.com/flutter/flutter/issues/148475#issuecomment-2118407411
-      // https://github.com/flutter/flutter/pull/142930#issuecomment-1981750069
+    if (_appLifecycleListener == null && _respondToWindowFocus) {
       _appLifecycleListener = _AppLifecycleListener(_appLifecycleChange);
       WidgetsBinding.instance.addObserver(_appLifecycleListener!);
     }
