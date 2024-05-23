@@ -82,6 +82,7 @@ class CupertinoCheckbox extends StatefulWidget {
     this.autofocus = false,
     this.side,
     this.shape,
+    this.dropshadow,
     this.isError = false,
     this.semanticLabel,
   }) : assert(tristate || value != null);
@@ -243,6 +244,14 @@ class CupertinoCheckbox extends StatefulWidget {
   /// If this property is null then the shape defaults to a
   /// [RoundedRectangleBorder] with a circular corner radius of 4.0.
   final OutlinedBorder? shape;
+
+  /// The dropshadow from the top edge of the checkbox. On iOS/macOS, checkboxes
+  /// have a slight dropshadow with three pixel-long layers from the top edge.
+  ///
+  /// If this property is null, then the dropshadow defaults to a linear gradient
+  /// starting at the top edge with color [CupertinoColors.black] at opacities
+  /// 0.1 and 0.05.
+  final LinearGradient? dropshadow;
 
   /// True if this checkbox wants to show an error state.
   ///
@@ -408,7 +417,8 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
           ..shape = widget.shape ?? RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4.0),
           )
-          ..side = effectiveBorderSide,
+          ..side = effectiveBorderSide
+          ..dropshadow = widget.dropshadow,
       ),
     );
   }
@@ -465,6 +475,16 @@ class _CheckboxPainter extends ToggleablePainter {
     notifyListeners();
   }
 
+  LinearGradient? get dropshadow => _dropshadow!;
+  LinearGradient? _dropshadow;
+  set dropshadow(LinearGradient value) {
+    if (_dropshadow == value) {
+      return;
+    }
+    _dropshadow = value;
+    notifyListeners();
+  }
+
   Rect _outerRectAt(Offset origin) {
     const double size = CupertinoCheckbox.width;
     final Rect rect = Rect.fromLTWH(origin.dx, origin.dy, size, size);
@@ -499,7 +519,7 @@ class _CheckboxPainter extends ToggleablePainter {
       // The drop shadow has three layers.
       final Rect shadowRect = Rect.fromLTRB(
         outer.left, outer.top, outer.right, outer.top + 3);
-      final LinearGradient topEdgeGradient = LinearGradient(
+      final LinearGradient topEdgeGradient = dropshadow ?? LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: <Color>[
