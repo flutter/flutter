@@ -20,6 +20,23 @@ void main() {
     expect(value.resolve(<WidgetState>{WidgetState.error}), WidgetState.error);
   });
 
+  test('WidgetStateProperty.map()', () {
+    final WidgetStateMapKey active = WidgetState.hovered | WidgetState.focused | WidgetState.pressed;
+    final WidgetStateProperty<String?> value = WidgetStateProperty.map<String?>(
+      <WidgetStateMapKey, String?>{
+        active & WidgetState.error: 'active error',
+        WidgetState.disabled | WidgetState.error: 'kinda sus',
+        ~(WidgetState.dragged | WidgetState.selected) & ~active: 'this is boring',
+        active: 'active',
+      },
+    );
+    expect(value.resolve(<WidgetState>{WidgetState.focused, WidgetState.error}), 'active error');
+    expect(value.resolve(<WidgetState>{WidgetState.scrolledUnder}), 'this is boring');
+    expect(value.resolve(<WidgetState>{WidgetState.disabled}), 'kinda sus');
+    expect(value.resolve(<WidgetState>{WidgetState.hovered}), 'active');
+    expect(value.resolve(<WidgetState>{WidgetState.dragged}),  null);
+  });
+
   test('WidgetStateProperty.all()', () {
     final WidgetStateProperty<int> value = WidgetStateProperty.all<int>(123);
     expect(value.resolve(<WidgetState>{WidgetState.hovered}), 123);
