@@ -5,7 +5,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'button_style.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'icon_button.dart';
@@ -204,10 +203,11 @@ class _SnackBarActionState extends State<SnackBarAction> {
     }
 
     return TextButton(
-      style: ButtonStyle(
-        foregroundColor: resolveForegroundColor(),
-        backgroundColor: resolveBackgroundColor(),
-      ),
+      style: TextButton.styleFrom(overlayColor: resolveForegroundColor())
+        .copyWith(
+          foregroundColor: resolveForegroundColor(),
+          backgroundColor: resolveBackgroundColor(),
+        ),
       onPressed: _haveTriggeredAction ? null : _handlePressed,
       child: Text(widget.label),
     );
@@ -670,9 +670,6 @@ class _SnackBarState extends State<SnackBar> {
 
     final double actionHorizontalMargin = (widget.padding?.resolve(TextDirection.ltr).right ?? horizontalPadding) / 2;
     final double iconHorizontalMargin = (widget.padding?.resolve(TextDirection.ltr).right ?? horizontalPadding) / 12.0;
-
-
-
 
     final IconButton? iconButton = showCloseIcon
         ? IconButton(
