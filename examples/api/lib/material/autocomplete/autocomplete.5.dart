@@ -152,9 +152,7 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
             final Iterable<String>? options =
                 await _debouncedSearch(textEditingValue.text);
             if (textEditingValue.text == _lastValue || _networkError) {
-              setState(() {
-                _isLoading = false; // End options loading.
-              });
+              _isLoading = false; // End options loading.
             }
             if (options == null) {
               return _lastOptions;
