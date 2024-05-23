@@ -782,10 +782,10 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   Widget _buildMaterialSlider(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     SliderThemeData sliderTheme = SliderTheme.of(context);
-    final SliderThemeData defaults = theme.useMaterial3
-      ? _SliderDefaultsM3(context: context, sliderTheme: sliderTheme)
-      : _SliderDefaultsM2(context: context, sliderTheme: sliderTheme);
     final bool useNewShapes = sliderTheme.use2024SliderShapes ?? false;
+    final SliderThemeData defaults = theme.useMaterial3
+      ? useNewShapes ? _SliderDefaultsM3(context: context) : _SliderDefaultsM3Legacy(context: context, sliderTheme: sliderTheme)
+      : _SliderDefaultsM2(context: context, sliderTheme: sliderTheme);
 
     // If the widget has active or inactive colors specified, then we plug them
     // in to the slider theme as best we can. If the developer wants more
@@ -794,11 +794,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     // the default shapes and text styles are aligned to the Material
     // Guidelines.
 
-    final SliderTrackShape defaultTrackShape = useNewShapes ? const GappedSliderTrackShape() as SliderTrackShape : const RoundedRectSliderTrackShape();
-    const SliderTickMarkShape defaultTickMarkShape = RoundSliderTickMarkShape();
     const SliderComponentShape defaultOverlayShape = RoundSliderOverlayShape();
-    final SliderComponentShape defaultThumbShape = useNewShapes ? const BarSliderThumbShape() : const RoundSliderThumbShape();
-    final SliderComponentShape defaultValueIndicatorShape = useNewShapes ? const RoundedRectSliderValueIndicatorShape() : defaults.valueIndicatorShape!;
     const ShowValueIndicator defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
     const SliderInteraction defaultAllowedInteraction = SliderInteraction.tapAndSlide;
 
@@ -813,7 +809,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     // (which can be defined by activeColor) if the
     // RectangularSliderValueIndicatorShape is used. In all other cases, the
     // value indicator is assumed to be the same as the active color.
-    final SliderComponentShape valueIndicatorShape = sliderTheme.valueIndicatorShape ?? defaultValueIndicatorShape;
+    final SliderComponentShape valueIndicatorShape = sliderTheme.valueIndicatorShape ?? defaults.valueIndicatorShape!;
     final Color valueIndicatorColor;
     if (valueIndicatorShape is RectangularSliderValueIndicatorShape) {
       valueIndicatorColor = sliderTheme.valueIndicatorColor ?? Color.alphaBlend(theme.colorScheme.onSurface.withOpacity(0.60), theme.colorScheme.surface.withOpacity(0.90));
@@ -849,9 +845,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       disabledThumbColor: sliderTheme.disabledThumbColor ?? defaults.disabledThumbColor,
       overlayColor: effectiveOverlayColor(),
       valueIndicatorColor: valueIndicatorColor,
-      trackShape: sliderTheme.trackShape ?? defaultTrackShape,
-      tickMarkShape: sliderTheme.tickMarkShape ?? defaultTickMarkShape,
-      thumbShape: sliderTheme.thumbShape ?? defaultThumbShape,
+      trackShape: sliderTheme.trackShape ?? defaults.trackShape,
+      tickMarkShape: sliderTheme.tickMarkShape ?? defaults.tickMarkShape,
+      thumbShape: sliderTheme.thumbShape ?? defaults.thumbShape,
       overlayShape: sliderTheme.overlayShape ?? defaultOverlayShape,
       valueIndicatorShape: valueIndicatorShape,
       showValueIndicator: sliderTheme.showValueIndicator ?? defaultShowValueIndicator,
@@ -1669,9 +1665,10 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       overlayRect = Rect.fromCircle(center: thumbCenter, radius: overlaySize.width / 2.0);
     }
     final Offset? secondaryOffset = (secondaryVisualPosition != null) ? Offset(trackRect.left + secondaryVisualPosition * trackRect.width, trackRect.center.dy) : null;
-    double thumbWidth = _sliderTheme.barThumbSize!.width;
+    double thumbWidth = _sliderTheme.barThumbSize!.resolve(<MaterialState>{})!.width;
+    final double thumbHeight = _sliderTheme.barThumbSize!.resolve(<MaterialState>{})!.height;
     double trackGapSize = _sliderTheme.trackGapSize!;
-    final double pressedThumbWidth = (thumbWidth * 0.5).roundToDouble();
+    final double pressedThumbWidth = _sliderTheme.barThumbSize!.resolve(<MaterialState>{ MaterialState.pressed })!.width;
     final double delta = thumbWidth - pressedThumbWidth;
 
     if (_active) {
@@ -1774,7 +1771,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       isDiscrete: isDiscrete,
       labelPainter: _labelPainter,
       parentBox: this,
-      sliderTheme: _sliderTheme.copyWith(barThumbSize: Size(thumbWidth, _sliderTheme.barThumbSize!.height)),
+      sliderTheme: _sliderTheme.copyWith(barThumbSize: MaterialStatePropertyAll<Size>(Size(thumbWidth, thumbHeight))),
       textDirection: _textDirection,
       value: _value,
       textScaleFactor: textScaleFactor,
@@ -1944,7 +1941,6 @@ class _SliderDefaultsM2 extends SliderThemeData {
   late final ThemeData theme = Theme.of(context);
   late final ColorScheme _colors = Theme.of(context).colorScheme;
   final SliderThemeData _sliderTheme;
-  late final bool newShapes = _sliderTheme.use2024SliderShapes ?? false;
 
   @override
   Color? get activeTrackColor => _colors.primary;
@@ -1984,7 +1980,7 @@ class _SliderDefaultsM2 extends SliderThemeData {
 
   @override
   Color? get overlayColor {
-    if ((_sliderTheme.thumbShape is BarSliderThumbShape || newShapes) && theme.brightness != Brightness.dark) {
+    if (_sliderTheme.thumbShape is BarSliderThumbShape) {
       return Colors.transparent;
     }
     return _colors.primary.withOpacity(0.12);
@@ -1992,7 +1988,7 @@ class _SliderDefaultsM2 extends SliderThemeData {
 
   @override
   TextStyle? get valueIndicatorTextStyle => Theme.of(context).textTheme.bodyLarge!.copyWith(
-    color: _sliderTheme.valueIndicatorShape is RoundedRectSliderValueIndicatorShape || newShapes
+    color: _sliderTheme.valueIndicatorShape is RoundedRectSliderValueIndicatorShape
       ? _colors.onInverseSurface
       : _colors.onPrimary,
   );
@@ -2001,52 +1997,61 @@ class _SliderDefaultsM2 extends SliderThemeData {
   SliderComponentShape? get valueIndicatorShape => const RectangularSliderValueIndicatorShape();
 
   @override
+  SliderComponentShape? get thumbShape => const RoundSliderThumbShape();
+
+  @override
+  SliderTrackShape? get trackShape => const RoundedRectSliderTrackShape();
+
+  @override
+  SliderTickMarkShape? get tickMarkShape => const RoundSliderTickMarkShape();
+
+  @override
+  SliderComponentShape? get overlayShape => const RoundSliderOverlayShape();
+
+  @override
   Color? get valueIndicatorColor {
-    if (_sliderTheme.valueIndicatorShape is RoundedRectSliderValueIndicatorShape || newShapes) {
+    if (_sliderTheme.valueIndicatorShape is RoundedRectSliderValueIndicatorShape) {
       return _colors.inverseSurface;
     }
     return _colors.primary;
   }
 
   @override
-  double? get trackHeight => _sliderTheme.trackShape is GappedSliderTrackShape || newShapes
-    // TODO(tahatesser): Update this hard-coded value to use the latest tokens.
+  double? get trackHeight => _sliderTheme.trackShape is GappedSliderTrackShape
     ? 16.0
     : 4.0;
 
-  // TODO(tahatesser): Update this hard-coded value to use the latest tokens.
   @override
-  Size? get barThumbSize => const Size(4.0, 44.0);
+  MaterialStateProperty<Size?>? get barThumbSize =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return  const Size(2.0, 44.0);
+      }
+      return  const Size(4.0, 44.0);
+    });
 
-  // TODO(tahatesser): Update this hard-coded value to use the latest tokens.
   @override
   double? get trackGapSize => 6.0;
 }
 
-// BEGIN GENERATED TOKEN PROPERTIES - Slider
-
-// Do not edit by hand. The code between the "BEGIN GENERATED" and
-// "END GENERATED" comments are generated from data in the Material
-// Design token database by the script:
-//   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-class _SliderDefaultsM3 extends SliderThemeData {
-  _SliderDefaultsM3({ required this.context, required SliderThemeData sliderTheme })
+/// The default [SliderThemeData] for the legacy Material 3 slider.
+///
+/// This theme is used by [Slider] if the [[SliderThemeData.use2024SliderShapes] is set to false.
+class _SliderDefaultsM3Legacy extends SliderThemeData {
+  _SliderDefaultsM3Legacy({ required this.context, required SliderThemeData sliderTheme })
     : _sliderTheme = sliderTheme;
 
   final BuildContext context;
   late final ThemeData theme = Theme.of(context);
   late final ColorScheme _colors = Theme.of(context).colorScheme;
   final SliderThemeData _sliderTheme;
-  late final bool newShapes = _sliderTheme.use2024SliderShapes ?? false;
 
   @override
   Color? get activeTrackColor => _colors.primary;
 
   @override
   Color? get inactiveTrackColor {
-    if (_sliderTheme.trackShape is GappedSliderTrackShape || newShapes) {
-      // TODO(tahatesser): Update this hard-coded value to use the latest tokens.
+    if (_sliderTheme.trackShape is GappedSliderTrackShape) {
       return _colors.secondaryContainer;
     }
     return _colors.surfaceContainerHighest;
@@ -2083,30 +2088,27 @@ class _SliderDefaultsM3 extends SliderThemeData {
   Color? get disabledThumbColor => Color.alphaBlend(_colors.onSurface.withOpacity(0.38), _colors.surface);
 
   @override
-  Color? get overlayColor {
-    if ((_sliderTheme.thumbShape is BarSliderThumbShape || newShapes) && theme.brightness != Brightness.dark) {
-      // TODO(tahatesser): Update this hard-coded value to use the latest tokens.
+  Color? get overlayColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    if (_sliderTheme.thumbShape is BarSliderThumbShape) {
       return Colors.transparent;
     }
-    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.dragged)) {
-        return _colors.primary.withOpacity(0.1);
-      }
-      if (states.contains(MaterialState.hovered)) {
-        return _colors.primary.withOpacity(0.08);
-      }
-      if (states.contains(MaterialState.focused)) {
-        return _colors.primary.withOpacity(0.1);
-      }
 
-      return Colors.transparent;
-    });
-  }
+    if (states.contains(MaterialState.dragged)) {
+      return _colors.primary.withOpacity(0.1);
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return _colors.primary.withOpacity(0.08);
+    }
+    if (states.contains(MaterialState.focused)) {
+      return _colors.primary.withOpacity(0.1);
+    }
+
+    return Colors.transparent;
+  });
 
   @override
   TextStyle? get valueIndicatorTextStyle => Theme.of(context).textTheme.labelMedium!.copyWith(
-    // TODO(tahatesser): Update this hard-coded value to use the latest tokens.
-    color:  _sliderTheme.valueIndicatorShape is RoundedRectSliderValueIndicatorShape || newShapes
+    color: _sliderTheme.valueIndicatorShape is RoundedRectSliderValueIndicatorShape
       ? _colors.onInverseSurface
       : _colors.onPrimary,
   );
@@ -2115,26 +2117,132 @@ class _SliderDefaultsM3 extends SliderThemeData {
   SliderComponentShape? get valueIndicatorShape => const DropSliderValueIndicatorShape();
 
   @override
+  SliderComponentShape? get thumbShape => const RoundSliderThumbShape();
+
+  @override
+  SliderTrackShape? get trackShape => const RoundedRectSliderTrackShape();
+
+  @override
+  SliderTickMarkShape? get tickMarkShape => const RoundSliderTickMarkShape();
+
+  @override
+  SliderComponentShape? get overlayShape => const RoundSliderOverlayShape();
+
+  @override
   Color? get valueIndicatorColor {
-    // TODO(tahatesser): Update this hard-coded value to use the latest tokens.
-    if (_sliderTheme.valueIndicatorShape is RoundedRectSliderValueIndicatorShape || newShapes) {
+    if (_sliderTheme.valueIndicatorShape is RoundedRectSliderValueIndicatorShape) {
       return _colors.inverseSurface;
     }
     return _colors.primary;
   }
 
   @override
-  double? get trackHeight => _sliderTheme.trackShape is GappedSliderTrackShape || newShapes
-    // TODO(tahatesser): Update this hard-coded value to use the latest tokens.
-    ? 16.0
-    : 4.0;
+  double? get trackHeight => _sliderTheme.trackShape is GappedSliderTrackShape ? 16.0 : 4.0;
 
-  // TODO(tahatesser): Update this hard-coded value to use the latest tokens.
   @override
-  Size? get barThumbSize => const Size(4.0, 44.0);
+  MaterialStateProperty<Size?>? get barThumbSize =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return  const Size(2.0, 44.0);
+      }
+      return  const Size(4.0, 44.0);
+    });
 
-  // TODO(tahatesser): Update this hard-coded value to use the latest tokens.
   @override
+  double? get trackGapSize => 6.0;
+}
+
+// BEGIN GENERATED TOKEN PROPERTIES - Slider
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+class _SliderDefaultsM3 extends SliderThemeData {
+  _SliderDefaultsM3({ required this.context });
+
+  final BuildContext context;
+  late final ThemeData theme = Theme.of(context);
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+
+  @override
+  Color? get activeTrackColor => _colors.primary;
+
+  @override
+  Color? get inactiveTrackColor => _colors.secondaryContainer;
+
+  @override
+  Color? get secondaryActiveTrackColor => _colors.primary.withOpacity(0.54);
+
+  @override
+  Color? get disabledActiveTrackColor => _colors.onSurface.withOpacity(0.38);
+
+  @override
+  Color? get disabledInactiveTrackColor => _colors.onSurface.withOpacity(0.12);
+
+  @override
+  Color? get disabledSecondaryActiveTrackColor => _colors.onSurface.withOpacity(0.12);
+
+  @override
+  Color? get activeTickMarkColor => _colors.onInverseSurface;
+
+  @override
+  // TODO(tahatesser): Update this hard-coded value to use the correct token value.
+  Color? get inactiveTickMarkColor => _colors.primary;
+
+  @override
+  Color? get disabledActiveTickMarkColor => _colors.onSurface;
+
+  @override
+  Color? get disabledInactiveTickMarkColor => _colors.onSurface;
+
+  @override
+  Color? get thumbColor => _colors.primary;
+
+  @override
+  Color? get disabledThumbColor => Color.alphaBlend(_colors.onSurface.withOpacity(0.38), _colors.surface);
+
+  @override
+  Color? get overlayColor => Colors.transparent;
+
+  @override
+  TextStyle? get valueIndicatorTextStyle => Theme.of(context).textTheme.labelLarge!.copyWith(
+    color: _colors.onInverseSurface,
+  );
+
+  @override
+  SliderComponentShape? get valueIndicatorShape => const RoundedRectSliderValueIndicatorShape();
+
+  @override
+  SliderComponentShape? get thumbShape => const BarSliderThumbShape();
+
+  @override
+  SliderTrackShape? get trackShape => const GappedSliderTrackShape();
+
+  @override
+  SliderComponentShape? get overlayShape => const RoundSliderOverlayShape();
+
+  @override
+  SliderTickMarkShape? get tickMarkShape => const RoundSliderTickMarkShape(tickMarkRadius: 4.0 / 2);
+
+  @override
+  Color? get valueIndicatorColor => _colors.inverseSurface;
+
+  @override
+  double? get trackHeight => 16.0;
+
+  @override
+  MaterialStateProperty<Size?>? get barThumbSize =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return const Size(2.0, 44.0);
+      }
+      return const Size(4.0, 44.0);
+    });
+
+  @override
+  // TODO(tahatesser): Update this hard-coded value to use the token value when it is available.
   double? get trackGapSize => 6.0;
 }
 

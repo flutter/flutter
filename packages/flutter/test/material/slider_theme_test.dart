@@ -63,7 +63,7 @@ void main() {
       valueIndicatorTextStyle: TextStyle(color: Colors.black),
       mouseCursor: MaterialStateMouseCursor.clickable,
       allowedInteraction: SliderInteraction.tapOnly,
-      barThumbSize: Size(20, 40),
+      barThumbSize: MaterialStatePropertyAll<Size>( Size(20, 40)),
       trackGapSize: 10.0,
       use2024SliderShapes: true,
     ).debugFillProperties(builder);
@@ -104,7 +104,7 @@ void main() {
       'valueIndicatorTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
       'mouseCursor: WidgetStateMouseCursor(clickable)',
       'allowedInteraction: tapOnly',
-      'barThumbSize: Size(20.0, 40.0)',
+      'barThumbSize: WidgetStatePropertyAll(Size(20.0, 40.0))',
       'trackGapSize: 10.0',
       'use2024SliderShapes: true'
     ]);
@@ -2643,7 +2643,7 @@ void main() {
             ..rrect(color: const Color(0xff2196f3))
             ..rrect(color: const Color(0x3d2196f3))
             // Test that the value indicator text is painted with the correct color.
-            ..path(color: const Color(0xf55f5f5f))
+            ..path(color: const Color(0xf55f5f5f)),
         );
 
         // Finish gesture to release resources.
@@ -2733,7 +2733,7 @@ void main() {
             rect.left, rect.top, rect.right, rect.bottom,
             Radius.circular(rect.shortestSide / 2),
           ),
-          color: Color(theme.colorScheme.primary.value)
+          color: Color(theme.colorScheme.primary.value),
         ),
     );
   });
@@ -2744,7 +2744,7 @@ void main() {
     final ThemeData theme = ThemeData(
       sliderTheme: const SliderThemeData(
         thumbShape: BarSliderThumbShape(),
-        barThumbSize: thumbSize,
+        barThumbSize: MaterialStatePropertyAll<Size>(thumbSize),
       ),
     );
 
@@ -2850,8 +2850,7 @@ void main() {
     );
   });
 
-
-  testWidgets('BarSliderThumbShape draws transparent overlay when brightness is light', (WidgetTester tester) async {
+  testWidgets('BarSliderThumbShape draws transparent overlay', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       sliderTheme: const SliderThemeData(
         thumbShape: BarSliderThumbShape(),
@@ -2879,7 +2878,7 @@ void main() {
 
     final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
     final Offset center = tester.getCenter(find.byType(Slider));
-    TestGesture gesture = await tester.startGesture(center);
+    await tester.startGesture(center);
     // Wait for overlay animation to finish.
     await tester.pumpAndSettle();
     // With no touch, paints only the thumb.
@@ -2889,26 +2888,6 @@ void main() {
       paints
         ..circle(
           color: Colors.transparent,
-          x: 400.0,
-          y: 300.0,
-          radius: 24.0,
-        ),
-    );
-
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    await tester.pumpWidget(buildSlider(Brightness.dark));
-
-    gesture = await tester.startGesture(center);
-    // Wait for overlay animation to finish.
-    await tester.pumpAndSettle();
-
-    expect(
-      material,
-      paints
-        ..circle(
-          color: theme.colorScheme.primary.withOpacity(0.1),
           x: 400.0,
           y: 300.0,
           radius: 24.0,
@@ -3339,7 +3318,7 @@ void main() {
       paints
         ..clipRRect(rrect: clipRRect)
         ..rrect(rrect: activeTrackRRect)
-        ..rrect(rrect: inactiveTrackRRect)
+        ..rrect(rrect: inactiveTrackRRect),
     );
   });
 
@@ -3384,7 +3363,7 @@ void main() {
       find.byType(Slider),
       paints
         ..rrect(rrect: activeTrackRRect)
-        ..rrect(rrect: inactiveTrackRRect)
+        ..rrect(rrect: inactiveTrackRRect),
     );
 
     final Offset center = tester.getCenter(find.byType(Slider));
@@ -3410,7 +3389,7 @@ void main() {
       find.byType(Slider),
       paints
         ..rrect(rrect: activeTrackRRectPressed)
-        ..rrect(rrect: inactiveTrackRRectPressed)
+        ..rrect(rrect: inactiveTrackRRectPressed),
     );
 
     await gesture.up();
@@ -3420,7 +3399,7 @@ void main() {
       find.byType(Slider),
       paints
         ..rrect(rrect: activeTrackRRect)
-        ..rrect(rrect: inactiveTrackRRect)
+        ..rrect(rrect: inactiveTrackRRect),
     );
   });
 
@@ -3490,7 +3469,7 @@ void main() {
       find.byType(Slider),
       paints
         ..rrect(rrect: activeTrackRRectPressed)
-        ..rrect(rrect: inactiveTrackRRectPressed)
+        ..rrect(rrect: inactiveTrackRRectPressed),
     );
 
     await gesture.up();
@@ -3500,7 +3479,7 @@ void main() {
       find.byType(Slider),
       paints
         ..rrect(rrect: activeTrackRRect)
-        ..rrect(rrect: inactiveTrackRRect)
+        ..rrect(rrect: inactiveTrackRRect),
     );
   });
 
@@ -3641,7 +3620,7 @@ void main() {
         ..clipRRect(rrect: clipRRect)
         ..rrect(rrect: activeTrackRRect, color: activeTrackColor)
         ..rrect(rrect: inactiveTrackRRect, color: inactiveTrackColor)
-        ..rrect(rrect: thumbRRect, color: thumbColor)
+        ..rrect(rrect: thumbRRect, color: thumbColor),
     );
 
     final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
@@ -3651,7 +3630,7 @@ void main() {
     // Wait for value indicator animation to finish.
     await tester.pumpAndSettle();
 
-    final RRect valueIndicatorRRect = RRect.fromLTRBR(-28.75, -42.0, 28.75, -10.0, const Radius.circular(16.0));
+    final RRect valueIndicatorRRect = RRect.fromLTRBR(-31.149999618530273, -42.0, 31.149999618530273, -10.0, const Radius.circular(16.0));
     final Color valueIndicatorColor = theme.colorScheme.inverseSurface;
 
     expect(
@@ -3659,96 +3638,7 @@ void main() {
       paints
         ..scale()
         ..rrect(rrect: valueIndicatorRRect, color: valueIndicatorColor)
-        ..translate()
-    );
-  });
-
-  testWidgets('Material2 - SliderThemeData.use2024SliderShapes enables 2024 Slider shapes', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(
-      sliderTheme: const SliderThemeData(
-        use2024SliderShapes: true,
-        showValueIndicator: ShowValueIndicator.always,
-      ),
-      useMaterial3: false,
-    );
-
-    const double value = 0.5;
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: theme,
-        home: Material(
-          child: UnconstrainedBox(
-            constrainedAxis: Axis.horizontal,
-            child: Slider(
-              value: value,
-              label: '$value',
-              onChanged: (double newValue) {},
-            ),
-          ),
-        ),
-      ),
-    );
-
-    final ThemeData thene = Theme.of(tester.element(find.byType(Slider)));
-    expect(thene.sliderTheme.use2024SliderShapes, isTrue);
-
-    const Size thumbSize = Size(4.0, 44.0);
-    final Color thumbColor = Color(theme.colorScheme.primary.value);
-    final Color activeTrackColor = Color(theme.colorScheme.primary.value);
-    final Color inactiveTrackColor = theme.colorScheme.primary.withOpacity(0.24);
-    const double trackHeight = 16.0;
-
-    final Rect rect = Rect.fromLTRB(398.0, 3.0, 398.0 + thumbSize.width, 3.0 + thumbSize.height);
-    final RRect thumbRRect = RRect.fromRectAndRadius(rect, Radius.circular(rect.shortestSide / 2));
-
-    final RRect clipRRect = RRect.fromLTRBAndCorners(
-      24.0, 17.0, 776.0, 17.0 + trackHeight,
-      topLeft: const Radius.circular(8.0),
-      bottomLeft: const Radius.circular(8.0),
-      topRight: const Radius.circular(8.0),
-      bottomRight: const Radius.circular(8.0),
-    );
-    final RRect activeTrackRRect = RRect.fromLTRBAndCorners(
-      24.0, 17.0, 394.0, 17.0 + trackHeight,
-      topLeft: const Radius.circular(8.0),
-      bottomLeft: const Radius.circular(8.0),
-      topRight: const Radius.circular(2.0),
-      bottomRight: const Radius.circular(2.0),
-    );
-    final RRect inactiveTrackRRect = RRect.fromLTRBAndCorners(
-      406.0, 17.0, 776.0, 17.0 + trackHeight,
-      topLeft: const Radius.circular(2.0),
-      bottomLeft: const Radius.circular(2.0),
-      topRight: const Radius.circular(8.0),
-      bottomRight: const Radius.circular(8.0),
-    );
-
-    expect(
-      find.byType(Slider),
-      paints
-        ..clipRRect(rrect: clipRRect)
-        ..rrect(rrect: activeTrackRRect, color: activeTrackColor)
-        ..rrect(rrect: inactiveTrackRRect, color: inactiveTrackColor)
-        ..rrect(rrect: thumbRRect, color: thumbColor)
-    );
-
-    final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
-
-    final Offset center = tester.getCenter(find.byType(Slider));
-    await tester.startGesture(center);
-    // Wait for value indicator animation to finish.
-    await tester.pumpAndSettle();
-
-    final RRect valueIndicatorRRect = RRect.fromLTRBR(-31.0, -42.0, 31.0, -10.0, const Radius.circular(16.0));
-    final Color valueIndicatorColor = theme.colorScheme.inverseSurface;
-
-    expect(
-      valueIndicatorBox,
-      paints
-        ..scale()
-        ..rrect(rrect: valueIndicatorRRect, color: valueIndicatorColor)
-        ..translate()
+        ..translate(),
     );
   });
 }

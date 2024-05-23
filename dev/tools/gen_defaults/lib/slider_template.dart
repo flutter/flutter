@@ -14,26 +14,17 @@ class SliderTemplate extends TokenTemplate {
   @override
   String generate() => '''
 class _${blockName}DefaultsM3 extends SliderThemeData {
-  _${blockName}DefaultsM3({ required this.context, required SliderThemeData sliderTheme })
-    : _sliderTheme = sliderTheme;
+  _${blockName}DefaultsM3({ required this.context });
 
   final BuildContext context;
   late final ThemeData theme = Theme.of(context);
   late final ColorScheme _colors = Theme.of(context).colorScheme;
-  final SliderThemeData _sliderTheme;
-  late final bool newShapes = _sliderTheme.use2024SliderShapes ?? false;
 
   @override
   Color? get activeTrackColor => ${componentColor('$tokenGroup.active.track')};
 
   @override
-  Color? get inactiveTrackColor {
-    if (_sliderTheme.trackShape is ExpressiveRoundedRectSliderTrackShape || newShapes) {
-      // TODO(tahatesser): Update this hard-coded value to use the latest tokens.
-      return _colors.secondaryContainer;
-    }
-    return ${componentColor('$tokenGroup.inactive.track')};
-  }
+  Color? get inactiveTrackColor => ${componentColor('$tokenGroup.inactive.track')};
 
   @override
   Color? get secondaryActiveTrackColor => _colors.primary.withOpacity(0.54);
@@ -48,16 +39,17 @@ class _${blockName}DefaultsM3 extends SliderThemeData {
   Color? get disabledSecondaryActiveTrackColor => _colors.onSurface.withOpacity(0.12);
 
   @override
-  Color? get activeTickMarkColor => ${componentColor('$tokenGroup.with-tick-marks.active.container')};
+  Color? get activeTickMarkColor => _colors.${getToken("$tokenGroup.disabled.stop-indicator.color-selected")};
 
   @override
-  Color? get inactiveTickMarkColor => ${componentColor('$tokenGroup.with-tick-marks.inactive.container')};
+  // TODO(tahatesser): Update this hard-coded value to use the correct token value.
+  Color? get inactiveTickMarkColor => _colors.primary;
 
   @override
-  Color? get disabledActiveTickMarkColor => ${componentColor('$tokenGroup.with-tick-marks.disabled.container')};
+  Color? get disabledActiveTickMarkColor => ${componentColor('$tokenGroup.disabled.stop-indicator')};
 
   @override
-  Color? get disabledInactiveTickMarkColor => ${componentColor('$tokenGroup.with-tick-marks.disabled.container')};
+  Color? get disabledInactiveTickMarkColor => ${componentColor('$tokenGroup.disabled.stop-indicator')};
 
   @override
   Color? get thumbColor => ${componentColor('$tokenGroup.handle')};
@@ -66,58 +58,45 @@ class _${blockName}DefaultsM3 extends SliderThemeData {
   Color? get disabledThumbColor => Color.alphaBlend(${componentColor('$tokenGroup.disabled.handle')}, _colors.surface);
 
   @override
-  Color? get overlayColor {
-    if ((_sliderTheme.thumbShape is BarSliderThumbShape || newShapes) && theme.brightness != Brightness.dark) {
-      // TODO(tahatesser): Update this hard-coded value to use the latest tokens.
-      return Colors.transparent;
-    }
-    return MaterialStateColor.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.dragged)) {
-        return ${componentColor('$tokenGroup.pressed.state-layer')};
-      }
-      if (states.contains(MaterialState.hovered)) {
-        return ${componentColor('$tokenGroup.hover.state-layer')};
-      }
-      if (states.contains(MaterialState.focused)) {
-        return ${componentColor('$tokenGroup.focus.state-layer')};
-      }
-
-      return Colors.transparent;
-    });
-  }
+  Color? get overlayColor => Colors.transparent;
 
   @override
-  TextStyle? get valueIndicatorTextStyle => ${textStyle('$tokenGroup.label.label-text')}!.copyWith(
-    // TODO(tahatesser): Update this hard-coded value to use the latest tokens.
-    color:  _sliderTheme.valueIndicatorShape is RoundedRectSliderValueIndicatorShape || newShapes
-      ? _colors.onInverseSurface
-      : ${componentColor('$tokenGroup.label.label-text')},
+  TextStyle? get valueIndicatorTextStyle => ${textStyle('$tokenGroup.value-indicator.label.label-text')}!.copyWith(
+    color: ${componentColor('$tokenGroup.label.label-text')},
   );
 
   @override
-  SliderComponentShape? get valueIndicatorShape => const DropSliderValueIndicatorShape();
+  SliderComponentShape? get valueIndicatorShape => const RoundedRectSliderValueIndicatorShape();
 
   @override
-  Color? get valueIndicatorColor {
-    // TODO(tahatesser): Update this hard-coded value to use the latest tokens.
-    if (_sliderTheme.valueIndicatorShape is RoundedRectSliderValueIndicatorShape || newShapes) {
-      return _colors.inverseSurface;
-    }
-    return ${componentColor('$tokenGroup.label.container')};
-  }
+  SliderComponentShape? get thumbShape => const BarSliderThumbShape();
 
   @override
-  double? get trackHeight => _sliderTheme.trackShape is ExpressiveRoundedRectSliderTrackShape || newShapes
-    // TODO(tahatesser): Update this hard-coded value to use the latest tokens.
-    ? 16.0
-    : ${getToken("$tokenGroup.active.track.height")};
+  SliderTrackShape? get trackShape => const GappedSliderTrackShape();
 
-  // TODO(tahatesser): Update this hard-coded value to use the latest tokens.
   @override
-  Size? get barThumbSize => const Size(4.0, 44.0);
+  SliderComponentShape? get overlayShape => const RoundSliderOverlayShape();
 
-  // TODO(tahatesser): Update this hard-coded value to use the latest tokens.
   @override
+  SliderTickMarkShape? get tickMarkShape => const RoundSliderTickMarkShape(tickMarkRadius: ${getToken("$tokenGroup.stop-indicator.size")} / 2);
+
+  @override
+  Color? get valueIndicatorColor => ${componentColor('$tokenGroup.value-indicator.container')};
+
+  @override
+  double? get trackHeight => ${getToken("$tokenGroup.active.track.height")};
+
+  @override
+  MaterialStateProperty<Size?>? get barThumbSize =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return const Size(${getToken("$tokenGroup.pressed.handle.width")}, ${getToken("$tokenGroup.handle.height")});
+      }
+      return const Size(${getToken("$tokenGroup.handle.width")}, ${getToken("$tokenGroup.handle.height")});
+    });
+
+  @override
+  // TODO(tahatesser): Update this hard-coded value to use the token value when it is available.
   double? get trackGapSize => 6.0;
 }
 ''';
