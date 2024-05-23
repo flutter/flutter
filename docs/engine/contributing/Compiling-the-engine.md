@@ -60,7 +60,7 @@ Run the following steps, from the `src` directory created in [Setting up the Eng
 > 💡 **TIP**: When developing on a Mac with ARM (M CPU), prefer `host_debug_unopt_arm64`.
 >
 > You can continue to use `host_debug_unopt` (required for Intel Macs), but the engine will be run under Rosetta
-> which may be slower. See [Developing with Flutter on Apple Silicon](https://github.com/flutter/flutter/wiki/Developing-with-Flutter-on-Apple-Silicon)
+> which may be slower. See [Developing with Flutter on Apple Silicon](../../platforms/desktop/macos/Developing-with-Flutter-on-Apple-Silicon.md)
 > for more information.
 
 4. Build your executables
@@ -133,13 +133,13 @@ Run the following steps, from the `src` directory created in the steps above:
 
 5. `ninja -C out/ios_debug_unopt && ninja -C out/host_debug_unopt` to build all artifacts (use `out/ios_debug_sim_unopt` for Simulator).
 
-See [The flutter tool](https://github.com/flutter/flutter/wiki/The-flutter-tool) for instructions on how to use the `flutter` tool with a local engine.
+See [The flutter tool](../../tool/README.md) for instructions on how to use the `flutter` tool with a local engine.
 You will typically use the `ios_debug_unopt` build to debug the engine on a device, and
 `ios_debug_sim_unopt` to debug in on a simulator. Modifying dart sources in the engine will
 require adding a `dependency_override` section in you app's `pubspec.yaml` as detailed
 [here](../../tool/README.md#using-a-locally-built-engine-with-the-flutter-tool).
 
-See also [instructions for debugging the engine in a Flutter app in Xcode](https://github.com/flutter/flutter/wiki/Debugging-the-engine#debugging-ios-builds-with-xcode).
+See also [instructions for debugging the engine in a Flutter app in Xcode](../Debugging-the-engine.md#debugging-ios-builds-with-xcode).
 
 ## Compiling for macOS or Linux
 
@@ -155,10 +155,10 @@ These steps build the desktop embedding, and the engine used by `flutter test` o
 4. `ninja -C out/host_debug_unopt` to build a desktop unoptimized binary.
     * If you skipped `--unoptimized`, use `ninja -C out/host_debug` instead.
 
-See [The flutter tool](https://github.com/flutter/flutter/wiki/The-flutter-tool) for instructions on how to use the `flutter` tool with a local engine.
+See [The flutter tool](../../tool/README.md) for instructions on how to use the `flutter` tool with a local engine.
 You will typically use the `host_debug_unopt` build in this setup. Modifying dart sources in the engine will
 require adding a `dependency_override` section in you app's `pubspec.yaml` as detailed
-[here](https://github.com/flutter/flutter/wiki/The-flutter-tool#using-a-locally-built-engine-with-the-flutter-tool).
+[here](../../tool/README.md#using-a-locally-built-engine-with-the-flutter-tool).
 
 
 ## Compiling for Windows

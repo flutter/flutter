@@ -1,22 +1,4 @@
-////
-Enable icons for admonitions
-From https://gist.github.com/dcode/0cfbf2699a1fe9b46ff04c41721dda74#admonitions
-////
-ifdef::env-github[]
-:tip-caption: :bulb:
-:note-caption: :information_source:
-:important-caption: :heavy_exclamation_mark:
-:caution-caption: :fire:
-:warning-caption: :warning:
-endif::[]
-
-
-:toc:
-:toc-placement!:
-
 Common issues Flutter developers might run into and recipes how to fix or work around.
-
-toc::[]
 
 = Flutter Recipes
 
@@ -133,10 +115,6 @@ In a network where the Internet can only be reached through a proxy and Flutter 
 ==== Causes
 
 Proxy setting incomplete or invalid.
-
-==== Ways to fix
-
-- See https://github.com/flutter/flutter/wiki/Using-Flutter-in-China
 
 ==== Related information
 (none yet)

@@ -4,10 +4,9 @@ _**Everything in this doc and linked from this doc is experimental. These detail
 
 Flutter can be added to an Android app as a single `View` in an `Activity`'s `View` hierarchy.
 
-Before adding Flutter as a single `View`, you should consider if it is possible to add Flutter as a `Fragment` or an `Activity` to reduce your development burden.
+Before adding Flutter as a single `View`, you should consider if it is possible to add Flutter as a `Fragment` to reduce your development burden.
 
-* [How to use a `FlutterActivity`](https://github.com/flutter/flutter/wiki/Experimental:-Add-Flutter-Activity)
-* [How to use a `FlutterFragment`](https://github.com/flutter/flutter/wiki/Experimental:-Add-Flutter-Fragment)
+* [How to use a `FlutterFragment`](Experimental-Add-Flutter-Fragment-ViewPager.md)
 
 If you really need to add Flutter as a single `View` then do the following.
 
@@ -15,7 +14,7 @@ If you really need to add Flutter as a single `View` then do the following.
 
 ### Create and start a FlutterEngine
 
-Create and start a `FlutterEngine` by following the appropriate instructions. See the [FlutterEngine page](https://github.com/flutter/flutter/wiki/Experimental:-Reuse-FlutterEngine-across-screens)
+Create and start a `FlutterEngine` by following the appropriate instructions. See the [FlutterEngine page](Experimental-Reuse-FlutterEngine-across-screens.md)
 
 ### Create a FlutterView and add to layout
 

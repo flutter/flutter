@@ -16,7 +16,7 @@ flutter/packages uses the same LUCI infrastructure as most of the rest of Flutte
 
 ### LUCI
 
-This is the CI system used by flutter/flutter and flutter/engine. For information about LUCI results pages, see [Understanding a LUCI build failure](https://github.com/flutter/flutter/wiki/Understanding-a-LUCI-build-failure).
+This is the CI system used by flutter/flutter and flutter/engine. For information about LUCI results pages, see [Understanding a LUCI build failure](../../infra/Understanding-a-LUCI-build-failure.md).
 
 #### Results
 
@@ -40,7 +40,7 @@ GitHub Actions tasks are configured in `.github/workflows/`.
 
 The overall testing structure for flutter/packages is:
 - Most tests are run on only one host platform: Linux when possible, or the relevant platform if necessary (e.g., Windows target tests must run on Windows hosts, and iOS and macOS tests must run on macOS hosts).
-- Most tests are run with both Flutter `master` and Flutter `stable` (see [discussion of supported platforms](https://github.com/flutter/flutter/wiki/Contributing-to-Plugins-and-Packages#supported-flutter-versions) for more details).
+- Most tests are run with both Flutter `master` and Flutter `stable` (see [discussion of supported platforms](../contributing/README.md#supported-flutter-versions) for more details).
     - Since in practice `stable`-only failures are very rare, CI is currently configured to only run `stable` in post-submit to reduce CI time and costs.
 - Architecture coverage is as-needed; we generally don't duplicate tests across architectures. For plugins, where architecture is most likely to be an issue, we try to run:
     - the majority of the tests (`*_platform_tests`) on the most popular architecture, and
@@ -72,7 +72,7 @@ Below are descriptions of many of the less self-evident CI tests, and common sol
         - **Solution**: Suppress the warnings with `// ignore: deprecated_member_use` annotations in the other packages using that method, [with a comment](../../contributing/Style-guide-for-Flutter-repo.md#comment-all--ignores) linking to the issue that tracks updating it. Once it lands, do a follow-up PR to update the calls and remove the `ignore`s.
     - Adding a new enum value. We generally do not consider this breaking, but use your judgement and discuss with your reviewer; consider whether it is likely that clients have critical logic that depends on exhaustively handling all enum values, and what the effects are likely to be for those use cases if a new value is added.
         - **Solution**: If it's not treated as breaking, then temporary disable that analyzer warning while adding the value:
-            * In the PR that adds the value, suppress the warnings with `// ignore: exhaustive_cases` annotations, [with a comment](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#comment-all--ignores) linking to the issue that tracks updating it.
+            * In the PR that adds the value, suppress the warnings with `// ignore: exhaustive_cases` annotations, [with a comment](../../contributing/Style-guide-for-Flutter-repo.md#comment-all--ignores) linking to the issue that tracks updating it.
             * In the follow-up PR that picks up the new enum value and uses it, remove the `ignore`.
 - **`legacy_version_analyze`**: Runs `analyze` with older versions of Flutter than the current `stable` on any package that claims to support them; see [the supported version policy](../contributing/README.md#supported-flutter-versions) for details.
     - **Solution**: Unless you have a specific need to keep support for the old version (unlikely), just update the Flutter constraint in `pubspec.yaml` to exclude the failing version(s) of Flutter.
@@ -84,7 +84,7 @@ Below are descriptions of many of the less self-evident CI tests, and common sol
         - Otherwise, temporarily add the necessary package(s) to the `exclude_all_packages_app.yaml` exclusion file (see discussion of exclusion files above).
 - **`repo_checks`**: Enforces various best practices (formatting, style, common mistakes, etc.). In most cases, the error messages should give clear and actionable explanations of what is wrong and how to fix it. Some general notes on specific steps:
     - **`license_script`**: All code files must have the repository copyright/license block at the top. In most cases a failure here just means you forgot to add the license to a new file.
-    - **`federated_safety_script`**: Changing interdependent sub-packages of a federated plugin in the same PR can mask serious issues, such as undesired breaking changes in platform APIs. See the documentation on [changing federated plugins](https://github.com/flutter/flutter/wiki/Contributing-to-Plugins-and-Packages#changing-federated-plugins) for next steps.
+    - **`federated_safety_script`**: Changing interdependent sub-packages of a federated plugin in the same PR can mask serious issues, such as undesired breaking changes in platform APIs. See the documentation on [changing federated plugins](../contributing/README.md#changing-federated-plugins) for next steps.
 
 # Out-of-band failures
 

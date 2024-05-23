@@ -17,19 +17,18 @@ _Contributors: please consider moving this content to the web site or deleting i
 ## General
 
 <!-- don't add things here; if you have a new feature, it should be documented on the web site not the wiki -->
-- [Apple Silicon support](https://github.com/flutter/flutter/wiki/Developing-with-Flutter-on-Apple-Silicon)
+- [Apple Silicon support](../platforms/desktop/macos/Developing-with-Flutter-on-Apple-Silicon.md)
 - [Bad Builds](../releases/Bad-Builds.md)
 - [Binding to native code via FFI](https://flutter.dev/docs/development/platform-integration/c-interop)
 - [Data-driven Fixes](../contributing/Data-driven-Fixes.md)
 - [Flutter CLI crash reporting](https://docs.flutter.dev/reference/crash-reporting)
-- [Flutter CLI custom embedder support](https://github.com/flutter/flutter/wiki/Using-custom-embedders-with-the-Flutter-CLI)
+- [Flutter CLI custom embedder support](../tool/Using-custom-embedders-with-the-Flutter-CLI.md)
 - [Flutter Test Fonts](../contributing/testing/Flutter-Test-Fonts.md)
 - [Hybrid Composition](../platforms/Hybrid-Composition.md)
 - [IntelliJ - Flutter Setup Tips and Tricks](IntelliJ---Flutter-Setup-Tips-and-Tricks.md)
-- [JIT release builds](https://github.com/flutter/flutter/wiki/JIT-Release-Modes)
+- [JIT release builds](../engine/JIT-Release-Modes.md)
 - [Making animated GIFs of Flutter apps](../contributing/issue_hygiene/Making-animated-GIFs-of-Flutter-apps.md)
 - [Multi-device debugging in VS Code](Multi-device-debugging-in-VS-Code.md)
-- [Null safety package migration status](https://github.com/dart-lang/sdk/wiki/Null-safety-migration-status)
 - [Obfuscating Dart Code](https://flutter.dev/docs/deployment/obfuscate)
 - [Reduce shader compilation jank using SkSL warm up](https://flutter.dev/docs/perf/rendering/shader)
 - [Upgrading Flutter projects from using PlatformMessages to using channels](Upgrading-Flutter-projects-from-using-PlatformMessages-to-using-channels.md)
@@ -37,11 +36,11 @@ _Contributors: please consider moving this content to the web site or deleting i
 
 ### Android
 <!-- don't add things here; user documentation belongs on the web site not the wiki -->
-- [Android Fast Start](https://github.com/flutter/flutter/wiki/Fast-Start)
+- [Android Fast Start](../tool/Fast-Start.md)
 - [Android Platform Views](../platforms/android/Android-Platform-Views.md)
 - [How Flutter apps are compiled with Gradle for Android](../platforms/android/How-Flutter-apps-are-compiled-with-Gradle-for-Android.md)
 - [Hybrid Composition](../platforms/Hybrid-Composition.md#android)
-- [Multidex](https://github.com/flutter/flutter/wiki/Android-Multidex-support)
+- [Multidex](../platforms/android/Android-Multidex-support.md)
 - [Texture Layer Hybrid Composition](../platforms/android/Texture-Layer-Hybrid-Composition.md)
 
 ### iOS

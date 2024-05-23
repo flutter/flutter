@@ -92,8 +92,8 @@ gclient sync
 ## Next steps:
 
  * [Compiling the engine](Compiling-the-engine.md) explains how to actually get builds, now that you have the code.
- * [The flutter tool](https://github.com/flutter/flutter/wiki/The-flutter-tool) has a section explaining how to use custom engine builds.
- * [Signing commits](https://github.com/flutter/flutter/wiki/Signing-commits), to configure your environment to securely sign your commits.
+ * [The flutter tool](../../tool/README.md) has a section explaining how to use custom engine builds.
+ * [Signing commits](../../contributing/Signing-commits.md), to configure your environment to securely sign your commits.
 
 ## Editor autocomplete support
 

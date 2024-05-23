@@ -2,7 +2,7 @@
 
 The process of triaging new incoming bugs consiists of processing the list of [issues without team-* labels, with no assignees, and not labeled `will need additional triage`](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+no%3Aassignee+-label%3A%22will+need+additional+triage%22+-label%3Ateam-release%2Cteam-codelabs%2Cteam-ecosystem%2Cteam-infra%2Cteam-engine%2Cteam-framework%2Cteam-news%2Cteam-ios%2Cteam-tool%2Cteam-web%2Cteam-desktop%2Cteam-design%2Cteam-android%2Cteam-go_router%2Cteam-games%2Cteam-text-input+) as described in this section, so as to make that list empty.
 
-_See also: [Issue triage reports](https://github.com/flutter/flutter/wiki/Issue-triage-reports)_
+_See also: [Issue triage reports](../wiki_archive/Nevercode%20[TBD]/Issue-triage-reports.md)_
 
 ### General
 

@@ -329,7 +329,7 @@ Xcode and hit CMD+U.
 Dart unit tests are executed during pre-submit on our CI system when submitting
 PRs to the `flutter/engine` repository.
 
-_See also: [Flutter Test Fonts](https://github.com/flutter/flutter/wiki/Flutter-Test-Fonts)_
+_See also: [Flutter Test Fonts](../../contributing/testing/Flutter-Test-Fonts.md)_
 
 ### Framework tests
 

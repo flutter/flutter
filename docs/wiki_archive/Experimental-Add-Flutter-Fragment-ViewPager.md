@@ -40,4 +40,4 @@ Next, alter your `FragmentPagerAdapter` to return a `FlutterFragment` for the de
 
 You should now have a Flutter UI as one or more pages within your tabbed navigation.
 
-You may notice a delay between creation of your `FlutterFragment` and the display of your Flutter UI. This delay is caused by the warm-up time for the `FlutterEngine`. This warm-up issue a standard concern that applies to all uses of Flutter, including `FlutterActivity`. The way to minimize this visual delay is to use pre-warmed `FlutterEngine`s. Please see [the page about pre-warming FlutterEngines](https://github.com/flutter/flutter/wiki/Experimental:-Reuse-FlutterEngine-across-screens).
+You may notice a delay between creation of your `FlutterFragment` and the display of your Flutter UI. This delay is caused by the warm-up time for the `FlutterEngine`. This warm-up issue a standard concern that applies to all uses of Flutter, including `FlutterActivity`. The way to minimize this visual delay is to use pre-warmed `FlutterEngine`s. Please see [the page about pre-warming FlutterEngines](Experimental-Reuse-FlutterEngine-across-screens.md).

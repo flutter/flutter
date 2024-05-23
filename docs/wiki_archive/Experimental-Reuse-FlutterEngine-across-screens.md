@@ -32,14 +32,6 @@ engine.getDartExecutor().executeDartEntrypoint(entrypoint);
 
 To cache one or more `FlutterEngine`s, store the initialized `FlutterEngine`s in a central place that you can access from your desired `Activity`s and `Fragment`s. You could choose to store these `FlutterEngine`s in your `Application` subclass, or you could store them in a statically accessible location of your choice. This choice is up to you, and should consider your specific application architecture and development practices.
 
-## Using a cached FlutterEngine in a FlutterActivity
-
-See the [FlutterActivity page](https://github.com/flutter/flutter/wiki/Experimental:-Add-Flutter-Activity#using-a-cached-flutterengine)
-
-## Using a cached FlutterEngine in a FlutterFragment
-
-See the [FlutterFragment page](https://github.com/flutter/flutter/wiki/Experimental:-Add-Flutter-Activity#using-a-cached-flutterengine)
-
 ## Dart entrypoint restrictions
 
 A `FlutterEngine` can only execute a Dart entrypoint one time. Once a `FlutterEngine` has started executing Dart code, it will continue to execute that Dart code until the `FlutterEngine` is disposed. To re-use a `FlutterEngine` that needs to display different experiences at different times you will need to find an approach that accomplishes your goals without restarting Dart execution. Below are a couple options.
