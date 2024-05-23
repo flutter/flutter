@@ -40,7 +40,7 @@ https://docs.flutter.dev/reference/supported-platforms
 #### Modify defaults
 In flutter/flutter:
 Update default compile sdk version and target sdk version to the new api value
-Code here https://github.com/flutter/flutter/blob/master/packages/flutter_tools/gradle/src/main/groovy/flutter.groovy
+[Code here](../../../packages/flutter_tools/gradle/src/main/groovy/flutter.groovy)
 Follow comments in that file to update other locations that are assumed to be the same.
 Example bumping min sdk which is similar but different: https://github.com/flutter/flutter/pull/125515
 In flutter/buildroot:

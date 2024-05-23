@@ -5,4 +5,4 @@ This page contains weekly issue triage reports from the Nevercode front-line tri
 - [2022 reports](https://github.com/flutter/flutter/wiki/2022---Issue-Triage-Reports)
 - [2021 reports](https://github.com/flutter/flutter/wiki/2021---Issue-Triage-Reports)
 
-_See also: [[Triage]]_
+_See also: [Triage](../../triage/README.md)_

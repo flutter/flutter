@@ -3,9 +3,9 @@ Hybrid composition refers to the ability of composing native views alongside Flu
 ## Android
 *Requires API level 19*
 
-_See also: [[Texture Layer Hybrid Composition]]_
+_See also: [Texture Layer Hybrid Composition](./android/Texture-Layer-Hybrid-Composition.md)_
 
-Starting from Flutter 1.20.0, hybrid composition can be used on Android. This new feature fixes most of the [issues with the preview platform view approach](https://github.com/flutter/flutter/wiki/Virtual-Display#associated-problems-and-workarounds) (Virtual Display); in particular, accessibility and keyboard related issues. See also [[Android Platform Views]] for an overview of modes.
+Starting from Flutter 1.20.0, hybrid composition can be used on Android. This new feature fixes most of the [issues with the preview platform view approach](./android/Virtual-Display.md#associated-problems-and-workarounds) (Virtual Display); in particular, accessibility and keyboard related issues. See also [Android Platform Views](./android/Android-Platform-Views.md) for an overview of modes.
 
 To see all known issues specific to this mode, search for the [`hc-only` label](https://github.com/flutter/flutter/labels/hc-only).
 
@@ -185,8 +185,6 @@ android {
 }
 ```
 ## iOS
-
-_See also: [[Hybrid Composition iOS]]_
 
 In Flutter 1.22, platform views are enabled by default. This means
 that it's no longer required to add the

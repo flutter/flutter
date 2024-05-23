@@ -6,7 +6,7 @@ Prior to [Pull Request 7902](https://github.com/flutter/flutter/pull/7902) -- wh
 
 If you have a project that was created prior to this date, please follow these steps to switch to building with gradle. This is required as we will be removing the custom build support shortly.
 
-*Note*: These steps apply to projects created with `flutter create` prior to February 6th 2017. If your project was based on a copy of `/examples/hello_services/`, then you just need to synchronize the contents of [`/android/build.gradle`](https://github.com/flutter/flutter/blob/master/packages/flutter_tools/templates/create/android.tmpl/build.gradle) and [`/android/app/build.gradle`](https://github.com/flutter/flutter/blob/master/packages/flutter_tools/templates/create/android.tmpl/app/build.gradle).
+*Note*: These steps apply to projects created with `flutter create` prior to February 6th 2017. If your project was based on a copy of `/examples/hello_services/`, then you just need to synchronize the contents of [`/android/build.gradle`](../../../packages/flutter_tools/templates/create/android.tmpl/build.gradle) and [`/android/app/build.gradle`](../../../packages/flutter_tools/templates/create/android.tmpl/app/build.gradle).
 
 ## Upgrading an existing project
 

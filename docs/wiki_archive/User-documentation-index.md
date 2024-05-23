@@ -18,62 +18,40 @@ _Contributors: please consider moving this content to the web site or deleting i
 
 <!-- don't add things here; if you have a new feature, it should be documented on the web site not the wiki -->
 - [Apple Silicon support](https://github.com/flutter/flutter/wiki/Developing-with-Flutter-on-Apple-Silicon)
-- [[Bad Builds]]
-- [[Binding to native code via FFI]] (moved to website)
-- [[Code generation in Flutter]]
-- [[Codelabs]]
-- [[Data-driven Fixes]]
-- [[Desktop shells]]
-- [[Deferred Components]]
-- [[Flutter CLI crash reporting]]
+- [Bad Builds](../releases/Bad-Builds.md)
+- [Binding to native code via FFI](https://flutter.dev/docs/development/platform-integration/c-interop)
+- [Data-driven Fixes](../contributing/Data-driven-Fixes.md)
+- [Flutter CLI crash reporting](https://docs.flutter.dev/reference/crash-reporting)
 - [Flutter CLI custom embedder support](https://github.com/flutter/flutter/wiki/Using-custom-embedders-with-the-Flutter-CLI)
-- [[Flutter Test Fonts]]
-- [[Game development with Flutter]]
-- [[Hybrid Composition]]
-- [[IntelliJ - Flutter Setup Tips and Tricks]]
+- [Flutter Test Fonts](../contributing/testing/Flutter-Test-Fonts.md)
+- [Hybrid Composition](../platforms/Hybrid-Composition.md)
+- [IntelliJ - Flutter Setup Tips and Tricks](IntelliJ---Flutter-Setup-Tips-and-Tricks.md)
 - [JIT release builds](https://github.com/flutter/flutter/wiki/JIT-Release-Modes)
-- [[Making animated GIFs of Flutter apps]]
-- [[Multi-device debugging in VS Code]]
+- [Making animated GIFs of Flutter apps](../contributing/issue_hygiene/Making-animated-GIFs-of-Flutter-apps.md)
+- [Multi-device debugging in VS Code](Multi-device-debugging-in-VS-Code.md)
 - [Null safety package migration status](https://github.com/dart-lang/sdk/wiki/Null-safety-migration-status)
-- [[Obfuscating Dart Code]]
-- [[Reduce shader compilation jank using SkSL warm up]] (moved to website)
-- [[Upgrading Flutter projects from using PlatformMessages to using channels]]
-- [[Writing Effective Tests]]
+- [Obfuscating Dart Code](https://flutter.dev/docs/deployment/obfuscate)
+- [Reduce shader compilation jank using SkSL warm up](https://flutter.dev/docs/perf/rendering/shader)
+- [Upgrading Flutter projects from using PlatformMessages to using channels](Upgrading-Flutter-projects-from-using-PlatformMessages-to-using-channels.md)
+- [Writing Effective Tests](../contributing/testing/Writing-Effective-Tests.md)
 
 ### Android
 <!-- don't add things here; user documentation belongs on the web site not the wiki -->
 - [Android Fast Start](https://github.com/flutter/flutter/wiki/Fast-Start)
-- [[Android Platform Views]]
-- [[Experimental: Add Flutter Activity]] (moved to website)
-- [[Experimental: Add Flutter Fragment]]
-- [[Experimental: Add Flutter Fragment ViewPager]]
-- [[Experimental: Add Flutter View]]
-- [[Experimental: Create Flutter Plugin]] (moved to website)
-- [[Experimental: Launch Flutter with non main entrypoint]]
-- [[Experimental: Reuse FlutterEngine across screens]]
-- [[Experimental: Use old plugins with new embedding]]
-- [[How Flutter apps are compiled with Gradle for Android]]
-- [[Hybrid Composition|Hybrid Composition#Android]]
+- [Android Platform Views](../platforms/android/Android-Platform-Views.md)
+- [How Flutter apps are compiled with Gradle for Android](../platforms/android/How-Flutter-apps-are-compiled-with-Gradle-for-Android.md)
+- [Hybrid Composition](../platforms/Hybrid-Composition.md#android)
 - [Multidex](https://github.com/flutter/flutter/wiki/Android-Multidex-support)
-- [[Texture Layer Hybrid Composition]]
-- [[Upgrading Flutter projects to build with gradle]]
-- [[Upgrading Flutter projects to Gradle 4.1 and Android Studio Gradle plugin 3.0.1]]
-- [[Upgrading pre 1.12 Android projects]]
+- [Texture Layer Hybrid Composition](../platforms/android/Texture-Layer-Hybrid-Composition.md)
 
 ### iOS
 <!-- don't add things here; user documentation belongs on the web site not the wiki -->
-- [[Creating an iOS Bitcode enabled app]]
-- [Hybrid Composition](../platforms/android/Hybrid-Composition.md#ios)
-- [[Hybrid Composition iOS]]
-- [[PID leak in iOS development workflow]]
-- [[State of Catalina Support]] in Flutter 1.9.
-- [[Upgrading Flutter added to existing iOS Xcode project]]
+- [Hybrid Composition iOS](../platforms/Hybrid-Composition.md#ios)
 
 ### Web
 <!-- don't add things here; user documentation belongs on the web site not the wiki -->
-- [[Debugging issues on the Web]]
-- [[Running Flutter Driver tests with Web]]
-- [[Upgrading from package:flutter_web to the Flutter SDK]]
+- [Debugging issues on the Web](../platforms/web/Debugging-issues-on-the-Web.md)
+- [Running Flutter Driver tests with Web](../contributing/testing/Running-Flutter-Driver-tests-with-Web.md)
 
 ### Release notes
 <!-- don't add things here; user documentation belongs on the web site not the wiki -->
