@@ -101,16 +101,29 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
 }
 
 /// A controller for the content of a [Selectable].
+///
+/// A user can set the value on this controller to modify the content under
+/// a selection created by [SelectionArea] or [SelectableRegion].
 abstract class SelectedContentController<T> extends ValueNotifier {
+  /// Creates a controller for the content of a [Selectable] or [SelectionHandler].
   SelectedContentController(super.value);
 
+  /// Additional controllers to include as children.
+  ///
+  /// Children of a given controller enable more granular modification of the
+  /// selection.
   List<SelectedContentController> children = <SelectedContentController>[];
 
+  /// The start of the selection relative to the type of content in [value].
   int get startOffset;
+
+  /// The end of the selection relative to the type of content in [value].
   int get endOffset;
 
+  /// Builds the content from current [value].
   T buildContents();
 
+  /// Adds a child controller to the list of [children].
   void addChild(SelectedContentController childController) {
     children.add(childController);
   }
