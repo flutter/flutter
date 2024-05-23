@@ -354,13 +354,9 @@ void main() {
       logs.clear();
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgets('FocusManager ignores app lifecycle changes on Android and iOS.', (WidgetTester tester) async {
-      final bool shouldListenToAppLifecycle = switch (defaultTargetPlatform) {
-        TargetPlatform.android || TargetPlatform.iOS => false,
-        TargetPlatform.fuchsia || TargetPlatform.linux => true,
-        TargetPlatform.windows || TargetPlatform.macOS => true,
-      };
-      if (shouldListenToAppLifecycle) {
+    testWidgets('FocusManager ignores app lifecycle changes on Android.', (WidgetTester tester) async {
+      final bool shouldRespond = kIsWeb || defaultTargetPlatform != TargetPlatform.android;
+      if (shouldRespond) {
         return;
       }
 
@@ -391,12 +387,8 @@ void main() {
     });
 
     testWidgets('FocusManager responds to app lifecycle changes.', (WidgetTester tester) async {
-      final bool shouldListenToAppLifecycle = switch (defaultTargetPlatform) {
-        TargetPlatform.android || TargetPlatform.iOS => false,
-        TargetPlatform.fuchsia || TargetPlatform.linux => true,
-        TargetPlatform.windows || TargetPlatform.macOS => true,
-      };
-      if (!shouldListenToAppLifecycle) {
+      final bool shouldRespond = kIsWeb || defaultTargetPlatform != TargetPlatform.android;
+      if (!shouldRespond) {
         return;
       }
 
