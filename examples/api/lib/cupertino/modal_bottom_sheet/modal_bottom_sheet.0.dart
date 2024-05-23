@@ -5,6 +5,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+/// Example creating a modal bottom sheet in an app with mixed transitions. This
+/// example is mostly a POC for route transition mixing, and the actual example
+/// for routes will be simpler.
+
 void main() {
   runApp(const MyApp());
 }
@@ -130,7 +134,7 @@ class MBSTransition extends StatelessWidget {
                  reverseCurve: Curves.easeInToLinear,
                )
            .drive(_kMidUpTween),
-      _tertiaryPositionAnimation =
+      _primaryPositionAnimationMBS =
             CurvedAnimation(
                  parent: primaryRouteAnimation,
                  curve: Curves.linearToEaseOut,
@@ -141,10 +145,13 @@ class MBSTransition extends StatelessWidget {
   // When this page is coming in to cover another page.
   final Animation<Offset> _primaryPositionAnimation;
 
-  // When this page is coming in to cover another page.
-  final Animation<Offset> _tertiaryPositionAnimation;
+  // When this page is coming in to cover another MBS. Because it's nested within
+  // a MBS, a 0 y offset is not the top of the physical screen, but the top of
+  // the previous MBS.
+  final Animation<Offset> _primaryPositionAnimationMBS;
 
-  // When this page is coming in to cover another page.
+  // When this page is being covered by another MBS. It slides up slightly to
+  // look like it's joining the stack of previous routes.
   final Animation<Offset> _secondaryPositionAnimation;
 
   /// Animation
@@ -153,7 +160,7 @@ class MBSTransition extends StatelessWidget {
   /// The widget below this widget in the tree.
   final Widget child;
 
-  /// The delegated transition.
+  /// The primary delegated transition. Will slide a non MBS page down.
   static Widget delegateTransition(BuildContext context, Widget? child, Animation<double> secondaryAnimation) {
     const Offset begin = Offset.zero;
     const Offset end = Offset(0.0, 0.05);
@@ -167,7 +174,7 @@ class MBSTransition extends StatelessWidget {
     );
   }
 
-  /// The secondary delegated transition.
+  /// The secondary delegated transition. Will slide a MBS page up.
   static Widget secondaryDelegateTransition(BuildContext context, Widget? child, Animation<double> secondaryAnimation) {
     const Offset begin = Offset.zero;
     const Offset end = Offset(0.0, -0.05);
@@ -198,7 +205,7 @@ class MBSTransition extends StatelessWidget {
         );
       },
       child: SlideTransition(
-        position: topLevelMBS ? _primaryPositionAnimation : _tertiaryPositionAnimation,
+        position: topLevelMBS ? _primaryPositionAnimation : _primaryPositionAnimationMBS,
         textDirection: textDirection,
         child: ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
@@ -251,7 +258,6 @@ mixin MBSRouteTransitionMixin<T> on PageRoute<T> {
   @override
   Duration get transitionDuration => const Duration(milliseconds: 500);
 
-
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     final Widget child = buildContent(context);
@@ -299,7 +305,7 @@ mixin MBSRouteTransitionMixin<T> on PageRoute<T> {
 
 class MBSNavigator extends Navigator {
 
-  MBSNavigator({
+  const MBSNavigator({
     super.key,
     super.pages,
     super.onPopPage,
