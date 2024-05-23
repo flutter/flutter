@@ -9,15 +9,15 @@ We support several kinds of tests:
 - Unit tests, e.g. using [`flutter_test`](https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html). See below.
 
 - Unit tests that use golden-file testing, comparing pixels.
-  See [[Writing a golden-file test for package:flutter]].
+  See [Writing a golden-file test for package:flutter](Writing-a-golden-file-test-for-package-flutter.md).
 
-- End-to-end tests, e.g. using [`flutter_driver`](https://api.flutter.dev/flutter/flutter_driver/flutter_driver-library.html) and our [device lab](https://github.com/flutter/flutter/blob/master/dev/devicelab/README.md).
+- End-to-end tests, e.g. using [`flutter_driver`](https://api.flutter.dev/flutter/flutter_driver/flutter_driver-library.html) and our [device lab](https://github.com/flutter/flutter/blob/main/dev/devicelab/README.md).
 
-Our bots run on our [test and build infrastructure](https://github.com/flutter/flutter/blob/master/dev/bots/README.md).
+Our bots run on our [test and build infrastructure](https://github.com/flutter/flutter/blob/main/dev/bots/README.md).
 
 ## Running unit tests
 
-Flutter tests use the `flutter_test` package ([source](https://github.com/flutter/flutter/tree/master/packages/flutter_test), [API documentation](https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html)),
+Flutter tests use the `flutter_test` package ([source](https://github.com/flutter/flutter/tree/main/packages/flutter_test), [API documentation](https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html)),
 which provides flutter-specific extensions on top of the [Dart `test` package](https://pub.dartlang.org/packages/test).
 
 To automatically find all files named `*_test.dart` inside a package's `test/` subdirectory, and
@@ -45,7 +45,7 @@ before the test runs.
 To run analysis and all the tests for the entire Flutter repository, the same way that Cirrus
 runs them, run `dart dev/bots/test.dart` and `dart --enable-asserts dev/bots/analyze.dart`.
 
-If you've built your own flutter engine (see [[Setting up the Engine development environment]]), you
+If you've built your own flutter engine (see [Setting up the Engine development environment](../../engine/dev/Setting-up-the-Engine-development-environment.md)), you
 can pass `--local-engine` to change what flutter shell `flutter test` uses. For example,
 if you built an engine in the `out/host_debug_unopt` directory, you can use:
 
@@ -58,9 +58,9 @@ flutter test \
 to run the tests in the locally built engine. Note that in this case you need to specify `host_debug_unopt`
 as both arguments.
 
-To learn how to see how well tested the codebase is, see [[Test coverage for package:flutter]].
+To learn how to see how well tested the codebase is, see [Test coverage for package:flutter](Test-coverage-for-package-flutter.md).
 
-_See also: [[Flutter Test Fonts]]_
+_See also: [Flutter Test Fonts](Flutter-Test-Fonts.md)_
 
 ## Running device lab tests locally
 
@@ -118,8 +118,8 @@ The following is an example of what running the local engine command might look 
 
 The above command would use the local Flutter engine located at `/Users/myname/flutter/engine` to execute the `external_ui_integration_test` test on an Android emulator, which is why the `android_debug_unopt_x86` version of the engine is used.
 
-Note that some tests may require `profile` mode instead of `debug` mode when running with local engine. Make sure to pass in the correct local engine. See [Compiling the engine](https://github.com/flutter/flutter/wiki/Compiling-the-engine) for more details.
+Note that some tests may require `profile` mode instead of `debug` mode when running with local engine. Make sure to pass in the correct local engine. See [Compiling the engine](../../engine/dev/Compiling-the-engine.md) for more details.
 
 ## For the engine
 
-See the [[Testing the engine]] wiki.
+See the [Testing the engine](../../engine/testing/Testing-the-engine.md) wiki.
