@@ -23,9 +23,9 @@ void main() {
         .having((SizeTransition transition) => transition.axis, 'axis', Axis.horizontal)
         .having((SizeTransition transition) => transition.axisAlignment, 'axis alignment', -1)
         .having((SizeTransition transition) => transition.sizeFactor, 'factor', isA<CurvedAnimation>()
-          .having((CurvedAnimation animation) => animation.curve, 'curve', Curves.fastOutSlowIn)
-          .having((CurvedAnimation animation) => animation.parent, 'paren', isA<AnimationController>()
-            .having((AnimationController controller) => controller.duration, 'duration', const Duration(seconds: 3)))
+        .having((CurvedAnimation animation) => animation.curve, 'curve', Curves.fastOutSlowIn)
+        .having((CurvedAnimation animation) => animation.parent, 'paren', isA<AnimationController>()
+        .having((AnimationController controller) => controller.duration, 'duration', const Duration(seconds: 3)))
       )
     );
   });
