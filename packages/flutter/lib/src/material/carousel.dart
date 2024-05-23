@@ -121,7 +121,7 @@ class Carousel extends StatefulWidget {
   /// view is scrolled.
   final CarouselController? controller;
 
-  /// The [Axis] along which the scroll view's offset increases with each page.
+  /// The [Axis] along which the scroll view's offset increases with each item.
   ///
   /// Defaults to [Axis.horizontal].
   final Axis scrollDirection;
@@ -133,7 +133,7 @@ class Carousel extends StatefulWidget {
   /// left to right when [reverse] is false and from right to left when
   /// [reverse] is true.
   ///
-  /// Similarly, if [scrollDirection] is [Axis.vertical], then the page view
+  /// Similarly, if [scrollDirection] is [Axis.vertical], then the carousel view
   /// scrolls from top to bottom when [reverse] is false and from bottom to top
   /// when [reverse] is true.
   ///
@@ -320,7 +320,7 @@ class _CarouselState extends State<Carousel> {
 /// along the main axis and the [SliverConstraints.crossAxisExtent]
 /// along the cross axis. The difference between this and a list view with a fixed
 /// extent is the first item and last item can be squished a little during scrolling
-/// transition.This compression is controlled by the `minExtent` property and
+/// transition. This compression is controlled by the `minExtent` property and
 /// aligns with the [Material Design Carousel specifications]
 /// (https://m3.material.io/components/carousel/guidelines#96c5c157-fe5b-4ee3-a9b4-72bf8efab7e9).
 class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
@@ -346,6 +346,7 @@ class _SliverFixedExtentCarousel extends SliverMultiBoxAdaptorWidget {
   @override
   void updateRenderObject(BuildContext context, _RenderSliverFixedExtentCarousel renderObject) {
     renderObject.maxExtent = itemExtent;
+    renderObject.minExtent = itemExtent;
   }
 }
 
@@ -384,17 +385,18 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
     // Calculate how many items have been completely scroll off screen.
     final int offscreenItems = (constraints.scrollOffset / maxExtent).floor();
 
-    // If there is an item is partially off screen and partually on screen, `constraints.scrollOffset`
-    // must be greater than `offscreenItems * maxExtent`, so the difference
-    // between these two is how much the current first visible item is off screen.
+    // If an item is partially off screen and partially on screen,
+    // `constraints.scrollOffset` must be greater than
+    // `offscreenItems * maxExtent`, so the difference between these two is how
+    // much the current first visible item is off screen.
     final double offscreenExtent = constraints.scrollOffset - offscreenItems * maxExtent;
 
     // If there is not enough space to place the last visible item but the remaining
     // space is larger than `minExtent`, the extent for last item should be at
-    // least the remaining extent to make sure a smooth size transition.
+    // least the remaining extent to ensure a smooth size transition.
     final double effectiveMinExtent = math.max(constraints.remainingPaintExtent % maxExtent, minExtent);
 
-    // Two special handles are the first and last visible items. Other items' extent
+    // Two special cases are the first and last visible items. Other items' extent
     // should all return `maxExtent`.
     if (index == firstVisibleIndex) {
       final double effectiveExtent = maxExtent - offscreenExtent;
@@ -526,8 +528,7 @@ class CarouselScrollPhysics extends ScrollPhysics {
     double item;
     if ((actual - round).abs() < precisionErrorTolerance) {
       item = round;
-    }
-    else {
+    } else {
       item = actual;
     }
     if (velocity < -tolerance.velocity) {
@@ -586,6 +587,11 @@ class _CarouselMetrics extends FixedScrollMetrics {
     required super.devicePixelRatio,
   });
 
+  /// Extent for the carousel item.
+  ///
+  /// Used to compute the first item from the current [pixels].
+  final double? itemExtent;
+
   @override
   _CarouselMetrics copyWith({
     double? minScrollExtent,
@@ -606,11 +612,6 @@ class _CarouselMetrics extends FixedScrollMetrics {
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
     );
   }
-
-  /// Extent for the carousel item.
-  ///
-  /// Used to compute the first item from the current [pixels].
-  final double? itemExtent;
 }
 
 class _CarouselPosition extends ScrollPositionWithSingleContext implements _CarouselMetrics {
@@ -618,30 +619,22 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     required super.physics,
     required super.context,
     this.initialItem = 0,
-    required double itemExtent,
+    required this.itemExtent,
     super.oldPosition,
-  }) : _itemExtent = itemExtent,
-       _itemToShowOnStartup = initialItem.toDouble(),
+  }) : _itemToShowOnStartup = initialItem.toDouble(),
        super(
          initialPixels: null
        );
 
   final int initialItem;
   final double _itemToShowOnStartup;
-  // When the viewport has a zero-size, the `page` can not
-  // be retrieved by `getPageFromPixels`, so we need to cache the page
+  // When the viewport has a zero-size, the item can not
+  // be retrieved by `getItemFromPixels`, so we need to cache the item
   // for use when resizing the viewport to non-zero next time.
   double? _cachedItem;
 
   @override
-  double? get itemExtent => _itemExtent;
-  double? _itemExtent;
-  set itemExtent(double? value) {
-    if (_itemExtent == value) {
-      return;
-    }
-    _itemExtent = value;
-  }
+  double? itemExtent;
 
   double getItemFromPixels(double pixels, double viewportDimension) {
     assert(viewportDimension > 0.0);
@@ -679,7 +672,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
       item = getItemFromPixels(oldPixels, oldViewportDimensions!);
     }
     final double newPixels = getPixelsFromItem(item);
-    // If the viewportDimension is zero, cache the page
+    // If the viewportDimension is zero, cache the item
     // in case the viewport is resized to be non-zero.
     _cachedItem = (viewportDimension == 0.0) ? item : null;
 
@@ -715,8 +708,8 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
 
 /// A controller for [Carousel].
 ///
-/// Using a carousel controller helps to show which item is fully expanded on
-/// the carousel list.
+/// Using a carousel controller helps to show the first visible item on the
+/// carousel list.
 class CarouselController extends ScrollController {
   /// Creates a carousel controller.
   CarouselController({
