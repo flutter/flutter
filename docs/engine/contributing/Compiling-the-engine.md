@@ -80,11 +80,11 @@ If you're going to be debugging crashes in the engine, make sure you add
 `android/AndroidManifest.xml` file for the Flutter app you are using
 to test the engine.
 
-See [The flutter tool](https://github.com/flutter/flutter/wiki/The-flutter-tool) for instructions on how to use the `flutter` tool with a local engine.
+See [The flutter tool](../../tool/README.md) for instructions on how to use the `flutter` tool with a local engine.
 You will typically use the `android_debug_unopt` build to debug the engine on a device, and
 `android_debug_unopt_x64` to debug in on a simulator. Modifying dart sources in the engine will
 require adding a `dependency_override` section in you app's `pubspec.yaml` as detailed
-[here](https://github.com/flutter/flutter/wiki/The-flutter-tool#using-a-locally-built-engine-with-the-flutter-tool).
+[here](../../tool/README.md#using-a-locally-built-engine-with-the-flutter-tool).
 
 Note that if you use particular android or ios engine build, you will need to have corresponding
 host build available next to it: if you use `android_debug_unopt`, you should have built `host_debug_unopt`,
@@ -137,7 +137,7 @@ See [The flutter tool](https://github.com/flutter/flutter/wiki/The-flutter-tool)
 You will typically use the `ios_debug_unopt` build to debug the engine on a device, and
 `ios_debug_sim_unopt` to debug in on a simulator. Modifying dart sources in the engine will
 require adding a `dependency_override` section in you app's `pubspec.yaml` as detailed
-[here](https://github.com/flutter/flutter/wiki/The-flutter-tool#using-a-locally-built-engine-with-the-flutter-tool).
+[here](../../tool/README.md#using-a-locally-built-engine-with-the-flutter-tool).
 
 See also [instructions for debugging the engine in a Flutter app in Xcode](https://github.com/flutter/flutter/wiki/Debugging-the-engine#debugging-ios-builds-with-xcode).
 

@@ -30,14 +30,14 @@ The Flutter project has many teams, including, but not limited to:
 
 There are also specific cross-cutting areas of work that may have their own subteam and that affect multiple subteams (e.g. accessibility, performance, etc).
 
-We also work closely with other projects, such as [Dart](https://dart.dev) and [Skia](https://skia.org), and with many [customers](https://github.com/flutter/flutter/wiki/Issue-hygiene#customers).
+We also work closely with other projects, such as [Dart](https://dart.dev) and [Skia](https://skia.org), and with many [customers](../contributing/issue_hygiene/README.md#customers).
 
 ## Responsibilities
 
 Subteams are responsible for reviewing PRs in their area, triaging issues, and scheduling work.
 How subteams organize themselves is not defined by this document. This document does not attempt to impose a process, merely a set of responsibilities.
 
-See the [Roadmap](../roadmap/Roadmap.md) and [What should I work on?](https://github.com/flutter/flutter/wiki/What-should-I-work-on%3F) pages for details on how to prioritize work.
+See the [Roadmap](../roadmap/Roadmap.md) and [What should I work on?](../contributing/What-should-I-work-on.md) pages for details on how to prioritize work.
 
 ### Reviewing PRs
 
@@ -55,7 +55,7 @@ Please triage issues with your label on a regular basis. You may do this in what
 
 * Make sure that assigned bugs have a month-based milestone (see section below).
 
-See our page on managing issues: https://github.com/flutter/flutter/wiki/Issue-hygiene
+[See our page on managing issues.](../contributing/issue_hygiene/README.md)
 
 Keep an eye out for bugs that should block releases, update the [bad builds](../releases/Bad-Builds.md) page accordingly.
 

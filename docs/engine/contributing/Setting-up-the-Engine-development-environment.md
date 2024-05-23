@@ -126,7 +126,7 @@ For example, in `src/.vscode/settings.json`:
 ./tools/gn --unopt --mac-cpu arm64 --enable-impeller-vulkan --enable-impeller-opengles --enable-unittests
 ```
 
-For adding IDE support to the Java code in the engine with VSCode, see ["Using VSCode as an IDE for the Android Embedding"](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment#using-vscode-as-an-ide-for-the-android-embedding-java).
+For adding IDE support to the Java code in the engine with VSCode, see ["Using VSCode as an IDE for the Android Embedding"](#using-vscode-as-an-ide-for-the-android-embedding-java).
 
 ### Zed Editor
 

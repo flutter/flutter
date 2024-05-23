@@ -56,25 +56,25 @@ Exclusions **must** include explanatory comments, and in cases where they are no
 
 # Specific tests
 
-In addition to Dart unit tests, Dart integration tests, and for plugins the various kinds of [native plugin tests](https://github.com/flutter/flutter/wiki/Plugin-Tests), there are a number of tests that check for repository best practices or to catch problems that have affected packages in the past. As a rule of thumb, any time we find a bug or mistake only *after* publishing a package, we try to add a check for that in CI to prevent similar issues in the future.
+In addition to Dart unit tests, Dart integration tests, and for plugins the various kinds of [native plugin tests](Plugin-Tests.md), there are a number of tests that check for repository best practices or to catch problems that have affected packages in the past. As a rule of thumb, any time we find a bug or mistake only *after* publishing a package, we try to add a check for that in CI to prevent similar issues in the future.
 
 Below are descriptions of many of the less self-evident CI tests, and common solution to failures. Anyone adding new tests is encouraged to document them here.
 
 - **`submit-queue`**: This only shows in PRs (presubmit), and reflects the current state of the tree: if it is red, the tree is currently closed to commits (which can mean either that the tree is red, or that a recently landed PR is still running post-submit tests), and if it is green the tree is open. This has **no relation** to the PR itself, and as a PR author you do not need to do anything about it; Flutter team members monitor the state of the tree, and will handle failures.
     - There is a known issue that sometimes causes the status of this check to be stale; the causes is unknown. If this happens (i.e., the check in red but the tree state as described in the Infrastructure section above is actually green), you an either update your PR by merging in the latest `main` to force updates, or you can reach out to a Flutter team member (in a comment on the PR, or in Discord) to override the incorrect check.
-- **`*_platform_tests`**: This runs each package's integration tests on the given target platform, as well as any [native plugin tests](https://github.com/flutter/flutter/wiki/Plugin-Tests) for that platform. This can also include native-language-specific analysis or lint checks.
+- **`*_platform_tests`**: This runs each package's integration tests on the given target platform, as well as any [native plugin tests](Plugin-Tests.md) for that platform. This can also include native-language-specific analysis or lint checks.
 - **`analyze`**: The initial `analyze` step is a straightforward Dart `analyze` run, but the `pathified_analyze` step is more complicated; it is intended to find issues that will cause out-of-band breakage in our own repository when the change being tested is published (most commonly with federated plugins). It does this by finding all packages that have non-breaking-version changes in the PR, and then rewriting all references to those packages in the repository to be `path:` dependencies, then re-running analysis.
 
   A failure here does not necessarily mean that the PR is wrong; because we use very strict analysis options, changes that are not considered breaking by Dart semver conventions can break our CI. Common sources of failures here include:
     - Accidentally making a breaking change without making a major version change to the plugin.
         - **Solution**: Fix the versioning.
     - Deprecating something that is still in use by another package within the repository.
-        - **Solution**: Suppress the warnings with `// ignore: deprecated_member_use` annotations in the other packages using that method, [with a comment](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#comment-all--ignores) linking to the issue that tracks updating it. Once it lands, do a follow-up PR to update the calls and remove the `ignore`s.
+        - **Solution**: Suppress the warnings with `// ignore: deprecated_member_use` annotations in the other packages using that method, [with a comment](../../contributing/Style-guide-for-Flutter-repo.md#comment-all--ignores) linking to the issue that tracks updating it. Once it lands, do a follow-up PR to update the calls and remove the `ignore`s.
     - Adding a new enum value. We generally do not consider this breaking, but use your judgement and discuss with your reviewer; consider whether it is likely that clients have critical logic that depends on exhaustively handling all enum values, and what the effects are likely to be for those use cases if a new value is added.
         - **Solution**: If it's not treated as breaking, then temporary disable that analyzer warning while adding the value:
             * In the PR that adds the value, suppress the warnings with `// ignore: exhaustive_cases` annotations, [with a comment](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#comment-all--ignores) linking to the issue that tracks updating it.
             * In the follow-up PR that picks up the new enum value and uses it, remove the `ignore`.
-- **`legacy_version_analyze`**: Runs `analyze` with older versions of Flutter than the current `stable` on any package that claims to support them; see [the supported version policy](https://github.com/flutter/flutter/wiki/Contributing-to-Plugins-and-Packages#supported-flutter-versions) for details.
+- **`legacy_version_analyze`**: Runs `analyze` with older versions of Flutter than the current `stable` on any package that claims to support them; see [the supported version policy](../contributing/README.md#supported-flutter-versions) for details.
     - **Solution**: Unless you have a specific need to keep support for the old version (unlikely), just update the Flutter constraint in `pubspec.yaml` to exclude the failing version(s) of Flutter.
 - **`analyze_downgraded`**: Runs `analyze` after running a `pub downgrade`, to ensure that minimum constraints are correct (e.g., that you don't add usage of an API from version `x.1` of a dependency that is specified as `^x.0` in `pubspec.yaml`).
     - **Solution**: Update the relevant constraint to the version that introduced the new APIs.
@@ -111,7 +111,7 @@ LUCI tasks are run on Flutter-infrastructure-managed VMs, using an [out-of-repo 
 - Usually easy to identify since failures are generally before the tests even run.
 
 #### Investigation & resolution tips
-- File an [infrastructure ticket](https://github.com/flutter/flutter/wiki/Infra-Ticket-Queue).
+- File an [infrastructure ticket](../../infra/Infra-Ticket-Queue.md).
 - Check the recipe file for recent changes.
 
 ### Firebase Test Lab (Also known as: "FTL")

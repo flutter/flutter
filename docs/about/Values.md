@@ -70,7 +70,7 @@ The list of supported platforms on flutter.dev is describing the platforms suppo
 
 For each area, we consider the level to which we provide support:
 
-0. We will literally help you with your code if things don't work. This is very rare. (See also "[top-tier customers](https://github.com/flutter/flutter/wiki/Issue-hygiene#customers)".)
+0. We will literally help you with your code if things don't work. This is very rare. (See also "[top-tier customers](../contributing/issue_hygiene/README.md#customers)".)
 
 1. We will make a best effort to ensure that well written code works (e.g. we have testing on that platform). This is a common level for target platforms that have reached a label of "stable" (e.g. Android, iOS) on devices that are widely available (e.g. 64bit ARM). This corresponds to the "Supported Google-tested platforms" category on the list of supported platforms.
 

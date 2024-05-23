@@ -60,7 +60,7 @@ Some labels are used to track the flow of issues from the time they're filed unt
   * `assigned for triage`: The issue is assigned to a domain expert for further triage.
   * `has reproducible steps`: The issue has a reproducible case or test, Flutter doctor output, and usable stack traces if appropriate. It is actionable in the sense that it can be routed to a domain team for action.
   * `needs repro info`: We need more reproduction steps in order to be able to act on this issue.
-  * `workaround available`: A workaround is available to overcome the issue until it is properly addressed. Read more about [providing workarounds](https://github.com/flutter/flutter/wiki/Issue-hygiene#comments-providing-workarounds).
+  * `workaround available`: A workaround is available to overcome the issue until it is properly addressed. Read more about [providing workarounds](../contributing/issue_hygiene/README.md#comments-providing-workarounds).
   * `will need additional triage`: Assign this if you don't know how to route it to a team.
 
 **To complete the triage of an issue, add one (and only one) `team-*` label**. Team labels differ from the similar category names (such as `engine` or `framework`) in that the category labels indicate what part(s) of the codebase an issue affects, while `team-*` labels indicate the team that owns that work. Most issues will have both, and they won't always match.
@@ -124,7 +124,7 @@ Each team has an **incoming issue list**, the issues assigned to that team (team
 
 Each issue in this list should be examined, cleaned up (see next section), and either:
 - closed, with a comment saying why (e.g. is a duplicate, is not actionable, is invalid). The [`r:`](https://github.com/flutter/flutter/labels?q=r%3A) labels may be of use when closing an issue.
-- given a [priority](https://github.com/flutter/flutter/wiki/Issue-hygiene#priorities), and tagged with the team's corresponding `triaged-*` label. This marks the issue as triaged. If the priority is P3 and the reporter has expressed that the issue is important to them, it will help the reporter feel welcome if a comment is added expressing empathy for their plight and explaining why it is not something we consider important.
+- given a [priority](../contributing/issue_hygiene/README.md#priorities), and tagged with the team's corresponding `triaged-*` label. This marks the issue as triaged. If the priority is P3 and the reporter has expressed that the issue is important to them, it will help the reporter feel welcome if a comment is added expressing empathy for their plight and explaining why it is not something we consider important.
 - sent to another team, by removing the current `team-*` label and adding another one. A comment should be added explaining the action.
 - sent back to primary triage, by removing the `team-*` label but not adding another one. A comment should be added explaining the action.
 - escalated to critical triage, by adding the `will need additional triage` label. A comment should be added explaining the action.
@@ -190,7 +190,7 @@ Teams should also go through all PRs in their area (ideally in a separate meetin
 2. Check that the assigned reviewers have left comments; if not, contact them to remind them.
 3. Check that any questions on the PR from the contributor have been answered.
 
-For more guidance on reviewing PRs, see [Tree Hygiene](https://github.com/flutter/flutter/wiki/Tree-hygiene#how).
+For more guidance on reviewing PRs, see [Tree Hygiene](../contributing/Tree-hygiene.md#how).
 
 ## Links for teams
 
@@ -303,7 +303,7 @@ PRs are reviewed weekly across the framework, packages, and engine repositories:
 
 ### Web platform team (`team-web`)
 
-- See the [Flutter Web Triage](https://github.com/flutter/flutter/wiki/Flutter-Web-Triage) page.
+- See the [Flutter Web Triage](Flutter-Web-Triage.md) page.
 
 ## Adding a new team
 

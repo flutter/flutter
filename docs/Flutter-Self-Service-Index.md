@@ -22,7 +22,7 @@ Flutter provides multiple functionality through self-service services. Most of t
   <tr>
    <td>Flutter organization members
    </td>
-   <td><a href="https://github.com/flutter/flutter/wiki/Contributor-access">Anyone with write access to the flutter organization resources</a>.
+   <td>[Anyone with write access to the flutter organization resources.](./contributing/Contributor-access.md)
    </td>
   </tr>
   <tr>
@@ -100,7 +100,7 @@ Flutter provides multiple functionality through self-service services. Most of t
    </td>
    <td>Flutter contributors
    </td>
-   <td><a href="https://github.com/flutter/flutter/wiki/flutter-firebaselab-tests">Link</a>
+   <td>[Link](./infra/Flutter-FirebaseLab-Tests.md)
    </td>
    <td>These configurations go directly in the .ci.yaml file of <a href="https://github.com/flutter/flutter">flutter/flutter</a> repository.
    </td>
@@ -112,7 +112,7 @@ Flutter provides multiple functionality through self-service services. Most of t
    </td>
    <td>Flutter contributors
    </td>
-   <td><a href="https://github.com/flutter/flutter/wiki/code-signing-metadata">Link</a>
+   <td>[Link](./engine/release/Code-signing-metadata.md)
    </td>
    <td>GN files and global generator scripts in the <a href="https://github.com/flutter/engine">flutter/engine</a> repository.
    </td>
@@ -124,7 +124,7 @@ Flutter provides multiple functionality through self-service services. Most of t
    </td>
    <td>Flutter contributors
    </td>
-   <td><a href="https://github.com/flutter/flutter/wiki/Testing-Android-Changes-in-the-Devicelab-on-an-Emulator">Link</a>
+   <td>[Link](./platforms/android/Testing-Android-Changes-in-the-Devicelab-on-an-Emulator.md)
    </td>
    <td>Flutter Github Wiki page under the “Android Development” Section.
    </td>

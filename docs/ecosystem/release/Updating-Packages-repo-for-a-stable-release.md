@@ -9,7 +9,7 @@ This page describes the process of updating flutter/packages after a stable Flut
 
   `dart run script/tool/bin/flutter_plugin_tools.dart update-min-sdk --flutter-min=3.7.0`
 
-  * Per [repo policy](https://github.com/flutter/flutter/wiki/Contributing-to-Plugins-and-Packages#version), we do not version-bump these changes, so the associated `update-release-info` command should use `--version=next`. A convenient way to run the `update-release-info` command on only the necessary packages is to make the `update-min-sdk` run its own commit, then use `--base-branch HEAD^ --run-on-changed-packages` to target only the packages changed in that commit.
+  * Per [repo policy](../contributing/README.md#version), we do not version-bump these changes, so the associated `update-release-info` command should use `--version=next`. A convenient way to run the `update-release-info` command on only the necessary packages is to make the `update-min-sdk` run its own commit, then use `--base-branch HEAD^ --run-on-changed-packages` to target only the packages changed in that commit.
   * This must be done in the same PR as the previous step, or CI will fail.
 * The [release action](https://github.com/flutter/packages/blob/e7d812cefce083fa09762d25cd42303737d05b9f/.github/workflows/release.yml#L34) should be updated to use the new stable.
 

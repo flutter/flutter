@@ -4,33 +4,33 @@ If you are new to Flutter, then you will find more general information on the Fl
 
 If you want to know what we're likely to do in the future, our [roadmap](./roadmap/Roadmap.md) may be of interest.
 
-If you intend to contribute to Flutter, welcome! You are encouraged to start with [our contributor guide](../CONTRIBUTING.md), which helps onboard new team members. It points to the most relevant pages on this wiki. You are also invited to join our [Discord](https://github.com/flutter/flutter/wiki/Chat) server.
+If you intend to contribute to Flutter, welcome! You are encouraged to start with [our contributor guide](../CONTRIBUTING.md), which helps onboard new team members. It points to the most relevant pages on this wiki. You are also invited to join our [Discord](./contributing/Chat.md) server.
 
 
 ## Index of notable sections
 
 * [Actionable bugs](./triage/README.md#what-makes-an-issue-actionable), and the closing of unactionable bugs
-* [Breaking changes](https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes)
+* [Breaking changes](./contributing/Tree-hygiene.md#handling-breaking-changes)
 * [Cherrypick process](./releases/Flutter-Cherrypick-Process.md)
-* [Closing issues](https://github.com/flutter/flutter/wiki/Issue-hygiene#closing-issues)
+* [Closing issues](./contributing/issue_hygiene/README.md#closing-issues)
 * [Dashboards](./infra/Dashboards.md)
 * [Debugging a broken engine autoroll](./engine/Debugging-the-engine.md#bisecting-a-roll-failure)
-* [Deprecations](https://github.com/flutter/flutter/wiki/Tree-hygiene#deprecations)
-* [Design documents](https://github.com/flutter/flutter/wiki/Design-Documents)
-* [Discord](https://github.com/flutter/flutter/wiki/Chat)
-* [Engineering Philosophy](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#philosophy)
-* [Flaky tests](https://github.com/flutter/flutter/wiki/Issue-hygiene#flaky-tests)
+* [Deprecations](./contributing/Tree-hygiene.md#deprecations)
+* [Design documents](./contributing/Design-Documents.md)
+* [Discord](./contributing/Chat.md)
+* [Engineering Philosophy](./contributing/Style-guide-for-Flutter-repo.md#philosophy)
+* [Flaky tests](./contributing/issue_hygiene/README.md#flaky-tests)
 * [flutter.dev is down](./In-case-of-emergency.md)
-* [Issue prioritization](https://github.com/flutter/flutter/wiki/Issue-hygiene#priorities)
-* [Labels](https://github.com/flutter/flutter/wiki/Issue-hygiene#labels)
-* [Milestones](https://github.com/flutter/flutter/wiki/Issue-hygiene#milestones)
-* [Plugin compatibility policy](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#plugin-compatibility)
-* [Reviewing code](https://github.com/flutter/flutter/wiki/Tree-hygiene#how-to-review-code)
-* [RFC process](https://github.com/flutter/flutter/wiki/Issue-hygiene#how-to-propose-a-specific-change)
-* [Status of popular issues](https://github.com/flutter/flutter/wiki/Popular-issues)
-* [Submitting code, process for](https://github.com/flutter/flutter/wiki/Tree-hygiene#overview)
-* [Support levels, definitions of](https://github.com/flutter/flutter/wiki/Values#support)
+* [Issue prioritization](./contributing/issue_hygiene/README.md#priorities)
+* [Labels](./contributing/issue_hygiene/README.md#labels)
+* [Milestones](./contributing/issue_hygiene/README.md#milestones)
+* [Plugin compatibility policy](./contributing/Style-guide-for-Flutter-repo.md#plugin-compatibility)
+* [Reviewing code](./contributing/Tree-hygiene.md#getting-a-code-review)
+* [RFC process](./contributing/issue_hygiene/README.md#how-to-propose-a-specific-change)
+* [Status of popular issues](./contributing/issue_hygiene/Popular-issues.md)
+* [Submitting code, process for](./contributing/Tree-hygiene.md#overview)
+* [Support levels, definitions of](./about/Values.md#support)
 * [Symbolicating stack traces](./engine/Crashes.md)
 * [Threading in the Engine](./about/The-Engine-architecture.md#threading)
-* [When will my bug be fixed?](https://github.com/flutter/flutter/wiki/Issue-hygiene#when-will-my-bug-be-fixed)
+* [When will my bug be fixed?](./contributing/issue_hygiene/README.md#when-will-my-bug-be-fixed)
 * [Security best practices](./infra/Security.md#best-practices)

@@ -292,9 +292,9 @@ by real developers.
 
 ### Get early feedback when designing new APIs
 
-If you're designing a new API or a new feature, consider https://github.com/flutter/flutter/wiki/Chat#design-documents[writing a design doc].
+If you're designing a new API or a new feature, consider [writing a design doc](Design-Documents.md).
 Then, get feedback from the relevant people, e.g. send it to `flutter-dev` or
-post it on the https://github.com/flutter/flutter/wiki/Chat#existing-channels[relevant chat channel].
+post it on the [relevant chat channel](Chat.md#existing-channels).
 
 
 ### Start designing APIs from the closest point to the developer

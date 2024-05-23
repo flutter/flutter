@@ -12,7 +12,7 @@ The Flutter repo does not use a `DEPS` file and `gclient` for its dependencies. 
 
 ## Dart Autoroller
 
-Dart is now automatically rolled into the Flutter engine repository on a regular basis. See [Autorollers](https://github.com/flutter/flutter/wiki/Autorollers) for more information.
+Dart is now automatically rolled into the Flutter engine repository on a regular basis. See [Autorollers](Autorollers.md) for more information.
 
 ## Using dart_roll_helper.py to roll the version of Dart used by the engine
 
@@ -54,7 +54,7 @@ If the script completes without errors, move on to step 10 in the next section t
    linked to from [our contributing guide](../../CONTRIBUTING.md).
 2. Build the engine according to the instructions on the [Compiling the engine](../engine/dev/Compiling-the-engine.md) page.
 3. Select a target Dart revision, typically use the [latest revision](https://github.com/dart-lang/sdk/commits/master). Check that the tests for that revision have all passed (all green) on the [Dart buildbot](https://ci.chromium.org/p/flutter/g/engine/console) and the [Internal Dart Flutter buildbot](https://ci.chromium.org/p/dart/g/flutter/console).
-4. Create a PR (see [Tree hygiene](https://github.com/flutter/flutter/wiki/Tree-hygiene)) that updates `dart_revision` in [DEPS](https://github.com/flutter/engine/blob/main/DEPS) to your selected revision. Invoke `gclient sync` in the src directory to ensure versions corresponding to the DEPS file are synched up.
+4. Create a PR (see [Tree hygiene](../contributing/Tree-hygiene.md)) that updates `dart_revision` in [DEPS](https://github.com/flutter/engine/blob/main/DEPS) to your selected revision. Invoke `gclient sync` in the src directory to ensure versions corresponding to the DEPS file are synched up.
 5. Update all Dart-dependent DEPS entries using `engine/src/tools/dart/create_updated_flutter_deps.py` script. In case script complains that dart dependency was removed, remove entry from flutter DEPS file manually. If the list of library source files or patch files is modified, update the file [libraries.yaml](https://github.com/flutter/engine/blob/main/lib/snapshot/libraries.yaml) and regenerate the corresponding json file.
 6. Invoke `gclient sync` in the src directory to ensure versions corresponding to the DEPS file are synched up
 7. Build the debug, profile, and release versions of the engine, following the normal [Compiling the engine](../engine/dev/Compiling-the-engine.md) instructions. You will need to build the host versions of the engine too. Here is a script with the build commands:
@@ -91,7 +91,7 @@ cd $FLUTTER_HOME/packages/flutter
 flutter test --local-engine=host_debug --local-engine-host=host_debug
 ```
 
-> See [Running a Flutter app with a local engine](https://github.com/flutter/flutter/wiki/Debugging-the-engine#running-a-flutter-app-with-a-local-engine) for more information.
+> See [Running a Flutter app with a local engine](../engine/Debugging-the-engine.md#running-a-flutter-app-with-a-local-engine) for more information.
 
 8. Make sure your path contains `engine/src/third_party/dart/tools/sdks/dart-sdk/bin`, run the script `flutter/ci/licenses.sh` in the src directory, update `flutter/ci/licenses_golden/licenses_third_party` by copying `out/license_script_output/licenses_third_party` into it. Include this change in your pull request.
    **If any licenses changed, make sure to also update the actual `LICENSE` file.**

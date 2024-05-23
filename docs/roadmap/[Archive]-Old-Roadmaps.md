@@ -71,7 +71,7 @@ We unfortunately have had to shelve our current efforts to implement hot reload 
 
 In general we prioritize [issues with the most thumbs-up reactions on GitHub](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc), and the astute among you may notice that the list of non-goals includes a number of these highest-rated issues. Unfortunately, we have discovered a pattern that we did not expect, though it is obvious in retrospect: when we address all the highest-ranked issues except for those that are technically infeasible or intractable for whatever reason, the result is that the highest-ranked issues that are left are _all_ issues that are infeasible or somehow intractable.
 
-_See also: [Popular issues](https://github.com/flutter/flutter/wiki/Popular-issues), which discusses each of the top 10 issues._
+_See also: [Popular issues](../contributing/issue_hygiene/Popular-issues.md), which discusses each of the top 10 issues._
 
 
 # 2022
@@ -198,4 +198,4 @@ We intend to deliver on long-anticipated features such as our router refactor, i
 
 In general in 2020 we intend to primarily focus on fixing bugs rather than adding new features.
 
-_We mainly use the "Thumbs-Up" emoji reactions on the first comment of an issue to determine its importance. See the [Issue hygiene](https://github.com/flutter/flutter/wiki/Issue-hygiene) wiki page for more details on our prioritization strategy._
+_We mainly use the "Thumbs-Up" emoji reactions on the first comment of an issue to determine its importance. See the [Issue hygiene](../contributing/issue_hygiene/README.md) wiki page for more details on our prioritization strategy._
