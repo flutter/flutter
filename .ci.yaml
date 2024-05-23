@@ -1294,6 +1294,7 @@ targets:
 
   - name: Linux web_long_running_tests_2_5
     recipe: flutter/flutter_drone
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -5455,6 +5456,7 @@ targets:
       - .ci.yaml
 
   - name: Windows plugin_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/148834
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
