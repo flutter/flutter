@@ -8,6 +8,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
+import 'package:material_color_utilities/scheme/scheme_fruit_salad.dart';
+import 'package:material_color_utilities/scheme/scheme_rainbow.dart';
 
 import 'colors.dart';
 import 'theme_data.dart';
