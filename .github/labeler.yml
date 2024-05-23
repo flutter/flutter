@@ -195,6 +195,11 @@ team-tool:
     - any-glob-to-any-file:
       - docs/tool/**/*
 
+team-web:
+  - changed-files:
+    - any-glob-to-any-file:
+      - docs/platforms/web/**/*
+
 tool:
   - changed-files:
     - any-glob-to-any-file:
