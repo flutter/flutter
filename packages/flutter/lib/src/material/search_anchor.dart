@@ -932,11 +932,6 @@ class _ViewContentState extends State<_ViewContent> {
       ?? viewTheme.headerTextStyle
       ?? viewDefaults.headerHintStyle;
 
-    final Widget viewDivider = DividerTheme(
-      data: dividerTheme.copyWith(color: effectiveDividerColor),
-      child: const Divider(height: 1),
-    );
-
     final SearchBarThemeData barDefaults = _SearchBarDefaultsM3(context);
     final SearchBarThemeData barTheme = SearchBarTheme.of(context);
     final BoxConstraints barConstraints = headerConstraints ?? (widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null) ?? barTheme.constraints ?? barDefaults.constraints!;
@@ -984,21 +979,23 @@ class _ViewContentState extends State<_ViewContent> {
                           textCapitalization: widget.textCapitalization,
                           textInputAction: widget.textInputAction,
                           keyboardType: widget.keyboardType,
+                          backgroundColor: effectiveBackgroundColor,
+                          surfaceTint: effectiveSurfaceTint,
+                          dividerFadeCurve: viewDividerFadeCurve,
+                          dividerTheme: dividerTheme.copyWith(color: effectiveDividerColor),
+                          hasSuggestions: result.isNotEmpty,
                         ),
                       ),
                     ),
                   ),
                 ),
-                if (_controller.isOpen && result.isNotEmpty) ...<Widget>[
-                  SliverFadeTransition(
-                    opacity: viewDividerFadeCurve,
-                    sliver: SliverToBoxAdapter(child: viewDivider),
-                  ),
-                  SliverFadeTransition(
-                    opacity: viewListFadeOnIntervalCurve,
+                SliverFadeTransition(
+                  opacity: viewListFadeOnIntervalCurve,
+                  sliver: SliverVisibility(
+                    visible: _controller.isOpen && result.isNotEmpty,
                     sliver: viewBuilder(result),
                   ),
-                ],
+                ),
               ],
             ),
           ),
@@ -1016,14 +1013,20 @@ class _SearchBarHeaderDelegate extends SliverPersistentHeaderDelegate {
     this.hintText,
     this.textStyle,
     this.hintStyle,
-    this.controller,
+    required this.controller,
     this.onChanged,
     this.onSubmitted,
     this.textCapitalization,
     this.textInputAction,
     this.keyboardType,
-
+    required this.backgroundColor,
+    required this.surfaceTint,
+    required this.dividerFadeCurve,
+    required this.dividerTheme,
+    required this.hasSuggestions,
   });
+
+  static const double _dividerHeight = 1;
 
   final BoxConstraints constraints;
   final Widget? leading;
@@ -1031,40 +1034,63 @@ class _SearchBarHeaderDelegate extends SliverPersistentHeaderDelegate {
   final String? hintText;
   final TextStyle? textStyle;
   final TextStyle? hintStyle;
-  final TextEditingController? controller;
+  final SearchController controller;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final TextCapitalization? textCapitalization;
   final TextInputAction? textInputAction;
   final TextInputType? keyboardType;
+  final Color backgroundColor;
+  final Color surfaceTint;
+  final Animation<double> dividerFadeCurve;
+  final DividerThemeData dividerTheme;
+  final bool hasSuggestions;
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return  SearchBar(
-      autoFocus: true,
-      constraints: constraints,
-      leading: leading,
-      trailing: trailing,
-      hintText: hintText,
-      backgroundColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
-      overlayColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
-      elevation: const MaterialStatePropertyAll<double>(0.0),
-      textStyle: MaterialStatePropertyAll<TextStyle?>(textStyle),
-      hintStyle: MaterialStatePropertyAll<TextStyle?>(hintStyle),
-      controller: controller,
-      onChanged: (String value) => onChanged?.call(value),
-      onSubmitted: onSubmitted,
-      textCapitalization: textCapitalization,
-      textInputAction: textInputAction,
-      keyboardType: keyboardType,
+    return  Material(
+      color: backgroundColor,
+      surfaceTintColor: surfaceTint,
+      child: Column(
+        children: <Widget>[
+          SearchBar(
+            autoFocus: true,
+            constraints: constraints,
+            leading: leading,
+            trailing: trailing,
+            hintText: hintText,
+            backgroundColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
+            overlayColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
+            elevation: const MaterialStatePropertyAll<double>(0.0),
+            textStyle: MaterialStatePropertyAll<TextStyle?>(textStyle),
+            hintStyle: MaterialStatePropertyAll<TextStyle?>(hintStyle),
+            controller: controller,
+            onChanged: (String value) => onChanged?.call(value),
+            onSubmitted: onSubmitted,
+            textCapitalization: textCapitalization,
+            textInputAction: textInputAction,
+            keyboardType: keyboardType,
+          ),
+          FadeTransition(
+            opacity: dividerFadeCurve,
+            child: DividerTheme(
+              data: dividerTheme,
+              child: Visibility(
+                visible: controller.isOpen && hasSuggestions,
+                child: const Divider(height: _dividerHeight),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   @override
-  double get maxExtent => constraints.minHeight;
+  double get maxExtent => constraints.minHeight + _dividerHeight;
 
   @override
-  double get minExtent => constraints.minHeight;
+  double get minExtent => constraints.minHeight + _dividerHeight;
 
   @override
   bool shouldRebuild(covariant _SearchBarHeaderDelegate oldDelegate) {
@@ -1079,9 +1105,13 @@ class _SearchBarHeaderDelegate extends SliverPersistentHeaderDelegate {
       onSubmitted != oldDelegate.onSubmitted ||
       textCapitalization != oldDelegate.textCapitalization ||
       textInputAction != oldDelegate.textInputAction ||
-      keyboardType != oldDelegate.keyboardType;
+      keyboardType != oldDelegate.keyboardType ||
+      backgroundColor != oldDelegate.backgroundColor ||
+      surfaceTint != oldDelegate.surfaceTint ||
+      dividerFadeCurve != oldDelegate.dividerFadeCurve ||
+      dividerTheme != oldDelegate.dividerTheme ||
+      hasSuggestions != oldDelegate.hasSuggestions;
   }
-
 }
 
 class _SearchAnchorWithSearchBar extends SearchAnchor {
