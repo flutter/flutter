@@ -18,7 +18,7 @@ import 'theme.dart';
 /// Carousels present a scrollable list of items, each of which can dynamically
 /// change size based on the chosen layout.
 ///
-/// Material Design 3 introduces 4 [Carousel] layouts:
+/// Material Design 3 introduced 4 [Carousel] layouts:
 ///  * Multi-browse: This layout shows at least one large, medium, and small
 /// carousel item at a time.
 ///  * Uncontained (default): This layout show items that scroll to the edge of
