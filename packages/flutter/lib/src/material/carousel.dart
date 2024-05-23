@@ -100,14 +100,15 @@ class Carousel extends StatefulWidget {
   /// Similarly, the last visible item enters the viewport at this minimum size
   /// and expands to its full [itemExtent].
   ///
-  /// A `shrinkExtent` of 0.0 allows items to shrink/expand completely, transitioning
-  /// between 0.0 and the full `itemExtent`.
-  ///
   /// In cases where the remaining viewport space for the last visible item is
-  /// larger than the defined `shrinkExtent`, the `shrinkExtent` is dynamically
+  /// larger than the defined [shrinkExtent], the [shrinkExtent] is dynamically
   /// adjusted to match this remaining space, ensuring a smooth size transition.
   ///
-  /// Defaults to 0.0.
+  /// Defaults to null. If this is null, it is set to 0.0 which allows items to
+  /// shrink/expand completely, transitioning between 0.0 and the full `itemExtent`.
+  /// In cases where the remaining viewport space for the last visible item is
+  /// larger than the defined [shrinkExtent], the [shrinkExtent] is dynamically
+  /// adjusted to match this remaining space, ensuring a smooth size transition.
   final double? shrinkExtent;
 
   /// Whether the carousel should keep scrolling to the next/previous items to
