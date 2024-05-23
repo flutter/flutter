@@ -30,13 +30,6 @@ config("impeller_public_config") {
     defines += [ "IMPELLER_ENABLE_VULKAN=1" ]
   }
 
-  if (is_win) {
-    defines += [
-      # TODO(dnfield): https://github.com/flutter/flutter/issues/50053
-      "_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING",
-    ]
-  }
-
   if (impeller_enable_3d) {
     defines += [ "IMPELLER_ENABLE_3D" ]
   }
