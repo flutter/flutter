@@ -37,7 +37,7 @@ We also work closely with other projects, such as [Dart](https://dart.dev) and [
 Subteams are responsible for reviewing PRs in their area, triaging issues, and scheduling work.
 How subteams organize themselves is not defined by this document. This document does not attempt to impose a process, merely a set of responsibilities.
 
-See the [Roadmap](https://github.com/flutter/flutter/wiki/Roadmap) and [What should I work on?](https://github.com/flutter/flutter/wiki/What-should-I-work-on%3F) pages for details on how to prioritize work.
+See the [Roadmap](../roadmap/Roadmap.md) and [What should I work on?](https://github.com/flutter/flutter/wiki/What-should-I-work-on%3F) pages for details on how to prioritize work.
 
 ### Reviewing PRs
 
@@ -47,7 +47,7 @@ Please review PRs in your area (based on label and/or repositories). The goal is
 
 Please triage issues with your label on a regular basis. You may do this in whatever manner you prefer (on your phone while in line for lunch, as a team exercise in a dedicated meeting room, by having some sort of team rotation, whatever).
 
-You must cover these bug lists in particular: https://github.com/flutter/flutter/wiki/Triage#area-focused-triage
+[You must cover these bug lists in particular.](../triage/README.md#triage-process-for-teams)
 
 * Assign bugs that you are working on or that you have committed to work on.
 
@@ -57,7 +57,7 @@ You must cover these bug lists in particular: https://github.com/flutter/flutter
 
 See our page on managing issues: https://github.com/flutter/flutter/wiki/Issue-hygiene
 
-Keep an eye out for bugs that should block releases, update the bad builds page accordingly: https://github.com/flutter/flutter/wiki/Bad-Builds
+Keep an eye out for bugs that should block releases, update the [bad builds](../releases/Bad-Builds.md) page accordingly.
 
 ### Be conservative when scheduling
 
