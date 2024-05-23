@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Shows all elements', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MaterialBannerExampleApp()
+      const example.MaterialBannerExampleApp(),
     );
 
     expect(find.byType(MaterialBanner), findsOneWidget);
@@ -36,7 +36,7 @@ void main() {
 
   testWidgets('The banner is below the text saying so', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const example.MaterialBannerExampleApp()
+      const example.MaterialBannerExampleApp(),
     );
 
     expect(find.byType(MaterialBanner), findsOneWidget);

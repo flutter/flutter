@@ -24,7 +24,8 @@ void main() {
     expect(find.byIcon(Icons.agriculture_outlined), findsOneWidget);
 
     final MaterialBanner banner = tester.widget<MaterialBanner>(
-        find.byType(MaterialBanner));
+      find.byType(MaterialBanner),
+    );
     expect(banner.backgroundColor, Colors.green);
   });
 
