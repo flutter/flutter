@@ -4508,7 +4508,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     Rect? composingRect = renderEditable.getRectForComposingRange(composingRange);
     // Send the caret location instead if there's no marked text yet.
     if (composingRect == null) {
-      assert(!composingRange.isValid || composingRange.isCollapsed);
       final int offset = composingRange.isValid ? composingRange.start : 0;
       composingRect = renderEditable.getLocalRectForCaret(TextPosition(offset: offset));
     }
