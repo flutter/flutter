@@ -376,7 +376,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/widgets/framework/build_owner.0_test.dart',
   'examples/api/test/widgets/framework/error_widget.0_test.dart',
   'examples/api/test/widgets/inherited_theme/inherited_theme.0_test.dart',
-  'examples/api/test/widgets/sliver/decorated_sliver.0_test.dart',
   'examples/api/test/widgets/autofill/autofill_group.0_test.dart',
   'examples/api/test/widgets/nested_scroll_view/nested_scroll_view_state.0_test.dart',
   'examples/api/test/widgets/scroll_position/scroll_metrics_notification.0_test.dart',
