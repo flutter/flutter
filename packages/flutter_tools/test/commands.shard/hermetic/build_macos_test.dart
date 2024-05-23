@@ -115,7 +115,7 @@ void main() {
   }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
-    final String arch = 'x86_64'
+    final String arch = 'x86_64';
     return FakeCommand(
       command: <String>[
         '/usr/bin/env',
