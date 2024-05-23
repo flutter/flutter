@@ -39,21 +39,10 @@ class _CupertinoCheckboxExampleState extends State<CupertinoCheckboxExample> {
 
   @override
   Widget build(BuildContext context) {
-    Color getColor(Set<WidgetState> states) {
-      const Set<WidgetState> interactiveStates = <WidgetState>{
-        WidgetState.pressed,
-        WidgetState.hovered,
-        WidgetState.focused,
-      };
-      if (states.any(interactiveStates.contains)) {
-        return CupertinoColors.activeGreen;
-      }
-      return CupertinoColors.systemRed;
-    }
     return CupertinoCheckbox(
       checkColor: CupertinoColors.white,
       tristate: true,
-      fillColor: WidgetStateProperty.resolveWith(getColor),
+      fillColor: WidgetStateProperty.resolveWith(_getColor),
       value: isChecked,
       onChanged: (bool? value) {
         setState(() {
@@ -62,4 +51,16 @@ class _CupertinoCheckboxExampleState extends State<CupertinoCheckboxExample> {
       },
     );
   }
+}
+
+Color _getColor(Set<WidgetState> states) {
+  const Set<WidgetState> interactiveStates = <WidgetState>{
+    WidgetState.pressed,
+    WidgetState.hovered,
+    WidgetState.focused,
+  };
+  if (states.any(interactiveStates.contains)) {
+    return CupertinoColors.activeGreen;
+  }
+  return CupertinoColors.systemRed;
 }

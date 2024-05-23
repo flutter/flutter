@@ -335,7 +335,7 @@ void main() {
     semanticsTester.dispose();
   });
 
-    testWidgets('Checkbox can configure a semantic label', (WidgetTester tester) async {
+  testWidgets('Checkbox can configure a semantic label', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
@@ -742,7 +742,7 @@ void main() {
       reason: 'Focused Checkbox should use $focusColor',
     );
 
-    // Start hovering
+    // Start hovering.
     final TestGesture gesture5 =
       await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture5.addPointer();

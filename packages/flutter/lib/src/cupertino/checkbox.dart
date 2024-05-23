@@ -152,6 +152,7 @@ class CupertinoCheckbox extends StatefulWidget {
   /// The color used if the checkbox is inactive.
   ///
   /// By default, [CupertinoColors.inactiveGray] is used.
+  ///
   /// If [fillColor] returns a non-null color in the [WidgetState.disabled]
   /// state, it will be used instead of this color.
   final Color? inactiveColor;
@@ -247,8 +248,9 @@ class CupertinoCheckbox extends StatefulWidget {
 
   /// The color of the dropshadow from the top edge of the checkbox.
   ///
-  /// On iOS/macOS, checkboxes have a slight dropshadow with three pixel-long
-  /// layers from the top edge.
+  /// From measuring the composition of the dropshadow in HIG checkbox examples,
+  /// the checkbox was found to have a slight dropshadow with three layers, each
+  /// one pixel long, starting from the top edge.
   ///
   /// If this property is null, then the dropshadow has color
   /// [CupertinoColors.black]. If no shadow is desired, set this property to the
@@ -349,15 +351,15 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
     });
   }
 
-    BorderSide? _resolveSide(BorderSide? side, Set<WidgetState> states) {
-      if (side is WidgetStateBorderSide) {
-        return WidgetStateProperty.resolveAs<BorderSide?>(side, states);
-      }
-      if (!states.contains(WidgetState.selected)) {
-        return side;
-      }
-      return null;
+  BorderSide? _resolveSide(BorderSide? side, Set<WidgetState> states) {
+    if (side is WidgetStateBorderSide) {
+      return WidgetStateProperty.resolveAs<BorderSide?>(side, states);
     }
+    if (!states.contains(WidgetState.selected)) {
+      return side;
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -386,13 +388,14 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
           .withSaturation(_kCupertinoFocusColorSaturation)
           .toColor();
 
-    final Set<WidgetState> checkStates = widget.isError ? (states..add(WidgetState.error)) : states;
+    final Set<WidgetState> checkStates = widget.isError
+      ? (states..add(WidgetState.error)) : states;
 
     final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
       WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
-      return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
-        ?? SystemMouseCursors.basic;
-    });
+        return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
+          ?? SystemMouseCursors.basic;
+      });
 
     return Semantics(
       label: widget.semanticLabel,
@@ -515,7 +518,7 @@ class _CheckboxPainter extends ToggleablePainter {
     // Since the focus outline is drawn around the outer border,
     // only clip to the outer border when not in focus.
     if (value == false && reaction.isDismissed && !isFocused &&
-         shadowColor != _kTransparentColor){
+      shadowColor != _kTransparentColor) {
       canvas.clipPath(shape.getOuterPath(outer));
       canvas.drawPath(shape.getOuterPath(outer), paint);
 
@@ -534,7 +537,7 @@ class _CheckboxPainter extends ToggleablePainter {
         ..shader = topEdgeGradient.createShader(shadowRect);
       canvas.drawPath(shape.getInnerPath(shadowRect), gradientPaint);
     }
-    else{
+    else {
       canvas.drawPath(shape.getOuterPath(outer), paint);
     }
     if (side != null) {
@@ -584,7 +587,7 @@ class _CheckboxPainter extends ToggleablePainter {
         _drawDash(canvas, origin, strokePaint);
     }
     // Apply effect to darken checkbox when pressed.
-    if (!reaction.isDismissed){
+    if (!reaction.isDismissed) {
       final Paint paint = Paint()
         ..color = _kTransparentColor.withOpacity(0.05);
       final Rect outer = _outerRectAt(origin);
