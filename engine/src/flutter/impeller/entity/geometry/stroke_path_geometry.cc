@@ -232,9 +232,17 @@ class StrokeGenerator {
       // For curve components, the polyline is detailed enough such that
       // it can avoid worrying about joins altogether.
       if (is_end_of_component) {
-        vtx.position = polyline.GetPoint(point_i + 1) + offset;
+        // Append two additional vertices to close off the component. If we're
+        // on the _last_ component of the contour then we need to use the
+        // contour's end direction.
+        // `ComputeOffset` returns the contour's end direction when attempting
+        // to grab offsets past `contour_end_point_i`, so just use `offset` when
+        // we're on the last component.
+        Point last_component_offset =
+            is_last_component ? offset : previous_offset;
+        vtx.position = polyline.GetPoint(point_i + 1) + last_component_offset;
         vtx_builder.AppendVertex(vtx.position);
-        vtx.position = polyline.GetPoint(point_i + 1) - offset;
+        vtx.position = polyline.GetPoint(point_i + 1) - last_component_offset;
         vtx_builder.AppendVertex(vtx.position);
         // Generate join from the current line to the next line.
         if (!is_last_component) {
