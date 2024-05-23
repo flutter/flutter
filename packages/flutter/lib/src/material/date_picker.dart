@@ -241,7 +241,7 @@ Future<DateTime?> showDatePicker({
       locale: locale,
       child: dialog,
     );
-  }else{
+  } else {
     final DatePickerThemeData datePickerTheme = DatePickerTheme.of(context);
     if (datePickerTheme.locale != null) {
       dialog = Localizations.override(
