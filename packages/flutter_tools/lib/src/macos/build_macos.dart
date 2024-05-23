@@ -148,7 +148,9 @@ Future<void> buildMacOS({
   if (configuration == null) {
     throwToolExit('Unable to find expected configuration in Xcode project.');
   }
-  final String arch = globals.platform.version.contains('arm64') ? 'arm64' : 'x86_64';
+  // Specifying the architecture makes the destination clear to Xcode
+  final String arch = globals.platform.version.contains('arm64') ? 'arm64' : globals.platform.version.contains('x86_64') ? 'x86_64' : '';
+  final String destination = 'platform=macOS${arch.isEmpty?'':',arch=$arch'}';
   // Run the Xcode build.
   final Stopwatch sw = Stopwatch()..start();
   final Status status = globals.logger.startProgress(
@@ -177,7 +179,7 @@ Future<void> buildMacOS({
       '-configuration', configuration,
       '-scheme', scheme,
       '-derivedDataPath', flutterBuildDir.absolute.path,
-      '-destination', 'platform=macOS,arch=$arch',
+      '-destination', destination,
       'OBJROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
       'SYMROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
       if (verboseLogging)
