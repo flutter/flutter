@@ -13,6 +13,7 @@
 @Timeout(Duration(minutes: 10))
 library;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/file.dart';
@@ -60,44 +61,40 @@ const String packageName = 'package_with_native_assets';
 
 const String exampleAppName = '${packageName}_example';
 
-String? _createIOSSimulator() {
-  ProcessResult result = processManager.runSync(<String>[
-    'xcrun',
-    'simctl',
-    'create',
-    'test-simulator',
-    'com.apple.CoreSimulator.SimDeviceType.iPhone-11',
-    'com.apple.CoreSimulator.SimRuntime.iOS-17-0',
-  ]);
-  if (result.exitCode != 0) {
-    throw Exception(
-        'xcrun simctl create failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+String? iOSSimulatorId() {
+  String? findSimulator() {
+    final ProcessResult res = processManager.runSync(<String>[
+      'flutter',
+      'devices',
+      '--machine',
+      '--device-connection=attached',
+    ]);
+    if (res.exitCode != 0) {
+      throw Exception(
+          'flutter devices failed: ${res.exitCode}\n${res.stderr}\n${res.stdout}');
+    }
+    final List<Map<dynamic, dynamic>> devices =
+        (json.decode(res.stdout as String) as List<dynamic>)
+            .cast<Map<dynamic, dynamic>>();
+    for (final Map<dynamic, dynamic> device in devices) {
+      if (device['emulator'] == true && device['targetPlatform'] == 'ios') {
+        return device['id'] as String;
+      }
+    }
+    return null;
   }
-  final String deviceId = result.stdout.toString().trim();
-  result = processManager.runSync(<String>[
-    'xcrun',
-    'simctl',
-    'boot',
-    deviceId,
-  ]);
-  if (result.exitCode != 0) {
-    throw Exception(
-        'xcrun simctl boot failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
-  }
-  return deviceId;
-}
 
-void _deleteIOSSimulator(String id) {
-  final ProcessResult result = processManager.runSync(<String>[
-    'xcrun',
-    'simctl',
-    'delete',
-    id,
-  ]);
-  if (result.exitCode != 0) {
-    throw Exception(
-        'xcrun simctl delete failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}');
+  final String? res = findSimulator();
+  if (res != null) {
+    return res;
   }
+  processManager.runSync(<String>[
+    'flutter',
+    'emulators',
+    '--launch',
+    'apple_ios_simulator',
+  ]);
+  return findSimulator();
 }
 
 void main() {
@@ -106,12 +103,13 @@ void main() {
     return;
   }
 
-  String? iosSimulatorId;
-
+  final List<String> testDevices = List<String>.of(devices);
   if (platform.isMacOS) {
-    iosSimulatorId = _createIOSSimulator();
-    if (iosSimulatorId == null) {
-      throw Exception('Could not create iOS Simulator');
+    final String? simulator = iOSSimulatorId();
+    if (simulator != null) {
+      testDevices.add(simulator);
+    } else {
+      throw Exception('No running iOS simulator found');
     }
   }
 
@@ -123,19 +121,9 @@ void main() {
     ]);
   });
 
-  tearDownAll(() {
-    if (iosSimulatorId != null) {
-      _deleteIOSSimulator(iosSimulatorId);
-    }
-  });
-
-  for (final String device in <String>[
-    ...devices,
-    if (iosSimulatorId != null) iosSimulatorId,
-  ]) {
+  for (final String device in testDevices) {
     for (final String buildMode in buildModes) {
-      if ((device == 'flutter-tester' || device == iosSimulatorId) &&
-          buildMode != 'debug') {
+      if (device == 'flutter-tester' && buildMode != 'debug') {
         continue;
       }
       final String hotReload = buildMode == 'debug' ? ' hot reload and hot restart' : '';
