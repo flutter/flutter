@@ -27,11 +27,10 @@ void main() {
     final AxisDirection axisDirection;
     switch (axis) {
       case Axis.horizontal:
-        if (textDirection == TextDirection.rtl) {
-          axisDirection = reverse ? AxisDirection.right : AxisDirection.left;
-        } else {
-          axisDirection = reverse ? AxisDirection.left : AxisDirection.right;
-        }
+        axisDirection = switch (textDirection) {
+          TextDirection.rtl => reverse ? AxisDirection.right : AxisDirection.left,
+          TextDirection.ltr => reverse ? AxisDirection.left : AxisDirection.right,
+        };
       case Axis.vertical:
         axisDirection = reverse ? AxisDirection.up : AxisDirection.down;
     }

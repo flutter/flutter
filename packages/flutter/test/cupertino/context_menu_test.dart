@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
@@ -98,10 +99,12 @@ void main() {
     );
   }
 
-  Finder findStaticChildDecoration(WidgetTester tester) {
+  Finder findStaticChildColor(WidgetTester tester) {
     return find.descendant(
       of: findStatic(),
-      matching: find.byType(DecoratedBox),
+      matching: find.byWidgetPredicate(
+        (Widget widget) => widget is ColoredBox && widget.color != CupertinoColors.activeOrange,
+      ),
     );
   }
 
@@ -140,7 +143,10 @@ void main() {
       expect(tester.getRect(find.byWidget(child)), childRect);
     });
 
-    testWidgets('Can open CupertinoContextMenu by tap and hold', (WidgetTester tester) async {
+    testWidgets('Can open CupertinoContextMenu by tap and hold',
+      // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
+      experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
+      (WidgetTester tester) async {
       final Widget child = getChild();
       await tester.pumpWidget(getContextMenu(child: child));
       expect(find.byWidget(child), findsOneWidget);
@@ -492,7 +498,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(findStatic(), findsOneWidget);
 
-      expect(findStaticChildDecoration(tester), findsNWidgets(1));
+      expect(findStaticChildColor(tester), findsNWidgets(1));
 
       // Close the CupertinoContextMenu.
       await tester.tapAt(const Offset(1.0, 1.0));
@@ -524,7 +530,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(findStatic(), findsOneWidget);
 
-      expect(findStaticChildDecoration(tester), findsNWidgets(3));
+      expect(findStaticChildColor(tester), findsNWidgets(2));
     });
 
     testWidgets('Can close CupertinoContextMenu by background tap', (WidgetTester tester) async {
@@ -587,7 +593,10 @@ void main() {
       expect(findStatic(), findsNothing);
     });
 
-    testWidgets('Can close CupertinoContextMenu by flinging down', (WidgetTester tester) async {
+    testWidgets('Can close CupertinoContextMenu by flinging down',
+      // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
+      experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
+      (WidgetTester tester) async {
       final Widget child = getChild();
       await tester.pumpWidget(getContextMenu(child: child));
 

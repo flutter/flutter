@@ -89,17 +89,13 @@ class _ReplyAppState extends State<ReplyApp> with RestorationMixin {
         supportedLocales: GalleryLocalizations.supportedLocales,
         locale: GalleryOptions.of(context).locale,
         initialRoute: ReplyApp.homeRoute,
-        onGenerateRoute: (RouteSettings settings) {
-          switch (settings.name) {
-            case ReplyApp.homeRoute:
-              return MaterialPageRoute<void>(
-                builder: (BuildContext context) => const AdaptiveNav(),
-                settings: settings,
-              );
-            case ReplyApp.composeRoute:
-              return ReplyApp.createComposeRoute(settings);
-          }
-          return null;
+        onGenerateRoute: (RouteSettings settings) => switch (settings.name) {
+          ReplyApp.homeRoute => MaterialPageRoute<void>(
+              builder: (BuildContext context) => const AdaptiveNav(),
+              settings: settings,
+            ),
+          ReplyApp.composeRoute => ReplyApp.createComposeRoute(settings),
+          _ => null,
         },
       ),
     );

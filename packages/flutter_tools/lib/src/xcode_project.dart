@@ -385,14 +385,11 @@ class IosProject extends XcodeBasedProject {
           )?.cast<String>();
 
           if (domains != null) {
-            final List<String> result = <String>[];
-            for (final String domain in domains) {
-              final RegExpMatch? match = _associatedDomainPattern.firstMatch(domain);
-              if (match != null) {
-                result.add(match.group(1)!);
-              }
-            }
-            return result;
+            return <String>[
+              for (final String domain in domains)
+                if (_associatedDomainPattern.firstMatch(domain) case final RegExpMatch match)
+                  match.group(1)!,
+            ];
           }
         }
       }

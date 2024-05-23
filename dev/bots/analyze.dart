@@ -1240,7 +1240,10 @@ Future<void> verifyIssueLinks(String workingDirectory) async {
   final Set<String> suggestions = <String>{};
   final List<File> files = await _gitFiles(workingDirectory);
   for (final File file in files) {
-    if (path.basename(file.path).endsWith('_test.dart') || path.basename(file.path) == 'analyze.dart') {
+    if (path.basename(file.path).endsWith('_test.dart')
+      || path.basename(file.path) == 'analyze.dart'
+      // TODO(Piinks): Disables checks in docs/unsorted, enabling unchanged initial migration, https://github.com/flutter/flutter/issues/145009
+      || file.path.contains('unsorted_wiki')) {
       continue; // Skip tests, they're not public-facing.
     }
     final Uint8List bytes = file.readAsBytesSync();
@@ -1301,14 +1304,19 @@ Future<void> verifyRepositoryLinks(String workingDirectory) async {
 
   // Repos whose default branch is still 'master'
   const Set<String> repoExceptions = <String>{
+    'bdero/flutter-gpu-examples',
+    'chromium/chromium',
     'clojure/clojure',
     'dart-lang/test', // TODO(guidezpl): remove when https://github.com/dart-lang/test/issues/2209 is closed
+    'dart-lang/webdev',
     'eseidelGoogle/bezier_perf',
     'flutter/devtools', // TODO(guidezpl): remove when https://github.com/flutter/devtools/issues/7551 is closed
     'flutter/flutter_gallery_assets', // TODO(guidezpl): remove when subtask in https://github.com/flutter/flutter/issues/121564 is complete
     'flutter/flutter-intellij', // TODO(guidezpl): remove when https://github.com/flutter/flutter-intellij/issues/7342 is closed
     'flutter/platform_tests', // TODO(guidezpl): remove when subtask in https://github.com/flutter/flutter/issues/121564 is complete
+    'flutter/web_installers',
     'glfw/glfw',
+    'GoogleCloudPlatform/artifact-registry-maven-tools',
     'material-components/material-components-android', // TODO(guidezpl): remove when https://github.com/material-components/material-components-android/issues/4144 is closed
     'torvalds/linux',
     'tpn/winsdk-10',
@@ -1322,6 +1330,10 @@ Future<void> verifyRepositoryLinks(String workingDirectory) async {
   final Set<String> suggestions = <String>{};
   final List<File> files = await _allFiles(workingDirectory, null, minimumMatches: 10).toList();
   for (final File file in files) {
+    // TODO(Piinks): Disables checks in docs/unsorted, enabling unchanged initial migration, https://github.com/flutter/flutter/issues/145009
+    if (file.path.contains('unsorted_wiki')) {
+      continue;
+    }
     final Uint8List bytes = file.readAsBytesSync();
     // We allow invalid UTF-8 here so that binaries don't trip us up.
     // There's a separate test in this file that verifies that all text
