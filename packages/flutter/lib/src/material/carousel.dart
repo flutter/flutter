@@ -145,6 +145,9 @@ class Carousel extends StatefulWidget {
 
   /// The extent the children are forced to have in the main axis.
   ///
+  /// The item extent should not exceed the available space that the carousel
+  /// occupies to ensure at least one item is fully visible.
+  ///
   /// This must be non-null.
   final double itemExtent;
 
@@ -162,11 +165,11 @@ class _CarouselState extends State<Carousel> {
 
   @override
   void initState() {
+    super.initState();
     if (widget.controller == null) {
       _internalController = CarouselController();
     }
     _controller._attach(this);
-    super.initState();
   }
 
   @override
@@ -184,6 +187,9 @@ class _CarouselState extends State<Carousel> {
         _internalController?._detach(this);
         _internalController = null;
         widget.controller?._attach(this);
+      } else { // widget.controller == null && oldWidget.controller != null
+        _internalController = CarouselController();
+        _controller._attach(this);
       }
     }
     if (widget.itemExtent != oldWidget.itemExtent) {
@@ -265,31 +271,41 @@ class _CarouselState extends State<Carousel> {
       );
     });
 
-    return Scrollable(
-      axisDirection: axisDirection,
-      controller: _controller,
-      physics: physics,
-      viewportBuilder: (BuildContext context, ViewportOffset position) {
-        return Viewport(
-          cacheExtent: 0.0,
-          cacheExtentStyle: CacheExtentStyle.viewport,
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final double mainAxisExtent = switch (widget.scrollDirection) {
+          Axis.horizontal => constraints.maxWidth,
+          Axis.vertical => constraints.maxHeight,
+        };
+        _itemExtent = clampDouble(_itemExtent, 0, mainAxisExtent);
+
+        return Scrollable(
           axisDirection: axisDirection,
-          offset: position,
-          clipBehavior: Clip.antiAlias,
-          slivers: <Widget>[
-            _SliverFixedExtentCarousel(
-              itemExtent: _itemExtent,
-              minExtent: widget.shrinkExtent ?? 0.0,
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
-                  return children.elementAt(index);
-                },
-                childCount: children.length,
-              ),
-            ),
-          ],
+          controller: _controller,
+          physics: physics,
+          viewportBuilder: (BuildContext context, ViewportOffset position) {
+            return Viewport(
+              cacheExtent: 0.0,
+              cacheExtentStyle: CacheExtentStyle.viewport,
+              axisDirection: axisDirection,
+              offset: position,
+              clipBehavior: Clip.antiAlias,
+              slivers: <Widget>[
+                _SliverFixedExtentCarousel(
+                  itemExtent: _itemExtent,
+                  minExtent: widget.shrinkExtent ?? 0.0,
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
+                      return children.elementAt(index);
+                    },
+                    childCount: children.length,
+                  ),
+                ),
+              ],
+            );
+          },
         );
-      },
+      }
     );
   }
 }
@@ -361,38 +377,36 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
     markNeedsLayout();
   }
 
-  double get effectiveMaxExtent => clampDouble(maxExtent, 0, constraints.remainingPaintExtent);
-
   // This implements the [itemExtentBuilder] callback.
   double _buildItemExtent(int index, SliverLayoutDimensions currentLayoutDimensions) {
-    final int firstVisibleIndex = (constraints.scrollOffset / effectiveMaxExtent).floor();
+    final int firstVisibleIndex = (constraints.scrollOffset / maxExtent).floor();
 
     // Calculate how many items have been completely scroll off screen.
-    final int offscreenItems = (constraints.scrollOffset / effectiveMaxExtent).floor();
+    final int offscreenItems = (constraints.scrollOffset / maxExtent).floor();
 
     // If there is an item is partially off screen and partually on screen, `constraints.scrollOffset`
-    // must be greater than `offscreenItems * effectiveMaxExtent`, so the difference
+    // must be greater than `offscreenItems * maxExtent`, so the difference
     // between these two is how much the current first visible item is off screen.
-    final double offscreenExtent = constraints.scrollOffset - offscreenItems * effectiveMaxExtent;
+    final double offscreenExtent = constraints.scrollOffset - offscreenItems * maxExtent;
 
     // If there is not enough space to place the last visible item but the remaining
     // space is larger than `minExtent`, the extent for last item should be at
     // least the remaining extent to make sure a smooth size transition.
-    final double effectiveMinExtent = math.max(constraints.remainingPaintExtent % effectiveMaxExtent, minExtent);
+    final double effectiveMinExtent = math.max(constraints.remainingPaintExtent % maxExtent, minExtent);
 
     // Two special handles are the first and last visible items. Other items' extent
-    // should all return `effectiveMaxExtent`.
+    // should all return `maxExtent`.
     if (index == firstVisibleIndex) {
-      final double effectiveExtent = effectiveMaxExtent - offscreenExtent;
+      final double effectiveExtent = maxExtent - offscreenExtent;
       return math.max(effectiveExtent, effectiveMinExtent);
     }
 
     final double scrollOffsetForLastIndex = constraints.scrollOffset + constraints.remainingPaintExtent;
-    if (index == getMaxChildIndexForScrollOffset(scrollOffsetForLastIndex, effectiveMaxExtent)) {
-      return clampDouble(scrollOffsetForLastIndex - effectiveMaxExtent * index, effectiveMinExtent, effectiveMaxExtent);
+    if (index == getMaxChildIndexForScrollOffset(scrollOffsetForLastIndex, maxExtent)) {
+      return clampDouble(scrollOffsetForLastIndex - maxExtent * index, effectiveMinExtent, maxExtent);
     }
 
-    return effectiveMaxExtent;
+    return maxExtent;
   }
 
   late SliverLayoutDimensions _currentLayoutDimensions;
@@ -418,23 +432,23 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
     double itemExtent,
     int index,
   ) {
-    final int firstVisibleIndex = (constraints.scrollOffset / effectiveMaxExtent).floor();
+    final int firstVisibleIndex = (constraints.scrollOffset / maxExtent).floor();
 
     // If there is not enough space to place the last visible item but the remaining
     // space is larger than `minExtent`, the extent for last item should be at
     // least the remaining extent to make sure a smooth size transition.
-    final double effectiveMinExtent = math.max(constraints.remainingPaintExtent % effectiveMaxExtent, minExtent);
+    final double effectiveMinExtent = math.max(constraints.remainingPaintExtent % maxExtent, minExtent);
     if (index == firstVisibleIndex) {
       final double firstVisibleItemExtent = _buildItemExtent(index, _currentLayoutDimensions);
 
       // If the first item is squished to be less than `effectievMinExtent`,
       // then it should stop changinng its size and should start to scroll off screen.
       if (firstVisibleItemExtent <= effectiveMinExtent) {
-        return effectiveMaxExtent * index - effectiveMinExtent + effectiveMaxExtent;
+        return maxExtent * index - effectiveMinExtent + maxExtent;
       }
       return constraints.scrollOffset;
     }
-    return effectiveMaxExtent * index;
+    return maxExtent * index;
   }
 
   /// The minimum child index that is visible at the given scroll offset.
@@ -447,7 +461,7 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
     )
     double itemExtent,
   ) {
-    final int firstVisibleIndex = (constraints.scrollOffset / effectiveMaxExtent).floor();
+    final int firstVisibleIndex = (constraints.scrollOffset / maxExtent).floor();
     return math.max(firstVisibleIndex, 0);
   }
 
@@ -461,10 +475,10 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
     )
     double itemExtent,
   ) {
-    if (effectiveMaxExtent > 0.0) {
-      final double actual = scrollOffset / effectiveMaxExtent - 1;
+    if (maxExtent > 0.0) {
+      final double actual = scrollOffset / maxExtent - 1;
       final int round = actual.round();
-      if ((actual * effectiveMaxExtent - round * effectiveMaxExtent).abs() < precisionErrorTolerance) {
+      if ((actual * maxExtent - round * maxExtent).abs() < precisionErrorTolerance) {
         return math.max(0, round);
       }
       return math.max(0, actual.ceil());
