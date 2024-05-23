@@ -8,6 +8,80 @@ import 'package:flutter/services.dart';
 
 // Examples can assume:
 // late BuildContext context;
+// late Set<WidgetState> states;
+
+/// This class allows [WidgetState] enum values to be combined
+/// and resolved using [WidgetStateProperty.map].
+///
+/// {@macro flutter.widgets.WidgetStateProperty.WidgetStateMap}
+abstract interface class WidgetStateMapKey {
+  /// Whether this key should apply, given the current [states].
+  ///
+  /// If the key is a single [WidgetState] object,
+  /// it matches the set if the set contains the object.
+  ///
+  /// The key could also be created using one or more operators, for example:
+  ///
+  /// ```dart
+  /// final WidgetStateMapKey mapKey = WidgetState.focused | WidgetState.hovered;
+  /// ```
+  ///
+  /// In the above case, `mapKey.matchesSet(states)` is equivalent to:
+  ///
+  /// ```dart
+  /// states.contains(WidgetState.focused) || states.contains(WidgetState.hovered);
+  /// ```
+  bool matchesSet(Set<WidgetState> states);
+}
+
+// A private class, used in [WidgetStateOperators].
+class _WidgetStateOperation implements WidgetStateMapKey {
+  const _WidgetStateOperation(this._matchesSet);
+
+  final bool Function(Set<WidgetState> states) _matchesSet;
+
+  @override
+  bool matchesSet(Set<WidgetState> states) => _matchesSet(states);
+}
+
+/// These operators can be used inside a [WidgetStateMap] to combine states
+/// and find a match.
+///
+/// Since enums can't extend other classes, [WidgetState] instead
+/// `implements` the [WidgetStateMapKey] interface. This `extension` ensures
+/// that the operators can be used without being directly inherited.
+///
+/// {@macro flutter.widgets.WidgetStateProperty.WidgetStateMap}
+extension WidgetStateOperators on WidgetStateMapKey {
+  /// Combines two [WidgetStateMapKey] values using logical "and".
+  WidgetStateMapKey operator &(WidgetStateMapKey other) {
+    return _WidgetStateOperation(
+      (Set<WidgetState> states) => matchesSet(states) && other.matchesSet(states),
+    );
+  }
+
+  /// Combines two [WidgetStateMapKey] values using logical "or".
+  WidgetStateMapKey operator |(WidgetStateMapKey other) {
+    return _WidgetStateOperation(
+      (Set<WidgetState> states) => matchesSet(states) || other.matchesSet(states),
+    );
+  }
+
+  /// Takes a [WidgetStateMapKey] and applies the logical "not".
+  WidgetStateMapKey operator ~() {
+    return _WidgetStateOperation(
+      (Set<WidgetState> states) => !matchesSet(states),
+    );
+  }
+}
+
+// A private class, used to create [WidgetState.any].
+class _AlwaysMatch implements WidgetStateMapKey {
+  const _AlwaysMatch();
+
+  @override
+  bool matchesSet(Set<WidgetState> states) => true;
+}
 
 /// Interactive states that some of the widgets can take on when receiving input
 /// from the user.
@@ -39,7 +113,7 @@ import 'package:flutter/services.dart';
 ///    `WidgetStateProperty` which is used in APIs that need to accept either
 ///    a [TextStyle] or a [WidgetStateProperty<TextStyle>].
 /// {@endtemplate}
-enum WidgetState {
+enum WidgetState implements WidgetStateMapKey {
   /// The state when the user drags their mouse cursor over the given widget.
   ///
   /// See: https://material.io/design/interaction/states.html#hover.
@@ -89,7 +163,13 @@ enum WidgetState {
   /// The state when the widget has entered some form of invalid state.
   ///
   /// See https://material.io/design/interaction/states.html#usage.
-  error,
+  error;
+
+  /// Can be used as a [WidgetStateMap] key to match any value.
+  static const WidgetStateMapKey any = _AlwaysMatch();
+
+  @override
+  bool matchesSet(Set<WidgetState> states) => states.contains(this);
 }
 
 /// Signature for the function that returns a value of type `T` based on a given
@@ -112,6 +192,7 @@ typedef WidgetPropertyResolver<T> = T Function(Set<WidgetState> states);
 ///   1. Create a subclass of [WidgetStateColor] and implement the abstract `resolve` method.
 ///   2. Use [WidgetStateColor.resolveWith] and pass in a callback that
 ///      will be used to resolve the color in the given states.
+///   3. Use [WidgetStateColor.map] to assign a value using a [WidgetStateMap].
 ///
 /// If a [WidgetStateColor] is used for a property or a parameter that doesn't
 /// support resolving [WidgetStateProperty<Color>]s, then its default color
@@ -160,7 +241,15 @@ abstract class WidgetStateColor extends Color implements WidgetStateProperty<Col
   ///
   /// The given callback parameter must return a non-null color in the default
   /// state.
-  static WidgetStateColor resolveWith(WidgetPropertyResolver<Color> callback) => _WidgetStateColor(callback);
+  factory WidgetStateColor.resolveWith(WidgetPropertyResolver<Color> callback) = _WidgetStateColor;
+
+  /// Creates a [WidgetStateColor] from a [WidgetStateMap<Color>].
+  ///
+  /// If used as a regular color, the first key that matches an empty
+  /// [Set] of [WidgetState]s will be selected.
+  ///
+  /// The given map parameter must match a non-null color in the default state.
+  factory WidgetStateColor.map(WidgetStateMap<Color> map) = _WidgetStateColorMapper;
 
   /// Returns a [Color] that's to be used when a component is in the specified
   /// state.
@@ -180,6 +269,18 @@ class _WidgetStateColor extends WidgetStateColor {
 
   @override
   Color resolve(Set<WidgetState> states) => _resolve(states);
+}
+
+class _WidgetStateColorMapper extends WidgetStateColor {
+  _WidgetStateColorMapper(this.map)
+      : super(_WidgetStateMapper<Color>(map).resolve(_defaultStates).value);
+
+  final WidgetStateMap<Color> map;
+
+  static const Set<WidgetState> _defaultStates = <WidgetState>{};
+
+  @override
+  Color resolve(Set<WidgetState> states) => _WidgetStateMapper<Color>(map).resolve(states);
 }
 
 class _WidgetStateColorTransparent extends WidgetStateColor {
@@ -348,8 +449,26 @@ abstract class WidgetStateBorderSide extends BorderSide implements WidgetStatePr
   /// ```
   const factory WidgetStateBorderSide.resolveWith(WidgetPropertyResolver<BorderSide?> callback) = _WidgetStateBorderSide;
 
-  /// Returns a [BorderSide] that's to be used when a Material component is
-  /// in the specified state. Return null to defer to the default value of the
+  /// Creates a [WidgetStateBorderSide] from a [WidgetStateMap].
+  ///
+  /// If used as a regular [BorderSide], the first key that matches an empty
+  /// [Set] of [WidgetState]s will be selected.
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// const Chip(
+  ///   label: Text('Transceiver'),
+  ///   side: WidgetStateBorderSide.map(<WidgetStateMapKey, BorderSide?>{
+  ///     WidgetState.selected: BorderSide(color: Colors.red),
+  ///     // returns null if not selected, deferring to default theme/widget value.
+  ///   }),
+  /// ),
+  /// ```
+  const factory WidgetStateBorderSide.map(WidgetStateMap<BorderSide?> map) = _WidgetBorderSideMapper;
+
+  /// Returns a [BorderSide] that's to be used when a Widget is in the
+  /// specified state. Return null to defer to the default value of the
   /// widget or theme.
   @override
   BorderSide? resolve(Set<WidgetState> states);
@@ -399,6 +518,15 @@ class _WidgetStateBorderSide extends WidgetStateBorderSide {
 
   @override
   BorderSide? resolve(Set<WidgetState> states) => _resolve(states);
+}
+
+class _WidgetBorderSideMapper extends WidgetStateBorderSide {
+  const _WidgetBorderSideMapper(this.map);
+
+  final WidgetStateMap<BorderSide?> map;
+
+  @override
+  BorderSide? resolve(Set<WidgetState> states) => _WidgetStateMapper<BorderSide?>(map).resolve(states);
 }
 
 /// Defines an [OutlinedBorder] whose value depends on a set of [WidgetState]s
@@ -452,6 +580,7 @@ abstract class WidgetStateOutlinedBorder extends OutlinedBorder implements Widge
 ///   1. Create a subclass of [WidgetStateTextStyle] and implement the abstract `resolve` method.
 ///   2. Use [WidgetStateTextStyle.resolveWith] and pass in a callback that
 ///      will be used to resolve the color in the given states.
+///   3. Use [WidgetStateTextStyle.map] to assign a style using a [WidgetStateMap].
 ///
 /// If a [WidgetStateTextStyle] is used for a property or a parameter that doesn't
 /// support resolving [WidgetStateProperty<TextStyle>]s, then its default color
@@ -480,6 +609,14 @@ abstract class WidgetStateTextStyle extends TextStyle implements WidgetStateProp
   /// state.
   const factory WidgetStateTextStyle.resolveWith(WidgetPropertyResolver<TextStyle> callback) = _WidgetStateTextStyle;
 
+  /// Creates a [WidgetStateTextStyle] from a [WidgetStateMap].
+  ///
+  /// If used as a regular text style, the first key that matches an empty
+  /// [Set] of [WidgetState]s will be selected.
+  ///
+  /// The given map parameter must match a non-null text style in the default state.
+  const factory WidgetStateTextStyle.map(WidgetStateMap<TextStyle> map) = _WidgetTextStyleMapper;
+
   /// Returns a [TextStyle] that's to be used when a component is in the
   /// specified state.
   @override
@@ -493,6 +630,15 @@ class _WidgetStateTextStyle extends WidgetStateTextStyle {
 
   @override
   TextStyle resolve(Set<WidgetState> states) => _resolve(states);
+}
+
+class _WidgetTextStyleMapper extends WidgetStateTextStyle {
+  const _WidgetTextStyleMapper(this.map);
+
+  final WidgetStateMap<TextStyle> map;
+
+  @override
+  TextStyle resolve(Set<WidgetState> states) => _WidgetStateMapper<TextStyle>(map).resolve(states);
 }
 
 /// Interface for classes that [resolve] to a value of type `T` based
@@ -519,12 +665,14 @@ class _WidgetStateTextStyle extends WidgetStateTextStyle {
 ///    `WidgetStateProperty`.
 /// {@macro flutter.widgets.WidgetStateProperty.implementations}
 abstract class WidgetStateProperty<T> {
-  /// Returns a value of type `T` that depends on [states].
+  /// This abstract constructor allows extending the class.
   ///
-  /// Widgets like [TextButton] and [ElevatedButton] apply this method to their
-  /// current [WidgetState]s to compute colors and other visual parameters
-  /// at build time.
-  T resolve(Set<WidgetState> states);
+  /// [WidgetStateProperty] is designed as an interface, so this
+  /// constructor is only needed for backward compatibility.
+  WidgetStateProperty();
+
+  /// Creates a property that resolves using a [WidgetStateMap].
+  const factory WidgetStateProperty.map(WidgetStateMap<T> map) = _WidgetStateMapper<T>;
 
   /// Resolves the value for the given set of states if `value` is a
   /// [WidgetStateProperty], otherwise returns the value itself.
@@ -567,6 +715,13 @@ abstract class WidgetStateProperty<T> {
     }
     return _LerpProperties<T>(a, b, t, lerpFunction);
   }
+
+  /// Returns a value of type `T` that depends on [states].
+  ///
+  /// Widgets like [TextButton] and [ElevatedButton] apply this method to their
+  /// current [WidgetState]s to compute colors and other visual parameters
+  /// at build time.
+  T resolve(Set<WidgetState> states);
 }
 
 class _LerpProperties<T> implements WidgetStateProperty<T?> {
@@ -592,6 +747,93 @@ class _WidgetStatePropertyWith<T> implements WidgetStateProperty<T> {
 
   @override
   T resolve(Set<WidgetState> states) => _resolve(states);
+}
+
+/// A [Map] used to resolve to a single value of type `T` based on
+/// the current set of Widget states.
+///
+/// {@template flutter.widgets.WidgetStateProperty.WidgetStateMap}
+/// Example:
+///
+/// ```dart
+/// WidgetStateProperty<Color?>.map(<WidgetStateMapKey, Color?>{
+///   WidgetState.error: Colors.red,
+///   WidgetState.hovered & WidgetState.focused: Colors.blueAccent,
+///   WidgetState.focused: Colors.blue,
+///   ~WidgetState.disabled: Colors.black,
+/// });
+///
+/// // the same implementation, but with a WidgetPropertyResolver:
+/// WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+///   if (states.contains(WidgetState.error)) {
+///     return Colors.red;
+///   } else if (states.contains(WidgetState.hovered) && states.contains(WidgetState.focused)) {
+///     return Colors.blueAccent;
+///   } else if (states.contains(WidgetState.focused)) {
+///     return Colors.blue;
+///   } else if (!states.contains(WidgetState.disabled)) {
+///     return Colors.black;
+///   }
+///   return null;
+/// });
+/// ```
+///
+/// A widget state combination can be stored in a variable,
+/// and [WidgetState.any] can be used for non-nullable types:
+///
+/// ```dart
+/// final WidgetStateMapKey selectedError = WidgetState.selected & WidgetState.error;
+///
+/// final WidgetStateProperty<Color> color = WidgetStateProperty<Color>.map(
+///   <WidgetStateMapKey, Color>{
+///     selectedError & WidgetState.hovered: Colors.redAccent,
+///     selectedError: Colors.red,
+///     WidgetState.any: Colors.black,
+///   },
+/// );
+///
+/// // WidgetPropertyResolver implementation:
+/// final WidgetStateProperty<Color> colorResolveWith = WidgetStateProperty.resolveWith<Color>(
+///   (Set<WidgetState> states) {
+///     if (states.containsAll(<WidgetState>{WidgetState.selected, WidgetState.error})) {
+///       if (states.contains(WidgetState.hovered)) {
+///         return Colors.redAccent;
+///       }
+///       return Colors.red;
+///     }
+///     return Colors.black;
+///   },
+/// );
+/// ```
+/// {@endtemplate}
+typedef WidgetStateMap<T> = Map<WidgetStateMapKey, T>;
+
+// A private class, used to create the [WidgetStateProperty.map] constructor.
+class _WidgetStateMapper<T> implements WidgetStateProperty<T> {
+  const _WidgetStateMapper(this.map);
+
+  final WidgetStateMap<T> map;
+
+  @override
+  T resolve(Set<WidgetState> states) {
+    for (final MapEntry<WidgetStateMapKey, T> entry in map.entries) {
+      if (entry.key.matchesSet(states)) {
+        return entry.value;
+      }
+    }
+
+    try {
+      return null as T;
+    } on TypeError {
+      throw ArgumentError(
+        'The current set of material states is $states.\n'
+        'None of the provided map keys matched this set, '
+        'and the type "$T" is non-nullable.\n'
+        'Consider using "WidgetStateProperty<$T?>.map()", '
+        'or adding the "WidgetState.any" key to this map.',
+      );
+    }
+  }
 }
 
 /// Convenience class for creating a [WidgetStateProperty] that
