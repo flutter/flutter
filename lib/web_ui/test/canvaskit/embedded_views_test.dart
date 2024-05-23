@@ -418,7 +418,8 @@ void testMain() {
       } on AssertionError catch (error) {
         expect(
           error.toString(),
-          contains('Cannot render platform views: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15. These views have not been created, or they have been deleted.'),
+          contains(
+              'Cannot render platform views: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15. These views have not been created, or they have been deleted.'),
         );
       }
 
@@ -1219,6 +1220,101 @@ void testMain() {
         _overlay,
         _platformView,
       ]);
+
+      debugOverrideJsConfiguration(null);
+    });
+
+    test(
+        'correctly rearranges pictures to second-to-last canvas '
+        'when hitting canvas limit', () async {
+      final CkPicture testPicture =
+          paintPicture(const ui.Rect.fromLTRB(0, 0, 10, 10), (CkCanvas canvas) {
+        canvas.drawCircle(const ui.Offset(5, 5), 5, CkPaint());
+      });
+
+      // Initialize all platform views to be used in the test.
+      final List<int> platformViewIds = <int>[];
+      for (int i = 0; i < 20; i++) {
+        ui_web.platformViewRegistry.registerViewFactory(
+          'test-platform-view',
+          (int viewId) => createDomHTMLDivElement()..id = 'view-$i',
+        );
+        await createPlatformView(i, 'test-platform-view');
+        platformViewIds.add(i);
+      }
+
+      Future<void> renderTestScene(List<int> views) async {
+        final LayerSceneBuilder sb = LayerSceneBuilder();
+        sb.pushOffset(0, 0);
+        for (final int view in views) {
+          sb.addPicture(ui.Offset.zero, testPicture);
+          sb.addPlatformView(view, width: 10, height: 10);
+        }
+        await renderScene(sb.build());
+      }
+
+      // Render scene with 20 pictures. Check that the second-to-last canvas
+      // contains the pictures from the canvases that were deleted.
+      await renderTestScene(<int>[
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+      ]);
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _overlay,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _overlay,
+        _platformView,
+      ]);
+
+      // The second-to-last canvas should have all the extra pictures.
+      final Rendering rendering = CanvasKitRenderer.instance
+          .debugGetRasterizerForView(implicitView)!
+          .viewEmbedder
+          .debugActiveRendering;
+      final List<int> numPicturesPerCanvas = rendering.canvases
+          .map((RenderingRenderCanvas canvas) => canvas.pictures.length)
+          .toList();
+      expect(numPicturesPerCanvas, <int>[1, 1, 1, 1, 1, 1, 12, 1]);
     });
   });
 }
