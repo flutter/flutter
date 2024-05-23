@@ -1540,8 +1540,8 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   }
 
   /// It appears that some Android keyboard implementations can cause
-  /// app lifecycle state changes: adding this listener would cause the
-  /// text field to unfocus as the user is trying to type.
+  /// app lifecycle state changes: adding the app lifecycle listener would
+  /// cause the text field to unfocus as the user is trying to type.
   ///
   /// Additionally, on iOS, input fields aren't automatically populated
   /// with relevant data when using autofill.
