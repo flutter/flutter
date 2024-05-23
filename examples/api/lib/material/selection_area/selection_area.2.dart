@@ -50,9 +50,11 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
     for (int index = 0; index < content.controllers!.length; index += 1) {
-      // TODO(Renzo-Olivares): Should provide whether a controller is a text
-      // controller or not.
       final SelectedContentController contentController = content.controllers![index];
+      if (contentController.value is! TextSpan) {
+        // Do not edit the controller if it is not text.
+        return;
+      }
       final String plainText = (contentController.value as TextSpan).toPlainText();
       String collectedSelection = '';
       String beforeSelection = '';
