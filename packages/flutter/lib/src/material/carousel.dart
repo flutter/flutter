@@ -233,44 +233,6 @@ class _CarouselState extends State<Carousel> {
         borderRadius: BorderRadius.all(Radius.circular(28.0))
       );
 
-    final List<Widget> children = List<Widget>.generate(widget.children.length, (int index) {
-      return Padding(
-        padding: effectivePadding,
-        child: Material(
-          clipBehavior: Clip.antiAlias,
-          color: effectiveBackgroundColor,
-          elevation: effectiveElevation,
-          shape: effectiveShape,
-          child: Stack(
-            fit: StackFit.expand,
-            children: <Widget>[
-              widget.children.elementAt(index),
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    widget.onTap?.call(index);
-                  },
-                  overlayColor: widget.overlayColor ?? WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-                    if (states.contains(WidgetState.pressed)) {
-                      return theme.colorScheme.onSurface.withOpacity(0.1);
-                    }
-                    if (states.contains(WidgetState.hovered)) {
-                      return theme.colorScheme.onSurface.withOpacity(0.08);
-                    }
-                    if (states.contains(WidgetState.focused)) {
-                      return theme.colorScheme.onSurface.withOpacity(0.1);
-                    }
-                    return null;
-                  }),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    });
-
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final double mainAxisExtent = switch (widget.scrollDirection) {
@@ -296,9 +258,43 @@ class _CarouselState extends State<Carousel> {
                   minExtent: widget.shrinkExtent ?? 0.0,
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
-                      return children.elementAt(index);
+                      return Padding(
+                        padding: effectivePadding,
+                        child: Material(
+                          clipBehavior: Clip.antiAlias,
+                          color: effectiveBackgroundColor,
+                          elevation: effectiveElevation,
+                          shape: effectiveShape,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: <Widget>[
+                              widget.children.elementAt(index),
+                              Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () {
+                                    widget.onTap?.call(index);
+                                  },
+                                  overlayColor: widget.overlayColor ?? WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                                    if (states.contains(WidgetState.pressed)) {
+                                      return theme.colorScheme.onSurface.withOpacity(0.1);
+                                    }
+                                    if (states.contains(WidgetState.hovered)) {
+                                      return theme.colorScheme.onSurface.withOpacity(0.08);
+                                    }
+                                    if (states.contains(WidgetState.focused)) {
+                                      return theme.colorScheme.onSurface.withOpacity(0.1);
+                                    }
+                                    return null;
+                                  }),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
                     },
-                    childCount: children.length,
+                    childCount: widget.children.length,
                   ),
                 ),
               ],
