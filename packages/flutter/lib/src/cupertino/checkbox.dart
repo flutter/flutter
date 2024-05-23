@@ -475,9 +475,9 @@ class _CheckboxPainter extends ToggleablePainter {
     notifyListeners();
   }
 
-  LinearGradient? get dropshadow => _dropshadow!;
+  LinearGradient? get dropshadow => _dropshadow;
   LinearGradient? _dropshadow;
-  set dropshadow(LinearGradient value) {
+  set dropshadow(LinearGradient? value) {
     if (_dropshadow == value) {
       return;
     }
