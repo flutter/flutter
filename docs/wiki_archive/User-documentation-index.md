@@ -63,7 +63,7 @@ _Contributors: please consider moving this content to the web site or deleting i
 ### iOS
 <!-- don't add things here; user documentation belongs on the web site not the wiki -->
 - [[Creating an iOS Bitcode enabled app]]
-- [[Hybrid Composition|Hybrid Composition#iOS]]
+- [Hybrid Composition](../platforms/android/Hybrid-Composition.md#ios)
 - [[Hybrid Composition iOS]]
 - [[PID leak in iOS development workflow]]
 - [[State of Catalina Support]] in Flutter 1.9.
@@ -77,12 +77,4 @@ _Contributors: please consider moving this content to the web site or deleting i
 
 ### Release notes
 <!-- don't add things here; user documentation belongs on the web site not the wiki -->
-- [[Hotfixes to the Stable Channel]]
-- [[Release Notes - Changes in 1.2.1]]
-- [[Release Notes - Flutter 1.2.1]]
-- [[Commits Between 1.2.1 and 1.5.4]]
-- [[Release Notes Flutter 1.5.4]]
-- [[PRs addressed between 1.5.4 and 1.7.8]]
-- [[Release Notes Flutter 1.7.8]]
-- [[PRs merged between 1.7.8 and 1.9.1]]
-- [[Release Notes Flutter 1.9.1]]
+- [Hotfixes to the Stable Channel](../releases/Hotfixes-to-the-Stable-Channel.md)

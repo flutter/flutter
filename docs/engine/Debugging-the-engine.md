@@ -4,7 +4,7 @@ See also [Crashes](Crashes.md) for advice on handling engine crashes (specifical
 
 ## Running a Flutter app with a local engine
 
-First, make sure the appropriate version of the engine is built (see [Compiling the engine](./dev/Compiling-the-engine.md)).
+First, make sure the appropriate version of the engine is built (see [Compiling the engine](./contributing/Compiling-the-engine.md)).
 
 ### Using the Flutter tool
 

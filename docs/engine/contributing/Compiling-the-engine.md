@@ -1,4 +1,4 @@
-_If you've never built the engine before, first see [Setting up the Engine development environment](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment)._
+_If you've never built the engine before, first see [Setting up the Engine development environment](Setting-up-the-Engine-development-environment.md)._
 
 # Contents
 
@@ -43,7 +43,7 @@ source files, pass the flag `--no-prebuilt-dart-sdk` to `//flutter/tools/gn`.
 
 These steps build the engine used by `flutter run` for Android devices.
 
-Run the following steps, from the `src` directory created in [Setting up the Engine development environment](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment):
+Run the following steps, from the `src` directory created in [Setting up the Engine development environment](Setting-up-the-Engine-development-environment.md):
 
 1. `git pull upstream main` in `src/flutter` to update the Flutter Engine repo.
 

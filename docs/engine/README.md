@@ -2,7 +2,7 @@ This is an index of team-facing documentation for the [flutter/engine repository
 
 - [Accessibility on Windows](https://github.com/flutter/flutter/wiki/Accessibility-on-Windows)
 - [Code signing metadata](./release/Code-signing-metadata.md) for engine binaries
-- [Compiling the engine](./dev/Compiling-the-engine.md)
+- [Compiling the engine](./contributing/Compiling-the-engine.md)
 - [Comparing AOT Snapshot Sizes](./benchmarks/Comparing-AOT-Snapshot-Sizes.md)
 - [Crashes](./Crashes.md)
 - [Custom Flutter engine embedders](./Custom-Flutter-Engine-Embedders.md)
@@ -20,7 +20,7 @@ This is an index of team-facing documentation for the [flutter/engine repository
 - [Life of a Flutter Frame](Life-of-a-Flutter-Frame.md)
 - [Reduce Flutter engine size with MLGO](Reduce-Flutter-engine-size-with-MLGO.md)
 - [Resolving common build failures](https://github.com/flutter/flutter/wiki/Resolving-common-build-failures)
-- [Setting up the Engine development environment](./dev/Setting-up-the-Engine-development-environment.md)
+- [Setting up the Engine development environment](./contributing/Setting-up-the-Engine-development-environment.md)
 - [Supporting legacy platforms](Supporting-legacy-platforms.md)
 - [Testing Android Changes in the Devicelab on an Emulator](https://github.com/flutter/flutter/wiki/Testing-Android-Changes-in-the-Devicelab-on-an-Emulator)
 - [Testing the engine](./testing/Testing-the-engine.md)

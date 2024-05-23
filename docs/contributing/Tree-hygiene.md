@@ -111,7 +111,7 @@ Feel free to update the bot's logic to catch more cases that should be automatic
 ## Using git
 
 Assuming your environment has been configured according to the instructions in
-[Setting up the Engine development environment](../engine/dev/Setting-up-the-Engine-development-environment.md),
+[Setting up the Engine development environment](../engine/contributing/Setting-up-the-Engine-development-environment.md),
 [Setting up the Framework development environment](Setting-up-the-Framework-development-environment.md), or
 [Setting up the Packages development environment](../ecosystem/contributing/Setting-up-the-Packages-development-environment.md),
 follow these steps to start working on a patch:

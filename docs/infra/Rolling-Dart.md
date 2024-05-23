@@ -52,12 +52,12 @@ If the script completes without errors, move on to step 10 in the next section t
 
 1. Set up your Engine and Flutter environments by following the instructions described in the pages
    linked to from [our contributing guide](../../CONTRIBUTING.md).
-2. Build the engine according to the instructions on the [Compiling the engine](../engine/dev/Compiling-the-engine.md) page.
+2. Build the engine according to the instructions on the [Compiling the engine](../engine/contributing/Compiling-the-engine.md) page.
 3. Select a target Dart revision, typically use the [latest revision](https://github.com/dart-lang/sdk/commits/master). Check that the tests for that revision have all passed (all green) on the [Dart buildbot](https://ci.chromium.org/p/flutter/g/engine/console) and the [Internal Dart Flutter buildbot](https://ci.chromium.org/p/dart/g/flutter/console).
 4. Create a PR (see [Tree hygiene](../contributing/Tree-hygiene.md)) that updates `dart_revision` in [DEPS](https://github.com/flutter/engine/blob/main/DEPS) to your selected revision. Invoke `gclient sync` in the src directory to ensure versions corresponding to the DEPS file are synched up.
 5. Update all Dart-dependent DEPS entries using `engine/src/tools/dart/create_updated_flutter_deps.py` script. In case script complains that dart dependency was removed, remove entry from flutter DEPS file manually. If the list of library source files or patch files is modified, update the file [libraries.yaml](https://github.com/flutter/engine/blob/main/lib/snapshot/libraries.yaml) and regenerate the corresponding json file.
 6. Invoke `gclient sync` in the src directory to ensure versions corresponding to the DEPS file are synched up
-7. Build the debug, profile, and release versions of the engine, following the normal [Compiling the engine](../engine/dev/Compiling-the-engine.md) instructions. You will need to build the host versions of the engine too. Here is a script with the build commands:
+7. Build the debug, profile, and release versions of the engine, following the normal [Compiling the engine](../engine/contributing/Compiling-the-engine.md) instructions. You will need to build the host versions of the engine too. Here is a script with the build commands:
 
 ```bash
 #!/bin/bash -e
