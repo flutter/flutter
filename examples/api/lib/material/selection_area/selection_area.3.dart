@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -33,7 +37,7 @@ class _MyHomePageState extends State<MyHomePage> {
   static const String _aboutSteve =
     'Steve is a dog whose personality is as unique as his name. Not your average canine, '
     'Steve exudes a sense of adventure and curiosity that sets him apart from his peers. '
-    'Whether it\'s exploring the depths of the backyard or bravely venturing into unknown '
+    'Whether it is exploring the depths of the backyard or bravely venturing into unknown '
     'territories during his walks, Steve approaches life with a wagging tail and an eager heart. '
     'His keen senses and intuitive nature often lead him to discover things that would otherwise '
     'go unnoticed, making every day an exciting adventure.\n'
@@ -44,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
     'making problems seem less daunting. His presence in the house is like a beacon of warmth and '
     'love, illuminating the lives of those around him.\n'
     '\n'
-    'Steve’s intelligence is another trait that can\'t be overlooked. He’s not just skilled at '
+    'Steve’s intelligence is another trait that can not be overlooked. He’s not just skilled at '
     'learning tricks and following commands; Steve seems to understand the emotions and needs of '
     'his family, responding in ways that are both helpful and heartwarming. This emotional '
     'intelligence, combined with his playful antics, makes every interaction with him both '
@@ -52,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
     'knows how to make the most of every moment.\n'
     '\n'
     'Socially, Steve is a star. His friendly demeanor and playful spirit make him a favorite among '
-    'both dogs and humans alike. At the park, he\'s often seen leading the pack, initiating games, '
+    'both dogs and humans alike. At the park, he is often seen leading the pack, initiating games, '
     'and making new friends. Steve’s ability to get along with everyone, coupled with his '
     'infectious energy, often turns a simple outing into an unforgettable experience for everyone '
     'involved.\n'
@@ -117,9 +121,9 @@ class _MyHomePageState extends State<MyHomePage> {
     return paragraphSpans;
   }
 
-  void _insertContent(List<SelectedContentController> controllers, String plainText) {
+  void _insertContent(List<SelectedContentController<Object>> controllers, String plainText) {
     int count = 0;
-    for (final SelectedContentController selectionInstance in controllers) {
+    for (final SelectedContentController<Object> selectionInstance in controllers) {
       if (selectionInstance.value is! TextSpan) {
         // Do not edit the controller if it is not text.
         return;
@@ -127,7 +131,7 @@ class _MyHomePageState extends State<MyHomePage> {
       final List<InlineSpan> newSpans = <InlineSpan>[];
       final int start = min(selectionInstance.startOffset, selectionInstance.endOffset);
       final int end = max(selectionInstance.startOffset, selectionInstance.endOffset);
-      final String fullSpanText = selectionInstance.value.toPlainText(includeSemanticsLabels: false);
+      final String fullSpanText = (selectionInstance.value as TextSpan).toPlainText(includeSemanticsLabels: false);
       final String dataBeforeInsertionOffset = fullSpanText.substring(0, start);
       final String dataAfterInsertionOffset = fullSpanText.substring(end, fullSpanText.length);
       final List<InlineSpan> spansBeforeInsertionOffset = _initSpans(dataBeforeInsertionOffset);
@@ -158,7 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SelectionArea(
         controller: _selectionController,
         onSelectionChanged: (SelectedContent? selectedContent) {
-            if (selectedContent == null 
+            if (selectedContent == null
                 || selectedContent.plainText.isEmpty
                 || (selectedContent.geometry.startSelectionPoint == null
                 || selectedContent.geometry.endSelectionPoint == null)) {

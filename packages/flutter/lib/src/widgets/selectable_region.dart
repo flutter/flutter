@@ -2412,9 +2412,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     if (selections.isEmpty) {
       return null;
     }
-    final List<SelectedContentController> childControllers = <SelectedContentController>[
+    final List<SelectedContentController<Object>> childControllers = <SelectedContentController<Object>>[
       for (final SelectedContent selectedContent in selections)
-        if (selectedContent.controllers case final List<SelectedContentController> data) ...data,
+        if (selectedContent.controllers case final List<SelectedContentController<Object>> data) ...data,
     ];
     final StringBuffer buffer = StringBuffer();
     for (final SelectedContent selection in selections) {
@@ -2889,4 +2889,3 @@ class SelectionController with ChangeNotifier {
     notifyListeners();
   }
 }
-
