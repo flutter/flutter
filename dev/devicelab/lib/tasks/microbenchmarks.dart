@@ -75,7 +75,6 @@ TaskFunction createMicrobenchmarkTask({
       ...await runMicrobench('lib/stocks/layout_bench.dart'),
       ...await runMicrobench('lib/ui/image_bench.dart'),
       ...await runMicrobench('lib/layout/text_intrinsic_bench.dart'),
-      ...await runMicrobench('lib/building/const_vs_non_const_bench.dart'),
     };
 
     return TaskResult.success(allResults,
