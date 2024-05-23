@@ -148,6 +148,47 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
+  testWidgets('ListView dismiss keyboard onDrag and keep dismissed on drawer opened test', (WidgetTester tester) async {
+    final List<int> list = List<int>.generate(50, (int i) => i);
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(textFieldBoilerplate(
+      child: Scaffold(
+        key: scaffoldKey,
+        drawer: Container(),
+        body: Column(
+          children: <Widget>[
+            const TextField(),
+            Expanded(
+              child: ListView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              children: list.map((int i) {
+                return Container(
+                  height: 50,
+                );
+              }).toList(),
+              ),
+            ),
+          ]
+        ),
+      ),
+    ));
+
+    expect(tester.testTextInput.isVisible, isFalse);
+    final Finder finder = find.byType(TextField).first;
+    await tester.tap(finder);
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    await tester.drag(find.byType(ListView).first, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+
+    expect(tester.testTextInput.isVisible, isFalse);
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+
+    expect(tester.testTextInput.isVisible, isFalse);
+  });
+
   testWidgets('GridView.builder supports null items', (WidgetTester tester) async {
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.builder(
