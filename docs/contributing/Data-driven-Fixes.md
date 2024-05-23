@@ -350,7 +350,7 @@ The `name` key is required unless the `index` key is provided, and isn't allowed
 
 The `nullability` key is required and indicates the type of change made to the parameter. Currently `non_null` is the only type change that is supported.
 
-The `argumentValue` key is optional and if provided will be used as the default value of the parameter. The value of the argumentValue key is a [code template](https://github.com/flutter/flutter/wiki/Data-driven-Fixes#code-template) object.
+The `argumentValue` key is optional and if provided will be used as the default value of the parameter. The value of the argumentValue key is a [code template](Data-driven-Fixes.md#code-template) object.
 
 For eg, changing the parameter `a` to non null with a default value you would write:
 

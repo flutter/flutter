@@ -217,42 +217,42 @@ Tasks will be run automatically in the [devicelab], and the result is shown in [
 Big congratulations if you've successfully finished all steps above! You just made a big contribution to Flutter's performance. Please also feel encouraged to improve this doc to help future contributors (which probably include a future yourself that would forget something above in a few months)!
 
 <!-- Reference links below -->
-[flutter_driver]: https://github.com/flutter/flutter/tree/master/packages/flutter_driver
+[flutter_driver]: https://github.com/flutter/flutter/tree/main/packages/flutter_driver
 
-[macrobenchmarks]: https://github.com/flutter/flutter/tree/master/dev/benchmarks/macrobenchmarks
+[macrobenchmarks]: https://github.com/flutter/flutter/tree/main/dev/benchmarks/macrobenchmarks
 
 [cocoon]: https://github.com/flutter/cocoon
 
-[devicelab]: https://github.com/flutter/flutter/tree/master/dev/devicelab
+[devicelab]: https://github.com/flutter/flutter/tree/main/dev/devicelab
 
-[dev/devicelab/manifest.yaml]: https://github.com/flutter/flutter/tree/master/dev/devicelab/manifest.yaml
+[dev/devicelab/manifest.yaml]: https://github.com/flutter/flutter/tree/main/dev/devicelab/manifest.yaml
 
 [flutter_repo]: https://github.com/flutter/flutter
 
-[macrobenchmarks/lib/src]: https://github.com/flutter/flutter/tree/master/dev/benchmarks/macrobenchmarks/lib/src
+[macrobenchmarks/lib/src]: https://github.com/flutter/flutter/tree/main/dev/benchmarks/macrobenchmarks/lib/src
 
-[macrobenchmarks/lib/common.dart]: https://github.com/flutter/flutter/tree/master/dev/benchmarks/macrobenchmarks/lib/common.dart
+[macrobenchmarks/lib/common.dart]: https://github.com/flutter/flutter/tree/main/dev/benchmarks/macrobenchmarks/lib/common.dart
 
-[macrobenchmarks/lib/main.dart]: https://github.com/flutter/flutter/tree/master/dev/benchmarks/macrobenchmarks/lib/main.dart
+[macrobenchmarks/lib/main.dart]: https://github.com/flutter/flutter/tree/main/dev/benchmarks/macrobenchmarks/lib/main.dart
 
 [`MacrobenchmarksApp`]: https://github.com/flutter/flutter/blob/94b7ff241e6e5445b7f30215a777eb4971311797/dev/benchmarks/macrobenchmarks/lib/main.dart#L24
 
 [`HomePage`'s `ListView`]: https://github.com/flutter/flutter/blob/94b7ff241e6e5445b7f30215a777eb4971311797/dev/benchmarks/macrobenchmarks/lib/main.dart#L58
 
-[macrobenchmarks/test_driver]: https://github.com/flutter/flutter/tree/master/dev/benchmarks/macrobenchmarks/test_driver
+[macrobenchmarks/test_driver]: https://github.com/flutter/flutter/tree/main/dev/benchmarks/macrobenchmarks/test_driver
 
-[macrobenchmarks/test_driver/run_app.dart]: https://github.com/flutter/flutter/tree/master/dev/benchmarks/macrobenchmarks/test_driver/run_app.dart
+[macrobenchmarks/test_driver/run_app.dart]: https://github.com/flutter/flutter/tree/main/dev/benchmarks/macrobenchmarks/test_driver/run_app.dart
 
-[macrobenchmarks/README.md]: https://github.com/flutter/flutter/blob/master/dev/benchmarks/macrobenchmarks/README.md
+[macrobenchmarks/README.md]: https://github.com/flutter/flutter/blob/main/dev/benchmarks/macrobenchmarks/README.md
 
-[dev/devicelab/bin/tasks]: https://github.com/flutter/flutter/tree/master/dev/devicelab/bin/tasks
+[dev/devicelab/bin/tasks]: https://github.com/flutter/flutter/tree/main/dev/devicelab/bin/tasks
 
-[dev/devicelab/lib/tasks/perf_tests.dart]: https://github.com/flutter/flutter/tree/master/dev/devicelab/lib/tasks/perf_tests.dart
+[dev/devicelab/lib/tasks/perf_tests.dart]: https://github.com/flutter/flutter/tree/main/dev/devicelab/lib/tasks/perf_tests.dart
 
 [flutter-dashboard]: https://flutter-dashboard.appspot.com/benchmarks.html
 
 [e2e]: https://pub.dev/packages/e2e
 
-[macrobenchmarks/test_driver/e2e_test.dart]: https://github.com/flutter/flutter/blob/master/dev/benchmarks/macrobenchmarks/test_driver/e2e_test.dart
+[macrobenchmarks/test_driver/e2e_test.dart]: https://github.com/flutter/flutter/blob/main/dev/benchmarks/macrobenchmarks/test_driver/e2e_test.dart
 
-[macrobenchmarks/test]: https://github.com/flutter/flutter/blob/master/dev/benchmarks/macrobenchmarks/test
+[macrobenchmarks/test]: https://github.com/flutter/flutter/blob/main/dev/benchmarks/macrobenchmarks/test

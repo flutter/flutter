@@ -1,19 +1,13 @@
-:toc: macro
-:toc-title:
-:toclevels: 99
+### Style guide for Flutter repo
 
-⚠️✏️ Changes to the style guide should be announced to the team in the https://discord.com/channels/608014603317936148/608116355836805126[#announcements] channel on https://github.com/flutter/flutter/wiki/Chat[Discord].
-
-Summary
--------
+## Summary
 
 Optimize for readability. Write detailed documentation.
 Make error messages useful.
 Never use timeouts or timers.
 Avoid `is`, `print`, `part of`, `extension` and `_`.
 
-Introduction
-------------
+## Introduction
 
 This document contains some high-level philosophy and policy decisions for the Flutter
 project, and a description of specific style issues for some parts of the codebase.
@@ -23,15 +17,10 @@ project (the framework itself and all our sample code). Flutter application deve
 are welcome to follow this style as well, but this is by no means required. Flutter
 will work regardless of what style is used to author applications that use it.
 
-The engine repository uses https://github.com/flutter/engine/blob/master/CONTRIBUTING.md#style[other style guides for non-Dart code]. The language-neutral sections in this document still apply to engine code, however.
+The engine repository uses https://github.com/flutter/engine/blob/main/CONTRIBUTING.md#style[other style guides for non-Dart code]. The language-neutral sections in this document still apply to engine code, however.
 
-Table of Contents
------------------
 
-toc::[]
-
-Overview
---------
+## Overview
 
 This document describes our approach to designing and programming Flutter,
 from high-level architectural principles all the way to indentation rules.
@@ -76,8 +65,7 @@ This requires a different and equally important skill when designing APIs: not g
 An API is for life, not just for the one PR you are working on.
 
 
-Philosophy
-----------
+## Philosophy
 
 ### Lazy programming
 
@@ -343,8 +331,7 @@ Template defaults should focus on providing the best developer experience. Templ
 
 See flutter create's templates for an example.
 
-Policies
---------
+## Policies
 
 This section defines some policies that we have decided to honor. In the absence of a very specific policy in this section, the general philosophies in the section above are controlling.
 
@@ -392,8 +379,7 @@ All such "third party code" must either be a fork for which we take full respons
 In general it is _strongly_ recommended that we avoid any such code unless strictly necessary. In particular, we aim for all code in the flutter/flutter repository to be https://github.com/flutter/flutter/wiki/Why-we-have-a-separate-engine-repo#licensing?[single-licensed], which is why it does not contain any "third party code" at all.
 
 
-Documentation (dartdocs, javadocs, etc)
----------------------------------------
+## Documentation (dartdocs, javadocs, etc)
 
 We use "dartdoc" for our Dart documentation, and similar technologies for the documentation
 of our APIs in other languages, such as ObjectiveC and Java. All public members in Flutter
@@ -620,13 +606,13 @@ By definition, if they are looking at the documentation, they are not finding it
 
 Sample code helps developers learn your API quickly. Writing sample code also helps you think through how your API is going to be used by app developers.
 
-Sample code should go in a documentation comment that typically begins with `/// {@tool dartpad}`, and ends with `/// {@end-tool}`, with the example source and corresponding tests placed in a file under https://github.com/flutter/flutter/blob/master/examples/api[the API examples directory]. This will then be checked by automated tools, and formatted for display on the API documentation web site https://api.flutter.dev[api.flutter.dev]. For details on how to write sample code, see https://github.com/flutter/flutter/blob/master/examples/api/README.md#authoring[the API example documentation].
+Sample code should go in a documentation comment that typically begins with `/// {@tool dartpad}`, and ends with `/// {@end-tool}`, with the example source and corresponding tests placed in a file under https://github.com/flutter/flutter/blob/main/examples/api[the API examples directory]. This will then be checked by automated tools, and formatted for display on the API documentation web site https://api.flutter.dev[api.flutter.dev]. For details on how to write sample code, see https://github.com/flutter/flutter/blob/main/examples/api/README.md#authoring[the API example documentation].
 
 #### Provide full application samples.
 
 Our UX research has shown that developers prefer to see examples that are in the context of an entire app. So, whenever it makes sense, provide an example that can be presented as part of an entire application instead of just a snippet that uses the `{@tool snippet}` or &#96;&#96;&#96;dart ... &#96;&#96;&#96; indicators.
 
-An application sample can be created using the `{@tool dartpad}` ... `{@end-tool}` or `{@tool sample}` ... `{@end-tool}` dartdoc indicators. See https://github.com/flutter/flutter/blob/master/examples/api/README.md#authoring[here] for more details about writing these kinds of examples.
+An application sample can be created using the `{@tool dartpad}` ... `{@end-tool}` or `{@tool sample}` ... `{@end-tool}` dartdoc indicators. See https://github.com/flutter/flutter/blob/main/examples/api/README.md#authoring[here] for more details about writing these kinds of examples.
 
 Dartpad examples (those using the dartdoc `{@tool dartpad}` indicator) will be presented on the https://api.flutter.dev[API documentation website] as an in-page executable and editable example. This allows developers to interact with the example right there on the page, and is the preferred form of example. Here is https://api.flutter.dev/flutter/widgets/AnimatedSwitcher-class.html#widgets.AnimatedSwitcher.1[one such example].
 
@@ -741,8 +727,7 @@ When referencing a parameter, use backticks. However, when referencing a paramet
 Avoid using terms like "above" or "below" to reference one dartdoc section from another. Dartdoc sections are often shown alone on a Web page, the full context of the class is not present.
 
 
-Coding patterns and catching bugs early
----------------------------------------
+## Coding patterns and catching bugs early
 
 ### Use asserts liberally to detect contract violations and verify invariants
 
@@ -809,7 +794,7 @@ global constant.
 
 As a general rule, when you have a lot of constants, wrap them in a
 class. For examples of this, see
-https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/colors.dart[lib/src/material/colors.dart].
+https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/material/colors.dart[lib/src/material/colors.dart].
 
 
 ### Avoid using `if` chains or `?:` or `==` with enum values
@@ -1045,8 +1030,7 @@ anyway. It should also be avoided in very large functions.
 It incurs runtime overhead in maintaining and using an iterator, and space overhead for the compiler
 to actually desugar the generator into something that uses an iterator class.
 
-Writing tests
--------------
+## Writing tests
 
 ### Make each test entirely self-contained
 
@@ -1079,8 +1063,7 @@ As per the API docs for https://main-api.flutter.dev/flutter/flutter_test/Widget
 Using `pumpAndSettle`, especially without checking its return value, makes it very easy for bugs to sneak in where we trigger animations across multiple frames instead of immediately. It is almost always the case that a call to `pumpAndSettle` is more strictly correctly written as two `pump` calls, one to trigger the animations and one (with a duration) to jump to the point after the animations.
 
 
-Naming
-------
+## Naming
 
 ### Begin global constant names with prefix "k"
 
@@ -1190,8 +1173,7 @@ future is higher. Instead find a name that represents the idea being being used
 or replaced.
 
 
-Comments
---------
+## Comments
 
 ### Avoid checking in comments that ask questions
 
@@ -1272,8 +1254,7 @@ Generally the closure passed to `setState` should include all the code that chan
 ```
 
 
-Formatting
-----------
+## Formatting
 
 These guidelines have no technical effect, but they are still important purely
 for consistency and readability reasons.
@@ -1798,8 +1779,7 @@ Finally, `+=` is more convenient when changing the increment to a number other t
 To make it clearer when something is a double or an integer, even if the number is a round number, include a decimal point in double literals. For example, if a function `foo` takes a double, write `foo(1.0)` rather than `foo(1)` because the latter makes it look like the function takes an integer.
 
 
-Conventions
------------
+## Conventions
 
 ### Expectations around potential crashes in the engine
 
@@ -1847,8 +1827,7 @@ We generally prefer `Listenable` subclasses (e.g. `ValueNotifier` or `ChangeNoti
 In the specific case of exposing a value from `dart:ui` via a callback, we expect the bindings in the framework to register a single listener and then provide a mechanism to fan the notification to multiple listeners. Sometimes this is a rather involved process (e.g. the `SchedulerBinding` exists almost entirely for the purpose of doing this for `onBeginFrame`/`onDrawFrame`, and the `GesturesBinding` exists exclusively for the purpose of doing this for pointer events). Sometimes it's simpler (e.g. propagating changes to life cycle events).
 
 
-Packages
---------
+## Packages
 
 ### Structure
 
@@ -1856,20 +1835,20 @@ As per normal Dart conventions, a package should have a single import
 that reexports all of its API.
 
 > For example,
-> https://github.com/flutter/flutter/blob/master/packages/flutter/lib/rendering.dart[rendering.dart]
+> https://github.com/flutter/flutter/blob/main/packages/flutter/lib/rendering.dart[rendering.dart]
 > exports all of lib/src/rendering/*.dart
 
 If a package uses, as part of its exposed API, types that it imports
 from a lower layer, it should reexport those types.
 
 > For example,
-> https://github.com/flutter/flutter/blob/master/packages/flutter/lib/material.dart[material.dart]
+> https://github.com/flutter/flutter/blob/main/packages/flutter/lib/material.dart[material.dart]
 > reexports everything from
-> https://github.com/flutter/flutter/blob/master/packages/flutter/lib/widgets.dart[widgets.dart].
+> https://github.com/flutter/flutter/blob/main/packages/flutter/lib/widgets.dart[widgets.dart].
 > Similarly, the latter
-> https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/widgets/basic.dart[reexports]
+> https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/widgets/basic.dart[reexports]
 > many types from
-> https://github.com/flutter/flutter/blob/master/packages/flutter/lib/rendering.dart[rendering.dart],
+> https://github.com/flutter/flutter/blob/main/packages/flutter/lib/rendering.dart[rendering.dart],
 > such as `BoxConstraints`, that it uses in its API. On the other
 > hand, it does not reexport, say, `RenderProxyBox`, since that is not
 > part of the widgets API.
@@ -1910,7 +1889,7 @@ By convention, `dart:ui` is imported using `import 'dart:ui' show
 level will have done it for you), and as `import 'dart:ui' as ui show
 ...;` for low-level APIs, in both cases listing all the identifiers
 being imported. See
-https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/basic_types.dart[basic_types.dart]
+https://github.com/flutter/flutter/blob/main/packages/flutter/lib/src/painting/basic_types.dart[basic_types.dart]
 in the `painting` package for details of which identifiers we import
 which way. Other packages are usually imported undecorated unless they
 have a convention of their own (e.g. `path` is imported `as path`).

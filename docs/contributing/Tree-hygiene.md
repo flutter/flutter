@@ -2,21 +2,21 @@
 
 - Regressions should be [reverted first](https://github.com/flutter/flutter/wiki/Landing-Changes-With-Autosubmit) and questions asked later. Bringing the tree to green is higher priority.
 - A breaking change is one that breaks the tests in the flutter/tests repo, and those need a migration guide.
-- Expect that a new patch will be reviewed within two weeks, unless it is fixing a P0 bug in which case it should be reviewed the same day. If it has not been reviewed in that timeframe, reach out on [[Chat]]. Remember that reviewers are human beings with additional professional and personal responsibilities.
+- Expect that a new patch will be reviewed within two weeks, unless it is fixing a P0 bug in which case it should be reviewed the same day. If it has not been reviewed in that timeframe, reach out on [Chat](Chat.md). Remember that reviewers are human beings with additional professional and personal responsibilities.
 
 ## Introduction
 
 This page covers how to land a PR and other aspects of writing code for
 Flutter other than the actual writing of the code. For guidance on
 designing APIs, documenting, and formatting your code, see the
-[[Style guide for Flutter repo]] document.
+[Style guide for Flutter repo](Style-guide-for-Flutter-repo.md) document.
 
 ## Overview
 
 The general process for submitting code to a Flutter repository is as follows:
 
 1. Fork the repository on GitHub (see the
-   [contributing guide](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
+   [contributing guide](https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md)
    for advice on doing this and in general setting up your development environment).
 
 2. If there is not already an issue covering the work you are interested in doing,
@@ -26,11 +26,11 @@ The general process for submitting code to a Flutter repository is as follows:
    before it can land, having an issue means we have somewhere to point to the code when
    we close the PR without landing it, so other people can take it over.
 
-3. Discuss your design on the issue. See [[Design Documents]] for advice.
+3. Discuss your design on the issue. See [Design Documents](Design-Documents.md) for advice.
    You may find it useful to create a Google Doc to
    solicit feedback (use the template at [flutter.dev/go/template](https://flutter.dev/go/template)).
    You may wish to e-mail the mailing list, or discuss the topic
-   on our [[Chat]] channels. The more buy-in you get from the rest of the
+   on our [Chat](Chat.md) channels. The more buy-in you get from the rest of the
    team (especially the relevant leads), the easier the rest of the process will be.
    You can put the label "proposal" on your issue to indicate that you have a design
    up for discussion in the issue.
@@ -46,14 +46,14 @@ The general process for submitting code to a Flutter repository is as follows:
    having a `main` branch, from `master`) on your GitHub fork of the repository, and implement
    your change. Make sure it is tested (see the next section for details).
 
-   You must follow the guidelines described in the [[Style guide for Flutter repo]].
+   You must follow the guidelines described in the [Style guide for Flutter repo](Style-guide-for-Flutter-repo.md).
    Files must not have trailing spaces.
    For the engine repository, C, C++, and Objective-C code should be formatted with
    `clang-format` before submission (use `buildtools/<OS>/clang/bin/clang-format
    --style=file -i`).
 
 6. Submit this branch as a PR to the relevant Flutter repository.
-   _(See also: [[Signing commits]])_
+   _(See also: [Signing commits](./Signing-commits.md))_
 
 7. Get your code reviewed (see below). You should probably reach out to the relevant
    expert(s) for the areas you touched and ask them to review your PR directly.
@@ -62,7 +62,7 @@ The general process for submitting code to a Flutter repository is as follows:
 
 8. Make sure your PR passes all the pre-commit tests. Consider running some of the
    post-commit tests locally (see the
-   [devicelab](https://github.com/flutter/flutter/blob/master/dev/devicelab/README.md)
+   [devicelab](https://github.com/flutter/flutter/blob/main/dev/devicelab/README.md)
    directory). If any tests break, especially the `customer_testing` tests, please
    see the breaking change policy section below for details on how to proceed.
 
@@ -80,7 +80,7 @@ The general process for submitting code to a Flutter repository is as follows:
    goes wrong, revert your patch and study the problem. You should aim to be the one to revert your patch. You will be racing everyone
    else on the team who will also be trying to revert your patch. (See below for guidance on reverting PRs.)
 
-_See also: [[What should I work on?]]_
+_See also: [What should I work on?](What-should-I-work-on.md)_
 
 ## Tests
 
@@ -104,16 +104,16 @@ If a reviewer says a PR should have a test, then it needs a test regardless of t
 
 PRs adding data-driven fixes require tests that fall under the test_fixes directory, but are not yet recognized by the bot as being tested.
 
-Consider using the code coverage tools to check that all your new code is covered by tests (see [[Test coverage for package:flutter]]).
+Consider using the code coverage tools to check that all your new code is covered by tests (see [Test coverage for package:flutter](./testing/Test-coverage-for-package-flutter.md)).
 
 Feel free to update the bot's logic to catch more cases that should be automatically exempt (it's in the cocoon repo).
 
 ## Using git
 
 Assuming your environment has been configured according to the instructions in
-[[Setting up the Engine development environment]],
-[[Setting up the Framework development environment]], or
-[[Setting up the Packages development environment]],
+[Setting up the Engine development environment](../engine/dev/Setting-up-the-Engine-development-environment.md),
+[Setting up the Framework development environment](Setting-up-the-Framework-development-environment.md), or
+[Setting up the Packages development environment](../ecosystem/contributing/Setting-up-the-Packages-development-environment.md),
 follow these steps to start working on a patch:
 
  * `git fetch upstream`
@@ -127,7 +127,7 @@ GitHub provides you with a link for submitting the pull request in the message o
 
 Because `git pull` will often miss tags that are used to define the release of the flutter tool, it is recommended to use `git fetch` typically to avoid version mismatches when running `flutter update-packages`.
 
-Use `git fetch upstream; git rebase upstream/main; git push origin your_branch_name` to update your PRs, rather than using merge, because that way our tooling will recognize your PR as being up to date. (Otherwise it'll try testing against the tests at the time you originally branched.) Also, **be wary of force pushing to your PR branch** if you are dealing with golden image tests; see [[gold troubleshooting instructions|Writing-a-golden-file-test-for-package:flutter#troubleshooting]].
+Use `git fetch upstream; git rebase upstream/main; git push origin your_branch_name` to update your PRs, rather than using merge, because that way our tooling will recognize your PR as being up to date. (Otherwise it'll try testing against the tests at the time you originally branched.) Also, **be wary of force pushing to your PR branch** if you are dealing with golden image tests; see [gold troubleshooting instructions](./testing/Writing-a-golden-file-test-for-package-flutter.md#troubleshooting).
 
 Please make sure all your patches have detailed commit messages explaining what the problem was and
 what the solution is.
@@ -141,7 +141,7 @@ You can do this online, and it only takes a minute.
 
 Every PR must be code-reviewed before check-in, including things like
 rolling a dependency. Getting a review means that a regular Flutter
-contributor (someone with commit access; see [[contributor access]] for details) has "approved" the PR in the
+contributor (someone with commit access; see [contributor access](Contributor-access.md) for details) has "approved" the PR in the
 GitHub UI. We call this "getting an LGTM" ("looks good to me").
 
 If you are not yourself someone with commit access, then a second person
@@ -182,18 +182,18 @@ should be reserved for those with contributor access). The more
 reviews the better.
 
 If nobody reviews your PR within two weeks, you can ask for
-a review via our [[Chat]] channels. Start by asking in #hackers,
+a review via our [Chat](Chat.md) channels. Start by asking in #hackers,
 saying what your patch does and providing a link.
 
 ### Who
 
-PRs are assigned reviewers weekly. The precise process varies by team but tends to be combined with issue [[triage]].
+PRs are assigned reviewers weekly. The precise process varies by team but tends to be combined with issue [triage](https://github.com/flutter/flutter/wiki/Triage).
 
 Code should be reviewed by the owner (tech lead) of the area(s) of the codebase that you are changing,
 or someone to whom they have delegated that authority.
 If anyone else leaves comments, please also wait for their approval (LGTM) before landing code.
 
-If nobody has reviewed your code after a week, then reach out on our [[Chat]] channels.
+If nobody has reviewed your code after a week, then reach out on our [Chat](Chat.md) channels.
 The `#hackers-new` channel is a good place to ask for help if you're a new contributor.
 
 _For PRs affecting the `material` and `cupertino` libraries, team members are expected to seek reviewers directly;
@@ -210,7 +210,7 @@ Reviewers should carefully read the code and make sure they understand
 it. A reviewer should check the code for both high level concerns,
 such as whether the approach is reasonable and whether the code's structure makes sense, as well as
 lower-level issues like how readable the code is and adherence to the
-[Flutter style guide](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo).
+[Flutter style guide](Style-guide-for-Flutter-repo.md).
 Use [these best practices](https://mtlynch.io/human-code-reviews-1/)
 when reviewing code and providing comments.
 
@@ -219,18 +219,18 @@ As a reviewer, you are the last line of defense.
 0. Did the author sign the CLA? If not, ask them to do so and don't look at the code.
 1. Take a step back. What problem is the PR trying to solve? Is it a real problem?
 2. What other solutions could we consider? What could we do to make this even better?
-3. Is it the best API? See our [philosophy](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#philosophy) section. Look for state duplication, synchronous slow work, complecting, global state, overly-specific APIs, API cliffs and API oceans, API design in a vacuum (without a customer). If these terms don't make sense, read the style guide again. :-)
-4. Is it the best implementation? Again, see our [style guide](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#coding-patterns-and-catching-bugs-early), in particular its section on good coding patterns. Are there hacks? Are we taking on more technical debt? Think of ways in which the code could break.
+3. Is it the best API? See our [philosophy](Style-guide-for-Flutter-repo.md#philosophy) section. Look for state duplication, synchronous slow work, complecting, global state, overly-specific APIs, API cliffs and API oceans, API design in a vacuum (without a customer). If these terms don't make sense, read the style guide again. :-)
+4. Is it the best implementation? Again, see our [style guide](Style-guide-for-Flutter-repo.md#coding-patterns-and-catching-bugs-early), in particular its section on good coding patterns. Are there hacks? Are we taking on more technical debt? Think of ways in which the code could break.
 5. Is it testable? Is it tested? **All code must be tested.** Are there asserts? Encourage liberal use of assertions.
 6. Look for mistakes in indenting the code and other trivial formatting problems.
 7. Is new code licensed correctly?
-8. Is the documentation thorough and useful? Look for useless documentation, empty prose, and breadcrumbs. See the [documentation section](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#documentation-dartdocs-javadocs-etc) of our style guide for what that means.
+8. Is the documentation thorough and useful? Look for useless documentation, empty prose, and breadcrumbs. See the [documentation section](hStyle-guide-for-Flutter-repo.md#documentation-dartdocs-javadocs-etc) of our style guide for what that means.
 9. Check for good grammar in API docs and comments. Check that identifiers are named according to our conventions.
 
 Once you are satisfied with the contribution, and _only_ once you are satisfied,
 use the GitHub "Approval" mechanism (an "LGTM" comment is not sufficient).
 If you feel like you are being worn down, hand the review to someone else. Consider
-our [conflict resolution](https://github.com/flutter/flutter/blob/master/CODE_OF_CONDUCT.md#conflict-resolution)
+our [conflict resolution](https://github.com/flutter/flutter/blob/main/CODE_OF_CONDUCT.md#conflict-resolution)
 policy if you feel like you are being forced to agree to something you don't like.
 
 Reviewers should not give an LGTM unless the patch has tests that verify
@@ -283,7 +283,7 @@ revert (roll back) the check-in (even if it isn't yours). Do not attempt to forw
 
 There is no shame in making mistakes! Reverts happen all the time and are a normal part of engineering.
 
-To revert a PR, just add the `revert` label to it. _For more details, see [[Landing Changes With Autosubmit]]._
+To revert a PR, just add the `revert` label to it. _For more details, see [Landing Changes With Autosubmit](https://github.com/flutter/flutter/wiki/Landing-Changes-With-Autosubmit)._
 
 
 ### Avoid "Revert "Revert "Revert "Revert "Fix foo"""" commit messages
@@ -383,15 +383,15 @@ Implement the change you wish to see and run the existing tests against your new
 The "contributed tests" are:
 
 * Those in the [`customer_testing`](https://github.com/flutter/tests) shard on `flutter/flutter` PRs.
-* Additional test suites that we have been allowed to run but that are not public. (Notably, Google allows us to run several tens of thousands of [[proprietary tests|Understanding Google Testing]] on each commit.)
+* Additional test suites that we have been allowed to run but that are not public. (Notably, Google allows us to run several tens of thousands of [proprietary tests](https://github.com/flutter/flutter/wiki/Understanding-Google-Testing) on each commit.)
 
 There are no exemptions to this policy, because these tests run in our CI and breaking them will close the tree.
 
-In cases where these tests pass but we can nonetheless imagine reasonable scenarios where developers would be affected negatively, by courtesy, once the change has landed, engineers are encouraged to announce the changes by sending an e-mail to [flutter-announce@](https://groups.google.com/g/flutter-announce), a message to the `#announcements` channel on our [[Chat]], and tagging the relevant issues with the [**c: API break** label](https://github.com/flutter/flutter/labels/c%3A%20API%20break) (such that they will be included in our release notes). However, we do not consider these breaking changes. (One reason to do this would be if we see our own tests being significantly affected, even if no contributed test actually fails.)
+In cases where these tests pass but we can nonetheless imagine reasonable scenarios where developers would be affected negatively, by courtesy, once the change has landed, engineers are encouraged to announce the changes by sending an e-mail to [flutter-announce@](https://groups.google.com/g/flutter-announce), a message to the `#announcements` channel on our [Chat](Chat.md), and tagging the relevant issues with the [**c: API break** label](https://github.com/flutter/flutter/labels/c%3A%20API%20break) (such that they will be included in our release notes). However, we do not consider these breaking changes. (One reason to do this would be if we see our own tests being significantly affected, even if no contributed test actually fails.)
 
 ### 2. Evaluate the breaking change
 
-If your change counts as a breaking change, seriously consider whether it is truly necessary and beneficial. Consider writing a [[design document|Design Documents]]. Discuss it with your code reviewer. Raise it in [[Chat]].
+If your change counts as a breaking change, seriously consider whether it is truly necessary and beneficial. Consider writing a [design document](Design-Documents.md). Discuss it with your code reviewer. Raise it in [Chat](Chat.md).
 
 ### 3. Prepare your change.
 
@@ -405,7 +405,7 @@ If possible, avoid four-phase deprecations (adding a new API with a temporary na
 
 Stage your change and the documentation for your change. Typically this will be two or more PRs, plus PRs to fix the tests that were broken (see step 1), as well as writing a migration guide as a PR to the Website repository.
 
-If possible, include flutter fixes to aid users in migration. Whether or not the change is supported by flutter fix should be included in the migration guide. To learn about authoring fixes, see [Data driven Fixes](https://github.com/flutter/flutter/wiki/Data-driven-Fixes).
+If possible, include flutter fixes to aid users in migration. Whether or not the change is supported by flutter fix should be included in the migration guide. To learn about authoring fixes, see [Data driven Fixes](Data-driven-Fixes.md).
 
 **Use our [breaking change migration guide template](https://github.com/flutter/website/blob/main/src/release/breaking-changes/template.md)** (follow all the instructions in the comments) to create the migration guide that describes the change. Do not land the migration guide at this time. You will need to update it before you land it in the last step.
 
@@ -423,7 +423,7 @@ Once everything has landed:
 * update your migration guide based on your experience migrating everyone,
 * update the timeline on the guide, and push it to [the flutter.dev Web site](https://flutter.dev/docs/release/breaking-changes) (don't forget to update the [index](https://github.com/flutter/website/blob/main/src/release/breaking-changes/index.md) of that directory as well),
 * e-mail a copy to [flutter-announce@](https://groups.google.com/g/flutter-announce),
-* notify the `#announcements` channel on our [[Chat]], and
+* notify the `#announcements` channel on our [Chat](Chat.md), and
 * add the [**c: API break** label](https://github.com/flutter/flutter/labels/c%3A%20API%20break) to the relevant issues, so they get listed in the upcoming Release notes.
 
 ### Deprecations
@@ -454,7 +454,7 @@ Using this standard form ensures that we can write a script to detect all deprec
 
 To determine the latest beta version, see <https://flutter.dev/docs/development/tools/sdk/releases>.
 
-When adding a deprecation notice to the framework, a flutter fix should be included with your change. This helps users migrate to the new API as easily as possible. To learn more about authoring fixes, see [Data driven Fixes](https://github.com/flutter/flutter/wiki/Data-driven-Fixes). If a fix cannot be written for the new API, please file an issue in https://github.com/dart-lang/sdk and link to it in your change.
+When adding a deprecation notice to the framework, a flutter fix should be included with your change. This helps users migrate to the new API as easily as possible. To learn more about authoring fixes, see [Data driven Fixes](Data-driven-Fixes.md). If a fix cannot be written for the new API, please file an issue in https://github.com/dart-lang/sdk and link to it in your change.
 
 When deprecating features, be aware that *you* will not by default be informed when the Flutter code itself uses the deprecated feature (there is a `deprecated_member_use_from_same_package: ignore` line in the root `analysis_options.yaml` file). To find places where the old feature is used, rename its declaration and see where the compiler complains. (You can't just comment out the "ignore" in the `analysis_options.yaml` file because it's hiding hundreds of other warnings...)
 

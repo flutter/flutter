@@ -6,7 +6,7 @@ Don't forget to configure your document's Sharing settings so that everyone has 
 
 The template discusses how to create a shortlink for your design doc (flutter.dev/go/...). When creating the shortlink, remember to test the URL you are publishing in an incognito window!
 
-Googlers: Design docs must be created by non-corp accounts! See [Contributor Access](https://github.com/flutter/flutter/wiki/Contributor-access#fcontriborg-accounts) for details on getting `fcontrib.org` accounts if you don't want to use your personal GMail account.
+Googlers: Design docs must be created by non-corp accounts! See [Contributor Access](Contributor-access.md#fcontriborg-accounts) for details on getting `fcontrib.org` accounts if you don't want to use your personal GMail account.
 
 When you implement a design, document it in the source code in detail. The API documentation is the usual place where we document our designs. It's perfectly reasonable for API docs to be multiple pages long with subheadings (e.g. see the docs for [RenderBox](https://master-api.flutter.dev/flutter/rendering/RenderBox-class.html)!). Do not assume that anyone will ever read your design doc after the discussion has finished. Similarly, do not assume that anyone will look at closed GitHub issues or PR discussions.
 
@@ -26,7 +26,7 @@ If you wish to get feedback on your design doc, you have many options for doing 
 
 * If there is an issue already filed on the topic, definitely put a link to the design doc there. People who have found the issue and want to get updates on the topic will have subscribed to the issue, so this is the most effective way to communicate with them.
 
-* File a new issue to track the design doc using [the design doc issue template](https://github.com/flutter/flutter/issues/new?labels=design+doc&template=8_design_doc.yml). Assign it to yourself.
+* File a new issue to track the design doc using [the design doc issue template](https://github.com/flutter/flutter/issues/new?template=8_design_doc.yml). Assign it to yourself.
 
 * Post the link on Discord. You can post it to #hidden-chat to just get feedback from team members. You can post it to one or more of the #hackers-* channels if you want feedback from people who are interested in the general area. You can post it to the global #hackers channel if you want feedback from anyone interested in working on Flutter. If you really want feedback, you can post a request to #announcements and publish it to any server that is following ours.
 

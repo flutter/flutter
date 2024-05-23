@@ -49,11 +49,11 @@ Each channel describes its topic in the channel description. Please read the cha
 
 ## Policies
 
-Our [code of conduct](https://github.com/flutter/flutter/blob/master/CODE_OF_CONDUCT.md) applies to the Discord server, as it does to any communications involving Flutter.
+Our [code of conduct](https://github.com/flutter/flutter/blob/main/CODE_OF_CONDUCT.md) applies to the Discord server, as it does to any communications involving Flutter.
 
-The #hackers-* channels are visible to anyone, but please only post in those channels if you are actively contributing. If you want help with your app, ask in #help instead. If you want to learn how to contribute, have a look at our [contributing guide](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md).
+The #hackers-* channels are visible to anyone, but please only post in those channels if you are actively contributing. If you want help with your app, ask in #help instead. If you want to learn how to contribute, have a look at our [contributing guide](https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md).
 
-See the [[contributor access]] wiki page for details on becoming a member of the "team" role.
+See the [contributor access](Contributor-access.md) wiki page for details on becoming a member of the "team" role.
 
 Please don't direct-message people unless they are comfortable with it (ask publicly first).
 You can disable direct messages on this server by changing your Privacy settings for the server, or on a global basis by changing your Privacy & Safety user settings.
@@ -71,4 +71,4 @@ You can [change your status](https://support.discord.com/hc/en-us/articles/36003
 
 # Design documents
 
-This page used to discuss how to create design docs, but that content is now on its own page: [[Design documents]].
+This page used to discuss how to create design docs, but that content is now on its own page: [Design documents](Design-Documents.md).
