@@ -1013,7 +1013,7 @@ class _SearchBarHeaderDelegate extends SliverPersistentHeaderDelegate {
     this.hintText,
     this.textStyle,
     this.hintStyle,
-    required this.controller,
+    this.controller,
     this.onChanged,
     this.onSubmitted,
     this.textCapitalization,
@@ -1034,7 +1034,7 @@ class _SearchBarHeaderDelegate extends SliverPersistentHeaderDelegate {
   final String? hintText;
   final TextStyle? textStyle;
   final TextStyle? hintStyle;
-  final SearchController controller;
+  final SearchController? controller;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final TextCapitalization? textCapitalization;
@@ -1076,7 +1076,7 @@ class _SearchBarHeaderDelegate extends SliverPersistentHeaderDelegate {
             child: DividerTheme(
               data: dividerTheme,
               child: Visibility(
-                visible: controller.isOpen && hasSuggestions,
+                visible: hasSuggestions,
                 child: const Divider(height: _dividerHeight),
               ),
             ),
@@ -1087,10 +1087,10 @@ class _SearchBarHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  double get maxExtent => constraints.minHeight + _dividerHeight;
+  double get maxExtent => constraints.minHeight + (hasSuggestions ? _dividerHeight : 0);
 
   @override
-  double get minExtent => constraints.minHeight + _dividerHeight;
+  double get minExtent => constraints.minHeight + (hasSuggestions ? _dividerHeight : 0);
 
   @override
   bool shouldRebuild(covariant _SearchBarHeaderDelegate oldDelegate) {

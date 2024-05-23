@@ -1419,7 +1419,7 @@ void main() {
     ));
     await tester.tap(find.widgetWithIcon(IconButton, Icons.search));
     await tester.pumpAndSettle();
-    expect(find.byType(ListView), findsNothing);
+    expect(find.byType(SliverList), findsNothing);
     expect(find.byType(SliverGrid), findsOneWidget);
   });
 
@@ -1743,7 +1743,7 @@ void main() {
               isFullScreen: false,
               builder: builder,
               suggestionsBuilder: (BuildContext context, SearchController controller) {
-                return const <Widget>[ListTile(title: Text('test'))];
+                return <Widget>[];
               },
             ),
           ),
@@ -1763,7 +1763,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
-    expect(searchViewRect, equals(const Rect.fromLTRB(388.0, 0.0, 748.0, 113.0)));
+    expect(searchViewRect, equals(const Rect.fromLTRB(388.0, 0.0, 748.0, 56.0)));
 
     // Search view top left should be the same as the anchor top left
     expect(searchViewRect.topLeft, anchorRect.topLeft);
@@ -1781,7 +1781,7 @@ void main() {
                 isFullScreen: false,
                 builder: builder,
                 suggestionsBuilder: (BuildContext context, SearchController controller) {
-                  return const <Widget>[ListTile(title: Text('test'))];
+                  return <Widget>[];
                 },
               ),
             ),
@@ -1800,7 +1800,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
-    expect(searchViewRect, equals(const Rect.fromLTRB(52.0, 0.0, 412.0, 113.0)));
+    expect(searchViewRect, equals(const Rect.fromLTRB(52.0, 0.0, 412.0, 56.0)));
 
     // Search view top right should be the same as the anchor top right
     expect(searchViewRect.topRight, anchorRect.topRight);
@@ -1994,7 +1994,7 @@ void main() {
           child: SearchAnchor.bar(
             isFullScreen: false,
             suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return const <Widget>[ListTile(title: Text('test'))];
+              return <Widget>[];
             },
           ),
         ),
@@ -2010,7 +2010,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(ConstrainedBox)).first);
-    expect(searchViewRect, equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 113.0)));
+    expect(searchViewRect, equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 56.0)));
 
     // Search view has same width with the default anchor(search bar).
     expect(searchViewRect.width, anchorRect.width);
