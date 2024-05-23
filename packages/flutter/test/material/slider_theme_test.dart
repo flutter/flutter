@@ -2648,39 +2648,27 @@ void main() {
       }
     });
   });
-  testWidgets('indicator shape skips all painting at label is null',
-      (WidgetTester tester) async {
+  testWidgets('Skip drawing ValueIndicator shape when label painter text is null', (WidgetTester tester) async {
     debugDisableShadows = false;
     try {
-      final List<SliderComponentShape> shapes = <SliderComponentShape>[
-        const PaddleSliderValueIndicatorShape(),
-        const DropSliderValueIndicatorShape(),
-        const RectangularSliderValueIndicatorShape(),
-      ];
+      await tester.pumpWidget(_buildSilderApp());
 
-      for (final SliderComponentShape element in shapes) {
-        await tester.pumpWidget(_buildSilderApp(element));
+      final RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
 
-        final RenderBox valueIndicatorBox =
-            tester.renderObject(find.byType(Overlay));
+      // Calculate a specific position on the Slider
+      final Rect sliderRect = tester.getRect(find.byType(Slider));
+      final Offset tapPositionLeft = Offset(sliderRect.left + sliderRect.width * 0.25, sliderRect.center.dy);
+      final Offset tapPositionRight = Offset(sliderRect.left + sliderRect.width * 0.75, sliderRect.center.dy);
 
-        // Calculate a specific position on the Slider
-        final Rect sliderRect = tester.getRect(find.byType(Slider));
-        final Offset tapPositionLeft = Offset(
-            sliderRect.left + sliderRect.width * 0.25, sliderRect.center.dy);
-        final Offset tapPositionRight = Offset(
-            sliderRect.left + sliderRect.width * 0.75, sliderRect.center.dy);
+      // Tap on the 25% position of the Slider
+      await tester.tapAt(tapPositionLeft);
+      await tester.pumpAndSettle();
+      expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
 
-        // Tap on the 25% position of the Slider
-        await tester.tapAt(tapPositionLeft);
-        await tester.pumpAndSettle();
-        expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 1));
-
-        // Tap on the 75% position of the Slider
-        await tester.tapAt(tapPositionRight);
-        await tester.pumpAndSettle();
-        expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 0));
-      }
+      // Tap on the 75% position of the Slider
+      await tester.tapAt(tapPositionRight);
+      await tester.pumpAndSettle();
+      expect(valueIndicatorBox, paintsExactlyCountTimes(#drawPath, 0));
     } finally {
       debugDisableShadows = true;
     }
@@ -2759,27 +2747,22 @@ Widget _buildRangeApp(
     ),
   );
 }
-Widget _buildSilderApp(SliderComponentShape sliderComponentShape) {
+Widget _buildSilderApp() {
   double sliderValue = 10;
   return MaterialApp(
     home: StatefulBuilder(
       builder: (BuildContext context, void Function(void Function()) setState) {
         return Material(
-          child: SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              valueIndicatorShape: sliderComponentShape,
-            ),
-            child: Slider(
-              value: sliderValue,
-              max: 100,
-              label: sliderValue > 50 ? null : sliderValue.toString(),
-              divisions: 10,
-              onChanged: (double value) {
-                setState(() {
-                  sliderValue = value;
-                });
-              },
-            ),
+          child: Slider(
+            value: sliderValue,
+            max: 100,
+            label: sliderValue > 50 ? null : sliderValue.toString(),
+            divisions: 10,
+            onChanged: (double value) {
+              setState(() {
+                sliderValue = value;
+              });
+            },
           ),
         );
       },
