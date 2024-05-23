@@ -51,13 +51,13 @@ If the script completes without errors, move on to step 10 in the next section t
 ## Manually rolling the version of Dart used by the engine
 
 1. Set up your Engine and Flutter environments by following the instructions described in the pages
-   linked to from [our contributing guide](https://github.com/flutter/engine/blob/master/CONTRIBUTING.md).
-2. Build the engine according to the instructions on the [[Compiling the engine]] page.
+   linked to from [our contributing guide](../../CONTRIBUTING.md).
+2. Build the engine according to the instructions on the [Compiling the engine](../engine/dev/Compiling-the-engine.md) page.
 3. Select a target Dart revision, typically use the [latest revision](https://github.com/dart-lang/sdk/commits/master). Check that the tests for that revision have all passed (all green) on the [Dart buildbot](https://ci.chromium.org/p/flutter/g/engine/console) and the [Internal Dart Flutter buildbot](https://ci.chromium.org/p/dart/g/flutter/console).
-4. Create a PR (see [[Tree hygiene]]) that updates `dart_revision` in [DEPS](https://github.com/flutter/engine/blob/master/DEPS) to your selected revision. Invoke `gclient sync` in the src directory to ensure versions corresponding to the DEPS file are synched up.
-5. Update all Dart-dependent DEPS entries using `engine/src/tools/dart/create_updated_flutter_deps.py` script. In case script complains that dart dependency was removed, remove entry from flutter DEPS file manually. If the list of library source files or patch files is modified, update the file [libraries.yaml](https://github.com/flutter/engine/blob/master/lib/snapshot/libraries.yaml) and regenerate the corresponding json file.
+4. Create a PR (see [Tree hygiene](https://github.com/flutter/flutter/wiki/Tree-hygiene)) that updates `dart_revision` in [DEPS](https://github.com/flutter/engine/blob/main/DEPS) to your selected revision. Invoke `gclient sync` in the src directory to ensure versions corresponding to the DEPS file are synched up.
+5. Update all Dart-dependent DEPS entries using `engine/src/tools/dart/create_updated_flutter_deps.py` script. In case script complains that dart dependency was removed, remove entry from flutter DEPS file manually. If the list of library source files or patch files is modified, update the file [libraries.yaml](https://github.com/flutter/engine/blob/main/lib/snapshot/libraries.yaml) and regenerate the corresponding json file.
 6. Invoke `gclient sync` in the src directory to ensure versions corresponding to the DEPS file are synched up
-7. Build the debug, profile, and release versions of the engine, following the normal [[Compiling the engine]] instructions. You will need to build the host versions of the engine too. Here is a script with the build commands:
+7. Build the debug, profile, and release versions of the engine, following the normal [Compiling the engine](../engine/dev/Compiling-the-engine.md) instructions. You will need to build the host versions of the engine too. Here is a script with the build commands:
 
 ```bash
 #!/bin/bash -e
@@ -75,7 +75,7 @@ cd out
 find . -mindepth 1 -maxdepth 1 -type d | xargs -n 1 sh -c 'ninja -C $0 -j1000 || exit 255'
 ```
 
-7. Test the engine version you just built against the top of tree flutter/flutter version using the `--local-engine` and `--local-engine-host` options (see [[The flutter tool]]) against the Flutter Gallery app.
+7. Test the engine version you just built against the top of tree flutter/flutter version using the `--local-engine` and `--local-engine-host` options (see [The flutter tool](../tool/README.md)) against the Flutter Gallery app.
 
 ```bash
 cd $FLUTTER_HOME/examples/flutter_gallery
@@ -104,6 +104,6 @@ flutter test --local-engine=host_debug --local-engine-host=host_debug
 
 12. Wait for the [flutter engine build bot](https://ci.chromium.org/p/flutter/g/engine/console) to build your change and go green.
 
-13. Once the bot cycles green, the [[Autorollers]] will roll the engine into the flutter/flutter repo. When this happens, monitor the flutter [build bots](https://flutter-dashboard.appspot.com/build.html). If there is a failure, revert the Dart roll in flutter/engine, debug the problem and fix it or file a P0 issue against Dart. Please monitor the [flutter benchmarks dashboard](https://flutter-dashboard.appspot.com/benchmarks.html) and if any regressions are noticed please file P0 issues for all regressions **and revert the Dart roll**. The next roll is blocked until these issues/regressions are fixed.
+13. Once the bot cycles green, the [Autorollers](../infra/Autorollers.md) will roll the engine into the flutter/flutter repo. When this happens, monitor the flutter [build bots](https://flutter-dashboard.appspot.com/build.html). If there is a failure, revert the Dart roll in flutter/engine, debug the problem and fix it or file a P0 issue against Dart. Please monitor the [flutter benchmarks dashboard](https://flutter-dashboard.appspot.com/benchmarks.html) and if any regressions are noticed please file P0 issues for all regressions **and revert the Dart roll**. The next roll is blocked until these issues/regressions are fixed.
 
 14. When you are done please update the spread sheet at [http://go/dart-flutter-rolls](http://go/dart-flutter-rolls) with the git hash of the Dart revision that was rolled into the flutter engine. This hash will be used for rolling Dart into Google's internal code repository and would be picked as a potential candidate for a dev release. Also make sure you send an email to the next person on the list and make sure the person acknowledges picking up the roll baton.

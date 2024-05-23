@@ -29,4 +29,4 @@ We also plan to offer support for compilation directly to ARM64, as well as univ
 
 ## Filing Issues
 
-If you experience a problem relating to using Flutter on Apple Silicon hardware, please [file an issue on GitHub](https://github.com/flutter/flutter/issues/new?assignees=&labels=&template=1_activation.md&title=) with specific repro steps and information about your hardware and software configuration (paste the results of `flutter doctor -v`). Thank you!
+If you experience a problem relating to using Flutter on Apple Silicon hardware, please [file an issue on GitHub](https://github.com/flutter/flutter/issues/new?template=1_activation.yml) with specific repro steps and information about your hardware and software configuration (paste the results of `flutter doctor -v`). Thank you!

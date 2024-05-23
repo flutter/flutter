@@ -183,7 +183,7 @@ On some platforms, there are multiple native languages that can be used to write
   - Swift if the plugin is entirely Swift.
   - Swift or Objective-C if the plugin is partially migrated.
   - Objective-C if the plugin is still entirely Objective-C.
-- Linux: C. Use of C++ constructs is strongly discouraged; see [repo style notes](https://github.com/flutter/packages/blob/main/CONTRIBUTING.md#style) for details
+- Linux: C. Use of C++ constructs is strongly discouraged; see [repo style notes](../../../CONTRIBUTING.md#style) for details
 - macOS: Swift only\*.
   - \* In some cases an existing iOS implementation has been updated to support macOS, so is Objective-C (e.g., `in_app_purchase`). This is the only case where Objective-C is allowed for macOS plugins.
 - Windows: C++.

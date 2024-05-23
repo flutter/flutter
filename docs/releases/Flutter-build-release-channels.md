@@ -5,7 +5,7 @@ Flutter has the following channels, in increasing order of stability.
 ### `master` (aka `main`)
 
 The current tip-of-tree, absolute latest cutting edge build. Usually functional, though sometimes we accidentally break things. We do not run the entirety of our testing before allowing patches to land on this branch. We do not
-recommend using this branch unless [you are contributing to Flutter](https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md).
+recommend using this branch unless [you are contributing to Flutter](../../CONTRIBUTING.md).
 
 The API documentation for the most recent commit on `master` is staged at: <https://master-api.flutter.dev>
 

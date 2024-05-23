@@ -66,7 +66,7 @@ Flutter provides multiple functionality through self-service services. Most of t
    </td>
    <td><a href="https://github.com/flutter/cocoon/blob/main/CI_YAML.md">Link</a>
    </td>
-   <td>Top level folder of the GitHub repositories. E.g. <a href="https://github.com/flutter/flutter/blob/master/.ci.yaml">flutter/flutter</a>.
+   <td>Top level folder of the GitHub repositories. E.g. <a href="https://github.com/flutter/flutter/blob/main/.ci.yaml">flutter/flutter</a>.
    </td>
   </tr>
   <tr>
