@@ -18,35 +18,28 @@ import 'theme.dart';
 /// Carousels present a scrollable list of items, each of which can dynamically
 /// change size based on the chosen layout.
 ///
-/// Material Design 3 introduced 4 [Carousel] layouts:
-///  * Multi-browse: This layout shows at least one large, medium, and small
-/// carousel item at a time.
-///  * Uncontained (default): This layout show items that scroll to the edge of
-/// the container.
-///  * Hero: This layout shows at least one large and one small item at a time.
-///  * Full-screen: This layout shows one edge-to-edge large item at a time and
-/// scrolls vertically.
-///
-/// By default, `Carousel` uses the uncontained layout, behaving similarly to a
-/// `ListView` where all children are a uniform size.
+/// This widget supports uncontained carousel layout. It shows items that scroll
+/// to the edge of the container, behaving similarly to a `ListView` where all
+/// children are a uniform size.
 ///
 /// The [CarouselController] is used to control the [CarouselController.initialItem].
 ///
-/// The `Carousel.itemExtent` property must be non-null and defines the base
+/// The [Carousel.itemExtent] property must be non-null and defines the base
 /// size of items. While items typically maintain this size, the first and last
-/// visible items may be slightly compressed during scrolling. The `shrinkExtent`
+/// visible items may be slightly compressed during scrolling. The [shrinkExtent]
 /// property controls the minimum allowable size for these compressed items.
 ///
 /// {@tool dartpad}
-/// Here is an example of [Carousel].
+/// Here is an example of [Carousel] to show the uncontained layout. Each carousel
+/// item has the same size but can be "squished" to the [shrinkExtent] when they
+/// are show on the view and out of view.
 ///
 /// ** See code in examples/api/lib/material/carousel/carousel.0.dart **
 /// {@end-tool}
 ///
 /// See also:
 ///
-///  * [CarouselController], which controls which item is the first visible in
-/// the view.
+///  * [CarouselController], which controls the first visible item in the carousel.
 ///  * [PageView], which is a scrollable list that works page by page.
 class Carousel extends StatefulWidget {
   /// Creates a Material Design carousel.
@@ -69,7 +62,7 @@ class Carousel extends StatefulWidget {
 
   /// The amount of space to surround each carousel item with.
   ///
-  /// Defaults to EdgeInsets.all(4.0).
+  /// Defaults to [EdgeInsets.all] of 4 pixels.
   final EdgeInsets? padding;
 
   /// The background color for each carousel item.
@@ -94,18 +87,18 @@ class Carousel extends StatefulWidget {
   /// or focused states.
   ///
   /// The default values are:
-  ///   * pressed - Theme.colorScheme.onSurface(0.1)
-  ///   * hovered - Theme.colorScheme.onSurface(0.08)
-  ///   * focused - Theme.colorScheme.onSurface(0.1)
+  ///   * [WidgetState.pressed] - [ThemeData.colorScheme.onSurface] with an opacity of 0.1
+  ///   * [WidgetState.hovered] - [ThemeData.colorScheme.onSurface] with an opacity of 0.08
+  ///   * [WidgetState.focused] - [ThemeData.colorScheme.onSurface] with an opacity of 0.1
   final WidgetStateProperty<Color?>? overlayColor;
 
-  /// The minimum allowable extent (size) for carousel items during scrolling
-  /// transitions.
+  /// The minimum allowable extent (size) in the main axis for carousel items
+  /// during scrolling transitions.
   ///
   /// As the carousel scrolls, the first visible item is pinned and gradually
   /// shrinks until it reaches this minimum extent before scrolling off-screen.
   /// Similarly, the last visible item enters the viewport at this minimum size
-  /// and expands to its full `itemExtent`.
+  /// and expands to its full [itemExtent].
   ///
   /// A `shrinkExtent` of 0.0 allows items to shrink/expand completely, transitioning
   /// between 0.0 and the full `itemExtent`.
