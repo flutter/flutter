@@ -41,7 +41,7 @@ void main() {
   });
 
   testWidgets('Carousel items customization', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+    final Key key = UniqueKey();
     final ThemeData theme = ThemeData();
 
     await tester.pumpWidget(
@@ -94,7 +94,7 @@ void main() {
     RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
 
     // On hovered.
-    final TestGesture gesture = await _pointGestureToCarouselItem(tester, key);
+    final TestGesture gesture = await hoverPointerOverCarouselItem(tester, key);
     await tester.pumpAndSettle();
     expect(inkFeatures, paints..rect(color: Colors.red.withOpacity(1.0)));
 
@@ -116,12 +116,12 @@ void main() {
 
     const MaterialState state = MaterialState.focused;
 
-    // Check overlay color in focused state
+    // Check overlay color in focused state.
     expect(inkWell.overlayColor?.resolve(<WidgetState>{state}), Colors.purple);
   });
 
   testWidgets('Carousel respect onTap', (WidgetTester tester) async {
-    final List<GlobalKey> keys = List<GlobalKey>.generate(10, (_) => GlobalKey());
+    final List<Key> keys = List<Key>.generate(10, (_) => UniqueKey());
     final ThemeData theme = ThemeData();
     int tapIndex = 0;
 
@@ -136,7 +136,7 @@ void main() {
             },
             children: List<Widget>.generate(10, (int index) {
               return Center(
-                key: keys.elementAt(index),
+                key: keys[index],
                 child: Text('Item $index'),
               );
             }),
@@ -448,7 +448,7 @@ Finder getItem(int index) {
   return find.descendant(of: find.byType(Carousel), matching: find.ancestor(of: find.text('Item $index'), matching: find.byType(Padding)));
 }
 
-Future<TestGesture> _pointGestureToCarouselItem(WidgetTester tester, GlobalKey key) async {
+Future<TestGesture> hoverPointerOverCarouselItem(WidgetTester tester, Key key) async {
   final Offset center = tester.getCenter(find.byKey(key));
   final TestGesture gesture = await tester.createGesture(
     kind: PointerDeviceKind.mouse,
