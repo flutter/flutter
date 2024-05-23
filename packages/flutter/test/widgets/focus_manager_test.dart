@@ -383,7 +383,7 @@ void main() {
         expect(focusNode.hasPrimaryFocus, isTrue);
       },
       skip: kIsWeb, // [intended]
-      variant: TargetPlatformVariant.only(TargetPlatform.iOS, TargetPlatform.android),
+      variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android, TargetPlatform.iOS}),
     );
 
     testWidgets('FocusManager responds to app lifecycle changes.', (WidgetTester tester) async {
