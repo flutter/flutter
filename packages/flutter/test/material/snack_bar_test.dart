@@ -4045,6 +4045,39 @@ testWidgets('SnackBarAction backgroundColor works as a Color', (WidgetTester tes
 
     expect(completer.isCompleted, false);
   });
+
+  testWidgets('Action text button uses correct overlay color', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: const Text('I am a snack bar.'),
+                  action: SnackBarAction(label: 'ACTION', onPressed: () { }),
+                ));
+              },
+              child: const Text('X'),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final ButtonStyle? actionButtonStyle = tester.widget<TextButton>(
+      find.widgetWithText(TextButton, 'ACTION'),
+    ).style;
+    expect(
+      actionButtonStyle?.overlayColor?.resolve(<MaterialState>{MaterialState.hovered}),
+      theme.colorScheme.inversePrimary.withOpacity(0.08),
+    );
+  });
 }
 
 /// Start test for "SnackBar dismiss test".
