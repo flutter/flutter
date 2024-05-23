@@ -82,7 +82,7 @@ class CupertinoCheckbox extends StatefulWidget {
     this.autofocus = false,
     this.side,
     this.shape,
-    this.dropshadow,
+    this.shadowColor,
     this.isError = false,
     this.semanticLabel,
   }) : assert(tristate || value != null);
@@ -245,13 +245,15 @@ class CupertinoCheckbox extends StatefulWidget {
   /// [RoundedRectangleBorder] with a circular corner radius of 4.0.
   final OutlinedBorder? shape;
 
-  /// The dropshadow from the top edge of the checkbox. On iOS/macOS, checkboxes
-  /// have a slight dropshadow with three pixel-long layers from the top edge.
+  /// The color of the dropshadow from the top edge of the checkbox.
   ///
-  /// If this property is null, then the dropshadow defaults to a linear gradient
-  /// starting at the top edge with color [CupertinoColors.black] at opacities
-  /// 0.1 and 0.05.
-  final LinearGradient? dropshadow;
+  /// On iOS/macOS, checkboxes have a slight dropshadow with three pixel-long
+  /// layers from the top edge.
+  ///
+  /// If this property is null, then the dropshadow has color
+  /// [CupertinoColors.black]. If no shadow is desired, set this property to the
+  /// transparent color ([Color(0x00000000)]).
+  final Color? shadowColor;
 
   /// True if this checkbox wants to show an error state.
   ///
@@ -418,7 +420,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
             borderRadius: BorderRadius.circular(4.0),
           )
           ..side = effectiveBorderSide
-          ..dropshadow = widget.dropshadow,
+          ..shadowColor = widget.shadowColor ?? CupertinoColors.black,
       ),
     );
   }
@@ -475,13 +477,13 @@ class _CheckboxPainter extends ToggleablePainter {
     notifyListeners();
   }
 
-  LinearGradient? get dropshadow => _dropshadow;
-  LinearGradient? _dropshadow;
-  set dropshadow(LinearGradient? value) {
-    if (_dropshadow == value) {
+  Color get shadowColor => _shadowColor!;
+  Color? _shadowColor;
+  set shadowColor(Color? value) {
+    if (_shadowColor == value) {
       return;
     }
-    _dropshadow = value;
+    _shadowColor = value;
     notifyListeners();
   }
 
@@ -512,19 +514,20 @@ class _CheckboxPainter extends ToggleablePainter {
     //
     // Since the focus outline is drawn around the outer border,
     // only clip to the outer border when not in focus.
-    if (value == false && reaction.isDismissed && !isFocused){
+    if (value == false && reaction.isDismissed && !isFocused &&
+         shadowColor != _kTransparentColor){
       canvas.clipPath(shape.getOuterPath(outer));
       canvas.drawPath(shape.getOuterPath(outer), paint);
 
       // The drop shadow has three layers.
       final Rect shadowRect = Rect.fromLTRB(
         outer.left, outer.top, outer.right, outer.top + 3);
-      final LinearGradient topEdgeGradient = dropshadow ?? LinearGradient(
+      final LinearGradient topEdgeGradient = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: <Color>[
-          CupertinoColors.black.withOpacity(0.1),
-          CupertinoColors.black.withOpacity(0.05),
+          shadowColor.withOpacity(0.1),
+          shadowColor.withOpacity(0.05),
         ],
       );
       final Paint gradientPaint = Paint()
