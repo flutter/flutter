@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/scaffold/scaffold.1.dart' as example;
+import 'package:flutter_api_samples/material/scaffold/scaffold.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -21,8 +21,5 @@ void main() {
       await tester.pump();
       expect(find.text('You have pressed the button $i times.'), findsOne);
     }
-
-    final Scaffold scaffold = tester.firstWidget<Scaffold>(find.byType(Scaffold));
-    expect(scaffold.backgroundColor, Colors.blueGrey.shade200);
   });
 }
