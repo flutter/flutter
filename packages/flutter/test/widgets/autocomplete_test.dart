@@ -923,6 +923,55 @@ void main() {
     expect(lastOptions, <String>['dingo', 'flamingo']);
   });
 
+  testWidgets('Changing the selection does not rebuild the options', (WidgetTester tester) async {
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+    int optionsBuilderCalls = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              optionsBuilderCalls += 1;
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+              focusNode = fieldFocusNode;
+              textEditingController = fieldTextEditingController;
+              return TextField(
+                key: fieldKey,
+                focusNode: focusNode,
+                controller: textEditingController,
+              );
+            },
+            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+              return Container(key: optionsKey);
+            },
+          ),
+        ),
+      ),
+    );
+    // The options have not been built.
+    expect(find.byKey(optionsKey), findsNothing);
+
+    // Enter text to build the options.
+    focusNode.requestFocus();
+    await tester.enterText(find.byKey(fieldKey), 'go');
+    await tester.pump();
+    expect(optionsBuilderCalls, 2);
+
+    // Change the selection. optionsBuilder should not be called.
+    expect(textEditingController.selection, const TextSelection.collapsed(offset: 2));
+    textEditingController.selection = const TextSelection(baseOffset: 0, extentOffset: 2);
+    await tester.pump();
+    expect(optionsBuilderCalls, 2);
+  });
+
   testWidgets('can navigate options with the keyboard', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
