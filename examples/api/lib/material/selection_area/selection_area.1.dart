@@ -50,12 +50,12 @@ class _MyHomePageState extends State<MyHomePage> {
     return text.replaceAll(String.fromCharCode(PlaceholderSpan.placeholderCodeUnit), '');
   }
 
-  void _emphasizeText(List<SelectedContentController>? controllers) {
+  void _emphasizeText(List<SelectedContentController<Object>>? controllers) {
     if (controllers == null || controllers.isEmpty) {
       return;
     }
     for (int index = 0; index < controllers.length; index += 1) {
-      final SelectedContentController contentController = controllers[index];
+      final SelectedContentController<Object> contentController = controllers[index];
       if (contentController.value is! TextSpan) {
         // Do not edit the controller if it is not text.
         return;
@@ -88,7 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
         afterSelection += String.fromCharCode(plainText.codeUnitAt(j));
       }
       afterSelection = _trimPlaceholders(afterSelection);
-      List<InlineSpan> concreteSpans = <InlineSpan>[];
+      final List<InlineSpan> concreteSpans = <InlineSpan>[];
       final TextSpan beforeSpan = TextSpan(text: beforeSelection);
       final TextSpan selectionSpan = TextSpan(text: collectedSelection, style: const TextStyle(color: Colors.red));
       final TextSpan afterSpan = TextSpan(text: afterSelection);
@@ -104,7 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
         concreteSpans.add(afterSpan);
       }
       TextSpan lastSpan = concreteSpans.last as TextSpan;
-      List<InlineSpan> collectedChildren = <InlineSpan>[];
+      final List<InlineSpan> collectedChildren = <InlineSpan>[];
       if ((contentController.value as TextSpan).children != null) {
         for (int i = 0; i < (contentController.value as TextSpan).children!.length; i += 1) {
           if (((contentController.value as TextSpan).children![i] as TextSpan).children != null) {
@@ -135,7 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SelectionArea(
         controller: _selectionController,
         onSelectionChanged: (SelectedContent? selectedContent) {
-            if (selectedContent == null 
+            if (selectedContent == null
                 || selectedContent.plainText.isEmpty
                 || (selectedContent.geometry.startSelectionPoint == null
                 || selectedContent.geometry.endSelectionPoint == null)) {

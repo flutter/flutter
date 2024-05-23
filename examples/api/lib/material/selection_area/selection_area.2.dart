@@ -50,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
     for (int index = 0; index < content.controllers!.length; index += 1) {
-      final SelectedContentController contentController = content.controllers![index];
+      final SelectedContentController<Object> contentController = content.controllers![index];
       if (contentController.value is! TextSpan) {
         // Do not edit the controller if it is not text.
         return;
@@ -62,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // Collect text before selection.
       for (int j = 0; j < contentController.startOffset; j += 1) {
         beforeSelection += String.fromCharCode(plainText.codeUnitAt(j));
-      } 
+      }
       // Collect text inside selection.
       for (int j = contentController.startOffset; j < contentController.endOffset; j += 1) {
         collectedSelection += String.fromCharCode(plainText.codeUnitAt(j));
@@ -96,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SelectionArea(
         controller: _selectionController,
         onSelectionChanged: (SelectedContent? selectedContent) {
-            if (selectedContent == null 
+            if (selectedContent == null
                 || selectedContent.plainText.isEmpty
                 || (selectedContent.geometry.startSelectionPoint == null
                 || selectedContent.geometry.endSelectionPoint == null)) {
