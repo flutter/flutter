@@ -86,7 +86,7 @@ For more details use the [documentation](https://github.com/flutter/web_installe
 
 ## Examples From Flutter Project
 
-We already use Flutter Driver in many different places in Flutter Project. We have a smoke test running as a [Cirrus CI task](https://github.com/flutter/flutter/blob/master/.cirrus.yml#L291) in Flutter repo, which is also a great example for showing web_installers + flutter drive usage.
+We already use Flutter Driver in many different places in Flutter Project. We have a smoke test running as a [Cirrus CI task](https://github.com/flutter/flutter/blob/main/.cirrus.yml#L291) in Flutter repo, which is also a great example for showing web_installers + flutter drive usage.
 
 ```
 script:
