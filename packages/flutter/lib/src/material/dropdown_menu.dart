@@ -265,9 +265,9 @@ class DropdownMenu<T> extends StatefulWidget {
   /// if the dropdown menu theme's value is null.
   final TextStyle? textStyle;
 
-  /// The text align for the [TextField] of the [DropdownMenu];
+  /// The text align for the [TextField] of the [DropdownMenu].
   ///
-  /// Defaults to [TextAlign.start]
+  /// Defaults to [TextAlign.start].
   final TextAlign textAlign;
 
   /// Defines the default appearance of [InputDecoration] to show around the text field.
