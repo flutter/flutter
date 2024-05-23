@@ -115,6 +115,7 @@ void main() {
   }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
+    final String arch = 'x86_64'
     return FakeCommand(
       command: <String>[
         '/usr/bin/env',
@@ -124,7 +125,7 @@ void main() {
         '-configuration', configuration,
         '-scheme', 'Runner',
         '-derivedDataPath', flutterBuildDir.absolute.path,
-        '-destination', 'platform=macOS',
+        '-destination', 'platform=macOS,arch=$arch',
         'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
         'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
         if (verbose)
