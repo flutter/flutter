@@ -21,5 +21,8 @@ void main() {
       await tester.pump();
       expect(find.text('You have pressed the button $i times.'), findsOne);
     }
+
+    final Scaffold scaffold = tester.firstWidget<Scaffold>(find.byType(Scaffold));
+    expect(scaffold.backgroundColor, Colors.blueGrey.shade200);
   });
 }

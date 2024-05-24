@@ -259,6 +259,7 @@ class TextField extends StatefulWidget {
   ///    characters" and how it may differ from the intuitive meaning.
   const TextField({
     super.key,
+    this.groupId = EditableText,
     this.controller,
     this.focusNode,
     this.undoController,
@@ -367,6 +368,9 @@ class TextField extends StatefulWidget {
   /// ** See code in examples/api/lib/widgets/text_magnifier/text_magnifier.0.dart **
   /// {@end-tool}
   final TextMagnifierConfiguration? magnifierConfiguration;
+
+  /// {@macro flutter.widgets.editableText.groupId}
+  final Object groupId;
 
   /// Controls the text being edited.
   ///
@@ -1499,6 +1503,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           onEditingComplete: widget.onEditingComplete,
           onSubmitted: widget.onSubmitted,
           onAppPrivateCommand: widget.onAppPrivateCommand,
+          groupId: widget.groupId,
           onSelectionHandleTapped: _handleSelectionHandleTapped,
           onTapOutside: widget.onTapOutside,
           inputFormatters: formatters,

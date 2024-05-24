@@ -186,14 +186,23 @@ Map<KernelAssetPath, List<AssetImpl>> _fatAssetTargetLocations(
 Map<AssetImpl, KernelAsset> _assetTargetLocations(
     List<AssetImpl> nativeAssets) {
   final Set<String> alreadyTakenNames = <String>{};
-  return <AssetImpl, KernelAsset>{
-    for (final AssetImpl asset in nativeAssets)
-      asset: _targetLocationIOS(asset, alreadyTakenNames),
-  };
+  final Map<String, KernelAssetPath> idToPath = <String, KernelAssetPath>{};
+  final Map<AssetImpl, KernelAsset> result = <AssetImpl, KernelAsset>{};
+  for (final AssetImpl asset in nativeAssets) {
+    final KernelAssetPath path = idToPath[asset.id] ??
+        _targetLocationIOS(asset, alreadyTakenNames).path;
+    idToPath[asset.id] = path;
+    result[asset] = KernelAsset(
+      id: (asset as NativeCodeAssetImpl).id,
+      target: Target.fromArchitectureAndOS(asset.architecture!, asset.os),
+      path: path,
+    );
+  }
+  return result;
 }
 
 KernelAsset _targetLocationIOS(AssetImpl asset, Set<String> alreadyTakenNames) {
-  final LinkModeImpl linkMode = (asset as NativeCodeAssetImpl).linkMode;
+final LinkModeImpl linkMode = (asset as NativeCodeAssetImpl).linkMode;
 final KernelAssetPath kernelAssetPath;
   switch (linkMode) {
     case DynamicLoadingSystemImpl _:
