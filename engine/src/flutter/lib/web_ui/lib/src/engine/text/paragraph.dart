@@ -435,7 +435,7 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
     this.maxLines,
     this.fontFamily,
     this.fontSize,
-    this.height,
+    double? height,
     ui.TextHeightBehavior? textHeightBehavior,
     this.fontWeight,
     this.fontStyle,
@@ -444,7 +444,8 @@ class EngineParagraphStyle implements ui.ParagraphStyle {
     this.locale,
   })  : _textHeightBehavior = textHeightBehavior,
         // TODO(mdebbar): add support for strut style., b/128317744
-        _strutStyle = strutStyle as EngineStrutStyle?;
+        _strutStyle = strutStyle as EngineStrutStyle?,
+        height = height == ui.kTextHeightNone ? null : height;
 
   final ui.TextAlign? textAlign;
   final ui.TextDirection? textDirection;
@@ -808,7 +809,7 @@ class EngineStrutStyle implements ui.StrutStyle {
   })  : _fontFamily = fontFamily,
         _fontFamilyFallback = fontFamilyFallback,
         _fontSize = fontSize,
-        _height = height,
+        _height = height == ui.kTextHeightNone ? null : height,
         _leadingDistribution = leadingDistribution,
         _leading = leading,
         _fontWeight = fontWeight,

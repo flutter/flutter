@@ -6,6 +6,8 @@
 #include "../wrappers.h"
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"
 
+const double kTextHeightNone = 0.0;
+
 using namespace skia::textlayout;
 using namespace Skwasm;
 
@@ -96,7 +98,7 @@ SKWASM_EXPORT void textStyle_setWordSpacing(TextStyle* style,
 
 SKWASM_EXPORT void textStyle_setHeight(TextStyle* style, SkScalar height) {
   style->setHeight(height);
-  style->setHeightOverride(true);
+  style->setHeightOverride(height != kTextHeightNone);
 }
 
 SKWASM_EXPORT void textStyle_setHalfLeading(TextStyle* style,

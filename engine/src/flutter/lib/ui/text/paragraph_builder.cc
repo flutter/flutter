@@ -30,6 +30,8 @@
 namespace flutter {
 namespace {
 
+const double kTextHeightNone = 0.0;
+
 // TextStyle
 
 const int kTSLeadingDistributionIndex = 0;
@@ -445,7 +447,7 @@ void ParagraphBuilder::pushStyle(const tonic::Int32List& encoded,
 
   if (mask & kTSHeightMask) {
     style.height = height;
-    style.has_height_override = true;
+    style.has_height_override = style.height != kTextHeightNone;
   }
 
   if (mask & kTSLocaleMask) {

@@ -594,7 +594,7 @@ final class SkwasmStrutStyle extends SkwasmObjectWrapper<RawStrutStyle> implemen
     if (fontSize != null) {
       strutStyleSetFontSize(handle, fontSize);
     }
-    if (height != null) {
+    if (height != null && height != ui.kTextHeightNone) {
       strutStyleSetHeight(handle, height);
     }
     if (leadingDistribution != null) {
@@ -734,7 +734,7 @@ class SkwasmParagraphStyle extends SkwasmObjectWrapper<RawParagraphStyle> implem
     if (maxLines != null) {
       paragraphStyleSetMaxLines(handle, maxLines);
     }
-    if (height != null) {
+    if (height != null && height != ui.kTextHeightNone) {
       paragraphStyleSetHeight(handle, height);
     }
     if (textHeightBehavior != null) {

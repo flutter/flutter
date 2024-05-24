@@ -3,6 +3,12 @@
 // found in the LICENSE file.
 part of dart.ui;
 
+/// A [TextStyle.height] value that indicates the text span should take
+/// the height defined by the font, which may not be exactly the height of
+/// [TextStyle.fontSize].
+// To change the sentinel value, search for "kTextHeightNone" in the source code.
+const double kTextHeightNone = 0.0;
+
 /// Whether to use the italic type variation of glyphs in the font.
 ///
 /// Some modern fonts allow this to be selected in a more fine-grained manner.
@@ -1687,10 +1693,10 @@ class TextStyle {
   /// * `letterSpacing`: The amount of space (in logical pixels) to add between each letter.
   /// * `wordSpacing`: The amount of space (in logical pixels) to add at each sequence of white-space (i.e. between each word).
   /// * `textBaseline`: The common baseline that should be aligned between this text span and its parent text span, or, for the root text spans, with the line box.
-  /// * `height`: The height of this text span, as a multiplier of the font size. Omitting `height` will allow the line height
+  /// * `height`: The height of this text span, as a multiplier of the font size. Setting the `height` to `kTextHeightNone` will allow the line height
   ///   to take the height as defined by the font, which may not be exactly the height of the fontSize.
-  /// * `leadingDistribution`: When `height` is specified, how the extra vertical space should be distributed over and under the text. Defaults
-  ///   to the paragraph's [TextHeightBehavior] if left unspecified.
+  /// * `leadingDistribution`: When `height` is set to a non-null that is not `kTextHeightNone`, how the extra vertical space should be distributed over and under the text.
+  ///   Defaults to the paragraph's [TextHeightBehavior] if left unspecified.
   /// * `locale`: The locale used to select region-specific glyphs.
   /// * `background`: The paint drawn as a background for the text.
   /// * `foreground`: The paint used to draw the text. If this is specified, `color` must be null.
@@ -1825,6 +1831,7 @@ class TextStyle {
   @override
   String toString() {
     final List<String>? fontFamilyFallback = _fontFamilyFallback;
+    final String heightText = _encoded[0] & 0x02000 == 0x02000  ? (_height == kTextHeightNone ? 'kTextHeightNone' : '${_height}x') : 'unspecified';
     return 'TextStyle('
              'color: ${              _encoded[0] & 0x00002 == 0x00002  ? Color(_encoded[1])                           : "unspecified"}, '
              'decoration: ${         _encoded[0] & 0x00004 == 0x00004  ? TextDecoration._(_encoded[2])                : "unspecified"}, '
@@ -1843,7 +1850,7 @@ class TextStyle {
              'fontSize: ${           _encoded[0] & 0x00400 == 0x00400  ? _fontSize                                    : "unspecified"}, '
              'letterSpacing: ${      _encoded[0] & 0x00800 == 0x00800  ? "${_letterSpacing}x"                         : "unspecified"}, '
              'wordSpacing: ${        _encoded[0] & 0x01000 == 0x01000  ? "${_wordSpacing}x"                           : "unspecified"}, '
-             'height: ${             _encoded[0] & 0x02000 == 0x02000  ? "${_height}x"                                : "unspecified"}, '
+             'height: $heightText, '
              'leadingDistribution: ${_leadingDistribution ?? "unspecified"}, '
              'locale: ${             _encoded[0] & 0x04000 == 0x04000  ? _locale                                      : "unspecified"}, '
              'background: ${         _encoded[0] & 0x08000 == 0x08000  ? _background                                  : "unspecified"}, '
@@ -1923,7 +1930,9 @@ Int32List _encodeParagraphStyle(
     result[0] |= 1 << 8;
     // Passed separately to native.
   }
-  if (height != null) {
+  // Paragraph styles are unique in a paragraph, there is no inheriting so
+  // height == null and height == kTextHeightNone are semantically equivalent.
+  if (height != null && height != kTextHeightNone) {
     result[0] |= 1 << 9;
     // Passed separately to native.
   }
@@ -1973,9 +1982,10 @@ class ParagraphStyle {
   ///
   /// * `height`: The fallback height of the spans as a multiplier of the font
   ///   size. The fallback height is used when no height is provided through
-  ///   [TextStyle.height]. Omitting `height` here and in [TextStyle] will allow
-  ///   the line height to take the height as defined by the font, which may not
-  ///   be exactly the height of the `fontSize`.
+  ///   [TextStyle.height]. Omitting `height` here (or setting it to
+  ///   [kTextHeightNone]) and in [TextStyle] will allow the line height to take
+  ///   the height as defined by the font, which may not be exactly the height of
+  ///   the `fontSize`.
   ///
   /// * `textHeightBehavior`: Specifies how the `height` multiplier is
   ///   applied to ascent of the first line and the descent of the last line.
@@ -2110,9 +2120,12 @@ ByteData _encodeStrut(
   FontWeight? fontWeight,
   FontStyle? fontStyle,
   bool? forceStrutHeight) {
+  // Strut styles are unique in a paragraph, there is no inheriting so
+  // height == null and height == kTextHeightNone are semantically equivalent.
+  final bool hasHeightOverride = height != null && height != kTextHeightNone;
   if (fontFamily == null &&
     fontSize == null &&
-    height == null &&
+    !hasHeightOverride &&
     leadingDistribution == null &&
     leading == null &&
     fontWeight == null &&
@@ -2146,7 +2159,7 @@ ByteData _encodeStrut(
     data.setFloat32(byteCount, fontSize, _kFakeHostEndian);
     byteCount += 4;
   }
-  if (height != null) {
+  if (hasHeightOverride) {
     bitmask |= 1 << 5;
     data.setFloat32(byteCount, height, _kFakeHostEndian);
     byteCount += 4;
@@ -2186,12 +2199,13 @@ class StrutStyle {
   /// * `height`: The minimum height of the line boxes, as a multiplier of the
   ///   font size. The lines of the paragraph will be at least
   ///   `(height + leading) * fontSize` tall when `fontSize` is not null. Omitting
-  ///   `height` will allow the minimum line height to take the height as defined
-  ///   by the font, which may not be exactly the height of the `fontSize`. When
-  ///   `fontSize` is null, there is no minimum line height. Tall glyphs due to
-  ///   baseline alignment or large [TextStyle.fontSize] may cause the actual line
-  ///   height after layout to be taller than specified here. The `fontSize` must
-  ///   be provided for this property to take effect.
+  ///   `height` (or setting it to [kTextHeightNone]) will allow the minimum line
+  ///   height to take the height as defined by the font, which may not be exactly
+  ///   the height of the `fontSize`. When `fontSize` is null, there is no minimum
+  ///   line height. Tall glyphs due to baseline alignment or large
+  ///   [TextStyle.fontSize] may cause the actual line height after layout to be
+  ///   taller than specified here. The `fontSize` must be provided for
+  ///   this property to take effect.
   ///
   /// * `leading`: The minimum amount of leading between lines as a multiple of
   ///   the font size. `fontSize` must be provided for this property to take
