@@ -1,4 +1,4 @@
-Signature: d18882e6842cc881b2329b61241cdda2
+Signature: 7bd35e8f740d6cad8daa0738144ea577
 
 ====================================================================================================
 LIBRARY: dart
@@ -4093,6 +4093,7 @@ ORIGIN: ../../../flutter/third_party/dart/runtime/vm/os.cc + ../../../flutter/th
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_dev_runtime/private/ddc_only.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/lib/dart2js_only.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/lib/synced/invocation_mirror_constants.dart + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/js_shared/lib/date_time_patch.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/compact_hash.dart + ../../../flutter/third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/dart/runtime/bin/ifaddrs.cc
@@ -4106,6 +4107,7 @@ FILE: ../../../flutter/third_party/dart/runtime/vm/os.cc
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_dev_runtime/private/ddc_only.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/lib/dart2js_only.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_runtime/lib/synced/invocation_mirror_constants.dart
+FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/js_shared/lib/date_time_patch.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/compact_hash.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2024, the Dart project authors.  Please see the AUTHORS file
@@ -4745,7 +4747,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/7809d6e332fffca9c6cdc82f0698944744ad5022
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/9d7324ea563a7dc9eb412ec25b210cb56641319b
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
