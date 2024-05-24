@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 
@@ -192,6 +193,15 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
     _hasTerminal = value;
   }
   bool _hasTerminal = true;
+
+  @override
+  // ignore: override_on_non_overriding_member
+  String get lineTerminator => '\n';
+  @override
+  // ignore: override_on_non_overriding_member
+  set lineTerminator(String value) {
+    throw UnimplementedError('Setting the line terminator is not supported');
+  }
 
   @override
   io.IOSink get nonBlocking => this;
@@ -459,7 +469,6 @@ class TestFeatureFlags implements FeatureFlags {
     this.isIOSEnabled = true,
     this.isFuchsiaEnabled = false,
     this.areCustomDevicesEnabled = false,
-    this.isFlutterWebWasmEnabled = false,
     this.isCliAnimationEnabled = true,
     this.isNativeAssetsEnabled = false,
     this.isPreviewDeviceEnabled = false,
@@ -488,9 +497,6 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool areCustomDevicesEnabled;
-
-  @override
-  final bool isFlutterWebWasmEnabled;
 
   @override
   final bool isCliAnimationEnabled;
@@ -540,6 +546,9 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
 
   @override
   List<File> whichAll(String execName) => <File>[];
+
+  @override
+  int? getDirectorySize(Directory directory) => 10000000; // 10 MB / 9.5 MiB
 
   @override
   void unzip(File file, Directory targetDirectory) { }
@@ -672,5 +681,50 @@ class FakeJava extends Fake implements Java {
   @override
   bool canRun() {
     return _canRun;
+  }
+}
+
+class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
+  FakeDevtoolsLauncher({DevToolsServerAddress? serverAddress})
+      : _serverAddress = serverAddress;
+
+  @override
+  Future<void> get processStart => _processStarted.future;
+
+  final Completer<void> _processStarted = Completer<void>();
+
+  @override
+  Future<void> get ready => readyCompleter.future;
+
+  Completer<void> readyCompleter = Completer<void>()..complete();
+
+  @override
+  DevToolsServerAddress? activeDevToolsServer;
+
+  @override
+  Uri? devToolsUrl;
+
+  @override
+  Uri? dtdUri;
+
+  @override
+  bool printDtdUri = false;
+
+  final DevToolsServerAddress? _serverAddress;
+
+  @override
+  Future<DevToolsServerAddress?> serve() async => _serverAddress;
+
+  @override
+  Future<void> launch(Uri vmServiceUri, {List<String>? additionalArguments}) {
+    _processStarted.complete();
+    return Completer<void>().future;
+  }
+
+  bool closed = false;
+
+  @override
+  Future<void> close() async {
+    closed = true;
   }
 }

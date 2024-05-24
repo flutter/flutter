@@ -28,6 +28,8 @@ import 'sliver.dart';
 ///
 ///  * [SliverFixedExtentList], whose children are forced to a given pixel
 ///    extent.
+///  * [SliverVariedExtentList], which supports children with varying (but known
+///    upfront) extents.
 ///  * [SliverList], which does not require its children to have the same
 ///    extent in the main axis.
 ///  * [SliverFillViewport], which sizes its children based on the

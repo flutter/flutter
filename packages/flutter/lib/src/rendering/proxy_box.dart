@@ -468,10 +468,7 @@ class RenderAspectRatio extends RenderProxyBox {
     if (height.isFinite) {
       return height * _aspectRatio;
     }
-    if (child != null) {
-      return child!.getMinIntrinsicWidth(height);
-    }
-    return 0.0;
+    return child?.getMinIntrinsicWidth(height) ?? 0.0;
   }
 
   @override
@@ -479,10 +476,7 @@ class RenderAspectRatio extends RenderProxyBox {
     if (height.isFinite) {
       return height * _aspectRatio;
     }
-    if (child != null) {
-      return child!.getMaxIntrinsicWidth(height);
-    }
-    return 0.0;
+    return child?.getMaxIntrinsicWidth(height) ?? 0.0;
   }
 
   @override
@@ -490,10 +484,7 @@ class RenderAspectRatio extends RenderProxyBox {
     if (width.isFinite) {
       return width / _aspectRatio;
     }
-    if (child != null) {
-      return child!.getMinIntrinsicHeight(width);
-    }
-    return 0.0;
+    return child?.getMinIntrinsicHeight(width) ?? 0.0;
   }
 
   @override
@@ -501,10 +492,7 @@ class RenderAspectRatio extends RenderProxyBox {
     if (width.isFinite) {
       return width / _aspectRatio;
     }
-    if (child != null) {
-      return child!.getMaxIntrinsicHeight(width);
-    }
-    return 0.0;
+    return child?.getMaxIntrinsicHeight(width) ?? 0.0;
   }
 
   Size _applyAspectRatio(BoxConstraints constraints) {
@@ -575,10 +563,8 @@ class RenderAspectRatio extends RenderProxyBox {
 
   @override
   void performLayout() {
-    size = computeDryLayout(constraints);
-    if (child != null) {
-      child!.layout(BoxConstraints.tight(size));
-    }
+    size = getDryLayout(constraints);
+    child?.layout(BoxConstraints.tight(size));
   }
 
   @override
@@ -673,7 +659,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    return computeMaxIntrinsicWidth(height);
+    return getMaxIntrinsicWidth(height);
   }
 
   @override
@@ -691,7 +677,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
       return 0.0;
     }
     if (!width.isFinite) {
-      width = computeMaxIntrinsicWidth(double.infinity);
+      width = getMaxIntrinsicWidth(double.infinity);
     }
     assert(width.isFinite);
     final double height = child!.getMinIntrinsicHeight(width);
@@ -704,7 +690,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
       return 0.0;
     }
     if (!width.isFinite) {
-      width = computeMaxIntrinsicWidth(double.infinity);
+      width = getMaxIntrinsicWidth(double.infinity);
     }
     assert(width.isFinite);
     final double height = child!.getMaxIntrinsicHeight(width);
@@ -814,7 +800,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    return computeMaxIntrinsicHeight(width);
+    return getMaxIntrinsicHeight(width);
   }
 
   Size _computeSize({required ChildLayouter layoutChild, required BoxConstraints constraints}) {
@@ -1970,12 +1956,10 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   RRect get _defaultClip {
     assert(hasSize);
     final Rect rect = Offset.zero & size;
-    switch (_shape) {
-      case BoxShape.rectangle:
-        return (borderRadius ?? BorderRadius.zero).toRRect(rect);
-      case BoxShape.circle:
-        return RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
-    }
+    return switch (_shape) {
+      BoxShape.rectangle => (borderRadius ?? BorderRadius.zero).toRRect(rect),
+      BoxShape.circle => RRect.fromRectXY(rect, rect.width / 2, rect.height / 2),
+    };
   }
 
   @override

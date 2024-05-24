@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/windows/windows_version_validator.dart';
@@ -17,6 +18,29 @@ class FakeValidOperatingSystemUtils extends Fake
 
   @override
   final String name;
+}
+
+class FakeProcessLister extends Fake implements ProcessLister {
+  FakeProcessLister({required this.result, this.exitCode = 0});
+  final String result;
+  final int exitCode;
+
+  @override
+  Future<ProcessResult> getProcessesWithPath() async {
+    return ProcessResult(0, exitCode, result, null);
+  }
+}
+
+FakeProcessLister ofdRunning() {
+  return FakeProcessLister(result: r'Path: "C:\Program Files\Topaz OFD\Warsaw\core.exe"');
+}
+
+FakeProcessLister ofdNotRunning() {
+  return FakeProcessLister(result: r'Path: "C:\Program Files\Google\Chrome\Application\chrome.exe');
+}
+
+FakeProcessLister failure() {
+  return FakeProcessLister(result: r'Path: "C:\Program Files\Google\Chrome\Application\chrome.exe', exitCode: 10);
 }
 
 /// The expected validation result object for
@@ -35,12 +59,32 @@ const ValidationResult invalidWindowsValidationResult = ValidationResult(
   statusInfo: 'Unable to confirm if installed Windows version is 10 or greater',
 );
 
+const ValidationResult ofdFoundRunning = ValidationResult(
+  ValidationType.partial,
+  <ValidationMessage>[
+    ValidationMessage.hint(
+      'The Topaz OFD Security Module was detected on your machine. '
+      'You may need to disable it to build Flutter applications.',
+    ),
+  ],
+  statusInfo: 'Problem detected with Windows installation',
+);
+
+const ValidationResult getProcessFailed = ValidationResult(
+  ValidationType.partial,
+  <ValidationMessage>[
+    ValidationMessage.hint('Get-Process failed to complete'),
+  ],
+  statusInfo: 'Problem detected with Windows installation',
+);
+
 void main() {
   testWithoutContext('Successfully running windows version check on windows 10',
       () async {
     final WindowsVersionValidator windowsVersionValidator =
         WindowsVersionValidator(
-            operatingSystemUtils: FakeValidOperatingSystemUtils());
+            operatingSystemUtils: FakeValidOperatingSystemUtils(),
+            processLister: ofdNotRunning());
 
     final ValidationResult result = await windowsVersionValidator.validate();
 
@@ -56,7 +100,8 @@ void main() {
     final WindowsVersionValidator windowsVersionValidator =
         WindowsVersionValidator(
             operatingSystemUtils: FakeValidOperatingSystemUtils(
-                'Microsoft Windows [versão 10.0.22621.1105]'));
+                'Microsoft Windows [versão 10.0.22621.1105]'),
+            processLister: ofdNotRunning());
 
     final ValidationResult result = await windowsVersionValidator.validate();
 
@@ -70,7 +115,8 @@ void main() {
     final WindowsVersionValidator windowsVersionValidator =
         WindowsVersionValidator(
             operatingSystemUtils: FakeValidOperatingSystemUtils(
-                'Microsoft Windows [Version 8.0.22621.1105]'));
+                'Microsoft Windows [Version 8.0.22621.1105]'),
+            processLister: ofdNotRunning());
 
     final ValidationResult result = await windowsVersionValidator.validate();
 
@@ -98,5 +144,29 @@ OS 版本:          10.0.22621 暂缺 Build 22621
 
     expect(matches.length, 5,
         reason: 'There should be only 5 matches for the pattern provided');
+  });
+
+  testWithoutContext('Successfully checks for Topaz OFD when it is running', () async {
+    final WindowsVersionValidator validator =
+        WindowsVersionValidator(
+            operatingSystemUtils: FakeValidOperatingSystemUtils(),
+            processLister: ofdRunning());
+    final ValidationResult result = await validator.validate();
+    expect(result.type, ofdFoundRunning.type, reason: 'The ValidationResult type should be the same (partial)');
+    expect(result.statusInfo, ofdFoundRunning.statusInfo, reason: 'The ValidationResult statusInfo should be the same');
+    expect(result.messages.length, 1, reason: 'The ValidationResult should have precisely 1 message');
+    expect(result.messages[0].message, ofdFoundRunning.messages[0].message, reason: 'The ValidationMessage message should be the same');
+  });
+
+  testWithoutContext('Reports failure of Get-Process', () async {
+    final WindowsVersionValidator validator =
+        WindowsVersionValidator(
+            operatingSystemUtils: FakeValidOperatingSystemUtils(),
+            processLister: failure());
+    final ValidationResult result = await validator.validate();
+    expect(result.type, getProcessFailed.type, reason: 'The ValidationResult type should be the same (partial)');
+    expect(result.statusInfo, getProcessFailed.statusInfo, reason: 'The ValidationResult statusInfo should be the same');
+    expect(result.messages.length, 1, reason: 'The ValidationResult should have precisely 1 message');
+    expect(result.messages[0].message, getProcessFailed.messages[0].message, reason: 'The ValidationMessage message should be the same');
   });
 }

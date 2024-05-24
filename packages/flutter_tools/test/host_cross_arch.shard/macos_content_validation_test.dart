@@ -24,6 +24,38 @@ void main() {
     ]);
   });
 
+  test('verify FlutterMacOS.xcframework artifact', () {
+    final String flutterRoot = getFlutterRoot();
+
+    final Directory xcframeworkArtifact = fileSystem.directory(
+      fileSystem.path.join(
+        flutterRoot,
+        'bin',
+        'cache',
+        'artifacts',
+        'engine',
+        'darwin-x64',
+        'FlutterMacOS.xcframework',
+      ),
+    );
+
+    final Directory tempDir = createResolvedTempDirectorySync('macos_content_validation.');
+
+    // Pre-cache iOS engine Flutter.xcframework artifacts.
+    final ProcessResult result = processManager.runSync(
+      <String>[
+        flutterBin,
+        ...getLocalEngineArguments(),
+        'precache',
+        '--macos',
+      ],
+      workingDirectory: tempDir.path,
+    );
+
+    expect(result, const ProcessResultMatcher());
+    expect(xcframeworkArtifact.existsSync(), isTrue);
+  });
+
   for (final String buildMode in <String>['Debug', 'Release']) {
     final String buildModeLower = buildMode.toLowerCase();
 
@@ -131,6 +163,11 @@ void main() {
           'FlutterMacOS.framework',
         ),
       );
+
+      // Check read/write permissions are being correctly set
+      final String rawStatString = outputFlutterFramework.statSync().modeString();
+      final String statString = rawStatString.substring(rawStatString.length - 9);
+      expect(statString, 'rwxr-xr-x');
 
       // Check complicated macOS framework symlink structure.
       final Link current = outputFlutterFramework.childDirectory('Versions').childLink('Current');

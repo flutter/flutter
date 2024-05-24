@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_testing/leak_tracker_testing.dart';
 
 typedef ElementRebuildCallback = void Function(StatefulElement element);
 
@@ -447,7 +448,9 @@ void main() {
     );
   });
 
-  testWidgets('GlobalKey duplication 2 - splitting and changing type', (WidgetTester tester) async {
+  testWidgets('GlobalKey duplication 2 - splitting and changing type',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     final Key key = GlobalKey(debugLabel: 'problematic');
 
     await tester.pumpWidget(Stack(
@@ -493,7 +496,9 @@ void main() {
     );
   });
 
-  testWidgets('GlobalKey duplication 3 - splitting and changing type', (WidgetTester tester) async {
+  testWidgets('GlobalKey duplication 3 - splitting and changing type',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     final Key key = GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
@@ -520,7 +525,9 @@ void main() {
     );
   });
 
-  testWidgets('GlobalKey duplication 4 - splitting and half changing type', (WidgetTester tester) async {
+  testWidgets('GlobalKey duplication 4 - splitting and half changing type',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     final Key key = GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
@@ -547,7 +554,9 @@ void main() {
     );
   });
 
-  testWidgets('GlobalKey duplication 5 - splitting and half changing type', (WidgetTester tester) async {
+  testWidgets('GlobalKey duplication 5 - splitting and half changing type',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     final Key key = GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
@@ -565,7 +574,9 @@ void main() {
     expect(tester.takeException(), isFlutterError);
   });
 
-  testWidgets('GlobalKey duplication 6 - splitting and not changing type', (WidgetTester tester) async {
+  testWidgets('GlobalKey duplication 6 - splitting and not changing type',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     final Key key = GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(Stack(
       textDirection: TextDirection.ltr,
@@ -723,7 +734,9 @@ void main() {
     );
   });
 
-  testWidgets('GlobalKey duplication 13 - all kinds of badness at once', (WidgetTester tester) async {
+  testWidgets('GlobalKey duplication 13 - all kinds of badness at once',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     final Key key1 = GlobalKey(debugLabel: 'problematic');
     final Key key2 = GlobalKey(debugLabel: 'problematic'); // intentionally the same label
     final Key key3 = GlobalKey(debugLabel: 'also problematic');
@@ -1522,7 +1535,9 @@ void main() {
     });
   });
 
-  testWidgets('A widget whose element has an invalid visitChildren implementation triggers a useful error message', (WidgetTester tester) async {
+  testWidgets('A widget whose element has an invalid visitChildren implementation triggers a useful error message',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(_WidgetWithNoVisitChildren(_StatefulLeaf(key: key)));
     (key.currentState! as _StatefulLeafState).markNeedsBuild();
@@ -1781,7 +1796,9 @@ The findRenderObject() method was called for the following element:
     );
   });
 
-  testWidgets('Elements use the identity hashCode', (WidgetTester tester) async {
+  testWidgets('Elements use the identity hashCode',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // The test leaks by design.
+  (WidgetTester tester) async {
     final StatefulElement statefulElement = StatefulElement(const _StatefulLeaf());
     expect(statefulElement.hashCode, identityHashCode(statefulElement));
 

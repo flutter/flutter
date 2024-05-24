@@ -529,8 +529,11 @@ void main() {
                     children: <TestSemantics>[
                       TestSemantics(
                         id: 4,
-                        flags: <SemanticsFlag>[SemanticsFlag.isTextField,
-                          SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled,],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.isTextField,
+                          SemanticsFlag.hasEnabledState,
+                          SemanticsFlag.isEnabled,
+                        ],
                         actions: <SemanticsAction>[SemanticsAction.tap,
                           SemanticsAction.didGainAccessibilityFocus,],
                         textDirection: TextDirection.ltr,
@@ -619,6 +622,48 @@ void main() {
         const Size(200, 31), // 31 is the height of the default font (17) + decoration (12).
       );
     },
+  );
+
+  testWidgets('selection handles color respects CupertinoTheme', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/74890.
+    const Color expectedSelectionHandleColor = Color.fromARGB(255, 10, 200, 255);
+
+    final TextEditingController controller = TextEditingController(text: 'Some text.');
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(
+          primaryColor: Colors.red,
+        ),
+        home: Center(
+          child: CupertinoTheme(
+            data: const CupertinoThemeData(
+              primaryColor: expectedSelectionHandleColor,
+            ),
+            child: CupertinoTextField(controller: controller),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pump();
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pumpAndSettle();
+    final Iterable<RenderBox> boxes = tester.renderObjectList<RenderBox>(
+      find.descendant(
+        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
+        matching: find.byType(CustomPaint),
+      ),
+    );
+    expect(boxes.length, 2);
+
+    for (final RenderBox box in boxes) {
+      expect(box, paints..path(color: expectedSelectionHandleColor));
+    }
+  },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
   testWidgets(
@@ -4827,7 +4872,7 @@ void main() {
           TextSelection(baseOffset: 0, extentOffset: platformSelectsByLine ? 19 : 20),
         );
 
-        // Clicking again moves the caret to the tapped positio.
+        // Clicking again moves the caret to the tapped position.
         await gesture.down(textFieldStart + const Offset(200.0, 9.0));
         await tester.pump();
         await gesture.up();
@@ -6899,7 +6944,7 @@ void main() {
       // the arrow should not point exactly to the caret because the caret is
       // too close to the right.
       controller.dispose();
-      controller = TextEditingController(text: List<String>.filled(200, 'a').join());
+      controller = TextEditingController(text: 'a' * 200);
       await tester.pumpWidget(
         CupertinoApp(
           debugShowCheckedModeBanner: false,
@@ -6960,7 +7005,7 @@ void main() {
       // Normal centered collapsed selection. The toolbar arrow should point down, and
       // it should point exactly to the caret.
       controller.dispose();
-      controller = TextEditingController(text: List<String>.filled(200, 'a').join());
+      controller = TextEditingController(text: 'a' * 200);
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         CupertinoApp(
@@ -7787,9 +7832,6 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
     expect(focusNode3.hasPrimaryFocus, isTrue);
-    // TODO(gspencergoog): Remove the variant when the deprecated
-    // KeySimulatorTransitModeVariant API is removed.
-    // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Scrolling shortcuts are disabled in text fields', (WidgetTester tester) async {
@@ -7824,9 +7866,6 @@ void main() {
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     expect(scrollInvoked, isFalse);
-    // TODO(gspencergoog): Remove the variant when the deprecated
-    // KeySimulatorTransitModeVariant API is removed.
-    // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('Cupertino text field semantics', (WidgetTester tester) async {
@@ -8468,14 +8507,12 @@ void main() {
     expect(controller.selection.extentOffset, 20);
 
     await tester.pump(kDoubleTapTimeout);
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     await tester.tapAt(textOffsetToPosition(tester, 23));
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 13);
     expect(controller.selection.extentOffset, 23);
 
     await tester.pump(kDoubleTapTimeout);
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
     await tester.tapAt(textOffsetToPosition(tester, 4));
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 13);
@@ -9965,7 +10002,7 @@ void main() {
     expect(state.selectionOverlay!.handlesAreVisible, isTrue);
     expect(state.renderEditable.selectionColor, defaultSelectionColor);
 
-    // Single tapping a non-misspelled word shows a collpased cursor.
+    // Single tapping a non-misspelled word shows a collapsed cursor.
     await tester.tapAt(textOffsetToPosition(tester, 7));
     await tester.pumpAndSettle();
     expect(
@@ -9992,7 +10029,7 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgets('text selection toolbar is hidden on tap down', (WidgetTester tester) async {
+  testWidgets('text selection toolbar is hidden on tap down on desktop platforms', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
@@ -10035,7 +10072,7 @@ void main() {
     expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
   },
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
-    variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }),
+    variant: TargetPlatformVariant.all(excluding: TargetPlatformVariant.mobile().values),
   );
 
   testWidgets('Does not shrink in height when enters text when there is large single-line placeholder', (WidgetTester tester) async {
@@ -10100,6 +10137,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'abcd',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

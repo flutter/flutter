@@ -1287,7 +1287,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(
       Material.of(tester.element(find.byKey(radioKey))),
-      paints..rect()..circle(color: theme.colorScheme.primary.withOpacity(0.12))..circle(color: focusedFillColor),
+      paints..rect()..circle(color: theme.colorScheme.primary.withOpacity(0.1))..circle(color: focusedFillColor),
     );
 
     // Start hovering
@@ -1763,7 +1763,7 @@ void main() {
 
     expect(
         Material.of(tester.element(find.byType(Radio<bool>))),
-        paints..circle(color: colors.onSurface.withOpacity(0.12))
+        paints..circle(color: colors.onSurface.withOpacity(0.1))
           ..circle(color: colors.primary.withOpacity(1))
     );
 
@@ -1774,7 +1774,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
-      paints..circle(color: colors.primary.withOpacity(0.12))..circle(color: colors.onSurfaceVariant.withOpacity(1))
+      paints..circle(color: colors.primary.withOpacity(0.1))..circle(color: colors.onSurfaceVariant.withOpacity(1))
     );
 
     // selected radio in focused state
@@ -1785,7 +1785,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
-      paints..circle(color: colors.primary.withOpacity(0.12))..circle(color: colors.primary.withOpacity(1))
+      paints..circle(color: colors.primary.withOpacity(0.1))..circle(color: colors.primary.withOpacity(1))
     );
 
     // unselected radio in focused state
@@ -1796,7 +1796,7 @@ void main() {
 
     expect(
       Material.of(tester.element(find.byType(Radio<bool>))),
-      paints..circle(color: colors.onSurface.withOpacity(0.12))..circle(color: colors.onSurface.withOpacity(1))
+      paints..circle(color: colors.onSurface.withOpacity(0.1))..circle(color: colors.onSurface.withOpacity(1))
     );
 
     // selected radio in hovered state
@@ -1962,7 +1962,7 @@ void main() {
 
     expect(getRadioMaterial(tester),
       paints
-        ..circle(color: theme.colorScheme.onSurface.withOpacity(0.12))
+        ..circle(color: theme.colorScheme.onSurface.withOpacity(0.1))
         ..circle(color: theme.colorScheme.primary)
     );
     // Remove pressed and hovered states
@@ -1977,7 +1977,7 @@ void main() {
 
     expect(getRadioMaterial(tester),
       paints
-        ..circle(color: theme.colorScheme.primary.withOpacity(0.12))
+        ..circle(color: theme.colorScheme.primary.withOpacity(0.1))
         ..circle(color: theme.colorScheme.primary)
     );
     focusNode.dispose();

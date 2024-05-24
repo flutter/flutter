@@ -42,9 +42,6 @@ abstract class FeatureFlags {
   /// Whether custom devices are enabled.
   bool get areCustomDevicesEnabled => false;
 
-  /// Whether WebAssembly compilation for Flutter Web is enabled.
-  bool get isFlutterWebWasmEnabled => false;
-
   /// Whether animations are used in the command line interface.
   bool get isCliAnimationEnabled => true;
 
@@ -70,7 +67,6 @@ const List<Feature> allFeatures = <Feature>[
   flutterIOSFeature,
   flutterFuchsiaFeature,
   flutterCustomDevicesFeature,
-  flutterWebWasm,
   cliAnimation,
   nativeAssets,
   previewDevice,
@@ -143,16 +139,6 @@ const Feature flutterCustomDevicesFeature = Feature(
   ),
   stable: FeatureChannelSetting(
     available: true,
-  ),
-);
-
-/// Enabling WebAssembly compilation from `flutter build web`
-const Feature flutterWebWasm = Feature(
-  name: 'WebAssembly compilation from flutter build web',
-  environmentOverride: 'FLUTTER_WEB_WASM',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
   ),
 );
 

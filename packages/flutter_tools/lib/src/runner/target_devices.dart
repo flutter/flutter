@@ -8,7 +8,6 @@ import '../base/common.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
-import '../base/user_messages.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
@@ -31,6 +30,8 @@ String _noMatchingDeviceMessage(String deviceId) => 'No supported devices found 
     "matching '$deviceId'.";
 String flutterSpecifiedDeviceDevModeDisabled(String deviceName) => 'To use '
     "'$deviceName' for development, enable Developer Mode in Settings → Privacy & Security.";
+String flutterSpecifiedDeviceUnpaired(String deviceName) => "'$deviceName' is not paired. "
+    'Open Xcode and trust this computer when prompted.';
 
 /// This class handles functionality of finding and selecting target devices.
 ///
@@ -151,7 +152,7 @@ class TargetDevices {
     bool includeDevicesUnsupportedByProject = false,
   }) async {
     if (!globals.doctor!.canLaunchAnything) {
-      _logger.printError(userMessages.flutterNoDevelopmentDevice);
+      _logger.printError(globals.userMessages.flutterNoDevelopmentDevice);
       return null;
     }
 
@@ -215,7 +216,7 @@ class TargetDevices {
 
     _logger.printStatus(_deviceManager.hasSpecifiedAllDevices
         ? _noDevicesFoundMessage
-        : userMessages.flutterNoSupportedDevices);
+        : globals.userMessages.flutterNoSupportedDevices);
     await _printUnsupportedDevice(unsupportedDevices);
     return null;
   }
@@ -272,7 +273,7 @@ class TargetDevices {
         supportFilter: DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutter(),
       );
 
-      _logger.printStatus(userMessages.flutterSpecifyDeviceWithAllOption);
+      _logger.printStatus(globals.userMessages.flutterSpecifyDeviceWithAllOption);
       _logger.printStatus('');
     }
 
@@ -336,7 +337,7 @@ class TargetDevices {
         '\n',
       );
       result.writeln();
-      result.writeln(userMessages.flutterMissPlatformProjects(
+      result.writeln(globals.userMessages.flutterMissPlatformProjects(
         Device.devicesPlatformTypes(unsupportedDevices),
       ));
       _logger.printStatus(result.toString(), newline: false);
@@ -461,7 +462,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
     bool includeDevicesUnsupportedByProject = false,
   }) async {
     if (!globals.doctor!.canLaunchAnything) {
-      _logger.printError(userMessages.flutterNoDevelopmentDevice);
+      _logger.printError(globals.userMessages.flutterNoDevelopmentDevice);
       return null;
     }
 
@@ -495,17 +496,24 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
 
       if (specifiedDevices.length == 1) {
         Device? matchedDevice = specifiedDevices.first;
-        // If the only matching device does not have Developer Mode enabled,
-        // print a warning
-        if (matchedDevice is IOSDevice && !matchedDevice.devModeEnabled) {
-          _logger.printStatus(
-              flutterSpecifiedDeviceDevModeDisabled(matchedDevice.name)
-          );
-          return null;
-        }
+        if (matchedDevice is IOSDevice) {
+          // If the only matching device is not paired, print a warning
+          if (!matchedDevice.isPaired) {
+            _logger.printStatus(flutterSpecifiedDeviceUnpaired(matchedDevice.name));
+            return null;
+          }
+          // If the only matching device does not have Developer Mode enabled,
+          // print a warning
+          if (!matchedDevice.devModeEnabled) {
+            _logger.printStatus(
+                flutterSpecifiedDeviceDevModeDisabled(matchedDevice.name)
+            );
+            return null;
+          }
 
-        if (!matchedDevice.isConnected && matchedDevice is IOSDevice) {
-          matchedDevice = await _waitForIOSDeviceToConnect(matchedDevice);
+          if (!matchedDevice.isConnected) {
+            matchedDevice = await _waitForIOSDeviceToConnect(matchedDevice);
+          }
         }
 
         if (matchedDevice != null && matchedDevice.isConnected) {
@@ -513,9 +521,14 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
         }
 
       } else {
-        for (final Device device in specifiedDevices) {
+        for (final IOSDevice device in specifiedDevices.whereType<IOSDevice>()) {
+          // Print warning for every matching unpaired device.
+          if (!device.isPaired) {
+            _logger.printStatus(flutterSpecifiedDeviceUnpaired(device.name));
+          }
+
           // Print warning for every matching device that does not have Developer Mode enabled.
-          if (device is IOSDevice && !device.devModeEnabled) {
+          if (!device.devModeEnabled) {
             _logger.printStatus(
                 flutterSpecifiedDeviceDevModeDisabled(device.name)
             );

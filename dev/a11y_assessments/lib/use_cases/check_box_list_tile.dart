@@ -33,7 +33,6 @@ class _MainWidgetState extends State<_MainWidget> {
       body: ListView(
         children: <Widget>[
           CheckboxListTile(
-            autofocus: true,
             value: _checked,
             onChanged: (bool? value) {
               setState(() {

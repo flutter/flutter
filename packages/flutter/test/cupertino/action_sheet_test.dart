@@ -293,8 +293,9 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         Builder(builder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: CupertinoActionSheet(
               title: const Text('The title'),
               message: const Text('The message.'),
@@ -361,8 +362,9 @@ void main() {
       createAppWithButtonThatLaunchesActionSheet(
         Builder(builder: (BuildContext context) {
           screenHeight = MediaQuery.sizeOf(context).height;
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: CupertinoActionSheet(
               title: const Text('The title'),
               message: Text('Very long content' * 200),
@@ -1039,8 +1041,9 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         Builder(builder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: 3.0,
+            maxScaleFactor: 3.0,
             child: CupertinoActionSheet(
               title: const Text('The title'),
               message: const Text('The message.'),

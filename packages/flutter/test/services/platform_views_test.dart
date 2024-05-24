@@ -144,7 +144,7 @@ void main() {
         layoutDirection: TextDirection.ltr,
       );
       await controller.create(size: const Size(100.0, 100.0));
-      expectLater(
+      await expectLater(
         () {
           final AndroidViewController controller = PlatformViewsService.initAndroidView(
             id: 0,

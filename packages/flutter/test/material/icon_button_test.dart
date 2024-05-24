@@ -1239,7 +1239,7 @@ void main() {
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.12)));
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.1)));
     // Remove pressed and hovered states
     await gesture.up();
     await tester.pumpAndSettle();
@@ -1249,7 +1249,7 @@ void main() {
     // Focused.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.12)));
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.1)));
 
     focusNode.dispose();
   });
@@ -1380,7 +1380,7 @@ void main() {
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onPrimary.withOpacity(0.12)));
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onPrimary.withOpacity(0.1)));
     // Remove pressed and hovered states
     await gesture.up();
     await tester.pumpAndSettle();
@@ -1390,7 +1390,7 @@ void main() {
     // Focused.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.onPrimary.withOpacity(0.12)));
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onPrimary.withOpacity(0.1)));
 
     focusNode.dispose();
   });
@@ -1636,7 +1636,7 @@ void main() {
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.12)));
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.1)));
     // Remove pressed and hovered states
     await gesture.up();
     await tester.pumpAndSettle();
@@ -1646,7 +1646,7 @@ void main() {
     // Focused.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.12)));
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.1)));
 
     focusNode.dispose();
   });
@@ -1892,7 +1892,7 @@ void main() {
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pumpAndSettle();
-    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.1)));
     // Remove pressed and hovered states
     await gesture.up();
     await tester.pumpAndSettle();

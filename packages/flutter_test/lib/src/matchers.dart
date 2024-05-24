@@ -14,7 +14,7 @@ import 'package:matcher/expect.dart';
 import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
 import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
-import '_matchers_io.dart' if (dart.library.html) '_matchers_web.dart' show MatchesGoldenFile, captureImage;
+import '_matchers_io.dart' if (dart.library.js_interop) '_matchers_web.dart' show MatchesGoldenFile, captureImage;
 import 'accessibility.dart';
 import 'binding.dart';
 import 'controller.dart';

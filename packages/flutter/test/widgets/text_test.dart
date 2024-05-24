@@ -9,14 +9,16 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Text respects media query', (WidgetTester tester) async {
-    await tester.pumpWidget(const MediaQuery(
-      data: MediaQueryData(textScaleFactor: 1.3),
-      child: Center(
+    await tester.pumpWidget(MediaQuery.withClampedTextScaling(
+      minScaleFactor: 1.3,
+      maxScaleFactor: 1.3,
+      child: const Center(
         child: Text('Hello', textDirection: TextDirection.ltr),
       ),
     ));
@@ -95,7 +97,9 @@ void main() {
     expect(largeSize.height, equals(26.0));
   });
 
-  testWidgets("Text throws a nice error message if there's no Directionality", (WidgetTester tester) async {
+  testWidgets("Text throws a nice error message if there's no Directionality",
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     await tester.pumpWidget(const Text('Hello'));
     final String message = tester.takeException().toString();
     expect(message, contains('Directionality'));

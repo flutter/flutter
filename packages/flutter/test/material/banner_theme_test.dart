@@ -92,8 +92,8 @@ void main() {
     ));
 
     final Material material = _getMaterialFromText(tester, contentText);
-    expect(material.color, theme.colorScheme.surface);
-    expect(material.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(material.color, theme.colorScheme.surfaceContainerLow);
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.shadowColor, null);
     expect(material.elevation, 0.0);
 
@@ -155,8 +155,8 @@ void main() {
     await tester.pumpAndSettle();
 
     final Material material = _getMaterialFromText(tester, contentText);
-    expect(material.color, theme.colorScheme.surface);
-    expect(material.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(material.color, theme.colorScheme.surfaceContainerLow);
+    expect(material.surfaceTintColor, Colors.transparent);
     expect(material.shadowColor, null);
     expect(material.elevation, 0.0);
 
@@ -406,7 +406,7 @@ void main() {
     ));
 
     final Material material = _getMaterialFromText(tester, contentText);
-    expect(material.color, colorScheme.surface);
+    expect(material.color, colorScheme.surfaceContainerLow);
   });
 
   testWidgets('MaterialBanner uses color scheme when necessary when presented by ScaffoldMessenger', (WidgetTester tester) async {
@@ -445,7 +445,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Material material = _getMaterialFromText(tester, contentText);
-    expect(material.color, colorScheme.surface);
+    expect(material.color, colorScheme.surfaceContainerLow);
   });
 
   group('Material 2', () {
@@ -482,8 +482,8 @@ void main() {
       // Default value for ThemeData.typography is Typography.material2014()
       expect(
         content.text.style,
-        Typography.material2014().englishLike.bodyText2!.merge(
-          Typography.material2014().black.bodyText2,
+        Typography.material2014().englishLike.bodyMedium!.merge(
+          Typography.material2014().black.bodyMedium,
         ),
       );
 
@@ -545,8 +545,8 @@ void main() {
       // Default value for ThemeData.typography is Typography.material2014()
       expect(
         content.text.style,
-        Typography.material2014().englishLike.bodyText2!.merge(
-          Typography.material2014().black.bodyText2,
+        Typography.material2014().englishLike.bodyMedium!.merge(
+          Typography.material2014().black.bodyMedium,
         ),
       );
 

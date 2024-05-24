@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
@@ -290,13 +289,38 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.1.dart **
   /// {@end-tool}
   ///
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(SnackBar snackBar) {
+  /// If [AnimationStyle.duration] is provided in the [snackBarAnimationStyle]
+  /// parameter, it will be used to override the snackbar show animation duration.
+  /// Otherwise, defaults to 250ms.
+  ///
+  /// If [AnimationStyle.reverseDuration] is provided in the [snackBarAnimationStyle]
+  /// parameter, it will be used to override the snackbar hide animation duration.
+  /// Otherwise, defaults to 250ms.
+  ///
+  /// To disable the snackbar animation, use [AnimationStyle.noAnimation].
+  ///
+  /// {@tool dartpad}
+  /// This sample showcases how to override [SnackBar] show and hide animation
+  /// duration using [AnimationStyle] in [ScaffoldMessengerState.showSnackBar].
+  ///
+  /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.2.dart **
+  /// {@end-tool}
+  ///
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showSnackBar(
+    SnackBar snackBar,
+    { AnimationStyle? snackBarAnimationStyle }
+  ) {
     assert(
       _scaffolds.isNotEmpty,
       'ScaffoldMessenger.showSnackBar was called, but there are currently no '
       'descendant Scaffolds to present to.',
     );
-    _snackBarController ??= SnackBar.createAnimationController(vsync: this)
+    _didUpdateAnimationStyle(snackBarAnimationStyle);
+    _snackBarController ??= SnackBar.createAnimationController(
+        duration: snackBarAnimationStyle?.duration,
+        reverseDuration: snackBarAnimationStyle?.reverseDuration,
+        vsync: this,
+      )
       ..addStatusListener(_handleSnackBarStatusChanged);
     if (_snackBars.isEmpty) {
       assert(_snackBarController!.isDismissed);
@@ -353,6 +377,16 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
     }
 
     return controller;
+  }
+
+  void _didUpdateAnimationStyle(AnimationStyle? snackBarAnimationStyle) {
+    if (snackBarAnimationStyle != null) {
+      if (_snackBarController?.duration != snackBarAnimationStyle.duration ||
+          _snackBarController?.reverseDuration != snackBarAnimationStyle.reverseDuration) {
+        _snackBarController?.dispose();
+        _snackBarController = null;
+      }
+    }
   }
 
   void _handleSnackBarStatusChanged(AnimationStatus status) {
@@ -1287,11 +1321,11 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   // Controls the previous widget.child as it exits.
   late AnimationController _previousController;
   late Animation<double> _previousScaleAnimation;
-  late Animation<double> _previousRotationAnimation;
+  late TrainHoppingAnimation _previousRotationAnimation;
   // The animations to run, considering the widget's fabMoveAnimation and the current/previous entrance/exit animations.
   late Animation<double> _currentScaleAnimation;
   late Animation<double> _extendedCurrentScaleAnimation;
-  late Animation<double> _currentRotationAnimation;
+  late TrainHoppingAnimation _currentRotationAnimation;
   Widget? _previousChild;
 
   @override
@@ -1318,6 +1352,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   @override
   void dispose() {
     _previousController.dispose();
+    _disposeAnimations();
     super.dispose();
   }
 
@@ -1325,6 +1360,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   void didUpdateWidget(_FloatingActionButtonTransition oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.fabMotionAnimator != widget.fabMotionAnimator || oldWidget.fabMoveAnimation != widget.fabMoveAnimation) {
+      _disposeAnimations();
       // Get the right scale and rotation animations to use for this widget.
       _updateAnimations();
     }
@@ -1359,6 +1395,11 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     begin: 1.0 - kFloatingActionButtonTurnInterval,
     end: 1.0,
   ).chain(CurveTween(curve: Curves.easeIn));
+
+  void _disposeAnimations() {
+    _previousRotationAnimation.dispose();
+    _currentRotationAnimation.dispose();
+  }
 
   void _updateAnimations() {
     // Get the animations for exit and entrance.
@@ -2306,6 +2347,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     Clip? clipBehavior,
     BoxConstraints? constraints,
     bool? enableDrag,
+    bool? showDragHandle,
     bool shouldDisposeAnimationController = true,
   }) {
     assert(() {
@@ -2380,6 +2422,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       key: bottomSheetKey,
       animationController: animationController,
       enableDrag: enableDrag ?? !isPersistent,
+      showDragHandle: showDragHandle,
       onClosing: () {
         if (_currentBottomSheet == null) {
           return;
@@ -2463,6 +2506,26 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///
   /// ** See code in examples/api/lib/material/scaffold/scaffold_state.show_bottom_sheet.0.dart **
   /// {@end-tool}
+  ///
+  /// The [sheetAnimationStyle] parameter is used to override the bottom sheet
+  /// animation duration and reverse animation duration.
+  ///
+  /// If [AnimationStyle.duration] is provided, it will be used to override
+  /// the bottom sheet animation duration in the underlying
+  /// [BottomSheet.createAnimationController].
+  ///
+  /// If [AnimationStyle.reverseDuration] is provided, it will be used to
+  /// override the bottom sheet reverse animation duration in the underlying
+  /// [BottomSheet.createAnimationController].
+  ///
+  /// To disable the bottom sheet animation, use [AnimationStyle.noAnimation].
+  ///
+  /// {@tool dartpad}
+  /// This sample showcases how to override the [showBottomSheet] animation
+  /// duration and reverse animation duration using [AnimationStyle].
+  ///
+  /// ** See code in examples/api/lib/material/scaffold/scaffold_state.show_bottom_sheet.1.dart **
+  /// {@end-tool}
   /// See also:
   ///
   ///  * [BottomSheet], which becomes the parent of the widget returned by the
@@ -2473,6 +2536,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
   ///  * The Material 2 spec at <https://m2.material.io/components/sheets-bottom>.
   ///  * The Material 3 spec at <https://m3.material.io/components/bottom-sheets/overview>.
+  ///  * [AnimationStyle], which is used to override the modal bottom sheet
+  ///    animation duration and reverse animation duration.
   PersistentBottomSheetController showBottomSheet(
     WidgetBuilder builder, {
     Color? backgroundColor,
@@ -2481,7 +2546,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     Clip? clipBehavior,
     BoxConstraints? constraints,
     bool? enableDrag,
+    bool? showDragHandle,
     AnimationController? transitionAnimationController,
+    AnimationStyle? sheetAnimationStyle,
   }) {
     assert(() {
       if (widget.bottomSheet != null) {
@@ -2496,7 +2563,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     assert(debugCheckHasMediaQuery(context));
 
     _closeCurrentBottomSheet();
-    final AnimationController controller = (transitionAnimationController ?? BottomSheet.createAnimationController(this))..forward();
+    final AnimationController controller = (transitionAnimationController
+      ?? BottomSheet.createAnimationController(this, sheetAnimationStyle: sheetAnimationStyle))
+         ..forward();
     setState(() {
       _currentBottomSheet = _buildBottomSheet(
         builder,
@@ -2508,6 +2577,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
         clipBehavior: clipBehavior,
         constraints: constraints,
         enableDrag: enableDrag,
+        showDragHandle: showDragHandle,
         shouldDisposeAnimationController: transitionAnimationController == null,
       );
     });
@@ -3073,66 +3143,12 @@ class ScaffoldFeatureController<T extends Widget, U> {
   final StateSetter? setState;
 }
 
-// TODO(guidezpl): Look into making this public. A copy of this class is in
-//  bottom_sheet.dart, for now, https://github.com/flutter/flutter/issues/51627
-/// A curve that progresses linearly until a specified [startingPoint], at which
-/// point [curve] will begin. Unlike [Interval], [curve] will not start at zero,
-/// but will use [startingPoint] as the Y position.
-///
-/// For example, if [startingPoint] is set to `0.5`, and [curve] is set to
-/// [Curves.easeOut], then the bottom-left quarter of the curve will be a
-/// straight line, and the top-right quarter will contain the entire contents of
-/// [Curves.easeOut].
-///
-/// This is useful in situations where a widget must track the user's finger
-/// (which requires a linear animation), and afterwards can be flung using a
-/// curve specified with the [curve] argument, after the finger is released. In
-/// such a case, the value of [startingPoint] would be the progress of the
-/// animation at the time when the finger was released.
-class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
-  /// Creates a suspended curve.
-  const _BottomSheetSuspendedCurve(
-      this.startingPoint, {
-        this.curve = Curves.easeOutCubic,
-      });
-
-  /// The progress value at which [curve] should begin.
-  ///
-  /// This defaults to [Curves.easeOutCubic].
-  final double startingPoint;
-
-  /// The curve to use when [startingPoint] is reached.
-  final Curve curve;
-
-  @override
-  double transform(double t) {
-    assert(t >= 0.0 && t <= 1.0);
-    assert(startingPoint >= 0.0 && startingPoint <= 1.0);
-
-    if (t < startingPoint) {
-      return t;
-    }
-
-    if (t == 1.0) {
-      return t;
-    }
-
-    final double curveProgress = (t - startingPoint) / (1 - startingPoint);
-    final double transformed = curve.transform(curveProgress);
-    return lerpDouble(startingPoint, 1, transformed)!;
-  }
-
-  @override
-  String toString() {
-    return '${describeIdentity(this)}($startingPoint, $curve)';
-  }
-}
-
 class _StandardBottomSheet extends StatefulWidget {
   const _StandardBottomSheet({
     super.key,
     required this.animationController,
     this.enableDrag = true,
+    this.showDragHandle,
     required this.onClosing,
     required this.onDismissed,
     required this.builder,
@@ -3147,6 +3163,7 @@ class _StandardBottomSheet extends StatefulWidget {
 
   final AnimationController animationController; // we control it, but it must be disposed by whoever created it.
   final bool enableDrag;
+  final bool? showDragHandle;
   final VoidCallback? onClosing;
   final VoidCallback? onDismissed;
   final VoidCallback? onDispose;
@@ -3199,9 +3216,9 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
 
   void _handleDragEnd(DragEndDetails details, { bool? isClosing }) {
     // Allow the bottom sheet to animate smoothly from its current position.
-    animationCurve = _BottomSheetSuspendedCurve(
+    animationCurve = Split(
       widget.animationController.value,
-      curve: _standardBottomSheetCurve,
+      endCurve: _standardBottomSheetCurve,
     );
   }
 
@@ -3252,6 +3269,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
           child: BottomSheet(
             animationController: widget.animationController,
             enableDrag: widget.enableDrag,
+            showDragHandle: widget.showDragHandle,
             onDragStart: _handleDragStart,
             onDragEnd: _handleDragEnd,
             onClosing: widget.onClosing!,

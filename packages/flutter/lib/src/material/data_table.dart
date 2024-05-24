@@ -194,6 +194,8 @@ class DataRow {
   /// [InkWell] is visible (when pressed, hovered and focused), it is
   /// recommended to use a translucent color.
   ///
+  /// If [onSelectChanged] or [onLongPress] is null, the row's [InkWell] will be disabled.
+  ///
   /// ```dart
   /// DataRow(
   ///   color: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
@@ -513,6 +515,9 @@ class DataTable extends StatelessWidget {
   /// row. To make sure that the row's [InkWell] is visible (when pressed,
   /// hovered and focused), it is recommended to use a translucent background
   /// color.
+  ///
+  /// If [DataRow.onSelectChanged] or [DataRow.onLongPress] is null, the row's
+  /// [InkWell] will be disabled.
   /// {@endtemplate}
   ///
   /// If null, [DataTableThemeData.dataRowColor] is used. By default, the
@@ -1075,16 +1080,11 @@ class DataTable extends StatelessWidget {
     for (int dataColumnIndex = 0; dataColumnIndex < columns.length; dataColumnIndex += 1) {
       final DataColumn column = columns[dataColumnIndex];
 
-      final double paddingStart;
-      if (dataColumnIndex == 0 && displayCheckboxColumn && checkboxHorizontalMargin != null) {
-        paddingStart = effectiveHorizontalMargin;
-      } else if (dataColumnIndex == 0 && displayCheckboxColumn) {
-        paddingStart = effectiveHorizontalMargin / 2.0;
-      } else if (dataColumnIndex == 0 && !displayCheckboxColumn) {
-        paddingStart = effectiveHorizontalMargin;
-      } else {
-        paddingStart = effectiveColumnSpacing / 2.0;
-      }
+      final double paddingStart = switch (dataColumnIndex) {
+        0 when displayCheckboxColumn && checkboxHorizontalMargin == null => effectiveHorizontalMargin / 2.0,
+        0 => effectiveHorizontalMargin,
+        _ => effectiveColumnSpacing / 2.0,
+      };
 
       final double paddingEnd;
       if (dataColumnIndex == columns.length - 1) {

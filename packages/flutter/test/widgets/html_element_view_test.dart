@@ -28,7 +28,7 @@ void main() {
   setUp(() {
     fakePlatformViewRegistry = FakePlatformViewRegistry();
 
-    // Simulate the engine registering default factores.
+    // Simulate the engine registering default factories.
     fakePlatformViewRegistry.registerViewFactory(ui_web.PlatformViewRegistry.defaultVisibleViewType, (int viewId, {Object? params}) {
       params!;
       params as Map<Object?, Object?>;
@@ -442,13 +442,11 @@ class FakePlatformViewRegistry implements ui_web.PlatformViewRegistry {
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
-    switch (call.method) {
-      case 'create':
-        return _create(call);
-      case 'dispose':
-        return _dispose(call);
-    }
-    return Future<dynamic>.sync(() => null);
+    return switch (call.method) {
+      'create'  => _create(call),
+      'dispose' => _dispose(call),
+      _ => Future<dynamic>.sync(() => null),
+    };
   }
 
   Future<dynamic> _create(MethodCall call) async {

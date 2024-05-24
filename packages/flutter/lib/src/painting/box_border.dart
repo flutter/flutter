@@ -1013,16 +1013,11 @@ class BorderDirectional extends BoxBorder {
       return;
     }
 
-    final BorderSide left, right;
     assert(textDirection != null, 'Non-uniform BorderDirectional objects require a TextDirection when painting.');
-    switch (textDirection!) {
-      case TextDirection.rtl:
-        left = end;
-        right = start;
-      case TextDirection.ltr:
-        left = start;
-        right = end;
-    }
+    final (BorderSide left, BorderSide right) = switch (textDirection!) {
+      TextDirection.rtl => (end, start),
+      TextDirection.ltr => (start, end),
+    };
 
     // Allow painting non-uniform borders if the visible colors are uniform.
     final Set<Color> visibleColors = _distinctVisibleColors();

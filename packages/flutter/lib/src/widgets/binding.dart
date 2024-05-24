@@ -24,6 +24,10 @@ import 'widget_inspector.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
 
+// Examples can assume:
+// late FlutterView myFlutterView;
+// class MyApp extends StatelessWidget { const MyApp({super.key}); @override Widget build(BuildContext context) => const Placeholder(); }
+
 /// Interface for classes that register with the Widgets layer binding.
 ///
 /// This can be used by any class, not just widgets. It provides an interface
@@ -71,6 +75,57 @@ abstract mixin class WidgetsBindingObserver {
   ///
   /// {@macro flutter.widgets.AndroidPredictiveBack}
   Future<bool> didPopRoute() => Future<bool>.value(false);
+
+  /// Called at the start of a predictive back gesture.
+  ///
+  /// Observers are notified in registration order until one returns true or all
+  /// observers have been notified. If an observer returns true then that
+  /// observer, and only that observer, will be notified of subsequent events in
+  /// this same gesture (for example [handleUpdateBackGestureProgress], etc.).
+  ///
+  /// Observers are expected to return true if they were able to handle the
+  /// notification, for example by starting a predictive back animation, and
+  /// false otherwise. [PredictiveBackPageTransitionsBuilder] uses this
+  /// mechanism to listen for predictive back gestures.
+  ///
+  /// If all observers indicate they are not handling this back gesture by
+  /// returning false, then a navigation pop will result when
+  /// [handleCommitBackGesture] is called, as in a non-predictive system back
+  /// gesture.
+  ///
+  /// Currently, this is only used on Android devices that support the
+  /// predictive back feature.
+  bool handleStartBackGesture(PredictiveBackEvent backEvent) => false;
+
+  /// Called when a predictive back gesture moves.
+  ///
+  /// The observer which was notified of this gesture's [handleStartBackGesture]
+  /// is the same observer notified for this.
+  ///
+  /// Currently, this is only used on Android devices that support the
+  /// predictive back feature.
+  void handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) {}
+
+  /// Called when a predictive back gesture is finished successfully, indicating
+  /// that the current route should be popped.
+  ///
+  /// The observer which was notified of this gesture's [handleStartBackGesture]
+  /// is the same observer notified for this. If there is none, then a
+  /// navigation pop will result, as in a non-predictive system back gesture.
+  ///
+  /// Currently, this is only used on Android devices that support the
+  /// predictive back feature.
+  void handleCommitBackGesture() {}
+
+  /// Called when a predictive back gesture is canceled, indicating that no
+  /// navigation should occur.
+  ///
+  /// The observer which was notified of this gesture's [handleStartBackGesture]
+  /// is the same observer notified for this.
+  ///
+  /// Currently, this is only used on Android devices that support the
+  /// predictive back feature.
+  void handleCancelBackGesture() {}
 
   /// Called when the host tells the application to push a new route onto the
   /// navigator.
@@ -356,6 +411,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     buildOwner!.onBuildScheduled = _handleBuildScheduled;
     platformDispatcher.onLocaleChanged = handleLocaleChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
+    SystemChannels.backGesture.setMethodCallHandler(
+      _handleBackGestureInvocation,
+    );
     assert(() {
       FlutterErrorDetails.propertiesTransformers.add(debugTransformDebugCreator);
       return true;
@@ -370,6 +428,36 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// [runApp] or [WidgetsFlutterBinding.ensureInitialized].
   static WidgetsBinding get instance => BindingBase.checkInstance(_instance);
   static WidgetsBinding? _instance;
+
+  /// If true, forces the widget inspector to be visible.
+  ///
+  /// Overrides the `debugShowWidgetInspector` value set in [WidgetsApp].
+  ///
+  /// Used by the `debugShowWidgetInspector` debugging extension.
+  ///
+  /// The inspector allows the selection of a location on your device or emulator
+  /// and view what widgets and render objects associated with it. An outline of
+  /// the selected widget and some summary information is shown on device and
+  /// more detailed information is shown in the IDE or DevTools.
+  bool get debugShowWidgetInspectorOverride {
+    return debugShowWidgetInspectorOverrideNotifier.value;
+  }
+  set debugShowWidgetInspectorOverride(bool value) {
+    debugShowWidgetInspectorOverrideNotifier.value = value;
+  }
+
+  /// Notifier for [debugShowWidgetInspectorOverride].
+  ValueNotifier<bool> get debugShowWidgetInspectorOverrideNotifier => _debugShowWidgetInspectorOverrideNotifierObject ??= ValueNotifier<bool>(false);
+  ValueNotifier<bool>? _debugShowWidgetInspectorOverrideNotifierObject;
+
+  @visibleForTesting
+  @override
+  void resetInternalState() {
+    // ignore: invalid_use_of_visible_for_testing_member, https://github.com/dart-lang/sdk/issues/41998
+    super.resetInternalState();
+    _debugShowWidgetInspectorOverrideNotifierObject?.dispose();
+    _debugShowWidgetInspectorOverrideNotifierObject = null;
+  }
 
   void _debugAddStackFilters() {
     const PartialStackFrame elementInflateWidget = PartialStackFrame(package: 'package:flutter/src/widgets/framework.dart', className: 'Element', method: 'inflateWidget');
@@ -612,7 +700,12 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   ///  * [addObserver], for the method that adds observers in the first place.
   ///  * [WidgetsBindingObserver], which has an example of using this method.
-  bool removeObserver(WidgetsBindingObserver observer) => _observers.remove(observer);
+  bool removeObserver(WidgetsBindingObserver observer) {
+    if (observer == _backGestureObserver) {
+      _backGestureObserver = null;
+    }
+    return _observers.remove(observer);
+  }
 
   @override
   Future<AppExitResponse> handleRequestAppExit() async {
@@ -746,6 +839,50 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     SystemNavigator.pop();
   }
 
+  // The observer that is currently handling an active predictive back gesture.
+  WidgetsBindingObserver? _backGestureObserver;
+
+  Future<bool> _handleStartBackGesture(Map<String?, Object?> arguments) {
+    _backGestureObserver = null;
+    final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
+      if (observer.handleStartBackGesture(backEvent)) {
+        _backGestureObserver = observer;
+        return Future<bool>.value(true);
+      }
+    }
+    return Future<bool>.value(false);
+  }
+
+  Future<void> _handleUpdateBackGestureProgress(Map<String?, Object?> arguments) async {
+    if (_backGestureObserver == null) {
+      return;
+    }
+
+    final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
+    _backGestureObserver!.handleUpdateBackGestureProgress(backEvent);
+  }
+
+  Future<void> _handleCommitBackGesture() async {
+    if (_backGestureObserver == null) {
+      // If the predictive back was not handled, then the route should be popped
+      // like a normal, non-predictive back. For example, this will happen if a
+      // back gesture occurs but no predictive back route transition exists to
+      // handle it. The back gesture should still cause normal pop even if it
+      // doesn't cause a predictive transition.
+      return handlePopRoute();
+    }
+    _backGestureObserver?.handleCommitBackGesture();
+  }
+
+  Future<void> _handleCancelBackGesture() async {
+    if (_backGestureObserver == null) {
+      return;
+    }
+
+    _backGestureObserver!.handleCancelBackGesture();
+  }
+
   /// Called when the host tells the app to push a new route onto the
   /// navigator.
   ///
@@ -781,15 +918,24 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 
   Future<dynamic> _handleNavigationInvocation(MethodCall methodCall) {
-    switch (methodCall.method) {
-      case 'popRoute':
-        return handlePopRoute();
-      case 'pushRoute':
-        return handlePushRoute(methodCall.arguments as String);
-      case 'pushRouteInformation':
-        return _handlePushRouteInformation(methodCall.arguments as Map<dynamic, dynamic>);
-    }
-    return Future<dynamic>.value();
+    return switch (methodCall.method) {
+      'popRoute' => handlePopRoute(),
+      'pushRoute' => handlePushRoute(methodCall.arguments as String),
+      'pushRouteInformation' => _handlePushRouteInformation(methodCall.arguments as Map<dynamic, dynamic>),
+      _ => Future<dynamic>.value(),
+    };
+  }
+
+  Future<dynamic> _handleBackGestureInvocation(MethodCall methodCall) {
+    final Map<String?, Object?>? arguments =
+        (methodCall.arguments as Map<Object?, Object?>?)?.cast<String?, Object?>();
+    return switch (methodCall.method) {
+      'startBackGesture' => _handleStartBackGesture(arguments!),
+      'updateBackGestureProgress' => _handleUpdateBackGestureProgress(arguments!),
+      'commitBackGesture' => _handleCommitBackGesture(),
+      'cancelBackGesture' => _handleCancelBackGesture(),
+      _ => throw MissingPluginException(),
+    };
   }
 
   @override
@@ -960,11 +1106,12 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     }());
 
     TimingsCallback? firstFrameCallback;
+    bool debugFrameWasSentToEngine = false;
     if (_needToReportFirstFrame) {
       assert(!_firstFrameCompleter.isCompleted);
 
       firstFrameCallback = (List<FrameTiming> timings) {
-        assert(sendFramesToEngine);
+        assert(debugFrameWasSentToEngine);
         if (!kReleaseMode) {
           // Change the current user tag back to the default tag. At this point,
           // the user tag should be set to "AppStartUp" (originally set in the
@@ -989,6 +1136,10 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         buildOwner!.buildScope(rootElement!);
       }
       super.drawFrame();
+      assert(() {
+        debugFrameWasSentToEngine = sendFramesToEngine;
+        return true;
+      }());
       buildOwner!.finalizeTree();
     } finally {
       assert(() {
@@ -1152,14 +1303,20 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 }
 
-/// Inflate the given widget and attach it to the screen.
+/// Inflate the given widget and attach it to the view.
+///
+// TODO(goderbauer): Update the paragraph below to include the Window widget once that exists.
+/// The [runApp] method renders the provided `app` widget into the
+/// [PlatformDispatcher.implicitView] by wrapping it in a [View] widget, which
+/// will bootstrap the render tree for the app. Apps that want to control which
+/// [FlutterView] they render into can use [runWidget] instead.
 ///
 /// The widget is given constraints during layout that force it to fill the
-/// entire screen. If you wish to align your widget to one side of the screen
+/// entire view. If you wish to align your widget to one side of the view
 /// (e.g., the top), consider using the [Align] widget. If you wish to center
 /// your widget, you can also use the [Center] widget.
 ///
-/// Calling [runApp] again will detach the previous root widget from the screen
+/// Calling [runApp] again will detach the previous root widget from the view
 /// and attach the given widget in its place. The new widget tree is compared
 /// against the previous widget tree and any differences are applied to the
 /// underlying render tree, similar to what happens when a [StatefulWidget]
@@ -1167,6 +1324,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 ///
 /// Initializes the binding using [WidgetsFlutterBinding] if necessary.
 ///
+/// {@template flutter.widgets.runApp.shutdown}
 /// ## Application shutdown
 ///
 /// This widget tree is not torn down when the application shuts down, because
@@ -1178,29 +1336,32 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 /// Applications are responsible for ensuring that they are well-behaved
 /// even in the face of a rapid unscheduled termination.
 ///
+/// To listen for platform shutdown messages (and other lifecycle changes),
+/// consider the [AppLifecycleListener] API.
+/// {@endtemplate}
+///
 /// To artificially cause the entire widget tree to be disposed, consider
 /// calling [runApp] with a widget such as [SizedBox.shrink].
 ///
-/// To listen for platform shutdown messages (and other lifecycle changes),
-/// consider the [AppLifecycleListener] API.
-///
+/// {@template flutter.widgets.runApp.dismissal}
 /// ## Dismissing Flutter UI via platform native methods
 ///
-/// {@template flutter.widgets.runApp.dismissal}
 /// An application may have both Flutter and non-Flutter UI in it. If the
 /// application calls non-Flutter methods to remove Flutter based UI such as
 /// platform native API to manipulate the platform native navigation stack,
 /// the framework does not know if the developer intends to eagerly free
 /// resources or not. The widget tree remains mounted and ready to render
 /// as soon as it is displayed again.
+/// {@endtemplate}
 ///
 /// To release resources more eagerly, establish a [platform channel](https://flutter.dev/platform-channels/)
 /// and use it to call [runApp] with a widget such as [SizedBox.shrink] when
 /// the framework should dispose of the active widget tree.
-/// {@endtemplate}
 ///
 /// See also:
 ///
+///  * [runWidget], which bootstraps a widget tree without assuming the
+///    [FlutterView] into which it will be rendered.
 ///  * [WidgetsBinding.attachRootWidget], which creates the root widget for the
 ///    widget hierarchy.
 ///  * [RenderObjectToWidgetAdapter.attachToRenderTree], which creates the root
@@ -1209,9 +1370,75 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 ///    ensure the widget, element, and render trees are all built.
 void runApp(Widget app) {
   final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
-  assert(binding.debugCheckZone('runApp'));
+  _runWidget(binding.wrapWithDefaultView(app), binding, 'runApp');
+}
+
+/// Inflate the given widget and bootstrap the widget tree.
+///
+// TODO(goderbauer): Update the paragraph below to include the Window widget once that exists.
+/// Unlike [runApp], this method does not define a [FlutterView] into which the
+/// provided `app` widget is rendered into. It is up to the caller to include at
+/// least one [View] widget in the provided `app` widget that will bootstrap a
+/// render tree and define the [FlutterView] into which content is rendered.
+/// [RenderObjectWidget]s without an ancestor [View] widget will result in an
+/// exception. Apps that want to render into the default view without dealing
+/// with view management should consider calling [runApp] instead.
+///
+/// {@tool snippet}
+/// The sample shows how to utilize [runWidget] to specify the [FlutterView]
+/// into which the `MyApp` widget will be drawn:
+///
+/// ```dart
+/// runWidget(
+///   View(
+///     view: myFlutterView,
+///     child: const MyApp(),
+///   ),
+/// );
+/// ```
+/// {@end-tool}
+///
+/// Calling [runWidget] again will detach the previous root widget and attach
+/// the given widget in its place. The new widget tree is compared against the
+/// previous widget tree and any differences are applied to the underlying
+/// render tree, similar to what happens when a [StatefulWidget] rebuilds after
+/// calling [State.setState].
+///
+/// Initializes the binding using [WidgetsFlutterBinding] if necessary.
+///
+/// {@macro flutter.widgets.runApp.shutdown}
+///
+/// To artificially cause the entire widget tree to be disposed, consider
+/// calling [runWidget] with a [ViewCollection] that does not specify any
+/// [ViewCollection.views].
+///
+/// ## Dismissing Flutter UI via platform native methods
+///
+/// {@macro flutter.widgets.runApp.dismissal}
+///
+/// To release resources more eagerly, establish a [platform channel](https://flutter.dev/platform-channels/)
+/// and use it to remove the [View] whose widget resources should be released
+/// from the `app` widget tree provided to [runWidget].
+///
+/// See also:
+///
+///  * [runApp], which bootstraps a widget tree and renders it into a default
+///    [FlutterView].
+///  * [WidgetsBinding.attachRootWidget], which creates the root widget for the
+///    widget hierarchy.
+///  * [RenderObjectToWidgetAdapter.attachToRenderTree], which creates the root
+///    element for the element hierarchy.
+///  * [WidgetsBinding.handleBeginFrame], which pumps the widget pipeline to
+///    ensure the widget, element, and render trees are all built.
+void runWidget(Widget app) {
+  final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
+  _runWidget(app, binding, 'runWidget');
+}
+
+void _runWidget(Widget app, WidgetsBinding binding, String debugEntryPoint) {
+  assert(binding.debugCheckZone(debugEntryPoint));
   binding
-    ..scheduleAttachRootWidget(binding.wrapWithDefaultView(app))
+    ..scheduleAttachRootWidget(app)
     ..scheduleWarmUpFrame();
 }
 

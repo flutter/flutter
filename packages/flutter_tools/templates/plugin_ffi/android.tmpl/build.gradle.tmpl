@@ -1,7 +1,7 @@
 // The Android Gradle Plugin builds the native code with the Android NDK.
 
-group '{{androidIdentifier}}'
-version '1.0'
+group = "{{androidIdentifier}}"
+version = "1.0"
 
 buildscript {
     repositories {
@@ -11,7 +11,7 @@ buildscript {
 
     dependencies {
         // The Android Gradle Plugin knows how to build native code with the NDK.
-        classpath 'com.android.tools.build:gradle:{{agpVersion}}'
+        classpath("com.android.tools.build:gradle:{{agpVersion}}")
     }
 }
 
@@ -22,27 +22,27 @@ rootProject.allprojects {
     }
 }
 
-apply plugin: 'com.android.library'
+apply plugin: "com.android.library"
 
 android {
     if (project.android.hasProperty("namespace")) {
-        namespace '{{androidIdentifier}}'
+        namespace = "{{androidIdentifier}}"
     }
 
     // Bumping the plugin compileSdk version requires all clients of this plugin
     // to bump the version in their app.
-    compileSdk {{compileSdkVersion}}
+    compileSdk = {{compileSdkVersion}}
 
     // Use the NDK version
     // declared in /android/app/build.gradle file of the Flutter project.
-    // Replace it with a version number if this plugin requires a specfic NDK version.
+    // Replace it with a version number if this plugin requires a specific NDK version.
     // (e.g. ndkVersion "23.1.7779620")
-    ndkVersion android.ndkVersion
+    ndkVersion = android.ndkVersion
 
     // Invoke the shared CMake build with the Android Gradle Plugin.
     externalNativeBuild {
         cmake {
-            path "../src/CMakeLists.txt"
+            path = "../src/CMakeLists.txt"
 
             // The default CMake version for the Android Gradle Plugin is 3.10.2.
             // https://developer.android.com/studio/projects/install-ndk#vanilla_cmake
@@ -55,11 +55,11 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     defaultConfig {
-        minSdkVersion {{minSdkVersion}}
+        minSdk = {{minSdkVersion}}
     }
 }

@@ -383,14 +383,11 @@ class _RenderButtonBarRow extends RenderFlex {
       super.performLayout();
     } else {
       final BoxConstraints childConstraints = constraints.copyWith(minWidth: 0.0);
-      RenderBox? child;
       double currentHeight = 0.0;
-      switch (verticalDirection) {
-        case VerticalDirection.down:
-          child = firstChild;
-        case VerticalDirection.up:
-          child = lastChild;
-      }
+      RenderBox? child = switch (verticalDirection) {
+        VerticalDirection.down => firstChild,
+        VerticalDirection.up   => lastChild,
+      };
 
       while (child != null) {
         final FlexParentData childParentData = child.parentData! as FlexParentData;
@@ -432,12 +429,10 @@ class _RenderButtonBarRow extends RenderFlex {
             }
         }
         currentHeight += child.size.height;
-        switch (verticalDirection) {
-          case VerticalDirection.down:
-            child = childParentData.nextSibling;
-          case VerticalDirection.up:
-            child = childParentData.previousSibling;
-        }
+        child = switch (verticalDirection) {
+          VerticalDirection.down => childParentData.nextSibling,
+          VerticalDirection.up   => childParentData.previousSibling,
+        };
 
         if (overflowButtonSpacing != null && child != null) {
           currentHeight += overflowButtonSpacing!;

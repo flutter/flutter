@@ -156,79 +156,6 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
     return nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog;
   }
 
-  /// True if an iOS-style back swipe pop gesture is currently underway for [route].
-  ///
-  /// This just check the route's [NavigatorState.userGestureInProgress].
-  ///
-  /// See also:
-  ///
-  ///  * [popGestureEnabled], which returns true if a user-triggered pop gesture
-  ///    would be allowed.
-  static bool isPopGestureInProgress(PageRoute<dynamic> route) {
-    return route.navigator!.userGestureInProgress;
-  }
-
-  /// True if an iOS-style back swipe pop gesture is currently underway for this route.
-  ///
-  /// See also:
-  ///
-  ///  * [isPopGestureInProgress], which returns true if a Cupertino pop gesture
-  ///    is currently underway for specific route.
-  ///  * [popGestureEnabled], which returns true if a user-triggered pop gesture
-  ///    would be allowed.
-  bool get popGestureInProgress => isPopGestureInProgress(this);
-
-  /// Whether a pop gesture can be started by the user.
-  ///
-  /// Returns true if the user can edge-swipe to a previous route.
-  ///
-  /// Returns false once [isPopGestureInProgress] is true, but
-  /// [isPopGestureInProgress] can only become true if [popGestureEnabled] was
-  /// true first.
-  ///
-  /// This should only be used between frames, not during build.
-  bool get popGestureEnabled => _isPopGestureEnabled(this);
-
-  static bool _isPopGestureEnabled<T>(PageRoute<T> route) {
-    // If there's nothing to go back to, then obviously we don't support
-    // the back gesture.
-    if (route.isFirst) {
-      return false;
-    }
-    // If the route wouldn't actually pop if we popped it, then the gesture
-    // would be really confusing (or would skip internal routes), so disallow it.
-    if (route.willHandlePopInternally) {
-      return false;
-    }
-    // If attempts to dismiss this route might be vetoed such as in a page
-    // with forms, then do not allow the user to dismiss the route with a swipe.
-    if (route.hasScopedWillPopCallback
-        || route.popDisposition == RoutePopDisposition.doNotPop) {
-      return false;
-    }
-    // Fullscreen dialogs aren't dismissible by back swipe.
-    if (route.fullscreenDialog) {
-      return false;
-    }
-    // If we're in an animation already, we cannot be manually swiped.
-    if (route.animation!.status != AnimationStatus.completed) {
-      return false;
-    }
-    // If we're being popped into, we also cannot be swiped until the pop above
-    // it completes. This translates to our secondary animation being
-    // dismissed.
-    if (route.secondaryAnimation!.status != AnimationStatus.dismissed) {
-      return false;
-    }
-    // If we're in a gesture already, we cannot start another.
-    if (isPopGestureInProgress(route)) {
-      return false;
-    }
-
-    // Looks like a back gesture would be welcome!
-    return true;
-  }
-
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     final Widget child = buildContent(context);
@@ -243,10 +170,12 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   // gesture is detected. The returned controller handles all of the subsequent
   // drag events.
   static _CupertinoBackGestureController<T> _startPopGesture<T>(PageRoute<T> route) {
-    assert(_isPopGestureEnabled(route));
+    assert(route.popGestureEnabled);
 
     return _CupertinoBackGestureController<T>(
       navigator: route.navigator!,
+      getIsCurrent: () => route.isCurrent,
+      getIsActive: () => route.isActive,
       controller: route.controller!, // protected access
     );
   }
@@ -277,7 +206,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
     //
     // In the middle of a back gesture drag, let the transition be linear to
     // match finger motions.
-    final bool linearTransition = isPopGestureInProgress(route);
+    final bool linearTransition = route.popGestureInProgress;
     if (route.fullscreenDialog) {
       return CupertinoFullscreenDialogTransition(
         primaryRouteAnimation: animation,
@@ -291,7 +220,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
         secondaryRouteAnimation: secondaryAnimation,
         linearTransition: linearTransition,
         child: _CupertinoBackGestureDetector<T>(
-          enabledCallback: () => _isPopGestureEnabled<T>(route),
+          enabledCallback: () => route.popGestureEnabled,
           onStartPopGesture: () => _startPopGesture<T>(route),
           child: child,
         ),
@@ -673,12 +602,10 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
   }
 
   double _convertToLogical(double value) {
-    switch (Directionality.of(context)) {
-      case TextDirection.rtl:
-        return -value;
-      case TextDirection.ltr:
-        return value;
-    }
+    return switch (Directionality.of(context)) {
+      TextDirection.rtl => -value,
+      TextDirection.ltr =>  value,
+    };
   }
 
   @override
@@ -726,12 +653,16 @@ class _CupertinoBackGestureController<T> {
   _CupertinoBackGestureController({
     required this.navigator,
     required this.controller,
+    required this.getIsActive,
+    required this.getIsCurrent,
   }) {
     navigator.didStartUserGesture();
   }
 
   final AnimationController controller;
   final NavigatorState navigator;
+  final ValueGetter<bool> getIsActive;
+  final ValueGetter<bool> getIsCurrent;
 
   /// The drag gesture has changed by [fractionalDelta]. The total range of the
   /// drag should be 0.0 to 1.0.
@@ -747,12 +678,21 @@ class _CupertinoBackGestureController<T> {
     // This curve has been determined through rigorously eyeballing native iOS
     // animations.
     const Curve animationCurve = Curves.fastLinearToSlowEaseIn;
+    final bool isCurrent = getIsCurrent();
     final bool animateForward;
 
-    // If the user releases the page before mid screen with sufficient velocity,
-    // or after mid screen, we should animate the page out. Otherwise, the page
-    // should be animated back in.
-    if (velocity.abs() >= _kMinFlingVelocity) {
+    if (!isCurrent) {
+      // If the page has already been navigated away from, then the animation
+      // direction depends on whether or not it's still in the navigation stack,
+      // regardless of velocity or drag position. For example, if a route is
+      // being slowly dragged back by just a few pixels, but then a programmatic
+      // pop occurs, the route should still be animated off the screen.
+      // See https://github.com/flutter/flutter/issues/141268.
+      animateForward = getIsActive();
+    } else if (velocity.abs() >= _kMinFlingVelocity) {
+      // If the user releases the page before mid screen with sufficient velocity,
+      // or after mid screen, we should animate the page out. Otherwise, the page
+      // should be animated back in.
       animateForward = velocity <= 0;
     } else {
       animateForward = controller.value > 0.5;
@@ -768,8 +708,10 @@ class _CupertinoBackGestureController<T> {
       );
       controller.animateTo(1.0, duration: Duration(milliseconds: droppedPageForwardAnimationTime), curve: animationCurve);
     } else {
-      // This route is destined to pop at this point. Reuse navigator's pop.
-      navigator.pop();
+      if (isCurrent) {
+        // This route is destined to pop at this point. Reuse navigator's pop.
+        navigator.pop();
+      }
 
       // The popping may have finished inline if already at the target destination.
       if (controller.isAnimating) {
@@ -953,16 +895,10 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 
     final TextDirection? textDirection = configuration.textDirection;
     assert(textDirection != null);
-    final double start;
-    final double shadowDirection; // -1 for ltr, 1 for rtl.
-    switch (textDirection!) {
-      case TextDirection.rtl:
-        start = offset.dx + configuration.size!.width;
-        shadowDirection = 1;
-      case TextDirection.ltr:
-        start = offset.dx;
-        shadowDirection = -1;
-    }
+    final (double shadowDirection, double start) = switch (textDirection!) {
+      TextDirection.rtl => (1, offset.dx + configuration.size!.width),
+      TextDirection.ltr => (-1, offset.dx),
+    };
 
     int bandColorIndex = 0;
     for (int dx = 0; dx < shadowWidth; dx += 1) {
@@ -1272,7 +1208,7 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 ///  * [showGeneralDialog], which allows for customization of the dialog popup.
 ///  * [DisplayFeatureSubScreen], which documents the specifics of how
 ///    [DisplayFeature]s can split the screen into sub-screens.
-///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
+///  * <https://developer.apple.com/design/human-interface-guidelines/alerts/>
 Future<T?> showCupertinoDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,

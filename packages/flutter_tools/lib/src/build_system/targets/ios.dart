@@ -20,10 +20,10 @@ import '../../reporting/reporting.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
+import '../tools/shader_compiler.dart';
 import 'assets.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
-import 'shader_compiler.dart';
 
 /// Supports compiling a dart kernel file to an assembly file.
 ///
@@ -314,6 +314,7 @@ abstract class UnpackIOS extends Target {
       '--delete',
       '--filter',
       '- .DS_Store/',
+      '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
       basePath,
       environment.outputDir.path,
     ]);
@@ -503,9 +504,6 @@ abstract class IosAssetBundle extends Target {
       environment,
       assetDirectory,
       targetPlatform: TargetPlatform.ios,
-      // Always specify an impeller shader target so that we support runtime toggling and
-      // the --enable-impeller debug flag.
-      shaderTarget: ShaderTarget.impelleriOS,
       additionalInputs: <File>[
         flutterProject.ios.infoPlist,
         flutterProject.ios.appFrameworkInfoPlist,

@@ -144,5 +144,7 @@
   "menuDismissLabel": "മെനു ഡിസ്മിസ് ചെയ്യുക",
   "lookUpButtonLabel": "മുകളിലേക്ക് നോക്കുക",
   "searchWebButtonLabel": "വെബിൽ തിരയുക",
-  "shareButtonLabel": "പങ്കിടുക..."
+  "shareButtonLabel": "പങ്കിടുക...",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

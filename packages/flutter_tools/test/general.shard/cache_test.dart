@@ -393,33 +393,6 @@ void main() {
     expect(operatingSystemUtils.chmods, <List<String>>[<String>['/.tmp_rand0/flutter_cache_test_artifact.rand0/bin_dir', 'a+r,a+x']]);
   });
 
-  testWithoutContext('EngineCachedArtifact removes unzipped FlutterMacOS.framework before replacing', () async {
-    final OperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
-    final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync('flutter_cache_test_download.');
-    final FakeSecondaryCache cache = FakeSecondaryCache()
-      ..artifactDirectory = artifactDir
-      ..downloadDir = downloadDir;
-
-    final Directory binDir = artifactDir.childDirectory('bin_dir')..createSync();
-    binDir.childFile('FlutterMacOS.framework.zip').createSync();
-    final Directory unzippedFramework = binDir.childDirectory('FlutterMacOS.framework');
-    final File staleFile = unzippedFramework.childFile('stale_file')..createSync(recursive: true);
-    artifactDir.childFile('unused_url_path').createSync();
-
-    final FakeCachedArtifact artifact = FakeCachedArtifact(
-      cache: cache,
-      binaryDirs: <List<String>>[
-        <String>['bin_dir', 'unused_url_path'],
-      ],
-      requiredArtifacts: DevelopmentArtifact.universal,
-    );
-    await artifact.updateInner(FakeArtifactUpdater(), fileSystem, operatingSystemUtils);
-    expect(unzippedFramework, exists);
-    expect(staleFile, isNot(exists));
-  });
-
   testWithoutContext('Try to remove without a parent', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Directory parent = fileSystem.directory('dir');
@@ -615,7 +588,7 @@ void main() {
       expect(artifacts.getBinaryDirs(), <List<String>>[
         <String>['darwin-x64', 'darwin-arm64/font-subset.zip'],
         <String>['linux-arm64', 'linux-arm64/font-subset.zip'],
-        <String>['windows-x64', 'windows-x64/font-subset.zip'], // arm64 windows hosts are not supported now
+        <String>['windows-arm64', 'windows-arm64/font-subset.zip'],
       ]);
   });
 

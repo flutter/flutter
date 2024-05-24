@@ -88,10 +88,7 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
   /// idempotent; calling it a second time will just return the
   /// previously-created instance.
   static TestRenderingFlutterBinding ensureInitialized({ VoidCallback? onErrors }) {
-    if (_instance != null) {
-      return _instance!;
-    }
-    return TestRenderingFlutterBinding(onErrors: onErrors);
+    return _instance ?? TestRenderingFlutterBinding(onErrors: onErrors);
   }
 
   final List<FlutterErrorDetails> _errors = <FlutterErrorDetails>[];

@@ -78,12 +78,14 @@ class WebDriverService extends DriverService {
           buildInfo,
           port: debuggingOptions.port,
           hostname: debuggingOptions.hostname,
+          webRenderer: debuggingOptions.webRenderer,
         )
         : DebuggingOptions.enabled(
           buildInfo,
           port: debuggingOptions.port,
           hostname: debuggingOptions.hostname,
           disablePortPublication: debuggingOptions.disablePortPublication,
+          webRenderer: debuggingOptions.webRenderer,
         ),
       stayResident: true,
       flutterProject: FlutterProject.current(),
@@ -127,7 +129,7 @@ class WebDriverService extends DriverService {
     }
 
     if (debuggingOptions.webLaunchUrl != null) {
-      // It should thow an error if the provided url is invalid so no tryParse
+      // It should throw an error if the provided url is invalid so no tryParse
       _webUri = Uri.parse(debuggingOptions.webLaunchUrl!);
     } else {
       _webUri = _residentRunner.uri;

@@ -283,7 +283,6 @@ class MenuAnchor extends StatefulWidget {
     properties.add(DiagnosticsProperty<MenuStyle?>('style', style));
     properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior));
     properties.add(DiagnosticsProperty<Offset?>('alignmentOffset', alignmentOffset));
-    properties.add(StringProperty('child', child.toString()));
   }
 }
 
@@ -1041,11 +1040,8 @@ class MenuItemButton extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('enabled', value: onPressed != null, ifFalse: 'DISABLED'));
-    properties.add(DiagnosticsProperty<String>('child', child.toString()));
     properties.add(DiagnosticsProperty<ButtonStyle?>('style', style, defaultValue: null));
     properties.add(DiagnosticsProperty<MenuSerializableShortcut?>('shortcut', shortcut, defaultValue: null));
-    properties.add(DiagnosticsProperty<Widget?>('leadingIcon', leadingIcon, defaultValue: null));
-    properties.add(DiagnosticsProperty<Widget?>('trailingIcon', trailingIcon, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode?>('focusNode', focusNode, defaultValue: null));
     properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.none));
     properties.add(DiagnosticsProperty<MaterialStatesController?>('statesController', statesController, defaultValue: null));
@@ -1075,7 +1071,7 @@ class _MenuItemButtonState extends State<MenuItemButton> {
   @override
   void didUpdateWidget(MenuItemButton oldWidget) {
     if (widget.focusNode != oldWidget.focusNode) {
-      _focusNode.removeListener(_handleFocusChange);
+      (oldWidget.focusNode ?? _internalFocusNode)?.removeListener(_handleFocusChange);
       if (widget.focusNode != null) {
         _internalFocusNode?.dispose();
         _internalFocusNode = null;
@@ -1802,9 +1798,6 @@ class SubmenuButton extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Widget>('leadingIcon', leadingIcon, defaultValue: null));
-    properties.add(DiagnosticsProperty<String>('child', child.toString()));
-    properties.add(DiagnosticsProperty<Widget>('trailingIcon', trailingIcon, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode?>('focusNode', focusNode));
     properties.add(DiagnosticsProperty<MenuStyle>('menuStyle', menuStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<Offset>('alignmentOffset', alignmentOffset));
@@ -1878,19 +1871,15 @@ class _SubmenuButtonState extends State<SubmenuButton> {
   Widget build(BuildContext context) {
     Offset menuPaddingOffset = widget.alignmentOffset ?? Offset.zero;
     final EdgeInsets menuPadding = _computeMenuPadding(context);
+    final Axis orientation = _anchor?._orientation ?? Axis.vertical;
     // Move the submenu over by the size of the menu padding, so that
     // the first menu item aligns with the submenu button that opens it.
-    switch (_anchor?._orientation ?? Axis.vertical) {
-      case Axis.horizontal:
-        switch (Directionality.of(context)) {
-          case TextDirection.rtl:
-            menuPaddingOffset += Offset(menuPadding.right, 0);
-          case TextDirection.ltr:
-            menuPaddingOffset += Offset(-menuPadding.left, 0);
-        }
-      case Axis.vertical:
-        menuPaddingOffset += Offset(0, -menuPadding.top);
-    }
+    menuPaddingOffset += switch ((orientation, Directionality.of(context))) {
+      (Axis.horizontal, TextDirection.rtl) => Offset(menuPadding.right, 0),
+      (Axis.horizontal, TextDirection.ltr) => Offset(-menuPadding.left, 0),
+      (Axis.vertical, TextDirection.rtl)   => Offset(0, -menuPadding.top),
+      (Axis.vertical, TextDirection.ltr)   => Offset(0, -menuPadding.top),
+    };
 
     return MenuAnchor(
       controller: _menuController,
@@ -2438,130 +2427,35 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
       return;
     }
     final bool buttonIsFocused = anchor.widget.childFocusNode?.hasPrimaryFocus ?? false;
-    Axis orientation;
-    if (buttonIsFocused && anchor._parent != null) {
-      orientation = anchor._parent!._orientation;
-    } else {
-      orientation = anchor._orientation;
-    }
+    final Axis? parentOrientation = anchor._parent?._orientation;
+    final Axis orientation = (buttonIsFocused ? parentOrientation : null) ?? anchor._orientation;
+    final bool differentParent = orientation != parentOrientation;
     final bool firstItemIsFocused = anchor._firstItemFocusNode?.hasPrimaryFocus ?? false;
+    final bool rtl = switch (Directionality.of(context)) {
+      TextDirection.rtl => true,
+      TextDirection.ltr => false,
+    };
+
     assert(_debugMenuInfo('In _MenuDirectionalFocusAction, current node is ${anchor.widget.childFocusNode?.debugLabel}, '
         'button is${buttonIsFocused ? '' : ' not'} focused. Assuming ${orientation.name} orientation.'));
 
-    switch (intent.direction) {
-      case TraversalDirection.up:
-        switch (orientation) {
-          case Axis.horizontal:
-            if (_moveToParent(anchor)) {
-              return;
-            }
-          case Axis.vertical:
-            if (firstItemIsFocused) {
-              if (_moveToParent(anchor)) {
-                return;
-              }
-            }
-            if (_moveToPrevious(anchor)) {
-              return;
-            }
-        }
-      case TraversalDirection.down:
-        switch (orientation) {
-          case Axis.horizontal:
-            if (_moveToSubmenu(anchor)) {
-              return;
-            }
-          case Axis.vertical:
-            if (_moveToNext(anchor)) {
-              return;
-            }
-        }
-      case TraversalDirection.left:
-        switch (orientation) {
-          case Axis.horizontal:
-            switch (Directionality.of(context)) {
-              case TextDirection.rtl:
-                if (_moveToNext(anchor)) {
-                  return;
-                }
-              case TextDirection.ltr:
-                if (_moveToPrevious(anchor)) {
-                  return;
-                }
-            }
-          case Axis.vertical:
-            switch (Directionality.of(context)) {
-              case TextDirection.rtl:
-                if (buttonIsFocused) {
-                  if (_moveToSubmenu(anchor)) {
-                    return;
-                  }
-                } else {
-                  if (_moveToNextFocusableTopLevel(anchor)) {
-                    return;
-                  }
-                }
-              case TextDirection.ltr:
-                switch (anchor._parent?._orientation) {
-                  case Axis.horizontal:
-                  case null:
-                    if (_moveToPreviousFocusableTopLevel(anchor)) {
-                      return;
-                    }
-                  case Axis.vertical:
-                    if (buttonIsFocused) {
-                      if (_moveToPreviousFocusableTopLevel(anchor)) {
-                        return;
-                      }
-                    } else {
-                      if (_moveToParent(anchor)) {
-                        return;
-                      }
-                    }
-                }
-            }
-        }
-      case TraversalDirection.right:
-        switch (orientation) {
-          case Axis.horizontal:
-            switch (Directionality.of(context)) {
-              case TextDirection.rtl:
-                if (_moveToPrevious(anchor)) {
-                  return;
-                }
-              case TextDirection.ltr:
-                if (_moveToNext(anchor)) {
-                  return;
-                }
-            }
-          case Axis.vertical:
-            switch (Directionality.of(context)) {
-              case TextDirection.rtl:
-                switch (anchor._parent?._orientation) {
-                  case Axis.horizontal:
-                  case null:
-                    if (_moveToPreviousFocusableTopLevel(anchor)) {
-                      return;
-                    }
-                  case Axis.vertical:
-                    if (_moveToParent(anchor)) {
-                      return;
-                    }
-                }
-              case TextDirection.ltr:
-                if (buttonIsFocused) {
-                  if (_moveToSubmenu(anchor)) {
-                    return;
-                  }
-                } else {
-                  if (_moveToNextFocusableTopLevel(anchor)) {
-                    return;
-                  }
-                }
-            }
-        }
+    final bool Function(_MenuAnchorState) traversal = switch ((intent.direction, orientation)) {
+      (TraversalDirection.up, Axis.horizontal) => _moveToParent,
+      (TraversalDirection.up, Axis.vertical) => firstItemIsFocused ? _moveToParent: _moveToPrevious,
+      (TraversalDirection.down, Axis.horizontal) => _moveToSubmenu,
+      (TraversalDirection.down, Axis.vertical) => _moveToNext,
+      (TraversalDirection.left, Axis.horizontal) => rtl ? _moveToNext : _moveToPrevious,
+      (TraversalDirection.right, Axis.horizontal) => rtl ? _moveToPrevious : _moveToNext,
+      (TraversalDirection.left, Axis.vertical) when rtl => buttonIsFocused ? _moveToSubmenu : _moveToNextFocusableTopLevel,
+      (TraversalDirection.left, Axis.vertical) when differentParent => _moveToPreviousFocusableTopLevel,
+      (TraversalDirection.left, Axis.vertical) => buttonIsFocused ? _moveToPreviousFocusableTopLevel : _moveToParent,
+      (TraversalDirection.right, Axis.vertical) when !rtl => buttonIsFocused ? _moveToSubmenu : _moveToNextFocusableTopLevel,
+      (TraversalDirection.right, Axis.vertical) when differentParent => _moveToPreviousFocusableTopLevel,
+      (TraversalDirection.right, Axis.vertical) => buttonIsFocused ? _moveToPreviousFocusableTopLevel : _moveToParent,
+    };
+    if (!traversal(anchor)) {
+      super.invoke(intent);
     }
-    super.invoke(intent);
   }
 
   bool _moveToNext(_MenuAnchorState currentMenu) {
@@ -3140,7 +3034,6 @@ class _MenuItemLabel extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<String>('child', child.toString()));
     properties.add(DiagnosticsProperty<MenuSerializableShortcut>('shortcut', shortcut, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('hasSubmenu', hasSubmenu));
     properties.add(DiagnosticsProperty<bool>('showDecoration', showDecoration));
@@ -3212,12 +3105,10 @@ class _MenuLayout extends SingleChildLayoutDelegate {
       Offset desiredPosition = alignment.resolve(textDirection).withinRect(anchorRect);
       final Offset directionalOffset;
       if (alignment is AlignmentDirectional) {
-        switch (textDirection) {
-          case TextDirection.rtl:
-            directionalOffset = Offset(-alignmentOffset.dx, alignmentOffset.dy);
-          case TextDirection.ltr:
-            directionalOffset = alignmentOffset;
-        }
+        directionalOffset = switch (textDirection) {
+          TextDirection.rtl => Offset(-alignmentOffset.dx, alignmentOffset.dy),
+          TextDirection.ltr => alignmentOffset,
+        };
       } else {
         directionalOffset = alignmentOffset;
       }
@@ -3373,17 +3264,17 @@ class _MenuPanelState extends State<_MenuPanel> {
   ScrollController scrollController = ScrollController();
 
   @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final MenuStyle? themeStyle;
-    final MenuStyle defaultStyle;
-    switch (widget.orientation) {
-      case Axis.horizontal:
-        themeStyle = MenuBarTheme.of(context).style;
-        defaultStyle = _MenuBarDefaultsM3(context);
-      case Axis.vertical:
-        themeStyle = MenuTheme.of(context).style;
-        defaultStyle = _MenuDefaultsM3(context);
-    }
+    final (MenuStyle? themeStyle, MenuStyle defaultStyle) = switch (widget.orientation) {
+      Axis.horizontal => (MenuBarTheme.of(context).style, _MenuBarDefaultsM3(context)),
+      Axis.vertical => (MenuTheme.of(context).style, _MenuDefaultsM3(context)),
+    };
     final MenuStyle? widgetStyle = widget.menuStyle;
 
     T? effectiveValue<T>(T? Function(MenuStyle? style) getProperty) {
@@ -3501,12 +3392,10 @@ class _MenuPanelState extends State<_MenuPanel> {
   }
 
   Widget _intrinsicCrossSize({required Widget child}) {
-    switch (widget.orientation) {
-      case Axis.horizontal:
-        return IntrinsicHeight(child: child);
-      case Axis.vertical:
-        return IntrinsicWidth(child: child);
-    }
+    return switch (widget.orientation) {
+      Axis.horizontal => IntrinsicHeight(child: child),
+      Axis.vertical   => IntrinsicWidth(child: child),
+    };
   }
 }
 
@@ -3534,16 +3423,10 @@ class _Submenu extends StatelessWidget {
   Widget build(BuildContext context) {
     // Use the text direction of the context where the button is.
     final TextDirection textDirection = Directionality.of(context);
-    final MenuStyle? themeStyle;
-    final MenuStyle defaultStyle;
-    switch (anchor._parent?._orientation ?? Axis.horizontal) {
-      case Axis.horizontal:
-        themeStyle = MenuBarTheme.of(context).style;
-        defaultStyle = _MenuBarDefaultsM3(context);
-      case Axis.vertical:
-        themeStyle = MenuTheme.of(context).style;
-        defaultStyle = _MenuDefaultsM3(context);
-    }
+    final (MenuStyle? themeStyle,  MenuStyle defaultStyle) = switch (anchor._parent?._orientation) {
+      Axis.horizontal || null => (MenuBarTheme.of(context).style, _MenuBarDefaultsM3(context)),
+      Axis.vertical => (MenuTheme.of(context).style, _MenuDefaultsM3(context)),
+    };
     T? effectiveValue<T>(T? Function(MenuStyle? style) getProperty) {
       return getProperty(menuStyle) ?? getProperty(themeStyle) ?? getProperty(defaultStyle);
     }
@@ -3731,7 +3614,7 @@ class _MenuBarDefaultsM3 extends MenuStyle {
 
   @override
   MaterialStateProperty<Color?> get backgroundColor {
-    return MaterialStatePropertyAll<Color?>(_colors.surface);
+    return MaterialStatePropertyAll<Color?>(_colors.surfaceContainer);
   }
 
   @override
@@ -3741,7 +3624,7 @@ class _MenuBarDefaultsM3 extends MenuStyle {
 
   @override
   MaterialStateProperty<Color?>? get surfaceTintColor {
-    return MaterialStatePropertyAll<Color?>(_colors.surfaceTint);
+    return const MaterialStatePropertyAll<Color?>(Colors.transparent);
   }
 
   @override
@@ -3851,13 +3734,13 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
     return MaterialStateProperty.resolveWith(
       (Set<MaterialState> states) {
         if (states.contains(MaterialState.pressed)) {
-          return _colors.onSurface.withOpacity(0.12);
+          return _colors.onSurface.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onSurface.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.onSurface.withOpacity(0.12);
+          return _colors.onSurface.withOpacity(0.1);
         }
         return Colors.transparent;
       },
@@ -3903,6 +3786,11 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
     if (visualDensity.horizontal > 0) {
       visualDensity = VisualDensity(vertical: visualDensity.vertical);
     }
+    // Since the threshold paddings used below are empirical values determined
+    // at a font size of 14.0, 14.0 is used as the base value for scaling the
+    // padding.
+    final double fontSize = Theme.of(context).textTheme.labelLarge?.fontSize ?? 14.0;
+    final double fontSizeRatio = MediaQuery.textScalerOf(context).scale(fontSize) / 14.0;
     return ButtonStyleButton.scaledPadding(
       EdgeInsets.symmetric(horizontal: math.max(
         _kMenuViewPadding,
@@ -3913,7 +3801,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
         8 + visualDensity.baseSizeAdjustment.dx,
       )),
       const EdgeInsets.symmetric(horizontal: _kMenuViewPadding),
-      MediaQuery.maybeTextScaleFactorOf(context) ?? 1,
+      fontSizeRatio,
     );
   }
 }
@@ -3935,12 +3823,12 @@ class _MenuDefaultsM3 extends MenuStyle {
 
   @override
   MaterialStateProperty<Color?> get backgroundColor {
-    return MaterialStatePropertyAll<Color?>(_colors.surface);
+    return MaterialStatePropertyAll<Color?>(_colors.surfaceContainer);
   }
 
   @override
   MaterialStateProperty<Color?>? get surfaceTintColor {
-    return MaterialStatePropertyAll<Color?>(_colors.surfaceTint);
+    return const MaterialStatePropertyAll<Color?>(Colors.transparent);
   }
 
   @override

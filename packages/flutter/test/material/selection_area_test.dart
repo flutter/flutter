@@ -7,8 +7,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/process_text_utils.dart';
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
@@ -197,6 +199,54 @@ void main() {
     expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
     expect(find.byKey(key), findsOneWidget);
   },
+    skip: kIsWeb, // [intended]
+  );
+
+  testWidgets('Text processing actions are added to the toolbar', (WidgetTester tester) async {
+    final MockProcessTextHandler mockProcessTextHandler = MockProcessTextHandler();
+    TestWidgetsFlutterBinding.ensureInitialized().defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.processText, mockProcessTextHandler.handleMethodCall);
+    addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.processText, null));
+
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectionArea(
+          focusNode: focusNode,
+          child: const Text('How are you?'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+      find.descendant(
+        of: find.text('How are you?'),
+        matching: find.byType(RichText),
+      ),
+    );
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 6)); // at the 'r'
+    addTearDown(gesture.removePointer);
+    await tester.pump(const Duration(milliseconds: 500));
+    // `are` is selected.
+    expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // The toolbar is visible.
+    expect(find.byType(AdaptiveTextSelectionToolbar), findsOneWidget);
+
+    // The text processing actions are visible on Android only.
+    final bool areTextActionsSupported = defaultTargetPlatform == TargetPlatform.android;
+    expect(find.text(fakeAction1Label), areTextActionsSupported ? findsOneWidget : findsNothing);
+    expect(find.text(fakeAction2Label), areTextActionsSupported ? findsOneWidget : findsNothing);
+  },
+    variant: TargetPlatformVariant.all(),
     skip: kIsWeb, // [intended]
   );
 

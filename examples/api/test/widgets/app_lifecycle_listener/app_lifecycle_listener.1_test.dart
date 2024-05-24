@@ -17,7 +17,7 @@ void main() {
     expect(find.textContaining('Exit Request:'), findsOneWidget);
     await tester.tap(find.text('Quit'));
     await tester.pump();
-    // Responding to the the quit request happens in a Future that we don't have
+    // Responding to the quit request happens in a Future that we don't have
     // visibility for, so to avoid a flaky test with a delay, we just check to
     // see if the request string prefix is still there, rather than the request
     // response string. Testing it wasn't worth exposing a Completer in the

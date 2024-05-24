@@ -13,6 +13,7 @@
 - [ ] I listed at least one issue that this PR fixes in the description above.
 - [ ] I updated/added relevant documentation (doc comments with `///`).
 - [ ] I added new tests to check the change I am making, or this PR is [test-exempt].
+- [ ] I followed the [breaking change policy] and added [Data Driven Fixes] where supported.
 - [ ] All existing and new tests are passing.
 
 If you need help, consider asking for advice on the #hackers-new channel on [Discord].
@@ -27,3 +28,4 @@ If you need help, consider asking for advice on the #hackers-new channel on [Dis
 [flutter/tests]: https://github.com/flutter/tests
 [breaking change policy]: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes
 [Discord]: https://github.com/flutter/flutter/wiki/Chat
+[Data Driven Fixes]: https://github.com/flutter/flutter/wiki/Data-driven-Fixes

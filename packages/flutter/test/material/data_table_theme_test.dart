@@ -105,19 +105,19 @@ void main() {
       .toList();
 
     expect(description[0], 'decoration: BoxDecoration(color: Color(0xfffffff0))');
-    expect(description[1], "dataRowColor: Instance of '_MaterialStatePropertyWith<Color>'");
+    expect(description[1], "dataRowColor: Instance of '_WidgetStatePropertyWith<Color>'");
     expect(description[2], 'dataRowMinHeight: 41.0');
     expect(description[3], 'dataRowMaxHeight: 42.0');
     expect(description[4], 'dataTextStyle: TextStyle(inherit: true, size: 12.0)');
-    expect(description[5], "headingRowColor: Instance of '_MaterialStatePropertyWith<Color>'");
+    expect(description[5], "headingRowColor: Instance of '_WidgetStatePropertyWith<Color>'");
     expect(description[6], 'headingRowHeight: 52.0');
     expect(description[7], 'headingTextStyle: TextStyle(inherit: true, size: 14.0)');
     expect(description[8], 'horizontalMargin: 3.0');
     expect(description[9], 'columnSpacing: 4.0');
     expect(description[10], 'dividerThickness: 5.0');
     expect(description[11], 'checkboxHorizontalMargin: 6.0');
-    expect(description[12], 'headingCellCursor: MaterialStatePropertyAll(SystemMouseCursor(grab))');
-    expect(description[13], 'dataRowCursor: MaterialStatePropertyAll(SystemMouseCursor(forbidden))');
+    expect(description[12], 'headingCellCursor: WidgetStatePropertyAll(SystemMouseCursor(grab))');
+    expect(description[13], 'dataRowCursor: WidgetStatePropertyAll(SystemMouseCursor(forbidden))');
   });
 
   testWidgets('DataTable is themeable', (WidgetTester tester) async {

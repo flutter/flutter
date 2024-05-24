@@ -20,16 +20,9 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'flutter_template_images': '4.2.0', // Must always exactly match flutter_tools template.
   'material_color_utilities': '0.8.0', // Keep pinned to latest until 1.0.0.
   'archive': '3.3.2', // https://github.com/flutter/flutter/issues/115660
-  'leak_tracker': '10.0.0', // https://github.com/flutter/devtools/issues/3951
-  'leak_tracker_testing': '2.0.1', // https://github.com/flutter/devtools/issues/3951
-  'leak_tracker_flutter_testing': '2.0.1', // https://github.com/flutter/devtools/issues/3951
+  'leak_tracker': '10.0.4', // https://github.com/flutter/devtools/issues/3951
+  'leak_tracker_testing': '3.0.1', // https://github.com/flutter/devtools/issues/3951
+  'leak_tracker_flutter_testing': '3.0.3', // https://github.com/flutter/devtools/issues/3951
   'path_provider_android':
       '2.2.1', // https://github.com/flutter/flutter/issues/140796
-  // vm_service 14 contains breaking changes and needs to be rolled carefully
-  // https://github.com/flutter/flutter/pull/140916#issuecomment-1877383354
-  'vm_service': '13.0.0',
-  'test_api': '0.6.1', // https://github.com/flutter/flutter/issues/140169
-  'test_core': '0.5.9', // https://github.com/flutter/flutter/issues/140169
-  'test': '1.24.9', // https://github.com/flutter/flutter/issues/140169
-  'web_socket_channel': '2.4.1', // https://github.com/flutter/flutter/issues/141032
 };

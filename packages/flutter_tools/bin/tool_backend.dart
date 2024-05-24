@@ -76,7 +76,7 @@ or
     else
       'flutter',
   ]);
-  final String bundlePlatform = targetPlatform.startsWith('windows') ? 'windows' : targetPlatform;
+  final String bundlePlatform = targetPlatform;
   final String target = '${buildMode}_bundle_${bundlePlatform}_assets';
   final Process assembleProcess = await Process.start(
     flutterExecutable,

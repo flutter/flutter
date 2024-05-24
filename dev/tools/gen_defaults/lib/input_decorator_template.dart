@@ -215,10 +215,10 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
         ? componentColor(componentToken1)
         : componentColor(componentToken2);
     final double width = (
-        getToken('$componentToken1.width') ??
-        getToken('$componentToken1.height') ??
-        getToken('$componentToken2.width') ??
-        getToken('$componentToken2.height') ??
+        getToken('$componentToken1.width', optional: true) ??
+        getToken('$componentToken1.height', optional: true) ??
+        getToken('$componentToken2.width', optional: true) ??
+        getToken('$componentToken2.height', optional: true) ??
         1.0) as double;
     return 'BorderSide(color: $borderColor${width != 1.0 ? ", width: $width" : ""})';
   }

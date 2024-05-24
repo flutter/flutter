@@ -489,9 +489,13 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The fill color to use for an app bar's [Material].
   ///
   /// If null, then the [AppBarTheme.backgroundColor] is used. If that value is also
-  /// null, then [AppBar] uses the overall theme's [ColorScheme.primary] if the
+  /// null:
+  /// In Material v2 (i.e., when [ThemeData.useMaterial3] is false),
+  /// then [AppBar] uses the overall theme's [ColorScheme.primary] if the
   /// overall theme's brightness is [Brightness.light], and [ColorScheme.surface]
   /// if the overall theme's brightness is [Brightness.dark].
+  /// In Material v3 (i.e., when [ThemeData.useMaterial3] is true),
+  /// then [AppBar] uses the overall theme's [ColorScheme.surface]
   ///
   /// If this color is a [MaterialStateColor] it will be resolved against
   /// [MaterialState.scrolledUnder] when the content of the app's
@@ -514,10 +518,13 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// The default color for [Text] and [Icon]s within the app bar.
   ///
   /// If null, then [AppBarTheme.foregroundColor] is used. If that
-  /// value is also null, then [AppBar] uses the overall theme's
-  /// [ColorScheme.onPrimary] if the overall theme's brightness is
-  /// [Brightness.light], and [ColorScheme.onSurface] if the overall
-  /// theme's brightness is [Brightness.dark].
+  /// value is also null:
+  /// In Material v2 (i.e., when [ThemeData.useMaterial3] is false),
+  /// then [AppBar] uses the overall theme's [ColorScheme.onPrimary] if the
+  /// overall theme's brightness is [Brightness.light], and [ColorScheme.onSurface]
+  /// if the overall theme's brightness is [Brightness.dark].
+  /// In Material v3 (i.e., when [ThemeData.useMaterial3] is true),
+  /// then [AppBar] uses the overall theme's [ColorScheme.onSurface].
   ///
   /// This color is used to configure [DefaultTextStyle] that contains
   /// the toolbar's children, and the default [IconTheme] widgets that
@@ -841,6 +848,17 @@ class _AppBarState extends State<AppBar> {
       defaults.backgroundColor!,
     );
 
+    final Color scrolledUnderBackground = _resolveColor(
+      states,
+      widget.backgroundColor,
+      appBarTheme.backgroundColor,
+      Theme.of(context).colorScheme.surfaceContainer,
+    );
+
+    final Color effectiveBackgroundColor = states.contains(MaterialState.scrolledUnder)
+        ? scrolledUnderBackground
+        : backgroundColor;
+
     final Color foregroundColor = widget.foregroundColor
       ?? appBarTheme.foregroundColor
       ?? defaults.foregroundColor!;
@@ -1106,7 +1124,7 @@ class _AppBarState extends State<AppBar> {
       ?? appBarTheme.systemOverlayStyle
       ?? defaults.systemOverlayStyle
       ?? _systemOverlayStyleForBrightness(
-        ThemeData.estimateBrightnessForColor(backgroundColor),
+        ThemeData.estimateBrightnessForColor(effectiveBackgroundColor),
         // Make the status bar transparent for M3 so the elevation overlay
         // color is picked up by the statusbar.
         theme.useMaterial3 ? const Color(0x00000000) : null,
@@ -1117,7 +1135,7 @@ class _AppBarState extends State<AppBar> {
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: overlayStyle,
         child: Material(
-          color: backgroundColor,
+          color: theme.useMaterial3 ? effectiveBackgroundColor : backgroundColor,
           elevation: effectiveElevation,
           type: widget.forceMaterialTransparency
               ? MaterialType.transparency
@@ -1127,7 +1145,10 @@ class _AppBarState extends State<AppBar> {
             ?? defaults.shadowColor,
           surfaceTintColor: widget.surfaceTintColor
             ?? appBarTheme.surfaceTintColor
-            ?? defaults.surfaceTintColor,
+            // M3 `defaults.surfaceTint` is Colors.transparent now. It is not used
+            // here because otherwise, it will cause breaking change for
+            // `scrolledUnderElevation`.
+            ?? (theme.useMaterial3 ? theme.colorScheme.surfaceTint : null),
           shape: widget.shape ?? appBarTheme.shape ?? defaults.shape,
           child: Semantics(
             explicitChildNodes: true,
@@ -1178,6 +1199,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     required this.forceMaterialTransparency,
     required this.clipBehavior,
     required this.variant,
+    required this.accessibleNavigation,
   }) : assert(primary || topPadding == 0.0),
        _bottomHeight = bottom?.preferredSize.height ?? 0.0;
 
@@ -1215,6 +1237,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final bool forceMaterialTransparency;
   final Clip? clipBehavior;
   final _SliverAppVariant variant;
+  final bool accessibleNavigation;
 
   @override
   double get minExtent => collapsedHeight;
@@ -1242,7 +1265,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 
     final bool isScrolledUnder = overlapsContent || forceElevated || (pinned && shrinkOffset > maxExtent - minExtent);
     final bool isPinnedWithOpacityFade = pinned && floating && bottom != null && extraToolbarHeight == 0.0;
-    final double toolbarOpacity = !pinned || isPinnedWithOpacityFade
+    final double toolbarOpacity =  !accessibleNavigation && (!pinned || isPinnedWithOpacityFade)
       ? clampDouble(visibleToolbarHeight / (toolbarHeight ?? kToolbarHeight), 0.0, 1.0)
       : 1.0;
     final Widget? effectiveTitle = switch (variant) {
@@ -1333,7 +1356,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || toolbarTextStyle != oldDelegate.toolbarTextStyle
         || titleTextStyle != oldDelegate.titleTextStyle
         || systemOverlayStyle != oldDelegate.systemOverlayStyle
-        || forceMaterialTransparency != oldDelegate.forceMaterialTransparency;
+        || forceMaterialTransparency != oldDelegate.forceMaterialTransparency
+        || accessibleNavigation != oldDelegate.accessibleNavigation;
   }
 
   @override
@@ -2015,6 +2039,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           forceMaterialTransparency: widget.forceMaterialTransparency,
           clipBehavior: widget.clipBehavior,
           variant: widget._variant,
+          accessibleNavigation: MediaQuery.of(context).accessibleNavigation,
         ),
       ),
     );
@@ -2334,7 +2359,7 @@ class _AppBarDefaultsM3 extends AppBarTheme {
   Color? get shadowColor => Colors.transparent;
 
   @override
-  Color? get surfaceTintColor => _colors.surfaceTint;
+  Color? get surfaceTintColor => Colors.transparent;
 
   @override
   IconThemeData? get iconTheme => IconThemeData(

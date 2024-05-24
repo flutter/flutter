@@ -7,9 +7,7 @@ import 'dart:async';
 import 'package:dds/dds.dart' as dds;
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
-import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/dds.dart';
@@ -18,14 +16,10 @@ import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/targets/scene_importer.dart';
-import 'package:flutter_tools/src/build_system/targets/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
@@ -36,12 +30,7 @@ import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:native_assets_cli/native_assets_cli.dart'
-    hide BuildMode, Target;
-import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
-import 'package:package_config/package_config.dart';
-import 'package:test/fake.dart';
-import 'package:unified_analytics/src/enums.dart';
+import 'package:unified_analytics/testing.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -50,121 +39,7 @@ import '../src/context.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
 import '../src/testbed.dart';
-import 'fake_native_assets_build_runner.dart';
-
-final vm_service.Event fakeUnpausedEvent = vm_service.Event(
-  kind: vm_service.EventKind.kResume,
-  timestamp: 0
-);
-
-final vm_service.Event fakePausedEvent = vm_service.Event(
-  kind: vm_service.EventKind.kPauseException,
-  timestamp: 0
-);
-
-final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
-  id: '1',
-  pauseEvent: fakeUnpausedEvent,
-  breakpoints: <vm_service.Breakpoint>[],
-  extensionRPCs: <String>[],
-  libraries: <vm_service.LibraryRef>[
-    vm_service.LibraryRef(
-      id: '1',
-      uri: 'file:///hello_world/main.dart',
-      name: '',
-    ),
-  ],
-  livePorts: 0,
-  name: 'test',
-  number: '1',
-  pauseOnExit: false,
-  runnable: true,
-  startTime: 0,
-  isSystemIsolate: false,
-  isolateFlags: <vm_service.IsolateFlag>[],
-);
-
-final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
-  id: '1',
-  pauseEvent: fakePausedEvent,
-  breakpoints: <vm_service.Breakpoint>[
-    vm_service.Breakpoint(
-      breakpointNumber: 123,
-      id: 'test-breakpoint',
-      location: vm_service.SourceLocation(
-        tokenPos: 0,
-        script: vm_service.ScriptRef(id: 'test-script', uri: 'foo.dart'),
-      ),
-      enabled: true,
-      resolved: true,
-    ),
-  ],
-  libraries: <vm_service.LibraryRef>[],
-  livePorts: 0,
-  name: 'test',
-  number: '1',
-  pauseOnExit: false,
-  runnable: true,
-  startTime: 0,
-  isSystemIsolate: false,
-  isolateFlags: <vm_service.IsolateFlag>[],
-);
-
-final vm_service.VM fakeVM = vm_service.VM(
-  isolates: <vm_service.IsolateRef>[fakeUnpausedIsolate],
-  pid: 1,
-  hostCPU: '',
-  isolateGroups: <vm_service.IsolateGroupRef>[],
-  targetCPU: '',
-  startTime: 0,
-  name: 'dart',
-  architectureBits: 64,
-  operatingSystem: '',
-  version: '',
-  systemIsolateGroups: <vm_service.IsolateGroupRef>[],
-  systemIsolates: <vm_service.IsolateRef>[],
-);
-
-final FlutterView fakeFlutterView = FlutterView(
-  id: 'a',
-  uiIsolate: fakeUnpausedIsolate,
-);
-
-final FakeVmServiceRequest listViews = FakeVmServiceRequest(
-  method: kListViewsMethod,
-  jsonResponse: <String, Object>{
-    'views': <Object>[
-      fakeFlutterView.toJson(),
-    ],
-  },
-);
-
-const FakeVmServiceRequest setAssetBundlePath = FakeVmServiceRequest(
-  method: '_flutter.setAssetBundlePath',
-  args: <String, Object>{
-    'viewId': 'a',
-    'assetDirectory': 'build/flutter_assets',
-    'isolateId': '1',
-  }
-);
-
-const FakeVmServiceRequest evict = FakeVmServiceRequest(
-  method: 'ext.flutter.evict',
-  args: <String, Object>{
-    'value': 'asset',
-    'isolateId': '1',
-  }
-);
-
-const FakeVmServiceRequest evictShader = FakeVmServiceRequest(
-  method: 'ext.ui.window.reinitializeShader',
-  args: <String, Object>{
-    'assetKey': 'foo.frag',
-    'isolateId': '1',
-  }
-);
-
-final Uri testUri = Uri.parse('foo://bar');
+import 'resident_runner_helpers.dart';
 
 void main() {
   late Testbed testbed;
@@ -204,7 +79,7 @@ void main() {
       ..testUri = testUri
       ..vmServiceHost = (() => fakeVmServiceHost)
       ..device = device
-      .._devFS = devFS;
+      ..fakeDevFS = devFS;
   });
 
   testUsingContext('ResidentRunner can attach to device successfully', () => testbed.run(() async {
@@ -496,7 +371,7 @@ void main() {
       connectionInfoCompleter: futureConnectionInfo,
     ));
     await futureAppStart.future;
-    flutterDevice._devFS = null;
+    flutterDevice.fakeDevFS = null;
 
     final OperationResult result = await residentRunner.restart();
     expect(result.fatal, false);
@@ -2155,10 +2030,10 @@ flutter:
       vmServiceUris: Stream<Uri>.value(testUri),
     );
     final Completer<void> done = Completer<void>();
-    await runZonedGuarded(
+    unawaited(runZonedGuarded(
       () => flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete()),
       (_, __) => done.complete(),
-    );
+    ));
     await done.future;
     expect(device.dds.uri, Uri.parse('http://localhost/existingDdsInField'));
   }, overrides: <Type, Generator>{
@@ -2189,10 +2064,10 @@ flutter:
       vmServiceUris: Stream<Uri>.value(testUri),
     );
     final Completer<void>done = Completer<void>();
-    await runZonedGuarded(
+    unawaited(runZonedGuarded(
       () => flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete()),
       (_, __) => done.complete(),
-    );
+    ));
     await done.future;
     expect(device.dds.uri, Uri.parse('http://localhost/existingDdsInMessage'));
   }, overrides: <Type, Generator>{
@@ -2463,29 +2338,20 @@ flutter:
   }));
 
   testUsingContext(
-      'native assets',
+      'use the nativeAssetsYamlFile when provided',
       () => testbed.run(() async {
-        final FileSystem fileSystem = globals.fs;
-        final Environment environment = Environment.test(
-          fileSystem.currentDirectory,
-          inputs: <String, String>{},
-          artifacts: Artifacts.test(),
-          processManager: FakeProcessManager.empty(),
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-        );
-        final Uri projectUri = environment.projectDir.uri;
-
         final FakeDevice device = FakeDevice(
           targetPlatform: TargetPlatform.darwin,
           sdkNameAndVersion: 'Macos',
         );
+        final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
         final FakeFlutterDevice flutterDevice = FakeFlutterDevice()
           ..testUri = testUri
           ..vmServiceHost = (() => fakeVmServiceHost)
           ..device = device
-          .._devFS = devFS
-          ..targetPlatform = TargetPlatform.darwin;
+          ..fakeDevFS = devFS
+          ..targetPlatform = TargetPlatform.darwin
+          ..generator = residentCompiler;
 
         fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
           listViews,
@@ -2494,21 +2360,6 @@ flutter:
         globals.fs
             .file(globals.fs.path.join('lib', 'main.dart'))
             .createSync(recursive: true);
-        final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
-          packagesWithNativeAssetsResult: <Package>[
-            Package('bar', projectUri),
-          ],
-          dryRunResult: FakeNativeAssetsBuilderResult(
-            assets: <Asset>[
-              Asset(
-                id: 'package:bar/bar.dart',
-                linkMode: LinkMode.dynamic,
-                target: native_assets_cli.Target.macOSArm64,
-                path: AssetAbsolutePath(Uri.file('bar.dylib')),
-              ),
-            ],
-          ),
-        );
         residentRunner = HotRunner(
           <FlutterDevice>[
             flutterDevice,
@@ -2522,23 +2373,22 @@ flutter:
           )),
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
-          buildRunner: buildRunner,
           analytics: fakeAnalytics,
+          nativeAssetsYamlFile: 'foo.yaml',
         );
 
         final int? result = await residentRunner.run();
         expect(result, 0);
 
-        expect(buildRunner.buildInvocations, 0);
-        expect(buildRunner.dryRunInvocations, 1);
-        expect(buildRunner.hasPackageConfigInvocations, 1);
-        expect(buildRunner.packagesWithNativeAssetsInvocations, 1);
+        expect(residentCompiler.recompileCalled, true);
+        expect(residentCompiler.receivedNativeAssetsYaml, globals.fs.path.toUri('foo.yaml'));
       }),
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
       });
 }
+<<<<<<< HEAD
 
 // This implements [dds.DartDevelopmentService], not the [DartDevelopmentService]
 // interface from package:flutter_tools.
@@ -2937,3 +2787,5 @@ const FakeVmServiceRequest renderFrameRasterStats = FakeVmServiceRequest(
     error: 'Raster status not supported on Impeller backend',
   ),
 );
+=======
+>>>>>>> a14f74ff3a1cbd521163c5f03d68113d50af93d3

@@ -14,7 +14,7 @@ import 'package:flutter/foundation.dart';
 ///
 /// The [==] operator defines the equality of 2 [TextScaler]s, which the
 /// framework uses to determine whether text widgets should rebuild when their
-/// [TextScaler] changes. Consider overridding the [==] operator if applicable
+/// [TextScaler] changes. Consider overriding the [==] operator if applicable
 /// to avoid unnecessary rebuilds.
 @immutable
 abstract class TextScaler {

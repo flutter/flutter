@@ -6,7 +6,6 @@ import 'dart:io';
 
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/features.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
@@ -42,16 +41,13 @@ void main() {
         '--wasm',
       ],
       workingDirectory: exampleAppDir.path,
-      environment: <String, String>{
-        flutterWebWasm.environmentOverride!: 'true'
-      },
     );
     expect(result, const ProcessResultMatcher());
 
     final Directory appBuildDir = fileSystem.directory(fileSystem.path.join(
       exampleAppDir.path,
       'build',
-      'web_wasm',
+      'web',
     ));
     for (final String filename in const <String>[
       'flutter.js',

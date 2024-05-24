@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../widgets/clipboard_utils.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -166,9 +167,9 @@ void main() {
           matching: find.byType(Material),
         ).first);
 
-        expect(dialogMaterial.color, theme.colorScheme.surface);
+        expect(dialogMaterial.color, theme.colorScheme.surfaceContainerHigh);
         expect(dialogMaterial.shadowColor, Colors.transparent);
-        expect(dialogMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+        expect(dialogMaterial.surfaceTintColor, Colors.transparent);
         expect(dialogMaterial.elevation, 6.0);
         expect(
           dialogMaterial.shape,
@@ -877,8 +878,8 @@ void main() {
       // Test vertical divider position.
       final Finder divider = find.byType(VerticalDivider);
       final Offset dividerTopLeft = tester.getTopLeft(divider);
-      final Offset headerTextTopRiught = tester.getTopRight(headerText);
-      expect(dividerTopLeft.dx, headerTextTopRiught.dx + 16.0);
+      final Offset headerTextTopRight = tester.getTopRight(headerText);
+      expect(dividerTopLeft.dx, headerTextTopRight.dx + 16.0);
       expect(dividerTopLeft.dy, dialogTopLeft.dy);
 
       // Test sub header text position.
@@ -1290,7 +1291,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(
           Material.of(tester.element(find.text('30'))),
-          paints..circle()..circle(color: material3 ? theme.colorScheme.onSurfaceVariant.withOpacity(0.12) : theme.colorScheme.onSurfaceVariant.withOpacity(0.12))
+          paints..circle()..circle(color: material3 ? theme.colorScheme.onSurfaceVariant.withOpacity(0.1) : theme.colorScheme.onSurfaceVariant.withOpacity(0.12))
         );
         await gesture.up();
         await tester.pumpAndSettle();
@@ -1577,6 +1578,13 @@ void main() {
     });
 
     testWidgets('input mode', (WidgetTester tester) async {
+      // Fill the clipboard so that the Paste option is available in the text
+      // selection menu.
+      final MockClipboard mockClipboard = MockClipboard();
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+      await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
+      addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
+
       final SemanticsHandle semantics = tester.ensureSemantics();
 
       initialEntryMode = DatePickerEntryMode.input;
@@ -1596,7 +1604,22 @@ void main() {
           isFocusable: true,
         ));
 
-        // The semantics of the InputDatePickerFormField are tested in its tests.
+        expect(tester.getSemantics(find.byType(EditableText)), matchesSemantics(
+          label: 'Enter Date',
+          isEnabled: true,
+          hasEnabledState: true,
+          isTextField: true,
+          isFocused: true,
+          value: '01/15/2016',
+          hasTapAction: true,
+          hasSetTextAction: true,
+          hasSetSelectionAction: true,
+          hasCopyAction: true,
+          hasCutAction: true,
+          hasPasteAction: true,
+          hasMoveCursorBackwardByCharacterAction: true,
+          hasMoveCursorBackwardByWordAction: true,
+        ));
 
         // Ok/Cancel buttons
         expect(tester.getSemantics(find.text('OK')), matchesSemantics(

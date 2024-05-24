@@ -314,6 +314,21 @@ void main() {
     log.clear();
   });
 
+  test('Merging change notifiers supports any iterable', () {
+    final TestNotifier source1 = TestNotifier();
+    final TestNotifier source2 = TestNotifier();
+    final List<String> log = <String>[];
+
+    final Listenable merged = Listenable.merge(<Listenable?>{source1, source2});
+    void listener() => log.add('listener');
+
+    merged.addListener(listener);
+    source1.notify();
+    source2.notify();
+    expect(log, <String>['listener', 'listener']);
+    log.clear();
+  });
+
   test('Merging change notifiers ignores null', () {
     final TestNotifier source1 = TestNotifier();
     final TestNotifier source2 = TestNotifier();

@@ -62,8 +62,13 @@ class _SaveableFormState extends State<_SaveableForm> {
     });
   }
 
-  Future<void> _showDialog() async {
-    final bool? shouldDiscard = await showDialog<bool>(
+  /// Shows a dialog and resolves to true when the user has indicated that they
+  /// want to pop.
+  ///
+  /// A return value of null indicates a desire not to pop, such as when the
+  /// user has dismissed the modal without tapping a button.
+  Future<bool?> _showDialog() {
+    return showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -86,19 +91,13 @@ class _SaveableFormState extends State<_SaveableForm> {
         );
       },
     );
-
-    if (shouldDiscard ?? false) {
-      // Since this is the root route, quit the app where possible by invoking
-      // the SystemNavigator. If this wasn't the root route, then
-      // Navigator.maybePop could be used instead.
-      // See https://github.com/flutter/flutter/issues/11490
-      SystemNavigator.pop();
-    }
   }
 
   void _save(String? value) {
+    final String nextSavedValue = value ?? '';
     setState(() {
-      _savedValue = value ?? '';
+      _savedValue = nextSavedValue;
+      _isDirty = nextSavedValue != _controller.text;
     });
   }
 
@@ -112,11 +111,18 @@ class _SaveableFormState extends State<_SaveableForm> {
           const SizedBox(height: 20.0),
           Form(
             canPop: !_isDirty,
-            onPopInvoked: (bool didPop) {
+            onPopInvoked: (bool didPop) async {
               if (didPop) {
                 return;
               }
-              _showDialog();
+              final bool shouldPop = await _showDialog() ?? false;
+              if (shouldPop) {
+                // Since this is the root route, quit the app where possible by
+                // invoking the SystemNavigator. If this wasn't the root route,
+                // then Navigator.maybePop could be used instead.
+                // See https://github.com/flutter/flutter/issues/11490
+                SystemNavigator.pop();
+              }
             },
             autovalidateMode: AutovalidateMode.always,
             child: Column(
@@ -146,9 +152,9 @@ class _SaveableFormState extends State<_SaveableForm> {
             ),
           ),
           TextButton(
-            onPressed: () {
-              if (_isDirty) {
-                _showDialog();
+            onPressed: () async {
+              final bool shouldPop = !_isDirty || (await _showDialog() ?? false);
+              if (!shouldPop) {
                 return;
               }
               // Since this is the root route, quit the app where possible by

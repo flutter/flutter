@@ -13,8 +13,8 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    final Finder stringFragmentTextFinder = find.descendant(
-      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_StringFragment'),
+    final Finder timeSelectorSeparatorFinder = find.descendant(
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator'),
       matching: find.byType(Text),
     ).first;
     final Finder hourControlFinder = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourControl');
@@ -33,10 +33,10 @@ void main() {
 
     for (final Locale locale in locales) {
       final Offset center = await startPicker(tester, (TimeOfDay? time) { }, locale: locale, useMaterial3: false);
-      final Text stringFragmentText = tester.widget(stringFragmentTextFinder);
+      final Text stringFragmentText = tester.widget(timeSelectorSeparatorFinder);
       final double hourLeftOffset = tester.getTopLeft(hourControlFinder).dx;
       final double minuteLeftOffset = tester.getTopLeft(minuteControlFinder).dx;
-      final double stringFragmentLeftOffset = tester.getTopLeft(stringFragmentTextFinder).dx;
+      final double stringFragmentLeftOffset = tester.getTopLeft(timeSelectorSeparatorFinder).dx;
 
       if (locale == const Locale('en', 'US')) {
         final double dayPeriodLeftOffset = tester.getTopLeft(dayPeriodControlFinder).dx;
@@ -83,8 +83,8 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    final Finder stringFragmentTextFinder = find.descendant(
-      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_StringFragment'),
+    final Finder timeSelectorSeparatorFinder = find.descendant(
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator'),
       matching: find.byType(Text),
     ).first;
     final Finder hourControlFinder = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourControl');
@@ -103,10 +103,10 @@ void main() {
 
     for (final Locale locale in locales) {
       final Offset center = await startPicker(tester, (TimeOfDay? time) { }, locale: locale, useMaterial3: true);
-      final Text stringFragmentText = tester.widget(stringFragmentTextFinder);
+      final Text stringFragmentText = tester.widget(timeSelectorSeparatorFinder);
       final double hourLeftOffset = tester.getTopLeft(hourControlFinder).dx;
       final double minuteLeftOffset = tester.getTopLeft(minuteControlFinder).dx;
-      final double stringFragmentLeftOffset = tester.getTopLeft(stringFragmentTextFinder).dx;
+      final double stringFragmentLeftOffset = tester.getTopLeft(timeSelectorSeparatorFinder).dx;
 
       if (locale == const Locale('en', 'US')) {
         final double dayPeriodLeftOffset = tester.getTopLeft(dayPeriodControlFinder).dx;
@@ -153,8 +153,8 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    final Finder stringFragmentTextFinder = find.descendant(
-      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_StringFragment'),
+    final Finder timeSelectorSeparatorFinder = find.descendant(
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator'),
       matching: find.byType(Text),
     ).first;
     final Finder hourControlFinder = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourControl');
@@ -173,11 +173,11 @@ void main() {
 
     for (final Locale locale in locales) {
       final Offset center = await startPicker(tester, (TimeOfDay? time) { }, locale: locale, useMaterial3: false);
-      final Text stringFragmentText = tester.widget(stringFragmentTextFinder);
+      final Text stringFragmentText = tester.widget(timeSelectorSeparatorFinder);
       final double hourLeftOffset = tester.getTopLeft(hourControlFinder).dx;
       final double hourTopOffset = tester.getTopLeft(hourControlFinder).dy;
       final double minuteLeftOffset = tester.getTopLeft(minuteControlFinder).dx;
-      final double stringFragmentLeftOffset = tester.getTopLeft(stringFragmentTextFinder).dx;
+      final double stringFragmentLeftOffset = tester.getTopLeft(timeSelectorSeparatorFinder).dx;
 
       if (locale == const Locale('en', 'US')) {
         final double dayPeriodLeftOffset = tester.getTopLeft(dayPeriodControlFinder).dx;
@@ -228,8 +228,8 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    final Finder stringFragmentTextFinder = find.descendant(
-      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_StringFragment'),
+    final Finder timeSelectorSeparatorFinder = find.descendant(
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator'),
       matching: find.byType(Text),
     ).first;
     final Finder hourControlFinder = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourControl');
@@ -248,11 +248,11 @@ void main() {
 
     for (final Locale locale in locales) {
       final Offset center = await startPicker(tester, (TimeOfDay? time) { }, locale: locale, useMaterial3: true);
-      final Text stringFragmentText = tester.widget(stringFragmentTextFinder);
+      final Text stringFragmentText = tester.widget(timeSelectorSeparatorFinder);
       final double hourLeftOffset = tester.getTopLeft(hourControlFinder).dx;
       final double hourTopOffset = tester.getTopLeft(hourControlFinder).dy;
       final double minuteLeftOffset = tester.getTopLeft(minuteControlFinder).dx;
-      final double stringFragmentLeftOffset = tester.getTopLeft(stringFragmentTextFinder).dx;
+      final double stringFragmentLeftOffset = tester.getTopLeft(timeSelectorSeparatorFinder).dx;
 
       if (locale == const Locale('en', 'US')) {
         final double dayPeriodLeftOffset = tester.getTopLeft(dayPeriodControlFinder).dx;
@@ -301,8 +301,8 @@ void main() {
     final Finder hourControlFinder = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourTextField');
     final Finder minuteControlFinder = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MinuteTextField');
     final Finder dayPeriodControlFinder = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodControl');
-    final Finder stringFragmentTextFinder = find.descendant(
-      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_StringFragment'),
+    final Finder timeSelectorSeparatorFinder = find.descendant(
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator'),
       matching: find.byType(Text),
     ).first;
 
@@ -321,10 +321,10 @@ void main() {
       await tester.tap(find.text('X'));
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
-      final Text stringFragmentText = tester.widget(stringFragmentTextFinder);
+      final Text stringFragmentText = tester.widget(timeSelectorSeparatorFinder);
       final double hourLeftOffset = tester.getTopLeft(hourControlFinder).dx;
       final double minuteLeftOffset = tester.getTopLeft(minuteControlFinder).dx;
-      final double stringFragmentLeftOffset = tester.getTopLeft(stringFragmentTextFinder).dx;
+      final double stringFragmentLeftOffset = tester.getTopLeft(timeSelectorSeparatorFinder).dx;
 
       if (locale == const Locale('en', 'US')) {
         final double dayPeriodLeftOffset = tester.getTopLeft(dayPeriodControlFinder).dx;
@@ -369,8 +369,8 @@ void main() {
     final Finder hourControlFinder = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourTextField');
     final Finder minuteControlFinder = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MinuteTextField');
     final Finder dayPeriodControlFinder = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodControl');
-    final Finder stringFragmentTextFinder = find.descendant(
-      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_StringFragment'),
+    final Finder timeSelectorSeparatorFinder = find.descendant(
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TimeSelectorSeparator'),
       matching: find.byType(Text),
     ).first;
 
@@ -389,10 +389,10 @@ void main() {
       await tester.tap(find.text('X'));
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
-      final Text stringFragmentText = tester.widget(stringFragmentTextFinder);
+      final Text stringFragmentText = tester.widget(timeSelectorSeparatorFinder);
       final double hourLeftOffset = tester.getTopLeft(hourControlFinder).dx;
       final double minuteLeftOffset = tester.getTopLeft(minuteControlFinder).dx;
-      final double stringFragmentLeftOffset = tester.getTopLeft(stringFragmentTextFinder).dx;
+      final double stringFragmentLeftOffset = tester.getTopLeft(timeSelectorSeparatorFinder).dx;
 
       if (locale == const Locale('en', 'US')) {
         final double dayPeriodLeftOffset = tester.getTopLeft(dayPeriodControlFinder).dx;

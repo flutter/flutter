@@ -524,6 +524,27 @@ void main() {
     // ignore: avoid_dynamic_calls
     expect(_getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester).labelStyle, labelStyle);
   });
+
+  testWidgets('SemanticsDebugger label for rtl.', (WidgetTester tester) async {
+    final UniqueKey debugger = UniqueKey();
+    final Key label = UniqueKey();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: SemanticsDebugger(
+          key: debugger,
+          child: Semantics(
+            label: 'ملصق',
+            textDirection: TextDirection.rtl,
+            key: label,
+          ),
+        ),
+      ),
+    );
+
+    expect(_getMessageShownInSemanticsDebugger(widgetKey: label, debuggerKey: debugger, tester: tester), '\u2067ملصق\u2069');
+  });
 }
 
 String _getMessageShownInSemanticsDebugger({

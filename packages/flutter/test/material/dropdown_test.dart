@@ -2269,16 +2269,16 @@ void main() {
       'three',
     ];
     String? item = items[0];
-    late MediaQueryData mediaQuery;
+    late double textScale;
 
     await tester.pumpWidget(
       StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return MaterialApp(
             builder: (BuildContext context, Widget? child) {
-              mediaQuery = MediaQuery.of(context);
+              textScale = MediaQuery.of(context).textScaler.scale(14) / 14;
               return MediaQuery(
-                data: mediaQuery,
+                data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
                 child: child!,
               );
             },
@@ -2292,9 +2292,7 @@ void main() {
                 onChanged: (String? newItem) {
                   setState(() {
                     item = newItem;
-                    mediaQuery = mediaQuery.copyWith(
-                      textScaleFactor: mediaQuery.textScaleFactor + 0.1,
-                    );
+                    textScale += 0.1;
                   });
                 },
               ),
@@ -2410,11 +2408,11 @@ void main() {
     await tester.pumpWidget(buildFrame(isFormField: true, buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, autofocus: true));
     await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
     expect(focusNode.hasPrimaryFocus, isTrue);
-    expect(find.byType(Material), paints ..rect(rect: const Rect.fromLTRB(0.0, 264.0, 800.0, 336.0), color: const Color(0x1f000000)));
+    expect(find.byType(Material), paints ..rect(rect: const Rect.fromLTRB(0.0, 268.0, 800.0, 332.0), color: const Color(0x1f000000)));
 
     await tester.pumpWidget(buildFrame(isFormField: true, buttonKey: buttonKey, onChanged: onChanged, focusNode: focusNode, focusColor: const Color(0xff00ff00)));
     await tester.pumpAndSettle(); // Pump a frame for autofocus to take effect.
-    expect(find.byType(Material), paints ..rect(rect: const Rect.fromLTRB(0.0, 264.0, 800.0, 336.0), color: const Color(0x1f00ff00)));
+    expect(find.byType(Material), paints ..rect(rect: const Rect.fromLTRB(0.0, 268.0, 800.0, 332.0), color: const Color(0x1f00ff00)));
   });
 
   testWidgets("DropdownButton won't be focused if not enabled", (WidgetTester tester) async {

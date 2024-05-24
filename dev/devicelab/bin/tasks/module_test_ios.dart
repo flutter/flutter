@@ -250,9 +250,7 @@ dependencies:
       checkDirectoryNotExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', '$dartPluginName.framework'));
 
       // Native assets embedded, no embedded framework.
-      const String libFfiPackageDylib = 'lib$ffiPackageName.dylib';
-      checkFileExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', libFfiPackageDylib));
-      checkDirectoryNotExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', '$ffiPackageName.framework'));
+      checkFileExists(path.join(ephemeralIOSHostApp.path, 'Frameworks', '$ffiPackageName.framework', ffiPackageName));
 
       section('Clean and pub get module');
 
@@ -312,8 +310,38 @@ end
           },
         );
 
-        final File hostPodfileLockFile = File(path.join(objectiveCHostApp.path, 'Podfile.lock'));
-        final String hostPodfileLockOutput = hostPodfileLockFile.readAsStringSync();
+        File hostPodfileLockFile = File(path.join(objectiveCHostApp.path, 'Podfile.lock'));
+        String hostPodfileLockOutput = hostPodfileLockFile.readAsStringSync();
+        if (!hostPodfileLockOutput.contains(':path: "../hello/.ios/Flutter"')
+            || !hostPodfileLockOutput.contains(':path: "../hello/.ios/Flutter/FlutterPluginRegistrant"')
+            || !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/url_launcher_ios/ios"')
+            || hostPodfileLockOutput.contains('android_alarm_manager')
+            || hostPodfileLockOutput.contains(dartPluginName)) {
+          print(hostPodfileLockOutput);
+          throw TaskResult.failure('Building host app Podfile.lock does not contain expected pods');
+        }
+
+        section('Validate install_flutter_[engine_pod|plugin_pods|application_pod] methods in the Podfile can be executed normally');
+
+        podfileContent = podfileContent.replaceFirst('''
+  install_all_flutter_pods flutter_application_path
+''', '''
+  install_flutter_engine_pod(flutter_application_path)
+  install_flutter_plugin_pods(flutter_application_path)
+  install_flutter_application_pod(flutter_application_path)
+''');
+        await podfile.writeAsString(podfileContent, flush: true);
+
+        await exec(
+          'pod',
+          <String>['install'],
+          environment: <String, String>{
+            'LANG': 'en_US.UTF-8',
+          },
+        );
+
+        hostPodfileLockFile = File(path.join(objectiveCHostApp.path, 'Podfile.lock'));
+        hostPodfileLockOutput = hostPodfileLockFile.readAsStringSync();
         if (!hostPodfileLockOutput.contains(':path: "../hello/.ios/Flutter"')
             || !hostPodfileLockOutput.contains(':path: "../hello/.ios/Flutter/FlutterPluginRegistrant"')
             || !hostPodfileLockOutput.contains(':path: "../hello/.ios/.symlinks/plugins/url_launcher_ios/ios"')
@@ -385,7 +413,8 @@ end
 
       checkFileExists(path.join(
         hostFrameworksDirectory,
-        libFfiPackageDylib,
+        '$ffiPackageName.framework',
+        ffiPackageName,
       ));
 
       section('Check the NOTICE file is correct');
@@ -491,7 +520,8 @@ end
         checkFileExists(path.join(
           archivedAppPath,
           'Frameworks',
-          libFfiPackageDylib,
+          '$ffiPackageName.framework',
+          ffiPackageName,
         ));
 
         // The host app example builds plugins statically, url_launcher_ios.framework

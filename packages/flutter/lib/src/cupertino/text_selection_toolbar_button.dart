@@ -92,26 +92,18 @@ class CupertinoTextSelectionToolbarButton extends StatefulWidget {
 
     assert(debugCheckHasCupertinoLocalizations(context));
     final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
-    switch (buttonItem.type) {
-      case ContextMenuButtonType.cut:
-        return localizations.cutButtonLabel;
-      case ContextMenuButtonType.copy:
-        return localizations.copyButtonLabel;
-      case ContextMenuButtonType.paste:
-        return localizations.pasteButtonLabel;
-      case ContextMenuButtonType.selectAll:
-        return localizations.selectAllButtonLabel;
-      case ContextMenuButtonType.lookUp:
-        return localizations.lookUpButtonLabel;
-      case ContextMenuButtonType.searchWeb:
-        return localizations.searchWebButtonLabel;
-      case ContextMenuButtonType.share:
-        return localizations.shareButtonLabel;
-      case ContextMenuButtonType.liveTextInput:
-      case ContextMenuButtonType.delete:
-      case ContextMenuButtonType.custom:
-        return '';
-    }
+    return switch (buttonItem.type) {
+      ContextMenuButtonType.cut       => localizations.cutButtonLabel,
+      ContextMenuButtonType.copy      => localizations.copyButtonLabel,
+      ContextMenuButtonType.paste     => localizations.pasteButtonLabel,
+      ContextMenuButtonType.selectAll => localizations.selectAllButtonLabel,
+      ContextMenuButtonType.lookUp    => localizations.lookUpButtonLabel,
+      ContextMenuButtonType.searchWeb => localizations.searchWebButtonLabel,
+      ContextMenuButtonType.share     => localizations.shareButtonLabel,
+      ContextMenuButtonType.liveTextInput
+        || ContextMenuButtonType.delete
+        || ContextMenuButtonType.custom => '',
+    };
   }
 
   @override

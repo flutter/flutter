@@ -149,8 +149,9 @@ const double _kMaxRegularTextScaleFactor = 1.4;
 // Accessibility mode on iOS is determined by the text scale factor that the
 // user has selected.
 bool _isInAccessibilityMode(BuildContext context) {
-  final double? factor = MediaQuery.maybeTextScalerOf(context)?.textScaleFactor;
-  return factor != null && factor > _kMaxRegularTextScaleFactor;
+  const double defaultFontSize = 14.0;
+  final double? scaledFontSize = MediaQuery.maybeTextScalerOf(context)?.scale(defaultFontSize);
+  return scaledFontSize != null && scaledFontSize > defaultFontSize * _kMaxRegularTextScaleFactor;
 }
 
 /// An iOS-style alert dialog.
@@ -187,7 +188,7 @@ bool _isInAccessibilityMode(BuildContext context) {
 ///    holds arbitrary content to create custom popups.
 ///  * [CupertinoDialogAction], which is an iOS-style dialog button.
 ///  * [AlertDialog], a Material Design alert dialog.
-///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
+///  * <https://developer.apple.com/design/human-interface-guidelines/alerts/>
 class CupertinoAlertDialog extends StatefulWidget {
   /// Creates an iOS-style alert dialog.
   const CupertinoAlertDialog({
@@ -264,7 +265,8 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
     widget.actionScrollController ?? (_backupActionScrollController ??= ScrollController());
 
   Widget _buildContent(BuildContext context) {
-    final double textScaleFactor = MediaQuery.textScalerOf(context).textScaleFactor;
+    const double defaultFontSize = 14.0;
+    final double effectiveTextScaleFactor = MediaQuery.textScalerOf(context).scale(defaultFontSize) / defaultFontSize;
 
     final List<Widget> children = <Widget>[
       if (widget.title != null || widget.content != null)
@@ -278,12 +280,12 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
               left: _kDialogEdgePadding,
               right: _kDialogEdgePadding,
               bottom: widget.content == null ? _kDialogEdgePadding : 1.0,
-              top: _kDialogEdgePadding * textScaleFactor,
+              top: _kDialogEdgePadding * effectiveTextScaleFactor,
             ),
             messagePadding: EdgeInsets.only(
               left: _kDialogEdgePadding,
               right: _kDialogEdgePadding,
-              bottom: _kDialogEdgePadding * textScaleFactor,
+              bottom: _kDialogEdgePadding * effectiveTextScaleFactor,
               top: widget.title == null ? _kDialogEdgePadding : 1.0,
             ),
             titleTextStyle: _kCupertinoDialogTitleStyle.copyWith(
@@ -398,7 +400,7 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
 ///
 ///  * [CupertinoAlertDialog], which is a dialog with a title, content, and
 ///    actions.
-///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
+///  * <https://developer.apple.com/design/human-interface-guidelines/alerts/>
 class CupertinoPopupSurface extends StatelessWidget {
   /// Creates an iOS-style rounded rectangle popup surface.
   const CupertinoPopupSurface({
@@ -1176,11 +1178,11 @@ class _RenderCupertinoDialog extends RenderBox {
   // for buttons to just over 1 button's height to make room for the content
   // section.
   _AlertDialogSizes performRegularLayout({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
-    final bool hasDivider = contentSection!.getMaxIntrinsicHeight(computeMaxIntrinsicWidth(0)) > 0.0
-        && actionsSection!.getMaxIntrinsicHeight(computeMaxIntrinsicWidth(0)) > 0.0;
+    final bool hasDivider = contentSection!.getMaxIntrinsicHeight(getMaxIntrinsicWidth(0)) > 0.0
+        && actionsSection!.getMaxIntrinsicHeight(getMaxIntrinsicWidth(0)) > 0.0;
     final double dividerThickness = hasDivider ? _dividerThickness : 0.0;
 
-    final double minActionsHeight = actionsSection!.getMinIntrinsicHeight(computeMaxIntrinsicWidth(0));
+    final double minActionsHeight = actionsSection!.getMinIntrinsicHeight(getMaxIntrinsicWidth(0));
 
     final Size contentSize = layoutChild(
       contentSection!,
@@ -1653,10 +1655,6 @@ class CupertinoDialogAction extends StatelessWidget {
   /// value.
   bool get enabled => onPressed != null;
 
-  double _calculatePadding(BuildContext context) {
-    return 8.0 * MediaQuery.textScalerOf(context).textScaleFactor;
-  }
-
   // Dialog action content shrinks to fit, up to a certain point, and if it still
   // cannot fit at the minimum size, the text content is ellipsized.
   //
@@ -1665,6 +1663,7 @@ class CupertinoDialogAction extends StatelessWidget {
     required BuildContext context,
     required TextStyle textStyle,
     required Widget content,
+    required double padding,
   }) {
     final bool isInAccessibilityMode = _isInAccessibilityMode(context);
     final double dialogWidth = isInAccessibilityMode
@@ -1675,7 +1674,6 @@ class CupertinoDialogAction extends StatelessWidget {
     // buttons. This ratio information is used to automatically scale down action
     // button text to fit the available space.
     final double fontSizeRatio = MediaQuery.textScalerOf(context).scale(textStyle.fontSize!) / _kDialogMinButtonFontSize;
-    final double padding = _calculatePadding(context);
 
     return IntrinsicHeight(
       child: SizedBox(
@@ -1724,8 +1722,7 @@ class CupertinoDialogAction extends StatelessWidget {
         isDestructiveAction ? CupertinoColors.systemRed : CupertinoTheme.of(context).primaryColor,
         context,
       ),
-    );
-    style = style.merge(textStyle);
+    ).merge(textStyle);
 
     if (isDefaultAction) {
       style = style.copyWith(fontWeight: FontWeight.w600);
@@ -1734,7 +1731,10 @@ class CupertinoDialogAction extends StatelessWidget {
     if (!enabled) {
       style = style.copyWith(color: style.color!.withOpacity(0.5));
     }
-
+    final double fontSize = style.fontSize ?? kDefaultFontSize;
+    final double fontSizeToScale = fontSize == 0.0 ? kDefaultFontSize : fontSize;
+    final double effectiveTextScale = MediaQuery.textScalerOf(context).scale(fontSizeToScale) / fontSizeToScale;
+    final double padding = 8.0 * effectiveTextScale;
     // Apply a sizing policy to the action button's content based on whether or
     // not the device is in accessibility mode.
     // TODO(mattcarroll): The following logic is not entirely correct. It is also
@@ -1750,6 +1750,7 @@ class CupertinoDialogAction extends StatelessWidget {
             context: context,
             textStyle: style,
             content: child,
+            padding: padding,
           );
 
     return MouseRegion(
@@ -1764,7 +1765,7 @@ class CupertinoDialogAction extends StatelessWidget {
           ),
           child: Container(
             alignment: Alignment.center,
-            padding: EdgeInsets.all(_calculatePadding(context)),
+            padding: EdgeInsets.all(padding),
             child: sizedContent,
           ),
         ),
@@ -2016,7 +2017,7 @@ class _RenderCupertinoDialogActions extends RenderBox
       return 0.0;
     } else if (isActionSheet) {
       if (childCount == 1) {
-        return firstChild!.computeMaxIntrinsicHeight(width) + dividerThickness;
+        return firstChild!.getMaxIntrinsicHeight(width) + dividerThickness;
       }
       if (hasCancelButton && childCount < 4) {
         return _computeMinIntrinsicHeightWithCancel(width);
@@ -2088,7 +2089,7 @@ class _RenderCupertinoDialogActions extends RenderBox
       return 0.0;
     } else if (isActionSheet) {
       if (childCount == 1) {
-        return firstChild!.computeMaxIntrinsicHeight(width) + dividerThickness;
+        return firstChild!.getMaxIntrinsicHeight(width) + dividerThickness;
       }
       return _computeMaxIntrinsicHeightStacked(width);
     } else if (childCount == 1) {
@@ -2242,7 +2243,7 @@ class _RenderCupertinoDialogActions extends RenderBox
 
       // Our height is the accumulated height of all buttons and dividers.
       return constraints.constrain(
-        Size(computeMaxIntrinsicWidth(0), verticalOffset),
+        Size(getMaxIntrinsicWidth(0), verticalOffset),
       );
     }
   }

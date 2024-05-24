@@ -99,7 +99,7 @@ void main() {
     );
 
     final ThemeData theme = Theme.of(tester.element(find.byType(Scaffold)));
-    expect(material.color, theme.colorScheme.surface);
+    expect(material.color, theme.colorScheme.surfaceContainerLow);
     expect(material.elevation, 1.0);
     expect(material.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28.0))));
     expect(material.clipBehavior, Clip.none);
@@ -273,7 +273,7 @@ void main() {
     );
     expect(material.elevation, 1.0);
     final ThemeData theme = Theme.of(tester.element(find.byType(Scaffold)));
-    expect(material.color, theme.colorScheme.surface);
+    expect(material.color, theme.colorScheme.surfaceContainerLow);
   });
 
   testWidgets("Material2 - Modal bottom sheet-specific parameters don't apply to persistent bottom sheets", (WidgetTester tester) async {

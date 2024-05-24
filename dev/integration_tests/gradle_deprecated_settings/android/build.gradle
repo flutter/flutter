@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This file is auto generated.
-// To update all the build.gradle files in the Flutter repo,
-// See dev/tools/bin/generate_gradle_lockfiles.dart.
+// This file is NOT auto generated.
+// DO NOT update it by running dev/tools/bin/generate_gradle_lockfiles.dart.
 
 buildscript {
     ext.kotlin_version = '1.7.10'

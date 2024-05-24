@@ -78,6 +78,9 @@ class FakeEventReportingImageStreamCompleter extends ImageStreamCompleter {
 }
 
 void main() {
+  // TODO(polina-c): make sure images are disposed, https://github.com/flutter/flutter/issues/141388 [leaks-to-clean]
+  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
+
   late Image image20x10;
   late Image image200x100;
   setUp(() async {
@@ -884,6 +887,19 @@ void main() {
               imageStreamCompleterHandle.dispose();
             },
         ImageStreamCompleterHandle,
+      ),
+      areCreateAndDispose,
+    );
+  });
+
+  testWidgets('ImageInfo dispatches memory events', (WidgetTester tester) async {
+    await expectLater(
+      await memoryEvents(
+        () async {
+          final ImageInfo info = ImageInfo(image: image20x10);
+          info.dispose();
+        },
+        ImageInfo,
       ),
       areCreateAndDispose,
     );

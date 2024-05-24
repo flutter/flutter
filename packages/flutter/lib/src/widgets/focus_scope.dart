@@ -511,7 +511,7 @@ class _FocusWithExternalFocusNode extends Focus {
 
 class _FocusState extends State<Focus> {
   FocusNode? _internalNode;
-  FocusNode get focusNode => widget.focusNode ?? _internalNode!;
+  FocusNode get focusNode => widget.focusNode ?? (_internalNode ??= _createNode());
   late bool _hadPrimaryFocus;
   late bool _couldRequestFocus;
   late bool _descendantsWereFocusable;
@@ -526,17 +526,13 @@ class _FocusState extends State<Focus> {
   }
 
   void _initNode() {
-    if (widget.focusNode == null) {
-      // Only create a new node if the widget doesn't have one.
-      // This calls a function instead of just allocating in place because
-      // _createNode is overridden in _FocusScopeState.
-      _internalNode ??= _createNode();
-    }
-    focusNode.descendantsAreFocusable = widget.descendantsAreFocusable;
-    focusNode.descendantsAreTraversable = widget.descendantsAreTraversable;
-    focusNode.skipTraversal = widget.skipTraversal;
-    if (widget._canRequestFocus != null) {
-      focusNode.canRequestFocus = widget._canRequestFocus!;
+    if (!widget._usingExternalFocus) {
+      focusNode.descendantsAreFocusable = widget.descendantsAreFocusable;
+      focusNode.descendantsAreTraversable = widget.descendantsAreTraversable;
+      focusNode.skipTraversal = widget.skipTraversal;
+      if (widget._canRequestFocus != null) {
+        focusNode.canRequestFocus = widget._canRequestFocus!;
+      }
     }
     _couldRequestFocus = focusNode.canRequestFocus;
     _descendantsWereFocusable = focusNode.descendantsAreFocusable;

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:unified_analytics/unified_analytics.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
@@ -24,7 +23,6 @@ import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
 import 'platform_plugins.dart';
 import 'project_validator_result.dart';
-import 'reporting/reporting.dart';
 import 'template.dart';
 import 'xcode_project.dart';
 
@@ -455,11 +453,15 @@ class AndroidProject extends FlutterProjectPlatform {
   @override
   String get pluginConfigKey => AndroidPlugin.kConfigKey;
 
-  static final RegExp _androidNamespacePattern = RegExp('android {[\\S\\s]+namespace[\\s]+[\'"](.+)[\'"]');
-  static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'"](.*)[\'"]\\s*\$');
+  static final RegExp _androidNamespacePattern = RegExp('android {[\\S\\s]+namespace\\s*=?\\s*[\'"](.+)[\'"]');
+  static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
   static final RegExp _imperativeKotlinPluginPattern = RegExp('^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$');
   static final RegExp _declarativeKotlinPluginPattern = RegExp('^\\s*id\\s+[\'"]kotlin-android[\'"]\\s*\$');
-  static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'"](.*)[\'"]\\s*\$');
+
+  /// Pattern used to find the assignment of the "group" property in Gradle.
+  /// Expected example: `group "dev.flutter.plugin"`
+  /// Regex is used in both Groovy and Kotlin Gradle files.
+  static final RegExp _groupPattern = RegExp('^\\s*group\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
 
   /// The Gradle root directory of the Android host app. This is the directory
   /// containing the `app/` subdirectory and the `settings.gradle` file that
@@ -534,7 +536,7 @@ class AndroidProject extends FlutterProjectPlatform {
 
         // This case allows for flutter run/build to work for modules. It does
         // not guarantee the Flutter Gradle Plugin is applied.
-        final bool managed = line.contains("def flutterPluginVersion = 'managed'");
+        final bool managed = line.contains(RegExp('def flutterPluginVersion = [\'"]managed[\'"]'));
         if (fileBasedApply || declarativeApply || managed) {
           return true;
         }
@@ -552,10 +554,54 @@ class AndroidProject extends FlutterProjectPlatform {
     return imperativeMatch || declarativeMatch;
   }
 
+  /// Gets top-level Gradle build file.
+  /// See https://developer.android.com/build#top-level.
+  ///
+  /// The file must exist and it must be written in either Groovy (build.gradle)
+  /// or Kotlin (build.gradle.kts).
+  File get hostAppGradleFile {
+    final File buildGroovy = hostAppGradleRoot.childFile('build.gradle');
+    final File buildKotlin = hostAppGradleRoot.childFile('build.gradle.kts');
+
+    if (buildGroovy.existsSync() && buildKotlin.existsSync()) {
+      // We mimic Gradle's behavior of preferring Groovy over Kotlin when both files exist.
+      return buildGroovy;
+    }
+
+    if (buildKotlin.existsSync()) {
+      return buildKotlin;
+    }
+
+    // TODO(bartekpacia): An exception should be thrown when neither
+    // build.gradle nor build.gradle.kts exist, instead of falling back to the
+    // Groovy file. See #141180.
+    return buildGroovy;
+  }
+
   /// Gets the module-level build.gradle file.
   /// See https://developer.android.com/build#module-level.
-  File get appGradleFile => hostAppGradleRoot.childDirectory('app')
-      .childFile('build.gradle');
+  ///
+  /// The file must exist and it must be written in either Groovy (build.gradle)
+  /// or Kotlin (build.gradle.kts).
+  File get appGradleFile {
+    final Directory appDir = hostAppGradleRoot.childDirectory('app');
+    final File buildGroovy = appDir.childFile('build.gradle');
+    final File buildKotlin = appDir.childFile('build.gradle.kts');
+
+    if (buildGroovy.existsSync() && buildKotlin.existsSync()) {
+      // We mimic Gradle's behavior of preferring Groovy over Kotlin when both files exist.
+      return buildGroovy;
+    }
+
+    if (buildKotlin.existsSync()) {
+      return buildKotlin;
+    }
+
+    // TODO(bartekpacia): An exception should be thrown when neither
+    // build.gradle nor build.gradle.kts exist, instead of falling back to the
+    // Groovy file. See #141180.
+    return buildGroovy;
+  }
 
   File get appManifestFile {
     if (isUsingGradle) {
@@ -652,7 +698,7 @@ $javaGradleCompatUrl
   }
 
   bool get isUsingGradle {
-    return hostAppGradleRoot.childFile('build.gradle').existsSync();
+    return hostAppGradleFile.existsSync();
   }
 
   String? get applicationId {
@@ -671,8 +717,7 @@ $javaGradleCompatUrl
   }
 
   String? get group {
-    final File gradleFile = hostAppGradleRoot.childFile('build.gradle');
-    return firstMatchInFile(gradleFile, _groupPattern)?.group(1);
+    return firstMatchInFile(hostAppGradleFile, _groupPattern)?.group(1);
   }
 
   /// The build directory where the Android artifacts are placed.
@@ -759,47 +804,23 @@ $javaGradleCompatUrl
     if (result.version != AndroidEmbeddingVersion.v1) {
       return;
     }
-    globals.printStatus(
-'''
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Warning
-──────────────────────────────────────────────────────────────────────────────
-Your Flutter application is created using an older version of the Android
-embedding. It is being deprecated in favor of Android embedding v2. To migrate
-your project, follow the steps at:
-
-https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-The detected reason was:
-
-  ${result.reason}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-''');
-    if (deprecationBehavior == DeprecationBehavior.ignore) {
-      BuildEvent('deprecated-v1-android-embedding-ignored', type: 'gradle', flutterUsage: globals.flutterUsage).send();
-      globals.analytics.send(
-        Event.flutterBuildInfo(
-        label: 'deprecated-v1-android-embedding-ignored',
-        buildType: 'gradle',
-      ));
-
-    } else { // DeprecationBehavior.exit
-      globals.analytics.send(
-        Event.flutterBuildInfo(
-        label: 'deprecated-v1-android-embedding-failed',
-        buildType: 'gradle',
-      ));
-
-      throwToolExit(
-        'Build failed due to use of deprecated Android v1 embedding.',
-        exitCode: 1,
-      );
-    }
+    // The v1 android embedding has been deleted.
+    throwToolExit(
+      'Build failed due to use of deleted Android v1 embedding.',
+      exitCode: 1,
+    );
   }
 
   AndroidEmbeddingVersion getEmbeddingVersion() {
-    return computeEmbeddingVersion().version;
+    final AndroidEmbeddingVersion androidEmbeddingVersion = computeEmbeddingVersion().version;
+    if (androidEmbeddingVersion == AndroidEmbeddingVersion.v1) {
+      throwToolExit(
+        'Build failed due to use of deleted Android v1 embedding.',
+        exitCode: 1,
+      );
+    }
+
+    return androidEmbeddingVersion;
   }
 
   AndroidEmbeddingVersionResult computeEmbeddingVersion() {

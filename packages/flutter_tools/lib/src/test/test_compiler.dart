@@ -10,17 +10,13 @@ import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
-import '../linux/native_assets.dart';
-import '../macos/native_assets.dart';
 import '../native_assets.dart';
 import '../project.dart';
-import '../windows/native_assets.dart';
 import 'test_time_recorder.dart';
 
 /// A request to the [TestCompiler] for recompilation.
@@ -50,9 +46,11 @@ class TestCompiler {
   /// If [testTimeRecorder] is passed, times will be recorded in it.
   TestCompiler(
     this.buildInfo,
-    this.flutterProject,
-    { String? precompiledDillPath, this.testTimeRecorder }
-  ) : testFilePath = precompiledDillPath ?? globals.fs.path.join(
+    this.flutterProject, {
+    String? precompiledDillPath,
+    this.testTimeRecorder,
+    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+  }) : testFilePath = precompiledDillPath ?? globals.fs.path.join(
         flutterProject!.directory.path,
         getBuildDirectory(),
         'test_cache',
@@ -61,7 +59,8 @@ class TestCompiler {
           dartDefines: buildInfo.dartDefines,
           extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         )),
-       shouldCopyDillFile = precompiledDillPath == null {
+       shouldCopyDillFile = precompiledDillPath == null,
+       _nativeAssetsBuilder = nativeAssetsBuilder {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
@@ -82,6 +81,7 @@ class TestCompiler {
   final String testFilePath;
   final bool shouldCopyDillFile;
   final TestTimeRecorder? testTimeRecorder;
+  final TestCompilerNativeAssetsBuilder? _nativeAssetsBuilder;
 
 
   ResidentCompiler? compiler;
@@ -169,50 +169,7 @@ class TestCompiler {
         invalidatedRegistrantFiles.add(flutterProject!.dartPluginRegistrant.absolute.uri);
       }
 
-      Uri? nativeAssetsYaml;
-      if (!buildInfo.buildNativeAssets) {
-        nativeAssetsYaml = null;
-      } else {
-        final Uri projectUri = FlutterProject.current().directory.uri;
-        final NativeAssetsBuildRunner buildRunner = NativeAssetsBuildRunnerImpl(
-          projectUri,
-          buildInfo.packageConfig,
-          globals.fs,
-          globals.logger,
-        );
-        if (globals.platform.isMacOS) {
-          (nativeAssetsYaml, _) = await buildNativeAssetsMacOS(
-            buildMode: buildInfo.mode,
-            projectUri: projectUri,
-            flutterTester: true,
-            fileSystem: globals.fs,
-            buildRunner: buildRunner,
-          );
-        } else if (globals.platform.isLinux) {
-          (nativeAssetsYaml, _) = await buildNativeAssetsLinux(
-            buildMode: buildInfo.mode,
-            projectUri: projectUri,
-            flutterTester: true,
-            fileSystem: globals.fs,
-            buildRunner: buildRunner,
-          );
-        } else if (globals.platform.isWindows) {
-          (nativeAssetsYaml, _) = await buildNativeAssetsWindows(
-            buildMode: buildInfo.mode,
-            projectUri: projectUri,
-            flutterTester: true,
-            fileSystem: globals.fs,
-            buildRunner: buildRunner,
-          );
-        } else {
-          await ensureNoNativeAssetsOrOsIsSupported(
-            projectUri,
-            const LocalPlatform().operatingSystem,
-            globals.fs,
-            buildRunner,
-          );
-        }
-      }
+      final Uri? nativeAssetsYaml = await _nativeAssetsBuilder?.build(buildInfo);
 
       final CompilerOutput? compilerOutput = await compiler!.recompile(
         request.mainUri,

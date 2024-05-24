@@ -637,12 +637,7 @@ class IOSDeployDebugger {
       );
     }
 
-    if (_stdinWriteFuture != null) {
-      _stdinWriteFuture = _stdinWriteFuture!.then<void>((_) => writeln());
-    } else {
-      _stdinWriteFuture = writeln();
-    }
-
+    _stdinWriteFuture = _stdinWriteFuture?.then<void>((_) => writeln()) ?? writeln();
     return _stdinWriteFuture;
   }
 

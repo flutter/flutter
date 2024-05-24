@@ -30,7 +30,7 @@ class ListenableBuilderExample extends StatefulWidget {
 
 class _ListenableBuilderExampleState extends State<ListenableBuilderExample> {
   final ListModel _listNotifier = ListModel();
-  final math.Random _random = math.Random(0); // fixed seed for reproducability
+  final math.Random _random = math.Random(0); // fixed seed for reproducibility
 
   @override
   Widget build(BuildContext context) {

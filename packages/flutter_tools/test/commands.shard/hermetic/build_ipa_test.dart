@@ -137,7 +137,7 @@ void main() {
     'xattr', '-r', '-d', 'com.apple.FinderInfo', '/',
   ]);
 
-  FakeCommand setUpXCResultCommand({String stdout = '', void Function()? onRun}) {
+  FakeCommand setUpXCResultCommand({String stdout = '', void Function(List<String> command)? onRun}) {
     return FakeCommand(
       command: const <String>[
         'xcrun',
@@ -155,7 +155,11 @@ void main() {
 
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
-  FakeCommand setUpFakeXcodeBuildHandler({ bool verbose = false, int exitCode = 0, void Function()? onRun }) {
+  FakeCommand setUpFakeXcodeBuildHandler({
+    bool verbose = false,
+    int exitCode = 0,
+    void Function(List<String> args)? onRun,
+  }) {
     return FakeCommand(
       command: <String>[
         'xcrun',
@@ -202,7 +206,7 @@ void main() {
         '-exportOptionsPlist',
         exportOptionsPlist,
       ],
-      onRun: () {
+      onRun: (_) {
         // exportOptionsPlist will be cleaned up within the command.
         // Save it somewhere else so test expectations can be run on it.
         if (cachePlist != null) {
@@ -572,7 +576,7 @@ void main() {
 
     expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
     expect(logger.statusText, contains('Building App Store IPA'));
-    expect(logger.statusText, contains('Built IPA to /build/ios/ipa'));
+    expect(logger.statusText, contains(RegExp(r'Built IPA to build/ios/ipa \(\d+\.\d+MB\)')));
     expect(logger.statusText, contains('To upload to the App Store'));
     expect(logger.statusText, contains('Apple Transporter macOS app'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -624,7 +628,7 @@ void main() {
 
     expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
     expect(logger.statusText, contains('Building ad-hoc IPA'));
-    expect(logger.statusText, contains('Built IPA to /build/ios/ipa'));
+    expect(logger.statusText, contains(RegExp(r'Built IPA to build/ios/ipa \(\d+\.\d+MB\)')));
     // Don'ltruct how to upload to the App Store.
     expect(logger.statusText, isNot(contains('To upload')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -676,7 +680,7 @@ void main() {
 
     expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
     expect(logger.statusText, contains('Building enterprise IPA'));
-    expect(logger.statusText, contains('Built IPA to /build/ios/ipa'));
+    expect(logger.statusText, contains(RegExp(r'Built IPA to build/ios/ipa \(\d+\.\d+MB\)')));
     // Don'ltruct how to upload to the App Store.
     expect(logger.statusText, isNot(contains('To upload')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -840,7 +844,7 @@ void main() {
       ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file('build/flutter_size_01/snapshot.arm64.json')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -885,7 +889,7 @@ void main() {
 
   testUsingContext('ipa build invokes xcode build export archive when passed plist', () async {
     final String outputPath =
-        fileSystem.path.absolute(fileSystem.path.join('build', 'ios', 'ipa'));
+        fileSystem.path.relative(fileSystem.path.join('build', 'ios', 'ipa'));
     final File exportOptions = fileSystem.file('ExportOptions.plist')
       ..createSync();
     final BuildCommand command = BuildCommand(
@@ -914,7 +918,7 @@ void main() {
       ],
     );
 
-    expect(logger.statusText, contains('Built IPA to $outputPath.'));
+    expect(logger.statusText, contains(RegExp('Built IPA to $outputPath ' r'\(\d+\.\d+MB\)')));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -936,7 +940,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
         fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
       setUpXCResultCommand(),
@@ -970,7 +974,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
         fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
       setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
@@ -1005,7 +1009,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
         fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
       setUpXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
@@ -1074,7 +1078,7 @@ void main() {
     );
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+      setUpFakeXcodeBuildHandler(exitCode: 1, onRun: (_) {
         fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
       }),
       setUpXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
@@ -1106,7 +1110,7 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
@@ -1159,7 +1163,7 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
@@ -1218,7 +1222,7 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
@@ -1277,7 +1281,7 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
@@ -1320,7 +1324,7 @@ void main() {
     const String plistPath = 'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(plistPath).createSync(recursive: true);
       }),
       exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
@@ -1366,7 +1370,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(templateIconContentsJsonPath)
         ..createSync(recursive: true)
         ..writeAsStringSync('''
@@ -1448,7 +1452,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(templateIconContentsJsonPath)
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -1528,7 +1532,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(projectIconContentsJsonPath)
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -1590,7 +1594,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(projectIconContentsJsonPath)
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -1653,7 +1657,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(projectIconContentsJsonPath)
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -1715,7 +1719,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         // Uses unknown format version 123.
         fileSystem.file(projectIconContentsJsonPath)
           ..createSync(recursive: true)
@@ -1787,7 +1791,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         // The following json contains examples of:
         // - invalid size
         // - invalid scale
@@ -1892,7 +1896,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(templateLaunchImageContentsJsonPath)
           ..createSync(recursive: true)
           ..writeAsStringSync('''
@@ -1973,7 +1977,7 @@ void main() {
 
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
-      setUpFakeXcodeBuildHandler(onRun: () {
+      setUpFakeXcodeBuildHandler(onRun: (_) {
         fileSystem.file(templateLaunchImageContentsJsonPath)
           ..createSync(recursive: true)
           ..writeAsStringSync('''

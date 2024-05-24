@@ -1,8 +1,11 @@
 {
-  "version": "v0_162",
+  "version": "v0_206",
 
   "md.comp.icon-button.disabled.icon.color": "onSurface",
   "md.comp.icon-button.disabled.icon.opacity": 0.38,
+  "md.comp.icon-button.focus.indicator.color": "secondary",
+  "md.comp.icon-button.focus.indicator.outline.offset": "md.sys.state.focus-indicator.outer-offset",
+  "md.comp.icon-button.focus.indicator.thickness": "md.sys.state.focus-indicator.thickness",
   "md.comp.icon-button.icon.size": 24.0,
   "md.comp.icon-button.selected.focus.icon.color": "primary",
   "md.comp.icon-button.selected.focus.state-layer.color": "primary",
@@ -14,8 +17,9 @@
   "md.comp.icon-button.selected.pressed.icon.color": "primary",
   "md.comp.icon-button.selected.pressed.state-layer.color": "primary",
   "md.comp.icon-button.selected.pressed.state-layer.opacity": "md.sys.state.pressed.state-layer-opacity",
+  "md.comp.icon-button.state-layer.height": 40.0,
   "md.comp.icon-button.state-layer.shape": "md.sys.shape.corner.full",
-  "md.comp.icon-button.state-layer.size": 40.0,
+  "md.comp.icon-button.state-layer.width": 40.0,
   "md.comp.icon-button.unselected.focus.icon.color": "onSurfaceVariant",
   "md.comp.icon-button.unselected.focus.state-layer.color": "onSurfaceVariant",
   "md.comp.icon-button.unselected.focus.state-layer.opacity": "md.sys.state.focus.state-layer-opacity",

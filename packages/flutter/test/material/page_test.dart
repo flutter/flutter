@@ -292,6 +292,7 @@ void main() {
       RepaintBoundary(
         key: key,
         child: MaterialApp(
+          debugShowCheckedModeBanner: false, // https://github.com/flutter/flutter/issues/143616
           theme: ThemeData(useMaterial3: true),
           onGenerateRoute: (RouteSettings settings) {
             return MaterialPageRoute<void>(

@@ -9,6 +9,8 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/project_migrator.dart';
+import '../base/terminal.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
@@ -18,6 +20,7 @@ import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
 import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
 import '../project.dart';
+import 'application_package.dart';
 import 'cocoapod_utils.dart';
 import 'migrations/flutter_application_migration.dart';
 import 'migrations/macos_deployment_target_migration.dart';
@@ -158,8 +161,23 @@ Future<void> buildMacOS({
   } finally {
     status.cancel();
   }
+
   if (result != 0) {
     throwToolExit('Build process failed');
+  }
+  final String? applicationBundle = MacOSApp.fromMacOSProject(flutterProject.macos).applicationBundle(buildInfo);
+  if (applicationBundle != null) {
+    final Directory outputDirectory = globals.fs.directory(applicationBundle);
+    // This output directory is the .app folder itself.
+    final int? directorySize = globals.os.getDirectorySize(outputDirectory);
+    final String appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
+        ? '' // Don't display the size when building a debug variant.
+        : ' (${getSizeAsPlatformMB(directorySize)})';
+    globals.printStatus(
+      '${globals.terminal.successMark} '
+      'Built ${globals.fs.path.relative(outputDirectory.path)}$appSize',
+      color: TerminalColor.green,
+    );
   }
   await _writeCodeSizeAnalysis(buildInfo, sizeAnalyzer);
   final Duration elapsedDuration = sw.elapsed;
@@ -181,11 +199,25 @@ Future<void> _writeCodeSizeAnalysis(BuildInfo buildInfo, SizeAnalyzer? sizeAnaly
   if (buildInfo.codeSizeDirectory == null || sizeAnalyzer == null) {
     return;
   }
-  final String arch = DarwinArch.x86_64.name;
-  final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
-    .childFile('snapshot.$arch.json');
-  final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)
-    .childFile('trace.$arch.json');
+  final File? aotSnapshot = DarwinArch.values.map<File?>((DarwinArch arch) {
+    return globals.fs.directory(buildInfo.codeSizeDirectory).childFile('snapshot.${arch.name}.json');
+    // Pick the first if there are multiple for simplicity
+  }).firstWhere(
+    (File? file) => file!.existsSync(),
+    orElse: () => null,
+  );
+  if (aotSnapshot == null) {
+    throw StateError('No code size snapshot file (snapshot.<ARCH>.json) found in ${buildInfo.codeSizeDirectory}');
+  }
+  final File? precompilerTrace = DarwinArch.values.map<File?>((DarwinArch arch) {
+    return globals.fs.directory(buildInfo.codeSizeDirectory).childFile('trace.${arch.name}.json');
+  }).firstWhere(
+    (File? file) => file!.existsSync(),
+    orElse: () => null,
+  );
+  if (precompilerTrace == null) {
+    throw StateError('No precompiler trace file (trace.<ARCH>.json) found in ${buildInfo.codeSizeDirectory}');
+  }
 
   // This analysis is only supported for release builds.
   // Attempt to guess the correct .app by picking the first one.

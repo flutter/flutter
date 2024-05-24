@@ -272,6 +272,121 @@ void main() {
     },
   );
 
+  testWidgets(
+    'validateGranularly returns a set containing all, and only, invalid fields',
+    (WidgetTester tester) async {
+      final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+      final UniqueKey validFieldsKey = UniqueKey();
+      final UniqueKey invalidFieldsKey = UniqueKey();
+
+      const String validString = 'Valid string';
+      const String invalidString = 'Invalid string';
+      String? validator(String? s) => s == validString ? null : 'Error text';
+
+      Widget builder() {
+        return MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: Form(
+                    key: formKey,
+                    child: ListView(
+                      children: <Widget>[
+                        TextFormField(
+                          key: validFieldsKey,
+                          initialValue: validString,
+                          validator: validator,
+                          autovalidateMode: AutovalidateMode.disabled,
+                        ),
+                        TextFormField(
+                          key: invalidFieldsKey,
+                          initialValue: invalidString,
+                          validator: validator,
+                          autovalidateMode: AutovalidateMode.disabled,
+                        ),
+                        TextFormField(
+                          key: invalidFieldsKey,
+                          initialValue: invalidString,
+                          validator: validator,
+                          autovalidateMode: AutovalidateMode.disabled,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(builder());
+
+      final Set<FormFieldState<dynamic>> validationResult = formKey.currentState!.validateGranularly();
+
+      expect(validationResult.length, equals(2));
+      expect(validationResult.where((FormFieldState<dynamic> field) => field.widget.key == invalidFieldsKey).length, equals(2));
+      expect(validationResult.where((FormFieldState<dynamic> field) => field.widget.key == validFieldsKey).length, equals(0));
+    },
+  );
+
+  testWidgets(
+    'Should announce error text when validateGranularly is called',
+    (WidgetTester tester) async {
+      final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+      const String validString = 'Valid string';
+      String? validator(String? s) => s == validString ? null : 'error';
+
+      Widget builder() {
+        return MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: Form(
+                    key: formKey,
+                    child: ListView(
+                      children: <Widget>[
+                        TextFormField(
+                          initialValue: validString,
+                          validator: validator,
+                          autovalidateMode: AutovalidateMode.disabled,
+                        ),
+                        TextFormField(
+                          initialValue: '',
+                          validator: validator,
+                          autovalidateMode: AutovalidateMode.disabled,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(builder());
+      expect(find.text('error'), findsNothing);
+
+      formKey.currentState!.validateGranularly();
+
+      await tester.pump();
+      expect(find.text('error'), findsOneWidget);
+
+      final CapturedAccessibilityAnnouncement announcement = tester.takeAnnouncements().single;
+      expect(announcement.message, 'error');
+      expect(announcement.textDirection, TextDirection.ltr);
+      expect(announcement.assertiveness, Assertiveness.assertive);
+    },
+  );
+
   testWidgets('Multiple TextFormFields communicate', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     final GlobalKey<FormFieldState<String>> fieldKey = GlobalKey<FormFieldState<String>>();

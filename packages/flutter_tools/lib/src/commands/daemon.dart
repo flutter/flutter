@@ -73,7 +73,7 @@ class DaemonCommand extends FlutterCommand {
         throwToolExit('Invalid port for `--listen-on-tcp-port`: $error');
       }
 
-      await _DaemonServer(
+      await DaemonServer(
         port: port,
         logger: StdoutLogger(
           terminal: globals.terminal,
@@ -100,12 +100,14 @@ class DaemonCommand extends FlutterCommand {
   }
 }
 
-class _DaemonServer {
-  _DaemonServer({
+@visibleForTesting
+class DaemonServer {
+  DaemonServer({
     this.port,
     required this.logger,
     this.notifyingLogger,
-  });
+    @visibleForTesting Future<ServerSocket> Function(InternetAddress address, int port) bind = ServerSocket.bind,
+  }) : _bind = bind;
 
   final int? port;
 
@@ -115,8 +117,20 @@ class _DaemonServer {
   // Logger that sends the message to the other end of daemon connection.
   final NotifyingLogger? notifyingLogger;
 
+  final Future<ServerSocket> Function(InternetAddress address, int port) _bind;
+
   Future<void> run() async {
-    final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, port!);
+    ServerSocket? serverSocket;
+    try {
+      serverSocket = await _bind(InternetAddress.loopbackIPv4, port!);
+    } on SocketException {
+      logger.printTrace('Bind on $port failed with IPv4, retrying on IPv6');
+    }
+
+    // If binding on IPv4 failed, try binding on IPv6.
+    // Omit try catch here, let the failure fallthrough.
+    serverSocket ??= await _bind(InternetAddress.loopbackIPv6, port!);
+
     logger.printStatus('Daemon server listening on ${serverSocket.port}');
 
     final StreamSubscription<Socket> subscription = serverSocket.listen(
@@ -650,11 +664,11 @@ class AppDomain extends Domain {
     String? packagesFilePath,
     String? dillOutputPath,
     bool ipv6 = false,
-    bool multidexEnabled = false,
     String? isolateFilter,
     bool machine = true,
     String? userIdentifier,
     bool enableDevTools = true,
+    required HotRunnerNativeAssetsBuilder? nativeAssetsBuilder,
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
@@ -703,10 +717,10 @@ class AppDomain extends Domain {
         projectRootPath: projectRootPath,
         dillOutputPath: dillOutputPath,
         ipv6: ipv6,
-        multidexEnabled: multidexEnabled,
         hostIsIde: true,
         machine: machine,
         analytics: globals.analytics,
+        nativeAssetsBuilder: nativeAssetsBuilder,
       );
     } else {
       runner = ColdRunner(
@@ -715,7 +729,6 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         applicationBinary: applicationBinary,
         ipv6: ipv6,
-        multidexEnabled: multidexEnabled,
         machine: machine,
       );
     }
@@ -995,6 +1008,7 @@ class DeviceDomain extends Domain {
     registerHandler('startDartDevelopmentService', startDartDevelopmentService);
     registerHandler('shutdownDartDevelopmentService', shutdownDartDevelopmentService);
     registerHandler('setExternalDevToolsUriForDartDevelopmentService', setExternalDevToolsUriForDartDevelopmentService);
+    registerHandler('getDiagnostics', getDiagnostics);
 
     // Use the device manager discovery so that client provided device types
     // are usable via the daemon protocol.
@@ -1046,12 +1060,23 @@ class DeviceDomain extends Domain {
   }
 
   /// Return a list of the current devices, discarding existing cache of devices.
-  Future<List<Map<String, Object?>>> discoverDevices([ Map<String, Object?>? args ]) async {
-    return <Map<String, Object?>>[
+  Future<List<Map<String, Object?>>> discoverDevices(Map<String, Object?> args) async {
+    final int? timeoutInMilliseconds = _getIntArg(args, 'timeoutInMilliseconds');
+    final Duration? timeout = timeoutInMilliseconds != null ? Duration(milliseconds: timeoutInMilliseconds) : null;
+
+    // Calling `discoverDevices()` and `_deviceToMap()` in parallel for better performance.
+    final List<List<Device>> devicesListList = await Future.wait(<Future<List<Device>>>[
       for (final PollingDeviceDiscovery discoverer in _discoverers)
-        for (final Device device in await discoverer.discoverDevices())
-          await _deviceToMap(device),
+        discoverer.discoverDevices(timeout: timeout),
+    ]);
+
+    final List<Device> devices = <Device>[
+      for (final List<Device> devicesList in devicesListList)
+        ...devicesList,
     ];
+    return Future.wait(<Future<Map<String, Object?>>>[
+      for (final Device device in devices) _deviceToMap(device),
+    ]);
   }
 
   /// Enable device events.
@@ -1285,6 +1310,21 @@ class DeviceDomain extends Domain {
     }
     return null;
   }
+
+  /// Gets a list of diagnostic messages pertaining to issues with any connected
+  /// devices.
+  Future<List<String>> getDiagnostics(Map<String, Object?> args) async {
+    // Call `getDiagnostics()` in parallel to improve performance.
+    final List<List<String>> diagnosticsLists = await Future.wait(<Future<List<String>>>[
+      for (final PollingDeviceDiscovery discoverer in _discoverers)
+        discoverer.getDiagnostics(),
+    ]);
+
+    return <String>[
+      for (final List<String> diagnostics in diagnosticsLists)
+        ...diagnostics,
+    ];
+  }
 }
 
 class DevToolsDomain extends Domain {
@@ -1320,6 +1360,8 @@ Future<Map<String, Object?>> _deviceToMap(Device device) async {
     'ephemeral': device.ephemeral,
     'emulatorId': await device.emulatorId,
     'sdk': await device.sdkNameAndVersion,
+    'isConnected': device.isConnected,
+    'connectionInterface': getNameForDeviceConnectionInterface(device.connectionInterface),
     'capabilities': <String, Object>{
       'hotReload': device.supportsHotReload,
       'hotRestart': device.supportsHotRestart,

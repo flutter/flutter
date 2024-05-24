@@ -2,27 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This file is auto generated.
-// To update all the build.gradle files in the Flutter repo,
-// See dev/tools/bin/generate_gradle_lockfiles.dart.
-
-buildscript {
-    ext.kotlin_version = '1.7.10'
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.0'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-
-    configurations.classpath {
-        resolutionStrategy.activateDependencyLocking()
-    }
-}
-
 allprojects {
     repositories {
         google()

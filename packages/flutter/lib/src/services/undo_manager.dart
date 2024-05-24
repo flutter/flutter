@@ -98,13 +98,11 @@ class UndoManager {
   }
 
   UndoDirection _toUndoDirection(String direction) {
-    switch (direction) {
-      case 'undo':
-        return UndoDirection.undo;
-      case 'redo':
-        return UndoDirection.redo;
-    }
-    throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown undo direction: $direction')]);
+    return switch (direction) {
+      'undo' => UndoDirection.undo,
+      'redo' => UndoDirection.redo,
+      _ => throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown undo direction: $direction')]),
+    };
   }
 }
 

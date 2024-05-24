@@ -49,7 +49,7 @@ void main() {
         '-v',
       ], workingDirectory: exampleAppDir.path);
       expect(
-          result.stdout, contains(RegExp(r'executing:\s+\S+gen_snapshot\s+')));
+          result.stdout, contains(RegExp(r'executing:\s+.+gen_snapshot\s+')));
     },
   );
 }

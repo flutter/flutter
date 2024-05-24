@@ -21,6 +21,11 @@
     "description": "The tooltip for the back button, which closes the current page and returns to the previous one."
   },
 
+  "clearButtonTooltip": "Clear text",
+  "@clearButtonTooltip": {
+    "description": "The tooltip for the button that clears the text input on the search view."
+  },
+
   "closeButtonTooltip": "Close",
   "@closeButtonTooltip": {
     "description": "The tooltip for the close button, which closes the current page and returns to the previous one."
@@ -437,6 +442,11 @@
   "currentDateLabel": "Today",
   "@currentDateLabel": {
     "description": "Label indicating that the focused date is the current date."
+  },
+
+  "selectedDateLabel": "Selected",
+  "@selectedDateLabel": {
+    "description": "The semantics label to describe the selected date in the calendar picker invoked using [showDatePicker]."
   },
 
   "reorderItemToStart": "Move to the start",

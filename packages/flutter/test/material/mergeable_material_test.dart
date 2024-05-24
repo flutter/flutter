@@ -14,38 +14,40 @@ enum RadiusType {
 void matches(BorderRadius? borderRadius, RadiusType top, RadiusType bottom) {
   final Radius cardRadius = kMaterialEdges[MaterialType.card]!.topLeft;
 
-  if (top == RadiusType.Sharp) {
-    expect(borderRadius?.topLeft, equals(Radius.zero));
-    expect(borderRadius?.topRight, equals(Radius.zero));
-  } else if (top == RadiusType.Shifting) {
-    expect(borderRadius?.topLeft.x, greaterThan(0.0));
-    expect(borderRadius?.topLeft.x, lessThan(cardRadius.x));
-    expect(borderRadius?.topLeft.y, greaterThan(0.0));
-    expect(borderRadius?.topLeft.y, lessThan(cardRadius.y));
-    expect(borderRadius?.topRight.x, greaterThan(0.0));
-    expect(borderRadius?.topRight.x, lessThan(cardRadius.x));
-    expect(borderRadius?.topRight.y, greaterThan(0.0));
-    expect(borderRadius?.topRight.y, lessThan(cardRadius.y));
-  } else {
-    expect(borderRadius?.topLeft, equals(cardRadius));
-    expect(borderRadius?.topRight, equals(cardRadius));
+  switch (top) {
+    case RadiusType.Sharp:
+      expect(borderRadius?.topLeft, equals(Radius.zero));
+      expect(borderRadius?.topRight, equals(Radius.zero));
+    case RadiusType.Shifting:
+      expect(borderRadius?.topLeft.x, greaterThan(0.0));
+      expect(borderRadius?.topLeft.x, lessThan(cardRadius.x));
+      expect(borderRadius?.topLeft.y, greaterThan(0.0));
+      expect(borderRadius?.topLeft.y, lessThan(cardRadius.y));
+      expect(borderRadius?.topRight.x, greaterThan(0.0));
+      expect(borderRadius?.topRight.x, lessThan(cardRadius.x));
+      expect(borderRadius?.topRight.y, greaterThan(0.0));
+      expect(borderRadius?.topRight.y, lessThan(cardRadius.y));
+    case RadiusType.Round:
+      expect(borderRadius?.topLeft, equals(cardRadius));
+      expect(borderRadius?.topRight, equals(cardRadius));
   }
 
-  if (bottom == RadiusType.Sharp) {
-    expect(borderRadius?.bottomLeft, equals(Radius.zero));
-    expect(borderRadius?.bottomRight, equals(Radius.zero));
-  } else if (bottom == RadiusType.Shifting) {
-    expect(borderRadius?.bottomLeft.x, greaterThan(0.0));
-    expect(borderRadius?.bottomLeft.x, lessThan(cardRadius.x));
-    expect(borderRadius?.bottomLeft.y, greaterThan(0.0));
-    expect(borderRadius?.bottomLeft.y, lessThan(cardRadius.y));
-    expect(borderRadius?.bottomRight.x, greaterThan(0.0));
-    expect(borderRadius?.bottomRight.x, lessThan(cardRadius.x));
-    expect(borderRadius?.bottomRight.y, greaterThan(0.0));
-    expect(borderRadius?.bottomRight.y, lessThan(cardRadius.y));
-  } else {
-    expect(borderRadius?.bottomLeft, equals(cardRadius));
-    expect(borderRadius?.bottomRight, equals(cardRadius));
+  switch (bottom) {
+    case RadiusType.Sharp:
+      expect(borderRadius?.bottomLeft, equals(Radius.zero));
+      expect(borderRadius?.bottomRight, equals(Radius.zero));
+    case RadiusType.Shifting:
+      expect(borderRadius?.bottomLeft.x, greaterThan(0.0));
+      expect(borderRadius?.bottomLeft.x, lessThan(cardRadius.x));
+      expect(borderRadius?.bottomLeft.y, greaterThan(0.0));
+      expect(borderRadius?.bottomLeft.y, lessThan(cardRadius.y));
+      expect(borderRadius?.bottomRight.x, greaterThan(0.0));
+      expect(borderRadius?.bottomRight.x, lessThan(cardRadius.x));
+      expect(borderRadius?.bottomRight.y, greaterThan(0.0));
+      expect(borderRadius?.bottomRight.y, lessThan(cardRadius.y));
+    case RadiusType.Round:
+      expect(borderRadius?.bottomLeft, equals(cardRadius));
+      expect(borderRadius?.bottomRight, equals(cardRadius));
   }
 }
 

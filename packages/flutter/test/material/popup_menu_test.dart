@@ -926,6 +926,39 @@ void main() {
     expect(tester.getTopLeft(popupFinder), buttonTopLeft);
   });
 
+  testWidgets('Popup menu with RouteSettings', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    const RouteSettings popupRoute = RouteSettings(name: '/popup');
+    late RouteSettings currentRouteSetting;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorObservers: <NavigatorObserver>[
+          _ClosureNavigatorObserver(onDidChange: (Route<dynamic> newRoute) {
+            currentRouteSetting = newRoute.settings;
+          }),
+        ],
+        home: Scaffold(
+         body: PopupMenuButton<int>(
+          key: buttonKey,
+          routeSettings: popupRoute,
+          itemBuilder: (_) => <PopupMenuItem<int>>[
+            const PopupMenuItem<int>(value: 1, child: Text('Item 1')),
+            const PopupMenuItem<int>(value: 2, child: Text('Item 2')),
+          ],
+          child: const Text('Show Menu'),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonFinder = find.byKey(buttonKey);
+    await tester.tap(buttonFinder);
+    await tester.pumpAndSettle();
+
+    expect(currentRouteSetting, popupRoute);
+  });
+
   testWidgets('PopupMenu positioning around display features', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
@@ -3704,11 +3737,11 @@ void main() {
 
     // Test popup menu item with a Text widget.
     expect(_labelStyle(tester, 'Item 0')!.fontSize, 16.0);
-    expect(_labelStyle(tester, 'Item 0')!.color, theme.textTheme.subtitle1!.color);
+    expect(_labelStyle(tester, 'Item 0')!.color, theme.textTheme.titleMedium!.color);
 
     // Test popup menu item with a ListTile widget.
     expect(_labelStyle(tester, 'Item 1')!.fontSize, 16.0);
-    expect(_labelStyle(tester, 'Item 1')!.color, theme.textTheme.subtitle1!.color);
+    expect(_labelStyle(tester, 'Item 1')!.color, theme.textTheme.titleMedium!.color);
 
     // Close the menu.
     await tester.tapAt(const Offset(20.0, 20.0));
@@ -3721,7 +3754,7 @@ void main() {
       fontStyle: FontStyle.italic,
     );
     theme = theme.copyWith(
-      textTheme: const TextTheme(subtitle1: customTextStyle),
+      textTheme: const TextTheme(titleMedium: customTextStyle),
     );
     await tester.pumpWidget(buildMenu());
 
@@ -3955,6 +3988,160 @@ void main() {
 
     expect(tester.getSize(find.byType(Material).last), within(distance: 0.1, from: const Size(112.0, 160.0)));
   });
+
+  testWidgets('PopupMenuButton scrolls initial value/selected value to visible', (WidgetTester tester) async {
+    const int length = 50;
+    const int selectedValue = length - 1;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.bottomCenter,
+            child: PopupMenuButton<int>(
+              itemBuilder: (BuildContext context) {
+                return List<PopupMenuEntry<int>>.generate(length, (int index) {
+                  return PopupMenuItem<int>(value: index, child: Text('item #$index'));
+                });
+              },
+              popUpAnimationStyle: AnimationStyle.noAnimation,
+              initialValue: selectedValue,
+              child: const Text('click here'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('click here'));
+    await tester.pump();
+
+    // Set up finder and verify basic widget structure.
+    final Finder item49 = find.text('item #49');
+    expect(item49, findsOneWidget);
+
+    // The initially selected menu item should be positioned on screen.
+    final RenderBox initialItem = tester.renderObject<RenderBox>(item49);
+    final Rect initialItemBounds = initialItem.localToGlobal(Offset.zero) & initialItem.size;
+    final Size windowSize = tester.view.physicalSize / tester.view.devicePixelRatio;
+    expect(initialItemBounds.bottomRight.dy, lessThanOrEqualTo(windowSize.height));
+
+    // Select item 20.
+    final Finder item20 = find.text('item #20');
+    await tester.scrollUntilVisible(item20, 500);
+    expect(item20, findsOneWidget);
+    await tester.tap(item20);
+    await tester.pump();
+
+    // Open menu again.
+    await tester.tap(find.text('click here'));
+    await tester.pump();
+    expect(item20, findsOneWidget);
+
+    // The selected menu item should be positioned on screen.
+    final RenderBox selectedItem = tester.renderObject<RenderBox>(item20);
+    final Rect selectedItemBounds = selectedItem.localToGlobal(Offset.zero) & selectedItem.size;
+    expect(selectedItemBounds.bottomRight.dy, lessThanOrEqualTo(windowSize.height));
+  });
+
+  testWidgets('PopupMenuButton properly positions a constrained-size popup', (WidgetTester tester) async {
+    final Size windowSize = tester.view.physicalSize / tester.view.devicePixelRatio;
+    const int length = 50;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.all(50),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return List<PopupMenuEntry<int>>.generate(length, (int index) {
+                    return PopupMenuItem<int>(value: index, child: Text('item #$index'));
+                  });
+                },
+                constraints: BoxConstraints(maxHeight: windowSize.height / 3),
+                popUpAnimationStyle: AnimationStyle.noAnimation,
+                initialValue: length - 1,
+                child: const Text('click here'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('click here'));
+    await tester.pump();
+
+    // Set up finders and verify basic widget structure
+    final Finder findButton = find.byType(PopupMenuButton<int>);
+    final Finder findLastItem = find.text('item #49');
+    final Finder findListBody = find.byType(ListBody);
+    final Finder findListViewport = find.ancestor(
+      of: findListBody,
+      matching: find.byType(SingleChildScrollView),
+    );
+    expect(findButton, findsOne);
+    expect(findLastItem, findsOne);
+    expect(findListBody, findsOne);
+    expect(findListViewport, findsOne);
+
+    // The button and the list viewport should overlap
+    final RenderBox button = tester.renderObject<RenderBox>(findButton);
+    final Rect buttonBounds = button.localToGlobal(Offset.zero) & button.size;
+    final RenderBox listViewport = tester.renderObject<RenderBox>(findListViewport);
+    final Rect listViewportBounds = listViewport.localToGlobal(Offset.zero) & listViewport.size;
+    expect(listViewportBounds.topLeft.dy, lessThanOrEqualTo(windowSize.height));
+    expect(listViewportBounds.bottomRight.dy, lessThanOrEqualTo(windowSize.height));
+    expect(listViewportBounds, overlaps(buttonBounds));
+  });
+
+  testWidgets('PopupMenuButton honors style', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PopupMenuButton<int>(
+            style: const ButtonStyle(
+              iconColor: MaterialStatePropertyAll<Color>(Colors.red),
+            ),
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuItem<int>>[
+                const PopupMenuItem<int>(
+                  value: 1,
+                  child: Text('One'),
+                ),
+              ];
+            },
+          ),
+        ),
+      ),
+    );
+    final RichText iconText = tester.firstWidget(find.descendant(
+      of: find.byType(PopupMenuButton<int>),
+      matching: find.byType(RichText),
+    ));
+    expect(iconText.text.style?.color, Colors.red);
+  });
+}
+
+Matcher overlaps(Rect other) => OverlapsMatcher(other);
+
+class OverlapsMatcher extends Matcher {
+  OverlapsMatcher(this.other);
+
+  final Rect other;
+
+  @override
+  Description describe(Description description) {
+    return description.add('<Rect that overlaps with $other>');
+  }
+
+  @override
+  bool matches(Object? item, Map<dynamic, dynamic> matchState) => item is Rect && item.overlaps(other);
+
+  @override
+  Description describeMismatch(dynamic item, Description mismatchDescription,
+      Map<dynamic, dynamic> matchState, bool verbose) {
+    return mismatchDescription.add('does not overlap');
+  }
 }
 
 class TestApp extends StatelessWidget {

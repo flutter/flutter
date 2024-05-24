@@ -12,7 +12,6 @@ import 'base/os.dart';
 import 'base/utils.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
-import 'web/compile.dart';
 
 /// Whether icon font subsetting is enabled by default.
 const bool kIconTreeShakerEnabledDefault = true;
@@ -36,13 +35,13 @@ class BuildInfo {
     List<String>? dartDefines,
     this.bundleSkSLPath,
     List<String>? dartExperiments,
-    this.webRenderer = WebRendererMode.auto,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
     this.packagesPath = '.dart_tool/package_config.json', // TODO(zanderso): make this required and remove the default.
     this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
+    this.androidSkipBuildDependencyValidation = false,
     this.packageConfig = PackageConfig.empty,
     this.initializeFromDill,
     this.assumeInitializeFromDillUpToDate = false,
@@ -130,9 +129,6 @@ class BuildInfo {
   /// A list of Dart experiments.
   final List<String> dartExperiments;
 
-  /// When compiling to web, which web renderer mode we are using (html, canvaskit, auto)
-  final WebRendererMode webRenderer;
-
   /// The name of a file where flutter assemble will output performance
   /// information in a JSON format.
   ///
@@ -157,6 +153,10 @@ class BuildInfo {
   ///
   /// The Gradle daemon may also be disabled in the Android application's properties file.
   final bool androidGradleDaemon;
+
+  /// Whether to skip checking of individual versions of our Android build time
+  /// dependencies.
+  final bool androidSkipBuildDependencyValidation;
 
   /// Additional key value pairs that are passed directly to the gradle project via the `-P`
   /// flag.
@@ -221,6 +221,10 @@ class BuildInfo {
   /// the flavor name in the output bundle files has the first character lower-cased,
   /// so the uncapitalized flavor name is used to compute the output file name
   String? get uncapitalizedFlavor => _uncapitalize(flavor);
+
+  /// The module system DDC is targeting, or null if not using DDC.
+  // TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
+  DdcModuleFormat? get ddcModuleFormat => _ddcModuleFormatFromFrontEndArgs(extraFrontEndOptions);
 
   /// Convert to a structured string encoded structure appropriate for usage
   /// in build system [Environment.defines].
@@ -332,7 +336,6 @@ class AndroidBuildInfo {
     ],
     this.splitPerAbi = false,
     this.fastStart = false,
-    this.multidexEnabled = false,
   });
 
   // The build info containing the mode and flavor.
@@ -350,9 +353,6 @@ class AndroidBuildInfo {
 
   /// Whether to bootstrap an empty application.
   final bool fastStart;
-
-  /// Whether to enable multidex support for apps with more than 64k methods.
-  final bool multidexEnabled;
 }
 
 /// A summary of the compilation strategy used for Dart.
@@ -513,6 +513,7 @@ enum TargetPlatform {
   linux_x64,
   linux_arm64,
   windows_x64,
+  windows_arm64,
   fuchsia_arm64,
   fuchsia_x64,
   tester,
@@ -544,6 +545,7 @@ enum TargetPlatform {
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
         throw UnsupportedError('Unexpected Fuchsia platform $this');
     }
   }
@@ -555,6 +557,7 @@ enum TargetPlatform {
       case TargetPlatform.windows_x64:
         return 'x64';
       case TargetPlatform.linux_arm64:
+      case TargetPlatform.windows_arm64:
         return 'arm64';
       case TargetPlatform.android:
       case TargetPlatform.android_arm:
@@ -713,6 +716,8 @@ String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch
       return 'linux-arm64';
     case TargetPlatform.windows_x64:
       return 'windows-x64';
+    case TargetPlatform.windows_arm64:
+      return 'windows-arm64';
     case TargetPlatform.fuchsia_arm64:
       return 'fuchsia-arm64';
     case TargetPlatform.fuchsia_x64:
@@ -756,6 +761,8 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.linux_arm64;
     case 'windows-x64':
       return TargetPlatform.windows_x64;
+    case 'windows-arm64':
+      return TargetPlatform.windows_arm64;
     case 'web-javascript':
       return TargetPlatform.web_javascript;
     case 'flutter-tester':
@@ -795,12 +802,9 @@ HostPlatform getCurrentHostPlatform() {
   return HostPlatform.linux_x64;
 }
 
-FileSystemEntity getWebPlatformBinariesDirectory(Artifacts artifacts, WebRendererMode webRenderer) {
-  return artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder);
-}
-
 /// Returns the top-level build output directory.
 String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
+  // TODO(andrewkolos): Prefer required parameters instead of falling back to globals.
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
   final Config localConfig = config ?? globals.config;
@@ -826,8 +830,9 @@ String getAotBuildDirectory() {
 }
 
 /// Returns the asset build output directory.
-String getAssetBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'flutter_assets');
+String getAssetBuildDirectory([Config? config, FileSystem? fileSystem]) {
+  return (fileSystem ?? globals.fs)
+    .path.join(getBuildDirectory(config, fileSystem), 'flutter_assets');
 }
 
 /// Returns the iOS build output directory.
@@ -841,8 +846,8 @@ String getMacOSBuildDirectory() {
 }
 
 /// Returns the web build output directory.
-String getWebBuildDirectory([bool isWasm = false]) {
-  return globals.fs.path.join(getBuildDirectory(), isWasm ? 'web_wasm' : 'web');
+String getWebBuildDirectory() {
+  return globals.fs.path.join(getBuildDirectory(), 'web');
 }
 
 /// Returns the Linux build output directory.
@@ -931,13 +936,6 @@ const String kDarwinArchs = 'DarwinArchs';
 ///
 /// This is expected to be a space-delimited list of architectures.
 const String kAndroidArchs = 'AndroidArchs';
-
-/// If the current build is `flutter build aar`.
-///
-/// This is expected to be a boolean.
-///
-/// If not provided, defaults to false.
-const String kIsAndroidLibrary = 'IsAndroidLibrary';
 
 /// The define to control what min Android SDK version is built for.
 ///
@@ -1048,6 +1046,28 @@ enum NullSafetyMode {
   unsound,
   /// The null safety mode was not detected. Only supported for 'flutter test'.
   autodetect,
+}
+
+/// Indicates the module system DDC is targeting.
+enum DdcModuleFormat {
+  amd,
+  ddc,
+}
+
+// TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
+DdcModuleFormat? _ddcModuleFormatFromFrontEndArgs(List<String>? extraFrontEndArgs) {
+  if (extraFrontEndArgs == null) {
+    return null;
+  }
+  const String ddcModuleFormatString = '--dartdevc-module-format=';
+  for (final String flag in extraFrontEndArgs) {
+    if (flag.startsWith(ddcModuleFormatString)) {
+      final String moduleFormatString = flag
+          .substring(ddcModuleFormatString.length, flag.length);
+      return DdcModuleFormat.values.byName(moduleFormatString);
+    }
+  }
+  return null;
 }
 
 String _getCurrentHostPlatformArchName() {

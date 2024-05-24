@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
@@ -2540,13 +2541,19 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/6128.
-  testWidgets('Draggable plays nice with onTap', (WidgetTester tester) async {
+  testWidgets('Draggable plays nice with onTap',
+  // TODO(polina-c): fix the leaking ImmediateMultiDragGestureRecognizer https://github.com/flutter/flutter/pull/144396 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            entry = OverlayEntry(
               builder: (BuildContext context) => GestureDetector(
                 onTap: () { /* registers a tap recognizer */ },
                 child: Draggable<Object>(
@@ -3427,7 +3434,10 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/92083
-  testWidgets('feedback respect the MouseRegion cursor configure', (WidgetTester tester) async {
+  testWidgets('feedback respect the MouseRegion cursor configure',
+  // TODO(polina-c): fix the leaking ImmediateMultiDragGestureRecognizer https://github.com/flutter/flutter/pull/144396 [leaks-to-clean]
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+  (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Column(

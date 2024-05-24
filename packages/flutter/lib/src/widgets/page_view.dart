@@ -576,11 +576,6 @@ class PageScrollPhysics extends ScrollPhysics {
   bool get allowImplicitScrolling => false;
 }
 
-// Having this global (mutable) page controller is a bit of a hack. We need it
-// to plumb in the factory for _PagePosition, but it will end up accumulating
-// a large list of scroll positions. As long as you don't try to actually
-// control the scroll positions, everything should be fine.
-final PageController _defaultPageController = PageController();
 const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 
 /// A scrollable list that works page by page.
@@ -645,7 +640,7 @@ class PageView extends StatefulWidget {
     super.key,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
-    PageController? controller,
+    this.controller,
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
@@ -656,8 +651,7 @@ class PageView extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.scrollBehavior,
     this.padEnds = true,
-  }) : controller = controller ?? _defaultPageController,
-       childrenDelegate = SliverChildListDelegate(children);
+  }) : childrenDelegate = SliverChildListDelegate(children);
 
   /// Creates a scrollable list that works page by page using widgets that are
   /// created on demand.
@@ -688,7 +682,7 @@ class PageView extends StatefulWidget {
     super.key,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
-    PageController? controller,
+    this.controller,
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
@@ -701,8 +695,7 @@ class PageView extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.scrollBehavior,
     this.padEnds = true,
-  }) : controller = controller ?? _defaultPageController,
-       childrenDelegate = SliverChildBuilderDelegate(
+  }) : childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
          findChildIndexCallback: findChildIndexCallback,
          childCount: itemCount,
@@ -719,11 +712,11 @@ class PageView extends StatefulWidget {
   /// {@end-tool}
   ///
   /// {@macro flutter.widgets.PageView.allowImplicitScrolling}
-  PageView.custom({
+  const PageView.custom({
     super.key,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
-    PageController? controller,
+    this.controller,
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
@@ -734,7 +727,7 @@ class PageView extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
     this.scrollBehavior,
     this.padEnds = true,
-  }) : controller = controller ?? _defaultPageController;
+  });
 
   /// Controls whether the widget's pages will respond to
   /// [RenderObject.showOnScreen], which will allow for implicit accessibility
@@ -776,7 +769,7 @@ class PageView extends StatefulWidget {
 
   /// An object that can be used to control the position to which this page
   /// view is scrolled.
-  final PageController controller;
+  final PageController? controller;
 
   /// How the page view should respond to user input.
   ///
@@ -848,10 +841,37 @@ class PageView extends StatefulWidget {
 class _PageViewState extends State<PageView> {
   int _lastReportedPage = 0;
 
+  late PageController _controller;
+
   @override
   void initState() {
     super.initState();
-    _lastReportedPage = widget.controller.initialPage;
+    _initController();
+    _lastReportedPage = _controller.initialPage;
+  }
+
+  @override
+  void dispose() {
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
+    super.dispose();
+  }
+
+
+  void _initController() {
+    _controller = widget.controller ?? PageController();
+  }
+
+  @override
+  void didUpdateWidget(PageView oldWidget) {
+    if (oldWidget.controller != widget.controller) {
+      if (oldWidget.controller == null) {
+        _controller.dispose();
+      }
+      _initController();
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   AxisDirection _getDirection(BuildContext context) {
@@ -892,7 +912,7 @@ class _PageViewState extends State<PageView> {
       child: Scrollable(
         dragStartBehavior: widget.dragStartBehavior,
         axisDirection: axisDirection,
-        controller: widget.controller,
+        controller: _controller,
         physics: physics,
         restorationId: widget.restorationId,
         scrollBehavior: widget.scrollBehavior ?? ScrollConfiguration.of(context).copyWith(scrollbars: false),
@@ -908,7 +928,7 @@ class _PageViewState extends State<PageView> {
             clipBehavior: widget.clipBehavior,
             slivers: <Widget>[
               SliverFillViewport(
-                viewportFraction: widget.controller.viewportFraction,
+                viewportFraction: _controller.viewportFraction,
                 delegate: widget.childrenDelegate,
                 padEnds: widget.padEnds,
               ),
@@ -924,7 +944,7 @@ class _PageViewState extends State<PageView> {
     super.debugFillProperties(description);
     description.add(EnumProperty<Axis>('scrollDirection', widget.scrollDirection));
     description.add(FlagProperty('reverse', value: widget.reverse, ifTrue: 'reversed'));
-    description.add(DiagnosticsProperty<PageController>('controller', widget.controller, showName: false));
+    description.add(DiagnosticsProperty<PageController>('controller', _controller, showName: false));
     description.add(DiagnosticsProperty<ScrollPhysics>('physics', widget.physics, showName: false));
     description.add(FlagProperty('pageSnapping', value: widget.pageSnapping, ifFalse: 'snapping disabled'));
     description.add(FlagProperty('allowImplicitScrolling', value: widget.allowImplicitScrolling, ifTrue: 'allow implicit scrolling'));

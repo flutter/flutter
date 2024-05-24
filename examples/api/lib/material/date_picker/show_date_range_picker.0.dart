@@ -13,10 +13,9 @@ class DatePickerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
+    return const MaterialApp(
       restorationScopeId: 'app',
-      home: const DatePickerExample(restorationId: 'main'),
+      home: DatePickerExample(restorationId: 'main'),
     );
   }
 }

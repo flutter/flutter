@@ -13,7 +13,6 @@ void main() {
     expect(bar.overflowSpacing, 0);
     expect(bar.overflowDirection, VerticalDirection.down);
     expect(bar.textDirection, null);
-    expect(bar.clipBehavior, Clip.none);
     expect(bar.children, const <Widget>[]);
   });
 

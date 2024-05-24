@@ -434,18 +434,18 @@ class XcodeDebug {
         return;
       }
       final XmlNode launchAction = nodes.first;
-      final XmlAttribute? debuggerIdentifer = launchAction.attributes
+      final XmlAttribute? debuggerIdentifier = launchAction.attributes
           .where((XmlAttribute attribute) =>
               attribute.localName == 'selectedDebuggerIdentifier')
           .firstOrNull;
-      final XmlAttribute? launcherIdentifer = launchAction.attributes
+      final XmlAttribute? launcherIdentifier = launchAction.attributes
           .where((XmlAttribute attribute) =>
               attribute.localName == 'selectedLauncherIdentifier')
           .firstOrNull;
-      if (debuggerIdentifer == null ||
-          launcherIdentifer == null ||
-          !debuggerIdentifer.value.contains('LLDB') ||
-          !launcherIdentifer.value.contains('LLDB')) {
+      if (debuggerIdentifier == null ||
+          launcherIdentifier == null ||
+          !debuggerIdentifier.value.contains('LLDB') ||
+          !launcherIdentifier.value.contains('LLDB')) {
         throwToolExit('''
 Your Xcode project is not setup to start a debugger. To fix this, launch Xcode
 and select "Product > Scheme > Edit Scheme", select "Run" in the sidebar,
@@ -501,7 +501,7 @@ class XcodeAutomationScriptDebugResult {
     );
   }
 
-  /// Whether this scheme action has completed (sucessfully or otherwise). Will
+  /// Whether this scheme action has completed (successfully or otherwise). Will
   /// be false if still running.
   final bool? completed;
 

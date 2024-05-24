@@ -114,6 +114,34 @@ class RentrantObserver implements WidgetsBindingObserver {
   }
 
   @override
+  bool handleStartBackGesture(PredictiveBackEvent backEvent) {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+    return true;
+  }
+
+  @override
+  bool handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+    return true;
+  }
+
+  @override
+  bool handleCommitBackGesture() {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+    return true;
+  }
+
+  @override
+  bool handleCancelBackGesture() {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+    return true;
+  }
+
+  @override
   Future<bool> didPushRoute(String route) {
     assert(active);
     WidgetsBinding.instance.addObserver(this);
@@ -224,7 +252,13 @@ void main() {
     ]);
 
     observer.accumulatedStates.clear();
-    await expectLater(() async => setAppLifeCycleState(AppLifecycleState.detached), throwsAssertionError);
+    await setAppLifeCycleState(AppLifecycleState.detached);
+    expect(observer.accumulatedStates, <AppLifecycleState>[
+      AppLifecycleState.inactive,
+      AppLifecycleState.hidden,
+      AppLifecycleState.paused,
+      AppLifecycleState.detached,
+    ]);
     WidgetsBinding.instance.removeObserver(observer);
   });
 
@@ -395,6 +429,21 @@ void main() {
     await setAppLifeCycleState(AppLifecycleState.resumed);
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
+  });
+
+  testWidgets('resetInternalState resets lifecycleState and framesEnabled to initial state', (WidgetTester tester) async {
+    // Initial state
+    expect(tester.binding.lifecycleState, isNull);
+    expect(tester.binding.framesEnabled, isTrue);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    expect(tester.binding.lifecycleState, AppLifecycleState.paused);
+    expect(tester.binding.framesEnabled, isFalse);
+
+    tester.binding.resetInternalState();
+
+    expect(tester.binding.lifecycleState, isNull);
+    expect(tester.binding.framesEnabled, isTrue);
   });
 
   testWidgets('scheduleFrameCallback error control test', (WidgetTester tester) async {

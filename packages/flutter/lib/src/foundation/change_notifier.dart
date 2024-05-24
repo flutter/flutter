@@ -62,11 +62,11 @@ abstract class Listenable {
   /// Return a [Listenable] that triggers when any of the given [Listenable]s
   /// themselves trigger.
   ///
-  /// The list must not be changed after this method has been called. Doing so
-  /// will lead to memory leaks or exceptions.
+  /// Once the factory is called, items must not be added or removed from the iterable.
+  /// Doing so will lead to memory leaks or exceptions.
   ///
-  /// The list may contain nulls; they are ignored.
-  factory Listenable.merge(List<Listenable?> listenables) = _MergingListenable;
+  /// The iterable may contain nulls; they are ignored.
+  factory Listenable.merge(Iterable<Listenable?> listenables) = _MergingListenable;
 
   /// Register a closure to be called when the object notifies its listeners.
   void addListener(VoidCallback listener);
@@ -491,7 +491,7 @@ mixin class ChangeNotifier implements Listenable {
 class _MergingListenable extends Listenable {
   _MergingListenable(this._children);
 
-  final List<Listenable?> _children;
+  final Iterable<Listenable?> _children;
 
   @override
   void addListener(VoidCallback listener) {

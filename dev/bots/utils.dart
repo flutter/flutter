@@ -8,7 +8,10 @@ import 'dart:io' as system show exit;
 import 'dart:io' hide exit;
 import 'dart:math' as math;
 
+import 'package:analyzer/dart/analysis/results.dart';
+import 'package:analyzer/dart/ast/ast.dart';
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as path;
 
 const Duration _quietTimeout = Duration(minutes: 10); // how long the output should be hidden between calls to printProgress before just being verbose
 
@@ -252,4 +255,8 @@ Future<bool> _isPortAvailable(int port) async {
   } on SocketException {
     return true;
   }
+}
+
+String locationInFile(ResolvedUnitResult unit, AstNode node, String workingDirectory) {
+  return '${path.relative(path.relative(unit.path, from: workingDirectory))}:${unit.lineInfo.getLocation(node.offset).lineNumber}';
 }

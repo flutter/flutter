@@ -90,12 +90,17 @@ class IMobileDevice {
   late final bool isInstalled = _processManager.canRun(_idevicescreenshotPath);
 
   /// Starts `idevicesyslog` and returns the running process.
-  Future<Process> startLogger(String deviceID) {
+  Future<Process> startLogger(
+    String deviceID,
+    bool isWirelesslyConnected,
+  ) {
     return _processUtils.start(
       <String>[
         _idevicesyslogPath,
         '-u',
         deviceID,
+        if (isWirelesslyConnected)
+          '--network',
       ],
       environment: Map<String, String>.fromEntries(
         <MapEntry<String, String>>[_dyLdLibEntry]
@@ -842,12 +847,7 @@ void _parseIssueInStdout(XcodeBuildExecution xcodeBuildExecution, Logger logger,
 
 String? _parseMissingPlatform(String message) {
   final RegExp pattern = RegExp(r'error:(.*?) is not installed\. To use with Xcode, first download and install the platform');
-  final RegExpMatch? match = pattern.firstMatch(message);
-  if (match != null) {
-    final String? version = match.group(1);
-    return version;
-  }
-  return null;
+  return pattern.firstMatch(message)?.group(1);
 }
 
 // The result of [_handleXCResultIssue].

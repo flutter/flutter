@@ -455,19 +455,35 @@ class ToggleButtons extends StatelessWidget {
   // Determines if this is the first child that is being laid out
   // by the render object, _not_ the order of the children in its list.
   bool _isFirstButton(int index, int length, TextDirection textDirection) {
-    return index == 0 && ((direction == Axis.horizontal && textDirection == TextDirection.ltr) ||
-      (direction == Axis.vertical && verticalDirection == VerticalDirection.down))
-      || index == length - 1 && ((direction == Axis.horizontal && textDirection == TextDirection.rtl) ||
-      (direction == Axis.vertical && verticalDirection == VerticalDirection.up));
+    switch (direction) {
+      case Axis.horizontal:
+        return switch (textDirection) {
+          TextDirection.rtl => index == length - 1,
+          TextDirection.ltr => index == 0,
+        };
+      case Axis.vertical:
+        return switch (verticalDirection) {
+          VerticalDirection.up   => index == length - 1,
+          VerticalDirection.down => index == 0,
+        };
+    }
   }
 
   // Determines if this is the last child that is being laid out
   // by the render object, _not_ the order of the children in its list.
   bool _isLastButton(int index, int length, TextDirection textDirection) {
-    return index == length - 1 && ((direction == Axis.horizontal && textDirection == TextDirection.ltr) ||
-      (direction == Axis.vertical && verticalDirection == VerticalDirection.down))
-      || index == 0 && ((direction == Axis.horizontal && textDirection == TextDirection.rtl) ||
-      (direction == Axis.vertical && verticalDirection == VerticalDirection.up));
+    switch (direction) {
+      case Axis.horizontal:
+        return switch (textDirection) {
+          TextDirection.rtl => index == 0,
+          TextDirection.ltr => index == length - 1,
+        };
+      case Axis.vertical:
+        return switch (verticalDirection) {
+          VerticalDirection.up   => index == 0,
+          VerticalDirection.down => index == length - 1,
+        };
+    }
   }
 
   BorderRadius _getEdgeBorderRadius(
@@ -1159,11 +1175,13 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   }
 
   @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
     // The baseline of this widget is the baseline of its child
-    return direction == Axis.horizontal
-      ? child!.computeDistanceToActualBaseline(baseline)! + borderSide.width
-      : child!.computeDistanceToActualBaseline(baseline)! + leadingBorderSide.width;
+    final BaselineOffset childOffset = BaselineOffset(child?.getDistanceToActualBaseline(baseline));
+    return switch (direction) {
+      Axis.horizontal => childOffset + borderSide.width,
+      Axis.vertical => childOffset + leadingBorderSide.width,
+    }.offset;
   }
 
   @override
@@ -1213,19 +1231,15 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     }
     final BoxParentData childParentData = child!.parentData! as BoxParentData;
     if (direction == Axis.horizontal) {
-      switch (textDirection) {
-        case TextDirection.ltr:
-          childParentData.offset = Offset(leadingBorderSide.width, borderSide.width);
-        case TextDirection.rtl:
-          childParentData.offset = Offset(trailingBorderSide.width, borderSide.width);
-      }
+      childParentData.offset = switch (textDirection) {
+        TextDirection.ltr => Offset(leadingBorderSide.width,  borderSide.width),
+        TextDirection.rtl => Offset(trailingBorderSide.width, borderSide.width),
+      };
     } else {
-      switch (verticalDirection) {
-        case VerticalDirection.down:
-          childParentData.offset = Offset(borderSide.width, leadingBorderSide.width);
-        case VerticalDirection.up:
-          childParentData.offset = Offset(borderSide.width, trailingBorderSide.width);
-      }
+      childParentData.offset = switch (verticalDirection) {
+        VerticalDirection.down => Offset(borderSide.width, leadingBorderSide.width),
+        VerticalDirection.up   => Offset(borderSide.width, trailingBorderSide.width),
+      };
     }
   }
 

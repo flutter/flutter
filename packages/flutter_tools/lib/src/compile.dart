@@ -133,22 +133,20 @@ class StdoutHandler {
       compilerOutput?.complete(output);
       return;
     }
-    if (state == StdoutState.CollectDiagnostic) {
-      if (!_suppressCompilerMessages) {
-        _logger.printError(message);
-      } else {
+    switch (state) {
+      case StdoutState.CollectDiagnostic when _suppressCompilerMessages:
         _logger.printTrace(message);
-      }
-    } else {
-      assert(state == StdoutState.CollectDependencies);
-      switch (message[0]) {
-        case '+':
-          sources.add(Uri.parse(message.substring(1)));
-        case '-':
-          sources.remove(Uri.parse(message.substring(1)));
-        default:
-          _logger.printTrace('Unexpected prefix for $message uri - ignoring');
-      }
+      case StdoutState.CollectDiagnostic:
+        _logger.printError(message);
+      case StdoutState.CollectDependencies:
+        switch (message[0]) {
+          case '+':
+            sources.add(Uri.parse(message.substring(1)));
+          case '-':
+            sources.remove(Uri.parse(message.substring(1)));
+          default:
+            _logger.printTrace('Unexpected prefix for $message uri - ignoring');
+        }
     }
   }
 
@@ -183,11 +181,15 @@ List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) =>
             '-Ddart.vm.profile=true',
           if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
             '-Ddart.vm.product=false',
+          '--delete-tostring-package-uri=dart:ui',
+          '--delete-tostring-package-uri=package:flutter',
           ...kDartCompilerExperiments,
         ],
       BuildMode.release => <String>[
           '-Ddart.vm.profile=false',
           '-Ddart.vm.product=true',
+          '--delete-tostring-package-uri=dart:ui',
+          '--delete-tostring-package-uri=package:flutter',
           ...kDartCompilerExperiments,
         ],
       _ => throw Exception('Unknown BuildMode: $mode')

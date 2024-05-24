@@ -18,6 +18,7 @@ import 'devfs.dart';
 import 'device_port_forwarder.dart';
 import 'project.dart';
 import 'vmservice.dart';
+import 'web/compile.dart';
 
 DeviceManager? get deviceManager => context.get<DeviceManager>();
 
@@ -479,18 +480,15 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   @protected
   @visibleForTesting
-  ItemListNotifier<Device>? deviceNotifier;
+  final ItemListNotifier<Device> deviceNotifier = ItemListNotifier<Device>();
 
   Timer? _timer;
 
   Future<List<Device>> pollingGetDevices({Duration? timeout});
 
   void startPolling() {
-    if (_timer == null) {
-      deviceNotifier ??= ItemListNotifier<Device>();
-      // Make initial population the default, fast polling timeout.
-      _timer = _initTimer(null, initialCall: true);
-    }
+    // Make initial population the default, fast polling timeout.
+    _timer ??= _initTimer(null, initialCall: true);
   }
 
   Timer _initTimer(Duration? pollingTimeout, {bool initialCall = false}) {
@@ -498,7 +496,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     return Timer(initialCall ? Duration.zero : _pollingInterval, () async {
       try {
         final List<Device> devices = await pollingGetDevices(timeout: pollingTimeout);
-        deviceNotifier!.updateWithNewList(devices);
+        deviceNotifier.updateWithNewList(devices);
       } on TimeoutException {
         // Do nothing on a timeout.
       }
@@ -545,32 +543,28 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     DeviceDiscoveryFilter? filter,
     bool resetCache = false,
   }) async {
-    if (deviceNotifier == null || resetCache) {
+    if (!deviceNotifier.isPopulated || resetCache) {
       final List<Device> devices = await pollingGetDevices(timeout: timeout);
       // If the cache was populated while the polling was ongoing, do not
       // overwrite the cache unless it's explicitly refreshing the cache.
-      if (resetCache) {
-        deviceNotifier = ItemListNotifier<Device>.from(devices);
-      } else {
-        deviceNotifier ??= ItemListNotifier<Device>.from(devices);
+      if (!deviceNotifier.isPopulated || resetCache) {
+        deviceNotifier.updateWithNewList(devices);
       }
     }
 
     // If a filter is provided, filter cache to only return devices matching.
     if (filter != null) {
-      return filter.filterDevices(deviceNotifier!.items);
+      return filter.filterDevices(deviceNotifier.items);
     }
-    return deviceNotifier!.items;
+    return deviceNotifier.items;
   }
 
   Stream<Device> get onAdded {
-    deviceNotifier ??= ItemListNotifier<Device>();
-    return deviceNotifier!.onAdded;
+    return deviceNotifier.onAdded;
   }
 
   Stream<Device> get onRemoved {
-    deviceNotifier ??= ItemListNotifier<Device>();
-    return deviceNotifier!.onRemoved;
+    return deviceNotifier.onRemoved;
   }
 
   void dispose() => stopPolling();
@@ -583,6 +577,27 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 enum DeviceConnectionInterface {
   attached,
   wireless,
+}
+
+/// Returns the `DeviceConnectionInterface` enum based on its string name.
+DeviceConnectionInterface getDeviceConnectionInterfaceForName(String name) {
+  switch (name) {
+    case 'attached':
+      return DeviceConnectionInterface.attached;
+    case 'wireless':
+      return DeviceConnectionInterface.wireless;
+  }
+  throw Exception('Unsupported DeviceConnectionInterface name "$name"');
+}
+
+/// Returns a `DeviceConnectionInterface`'s string name.
+String getNameForDeviceConnectionInterface(DeviceConnectionInterface connectionInterface) {
+  switch (connectionInterface) {
+    case DeviceConnectionInterface.attached:
+      return 'attached';
+    case DeviceConnectionInterface.wireless:
+      return 'wireless';
+  }
 }
 
 /// A device is a physical hardware that can run a Flutter application.
@@ -952,6 +967,7 @@ class DebuggingOptions {
     this.webEnableExpressionEvaluation = false,
     this.webHeaders = const <String, String>{},
     this.webLaunchUrl,
+    this.webRenderer = WebRendererMode.auto,
     this.vmserviceOutFile,
     this.fastStart = false,
     this.nullAssertions = false,
@@ -963,6 +979,7 @@ class DebuggingOptions {
     this.enableDartProfiling = true,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
+    this.debugLogsDirectoryPath,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
@@ -980,6 +997,7 @@ class DebuggingOptions {
       this.webBrowserFlags = const <String>[],
       this.webLaunchUrl,
       this.webHeaders = const <String, String>{},
+      this.webRenderer = WebRendererMode.auto,
       this.cacheSkSL = false,
       this.traceAllowlist,
       this.enableImpeller = ImpellerStatus.platformDefault,
@@ -988,6 +1006,7 @@ class DebuggingOptions {
       this.enableDartProfiling = true,
       this.enableEmbedderApi = false,
       this.usingCISystem = false,
+      this.debugLogsDirectoryPath,
     }) : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -1058,6 +1077,7 @@ class DebuggingOptions {
     required this.webEnableExpressionEvaluation,
     required this.webHeaders,
     required this.webLaunchUrl,
+    required this.webRenderer,
     required this.vmserviceOutFile,
     required this.fastStart,
     required this.nullAssertions,
@@ -1069,6 +1089,7 @@ class DebuggingOptions {
     required this.enableDartProfiling,
     required this.enableEmbedderApi,
     required this.usingCISystem,
+    required this.debugLogsDirectoryPath,
   });
 
   final bool debuggingEnabled;
@@ -1112,6 +1133,7 @@ class DebuggingOptions {
   final bool enableDartProfiling;
   final bool enableEmbedderApi;
   final bool usingCISystem;
+  final String? debugLogsDirectoryPath;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///
@@ -1139,6 +1161,9 @@ class DebuggingOptions {
 
   /// Allow developers to add custom headers to web server
   final Map<String, String> webHeaders;
+
+  /// Which web renderer to use for the debugging session
+  final WebRendererMode webRenderer;
 
   /// A file where the VM Service URL should be written after the application is started.
   final String? vmserviceOutFile;
@@ -1248,6 +1273,7 @@ class DebuggingOptions {
     'webEnableExpressionEvaluation': webEnableExpressionEvaluation,
     'webLaunchUrl': webLaunchUrl,
     'webHeaders': webHeaders,
+    'webRenderer': webRenderer.name,
     'vmserviceOutFile': vmserviceOutFile,
     'fastStart': fastStart,
     'nullAssertions': nullAssertions,
@@ -1258,6 +1284,7 @@ class DebuggingOptions {
     'enableDartProfiling': enableDartProfiling,
     'enableEmbedderApi': enableEmbedderApi,
     'usingCISystem': usingCISystem,
+    'debugLogsDirectoryPath': debugLogsDirectoryPath,
   };
 
   static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
@@ -1302,6 +1329,7 @@ class DebuggingOptions {
       webEnableExpressionEvaluation: json['webEnableExpressionEvaluation']! as bool,
       webHeaders: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
       webLaunchUrl: json['webLaunchUrl'] as String?,
+      webRenderer: WebRendererMode.values.byName(json['webRenderer']! as String),
       vmserviceOutFile: json['vmserviceOutFile'] as String?,
       fastStart: json['fastStart']! as bool,
       nullAssertions: json['nullAssertions']! as bool,
@@ -1313,6 +1341,7 @@ class DebuggingOptions {
       enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
       enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
       usingCISystem: (json['usingCISystem'] as bool?) ?? false,
+      debugLogsDirectoryPath: json['debugLogsDirectoryPath'] as String?,
     );
 }
 

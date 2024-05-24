@@ -43,7 +43,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 21
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'lib-proguard-rules.txt'
     }
@@ -51,13 +51,14 @@ android {
     dependencies {
         // TODO(egarciad): These dependencies should not be added to release builds.
         // https://github.com/flutter/flutter/issues/56591
-        testImplementation 'junit:junit:4.12'
-        testImplementation 'org.mockito:mockito-inline:5.0.0'
+        testImplementation 'androidx.test.ext:junit:1.1.4-alpha07'
+        testImplementation 'org.robolectric:robolectric:4.11'
+        testImplementation 'junit:junit:4.13.2'
+        testImplementation 'org.mockito:mockito-inline:5.1.0'
 
-        // https://developer.android.com/jetpack/androidx/releases/test/#1.2.0
-        api 'androidx.test:runner:1.2.0'
-        api 'androidx.test:rules:1.2.0'
-        api 'androidx.test.espresso:espresso-core:3.2.0'
+        api 'androidx.test:runner:1.2+'
+        api 'androidx.test:rules:1.2+'
+        api 'androidx.test.espresso:espresso-core:3.2+'
 
         implementation 'com.google.guava:guava:28.1-android'
     }

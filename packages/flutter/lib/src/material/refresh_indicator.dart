@@ -156,7 +156,7 @@ class RefreshIndicator extends StatefulWidget {
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
   ///
-  /// Noteably the scrollable widget itself will have slightly different behavior
+  /// Notably the scrollable widget itself will have slightly different behavior
   /// from [CupertinoSliverRefreshControl], due to a difference in structure.
   const RefreshIndicator.adaptive({
     super.key,
@@ -357,15 +357,10 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       });
       return false;
     }
-    bool? indicatorAtTopNow;
-    switch (notification.metrics.axisDirection) {
-      case AxisDirection.down:
-      case AxisDirection.up:
-        indicatorAtTopNow = true;
-      case AxisDirection.left:
-      case AxisDirection.right:
-        indicatorAtTopNow = null;
-    }
+    final bool? indicatorAtTopNow = switch (notification.metrics.axisDirection) {
+      AxisDirection.down || AxisDirection.up    => true,
+      AxisDirection.left || AxisDirection.right => null,
+    };
     if (indicatorAtTopNow != _isIndicatorAtTop) {
       if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
         _dismiss(_RefreshIndicatorMode.canceled);

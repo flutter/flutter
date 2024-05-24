@@ -163,11 +163,7 @@ class Java {
           RegExp(r'java\s+(?<version>\d+(\.\d+)?(\.\d+)?)\s+\d\d\d\d-\d\d-\d\d');
       final RegExpMatch? match = secondJdkVersionRegex.firstMatch(versionLines[0]);
       if (match != null) {
-        final Version? parsedVersion = Version.parse(match.namedGroup('version'));
-        if (parsedVersion == null) {
-          return null;
-        }
-        return parsedVersion;
+        return Version.parse(match.namedGroup('version'));
       }
       _logger.printWarning(_formatJavaVersionWarning(rawVersionOutput));
       return null;

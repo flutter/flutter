@@ -10,13 +10,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   // Constants taken from _ContextMenuActionState.
-  const CupertinoDynamicColor kBackgroundColor =
-      CupertinoDynamicColor.withBrightness(
+  const CupertinoDynamicColor kBackgroundColor = CupertinoDynamicColor.withBrightness(
     color: Color(0xFFF1F1F1),
     darkColor: Color(0xFF212122),
   );
-  const CupertinoDynamicColor kBackgroundColorPressed =
-      CupertinoDynamicColor.withBrightness(
+  const CupertinoDynamicColor kBackgroundColorPressed = CupertinoDynamicColor.withBrightness(
     color: Color(0xFFDDDDDD),
     darkColor: Color(0xFF3F3F40),
   );
@@ -117,24 +115,33 @@ void main() {
         paints..rect(color: kBackgroundColor.darkColor));
   });
 
-  testWidgets('icon and textStyle colors are correct out of the box',
-      (WidgetTester tester) async {
+  testWidgets('icon and textStyle colors are correct out of the box', (WidgetTester tester) async {
     await tester.pumpWidget(getApp());
     expect(getTextStyle(tester).color, CupertinoColors.label);
     expect(getIcon(tester).color, CupertinoColors.label);
   });
 
-  testWidgets('icon and textStyle colors are correct for destructive actions',
-      (WidgetTester tester) async {
+  testWidgets('icon and textStyle colors are correct for destructive actions', (WidgetTester tester) async {
     await tester.pumpWidget(getApp(isDestructiveAction: true));
     expect(getTextStyle(tester).color, kDestructiveActionColor);
     expect(getIcon(tester).color, kDestructiveActionColor);
   });
 
-  testWidgets('textStyle is correct for defaultAction',
-      (WidgetTester tester) async {
+  testWidgets('textStyle is correct for defaultAction for Brightness.light', (WidgetTester tester) async {
     await tester.pumpWidget(getApp(isDefaultAction: true));
     expect(getTextStyle(tester).fontWeight, kDefaultActionWeight);
+    final Element context = tester.element(find.byType(CupertinoContextMenuAction));
+    // The dynamic color should have been resolved.
+    expect(getTextStyle(tester).color, CupertinoColors.label.resolveFrom(context));
+  });
+
+  testWidgets('textStyle is correct for defaultAction for Brightness.dark', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/144492.
+    await tester.pumpWidget(getApp(isDefaultAction: true, brightness: Brightness.dark));
+    expect(getTextStyle(tester).fontWeight, kDefaultActionWeight);
+    final Element context = tester.element(find.byType(CupertinoContextMenuAction));
+    // The dynamic color should have been resolved.
+    expect(getTextStyle(tester).color, CupertinoColors.label.resolveFrom(context));
   });
 
   testWidgets(

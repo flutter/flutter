@@ -557,11 +557,9 @@ class Cache {
 
   /// Return the top-level directory in the cache; this is `bin/cache`.
   Directory getRoot() {
-    if (_rootOverride != null) {
-      return _fileSystem.directory(_fileSystem.path.join(_rootOverride.path, 'bin', 'cache'));
-    } else {
-      return _fileSystem.directory(_fileSystem.path.join(flutterRoot!, 'bin', 'cache'));
-    }
+    return _fileSystem.directory(
+      _fileSystem.path.join(_rootOverride?.path ?? flutterRoot!, 'bin', 'cache'),
+    );
   }
 
   String getHostPlatformArchName() {
@@ -946,14 +944,6 @@ abstract class EngineCachedArtifact extends CachedArtifact {
       await artifactUpdater.downloadZipArchive('Downloading $friendlyName tools...', Uri.parse(url + urlPath), dir);
 
       _makeFilesExecutable(dir, operatingSystemUtils);
-
-      final File frameworkZip = fileSystem.file(fileSystem.path.join(dir.path, 'FlutterMacOS.framework.zip'));
-      if (frameworkZip.existsSync()) {
-        final Directory framework = fileSystem.directory(fileSystem.path.join(dir.path, 'FlutterMacOS.framework'));
-        ErrorHandlingFileSystem.deleteIfExists(framework, recursive: true);
-        framework.createSync();
-        operatingSystemUtils.unzip(frameworkZip, framework);
-      }
     }
 
     final File licenseSource = cache.getLicenseFile();

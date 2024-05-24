@@ -37,7 +37,6 @@ class BuildApkCommand extends BuildSubCommand {
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesAnalyzeSizeFlag();
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
-    addMultidexOption();
     addIgnoreDeprecationOption();
     argParser
       ..addFlag('split-per-abi',
@@ -134,7 +133,6 @@ class BuildApkCommand extends BuildSubCommand {
       buildInfo,
       splitPerAbi: boolArg('split-per-abi'),
       targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
-      multidexEnabled: boolArg('multidex'),
     );
     validateBuild(androidBuildInfo);
     displayNullSafetyMode(androidBuildInfo.buildInfo);

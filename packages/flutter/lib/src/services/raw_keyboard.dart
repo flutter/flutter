@@ -488,14 +488,11 @@ abstract class RawKeyEvent with Diagnosticable {
     }
     final bool repeat = RawKeyboard.instance.physicalKeysPressed.contains(data.physicalKey);
     final String type = message['type']! as String;
-    switch (type) {
-      case 'keydown':
-        return RawKeyDownEvent(data: data, character: character, repeat: repeat);
-      case 'keyup':
-        return RawKeyUpEvent(data: data);
-      default:
-        throw FlutterError('Unknown key event type: $type');
-    }
+    return switch (type) {
+      'keydown' => RawKeyDownEvent(data: data, character: character, repeat: repeat),
+      'keyup'   => RawKeyUpEvent(data: data),
+      _ => throw FlutterError('Unknown key event type: $type'),
+    };
   }
 
   /// Returns true if the given [LogicalKeyboardKey] is pressed.

@@ -107,7 +107,7 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     this.text,
     this.icon,
-    this.iconMargin = const EdgeInsets.only(bottom: 10.0),
+    this.iconMargin,
     this.height,
     this.child,
   }) : assert(text != null || child != null || icon != null),
@@ -132,7 +132,10 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
   ///
   /// Only useful when used in combination with [icon], and either one of
   /// [text] or [child] is non-null.
-  final EdgeInsetsGeometry iconMargin;
+  ///
+  /// Defaults to 2 pixels of bottom margin. If [ThemeData.useMaterial3] is false,
+  /// then defaults to 10 pixels of bottom margin.
+  final EdgeInsetsGeometry? iconMargin;
 
   /// The height of the [Tab].
   ///
@@ -159,11 +162,15 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
       label = icon!;
     } else {
       calculatedHeight = _kTextAndIconTabHeight;
+      final EdgeInsetsGeometry effectiveIconMargin = iconMargin ??
+        (Theme.of(context).useMaterial3
+          ? _TabsPrimaryDefaultsM3.iconMargin
+          : _TabsDefaultsM2.iconMargin);
       label = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Container(
-            margin: iconMargin,
+            margin: effectiveIconMargin,
             child: icon,
           ),
           _buildLabelText(),
@@ -184,7 +191,6 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('text', text, defaultValue: null));
-    properties.add(DiagnosticsProperty<Widget>('icon', icon, defaultValue: null));
   }
 
   @override
@@ -437,6 +443,15 @@ class _IndicatorPainter extends CustomPainter {
     this.dividerHeight,
     required this.showDivider,
   }) : super(repaint: controller.animation) {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/material.dart',
+        className: '$_IndicatorPainter',
+        object: this,
+      );
+    }
     if (old != null) {
       saveTabOffsets(old._currentTabOffsets, old._currentTextDirection);
     }
@@ -444,7 +459,7 @@ class _IndicatorPainter extends CustomPainter {
 
   final TabController controller;
   final Decoration indicator;
-  final TabBarIndicatorSize? indicatorSize;
+  final TabBarIndicatorSize indicatorSize;
   final EdgeInsetsGeometry indicatorPadding;
   final List<GlobalKey> tabKeys;
   final List<EdgeInsetsGeometry> labelPaddings;
@@ -466,6 +481,9 @@ class _IndicatorPainter extends CustomPainter {
   }
 
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     _painter?.dispose();
   }
 
@@ -493,14 +511,10 @@ class _IndicatorPainter extends CustomPainter {
     assert(tabIndex >= 0);
     assert(tabIndex <= maxTabIndex);
     double tabLeft, tabRight;
-    switch (_currentTextDirection!) {
-      case TextDirection.rtl:
-        tabLeft = _currentTabOffsets![tabIndex + 1];
-        tabRight = _currentTabOffsets![tabIndex];
-      case TextDirection.ltr:
-        tabLeft = _currentTabOffsets![tabIndex];
-        tabRight = _currentTabOffsets![tabIndex + 1];
-    }
+    (tabLeft, tabRight) = switch (_currentTextDirection!) {
+      TextDirection.rtl => (_currentTabOffsets![tabIndex + 1], _currentTabOffsets![tabIndex]),
+      TextDirection.ltr => (_currentTabOffsets![tabIndex], _currentTabOffsets![tabIndex + 1]),
+    };
 
     if (indicatorSize == TabBarIndicatorSize.label) {
       final double tabWidth = tabKeys[tabIndex].currentContext!.size!.width;
@@ -536,6 +550,13 @@ class _IndicatorPainter extends CustomPainter {
     final Rect fromRect = indicatorRect(size, from);
     final Rect toRect = indicatorRect(size, to);
     _currentRect = Rect.lerp(fromRect, toRect, (value - from).abs());
+
+    _currentRect = switch (indicatorSize) {
+      TabBarIndicatorSize.label => _applyStretchEffect(_currentRect!),
+      // Do nothing.
+      TabBarIndicatorSize.tab => _currentRect,
+    };
+
     assert(_currentRect != null);
 
     final ImageConfiguration configuration = ImageConfiguration(
@@ -549,6 +570,70 @@ class _IndicatorPainter extends CustomPainter {
       canvas.drawLine(dividerP1, dividerP2, dividerPaint);
     }
     _painter!.paint(canvas, _currentRect!.topLeft, configuration);
+  }
+
+  /// Applies the stretch effect to the indicator.
+  Rect _applyStretchEffect(Rect rect) {
+    // If the tab animation is completed, there is no need to stretch the indicator
+    // This only works for the tab change animation via tab index, not when
+    // dragging a [TabBarView], but it's still ok, to avoid unnecessary calculations.
+    if (controller.animation!.status == AnimationStatus.completed) {
+      return rect;
+    }
+
+    final double index = controller.index.toDouble();
+    final double value = controller.animation!.value;
+
+    // The progress of the animation from 0 to 1.
+    late double tabChangeProgress;
+
+    // If we are changing tabs via index, we want to map the progress between 0 and 1.
+    if (controller.indexIsChanging) {
+      double progressLeft = (index - value).abs();
+      final int tabsDelta = (controller.index - controller.previousIndex).abs();
+      if (tabsDelta != 0) {
+        progressLeft /= tabsDelta;
+      }
+      tabChangeProgress = 1 - clampDouble(progressLeft, 0.0, 1.0);
+    } else {
+      // Otherwise, the progress is how close we are to the current tab.
+      tabChangeProgress = (index - value).abs();
+    }
+
+    // If the animation has finished, there is no need to apply the stretch effect.
+    if (tabChangeProgress == 1.0) {
+      return rect;
+    }
+
+    // The maximum amount of extra width to add to the indicator.
+    final double stretchSize = rect.width;
+
+    final double inflationPerSide = stretchSize * _stretchAnimation.transform(tabChangeProgress) / 2;
+    final Rect stretchedRect = _inflateRectHorizontally(rect, inflationPerSide);
+    return stretchedRect;
+  }
+
+  /// The animatable that stretches the indicator horizontally when changing tabs.
+  /// Value range is from 0 to 1, so we can multiply it by an stretch factor.
+  ///
+  /// Animation starts with no stretch, then quickly goes to the max stretch amount
+  /// and then goes back to no stretch.
+  late final Animatable<double> _stretchAnimation = TweenSequence<double>(
+    <TweenSequenceItem<double>>[
+      TweenSequenceItem<double>(
+        tween: Tween<double>(begin: 0.0, end: 1.0),
+        weight: 20,
+      ),
+      TweenSequenceItem<double>(
+        tween: Tween<double>(begin: 1.0, end: 0.0),
+        weight: 80,
+      ),
+    ],
+  );
+
+  /// Same as [Rect.inflate], but only inflates in the horizontal direction.
+  Rect _inflateRectHorizontally(Rect r, double delta) {
+    return Rect.fromLTRB(r.left - delta, r.top, r.right + delta, r.bottom);
   }
 
   @override
@@ -935,9 +1020,9 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// The color of the divider.
   ///
-  /// If null and [ThemeData.useMaterial3] is true, [TabBarTheme.dividerColor]
+  /// If null and [ThemeData.useMaterial3] is false, [TabBarTheme.dividerColor]
   /// color is used. If that is null and [ThemeData.useMaterial3] is true,
-  /// [ColorScheme.surfaceVariant] will be used, otherwise divider will not be drawn.
+  /// [ColorScheme.outlineVariant] will be used, otherwise divider will not be drawn.
   final Color? dividerColor;
 
   /// The height of the divider.
@@ -1036,9 +1121,17 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// [MaterialState.pressed] triggers a ripple (an ink splash), per
   /// the current Material Design spec.
   ///
-  /// If the overlay color is null or resolves to null, then the default values
-  /// for [InkResponse.focusColor], [InkResponse.hoverColor], [InkResponse.splashColor],
-  /// and [InkResponse.highlightColor] will be used instead.
+  /// If the overlay color is null or resolves to null, then if [ThemeData.useMaterial3] is
+  /// false, the default values for [InkResponse.focusColor], [InkResponse.hoverColor], [InkResponse.splashColor],
+  /// and [InkResponse.highlightColor] will be used instead. If [ThemeData.useMaterial3]
+  /// if true, the default values are:
+  /// * selected:
+  ///   * pressed - ThemeData.colorScheme.primary(0.1)
+  ///   * hovered - ThemeData.colorScheme.primary(0.08)
+  ///   * focused - ThemeData.colorScheme.primary(0.1)
+  /// * pressed - ThemeData.colorScheme.primary(0.1)
+  /// * hovered - ThemeData.colorScheme.onSurface(0.08)
+  /// * focused - ThemeData.colorScheme.onSurface(0.1)
   final MaterialStateProperty<Color?>? overlayColor;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
@@ -1250,11 +1343,20 @@ class _TabBarState extends State<TabBar> {
       color = Colors.white;
     }
 
-    final bool primaryWithLabelIndicator = widget._isPrimary && indicatorSize == TabBarIndicatorSize.label;
-    final double effectiveIndicatorWeight = theme.useMaterial3 && primaryWithLabelIndicator
-      ? math.max(widget.indicatorWeight, _TabsPrimaryDefaultsM3.indicatorWeight)
+    final double effectiveIndicatorWeight = theme.useMaterial3
+      ? math.max(
+          widget.indicatorWeight,
+          switch (widget._isPrimary) {
+            true  => _TabsPrimaryDefaultsM3.indicatorWeight(indicatorSize),
+            false => _TabsSecondaryDefaultsM3.indicatorWeight,
+          },
+        )
       : widget.indicatorWeight;
     // Only Material 3 primary TabBar with label indicatorSize should be rounded.
+    final bool primaryWithLabelIndicator = switch (indicatorSize) {
+      TabBarIndicatorSize.label  => widget._isPrimary,
+      TabBarIndicatorSize.tab    => false,
+    };
     final BorderRadius? effectiveBorderRadius = theme.useMaterial3 && primaryWithLabelIndicator
       ? BorderRadius.only(
           topLeft: Radius.circular(effectiveIndicatorWeight),
@@ -1317,18 +1419,23 @@ class _TabBarState extends State<TabBar> {
       ?? tabBarTheme.indicatorSize
       ?? _defaults.indicatorSize!;
 
+    final _IndicatorPainter? oldPainter = _indicatorPainter;
+
     _indicatorPainter = !_controllerIsValid ? null : _IndicatorPainter(
       controller: _controller!,
       indicator: _getIndicator(indicatorSize),
-      indicatorSize: widget.indicatorSize ?? tabBarTheme.indicatorSize ?? _defaults.indicatorSize!,
+      indicatorSize: indicatorSize,
       indicatorPadding: widget.indicatorPadding,
       tabKeys: _tabKeys,
-      old: _indicatorPainter,
+      // Passing old painter so that the constructor can copy some values from it.
+      old: oldPainter,
       labelPaddings: _labelPaddings,
       dividerColor: widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor,
       dividerHeight: widget.dividerHeight ?? tabBarTheme.dividerHeight ?? _defaults.dividerHeight,
       showDivider: theme.useMaterial3 && !widget.isScrollable,
     );
+
+    oldPainter?.dispose();
   }
 
   @override
@@ -2254,6 +2361,8 @@ class _TabsDefaultsM2 extends TabBarTheme {
 
   @override
   TabAlignment? get tabAlignment => isScrollable ? TabAlignment.start : TabAlignment.fill;
+
+  static const EdgeInsetsGeometry iconMargin = EdgeInsets.only(bottom: 10);
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Tabs
@@ -2272,9 +2381,11 @@ class _TabsPrimaryDefaultsM3 extends TabBarTheme {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
   final bool isScrollable;
 
+  // This value comes from Divider widget defaults. Token db deprecated 'primary-navigation-tab.divider.color' token.
   @override
-  Color? get dividerColor => _colors.surfaceVariant;
+  Color? get dividerColor => _colors.outlineVariant;
 
+  // This value comes from Divider widget defaults. Token db deprecated 'primary-navigation-tab.divider.height' token.
   @override
   double? get dividerHeight => 1.0;
 
@@ -2298,24 +2409,24 @@ class _TabsPrimaryDefaultsM3 extends TabBarTheme {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return _colors.primary.withOpacity(0.12);
+          return _colors.primary.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
           return _colors.primary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.primary.withOpacity(0.12);
+          return _colors.primary.withOpacity(0.1);
         }
         return null;
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.primary.withOpacity(0.12);
+        return _colors.primary.withOpacity(0.1);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSurface.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSurface.withOpacity(0.12);
+        return _colors.onSurface.withOpacity(0.1);
       }
       return null;
     });
@@ -2327,7 +2438,17 @@ class _TabsPrimaryDefaultsM3 extends TabBarTheme {
   @override
   TabAlignment? get tabAlignment => isScrollable ? TabAlignment.startOffset : TabAlignment.fill;
 
-  static double indicatorWeight = 3.0;
+  static double indicatorWeight(TabBarIndicatorSize indicatorSize) {
+    return switch (indicatorSize) {
+      TabBarIndicatorSize.label => 3.0,
+      TabBarIndicatorSize.tab => 2.0,
+    };
+  }
+
+  // TODO(davidmartos96): This value doesn't currently exist in
+  // https://m3.material.io/components/tabs/specs
+  // Update this when the token is available.
+  static const EdgeInsetsGeometry iconMargin = EdgeInsets.only(bottom: 2);
 }
 
 class _TabsSecondaryDefaultsM3 extends TabBarTheme {
@@ -2339,9 +2460,11 @@ class _TabsSecondaryDefaultsM3 extends TabBarTheme {
   late final TextTheme _textTheme = Theme.of(context).textTheme;
   final bool isScrollable;
 
+  // This value comes from Divider widget defaults. Token db deprecated 'secondary-navigation-tab.divider.color' token.
   @override
-  Color? get dividerColor => _colors.surfaceVariant;
+  Color? get dividerColor => _colors.outlineVariant;
 
+  // This value comes from Divider widget defaults. Token db deprecated 'secondary-navigation-tab.divider.height' token.
   @override
   double? get dividerHeight => 1.0;
 
@@ -2365,24 +2488,24 @@ class _TabsSecondaryDefaultsM3 extends TabBarTheme {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return _colors.onSurface.withOpacity(0.12);
+          return _colors.onSurface.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onSurface.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.onSurface.withOpacity(0.12);
+          return _colors.onSurface.withOpacity(0.1);
         }
         return null;
       }
       if (states.contains(MaterialState.pressed)) {
-        return _colors.onSurface.withOpacity(0.12);
+        return _colors.onSurface.withOpacity(0.1);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSurface.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSurface.withOpacity(0.12);
+        return _colors.onSurface.withOpacity(0.1);
       }
       return null;
     });
@@ -2393,6 +2516,8 @@ class _TabsSecondaryDefaultsM3 extends TabBarTheme {
 
   @override
   TabAlignment? get tabAlignment => isScrollable ? TabAlignment.startOffset : TabAlignment.fill;
+
+  static double indicatorWeight = 2.0;
 }
 
 // END GENERATED TOKEN PROPERTIES - Tabs

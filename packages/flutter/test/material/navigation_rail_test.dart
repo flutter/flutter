@@ -79,7 +79,7 @@ void main() {
       ),
     );
 
-    expect(_railMaterial(tester).color, equals(const Color(0xFFFFFBFE))); // default surface color in M3 colorScheme
+    expect(_railMaterial(tester).color, equals(const Color(0xfffef7ff))); // default surface color in M3 colorScheme
 
     await _pumpNavigationRail(
       tester,
@@ -1856,8 +1856,9 @@ void main() {
             return Scaffold(
               body: Row(
                 children: <Widget>[
-                  MediaQuery(
-                    data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+                  MediaQuery.withClampedTextScaling(
+                    minScaleFactor: 3.0,
+                    maxScaleFactor: 3.0,
                     child: NavigationRail(
                       selectedIndex: 0,
                       destinations: const <NavigationRailDestination>[
@@ -3604,6 +3605,32 @@ void main() {
     expect(inkFeatures, paints..circle(color: Colors.transparent));
   }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
+  testWidgets('Navigation rail can have expanded widgets inside', (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: 0,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            label: Text('Bcd'),
+          ),
+        ],
+        trailing: const Expanded(
+          child: Icon(Icons.search),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests
@@ -5135,8 +5162,9 @@ void main() {
               return Scaffold(
                 body: Row(
                   children: <Widget>[
-                    MediaQuery(
-                      data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+                    MediaQuery.withClampedTextScaling(
+                      minScaleFactor: 3.0,
+                      maxScaleFactor: 3.0,
                       child: NavigationRail(
                         selectedIndex: 0,
                         destinations: const <NavigationRailDestination>[
@@ -5511,8 +5539,9 @@ Future<void> _pumpNavigationRail(
       ),
       home: Builder(
         builder: (BuildContext context) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+          return MediaQuery.withClampedTextScaling(
+            minScaleFactor: textScaleFactor,
+            maxScaleFactor: textScaleFactor,
             child: Scaffold(
               body: Row(
                 children: <Widget>[

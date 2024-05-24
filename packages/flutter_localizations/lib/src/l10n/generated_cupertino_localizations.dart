@@ -10316,7 +10316,7 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   });
 
   @override
-  String get alertDialogLabel => 'ਸੁਚੇਤਨਾ';
+  String get alertDialogLabel => 'ਅਲਰਟ';
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
@@ -14015,7 +14015,7 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get lookUpButtonLabel => '向上看';
+  String get lookUpButtonLabel => '查询';
 
   @override
   String get menuDismissLabel => '关闭菜单';
@@ -14036,13 +14036,13 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => '搜索';
 
   @override
-  String get searchWebButtonLabel => '在网络上搜索';
+  String get searchWebButtonLabel => '搜索';
 
   @override
   String get selectAllButtonLabel => '全选';
 
   @override
-  String get shareButtonLabel => '分享…';
+  String get shareButtonLabel => '共享…';
 
   @override
   String get tabSemanticsLabelRaw => r'第 $tabIndex 个标签，共 $tabCount 个';
@@ -14183,10 +14183,13 @@ class CupertinoLocalizationZhHant extends CupertinoLocalizationZh {
   String get searchTextFieldPlaceholderLabel => '搜尋';
 
   @override
-  String get searchWebButtonLabel => '搜尋網頁';
+  String get searchWebButtonLabel => '搜尋';
 
   @override
   String get selectAllButtonLabel => '全選';
+
+  @override
+  String get shareButtonLabel => '分享…';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCount 個分頁中嘅第 $tabIndex 個';
@@ -14238,9 +14241,6 @@ class CupertinoLocalizationZhHantTw extends CupertinoLocalizationZhHant {
     required super.singleDigitSecondFormat,
     required super.decimalFormat,
   });
-
-  @override
-  String get searchWebButtonLabel => '在網路上搜尋';
 
   @override
   String get noSpellCheckReplacementsLabel => '找不到替代文字';

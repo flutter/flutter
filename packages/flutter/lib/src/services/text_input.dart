@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'dart:ui' show
+  FlutterView,
   FontWeight,
   Offset,
   Rect,
@@ -464,6 +465,7 @@ class TextInputConfiguration {
   /// All arguments have default values, except [actionLabel]. Only
   /// [actionLabel] may be null.
   const TextInputConfiguration({
+    this.viewId,
     this.inputType = TextInputType.text,
     this.readOnly = false,
     this.obscureText = false,
@@ -482,6 +484,14 @@ class TextInputConfiguration {
     this.enableDeltaModel = false,
   }) : smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled);
+
+  /// The ID of the view that the text input belongs to.
+  ///
+  /// See also:
+  ///
+  /// * [FlutterView], which is the view that the ID points to.
+  /// * [View], which is a widget that wraps a [FlutterView].
+  final int? viewId;
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -626,6 +636,7 @@ class TextInputConfiguration {
   /// Creates a copy of this [TextInputConfiguration] with the given fields
   /// replaced with new values.
   TextInputConfiguration copyWith({
+    int? viewId,
     TextInputType? inputType,
     bool? readOnly,
     bool? obscureText,
@@ -644,6 +655,7 @@ class TextInputConfiguration {
     bool? enableDeltaModel,
   }) {
     return TextInputConfiguration(
+      viewId: viewId ?? this.viewId,
       inputType: inputType ?? this.inputType,
       readOnly: readOnly ?? this.readOnly,
       obscureText: obscureText ?? this.obscureText,
@@ -691,6 +703,7 @@ class TextInputConfiguration {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic>? autofill = autofillConfiguration.toJson();
     return <String, dynamic>{
+      'viewId': viewId,
       'inputType': inputType.toJson(),
       'readOnly': readOnly,
       'obscureText': obscureText,
@@ -712,19 +725,41 @@ class TextInputConfiguration {
 }
 
 TextAffinity? _toTextAffinity(String? affinity) {
-  switch (affinity) {
-    case 'TextAffinity.downstream':
-      return TextAffinity.downstream;
-    case 'TextAffinity.upstream':
-      return TextAffinity.upstream;
-  }
-  return null;
+  return switch (affinity) {
+    'TextAffinity.downstream' => TextAffinity.downstream,
+    'TextAffinity.upstream'   => TextAffinity.upstream,
+    _ => null,
+  };
 }
 
-/// A floating cursor state the user has induced by force pressing an iOS
-/// keyboard.
+/// The state of a "floating cursor" drag on an iOS soft keyboard.
+///
+/// The "floating cursor" cursor-positioning mode is an iOS feature used to
+/// precisely position the caret in some editable text using certain touch
+/// gestures. As an example, when the user long-presses the spacebar on the iOS
+/// virtual keyboard, iOS enters floating cursor mode where the whole keyboard
+/// becomes a trackpad. In this mode, there are two visible cursors. One, the
+/// floating cursor, hovers over the text, following the user's horizontal
+/// movements exactly and snapping to lines vertically. The other, the
+/// placeholder cursor, is a "shadow" that also snaps to the actual location
+/// where the cursor will go horizontally when the user releases the trackpad.
+///
+/// The floating cursor renders over the text field, while the placeholder
+/// cursor is a faint shadow of the cursor rendered in the text field in the
+/// location between characters where the cursor will drop into when released.
+/// The placeholder cursor is a faint vertical bar, while the floating cursor
+/// has the same appearance as a normal cursor (a blue vertical bar).
+///
+/// This feature works out-of-the-box with Flutter. Support is built into
+/// [EditableText].
+///
+/// See also:
+///
+///  * [EditableText.backgroundCursorColor], which configures the color of the
+///    placeholder cursor while the floating cursor is being dragged.
 enum FloatingCursorDragState {
-  /// A user has just activated a floating cursor.
+  /// A user has just activated a floating cursor by long pressing on the
+  /// spacebar.
   Start,
 
   /// A user is dragging a floating cursor.
@@ -736,6 +771,11 @@ enum FloatingCursorDragState {
 }
 
 /// The current state and position of the floating cursor.
+///
+/// See also:
+///
+///  * [FloatingCursorDragState], which explains the floating cursor feature in
+///    detail.
 class RawFloatingCursorPoint {
   /// Creates information for setting the position and state of a floating
   /// cursor.
@@ -1151,6 +1191,11 @@ mixin TextInputClient {
   void performPrivateCommand(String action, Map<String, dynamic> data);
 
   /// Updates the floating cursor position and state.
+  ///
+  /// See also:
+  ///
+  ///  * [FloatingCursorDragState], which explains the floating cursor feature
+  ///    in detail.
   void updateFloatingCursor(RawFloatingCursorPoint point);
 
   /// Requests that this client display a prompt rectangle for the given text range,
@@ -1481,47 +1526,31 @@ class TextInputConnection {
 }
 
 TextInputAction _toTextInputAction(String action) {
-  switch (action) {
-    case 'TextInputAction.none':
-      return TextInputAction.none;
-    case 'TextInputAction.unspecified':
-      return TextInputAction.unspecified;
-    case 'TextInputAction.go':
-      return TextInputAction.go;
-    case 'TextInputAction.search':
-      return TextInputAction.search;
-    case 'TextInputAction.send':
-      return TextInputAction.send;
-    case 'TextInputAction.next':
-      return TextInputAction.next;
-    case 'TextInputAction.previous':
-      return TextInputAction.previous;
-    case 'TextInputAction.continueAction':
-      return TextInputAction.continueAction;
-    case 'TextInputAction.join':
-      return TextInputAction.join;
-    case 'TextInputAction.route':
-      return TextInputAction.route;
-    case 'TextInputAction.emergencyCall':
-      return TextInputAction.emergencyCall;
-    case 'TextInputAction.done':
-      return TextInputAction.done;
-    case 'TextInputAction.newline':
-      return TextInputAction.newline;
-  }
-  throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown text input action: $action')]);
+  return switch (action) {
+    'TextInputAction.none'           => TextInputAction.none,
+    'TextInputAction.unspecified'    => TextInputAction.unspecified,
+    'TextInputAction.go'             => TextInputAction.go,
+    'TextInputAction.search'         => TextInputAction.search,
+    'TextInputAction.send'           => TextInputAction.send,
+    'TextInputAction.next'           => TextInputAction.next,
+    'TextInputAction.previous'       => TextInputAction.previous,
+    'TextInputAction.continueAction' => TextInputAction.continueAction,
+    'TextInputAction.join'           => TextInputAction.join,
+    'TextInputAction.route'          => TextInputAction.route,
+    'TextInputAction.emergencyCall'  => TextInputAction.emergencyCall,
+    'TextInputAction.done'           => TextInputAction.done,
+    'TextInputAction.newline'        => TextInputAction.newline,
+    _ => throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown text input action: $action')]),
+  };
 }
 
 FloatingCursorDragState _toTextCursorAction(String state) {
-  switch (state) {
-    case 'FloatingCursorDragState.start':
-      return FloatingCursorDragState.Start;
-    case 'FloatingCursorDragState.update':
-      return FloatingCursorDragState.Update;
-    case 'FloatingCursorDragState.end':
-      return FloatingCursorDragState.End;
-  }
-  throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown text cursor action: $state')]);
+  return switch (state) {
+    'FloatingCursorDragState.start'  => FloatingCursorDragState.Start,
+    'FloatingCursorDragState.update' => FloatingCursorDragState.Update,
+    'FloatingCursorDragState.end'    => FloatingCursorDragState.End,
+    _ => throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown text cursor action: $state')]),
+  };
 }
 
 RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, dynamic> encoded) {
@@ -1779,29 +1808,30 @@ class TextInput {
 
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
     final String method = methodCall.method;
-    if (method == 'TextInputClient.focusElement') {
-      final List<dynamic> args = methodCall.arguments as List<dynamic>;
-      _scribbleClients[args[0]]?.onScribbleFocus(Offset((args[1] as num).toDouble(), (args[2] as num).toDouble()));
-      return;
-    } else if (method == 'TextInputClient.requestElementsInRect') {
-      final List<double> args = (methodCall.arguments as List<dynamic>).cast<num>().map<double>((num value) => value.toDouble()).toList();
-      return _scribbleClients.keys.where((String elementIdentifier) {
-        final Rect rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
-        if (!(_scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false)) {
-          return false;
-        }
-        final Rect bounds = _scribbleClients[elementIdentifier]?.bounds ?? Rect.zero;
-        return !(bounds == Rect.zero || bounds.hasNaN || bounds.isInfinite);
-      }).map((String elementIdentifier) {
-        final Rect bounds = _scribbleClients[elementIdentifier]!.bounds;
-        return <dynamic>[elementIdentifier, ...<dynamic>[bounds.left, bounds.top, bounds.width, bounds.height]];
-      }).toList();
-    } else if (method == 'TextInputClient.scribbleInteractionBegan') {
-      _scribbleInProgress = true;
-      return;
-    } else if (method == 'TextInputClient.scribbleInteractionFinished') {
-      _scribbleInProgress = false;
-      return;
+    switch (methodCall.method) {
+      case 'TextInputClient.focusElement':
+        final List<dynamic> args = methodCall.arguments as List<dynamic>;
+        _scribbleClients[args[0]]?.onScribbleFocus(Offset((args[1] as num).toDouble(), (args[2] as num).toDouble()));
+        return;
+      case 'TextInputClient.requestElementsInRect':
+        final List<double> args = (methodCall.arguments as List<dynamic>).cast<num>().map<double>((num value) => value.toDouble()).toList();
+        return _scribbleClients.keys.where((String elementIdentifier) {
+          final Rect rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
+          if (!(_scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false)) {
+            return false;
+          }
+          final Rect bounds = _scribbleClients[elementIdentifier]?.bounds ?? Rect.zero;
+          return !(bounds == Rect.zero || bounds.hasNaN || bounds.isInfinite);
+        }).map((String elementIdentifier) {
+          final Rect bounds = _scribbleClients[elementIdentifier]!.bounds;
+          return <dynamic>[elementIdentifier, ...<dynamic>[bounds.left, bounds.top, bounds.width, bounds.height]];
+        }).toList();
+      case 'TextInputClient.scribbleInteractionBegan':
+        _scribbleInProgress = true;
+        return;
+      case 'TextInputClient.scribbleInteractionFinished':
+        _scribbleInProgress = false;
+        return;
     }
     if (_currentConnection == null) {
       return;

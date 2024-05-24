@@ -124,23 +124,23 @@ class _${blockName}DefaultsM3 extends SegmentedButtonThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
-          return selectedColor?.withOpacity(0.12);
+          return selectedColor?.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
           return selectedColor?.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return selectedColor?.withOpacity(0.12);
+          return selectedColor?.withOpacity(0.1);
         }
       } else {
         if (states.contains(MaterialState.pressed)) {
-          return unselectedColor?.withOpacity(0.12);
+          return unselectedColor?.withOpacity(0.1);
         }
         if (states.contains(MaterialState.hovered)) {
           return unselectedColor?.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return unselectedColor?.withOpacity(0.12);
+          return unselectedColor?.withOpacity(0.1);
         }
       }
       return Colors.transparent;

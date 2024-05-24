@@ -300,9 +300,10 @@ void main() {
   // Changes made in https://github.com/flutter/flutter/pull/111706
   Scrollbar scrollbar = Scrollbar(trackVisibility: true);
   bool nowShowing = scrollbar.trackVisibility;
-  ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(trackVisibility: nowShowing);
-  scrollbarTheme.copyWith(trackVisibility: nowShowing);
-  scrollbarTheme.trackVisibility;
+  // The 3 expressions below have `bulkApply` set to true thus can't be tested yet.
+  //ScrollbarThemeData scrollbarTheme = ScrollbarThemeData(showTrackOnHover: nowShowing);
+  //scrollbarTheme.copyWith(showTrackOnHover: nowShowing);
+  //scrollbarTheme.showTrackOnHover;
 
   // Changes made in https://github.com/flutter/flutter/pull/114459
   MediaQuery.boldTextOf(context);
@@ -314,11 +315,10 @@ void main() {
   );
   final Clip clip = details.decorationClipBehavior;
 
-  // Changes made in https://github.com/flutter/flutter/pull/129942
-  // TODO(guidezpl): enable fix after https://github.com/dart-lang/sdk/issues/52902
-  // const Curve curve = standardEasing; expect Easing.legacy
-  // const Curve curve = accelerateEasing; expect Easing.legacyAccelerate
-  // const Curve curve = decelerateEasing; expect Easing.legacyDecelerate
+  // Changes made in https://github.com/flutter/flutter/pull/134417
+  const Curve curve = Easing.legacy;
+  const Curve curve = Easing.legacyAccelerate;
+  const Curve curve = Easing.legacyDecelerate;
 
   final PlatformMenuBar platformMenuBar = PlatformMenuBar(menus: <PlatformMenuItem>[], child: const SizedBox());
   final Widget bodyValue = platformMenuBar.child;

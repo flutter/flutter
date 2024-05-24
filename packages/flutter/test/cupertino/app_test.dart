@@ -4,6 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -179,6 +180,52 @@ void main() {
     expect(find.text('popped'), findsOneWidget);
   });
 
+  testWidgets('CupertinoApp.router works with onNavigationNotification', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/139903.
+    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
+      initialRouteInformation: RouteInformation(
+        uri: Uri.parse('initial'),
+      ),
+    );
+    addTearDown(provider.dispose);
+    final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.uri.toString());
+      },
+      onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
+        delegate.routeInformation = RouteInformation(
+          uri: Uri.parse('popped'),
+        );
+        return route.didPop(result);
+      },
+    );
+    addTearDown(delegate.dispose);
+
+    int navigationCount = 0;
+
+    await tester.pumpWidget(CupertinoApp.router(
+      routeInformationProvider: provider,
+      routeInformationParser: SimpleRouteInformationParser(),
+      routerDelegate: delegate,
+      onNavigationNotification: (NavigationNotification? notification) {
+        navigationCount += 1;
+        return true;
+      },
+    ));
+    expect(find.text('initial'), findsOneWidget);
+
+    expect(navigationCount, greaterThan(0));
+    final int navigationCountAfterBuild = navigationCount;
+
+    // Simulate android back button intent.
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.pumpAndSettle();
+    expect(find.text('popped'), findsOneWidget);
+
+    expect(navigationCount, greaterThan(navigationCountAfterBuild));
+  });
+
   testWidgets('CupertinoApp.router route information parser is optional', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
@@ -304,6 +351,24 @@ void main() {
       ),
     );
     expect(ScrollConfiguration.of(capturedContext).runtimeType, CupertinoScrollBehavior);
+  });
+
+  testWidgets('CupertinoApp has correct default multitouchDragStrategy', (WidgetTester tester) async {
+    late BuildContext capturedContext;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            capturedContext = context;
+            return const Placeholder();
+          },
+        ),
+      ),
+    );
+
+    final ScrollBehavior scrollBehavior = ScrollConfiguration.of(capturedContext);
+    expect(scrollBehavior.runtimeType, CupertinoScrollBehavior);
+    expect(scrollBehavior.getMultitouchDragStrategy(capturedContext), MultitouchDragStrategy.averageBoundaryPointers);
   });
 
   testWidgets('A ScrollBehavior can be set for CupertinoApp', (WidgetTester tester) async {

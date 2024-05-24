@@ -90,6 +90,11 @@ import 'value_listenable_builder.dart';
 /// [AnimatedBuilder], which can be used similarly to this
 /// [TweenAnimationBuilder], but unlike the latter it is powered by a
 /// developer-managed [AnimationController].
+///
+/// See also:
+///
+/// * [ValueListenableBuilder], a widget whose content stays synced with a
+///   [ValueListenable] instead of a [Tween].
 class TweenAnimationBuilder<T extends Object?> extends ImplicitlyAnimatedWidget {
   /// Creates a [TweenAnimationBuilder].
   ///

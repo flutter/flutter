@@ -517,21 +517,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///    focus traversal policy for a widget subtree.
   ///  * [FocusTraversalPolicy], a class that can be extended to describe a
   ///    traversal policy.
-  bool get canRequestFocus {
-    if (!_canRequestFocus) {
-      return false;
-    }
-    final FocusScopeNode? scope = enclosingScope;
-    if (scope != null && !scope.canRequestFocus) {
-      return false;
-    }
-    for (final FocusNode ancestor in ancestors) {
-      if (!ancestor.descendantsAreFocusable) {
-        return false;
-      }
-    }
-    return true;
-  }
+  bool get canRequestFocus => _canRequestFocus && ancestors.every(_allowDescendantsToBeFocused);
+  static bool _allowDescendantsToBeFocused(FocusNode ancestor) => ancestor.descendantsAreFocusable;
 
   bool _canRequestFocus;
   @mustCallSuper
@@ -791,6 +778,22 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Use [enclosingScope] to look for scopes above this node.
   FocusScopeNode? get nearestScope => enclosingScope;
 
+  FocusScopeNode? _enclosingScope;
+  void _clearEnclosingScopeCache() {
+    final FocusScopeNode? cachedScope = _enclosingScope;
+    if (cachedScope == null) {
+      return;
+    }
+    _enclosingScope = null;
+    if (children.isNotEmpty) {
+      for (final FocusNode child in children) {
+        if (identical(cachedScope, child._enclosingScope)) {
+          child._clearEnclosingScopeCache();
+        }
+      }
+    }
+  }
+
   /// Returns the nearest enclosing scope node above this node, or null if the
   /// node has not yet be added to the focus tree.
   ///
@@ -799,12 +802,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// Use [nearestScope] to start at this node instead of above it.
   FocusScopeNode? get enclosingScope {
-    for (final FocusNode node in ancestors) {
-      if (node is FocusScopeNode) {
-        return node;
-      }
-    }
-    return null;
+    final FocusScopeNode? enclosingScope = _enclosingScope ??= parent?.nearestScope;
+    assert(enclosingScope == parent?.nearestScope, '$this has invalid scope cache: $_enclosingScope != ${parent?.nearestScope}');
+    return enclosingScope;
   }
 
   /// Returns the size of the attached widget's [RenderObject], in logical
@@ -990,6 +990,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     }
 
     node._parent = null;
+    node._clearEnclosingScopeCache();
     _children.remove(node);
     for (final FocusNode ancestor in ancestors) {
       ancestor._descendants = null;
@@ -1268,12 +1269,13 @@ class FocusScopeNode extends FocusNode {
     super.skipTraversal,
     super.canRequestFocus,
     this.traversalEdgeBehavior = TraversalEdgeBehavior.closedLoop,
-  })  : super(
-          descendantsAreFocusable: true,
-        );
+  })  : super(descendantsAreFocusable: true);
 
   @override
   FocusScopeNode get nearestScope => this;
+
+  @override
+  bool get descendantsAreFocusable => _canRequestFocus && super.descendantsAreFocusable;
 
   /// Controls the transfer of focus beyond the first and the last items of a
   /// [FocusScopeNode].
@@ -1446,6 +1448,17 @@ enum FocusHighlightStrategy {
   alwaysTraditional,
 }
 
+// By extending the WidgetsBindingObserver class,
+// we can add a listener object to FocusManager as a private member.
+class _AppLifecycleListener extends WidgetsBindingObserver {
+  _AppLifecycleListener(this.onLifecycleStateChanged);
+
+  final void Function(AppLifecycleState) onLifecycleStateChanged;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) => onLifecycleStateChanged(state);
+}
+
 /// Manages the focus tree.
 ///
 /// The focus tree is a separate, sparser, tree from the widget tree that
@@ -1508,6 +1521,16 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
+      // It appears that some Android keyboard implementations can cause
+      // app lifecycle state changes: adding this listener would cause the
+      // text field to unfocus as the user is trying to type.
+      //
+      // Until this is resolved, we won't be adding the listener to Android apps.
+      // https://github.com/flutter/flutter/pull/142930#issuecomment-1981750069
+      _appLifecycleListener = _AppLifecycleListener(_appLifecycleChange);
+      WidgetsBinding.instance.addObserver(_appLifecycleListener!);
+    }
     rootScope._manager = this;
   }
 
@@ -1524,6 +1547,9 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
 
   @override
   void dispose() {
+    if (_appLifecycleListener != null) {
+      WidgetsBinding.instance.removeObserver(_appLifecycleListener!);
+    }
     _highlightManager.dispose();
     rootScope.dispose();
     super.dispose();
@@ -1682,6 +1708,33 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   // update.
   final Set<FocusNode> _dirtyNodes = <FocusNode>{};
 
+  // Allows FocusManager to respond to app lifecycle state changes,
+  // temporarily suspending the primaryFocus when the app is inactive.
+  _AppLifecycleListener? _appLifecycleListener;
+
+  // Stores the node that was focused before the app lifecycle changed.
+  // Will be restored as the primary focus once app is resumed.
+  FocusNode? _suspendedNode;
+
+  void _appLifecycleChange(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (_primaryFocus != rootScope) {
+        assert(_focusDebug(() => 'focus changed while app was paused, ignoring $_suspendedNode'));
+        _suspendedNode = null;
+      }
+      else if (_suspendedNode != null) {
+        assert(_focusDebug(() => 'requesting focus for $_suspendedNode'));
+        _suspendedNode!.requestFocus();
+        _suspendedNode = null;
+      }
+    } else if (_primaryFocus != rootScope) {
+      assert(_focusDebug(() => 'suspending $_primaryFocus'));
+      _markedForFocus = rootScope;
+      _suspendedNode = _primaryFocus;
+      applyFocusChangesIfNeeded();
+    }
+  }
+
   // The node that has requested to have the primary focus, but hasn't been
   // given it yet.
   FocusNode? _markedForFocus;
@@ -1692,6 +1745,9 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     assert(_focusDebug(() => 'Node was detached: $node'));
     if (_primaryFocus == node) {
       _primaryFocus = null;
+    }
+    if (_suspendedNode == node) {
+      _suspendedNode = null;
     }
     _dirtyNodes.remove(node);
   }
@@ -1831,6 +1887,18 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
 // This doesn't extend ChangeNotifier because the callback passes the updated
 // value, and ChangeNotifier requires using VoidCallback.
 class _HighlightModeManager {
+  _HighlightModeManager() {
+    // TODO(polina-c): stop duplicating code across disposables
+    // https://github.com/flutter/flutter/issues/137435
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectCreated(
+        library: 'package:flutter/widgets.dart',
+        className: '$_HighlightModeManager',
+        object: this,
+      );
+    }
+  }
+
   // If set, indicates if the last interaction detected was touch or not. If
   // null, no interactions have occurred yet.
   bool? _lastInteractionWasTouch;
@@ -1888,6 +1956,9 @@ class _HighlightModeManager {
 
   @mustCallSuper
   void dispose() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
+    }
     if (ServicesBinding.instance.keyEventManager.keyMessageHandler == handleKeyMessage) {
       GestureBinding.instance.pointerRouter.removeGlobalRoute(handlePointerEvent);
       ServicesBinding.instance.keyEventManager.keyMessageHandler = null;

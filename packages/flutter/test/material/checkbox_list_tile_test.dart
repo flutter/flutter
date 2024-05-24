@@ -1194,6 +1194,41 @@ void main() {
 
     handle.dispose();
   });
+
+  testWidgets('CheckboxListTile.control widget should not request focus on traversal', (WidgetTester tester) async {
+    final GlobalKey firstChildKey = GlobalKey();
+    final GlobalKey secondChildKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              CheckboxListTile(
+                value: true,
+                onChanged: (bool? value) {},
+                title: Text('Hey', key: firstChildKey),
+              ),
+              CheckboxListTile(
+                value: true,
+                onChanged: (bool? value) {},
+                title: Text('There', key: secondChildKey),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    Focus.of(firstChildKey.currentContext!).requestFocus();
+    await tester.pump();
+    expect(Focus.of(firstChildKey.currentContext!).hasPrimaryFocus, isTrue);
+    Focus.of(firstChildKey.currentContext!).nextFocus();
+    await tester.pump();
+    expect(Focus.of(firstChildKey.currentContext!).hasPrimaryFocus, isFalse);
+    expect(Focus.of(secondChildKey.currentContext!).hasPrimaryFocus, isTrue);
+  });
 }
 
 class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {

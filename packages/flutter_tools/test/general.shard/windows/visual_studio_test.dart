@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/windows/visual_studio.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 const String programFilesPath = r'C:\Program Files (x86)';
 const String visualStudioPath = programFilesPath + r'\Microsoft Visual Studio\2017\Community';
@@ -344,6 +345,7 @@ VisualStudioFixture setUpVisualStudio() {
     platform: windowsPlatform,
     logger: logger,
     processManager: processManager,
+    osUtils: FakeOperatingSystemUtils(),
   );
   return VisualStudioFixture(visualStudio, fileSystem, processManager, logger);
 }
@@ -382,6 +384,7 @@ void main() {
         fileSystem: MemoryFileSystem.test(style: FileSystemStyle.windows),
         platform: FakePlatform(operatingSystem: 'windows'),
         processManager: FakeProcessManager.any(),
+        osUtils: FakeOperatingSystemUtils(),
       );
 
       expect(() => visualStudio.isInstalled,
@@ -404,6 +407,7 @@ void main() {
         fileSystem: fileSystem,
         platform: windowsPlatform,
         processManager: fakeProcessManager,
+        osUtils: FakeOperatingSystemUtils(),
       );
 
       expect(visualStudio.isInstalled, false);
@@ -426,6 +430,7 @@ void main() {
         fileSystem: fileSystem,
         platform: windowsPlatform,
         processManager: fakeProcessManager,
+        osUtils: FakeOperatingSystemUtils(),
       );
 
       expect(visualStudio.isInstalled, false);

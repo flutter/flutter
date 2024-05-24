@@ -62,7 +62,6 @@ class OverflowBar extends MultiChildRenderObjectWidget {
     this.overflowAlignment = OverflowBarAlignment.start,
     this.overflowDirection = VerticalDirection.down,
     this.textDirection,
-    this.clipBehavior = Clip.none,
     super.children,
   });
 
@@ -192,11 +191,6 @@ class OverflowBar extends MultiChildRenderObjectWidget {
   ///    text and text-direction-sensitive render objects.
   final TextDirection? textDirection;
 
-  /// {@macro flutter.material.Material.clipBehavior}
-  ///
-  /// Defaults to [Clip.none].
-  final Clip clipBehavior;
-
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _RenderOverflowBar(
@@ -206,7 +200,6 @@ class OverflowBar extends MultiChildRenderObjectWidget {
       overflowAlignment: overflowAlignment,
       overflowDirection: overflowDirection,
       textDirection: textDirection ?? Directionality.of(context),
-      clipBehavior: clipBehavior,
     );
   }
 
@@ -218,8 +211,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
       ..overflowSpacing = overflowSpacing
       ..overflowAlignment = overflowAlignment
       ..overflowDirection = overflowDirection
-      ..textDirection = textDirection ?? Directionality.of(context)
-      ..clipBehavior = clipBehavior;
+      ..textDirection = textDirection ?? Directionality.of(context);
   }
 
   @override
@@ -247,14 +239,12 @@ class _RenderOverflowBar extends RenderBox
     OverflowBarAlignment overflowAlignment = OverflowBarAlignment.start,
     VerticalDirection overflowDirection = VerticalDirection.down,
     required TextDirection textDirection,
-    Clip clipBehavior = Clip.none,
   }) : _spacing = spacing,
        _alignment = alignment,
        _overflowSpacing = overflowSpacing,
        _overflowAlignment = overflowAlignment,
        _overflowDirection = overflowDirection,
-       _textDirection = textDirection,
-       _clipBehavior = clipBehavior {
+       _textDirection = textDirection {
     addAll(children);
   }
 
@@ -316,17 +306,6 @@ class _RenderOverflowBar extends RenderBox
     }
     _textDirection = value;
     markNeedsLayout();
-  }
-
-  Clip get clipBehavior => _clipBehavior;
-  Clip _clipBehavior = Clip.none;
-  set clipBehavior(Clip value) {
-    if (value == _clipBehavior) {
-      return;
-    }
-    _clipBehavior = value;
-    markNeedsPaint();
-    markNeedsSemanticsUpdate();
   }
 
   @override
@@ -488,15 +467,11 @@ class _RenderOverflowBar extends RenderBox
       double y = 0;
       while (child != null) {
         final _OverflowBarParentData childParentData = child.parentData! as _OverflowBarParentData;
-        double x = 0;
-        switch (overflowAlignment) {
-          case OverflowBarAlignment.start:
-            x = rtl ? constraints.maxWidth - child.size.width : 0;
-          case OverflowBarAlignment.center:
-            x = (constraints.maxWidth - child.size.width) / 2;
-          case OverflowBarAlignment.end:
-            x = rtl ? 0 : constraints.maxWidth - child.size.width;
-        }
+        final double x = switch (overflowAlignment) {
+          OverflowBarAlignment.center => (constraints.maxWidth - child.size.width) / 2,
+          OverflowBarAlignment.start  => rtl ? constraints.maxWidth - child.size.width : 0,
+          OverflowBarAlignment.end    => rtl ? 0 : constraints.maxWidth - child.size.width,
+        };
         childParentData.offset = Offset(x, y);
         y += child.size.height + overflowSpacing;
         child = nextChild();

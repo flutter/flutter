@@ -332,7 +332,7 @@ tasks.register("clean", Delete) {
       });
     });
 
-    group('migrate min sdk versions less than 19 to flutter.minSdkVersion '
+    group('migrate min sdk versions less than 21 to flutter.minSdkVersion '
         'when in a FlutterProject that is an app', ()
     {
       late MemoryFileSystem memoryFileSystem;
@@ -359,32 +359,25 @@ tasks.register("clean", Delete) {
         expect(bufferLogger.traceText, contains(appGradleNotFoundWarning));
       });
 
-      testWithoutContext('replace when api 16', () {
-        const String minSdkVersion16 = 'minSdkVersion 16';
-        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion16));
-        migration.migrate();
-        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(replacementMinSdkText));
-      });
-
-      testWithoutContext('replace when api 17', () {
-        const String minSdkVersion17 = 'minSdkVersion 17';
-        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion17));
-        migration.migrate();
-        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(replacementMinSdkText));
-      });
-
-      testWithoutContext('replace when api 18', () {
-        const String minSdkVersion18 = 'minSdkVersion 18';
-        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion18));
-        migration.migrate();
-        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(replacementMinSdkText));
-      });
-
-      testWithoutContext('do nothing when >=api 19', () {
+      testWithoutContext('replace when api 19', () {
         const String minSdkVersion19 = 'minSdkVersion 19';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion19));
         migration.migrate();
-        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(minSdkVersion19));
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(replacementMinSdkText));
+      });
+
+      testWithoutContext('replace when api 20', () {
+        const String minSdkVersion20 = 'minSdkVersion 20';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion20));
+        migration.migrate();
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(replacementMinSdkText));
+      });
+
+      testWithoutContext('do nothing when >=api 21', () {
+        const String minSdkVersion21 = 'minSdkVersion 21';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion21));
+        migration.migrate();
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(minSdkVersion21));
       });
 
       testWithoutContext('do nothing when already using '
@@ -395,7 +388,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('avoid rewriting comments', () {
-        const String code = '// minSdkVersion 16  // old default\n'
+        const String code = '// minSdkVersion 19  // old default\n'
             '        minSdkVersion 23  // new version';
         project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(code));
         migration.migrate();
@@ -411,10 +404,10 @@ tasks.register("clean", Delete) {
             project,
             bufferLogger
         );
-        const String minSdkVersion16 = 'minSdkVersion 16';
-        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion16));
+        const String minSdkVersion19 = 'minSdkVersion 19';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(minSdkVersion19));
         migration.migrate();
-        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(minSdkVersion16));
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(minSdkVersion19));
       });
 
       testWithoutContext('do nothing when minSdkVersion is set '
@@ -427,10 +420,10 @@ tasks.register("clean", Delete) {
 
       testWithoutContext('do nothing when minSdkVersion is set '
           'using = syntax', () {
-        const String equalsSyntaxMinSdkVersion16 = 'minSdkVersion = 16';
-        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(equalsSyntaxMinSdkVersion16));
+        const String equalsSyntaxMinSdkVersion19 = 'minSdkVersion = 19';
+        project.appGradleFile.writeAsStringSync(sampleModuleGradleBuildFile(equalsSyntaxMinSdkVersion19));
         migration.migrate();
-        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(equalsSyntaxMinSdkVersion16));
+        expect(project.appGradleFile.readAsStringSync(), sampleModuleGradleBuildFile(equalsSyntaxMinSdkVersion19));
       });
     });
   });

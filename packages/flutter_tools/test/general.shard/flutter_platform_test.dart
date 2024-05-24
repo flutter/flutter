@@ -8,7 +8,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/test/flutter_platform.dart';
-import 'package:test_core/backend.dart'; // ignore: deprecated_member_use
+import 'package:test_core/backend.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';

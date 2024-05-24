@@ -66,12 +66,6 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   }
 
   @override
-  void onSingleTapUp(TapDragUpDetails details) {
-    super.onSingleTapUp(details);
-    _state._requestKeyboard();
-  }
-
-  @override
   bool get onUserTapAlwaysCalled => _state.widget.onTapAlwaysCalled;
 
   @override
@@ -192,6 +186,14 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// ** See code in examples/api/lib/material/text_field/text_field.2.dart **
 /// {@end-tool}
 ///
+/// ## Scrolling Considerations
+///
+/// If this [TextField] is not a descendant of [Scaffold] and is being used
+/// within a [Scrollable] or nested [Scrollable]s, consider placing a
+/// [ScrollNotificationObserver] above the root [Scrollable] that contains this
+/// [TextField] to ensure proper scroll coordination for [TextField] and its
+/// components like [TextSelectionOverlay].
+///
 /// See also:
 ///
 ///  * [TextFormField], which integrates with the [Form] widget.
@@ -291,6 +293,7 @@ class TextField extends StatefulWidget {
     this.onAppPrivateCommand,
     this.inputFormatters,
     this.enabled,
+    this.ignorePointers,
     this.cursorWidth = 2.0,
     this.cursorHeight,
     this.cursorRadius,
@@ -346,15 +349,13 @@ class TextField extends StatefulWidget {
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText);
 
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.intro}
-  ///
-  /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
+  /// The configuration for the magnifier of this text field.
   ///
   /// By default, builds a [CupertinoTextMagnifier] on iOS and [TextMagnifier]
-  /// on Android, and builds nothing on all other platforms. If it is desired to
-  /// suppress the magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  /// on Android, and builds nothing on all other platforms. To suppress the
+  /// magnifier, consider passing [TextMagnifierConfiguration.disabled].
+  ///
+  /// {@macro flutter.widgets.magnifier.intro}
   ///
   /// {@tool dartpad}
   /// This sample demonstrates how to customize the magnifier that this text field uses.
@@ -603,6 +604,11 @@ class TextField extends StatefulWidget {
   /// If non-null this property overrides the [decoration]'s
   /// [InputDecoration.enabled] property.
   final bool? enabled;
+
+  /// Determines whether this widget ignores pointer events.
+  ///
+  /// Defaults to null, and when null, does nothing.
+  final bool? ignorePointers;
 
   /// {@macro flutter.widgets.editableText.cursorWidth}
   final double cursorWidth;
@@ -985,7 +991,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
 
   @override
-  bool get selectionEnabled => widget.selectionEnabled;
+  bool get selectionEnabled => widget.selectionEnabled && _isEnabled;
   // End of API for TextSelectionGestureDetectorBuilderDelegate.
 
   bool get _isEnabled =>  widget.enabled ?? widget.decoration?.enabled ?? true;
@@ -1000,7 +1006,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   bool get _hasError => widget.decoration?.errorText != null || widget.decoration?.error != null || _hasIntrinsicError;
 
-  Color get _errorColor => widget.cursorErrorColor ?? widget.decoration?.errorStyle?.color ?? Theme.of(context).colorScheme.error;
+  Color get _errorColor => widget.cursorErrorColor ?? _getEffectiveDecoration().errorStyle?.color ?? Theme.of(context).colorScheme.error;
 
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -1086,12 +1092,10 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   bool get _canRequestFocus {
     final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
-    switch (mode) {
-      case NavigationMode.traditional:
-        return widget.canRequestFocus && _isEnabled;
-      case NavigationMode.directional:
-        return true;
-    }
+    return switch (mode) {
+      NavigationMode.traditional => widget.canRequestFocus && _isEnabled,
+      NavigationMode.directional => true,
+    };
   }
 
   @override
@@ -1565,11 +1569,12 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       onExit: (PointerExitEvent event) => _handleHover(false),
       child: TextFieldTapRegion(
         child: IgnorePointer(
-          ignoring: !_isEnabled,
+          ignoring: widget.ignorePointers ?? !_isEnabled,
           child: AnimatedBuilder(
             animation: controller, // changes the _currentLength
             builder: (BuildContext context, Widget? child) {
               return Semantics(
+                enabled: _isEnabled,
                 maxValueLength: semanticsMaxValueLength,
                 currentValueLength: _currentLength,
                 onTap: widget.readOnly ? null : () {

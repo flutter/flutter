@@ -155,5 +155,7 @@
   "menuDismissLabel": "إغلاق القائمة",
   "lookUpButtonLabel": "النظر إلى أعلى",
   "searchWebButtonLabel": "البحث على الويب",
-  "shareButtonLabel": "مشاركة…"
+  "shareButtonLabel": "مشاركة…",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

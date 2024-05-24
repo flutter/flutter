@@ -352,8 +352,99 @@ void main() {
           false);
       expect(logs, <int>[20, 21, 10, 11]);
       logs.clear();
-    // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
+
+    testWidgets('FocusManager ignores app lifecycle changes on Android.', (WidgetTester tester) async {
+      final bool shouldRespond = kIsWeb || defaultTargetPlatform != TargetPlatform.android;
+      if (shouldRespond) {
+        return;
+      }
+
+      Future<void> setAppLifecycleState(AppLifecycleState state) async {
+        final ByteData? message = const StringCodec().encodeMessage(state.toString());
+        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .handlePlatformMessage('flutter/lifecycle', message, (_) {});
+      }
+
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      addTearDown(scope.dispose);
+      final FocusAttachment scopeAttachment = scope.attach(context);
+      final FocusNode focusNode = FocusNode(debugLabel: 'Focus Node');
+      addTearDown(focusNode.dispose);
+      final FocusAttachment focusNodeAttachment = focusNode.attach(context);
+      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+      focusNodeAttachment.reparent(parent: scope);
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      await setAppLifecycleState(AppLifecycleState.paused);
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      await setAppLifecycleState(AppLifecycleState.resumed);
+      expect(focusNode.hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets('FocusManager responds to app lifecycle changes.', (WidgetTester tester) async {
+      final bool shouldRespond = kIsWeb || defaultTargetPlatform != TargetPlatform.android;
+      if (!shouldRespond) {
+        return;
+      }
+
+      Future<void> setAppLifecycleState(AppLifecycleState state) async {
+        final ByteData? message = const StringCodec().encodeMessage(state.toString());
+        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .handlePlatformMessage('flutter/lifecycle', message, (_) {});
+      }
+
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      addTearDown(scope.dispose);
+      final FocusAttachment scopeAttachment = scope.attach(context);
+      final FocusNode focusNode = FocusNode(debugLabel: 'Focus Node');
+      addTearDown(focusNode.dispose);
+      final FocusAttachment focusNodeAttachment = focusNode.attach(context);
+      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+      focusNodeAttachment.reparent(parent: scope);
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      await setAppLifecycleState(AppLifecycleState.paused);
+      expect(focusNode.hasPrimaryFocus, isFalse);
+
+      await setAppLifecycleState(AppLifecycleState.resumed);
+      expect(focusNode.hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets('Node is removed completely even if app is paused.', (WidgetTester tester) async {
+      Future<void> setAppLifecycleState(AppLifecycleState state) async {
+        final ByteData? message = const StringCodec().encodeMessage(state.toString());
+        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .handlePlatformMessage('flutter/lifecycle', message, (_) {});
+      }
+
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+      addTearDown(scope.dispose);
+      final FocusAttachment scopeAttachment = scope.attach(context);
+      final FocusNode focusNode = FocusNode(debugLabel: 'Focus Node');
+      addTearDown(focusNode.dispose);
+      final FocusAttachment focusNodeAttachment = focusNode.attach(context);
+      scopeAttachment.reparent(parent: tester.binding.focusManager.rootScope);
+      focusNodeAttachment.reparent(parent: scope);
+      focusNode.requestFocus();
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
+
+      await setAppLifecycleState(AppLifecycleState.paused);
+      focusNodeAttachment.detach();
+      expect(focusNode.hasPrimaryFocus, isFalse);
+
+      await setAppLifecycleState(AppLifecycleState.resumed);
+      expect(focusNode.hasPrimaryFocus, isFalse);
+    });
   });
 
   group(FocusScopeNode, () {
@@ -473,16 +564,16 @@ void main() {
       // child1
       //   |
       // child2
-      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope2');
+      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1');
       addTearDown(scope1.dispose);
       final FocusAttachment scope2Attachment = scope1.attach(context);
       scope2Attachment.reparent(parent: tester.binding.focusManager.rootScope);
 
-      final FocusNode child1 = FocusNode(debugLabel: 'child2');
+      final FocusNode child1 = FocusNode(debugLabel: 'child1');
       addTearDown(child1.dispose);
       final FocusAttachment child2Attachment = child1.attach(context);
 
-      final FocusNode child2 = FocusNode(debugLabel: 'child3');
+      final FocusNode child2 = FocusNode(debugLabel: 'child2');
       addTearDown(child2.dispose);
       final FocusAttachment child3Attachment = child2.attach(context);
 
@@ -639,6 +730,26 @@ void main() {
       expect(child2.parent, equals(parent1));
       expect(parent1.children.first, equals(child2));
       expect(parent2.children.first, equals(child1));
+    });
+
+    test('FocusScopeNode.canRequestFocus affects descendantsAreFocusable', () {
+      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'Scope');
+
+      scope.descendantsAreFocusable = false;
+      expect(scope.descendantsAreFocusable, isFalse);
+      expect(scope.canRequestFocus, isTrue);
+
+      scope.descendantsAreFocusable = true;
+      expect(scope.descendantsAreFocusable, isTrue);
+      expect(scope.canRequestFocus, isTrue);
+
+      scope.canRequestFocus = false;
+      expect(scope.descendantsAreFocusable, isFalse);
+      expect(scope.canRequestFocus, isFalse);
+
+      scope.canRequestFocus = true;
+      expect(scope.descendantsAreFocusable, isTrue);
+      expect(scope.canRequestFocus, isTrue);
     });
 
     testWidgets('canRequestFocus affects children.', (WidgetTester tester) async {
@@ -1270,7 +1381,6 @@ void main() {
       // Since none of the focused nodes handle this event, nothing should
       // receive it.
       expect(receivedAnEvent, isEmpty);
-    // ignore: deprecated_member_use
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Initial highlight mode guesses correctly.', (WidgetTester tester) async {
@@ -1903,7 +2013,6 @@ void main() {
     expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), true);
     expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
     expect(logs, <int>[0, 1, 0, 1]);
-  // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('FocusManager.addLateKeyEventHandler works', (WidgetTester tester) async {
@@ -1983,7 +2092,6 @@ void main() {
     expect(await simulateKeyDownEvent(LogicalKeyboardKey.digit1), true);
     expect(await simulateKeyUpEvent(LogicalKeyboardKey.digit1), false);
     expect(logs, <int>[0, 1, 0, 1]);
-  // ignore: deprecated_member_use
   }, variant: KeySimulatorTransitModeVariant.all());
 
   testWidgets('FocusManager notifies listeners when a widget loses focus because it was removed.', (WidgetTester tester) async {

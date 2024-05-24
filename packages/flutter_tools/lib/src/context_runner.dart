@@ -218,7 +218,7 @@ Future<T> runInContext<T>(
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
-        dartExecutable: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
+        artifacts: globals.artifacts!,
         logger: globals.logger,
         botDetector: globals.botDetector,
       ),
@@ -278,7 +278,7 @@ Future<T> runInContext<T>(
         processManager: globals.processManager
       ),
       LocalEngineLocator: () => LocalEngineLocator(
-        userMessages: userMessages,
+        userMessages: globals.userMessages,
         logger: globals.logger,
         platform: globals.platform,
         fileSystem: globals.fs,
@@ -351,6 +351,7 @@ Future<T> runInContext<T>(
           platform: globals.platform,
           logger: globals.logger,
           processManager: globals.processManager,
+          osUtils: globals.os,
         )
       ),
       WebWorkflow: () => WebWorkflow(

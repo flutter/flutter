@@ -117,9 +117,9 @@ void main() {
       'shadowColor: Color(0xfffffff2)',
       'surfaceTintColor: Color(0xfffffff3)',
       'text style: TextStyle(inherit: true, color: Color(0xfffffff4))',
-      "labelTextStyle: Instance of '_MaterialStatePropertyWith<TextStyle?>'",
+      "labelTextStyle: Instance of '_WidgetStatePropertyWith<TextStyle?>'",
       'enableFeedback: false',
-      'mouseCursor: MaterialStateMouseCursor(clickable)',
+      'mouseCursor: WidgetStateMouseCursor(clickable)',
       'position: over',
       'iconColor: Color(0xfffffff8)',
       'iconSize: 31.0'
@@ -189,9 +189,9 @@ void main() {
         matching: find.byType(Material),
       ).last,
     );
-    expect(button.color, theme.colorScheme.surface);
+    expect(button.color, theme.colorScheme.surfaceContainer);
     expect(button.shadowColor, theme.colorScheme.shadow);
-    expect(button.surfaceTintColor, theme.colorScheme.surfaceTint);
+    expect(button.surfaceTintColor, Colors.transparent);
     expect(button.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)));
     expect(button.elevation, 3.0);
 

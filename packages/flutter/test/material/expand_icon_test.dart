@@ -73,9 +73,9 @@ void main() {
     expect(iconTheme.data.color, equals(Colors.white60));
   });
 
-  testWidgets('ExpandIcon disabled', (WidgetTester tester) async {
+  testWidgets('Material2 - ExpandIcon disabled', (WidgetTester tester) async {
     IconTheme iconTheme;
-    // Light mode test
+    // Test light mode.
     await tester.pumpWidget(wrap(
       theme: ThemeData(useMaterial3: false),
       child: const ExpandIcon(onPressed: null),
@@ -85,7 +85,7 @@ void main() {
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);
     expect(iconTheme.data.color, equals(Colors.black38));
 
-    // Dark mode test
+    // Test dark mode.
     await tester.pumpWidget(wrap(
       child: const ExpandIcon(onPressed: null),
       theme: ThemeData(useMaterial3: false, brightness: Brightness.dark),
@@ -94,6 +94,37 @@ void main() {
 
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);
     expect(iconTheme.data.color, equals(Colors.white38));
+  });
+
+  testWidgets('Material3 - ExpandIcon disabled', (WidgetTester tester) async {
+    ThemeData theme = ThemeData();
+    IconTheme iconTheme;
+    // Test light mode.
+    await tester.pumpWidget(wrap(
+      theme: theme,
+      child: const ExpandIcon(onPressed: null),
+    ));
+    await tester.pumpAndSettle();
+
+    iconTheme = tester.firstWidget(find.byType(IconTheme).last);
+    expect(
+      iconTheme.data.color,
+      equals(theme.colorScheme.onSurface.withOpacity(0.38)),
+    );
+
+    theme = ThemeData(brightness: Brightness.dark);
+    // Test dark mode.
+    await tester.pumpWidget(wrap(
+      theme: theme,
+      child: const ExpandIcon(onPressed: null),
+    ));
+    await tester.pumpAndSettle();
+
+    iconTheme = tester.firstWidget(find.byType(IconTheme).last);
+    expect(
+      iconTheme.data.color,
+      equals(theme.colorScheme.onSurface.withOpacity(0.38)),
+    );
   });
 
   testWidgets('ExpandIcon test isExpanded does not trigger callback', (WidgetTester tester) async {
@@ -173,7 +204,7 @@ void main() {
     expect(icon.size, 48);
   });
 
-  testWidgets('ExpandIcon has correct semantic hints', (WidgetTester tester) async {
+  testWidgets('Material2 - ExpandIcon has correct semantic hints', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
     await tester.pumpWidget(wrap(
@@ -194,6 +225,7 @@ void main() {
     ));
 
     await tester.pumpWidget(wrap(
+      theme: ThemeData(useMaterial3: false),
       child: ExpandIcon(
         onPressed: (bool _) { },
       ),
@@ -207,6 +239,52 @@ void main() {
       isButton: true,
       onTapHint: localizations.collapsedIconTapHint,
     ));
+    handle.dispose();
+  });
+
+  testWidgets('Material3 - ExpandIcon has correct semantic hints', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+
+    await tester.pumpWidget(wrap(
+      child: ExpandIcon(
+        isExpanded: true,
+        onPressed: (bool _) { },
+      ),
+    ));
+
+    expect(tester.getSemantics(find.byType(ExpandIcon)), matchesSemantics(
+      onTapHint: localizations.expandedIconTapHint,
+      children: <Matcher>[
+        matchesSemantics(
+          hasTapAction: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          isFocusable: true,
+          isButton: true,
+        ),
+      ],
+    ));
+
+    await tester.pumpWidget(wrap(
+      child: ExpandIcon(
+        onPressed: (bool _) { },
+      ),
+    ));
+
+    expect(tester.getSemantics(find.byType(ExpandIcon)), matchesSemantics(
+      onTapHint: localizations.collapsedIconTapHint,
+      children: <Matcher>[
+        matchesSemantics(
+          hasTapAction: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          isFocusable: true,
+          isButton: true,
+        ),
+      ],
+    ));
+
     handle.dispose();
   });
 

@@ -194,28 +194,6 @@ void main() {
           throwsToolExit(message: 'Please ensure that the android manifest is a valid XML document and try again.'),
         );
       });
-      _testInMemory('Android project not on v2 embedding shows a warning', () async {
-        final FlutterProject project = await someProject(includePubspec: true);
-        // The default someProject with an empty <manifest> already indicates
-        // v1 embedding, as opposed to having <meta-data
-        // android:name="flutterEmbedding" android:value="2" />.
-
-        project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.ignore);
-        expect(testLogger.statusText, contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects'));
-      });
-      _testInMemory('Android project not on v2 embedding exits', () async {
-        final FlutterProject project = await someProject(includePubspec: true);
-        // The default someProject with an empty <manifest> already indicates
-        // v1 embedding, as opposed to having <meta-data
-        // android:name="flutterEmbedding" android:value="2" />.
-
-        await expectToolExitLater(
-          Future<dynamic>.sync(() => project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.exit)),
-          contains('Build failed due to use of deprecated Android v1 embedding.')
-        );
-        expect(testLogger.statusText, contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects'));
-        expect(testLogger.statusText, contains('No `<meta-data android:name="flutterEmbedding" android:value="2"/>` in '));
-      });
       _testInMemory('Project not on v2 embedding does not warn if deprecation status is irrelevant', () async {
         final FlutterProject project = await someProject(includePubspec: true);
         // The default someProject with an empty <manifest> already indicates
@@ -225,15 +203,6 @@ void main() {
         // Default is "DeprecationBehavior.none"
         project.checkForDeprecation();
         expect(testLogger.statusText, isEmpty);
-      });
-      _testInMemory('Android project not on v2 embedding ignore continues', () async {
-        final FlutterProject project = await someProject(includePubspec: true);
-        // The default someProject with an empty <manifest> already indicates
-        // v1 embedding, as opposed to having <meta-data
-        // android:name="flutterEmbedding" android:value="2" />.
-
-        project.checkForDeprecation(deprecationBehavior: DeprecationBehavior.ignore);
-        expect(testLogger.statusText, contains('https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects'));
       });
       _testInMemory('Android project no pubspec continues', () async {
         final FlutterProject project = await someProject();
@@ -732,6 +701,60 @@ apply plugin: 'kotlin-android'
 ''';
         });
         expect(project.android.isKotlin, isTrue);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        FlutterProjectFactory: () => flutterProjectFactory,
+      });
+
+    testUsingContext('kotlin host app language with Gradle Kotlin DSL', () async {
+      final FlutterProject project = await someProject();
+
+        addAndroidGradleFile(project.directory,
+          kotlinDsl: true,
+          gradleFileContent: () {
+            return '''
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+''';
+        });
+        expect(project.android.isKotlin, isTrue);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        FlutterProjectFactory: () => flutterProjectFactory,
+      });
+
+    testUsingContext('Gradle Groovy files are preferred to Gradle Kotlin files', () async {
+      final FlutterProject project = await someProject();
+
+        addAndroidGradleFile(project.directory,
+          gradleFileContent: () {
+            return '''
+plugins {
+    id "com.android.application"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+''';
+        });
+        addAndroidGradleFile(project.directory,
+          kotlinDsl: true,
+          gradleFileContent: () {
+            return '''
+plugins {
+    id("com.android.application")
+    id("kotlin-android")
+    id("dev.flutter.flutter-gradle-plugin")
+}
+''';
+        });
+
+        expect(project.android.isKotlin, isFalse);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -1519,7 +1542,7 @@ void _testInMemory(
       ProcessManager: () => processManager ?? FakeProcessManager.any(),
       Java : () => java,
       AndroidStudio: () => androidStudio ?? FakeAndroidStudio(),
-      // Intentionlly null if not set. Some ios tests fail if this is a fake.
+      // Intentionally null if not set. Some ios tests fail if this is a fake.
       AndroidSdk: () => androidSdk,
       Cache: () => Cache(
             logger: globals.logger,
@@ -1568,11 +1591,18 @@ void addIosProjectFile(Directory directory, {required String Function() projectF
     ..writeAsStringSync(projectFileContent());
 }
 
-void addAndroidGradleFile(Directory directory, { required String Function() gradleFileContent }) {
+/// Adds app-level Gradle Groovy build file (build.gradle) to [directory].
+///
+/// If [kotlinDsl] is true, then build.gradle.kts is created instead of
+/// build.gradle. It's the caller's responsibility to make sure that
+/// [gradleFileContent] is consistent with the value of the [kotlinDsl] flag.
+void addAndroidGradleFile(Directory directory, {
+  required String Function() gradleFileContent, bool kotlinDsl = false,
+}) {
   directory
       .childDirectory('android')
       .childDirectory('app')
-      .childFile('build.gradle')
+      .childFile(kotlinDsl ? 'build.gradle.kts' : 'build.gradle')
     ..createSync(recursive: true)
     ..writeAsStringSync(gradleFileContent());
 }
@@ -1608,8 +1638,8 @@ FileSystem getFileSystemForPlatform() {
   );
 }
 
-void addAndroidWithGroup(Directory directory, String id) {
-  directory.childDirectory('android').childFile('build.gradle')
+void addAndroidWithGroup(Directory directory, String id, {bool kotlinDsl = false}) {
+  directory.childDirectory('android').childFile(kotlinDsl ? 'build.gradle.kts' : 'build.gradle')
     ..createSync(recursive: true)
     ..writeAsStringSync(gradleFileWithGroupId(id));
 }

@@ -234,6 +234,7 @@ class AndroidDevice extends Device {
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
         throw UnsupportedError('Invalid target platform for Android');
     }
   }
@@ -570,6 +571,7 @@ class AndroidDevice extends Device {
       case TargetPlatform.linux_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
+      case TargetPlatform.windows_arm64:
       case TargetPlatform.windows_x64:
         _logger.printError('Android platforms are only supported.');
         return LaunchResult.failed();
@@ -585,7 +587,6 @@ class AndroidDevice extends Device {
             debuggingOptions.buildInfo,
             targetArchs: <AndroidArch>[androidArch],
             fastStart: debuggingOptions.fastStart,
-            multidexEnabled: (platformArgs['multidex'] as bool?) ?? false,
           ),
       );
       // Package has been built, so we can get the updated application ID and
@@ -611,7 +612,7 @@ class AndroidDevice extends Device {
     if (debuggingOptions.debuggingEnabled) {
       vmServiceDiscovery = ProtocolDiscovery.vmService(
         // Avoid using getLogReader, which returns a singleton instance, because the
-        // VM Service discovery will dipose at the end. creating a new logger here allows
+        // VM Service discovery will dispose at the end. creating a new logger here allows
         // logs to be surfaced normally during `flutter drive`.
         await AdbLogReader.createLogReader(
           this,

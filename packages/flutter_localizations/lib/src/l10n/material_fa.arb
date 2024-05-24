@@ -56,7 +56,7 @@
   "refreshIndicatorSemanticLabel": "بازآوری",
   "moreButtonTooltip": "بیشتر",
   "dateSeparator": "/",
-  "dateHelpText": "روز/ماه/سال",
+  "dateHelpText": "رر/م‌م/س‌س‌س‌س",
   "selectYearSemanticsLabel": "انتخاب سال",
   "unspecifiedDate": "تاریخ",
   "unspecifiedDateRange": "محدوده تاریخ",
@@ -144,5 +144,7 @@
   "menuDismissLabel": "بستن منو",
   "lookUpButtonLabel": "جستجو",
   "searchWebButtonLabel": "جستجو در وب",
-  "shareButtonLabel": "هم‌رسانی…"
+  "shareButtonLabel": "هم‌رسانی…",
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected"
 }

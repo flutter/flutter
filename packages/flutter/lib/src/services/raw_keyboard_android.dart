@@ -216,40 +216,27 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
     if (metaState & anyMask == 0) {
       return false;
     }
-    switch (side) {
-      case KeyboardSide.any:
-        return true;
-      case KeyboardSide.all:
-        return metaState & leftMask != 0 && metaState & rightMask != 0;
-      case KeyboardSide.left:
-        return metaState & leftMask != 0;
-      case KeyboardSide.right:
-        return metaState & rightMask != 0;
-    }
+    return switch (side) {
+      KeyboardSide.any   => true,
+      KeyboardSide.all   => (metaState & leftMask != 0) && (metaState & rightMask != 0),
+      KeyboardSide.left  => metaState & leftMask != 0,
+      KeyboardSide.right => metaState & rightMask != 0,
+    };
   }
 
   @override
   bool isModifierPressed(ModifierKey key, { KeyboardSide side = KeyboardSide.any }) {
-    switch (key) {
-      case ModifierKey.controlModifier:
-        return _isLeftRightModifierPressed(side, modifierControl, modifierLeftControl, modifierRightControl);
-      case ModifierKey.shiftModifier:
-        return _isLeftRightModifierPressed(side, modifierShift, modifierLeftShift, modifierRightShift);
-      case ModifierKey.altModifier:
-        return _isLeftRightModifierPressed(side, modifierAlt, modifierLeftAlt, modifierRightAlt);
-      case ModifierKey.metaModifier:
-        return _isLeftRightModifierPressed(side, modifierMeta, modifierLeftMeta, modifierRightMeta);
-      case ModifierKey.capsLockModifier:
-        return metaState & modifierCapsLock != 0;
-      case ModifierKey.numLockModifier:
-        return metaState & modifierNumLock != 0;
-      case ModifierKey.scrollLockModifier:
-        return metaState & modifierScrollLock != 0;
-      case ModifierKey.functionModifier:
-        return metaState & modifierFunction != 0;
-      case ModifierKey.symbolModifier:
-        return metaState & modifierSym != 0;
-    }
+    return switch (key) {
+      ModifierKey.controlModifier    => _isLeftRightModifierPressed(side, modifierControl, modifierLeftControl, modifierRightControl),
+      ModifierKey.shiftModifier      => _isLeftRightModifierPressed(side, modifierShift, modifierLeftShift, modifierRightShift),
+      ModifierKey.altModifier        => _isLeftRightModifierPressed(side, modifierAlt, modifierLeftAlt, modifierRightAlt),
+      ModifierKey.metaModifier       => _isLeftRightModifierPressed(side, modifierMeta, modifierLeftMeta, modifierRightMeta),
+      ModifierKey.capsLockModifier   => metaState & modifierCapsLock != 0,
+      ModifierKey.numLockModifier    => metaState & modifierNumLock != 0,
+      ModifierKey.scrollLockModifier => metaState & modifierScrollLock != 0,
+      ModifierKey.functionModifier   => metaState & modifierFunction != 0,
+      ModifierKey.symbolModifier     => metaState & modifierSym != 0,
+    };
   }
 
   @override

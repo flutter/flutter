@@ -719,7 +719,6 @@ void main() {
 
     await tester.pumpWidget(buildFrame(TargetPlatform.macOS, false));
     expect(getTitleBottomLeft(), const Offset(72.0, 16.0));
-
   });
 
   testWidgets('FlexibleSpaceBar test titlePadding override', (WidgetTester tester) async {
@@ -830,7 +829,9 @@ void main() {
         leading: const Icon(Icons.menu),
         flexibleSpace: FlexibleSpaceBar(
           title: Text('title ' * 10),
-          centerTitle: true,
+          // Set centerTitle to false to create a gap between the leading widget
+          // and the long title.
+          centerTitle: false,
         ),
       ),
     ) as FlexibleSpaceBarSettings;
@@ -859,54 +860,6 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.byType(Text)).dx, closeTo(72.0, 0.01));
-  });
-
-  // This is a regression test for https://github.com/flutter/flutter/issues/132030.
-  testWidgets('Long centered FlexibleSpaceBar.title respects leading widget', (WidgetTester tester) async {
-    // Test start position of a long title when the leading widget is
-    // shown by default and the long title is centered.
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          drawer: const Drawer(),
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverAppBar(
-                flexibleSpace: FlexibleSpaceBar(
-                  title: Text('Title ' * 10),
-                  centerTitle: true,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    expect(tester.getTopLeft(find.byType(Text)).dx, 72.0);
-
-    // Test start position of a long title when the leading widget is provided
-    // and the long title is centered.
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverAppBar(
-                leading: const Icon(Icons.menu),
-                flexibleSpace: FlexibleSpaceBar(
-                  title: Text('Title ' * 10),
-                  centerTitle: true,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    await tester.pumpAndSettle();
-    expect(tester.getTopLeft(find.byType(Text)).dx, 72.0);
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/135698.
@@ -948,6 +901,55 @@ void main() {
 
     expect(tester.takeException(), isNull);
   }, variant: TargetPlatformVariant.mobile());
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/138608.
+  testWidgets('FlexibleSpaceBar centers title with a leading widget', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverAppBar(
+                leading: Icon(Icons.menu),
+                flexibleSpace: FlexibleSpaceBar(
+                  centerTitle: true,
+                  title: Text('X'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Offset appBarCenter = tester.getCenter(find.byType(AppBar));
+    final Offset titleCenter = tester.getCenter(find.text('X'));
+    expect(appBarCenter.dx, titleCenter.dx);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/138296.
+  testWidgets('Material3 - Default title color', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme, // Provide the expected theme data.
+        home: const Material(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverAppBar(
+                flexibleSpace: FlexibleSpaceBar(
+                  title: Text('Title'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final DefaultTextStyle textStyle = DefaultTextStyle.of(tester.element(find.text('Title')));
+    expect(textStyle.style.color, theme.textTheme.titleLarge!.color);
+  });
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {

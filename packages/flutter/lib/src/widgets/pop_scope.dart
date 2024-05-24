@@ -8,26 +8,35 @@ import 'framework.dart';
 import 'navigator.dart';
 import 'routes.dart';
 
-/// Manages system back gestures.
+/// Manages back navigation gestures.
 ///
-/// The [canPop] parameter can be used to disable system back gestures. Defaults
-/// to true, meaning that back gestures happen as usual.
+/// The [canPop] parameter disables back gestures when set to `false`.
 ///
-/// The [onPopInvoked] parameter reports when system back gestures occur,
-/// regardless of whether or not they were successful.
+/// The [onPopInvoked] parameter reports when pop navigation was attempted, and
+/// `didPop` indicates whether or not the navigation was successful.
+///
+/// Android has a system back gesture that is a swipe inward from near the edge
+/// of the screen. It is recognized by Android before being passed to Flutter.
+/// iOS has a similar gesture that is recognized in Flutter by
+/// [CupertinoRouteTransitionMixin], not by iOS, and is therefore not a system
+/// back gesture.
 ///
 /// If [canPop] is false, then a system back gesture will not pop the route off
 /// of the enclosing [Navigator]. [onPopInvoked] will still be called, and
-/// `didPop` will be `false`.
+/// `didPop` will be `false`. On iOS when using [CupertinoRouteTransitionMixin]
+/// with [canPop] set to false, no gesture will be detected at all, so
+/// [onPopInvoked] will not be called. Programmatically attempting pop
+/// navigation will also result in a call to [onPopInvoked], with `didPop`
+/// indicating success or failure.
 ///
 /// If [canPop] is true, then a system back gesture will cause the enclosing
 /// [Navigator] to receive a pop as usual. [onPopInvoked] will be called with
-/// `didPop` as `true`, unless the pop failed for reasons unrelated to
-/// [PopScope], in which case it will be `false`.
+/// `didPop` as true, unless the pop failed for reasons unrelated to
+/// [PopScope], in which case it will be false.
 ///
 /// {@tool dartpad}
-/// This sample demonstrates how to use this widget to handle nested navigation
-/// in a bottom navigation bar.
+/// This sample demonstrates showing a confirmation dialog before navigating
+/// away from a page.
 ///
 /// ** See code in examples/api/lib/widgets/pop_scope/pop_scope.0.dart **
 /// {@end-tool}
