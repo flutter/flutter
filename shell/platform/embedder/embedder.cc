@@ -75,6 +75,7 @@ extern const intptr_t kPlatformStrongDillSize;
 #ifdef IMPELLER_SUPPORTS_RENDERING
 #include "flutter/shell/platform/embedder/embedder_render_target_impeller.h"  // nogncheck
 #include "flutter/shell/platform/embedder/embedder_surface_gl_impeller.h"  // nogncheck
+#include "flutter/shell/platform/embedder/embedder_surface_gl_skia.h"  // nogncheck
 #include "impeller/core/texture.h"                        // nogncheck
 #include "impeller/renderer/backend/gles/context_gles.h"  // nogncheck
 #include "impeller/renderer/backend/gles/texture_gles.h"  // nogncheck
@@ -84,7 +85,7 @@ extern const intptr_t kPlatformStrongDillSize;
 #endif  // SHELL_ENABLE_GL
 
 #ifdef SHELL_ENABLE_METAL
-#include "flutter/shell/platform/embedder/embedder_surface_metal.h"
+#include "flutter/shell/platform/embedder/embedder_surface_metal_skia.h"
 #include "third_party/skia/include/gpu/ganesh/mtl/GrMtlBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/mtl/GrMtlTypes.h"
 #include "third_party/skia/include/ports/SkCFObject.h"
@@ -447,7 +448,7 @@ InferOpenGLPlatformViewCreationCallback(
   bool fbo_reset_after_present =
       SAFE_ACCESS(open_gl_config, fbo_reset_after_present, false);
 
-  flutter::EmbedderSurfaceGL::GLDispatchTable gl_dispatch_table = {
+  flutter::EmbedderSurfaceGLSkia::GLDispatchTable gl_dispatch_table = {
       gl_make_current,                     // gl_make_current_callback
       gl_clear_current,                    // gl_clear_current_callback
       gl_present,                          // gl_present_callback
@@ -479,7 +480,7 @@ InferOpenGLPlatformViewCreationCallback(
         return std::make_unique<flutter::PlatformViewEmbedder>(
             shell,                   // delegate
             shell.GetTaskRunners(),  // task runners
-            std::make_unique<flutter::EmbedderSurfaceGL>(
+            std::make_unique<flutter::EmbedderSurfaceGLSkia>(
                 gl_dispatch_table, fbo_reset_after_present,
                 view_embedder),       // embedder_surface
             platform_dispatch_table,  // embedder platform dispatch table
@@ -551,11 +552,12 @@ InferMetalPlatformViewCreationCallback(
         metal_dispatch_table, view_embedder);
   } else {
 #if !SLIMPELLER
-    flutter::EmbedderSurfaceMetal::MetalDispatchTable metal_dispatch_table = {
-        .present = metal_present,
-        .get_texture = metal_get_texture,
-    };
-    embedder_surface = std::make_unique<flutter::EmbedderSurfaceMetal>(
+    flutter::EmbedderSurfaceMetalSkia::MetalDispatchTable metal_dispatch_table =
+        {
+            .present = metal_present,
+            .get_texture = metal_get_texture,
+        };
+    embedder_surface = std::make_unique<flutter::EmbedderSurfaceMetalSkia>(
         const_cast<flutter::GPUMTLDeviceHandle>(config->metal.device),
         const_cast<flutter::GPUMTLCommandQueueHandle>(
             config->metal.present_command_queue),

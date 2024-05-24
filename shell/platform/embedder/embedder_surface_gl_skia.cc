@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/embedder/embedder_surface_gl.h"
+#include "flutter/shell/platform/embedder/embedder_surface_gl_skia.h"
 
 #include <utility>
 
@@ -10,7 +10,7 @@
 
 namespace flutter {
 
-EmbedderSurfaceGL::EmbedderSurfaceGL(
+EmbedderSurfaceGLSkia::EmbedderSurfaceGLSkia(
     GLDispatchTable gl_dispatch_table,
     bool fbo_reset_after_present,
     std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder)
@@ -29,32 +29,33 @@ EmbedderSurfaceGL::EmbedderSurfaceGL(
   valid_ = true;
 }
 
-EmbedderSurfaceGL::~EmbedderSurfaceGL() = default;
+EmbedderSurfaceGLSkia::~EmbedderSurfaceGLSkia() = default;
 
 // |EmbedderSurface|
-bool EmbedderSurfaceGL::IsValid() const {
+bool EmbedderSurfaceGLSkia::IsValid() const {
   return valid_;
 }
 
 // |GPUSurfaceGLDelegate|
-std::unique_ptr<GLContextResult> EmbedderSurfaceGL::GLContextMakeCurrent() {
+std::unique_ptr<GLContextResult> EmbedderSurfaceGLSkia::GLContextMakeCurrent() {
   return std::make_unique<GLContextDefaultResult>(
       gl_dispatch_table_.gl_make_current_callback());
 }
 
 // |GPUSurfaceGLDelegate|
-bool EmbedderSurfaceGL::GLContextClearCurrent() {
+bool EmbedderSurfaceGLSkia::GLContextClearCurrent() {
   return gl_dispatch_table_.gl_clear_current_callback();
 }
 
 // |GPUSurfaceGLDelegate|
-bool EmbedderSurfaceGL::GLContextPresent(const GLPresentInfo& present_info) {
+bool EmbedderSurfaceGLSkia::GLContextPresent(
+    const GLPresentInfo& present_info) {
   // Pass the present information to the embedder present callback.
   return gl_dispatch_table_.gl_present_callback(present_info);
 }
 
 // |GPUSurfaceGLDelegate|
-GLFBOInfo EmbedderSurfaceGL::GLContextFBO(GLFrameInfo frame_info) const {
+GLFBOInfo EmbedderSurfaceGLSkia::GLContextFBO(GLFrameInfo frame_info) const {
   // Get the FBO ID using the gl_fbo_callback and then get exiting damage by
   // passing that ID to the gl_populate_existing_damage.
   return gl_dispatch_table_.gl_populate_existing_damage(
@@ -62,12 +63,12 @@ GLFBOInfo EmbedderSurfaceGL::GLContextFBO(GLFrameInfo frame_info) const {
 }
 
 // |GPUSurfaceGLDelegate|
-bool EmbedderSurfaceGL::GLContextFBOResetAfterPresent() const {
+bool EmbedderSurfaceGLSkia::GLContextFBOResetAfterPresent() const {
   return fbo_reset_after_present_;
 }
 
 // |GPUSurfaceGLDelegate|
-SkMatrix EmbedderSurfaceGL::GLContextSurfaceTransformation() const {
+SkMatrix EmbedderSurfaceGLSkia::GLContextSurfaceTransformation() const {
   auto callback = gl_dispatch_table_.gl_surface_transformation_callback;
   if (!callback) {
     SkMatrix matrix;
@@ -78,12 +79,13 @@ SkMatrix EmbedderSurfaceGL::GLContextSurfaceTransformation() const {
 }
 
 // |GPUSurfaceGLDelegate|
-EmbedderSurfaceGL::GLProcResolver EmbedderSurfaceGL::GetGLProcResolver() const {
+EmbedderSurfaceGLSkia::GLProcResolver EmbedderSurfaceGLSkia::GetGLProcResolver()
+    const {
   return gl_dispatch_table_.gl_proc_resolver;
 }
 
 // |GPUSurfaceGLDelegate|
-SurfaceFrame::FramebufferInfo EmbedderSurfaceGL::GLContextFramebufferInfo()
+SurfaceFrame::FramebufferInfo EmbedderSurfaceGLSkia::GLContextFramebufferInfo()
     const {
   // Enable partial repaint by default on the embedders.
   auto info = SurfaceFrame::FramebufferInfo{};
@@ -94,7 +96,7 @@ SurfaceFrame::FramebufferInfo EmbedderSurfaceGL::GLContextFramebufferInfo()
 }
 
 // |EmbedderSurface|
-std::unique_ptr<Surface> EmbedderSurfaceGL::CreateGPUSurface() {
+std::unique_ptr<Surface> EmbedderSurfaceGLSkia::CreateGPUSurface() {
   const bool render_to_surface = !external_view_embedder_;
   return std::make_unique<GPUSurfaceGLSkia>(
       this,              // GPU surface GL delegate
@@ -103,7 +105,7 @@ std::unique_ptr<Surface> EmbedderSurfaceGL::CreateGPUSurface() {
 }
 
 // |EmbedderSurface|
-sk_sp<GrDirectContext> EmbedderSurfaceGL::CreateResourceContext() const {
+sk_sp<GrDirectContext> EmbedderSurfaceGLSkia::CreateResourceContext() const {
   auto callback = gl_dispatch_table_.gl_make_resource_current_callback;
   if (callback && callback()) {
     if (auto context = ShellIOManager::CreateCompatibleResourceLoadingContext(
