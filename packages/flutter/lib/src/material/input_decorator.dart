@@ -1754,7 +1754,7 @@ class InputDecorator extends StatefulWidget {
   /// The style on which to base the label, hint, counter, and error styles
   /// if the [decoration] does not provide explicit styles.
   ///
-  /// If null, [TextTheme.bodyLarge] will be used
+  /// If null, [TextTheme.bodyLarge] will be used.
   ///
   /// If null and [ThemeData.useMaterial3] is false, [TextTheme.titleMedium] will
   /// be used.
