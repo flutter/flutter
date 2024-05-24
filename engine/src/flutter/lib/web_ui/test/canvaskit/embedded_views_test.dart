@@ -1315,6 +1315,69 @@ void testMain() {
           .map((RenderingRenderCanvas canvas) => canvas.pictures.length)
           .toList();
       expect(numPicturesPerCanvas, <int>[1, 1, 1, 1, 1, 1, 12, 1]);
+
+      // It should also work when the maximum canvases is just one.
+      debugOverrideJsConfiguration(<String, Object?>{
+        'canvasKitMaximumSurfaces': 1,
+      }.jsify() as JsFlutterConfiguration?);
+
+      // Render scene with 20 pictures. Check that the last canvas contains the
+      // pictures from the canvases that were deleted.
+      await renderTestScene(<int>[
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+      ]);
+      _expectSceneMatches(<_EmbeddedViewMarker>[
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _platformView,
+        _overlay,
+        _platformView,
+      ]);
+
+      // The last canvas should have all the pictures.
+      final Rendering secondRendering = CanvasKitRenderer.instance
+          .debugGetRasterizerForView(implicitView)!
+          .viewEmbedder
+          .debugActiveRendering;
+      final List<int> picturesPerCanvasInSecondRendering = secondRendering
+          .canvases
+          .map((RenderingRenderCanvas canvas) => canvas.pictures.length)
+          .toList();
+      expect(picturesPerCanvasInSecondRendering, <int>[19]);
+      debugOverrideJsConfiguration(null);
     });
   });
 }
