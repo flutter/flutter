@@ -85,7 +85,7 @@ class GitHubTemplateCreator {
     final String title = '[tool_crash] $errorString';
     final String body = '''
 ## Command
-```
+```sh
 $command
 ```
 
@@ -96,10 +96,10 @@ $command
 
 ## Logs
 $errorString
-```
+```console
 ${LineSplitter.split(stackTrace.toString()).take(25).join('\n')}
 ```
-```
+```console
 $doctorText
 ```
 

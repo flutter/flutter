@@ -2532,6 +2532,22 @@ void main() {
           ..rect(color: overlayColor.withOpacity(0.1)),
       );
     });
+
+    testWidgets('MenuItemButton can build when its child is null', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 200,
+              child: MenuItemButton(),
+            ),
+          ),
+        ),
+      );
+
+      // exception `Null check operator used on a null value` would be thrown.
+      expect(tester.takeException(), isNull);
+    });
   });
 
   group('Layout', () {

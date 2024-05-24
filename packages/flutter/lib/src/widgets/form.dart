@@ -171,14 +171,14 @@ class Form extends StatefulWidget {
   ///  * [PopScope.canPop], which is what [Form] delegates to internally.
   final bool? canPop;
 
-  /// {@macro flutter.widgets.navigator.onPopInvoked}
+  /// {@macro flutter.widgets.navigator.onPopInvokedWithResult}
   @Deprecated(
     'Use onPopInvokedWithResult instead. '
     'This feature was deprecated after v3.22.0-12.0.pre.',
   )
   final PopInvokedCallback? onPopInvoked;
 
-  /// {@macro flutter.widgets.navigator.onPopInvoked}
+  /// {@macro flutter.widgets.navigator.onPopInvokedWithResult}
   ///
   /// {@tool dartpad}
   /// This sample demonstrates how to use this parameter to show a confirmation

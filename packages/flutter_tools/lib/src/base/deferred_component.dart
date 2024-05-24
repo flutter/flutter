@@ -71,14 +71,11 @@ class DeferredComponent {
   /// status, but will result in [loadingUnits] returning an empty set.
   void assignLoadingUnits(List<LoadingUnit> allLoadingUnits) {
     _assigned = true;
-    _loadingUnits = <LoadingUnit>{};
-    for (final String lib in libraries) {
-      for (final LoadingUnit loadingUnit in allLoadingUnits) {
-        if (loadingUnit.libraries.contains(lib)) {
-          _loadingUnits!.add(loadingUnit);
-        }
-      }
-    }
+    _loadingUnits = <LoadingUnit>{
+      for (final String lib in libraries)
+        for (final LoadingUnit loadingUnit in allLoadingUnits)
+          if (loadingUnit.libraries.contains(lib)) loadingUnit,
+    };
   }
 
   /// Provides a human readable string representation of the
@@ -193,21 +190,16 @@ class LoadingUnit {
     } on FormatException catch (e) {
       logger.printError('Loading unit manifest at `${manifestFile.path}` was invalid JSON:\n$e');
     }
-    final List<LoadingUnit> loadingUnits = <LoadingUnit>[];
-    // Setup android source directory
-    if (manifest != null) {
-      for (final dynamic loadingUnitMetadata in manifest['loadingUnits'] as List<dynamic>) {
-        final Map<String, dynamic> loadingUnitMap = loadingUnitMetadata as Map<String, dynamic>;
-        if (loadingUnitMap['id'] == 1) {
-          continue; // Skip base unit
-        }
-        loadingUnits.add(LoadingUnit(
-          id: loadingUnitMap['id'] as int,
-          path: loadingUnitMap['path'] as String,
-          libraries: List<String>.from(loadingUnitMap['libraries'] as List<dynamic>)),
-        );
-      }
-    }
-    return loadingUnits;
+    // Set up android source directory
+    return <LoadingUnit>[
+      if (manifest?['loadingUnits'] case final List<dynamic> loadingUnits)
+        for (final Map<String, dynamic> loadingUnitMap in loadingUnits.cast<Map<String, dynamic>>())
+          if (loadingUnitMap['id'] != 1) // skip base unit
+            LoadingUnit(
+              id: loadingUnitMap['id'] as int,
+              path: loadingUnitMap['path'] as String,
+              libraries: List<String>.from(loadingUnitMap['libraries'] as List<dynamic>),
+            ),
+    ];
   }
 }
