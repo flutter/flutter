@@ -9,7 +9,7 @@
 #include "flutter/shell/gpu/gpu_surface_gl_impeller.h"
 #include "flutter/shell/platform/embedder/embedder_external_view_embedder.h"
 #include "flutter/shell/platform/embedder/embedder_surface.h"
-#include "flutter/shell/platform/embedder/embedder_surface_gl.h"
+#include "flutter/shell/platform/embedder/embedder_surface_gl_skia.h"
 
 namespace impeller {
 class ContextGLES;
@@ -23,7 +23,7 @@ class EmbedderSurfaceGLImpeller final : public EmbedderSurface,
                                         public GPUSurfaceGLDelegate {
  public:
   EmbedderSurfaceGLImpeller(
-      EmbedderSurfaceGL::GLDispatchTable gl_dispatch_table,
+      EmbedderSurfaceGLSkia::GLDispatchTable gl_dispatch_table,
       bool fbo_reset_after_present,
       std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
 
@@ -31,7 +31,7 @@ class EmbedderSurfaceGLImpeller final : public EmbedderSurface,
 
  private:
   bool valid_ = false;
-  EmbedderSurfaceGL::GLDispatchTable gl_dispatch_table_;
+  EmbedderSurfaceGLSkia::GLDispatchTable gl_dispatch_table_;
   bool fbo_reset_after_present_;
   std::shared_ptr<impeller::ContextGLES> impeller_context_;
   std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder_;

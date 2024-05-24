@@ -118,8 +118,8 @@ template("embedder_source_set") {
       sources += [
         "embedder_external_texture_gl.cc",
         "embedder_external_texture_gl.h",
-        "embedder_surface_gl.cc",
-        "embedder_surface_gl.h",
+        "embedder_surface_gl_skia.cc",
+        "embedder_surface_gl_skia.h",
       ]
 
       if (impeller_supports_rendering) {
@@ -147,8 +147,8 @@ template("embedder_source_set") {
       sources += [
         "embedder_external_texture_metal.h",
         "embedder_external_texture_metal.mm",
-        "embedder_surface_metal.h",
-        "embedder_surface_metal.mm",
+        "embedder_surface_metal_skia.h",
+        "embedder_surface_metal_skia.mm",
       ]
 
       if (impeller_supports_rendering) {

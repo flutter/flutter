@@ -6,7 +6,7 @@
 
 #include <utility>
 
-#include "flutter/shell/platform/embedder/embedder_surface_metal.h"
+#include "flutter/shell/platform/embedder/embedder_surface_metal_skia.h"
 
 #include "flutter/fml/logging.h"
 #include "flutter/shell/gpu/gpu_surface_metal_delegate.h"
@@ -16,7 +16,7 @@
 FLUTTER_ASSERT_NOT_ARC
 namespace flutter {
 
-EmbedderSurfaceMetal::EmbedderSurfaceMetal(
+EmbedderSurfaceMetalSkia::EmbedderSurfaceMetalSkia(
     GPUMTLDeviceHandle device,
     GPUMTLCommandQueueHandle command_queue,
     MetalDispatchTable metal_dispatch_table,
@@ -33,13 +33,13 @@ EmbedderSurfaceMetal::EmbedderSurfaceMetal(
   valid_ = main_context_ && resource_context_;
 }
 
-EmbedderSurfaceMetal::~EmbedderSurfaceMetal() = default;
+EmbedderSurfaceMetalSkia::~EmbedderSurfaceMetalSkia() = default;
 
-bool EmbedderSurfaceMetal::IsValid() const {
+bool EmbedderSurfaceMetalSkia::IsValid() const {
   return valid_;
 }
 
-std::unique_ptr<Surface> EmbedderSurfaceMetal::CreateGPUSurface() API_AVAILABLE(ios(13.0)) {
+std::unique_ptr<Surface> EmbedderSurfaceMetalSkia::CreateGPUSurface() API_AVAILABLE(ios(13.0)) {
   if (@available(iOS 13.0, *)) {
   } else {
     return nullptr;
@@ -58,25 +58,25 @@ std::unique_ptr<Surface> EmbedderSurfaceMetal::CreateGPUSurface() API_AVAILABLE(
   return surface;
 }
 
-sk_sp<GrDirectContext> EmbedderSurfaceMetal::CreateResourceContext() const {
+sk_sp<GrDirectContext> EmbedderSurfaceMetalSkia::CreateResourceContext() const {
   return resource_context_;
 }
 
-GPUCAMetalLayerHandle EmbedderSurfaceMetal::GetCAMetalLayer(const SkISize& frame_info) const {
+GPUCAMetalLayerHandle EmbedderSurfaceMetalSkia::GetCAMetalLayer(const SkISize& frame_info) const {
   FML_CHECK(false) << "Only rendering to MTLTexture is supported.";
   return nullptr;
 }
 
-bool EmbedderSurfaceMetal::PresentDrawable(GrMTLHandle drawable) const {
+bool EmbedderSurfaceMetalSkia::PresentDrawable(GrMTLHandle drawable) const {
   FML_CHECK(false) << "Only rendering to MTLTexture is supported.";
   return false;
 }
 
-GPUMTLTextureInfo EmbedderSurfaceMetal::GetMTLTexture(const SkISize& frame_info) const {
+GPUMTLTextureInfo EmbedderSurfaceMetalSkia::GetMTLTexture(const SkISize& frame_info) const {
   return metal_dispatch_table_.get_texture(frame_info);
 }
 
-bool EmbedderSurfaceMetal::PresentTexture(GPUMTLTextureInfo texture) const {
+bool EmbedderSurfaceMetalSkia::PresentTexture(GPUMTLTextureInfo texture) const {
   return metal_dispatch_table_.present(texture);
 }
 

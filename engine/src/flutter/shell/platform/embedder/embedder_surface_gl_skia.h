@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_GL_H_
-#define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_GL_H_
+#ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_GL_SKIA_H_
+#define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_GL_SKIA_H_
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/gpu/gpu_surface_gl_skia.h"
@@ -12,8 +12,8 @@
 
 namespace flutter {
 
-class EmbedderSurfaceGL final : public EmbedderSurface,
-                                public GPUSurfaceGLDelegate {
+class EmbedderSurfaceGLSkia final : public EmbedderSurface,
+                                    public GPUSurfaceGLDelegate {
  public:
   struct GLDispatchTable {
     std::function<bool(void)> gl_make_current_callback;           // required
@@ -27,12 +27,12 @@ class EmbedderSurfaceGL final : public EmbedderSurface,
     std::function<GLFBOInfo(intptr_t)> gl_populate_existing_damage;  // required
   };
 
-  EmbedderSurfaceGL(
+  EmbedderSurfaceGLSkia(
       GLDispatchTable gl_dispatch_table,
       bool fbo_reset_after_present,
       std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
 
-  ~EmbedderSurfaceGL() override;
+  ~EmbedderSurfaceGLSkia() override;
 
  private:
   bool valid_ = false;
@@ -74,9 +74,9 @@ class EmbedderSurfaceGL final : public EmbedderSurface,
   // |GPUSurfaceGLDelegate|
   SurfaceFrame::FramebufferInfo GLContextFramebufferInfo() const override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(EmbedderSurfaceGL);
+  FML_DISALLOW_COPY_AND_ASSIGN(EmbedderSurfaceGLSkia);
 };
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_GL_H_
+#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_GL_SKIA_H_
