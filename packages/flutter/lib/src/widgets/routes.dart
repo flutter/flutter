@@ -922,7 +922,7 @@ class _ModalScopeStatus extends InheritedModel<_ModalRouteAspect> {
     description.add(FlagProperty('canPop', value: canPop, ifTrue: 'can pop'));
     description.add(FlagProperty('impliesAppBarDismissal', value: impliesAppBarDismissal, ifTrue: 'implies app bar dismissal'));
   }
-  
+
   @override
   bool updateShouldNotifyDependent(covariant _ModalScopeStatus oldWidget, Set<Object> dependencies) {
     return dependencies.any((Object dependency) => dependency is _ModalRouteAspect && switch (dependency) {
