@@ -308,6 +308,8 @@ enum CrossAxisAlignment {
   /// See also:
   ///
   ///  * [RenderBox.getDistanceToBaseline], which defines the baseline of a box.
+  ///  * [IgnoreBaseline], which can be used to ignore a child for the purpose of
+  ///    baseline alignment.
   baseline;
 
   double _getChildCrossAxisOffset(double freeSpace, bool flipped) {
