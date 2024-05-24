@@ -1067,6 +1067,7 @@ class PubspecYaml {
       ...directDependencies,
       ...specialDependencies,
       ...devDependencies,
+      ...kExplicitlyExcludedPackages,
     };
 
     // Create a new set to hold the list of packages we've already processed, so
@@ -1548,6 +1549,12 @@ String generateFakePubspec(
         globals.printStatus('  - $package: $version');
       }
     });
+  }
+  if (verbose && kExplicitlyExcludedPackages.isNotEmpty) {
+    globals.printStatus('WARNING: the following packages are explicitly excluded from version pinning');
+    for (final String package in kExplicitlyExcludedPackages) {
+      globals.printStatus('  - $package');
+    }
   }
   for (final PubspecDependency dependency in dependencies) {
     if (!dependency.pointsToSdk) {
