@@ -401,33 +401,29 @@ abstract class StyleNode {
   /// The resolved text style is equivalent to the entire ascendent chain of
   /// parent style nodes.
   EngineTextStyle resolveStyle() {
-    final EngineTextStyle? style = _cachedStyle;
-    if (style == null) {
-      return _cachedStyle ??= EngineTextStyle(
-        color: _color,
-        decoration: _decoration,
-        decorationColor: _decorationColor,
-        decorationStyle: _decorationStyle,
-        decorationThickness: _decorationThickness,
-        fontWeight: _fontWeight,
-        fontStyle: _fontStyle,
-        textBaseline: _textBaseline,
-        fontFamily: _fontFamily,
-        fontFamilyFallback: _fontFamilyFallback,
-        fontFeatures: _fontFeatures,
-        fontVariations: _fontVariations,
-        fontSize: _fontSize,
-        letterSpacing: _letterSpacing,
-        wordSpacing: _wordSpacing,
-        height: _height,
-        leadingDistribution: _leadingDistribution,
-        locale: _locale,
-        background: _background,
-        foreground: _foreground,
-        shadows: _shadows,
-      );
-    }
-    return style;
+    return _cachedStyle ??= EngineTextStyle(
+      color: _color,
+      decoration: _decoration,
+      decorationColor: _decorationColor,
+      decorationStyle: _decorationStyle,
+      decorationThickness: _decorationThickness,
+      fontWeight: _fontWeight,
+      fontStyle: _fontStyle,
+      textBaseline: _textBaseline,
+      fontFamily: _fontFamily,
+      fontFamilyFallback: _fontFamilyFallback,
+      fontFeatures: _fontFeatures,
+      fontVariations: _fontVariations,
+      fontSize: _fontSize,
+      letterSpacing: _letterSpacing,
+      wordSpacing: _wordSpacing,
+      height: _height,
+      leadingDistribution: _leadingDistribution,
+      locale: _locale,
+      background: _background,
+      foreground: _foreground,
+      shadows: _shadows,
+    );
   }
 
   ui.Color? get _color;
@@ -510,7 +506,9 @@ class ChildStyleNode extends StyleNode {
   double? get _wordSpacing => style.wordSpacing ?? parent._wordSpacing;
 
   @override
-  double? get _height => style.height ?? parent._height;
+  double? get _height {
+    return style.height == ui.kTextHeightNone ? null : (style.height ?? parent._height);
+  }
 
   @override
   ui.TextLeadingDistribution? get _leadingDistribution => style.leadingDistribution ?? parent._leadingDistribution;
