@@ -1181,5 +1181,171 @@ TEST(DisplayListMatrixClipState, DiffClipPathWithInvertFillType) {
   EXPECT_EQ(state.device_cull_rect(), clip_bounds);
 }
 
+TEST(DisplayListMatrixClipState, MapAndClipRectTranslation) {
+  DlRect cull_rect = DlRect::MakeLTRB(100.0f, 100.0f, 200.0f, 200.0f);
+  DlMatrix matrix = DlMatrix::MakeTranslation({10.0f, 20.0f, 1.0f});
+  DisplayListMatrixClipState state(cull_rect, matrix);
+
+  {
+    // Empty width in src rect (before and after translation)
+    SkRect rect = SkRect::MakeLTRB(150.0f, 150.0f, 150.0f, 160.0f);
+    EXPECT_FALSE(state.mapAndClipRect(&rect));
+    EXPECT_TRUE(rect.isEmpty());
+  }
+
+  {
+    // Empty height in src rect (before and after translation)
+    SkRect rect = SkRect::MakeLTRB(150.0f, 150.0f, 160.0f, 150.0f);
+    EXPECT_FALSE(state.mapAndClipRect(&rect));
+    EXPECT_TRUE(rect.isEmpty());
+  }
+
+  {
+    // rect far outside of clip, even after translation
+    SkRect rect = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+    EXPECT_FALSE(state.mapAndClipRect(&rect));
+    EXPECT_TRUE(rect.isEmpty());
+  }
+
+  {
+    // Rect abuts clip left side after translation
+    SkRect rect = SkRect::MakeLTRB(80.0f, 100.0f, 90.0f, 110.0f);
+    EXPECT_FALSE(state.mapAndClipRect(&rect));
+    EXPECT_TRUE(rect.isEmpty());
+  }
+
+  {
+    // Rect barely grazes clip left side after translation
+    SkRect rect = SkRect::MakeLTRB(80.0f, 100.0f, 91.0f, 110.0f);
+    EXPECT_TRUE(state.mapAndClipRect(&rect));
+    EXPECT_EQ(rect, SkRect::MakeLTRB(100.0f, 120.0f, 101.0f, 130.0f));
+  }
+
+  {
+    // Rect abuts clip top after translation
+    SkRect rect = SkRect::MakeLTRB(100.0f, 70.0f, 110.0f, 80.0f);
+    EXPECT_FALSE(state.mapAndClipRect(&rect));
+    EXPECT_TRUE(rect.isEmpty());
+  }
+
+  {
+    // Rect barely grazes clip top after translation
+    SkRect rect = SkRect::MakeLTRB(100.0f, 70.0f, 110.0f, 81.0f);
+    EXPECT_TRUE(state.mapAndClipRect(&rect));
+    EXPECT_EQ(rect, SkRect::MakeLTRB(110.0f, 100.0f, 120.0f, 101.0f));
+  }
+
+  {
+    // Rect abuts clip right side after translation
+    SkRect rect = SkRect::MakeLTRB(190.0f, 100.0f, 200.0f, 110.0f);
+    EXPECT_FALSE(state.mapAndClipRect(&rect));
+    EXPECT_TRUE(rect.isEmpty());
+  }
+
+  {
+    // Rect barely grazes clip right side after translation
+    SkRect rect = SkRect::MakeLTRB(189.0f, 100.0f, 200.0f, 110.0f);
+    EXPECT_TRUE(state.mapAndClipRect(&rect));
+    EXPECT_EQ(rect, SkRect::MakeLTRB(199.0f, 120.0f, 200.0f, 130.0f));
+  }
+
+  {
+    // Rect abuts clip bottom after translation
+    SkRect rect = SkRect::MakeLTRB(100.0f, 180.0f, 110.0f, 190.0f);
+    EXPECT_FALSE(state.mapAndClipRect(&rect));
+    EXPECT_TRUE(rect.isEmpty());
+  }
+
+  {
+    // Rect barely grazes clip bottom after translation
+    SkRect rect = SkRect::MakeLTRB(100.0f, 179.0f, 110.0f, 190.0f);
+    EXPECT_TRUE(state.mapAndClipRect(&rect));
+    EXPECT_EQ(rect, SkRect::MakeLTRB(110.0f, 199.0f, 120.0f, 200.0f));
+  }
+}
+
+TEST(DisplayListMatrixClipState, MapAndClipRectScale) {
+  DlRect cull_rect = DlRect::MakeLTRB(100.0f, 100.0f, 500.0f, 500.0f);
+  DlMatrix matrix = DlMatrix::MakeScale({2.0f, 4.0f, 1.0f});
+  DisplayListMatrixClipState state(cull_rect, matrix);
+
+  {
+    // Empty width in src rect (before and after scaling)
+    SkRect rect = SkRect::MakeLTRB(100.0f, 100.0f, 100.0f, 110.0f);
+    EXPECT_FALSE(state.mapAndClipRect(&rect));
+    EXPECT_TRUE(rect.isEmpty());
+  }
+
+  {
+    // Empty height in src rect (before and after scaling)
+    SkRect rect = SkRect::MakeLTRB(100.0f, 100.0f, 110.0f, 100.0f);
+    EXPECT_FALSE(state.mapAndClipRect(&rect));
+    EXPECT_TRUE(rect.isEmpty());
+  }
+
+  {
+    // rect far outside of clip, even after scaling
+    SkRect rect = SkRect::MakeLTRB(10.0f, 10.0f, 20.0f, 20.0f);
+    EXPECT_FALSE(state.mapAndClipRect(&rect));
+    EXPECT_TRUE(rect.isEmpty());
+  }
+
+  {
+    // Rect abuts clip left side after scaling
+    SkRect rect = SkRect::MakeLTRB(40.0f, 100.0f, 50.0f, 110.0f);
+    EXPECT_FALSE(state.mapAndClipRect(&rect));
+    EXPECT_TRUE(rect.isEmpty());
+  }
+
+  {
+    // Rect barely grazes clip left side after scaling
+    SkRect rect = SkRect::MakeLTRB(40.0f, 100.0f, 51.0f, 110.0f);
+    EXPECT_TRUE(state.mapAndClipRect(&rect));
+    EXPECT_EQ(rect, SkRect::MakeLTRB(100.0f, 400.0f, 102.0f, 440.0f));
+  }
+
+  {
+    // Rect abuts clip top after scaling
+    SkRect rect = SkRect::MakeLTRB(100.0f, 15.0f, 110.0f, 25.0f);
+    EXPECT_FALSE(state.mapAndClipRect(&rect));
+    EXPECT_TRUE(rect.isEmpty());
+  }
+
+  {
+    // Rect barely grazes clip top after scaling
+    SkRect rect = SkRect::MakeLTRB(100.0f, 15.0f, 110.0f, 26.0f);
+    EXPECT_TRUE(state.mapAndClipRect(&rect));
+    EXPECT_EQ(rect, SkRect::MakeLTRB(200.0f, 100.0f, 220.0f, 104.0f));
+  }
+
+  {
+    // Rect abuts clip right side after scaling
+    SkRect rect = SkRect::MakeLTRB(250.0f, 100.0f, 260.0f, 110.0f);
+    EXPECT_FALSE(state.mapAndClipRect(&rect));
+    EXPECT_TRUE(rect.isEmpty());
+  }
+
+  {
+    // Rect barely grazes clip right side after scaling
+    SkRect rect = SkRect::MakeLTRB(249.0f, 100.0f, 260.0f, 110.0f);
+    EXPECT_TRUE(state.mapAndClipRect(&rect));
+    EXPECT_EQ(rect, SkRect::MakeLTRB(498.0f, 400.0f, 500.0f, 440.0f));
+  }
+
+  {
+    // Rect abuts clip bottom after scaling
+    SkRect rect = SkRect::MakeLTRB(100.0f, 125.0f, 110.0f, 135.0f);
+    EXPECT_FALSE(state.mapAndClipRect(&rect));
+    EXPECT_TRUE(rect.isEmpty());
+  }
+
+  {
+    // Rect barely grazes clip bottom after scaling
+    SkRect rect = SkRect::MakeLTRB(100.0f, 124.0f, 110.0f, 135.0f);
+    EXPECT_TRUE(state.mapAndClipRect(&rect));
+    EXPECT_EQ(rect, SkRect::MakeLTRB(200.0f, 496.0f, 220.0f, 500.0f));
+  }
+}
+
 }  // namespace testing
 }  // namespace flutter
