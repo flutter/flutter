@@ -433,7 +433,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   int? currentHighlight;
   double? leadingPadding;
   bool _menuHasEnabledItem = false;
-  late final FocusNode _focusNode;
+  final FocusNode _focusNode = FocusNode();
   TextEditingController? _localTextEditingController;
 
   @override
@@ -457,18 +457,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       );
     }
     refreshLeadingPadding();
-    _focusNode = FocusNode(
-      canRequestFocus: canRequestFocus(),
-    );
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final bool widgetCanRequestFocus = canRequestFocus();
-    if (widgetCanRequestFocus != _focusNode.canRequestFocus) {
-      _focusNode.canRequestFocus = widgetCanRequestFocus;
-    }
   }
 
   @override
@@ -511,10 +499,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           selection: TextSelection.collapsed(offset: filteredEntries[index].label.length),
         );
       }
-    }
-    final bool widgetCanRequestFocus = canRequestFocus();
-    if (widgetCanRequestFocus != _focusNode.canRequestFocus) {
-      _focusNode.canRequestFocus = widgetCanRequestFocus;
     }
   }
 
@@ -696,6 +680,11 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
   @override
   Widget build(BuildContext context) {
+    final bool currentCanRequestFocus = canRequestFocus();
+    if (_focusNode.canRequestFocus != currentCanRequestFocus) {
+      _focusNode.canRequestFocus = canRequestFocus();
+    }
+
     final TextDirection textDirection = Directionality.of(context);
     _initialMenu ??= _buildButtons(widget.dropdownMenuEntries, textDirection, enableScrollToHighlight: false);
     final DropdownMenuThemeData theme = DropdownMenuTheme.of(context);
@@ -769,7 +758,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           key: _anchorKey,
           mouseCursor: effectiveMouseCursor,
           focusNode: _focusNode,
-          readOnly: !canRequestFocus(),
+          readOnly: !_focusNode.canRequestFocus,
           enableInteractiveSelection: canRequestFocus(),
           textAlignVertical: TextAlignVertical.center,
           style: effectiveTextStyle,
