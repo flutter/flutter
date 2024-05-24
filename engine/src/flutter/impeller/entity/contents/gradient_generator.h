@@ -28,8 +28,11 @@ std::shared_ptr<Texture> CreateGradientTexture(
 struct StopData {
   Color color;
   Scalar stop;
-  Padding<12> _padding_;
+  Scalar inverse_delta;
+  Padding<8> _padding_;
 };
+
+static_assert(sizeof(StopData) == 32);
 
 /**
  * @brief Populate a vector with the color and stop data for a gradient
