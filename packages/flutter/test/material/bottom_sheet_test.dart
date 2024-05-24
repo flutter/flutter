@@ -1362,7 +1362,7 @@ void main() {
       context: scaffoldKey.currentContext!,
       routeSettings: routeSettings,
       builder: (BuildContext context) {
-        retrievedRouteSettings = ModalRoute.of(context)!.settings;
+        retrievedRouteSettings = ModalRoute.settingsOf(context)!;
         return const Text('BottomSheet');
       },
     );
