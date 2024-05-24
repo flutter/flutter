@@ -102,7 +102,7 @@ TEST(DisplayListComplexity, StrokeWidth) {
   auto display_list_stroke_0 = builder_stroke_0.Build();
 
   DisplayListBuilder builder_stroke_1;
-  builder_stroke_0.DrawLine(SkPoint::Make(0, 0), SkPoint::Make(100, 100),
+  builder_stroke_1.DrawLine(SkPoint::Make(0, 0), SkPoint::Make(100, 100),
                             DlPaint().setStrokeWidth(1.0f));
   auto display_list_stroke_1 = builder_stroke_1.Build();
 

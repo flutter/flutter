@@ -583,6 +583,8 @@ struct DisplayListJobRenderer : public JobRenderer {
 
 class RenderEnvironment {
  public:
+  static bool EnableImpeller;
+
   RenderEnvironment(const DlSurfaceProvider* provider, PixelFormat format)
       : provider_(provider), format_(format) {
     if (provider->supports(format)) {
@@ -619,7 +621,7 @@ class RenderEnvironment {
     ref_clip_bounds_ = dl_job.setup_clip_bounds();
     ASSERT_EQ(sk_job.setup_matrix(), ref_matrix_);
     ASSERT_EQ(sk_job.setup_clip_bounds(), ref_clip_bounds_);
-    if (provider_->supports_impeller()) {
+    if (supports_impeller()) {
       test_impeller_image_ = makeTestImpellerImage(provider_);
       DlJobRenderer imp_job(dl_setup, imp_renderer, kEmptyDlRenderer,
                             test_impeller_image_);
@@ -670,7 +672,9 @@ class RenderEnvironment {
   const DlSurfaceProvider* provider() const { return provider_; }
   bool valid() const { return provider_->supports(format_); }
   const std::string backend_name() const { return provider_->backend_name(); }
-  bool supports_impeller() const { return provider_->supports_impeller(); }
+  bool supports_impeller() const {
+    return EnableImpeller && provider_->supports_impeller();
+  }
 
   PixelFormat format() const { return format_; }
   const DlPaint& ref_dl_paint() const { return ref_dl_paint_; }
@@ -1108,6 +1112,7 @@ class CanvasCompareTester {
   static std::string ImpellerFailureImageDirectory;
   static bool SaveImpellerFailureImages;
   static std::vector<std::string> ImpellerFailureImages;
+  static bool ImpellerSupported;
 
   static std::unique_ptr<DlSurfaceProvider> GetProvider(BackendType type) {
     auto provider = DlSurfaceProvider::Create(type);
@@ -1121,12 +1126,17 @@ class CanvasCompareTester {
     return provider;
   }
 
+  static void ClearProviders() { TestBackends.clear(); }
+
   static bool AddProvider(BackendType type) {
     auto provider = GetProvider(type);
     if (!provider) {
       return false;
     }
-    CanvasCompareTester::TestBackends.push_back(type);
+    if (provider->supports_impeller()) {
+      ImpellerSupported = true;
+    }
+    TestBackends.push_back(type);
     return true;
   }
 
@@ -2765,6 +2775,8 @@ std::vector<BackendType> CanvasCompareTester::TestBackends;
 std::string CanvasCompareTester::ImpellerFailureImageDirectory = "";
 bool CanvasCompareTester::SaveImpellerFailureImages = false;
 std::vector<std::string> CanvasCompareTester::ImpellerFailureImages;
+bool CanvasCompareTester::ImpellerSupported = false;
+bool RenderEnvironment::EnableImpeller = true;
 
 BoundsTolerance CanvasCompareTester::DefaultTolerance =
     BoundsTolerance().addAbsolutePadding(1, 1);
@@ -2805,6 +2817,9 @@ class DisplayListRenderingTestBase : public BaseT,
       if (StartsWith(arg, "--no")) {
         enable = false;
         arg = "-" + arg.substr(4);
+      } else if (StartsWith(arg, "--disable")) {
+        enable = false;
+        arg = "--en" + arg.substr(5);
       }
       if (arg == "--enable-software") {
         do_software = enable;
@@ -2812,8 +2827,13 @@ class DisplayListRenderingTestBase : public BaseT,
         do_opengl = enable;
       } else if (arg == "--enable-metal") {
         do_metal = enable;
+      } else if (arg == "--enable-impeller") {
+        RenderEnvironment::EnableImpeller = enable;
       }
     }
+    // Multiple test suites use this test base. Make sure that they don't
+    // double-register the supported providers.
+    CanvasCompareTester::ClearProviders();
     if (do_software) {
       CanvasCompareTester::AddProvider(BackendType::kSoftwareBackend);
     }
@@ -2827,7 +2847,13 @@ class DisplayListRenderingTestBase : public BaseT,
     for (auto& back_end : CanvasCompareTester::TestBackends) {
       providers += " " + DlSurfaceProvider::BackendName(back_end);
     }
-    FML_LOG(INFO) << "Running tests on [" << providers << " ]";
+    std::string libraries = " Skia";
+    if (CanvasCompareTester::ImpellerSupported &&
+        RenderEnvironment::EnableImpeller) {
+      libraries += " Impeller";
+    }
+    FML_LOG(INFO) << "Running tests on [" << providers  //
+                  << " ], and [" << libraries << " ]";
   }
 
   static void TearDownTestSuite() {
