@@ -3194,6 +3194,10 @@ void main() {
       ),
       findsNothing,
     );
+
+    // Finish gesture to release resources.
+    await gesture.up();
+    await tester.pump();
   });
 
   testWidgets('configurable DragTarget hit test behavior', (WidgetTester tester) async {
