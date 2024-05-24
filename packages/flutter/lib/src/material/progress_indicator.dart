@@ -566,7 +566,7 @@ class CircularProgressIndicator extends ProgressIndicator {
   }) : _indicatorType = _ActivityIndicatorType.material;
 
   /// Creates an adaptive progress indicator that is a
-  /// [CupertinoActivityIndicator] in iOS & macOS and [CircularProgressIndicator] in
+  /// [CupertinoActivityIndicator] in [TargetPlatform.iOS] & [TargetPlatform.macOS] and [CircularProgressIndicator] in
   /// material theme/non-Apple platforms.
   ///
   /// The [value], [valueColor], [strokeWidth], [semanticsLabel], and
