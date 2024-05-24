@@ -48,7 +48,7 @@ export 'src/cupertino/list_tile.dart';
 export 'src/cupertino/localizations.dart';
 export 'src/cupertino/magnifier.dart';
 export 'src/cupertino/nav_bar.dart';
-export 'src/cupertino/page_scaffold.dart';
+export 'src/cupertino/page_scaffold.dart' hide CupertinoPageScaffoldBackgroundColor;
 export 'src/cupertino/picker.dart';
 export 'src/cupertino/radio.dart';
 export 'src/cupertino/refresh.dart';
