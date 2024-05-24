@@ -101,6 +101,9 @@ class PointerSignalResolver {
     assert(_isSameEvent(_currentEvent!, event));
     try {
       _firstRegisteredCallback!(_currentEvent!);
+      _currentEvent!.respond(
+        preventPlatformDefault: true
+      );
     } catch (exception, stack) {
       InformationCollector? collector;
       assert(() {

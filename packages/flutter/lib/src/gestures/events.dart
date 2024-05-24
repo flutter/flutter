@@ -1717,7 +1717,7 @@ class _TransformedPointerUpEvent extends _TransformedPointerEvent with _CopyPoin
 ///    events in a widget tree.
 ///  * [PointerSignalResolver], which provides an opt-in mechanism whereby
 ///    participating agents may disambiguate an event's target.
-abstract class PointerSignalEvent extends PointerEvent {
+abstract class PointerSignalEvent extends PointerEvent with _RespondablePointerEvent {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const PointerSignalEvent({
@@ -1729,6 +1729,22 @@ abstract class PointerSignalEvent extends PointerEvent {
     super.position,
     super.embedderId,
   });
+}
+
+/// A function used to send information about a PointerEvent back to the engine.
+///
+/// This is used on the web to `preventDefault`.
+typedef RespondPointerEventFn = void Function({required bool preventPlatformDefault});
+
+mixin _RespondablePointerEvent on PointerEvent {
+  /// Responds the current [PointerSignalEvent] in the native embedder.
+  ///
+  /// Used to send information about the current event to the Flutter engine, for
+  /// example, if it should prevent the default behavior of the embedder
+  /// ([preventPlatformDefault] = `true`).
+  void respond({
+    required bool preventPlatformDefault,
+  }) {}
 }
 
 mixin _CopyPointerScrollEvent on PointerEvent {
@@ -1760,6 +1776,7 @@ mixin _CopyPointerScrollEvent on PointerEvent {
     double? tilt,
     bool? synthesized,
     int? embedderId,
+    RespondPointerEventFn? respond,
   }) {
     return PointerScrollEvent(
       viewId: viewId ?? this.viewId,
@@ -1769,6 +1786,7 @@ mixin _CopyPointerScrollEvent on PointerEvent {
       position: position ?? this.position,
       scrollDelta: scrollDelta,
       embedderId: embedderId ?? this.embedderId,
+      respond: respond ?? (this as PointerScrollEvent).respond,
     ).transformed(transform);
   }
 }
@@ -1794,7 +1812,8 @@ class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescriptio
     super.position,
     this.scrollDelta = Offset.zero,
     super.embedderId,
-  });
+    required RespondPointerEventFn respond,
+  }) : _respond = respond;
 
   @override
   final Offset scrollDelta;
@@ -1811,6 +1830,13 @@ class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescriptio
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Offset>('scrollDelta', scrollDelta));
+  }
+
+  final RespondPointerEventFn _respond;
+
+  @override
+  void respond({required bool preventPlatformDefault}) {
+    _respond(preventPlatformDefault: preventPlatformDefault);
   }
 }
 
@@ -1833,6 +1859,14 @@ class _TransformedPointerScrollEvent extends _TransformedPointerEvent with _Copy
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Offset>('scrollDelta', scrollDelta));
+  }
+
+  @override
+  RespondPointerEventFn get _respond => original._respond;
+
+  @override
+  void respond({required bool preventPlatformDefault}) {
+    original.respond(preventPlatformDefault: preventPlatformDefault);
   }
 }
 
@@ -1905,7 +1939,7 @@ class PointerScrollInertiaCancelEvent extends PointerSignalEvent with _PointerEv
   }
 }
 
-class _TransformedPointerScrollInertiaCancelEvent extends _TransformedPointerEvent with _CopyPointerScrollInertiaCancelEvent implements PointerScrollInertiaCancelEvent {
+class _TransformedPointerScrollInertiaCancelEvent extends _TransformedPointerEvent with _CopyPointerScrollInertiaCancelEvent, _RespondablePointerEvent implements PointerScrollInertiaCancelEvent {
   _TransformedPointerScrollInertiaCancelEvent(this.original, this.transform);
 
   @override
@@ -1996,7 +2030,7 @@ class PointerScaleEvent extends PointerSignalEvent with _PointerEventDescription
   }
 }
 
-class _TransformedPointerScaleEvent extends _TransformedPointerEvent with _CopyPointerScaleEvent implements PointerScaleEvent {
+class _TransformedPointerScaleEvent extends _TransformedPointerEvent with _CopyPointerScaleEvent, _RespondablePointerEvent implements PointerScaleEvent {
   _TransformedPointerScaleEvent(this.original, this.transform);
 
   @override
