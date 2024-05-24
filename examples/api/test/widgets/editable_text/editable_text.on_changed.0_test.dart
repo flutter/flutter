@@ -8,6 +8,18 @@ import 'package:flutter_api_samples/widgets/editable_text/editable_text.on_chang
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('Verify correct labels are displayed', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const example.OnChangedExampleApp(),
+    );
+
+    expect(
+      find.text('What number comes next in the sequence?'),
+      findsOneWidget,
+    );
+    expect(find.text('1, 1, 2, 3, 5, 8...?'), findsOneWidget);
+  });
+
   testWidgets('Does not show dialog when answer is not correct', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.OnChangedExampleApp(),
