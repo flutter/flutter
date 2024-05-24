@@ -26,10 +26,8 @@ class App extends StatelessWidget {
     );
     return MaterialApp(
       title: 'Accessibility Assessments',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
       routes: <String, WidgetBuilder>{
         '/': (_) => const HomePage(),
         ...routes
