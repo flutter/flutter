@@ -1240,6 +1240,8 @@ class GestureDetector extends StatelessWidget {
   }
 }
 
+typedef PointerEventFilter = bool Function(PointerEvent);
+
 /// A widget that detects gestures described by the given gesture
 /// factories.
 ///
@@ -1290,6 +1292,7 @@ class RawGestureDetector extends StatefulWidget {
     super.key,
     this.child,
     this.gestures = const <Type, GestureRecognizerFactory>{},
+    this.filterPointer,
     this.behavior,
     this.excludeFromSemantics = false,
     this.semantics,
@@ -1314,6 +1317,10 @@ class RawGestureDetector extends StatefulWidget {
   /// This defaults to [HitTestBehavior.deferToChild] if [child] is not null and
   /// [HitTestBehavior.translucent] if child is null.
   final HitTestBehavior? behavior;
+
+  /// If not null, every new pointer will be tested against this function,
+  /// and only those returning true will be sent to the recognizers.
+  final PointerEventFilter? filterPointer;
 
   /// Whether to exclude these gestures from the semantics tree. For
   /// example, the long-press gesture for showing a tooltip is
@@ -1510,15 +1517,19 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
 
   void _handlePointerDown(PointerDownEvent event) {
     assert(_recognizers != null);
-    for (final GestureRecognizer recognizer in _recognizers!.values) {
-      recognizer.addPointer(event);
+    if (widget.filterPointer?.call(event) ?? true) {
+      for (final GestureRecognizer recognizer in _recognizers!.values) {
+        recognizer.addPointer(event);
+      }
     }
   }
 
   void _handlePointerPanZoomStart(PointerPanZoomStartEvent event) {
     assert(_recognizers != null);
-    for (final GestureRecognizer recognizer in _recognizers!.values) {
-      recognizer.addPointerPanZoom(event);
+    if (widget.filterPointer?.call(event) ?? true) {
+      for (final GestureRecognizer recognizer in _recognizers!.values) {
+        recognizer.addPointerPanZoom(event);
+      }
     }
   }
 
