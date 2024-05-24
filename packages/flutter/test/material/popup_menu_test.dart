@@ -927,9 +927,8 @@ void main() {
     expect(tester.getTopLeft(popupFinder), buttonTopLeft);
   });
 
-  testWidgets(
-      'PopupMenu positioning inside nested Navigator when useRootNavigator',
-      (WidgetTester tester) async {
+  testWidgets('PopupMenu positioning inside nested Navigator when useRootNavigator',
+    (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
