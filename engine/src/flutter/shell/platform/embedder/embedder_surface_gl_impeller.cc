@@ -46,7 +46,7 @@ class ReactorWorker final : public impeller::ReactorGLES::Worker {
 };
 
 EmbedderSurfaceGLImpeller::EmbedderSurfaceGLImpeller(
-    EmbedderSurfaceGL::GLDispatchTable gl_dispatch_table,
+    EmbedderSurfaceGLSkia::GLDispatchTable gl_dispatch_table,
     bool fbo_reset_after_present,
     std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder)
     : gl_dispatch_table_(std::move(gl_dispatch_table)),
@@ -160,8 +160,8 @@ SkMatrix EmbedderSurfaceGLImpeller::GLContextSurfaceTransformation() const {
 }
 
 // |GPUSurfaceGLDelegate|
-EmbedderSurfaceGL::GLProcResolver EmbedderSurfaceGLImpeller::GetGLProcResolver()
-    const {
+EmbedderSurfaceGLSkia::GLProcResolver
+EmbedderSurfaceGLImpeller::GetGLProcResolver() const {
   return gl_dispatch_table_.gl_proc_resolver;
 }
 

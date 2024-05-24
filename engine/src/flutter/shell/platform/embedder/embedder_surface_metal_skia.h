@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_METAL_H_
-#define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_METAL_H_
+#ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_METAL_SKIA_H_
+#define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_METAL_SKIA_H_
 
 #if !SLIMPELLER
 
@@ -20,8 +20,8 @@ namespace flutter {
 // TODO(148235): This class is Skia specific and there is another on
 // specifically for Impeller called EmbedderSurfaceMetalImpeller. Rename this to
 // EmbedderSurfaceMetalSkia to avoid confusion.
-class EmbedderSurfaceMetal final : public EmbedderSurface,
-                                   public GPUSurfaceMetalDelegate {
+class EmbedderSurfaceMetalSkia final : public EmbedderSurface,
+                                       public GPUSurfaceMetalDelegate {
  public:
   struct MetalDispatchTable {
     std::function<bool(GPUMTLTextureInfo texture)> present;  // required
@@ -29,13 +29,13 @@ class EmbedderSurfaceMetal final : public EmbedderSurface,
         get_texture;  // required
   };
 
-  EmbedderSurfaceMetal(
+  EmbedderSurfaceMetalSkia(
       GPUMTLDeviceHandle device,
       GPUMTLCommandQueueHandle command_queue,
       MetalDispatchTable dispatch_table,
       std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
 
-  ~EmbedderSurfaceMetal() override;
+  ~EmbedderSurfaceMetalSkia() override;
 
  private:
   bool valid_ = false;
@@ -67,11 +67,11 @@ class EmbedderSurfaceMetal final : public EmbedderSurface,
   // |GPUSurfaceMetalDelegate|
   bool PresentTexture(GPUMTLTextureInfo texture) const override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(EmbedderSurfaceMetal);
+  FML_DISALLOW_COPY_AND_ASSIGN(EmbedderSurfaceMetalSkia);
 };
 
 }  // namespace flutter
 
 #endif  //  !SLIMPELLER
 
-#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_METAL_H_
+#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_METAL_SKIA_H_
