@@ -39,7 +39,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
           maxLines,
           _computeEffectiveFontFamily(fontFamily),
           fontSize,
-          height,
+          height == ui.kTextHeightNone ? null : height,
           textHeightBehavior,
           fontWeight,
           fontStyle,
@@ -55,7 +55,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
         _originalFontFamily = fontFamily,
         _effectiveFontFamily = _computeEffectiveFontFamily(fontFamily),
         _fontSize = fontSize,
-        _height = height,
+        _height = height == ui.kTextHeightNone ? null : height,
         _textHeightBehavior = textHeightBehavior,
         _strutStyle = strutStyle,
         _ellipsis = ellipsis,
@@ -413,6 +413,9 @@ class CkTextStyle implements ui.TextStyle {
   /// The values in this text style are used unless [other] specifically
   /// overrides it.
   CkTextStyle mergeWith(CkTextStyle other) {
+    final double? textHeight = other.height == ui.kTextHeightNone
+      ? null
+      : (other.height ?? height);
     return CkTextStyle._(
       color: other.color ?? color,
       decoration: other.decoration ?? decoration,
@@ -429,7 +432,7 @@ class CkTextStyle implements ui.TextStyle {
       fontSize: other.fontSize ?? fontSize,
       letterSpacing: other.letterSpacing ?? letterSpacing,
       wordSpacing: other.wordSpacing ?? wordSpacing,
-      height: other.height ?? height,
+      height: textHeight,
       leadingDistribution: other.leadingDistribution ?? leadingDistribution,
       locale: other.locale ?? locale,
       background: other.background ?? background,
@@ -699,7 +702,7 @@ class CkStrutStyle implements ui.StrutStyle {
   })  : _fontFamily = _computeEffectiveFontFamily(fontFamily),
         _fontFamilyFallback = ui_web.debugEmulateFlutterTesterEnvironment ? null : fontFamilyFallback,
         _fontSize = fontSize,
-        _height = height,
+        _height = height == ui.kTextHeightNone ? null : height,
         _leadingDistribution = leadingDistribution,
         _leading = leading,
         _fontWeight = fontWeight,
