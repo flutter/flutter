@@ -616,12 +616,13 @@ class SliderThemeData with Diagnosticable {
 
     /// A temporary flag that can be used to opt-in to the new 2024 slider shapes.
     ///
+    /// This flag is inteded to migrate usuages, eventually this flag will be defaulted to
+    /// _true_ and then deprecated and removed.
+    ///
     /// This flag is _false_ by default. If true, then the [Slider]'s will use the
     /// new 2024 slider shape, track shape will be [GappedSliderTrackShape],
     /// thumb shape will be [BarSliderThumbShape], and value indicator shape will be
     /// [RoundedRectSliderValueIndicatorShape].
-    ///
-    /// This flag will be defaulted to _true_ in the future, and then deprecated.
     ///
     /// {@tool dartpad}
     /// This example shows how to use [SliderThemeData.use2024SliderShapes] to enable

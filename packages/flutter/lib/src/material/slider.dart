@@ -2034,9 +2034,13 @@ class _SliderDefaultsM2 extends SliderThemeData {
   double? get trackGapSize => 6.0;
 }
 
-/// The default [SliderThemeData] for the legacy Material 3 slider.
+/// The default [SliderThemeData] for the legacy Material 3 slider. This is the
+/// initial implementation of the Material 3 slider which was later updated in
+/// Dec, 2023 with new shapes and colors.
 ///
-/// This theme is used by [Slider] if the [[SliderThemeData.use2024SliderShapes] is set to false.
+/// If the [[SliderThemeData.use2024SliderShapes] is set to false, this theme is
+/// used for the default slider appearance. Otherwise, the [SliderDefaultsM3]
+/// theme is used.
 class _SliderDefaultsM3Legacy extends SliderThemeData {
   _SliderDefaultsM3Legacy({ required this.context, required SliderThemeData sliderTheme })
     : _sliderTheme = sliderTheme;
