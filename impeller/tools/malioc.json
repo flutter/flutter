@@ -5737,7 +5737,7 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 35,
+          "fp16_arithmetic": 37,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
@@ -5778,10 +5778,10 @@
               "load_store"
             ],
             "total_cycles": [
-              0.75,
-              0.421875,
-              0.75,
-              0.625,
+              0.71875,
+              0.40625,
+              0.71875,
+              0.5625,
               4.0,
               0.25,
               0.0
@@ -5790,7 +5790,7 @@
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
           "uniform_registers_used": 24,
-          "work_registers_used": 17
+          "work_registers_used": 21
         }
       }
     }

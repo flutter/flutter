@@ -12,6 +12,7 @@ precision mediump float;
 struct ColorPoint {
   vec4 color;
   float stop;
+  float inverse_delta;
 };
 
 layout(std140) readonly buffer ColorData {
@@ -26,6 +27,8 @@ uniform FragInfo {
   float tile_mode;
   vec4 decal_border_color;
   int colors_length;
+  highp vec2 start_to_end;
+  float inverse_dot_start_to_end;
 }
 frag_info;
 
@@ -34,10 +37,9 @@ highp in vec2 v_position;
 out vec4 frag_color;
 
 void main() {
-  highp vec2 start_to_end = frag_info.end_point - frag_info.start_point;
   highp vec2 start_to_position = v_position - frag_info.start_point;
-  highp float t =
-      dot(start_to_position, start_to_end) / dot(start_to_end, start_to_end);
+  highp float t = dot(start_to_position, frag_info.start_to_end) *
+                  frag_info.inverse_dot_start_to_end;
 
   if ((t < 0.0 || t > 1.0) && frag_info.tile_mode == kTileModeDecal) {
     frag_color = frag_info.decal_border_color;
@@ -48,11 +50,10 @@ void main() {
       ColorPoint prev_point = color_data.colors[i - 1];
       ColorPoint current_point = color_data.colors[i];
       if (t >= prev_point.stop && t <= current_point.stop) {
-        float delta = (current_point.stop - prev_point.stop);
-        if (delta < 0.001) {
+        if (current_point.inverse_delta > 1000.0) {
           frag_color = current_point.color;
         } else {
-          float ratio = (t - prev_point.stop) / delta;
+          float ratio = (t - prev_point.stop) * current_point.inverse_delta;
           frag_color = mix(prev_point.color, current_point.color, ratio);
         }
         break;
