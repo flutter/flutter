@@ -148,7 +148,7 @@ class AnimatedList extends _AnimatedScrollView {
   AnimatedList.separated({
     super.key,
     required AnimatedItemBuilder itemBuilder,
-    required AnimatedSeparatorBuilder separatorBuilder,
+    required AnimatedItemBuilder separatorBuilder,
     required super.removedSeparatorBuilder,
     int initialItemCount = 0,
     super.scrollDirection = Axis.vertical,
@@ -245,20 +245,6 @@ class AnimatedList extends _AnimatedScrollView {
   @override
   AnimatedListState createState() => AnimatedListState();
 }
-
-/// Signature for the builder callback used by [AnimatedList.separated] to
-/// build its animated separators.
-///
-/// The [context] argument is the build context where the widget will be
-/// created, the [index] is the index of the item of the separator to be built,
-/// and the [animation] is an [Animation] that should be used to animate an entry
-/// transition for the widget that is built.
-///
-/// See also:
-///
-/// * [AnimatedRemovedItemBuilder], a builder that is used for removing items with
-///   animations instead of adding them.
-typedef AnimatedSeparatorBuilder = Widget Function(BuildContext context, int index, Animation<double> animation);
 
 /// The [AnimatedListState] for [AnimatedList], a scrolling list container that
 /// animates items when they are inserted or removed.
@@ -855,13 +841,15 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   }
 }
 
-/// Signature for the builder callback used by [AnimatedList] & [AnimatedGrid] to
-/// build their animated children.
+/// Signature for the builder callback used by [AnimatedList], [AnimatedList.separated]
+/// & [AnimatedGrid] to build their animated children.
+/// [AnimatedList.separated] also uses this signature to build its separators.
 ///
 /// The [context] argument is the build context where the widget will be
 /// created, the [index] is the index of the item to be built, and the
 /// [animation] is an [Animation] that should be used to animate an entry
-/// transition for the widget that is built.
+/// transition for the widget that is built. When used in [AnimatedList.separated],
+/// the [index] is the index of the corresponding item of the separator to be built.
 ///
 /// See also:
 ///
