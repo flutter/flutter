@@ -487,8 +487,8 @@ void main() {
     }, variant: macOSOnly);
   }, skip: kIsWeb); // [intended] specific tests target non-web.
 
-  group('Linux does accept numpad shortcuts', () {
-    testWidgets('when numlock is locked', (WidgetTester tester) async {
+  group('Linux numpad shortcuts', () {
+    testWidgets('are triggered when numlock is locked', (WidgetTester tester) async {
       final FocusNode editable = FocusNode();
       addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
@@ -577,7 +577,7 @@ void main() {
       expect((state.lastIntent! as DeleteToNextWordBoundaryIntent).forward, true);
     }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
 
-    testWidgets('when numlock is unlocked', (WidgetTester tester) async {
+    testWidgets('are triggered when numlock is unlocked', (WidgetTester tester) async {
       final FocusNode editable = FocusNode();
       addTearDown(editable.dispose);
       final FocusNode spy = FocusNode();
@@ -664,7 +664,79 @@ void main() {
       expect(state.lastIntent, isA<DeleteToNextWordBoundaryIntent>());
       expect((state.lastIntent! as DeleteToNextWordBoundaryIntent).forward, true);
     }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
-  }, skip: kIsWeb); // [intended] specific tests target non-web.
+
+    testWidgets('update the editable text content when triggered on non-web', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final TextEditingController controller = TextEditingController(text: 'Flutter');
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: EditableText(
+            controller: controller,
+            autofocus: true,
+            focusNode: focusNode,
+            style: const TextStyle(fontSize: 10.0),
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+          ),
+        ),
+      ));
+
+      // Verify that NumLock is unlocked.
+      expect(HardwareKeyboard.instance.lockModesEnabled.contains(KeyboardLockMode.numLock), isFalse);
+
+      await tester.enterText(find.byType(EditableText), 'Flutter');
+      expect(controller.selection.end, 7);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad4));
+      // Verify the cursor moved to the left (numpad4).
+      expect(controller.selection.end, 6);
+    },
+      variant: TargetPlatformVariant.only(TargetPlatform.linux),
+      skip: kIsWeb, // [intended] Non-web test.
+    );
+
+    testWidgets('do not update the editable text content when triggered on web', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final TextEditingController controller = TextEditingController(text: 'Flutter');
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: EditableText(
+            controller: controller,
+            autofocus: true,
+            focusNode: focusNode,
+            style: const TextStyle(fontSize: 10.0),
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+          ),
+        ),
+      ));
+
+      // Verify that NumLock is unlocked.
+      expect(HardwareKeyboard.instance.lockModesEnabled.contains(KeyboardLockMode.numLock), isFalse);
+
+      await tester.enterText(find.byType(EditableText), 'Flutter');
+      expect(controller.selection.end, 7);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad4));
+      // On web, the editable text would have been updated by the browser.
+      // In the flutter test environment, the browser logic is not called
+      // so the editable content is not updated when a shortcut is triggered.
+      // This is the intended result, this test is checking that numpad shortcuts
+      // have no effect on the web (their intent is set to DoNothingAndStopPropagationTextIntent).
+      expect(controller.selection.end, 7);
+    },
+      variant: TargetPlatformVariant.only(TargetPlatform.linux),
+      skip: !kIsWeb, // [intended] Web only.
+    );
+  });
 }
 
 class ActionSpy extends StatefulWidget {
