@@ -182,17 +182,27 @@ void main() {
         equalsIgnoringHashCodes(
           'FocusScopeNode#00000(Root Focus Scope [IN FOCUS PATH])\n'
           ' │ IN FOCUS PATH\n'
-          ' │ focusedChildren: FocusScopeNode#00000(Parent Scope Node [IN FOCUS\n'
-          ' │   PATH])\n'
+          ' │ focusedChildren: FocusScopeNode#00000(View Scope [IN FOCUS PATH])\n'
           ' │\n'
-          ' └─Child 1: FocusScopeNode#00000(Parent Scope Node [IN FOCUS PATH])\n'
-          '   │ context: FocusScope\n'
+          ' └─Child 1: _FocusTraversalGroupNode#00000(FocusTraversalGroup [IN FOCUS PATH])\n'
+          '   │ context: Focus\n'
+          '   │ NOT FOCUSABLE\n'
           '   │ IN FOCUS PATH\n'
-          '   │ focusedChildren: FocusNode#00000(Child [PRIMARY FOCUS])\n'
           '   │\n'
-          '   └─Child 1: FocusNode#00000(Child [PRIMARY FOCUS])\n'
-          '       context: Focus\n'
-          '       PRIMARY FOCUS\n',
+          '   └─Child 1: FocusScopeNode#00000(View Scope [IN FOCUS PATH])\n'
+          '     │ context: _FocusScopeWithExternalFocusNode\n'
+          '     │ IN FOCUS PATH\n'
+          '     │ focusedChildren: FocusScopeNode#00000(Parent Scope Node [IN FOCUS\n'
+          '     │   PATH])\n'
+          '     │\n'
+          '     └─Child 1: FocusScopeNode#00000(Parent Scope Node [IN FOCUS PATH])\n'
+          '       │ context: FocusScope\n'
+          '       │ IN FOCUS PATH\n'
+          '       │ focusedChildren: FocusNode#00000(Child [PRIMARY FOCUS])\n'
+          '       │\n'
+          '       └─Child 1: FocusNode#00000(Child [PRIMARY FOCUS])\n'
+          '           context: Focus\n'
+          '           PRIMARY FOCUS\n'
         ),
       );
 
@@ -730,9 +740,11 @@ void main() {
       expect(keyB.currentState!.focusNode.hasFocus, isFalse);
       expect(find.text('b'), findsOneWidget);
 
+      expect(FocusManager.instance.rootScope.descendants.length, equals(7));
       await tester.pumpWidget(Container());
-
-      expect(FocusManager.instance.rootScope.children, isEmpty);
+      expect(FocusManager.instance.rootScope.descendants.length, equals(2));
+      expect(FocusManager.instance.rootScope.descendants, isNot(contains(aScope)));
+      expect(FocusManager.instance.rootScope.descendants, isNot(contains(bScope)));
     });
 
     // By "pinned", it means kept in the tree by a GlobalKey.
@@ -1093,7 +1105,7 @@ void main() {
       await tester.pump();
 
       expect(rootNode.hasFocus, isTrue);
-      expect(rootNode, equals(firstElement.owner!.focusManager.rootScope));
+      expect(rootNode, equals(FocusManager.instance.rootScope.descendants.toList()[1]));
     });
 
     testWidgets('Can autofocus a node.', (WidgetTester tester) async {
@@ -1278,9 +1290,9 @@ void main() {
       expect(Focus.maybeOf(element1), isNull);
       expect(Focus.maybeOf(element2), isNull);
       expect(Focus.maybeOf(element3), isNull);
-      expect(Focus.of(element4).parent!.parent, equals(root));
-      expect(Focus.of(element5).parent!.parent, equals(root));
-      expect(Focus.of(element6).parent!.parent!.parent, equals(root));
+      expect(Focus.of(element4).parent!.parent!.parent!.parent, equals(root));
+      expect(Focus.of(element5).parent!.parent!.parent!.parent, equals(root));
+      expect(Focus.of(element6).parent!.parent!.parent!.parent!.parent, equals(root));
     });
     testWidgets('Can traverse Focus children.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
@@ -1492,8 +1504,9 @@ void main() {
       expect(node.hasFocus, isTrue);
 
       await tester.pumpWidget(Container());
-
-      expect(FocusManager.instance.rootScope.descendants, isEmpty);
+      // Even with no other focusable widgets, there will be the top level focus
+      // traversal and view focus nodes.
+      expect(FocusManager.instance.rootScope.descendants, hasLength(2));
     });
 
     testWidgets('Focus widgets set Semantics information about focus', (WidgetTester tester) async {
@@ -2139,169 +2152,6 @@ void main() {
       // childFocusNode.canRequestFocus is true again when parent canRequestFocus is changed back to true
       await tester.pumpWidget(buildFocusTree(parentCanRequestFocus: true));
       expect(childFocusNode.canRequestFocus, isTrue);
-    });
-  });
-
-  group('focusability listener', () {
-    int focusabilityChangeCount = 0;
-    void focusabilityCallback() {
-      focusabilityChangeCount += 1;
-    }
-
-    setUp(() { focusabilityChangeCount = 0; });
-
-    testWidgets('canRequestFocus affects child focusability', (WidgetTester tester) async {
-      final FocusScopeNode scopeNode1 = FocusScopeNode(debugLabel: 'scope1');
-      final FocusScopeNode scopeNode2 = FocusScopeNode(debugLabel: 'scope2');
-      final FocusNode node1 = FocusNode(debugLabel: 'node 1');
-      final FocusNode node2 = FocusNode(debugLabel: 'node 2');
-      final FocusNode node3 = FocusNode(debugLabel: 'node 3');
-      addTearDown(scopeNode1.dispose);
-      addTearDown(scopeNode2.dispose);
-      addTearDown(node1.dispose);
-      addTearDown(node2.dispose);
-      addTearDown(node3.dispose);
-
-      await tester.pumpWidget(
-        FocusScope(
-          node: scopeNode1,
-          child: Column(
-            children: <Widget>[
-              Focus(
-                focusNode: node1,
-                child: Container(),
-              ),
-              Focus(
-                focusNode: node2,
-                child: FocusScope(
-                  node: scopeNode2,
-                  child: Focus(focusNode: node3, child: const SizedBox()),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-
-      node3.focusabilityListenable.addListener(focusabilityCallback);
-      int node1FocusabilityCallbackCount = 0;
-      node1.focusabilityListenable.addListener(() => node1FocusabilityCallbackCount += 1);
-
-      scopeNode1.canRequestFocus = false;
-      expect(node3.focusabilityListenable.value, isFalse);
-      expect(focusabilityChangeCount, 1);
-      expect(node1.focusabilityListenable.value, isFalse);
-      expect(node1FocusabilityCallbackCount, 1);
-
-      scopeNode2.canRequestFocus = false;
-      expect(node3.focusabilityListenable.value, isFalse);
-      expect(focusabilityChangeCount, 1);
-      expect(node1.focusabilityListenable.value, isFalse);
-      expect(node1FocusabilityCallbackCount, 1);
-
-      scopeNode1.canRequestFocus = true;
-      expect(node3.focusabilityListenable.value, isFalse);
-      expect(focusabilityChangeCount, 1);
-      expect(node1.focusabilityListenable.value, isTrue);
-      expect(node1FocusabilityCallbackCount, 2);
-
-      scopeNode2.canRequestFocus = true;
-      expect(node3.focusabilityListenable.value, isTrue);
-      expect(focusabilityChangeCount, 2);
-      expect(node1.focusabilityListenable.value, isTrue);
-      expect(node1FocusabilityCallbackCount, 2);
-    });
-
-    testWidgets('onFocusabilityCallback invoked on mount, if not focusable', (WidgetTester tester) async {
-      final FocusScopeNode scopeNode1 = FocusScopeNode(debugLabel: 'scope1', canRequestFocus: false);
-      final FocusNode node1 = FocusNode(debugLabel: 'node 1')..focusabilityListenable.addListener(focusabilityCallback);
-      addTearDown(scopeNode1.dispose);
-      addTearDown(node1.dispose);
-
-      await tester.pumpWidget(
-        FocusScope(
-          node: scopeNode1,
-          child: Column(
-            children: <Widget>[
-              Focus(
-                focusNode: node1,
-                child: Container(),
-              ),
-            ],
-          ),
-        ),
-      );
-
-      expect(node1.focusabilityListenable.value, isFalse);
-      expect(focusabilityChangeCount, 1);
-    });
-
-    testWidgets('onFocusabilityCallback is not invoked on mount, if focusable', (WidgetTester tester) async {
-      final FocusScopeNode scopeNode1 = FocusScopeNode(debugLabel: 'scope1');
-      final FocusNode node1 = FocusNode(debugLabel: 'node 1')..focusabilityListenable.addListener(focusabilityCallback);
-      addTearDown(scopeNode1.dispose);
-      addTearDown(node1.dispose);
-
-      await tester.pumpWidget(
-        FocusScope(
-          node: scopeNode1,
-          child: Column(
-            children: <Widget>[
-              Focus(
-                focusNode: node1,
-                child: Container(),
-              ),
-            ],
-          ),
-        ),
-      );
-
-      expect(focusabilityChangeCount, 0);
-    });
-
-    testWidgets('onFocusabilityCallback on scope node', (WidgetTester tester) async {
-      final FocusScopeNode scopeNode1 = FocusScopeNode(debugLabel: 'scope1');
-      final FocusScopeNode scopeNode2 = FocusScopeNode(debugLabel: 'scope2')..focusabilityListenable.addListener(focusabilityCallback);
-      addTearDown(scopeNode1.dispose);
-      addTearDown(scopeNode2.dispose);
-
-      await tester.pumpWidget(
-        FocusScope(
-          node: scopeNode1,
-          child: FocusScope(node: scopeNode2, child: Container())
-        ),
-      );
-
-      expect(focusabilityChangeCount, 0);
-
-      scopeNode2.canRequestFocus = false;
-      expect(focusabilityChangeCount, 1);
-      expect(scopeNode2.focusabilityListenable.value, isFalse);
-
-      scopeNode2.canRequestFocus = true;
-      expect(focusabilityChangeCount, 2);
-      expect(scopeNode2.focusabilityListenable.value, isTrue);
-
-      // scope 2 has no descendants.
-      scopeNode2.descendantsAreFocusable = false;
-      expect(focusabilityChangeCount, 2);
-      expect(scopeNode2.focusabilityListenable.value, isTrue);
-
-      scopeNode1.descendantsAreFocusable = false;
-      expect(focusabilityChangeCount, 3);
-      expect(scopeNode2.focusabilityListenable.value, isFalse);
-
-      scopeNode1.descendantsAreFocusable = true;
-      expect(focusabilityChangeCount, 4);
-      expect(scopeNode2.focusabilityListenable.value, isTrue);
-
-      scopeNode1.canRequestFocus = false;
-      expect(focusabilityChangeCount, 5);
-      expect(scopeNode2.focusabilityListenable.value, isFalse);
-
-      scopeNode1.canRequestFocus = true;
-      expect(focusabilityChangeCount, 6);
-      expect(scopeNode2.focusabilityListenable.value, isTrue);
     });
   });
 }

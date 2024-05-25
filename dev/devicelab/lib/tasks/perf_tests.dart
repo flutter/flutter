@@ -63,6 +63,17 @@ TaskFunction createUiKitViewScrollPerfTest({bool? enableImpeller}) {
   ).run;
 }
 
+TaskFunction createUiKitViewScrollPerfAdBannersTest({bool? enableImpeller}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
+    'test_driver/uikit_view_scroll_perf_ad_banners.dart',
+    'platform_views_scroll_perf_ad_banners',
+    testDriver: 'test_driver/scroll_perf_ad_banners_test.dart',
+    needsFullTimeline: false,
+    enableImpeller: enableImpeller,
+  ).run;
+}
+
 TaskFunction createUiKitViewScrollPerfNonIntersectingTest({bool? enableImpeller}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',

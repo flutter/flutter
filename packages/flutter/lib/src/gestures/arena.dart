@@ -222,22 +222,23 @@ class GestureArenaManager {
     if (state == null) {
       return; // This arena has already resolved.
     }
-    assert(_debugLogDiagnostic(pointer, '${ disposition == GestureDisposition.accepted ? "Accepting" : "Rejecting" }: $member'));
     assert(state.members.contains(member));
-    if (disposition == GestureDisposition.rejected) {
-      state.members.remove(member);
-      member.rejectGesture(pointer);
-      if (!state.isOpen) {
-        _tryToResolveArena(pointer, state);
-      }
-    } else {
-      assert(disposition == GestureDisposition.accepted);
-      if (state.isOpen) {
-        state.eagerWinner ??= member;
-      } else {
-        assert(_debugLogDiagnostic(pointer, 'Self-declared winner: $member'));
-        _resolveInFavorOf(pointer, state, member);
-      }
+    switch (disposition) {
+      case GestureDisposition.accepted:
+        assert(_debugLogDiagnostic(pointer, 'Accepting: $member'));
+        if (state.isOpen) {
+          state.eagerWinner ??= member;
+        } else {
+          assert(_debugLogDiagnostic(pointer, 'Self-declared winner: $member'));
+          _resolveInFavorOf(pointer, state, member);
+        }
+      case GestureDisposition.rejected:
+        assert(_debugLogDiagnostic(pointer, 'Rejecting: $member'));
+        state.members.remove(member);
+        member.rejectGesture(pointer);
+        if (!state.isOpen) {
+          _tryToResolveArena(pointer, state);
+        }
     }
   }
 

@@ -481,7 +481,7 @@ void main() {
     await tester.tap(find.text('Accessible'));
     expect(selectedIndex, 1);
 
-    tester.pumpAndSettle();
+    await tester.pumpAndSettle();
   });
 }
 

@@ -40,7 +40,7 @@ const Map<String, PlatformDocsSection> kPlatformDocs = <String, PlatformDocsSect
   'android': PlatformDocsSection(
     zipName: 'android-javadoc.zip',
     sectionName: 'Android',
-    checkFile: 'io/flutter/view/FlutterView.html',
+    checkFile: 'io/flutter/embedding/android/FlutterView.html',
     subdir: 'javadoc',
   ),
   'ios': PlatformDocsSection(
@@ -521,8 +521,8 @@ class DartdocGenerator {
 
     final Version version = FlutterInformation.instance.getFlutterVersion();
 
-    // Verify which version of snippets and dartdoc we're using.
-    final ProcessResult snippetsResult = processManager.runSync(
+    // Verify which version of the global activated packages we're using.
+    final ProcessResult versionResults = processManager.runSync(
       <String>[
         FlutterInformation.instance.getFlutterBinaryPath().path,
         'pub',
@@ -535,8 +535,8 @@ class DartdocGenerator {
     );
     print('');
     final Iterable<RegExpMatch> versionMatches =
-        RegExp(r'^(?<name>snippets|dartdoc) (?<version>[^\s]+)', multiLine: true)
-            .allMatches(snippetsResult.stdout as String);
+        RegExp(r'^(?<name>dartdoc) (?<version>[^\s]+)', multiLine: true)
+            .allMatches(versionResults.stdout as String);
     for (final RegExpMatch match in versionMatches) {
       print('${match.namedGroup('name')} version: ${match.namedGroup('version')}');
     }

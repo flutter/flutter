@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+
   const String longText = 'one two three four five six seven eight nine ten eleven twelve';
   final List<DropdownMenuEntry<TestMenu>> menuChildren = <DropdownMenuEntry<TestMenu>>[];
 
@@ -441,7 +442,7 @@ void main() {
       label: const Text('label'),
     ));
 
-    final Finder leadingIcon = find.widgetWithIcon(Container, Icons.search);
+    final Finder leadingIcon = find.widgetWithIcon(SizedBox, Icons.search).last;
     final double iconWidth = tester.getSize(leadingIcon).width;
     final Finder updatedLabel = find.text('label');
     final Offset updatedLabelTopLeft = tester.getTopLeft(updatedLabel);
@@ -464,7 +465,7 @@ void main() {
       label: const Text('label'),
     ));
 
-    final Finder largeLeadingIcon = find.widgetWithIcon(Container, Icons.search);
+    final Finder largeLeadingIcon = find.widgetWithIcon(SizedBox, Icons.search).last;
     final double largeIconWidth = tester.getSize(largeLeadingIcon).width;
     final Finder updatedLabel1 = find.text('label');
     final Offset updatedLabelTopLeft1 = tester.getTopLeft(updatedLabel1);
@@ -523,7 +524,7 @@ void main() {
     ));
     await tester.pump();
 
-    final Finder leadingIcon = find.widgetWithIcon(Container, Icons.search);
+    final Finder leadingIcon = find.widgetWithIcon(SizedBox, Icons.search).last;
     final double iconWidth = tester.getSize(leadingIcon).width;
     final Offset dropdownMenuTopRight = tester.getTopRight(find.byType(DropdownMenu<TestMenu>));
     final Finder updatedLabel = find.text('label');
@@ -555,7 +556,7 @@ void main() {
     ));
     await tester.pump();
 
-    final Finder largeLeadingIcon = find.widgetWithIcon(Container, Icons.search);
+    final Finder largeLeadingIcon = find.widgetWithIcon(SizedBox, Icons.search).last;
     final double largeIconWidth = tester.getSize(largeLeadingIcon).width;
     final Offset updatedDropdownMenuTopRight = tester.getTopRight(find.byType(DropdownMenu<TestMenu>));
     final Finder updatedLabel1 = find.text('label');
@@ -761,6 +762,116 @@ void main() {
 
     item5material = tester.widget<Material>(button5Material);
     expect(item5material.color, Colors.transparent); // the previous item should not be highlighted.
+  }, variant: TargetPlatformVariant.desktop());
+
+  // Regression test for https://github.com/flutter/flutter/issues/147253.
+  testWidgets('Down key and up key can navigate on desktop platforms '
+      'when a label text contains another label text', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: const Scaffold(
+        body: DropdownMenu<int>(
+          dropdownMenuEntries: <DropdownMenuEntry<int>>[
+            DropdownMenuEntry<int>(
+              value: 0,
+              label: 'ABC'
+            ),
+            DropdownMenuEntry<int>(
+              value: 1,
+              label: 'AB'
+            ),
+            DropdownMenuEntry<int>(
+              value: 2,
+              label: 'ABCD'
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(DropdownMenu<int>));
+    await tester.pump();
+
+    final Finder button0Material = find.descendant(
+      of: find.widgetWithText(MenuItemButton, 'ABC').last,
+      matching: find.byType(Material),
+    );
+    final Finder button1Material = find.descendant(
+      of: find.widgetWithText(MenuItemButton, 'AB').last,
+      matching: find.byType(Material),
+    );
+    final Finder button2Material = find.descendant(
+      of: find.widgetWithText(MenuItemButton, 'ABCD').last,
+      matching: find.byType(Material),
+    );
+
+    // Press down key three times, the highlight should move to the next item each time.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    Material item0Material = tester.widget<Material>(button0Material);
+    expect(item0Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    Material item1Material = tester.widget<Material>(button1Material);
+    expect(item1Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    final Material item2Material = tester.widget<Material>(button2Material);
+    expect(item2Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+    // Press up key two times, the highlight should up each time.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    item1Material = tester.widget<Material>(button1Material);
+    expect(item1Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    item0Material = tester.widget<Material>(button0Material);
+    expect(item0Material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+  }, variant: TargetPlatformVariant.desktop());
+
+  // Regression test for https://github.com/flutter/flutter/issues/147253.
+  testWidgets('Default search prioritises the current highlight on desktop platforms',
+      (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData();
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: Scaffold(
+        body: DropdownMenu<TestMenu>(
+          dropdownMenuEntries: menuChildren,
+        ),
+      ),
+    ));
+
+    const String itemLabel = 'Item 2';
+    // Open the menu
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pumpAndSettle();
+    // Highlight the third item by exact search.
+    await tester.enterText(find.byType(TextField).first, itemLabel);
+    await tester.pumpAndSettle();
+    Finder button2Material = find.descendant(
+      of: find.widgetWithText(MenuItemButton, itemLabel).last,
+      matching: find.byType(Material),
+    );
+    Material item2material = tester.widget<Material>(button2Material);
+    expect(item2material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
+
+    // Search something that matches multiple items.
+    await tester.enterText(find.byType(TextField).first, 'Item');
+    await tester.pumpAndSettle();
+    // The third item should still be highlighted.
+    button2Material = find.descendant(
+      of: find.widgetWithText(MenuItemButton, itemLabel).last,
+      matching: find.byType(Material),
+    );
+    item2material = tester.widget<Material>(button2Material);
+    expect(item2material.color, themeData.colorScheme.onSurface.withOpacity(0.12));
   }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('The text input should match the label of the menu item '
@@ -1119,17 +1230,10 @@ void main() {
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pump();
 
-    late final bool isMobile;
-    switch (themeData.platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-      case TargetPlatform.fuchsia:
-        isMobile = true;
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        isMobile = false;
-    }
+    final bool isMobile = switch (themeData.platform) {
+      TargetPlatform.android || TargetPlatform.iOS || TargetPlatform.fuchsia => true,
+      TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => false,
+    };
     int expectedCount = isMobile ? 0 : 1;
 
     // Test onSelected on key press
@@ -1343,6 +1447,68 @@ void main() {
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.moveTo(tester.getCenter(textFieldFinder));
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
+
+  testWidgets('If enabled is false, the mouse cursor should be deferred when hovered', (WidgetTester tester) async {
+    Widget buildDropdownMenu({ bool enabled = true,  bool? requestFocusOnTap }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              DropdownMenu<TestMenu>(
+                enabled: enabled,
+                requestFocusOnTap: requestFocusOnTap,
+                dropdownMenuEntries: menuChildren,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Check mouse cursor dropdown menu is disabled and requestFocusOnTap is true.
+    await tester.pumpWidget(buildDropdownMenu(enabled: false, requestFocusOnTap: true));
+    await tester.pumpAndSettle();
+
+    Finder textFieldFinder = find.byType(TextField);
+    TextField textField = tester.widget<TextField>(textFieldFinder);
+    expect(textField.canRequestFocus, true);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.moveTo(tester.getCenter(textFieldFinder));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    // Remove the pointer.
+    await gesture.removePointer();
+
+    // Check mouse cursor dropdown menu is disabled and requestFocusOnTap is false.
+    await tester.pumpWidget(buildDropdownMenu(enabled: false, requestFocusOnTap: false));
+    await tester.pumpAndSettle();
+
+    textFieldFinder = find.byType(TextField);
+    textField = tester.widget<TextField>(textFieldFinder);
+    expect(textField.canRequestFocus, false);
+
+    // Add a new pointer.
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(textFieldFinder));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+
+    // Remove the pointer.
+    await gesture.removePointer();
+
+    // Check enabled dropdown menu updates the mouse cursor when hovered.
+    await tester.pumpWidget(buildDropdownMenu(requestFocusOnTap: true));
+    await tester.pumpAndSettle();
+
+    textFieldFinder = find.byType(TextField);
+    textField = tester.widget<TextField>(textFieldFinder);
+    expect(textField.canRequestFocus, true);
+
+    // Add a new pointer.
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(textFieldFinder));
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 
   testWidgets('The menu has the same width as the input field in ListView', (WidgetTester tester) async {
@@ -1807,8 +1973,7 @@ void main() {
     checkExpectedHighlight(searchResult: 'Read', otherItems: <String>['All', 'Unread']);
   });
 
-   testWidgets('onSelected gets called when a selection is made in a nested menu',
-      (WidgetTester tester) async {
+   testWidgets('onSelected gets called when a selection is made in a nested menu', (WidgetTester tester) async {
     int selectionCount = 0;
 
     final ThemeData themeData = ThemeData();
@@ -2012,6 +2177,7 @@ void main() {
       },
     );
     final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2049,6 +2215,83 @@ void main() {
     state.updateEditingValue(const TextEditingValue(text: 'Green2'));
     expect(called, 3);
     expect(controller.text, 'Green');
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/140596.
+  testWidgets('Long text item does not overflow', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: DropdownMenu<int>(
+          dropdownMenuEntries: <DropdownMenuEntry<int>>[
+            DropdownMenuEntry<int>(
+              value: 0,
+              label: 'This is a long text that is multiplied by 4 so it can overflow. ' * 4,
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.pump();
+    await tester.tap(find.byType(DropdownMenu<int>));
+    await tester.pumpAndSettle();
+
+    // No exception should be thrown.
+    expect(tester.takeException(), isNull);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/147076.
+  testWidgets('Text field does not overflow parent', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SizedBox(
+          width: 300,
+          child: DropdownMenu<int>(
+            dropdownMenuEntries: <DropdownMenuEntry<int>>[
+              DropdownMenuEntry<int>(
+                value: 0,
+                label: 'This is a long text that is multiplied by 4 so it can overflow. ' * 4,
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump();
+    final RenderBox box = tester.firstRenderObject(find.byType(TextField));
+    expect(box.size.width, 300.0);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/147173.
+  testWidgets('Text field with large helper text can be selected', (WidgetTester tester) async {
+    const String labelText = 'MenuEntry 1';
+    await tester.pumpWidget(const MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: DropdownMenu<int>(
+            hintText: 'Hint text',
+            helperText: 'Menu Helper text',
+            inputDecorationTheme: InputDecorationTheme(
+              helperMaxLines: 2,
+              helperStyle: TextStyle(fontSize: 30),
+            ),
+            dropdownMenuEntries: <DropdownMenuEntry<int>>[
+              DropdownMenuEntry<int>(
+                value: 0,
+                label: labelText,
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    await tester.pump();
+    await tester.tapAt(tester.getCenter(find.text('Hint text')));
+    await tester.pumpAndSettle();
+    // One is layout for the _DropdownMenuBody, the other one is the real button item in the menu.
+    expect(find.widgetWithText(MenuItemButton, labelText), findsNWidgets(2));
   });
 }
 

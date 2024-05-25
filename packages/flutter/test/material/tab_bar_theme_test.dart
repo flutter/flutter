@@ -7,6 +7,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -973,8 +974,7 @@ void main() {
   });
 
   testWidgets(
-    "TabBarTheme's labelColor & unselectedLabelColor override labelStyle & unselectedLabelStyle colors",
-    (WidgetTester tester) async {
+    "TabBarTheme's labelColor & unselectedLabelColor override labelStyle & unselectedLabelStyle colors", (WidgetTester tester) async {
       const Color labelColor = Color(0xfff00000);
       const Color unselectedLabelColor = Color(0x95ff0000);
       const TextStyle labelStyle = TextStyle(
@@ -1540,4 +1540,48 @@ void main() {
       expect(selectedTextStyle.color, selectedColor);
       expect(unselectedTextStyle.color, unselectedColor);
   });
+
+  testWidgets('TabBarTheme.textScaler overrides tab label text scale, textScaleFactor = noScaling, 1.75, 2.0', (WidgetTester tester) async {
+    final List<String> tabs = <String>['Tab 1', 'Tab 2'];
+
+    Widget buildTabs({ TextScaler? textScaler }) {
+      return MaterialApp(
+        theme: ThemeData(
+          tabBarTheme: TabBarTheme(
+            textScaler: textScaler,
+          ),
+        ),
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(3.0)),
+          child: DefaultTabController(
+            length: tabs.length,
+            child: Scaffold(
+              appBar: AppBar(
+                bottom: TabBar(
+                  tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabs(textScaler: TextScaler.noScaling));
+
+    Size labelSize = tester.getSize(find.text('Tab 1'));
+    expect(labelSize, equals(const Size(70.5, 20.0)));
+
+    await tester.pumpWidget(buildTabs(textScaler: const TextScaler.linear(1.75)));
+    await tester.pumpAndSettle();
+
+    labelSize = tester.getSize(find.text('Tab 1'));
+    expect(labelSize, equals(const Size(123.0, 35.0)));
+
+    await tester.pumpWidget(buildTabs(textScaler: const TextScaler.linear(2.0)));
+    await tester.pumpAndSettle();
+
+    labelSize = tester.getSize(find.text('Tab 1'));
+    expect(labelSize, equals(const Size(140.5, 40.0)));
+  }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/87543
 }

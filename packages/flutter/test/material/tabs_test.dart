@@ -2,19 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
-import 'feedback_tester.dart';
 import 'tabs_utils.dart';
 
-Widget boilerplate({ Widget? child, TextDirection textDirection = TextDirection.ltr, bool? useMaterial3, TabBarTheme? tabBarTheme }) {
+Widget boilerplate({
+  Widget? child,
+  TextDirection textDirection = TextDirection.ltr,
+  ThemeData? theme,
+  TabBarTheme? tabBarTheme,
+  bool? useMaterial3,
+}) {
   return Theme(
-    data: ThemeData(useMaterial3: useMaterial3, tabBarTheme: tabBarTheme),
+    data: theme ?? ThemeData(useMaterial3: useMaterial3, tabBarTheme: tabBarTheme),
     child: Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[
@@ -43,6 +50,7 @@ Widget buildFrame({
   TextDirection textDirection = TextDirection.ltr,
   TabAlignment? tabAlignment,
   TabBarTheme? tabBarTheme,
+  Decoration? indicator,
   bool? useMaterial3,
 }) {
   if (secondaryTabBar) {
@@ -81,6 +89,7 @@ Widget buildFrame({
         indicatorColor: indicatorColor,
         padding: padding,
         tabAlignment: tabAlignment,
+        indicator: indicator,
       ),
     ),
   );
@@ -342,45 +351,48 @@ void main() {
   });
 
   testWidgets('TabBar default tab indicator (primary)', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final List<Widget> tabs = List<Widget>.generate(4, (int index) {
       return Tab(text: 'Tab $index');
     });
-
     final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
+    const double indicatorWeightLabel = 3.0;
+    const double indicatorWeightTab = 2.0;
 
-    await tester.pumpWidget(
-      MaterialApp(
+    Widget buildTab({ TabBarIndicatorSize? indicatorSize }) {
+      return MaterialApp(
         home: boilerplate(
-          useMaterial3: theme.useMaterial3,
+          theme: theme,
           child: Container(
             alignment: Alignment.topLeft,
             child: TabBar(
+              indicatorSize: indicatorSize,
               controller: controller,
               tabs: tabs,
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
 
-    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    // Test default tab indicator (TabBarIndicatorSize.label).
+    await tester.pumpWidget(buildTab());
+
+    RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
     expect(tabBarBox.size.height, 48.0);
 
-    const double indicatorWeight = 3.0;
-
+    // Check tab indicator size and color.
     final RRect rrect = RRect.fromLTRBAndCorners(
       64.75,
-      tabBarBox.size.height - indicatorWeight,
+      tabBarBox.size.height - indicatorWeightLabel,
       135.25,
       tabBarBox.size.height,
       topLeft: const Radius.circular(3.0),
       topRight: const Radius.circular(3.0),
     );
-
     expect(
       tabBarBox,
       paints
@@ -388,23 +400,52 @@ void main() {
           color: theme.colorScheme.primary,
           rrect: rrect,
     ));
+
+    // Test default tab indicator (TabBarIndicatorSize.tab).
+    await tester.pumpWidget(buildTab(indicatorSize: TabBarIndicatorSize.tab));
+    await tester.pumpAndSettle();
+
+    tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(tabBarBox.size.height, 48.0);
+
+    const double indicatorY = 48 - (indicatorWeightTab / 2.0);
+    const double indicatorLeft =  indicatorWeightTab / 2.0;
+    const double indicatorRight = 200.0 - (indicatorWeightTab / 2.0);
+
+    // Check tab indicator size and color.
+    expect(
+      tabBarBox,
+      paints
+        // Divider.
+        ..line(
+          color: theme.colorScheme.outlineVariant,
+        )
+        // Tab indicator.
+        ..line(
+          color: theme.colorScheme.primary,
+          strokeWidth: indicatorWeightTab,
+          p1: const Offset(indicatorLeft, indicatorY),
+          p2: const Offset(indicatorRight, indicatorY),
+        ),
+    );
   });
 
   testWidgets('TabBar default tab indicator (secondary)', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final List<Widget> tabs = List<Widget>.generate(4, (int index) {
       return Tab(text: 'Tab $index');
     });
-
     final TabController controller = createTabController(
       vsync: const TestVSync(),
       length: tabs.length,
     );
+    const double indicatorWeight = 2.0;
 
+    // Test default tab indicator.
     await tester.pumpWidget(
       MaterialApp(
         home: boilerplate(
-          useMaterial3: theme.useMaterial3,
+          theme: theme,
           child: Container(
             alignment: Alignment.topLeft,
             child: TabBar.secondary(
@@ -419,26 +460,26 @@ void main() {
     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
     expect(tabBarBox.size.height, 48.0);
 
-    const double indicatorWeight = 2.0;
     const double indicatorY = 48 - (indicatorWeight / 2.0);
     const double indicatorLeft =  indicatorWeight / 2.0;
     const double indicatorRight = 200.0 - (indicatorWeight / 2.0);
 
+    // Check tab indicator size and color.
     expect(
       tabBarBox,
       paints
-        // Divider
+        // Divider.
         ..line(
           color: theme.colorScheme.outlineVariant,
         )
-        // Tab indicator
+        // Tab indicator.
         ..line(
           color: theme.colorScheme.primary,
           strokeWidth: indicatorWeight,
           p1: const Offset(indicatorLeft, indicatorY),
           p2: const Offset(indicatorRight, indicatorY),
         ),
-      );
+    );
   });
 
   testWidgets('TabBar default overlay (primary)', (WidgetTester tester) async {
@@ -7033,4 +7074,88 @@ void main() {
     expect(find.text('View 0'), findsNothing);
     expect(find.text('View 2'), findsOneWidget);
   });
+
+  testWidgets('Tab indicator painter image configuration', (WidgetTester tester) async {
+    final List<String> tabs = <String>['A', 'B'];
+    final TestIndicatorDecoration decoration = TestIndicatorDecoration();
+
+    Widget buildTabs({
+      TextDirection textDirection = TextDirection.ltr,
+      double ratio = 1.0,
+    }) {
+      return MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(devicePixelRatio: ratio),
+          child: Directionality(
+            textDirection: textDirection,
+            child: DefaultTabController(
+              length: tabs.length,
+              child: Scaffold(
+                appBar: AppBar(
+                  bottom: TabBar(
+                    indicator: decoration,
+                    tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabs());
+
+    ImageConfiguration config = decoration.painters.last.lastConfiguration!;
+    expect(config.size?.width, closeTo(14.1, 0.1));
+    expect(config.size?.height, equals(48.0));
+    expect(config.textDirection, TextDirection.ltr);
+    expect(config.devicePixelRatio, 1.0);
+
+    await tester.pumpWidget(buildTabs(textDirection: TextDirection.rtl, ratio: 2.33));
+
+    config = decoration.painters.last.lastConfiguration!;
+    expect(config.size?.width, closeTo(14.1, 0.1));
+    expect(config.size?.height, equals(48.0));
+    expect(config.textDirection, TextDirection.rtl);
+    expect(config.devicePixelRatio, 2.33);
+  });
+
+  testWidgets('TabBar.textScaler overrides tab label text scale, textScaleFactor = noScaling, 1.75, 2.0', (WidgetTester tester) async {
+    final List<String> tabs = <String>['Tab 1', 'Tab 2'];
+
+    Widget buildTabs({ TextScaler? textScaler }) {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(3.0)),
+          child: DefaultTabController(
+            length: tabs.length,
+            child: Scaffold(
+              appBar: AppBar(
+                bottom: TabBar(
+                  textScaler: textScaler,
+                  tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabs(textScaler: TextScaler.noScaling));
+
+    Size labelSize = tester.getSize(find.text('Tab 1'));
+    expect(labelSize, equals(const Size(70.5, 20.0)));
+
+    await tester.pumpWidget(buildTabs(textScaler: const TextScaler.linear(1.75)));
+
+    labelSize = tester.getSize(find.text('Tab 1'));
+    expect(labelSize, equals(const Size(123.0, 35.0)));
+
+    await tester.pumpWidget(buildTabs(textScaler: const TextScaler.linear(2.0)));
+
+    labelSize = tester.getSize(find.text('Tab 1'));
+    expect(labelSize, equals(const Size(140.5, 40.0)));
+  }, skip: isBrowser && !isSkiaWeb); // https://github.com/flutter/flutter/issues/87543
 }

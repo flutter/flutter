@@ -38,7 +38,7 @@ void main() {
     );
   });
 
-  test('framework name name confilicts', () {
+  test('framework name conflicts', () {
     final Set<String> alreadyTakenNames = <String>{};
     expect(
       frameworkUri('libfoo.dylib', alreadyTakenNames),

@@ -110,8 +110,20 @@ class ScrollBehavior {
   /// {@macro flutter.gestures.monodrag.DragGestureRecognizer.multitouchDragStrategy}
   ///
   /// By default, [MultitouchDragStrategy.latestPointer] is configured to
-  /// create drag gestures for all platforms.
-  MultitouchDragStrategy get multitouchDragStrategy => MultitouchDragStrategy.latestPointer;
+  /// create drag gestures for non-Apple platforms, and
+  /// [MultitouchDragStrategy.averageBoundaryPointers] for Apple platforms.
+  MultitouchDragStrategy getMultitouchDragStrategy(BuildContext context) {
+    switch (getPlatform(context)) {
+      case TargetPlatform.macOS:
+      case TargetPlatform.iOS:
+        return MultitouchDragStrategy.averageBoundaryPointers;
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return MultitouchDragStrategy.latestPointer;
+    }
+  }
 
   /// A set of [LogicalKeyboardKey]s that, when any or all are pressed in
   /// combination with a [PointerDeviceKind.mouse] pointer scroll event, will
@@ -253,12 +265,11 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     this.scrollbars = true,
     this.overscroll = true,
     Set<PointerDeviceKind>? dragDevices,
-    MultitouchDragStrategy? multitouchDragStrategy,
+    this.multitouchDragStrategy,
     Set<LogicalKeyboardKey>? pointerAxisModifiers,
     this.physics,
     this.platform,
   }) : _dragDevices = dragDevices,
-        _multitouchDragStrategy = multitouchDragStrategy,
        _pointerAxisModifiers = pointerAxisModifiers;
 
   final ScrollBehavior delegate;
@@ -267,17 +278,19 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   final ScrollPhysics? physics;
   final TargetPlatform? platform;
   final Set<PointerDeviceKind>? _dragDevices;
-  final MultitouchDragStrategy? _multitouchDragStrategy;
+  final MultitouchDragStrategy? multitouchDragStrategy;
   final Set<LogicalKeyboardKey>? _pointerAxisModifiers;
 
   @override
   Set<PointerDeviceKind> get dragDevices => _dragDevices ?? delegate.dragDevices;
 
   @override
-  MultitouchDragStrategy get multitouchDragStrategy => _multitouchDragStrategy ?? delegate.multitouchDragStrategy;
+  Set<LogicalKeyboardKey> get pointerAxisModifiers => _pointerAxisModifiers ?? delegate.pointerAxisModifiers;
 
   @override
-  Set<LogicalKeyboardKey> get pointerAxisModifiers => _pointerAxisModifiers ?? delegate.pointerAxisModifiers;
+  MultitouchDragStrategy getMultitouchDragStrategy(BuildContext context) {
+    return multitouchDragStrategy ?? delegate.getMultitouchDragStrategy(context);
+  }
 
   @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {

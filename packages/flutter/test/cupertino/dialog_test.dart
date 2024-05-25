@@ -15,6 +15,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -140,6 +141,7 @@ void main() {
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
     expect(widget.style.color!.withAlpha(255), CupertinoColors.systemGreen.color);
+    expect(widget.style.fontFamily, 'CupertinoSystemText');
   });
 
   testWidgets('Dialog dark theme', (WidgetTester tester) async {
@@ -346,7 +348,7 @@ void main() {
     // regular font. However, when using the test font, "Cancel" becomes 2 lines which
     // is why the height we're verifying for "Cancel" is larger than "OK".
 
-    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+    if (!kIsWeb || isSkiaWeb) { // https://github.com/flutter/flutter/issues/99933
       expect(tester.getSize(find.text('The Title')), equals(const Size(270.0, 132.0)));
     }
     expect(tester.getTopLeft(find.text('The Title')), equals(const Offset(265.0, 80.0 + 24.0)));
@@ -354,7 +356,10 @@ void main() {
     expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'OK')), equals(const Size(310.0, 98.0)));
   });
 
-  testWidgets('Dialog respects small constraints.', (WidgetTester tester) async {
+  testWidgets('Dialog respects small constraints.',
+  // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
+  experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
+  (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(

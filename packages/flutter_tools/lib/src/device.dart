@@ -16,6 +16,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'devfs.dart';
 import 'device_port_forwarder.dart';
+import 'device_vm_service_discovery_for_attach.dart';
 import 'project.dart';
 import 'vmservice.dart';
 import 'web/compile.dart';
@@ -480,18 +481,15 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   @protected
   @visibleForTesting
-  ItemListNotifier<Device>? deviceNotifier;
+  final ItemListNotifier<Device> deviceNotifier = ItemListNotifier<Device>();
 
   Timer? _timer;
 
   Future<List<Device>> pollingGetDevices({Duration? timeout});
 
   void startPolling() {
-    if (_timer == null) {
-      deviceNotifier ??= ItemListNotifier<Device>();
-      // Make initial population the default, fast polling timeout.
-      _timer = _initTimer(null, initialCall: true);
-    }
+    // Make initial population the default, fast polling timeout.
+    _timer ??= _initTimer(null, initialCall: true);
   }
 
   Timer _initTimer(Duration? pollingTimeout, {bool initialCall = false}) {
@@ -499,7 +497,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     return Timer(initialCall ? Duration.zero : _pollingInterval, () async {
       try {
         final List<Device> devices = await pollingGetDevices(timeout: pollingTimeout);
-        deviceNotifier!.updateWithNewList(devices);
+        deviceNotifier.updateWithNewList(devices);
       } on TimeoutException {
         // Do nothing on a timeout.
       }
@@ -546,32 +544,28 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     DeviceDiscoveryFilter? filter,
     bool resetCache = false,
   }) async {
-    if (deviceNotifier == null || resetCache) {
+    if (!deviceNotifier.isPopulated || resetCache) {
       final List<Device> devices = await pollingGetDevices(timeout: timeout);
       // If the cache was populated while the polling was ongoing, do not
       // overwrite the cache unless it's explicitly refreshing the cache.
-      if (resetCache) {
-        deviceNotifier = ItemListNotifier<Device>.from(devices);
-      } else {
-        deviceNotifier ??= ItemListNotifier<Device>.from(devices);
+      if (!deviceNotifier.isPopulated || resetCache) {
+        deviceNotifier.updateWithNewList(devices);
       }
     }
 
     // If a filter is provided, filter cache to only return devices matching.
     if (filter != null) {
-      return filter.filterDevices(deviceNotifier!.items);
+      return filter.filterDevices(deviceNotifier.items);
     }
-    return deviceNotifier!.items;
+    return deviceNotifier.items;
   }
 
   Stream<Device> get onAdded {
-    deviceNotifier ??= ItemListNotifier<Device>();
-    return deviceNotifier!.onAdded;
+    return deviceNotifier.onAdded;
   }
 
   Stream<Device> get onRemoved {
-    deviceNotifier ??= ItemListNotifier<Device>();
-    return deviceNotifier!.onRemoved;
+    return deviceNotifier.onRemoved;
   }
 
   void dispose() => stopPolling();
@@ -584,6 +578,23 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 enum DeviceConnectionInterface {
   attached,
   wireless,
+}
+
+/// Returns the `DeviceConnectionInterface` enum based on its string name.
+DeviceConnectionInterface getDeviceConnectionInterfaceForName(String name) {
+  return switch (name) {
+    'attached' => DeviceConnectionInterface.attached,
+    'wireless' => DeviceConnectionInterface.wireless,
+    _ => throw Exception('Unsupported DeviceConnectionInterface name "$name"'),
+  };
+}
+
+/// Returns a `DeviceConnectionInterface`'s string name.
+String getNameForDeviceConnectionInterface(DeviceConnectionInterface connectionInterface) {
+  return switch (connectionInterface) {
+    DeviceConnectionInterface.attached => 'attached',
+    DeviceConnectionInterface.wireless => 'wireless',
+  };
 }
 
 /// A device is a physical hardware that can run a Flutter application.
@@ -726,6 +737,35 @@ abstract class Device {
 
   /// Clear the device's logs.
   void clearLogs();
+
+  /// Get the [VMServiceDiscoveryForAttach] instance for this device, which
+  /// discovers, and forwards any necessary ports to the vm service uri of a
+  /// running app on the device.
+  ///
+  /// If `appId` is specified, on supported platforms, the service discovery
+  /// will only return the VM service URI from the given app.
+  ///
+  /// If `fuchsiaModule` is specified, this will only return the VM service uri
+  /// from the specified Fuchsia module.
+  ///
+  /// If `filterDevicePort` is specified, this will only return the VM service
+  /// uri that matches the given port on the device.
+  VMServiceDiscoveryForAttach getVMServiceDiscoveryForAttach({
+    String? appId,
+    String? fuchsiaModule,
+    int? filterDevicePort,
+    int? expectedHostPort,
+    required bool ipv6,
+    required Logger logger,
+  }) =>
+      LogScanningVMServiceDiscoveryForAttach(
+        Future<DeviceLogReader>.value(getLogReader()),
+        portForwarder: portForwarder,
+        devicePort: filterDevicePort,
+        hostPort: expectedHostPort,
+        ipv6: ipv6,
+        logger: logger,
+      );
 
   /// Start an app package on the current device.
   ///
@@ -902,12 +942,11 @@ enum ImpellerStatus {
 
   const ImpellerStatus._(this.asBool);
 
-  factory ImpellerStatus.fromBool(bool? b) {
-    if (b == null) {
-      return platformDefault;
-    }
-    return b ? enabled : disabled;
-  }
+  factory ImpellerStatus.fromBool(bool? b) => switch (b) {
+    true  => enabled,
+    false => disabled,
+    null  => platformDefault,
+  };
 
   final bool? asBool;
 }
@@ -954,6 +993,7 @@ class DebuggingOptions {
     this.webHeaders = const <String, String>{},
     this.webLaunchUrl,
     this.webRenderer = WebRendererMode.auto,
+    this.webUseWasm = false,
     this.vmserviceOutFile,
     this.fastStart = false,
     this.nullAssertions = false,
@@ -984,6 +1024,7 @@ class DebuggingOptions {
       this.webLaunchUrl,
       this.webHeaders = const <String, String>{},
       this.webRenderer = WebRendererMode.auto,
+      this.webUseWasm = false,
       this.cacheSkSL = false,
       this.traceAllowlist,
       this.enableImpeller = ImpellerStatus.platformDefault,
@@ -1064,6 +1105,7 @@ class DebuggingOptions {
     required this.webHeaders,
     required this.webLaunchUrl,
     required this.webRenderer,
+    required this.webUseWasm,
     required this.vmserviceOutFile,
     required this.fastStart,
     required this.nullAssertions,
@@ -1150,6 +1192,9 @@ class DebuggingOptions {
 
   /// Which web renderer to use for the debugging session
   final WebRendererMode webRenderer;
+
+  /// Whether to compile to webassembly
+  final bool webUseWasm;
 
   /// A file where the VM Service URL should be written after the application is started.
   final String? vmserviceOutFile;
@@ -1260,6 +1305,7 @@ class DebuggingOptions {
     'webLaunchUrl': webLaunchUrl,
     'webHeaders': webHeaders,
     'webRenderer': webRenderer.name,
+    'webUseWasm': webUseWasm,
     'vmserviceOutFile': vmserviceOutFile,
     'fastStart': fastStart,
     'nullAssertions': nullAssertions,
@@ -1316,6 +1362,7 @@ class DebuggingOptions {
       webHeaders: (json['webHeaders']! as Map<dynamic, dynamic>).cast<String, String>(),
       webLaunchUrl: json['webLaunchUrl'] as String?,
       webRenderer: WebRendererMode.values.byName(json['webRenderer']! as String),
+      webUseWasm: json['webUseWasm']! as bool,
       vmserviceOutFile: json['vmserviceOutFile'] as String?,
       fastStart: json['fastStart']! as bool,
       nullAssertions: json['nullAssertions']! as bool,

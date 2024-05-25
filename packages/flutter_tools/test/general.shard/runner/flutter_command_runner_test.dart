@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -175,116 +176,134 @@ void main() {
         Analytics: () => fakeAnalytics,
       });
 
-    testUsingContext("Doesn't crash on invalid .packages file", () async {
-      final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-      fileSystem.file('pubspec.yaml').createSync();
-      fileSystem.file('.packages')
-        ..createSync()
-        ..writeAsStringSync('Not a valid package');
+      group('${FlutterGlobalOptions.kPrintDtd} flag', () {
+        testUsingContext('sets DevtoolsLauncher.printDtdUri to false when not present', () async {
+          final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+          await runner.run(<String>[]);
+          expect(DevtoolsLauncher.instance!.printDtdUri, false);
+        }, overrides: <Type, Generator>{
+          DevtoolsLauncher: () => FakeDevtoolsLauncher()..dtdUri = Uri(),
+        });
 
-      await runner.run(<String>['dummy']);
-
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-      Platform: () => platform,
-      OutputPreferences: () => OutputPreferences.test(),
-    });
-
-    group('getRepoPackages', () {
-      late String? oldFlutterRoot;
-
-      setUp(() {
-        oldFlutterRoot = Cache.flutterRoot;
-        Cache.flutterRoot = _kFlutterRoot;
-        fileSystem.directory(fileSystem.path.join(_kFlutterRoot, 'examples'))
-            .createSync(recursive: true);
-        fileSystem.directory(fileSystem.path.join(_kFlutterRoot, 'packages'))
-            .createSync(recursive: true);
-        fileSystem.directory(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool'))
-            .createSync(recursive: true);
-
-        fileSystem.file(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', 'pubspec.yaml'))
-            .createSync();
-        fileSystem.file(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool', 'pubspec.yaml'))
-            .createSync();
+        testUsingContext('sets DevtoolsLauncher.printDtdUri to true when present', () async {
+          final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+          await runner.run(<String>['--${FlutterGlobalOptions.kPrintDtd}']);
+          expect(DevtoolsLauncher.instance!.printDtdUri, true);
+        }, overrides: <Type, Generator>{
+          DevtoolsLauncher: () => FakeDevtoolsLauncher()..dtdUri = Uri(),
+        });
       });
 
-      tearDown(() {
-        Cache.flutterRoot = oldFlutterRoot;
-      });
-
-      testUsingContext('', () {
+      testUsingContext("Doesn't crash on invalid .packages file", () async {
         final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-        final List<String> packagePaths = runner.getRepoPackages()
-          .map((Directory d) => d.path).toList();
-        expect(packagePaths, <String>[
-          fileSystem.directory(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool')).path,
-          fileSystem.directory(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools')).path,
-        ]);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.packages')
+          ..createSync()
+          ..writeAsStringSync('Not a valid package');
+
+        await runner.run(<String>['dummy']);
+
       }, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Platform: () => platform,
-        FlutterVersion: () => FakeFlutterVersion(),
         OutputPreferences: () => OutputPreferences.test(),
       });
+
+      group('getRepoPackages', () {
+        late String? oldFlutterRoot;
+
+        setUp(() {
+          oldFlutterRoot = Cache.flutterRoot;
+          Cache.flutterRoot = _kFlutterRoot;
+          fileSystem.directory(fileSystem.path.join(_kFlutterRoot, 'examples'))
+              .createSync(recursive: true);
+          fileSystem.directory(fileSystem.path.join(_kFlutterRoot, 'packages'))
+              .createSync(recursive: true);
+          fileSystem.directory(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool'))
+              .createSync(recursive: true);
+
+          fileSystem.file(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', 'pubspec.yaml'))
+              .createSync();
+          fileSystem.file(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool', 'pubspec.yaml'))
+              .createSync();
+        });
+
+        tearDown(() {
+          Cache.flutterRoot = oldFlutterRoot;
+        });
+
+        testUsingContext('', () {
+          final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+          final List<String> packagePaths = runner.getRepoPackages()
+            .map((Directory d) => d.path).toList();
+          expect(packagePaths, <String>[
+            fileSystem.directory(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool')).path,
+            fileSystem.directory(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools')).path,
+          ]);
+        }, overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Platform: () => platform,
+          FlutterVersion: () => FakeFlutterVersion(),
+          OutputPreferences: () => OutputPreferences.test(),
+        });
+      });
+
+      group('wrapping', () {
+        testUsingContext('checks that output wrapping is turned on when writing to a terminal', () async {
+          final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+          final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
+          runner.addCommand(fakeCommand);
+          await runner.run(<String>['fake']);
+          expect(fakeCommand.preferences.wrapText, isTrue);
+        }, overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Stdio: () => FakeStdio(hasFakeTerminal: true),
+          OutputPreferences: () => OutputPreferences.test(),
+        }, initializeFlutterRoot: false);
+
+        testUsingContext('checks that output wrapping is turned off when not writing to a terminal', () async {
+          final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+          final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
+          runner.addCommand(fakeCommand);
+          await runner.run(<String>['fake']);
+          expect(fakeCommand.preferences.wrapText, isFalse);
+        }, overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Stdio: () => FakeStdio(hasFakeTerminal: false),
+          OutputPreferences: () => OutputPreferences.test(),
+        }, initializeFlutterRoot: false);
+
+        testUsingContext('checks that output wrapping is turned off when set on the command line and writing to a terminal', () async {
+          final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+          final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
+          runner.addCommand(fakeCommand);
+          await runner.run(<String>['--no-wrap', 'fake']);
+          expect(fakeCommand.preferences.wrapText, isFalse);
+        }, overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Stdio: () => FakeStdio(hasFakeTerminal: true),
+          OutputPreferences: () => OutputPreferences.test(),
+        }, initializeFlutterRoot: false);
+
+        testUsingContext('checks that output wrapping is turned on when set on the command line, but not writing to a terminal', () async {
+          final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+          final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
+          runner.addCommand(fakeCommand);
+          await runner.run(<String>['--wrap', 'fake']);
+          expect(fakeCommand.preferences.wrapText, isTrue);
+        }, overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          Stdio: () => FakeStdio(hasFakeTerminal: false),
+          OutputPreferences: () => OutputPreferences.test(),
+        }, initializeFlutterRoot: false);
+      });
     });
-
-    group('wrapping', () {
-      testUsingContext('checks that output wrapping is turned on when writing to a terminal', () async {
-        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-        final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
-        runner.addCommand(fakeCommand);
-        await runner.run(<String>['fake']);
-        expect(fakeCommand.preferences.wrapText, isTrue);
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Stdio: () => FakeStdio(hasFakeTerminal: true),
-        OutputPreferences: () => OutputPreferences.test(),
-      }, initializeFlutterRoot: false);
-
-      testUsingContext('checks that output wrapping is turned off when not writing to a terminal', () async {
-        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-        final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
-        runner.addCommand(fakeCommand);
-        await runner.run(<String>['fake']);
-        expect(fakeCommand.preferences.wrapText, isFalse);
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Stdio: () => FakeStdio(hasFakeTerminal: false),
-        OutputPreferences: () => OutputPreferences.test(),
-      }, initializeFlutterRoot: false);
-
-      testUsingContext('checks that output wrapping is turned off when set on the command line and writing to a terminal', () async {
-        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-        final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
-        runner.addCommand(fakeCommand);
-        await runner.run(<String>['--no-wrap', 'fake']);
-        expect(fakeCommand.preferences.wrapText, isFalse);
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Stdio: () => FakeStdio(hasFakeTerminal: true),
-        OutputPreferences: () => OutputPreferences.test(),
-      }, initializeFlutterRoot: false);
-
-      testUsingContext('checks that output wrapping is turned on when set on the command line, but not writing to a terminal', () async {
-        final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
-        final FakeFlutterCommand fakeCommand = FakeFlutterCommand();
-        runner.addCommand(fakeCommand);
-        await runner.run(<String>['--wrap', 'fake']);
-        expect(fakeCommand.preferences.wrapText, isTrue);
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Stdio: () => FakeStdio(hasFakeTerminal: false),
-        OutputPreferences: () => OutputPreferences.test(),
-      }, initializeFlutterRoot: false);
-    });
-  });
   });
 }
 

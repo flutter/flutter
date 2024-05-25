@@ -17,9 +17,9 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/html_utils.dart';
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/web/compile.dart';
+import 'package:flutter_tools/src/web_template.dart';
 import 'package:logging/logging.dart' as logging;
 import 'package:package_config/package_config.dart';
 import 'package:shelf/shelf.dart';
@@ -137,6 +137,7 @@ void main() {
             flutterRoot: null, // ignore: avoid_redundant_argument_values
             platform: FakePlatform(),
             webBuildDirectory: null, // ignore: avoid_redundant_argument_values
+            needsCoopCoep: false,
           );
         },
         overrides: <Type, Generator>{
@@ -344,6 +345,11 @@ void main() {
             final Directory webDir =
                 globals.fs.currentDirectory.childDirectory('web')..createSync();
             webDir.childFile('index.html').writeAsStringSync(htmlContent);
+            globals.fs.file(globals.fs.path.join(
+              globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+              'flutter.js',
+            ))..createSync(recursive: true)..writeAsStringSync('flutter.js content');
+
 
             final Response response = await webAssetServer.handleRequest(
                 Request('GET', Uri.parse('http://foobar/base/path/')));
@@ -360,6 +366,10 @@ void main() {
             final Directory webDir =
                 globals.fs.currentDirectory.childDirectory('web')..createSync();
             webDir.childFile('index.html').writeAsStringSync(htmlContent);
+            globals.fs.file(globals.fs.path.join(
+              globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+              'flutter.js',
+            ))..createSync(recursive: true)..writeAsStringSync('flutter.js content');
 
             final Response response = await webAssetServer
                 .handleRequest(Request('GET', Uri.parse('http://foobar/')));
@@ -530,6 +540,10 @@ void main() {
             final Directory webDir =
                 globals.fs.currentDirectory.childDirectory('web')..createSync();
             webDir.childFile('index.html').writeAsStringSync(htmlContent);
+            globals.fs.file(globals.fs.path.join(
+              globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+              'flutter.js',
+            ))..createSync(recursive: true)..writeAsStringSync('flutter.js content');
 
             final Response response = await webAssetServer.handleRequest(
                 Request('GET', Uri.parse('http://foobar/bar/baz')));
@@ -586,6 +600,11 @@ void main() {
   test(
       'serves default index.html',
       () => testbed.run(() async {
+            globals.fs.file(globals.fs.path.join(
+              globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
+              'flutter.js',
+            ))..createSync(recursive: true)..writeAsStringSync('flutter.js content');
+
             final Response response = await webAssetServer
                 .handleRequest(Request('GET', Uri.parse('http://foobar/')));
 
@@ -909,6 +928,7 @@ void main() {
               nullSafetyMode: NullSafetyMode.unsound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.html,
+              isWasm: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1045,6 +1065,7 @@ void main() {
               nullSafetyMode: NullSafetyMode.sound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.html,
+              isWasm: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1181,6 +1202,7 @@ void main() {
                 nullSafetyMode: NullSafetyMode.sound,
                 ddcModuleSystem: usesDdcModuleSystem,
                 webRenderer: WebRendererMode.canvaskit,
+                isWasm: false,
                 rootDirectory: globals.fs.currentDirectory,
               );
               webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1254,6 +1276,7 @@ void main() {
               nullSafetyMode: NullSafetyMode.sound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
+              isWasm: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1303,6 +1326,7 @@ void main() {
               nullSafetyMode: NullSafetyMode.sound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
+              isWasm: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1354,6 +1378,7 @@ void main() {
               nullSafetyMode: NullSafetyMode.sound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.auto,
+              isWasm: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1407,6 +1432,7 @@ void main() {
               nullSafetyMode: NullSafetyMode.unsound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
+              isWasm: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
@@ -1445,6 +1471,7 @@ void main() {
         const <String, String>{},
         NullSafetyMode.unsound,
         webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
         testMode: true);
 
     expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
@@ -1478,6 +1505,7 @@ void main() {
         },
         NullSafetyMode.unsound,
         webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
         testMode: true);
 
     expect(webAssetServer.defaultResponseHeaders[extraHeaderKey],
@@ -1578,6 +1606,7 @@ void main() {
               nullSafetyMode: NullSafetyMode.unsound,
               ddcModuleSystem: usesDdcModuleSystem,
               webRenderer: WebRendererMode.canvaskit,
+              isWasm: false,
               rootDirectory: globals.fs.currentDirectory,
             );
             webDevFS.ddcModuleLoaderJS.createSync(recursive: true);

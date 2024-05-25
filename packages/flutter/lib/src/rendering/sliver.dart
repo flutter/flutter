@@ -1390,7 +1390,7 @@ abstract class RenderSliver extends RenderObject {
   /// having been called in [hitTest] but cannot rely upon [paint] having been
   /// called. For example, a render object might be a child of a [RenderOpacity]
   /// object, which calls [hitTest] on its children when its opacity is zero
-  /// even through it does not [paint] its children.
+  /// even though it does not [paint] its children.
   ///
   /// ## Coordinates for RenderSliver objects
   ///

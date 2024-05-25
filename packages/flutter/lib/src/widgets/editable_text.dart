@@ -174,7 +174,8 @@ class _RenderCompositionCallback extends RenderProxyBox {
 /// [TextInputFormatter]s instead for as-you-type text modification.
 ///
 /// If both the [text] and [selection] properties need to be changed, set the
-/// controller's [value] instead.
+/// controller's [value] instead. Setting [text] will clear the selection
+/// and composing range.
 ///
 /// Remember to [dispose] of the [TextEditingController] when it is no longer
 /// needed. This will ensure we discard any resources used by the object.
@@ -243,7 +244,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// This property can be set from a listener added to this
   /// [TextEditingController]; **however, one should not also set [selection]
   /// in a separate statement. To change both the [text] and the [selection]
-  /// change the controller's [value].**
+  /// change the controller's [value].** Setting this here will clear
+  /// the current selection and composing range, so avoid using it directly
+  /// unless that is the desired behavior.
   set text(String newText) {
     value = value.copyWith(
       text: newText,
@@ -838,6 +841,7 @@ class EditableText extends StatefulWidget {
     this.onAppPrivateCommand,
     this.onSelectionChanged,
     this.onSelectionHandleTapped,
+    this.groupId = EditableText,
     this.onTapOutside,
     List<TextInputFormatter>? inputFormatters,
     this.mouseCursor,
@@ -1466,6 +1470,19 @@ class EditableText extends StatefulWidget {
 
   /// {@macro flutter.widgets.SelectionOverlay.onSelectionHandleTapped}
   final VoidCallback? onSelectionHandleTapped;
+
+  /// {@template flutter.widgets.editableText.groupId}
+  /// The group identifier for the [TextFieldTapRegion] of this text field.
+  ///
+  /// Text fields with the same group identifier share the same tap region.
+  /// Defaults to the type of [EditableText].
+  ///
+  /// See also:
+  ///
+  ///  * [TextFieldTapRegion], to give a [groupId] to a widget that is to be
+  ///    included in a [EditableText]'s tap region that has [groupId] set.
+  /// {@endtemplate}
+  final Object groupId;
 
   /// {@template flutter.widgets.editableText.onTapOutside}
   /// Called for each tap that occurs outside of the[TextFieldTapRegion] group
@@ -2783,7 +2800,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   /// Gets the line heights at the start and end of the selection for the given
   /// [EditableTextState].
-  _GlyphHeights _getGlyphHeights() {
+  ///
+  /// See also:
+  ///
+  /// * [TextSelectionToolbarAnchors.getSelectionRect], which depends on this
+  ///   information.
+  ({double startGlyphHeight, double endGlyphHeight}) getGlyphHeights() {
     final TextSelection selection = textEditingValue.selection;
 
     // Only calculate handle rects if the text in the previous frame
@@ -2797,9 +2819,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final String prevText = span.toPlainText();
     final String currText = textEditingValue.text;
     if (prevText != currText || !selection.isValid || selection.isCollapsed) {
-      return _GlyphHeights(
-        start: renderEditable.preferredLineHeight,
-        end: renderEditable.preferredLineHeight,
+      return (
+        startGlyphHeight: renderEditable.preferredLineHeight,
+        endGlyphHeight: renderEditable.preferredLineHeight,
       );
     }
 
@@ -2814,9 +2836,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       start: selection.end - lastSelectedGraphemeExtent,
       end: selection.end,
     ));
-    return _GlyphHeights(
-      start: startCharacterRect?.height ?? renderEditable.preferredLineHeight,
-      end: endCharacterRect?.height ?? renderEditable.preferredLineHeight,
+    return (
+      startGlyphHeight: startCharacterRect?.height ?? renderEditable.preferredLineHeight,
+      endGlyphHeight: endCharacterRect?.height ?? renderEditable.preferredLineHeight,
     );
   }
 
@@ -2835,14 +2857,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       );
     }
 
-    final _GlyphHeights glyphHeights = _getGlyphHeights();
+    final (startGlyphHeight: double startGlyphHeight, endGlyphHeight: double endGlyphHeight) = getGlyphHeights();
     final TextSelection selection = textEditingValue.selection;
     final List<TextSelectionPoint> points =
         renderEditable.getEndpointsForSelection(selection);
     return TextSelectionToolbarAnchors.fromSelection(
       renderBox: renderEditable,
-      startGlyphHeight: glyphHeights.start,
-      endGlyphHeight: glyphHeights.end,
+      startGlyphHeight: startGlyphHeight,
+      endGlyphHeight: endGlyphHeight,
       selectionEndpoints: points,
     );
   }
@@ -2979,6 +3001,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _startCursorBlink();
       } else if (!_tickersEnabled && _cursorTimer != null) {
         _stopCursorBlink();
+      }
+    }
+
+    // Check for changes in viewId.
+    if (_hasInputConnection) {
+      final int newViewId = View.of(context).viewId;
+      if (newViewId != _viewId) {
+        _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
       }
     }
 
@@ -4478,7 +4508,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     Rect? composingRect = renderEditable.getRectForComposingRange(composingRange);
     // Send the caret location instead if there's no marked text yet.
     if (composingRect == null) {
-      assert(!composingRange.isValid || composingRange.isCollapsed);
       final int offset = composingRange.isValid ? composingRange.start : 0;
       composingRect = renderEditable.getLocalRectForCaret(TextPosition(offset: offset));
     }
@@ -4727,6 +4756,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   String get autofillId => 'EditableText-$hashCode';
 
+  int? _viewId;
+
   @override
   TextInputConfiguration get textInputConfiguration {
     final List<String>? autofillHints = widget.autofillHints?.toList(growable: false);
@@ -4738,7 +4769,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         )
       : AutofillConfiguration.disabled;
 
+    _viewId = View.of(context).viewId;
     return TextInputConfiguration(
+      viewId: _viewId,
       inputType: widget.keyboardType,
       readOnly: widget.readOnly,
       obscureText: widget.obscureText,
@@ -5151,6 +5184,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       compositeCallback: _compositeCallback,
       enabled: _hasInputConnection,
       child: TextFieldTapRegion(
+        groupId: widget.groupId,
         onTapOutside: _hasFocus ? widget.onTapOutside ?? _defaultOnTapOutside : null,
         debugLabel: kReleaseMode ? null : 'EditableText',
         child: MouseRegion(
@@ -6009,21 +6043,6 @@ class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
 
   @override
   bool get isActionEnabled => state._value.selection.isValid && !state._value.selection.isCollapsed;
-}
-
-/// The start and end glyph heights of some range of text.
-@immutable
-class _GlyphHeights {
-  const _GlyphHeights({
-    required this.start,
-    required this.end,
-  });
-
-  /// The glyph height of the first line.
-  final double start;
-
-  /// The glyph height of the last line.
-  final double end;
 }
 
 /// A [ClipboardStatusNotifier] whose [value] is hardcoded to

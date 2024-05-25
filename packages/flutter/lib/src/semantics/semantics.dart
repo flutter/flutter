@@ -1839,7 +1839,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// [isMergedIntoParent].
   ///
   /// An invisible node can be safely dropped from the semantic tree without
-  /// loosing semantic information that is relevant for describing the content
+  /// losing semantic information that is relevant for describing the content
   /// currently shown on screen.
   bool get isInvisible => !isMergedIntoParent && rect.isEmpty;
 

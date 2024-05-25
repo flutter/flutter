@@ -23,7 +23,7 @@ class MainActivity : FragmentActivity() {
         root.layoutParams =
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
             )
         root.orientation = LinearLayout.VERTICAL
         root.weightSum = numberOfFlutters.toFloat()
@@ -36,7 +36,7 @@ class MainActivity : FragmentActivity() {
         val dartEntrypoint =
             DartExecutor.DartEntrypoint(
                 FlutterInjector.instance().flutterLoader().findAppBundlePath(),
-                "main",
+                "main"
             )
         val engines =
             generateSequence(0) { it + 1 }
@@ -51,7 +51,7 @@ class MainActivity : FragmentActivity() {
                 LinearLayout.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT,
                     FrameLayout.LayoutParams.MATCH_PARENT,
-                    1.0f,
+                    1.0f
                 )
             val engine = engines[i]
             FlutterEngineCache.getInstance().put(i.toString(), engine)
@@ -61,7 +61,7 @@ class MainActivity : FragmentActivity() {
                 .beginTransaction()
                 .add(
                     12345 + i,
-                    flutterFragment,
+                    flutterFragment
                 )
                 .commit()
         }

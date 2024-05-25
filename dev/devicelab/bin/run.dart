@@ -114,6 +114,7 @@ Future<void> main(List<String> rawArgs) async {
       deviceId: deviceId,
       resultsFile: resultsFile,
       taskName: taskNames.single,
+      onlyLocalEngine: (args['ab-local-engine-only'] as bool?) ?? false,
     );
   } else {
     await runTasks(taskNames,
@@ -142,6 +143,7 @@ Future<void> _runABTest({
   required String? deviceId,
   required String resultsFile,
   required String taskName,
+  bool onlyLocalEngine = false,
 }) async {
   print('$taskName A/B test. Will run $runsPerTest times.');
 
@@ -155,22 +157,26 @@ Future<void> _runABTest({
   for (int i = 1; i <= runsPerTest; i++) {
     section('Run #$i');
 
-    print('Running with the default engine (A)');
-    final TaskResult defaultEngineResult = await runTask(
-      taskName,
-      silent: silent,
-      deviceId: deviceId,
-    );
+    if (onlyLocalEngine) {
+      print('Skipping default engine (A)');
+    } else {
+      print('Running with the default engine (A)');
+      final TaskResult defaultEngineResult = await runTask(
+        taskName,
+        silent: silent,
+        deviceId: deviceId,
+      );
 
-    print('Default engine result:');
-    print(const JsonEncoder.withIndent('  ').convert(defaultEngineResult));
+      print('Default engine result:');
+      print(const JsonEncoder.withIndent('  ').convert(defaultEngineResult));
 
-    if (!defaultEngineResult.succeeded) {
-      stderr.writeln('Task failed on the default engine.');
-      exit(1);
+      if (!defaultEngineResult.succeeded) {
+        stderr.writeln('Task failed on the default engine.');
+        exit(1);
+      }
+
+      abTest.addAResult(defaultEngineResult);
     }
-
-    abTest.addAResult(defaultEngineResult);
 
     print('Running with the local engine (B)');
     final TaskResult localEngineResult = await runTask(
@@ -272,6 +278,11 @@ ArgParser createArgParser(List<String> taskNames) {
       help: 'The filename in which to place the json encoded results of an A/B test.\n'
             'The filename may contain a single # character to be replaced by a sequence\n'
             'number if the name already exists.',
+    )
+    ..addFlag(
+      'ab-local-engine-only',
+      help: 'When running the A/B aggregator, do not run benchmarks with the default engine (A), only the local engine (B).\n'
+            'Shows the averages and noise report for the local engine without comparison to anything else.',
     )
     ..addFlag(
       'exit',

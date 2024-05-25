@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
@@ -311,7 +312,9 @@ void main() {
       verifyTreeIsClean();
   });
 
-  testWidgets('Throws when the same controller is attached to multiple OverlayPortal', (WidgetTester tester) async {
+  testWidgets('Throws when the same controller is attached to multiple OverlayPortal',
+  experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+  (WidgetTester tester) async {
     final OverlayPortalController controller = OverlayPortalController(debugLabel: 'local controller');
     late final OverlayEntry entry;
     addTearDown(() { entry.remove(); entry.dispose(); });

@@ -186,6 +186,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         testFiles: testFiles.map((Uri uri) => uri.toFilePath()).toList(),
         buildInfo: debuggingOptions.buildInfo,
         webRenderer: debuggingOptions.webRenderer,
+        useWasm: debuggingOptions.webUseWasm,
       );
       testArgs
         ..add('--platform=chrome')
@@ -205,6 +206,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
             webMemoryFS: result,
             logger: globals.logger,
             fileSystem: globals.fs,
+            buildDirectory: globals.fs.directory(tempBuildDir),
             artifacts: globals.artifacts,
             processManager: globals.processManager,
             chromiumLauncher: ChromiumLauncher(
@@ -217,6 +219,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
             ),
             testTimeRecorder: testTimeRecorder,
             webRenderer: debuggingOptions.webRenderer,
+            useWasm: debuggingOptions.webUseWasm,
           );
         },
       );

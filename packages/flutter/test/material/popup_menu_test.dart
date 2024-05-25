@@ -9,9 +9,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import '../widgets/feedback_tester.dart';
 import '../widgets/semantics_tester.dart';
-import 'feedback_tester.dart';
 
 void main() {
   testWidgets('Navigator.push works within a PopupMenuButton', (WidgetTester tester) async {
@@ -924,6 +925,84 @@ void main() {
 
     final Offset buttonTopLeft = tester.getTopLeft(buttonFinder);
     expect(tester.getTopLeft(popupFinder), buttonTopLeft);
+  });
+
+  testWidgets('PopupMenu positioning inside nested Navigator when useRootNavigator',
+    (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Example')),
+          body: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute<dynamic>(
+                  builder: (BuildContext context) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(
+                        child: PopupMenuButton<int>(
+                          key: buttonKey,
+                          useRootNavigator: true,
+                          itemBuilder: (_) => <PopupMenuItem<int>>[
+                            const PopupMenuItem<int>(value: 1, child: Text('Item 1')),
+                            const PopupMenuItem<int>(value: 2, child: Text('Item 2')),
+                          ],
+                          child: const Text('Show Menu'),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonFinder = find.byKey(buttonKey);
+    final Finder popupFinder = find.bySemanticsLabel('Popup menu');
+    await tester.tap(buttonFinder);
+    await tester.pumpAndSettle();
+
+    final Offset buttonTopLeft = tester.getTopLeft(buttonFinder);
+    expect(tester.getTopLeft(popupFinder), buttonTopLeft);
+  });
+
+  testWidgets('Popup menu with RouteSettings', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    const RouteSettings popupRoute = RouteSettings(name: '/popup');
+    late RouteSettings currentRouteSetting;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorObservers: <NavigatorObserver>[
+          _ClosureNavigatorObserver(onDidChange: (Route<dynamic> newRoute) {
+            currentRouteSetting = newRoute.settings;
+          }),
+        ],
+        home: Scaffold(
+         body: PopupMenuButton<int>(
+          key: buttonKey,
+          routeSettings: popupRoute,
+          itemBuilder: (_) => <PopupMenuItem<int>>[
+            const PopupMenuItem<int>(value: 1, child: Text('Item 1')),
+            const PopupMenuItem<int>(value: 2, child: Text('Item 2')),
+          ],
+          child: const Text('Show Menu'),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonFinder = find.byKey(buttonKey);
+    await tester.tap(buttonFinder);
+    await tester.pumpAndSettle();
+
+    expect(currentRouteSetting, popupRoute);
   });
 
   testWidgets('PopupMenu positioning around display features', (WidgetTester tester) async {
@@ -2063,7 +2142,10 @@ void main() {
     expect(find.text('PopupMenuButton icon'), findsOneWidget);
   });
 
-  testWidgets('showMenu uses nested navigator by default', (WidgetTester tester) async {
+  testWidgets('showMenu uses nested navigator by default',
+    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
+    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
+    (WidgetTester tester) async {
     final MenuObserver rootObserver = MenuObserver();
     final MenuObserver nestedObserver = MenuObserver();
 
@@ -3704,11 +3786,11 @@ void main() {
 
     // Test popup menu item with a Text widget.
     expect(_labelStyle(tester, 'Item 0')!.fontSize, 16.0);
-    expect(_labelStyle(tester, 'Item 0')!.color, theme.textTheme.subtitle1!.color);
+    expect(_labelStyle(tester, 'Item 0')!.color, theme.textTheme.titleMedium!.color);
 
     // Test popup menu item with a ListTile widget.
     expect(_labelStyle(tester, 'Item 1')!.fontSize, 16.0);
-    expect(_labelStyle(tester, 'Item 1')!.color, theme.textTheme.subtitle1!.color);
+    expect(_labelStyle(tester, 'Item 1')!.color, theme.textTheme.titleMedium!.color);
 
     // Close the menu.
     await tester.tapAt(const Offset(20.0, 20.0));
@@ -3721,7 +3803,7 @@ void main() {
       fontStyle: FontStyle.italic,
     );
     theme = theme.copyWith(
-      textTheme: const TextTheme(subtitle1: customTextStyle),
+      textTheme: const TextTheme(titleMedium: customTextStyle),
     );
     await tester.pumpWidget(buildMenu());
 

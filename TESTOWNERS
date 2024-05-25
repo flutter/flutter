@@ -36,7 +36,7 @@
 /dev/devicelab/bin/tasks/cubic_bezier_perf_sksl_warmup__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/cull_opacity_perf__e2e_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/devtools_profile_start_test.dart @zanderso @flutter/tool
-/dev/devicelab/bin/tasks/engine_dependency_proxy_test.dart @godofredoc @flutter/engine
+/dev/devicelab/bin/tasks/engine_dependency_proxy_test.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/fast_scroll_heavy_gridview__memory.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_engine_group_performance.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery__back_button_memory.dart @zanderso @flutter/engine
@@ -184,6 +184,8 @@
 /dev/devicelab/bin/tasks/fullscreen_textfield_perf_ios__e2e_summary.dart @vashworth @flutter/engine
 /dev/devicelab/bin/tasks/hello_world_ios__compile.dart @jmagman @flutter/engine
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_ios__benchmark.dart @vashworth @flutter/tool
+# TODO(vashworth): Remove once https://github.com/flutter/flutter/issues/142305 is fixed.
+/dev/devicelab/bin/tasks/hot_mode_dev_cycle_ios__benchmark_no_dds.dart @vashworth @flutter/tool
 /dev/devicelab/bin/tasks/imagefiltered_transform_animation_perf_ios__timeline_summary.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/integration_test_test_ios.dart @jmagman @flutter/engine
 /dev/devicelab/bin/tasks/integration_ui_ios_driver.dart @vashworth @flutter/tool
@@ -197,8 +199,8 @@
 /dev/devicelab/bin/tasks/ios_platform_view_tests.dart @stuartmorgan @flutter/plugin
 /dev/devicelab/bin/tasks/large_image_changer_perf_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/microbenchmarks_ios.dart @vashworth @flutter/engine
-/dev/devicelab/bin/tasks/native_assets_android.dart @dacoharkes @flutter/android
-/dev/devicelab/bin/tasks/native_assets_ios.dart @dacoharkes @flutter/ios
+/dev/devicelab/bin/tasks/native_assets_android.dart @dcharkes @flutter/android
+/dev/devicelab/bin/tasks/native_assets_ios.dart @dcharkes @flutter/ios
 /dev/devicelab/bin/tasks/native_platform_view_ui_tests_ios.dart @hellohuanlin @flutter/ios
 /dev/devicelab/bin/tasks/new_gallery_ios__transition_perf.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/new_gallery_skia_ios__transition_perf.dart @zanderso @flutter/engine
@@ -207,6 +209,7 @@
 /dev/devicelab/bin/tasks/platform_channels_benchmarks_ios.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/platform_interaction_test_ios.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/platform_view_ios__start_up.dart @stuartmorgan @flutter/plugin
+/dev/devicelab/bin/tasks/platform_views_scroll_perf_ad_banners__timeline_summary.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/platform_views_scroll_perf_ios__timeline_summary.dart @hellohuanlin @flutter/engine
 /dev/devicelab/bin/tasks/platform_views_scroll_perf_non_intersecting_impeller_ios__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/post_backdrop_filter_perf_ios__timeline_summary.dart @hellohuanlin @flutter/engine
@@ -260,7 +263,7 @@
 /dev/devicelab/bin/tasks/module_host_with_custom_build_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/module_test.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/module_test_ios.dart @jmagman @flutter/tool
-/dev/devicelab/bin/tasks/native_assets_ios_simulator.dart @dacoharkes @flutter/ios
+/dev/devicelab/bin/tasks/native_assets_ios_simulator.dart @dcharkes @flutter/ios
 /dev/devicelab/bin/tasks/native_ui_tests_macos.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/platform_channel_sample_test_macos.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/platform_channel_sample_test_windows.dart @cbracken @flutter/desktop
@@ -283,7 +286,7 @@
 /dev/devicelab/bin/tasks/technical_debt__cost.dart @HansMuller @flutter/framework
 /dev/devicelab/bin/tasks/web_benchmarks_canvaskit.dart @yjbanov @flutter/web
 /dev/devicelab/bin/tasks/web_benchmarks_html.dart @yjbanov @flutter/web
-/dev/devicelab/bin/tasks/web_benchmarks_skwasm.dart @jacksongardner @flutter/web
+/dev/devicelab/bin/tasks/web_benchmarks_skwasm.dart @eyebrowsoffire @flutter/web
 /dev/devicelab/bin/tasks/windows_home_scroll_perf__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/windows_startup_test.dart @loic-sharma @flutter/desktop
 
@@ -313,24 +316,25 @@
 # https://github.com/flutter/flutter/issues/82068
 #
 # analyze @HansMuller @flutter/framework
-# build_tests @eliasyishak @flutter/tool
-# ci_yaml flutter roller @caseyhillers @flutter/infra
-# coverage @godofredoc @flutter/infra
+# build_tests @andrewkolos @flutter/tool
+# ci_yaml flutter roller @keyonghan @flutter/infra
+# coverage @goderbauer @flutter/infra
 # customer_testing @HansMuller @flutter/framework
 # docs @HansMuller @flutter/framework
-# flutter_packaging @godofredoc @flutter/infra
+# flutter_packaging @christopherfujino @flutter/infra
 # flutter_plugins @stuartmorgan @flutter/plugin
 # framework_tests @HansMuller @flutter/framework
 # fuchsia_precache @christopherfujino @flutter/tool
-# realm_checker @jacksongardner @flutter/tool
+# realm_checker @eyebrowsoffire @flutter/tool
 # skp_generator @Hixie
 # test_ownership @keyonghan
 # tool_host_cross_arch_tests @andrewkolos @flutter/tool
 # tool_integration_tests @christopherfujino @flutter/tool
 # tool_tests @andrewkolos @flutter/tool
-# verify_binaries_codesigned @xilaizhang @flutter/releases
+# verify_binaries_codesigned @cbracken @flutter/releases
 # web_canvaskit_tests @yjbanov @flutter/web
 # web_integration_tests @yjbanov @flutter/web
 # web_long_running_tests @yjbanov @flutter/web
 # web_tests @yjbanov @flutter/web
-# web_tool_tests @eliasyishak @flutter/tool
+# web_skwasm_tests @eyebrowsoffire @flutter/web
+# web_tool_tests @yjbanov @flutter/tool

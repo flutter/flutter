@@ -314,6 +314,7 @@ abstract class UnpackIOS extends Target {
       '--delete',
       '--filter',
       '- .DS_Store/',
+      '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
       basePath,
       environment.outputDir.path,
     ]);
@@ -503,6 +504,7 @@ abstract class IosAssetBundle extends Target {
       environment,
       assetDirectory,
       targetPlatform: TargetPlatform.ios,
+      buildMode: buildMode,
       additionalInputs: <File>[
         flutterProject.ios.infoPlist,
         flutterProject.ios.appFrameworkInfoPlist,

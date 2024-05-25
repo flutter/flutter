@@ -14,6 +14,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   _TestSliverPersistentHeaderDelegate({
@@ -1259,12 +1260,10 @@ void main() {
       }
 
       final RenderBox renderBox = renderObject as RenderBox;
-      switch (axis) {
-        case Axis.horizontal:
-          return renderBox.size.width;
-        case Axis.vertical:
-          return renderBox.size.height;
-      }
+      return switch (axis) {
+        Axis.horizontal => renderBox.size.width,
+        Axis.vertical   => renderBox.size.height,
+      };
     }
 
     group('animated: $animated, scrollDirection: $axis', () {
@@ -2056,7 +2055,10 @@ void main() {
       expect(tester.getTopLeft(find.text('Item 9')).dy, 226.0);
     });
 
-    testWidgets('allows overscrolling on default platforms - vertical', (WidgetTester tester) async {
+    testWidgets('allows overscrolling on default platforms - vertical',
+    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
+    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
+    (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/10949
       // Scrollables should overscroll by default on iOS and macOS
       final  ScrollController controller = ScrollController();
@@ -2370,4 +2372,85 @@ void main() {
     );
     errors.clear();
   });
+
+  testWidgets('RenderViewport maxLayoutCycles depends on the number of children',
+      (WidgetTester tester) async {
+    Future<void> expectFlutterError({
+      required Widget widget,
+      required WidgetTester tester,
+    }) async {
+      final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
+      try {
+        await tester.pumpWidget(widget);
+      } finally {
+        FlutterError.onError = oldHandler;
+      }
+      expect(errors, isNotEmpty);
+      expect(errors.first.exception, isFlutterError);
+    }
+
+    Widget buildWidget({required int sliverCount, required int correctionsCount}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: List<Widget>.generate(
+              sliverCount,
+              (_) => _ScrollOffsetCorrectionSliver(correctionsCount: correctionsCount)),
+        ),
+      );
+    }
+
+    // 5 correction per child will pass.
+    await tester.pumpWidget(buildWidget(sliverCount: 30, correctionsCount: 5));
+
+    // 15 correction per child will throw exception.
+    await expectFlutterError(
+      widget: buildWidget(sliverCount: 1, correctionsCount: 15),
+      tester: tester,
+    );
+  });
+}
+
+// Simple sliver that applies N scroll offset corrections.
+class _RenderScrollOffsetCorrectionSliver extends RenderSliver {
+  int _correctionCount = 0;
+  @override
+  void performLayout() {
+    if (_correctionCount > 0) {
+      --_correctionCount;
+      geometry = const SliverGeometry(scrollOffsetCorrection: 1.0);
+      return;
+    }
+    const double extent = 5;
+    final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
+    final double cacheExtent = calculateCacheOffset(constraints, from: 0.0, to: extent);
+
+    geometry = SliverGeometry(
+      scrollExtent: extent,
+      paintExtent: paintedChildSize,
+      maxPaintExtent: extent,
+      cacheExtent: cacheExtent
+    );
+  }
+}
+
+class _ScrollOffsetCorrectionSliver extends SingleChildRenderObjectWidget {
+  const _ScrollOffsetCorrectionSliver({required this.correctionsCount});
+  final int correctionsCount;
+
+  @override
+  _RenderScrollOffsetCorrectionSliver createRenderObject(BuildContext context) {
+    final _RenderScrollOffsetCorrectionSliver sliver = _RenderScrollOffsetCorrectionSliver();
+    sliver._correctionCount = correctionsCount;
+    return sliver;
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderScrollOffsetCorrectionSliver renderObject) {
+    super.updateRenderObject(context, renderObject);
+    renderObject.markNeedsLayout();
+    renderObject._correctionCount = correctionsCount;
+  }
 }

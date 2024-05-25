@@ -10,6 +10,36 @@ import 'rendering_tester.dart';
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
+  test('StackParentData basic test', () {
+    final StackParentData parentData = StackParentData();
+    const Size stackSize = Size(800.0, 600.0);
+    expect(parentData.isPositioned, isFalse);
+
+    parentData.width = -100.0;
+    expect(parentData.isPositioned, isTrue);
+    expect(parentData.positionedChildConstraints(stackSize), const BoxConstraints.tightFor(width: 0.0));
+
+    parentData.width = 100.0;
+    expect(parentData.positionedChildConstraints(stackSize), const BoxConstraints.tightFor(width: 100.0));
+
+    parentData.left = 0.0;
+    parentData.right = 0.0;
+    expect(parentData.positionedChildConstraints(stackSize), const BoxConstraints.tightFor(width: 800.0));
+
+    parentData.height = -100.0;
+    expect(parentData.positionedChildConstraints(stackSize), const BoxConstraints.tightFor(width: 800.0, height: 0.0));
+
+    parentData.height = 100.0;
+    expect(parentData.positionedChildConstraints(stackSize), const BoxConstraints.tightFor(width: 800.0, height: 100.0));
+
+    parentData.top = 0.0;
+    parentData.bottom = 0.0;
+    expect(parentData.positionedChildConstraints(stackSize), const BoxConstraints.tightFor(width: 800.0, height: 600.0));
+
+    parentData.bottom = 1000.0;
+    expect(parentData.positionedChildConstraints(stackSize), const BoxConstraints.tightFor(width: 800.0, height: 0.0));
+  });
+
   test('Stack can layout with top, right, bottom, left 0.0', () {
     final RenderBox size = RenderConstrainedBox(
       additionalConstraints: BoxConstraints.tight(const Size(100.0, 100.0)),
@@ -119,6 +149,7 @@ void main() {
         visitedChildren.add(child);
       }
 
+      layout(stack);
       stack.visitChildrenForSemantics(visitor);
 
       expect(visitedChildren, hasLength(1));

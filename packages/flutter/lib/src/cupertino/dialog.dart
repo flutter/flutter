@@ -23,7 +23,7 @@ import 'theme.dart';
 // Apple Design Resources(https://developer.apple.com/design/resources/).
 // However the values are not exactly the same as native, so eyeballing is needed.
 const TextStyle _kCupertinoDialogTitleStyle = TextStyle(
-  fontFamily: 'CupertinoSystemDisplay',
+  fontFamily: 'CupertinoSystemText',
   inherit: false,
   fontSize: 17.0,
   fontWeight: FontWeight.w600,
@@ -309,8 +309,9 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
   }
 
   Widget _buildActions() {
-    Widget actionSection = Container(
-      height: 0.0,
+    Widget actionSection = const LimitedBox(
+      maxWidth: 0,
+      child: SizedBox(width: double.infinity, height: 0),
     );
     if (widget.actions.isNotEmpty) {
       actionSection = _CupertinoAlertActionSection(
@@ -348,22 +349,24 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
                   removeBottom: true,
                   context: context,
                   child: Center(
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(vertical: _kDialogEdgePadding),
-                      width: isInAccessibilityMode
-                          ? _kAccessibilityCupertinoDialogWidth
-                          : _kCupertinoDialogWidth,
-                      child: CupertinoPopupSurface(
-                        isSurfacePainted: false,
-                        child: Semantics(
-                          namesRoute: true,
-                          scopesRoute: true,
-                          explicitChildNodes: true,
-                          label: localizations.alertDialogLabel,
-                          child: _CupertinoDialogRenderWidget(
-                            contentSection: _buildContent(context),
-                            actionsSection: _buildActions(),
-                            dividerColor: CupertinoColors.separator,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: _kDialogEdgePadding),
+                      child: SizedBox(
+                        width: isInAccessibilityMode
+                            ? _kAccessibilityCupertinoDialogWidth
+                            : _kCupertinoDialogWidth,
+                        child: CupertinoPopupSurface(
+                          isSurfacePainted: false,
+                          child: Semantics(
+                            namesRoute: true,
+                            scopesRoute: true,
+                            explicitChildNodes: true,
+                            label: localizations.alertDialogLabel,
+                            child: _CupertinoDialogRenderWidget(
+                              contentSection: _buildContent(context),
+                              actionsSection: _buildActions(),
+                              dividerColor: CupertinoColors.separator,
+                            ),
                           ),
                         ),
                       ),
@@ -424,14 +427,18 @@ class CupertinoPopupSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget? contents = child;
+    if (isSurfacePainted) {
+      contents = ColoredBox(
+        color: CupertinoDynamicColor.resolve(_kDialogColor, context),
+        child: contents,
+      );
+    }
     return ClipRRect(
       borderRadius: const BorderRadius.all(Radius.circular(_kCornerRadius)),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
-        child: Container(
-          color: isSurfacePainted ? CupertinoDynamicColor.resolve(_kDialogColor, context) : null,
-          child: child,
-        ),
+        child: contents,
       ),
     );
   }
@@ -596,8 +603,9 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
   Widget _buildActions() {
     if (widget.actions == null || widget.actions!.isEmpty) {
-      return Container(
-        height: 0.0,
+      return const LimitedBox(
+        maxWidth: 0,
+        child: SizedBox(width: double.infinity, height: 0),
       );
     }
     return _CupertinoAlertActionSection(
@@ -639,14 +647,10 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
       ),
       if (widget.cancelButton != null) _buildCancelButton(),
     ];
-
-    final Orientation orientation = MediaQuery.orientationOf(context);
-    final double actionSheetWidth;
-    if (orientation == Orientation.portrait) {
-      actionSheetWidth = MediaQuery.sizeOf(context).width - (_kActionSheetEdgeHorizontalPadding * 2);
-    } else {
-      actionSheetWidth = MediaQuery.sizeOf(context).height - (_kActionSheetEdgeHorizontalPadding * 2);
-    }
+    final double actionSheetWidth = switch (MediaQuery.orientationOf(context)) {
+      Orientation.portrait  => MediaQuery.sizeOf(context).width,
+      Orientation.landscape => MediaQuery.sizeOf(context).height,
+    };
 
     return SafeArea(
       child: ScrollConfiguration(
@@ -659,16 +663,18 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
           label: 'Alert',
           child: CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.elevated,
-            child: Container(
-              width: actionSheetWidth,
-              margin: const EdgeInsets.symmetric(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
                 horizontal: _kActionSheetEdgeHorizontalPadding,
                 vertical: _kActionSheetEdgeVerticalPadding,
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: children,
+              child: SizedBox(
+                width: actionSheetWidth - _kActionSheetEdgeHorizontalPadding * 2,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: children,
+                ),
               ),
             ),
           ),
@@ -735,8 +741,7 @@ class CupertinoActionSheetAction extends StatelessWidget {
           ),
           child: Semantics(
             button: true,
-            child: Container(
-              alignment: Alignment.center,
+            child: Padding(
               padding: const EdgeInsets.symmetric(
                 vertical: 16.0,
                 horizontal: 10.0,
@@ -744,7 +749,7 @@ class CupertinoActionSheetAction extends StatelessWidget {
               child: DefaultTextStyle(
                 style: style,
                 textAlign: TextAlign.center,
-                child: child,
+                child: Center(child: child),
               ),
             ),
           ),
@@ -1178,11 +1183,11 @@ class _RenderCupertinoDialog extends RenderBox {
   // for buttons to just over 1 button's height to make room for the content
   // section.
   _AlertDialogSizes performRegularLayout({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
-    final bool hasDivider = contentSection!.getMaxIntrinsicHeight(computeMaxIntrinsicWidth(0)) > 0.0
-        && actionsSection!.getMaxIntrinsicHeight(computeMaxIntrinsicWidth(0)) > 0.0;
+    final bool hasDivider = contentSection!.getMaxIntrinsicHeight(getMaxIntrinsicWidth(0)) > 0.0
+        && actionsSection!.getMaxIntrinsicHeight(getMaxIntrinsicWidth(0)) > 0.0;
     final double dividerThickness = hasDivider ? _dividerThickness : 0.0;
 
-    final double minActionsHeight = actionsSection!.getMinIntrinsicHeight(computeMaxIntrinsicWidth(0));
+    final double minActionsHeight = actionsSection!.getMinIntrinsicHeight(getMaxIntrinsicWidth(0));
 
     final Size contentSize = layoutChild(
       contentSection!,
@@ -1485,22 +1490,15 @@ class _CupertinoAlertActionSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    final List<Widget> interactiveButtons = <Widget>[];
-    for (int i = 0; i < children.length; i += 1) {
-      interactiveButtons.add(
-        _PressableActionButton(
-          child: children[i],
-        ),
-      );
-    }
-
     return CupertinoScrollbar(
       controller: scrollController,
       child: SingleChildScrollView(
         controller: scrollController,
         child: _CupertinoDialogActionsRenderWidget(
-          actionButtons: interactiveButtons,
+          actionButtons: <Widget>[
+            for (final Widget child in children)
+              _PressableActionButton(child: child),
+          ],
           dividerThickness: _kDividerThickness,
           hasCancelButton: hasCancelButton,
           isActionSheet: isActionSheet,
@@ -1763,10 +1761,9 @@ class CupertinoDialogAction extends StatelessWidget {
           constraints: const BoxConstraints(
             minHeight: _kDialogMinButtonHeight,
           ),
-          child: Container(
-            alignment: Alignment.center,
+          child: Padding(
             padding: EdgeInsets.all(padding),
-            child: sizedContent,
+            child: Center(child: sizedContent),
           ),
         ),
       ),
@@ -2017,7 +2014,7 @@ class _RenderCupertinoDialogActions extends RenderBox
       return 0.0;
     } else if (isActionSheet) {
       if (childCount == 1) {
-        return firstChild!.computeMaxIntrinsicHeight(width) + dividerThickness;
+        return firstChild!.getMaxIntrinsicHeight(width) + dividerThickness;
       }
       if (hasCancelButton && childCount < 4) {
         return _computeMinIntrinsicHeightWithCancel(width);
@@ -2089,7 +2086,7 @@ class _RenderCupertinoDialogActions extends RenderBox
       return 0.0;
     } else if (isActionSheet) {
       if (childCount == 1) {
-        return firstChild!.computeMaxIntrinsicHeight(width) + dividerThickness;
+        return firstChild!.getMaxIntrinsicHeight(width) + dividerThickness;
       }
       return _computeMaxIntrinsicHeightStacked(width);
     } else if (childCount == 1) {
@@ -2243,7 +2240,7 @@ class _RenderCupertinoDialogActions extends RenderBox
 
       // Our height is the accumulated height of all buttons and dividers.
       return constraints.constrain(
-        Size(computeMaxIntrinsicWidth(0), verticalOffset),
+        Size(getMaxIntrinsicWidth(0), verticalOffset),
       );
     }
   }

@@ -103,7 +103,7 @@ class _TextButtonExampleState extends State<TextButtonExample> {
 
     // This gradient's appearance reflects the button's state.
     // Always return a gradient decoration so that AnimatedContainer
-    // can interpolorate in between. Used by TextButton #7.
+    // can interpolate in between. Used by TextButton #7.
     Decoration? statesToDecoration(Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
         return BoxDecoration(
@@ -358,13 +358,13 @@ class _TextButtonExampleState extends State<TextButtonExample> {
         },
         style: TextButton.styleFrom(
           overlayColor: Colors.transparent,
-          foregroundBuilder: (BuildContext context, Set<MaterialState> states, Widget? child) {
+          foregroundBuilder: (BuildContext context, Set<WidgetState> states, Widget? child) {
             late final ImageProvider image;
             if (currentAction != null) {
               image = runningImage;
-            } else if (states.contains(MaterialState.pressed)) {
+            } else if (states.contains(WidgetState.pressed)) {
               image = pressedImage;
-            } else if (states.contains(MaterialState.hovered)) {
+            } else if (states.contains(WidgetState.hovered)) {
               image = hoveredImage;
             } else {
               image = defaultImage;

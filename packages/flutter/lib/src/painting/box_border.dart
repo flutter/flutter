@@ -492,20 +492,12 @@ class Border extends BoxBorder {
   }
 
   Set<Color> _distinctVisibleColors() {
-    final Set<Color> distinctVisibleColors = <Color>{};
-    if (top.style != BorderStyle.none) {
-      distinctVisibleColors.add(top.color);
-    }
-    if (right.style != BorderStyle.none) {
-      distinctVisibleColors.add(right.color);
-    }
-    if (bottom.style != BorderStyle.none) {
-      distinctVisibleColors.add(bottom.color);
-    }
-    if (left.style != BorderStyle.none) {
-      distinctVisibleColors.add(left.color);
-    }
-    return distinctVisibleColors;
+    return <Color>{
+      if (top.style != BorderStyle.none) top.color,
+      if (right.style != BorderStyle.none) right.color,
+      if (bottom.style != BorderStyle.none) bottom.color,
+      if (left.style != BorderStyle.none) left.color,
+    };
   }
 
   // [BoxBorder.paintNonUniformBorder] is about 20% faster than [paintBorder],
@@ -840,21 +832,12 @@ class BorderDirectional extends BoxBorder {
   }
 
   Set<Color> _distinctVisibleColors() {
-    final Set<Color> distinctVisibleColors = <Color>{};
-    if (top.style != BorderStyle.none) {
-      distinctVisibleColors.add(top.color);
-    }
-    if (end.style != BorderStyle.none) {
-      distinctVisibleColors.add(end.color);
-    }
-    if (bottom.style != BorderStyle.none) {
-      distinctVisibleColors.add(bottom.color);
-    }
-    if (start.style != BorderStyle.none) {
-      distinctVisibleColors.add(start.color);
-    }
-
-    return distinctVisibleColors;
+    return <Color>{
+      if (top.style != BorderStyle.none) top.color,
+      if (end.style != BorderStyle.none) end.color,
+      if (bottom.style != BorderStyle.none) bottom.color,
+      if (start.style != BorderStyle.none) start.color,
+    };
   }
 
 

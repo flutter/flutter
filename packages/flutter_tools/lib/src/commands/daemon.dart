@@ -21,6 +21,7 @@ import '../convert.dart';
 import '../daemon.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
+import '../device_vm_service_discovery_for_attach.dart';
 import '../emulator.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
@@ -1008,6 +1009,9 @@ class DeviceDomain extends Domain {
     registerHandler('startDartDevelopmentService', startDartDevelopmentService);
     registerHandler('shutdownDartDevelopmentService', shutdownDartDevelopmentService);
     registerHandler('setExternalDevToolsUriForDartDevelopmentService', setExternalDevToolsUriForDartDevelopmentService);
+    registerHandler('getDiagnostics', getDiagnostics);
+    registerHandler('startVMServiceDiscoveryForAttach', startVMServiceDiscoveryForAttach);
+    registerHandler('stopVMServiceDiscoveryForAttach', stopVMServiceDiscoveryForAttach);
 
     // Use the device manager discovery so that client provided device types
     // are usable via the daemon protocol.
@@ -1059,12 +1063,23 @@ class DeviceDomain extends Domain {
   }
 
   /// Return a list of the current devices, discarding existing cache of devices.
-  Future<List<Map<String, Object?>>> discoverDevices([ Map<String, Object?>? args ]) async {
-    return <Map<String, Object?>>[
+  Future<List<Map<String, Object?>>> discoverDevices(Map<String, Object?> args) async {
+    final int? timeoutInMilliseconds = _getIntArg(args, 'timeoutInMilliseconds');
+    final Duration? timeout = timeoutInMilliseconds != null ? Duration(milliseconds: timeoutInMilliseconds) : null;
+
+    // Calling `discoverDevices()` and `_deviceToMap()` in parallel for better performance.
+    final List<List<Device>> devicesListList = await Future.wait(<Future<List<Device>>>[
       for (final PollingDeviceDiscovery discoverer in _discoverers)
-        for (final Device device in await discoverer.discoverDevices())
-          await _deviceToMap(device),
+        discoverer.discoverDevices(timeout: timeout),
+    ]);
+
+    final List<Device> devices = <Device>[
+      for (final List<Device> devicesList in devicesListList)
+        ...devicesList,
     ];
+    return Future.wait(<Future<Map<String, Object?>>>[
+      for (final Device device in devices) _deviceToMap(device),
+    ]);
   }
 
   /// Enable device events.
@@ -1298,6 +1313,56 @@ class DeviceDomain extends Domain {
     }
     return null;
   }
+
+  /// Gets a list of diagnostic messages pertaining to issues with any connected
+  /// devices.
+  Future<List<String>> getDiagnostics(Map<String, Object?> args) async {
+    // Call `getDiagnostics()` in parallel to improve performance.
+    final List<List<String>> diagnosticsLists = await Future.wait(<Future<List<String>>>[
+      for (final PollingDeviceDiscovery discoverer in _discoverers)
+        discoverer.getDiagnostics(),
+    ]);
+
+    return <String>[
+      for (final List<String> diagnostics in diagnosticsLists)
+        ...diagnostics,
+    ];
+  }
+
+  final Map<String, StreamSubscription<Uri>> _vmServiceDiscoverySubscriptions = <String, StreamSubscription<Uri>>{};
+
+  Future<String> startVMServiceDiscoveryForAttach(Map<String, Object?> args) async {
+    final String? deviceId = _getStringArg(args, 'deviceId', required: true);
+    final String? appId = _getStringArg(args, 'appId');
+    final String? fuchsiaModule = _getStringArg(args, 'fuchsiaModule');
+    final int? filterDevicePort = _getIntArg(args, 'filterDevicePort');
+    final bool? ipv6 = _getBoolArg(args, 'ipv6');
+
+    final Device? device = await daemon.deviceDomain._getDevice(deviceId);
+    if (device == null) {
+      throw DaemonException("device '$deviceId' not found");
+    }
+
+    final String id = '${_id++}';
+
+    final VMServiceDiscoveryForAttach discovery = device.getVMServiceDiscoveryForAttach(
+      appId: appId,
+      fuchsiaModule: fuchsiaModule,
+      filterDevicePort: filterDevicePort,
+      ipv6: ipv6 ?? false,
+      logger: globals.logger
+    );
+    _vmServiceDiscoverySubscriptions[id] = discovery.uris.listen(
+      (Uri uri) => sendEvent('device.VMServiceDiscoveryForAttach.$id', uri.toString()),
+    );
+
+    return id;
+  }
+
+  Future<void> stopVMServiceDiscoveryForAttach(Map<String, Object?> args) async {
+    final String? id = _getStringArg(args, 'id', required: true);
+    await _vmServiceDiscoverySubscriptions.remove(id)?.cancel();
+  }
 }
 
 class DevToolsDomain extends Domain {
@@ -1333,6 +1398,8 @@ Future<Map<String, Object?>> _deviceToMap(Device device) async {
     'ephemeral': device.ephemeral,
     'emulatorId': await device.emulatorId,
     'sdk': await device.sdkNameAndVersion,
+    'isConnected': device.isConnected,
+    'connectionInterface': getNameForDeviceConnectionInterface(device.connectionInterface),
     'capabilities': <String, Object>{
       'hotReload': device.supportsHotReload,
       'hotRestart': device.supportsHotRestart,
@@ -1362,16 +1429,12 @@ Map<String, Object?> _operationResultToMap(OperationResult result) {
 }
 
 Object? _toJsonable(Object? obj) {
-  if (obj is String || obj is int || obj is bool || obj is Map<Object?, Object?> || obj is List<Object?> || obj == null) {
-    return obj;
-  }
-  if (obj is OperationResult) {
-    return _operationResultToMap(obj);
-  }
-  if (obj is ToolExit) {
-    return obj.message;
-  }
-  return '$obj';
+  return switch (obj) {
+    String() || int() || bool() || Map<Object?, Object?>() || List<Object?>() || null => obj,
+    OperationResult() => _operationResultToMap(obj),
+    ToolExit() => obj.message,
+    _ => obj.toString(),
+  };
 }
 
 class NotifyingLogger extends DelegatingLogger {

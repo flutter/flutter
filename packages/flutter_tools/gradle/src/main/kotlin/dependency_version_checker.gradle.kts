@@ -104,18 +104,18 @@ class DependencyVersionChecker {
          * we treat it as within the range for the purpose of this check.
          */
         fun checkDependencyVersions(project: Project) {
-            var agpVersion: Version? = null
-            var kgpVersion: Version? = null
+            var agpVersion: Version?
+            var kgpVersion: Version?
 
             checkGradleVersion(getGradleVersion(project), project)
-            checkJavaVersion(getJavaVersion(project), project)
+            checkJavaVersion(getJavaVersion(), project)
             agpVersion = getAGPVersion(project)
             if (agpVersion != null) {
                 checkAGPVersion(agpVersion, project)
             } else {
                 project.logger.error(
                     "Warning: unable to detect project AGP version. Skipping " +
-                        "version checking. \nThis may be because you have applied AGP after the Flutter Gradle Plugin.",
+                        "version checking. \nThis may be because you have applied AGP after the Flutter Gradle Plugin."
                 )
             }
 
@@ -125,7 +125,7 @@ class DependencyVersionChecker {
             } else {
                 project.logger.error(
                     "Warning: unable to detect project KGP version. Skipping " +
-                        "version checking. \nThis may be because you have applied KGP after the Flutter Gradle Plugin.",
+                        "version checking. \nThis may be because you have applied KGP after the Flutter Gradle Plugin."
                 )
             }
         }
@@ -140,7 +140,7 @@ class DependencyVersionChecker {
         }
 
         // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api/-java-version/index.html#-1790786897%2FFunctions%2F-1793262594
-        fun getJavaVersion(project: Project): JavaVersion {
+        fun getJavaVersion(): JavaVersion {
             return JavaVersion.current()
         }
 
@@ -149,24 +149,25 @@ class DependencyVersionChecker {
         fun getAGPVersion(project: Project): Version? {
             val agpPluginName: String = "com.android.base"
             val agpVersionFieldName: String = "ANDROID_GRADLE_PLUGIN_VERSION"
-            var agpVersion: Version? = null
+            var agpVersion: Version?
             try {
                 agpVersion =
                     Version.fromString(
                         project.plugins.getPlugin(agpPluginName)::class.java.classLoader.loadClass(
-                            com.android.Version::class.java.name,
+                            com.android.Version::class.java.name
                         ).fields.find { it.name == agpVersionFieldName }!!
-                            .get(null) as String,
+                            .get(null) as String
                     )
             } catch (ignored: ClassNotFoundException) {
                 // Use deprecated Version class as it exists in older AGP (com.android.Version) does
                 // not exist in those versions.
+                @Suppress("deprecation")
                 agpVersion =
                     Version.fromString(
                         project.plugins.getPlugin(agpPluginName)::class.java.classLoader.loadClass(
-                            com.android.builder.model.Version::class.java.name,
+                            com.android.builder.model.Version::class.java.name
                         ).fields.find { it.name == agpVersionFieldName }!!
-                            .get(null) as String,
+                            .get(null) as String
                     )
             }
             return agpVersion
@@ -192,7 +193,7 @@ class DependencyVersionChecker {
             if (versionString == null) {
                 return null
             } else {
-                return Version.fromString(versionString!! as String)
+                return Version.fromString(versionString as String)
             }
         }
 
@@ -200,7 +201,7 @@ class DependencyVersionChecker {
             dependencyName: String,
             versionString: String,
             errorVersion: String,
-            potentialFix: String,
+            potentialFix: String
         ): String {
             return "Error: Your project's $dependencyName version ($versionString) is lower " +
                 "than Flutter's minimum supported version of $errorVersion. Please upgrade " +
@@ -213,7 +214,7 @@ class DependencyVersionChecker {
             dependencyName: String,
             versionString: String,
             warnVersion: String,
-            potentialFix: String,
+            potentialFix: String
         ): String {
             return "Warning: Flutter support for your project's $dependencyName version " +
                 "($versionString) will soon be dropped. Please upgrade your $dependencyName " +
@@ -224,7 +225,7 @@ class DependencyVersionChecker {
 
         fun checkGradleVersion(
             version: Version,
-            project: Project,
+            project: Project
         ) {
             if (version < errorGradleVersion) {
                 val errorMessage: String =
@@ -232,7 +233,7 @@ class DependencyVersionChecker {
                         GRADLE_NAME,
                         version.toString(),
                         errorGradleVersion.toString(),
-                        getPotentialGradleFix(project.getRootDir().getPath()),
+                        getPotentialGradleFix(project.getRootDir().getPath())
                     )
                 throw GradleException(errorMessage)
             } else if (version < warnGradleVersion) {
@@ -241,7 +242,7 @@ class DependencyVersionChecker {
                         GRADLE_NAME,
                         version.toString(),
                         warnGradleVersion.toString(),
-                        getPotentialGradleFix(project.getRootDir().getPath()),
+                        getPotentialGradleFix(project.getRootDir().getPath())
                     )
                 project.logger.error(warnMessage)
             }
@@ -249,7 +250,7 @@ class DependencyVersionChecker {
 
         fun checkJavaVersion(
             version: JavaVersion,
-            project: Project,
+            project: Project
         ) {
             if (version < errorJavaVersion) {
                 val errorMessage: String =
@@ -257,7 +258,7 @@ class DependencyVersionChecker {
                         JAVA_NAME,
                         version.toString(),
                         errorJavaVersion.toString(),
-                        POTENTIAL_JAVA_FIX,
+                        POTENTIAL_JAVA_FIX
                     )
                 throw GradleException(errorMessage)
             } else if (version < warnJavaVersion) {
@@ -266,7 +267,7 @@ class DependencyVersionChecker {
                         JAVA_NAME,
                         version.toString(),
                         warnJavaVersion.toString(),
-                        POTENTIAL_JAVA_FIX,
+                        POTENTIAL_JAVA_FIX
                     )
                 project.logger.error(warnMessage)
             }
@@ -274,7 +275,7 @@ class DependencyVersionChecker {
 
         fun checkAGPVersion(
             version: Version,
-            project: Project,
+            project: Project
         ) {
             if (version < errorAGPVersion) {
                 val errorMessage: String =
@@ -282,7 +283,7 @@ class DependencyVersionChecker {
                         AGP_NAME,
                         version.toString(),
                         errorAGPVersion.toString(),
-                        getPotentialAGPFix(project.getRootDir().getPath()),
+                        getPotentialAGPFix(project.getRootDir().getPath())
                     )
                 throw GradleException(errorMessage)
             } else if (version < warnAGPVersion) {
@@ -291,7 +292,7 @@ class DependencyVersionChecker {
                         AGP_NAME,
                         version.toString(),
                         warnAGPVersion.toString(),
-                        getPotentialAGPFix(project.getRootDir().getPath()),
+                        getPotentialAGPFix(project.getRootDir().getPath())
                     )
                 project.logger.error(warnMessage)
             }
@@ -299,7 +300,7 @@ class DependencyVersionChecker {
 
         fun checkKGPVersion(
             version: Version,
-            project: Project,
+            project: Project
         ) {
             if (version < errorKGPVersion) {
                 val errorMessage: String =
@@ -307,7 +308,7 @@ class DependencyVersionChecker {
                         KGP_NAME,
                         version.toString(),
                         errorKGPVersion.toString(),
-                        getPotentialKGPFix(project.getRootDir().getPath()),
+                        getPotentialKGPFix(project.getRootDir().getPath())
                     )
                 throw GradleException(errorMessage)
             } else if (version < warnKGPVersion) {
@@ -316,7 +317,7 @@ class DependencyVersionChecker {
                         KGP_NAME,
                         version.toString(),
                         warnKGPVersion.toString(),
-                        getPotentialKGPFix(project.getRootDir().getPath()),
+                        getPotentialKGPFix(project.getRootDir().getPath())
                     )
                 project.logger.error(warnMessage)
             }
@@ -336,20 +337,20 @@ class Version(val major: Int, val minor: Int, val patch: Int) : Comparable<Versi
             return Version(
                 major = convertedToNumbers.getOrElse(0, { 0 }),
                 minor = convertedToNumbers.getOrElse(1, { 0 }),
-                patch = convertedToNumbers.getOrElse(2, { 0 }),
+                patch = convertedToNumbers.getOrElse(2, { 0 })
             )
         }
     }
 
-    override fun compareTo(otherVersion: Version): Int {
-        if (major != otherVersion.major) {
-            return major - otherVersion.major
+    override fun compareTo(other: Version): Int {
+        if (major != other.major) {
+            return major - other.major
         }
-        if (minor != otherVersion.minor) {
-            return minor - otherVersion.minor
+        if (minor != other.minor) {
+            return minor - other.minor
         }
-        if (patch != otherVersion.patch) {
-            return patch - otherVersion.patch
+        if (patch != other.patch) {
+            return patch - other.patch
         }
         return 0
     }
