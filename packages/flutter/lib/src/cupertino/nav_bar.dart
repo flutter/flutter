@@ -33,7 +33,7 @@ const double _kNavBarShowLargeTitleThreshold = 10.0;
 
 /// Number of logical pixels scrolled during which the navigation bar's background
 /// fades in or out.
-const _kNavBarScrollUnderAnimationExtent = 10.0;
+const double _kNavBarScrollUnderAnimationExtent = 10.0;
 
 const double _kNavBarEdgePadding = 16.0;
 
@@ -478,7 +478,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
   void _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification && notification.depth == 0) {
       final ScrollMetrics metrics = notification.metrics;
-      final oldScrollAnimationValue = _scrollAnimationValue;
+      final double oldScrollAnimationValue = _scrollAnimationValue;
       double scrollExtent = 0.0;
       switch (metrics.axisDirection) {
         case AxisDirection.up:
@@ -515,10 +515,16 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
     final Color backgroundColor =
       CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ?? CupertinoTheme.of(context).barBackgroundColor;
 
-    final Border? initialBorder = widget.initiallyTransparent ? const Border(bottom: BorderSide(width: 0.0, color: Color(0x00000000))) : widget.border;
+    final Color? parentPageScaffoldBackgroundColor = CupertinoPageScaffoldBackgroundColor.maybeOf(context);
+
+    final Border? initialBorder = widget.initiallyTransparent && parentPageScaffoldBackgroundColor != null
+      ? const Border(bottom: BorderSide(width: 0.0, color: Color(0x00000000)))
+      : widget.border;
     final Border? effectiveBorder = widget.border == null ? null : Border.lerp(initialBorder, widget.border, _scrollAnimationValue,);
 
-    final Color initialBackgroundColor = widget.initiallyTransparent ? (CupertinoPageScaffoldBackgroundColor.maybeOf(context) ?? backgroundColor) : backgroundColor;
+    final Color initialBackgroundColor = widget.initiallyTransparent
+      ? parentPageScaffoldBackgroundColor ?? backgroundColor
+      : backgroundColor;
     final Color effectiveBackgroundColor = Color.lerp(initialBackgroundColor, backgroundColor, _scrollAnimationValue)!;
 
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
