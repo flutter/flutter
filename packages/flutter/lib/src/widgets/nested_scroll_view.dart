@@ -733,7 +733,6 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     );
   }
 
-
   ScrollActivity createOuterBallisticScrollActivity(double velocity) {
     // This function creates a ballistic scroll for the outer scrollable.
     //
@@ -1413,7 +1412,6 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
       mode: _NestedBallisticScrollActivityMode.independent,
     ));
   }
-
 
   ScrollActivity createBallisticScrollActivity(
     Simulation? simulation, {
