@@ -560,7 +560,7 @@ abstract class _AnimatedScrollView extends StatefulWidget {
   ///
   /// Separators are only built when they're scrolled into view.
   ///
-  /// The [AnimatedRemovedSeparatorBuilder] index parameter indicates the
+  /// The [AnimatedItemBuilder] index parameter indicates the
   /// separator's corresponding item's position in the scroll view. The value
   /// of the index parameter will be between 0 and [initialItemCount] plus the
   /// total number of items that have been inserted with [AnimatedListState.insertItem]
@@ -792,7 +792,7 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   }
 
   // Helper method to create an [AnimatedRemovedItemBuilder]
-  // from an [AnimatedRemovedSeparatorBuilder] for given [index].
+  // from an [AnimatedItemBuilder] for given [index].
   AnimatedRemovedItemBuilder _toRemovedItemBuilder(AnimatedItemBuilder builder, int index) {
     return (BuildContext context, Animation<double> animation) {
       return builder(context, index, animation);
