@@ -174,11 +174,11 @@ void testWidgets(
         test_package.addTearDown(binding.postTest);
         return binding.runTest(
           () async {
-            binding.reset(); // TODO(ianh): the binding should just do this itself in _runTest
             debugResetSemanticsIdCounter();
             Object? memento;
             try {
               memento = await variant.setUp(value);
+              binding.reset(); // TODO(ianh): the binding should just do this itself in _runTest
               maybeSetupLeakTrackingForTest(experimentalLeakTesting, combinedDescription);
               await callback(tester);
             } finally {

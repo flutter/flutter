@@ -902,22 +902,15 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           index: index,
           color: widget.items[index].backgroundColor!,
           vsync: this,
-        )..controller.addStatusListener(
-          (AnimationStatus status) {
-            switch (status) {
-              case AnimationStatus.completed:
-                setState(() {
-                  final _Circle circle = _circles.removeFirst();
-                  _backgroundColor = circle.color;
-                  circle.dispose();
-                });
-              case AnimationStatus.dismissed:
-              case AnimationStatus.forward:
-              case AnimationStatus.reverse:
-                break;
-            }
-          },
-        ),
+        )..controller.addStatusListener((AnimationStatus status) {
+          if (status.isCompleted) {
+            setState(() {
+              final _Circle circle = _circles.removeFirst();
+              _backgroundColor = circle.color;
+              circle.dispose();
+            });
+          }
+        }),
       );
     }
   }

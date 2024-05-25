@@ -112,7 +112,7 @@ class _SplashPageState extends State<SplashPage>
         return true;
       },
       child: SplashPageAnimation(
-        isFinished: _controller.status == AnimationStatus.dismissed,
+        isFinished: _controller.isDismissed,
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             final Animation<RelativeRect> animation = _getPanelAnimation(context, constraints);
@@ -122,9 +122,7 @@ class _SplashPageState extends State<SplashPage>
                 cursor: SystemMouseCursors.click,
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    _controller.reverse();
-                  },
+                  onTap: _controller.reverse,
                   onVerticalDragEnd: (DragEndDetails details) {
                     if (details.velocity.pixelsPerSecond.dy < -200) {
                       _controller.reverse();
@@ -168,9 +166,7 @@ class _SplashPageState extends State<SplashPage>
                   _SplashBackLayer(
                     isSplashCollapsed: !_isSplashVisible,
                     effect: _effect,
-                    onTap: () {
-                      _controller.forward();
-                    },
+                    onTap: _controller.forward,
                   ),
                   PositionedTransition(
                     rect: animation,
