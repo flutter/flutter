@@ -3265,9 +3265,17 @@ void main() {
         ),
       ),
     ));
-    // await tester.pump();
     await tester.tap(find.byIcon(Icons.search)); // Open search view.
+    await tester.pumpAndSettle();
+
+    // Simulate the keyboard opening resizing the view.
+    tester.view.viewInsets = const FakeViewPadding(bottom: 500.0);
+    addTearDown(tester.view.reset);
+
+    // Show the keyboard.
+    await tester.showKeyboard(find.byType(TextField));
     await tester.pumpAndSettle(apiCallDuration);
+
     expect(find.text('Item - 1'), findsOneWidget);
   });
 }
