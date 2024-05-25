@@ -2029,7 +2029,7 @@ class CupertinoTimerPicker extends StatefulWidget {
   /// Defaults to a value that matches the default iOS timer picker wheel.
   final double itemExtent;
 
-  /// A function that returns a widget that overlaid on the picker
+  /// A function that returns a widget that is overlaid on the picker
   /// to highlight the currently selected entry.
   ///
   /// If unspecified, it defaults to a [CupertinoPickerDefaultSelectionOverlay]
