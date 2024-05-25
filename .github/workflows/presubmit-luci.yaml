@@ -13,7 +13,14 @@ permissions: read-all
 jobs:
   foo:
     name: foo-job
+    if: ${{ github.repository == 'flutter/flutter' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Bar Step
-        run: echo 'Hello, world!' ; false
+      - name: Checkout Flutter Repo
+        # TODO does this need to be pinned?
+        uses: actions/checkout@v4
+      - name: Schedule Presubmits
+        run: |
+          cd dev/bots
+          ../../bin/dart pub get
+          ../../bin/dart schedule_presubmits.dart

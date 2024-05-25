@@ -7,6 +7,7 @@ environment:
 dependencies:
   analyzer: 6.5.0
   args: 2.5.0
+  buildbucket: 1.0.12
   crypto: 3.0.3
   intl: 0.19.0
   file: 7.0.0
