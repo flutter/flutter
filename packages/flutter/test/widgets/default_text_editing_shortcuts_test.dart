@@ -696,7 +696,8 @@ void main() {
       expect(controller.selection.end, 6);
     },
       variant: TargetPlatformVariant.only(TargetPlatform.linux),
-      skip: kIsWeb); // [intended] Non-web test.
+      skip: kIsWeb, // [intended] Non-web test.
+    );
 
     testWidgets('do not update the editable text content when triggered on web', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
@@ -733,7 +734,8 @@ void main() {
       expect(controller.selection.end, 7);
     },
       variant: TargetPlatformVariant.only(TargetPlatform.linux),
-      skip: !kIsWeb); // [intended] Web only.
+      skip: !kIsWeb, // [intended] Web only.
+    );
   });
 }
 
