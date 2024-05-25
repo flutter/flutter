@@ -438,8 +438,8 @@ class CupertinoDatePicker extends StatefulWidget {
   ///   initialDateTime: DateTime(2018, 9, 15),
   ///   selectionOverlayBuilder: (
   ///     BuildContext context,
-  ///     int index,
-  ///     int totalCount,
+  ///     required int index,
+  ///     required int totalCount,
   ///   ) {
   ///     if (index == 0) {
   ///       return const CupertinoPickerDefaultSelectionOverlay(
@@ -2047,8 +2047,8 @@ class CupertinoTimerPicker extends StatefulWidget {
   ///   onTimerDurationChanged: (Duration newDateTime) {},
   ///   selectionOverlayBuilder: (
   ///     BuildContext context,
-  ///     int index,
-  ///     int totalCount,
+  ///     required int index,
+  ///     required int totalCount,
   ///   ) {
   ///     if (index == 0) {
   ///       return const CupertinoPickerDefaultSelectionOverlay(
