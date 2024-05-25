@@ -688,6 +688,8 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
       final int itemIndex = _computeItemIndex(index);
       _sliverAnimatedMultiBoxKey.currentState!.insertItem(itemIndex, duration: duration);
       if (_itemsCount > 1) {
+        // Because `insertItem` moves the items after the index, we need to insert the separator
+        // at the same index as the item. If there is only one item, we don't need to insert a separator.
         _sliverAnimatedMultiBoxKey.currentState!.insertItem(itemIndex, duration: duration);
       }
     }
