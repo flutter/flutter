@@ -940,6 +940,7 @@ void main() {
                     width: 0.0,
                   ),
                 ),
+                initiallyTransparent: false,
               ),
             ],
           ),
