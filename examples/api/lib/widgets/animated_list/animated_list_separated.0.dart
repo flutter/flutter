@@ -81,13 +81,15 @@ class _AnimatedListSeparatedSampleState extends State<AnimatedListSeparatedSampl
   ///
   /// The item parameter is null, because the corresponding item will
   /// have been removed from the list model by the time this builder is called.
-  Widget _buildRemovedSeparator(BuildContext context, int index, Animation<double> animation) => SizeTransition(
+  Widget _buildRemovedSeparator(BuildContext context, int index, Animation<double> animation) {
+    return SizeTransition(
                 sizeFactor: animation,
                 child: ItemSeparator(
                   animation: animation,
                   item: null,
                 )
               );
+  }
 
   // Insert the "next item" into the list model.
   void _insert() {
