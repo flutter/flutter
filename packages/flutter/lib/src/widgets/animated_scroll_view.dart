@@ -732,15 +732,19 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   void removeItem(int index, AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
     final AnimatedRemovedSeparatorBuilder? removedSeparatorBuilder = widget.removedSeparatorBuilder;
     if (removedSeparatorBuilder == null) {
+      // There are no separators. Remove only the item.
       _sliverAnimatedMultiBoxKey.currentState!.removeItem(index, builder, duration: duration);
     } else {
       final int itemIndex = _computeItemIndex(index);
+      // Remove the item
       _sliverAnimatedMultiBoxKey.currentState!.removeItem(itemIndex, builder, duration: duration);
       if (_itemsCount > 1) {
         if (itemIndex == _itemsCount - 1) {
-          // Removing from the end of the list, so the separator to remove is the one at `last index` - 1.
+          // The item was removed from the end of the list, so the separator to remove is the one at `last index` - 1.
           _sliverAnimatedMultiBoxKey.currentState!.removeItem(itemIndex - 1, _toRemovedItemBuilder(removedSeparatorBuilder, index - 1), duration: duration);
         } else {
+          // The item was removed from the middle or beginning of the list,
+          // so the corresponding separator took its place and needs to be removed at `itemIndex`.
           _sliverAnimatedMultiBoxKey.currentState!.removeItem(itemIndex, _toRemovedItemBuilder(removedSeparatorBuilder, index), duration: duration);
         }
       }
