@@ -580,7 +580,7 @@ class _IndicatorPainter extends CustomPainter {
     // If the tab animation is completed, there is no need to stretch the indicator
     // This only works for the tab change animation via tab index, not when
     // dragging a [TabBarView], but it's still ok, to avoid unnecessary calculations.
-    if (controller.animation!.status == AnimationStatus.completed) {
+    if (controller.animation!.isCompleted) {
       return rect;
     }
 
