@@ -2128,13 +2128,13 @@ void main() {
         home: Center(
           child: CupertinoDatePicker(
             mode: CupertinoDatePickerMode.monthYear,
-            onDateTimeChanged: (_) {},
+            onDateTimeChanged: (DateTime date) {},
             initialDateTime: DateTime(2018, 9, 15),
             selectionOverlayBuilder: (
-              BuildContext context,
-              int index,
-              int totalCount,
-            ) {
+              BuildContext context, {
+              required int selectedIndex,
+              required int columnCount,
+            }) {
               return selectionOverlay;
             },
           ),
@@ -2142,7 +2142,7 @@ void main() {
       ),
     );
 
-    // find the selection overlay
+    // Find the selection overlay.
     expect(find.byWidget(selectionOverlay), findsExactly(2));
   });
 
@@ -2159,13 +2159,13 @@ void main() {
         home: Center(
           child: CupertinoDatePicker(
             mode: CupertinoDatePickerMode.date,
-            onDateTimeChanged: (_) {},
+            onDateTimeChanged: (DateTime date) {},
             initialDateTime: DateTime(2018, 9, 15),
             selectionOverlayBuilder: (
-              BuildContext context,
-              int index,
-              int totalCount,
-            ) {
+              BuildContext context, {
+              required int selectedIndex,
+              required int columnCount,
+            }) {
               return selectionOverlay;
             },
           ),
@@ -2173,7 +2173,7 @@ void main() {
       ),
     );
 
-    // find the selection overlay
+    // Find the selection overlay.
     expect(find.byWidget(selectionOverlay), findsExactly(3));
   });
 
@@ -2191,13 +2191,13 @@ void main() {
         home: Center(
           child: CupertinoDatePicker(
             mode: CupertinoDatePickerMode.time,
-            onDateTimeChanged: (_) {},
+            onDateTimeChanged: (DateTime date) {},
             initialDateTime: DateTime(2018, 9, 15),
             selectionOverlayBuilder: (
-              BuildContext context,
-              int index,
-              int totalCount,
-            ) {
+              BuildContext context, {
+              required int selectedIndex,
+              required int columnCount,
+            }) {
               return selectionOverlay;
             },
           ),
@@ -2205,10 +2205,8 @@ void main() {
       ),
     );
 
-    // find the selection overlay
+    // Find the selection overlay.
     expect(find.byWidget(selectionOverlay), findsExactly(3));
-
-
   });
 
   testWidgets('CupertinoDatePicker selectionOverlayBuilder with dateAndTime mode',
@@ -2223,13 +2221,13 @@ void main() {
       CupertinoApp(
         home: Center(
           child: CupertinoDatePicker(
-            onDateTimeChanged: (_) {},
+            onDateTimeChanged: (DateTime date) {},
             initialDateTime: DateTime(2018, 9, 15),
             selectionOverlayBuilder: (
-              BuildContext context,
-              int index,
-              int totalCount,
-            ) {
+              BuildContext context, {
+              required int selectedIndex,
+              required int columnCount,
+            }) {
               return selectionOverlay;
             },
           ),
@@ -2237,7 +2235,7 @@ void main() {
       ),
     );
 
-    // find the selection overlay
+    // Find the selection overlay.
     expect(find.byWidget(selectionOverlay), findsExactly(4));
   });
 
@@ -2253,13 +2251,13 @@ void main() {
       CupertinoApp(
         home: Center(
           child: CupertinoTimerPicker(
-            onTimerDurationChanged: (_) {},
+            onTimerDurationChanged: (Duration duration) {},
             initialTimerDuration: const Duration(hours: 1, minutes: 1, seconds: 1),
             selectionOverlayBuilder: (
-              BuildContext context,
-              int index,
-              int totalCount,
-            ) {
+              BuildContext context, {
+              required int selectedIndex,
+              required int columnCount,
+            }) {
               return selectionOverlay;
             },
           ),
@@ -2267,7 +2265,7 @@ void main() {
       ),
     );
 
-    // find the selection overlay
+    // Find the selection overlay.
     expect(find.byWidget(selectionOverlay), findsExactly(3));
   });
 
@@ -2283,14 +2281,14 @@ void main() {
       CupertinoApp(
         home: Center(
           child: CupertinoTimerPicker(
-            onTimerDurationChanged: (_) {},
+            onTimerDurationChanged: (Duration duration) {},
             mode: CupertinoTimerPickerMode.ms,
             initialTimerDuration: const Duration(hours: 1, minutes: 1, seconds: 1),
             selectionOverlayBuilder: (
-              BuildContext context,
-              int index,
-              int totalCount,
-            ) {
+              BuildContext context, {
+              required int selectedIndex,
+              required int columnCount,
+            }) {
               return selectionOverlay;
             },
           ),
@@ -2298,7 +2296,7 @@ void main() {
       ),
     );
 
-    // find the selection overlay
+    // Find the selection overlay.
     expect(find.byWidget(selectionOverlay), findsExactly(2));
   });
 
@@ -2314,14 +2312,14 @@ void main() {
       CupertinoApp(
         home: Center(
           child: CupertinoTimerPicker(
-            onTimerDurationChanged: (_) {},
+            onTimerDurationChanged: (Duration duration) {},
             mode: CupertinoTimerPickerMode.hm,
             initialTimerDuration: const Duration(hours: 1, minutes: 1, seconds: 1),
             selectionOverlayBuilder: (
-              BuildContext context,
-              int index,
-              int totalCount,
-            ) {
+              BuildContext context, {
+              required int selectedIndex,
+              required int columnCount,
+            }) {
               return selectionOverlay;
             },
           ),
@@ -2329,7 +2327,7 @@ void main() {
       ),
     );
 
-    // find the selection overlay
+    // Find the selection overlay.
     expect(find.byWidget(selectionOverlay), findsExactly(2));
   });
 
@@ -2340,13 +2338,13 @@ void main() {
       CupertinoApp(
         home: Center(
           child: CupertinoDatePicker(
-            onDateTimeChanged: (_) {},
+            onDateTimeChanged: (DateTime date) {},
             initialDateTime: DateTime(2018, 9, 15),
             selectionOverlayBuilder: (
-              BuildContext context,
-              int index,
-              int totalCount,
-            ) {
+              BuildContext context, {
+              required int selectedIndex,
+              required int columnCount,
+            }) {
               return null;
             },
           ),
@@ -2364,14 +2362,14 @@ void main() {
       CupertinoApp(
         home: Center(
           child: CupertinoTimerPicker(
-            onTimerDurationChanged: (_) {},
+            onTimerDurationChanged: (Duration duration) {},
             mode: CupertinoTimerPickerMode.hm,
             initialTimerDuration: const Duration(hours: 1, minutes: 1, seconds: 1),
             selectionOverlayBuilder: (
-              BuildContext context,
-              int index,
-              int totalCount,
-            ) {
+              BuildContext context, {
+              required int selectedIndex,
+              required int columnCount,
+            }) {
               return null;
             },
           ),
@@ -2380,6 +2378,41 @@ void main() {
     );
 
     expect(find.byType(CupertinoPicker), isNot(paints..rrect()));
+  });
+
+  testWidgets('CupertinoTimerPicker selectionOverlayBuilder is explicitly passed null',
+      (WidgetTester tester) async {
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTimerPicker(
+            onTimerDurationChanged: (Duration duration) {},
+            mode: CupertinoTimerPickerMode.hm,
+            initialTimerDuration: const Duration(hours: 1, minutes: 1, seconds: 1),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoPickerDefaultSelectionOverlay), findsExactly(2));
+  });
+
+  testWidgets('CupertinoDatePicker selectionOverlayBuilder is explicitly passed null',
+      (WidgetTester tester) async {
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoDatePicker(
+            onDateTimeChanged: (DateTime date) {},
+            initialDateTime: DateTime(2018, 9, 15),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoPickerDefaultSelectionOverlay), findsExactly(4));
   });
 }
 

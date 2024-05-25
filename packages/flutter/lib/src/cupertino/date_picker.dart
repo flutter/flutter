@@ -72,7 +72,7 @@ const Widget _endSelectionOverlay = CupertinoPickerDefaultSelectionOverlay(capSt
 
 /// Defines a function signature for creating a widget that serves as a selection overlay,
 /// given the current context, the selected item's index, and the total number of columns.
-typedef SelectionOverlayBuilder = Widget? Function(BuildContext context, int index, int columnCount);
+typedef SelectionOverlayBuilder = Widget? Function(BuildContext context, { required int columnCount, required int selectedIndex });
 
 // Lays out the date picker based on how much space each single column needs.
 //
@@ -418,7 +418,7 @@ class CupertinoDatePicker extends StatefulWidget {
   /// Defaults to a value that matches the default iOS date picker wheel.
   final double itemExtent;
 
-  /// A function that returns a widget that overlaid on the picker
+  /// A function that returns a widget that is overlaid on the picker
   /// to highlight the currently selected entry.
   ///
   /// If unspecified, it defaults to a [CupertinoPickerDefaultSelectionOverlay]
@@ -426,7 +426,7 @@ class CupertinoDatePicker extends StatefulWidget {
   ///
   /// If the selection overlay builder returns null, no overlay will be drawn.
   ///
-  /// ## Example
+  /// {@tool snippet}
   ///
   /// This example shows how to recreate the default selection overlay
   /// with selectionOverlayBuilder.
@@ -457,6 +457,7 @@ class CupertinoDatePicker extends StatefulWidget {
   ///   },
   /// )
   /// ```
+  /// {@end-tool}
   final SelectionOverlayBuilder? selectionOverlayBuilder;
 
   @override
@@ -1098,7 +1099,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
       if (widget.selectionOverlayBuilder != null) {
         selectionOverlay =
-            widget.selectionOverlayBuilder!(context, i, columnWidths.length);
+            widget.selectionOverlayBuilder!(context, selectedIndex: i, columnCount: columnWidths.length);
       } else {
         if (i == 0) {
           selectionOverlay = _startSelectionOverlay;
@@ -1517,7 +1518,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 
       if (widget.selectionOverlayBuilder != null) {
         selectionOverlay =
-            widget.selectionOverlayBuilder!(context, i, columnWidths.length);
+            widget.selectionOverlayBuilder!(context, selectedIndex: i, columnCount: columnWidths.length);
       } else {
         if (i == 0) {
           selectionOverlay = _startSelectionOverlay;
@@ -1831,7 +1832,7 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
 
       if (widget.selectionOverlayBuilder != null) {
         selectionOverlay =
-            widget.selectionOverlayBuilder!(context, i, columnWidths.length);
+            widget.selectionOverlayBuilder!(context, selectedIndex: i, columnCount: columnWidths.length);
       } else {
         if (i == 0) {
           selectionOverlay = _startSelectionOverlay;
@@ -2022,7 +2023,7 @@ class CupertinoTimerPicker extends StatefulWidget {
   ///
   /// If the selection overlay builder returns null, no overlay will be drawn.
   ///
-  /// ## Example
+  /// {@tool snippet}
   ///
   /// This example shows how to recreate the default selection overlay
   /// with selectionOverlayBuilder.
@@ -2051,6 +2052,7 @@ class CupertinoTimerPicker extends StatefulWidget {
   ///   },
   /// )
   /// ```
+  /// {@end-tool}
   final SelectionOverlayBuilder? selectionOverlayBuilder;
 
   @override
@@ -2542,9 +2544,9 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
             if (widget.selectionOverlayBuilder != null) {
               hourSelectionOverlay =
-                  widget.selectionOverlayBuilder!(context, 0, 2);
+                  widget.selectionOverlayBuilder!(context, selectedIndex: 0, columnCount: 2);
               minuteSelectionOverlay =
-                  widget.selectionOverlayBuilder!(context, 1, 2);
+                  widget.selectionOverlayBuilder!(context, selectedIndex: 1, columnCount: 2);
             }
 
             columns = <Widget>[
@@ -2582,9 +2584,9 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
             if (widget.selectionOverlayBuilder != null) {
               minuteSelectionOverlay =
-                  widget.selectionOverlayBuilder!(context, 0, 2);
+                  widget.selectionOverlayBuilder!(context, selectedIndex: 0, columnCount: 2);
               secondSelectionOverlay =
-                  widget.selectionOverlayBuilder!(context, 1, 2);
+                  widget.selectionOverlayBuilder!(context, selectedIndex: 1, columnCount: 2);
             }
 
             columns = <Widget>[
@@ -2618,11 +2620,11 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
             if (widget.selectionOverlayBuilder != null) {
               hourSelectionOverlay =
-                  widget.selectionOverlayBuilder!(context, 0, 3);
+                  widget.selectionOverlayBuilder!(context, selectedIndex: 0, columnCount: 3);
               minuteSelectionOverlay =
-                  widget.selectionOverlayBuilder!(context, 1, 3);
+                  widget.selectionOverlayBuilder!(context, selectedIndex: 1, columnCount: 3);
               secondSelectionOverlay =
-                  widget.selectionOverlayBuilder!(context, 2, 3);
+                  widget.selectionOverlayBuilder!(context, selectedIndex: 2, columnCount: 3);
             }
 
             columns = <Widget>[
