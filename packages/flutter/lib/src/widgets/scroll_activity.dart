@@ -48,9 +48,6 @@ abstract class ScrollActivityDelegate {
   /// given velocity.
   void goBallistic(double velocity);
 
-  /// Updates the delegate's flag to allow interaction with the scroll view's contents.
-  void updateIgnorePointer(bool ignorePointer);
-
   /// Flag to indicate whether the scroll view is over-scrolled. Meaning the
   /// user has scrolled beyond the extents of the scrollable. This is possible
   /// e.g. with [BouncingScrollPhysics].
@@ -604,10 +601,6 @@ class BallisticScrollActivity extends ScrollActivity {
   /// and returns true if the overflow was zero.
   @protected
   bool applyMoveTo(double value) {
-    if (delegate.outOfRange) {
-      shouldIgnorePointer = false;
-      delegate.updateIgnorePointer(shouldIgnorePointer);
-    }
     return delegate.setPixels(value).abs() < precisionErrorTolerance;
   }
 

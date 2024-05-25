@@ -154,16 +154,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     }
   }
 
-  /// Update the [ignorePointer] property of the [ScrollContext].
-  /// This is used to allow interaction with the scrollable's content.
-  /// When a scrollable reaches overscrolled state, e.g. when using [BouncingScrollPhysics],
-  /// the expected behavior is that the user can interact with the content and
-  /// not have to wait for the scroll to settle.
-  @override
-  void updateIgnorePointer(bool ignorePointer) {
-    context.setIgnorePointer(ignorePointer);
-  }
-
   @override
   ScrollDirection get userScrollDirection => _userScrollDirection;
   ScrollDirection _userScrollDirection = ScrollDirection.idle;

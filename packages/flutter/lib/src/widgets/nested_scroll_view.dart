@@ -733,19 +733,6 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     );
   }
 
-  /// Update the [ignorePointer] property of the [_outerPosition] and
-  /// all [_innerPositions].
-  /// This is used to allow interaction with the scrollable's content.
-  /// When a scrollable reaches overscrolled state, e.g. when using [BouncingScrollPhysics],
-  /// the expected behavior is that the user can interact with the content and
-  /// not have to wait for the scroll to settle.
-  @override
-  void updateIgnorePointer(bool ignorePointer) {
-    _outerPosition?.updateIgnorePointer(ignorePointer);
-    for (final _NestedScrollPosition position in _innerPositions) {
-      position.updateIgnorePointer(ignorePointer);
-    }
-  }
 
   ScrollActivity createOuterBallisticScrollActivity(double velocity) {
     // This function creates a ballistic scroll for the outer scrollable.
@@ -1427,15 +1414,6 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     ));
   }
 
-  /// Update the [ignorePointer] property of the [ScrollContext].
-  /// This is used to allow interaction with the scrollable's content.
-  /// When a scrollable reaches overscrolled state, e.g. when using [BouncingScrollPhysics],
-  /// the expected behavior is that the user can interact with the content and
-  /// not have to wait for the scroll to settle.
-  @override
-  void updateIgnorePointer(bool ignorePointer) {
-    context.setIgnorePointer(ignorePointer);
-  }
 
   ScrollActivity createBallisticScrollActivity(
     Simulation? simulation, {
