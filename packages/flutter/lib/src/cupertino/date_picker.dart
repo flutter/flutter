@@ -437,15 +437,15 @@ class CupertinoDatePicker extends StatefulWidget {
   ///   mode: CupertinoDatePickerMode.date,
   ///   initialDateTime: DateTime(2018, 9, 15),
   ///   selectionOverlayBuilder: (
-  ///     BuildContext context,
-  ///     required int index,
-  ///     required int totalCount,
-  ///   ) {
-  ///     if (index == 0) {
+  ///     BuildContext context, {
+  ///     required int selectedIndex,
+  ///     required int columnCount,
+  ///   }) {
+  ///     if (selectedIndex == 0) {
   ///       return const CupertinoPickerDefaultSelectionOverlay(
   ///         capEndEdge: false,
   ///       );
-  ///     } else if (index == totalCount - 1) {
+  ///     } else if (selectedIndex == columnCount - 1) {
   ///       return const CupertinoPickerDefaultSelectionOverlay(
   ///         capStartEdge: false,
   ///       );
@@ -2046,15 +2046,15 @@ class CupertinoTimerPicker extends StatefulWidget {
   /// CupertinoTimerPicker(
   ///   onTimerDurationChanged: (Duration newDateTime) {},
   ///   selectionOverlayBuilder: (
-  ///     BuildContext context,
-  ///     required int index,
-  ///     required int totalCount,
-  ///   ) {
-  ///     if (index == 0) {
+  ///     BuildContext context, {
+  ///     required int selectedIndex,
+  ///     required int columnCount,
+  ///   }) {
+  ///     if (selectedIndex == 0) {
   ///       return const CupertinoPickerDefaultSelectionOverlay(
   ///         capEndEdge: false,
   ///       );
-  ///     } else if (index == totalCount - 1) {
+  ///     } else if (selectedIndex == columnCount - 1) {
   ///       return const CupertinoPickerDefaultSelectionOverlay(
   ///         capStartEdge: false,
   ///       );
