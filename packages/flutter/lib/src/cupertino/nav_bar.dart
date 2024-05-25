@@ -900,10 +900,16 @@ class _LargeTitleNavigationBarSliverDelegate
       middleVisible: alwaysShowMiddle ? null : !showLargeTitle,
     );
 
-    final Border? initialBorder = initiallyTransparent ? const Border(bottom: BorderSide(width: 0.0, color: Color(0x00000000))) : border;
+    final Color? parentPageScaffoldBackgroundColor = CupertinoPageScaffoldBackgroundColor.maybeOf(context);
+
+    final Border? initialBorder = initiallyTransparent && parentPageScaffoldBackgroundColor != null
+        ? const Border(bottom: BorderSide(width: 0.0, color: Color(0x00000000)))
+        : border;
     final Border? effectiveBorder = border == null ? null : Border.lerp(initialBorder, border, shrinkAnimationValue);
 
-    final Color initialBackgroundColor = initiallyTransparent ? (CupertinoPageScaffoldBackgroundColor.maybeOf(context) ?? backgroundColor) : backgroundColor;
+    final Color initialBackgroundColor = initiallyTransparent
+        ? parentPageScaffoldBackgroundColor ?? backgroundColor
+        : backgroundColor;
     final Color effectiveBackgroundColor = Color.lerp(initialBackgroundColor, backgroundColor, shrinkAnimationValue)!;
 
     final Widget navBar = _wrapWithBackground(
