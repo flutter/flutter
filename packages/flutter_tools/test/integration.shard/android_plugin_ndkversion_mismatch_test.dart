@@ -74,13 +74,15 @@ void main() {
 
     // Check that an error message is thrown.
     expect(result.stderr, contains('''
-One or more plugins require a higher Android NDK version.
-Fix this issue by adding the following to ${projectGradleFile.path}:
-android {
-  ndkVersion "21.4.7075529"
-  ...
-}
+Your project is configured with Android NDK 21.1.6352462, but the following plugin(s) depend on a different Android NDK version:
+- test_plugin requires Android NDK 21.4.7075529
+Fix this issue by using the highest Android NDK version (they are backward compatible).
+Add the following to ${projectGradleFile.path}:
 
+    android {
+        ndkVersion = "21.4.7075529"
+        ...
+    }
 '''));
   });
 }

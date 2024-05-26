@@ -288,29 +288,16 @@ class FlutterProject {
 
   /// Returns a list of platform names that are supported by the project.
   List<SupportedPlatform> getSupportedPlatforms({bool includeRoot = false}) {
-    final List<SupportedPlatform> platforms = includeRoot ? <SupportedPlatform>[SupportedPlatform.root] : <SupportedPlatform>[];
-    if (android.existsSync()) {
-      platforms.add(SupportedPlatform.android);
-    }
-    if (ios.exists) {
-      platforms.add(SupportedPlatform.ios);
-    }
-    if (web.existsSync()) {
-      platforms.add(SupportedPlatform.web);
-    }
-    if (macos.existsSync()) {
-      platforms.add(SupportedPlatform.macos);
-    }
-    if (linux.existsSync()) {
-      platforms.add(SupportedPlatform.linux);
-    }
-    if (windows.existsSync()) {
-      platforms.add(SupportedPlatform.windows);
-    }
-    if (fuchsia.existsSync()) {
-      platforms.add(SupportedPlatform.fuchsia);
-    }
-    return platforms;
+    return <SupportedPlatform>[
+      if (includeRoot)          SupportedPlatform.root,
+      if (android.existsSync()) SupportedPlatform.android,
+      if (ios.exists)           SupportedPlatform.ios,
+      if (web.existsSync())     SupportedPlatform.web,
+      if (macos.existsSync())   SupportedPlatform.macos,
+      if (linux.existsSync())   SupportedPlatform.linux,
+      if (windows.existsSync()) SupportedPlatform.windows,
+      if (fuchsia.existsSync()) SupportedPlatform.fuchsia,
+    ];
   }
 
   /// The directory that will contain the example if an example exists.
