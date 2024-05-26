@@ -348,9 +348,9 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// Whether the navigation bar appears transparent when no content is scrolled under.
   ///
   /// If this is true, the navigation bar's background color will be the same as the
-  /// first [CupertinoPageScaffold] ancestor's background color.
+  /// parent [CupertinoPageScaffold]'s background color.
   ///
-  /// If the navigation bar is not a descendant of a [CupertinoPageScaffold], this has no effect.
+  /// If the navigation bar is not a child of a [CupertinoPageScaffold], this has no effect.
   ///
   /// This value defaults to true.
   /// {@endtemplate}
