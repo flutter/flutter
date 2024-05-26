@@ -93,6 +93,73 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
   /// The version code of the APK.
   final int? versionCode;
 
+  static String? _findLaunchActivity(
+    XmlDocument document,
+    String? packageId,
+  ) {
+    String? launchActivity;
+    for (final XmlElement activity in document.findAllElements('activity')) {
+      final String? enabled = activity.getAttribute('android:enabled');
+      if (enabled != null && enabled == 'false') {
+        continue;
+      }
+
+      for (final XmlElement element in activity.findElements('intent-filter')) {
+        String? actionName = '';
+        String? categoryName = '';
+        for (final XmlNode node in element.children) {
+          if (node is! XmlElement) {
+            continue;
+          }
+          final String? name = node.getAttribute('android:name');
+          if (name == 'android.intent.action.MAIN') {
+            actionName = name;
+          } else if (name == 'android.intent.category.LAUNCHER') {
+            categoryName = name;
+          }
+        }
+        if (actionName != null && categoryName != null && actionName.isNotEmpty && categoryName.isNotEmpty) {
+          final String? activityName = activity.getAttribute('android:name');
+          launchActivity = '$packageId/$activityName';
+          break;
+        }
+      }
+    }
+
+    // Handle case when use activity-alias instead of activity as `android.intent.category.LAUNCHER`
+    if (launchActivity == null) {
+      for (final XmlElement activityAlias in document.findAllElements('activity-alias')) {
+        final String? enabled = activityAlias.getAttribute('android:enabled');
+        if (enabled != null && enabled == 'false') {
+          continue;
+        }
+
+        for (final XmlElement element in activityAlias.findElements('intent-filter')) {
+          String? actionName = '';
+          String? categoryName = '';
+          for (final XmlNode node in element.children) {
+            if (node is! XmlElement) {
+              continue;
+            }
+            final String? name = node.getAttribute('android:name');
+            if (name == 'android.intent.action.MAIN') {
+              actionName = name;
+            } else if (name == 'android.intent.category.LAUNCHER') {
+              categoryName = name;
+            }
+          }
+          if (actionName != null && categoryName != null && actionName.isNotEmpty && categoryName.isNotEmpty) {
+            final String? targetActivityName = activityAlias.getAttribute('android:targetActivity');
+            launchActivity = '$packageId/$targetActivityName';
+            break;
+          }
+        }
+      }
+    }
+
+    return launchActivity;
+  }
+
   /// Creates a new AndroidApk based on the information in the Android manifest.
   static Future<AndroidApk?> fromAndroidProject(
     AndroidProject androidProject, {
@@ -176,34 +243,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     // can be replaced with the `namespace` attribute under the `android` section in `android/app/build.gradle`.
     final String? packageId = manifests.first.getAttribute('package') ?? androidProject.namespace;
 
-    String? launchActivity;
-    for (final XmlElement activity in document.findAllElements('activity')) {
-      final String? enabled = activity.getAttribute('android:enabled');
-      if (enabled != null && enabled == 'false') {
-        continue;
-      }
-
-      for (final XmlElement element in activity.findElements('intent-filter')) {
-        String? actionName = '';
-        String? categoryName = '';
-        for (final XmlNode node in element.children) {
-          if (node is! XmlElement) {
-            continue;
-          }
-          final String? name = node.getAttribute('android:name');
-          if (name == 'android.intent.action.MAIN') {
-            actionName = name;
-          } else if (name == 'android.intent.category.LAUNCHER') {
-            categoryName = name;
-          }
-        }
-        if (actionName != null && categoryName != null && actionName.isNotEmpty && categoryName.isNotEmpty) {
-          final String? activityName = activity.getAttribute('android:name');
-          launchActivity = '$packageId/$activityName';
-          break;
-        }
-      }
-    }
+    final String? launchActivity = _findLaunchActivity(document, packageId);
 
     if (packageId == null || launchActivity == null) {
       logger.printError('package identifier or launch activity not found.');
@@ -267,6 +307,10 @@ class _Element extends _Entry {
   Iterable<_Element> allElements(String name) {
     return children.whereType<_Element>().where((_Element e) => e.name?.startsWith(name) ?? false);
   }
+
+  Iterable<_Element> allElementsEqual(String name) {
+    return children.whereType<_Element>().where((_Element e) => e.name == name);
+  }
 }
 
 class _Attribute extends _Entry {
@@ -285,6 +329,12 @@ class _Attribute extends _Entry {
 
 class ApkManifestData {
   ApkManifestData._(this._data);
+
+  static String? _getActivityName(_Element element) {
+    final _Attribute? nameAttribute = element.firstAttribute('android:name');
+    // "io.flutter.examples.hello_world.MainActivity"
+    return nameAttribute?.value?.substring(1, nameAttribute.value?.indexOf('" '));
+  }
 
   static bool _isAttributeWithValuePresent(
       _Element baseElement, String childElement, String attributeName, String attributeValue) {
@@ -340,9 +390,11 @@ class ApkManifestData {
       return null;
     }
 
-    final Iterable<_Element> activities = application.allElements('activity');
+    final Iterable<_Element> activities = application.allElementsEqual('activity');
 
     _Element? launchActivity;
+    bool isActivityAlias = false;
+
     for (final _Element activity in activities) {
       final _Attribute? enabled = activity.firstAttribute('android:enabled');
       final Iterable<_Element> intentFilters = activity.allElements('intent-filter');
@@ -372,6 +424,48 @@ class ApkManifestData {
       }
     }
 
+    // Handle case when use activity-alias
+    if (launchActivity == null) {
+      final Iterable<_Element> activityAliases = application.allElementsEqual('activity-alias');
+
+      for (final _Element activityAlias in activityAliases) {
+        final _Attribute? enabled = activityAlias.firstAttribute('android:enabled');
+        final Iterable<_Element> intentFilters = activityAlias.allElements('intent-filter');
+        final bool isEnabledByDefault = enabled == null;
+        final bool isExplicitlyEnabled = enabled != null && (enabled.value?.contains('0xffffffff') ?? false);
+        if (!(isEnabledByDefault || isExplicitlyEnabled)) {
+          continue;
+        }
+
+        for (final _Element element in intentFilters) {
+          final bool isMainAction = _isAttributeWithValuePresent(
+              element, 'action', 'android:name', '"android.intent.action.MAIN"');
+          if (!isMainAction) {
+            continue;
+          }
+          final bool isLauncherCategory = _isAttributeWithValuePresent(
+              element, 'category', 'android:name',
+              '"android.intent.category.LAUNCHER"');
+          if (!isLauncherCategory) {
+            continue;
+          }
+          launchActivity = activityAlias;
+          isActivityAlias = true;
+          break;
+        }
+        if (launchActivity != null) {
+          break;
+        }
+      }
+    }
+
+    // For checking if Target Activity is declared
+    Iterable<String?> activityNames = <String?>[];
+
+    if (isActivityAlias) {
+      activityNames = activities.map(_getActivityName);
+    }
+
     final _Attribute? package = manifest.firstAttribute('package');
     // "io.flutter.examples.hello_world" (Raw: "io.flutter.examples.hello_world")
     final String? packageName = package?.value?.substring(1, package.value?.indexOf('" '));
@@ -381,9 +475,18 @@ class ApkManifestData {
       return null;
     }
 
-    final _Attribute? nameAttribute = launchActivity.firstAttribute('android:name');
+    final _Attribute? nameAttribute = isActivityAlias ? launchActivity.firstAttribute('android:targetActivity') : launchActivity.firstAttribute('android:name');
+
     // "io.flutter.examples.hello_world.MainActivity" (Raw: "io.flutter.examples.hello_world.MainActivity")
     final String? activityName = nameAttribute?.value?.substring(1, nameAttribute.value?.indexOf('" '));
+
+    // Checking if Target Activity is declared
+    if (isActivityAlias && activityName != null) {
+      if (!activityNames.contains(activityName)) {
+        logger.printError('Error running $packageName. Target activity not found');
+        return null;
+      }
+    }
 
     // Example format: (type 0x10)0x1
     final _Attribute? versionCodeAttr = manifest.firstAttribute('android:versionCode');
