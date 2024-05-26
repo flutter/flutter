@@ -1019,6 +1019,241 @@ void main() {
     },
   );
 
+  testWidgets(
+    'NavBar is initially transparent and appears when content is scrolled under',
+    (WidgetTester tester) async {
+      final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            backgroundColor: const Color(0xFFFFFFFF),
+            navigationBar: const CupertinoNavigationBar(
+              backgroundColor: Color(0xFFE5E5E5),
+              border: Border(
+                bottom: BorderSide(
+                  color: Color(0xFFAABBCC),
+                  width: 0.0,
+                ),
+              ),
+              middle: Text('Title'),
+            ),
+            child: ListView(
+              controller: scrollController,
+              children: const <Widget>[
+                Placeholder(),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(scrollController.offset, 0.0);
+
+      final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
+        of: find.byType(CupertinoNavigationBar),
+        matching: find.byType(DecoratedBox),
+      )).first as DecoratedBox;
+      expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+      final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+      final BorderSide side = decoration.border!.bottom;
+      expect(side.color.opacity, 0.0);
+
+      // appears transparent since it has the same background color as the scaffold.
+      expect(find.byType(CupertinoNavigationBar), paints..rect(color: const Color(0xFFFFFFFF)));
+
+      scrollController.jumpTo(100.0);
+      await tester.pump();
+
+      final DecoratedBox decoratedBoxAfterSroll = tester.widgetList(find.descendant(
+        of: find.byType(CupertinoNavigationBar),
+        matching: find.byType(DecoratedBox),
+      )).first as DecoratedBox;
+      expect(decoratedBoxAfterSroll.decoration.runtimeType, BoxDecoration);
+
+      final BorderSide borderAfterScroll = (decoratedBoxAfterSroll.decoration as BoxDecoration).border!.bottom;
+
+      expect(borderAfterScroll.color.opacity, 1.0);
+
+      expect(find.byType(CupertinoNavigationBar), paints..rect(color: const Color(0xFFE5E5E5)));
+    },
+  );
+
+  testWidgets(
+    'Nav bar is not initially transparent if not a child of CupertinoPageScaffold',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: CupertinoNavigationBar(
+            backgroundColor: Color(0xFFE5E5E5),
+            border: Border(
+              bottom: BorderSide(
+                color: Color(0xFFAABBCC),
+                width: 0.0,
+              ),
+            ),
+            middle: Text('Title'),
+          ),
+        ),
+      );
+
+      final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
+        of: find.byType(CupertinoNavigationBar),
+        matching: find.byType(DecoratedBox),
+      )).first as DecoratedBox;
+      expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+      final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+      final BorderSide side = decoration.border!.bottom;
+      expect(side.color, const Color(0xFFAABBCC));
+
+      expect(find.byType(CupertinoNavigationBar), paints..rect(color: const Color(0xFFE5E5E5)));
+    },
+  );
+
+  testWidgets(
+    'Nav bar is not initially transparent if initiallyTransparent parameter is false',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(
+              backgroundColor: Color(0xFFE5E5E5),
+              border: Border(
+                bottom: BorderSide(
+                  color: Color(0xFFAABBCC),
+                  width: 0.0,
+                ),
+              ),
+              middle: Text('Title'),
+              initiallyTransparent: false,
+            ),
+            child: Placeholder(),
+          ),
+        ),
+      );
+
+      DecoratedBox decoratedBox = tester.widgetList(find.descendant(
+        of: find.byType(CupertinoNavigationBar),
+        matching: find.byType(DecoratedBox),
+      )).first as DecoratedBox;
+      expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+      BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+      BorderSide side = decoration.border!.bottom;
+      expect(side.color, const Color(0xFFAABBCC));
+
+      expect(find.byType(CupertinoNavigationBar), paints..rect(color: const Color(0xFFE5E5E5)));
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                const CupertinoSliverNavigationBar(
+                  backgroundColor: Color(0xFFE5E5E5),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Color(0xFFAABBCC),
+                      width: 0.0,
+                    ),
+                  ),
+                  largeTitle: Text('Title'),
+                  initiallyTransparent: false,
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 1200.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      decoratedBox = tester.widgetList(find.descendant(
+        of: find.byType(CupertinoSliverNavigationBar),
+        matching: find.byType(DecoratedBox),
+      )).first as DecoratedBox;
+      expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+      decoration = decoratedBox.decoration as BoxDecoration;
+      side = decoration.border!.bottom;
+      expect(side.color, const Color(0xFFAABBCC));
+
+      expect(find.byType(CupertinoSliverNavigationBar), paints..rect(color: const Color(0xFFE5E5E5)));
+    },
+  );
+
+  testWidgets(
+    'CupertinoSliverNavigationBar is initially transparent and appears when content is scrolled under',
+    (WidgetTester tester) async {
+      final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            backgroundColor: const Color(0xFFFFFFFF),
+            child: CustomScrollView(
+              controller: scrollController,
+              slivers: <Widget>[
+                const CupertinoSliverNavigationBar(
+                  backgroundColor: Color(0xFFE5E5E5),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Color(0xFFAABBCC),
+                      width: 0.0,
+                    ),
+                  ),
+                  largeTitle: Text('Title'),
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 1200.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(scrollController.offset, 0.0);
+
+      final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
+        of: find.byType(CupertinoSliverNavigationBar),
+        matching: find.byType(DecoratedBox),
+      )).first as DecoratedBox;
+      expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+      final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+      final BorderSide side = decoration.border!.bottom;
+      expect(side.color.opacity, 0.0);
+
+      // appears transparent since it has the same background color as the scaffold.
+      expect(find.byType(CupertinoSliverNavigationBar), paints..rect(color: const Color(0xFFFFFFFF)));
+
+      scrollController.jumpTo(400.0);
+      await tester.pump();
+
+      final DecoratedBox decoratedBoxAfterSroll = tester.widgetList(find.descendant(
+        of: find.byType(CupertinoSliverNavigationBar),
+        matching: find.byType(DecoratedBox),
+      )).first as DecoratedBox;
+      expect(decoratedBoxAfterSroll.decoration.runtimeType, BoxDecoration);
+
+      final BorderSide borderAfterScroll = (decoratedBoxAfterSroll.decoration as BoxDecoration).border!.bottom;
+
+      expect(borderAfterScroll.color.opacity, 1.0);
+
+      expect(find.byType(CupertinoSliverNavigationBar), paints..rect(color: const Color(0xFFE5E5E5)));
+    },
+  );
+
   testWidgets('NavBar draws a light system bar for a dark background', (WidgetTester tester) async {
     await tester.pumpWidget(
       WidgetsApp(
