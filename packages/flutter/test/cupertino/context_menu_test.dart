@@ -143,10 +143,7 @@ void main() {
       expect(tester.getRect(find.byWidget(child)), childRect);
     });
 
-    testWidgets('Can open CupertinoContextMenu by tap and hold',
-      // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-      experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-      (WidgetTester tester) async {
+    testWidgets('Can open CupertinoContextMenu by tap and hold', (WidgetTester tester) async {
       final Widget child = getChild();
       await tester.pumpWidget(getContextMenu(child: child));
       expect(find.byWidget(child), findsOneWidget);
@@ -593,10 +590,7 @@ void main() {
       expect(findStatic(), findsNothing);
     });
 
-    testWidgets('Can close CupertinoContextMenu by flinging down',
-      // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-      experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-      (WidgetTester tester) async {
+    testWidgets('Can close CupertinoContextMenu by flinging down', (WidgetTester tester) async {
       final Widget child = getChild();
       await tester.pumpWidget(getContextMenu(child: child));
 

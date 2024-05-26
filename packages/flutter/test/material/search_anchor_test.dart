@@ -899,10 +899,7 @@ void main() {
     expect(textField.textCapitalization, TextCapitalization.none);
   });
 
-  testWidgets('SearchAnchor respects viewOnChanged and viewOnSubmitted properties',
-  // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-  experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-  (WidgetTester tester) async {
+  testWidgets('SearchAnchor respects viewOnChanged and viewOnSubmitted properties', (WidgetTester tester) async {
     final SearchController controller = SearchController();
     addTearDown(controller.dispose);
     int onChangedCalled = 0;

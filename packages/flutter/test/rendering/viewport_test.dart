@@ -2055,10 +2055,7 @@ void main() {
       expect(tester.getTopLeft(find.text('Item 9')).dy, 226.0);
     });
 
-    testWidgets('allows overscrolling on default platforms - vertical',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-    (WidgetTester tester) async {
+    testWidgets('allows overscrolling on default platforms - vertical', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/10949
       // Scrollables should overscroll by default on iOS and macOS
       final  ScrollController controller = ScrollController();

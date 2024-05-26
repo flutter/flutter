@@ -690,10 +690,7 @@ void main() {
           handle.dispose();
         });
 
-        testWidgets("Doesn't hide accessibility when a child declares its own semantics",
-          // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-          experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-          (WidgetTester tester) async {
+        testWidgets("Doesn't hide accessibility when a child declares its own semantics", (WidgetTester tester) async {
           final SemanticsHandle handle = tester.ensureSemantics();
           final Widget reorderableListView = ReorderableListView(
             onReorder: (int oldIndex, int newIndex) { },

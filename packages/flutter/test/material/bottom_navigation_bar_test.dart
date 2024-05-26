@@ -2188,10 +2188,7 @@ void main() {
     );
   });
 
-  testWidgets('BottomNavigationBar handles items.length changes',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-    (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar handles items.length changes', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/10322
 
     Widget buildFrame(int itemCount) {
@@ -2326,10 +2323,7 @@ void main() {
       );
     }
     for (int pump = 1; pump < 9; pump++) {
-      testWidgets('pump $pump',
-        // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-        experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']).withCreationStackTrace(),
-        (WidgetTester tester) async {
+      testWidgets('pump $pump', (WidgetTester tester) async {
         await tester.pumpWidget(runTest());
         await tester.tap(find.text('Green'));
 

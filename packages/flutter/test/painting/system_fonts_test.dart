@@ -213,10 +213,7 @@ void main() {
     await verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(tester, renderObject);
   });
 
-  testWidgets('Slider relayout upon system fonts changes',
-  // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-  experimentalLeakTesting: LeakTesting.settings.withTracked(classes: <String>['CurvedAnimation']),
-  (WidgetTester tester) async {
+  testWidgets('Slider relayout upon system fonts changes', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(

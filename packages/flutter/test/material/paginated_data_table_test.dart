@@ -71,10 +71,7 @@ void main() {
   setUp(() => source = TestDataSource());
   tearDown(() => source.dispose());
 
-  testWidgets('PaginatedDataTable paging',
-  // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-  experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-  (WidgetTester tester) async {
+  testWidgets('PaginatedDataTable paging', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(MaterialApp(
@@ -383,10 +380,7 @@ void main() {
     expect(find.byWidgetPredicate((Widget widget) => widget is SizedBox && widget.height == (rowsPerPage - (rowCount % rowsPerPage)) * 46.0), findsOneWidget);
   });
 
-  testWidgets('PaginatedDataTable control test',
-  // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-  experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-  (WidgetTester tester) async {
+  testWidgets('PaginatedDataTable control test', (WidgetTester tester) async {
     TestDataSource source = TestDataSource()
       ..generation = 42;
     addTearDown(source.dispose);
