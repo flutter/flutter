@@ -2821,10 +2821,7 @@ void main() {
       expect(events.length, 2);
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgets('Focus traversal does not throw when no focusable is available in a group',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-     (WidgetTester tester) async {
+    testWidgets('Focus traversal does not throw when no focusable is available in a group', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: Scaffold(body: ListTile(title: Text('title')))));
       final FocusNode? initialFocus = primaryFocus;
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);

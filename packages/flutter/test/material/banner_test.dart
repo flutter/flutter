@@ -508,10 +508,7 @@ void main() {
     expect(find.text('banner2'), findsNothing);
   });
 
-  testWidgets('ScaffoldMessenger does not duplicate a MaterialBanner when presenting a SnackBar.',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-    (WidgetTester tester) async {
+  testWidgets('ScaffoldMessenger does not duplicate a MaterialBanner when presenting a SnackBar.', (WidgetTester tester) async {
     const Key materialBannerTapTarget = Key('materialbanner-tap-target');
     const Key snackBarTapTarget = Key('snackbar-tap-target');
     const String snackBarText = 'SnackBar';

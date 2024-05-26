@@ -96,10 +96,7 @@ void main() {
       expect(actualDecoration.boxShadow, null);
     });
 
-    testWidgets('animations work with curves test',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-    (WidgetTester tester) async {
+    testWidgets('animations work with curves test', (WidgetTester tester) async {
       final CurvedAnimation curvedAnimation = CurvedAnimation(
         parent: controller,
         curve: Curves.easeOut,

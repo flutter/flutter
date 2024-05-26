@@ -975,10 +975,7 @@ void main() {
       expect(secondaryAnimationOfRouteOne.value, primaryAnimationOfRouteTwo.value);
     });
 
-    testWidgets('showGeneralDialog handles transparent barrier color',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: <String>['CurvedAnimation']),
-    (WidgetTester tester) async {
+    testWidgets('showGeneralDialog handles transparent barrier color', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Builder(
           builder: (BuildContext context) {

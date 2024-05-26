@@ -87,10 +87,7 @@ void main() {
     expect(indicatorColors(tester), const <Color>[kUnselectedColor, kUnselectedColor, kSelectedColor]);
   });
 
-  testWidgets('PageSelector responds correctly to TabController.animateTo()',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-  (WidgetTester tester) async {
+  testWidgets('PageSelector responds correctly to TabController.animateTo()', (WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       length: 3,
@@ -282,10 +279,7 @@ void main() {
     }
   });
 
-  testWidgets('PageSelector responds correctly to TabController.animateTo() from the default tab controller',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-    (WidgetTester tester) async {
+  testWidgets('PageSelector responds correctly to TabController.animateTo() from the default tab controller', (WidgetTester tester) async {
     await tester.pumpWidget(
       Localizations(
         locale: const Locale('en', 'US'),
