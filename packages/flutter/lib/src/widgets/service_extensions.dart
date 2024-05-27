@@ -144,7 +144,22 @@ enum WidgetInspectorServiceExtensions {
   ///   extension is registered.
   trackRebuildDirtyWidgets,
 
+  /// Name of service extension that, when called, returns the mapping of
+  /// widget locations to ids.
+  ///
+  /// This service extension is only supported if
+  /// [WidgetInspectorService._widgetCreationTracked] is true.
+  ///
+  /// See also:
+  ///
+  /// * [trackRebuildDirtyWidgets], which toggles dispatching events that use
+  ///   these ids to efficiently indicate the locations of widgets.
+  /// * [WidgetInspectorService.initServiceExtensions], where the service
+  ///   extension is registered.
+  widgetLocationIdMap,
+
   /// Name of service extension that, when called, determines whether
+  /// [WidgetInspectorService._trackRepaintWidgets], which determines whether
   /// a callback is invoked for every [RenderObject] painted each frame.
   ///
   /// See also:
