@@ -109,4 +109,61 @@ void main() {
     iconButton = tester.widget(iconButtonFinder);
     expect(iconButton.iconSize, equals(beginSize));
   });
+
+  testWidgets('Animation target can be updated during the animation', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const example.TweenAnimationBuilderExampleApp(),
+    );
+    await tester.pumpAndSettle();
+
+    const double beginSize = 24.0;
+    const double endSize = 48.0;
+    final double middleSize = lerpDouble(beginSize, endSize, 0.5)!;
+
+    final Finder iconButtonFinder = find.byType(IconButton);
+
+    IconButton iconButton = tester.widget(iconButtonFinder);
+    expect(iconButton.iconSize, equals(beginSize));
+
+    // Tap on the IconButton to start the forward animation.
+    await tester.tap(iconButtonFinder);
+    await tester.pump();
+
+    iconButton = tester.widget(iconButtonFinder);
+    expect(iconButton.iconSize, equals(beginSize));
+
+    // Advance animation to the middle.
+    await tester.pump(
+      example.TweenAnimationBuilderExampleApp.duration ~/ 2,
+    );
+
+    iconButton = tester.widget(iconButtonFinder);
+    expect(iconButton.iconSize, equals(middleSize));
+
+    // Tap on the IconButton to start the backward animation.
+    await tester.tap(iconButtonFinder);
+    await tester.pump();
+
+    iconButton = tester.widget(iconButtonFinder);
+    expect(iconButton.iconSize, equals(middleSize));
+
+    // Advance animation to the middle.
+    await tester.pump(
+      example.TweenAnimationBuilderExampleApp.duration ~/ 2,
+    );
+
+    iconButton = tester.widget(iconButtonFinder);
+    expect(
+      iconButton.iconSize,
+      equals(lerpDouble(middleSize, beginSize, 0.5)),
+    );
+
+    // Advance animation to the end.
+    await tester.pump(
+      example.TweenAnimationBuilderExampleApp.duration ~/ 2,
+    );
+
+    iconButton = tester.widget(iconButtonFinder);
+    expect(iconButton.iconSize, equals(beginSize));
+  });
 }
