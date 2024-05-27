@@ -851,7 +851,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       overlayShape: sliderTheme.overlayShape ?? defaultOverlayShape,
       valueIndicatorShape: valueIndicatorShape,
       showValueIndicator: sliderTheme.showValueIndicator ?? defaultShowValueIndicator,
-      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? defaults.valueIndicatorTextStyle,
+      valueIndicatorTextStyle: valueIndicatorTextStyle,
       barThumbSize: sliderTheme.barThumbSize ?? defaults.barThumbSize,
       trackGapSize: sliderTheme.trackGapSize ?? defaults.trackGapSize,
     );
