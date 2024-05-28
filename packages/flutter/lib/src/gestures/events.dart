@@ -1734,16 +1734,16 @@ abstract class PointerSignalEvent extends PointerEvent with _RespondablePointerE
 /// A function used to send information about a PointerEvent back to the engine.
 ///
 /// This is used on the web to `preventDefault`.
-typedef RespondPointerEventFn = void Function({required bool preventPlatformDefault});
+typedef RespondPointerEventFn = void Function({required bool allowPlatformDefault});
 
 mixin _RespondablePointerEvent on PointerEvent {
   /// Responds the current [PointerSignalEvent] in the native embedder.
   ///
   /// Used to send information about the current event to the Flutter engine, for
   /// example, if it should prevent the default behavior of the embedder
-  /// ([preventPlatformDefault] = `true`).
+  /// ([allowPlatformDefault] = `true`).
   void respond({
-    required bool preventPlatformDefault,
+    required bool allowPlatformDefault,
   }) {}
 }
 
@@ -1835,8 +1835,8 @@ class PointerScrollEvent extends PointerSignalEvent with _PointerEventDescriptio
   final RespondPointerEventFn _respond;
 
   @override
-  void respond({required bool preventPlatformDefault}) {
-    _respond(preventPlatformDefault: preventPlatformDefault);
+  void respond({required bool allowPlatformDefault}) {
+    _respond(allowPlatformDefault: allowPlatformDefault);
   }
 }
 
@@ -1865,8 +1865,8 @@ class _TransformedPointerScrollEvent extends _TransformedPointerEvent with _Copy
   RespondPointerEventFn get _respond => original._respond;
 
   @override
-  void respond({required bool preventPlatformDefault}) {
-    original.respond(preventPlatformDefault: preventPlatformDefault);
+  void respond({required bool allowPlatformDefault}) {
+    original.respond(allowPlatformDefault: allowPlatformDefault);
   }
 }
 

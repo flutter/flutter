@@ -916,6 +916,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   void _receivedPointerSignal(PointerSignalEvent event) {
     if (event is PointerScrollEvent && _position != null) {
       if (_physics != null && !_physics!.shouldAcceptUserOffset(position)) {
+        event.respond(allowPlatformDefault: true);
         return;
       }
       final double delta = _pointerSignalEventDelta(event);
@@ -923,9 +924,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       // Only express interest in the event if it would actually result in a scroll.
       if (delta != 0.0 && targetScrollOffset != position.pixels) {
         GestureBinding.instance.pointerSignalResolver.register(event, _handlePointerScroll);
-        event.respond(
-          preventPlatformDefault: true,
-        );
+      } else {
+        event.respond(allowPlatformDefault: true);
       }
     } else if (event is PointerScrollInertiaCancelEvent) {
       position.pointerScroll(0);
