@@ -51,3 +51,19 @@ TEST(FlRendererTest, RestoresGLState) {
 
   g_object_ref_sink(view);
 }
+
+static constexpr double kExpectedRefreshRate = 120.0;
+static gdouble renderer_get_refresh_rate(FlRenderer* renderer) {
+  return kExpectedRefreshRate;
+}
+
+TEST(FlRendererTest, RefreshRate) {
+  flutter::testing::fl_ensure_gtk_init();
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlMockRenderer) renderer =
+      fl_mock_renderer_new(&renderer_get_refresh_rate);
+
+  gdouble result_refresh_rate =
+      fl_renderer_get_refresh_rate(FL_RENDERER(renderer));
+  EXPECT_DOUBLE_EQ(result_refresh_rate, kExpectedRefreshRate);
+}
