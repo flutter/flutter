@@ -6,8 +6,12 @@
 
 namespace impeller {
 
-Font::Font(std::shared_ptr<Typeface> typeface, Metrics metrics)
-    : typeface_(std::move(typeface)), metrics_(metrics) {
+Font::Font(std::shared_ptr<Typeface> typeface,
+           Metrics metrics,
+           AxisAlignment axis_alignment)
+    : typeface_(std::move(typeface)),
+      metrics_(metrics),
+      axis_alignment_(axis_alignment) {
   if (!typeface_) {
     return;
   }
@@ -32,6 +36,10 @@ std::size_t Font::GetHash() const {
 bool Font::IsEqual(const Font& other) const {
   return DeepComparePointer(typeface_, other.typeface_) &&
          is_valid_ == other.is_valid_ && metrics_ == other.metrics_;
+}
+
+AxisAlignment Font::GetAxisAlignment() const {
+  return axis_alignment_;
 }
 
 const Font::Metrics& Font::GetMetrics() const {

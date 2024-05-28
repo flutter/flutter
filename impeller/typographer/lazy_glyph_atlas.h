@@ -19,7 +19,7 @@ class LazyGlyphAtlas {
 
   ~LazyGlyphAtlas();
 
-  void AddTextFrame(const TextFrame& frame, Scalar scale);
+  void AddTextFrame(const TextFrame& frame, Scalar scale, Point offset);
 
   void ResetTextFrames();
 
