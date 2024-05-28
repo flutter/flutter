@@ -738,6 +738,26 @@ TEST_P(AiksTest, CanRenderTextFrame) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, CanRenderTextFrameWithHalfScaling) {
+  Canvas canvas;
+  canvas.DrawPaint({.color = Color(0.1, 0.1, 0.1, 1.0)});
+  canvas.Scale({0.5, 0.5, 1});
+  ASSERT_TRUE(RenderTextInCanvasSkia(
+      GetContext(), canvas, "the quick brown fox jumped over the lazy dog!.?",
+      "Roboto-Regular.ttf"));
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, CanRenderTextFrameWithFractionScaling) {
+  Canvas canvas;
+  canvas.DrawPaint({.color = Color(0.1, 0.1, 0.1, 1.0)});
+  canvas.Scale({2.625, 2.625, 1});
+  ASSERT_TRUE(RenderTextInCanvasSkia(
+      GetContext(), canvas, "the quick brown fox jumped over the lazy dog!.?",
+      "Roboto-Regular.ttf"));
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, CanRenderTextFrameSTB) {
   Canvas canvas;
   canvas.DrawPaint({.color = Color(0.1, 0.1, 0.1, 1.0)});

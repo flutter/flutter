@@ -12,7 +12,7 @@ std::shared_ptr<TextFrame> MakeTextFrameSTB(
     const std::shared_ptr<TypefaceSTB>& typeface_stb,
     Font::Metrics metrics,
     const std::string& text) {
-  TextRun run(Font(typeface_stb, metrics));
+  TextRun run(Font(typeface_stb, metrics, AxisAlignment::kNone));
 
   // Shape the text run using STB. The glyph positions could also be resolved
   // using a more advanced text shaper such as harfbuzz.
@@ -28,6 +28,8 @@ std::shared_ptr<TextFrame> MakeTextFrameSTB(
   descent = std::round(descent * scale);
 
   float x = 0;
+  std::vector<Rect> bounds;
+  bounds.resize(text.size());
   for (size_t i = 0; i < text.size(); i++) {
     int glyph_index =
         stbtt_FindGlyphIndex(typeface_stb->GetFontInfo(), text[i]);
@@ -42,8 +44,8 @@ std::shared_ptr<TextFrame> MakeTextFrameSTB(
     stbtt_GetGlyphHMetrics(typeface_stb->GetFontInfo(), glyph_index,
                            &advance_width, &left_side_bearing);
 
-    Glyph glyph(glyph_index, Glyph::Type::kPath,
-                Rect::MakeXYWH(0, 0, x1 - x0, y1 - y0));
+    bounds.push_back(Rect::MakeXYWH(0, 0, x1 - x0, y1 - y0));
+    Glyph glyph(glyph_index, Glyph::Type::kPath);
     run.AddGlyph(glyph, {x + (left_side_bearing * scale), y});
 
     if (i + 1 < text.size()) {
@@ -54,10 +56,10 @@ std::shared_ptr<TextFrame> MakeTextFrameSTB(
   }
 
   std::optional<Rect> result;
-  for (const auto& glyph_position : run.GetGlyphPositions()) {
-    Rect glyph_rect = Rect::MakeOriginSize(
-        glyph_position.position + glyph_position.glyph.bounds.GetOrigin(),
-        glyph_position.glyph.bounds.GetSize());
+  for (auto i = 0u; i < bounds.size(); i++) {
+    const TextRun::GlyphPosition& gp = run.GetGlyphPositions()[i];
+    Rect glyph_rect = Rect::MakeOriginSize(gp.position + bounds[i].GetOrigin(),
+                                           bounds[i].GetSize());
     result = result.has_value() ? result->Union(glyph_rect) : glyph_rect;
   }
 

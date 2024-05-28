@@ -1249,8 +1249,8 @@ void TextFrameDispatcher::drawTextFrame(
     const std::shared_ptr<impeller::TextFrame>& text_frame,
     SkScalar x,
     SkScalar y) {
-  renderer_.GetLazyGlyphAtlas()->AddTextFrame(*text_frame,
-                                              matrix_.GetMaxBasisLengthXY());
+  renderer_.GetLazyGlyphAtlas()->AddTextFrame(
+      *text_frame, matrix_.GetMaxBasisLengthXY(), Point(x, y));
 }
 
 void TextFrameDispatcher::drawDisplayList(
