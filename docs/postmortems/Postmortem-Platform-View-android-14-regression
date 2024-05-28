@@ -1,0 +1,55 @@
+Flutter postmortem: Platform-View-android-14-regression
+Status: {draft}
+Owners: johnmccutchen, reidbaker, jrect
+
+Summary
+Description: Platform views on android 14 stopped displaying when apps were backgrounded. 
+Component: Android, Platform Views 
+Date/time: 2024-05-28
+Duration: 6 months
+User impact: All flutter customers using platform views on android 14
+
+Timeline (all times in PST/PDT)
+1900-01-01
+14:44 - something happened
+14:45 - next thing happened <START OF OUTAGE>
+
+1900-01-02
+09:12 - another thing happened <END OF OUTAGE>
+
+Impact
+{summarize the problems that the outage caused}
+
+Root causes
+{without blame, describe the root cause of the outage}
+
+Lessons learned
+What worked
+{list things where things worked as expected in a positive manner}
+
+Where we got lucky
+{list things that mitigated this incident but not because of our foresight}
+
+What didn't work
+{list things that failed, with github issues from the action items section}
+
+Action items
+{each item here should have an owner}
+
+Prevention
+{link to github issues for things that would have prevented this failure from happening in the first place, such as input validation, pinning dependencies, etc}
+
+Detection
+{link to github issues for things that would have detected this failure before it became An Incident, such as better testing, monitoring, etc}
+
+Mitigation
+{link to github issues for things that would have made this failure less serious, such as graceful degradation, better exception handling, etc}
+
+Process
+{link to github issues for things that would have helped us resolve this failure faster, such as documented processes and protocols, etc}
+
+Fixes
+{link to github issues or PRs/commits for the actual fixes that were necessary to resolve this incident}
+
+Appendix
+{any other useful information, such as relevant chat logs}
