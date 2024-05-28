@@ -3554,7 +3554,7 @@ void main() {
 
     // Finish gesture to release resources.
     await gesture.up();
-    await tester.pumpAndSettle();
+    await tester.pump();
   });
 
   testWidgets('Drag and drop - childDragAnchorStrategy works in scaled MaterialApp', (WidgetTester tester) async {
@@ -3581,7 +3581,7 @@ void main() {
 
     // Finish gesture to release resources.
     await gesture.up();
-    await tester.pumpAndSettle();
+    await tester.pump();
   });
 
   testWidgets('Drag and drop - feedback matches pointer in rotated MaterialApp', (WidgetTester tester) async {
@@ -3613,7 +3613,7 @@ void main() {
 
     // Finish gesture to release resources.
     await gesture.up();
-    await tester.pumpAndSettle();
+    await tester.pump();
   });
 
   testWidgets('configurable Draggable hit test behavior', (WidgetTester tester) async {
