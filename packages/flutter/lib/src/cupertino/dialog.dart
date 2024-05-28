@@ -831,6 +831,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
                   onPanEnd: _onGestureEnd,
                   onPanCancel: _onGestureCancel,
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: children,
@@ -1088,9 +1089,10 @@ class _ActionSheetScaffoldState extends State<_ActionSheetScaffold> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         widget.contentSection,
-        Expanded(
+        Flexible(
           child: CupertinoScrollbar(
             controller: widget.scrollController,
             child: SingleChildScrollView(
