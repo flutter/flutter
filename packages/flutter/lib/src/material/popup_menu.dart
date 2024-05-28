@@ -880,10 +880,12 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final Clip clipBehavior;
   final AnimationStyle? popUpAnimationStyle;
 
+  CurvedAnimation? _animation;
+
   @override
   Animation<double> createAnimation() {
     if (popUpAnimationStyle != AnimationStyle.noAnimation) {
-      return CurvedAnimation(
+      return _animation ??= CurvedAnimation(
         parent: super.createAnimation(),
         curve: popUpAnimationStyle?.curve ?? Curves.linear,
         reverseCurve: popUpAnimationStyle?.reverseCurve ?? const Interval(0.0, _kMenuCloseIntervalEnd),
@@ -961,6 +963,12 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 
   Set<Rect> _avoidBounds(MediaQueryData mediaQuery) {
     return DisplayFeatureSubScreen.avoidBounds(mediaQuery).toSet();
+  }
+
+  @override
+  void dispose() {
+    _animation?.dispose();
+    super.dispose();
   }
 }
 
@@ -1431,7 +1439,10 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   void showButtonMenu() {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final RenderBox button = context.findRenderObject()! as RenderBox;
-    final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
+    final RenderBox overlay = Navigator.of(
+      context,
+      rootNavigator: widget.useRootNavigator,
+    ).overlay!.context.findRenderObject()! as RenderBox;
     final PopupMenuPosition popupMenuPosition = widget.position ?? popupMenuTheme.position ?? PopupMenuPosition.over;
     late Offset offset;
     switch (popupMenuPosition) {
