@@ -25,7 +25,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  test('plugins use individualized build directories.', () async {
+  test('plugins use individualized build directories based on their name.', () async {
     final String flutterBin = fileSystem.path.join(
       getFlutterRoot(),
       'bin',
