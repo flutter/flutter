@@ -431,12 +431,10 @@ class FormField<T> extends StatefulWidget {
   /// will be set to the provided value, causing the form field to be considered
   /// invalid and display the error message specified.
   ///
-  /// The [forceErrorText] property is used to override the [InputDecoration.errorText]
-  /// value defined in the [InputDecoration] of the [TextFormField].
+  /// See also:
   ///
-  /// Note: Using [forceErrorText] directly to set the error state bypasses the regular
-  /// validation process performed by the [validator] function. This allows you to
-  /// handle error conditions or show specific error messages manually.
+  /// * [InputDecoration.errorText], which is used to display error messages in the text
+  /// field's decoration.
   final String? forceErrorText;
 
   /// An optional method that validates an input. Returns an error string to
@@ -452,15 +450,6 @@ class FormField<T> extends StatefulWidget {
   /// not an error is displayed, either wrap the  [TextFormField] in a fixed
   /// height parent like [SizedBox], or set the [InputDecoration.helperText]
   /// parameter to a space.
-  ///
-  /// Note: Using [forceErrorText] will bypasses the regular
-  /// validation process performed by the [validator] function. This allows you to
-  /// handle error conditions or show specific error messages manually.
-  ///
-  /// See also:
-  ///
-  ///  * [forceErrorText], which may force the error state directly.
-  ///
   final FormFieldValidator<T>? validator;
 
   /// Function that returns the widget representing this form field. It is
@@ -531,9 +520,6 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   /// This property is automatically updated when [validate] is called and the
   /// [FormField.validator] callback is invoked, or If [FormField.forceErrorText] is set
   /// directly to a non-null value.
-  ///
-  /// Note: When using [FormField.forceErrorText] directly to set the error state,
-  /// the usual validation process performed by [FormField.validator] is bypassed.
   String? get errorText => _errorText.value;
 
   /// True if this field has any validation errors.
@@ -554,7 +540,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   ///
   ///  * [validate], which may update [errorText] and [hasError].
   ///
-  ///  * [FormField.forceErrorText], which may update [errorText] and [hasError].
+  ///  * [FormField.forceErrorText], which also may update [errorText] and [hasError].
   bool get isValid => widget.forceErrorText != null || widget.validator?.call(_value) == null;
 
   /// Calls the [FormField]'s onSaved method with the current value.
@@ -574,10 +560,6 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
   /// Calls [FormField.validator] to set the [errorText] only if [FormField.forceErrorText] is null.
   /// Returns true if there were no errors.
-  ///
-  /// Note: When using the [FormField.forceErrorText] property directly to set the
-  /// error state, the regular validation process performed by the
-  /// [FormField.validator] is bypassed.
   ///
   /// See also:
   ///
