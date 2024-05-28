@@ -363,8 +363,11 @@ class CreateCommand extends CreateBase {
     final PubContext pubContext;
     switch (template) {
       case FlutterProjectType.app:
+        final bool skipWidgetTestsGeneration =
+            sampleCode != null || emptyArgument;
+
         generatedFileCount += await generateApp(
-          <String>['app', 'app_test_widget'],
+          <String>['app', if (!skipWidgetTestsGeneration) 'app_test_widget'],
           relativeDir,
           templateContext,
           overwrite: overwrite,
@@ -453,9 +456,6 @@ class CreateCommand extends CreateBase {
     }
     if (sampleCode != null) {
       _applySample(relativeDir, sampleCode);
-    }
-    if (sampleCode != null || emptyArgument) {
-      generatedFileCount += _removeTestDir(relativeDir);
     }
     globals.printStatus('Wrote $generatedFileCount files.');
     globals.printStatus('\nAll done!');
@@ -777,20 +777,6 @@ Your $application code is in $relativeAppMain.
     final File mainDartFile = directory.childDirectory('lib').childFile('main.dart');
     mainDartFile.createSync(recursive: true);
     mainDartFile.writeAsStringSync(sampleCode);
-  }
-
-  int _removeTestDir(Directory directory) {
-    final Directory testDir = directory.childDirectory('test');
-    if (!testDir.existsSync()) {
-      return 0;
-    }
-    final List<FileSystemEntity> files = testDir.listSync(recursive: true);
-    try {
-      testDir.deleteSync(recursive: true);
-    } on FileSystemException catch (exception) {
-      throwToolExit('Failed to delete test directory: $exception');
-    }
-    return -files.length;
   }
 
   List<String> _getSupportedPlatformsFromTemplateContext(Map<String, Object?> templateContext) {
