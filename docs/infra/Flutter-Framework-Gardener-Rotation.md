@@ -121,6 +121,9 @@ If there is a new regression not deemed to be noise in a benchmark:
 1. Notify the Flutter engine sheriff and Flutter Hackers Discord chats with any issues you file.
 If it's noise, accept the benchmark by clicking the checkbox in the triage details popup.
 
+### Handling a Skia gold failure
+See the [golden test build breakage] guide.
+
 ## Filing an infra ticket
 1. Open a [new infra issue].
 1. Add a descriptive title. A message like "Add a LUCI builder for linux web engine" or "Debug gallery startup" is much more helpful than "quick request" or "test doesn't work?".
@@ -159,6 +162,7 @@ The bulk of communication happens on [Discord].
 [Flutter issues]: https://github.com/flutter/flutter/issues
 [TESTOWNERS]: https://github.com/flutter/flutter/blob/main/TESTOWNERS
 [flutter-hackers]: https://github.com/orgs/flutter/teams/flutter-hackers
+[golden test build breakage]: /docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md#build-breakage
 [new issue]: https://github.com/flutter/flutter/issues/new/choose
 [new infra issue]: https://github.com/flutter/flutter/issues/new?template=6_infrastructure.yml
 
