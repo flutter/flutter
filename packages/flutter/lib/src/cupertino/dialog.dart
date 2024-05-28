@@ -136,7 +136,7 @@ const Color _kActionSheetContentTextColor = Color(0xFF8F8F8F);
 // areas between the content section and actions section, as well as between
 // buttons.
 // Eye-balled from iOS 13 beta simulator.
-const Color _kActionSheetButtonDividerColor = _kActionSheetContentTextColor;
+const Color _kActionSheetButtonDividerColor = Color(0xFFD6D6D6);
 
 // The alert dialog layout policy changes depending on whether the user is using
 // a "regular" font size vs a "large" font size. This is a spectrum. There are
@@ -634,6 +634,13 @@ abstract class _ActionSheetDragAvatar {
   void didConfirm();
 }
 
+T? _maybeFirst<T>(List<T> l) {
+  if (l.isEmpty) {
+    return null;
+  }
+  return l.first;
+}
+
 class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
   ScrollController? _backupMessageScrollController;
 
@@ -707,35 +714,45 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
   }
 
   Widget _buildCancelButton() {
+    assert(widget.cancelButton != null);
     final double cancelPadding = (widget.actions != null || widget.message != null || widget.title != null)
         ? _kActionSheetCancelButtonPadding : 0.0;
     return Padding(
       padding: EdgeInsets.only(top: cancelPadding),
-      child: widget.cancelButton,
+      child: _ActionSheetButtonListener(
+        isCancel: true,
+        onStateChange: (_) {},
+        child: widget.cancelButton!,
+      ),
     );
   }
 
-  _ActionSheetDragAvatar? currentAvatar;
+  final List<_ActionSheetDragAvatar> _currentAvatars = <_ActionSheetDragAvatar>[];
 
   void _updateDrag(Offset pointerPosition) {
     final int viewId = View.of(context).viewId;
     final HitTestResult result = HitTestResult();
     WidgetsBinding.instance.hitTestInView(result, pointerPosition, viewId);
 
-    _ActionSheetDragAvatar? foundAvatar;
+    final List<_ActionSheetDragAvatar> foundAvatars = <_ActionSheetDragAvatar>[];
     for (final HitTestEntry entry in result.path) {
       if (entry.target case final RenderMetaData target) {
         if (target.metaData is _ActionSheetDragAvatar) {
-          foundAvatar = target.metaData as _ActionSheetDragAvatar;
-          break;
+          foundAvatars.add(target.metaData as _ActionSheetDragAvatar);
         }
       }
     }
 
-    if (currentAvatar != foundAvatar) {
-      currentAvatar?.didLeave();
-      currentAvatar = foundAvatar;
-      currentAvatar?.didEnter();
+    if (_maybeFirst(_currentAvatars) != _maybeFirst(foundAvatars)) {
+      for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
+        avatar.didLeave();
+      }
+      _currentAvatars
+        ..clear()
+        ..addAll(foundAvatars);
+      for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
+        avatar.didEnter();
+      }
     }
   }
 
@@ -749,13 +766,17 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
   void _onGestureEnd(DragEndDetails details) {
     _updateDrag(details.globalPosition);
-    currentAvatar?.didConfirm();
-    currentAvatar = null;
+    for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
+      avatar.didConfirm();
+    }
+    _currentAvatars.clear();
   }
 
   void _onGestureCancel() {
-    currentAvatar?.didLeave();
-    currentAvatar = null;
+    for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
+      avatar.didLeave();
+    }
+    _currentAvatars.clear();
   }
 
   @override
@@ -763,15 +784,16 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     assert(debugCheckHasMediaQuery(context));
 
     final List<Widget> children = <Widget>[
-      Flexible(child: ClipRRect(
+      Flexible(child:
+        ClipRRect(
           borderRadius: const BorderRadius.all(Radius.circular(12.0)),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
-            child: _CupertinoDialogRenderWidget(
+            child: _ActionSheetScaffold(
+              scrollController: _effectiveActionScrollController,
               contentSection: Builder(builder: _buildContent),
-              actionsSection: _buildActions(),
+              actions: widget.actions,
               dividerColor: _kActionSheetButtonDividerColor,
-              isActionSheet: true,
             ),
           ),
         ),
@@ -795,9 +817,11 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
           child: CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.elevated,
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: _kActionSheetEdgeHorizontalPadding,
-                vertical: _kActionSheetEdgeVerticalPadding,
+              padding: const EdgeInsets.only(
+                left: _kActionSheetEdgeHorizontalPadding,
+                right: _kActionSheetEdgeHorizontalPadding,
+                bottom: _kActionSheetEdgeVerticalPadding,
+                top: 55,
               ),
               child: SizedBox(
                 width: actionSheetWidth - _kActionSheetEdgeHorizontalPadding * 2,
@@ -863,24 +887,19 @@ class CupertinoActionSheetAction extends StatefulWidget {
 }
 
 class CupertinoActionSheetActionState extends State<CupertinoActionSheetAction> implements _ActionSheetDragAvatar {
-  bool isBeingPressed = false;
-
   // |_ActionSheetDragAvatar|
   @override
   void didEnter() {
-    setState(() { isBeingPressed = true; });
   }
 
   // |_ActionSheetDragAvatar|
   @override
   void didLeave() {
-    setState(() { isBeingPressed = false; });
   }
 
   // |_ActionSheetDragAvatar|
   @override
   void didConfirm() {
-    setState(() { isBeingPressed = false; });
     widget.onPressed();
   }
 
@@ -896,20 +915,6 @@ class CupertinoActionSheetActionState extends State<CupertinoActionSheetAction> 
       style = style.copyWith(fontWeight: FontWeight.w600);
     }
 
-    late final Color backgroundColor;
-    late final BorderRadius? borderRadius;
-    if (widget.isCancel) {
-      backgroundColor = isBeingPressed
-          ? _kActionSheetCancelPressedColor
-          : _kActionSheetCancelColor;
-      borderRadius = const BorderRadius.all(Radius.circular(_kCornerRadius));
-    } else {
-      backgroundColor = isBeingPressed
-          ? _kPressedColor
-          : _kActionSheetBackgroundColor;
-      borderRadius = null;
-    }
-
 
     return MouseRegion(
       cursor: kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
@@ -920,28 +925,181 @@ class CupertinoActionSheetActionState extends State<CupertinoActionSheetAction> 
           constraints: const BoxConstraints(
             minHeight: _kActionSheetButtonHeight,
           ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: CupertinoDynamicColor.resolve(backgroundColor, context),
-              borderRadius: borderRadius,
-            ),
-            child: Semantics(
-              button: true,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 16.0,
-                  horizontal: 10.0,
-                ),
-                child: DefaultTextStyle(
-                  style: style,
-                  textAlign: TextAlign.center,
-                  child: Center(child: widget.child),
-                ),
+          child: Semantics(
+            button: true,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: 16.0,
+                horizontal: 10.0,
+              ),
+              child: DefaultTextStyle(
+                style: style,
+                textAlign: TextAlign.center,
+                child: Center(child: widget.child),
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ActionSheetButtonListener extends StatefulWidget {
+  /// Creates an action for an iOS-style action sheet.
+  const _ActionSheetButtonListener({
+    super.key,
+    this.isCancel = false,
+    required this.onStateChange,
+    required this.child,
+  });
+
+  final bool isCancel;
+
+  /// The callback that is called when the button is tapped.
+  final ValueSetter<bool> onStateChange;
+
+  /// The widget below this widget in the tree.
+  ///
+  /// Typically a [Text] widget.
+  final Widget child;
+
+  @override
+  _ActionSheetButtonListenerState createState() => _ActionSheetButtonListenerState();
+}
+
+class _ActionSheetButtonListenerState extends State<_ActionSheetButtonListener> implements _ActionSheetDragAvatar {
+  bool _pressed = false;
+
+  // |_ActionSheetDragAvatar|
+  @override
+  void didEnter() {
+    setState(() {
+      _pressed = true;
+    });
+    widget.onStateChange(true);
+  }
+
+  // |_ActionSheetDragAvatar|
+  @override
+  void didLeave() {
+    setState(() {
+      _pressed = false;
+    });
+    widget.onStateChange(false);
+  }
+
+  // |_ActionSheetDragAvatar|
+  @override
+  void didConfirm() {
+    setState(() {
+      _pressed = false;
+    });
+    widget.onStateChange(false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    late final Color backgroundColor;
+    BorderRadius? borderRadius;
+    if (!widget.isCancel) {
+      backgroundColor = _pressed
+        ? _kPressedColor
+        : CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
+    } else {
+      backgroundColor = _pressed
+          ? _kActionSheetCancelPressedColor
+          : _kActionSheetCancelColor;
+      borderRadius = const BorderRadius.all(Radius.circular(_kCornerRadius));
+    }
+    return MetaData(
+      metaData: this,
+      child: Container(
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: borderRadius,
+        ),
+        child: widget.child,
+      )
+    );
+  }
+}
+
+class _ActionSheetScaffold extends StatefulWidget {
+  _ActionSheetScaffold({
+    required this.scrollController,
+    required this.actions,
+    required this.contentSection,
+    required this.dividerColor,
+  });
+
+  final ScrollController? scrollController;
+  final List<Widget>? actions;
+  final Widget contentSection;
+  final Color dividerColor;
+
+  @override
+  _ActionSheetScaffoldState createState() => _ActionSheetScaffoldState();
+}
+
+class _ActionSheetScaffoldState extends State<_ActionSheetScaffold> {
+  int? _pressedAction;
+
+  Widget _buildActionSection() {
+    final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
+    final List<Widget>? actions = widget.actions;
+    if (actions == null || actions.isEmpty) {
+      return const LimitedBox(
+        maxWidth: 0,
+        child: SizedBox(width: double.infinity, height: 0),
+      );
+    }
+    final List<Widget> column = <Widget>[];
+    for (int actionIdx = 0; actionIdx < actions.length; actionIdx += 1) {
+      final bool shouldDisplay = _pressedAction != actionIdx - 1 && _pressedAction != actionIdx;
+      column.add(Container(
+        height: 1,
+        decoration: BoxDecoration(
+          color: shouldDisplay ? widget.dividerColor : backgroundColor,
+        ),
+      ));
+      column.add(_ActionSheetButtonListener(
+        onStateChange: (bool state) {
+          if (!state) {
+            if (_pressedAction == actionIdx) {
+              setState(() {
+                _pressedAction = null;
+              });
+            }
+          } else {
+            setState(() {
+              _pressedAction = actionIdx;
+            });
+          }
+        },
+        child: actions[actionIdx],
+      ));
+    }
+    return Column(
+      children: column,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        widget.contentSection,
+        Expanded(
+          child: CupertinoScrollbar(
+            controller: widget.scrollController,
+            child: SingleChildScrollView(
+              controller: widget.scrollController,
+              child: _buildActionSection(),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -3011,7 +3169,7 @@ class _RenderCupertinoDialogActions extends RenderBox
       child = childAfter(child);
     }
 
-    // canvas.drawPath(backgroundFillPath, _buttonBackgroundPaint);
+    canvas.drawPath(backgroundFillPath, _buttonBackgroundPaint);
     // canvas.drawPath(pressedBackgroundFillPath, _pressedButtonBackgroundPaint);
     canvas.drawPath(dividersPath, _dividerPaint);
   }
