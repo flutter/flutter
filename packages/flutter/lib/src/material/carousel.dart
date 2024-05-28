@@ -87,9 +87,9 @@ class Carousel extends StatefulWidget {
   /// or focused states.
   ///
   /// The default values are:
-  ///   * [WidgetState.pressed] - [ThemeData.colorScheme.onSurface] with an opacity of 0.1
-  ///   * [WidgetState.hovered] - [ThemeData.colorScheme.onSurface] with an opacity of 0.08
-  ///   * [WidgetState.focused] - [ThemeData.colorScheme.onSurface] with an opacity of 0.1
+  ///   * [WidgetState.pressed] - [ColorScheme.onSurface] with an opacity of 0.1
+  ///   * [WidgetState.hovered] - [ColorScheme.onSurface] with an opacity of 0.08
+  ///   * [WidgetState.focused] - [ColorScheme.onSurface] with an opacity of 0.1
   final WidgetStateProperty<Color?>? overlayColor;
 
   /// The minimum allowable extent (size) in the main axis for carousel items
