@@ -1135,38 +1135,56 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
 
   bool _hasActions() => (widget.actions?.length ?? 0) != 0;
 
+  Widget _buildContent(bool hasActions, double maxHeight) {
+    if (!hasActions) {
+      return Flexible(
+        child: widget.contentSection,
+      );
+    }
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: maxHeight,
+      ),
+      child: widget.contentSection,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return NotificationListener<ScrollUpdateNotification>(
-      onNotification: _onScrollUpdate,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          widget.contentSection,
-          if (widget.hasContent && _hasActions())
-            _ActionSheetDivider(
-              key: const _DividerKey(0),
-              dividerColor: widget.dividerColor,
-              hidden: false,
-            ),
-          Flexible(
-            child: Stack(
-              children: <Widget>[
-                Positioned.fill(
-                  child: _buildOverscroll(),
-                ),
-                CupertinoScrollbar(
-                  controller: widget.scrollController,
-                  child: SingleChildScrollView(
-                    controller: widget.scrollController,
-                    child: _buildActionSection(),
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            _buildContent(_hasActions(), constraints.maxHeight - 87),
+            if (widget.hasContent && _hasActions())
+              _ActionSheetDivider(
+                key: const _DividerKey(0),
+                dividerColor: widget.dividerColor,
+                hidden: false,
+              ),
+            Flexible(
+              child: Stack(
+                children: <Widget>[
+                  Positioned.fill(
+                    child: _buildOverscroll(),
                   ),
-                )
-              ],
+                  NotificationListener<ScrollUpdateNotification>(
+                    onNotification: _onScrollUpdate,
+                    child: CupertinoScrollbar(
+                      controller: widget.scrollController,
+                      child: SingleChildScrollView(
+                        controller: widget.scrollController,
+                        child: _buildActionSection(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     );
   }
 }
