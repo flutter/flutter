@@ -5,14 +5,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'examples/api/lib/material/menu_anchor/menu_anchor.3.dart';
+import 'package:flutter_api_samples/material/menu_anchor/menu_anchor.3.dart' as example;
 
 void main() {
   group('SimpleCascadingMenu Tests', () {
     testWidgets('Menu button opens and closes the menu',
         (WidgetTester tester) async {
       // Build the SimpleCascadingMenu widget.
-      await tester.pumpWidget(const MaterialApp(home: MyCascadingMenu()));
+      await tester.pumpWidget(const MaterialApp(home: example.MyCascadingMenu()));
 
       // Find the menu button.
       final Finder menuButton = find.byType(IconButton);
