@@ -932,9 +932,10 @@ class _ViewContentState extends State<_ViewContent> {
       ?? viewTheme.headerTextStyle
       ?? viewDefaults.headerHintStyle;
 
-    final SearchBarThemeData barDefaults = _SearchBarDefaultsM3(context);
-    final SearchBarThemeData barTheme = SearchBarTheme.of(context);
-    final BoxConstraints barConstraints = headerConstraints ?? (widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null) ?? barTheme.constraints ?? barDefaults.constraints!;
+    final Widget viewDivider = DividerTheme(
+      data: dividerTheme.copyWith(color: effectiveDividerColor),
+      child: const Divider(height: 1),
+    );
 
     return Align(
       alignment: Alignment.topLeft,
@@ -951,166 +952,64 @@ class _ViewContentState extends State<_ViewContent> {
             color: effectiveBackgroundColor,
             surfaceTintColor: effectiveSurfaceTint,
             elevation: effectiveElevation,
-            child: CustomScrollView(
-              shrinkWrap: true,
-              slivers: <Widget>[
-                SliverPadding(
-                  padding: EdgeInsets.only(top: widget.topPadding),
-                  sliver: SliverSafeArea(
-                    top: false,
-                    bottom: false,
-                    sliver: SliverFadeTransition(
-                      opacity: viewIconsFadeCurve,
-                      sliver: SliverPersistentHeader(
-                        pinned: true,
-                        delegate: _SearchBarHeaderDelegate(
-                          constraints: barConstraints,
-                          leading: widget.viewLeading ?? defaultLeading,
-                          trailing: widget.viewTrailing ?? defaultTrailing,
-                          hintText: widget.viewHintText,
-                          textStyle: effectiveTextStyle,
-                          hintStyle: effectiveHintStyle,
-                          controller: _controller,
-                          onChanged: (String value) {
-                            widget.viewOnChanged?.call(value);
-                            updateSuggestions();
-                          },
-                          onSubmitted: widget.viewOnSubmitted,
-                          textCapitalization: widget.textCapitalization,
-                          textInputAction: widget.textInputAction,
-                          keyboardType: widget.keyboardType,
-                          backgroundColor: effectiveBackgroundColor,
-                          surfaceTint: effectiveSurfaceTint,
-                          dividerFadeCurve: viewDividerFadeCurve,
-                          dividerTheme: dividerTheme.copyWith(color: effectiveDividerColor),
-                          hasSuggestions: result.isNotEmpty,
-                        ),
+            child: FadeTransition(
+              opacity: viewIconsFadeCurve,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.only(top: widget.topPadding),
+                    child: SafeArea(
+                      top: false,
+                      bottom: false,
+                      child: SearchBar(
+                        autoFocus: true,
+                        constraints: headerConstraints ?? (widget.showFullScreenView ? BoxConstraints(minHeight: _SearchViewDefaultsM3.fullScreenBarHeight) : null),
+                        leading: widget.viewLeading ?? defaultLeading,
+                        trailing: widget.viewTrailing ?? defaultTrailing,
+                        hintText: widget.viewHintText,
+                        backgroundColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
+                        overlayColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
+                        elevation: const MaterialStatePropertyAll<double>(0.0),
+                        textStyle: MaterialStatePropertyAll<TextStyle?>(effectiveTextStyle),
+                        hintStyle: MaterialStatePropertyAll<TextStyle?>(effectiveHintStyle),
+                        controller: _controller,
+                        onChanged: (String value) {
+                          widget.viewOnChanged?.call(value);
+                          updateSuggestions();
+                        },
+                        onSubmitted: widget.viewOnSubmitted,
+                        textCapitalization: widget.textCapitalization,
+                        textInputAction: widget.textInputAction,
+                        keyboardType: widget.keyboardType,
                       ),
                     ),
                   ),
-                ),
-                SliverFadeTransition(
-                  opacity: viewListFadeOnIntervalCurve,
-                  sliver: SliverVisibility(
-                    visible: _controller.isOpen && result.isNotEmpty,
-                    sliver: viewBuilder(result),
-                  ),
-                ),
-              ],
+                  if (widget.showFullScreenView || (_controller.isOpen && result.isNotEmpty)) ...<Widget>[
+                    FadeTransition(
+                      opacity: viewDividerFadeCurve,
+                      child: viewDivider,
+                    ),
+                    Flexible(
+                      child: FadeTransition(
+                        opacity: viewListFadeOnIntervalCurve,
+                        child: CustomScrollView(
+                          shrinkWrap: !widget.showFullScreenView,
+                          slivers: <Widget>[
+                            viewBuilder(result),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
-  }
-}
-
-class _SearchBarHeaderDelegate extends SliverPersistentHeaderDelegate {
-  const _SearchBarHeaderDelegate({
-    required this.constraints,
-    this.leading,
-    this.trailing,
-    this.hintText,
-    this.textStyle,
-    this.hintStyle,
-    this.controller,
-    this.onChanged,
-    this.onSubmitted,
-    this.textCapitalization,
-    this.textInputAction,
-    this.keyboardType,
-    required this.backgroundColor,
-    required this.surfaceTint,
-    required this.dividerFadeCurve,
-    required this.dividerTheme,
-    required this.hasSuggestions,
-  });
-
-  static const double _dividerHeight = 1;
-
-  final BoxConstraints constraints;
-  final Widget? leading;
-  final Iterable<Widget>? trailing;
-  final String? hintText;
-  final TextStyle? textStyle;
-  final TextStyle? hintStyle;
-  final SearchController? controller;
-  final ValueChanged<String>? onChanged;
-  final ValueChanged<String>? onSubmitted;
-  final TextCapitalization? textCapitalization;
-  final TextInputAction? textInputAction;
-  final TextInputType? keyboardType;
-  final Color backgroundColor;
-  final Color surfaceTint;
-  final Animation<double> dividerFadeCurve;
-  final DividerThemeData dividerTheme;
-  final bool hasSuggestions;
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return  Material(
-      color: backgroundColor,
-      surfaceTintColor: surfaceTint,
-      child: Column(
-        children: <Widget>[
-          SearchBar(
-            autoFocus: true,
-            constraints: constraints,
-            leading: leading,
-            trailing: trailing,
-            hintText: hintText,
-            backgroundColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
-            overlayColor: const MaterialStatePropertyAll<Color>(Colors.transparent),
-            elevation: const MaterialStatePropertyAll<double>(0.0),
-            textStyle: MaterialStatePropertyAll<TextStyle?>(textStyle),
-            hintStyle: MaterialStatePropertyAll<TextStyle?>(hintStyle),
-            controller: controller,
-            onChanged: (String value) => onChanged?.call(value),
-            onSubmitted: onSubmitted,
-            textCapitalization: textCapitalization,
-            textInputAction: textInputAction,
-            keyboardType: keyboardType,
-          ),
-          FadeTransition(
-            opacity: dividerFadeCurve,
-            child: DividerTheme(
-              data: dividerTheme,
-              child: Visibility(
-                visible: hasSuggestions,
-                child: const Divider(height: _dividerHeight),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  double get maxExtent => constraints.minHeight + (hasSuggestions ? _dividerHeight : 0);
-
-  @override
-  double get minExtent => constraints.minHeight + (hasSuggestions ? _dividerHeight : 0);
-
-  @override
-  bool shouldRebuild(covariant _SearchBarHeaderDelegate oldDelegate) {
-    return constraints != oldDelegate.constraints ||
-      leading != oldDelegate.leading ||
-      trailing != oldDelegate.trailing ||
-      hintText != oldDelegate.hintText ||
-      textStyle != oldDelegate.textStyle ||
-      hintStyle != oldDelegate.hintStyle ||
-      controller != oldDelegate.controller ||
-      onChanged != oldDelegate.onChanged ||
-      onSubmitted != oldDelegate.onSubmitted ||
-      textCapitalization != oldDelegate.textCapitalization ||
-      textInputAction != oldDelegate.textInputAction ||
-      keyboardType != oldDelegate.keyboardType ||
-      backgroundColor != oldDelegate.backgroundColor ||
-      surfaceTint != oldDelegate.surfaceTint ||
-      dividerFadeCurve != oldDelegate.dividerFadeCurve ||
-      dividerTheme != oldDelegate.dividerTheme ||
-      hasSuggestions != oldDelegate.hasSuggestions;
   }
 }
 
