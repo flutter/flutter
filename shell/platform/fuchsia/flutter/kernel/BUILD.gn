@@ -20,7 +20,7 @@ compile_platform("kernel_platform_files") {
   ]
 
   args = [
-    "--nnbd-agnostic",
+    "--nnbd-strong",
     "--target=flutter_runner",
     "dart:core",
   ]
