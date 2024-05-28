@@ -2356,26 +2356,6 @@ TEST_P(EntityTest, InheritOpacityTest) {
   tiled_texture->SetInheritedOpacity(0.5);
   ASSERT_EQ(tiled_texture->GetOpacityFactor(), 0.25);
 
-  // Text contents can accept opacity if the text frames do not
-  // overlap
-  SkFont font = flutter::testing::CreateTestFontOfSize(30);
-  auto blob = SkTextBlob::MakeFromString("A", font);
-  auto frame = MakeTextFrameFromTextBlobSkia(blob);
-  auto lazy_glyph_atlas =
-      std::make_shared<LazyGlyphAtlas>(TypographerContextSkia::Make());
-  lazy_glyph_atlas->AddTextFrame(*frame, 1.0f);
-
-  auto text_contents = std::make_shared<TextContents>();
-  text_contents->SetTextFrame(frame);
-  text_contents->SetColor(Color::Blue().WithAlpha(0.5));
-
-  ASSERT_TRUE(text_contents->CanInheritOpacity(entity));
-
-  text_contents->SetInheritedOpacity(0.5);
-  ASSERT_EQ(text_contents->GetColor().alpha, 0.25);
-  text_contents->SetInheritedOpacity(0.5);
-  ASSERT_EQ(text_contents->GetColor().alpha, 0.25);
-
   // Clips and restores trivially accept opacity.
   ASSERT_TRUE(ClipContents().CanInheritOpacity(entity));
   ASSERT_TRUE(ClipRestoreContents().CanInheritOpacity(entity));

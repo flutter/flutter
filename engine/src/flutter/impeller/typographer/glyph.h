@@ -8,8 +8,6 @@
 #include <cstdint>
 #include <functional>
 
-#include "impeller/geometry/rect.h"
-
 namespace impeller {
 
 //------------------------------------------------------------------------------
@@ -28,19 +26,12 @@ struct Glyph {
   ///
   Type type = Type::kPath;
 
-  //------------------------------------------------------------------------------
-  /// @brief  Visibility coverage of the glyph in text run space (relative to
-  ///         the baseline, no scaling applied).
-  ///
-  Rect bounds;
-
-  Glyph(uint16_t p_index, Type p_type, Rect p_bounds)
-      : index(p_index), type(p_type), bounds(p_bounds) {}
+  Glyph(uint16_t p_index, Type p_type) : index(p_index), type(p_type) {}
 };
 
 // Many Glyph instances are instantiated, so care should be taken when
 // increasing the size.
-static_assert(sizeof(Glyph) == 20);
+static_assert(sizeof(Glyph) == 4);
 
 }  // namespace impeller
 

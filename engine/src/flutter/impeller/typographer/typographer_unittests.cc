@@ -39,7 +39,7 @@ static std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
     const std::shared_ptr<GlyphAtlasContext>& atlas_context,
     const TextFrame& frame) {
   FontGlyphMap font_glyph_map;
-  frame.CollectUniqueFontGlyphPairs(font_glyph_map, scale);
+  frame.CollectUniqueFontGlyphPairs(font_glyph_map, scale, {0, 0});
   return typographer_context->CreateGlyphAtlas(context, type, host_buffer,
                                                atlas_context, font_glyph_map);
 }
@@ -54,7 +54,7 @@ static std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
     const std::vector<std::shared_ptr<TextFrame>>& frames) {
   FontGlyphMap font_glyph_map;
   for (auto& frame : frames) {
-    frame->CollectUniqueFontGlyphPairs(font_glyph_map, scale);
+    frame->CollectUniqueFontGlyphPairs(font_glyph_map, scale, {0, 0});
   }
   return typographer_context->CreateGlyphAtlas(context, type, host_buffer,
                                                atlas_context, font_glyph_map);
@@ -97,9 +97,10 @@ TEST_P(TypographerTest, CanCreateGlyphAtlas) {
   ASSERT_EQ(atlas->GetGlyphCount(), 4llu);
 
   std::optional<impeller::ScaledFont> first_scaled_font;
-  std::optional<impeller::Glyph> first_glyph;
+  std::optional<impeller::SubpixelGlyph> first_glyph;
   Rect first_rect;
-  atlas->IterateGlyphs([&](const ScaledFont& scaled_font, const Glyph& glyph,
+  atlas->IterateGlyphs([&](const ScaledFont& scaled_font,
+                           const SubpixelGlyph& glyph,
                            const Rect& rect) -> bool {
     first_scaled_font = scaled_font;
     first_glyph = glyph;
@@ -134,14 +135,14 @@ TEST_P(TypographerTest, LazyAtlasTracksColor) {
 
   LazyGlyphAtlas lazy_atlas(TypographerContextSkia::Make());
 
-  lazy_atlas.AddTextFrame(*frame, 1.0f);
+  lazy_atlas.AddTextFrame(*frame, 1.0f, {0, 0});
 
   frame = MakeTextFrameFromTextBlobSkia(
       SkTextBlob::MakeFromString("😀 ", emoji_font));
 
   ASSERT_TRUE(frame->GetAtlasType() == GlyphAtlas::Type::kColorBitmap);
 
-  lazy_atlas.AddTextFrame(*frame, 1.0f);
+  lazy_atlas.AddTextFrame(*frame, 1.0f, {0, 0});
 
   // Creates different atlases for color and red bitmap.
   auto color_atlas = lazy_atlas.CreateOrGetGlyphAtlas(
@@ -221,7 +222,7 @@ TEST_P(TypographerTest, GlyphAtlasWithLotsOfdUniqueGlyphSize) {
   size_t size_count = 8;
   for (size_t index = 0; index < size_count; index += 1) {
     MakeTextFrameFromTextBlobSkia(blob)->CollectUniqueFontGlyphPairs(
-        font_glyph_map, 0.6 * index);
+        font_glyph_map, 0.6 * index, {0, 0});
   };
   auto atlas =
       context->CreateGlyphAtlas(*GetContext(), GlyphAtlas::Type::kAlphaBitmap,
@@ -231,14 +232,15 @@ TEST_P(TypographerTest, GlyphAtlasWithLotsOfdUniqueGlyphSize) {
 
   std::set<uint16_t> unique_glyphs;
   std::vector<uint16_t> total_glyphs;
-  atlas->IterateGlyphs(
-      [&](const ScaledFont& scaled_font, const Glyph& glyph, const Rect& rect) {
-        unique_glyphs.insert(glyph.index);
-        total_glyphs.push_back(glyph.index);
-        return true;
-      });
+  atlas->IterateGlyphs([&](const ScaledFont& scaled_font,
+                           const SubpixelGlyph& glyph, const Rect& rect) {
+    unique_glyphs.insert(glyph.glyph.index);
+    total_glyphs.push_back(glyph.glyph.index);
+    return true;
+  });
 
-  EXPECT_EQ(unique_glyphs.size() * size_count, atlas->GetGlyphCount());
+  // These numbers may be different due to subpixel positions.
+  EXPECT_LE(unique_glyphs.size() * size_count, atlas->GetGlyphCount());
   EXPECT_EQ(total_glyphs.size(), atlas->GetGlyphCount());
 
   EXPECT_TRUE(atlas->GetGlyphCount() > 0);
@@ -281,22 +283,6 @@ TEST_P(TypographerTest, GlyphAtlasTextureIsRecycledIfUnchanged) {
 
   ASSERT_EQ(second_texture, first_texture);
   ASSERT_EQ(old_packer, new_packer);
-}
-
-TEST_P(TypographerTest, MaybeHasOverlapping) {
-  sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
-  sk_sp<SkTypeface> typeface =
-      font_mgr->matchFamilyStyle("Arial", SkFontStyle::Normal());
-  SkFont sk_font(typeface, 0.5f);
-
-  auto frame =
-      MakeTextFrameFromTextBlobSkia(SkTextBlob::MakeFromString("1", sk_font));
-  // Single character has no overlapping
-  ASSERT_FALSE(frame->MaybeHasOverlapping());
-
-  auto frame_2 = MakeTextFrameFromTextBlobSkia(
-      SkTextBlob::MakeFromString("123456789", sk_font));
-  ASSERT_FALSE(frame_2->MaybeHasOverlapping());
 }
 
 TEST_P(TypographerTest, GlyphColorIsPartOfCacheKey) {

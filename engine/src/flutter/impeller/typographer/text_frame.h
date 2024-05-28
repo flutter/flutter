@@ -27,7 +27,15 @@ class TextFrame {
 
   ~TextFrame();
 
-  void CollectUniqueFontGlyphPairs(FontGlyphMap& glyph_map, Scalar scale) const;
+  void CollectUniqueFontGlyphPairs(FontGlyphMap& glyph_map,
+                                   Scalar scale,
+                                   Point offset) const;
+
+  static Point ComputeSubpixelPosition(
+      const TextRun::GlyphPosition& glyph_position,
+      AxisAlignment alignment,
+      Point offset,
+      Scalar scale);
 
   static Scalar RoundScaledFontSize(Scalar scale, Scalar point_size);
 
@@ -52,16 +60,6 @@ class TextFrame {
   /// @return     The runs in this frame.
   ///
   const std::vector<TextRun>& GetRuns() const;
-
-  //----------------------------------------------------------------------------
-  /// @brief      Whether any of the glyphs of this run are potentially
-  /// overlapping
-  ///
-  ///             It is always safe to return true from this method. Generally,
-  ///             any large blobs of text should return true to avoid
-  ///             computationally complex calculations. This information is used
-  ///             to apply opacity peephole optimizations to text blobs.
-  bool MaybeHasOverlapping() const;
 
   //----------------------------------------------------------------------------
   /// @brief      Returns the paint color this text frame was recorded with.

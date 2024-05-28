@@ -92,9 +92,9 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
         builder_->DrawPath(transformed, dl_paints_[paint_id]);
         return;
       }
-
-      builder_->DrawTextFrame(impeller::MakeTextFrameFromTextBlobSkia(blob, dl_paints_[paint_id].getColor()), x,
-                              y, dl_paints_[paint_id]);
+      builder_->DrawTextFrame(impeller::MakeTextFrameFromTextBlobSkia(
+                                  blob, dl_paints_[paint_id].getColor()),
+                              x, y, dl_paints_[paint_id]);
       return;
     }
 #endif  // IMPELLER_SUPPORTS_RENDERING
@@ -116,8 +116,9 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
       paint.setMaskFilter(&filter);
     }
     if (impeller_enabled_) {
-      builder_->DrawTextFrame(impeller::MakeTextFrameFromTextBlobSkia(blob, paint.getColor()), x,
-                              y, paint);
+      builder_->DrawTextFrame(
+          impeller::MakeTextFrameFromTextBlobSkia(blob, paint.getColor()), x, y,
+          paint);
       return;
     }
     builder_->DrawTextBlob(blob, x, y, paint);
