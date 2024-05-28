@@ -1016,6 +1016,11 @@ class _ActionSheetButtonListenerState extends State<_ActionSheetButtonListener> 
   }
 }
 
+// The divider of an action sheet.
+//
+// If the divider is not `hidden`, then it displays the `dividerColor`.
+// Otherwise it displays the background color. A divider is hidden when either
+// of its neighbor button is pressed.
 class _ActionSheetDivider extends StatelessWidget {
   const _ActionSheetDivider({
     super.key,
@@ -1057,6 +1062,10 @@ class _ActionSheetMainSheet extends StatefulWidget {
   _ActionSheetMainSheetState createState() => _ActionSheetMainSheetState();
 }
 
+// The keys used by the dividers in the action section of an action sheet.
+//
+// The buttons and the dividers are placed alternately, both keyed by indexes.
+// Dividers use this special class so that their indexes can be told apart.
 class _DividerKey extends ValueKey<int> {
   const _DividerKey(super.value);
 }
@@ -1067,13 +1076,13 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
   double _bottomOverscroll = 0;
 
   Widget _buildActionSection() {
-    final List<Widget>? actions = widget.actions;
-    if (actions == null || actions.isEmpty) {
+    if (!_hasActions()) {
       return const LimitedBox(
         maxWidth: 0,
         child: SizedBox(width: double.infinity, height: 0),
       );
     }
+    final List<Widget> actions = widget.actions!;
     final List<Widget> column = <Widget>[];
     for (int actionIdx = 0; actionIdx < actions.length; actionIdx += 1) {
       if (actionIdx != 0) {
@@ -1106,6 +1115,10 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
     );
   }
 
+  // Fills the overscroll area at the top and bottom of the sheet. This is
+  // necessary because the action section's background is rendered by the
+  // buttons, so that a button's background can be _replaced_ by a different
+  // color when the button is pressed.
   Widget _buildOverscroll() {
     final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
     return Column(
@@ -1135,7 +1148,7 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
 
   bool _hasActions() => (widget.actions?.length ?? 0) != 0;
 
-  Widget _buildContent(bool hasActions, double maxHeight) {
+  Widget _buildContent({required bool hasActions, required double maxHeight}) {
     if (!hasActions) {
       return Flexible(
         child: widget.contentSection,
@@ -1151,15 +1164,21 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
 
   @override
   Widget build(BuildContext context) {
+    // If both the content section and the action section overflow, the content
+    // section takes priority but must leave at least `actionsMinHeight` for the
+    // action section.
+    const double actionsMinHeight = 87;
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            _buildContent(_hasActions(), constraints.maxHeight - 87),
+            _buildContent(
+              hasActions: _hasActions(),
+              maxHeight: constraints.maxHeight - actionsMinHeight,
+            ),
             if (widget.hasContent && _hasActions())
               _ActionSheetDivider(
-                key: const _DividerKey(0),
                 dividerColor: widget.dividerColor,
                 hidden: false,
               ),
