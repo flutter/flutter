@@ -456,7 +456,7 @@ class _ActionSheetGestureDetector extends StatefulWidget {
   /// Gesture detectors can contribute semantic information to the tree that is
   /// used by assistive technology. The behavior can be configured by
   /// [semantics], or disabled with [excludeFromSemantics].
-  _ActionSheetGestureDetector({
+  const _ActionSheetGestureDetector({
     super.key,
     this.onDown,
     this.onPanUpdate,
@@ -659,9 +659,11 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     super.dispose();
   }
 
+  bool hasContent() => widget.title != null || widget.message != null;
+
   Widget _buildContent(BuildContext context) {
     final List<Widget> content = <Widget>[];
-    if (widget.title != null || widget.message != null) {
+    if (hasContent()) {
       final Widget titleSection = _CupertinoAlertContentSection(
         title: widget.title,
         message: widget.message,
@@ -751,7 +753,6 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
   }
 
   void _onGestureEnd(DragEndDetails details) {
-    print('_onGestureEnd $_currentAvatars');
     _updateDrag(details.globalPosition);
     for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
       avatar.didConfirm();
@@ -760,7 +761,6 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
   }
 
   void _onGestureCancel() {
-    print('_onGestureCancel $_currentAvatars');
     for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
       avatar.didLeave();
     }
@@ -777,8 +777,9 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
           borderRadius: const BorderRadius.all(Radius.circular(12.0)),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
-            child: _ActionSheetScaffold(
+            child: _ActionSheetMainSheet(
               scrollController: _effectiveActionScrollController,
+              hasContent: hasContent(),
               contentSection: Builder(builder: _buildContent),
               actions: widget.actions,
               dividerColor: _kActionSheetButtonDividerColor,
@@ -805,11 +806,9 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
           child: CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.elevated,
             child: Padding(
-              padding: const EdgeInsets.only(
-                left: _kActionSheetEdgeHorizontalPadding,
-                right: _kActionSheetEdgeHorizontalPadding,
-                bottom: _kActionSheetEdgeVerticalPadding,
-                top: 55,
+              padding: const EdgeInsets.symmetric(
+                horizontal: _kActionSheetEdgeHorizontalPadding,
+                vertical: _kActionSheetEdgeVerticalPadding,
               ),
               child: SizedBox(
                 width: actionSheetWidth - _kActionSheetEdgeHorizontalPadding * 2,
@@ -1017,42 +1016,55 @@ class _ActionSheetButtonListenerState extends State<_ActionSheetButtonListener> 
   }
 }
 
-class _ActionSheetScaffold extends StatefulWidget {
-  _ActionSheetScaffold({
+class _ActionSheetDivider extends StatelessWidget {
+  const _ActionSheetDivider({
+    super.key,
+    required this.dividerColor,
+    required this.hidden,
+  });
+
+  final Color dividerColor;
+  final bool hidden;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
+    return Container(
+      height: 1,
+      decoration: BoxDecoration(
+        color: hidden ? backgroundColor : dividerColor,
+      ),
+    );
+  }
+}
+
+class _ActionSheetMainSheet extends StatefulWidget {
+  const _ActionSheetMainSheet({
     required this.scrollController,
     required this.actions,
+    required this.hasContent,
     required this.contentSection,
     required this.dividerColor,
   });
 
   final ScrollController? scrollController;
   final List<Widget>? actions;
+  final bool hasContent;
   final Widget contentSection;
   final Color dividerColor;
 
   @override
-  _ActionSheetScaffoldState createState() => _ActionSheetScaffoldState();
+  _ActionSheetMainSheetState createState() => _ActionSheetMainSheetState();
 }
 
 class _DividerKey extends ValueKey<int> {
   const _DividerKey(super.value);
 }
 
-class _ActionSheetScaffoldState extends State<_ActionSheetScaffold> {
+class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
   int? _pressedAction;
   double _topOverscroll = 0;
   double _bottomOverscroll = 0;
-
-  Widget _buildDivider({required int key, required bool hidden}) {
-    final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
-    return Container(
-      key: _DividerKey(key),
-      height: 1,
-      decoration: BoxDecoration(
-        color: hidden ? backgroundColor : widget.dividerColor,
-      ),
-    );
-  }
 
   Widget _buildActionSection() {
     final List<Widget>? actions = widget.actions;
@@ -1065,8 +1077,9 @@ class _ActionSheetScaffoldState extends State<_ActionSheetScaffold> {
     final List<Widget> column = <Widget>[];
     for (int actionIdx = 0; actionIdx < actions.length; actionIdx += 1) {
       if (actionIdx != 0) {
-        column.add(_buildDivider(
-          key: actionIdx,
+        column.add(_ActionSheetDivider(
+          key: _DividerKey(actionIdx),
+          dividerColor: widget.dividerColor,
           hidden: _pressedAction == actionIdx - 1 || _pressedAction == actionIdx,
         ));
       }
@@ -1120,6 +1133,8 @@ class _ActionSheetScaffoldState extends State<_ActionSheetScaffold> {
     return false;
   }
 
+  bool _hasActions() => (widget.actions?.length ?? 0) != 0;
+
   @override
   Widget build(BuildContext context) {
     return NotificationListener<ScrollUpdateNotification>(
@@ -1128,7 +1143,12 @@ class _ActionSheetScaffoldState extends State<_ActionSheetScaffold> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           widget.contentSection,
-          _buildDivider(key: 0, hidden: false),
+          if (widget.hasContent && _hasActions())
+            _ActionSheetDivider(
+              key: const _DividerKey(0),
+              dividerColor: widget.dividerColor,
+              hidden: false,
+            ),
           Flexible(
             child: Stack(
               children: <Widget>[
@@ -1803,50 +1823,6 @@ class _CupertinoAlertContentSection extends StatelessWidget {
     );
   }
 }
-
-// The "actions section" of a [CupertinoAlertDialog].
-//
-// See [_RenderCupertinoDialogActions] for details about action button sizing
-// and layout.
-class _CupertinoActionSheetActionSection extends StatelessWidget {
-  const _CupertinoActionSheetActionSection({
-    required this.children,
-    this.scrollController,
-    this.hasCancelButton = false,
-  });
-
-  final List<Widget> children;
-
-  // A scroll controller that can be used to control the scrolling of the
-  // actions in the dialog.
-  //
-  // Defaults to null, and is typically not needed, since most alert dialogs
-  // don't have many actions.
-  final ScrollController? scrollController;
-
-  // Used in ActionSheet to denote if ActionSheet has a separate so-called
-  // cancel button.
-  //
-  // Defaults to false, and is not needed in dialogs.
-  final bool hasCancelButton;
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoScrollbar(
-      controller: scrollController,
-      child: SingleChildScrollView(
-        controller: scrollController,
-        child: _CupertinoDialogActionsRenderWidget(
-          actionButtons: children,
-          dividerThickness: _kDividerThickness,
-          hasCancelButton: hasCancelButton,
-          isActionSheet: true,
-        ),
-      ),
-    );
-  }
-}
-
 
 // The "actions section" of a [CupertinoAlertDialog].
 //
