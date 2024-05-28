@@ -41,9 +41,6 @@ def get_out_dir(args):
   if args.android_cpu != 'arm':
     target_dir.append(args.android_cpu)
 
-  if args.ios_cpu != 'arm64':
-    target_dir.append(args.ios_cpu)
-
   if args.mac_cpu != 'x64':
     target_dir.append(args.mac_cpu)
 
@@ -183,7 +180,7 @@ def get_target_cpu(args):
   if args.target_os == 'ios':
     if args.simulator:
       return args.simulator_cpu
-    return args.ios_cpu
+    return 'arm64'
   if args.target_os == 'mac':
     return args.mac_cpu
   if args.target_os == 'linux':
@@ -917,7 +914,6 @@ def parse_args(args):
       '--android-cpu', type=str, choices=['arm', 'x64', 'x86', 'arm64'], default='arm'
   )
   parser.add_argument('--ios', dest='target_os', action='store_const', const='ios')
-  parser.add_argument('--ios-cpu', type=str, choices=['arm', 'arm64'], default='arm64')
   parser.add_argument('--mac', dest='target_os', action='store_const', const='mac')
   parser.add_argument('--mac-cpu', type=str, choices=['x64', 'arm64'], default='x64')
   parser.add_argument(
@@ -1229,12 +1225,6 @@ def validate_args(args):
     if args.mac_cpu != 'x64':
       print(
           'Specified a non-default mac-cpu for a simulator build. Did you mean '
-          'to use `--simulator-cpu`?'
-      )
-      valid = False
-    if args.ios_cpu != 'arm64':
-      print(
-          'Specified a non-default ios-cpu for a simulator build. Did you mean '
           'to use `--simulator-cpu`?'
       )
       valid = False
