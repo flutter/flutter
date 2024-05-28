@@ -116,7 +116,6 @@ class SearchAnchor extends StatefulWidget {
     this.isFullScreen,
     this.searchController,
     this.viewBuilder,
-    this.sliverViewBuilder,
     this.viewLeading,
     this.viewTrailing,
     this.viewHintText,
@@ -137,7 +136,7 @@ class SearchAnchor extends StatefulWidget {
     required this.suggestionsBuilder,
     this.textInputAction,
     this.keyboardType,
-  }): assert(viewBuilder == null || sliverViewBuilder == null);
+  });
 
   /// Create a [SearchAnchor] that has a [SearchBar] which opens a search view.
   ///
@@ -166,7 +165,6 @@ class SearchAnchor extends StatefulWidget {
     MaterialStateProperty<TextStyle?>? barTextStyle,
     MaterialStateProperty<TextStyle?>? barHintStyle,
     ViewBuilder? viewBuilder,
-    ViewBuilder? sliverViewBuilder,
     Widget? viewLeading,
     Iterable<Widget>? viewTrailing,
     String? viewHintText,
@@ -206,14 +204,8 @@ class SearchAnchor extends StatefulWidget {
   /// Optional callback to obtain a widget to lay out the suggestion list of the
   /// search view.
   ///
-  /// Default view uses a [SliverList] with a vertical scroll direction.
+  /// Default view uses a [ListView] with a vertical scroll direction.
   final ViewBuilder? viewBuilder;
-
-  /// Optional callback to obtain a sliver to lay out the suggestion list of the
-  /// search view.
-  ///
-  /// Default view uses a [SliverList] with a vertical scroll direction.
-  final ViewBuilder? sliverViewBuilder;
 
   /// An optional widget to display before the text input field when the search
   /// view is open.
@@ -426,7 +418,6 @@ class _SearchAnchorState extends State<SearchAnchor> {
       toggleVisibility: toggleVisibility,
       textDirection: Directionality.of(context),
       viewBuilder: widget.viewBuilder,
-      sliverViewBuilder: widget.sliverViewBuilder,
       anchorKey: _anchorKey,
       searchController: _searchController,
       suggestionsBuilder: widget.suggestionsBuilder,
@@ -479,7 +470,6 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     this.toggleVisibility,
     this.textDirection,
     this.viewBuilder,
-    this.sliverViewBuilder,
     this.viewLeading,
     this.viewTrailing,
     this.viewHintText,
@@ -508,7 +498,6 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final ValueGetter<bool>? toggleVisibility;
   final TextDirection? textDirection;
   final ViewBuilder? viewBuilder;
-  final ViewBuilder? sliverViewBuilder;
   final Widget? viewLeading;
   final Iterable<Widget>? viewTrailing;
   final String? viewHintText;
@@ -682,7 +671,6 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
                 viewMaxWidth: _rectTween.end!.width,
                 viewRect: viewRect,
                 viewBuilder: viewBuilder,
-                sliverViewBuilder: sliverViewBuilder,
                 searchController: searchController,
                 suggestionsBuilder: suggestionsBuilder,
                 textCapitalization: textCapitalization,
@@ -705,7 +693,6 @@ class _ViewContent extends StatefulWidget {
     this.viewOnChanged,
     this.viewOnSubmitted,
     this.viewBuilder,
-    this.sliverViewBuilder,
     this.viewLeading,
     this.viewTrailing,
     this.viewHintText,
@@ -733,7 +720,6 @@ class _ViewContent extends StatefulWidget {
   final ValueChanged<String>? viewOnChanged;
   final ValueChanged<String>? viewOnSubmitted;
   final ViewBuilder? viewBuilder;
-  final ViewBuilder? sliverViewBuilder;
   final Widget? viewLeading;
   final Iterable<Widget>? viewTrailing;
   final String? viewHintText;
@@ -848,18 +834,18 @@ class _ViewContentState extends State<_ViewContent> {
   }
 
   Widget viewBuilder(Iterable<Widget> suggestions) {
-    final ViewBuilder? builder = widget.viewBuilder;
-    final ViewBuilder? sliverBuilder = widget.sliverViewBuilder;
-    if (builder != null) {
-      return SliverToBoxAdapter(child: builder(suggestions));
-    } else if (sliverBuilder != null) {
-      return sliverBuilder(suggestions);
-    } else {
-      return SliverList.builder(
-        itemCount: suggestions.length,
-        itemBuilder: (BuildContext context, int index) => suggestions.elementAt(index),
+    if (widget.viewBuilder == null) {
+      return MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: suggestions.length,
+          itemBuilder: (BuildContext context, int index) => suggestions.elementAt(index),
+        ),
       );
     }
+    return widget.viewBuilder!(suggestions);
   }
 
   Future<void> updateSuggestions() async {
@@ -992,14 +978,10 @@ class _ViewContentState extends State<_ViewContent> {
                       child: viewDivider,
                     ),
                     Flexible(
+                      fit: widget.showFullScreenView ? FlexFit.tight : FlexFit.loose,
                       child: FadeTransition(
                         opacity: viewListFadeOnIntervalCurve,
-                        child: CustomScrollView(
-                          shrinkWrap: !widget.showFullScreenView,
-                          slivers: <Widget>[
-                            viewBuilder(result),
-                          ],
-                        ),
+                        child: viewBuilder(result),
                       ),
                     ),
                   ],
@@ -1028,7 +1010,6 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     MaterialStateProperty<TextStyle?>? barTextStyle,
     MaterialStateProperty<TextStyle?>? barHintStyle,
     super.viewBuilder,
-    super.sliverViewBuilder,
     super.viewLeading,
     super.viewTrailing,
     String? viewHintText,
