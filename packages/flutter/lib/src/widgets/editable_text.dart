@@ -314,7 +314,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// If the new selection is outside the composing range, the composing range is
   /// cleared.
   set selection(TextSelection newSelection) {
-    if (!_isSelectionWithinTextBounds(newSelection)) {
+    if (text.length < newSelection.end || text.length < newSelection.start) {
       throw FlutterError('invalid text selection: $newSelection');
     }
     final TextRange newComposing = _isSelectionWithinComposingRange(newSelection) ? value.composing : TextRange.empty;
@@ -346,11 +346,6 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// actions, not during the build, layout, or paint phases.
   void clearComposing() {
     value = value.copyWith(composing: TextRange.empty);
-  }
-
-  /// Check that the [selection] is inside of the bounds of [text].
-  bool _isSelectionWithinTextBounds(TextSelection selection) {
-    return selection.start <= text.length && selection.end <= text.length;
   }
 
   /// Check that the [selection] is inside of the composing range.
@@ -3953,7 +3948,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // We return early if the selection is not valid. This can happen when the
     // text of [EditableText] is updated at the same time as the selection is
     // changed by a gesture event.
-    if (!widget.controller._isSelectionWithinTextBounds(selection)) {
+    final String text = widget.controller.value.text;
+    if (text.length < selection.end || text.length < selection.start) {
       return;
     }
 

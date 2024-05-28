@@ -17654,6 +17654,27 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('Can implement TextEditingController', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            autofocus: true,
+            backgroundCursorColor: Colors.grey,
+            controller: _TextEditingControllerImpl(),
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class UnsettableController extends TextEditingController {
@@ -18014,6 +18035,36 @@ class _AccentColorTextEditingController extends TextEditingController {
     final Color color = Theme.of(context).colorScheme.secondary;
     return super.buildTextSpan(context: context, style: TextStyle(color: color), withComposing: withComposing);
   }
+}
+
+class _TextEditingControllerImpl extends ChangeNotifier implements TextEditingController {
+  final TextEditingController _innerController = TextEditingController();
+
+  @override
+  void clear() => _innerController.clear();
+
+  @override
+  void clearComposing() => _innerController.clearComposing();
+
+  @override
+  TextSelection get selection => _innerController.selection;
+  @override
+  set selection(TextSelection newSelection) => _innerController.selection = newSelection;
+
+  @override
+  String get text => _innerController.text;
+  @override
+  set text(String newText) => _innerController.text = newText;
+
+  @override
+  TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
+    return _innerController.buildTextSpan(context: context, style: style, withComposing: withComposing);
+  }
+
+  @override
+  TextEditingValue get value => _innerController.value;
+  @override
+  set value(TextEditingValue newValue) => _innerController.value = newValue;
 }
 
 class _TestScrollController extends ScrollController {
