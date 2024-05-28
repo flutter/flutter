@@ -45,7 +45,7 @@ We may sometimes gate features behind flags until we are confident of their qual
 
 ## 🤣‬ Have fun doing it
 
-Last, but definitely not least, we want to make sure that our work environment is pleasant for everyone involved. Your health and the health of your family and friends is more important than Flutter. Our community [is welcoming](https://github.com/flutter/flutter/blob/main/CODE_OF_CONDUCT.md). We don't know everything; all of us can make mistakes.
+Last, but definitely not least, we want to make sure that our work environment is pleasant for everyone involved. Your health and the health of your family and friends is more important than Flutter. Our community [is welcoming](../../CODE_OF_CONDUCT.md). We don't know everything; all of us can make mistakes.
 
 We want team members to feel empowered to make changes to the code and to our processes.
 
@@ -70,7 +70,7 @@ The list of supported platforms on flutter.dev is describing the platforms suppo
 
 For each area, we consider the level to which we provide support:
 
-0. We will literally help you with your code if things don't work. This is very rare. (See also "[top-tier customers](https://github.com/flutter/flutter/wiki/Issue-hygiene#customers)".)
+0. We will literally help you with your code if things don't work. This is very rare. (See also "[top-tier customers](../contributing/issue_hygiene/README.md#customers)".)
 
 1. We will make a best effort to ensure that well written code works (e.g. we have testing on that platform). This is a common level for target platforms that have reached a label of "stable" (e.g. Android, iOS) on devices that are widely available (e.g. 64bit ARM). This corresponds to the "Supported Google-tested platforms" category on the list of supported platforms.
 
@@ -89,7 +89,7 @@ For each area, we consider the level to which we provide support:
 
 _See also:_
 
-* [Code of Conduct](https://github.com/flutter/flutter/blob/main/CODE_OF_CONDUCT.md)
-* [Contributor Guide](https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md)
+* [Code of Conduct](../../CODE_OF_CONDUCT.md)
+* [Contributor Guide](../../CONTRIBUTING.md)
 * [Flutter's Culture of Inclusivity](https://flutter.dev/culture)
 * [Flutter culture and how to preserve it](https://medium.com/flutter/flutter-culture-and-how-to-preserve-it-436b4ed1031d)
