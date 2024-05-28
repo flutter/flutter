@@ -15,10 +15,14 @@
 namespace impeller {
 
 namespace {
-// Generous padding to make sure blurs with large sigmas are fully visible.
-// Used to expand the geometry around the rrect.
+// Generous padding to make sure blurs with large sigmas are fully visible. Used
+// to expand the geometry around the rrect.  Larger sigmas have more subtle
+// gradients so they need larger padding to avoid hard cutoffs.  Sigma is
+// maximized to 3.5 since that should cover 99.95% of all samples.  3.0 should
+// cover 99.7% but that was seen to be not enough for large sigmas.
 Scalar PadForSigma(Scalar sigma) {
-  return sigma * 4.0;
+  Scalar scalar = std::min((1.0f / 47.6f) * sigma + 2.5f, 3.5f);
+  return sigma * scalar;
 }
 }  // namespace
 
