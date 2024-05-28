@@ -986,7 +986,7 @@ class _ViewContentState extends State<_ViewContent> {
                       ),
                     ),
                   ),
-                  if (widget.showFullScreenView || (_controller.isOpen && result.isNotEmpty)) ...<Widget>[
+                  if (_controller.isOpen && (widget.showFullScreenView || result.isNotEmpty)) ...<Widget>[
                     FadeTransition(
                       opacity: viewDividerFadeCurve,
                       child: viewDivider,
