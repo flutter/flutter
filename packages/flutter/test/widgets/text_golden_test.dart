@@ -10,7 +10,6 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgets('Centered text', (WidgetTester tester) async {
@@ -189,11 +188,7 @@ void main() {
     );
   });
 
-  testWidgets(
-    'Text Fade',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-    (WidgetTester tester) async {
+  testWidgets('Text Fade', (WidgetTester tester) async {
       await tester.pumpWidget(
           MaterialApp(
             theme: ThemeData(useMaterial3: false),
