@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/material/menu_anchor/menu_anchor.3.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'examples/api/lib/material/menu_anchor/menu_anchor.3.dart';
 
 void main() {
   group('SimpleCascadingMenu Tests', () {
@@ -14,7 +15,7 @@ void main() {
       await tester.pumpWidget(const MaterialApp(home: MyCascadingMenu()));
 
       // Find the menu button.
-      final menuButton = find.byType(IconButton);
+      final Finder menuButton = find.byType(IconButton);
 
       // Tap the menu button to open the menu.
       await tester.tap(menuButton);
@@ -40,7 +41,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             appBar: AppBar(
-              actions: [
+              actions: <Widget>[
                 MenuAnchor(
                   childFocusNode: FocusNode(debugLabel: 'Menu Button'),
                   menuChildren: <Widget>[
@@ -79,14 +80,14 @@ void main() {
       );
 
       // Find the menu button.
-      final menuButton = find.byType(IconButton);
+      final Finder menuButton = find.byType(IconButton);
 
       // Tap the menu button to open the menu.
       await tester.tap(menuButton);
       await tester.pump();
 
       // Find the "Revert" menu item.
-      final revertItem = find.text('Revert');
+      final Finder revertItem = find.text('Revert');
 
       // Tap the "Revert" menu item.
       await tester.tap(revertItem);
