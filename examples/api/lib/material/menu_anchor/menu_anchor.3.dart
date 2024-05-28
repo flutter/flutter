@@ -84,7 +84,7 @@ class SimpleCascadingMenuApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(
           title: const Text('MenuAnchor Simple Example'),
-          actions: const [
+          actions: const <Widget>[
             MyCascadingMenu(),
           ],
         ),
