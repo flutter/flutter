@@ -573,6 +573,26 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
     g_warning("Failed to enable accessibility features on Flutter engine");
   }
 
+  gdouble refresh_rate = fl_renderer_get_refresh_rate(self->renderer);
+  // FlutterEngineDisplay::refresh_rate expects 0 if the refresh rate is
+  // unknown.
+  if (refresh_rate <= 0.0) {
+    refresh_rate = 0.0;
+  }
+  FlutterEngineDisplay display = {};
+  display.struct_size = sizeof(FlutterEngineDisplay);
+  display.display_id = 0;
+  display.single_display = true;
+  display.refresh_rate = refresh_rate;
+
+  std::vector displays = {display};
+  result = self->embedder_api.NotifyDisplayUpdate(
+      self->engine, kFlutterEngineDisplaysUpdateTypeStartup, displays.data(),
+      displays.size());
+  if (result != kSuccess) {
+    g_warning("Failed to notify display update to Flutter engine: %d", result);
+  }
+
   return TRUE;
 }
 

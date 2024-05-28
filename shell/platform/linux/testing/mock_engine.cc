@@ -513,6 +513,14 @@ FlutterEngineResult FlutterEngineUnregisterExternalTexture(
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineNotifyDisplayUpdate(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterEngineDisplaysUpdateType update_type,
+    const FlutterEngineDisplay* displays,
+    size_t display_count) {
+  return kSuccess;
+}
+
 }  // namespace
 
 FlutterEngineResult FlutterEngineGetProcAddresses(
@@ -552,5 +560,6 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   table->UnregisterExternalTexture = &FlutterEngineUnregisterExternalTexture;
   table->UpdateAccessibilityFeatures =
       &FlutterEngineUpdateAccessibilityFeatures;
+  table->NotifyDisplayUpdate = &FlutterEngineNotifyDisplayUpdate;
   return kSuccess;
 }
