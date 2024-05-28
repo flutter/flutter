@@ -1,6 +1,6 @@
 ## tl;dr
 
-- Regressions should be [reverted first](https://github.com/flutter/flutter/wiki/Landing-Changes-With-Autosubmit) and questions asked later. Bringing the tree to green is higher priority.
+- Regressions should be [reverted first](../infra/Landing-Changes-With-Autosubmit.md) and questions asked later. Bringing the tree to green is higher priority.
 - A breaking change is one that breaks the tests in the flutter/tests repo, and those need a migration guide.
 - Expect that a new patch will be reviewed within two weeks, unless it is fixing a P0 bug in which case it should be reviewed the same day. If it has not been reviewed in that timeframe, reach out on [Chat](Chat.md). Remember that reviewers are human beings with additional professional and personal responsibilities.
 
@@ -111,7 +111,7 @@ Feel free to update the bot's logic to catch more cases that should be automatic
 ## Using git
 
 Assuming your environment has been configured according to the instructions in
-[Setting up the Engine development environment](../engine/dev/Setting-up-the-Engine-development-environment.md),
+[Setting up the Engine development environment](../engine/contributing/Setting-up-the-Engine-development-environment.md),
 [Setting up the Framework development environment](Setting-up-the-Framework-development-environment.md), or
 [Setting up the Packages development environment](../ecosystem/contributing/Setting-up-the-Packages-development-environment.md),
 follow these steps to start working on a patch:
@@ -187,7 +187,7 @@ saying what your patch does and providing a link.
 
 ### Who
 
-PRs are assigned reviewers weekly. The precise process varies by team but tends to be combined with issue [triage](https://github.com/flutter/flutter/wiki/Triage).
+PRs are assigned reviewers weekly. The precise process varies by team but tends to be combined with issue [triage](../triage/README.md).
 
 Code should be reviewed by the owner (tech lead) of the area(s) of the codebase that you are changing,
 or someone to whom they have delegated that authority.
@@ -283,7 +283,7 @@ revert (roll back) the check-in (even if it isn't yours). Do not attempt to forw
 
 There is no shame in making mistakes! Reverts happen all the time and are a normal part of engineering.
 
-To revert a PR, just add the `revert` label to it. _For more details, see [Landing Changes With Autosubmit](https://github.com/flutter/flutter/wiki/Landing-Changes-With-Autosubmit)._
+To revert a PR, just add the `revert` label to it. _For more details, see [Landing Changes With Autosubmit](../infra/Landing-Changes-With-Autosubmit.md)._
 
 
 ### Avoid "Revert "Revert "Revert "Revert "Fix foo"""" commit messages
@@ -334,7 +334,7 @@ way or have determined it is an acceptable trade-off).
 ### Performance regressions caused by auto-roller commits
 
 Although reverting a normal commit that caused performance regressions is the default
-behavior, reverting an [auto-roller](https://github.com/flutter/flutter/wiki/Autorollers)
+behavior, reverting an [auto-roller](../infra/Autorollers.md)
 (e.g., an engine-roller commit like https://github.com/flutter/flutter/commit/fdcb57b69eff2162e9aead6dec0f8058788e7608)
 commit could cause some complications:
 
@@ -383,7 +383,7 @@ Implement the change you wish to see and run the existing tests against your new
 The "contributed tests" are:
 
 * Those in the [`customer_testing`](https://github.com/flutter/tests) shard on `flutter/flutter` PRs.
-* Additional test suites that we have been allowed to run but that are not public. (Notably, Google allows us to run several tens of thousands of [proprietary tests](https://github.com/flutter/flutter/wiki/Understanding-Google-Testing) on each commit.)
+* Additional test suites that we have been allowed to run but that are not public. (Notably, Google allows us to run several tens of thousands of [proprietary tests](../infra/Understanding-Google-Testing.md) on each commit.)
 
 There are no exemptions to this policy, because these tests run in our CI and breaking them will close the tree.
 

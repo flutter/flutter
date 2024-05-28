@@ -14,7 +14,7 @@ You can then re-run `flutter update-packages --force-upgrade`.
 
 ## To update a single dependency for cherrypicks:
 
-Sometimes you need to update a single dependency as a [cherrypick to a release candidate branch](https://github.com/flutter/flutter/wiki/Flutter-Cherrypick-Process).
+Sometimes you need to update a single dependency as a [cherrypick to a release candidate branch](../releases/Flutter-Cherrypick-Process.md).
 
 In that case, you can run:
 

@@ -2,7 +2,7 @@
 
 Design doc: https://flutter.dev/go/impeller-dart
 
-Flutter GPU's runtime is a thin wrapper over [Impeller](https://github.com/flutter/flutter/wiki/Impeller)'s HAL, from which custom renderers may be entirely built using Dart. Just like with Impeller, Flutter GPU shader bundles are compiled ahead of time using [impellerc](https://github.com/flutter/engine/tree/main/impeller/compiler). As such, Flutter GPU is only available on platforms that support Impeller.
+Flutter GPU's runtime is a thin wrapper over [Impeller](README.md)'s HAL, from which custom renderers may be entirely built using Dart. Just like with Impeller, Flutter GPU shader bundles are compiled ahead of time using [impellerc](https://github.com/flutter/engine/tree/main/impeller/compiler). As such, Flutter GPU is only available on platforms that support Impeller.
 
 ## Dart FFI
 
@@ -45,5 +45,5 @@ If you run into issues while using Flutter GPU, please file a bug using the stan
 ## Questions or feedback?
 
 If you have non-bug report questions surrounding Flutter GPU, there are several ways you can reach out to the developer:
-* Create a thread in the #help channel of the [Discord server](https://github.com/flutter/flutter/wiki/Chat). Place "Flutter GPU" in the title of the thread and tag @bdero in the message.
+* Create a thread in the #help channel of the [Discord server](../../contributing/Chat.md). Place "Flutter GPU" in the title of the thread and tag @bdero in the message.
 * Send a Twitter DM to [@algebrandon](https://twitter.com/algebrandon).

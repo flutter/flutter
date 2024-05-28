@@ -95,10 +95,10 @@ proper fix for a problem rather than just applying a band-aid.
 When you fix a bug, first write a test that fails, then fix the bug
 and verify the test passes.
 
-When you implement a new feature, write tests for it. (See also: https://github.com/flutter/flutter/wiki/Running-and-writing-tests[Running and writing tests], and the section on writing tests below.)
+When you implement a new feature, write tests for it. (See also: [Running and writing tests](./testing/Running-and-writing-tests.md), and the section on writing tests below.)
 
 Check the code coverage
-to make sure every line of your new code is tested. See also: https://github.com/flutter/flutter/wiki/Test-coverage-for-package%3Aflutter[Test coverage for package:flutter].
+to make sure every line of your new code is tested. See also: [Test coverage for package:flutter](./testing/Test-coverage-for-package-flutter.md).
 
 If something isn't tested, it is very likely to regress or to get "optimized away".
 If you want your code to remain in the codebase, you should make sure to test it.
@@ -292,9 +292,9 @@ by real developers.
 
 ### Get early feedback when designing new APIs
 
-If you're designing a new API or a new feature, consider https://github.com/flutter/flutter/wiki/Chat#design-documents[writing a design doc].
+If you're designing a new API or a new feature, consider [writing a design doc](Design-Documents.md).
 Then, get feedback from the relevant people, e.g. send it to `flutter-dev` or
-post it on the https://github.com/flutter/flutter/wiki/Chat#existing-channels[relevant chat channel].
+post it on the [relevant chat channel](Chat.md#existing-channels).
 
 
 ### Start designing APIs from the closest point to the developer
@@ -327,7 +327,7 @@ Put yourself in the shoes of whoever sees that error message. Why did they see i
 
 ### Template values should set developers up for success
 
-Template defaults should focus on providing the best developer experience. Templates should help developers understand the code, be easy to run now and support in the future. Help developers by picking dependencies that are broadly used and/or broadly supported and by leaving https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#leave-breadcrumbs-in-the-comments[comments that are helpful].
+Template defaults should focus on providing the best developer experience. Templates should help developers understand the code, be easy to run now and support in the future. Help developers by picking dependencies that are broadly used and/or broadly supported and by leaving [comments that are helpful](#leave-breadcrumbs-in-the-comments).
 
 See flutter create's templates for an example.
 
@@ -376,7 +376,7 @@ All licenses included in this manner must have been reviewed and determined to b
 
 All such "third party code" must either be a fork for which we take full responsibility, or there must be an automated rolling mechanism that keeps the code up to date when the upstream source changes.
 
-In general it is _strongly_ recommended that we avoid any such code unless strictly necessary. In particular, we aim for all code in the flutter/flutter repository to be https://github.com/flutter/flutter/wiki/Why-we-have-a-separate-engine-repo#licensing?[single-licensed], which is why it does not contain any "third party code" at all.
+In general it is _strongly_ recommended that we avoid any such code unless strictly necessary. In particular, we aim for all code in the flutter/flutter repository to be [single-licensed](../about/Why-we-have-a-separate-engine-repo.md#licensing), which is why it does not contain any "third party code" at all.
 
 
 ## Documentation (dartdocs, javadocs, etc)
@@ -651,7 +651,7 @@ The first two arguments are the video's width and height. These should be `560` 
 
 ### Clearly mark deprecated APIs
 
-We have conventions around deprecation. See the https://github.com/flutter/flutter/wiki/Tree-hygiene#deprecation[Tree Hygiene] page for more details.
+We have conventions around deprecation. See the [Tree Hygiene](Tree-hygiene.md#deprecations) page for more details.
 
 
 ### Use `///` for public-quality private documentation

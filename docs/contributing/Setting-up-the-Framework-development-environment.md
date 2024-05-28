@@ -13,7 +13,7 @@
    Verify that `adb` is in your [PATH](https://en.wikipedia.org/wiki/PATH_(variable)) (that `which adb` prints sensible output).
 
    If you're
-   [also working on the Flutter engine](../engine/dev/Setting-up-the-Engine-development-environment.md),
+   [also working on the Flutter engine](../engine/contributing/Setting-up-the-Engine-development-environment.md),
    you can use the copy of the Android platform tools in
    `.../engine/src/third_party/android_tools/sdk/platform-tools`.
 
@@ -57,8 +57,8 @@
 
 Next steps:
 
- * [Running examples](https://github.com/flutter/flutter/wiki/Running-examples), to see if your setup works.
- * [The flutter tool](https://github.com/flutter/flutter/wiki/The-flutter-tool), to learn about how the `flutter` command line tool works.
+ * [Running examples](../examples/Running-examples.md), to see if your setup works.
+ * [The flutter tool](../tool/README.md), to learn about how the `flutter` command line tool works.
  * [Style guide for Flutter repo](Style-guide-for-Flutter-repo.md), to learn how to write code for Flutter.
  * [Tree hygiene](Tree-hygiene.md), to learn about how to submit patches.
  * [Signing commits](Signing-commits.md), to configure your environment to securely sign your commits.

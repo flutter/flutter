@@ -2,7 +2,7 @@ We are excited to have you tinker on [the Impeller Scene Demo presented at Flutt
 
 **Compiling the Engine**
 
-- Configure your Mac host to compile the Flutter Engine by [following the guidance in wiki](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment).
+- Configure your Mac host to compile the Flutter Engine by [following the guidance in wiki](../contributing/Setting-up-the-Engine-development-environment.md).
 - Ensure that you are on the [main branch of the Flutter Engine](https://github.com/flutter/engine/tree/main).
 - Ensure that you are on the [main branch of the Flutter Framework](https://github.com/flutter/flutter/tree/main).
 - Configure the host build: `./flutter/tools/gn --enable-impeller-3d --no-lto`

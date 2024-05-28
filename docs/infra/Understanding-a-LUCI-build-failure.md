@@ -25,15 +25,15 @@ An example build: [Linux color_filter_and_fade_perf__e2e_summary](https://ci.chr
 1. Check if the infra failure has happened on earlier builds by clicking (i)
 2. Check if issue already exists in the [infra bug pool](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22team%3A+infra%22)
 3. If not, file [an infra bug](https://github.com/flutter/flutter/issues/new?template=6_infrastructure.yml)
-4. If this is a blocking failure, please add Projects [`Infra Ticket Queue`](https://github.com/flutter/flutter/wiki/Infra-Ticket-Queue). The infra gardener will scan through the queue frequently.
+4. If this is a blocking failure, please add Projects [`Infra Ticket Queue`](./Infra-Ticket-Queue.md). The infra gardener will scan through the queue frequently.
 5. If you want to get an immediate help, please ask in the discord `hackers-infra` channel
 6. If this is an infra flake, and a retry is needed
    *  For pre-submit test, click `Re-run` in the [check run page](https://github.com/flutter/flutter/pull/83894/checks?check_run_id=2738146673). ![The presubmit rerun interface](https://github.com/flutter/assets-for-api-docs/blob/main/assets/wiki/luci_pre_submit_rerun.png)
       * Limited to `flutter-hackers` group.
-      * Ask a team member to re-run in [Chat](https://github.com/flutter/flutter/wiki/Chat) channel `#hackers-infra` if you don't have access.
+      * Ask a team member to re-run in [Chat](../contributing/Chat.md) channel `#hackers-infra` if you don't have access.
    *  For post-submit test, login to [framework build dashboard](https://flutter-dashboard.appspot.com/#/build), click the task box, and click `RERUN`. ![The post submit rerun interface](https://github.com/flutter/assets-for-api-docs/blob/main/assets/wiki/luci_post_submit_rerun.png)
       * Limited to Googlers currently due to some technical limitations of our infrastructure.
-      * Ask a Googler to re-run in [Chat](https://github.com/flutter/flutter/wiki/Chat) channel `#hackers-infra`.
+      * Ask a Googler to re-run in [Chat](../contributing/Chat.md) channel `#hackers-infra`.
 
 ## Test Failure
 A test failure shows up as a red box in the dashboards:

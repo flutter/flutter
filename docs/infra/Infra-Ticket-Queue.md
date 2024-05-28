@@ -14,7 +14,7 @@ This allows the team to separate their engineering work from ["toil" work](https
 
 IMPORTANT: Whenever you have a request for the infra team, please file a ticket instead of contacting team members directly, even for seemingly trivial things or even if an individual has done the same thing for you in the past. Infra on-call will be there to handle your request, and it lets non on-call team members focus on their engineering tasks.
 
-When in doubt, ask on the `#hackers-infra` channel in [Chat](https://github.com/flutter/flutter/wiki/Chat).
+When in doubt, ask on the `#hackers-infra` channel in [Chat](../contributing/Chat.md).
 
 # How to File a Ticket as an Infra Customer
 1. Open a [new infra issue](https://github.com/flutter/flutter/issues/new?template=6_infrastructure.yml). (That template summarizes the information on this page.)
@@ -38,7 +38,7 @@ Below are instructions for infra on-call on how to process the ticket queue. It 
 ## Triaging
 SLO: A ticket in the queue will be triaged within 4 business hours provided it is opened during regularly kept office hours (9 a.m. to 5 p.m. PST). Otherwise it will be triaged the following business day.
 
-The issue priorities can be found [here](https://github.com/flutter/flutter/wiki/Issue-hygiene#priorities). Issues that are **not P0 or P1** will still be seen (during the infra weekly triage meeting) but do not belong on the ticket queue.
+The issue priorities can be found [here](../contributing/issue_hygiene/README.md#priorities). Issues that are **not P0 or P1** will still be seen (during the infra weekly triage meeting) but do not belong on the ticket queue.
 
 New, un-triaged tickets will be in the **New** column in [the ticket queue](https://github.com/orgs/flutter/projects/81/views/1).
 
@@ -56,7 +56,7 @@ Once all tickets have been triaged, on-call's job is to service them. Apply judg
 
 From the top of the priority queue down, on-call makes sure that someone is working on each ticket. It's important to keep things moving if you see that they're stuck; try CC'ing people with more information and making it clear what a given ticket is blocked on.
 
-1. Set the assignee. Read the [guideline](https://github.com/flutter/flutter/wiki/Issue-hygiene#assigning-issues) first. In addition:
+1. Set the assignee. Read the [guideline](../contributing/issue_hygiene/README.md#assigning-issues) first. In addition:
     *   All tickets must be assigned to someone who is working on them.
 2. Start working on the ticket
     *   Set the status to "in progress", typically by dragging its card to the **In progress** column.

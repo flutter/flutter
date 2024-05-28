@@ -250,7 +250,7 @@ and senior leads want resolved to the attention of the appropriate engineering
 team.
 
 The `customer: crowd` label is used to represent bugs that are affecting large
-numbers of people; during initial [Triage](https://github.com/flutter/flutter/wiki/Triage), high-profile bugs get labeled in
+numbers of people; during initial [Triage](../../triage/README.md), high-profile bugs get labeled in
 this way to bring them to the attention of the engineering team. "Large numbers"
 is a judgement call. If dozens of people independently run into the same issue
 and file a bug and we end up realizing that they're all duplicates of each other,
@@ -336,7 +336,7 @@ If you have an idea that you would like to land, the recommended process is:
 
 Avoid filing issues that are on vague topics without a clear problem description.
 
-Please close issues that are not actionable. See [Triage](https://github.com/flutter/flutter/wiki/Triage) for more details.
+Please close issues that are not actionable. See [Triage](../../triage/README.md) for more details.
 
 #### Issues should have clear steps to reproduce
 
@@ -349,12 +349,12 @@ If an issue is lacking this information, request it from the commenter and close
 An issue should be closed if:
 
 * it is fixed!
-* it is a [duplicate](https://github.com/flutter/flutter/wiki/Triage#duplicates).
+* it is a [duplicate](../../triage/README.md#duplicates).
 * it makes multiple requests which could be addressed independently. Encourage people to file separate bugs for each independent item.
 * it is describing a _solution_ rather than a _problem_. For example, it has no use cases, and the use cases are not obvious, or might have other solutions.
-* it is not [actionable](https://github.com/flutter/flutter/wiki/Triage#what-makes-an-issue-actionable) and does not [have unusual symptoms](https://github.com/flutter/flutter/wiki/Triage#unactionable-bugs-with-unusual-symptoms). This covers a wide variety of cases, such as invalid bugs, bugs without steps to reproduce, bugs that have become irrelevant, or bugs that are unclear and which the reporter has not offered more details for. It also includes non-catastrophic bugs that cannot be reproduced by anyone but the original reporter. For this latter case, encourage the reporter to attempt to debug the issue themselves, potentially giving suggestions for places where they could instrument the code to find the issue, and invite them to join the Discord for help; then add the `waiting for customer response` label. The issue will get automatically closed after a few weeks if they don't respond.
+* it is not [actionable](../../triage/README.md#what-makes-an-issue-actionable) and does not [have unusual symptoms](../../triage/README.md#unactionable-bugs-with-unusual-symptoms). This covers a wide variety of cases, such as invalid bugs, bugs without steps to reproduce, bugs that have become irrelevant, or bugs that are unclear and which the reporter has not offered more details for. It also includes non-catastrophic bugs that cannot be reproduced by anyone but the original reporter. For this latter case, encourage the reporter to attempt to debug the issue themselves, potentially giving suggestions for places where they could instrument the code to find the issue, and invite them to join the Discord for help; then add the `waiting for customer response` label. The issue will get automatically closed after a few weeks if they don't respond.
 * it is a feature request that we are unlikely to ever address, and if we did address it, it would not be part of the core SDK (e.g. it would be in a package). (For example, anything in the [`would be a good package` `P3`](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22would+be+a+good+package%22+label%3AP3) list is a good candidate for closing without fixing.)
-* we would not accept a fix even if one were to be offered ([e.g. support for platforms at level of support 4](https://github.com/flutter/flutter/wiki/Values#levels-of-support)).
+* we would not accept a fix even if one were to be offered ([e.g. support for platforms at level of support 4](../../about/Values.md#levels-of-support)).
 * it is an issue regarding internal processes, tooling, or infrastructure (i.e. something that our users are not affected by), that we have no plans to get to (e.g. that would be marked P3). (For example, anything in the [`c: tech-debt` `P3`](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22c%3A+tech-debt%22+label%3AP3) list is a good candidate for closing.)
 * it is tracking technical debt but the suggested improvements are marginal at best or would require significant research to be evaluated. Prefer having folks who work in the relevant part of the code make improvements based on their judgment.
 
@@ -384,4 +384,4 @@ If you need to track some work item, you can file a bug and assign it to yoursel
 
 When a test flakes, a P0 bug is automatically filed with the label [`team: flakes`](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22team%3A+flakes%22+sort%3Aupdated-asc). This issue should be investigated with all due haste, and a priority level should then be assigned to the issue. At any particular time, the most flaky tests should remain P0. However, flakes that are hard to pin down may be downgraded in priority (e.g. to P1). Please do not ignore the issue entirely, however, and make sure to close bugs once they are resolved, even if it's by magic.
 
-_See also: [Reducing test flakiness](https://github.com/flutter/flutter/wiki/Reducing-Test-Flakiness)_
+_See also: [Reducing test flakiness](../../infra/Reducing-Test-Flakiness.md)_

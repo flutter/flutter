@@ -1,7 +1,7 @@
 This is an index of team-facing documentation for the [flutter/packages repository](https://github.com/flutter/packages/).
 
 - [Contributing to Plugins and Packages](contributing/README.md)
-- [Flutter migrate](https://github.com/flutter/flutter/wiki/Flutter-migrate)
+- [Flutter migrate](../wiki_archive/Flutter-migrate.md)
 - [Package migration to 1.0.0](Package-migration-to-1.0.0.md)
 - [Plugin Tests](testing/Plugin-Tests.md)
 - [Plugins and Packages repository structure](Plugins-and-Packages-repository-structure.md)

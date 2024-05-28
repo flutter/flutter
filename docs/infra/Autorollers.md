@@ -2,7 +2,7 @@ Several of our dependencies are automatically rolled (updated) by bots.
 
 ## Clang to Engine
 
-We use an auto-roller for Clang on [Linux](https://autoroll.skia.org/r/clang-linux-flutter-engine) and [MacOS](https://autoroll.skia.org/r/clang-mac-flutter-engine) (Windows is pending availability of a Windows Clang package from the Fuchsia infra team). In case of build failures or other errors, ping the #hackers-engine channel on [Discord](https://github.com/flutter/flutter/wiki/Chat).
+We use an auto-roller for Clang on [Linux](https://autoroll.skia.org/r/clang-linux-flutter-engine) and [MacOS](https://autoroll.skia.org/r/clang-mac-flutter-engine) (Windows is pending availability of a Windows Clang package from the Fuchsia infra team). In case of build failures or other errors, ping the #hackers-engine channel on [Discord](../contributing/Chat.md).
 
 These rollers may fail if Clang catches a new compilation warning or error that it previously did not, or if a test relies on undefined behavior that has now changed in the new revision of Clang. It is best to resolve such issues ASAP to let the rollers continue and avoid a pile up of issues to resolve.
 
@@ -10,7 +10,7 @@ The rollers work by updating a [CIPD](https://chrome-infra-packages.appspot.com/
 
 ## Fuchsia SDK to Engine
 
-We use an auto-roller for the Fuchsia SDK on [Linux](https://autoroll.skia.org/r/fuchsia-linux-sdk-flutter-engine) and [MacOS](https://autoroll.skia.org/r/fuchsia-mac-sdk-flutter-engine) (Windows is pending availability of a Windows Fuchsia SDK package from the Fuchsia infra team). In case of build failures or other errors, ping the #hackers-engine channel on [Discord](https://github.com/flutter/flutter/wiki/Chat).
+We use an auto-roller for the Fuchsia SDK on [Linux](https://autoroll.skia.org/r/fuchsia-linux-sdk-flutter-engine) and [MacOS](https://autoroll.skia.org/r/fuchsia-mac-sdk-flutter-engine) (Windows is pending availability of a Windows Fuchsia SDK package from the Fuchsia infra team). In case of build failures or other errors, ping the #hackers-engine channel on [Discord](../contributing/Chat.md).
 
 These rollers may fail if the Fuchsia SDK contains a breaking change. It is best to resolve such issues ASAP to let the rollers continue and avoid a pile up of issues to resolve.
 
@@ -33,7 +33,7 @@ The bot updates <https://github.com/flutter/flutter/blob/main/bin/internal/engin
 
 ### Making a breaking change
 
-Our [breaking change policy](https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes) disallows making changes to the engine that require changes to the framework. If you find the need to do this, you should instead make a soft-breaking change which you can land in multiple phases, as described in that process.
+Our [breaking change policy](../contributing/Tree-hygiene.md#handling-breaking-changes) disallows making changes to the engine that require changes to the framework. If you find the need to do this, you should instead make a soft-breaking change which you can land in multiple phases, as described in that process.
 
 ### Doing a manual roll
 
@@ -49,12 +49,12 @@ For example, to generate a description from hash deadbeef to beefdead:
 $ ./tools/engine_roll_pr_desc.sh deadbeef..beefdead
 ```
 
-_See also: [Debugging the engine](https://github.com/flutter/flutter/wiki/Debugging-the-engine), which includes instructions on bisecting a roll failure._
+_See also: [Debugging the engine](../engine/Debugging-the-engine.md), which includes instructions on bisecting a roll failure._
 
 
 ## Dart to Engine
 
-The Dart SDK is automatically rolled into the engine on a regular basis, following the steps laid out at the [Rolling Dart](https://github.com/flutter/flutter/wiki/Rolling-Dart) page. Since this process is a bit more involved, this autoroller does not use the Skia infrastructure and has a custom dashboard hosted at [go/dart-sdk-roller-dashboard](http://go/dart-sdk-roller-dashboard) (**note: this is likely only accessible from a machine on the Google network**). Using the dashboard, the autoroller can be paused, rolls can be triggered and cancelled, and rolls to a particular revision can be done.
+The Dart SDK is automatically rolled into the engine on a regular basis, following the steps laid out at the [Rolling Dart](Rolling-Dart.md) page. Since this process is a bit more involved, this autoroller does not use the Skia infrastructure and has a custom dashboard hosted at [go/dart-sdk-roller-dashboard](http://go/dart-sdk-roller-dashboard) (**note: this is likely only accessible from a machine on the Google network**). Using the dashboard, the autoroller can be paused, rolls can be triggered and cancelled, and rolls to a particular revision can be done.
 
 If there are any issues with this process or the autoroller dashboard, contact bkonyi@ or a member of the Dart VM team.
 

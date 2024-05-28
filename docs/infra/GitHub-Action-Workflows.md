@@ -17,7 +17,7 @@ diligently check the workflow for any potential security issues.
 
 ## Adding a new GitHub Actions workflow
 
-To add a new workflow please open a new bug using the [ticket queue process](https://github.com/flutter/flutter/wiki/Infra-Ticket-Queue). The following data points are required:
+To add a new workflow please open a new bug using the [ticket queue process](Infra-Ticket-Queue.md). The following data points are required:
 
 *   Description/reason to enable this workflow
 *   workflow repository
@@ -25,7 +25,7 @@ To add a new workflow please open a new bug using the [ticket queue process](htt
 
 ## Updating a GitHub Actions workflow
 
-To update an existing workflow please open a new bug using the [ticket queue process](https://github.com/flutter/flutter/wiki/Infra-Ticket-Queue). The following data points are required:
+To update an existing workflow please open a new bug using the [ticket queue process](Infra-Ticket-Queue.md). The following data points are required:
 
 *   Description/reason to update the pinned version
 *   workflow/old_pinned_version

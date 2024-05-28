@@ -9,7 +9,7 @@ This page attempts to be a one-stop shop for figuring out what the most importan
    1. Performance regressions. Check the [dashboard](https://flutter-dashboard.appspot.com/benchmarks.html) for new unreported regressions and see GitHub for the list of [reported performance regressions](https://github.com/flutter/flutter/issues?utf8=%E2%9C%93&q=is%3Aopen+label%3A%22c%3A+performance%22+label%3A%22c%3A+regression%22+).
    1. [Other regressions](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22c%3A+regression%22).
    1. Reducing technical debt. (For example, increasing [our test coverage](./testing/Test-coverage-for-package-flutter.md) by [writing new tests](./testing/Running-and-writing-tests.md), or fixing TODOs.)
-1. [P2 issues](https://github.com/flutter/flutter/labels/P1), which correspond to the remaining areas of our [roadmap](https://github.com/flutter/flutter/wiki/Roadmap), such as:
+1. [P2 issues](https://github.com/flutter/flutter/labels/P1), which correspond to the remaining areas of our [roadmap](../roadmap/Roadmap.md), such as:
     * Bugs marked as [annoyances](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22a%3A+annoyance%22+sort%3Areactions-%2B1-desc).
     * Bugs labeled as issues of [quality](https://github.com/flutter/flutter/issues?utf8=%E2%9C%93&q=is%3Aopen+is%3Aissue+label%3A%22a%3A+quality%22+sort%3Areactions-%2B1-desc+).
     * Bugs with the [crash](https://github.com/flutter/flutter/issues?utf8=%E2%9C%93&q=is%3Aopen+is%3Aissue+label%3A%22c%3A+crash%22+sort%3Areactions-%2B1-desc+) label.
@@ -18,7 +18,7 @@ This page attempts to be a one-stop shop for figuring out what the most importan
 
 Bugs in other bug systems should be tracked with bugs in GitHub. OKRs should be reflected in the items listed above. For example, OKRs should reflect what the roadmap covers, expected customer blockers, and so forth. Work that is unique to a particular quarter would be represented by a filed bug with a milestone and assignee.
 
-During [triage](https://github.com/flutter/flutter/wiki/Triage), bugs should be prioritized according to the [P0-P3 labels](./issue_hygiene/README.md#priorities) so as to fit the order described above.
+During [triage](../triage/README.md), bugs should be prioritized according to the [P0-P3 labels](./issue_hygiene/README.md#priorities) so as to fit the order described above.
 
 Sometimes, items in the list above escalate. For example, a bug might get filed as a P2 issue, then be recognized as a critical regression and upgraded to P0.
 
