@@ -48,7 +48,7 @@ TODO(cbracken): write this up using [this patch](https://github.com/flutter/engi
 [animator]: https://github.com/flutter/engine/blob/main/shell/common/animator.h
 [drawFrame]: https://api.flutter.dev/flutter/rendering/RendererBinding/drawFrame.html
 [embedderAPI]: https://github.com/flutter/engine/blob/main/shell/platform/embedder/embedder.h
-[engineArchThreading]: https://github.com/flutter/flutter/wiki/The-Engine-architecture#threading
+[engineArchThreading]: ../about/The-Engine-architecture.md#threading
 [flutterViewRender]: https://api.flutter.dev/flutter/dart-ui/FlutterView/render.html
 [handleBeginFrame]: https://api.flutter.dev/flutter/scheduler/SchedulerBinding/handleBeginFrame.html
 [layerTree]: https://github.com/flutter/engine/blob/main/flow/layers/layer_tree.h

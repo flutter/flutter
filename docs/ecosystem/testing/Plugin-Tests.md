@@ -1,4 +1,4 @@
-*If you haven't already read it, start with [the repository structure overview](https://github.com/flutter/flutter/wiki/Plugins-and-Packages-repository-structure) to familiarize yourself with the types of packages discussed below.*
+*If you haven't already read it, start with [the repository structure overview](../Plugins-and-Packages-repository-structure.md) to familiarize yourself with the types of packages discussed below.*
 
 ## Types of Tests
 
@@ -131,7 +131,7 @@ flutter pub run build_runner build
 
 ## Adding tests
 
-A PR changing a plugin [should add tests](https://github.com/flutter/flutter/wiki/Tree-hygiene#tests). Which type(s) of tests you should add will depend on what exactly you are changing. See below for some high-level guidance, but if you're not sure please ask in your PR or in `#hackers-ecosystem` [on Discord](https://github.com/flutter/flutter/wiki/Chat).
+A PR changing a plugin [should add tests](../../contributing/Tree-hygiene.md#tests). Which type(s) of tests you should add will depend on what exactly you are changing. See below for some high-level guidance, but if you're not sure please ask in your PR or in `#hackers-ecosystem` [on Discord](../../contributing/Chat.md).
 Hopefully the scaffolding to run the necessary kinds of tests are already in place for that plugin, in which case you just add tests to the existing files in the locations referenced above. If not, see below for more information about adding test scaffolding.
 
 ### FAQ: Do I need to add tests even if the part of the code I'm changing isn't already tested?
@@ -170,7 +170,7 @@ Some patterns to consider given all of the above:
 If a plugin is missing test scaffolding for the type of tests you want to add, you have several options:
 - If it's simple to enable them, and you are comfortable making the changes, you can enable them as part of your PR.
 - If it's non-trivial to enable them, but you are comfortable doing it, you can make a new PR that enables them with some minimal test, and ask for that to be reviewed and landed before continuing with your PR.
-- If you aren't comfortable making the change, reach out [via Discord](https://github.com/flutter/flutter/wiki/Chat) and ask in `#hackers-ecosystem`.
+- If you aren't comfortable making the change, reach out [via Discord](../../contributing/Chat.md) and ask in `#hackers-ecosystem`.
 
 Regardless of the approach you use, please reach out on Discord if a PR that sets up a new kind of test doesn't get reviewed within two weeks. Filling in the gaps in test scaffolding is a priority for the team, so we want to review such PRs quickly whenever possible.
 

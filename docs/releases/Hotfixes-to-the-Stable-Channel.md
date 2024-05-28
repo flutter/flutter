@@ -20,7 +20,7 @@ without them needing to read each issue individually.
 Our goal is to make the list easy for them to scan.
 
 More information and tips:
-https://github.com/flutter/flutter/wiki/Hotfix-Documentation-Best-Practices
+docs/releases/Hotfix-Documentation-Best-Practices.md
 
 INTERNAL NOTE
 -->
