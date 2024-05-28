@@ -15,6 +15,13 @@ using VS = SolidFillVertexShader;
 
 namespace {
 
+/// @brief The minimum stroke size can be less than one physical pixel because
+///        of MSAA, but no less that half a physical pixel otherwise we might
+///        not hit one of the sample positions.
+static constexpr Scalar kMinStrokeSizeMSAA = 0.5f;
+
+static constexpr Scalar kMinStrokeSize = 1.0f;
+
 template <typename VertexWriter>
 using CapProc = std::function<void(VertexWriter& vtx_builder,
                                    const Point& position,
@@ -530,7 +537,10 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
     return {};
   }
 
-  Scalar min_size = 1.0f / sqrt(std::abs(determinant));
+  Scalar min_size =
+      (pass.GetSampleCount() == SampleCount::kCount4 ? kMinStrokeSizeMSAA
+                                                     : kMinStrokeSize) /
+      sqrt(std::abs(determinant));
   Scalar stroke_width = std::max(stroke_width_, min_size);
 
   auto& host_buffer = renderer.GetTransientsBuffer();
@@ -584,7 +594,8 @@ std::optional<Rect> StrokePathGeometry::GetCoverage(
   if (determinant == 0) {
     return std::nullopt;
   }
-  Scalar min_size = 1.0f / sqrt(std::abs(determinant));
+  // Use the most conervative coverage setting.
+  Scalar min_size = kMinStrokeSize / sqrt(std::abs(determinant));
   max_radius *= std::max(stroke_width_, min_size);
   return path_bounds->Expand(max_radius).TransformBounds(transform);
 }

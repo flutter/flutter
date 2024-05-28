@@ -48,6 +48,18 @@ TEST_P(AiksTest, CanRenderThickCurvedStrokes) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, CanRenderThinCurvedStrokes) {
+  Canvas canvas;
+  Paint paint;
+  paint.color = Color::Red();
+  // Impeller doesn't support hairlines yet, but size this guarantees
+  // the smallest possible stroke width.
+  paint.stroke_width = 0.01;
+  paint.style = Paint::Style::kStroke;
+  canvas.DrawPath(PathBuilder{}.AddCircle({100, 100}, 50).TakePath(), paint);
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, CanRenderStrokePathThatEndsAtSharpTurn) {
   Canvas canvas;
 
