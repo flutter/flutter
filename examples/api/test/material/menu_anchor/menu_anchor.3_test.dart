@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_api_samples/material/menu_anchor/menu_anchor.3.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:testapp/main.dart';
 
 void main() {
   group('SimpleCascadingMenu Tests', () {
