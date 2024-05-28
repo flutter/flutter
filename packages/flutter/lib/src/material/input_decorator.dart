@@ -4570,7 +4570,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 
   @override
   TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final ThemeData themeData= Theme.of(context);
+    final ThemeData themeData = Theme.of(context);
     if (states.contains(MaterialState.disabled)) {
       return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
@@ -4580,7 +4580,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 
   @override
   TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final ThemeData themeData= Theme.of(context);
+    final ThemeData themeData = Theme.of(context);
     if (states.contains(MaterialState.disabled)) {
       return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
@@ -4629,6 +4629,9 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
   Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled) && !states.contains(MaterialState.focused)) {
       return Theme.of(context).disabledColor;
+    }
+    if (states.contains(MaterialState.error)) {
+      return Theme.of(context).colorScheme.error;
     }
     if (states.contains(MaterialState.focused)) {
       return Theme.of(context).colorScheme.primary;
