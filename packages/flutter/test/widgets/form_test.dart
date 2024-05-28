@@ -1182,6 +1182,55 @@ void main() {
     expect(didCallValidator, isFalse);
   });
 
+  testWidgets('isValid returns false when forceErrorText is set and will change error display',
+  (WidgetTester tester) async {
+    final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormFieldState<String>> fieldKey2 = GlobalKey<FormFieldState<String>>();
+    const String forceErrorText = 'Forcing error.';
+    const String validString = 'Valid string';
+    String? validator(String? s) => s == validString ? null : 'Error text';
+
+    Widget builder() {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  child: ListView(
+                    children: <Widget>[
+                      TextFormField(
+                        key: fieldKey1,
+                        initialValue: validString,
+                        validator: validator,
+                        autovalidateMode: AutovalidateMode.disabled,
+                      ),
+                      TextFormField(
+                        key: fieldKey2,
+                        initialValue: '',
+                        forceErrorText: forceErrorText,
+                        validator: validator,
+                        autovalidateMode: AutovalidateMode.disabled,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    expect(fieldKey1.currentState!.isValid, isTrue);
+    expect(fieldKey2.currentState!.isValid, isFalse);
+    expect(fieldKey2.currentState!.hasError, isTrue);
+  });
+
   testWidgets('Validator is nullified and error text behaves accordingly', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     bool useValidator = false;
@@ -1247,5 +1296,4 @@ void main() {
     await tester.pump();
     expect(find.text('test_error'), findsNothing);
   });
-
 }
