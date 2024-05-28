@@ -641,7 +641,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.3));
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.0));
   });
 
   testWidgets('1 action button without cancel button', (WidgetTester tester) async {
@@ -689,7 +689,7 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.3));
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.0));
   });
 
   testWidgets('Action sheet with just cancel button is correct', (WidgetTester tester) async {
@@ -1106,7 +1106,7 @@ void main() {
 RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
   final RenderObject actionsSection = tester.renderObject(
     find.byElementPredicate((Element element) {
-      return element.widget.runtimeType.toString() == '_CupertinoAlertActionSection';
+      return element.widget.runtimeType.toString() == '_ActionSheetActionSection';
     }),
   );
   assert(actionsSection is RenderBox);

@@ -1035,7 +1035,7 @@ class _ActionSheetDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
     return Container(
-      height: 1,
+      height: _kDividerThickness,
       decoration: BoxDecoration(
         color: hidden ? backgroundColor : dividerColor,
       ),
@@ -1043,6 +1043,71 @@ class _ActionSheetDivider extends StatelessWidget {
   }
 }
 
+// The keys used by the dividers in the action section of an action sheet.
+//
+// The buttons and the dividers are placed alternately, both keyed by indexes.
+// Dividers use this special class so that their indexes can be told apart.
+class _DividerKey extends ValueKey<int> {
+  const _DividerKey(super.value);
+}
+
+typedef _PressedUpdateHandler = void Function(int actionIndex, bool state);
+
+class _ActionSheetActionSection extends StatelessWidget {
+  const _ActionSheetActionSection({
+    required this.actions,
+    required this.pressedIndex,
+    required this.dividerColor,
+    required this.backgroundColor,
+    required this.onPressedUpdate,
+    required this.scrollController,
+  });
+
+  final List<Widget>? actions;
+  final _PressedUpdateHandler onPressedUpdate;
+  final int? pressedIndex;
+  final Color dividerColor;
+  final Color backgroundColor;
+  final ScrollController? scrollController;
+
+  @override
+  Widget build(BuildContext context) {
+    if (actions == null || actions!.isEmpty) {
+      return const LimitedBox(
+        maxWidth: 0,
+        child: SizedBox(width: double.infinity, height: 0),
+      );
+    }
+    final List<Widget> column = <Widget>[];
+    for (int actionIndex = 0; actionIndex < actions!.length; actionIndex += 1) {
+      if (actionIndex != 0) {
+        column.add(_ActionSheetDivider(
+          key: _DividerKey(actionIndex),
+          dividerColor: dividerColor,
+          hidden: pressedIndex == actionIndex - 1 || pressedIndex == actionIndex,
+        ));
+      }
+      column.add(_ActionSheetButtonListener(
+        key: ValueKey<int>(actionIndex),
+        onStateChange: (bool state) {
+          onPressedUpdate(actionIndex, state);
+        },
+        child: actions![actionIndex],
+      ));
+    }
+    return CupertinoScrollbar(
+      controller: scrollController,
+      child: SingleChildScrollView(
+        controller: scrollController,
+        child: Column(
+          children: column,
+        ),
+      ),
+    );
+  }
+}
+
+// The part of an action sheet without the cancel button.
 class _ActionSheetMainSheet extends StatefulWidget {
   const _ActionSheetMainSheet({
     required this.scrollController,
@@ -1062,58 +1127,10 @@ class _ActionSheetMainSheet extends StatefulWidget {
   _ActionSheetMainSheetState createState() => _ActionSheetMainSheetState();
 }
 
-// The keys used by the dividers in the action section of an action sheet.
-//
-// The buttons and the dividers are placed alternately, both keyed by indexes.
-// Dividers use this special class so that their indexes can be told apart.
-class _DividerKey extends ValueKey<int> {
-  const _DividerKey(super.value);
-}
-
 class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
-  int? _pressedAction;
+  int? _pressedIndex;
   double _topOverscroll = 0;
   double _bottomOverscroll = 0;
-
-  Widget _buildActionSection() {
-    if (!_hasActions()) {
-      return const LimitedBox(
-        maxWidth: 0,
-        child: SizedBox(width: double.infinity, height: 0),
-      );
-    }
-    final List<Widget> actions = widget.actions!;
-    final List<Widget> column = <Widget>[];
-    for (int actionIdx = 0; actionIdx < actions.length; actionIdx += 1) {
-      if (actionIdx != 0) {
-        column.add(_ActionSheetDivider(
-          key: _DividerKey(actionIdx),
-          dividerColor: widget.dividerColor,
-          hidden: _pressedAction == actionIdx - 1 || _pressedAction == actionIdx,
-        ));
-      }
-      column.add(_ActionSheetButtonListener(
-        key: ValueKey<int>(actionIdx),
-        onStateChange: (bool state) {
-          if (!state) {
-            if (_pressedAction == actionIdx) {
-              setState(() {
-                _pressedAction = null;
-              });
-            }
-          } else {
-            setState(() {
-              _pressedAction = actionIdx;
-            });
-          }
-        },
-        child: actions[actionIdx],
-      ));
-    }
-    return Column(
-      children: column,
-    );
-  }
 
   // Fills the overscroll area at the top and bottom of the sheet. This is
   // necessary because the action section's background is rendered by the
@@ -1162,12 +1179,27 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
     );
   }
 
+  void _onPressedUpdate(int actionIndex, bool state) {
+    if (!state) {
+      if (_pressedIndex == actionIndex) {
+        setState(() {
+          _pressedIndex = null;
+        });
+      }
+    } else {
+      setState(() {
+        _pressedIndex = actionIndex;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // If both the content section and the action section overflow, the content
     // section takes priority but must leave at least `actionsMinHeight` for the
     // action section.
-    const double actionsMinHeight = 87;
+    const double actionsMinHeight = 84;
+    final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         return Column(
@@ -1175,7 +1207,7 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
           children: <Widget>[
             _buildContent(
               hasActions: _hasActions(),
-              maxHeight: constraints.maxHeight - actionsMinHeight,
+              maxHeight: constraints.maxHeight - actionsMinHeight - _kDividerThickness,
             ),
             if (widget.hasContent && _hasActions())
               _ActionSheetDivider(
@@ -1190,12 +1222,13 @@ class _ActionSheetMainSheetState extends State<_ActionSheetMainSheet> {
                   ),
                   NotificationListener<ScrollUpdateNotification>(
                     onNotification: _onScrollUpdate,
-                    child: CupertinoScrollbar(
-                      controller: widget.scrollController,
-                      child: SingleChildScrollView(
-                        controller: widget.scrollController,
-                        child: _buildActionSection(),
-                      ),
+                    child: _ActionSheetActionSection(
+                      actions: widget.actions,
+                      scrollController: widget.scrollController,
+                      pressedIndex: _pressedIndex,
+                      dividerColor: widget.dividerColor,
+                      backgroundColor: backgroundColor,
+                      onPressedUpdate: _onPressedUpdate,
                     ),
                   ),
                 ],
