@@ -86,36 +86,36 @@ To write a new iOS memory test case `some_memory_perf` and add it to Flutter’s
 - Memory polling mechanism may incur additional memory overhead.
 
 
-[manifest]: https://github.com/flutter/flutter/blob/master/dev/devicelab/manifest.yaml
+[manifest]: https://github.com/flutter/flutter/blob/main/dev/devicelab/manifest.yaml
 
-[tasks]: https://github.com/flutter/flutter/tree/master/dev/devicelab/bin/tasks
+[tasks]: https://github.com/flutter/flutter/tree/main/dev/devicelab/bin/tasks
 
 [class MemoryTest]: https://github.com/flutter/flutter/blob/51bb11f7cece47840a9ee6d6d43db97ab16b31df/dev/devicelab/lib/tasks/perf_tests.dart#L941
 
 [complex layout memory manifest]: https://github.com/flutter/flutter/blob/7e41425d4af21dec7a7ff072a3ec1387859e32c8/dev/devicelab/manifest.yaml#L329
 
-[complex layout memory task]: https://github.com/flutter/flutter/blob/master/dev/devicelab/bin/tasks/complex_layout_scroll_perf__memory.dart
+[complex layout memory task]: https://github.com/flutter/flutter/blob/main/dev/devicelab/bin/tasks/complex_layout_scroll_perf__memory.dart
 
-[complex layout memory main]: https://github.com/flutter/flutter/blob/master/dev/benchmarks/complex_layout/test_memory/scroll_perf.dart
+[complex layout memory main]: https://github.com/flutter/flutter/blob/main/dev/benchmarks/complex_layout/test_memory/scroll_perf.dart
 
 [fast scroll memory manifest]: https://github.com/flutter/flutter/blob/7e41425d4af21dec7a7ff072a3ec1387859e32c8/dev/devicelab/manifest.yaml#L837
 
-[fast scroll memory task]: https://github.com/flutter/flutter/blob/master/dev/devicelab/bin/tasks/fast_scroll_large_images__memory.dart
+[fast scroll memory task]: https://github.com/flutter/flutter/blob/main/dev/devicelab/bin/tasks/fast_scroll_large_images__memory.dart
 
-[fast scroll memory main]: https://github.com/flutter/flutter/blob/master/dev/benchmarks/macrobenchmarks/test_memory/large_images.dart
+[fast scroll memory main]: https://github.com/flutter/flutter/blob/main/dev/benchmarks/macrobenchmarks/test_memory/large_images.dart
 
 [class DevToolsMemoryTest]: https://github.com/flutter/flutter/blob/7e41425d4af21dec7a7ff072a3ec1387859e32c8/dev/devicelab/lib/tasks/perf_tests.dart#L1138
 
 [complex layout devtools memory manifest]: https://github.com/flutter/flutter/blob/7e41425d4af21dec7a7ff072a3ec1387859e32c8/dev/devicelab/manifest.yaml#L359
 
-[complex layout devtools memory task]: https://github.com/flutter/flutter/blob/master/dev/devicelab/bin/tasks/complex_layout_scroll_perf__devtools_memory.dart
+[complex layout devtools memory task]: https://github.com/flutter/flutter/blob/main/dev/devicelab/bin/tasks/complex_layout_scroll_perf__devtools_memory.dart
 
 [large image changer manifest]: https://github.com/flutter/flutter/blob/7e41425d4af21dec7a7ff072a3ec1387859e32c8/dev/devicelab/manifest.yaml#L874
 
-[large image changer task]: https://github.com/flutter/flutter/blob/master/dev/devicelab/bin/tasks/large_image_changer_perf_android.dart
+[large image changer task]: https://github.com/flutter/flutter/blob/main/dev/devicelab/bin/tasks/large_image_changer_perf_android.dart
 
 [Dart timeline]:https://flutter.dev/docs/development/tools/devtools/timeline
 
 [large image changer manifest ios]: https://github.com/flutter/flutter/blob/7e41425d4af21dec7a7ff072a3ec1387859e32c8/dev/devicelab/manifest.yaml#L880
 
-[large image changer task ios]: https://github.com/flutter/flutter/blob/master/dev/devicelab/bin/tasks/large_image_changer_perf_ios.dart
+[large image changer task ios]: https://github.com/flutter/flutter/blob/main/dev/devicelab/bin/tasks/large_image_changer_perf_ios.dart

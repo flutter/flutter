@@ -17623,6 +17623,37 @@ void main() {
       const TextSelection.collapsed(offset: 17, affinity: TextAffinity.upstream),
     );
   });
+
+  testWidgets('Composing region can truncate grapheme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            autofocus: true,
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    assert(focusNode.hasFocus);
+
+    controller.value = const TextEditingValue(
+      text: 'Á',
+      selection: TextSelection(baseOffset: 1, extentOffset: 2),
+      composing: TextSelection(baseOffset: 1, extentOffset: 2),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class UnsettableController extends TextEditingController {

@@ -33,7 +33,7 @@ Adding comments explaining how a bug is dire and how you will stop using Flutter
 if it is not fixed is upsetting for the engineers working on Flutter (many of
 whom are volunteers, not that being paid to work on Flutter makes such comments
 any less upsetting). Out of a respect for the team, and as required by our [code
-of conduct](https://github.com/flutter/flutter/blob/master/CODE_OF_CONDUCT.md), we
+of conduct](https://github.com/flutter/flutter/blob/main/CODE_OF_CONDUCT.md), we
 ask that you avoid adding comments that are not actively helpful. There are other
 venues if you want to complain without being constructive.
 
@@ -42,11 +42,11 @@ being full of comments asking for updates and that makes finding useful informat
 in a bug harder (an exception might be if you are participating in the triage process,
 but even then consider reaching out to people directly if possible). If you believe
 there could be information that has not been posted, ask on our Discord server instead
-(see [[Chat]]).
+(see [Chat](../Chat.md)).
 
 ### Issues are not always the best venue for discussions
 
-Discussions within an issue should remain focused on the topic, specifically about what the filed issue is and how to solve it. Broader discussions are best suited to happen on Discord (see [[Chat]]) or in design docs using Google Docs (see [[Design Documents]]). This is because GitHub hides comments, doesn't have threading, notifications get lost in the swamp of other GitHub e-mails, etc.
+Discussions within an issue should remain focused on the topic, specifically about what the filed issue is and how to solve it. Broader discussions are best suited to happen on Discord (see [Chat](../Chat.md)) or in design docs using Google Docs (see [Design Documents](../Design-Documents.md)). This is because GitHub hides comments, doesn't have threading, notifications get lost in the swamp of other GitHub e-mails, etc.
 
 If you move to another tool for part of the discussion, remember to add a summary of the discussion and document any decisions that took place. This allows people following the issue to keep updated and continue to participate.
 
@@ -76,7 +76,7 @@ can be copied and pasted into a test case.
 
 To debug a problem, we will need to be able to reproduce it. The best way
 to help us do that is to provide code, licensed according to [the BSD license
-used by Flutter](https://github.com/flutter/flutter/blob/master/LICENSE), that
+used by Flutter](https://github.com/flutter/flutter/blob/main/LICENSE), that
 has been reduced as far as possible (such that removing anything further stops
 showing the bug). Attach such a file or files to the issue itself.
 
@@ -98,7 +98,7 @@ able to assist you will be reduced.
 
 ## Locking an issue
 
-**Closed** issues that haven't received any activity in a [few weeks](https://github.com/flutter/flutter/blob/master/.github/lock.yml#L4)
+**Closed** issues that haven't received any activity in a [few weeks](https://github.com/flutter/flutter/blob/main/.github/lock.yml#L4)
 are automatically locked by a [bot](https://github.com/apps/lock). This is
 done to encourage developers to file new bugs, instead of piling comments
 on old ones.
@@ -115,14 +115,14 @@ or might not be the same as this one".
 If you are concerned that such an issue is not receiving its due
 attention, see Escalating an Issue, described above. If you are
 not already a contributor but would like to work on that issue,
-consider reaching out on an appropriate [chat](https://github.com/flutter/flutter/wiki/Chat).
+consider reaching out on an appropriate [chat](../Chat.md).
 
 If you have a similar issue and are not sure if it is the same,
 it is fine to file a new issue and linking it to the other issue.
 Please avoid intentionally filing duplicates.
 
 Very rarely, an issue gets locked because discussion has become
-unproductive and has repeatedly violated the [Code of Conduct](https://github.com/flutter/flutter/blob/master/CODE_OF_CONDUCT.md).
+unproductive and has repeatedly violated the [Code of Conduct](https://github.com/flutter/flutter/blob/main/CODE_OF_CONDUCT.md).
 
 
 ## Priorities
@@ -130,7 +130,7 @@ unproductive and has repeatedly violated the [Code of Conduct](https://github.co
 **The [`P0`](https://github.com/flutter/flutter/labels/P0) label** indicates that the issue is one of the following:
 * a build break, regression, or failure in an existing feature that prevents us from shipping the current build.
 * an important item of technical debt that we want to fix promptly because it is impacting team velocity.
-* an issue blocking, or about to block, a top-tier customer. (See [below](https://github.com/flutter/flutter/wiki/Issue-hygiene#customers) under "customers" for a definition of "top-tier customer".)
+* an issue blocking, or about to block, a top-tier customer. (See [below](#customers) under "customers" for a definition of "top-tier customer".)
 
 There are generally less than twenty-five P0 bugs (one GitHub search results page). If you find yourself assigning a P0 label to an issue, please be sure that there's a positive handoff between filing and a prospective owner for the issue.
 
@@ -146,7 +146,7 @@ Issues at this level should be resolved in a matter of months and should have mo
 
 **The [`P3`](https://github.com/flutter/flutter/labels/P3) label** indicates issues that we currently consider less important to the Flutter project. We use "thumbs-up" on these issues as a signal when discussing whether to promote them to P2 or higher based on demand. (Of course, this does not mean the issues are not important to _you_, just that we don't view them as the especially important for Flutter itself.)
 
-Typically we would accept PRs for `P3` issues (assuming they follow our [style guide](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo) and follow our [other rules](https://github.com/flutter/flutter/wiki/Tree-hygiene)). Issues marked with the [`would require significant investment`](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22would+require+significant+investment%22) label may require more than just a PR, for example, adding support for a whole new platform will require a commitment to provide CI resources for build and test, and someone to own the maintenance of those systems.
+Typically we would accept PRs for `P3` issues (assuming they follow our [style guide](../Style-guide-for-Flutter-repo.md) and follow our [other rules](../Tree-hygiene.md)). Issues marked with the [`would require significant investment`](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22would+require+significant+investment%22) label may require more than just a PR, for example, adding support for a whole new platform will require a commitment to provide CI resources for build and test, and someone to own the maintenance of those systems.
 
 ### When will my bug be fixed?
 
@@ -154,13 +154,13 @@ Flutter is an open source project and many people contribute their time (or thei
 
 To determine when a bug will be fixed, look at the issue.
 
-If there's a recent status update on the issue, that is the best information we have about the bug. If there's a lot of comments on the issue, we try to link to the latest status from the top comment, so look there. (Please [don't _ask_](https://github.com/flutter/flutter/wiki/Issue-hygiene#do-not-add-me-too-or-same-or-is-there-an-update-comments-to-bugs) for updates, though.)
+If there's a recent status update on the issue, that is the best information we have about the bug. If there's a lot of comments on the issue, we try to link to the latest status from the top comment, so look there. (Please [don't _ask_](#do-not-add-me-too-or-same-or-is-there-an-update-comments-to-bugs) for updates, though.)
 
 If the issue is labeled with priorities `P0` or `P1`, or if the issue is assigned, we are likely to address it in the near term; we just need to find time.
 
 Otherwise, we don't know when we're going to fix it. We may never get to it. In general, `P2` bugs are seen as more important than `P3` bugs. See the more detailed definitions of _priorities_ above.
 
-_See also [[Popular issues]]._
+_See also [Popular issues](../issue_hygiene/Popular-issues.md)._
 
 ### Escalating an issue that has the wrong priority
 
@@ -169,7 +169,7 @@ your contact if you think the priority should be changed.
 
 If you don't, consider finding like-minded developers to either implement
 the feature as a team, or to fund hiring someone to work on the feature,
-or to [mark the issue with a thumbs-up reaction](https://github.com/flutter/flutter/wiki/Issue-hygiene#thumbs-up-reactions).
+or to [mark the issue with a thumbs-up reaction](#thumbs-up-reactions).
 
 Please don't comment on an issue to indicate your interest. Comments should
 be reserved for making progress on the issue.
@@ -213,17 +213,17 @@ Common naming conventions for labels include:
 - **`d: *`** - The green `d` ("documentation") labels are for organizing our documentation-related issues.
 - **`dependency: *`** - Indicates the upstream team for issues that are blocked on some work from an upstream project (e.g. Skia, Dart).
 - **`e: *`** - The `e` ("engine") prefix is for subsets of the Flutter engine ([flutter/engine](https://github.com/flutter/engine)).
-- **`f: *`** - The `f` ("framework") prefix is for subsets of the Flutter framework ([flutter/flutter's packages/flutter/](https://github.com/flutter/flutter/tree/master/packages/flutter)).
+- **`f: *`** - The `f` ("framework") prefix is for subsets of the Flutter framework ([flutter/flutter's packages/flutter/](https://github.com/flutter/flutter/tree/main/packages/flutter)).
 - **`found in release: x.yy`** - Used for a series of labels that indicate which versions of Flutter an issue was found in.
 - **`from: *`** - Labels that indicate where an issue originated (e.g. research, postmortems), if it wasn't filed organically.
-- **`t: *`** - The `t` ("tool") prefix is for subsets of the Flutter tool ([flutter/flutter's packages/flutter_tools/](https://github.com/flutter/flutter/tree/master/packages/flutter_tools)).
+- **`t: *`** - The `t` ("tool") prefix is for subsets of the Flutter tool ([flutter/flutter's packages/flutter_tools/](https://github.com/flutter/flutter/tree/main/packages/flutter_tools)).
 - **`p: *`** - The `p` ("package") prefix is for specific packages ([flutter/packages](https://github.com/flutter/packages)). Light teal for packages and darker teal for plugins.
 - **`platform-*`** - The `platform` prefix is for bugs that are specific to one or more platforms.
 - **`r: *`** - The `r` ("resolution") prefix is used for labels that describe why an issue was closed.
 
 ### Adding labels
 
-Labels are more or less free, so we can add them pretty easily. Please mention it to other team members first, so that they know what you are planning and can give feedback (please at a minimum mention it on `#hidden-chat` in our [[Chat]]). Please make sure labels use a consistent color and naming scheme (e.g. all the framework-related labels are blue and start with `f:`).
+Labels are more or less free, so we can add them pretty easily. Please mention it to other team members first, so that they know what you are planning and can give feedback (please at a minimum mention it on `#hidden-chat` in our [Chat](../Chat.md)). Please make sure labels use a consistent color and naming scheme (e.g. all the framework-related labels are blue and start with `f:`).
 
 Labels should be used for adding information to a bug. If you plan to use a label to find all instances of a particular topic (e.g. finding all PRs where someone wrote a design doc), be aware that there's no way to force people to label issues or PRs. You can, however, rely on automation to do it, for example we have a script that labels all PRs that affect the framework.
 
@@ -250,7 +250,7 @@ and senior leads want resolved to the attention of the appropriate engineering
 team.
 
 The `customer: crowd` label is used to represent bugs that are affecting large
-numbers of people; during initial [[Triage]], high-profile bugs get labeled in
+numbers of people; during initial [Triage](https://github.com/flutter/flutter/wiki/Triage), high-profile bugs get labeled in
 this way to bring them to the attention of the engineering team. "Large numbers"
 is a judgement call. If dozens of people independently run into the same issue
 and file a bug and we end up realizing that they're all duplicates of each other,
@@ -281,7 +281,7 @@ We do not use GitHub milestones to track work.
 Issues are typically self-assigned. Only assign a bug to someone else if
 they have explicitly volunteered to do the task. If you don't have permissions
 to assign yourself an issue you want to work on, don't worry about it, just
-submit the PR (see [[Tree Hygiene]]).
+submit the PR (see [Tree Hygiene](../Tree-hygiene.md)).
 
 Only assign a bug to yourself when you are actively working on it
 or scheduled to work on it. If you don't know when you'll be working
@@ -329,14 +329,14 @@ If you have an idea that you would like to land, the recommended process is:
 
 1. [File a bug](https://github.com/flutter/flutter/issues/new/choose) describing the problem.
 2. Write a [design doc](https://flutter.dev/go/template) that references this problem and describes your solution.
-3. Socialize your design on the bug you filed and on [[Chat]]. Collect feedback from various people.
-4. Once you have received feedback, if it is mostly positive, implement your idea and submit it. See the [[Tree Hygiene]] wiki page for details on submitting PRs.
+3. Socialize your design on the bug you filed and on [Chat](../Chat.md). Collect feedback from various people.
+4. Once you have received feedback, if it is mostly positive, implement your idea and submit it. See the [Tree Hygiene](../Tree-hygiene.md) wiki page for details on submitting PRs.
 
 ### Every issue should be actionable
 
 Avoid filing issues that are on vague topics without a clear problem description.
 
-Please close issues that are not actionable. See [[Triage]] for more details.
+Please close issues that are not actionable. See [Triage](https://github.com/flutter/flutter/wiki/Triage) for more details.
 
 #### Issues should have clear steps to reproduce
 
@@ -384,4 +384,4 @@ If you need to track some work item, you can file a bug and assign it to yoursel
 
 When a test flakes, a P0 bug is automatically filed with the label [`team: flakes`](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22team%3A+flakes%22+sort%3Aupdated-asc). This issue should be investigated with all due haste, and a priority level should then be assigned to the issue. At any particular time, the most flaky tests should remain P0. However, flakes that are hard to pin down may be downgraded in priority (e.g. to P1). Please do not ignore the issue entirely, however, and make sure to close bugs once they are resolved, even if it's by magic.
 
-_See also: [[Reducing test flakiness]]_
+_See also: [Reducing test flakiness](https://github.com/flutter/flutter/wiki/Reducing-Test-Flakiness)_

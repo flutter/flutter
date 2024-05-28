@@ -927,6 +927,51 @@ void main() {
     expect(tester.getTopLeft(popupFinder), buttonTopLeft);
   });
 
+  testWidgets('PopupMenu positioning inside nested Navigator when useRootNavigator',
+    (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Example')),
+          body: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute<dynamic>(
+                  builder: (BuildContext context) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(
+                        child: PopupMenuButton<int>(
+                          key: buttonKey,
+                          useRootNavigator: true,
+                          itemBuilder: (_) => <PopupMenuItem<int>>[
+                            const PopupMenuItem<int>(value: 1, child: Text('Item 1')),
+                            const PopupMenuItem<int>(value: 2, child: Text('Item 2')),
+                          ],
+                          child: const Text('Show Menu'),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder buttonFinder = find.byKey(buttonKey);
+    final Finder popupFinder = find.bySemanticsLabel('Popup menu');
+    await tester.tap(buttonFinder);
+    await tester.pumpAndSettle();
+
+    final Offset buttonTopLeft = tester.getTopLeft(buttonFinder);
+    expect(tester.getTopLeft(popupFinder), buttonTopLeft);
+  });
+
   testWidgets('Popup menu with RouteSettings', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     const RouteSettings popupRoute = RouteSettings(name: '/popup');
