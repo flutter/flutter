@@ -11,10 +11,10 @@ buildscript {
         // needed to specify language version options.
         // Gradle 8.0 requires minimum kotlin 1.6.10
         // https://docs.gradle.org/current/userguide/upgrading_version_7.html#legacy_incrementaltaskinputs_api
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10'
         // Requries Minimum AGP 7.3.
         // https://docs.gradle.org/current/userguide/upgrading_version_7.html#legacy_incrementaltaskinputs_api
-        classpath 'com.android.tools.build:gradle:8.2.0'
+        classpath 'com.android.tools.build:gradle:7.4.2'
 
 
         // NOTE: Do not place your application dependencies here; they belong

@@ -322,7 +322,7 @@ public class FlutterFragmentTest {
 
     // Calling onBackPressed now will still be handled by Android (the default),
     // until setFrameworkHandlesBack is set to true.
-    activity.getOnBackPressedDispatcher().onBackPressed();
+    activity.onBackPressed();
     verify(mockDelegate, times(0)).onBackPressed();
 
     // Setting setFrameworkHandlesBack to true means the delegate will receive
