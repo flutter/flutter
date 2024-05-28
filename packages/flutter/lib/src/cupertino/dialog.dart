@@ -765,6 +765,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
   }
 
   void _onGestureEnd(DragEndDetails details) {
+    print('_onGestureEnd $_currentAvatars');
     _updateDrag(details.globalPosition);
     for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
       avatar.didConfirm();
@@ -773,6 +774,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
   }
 
   void _onGestureCancel() {
+    print('_onGestureCancel $_currentAvatars');
     for (final _ActionSheetDragAvatar avatar in _currentAvatars) {
       avatar.didLeave();
     }
@@ -922,7 +924,10 @@ class CupertinoActionSheetActionState extends State<CupertinoActionSheetAction> 
       hitTestBehavior: HitTestBehavior.opaque,
       child: MetaData(
         metaData: this,
-        child: ConstrainedBox(
+        child: Container(
+          // This decoration makes the entire button to return true during hit
+          // testing.
+          decoration: const BoxDecoration(),
           constraints: const BoxConstraints(
             minHeight: _kActionSheetButtonHeight,
           ),
