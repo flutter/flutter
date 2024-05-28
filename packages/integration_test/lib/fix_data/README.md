@@ -38,7 +38,7 @@ format do not break Flutter.
 See [tools/bots/flutter/analyze_flutter_flutter.sh](https://github.com/dart-lang/sdk/blob/main/tools/bots/flutter/analyze_flutter_flutter.sh)
 for where the flutter fix tests are invoked for the dart repo.
 
-See [dev/bots/test.dart](https://github.com/flutter/flutter/blob/master/dev/bots/test.dart)
+See [dev/bots/test.dart](https://github.com/flutter/flutter/blob/main/dev/bots/test.dart)
 for where the flutter fix tests are invoked for the flutter/flutter repo.
 
 When possible, please coordinate changes to this directory that might affect the

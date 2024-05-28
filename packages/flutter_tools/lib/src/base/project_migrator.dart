@@ -16,7 +16,7 @@ abstract class ProjectMigrator {
   @protected
   final Logger logger;
 
-  void migrate();
+  Future<void> migrate();
 
   /// Return null if the line should be deleted.
   @protected
@@ -79,9 +79,9 @@ class ProjectMigration {
 
   final List<ProjectMigrator> migrators;
 
-  void run() {
+  Future<void> run() async {
     for (final ProjectMigrator migrator in migrators) {
-      migrator.migrate();
+      await migrator.migrate();
     }
   }
 }

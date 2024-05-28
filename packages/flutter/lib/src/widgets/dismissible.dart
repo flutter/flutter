@@ -97,7 +97,7 @@ class Dismissible extends StatefulWidget {
   /// dismissed item. Using keys causes the widgets to sync according to their
   /// keys and avoids this pitfall.
   const Dismissible({
-    required Key key,
+    required Key super.key,
     required this.child,
     this.background,
     this.secondaryBackground,
@@ -112,8 +112,7 @@ class Dismissible extends StatefulWidget {
     this.crossAxisEndOffset = 0.0,
     this.dragStartBehavior = DragStartBehavior.start,
     this.behavior = HitTestBehavior.opaque,
-  }) : assert(secondaryBackground == null || background != null),
-       super(key: key);
+  }) : assert(secondaryBackground == null || background != null);
 
   /// The widget below this widget in the tree.
   ///
@@ -532,7 +531,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   }
 
   Future<void> _handleDismissStatusChanged(AnimationStatus status) async {
-    if (status == AnimationStatus.completed && !_dragUnderway) {
+    if (status.isCompleted && !_dragUnderway) {
       await _handleMoveCompleted();
     }
     if (mounted) {
@@ -624,7 +623,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       // we've been dragged aside, and are now resizing.
       assert(() {
         if (_resizeAnimation!.status != AnimationStatus.forward) {
-          assert(_resizeAnimation!.status == AnimationStatus.completed);
+          assert(_resizeAnimation!.isCompleted);
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('A dismissed Dismissible widget is still part of the tree.'),
             ErrorHint(

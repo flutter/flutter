@@ -144,9 +144,21 @@ BuildApp() {
   if [[ -n "$CODE_SIZE_DIRECTORY" ]]; then
     flutter_args+=("-dCodeSizeDirectory=${CODE_SIZE_DIRECTORY}")
   fi
-  flutter_args+=("${build_mode}_macos_bundle_flutter_assets")
+
+  # Run flutter assemble with the build mode specific target that was passed in.
+  # If no target was passed it, default to build mode specific
+  # macos_bundle_flutter_assets target.
+  if [[ -n "$1" ]]; then
+    flutter_args+=("${build_mode}$1")
+  else
+    flutter_args+=("${build_mode}_macos_bundle_flutter_assets")
+  fi
 
   RunCommand "${flutter_args[@]}"
+}
+
+PrepareFramework() {
+  BuildApp "_unpack_macos"
 }
 
 # Adds the App.framework as an embedded binary, the flutter_assets as
@@ -179,6 +191,12 @@ EmbedFrameworks() {
   local native_assets_path="${project_path}/${FLUTTER_BUILD_DIR}/native_assets/macos/"
   if [[ -d "$native_assets_path" ]]; then
     RunCommand rsync -av --filter "- .DS_Store" --filter "- native_assets.yaml" "${native_assets_path}" "${xcode_frameworks_dir}"
+
+    # Iterate through all .frameworks in native assets directory.
+    for native_asset in "${native_assets_path}"*.framework; do
+      # Codesign the framework inside the app bundle.
+      RunCommand codesign --force --verbose --sign "${EXPANDED_CODE_SIGN_IDENTITY}" -- "${xcode_frameworks_dir}/$(basename "$native_asset")"
+    done
   fi
 }
 
@@ -192,5 +210,7 @@ else
       BuildApp ;;
     "embed")
       EmbedFrameworks ;;
+    "prepare")
+      PrepareFramework ;;
   esac
 fi

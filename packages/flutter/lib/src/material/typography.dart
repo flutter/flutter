@@ -60,7 +60,7 @@ enum ScriptCategory {
 /// [blackCupertino], and [whiteCupertino]. The Mountain View theme [TextStyle]s
 /// are based on the Roboto fonts as used on Android. The Cupertino themes are
 /// based on the [San Francisco
-/// font](https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/)
+/// font](https://developer.apple.com/design/human-interface-guidelines/typography/)
 /// fonts as used by Apple on iOS.
 ///
 /// Two sets of geometry themes are provided: 2014 and 2018. The 2014 themes

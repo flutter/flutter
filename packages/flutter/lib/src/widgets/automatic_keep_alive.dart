@@ -400,6 +400,10 @@ mixin AutomaticKeepAliveClientMixin<T extends StatefulWidget> on State<T> {
   Widget build(BuildContext context) {
     if (wantKeepAlive && _keepAliveHandle == null) {
       _ensureKeepAlive();
+      // Whenever wantKeepAlive's value changes (or might change), the
+      // subclass should call [updateKeepAlive].
+      // That will ensure that the keepalive is disabled (or enabled)
+      // without requiring a rebuild.
     }
     return const _NullWidget();
   }

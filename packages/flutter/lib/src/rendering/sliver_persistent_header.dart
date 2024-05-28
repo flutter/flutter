@@ -348,7 +348,14 @@ abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersist
     }
     final double maxExtent = this.maxExtent;
     final double paintExtent = maxExtent - constraints.scrollOffset;
+    final double cacheExtent = calculateCacheOffset(
+      constraints,
+      from: 0.0,
+      to: maxExtent,
+    );
+
     geometry = SliverGeometry(
+      cacheExtent: cacheExtent,
       scrollExtent: maxExtent,
       paintOrigin: math.min(constraints.overlap, 0.0),
       paintExtent: clampDouble(paintExtent, 0.0, constraints.remainingPaintExtent),

@@ -62,8 +62,8 @@ class MatchesGoldenFile extends AsyncMatcher {
     final ui.FlutterView view = binding.platformDispatcher.implicitView!;
     final RenderView renderView = binding.renderViews.firstWhere((RenderView r) => r.flutterView == view);
 
-    if (isCanvasKit) {
-      // In CanvasKit, use Layer.toImage to generate the screenshot.
+    if (isSkiaWeb) {
+      // In CanvasKit and Skwasm, use Layer.toImage to generate the screenshot.
       final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
       return binding.runAsync<String?>(() async {
         assert(element.renderObject != null);

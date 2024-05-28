@@ -26,20 +26,20 @@ import 'package:path/path.dart' as path;
 /// Get contents of the file that contains the physical key mapping in Chromium
 /// source.
 Future<String> getChromiumCodes() async {
-  final Uri keyCodesUri = Uri.parse('https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/master/ui/events/keycodes/dom/dom_code_data.inc?format=TEXT');
+  final Uri keyCodesUri = Uri.parse('https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/main/ui/events/keycodes/dom/dom_code_data.inc?format=TEXT');
   return utf8.decode(base64.decode(await http.read(keyCodesUri)));
 }
 
 /// Get contents of the file that contains the logical key mapping in Chromium
 /// source.
 Future<String> getChromiumKeys() async {
-  final Uri keyCodesUri = Uri.parse('https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/master/ui/events/keycodes/dom/dom_key_data.inc?format=TEXT');
+  final Uri keyCodesUri = Uri.parse('https://chromium.googlesource.com/codesearch/chromium/src/+/refs/heads/main/ui/events/keycodes/dom/dom_key_data.inc?format=TEXT');
   return utf8.decode(base64.decode(await http.read(keyCodesUri)));
 }
 
 /// Get contents of the file that contains the key codes in Android source.
 Future<String> getAndroidKeyCodes() async {
-  final Uri keyCodesUri = Uri.parse('https://android.googlesource.com/platform/frameworks/native/+/master/include/android/keycodes.h?format=TEXT');
+  final Uri keyCodesUri = Uri.parse('https://android.googlesource.com/platform/frameworks/native/+/main/include/android/keycodes.h?format=TEXT');
   return utf8.decode(base64.decode(await http.read(keyCodesUri)));
 }
 
@@ -55,7 +55,7 @@ Future<String> getWindowsKeyCodes() async {
 /// common keyboards. Other than some special keyboards and game pads, this
 /// should be OK.
 Future<String> getAndroidScanCodes() async {
-  final Uri scanCodesUri = Uri.parse('https://android.googlesource.com/platform/frameworks/base/+/master/data/keyboards/Generic.kl?format=TEXT');
+  final Uri scanCodesUri = Uri.parse('https://android.googlesource.com/platform/frameworks/base/+/main/data/keyboards/Generic.kl?format=TEXT');
   return utf8.decode(base64.decode(await http.read(scanCodesUri)));
 }
 

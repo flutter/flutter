@@ -5,15 +5,16 @@
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
-import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/error_handling_io.dart';
+import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
@@ -22,6 +23,7 @@ import '../globals.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
+import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
@@ -50,7 +52,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   final String name = 'ios';
 
   @override
-  final String description = 'Build an iOS application bundle (macOS host only).';
+  final String description = 'Build an iOS application bundle.';
 
   @override
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.build;
@@ -127,7 +129,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   final List<String> aliases = <String>['xcarchive'];
 
   @override
-  final String description = 'Build an iOS archive bundle and IPA for distribution (macOS host only).';
+  final String description = 'Build an iOS archive bundle and IPA for distribution.';
 
   @override
   final XcodeBuildAction xcodeBuildAction = XcodeBuildAction.archive;
@@ -523,7 +525,17 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       return FlutterCommandResult.success();
     }
 
-    globals.printStatus('Built IPA to $absoluteOutputPath.');
+    final Directory outputDirectory = globals.fs.directory(absoluteOutputPath);
+    final int? directorySize = globals.os.getDirectorySize(outputDirectory);
+    final String appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
+      ? '' // Don't display the size when building a debug variant.
+        : ' (${getSizeAsPlatformMB(directorySize)})';
+
+    globals.printStatus(
+      '${globals.terminal.successMark} '
+      'Built IPA to ${globals.fs.path.relative(outputDirectory.path)}$appSize',
+      color: TerminalColor.green,
+    );
 
     if (isAppStoreUpload) {
       globals.printStatus('To upload to the App Store either:');
@@ -654,11 +666,10 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
     final String logTarget = environmentType == EnvironmentType.simulator ? 'simulator' : 'device';
     final String typeName = globals.artifacts!.getEngineType(TargetPlatform.ios, buildInfo.mode);
-    if (xcodeBuildAction == XcodeBuildAction.build) {
-      globals.printStatus('Building $app for $logTarget ($typeName)...');
-    } else {
-      globals.printStatus('Archiving $app...');
-    }
+    globals.printStatus(switch (xcodeBuildAction) {
+      XcodeBuildAction.build   => 'Building $app for $logTarget ($typeName)...',
+      XcodeBuildAction.archive => 'Archiving $app...',
+    });
     final XcodeBuildResult result = await buildXcodeProject(
       app: app,
       buildInfo: buildInfo,
@@ -675,7 +686,15 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     xcodeBuildResult = result;
 
     if (!result.success) {
-      await diagnoseXcodeBuildFailure(result, globals.flutterUsage, globals.logger, globals.analytics);
+      await diagnoseXcodeBuildFailure(
+        result,
+        analytics: globals.analytics,
+        fileSystem: globals.fs,
+        flutterUsage: globals.flutterUsage,
+        logger: globals.logger,
+        platform: SupportedPlatform.ios,
+        project: app.project.parent,
+      );
       final String presentParticiple = xcodeBuildAction == XcodeBuildAction.build ? 'building' : 'archiving';
       throwToolExit('Encountered error while $presentParticiple for $logTarget.');
     }
@@ -737,7 +756,17 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     }
 
     if (result.output != null) {
-      globals.printStatus('Built ${result.output}.');
+      final Directory outputDirectory = globals.fs.directory(result.output);
+      final int? directorySize = globals.os.getDirectorySize(outputDirectory);
+      final String appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
+        ? '' // Don't display the size when building a debug variant.
+          : ' (${getSizeAsPlatformMB(directorySize)})';
+
+      globals.printStatus(
+        '${globals.terminal.successMark} '
+        'Built ${globals.fs.path.relative(outputDirectory.path)}$appSize',
+        color: TerminalColor.green,
+      );
 
       // When an app is successfully built, record to analytics whether Impeller
       // is enabled or disabled.

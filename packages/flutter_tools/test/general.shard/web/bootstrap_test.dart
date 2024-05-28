@@ -138,37 +138,18 @@ void main() {
     expect(result, contains('el.setAttribute("data-main", \'foo.dart.js\');'));
   });
 
-  test('generateTestEntrypoint does not generate test config wrappers when testConfigPath is not passed', () {
+  test('generateTestEntrypoint generates proper imports and mappings for tests', () {
     final String result = generateTestEntrypoint(
-      relativeTestPath: 'relative_path.dart',
-      absolutePath: 'absolute_path.dart',
-      testConfigPath: null,
+      testInfos: <WebTestInfo>[
+        (entryPoint: 'foo.dart', goldensUri: Uri.parse('foo.dart'), configFile: null),
+        (entryPoint: 'bar.dart', goldensUri: Uri.parse('bar.dart'), configFile: 'bar_config.dart'),
+      ],
       languageVersion: LanguageVersion(2, 8),
     );
 
-    expect(result, isNot(contains('test_config.testExecutable')));
-  });
-
-  test('generateTestEntrypoint generates test config wrappers when testConfigPath is passed', () {
-    final String result = generateTestEntrypoint(
-      relativeTestPath: 'relative_path.dart',
-      absolutePath: 'absolute_path.dart',
-      testConfigPath: 'test_config_path.dart',
-      languageVersion: LanguageVersion(2, 8),
-    );
-
-    expect(result, contains('test_config.testExecutable'));
-  });
-
-  test('generateTestEntrypoint embeds urls correctly', () {
-    final String result = generateTestEntrypoint(
-      relativeTestPath: 'relative_path.dart',
-      absolutePath: '/test/absolute_path.dart',
-      testConfigPath: null,
-      languageVersion: LanguageVersion(2, 8),
-    );
-
-    expect(result, contains("Uri.parse('file:///test/absolute_path.dart')"));
+    expect(result, contains("import 'org-dartlang-app:///foo.dart'"));
+    expect(result, contains("import 'org-dartlang-app:///bar.dart'"));
+    expect(result, contains("import 'org-dartlang-app:///bar_config.dart'"));
   });
 
   group('Using the DDC module system', () {
@@ -298,39 +279,6 @@ void main() {
       final String result = generateTestBootstrapFileContents('foo.dart.js', 'require.js', 'mapper.js');
 
       expect(result, contains('el.setAttribute("data-main", \'foo.dart.js\');'));
-    });
-
-    test('generateTestEntrypoint does not generate test config wrappers when testConfigPath is not passed', () {
-      final String result = generateTestEntrypoint(
-        relativeTestPath: 'relative_path.dart',
-        absolutePath: 'absolute_path.dart',
-        testConfigPath: null,
-        languageVersion: LanguageVersion(2, 8),
-      );
-
-      expect(result, isNot(contains('test_config.testExecutable')));
-    });
-
-    test('generateTestEntrypoint generates test config wrappers when testConfigPath is passed', () {
-      final String result = generateTestEntrypoint(
-        relativeTestPath: 'relative_path.dart',
-        absolutePath: 'absolute_path.dart',
-        testConfigPath: 'test_config_path.dart',
-        languageVersion: LanguageVersion(2, 8),
-      );
-
-      expect(result, contains('test_config.testExecutable'));
-    });
-
-    test('generateTestEntrypoint embeds urls correctly', () {
-      final String result = generateTestEntrypoint(
-        relativeTestPath: 'relative_path.dart',
-        absolutePath: '/test/absolute_path.dart',
-        testConfigPath: null,
-        languageVersion: LanguageVersion(2, 8),
-      );
-
-      expect(result, contains("Uri.parse('file:///test/absolute_path.dart')"));
     });
   });
 }

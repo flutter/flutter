@@ -7,6 +7,7 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
   const TestImageProvider(this.image);
@@ -27,6 +28,9 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 }
 
 void main() {
+  // TODO(polina-c): dispose ImageStreamCompleterHandle, https://github.com/flutter/flutter/issues/145599 [leaks-to-clean]
+  LeakTesting.settings = LeakTesting.settings.withIgnoredAll();
+
   late ui.Image testImage;
 
   setUpAll(() async {

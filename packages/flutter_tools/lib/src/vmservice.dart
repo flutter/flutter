@@ -417,7 +417,7 @@ Future<FlutterVmService> _connect(
   // This call is to ensure we are able to establish a connection instead of
   // keeping on trucking and failing farther down the process.
   await delegateService.getVersion();
-  return FlutterVmService(service, httpAddress: httpUri, wsAddress: wsUri);
+  return FlutterVmService(service, httpAddress: httpUri, wsAddress: wsUri, logger: logger);
 }
 
 String _validateRpcStringParam(String methodName, Map<String, Object?> params, String paramName) {
@@ -486,11 +486,13 @@ class FlutterVmService {
     this.service, {
     this.wsAddress,
     this.httpAddress,
-  });
+    required Logger logger,
+  }) : _logger = logger;
 
   final vm_service.VmService service;
   final Uri? wsAddress;
   final Uri? httpAddress;
+  final Logger _logger;
 
   Future<vm_service.Response?> callMethodWrapper(
     String method, {
@@ -569,14 +571,36 @@ class FlutterVmService {
     required Uri main,
     required Uri assetsDirectory,
   }) async {
+    _logger.printTrace('Running $main in view $viewId...');
     try {
       await service.streamListen(vm_service.EventStreams.kIsolate);
-    } on vm_service.RPCError {
+    } on vm_service.RPCError catch (e) {
+      _logger.printTrace(
+        'Unable to listen to VM service stream "${vm_service.EventStreams.kIsolate}".\n'
+        'Error: $e',
+      );
       // Do nothing, since the tool is already subscribed.
     }
+
+    // TODO(andrewkolos): this is to assist in troubleshooting https://github.com/flutter/flutter/issues/146879
+    // and should be reverted once this issue is resolved.
+    unawaited(service.onReceive.firstWhere((String message) {
+      _logger.printTrace('runInView VM service onReceive listener received "$message"');
+      final dynamic messageAsJson = jsonDecode(message);
+      // ignore: avoid_dynamic_calls -- Temporary code.
+      final dynamic messageKind = messageAsJson['params']?['event']?['kind'];
+      if (messageKind == 'IsolateRunnable') {
+        _logger.printTrace('Received IsolateRunnable event from onReceive.');
+        return true;
+      }
+      return false;
+    }));
+
     final Future<void> onRunnable = service.onIsolateEvent.firstWhere((vm_service.Event event) {
+      _logger.printTrace('runInView VM service onIsolateEvent listener received $event');
       return event.kind == vm_service.EventKind.kIsolateRunnable;
     });
+    _logger.printTrace('Calling $kRunInViewMethod...');
     await callMethodWrapper(
       kRunInViewMethod,
       args: <String, Object>{
@@ -585,7 +609,9 @@ class FlutterVmService {
         'assetDirectory': assetsDirectory.toString(),
       },
     );
+    _logger.printTrace('Finished $kRunInViewMethod');
     await onRunnable;
+    _logger.printTrace('Finished running $main in view $viewId');
   }
 
   /// Renders the last frame with additional raster tracing enabled.
@@ -993,14 +1019,11 @@ class FlutterVmService {
       throw VmServiceDisappearedException();
     }
 
-    final List<vm_service.IsolateRef> refs = <vm_service.IsolateRef>[];
-    for (final FlutterView flutterView in flutterViews) {
-      final vm_service.IsolateRef? uiIsolate = flutterView.uiIsolate;
-      if (uiIsolate != null) {
-        refs.add(uiIsolate);
-      }
-    }
-    return refs;
+    return <vm_service.IsolateRef>[
+      for (final FlutterView flutterView in flutterViews)
+        if (flutterView.uiIsolate case final vm_service.IsolateRef uiIsolate)
+          uiIsolate,
+    ];
   }
 
   /// Attempt to retrieve the isolate with id [isolateId], or `null` if it has

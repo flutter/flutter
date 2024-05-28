@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'runner.dart' as runner;
-import 'src/artifacts.dart';
 import 'src/base/context.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -110,7 +109,7 @@ Future<void> main(List<String> args) async {
       // devtools source code.
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
-        dartExecutable: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
+        artifacts: globals.artifacts!,
         logger: globals.logger,
         botDetector: globals.botDetector,
       ),
@@ -137,6 +136,7 @@ Future<void> main(List<String> args) async {
           // So that we don't animate anything before calling applyFeatureFlags, default
           // the animations to disabled in real apps.
           defaultCliAnimationEnabled: false,
+          shutdownHooks: globals.shutdownHooks,
         );
         // runner.run calls "terminal.applyFeatureFlags()"
       },

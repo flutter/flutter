@@ -23,6 +23,7 @@
 #     * Material (general): fix_material.yaml
 #     * SliverAppBar: fix_sliver_app_bar.yaml
 #     * TextTheme: fix_text_theme.yaml
+#     * WidgetState: fix_widget_state.yaml
 version: 1
 transforms:
   # Changes made in https://github.com/flutter/flutter/pull/87281
@@ -1696,5 +1697,16 @@ transforms:
     changes:
       - kind: 'removeParameter'
         name: 'useMaterial3'
+
+  # Changes made in https://github.com/flutter/flutter/pull/145523
+  - title: "Remove 'buttonBarTheme'"
+    date: 2024-04-28
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'ThemeData'
+    changes:
+      - kind: 'removeParameter'
+        name: 'buttonBarTheme'
 
 # Before adding a new fix: read instructions at the top of this file.

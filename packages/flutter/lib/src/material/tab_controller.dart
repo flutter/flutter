@@ -133,21 +133,21 @@ class TabController extends ChangeNotifier {
        _previousIndex = previousIndex,
        _animationController = animationController,
        _animationDuration = animationDuration {
-    if (kFlutterMemoryAllocationsEnabled) {
-      ChangeNotifier.maybeDispatchObjectCreation(this);
+      if (kFlutterMemoryAllocationsEnabled) {
+        ChangeNotifier.maybeDispatchObjectCreation(this);
+      }
     }
-  }
+
 
   /// Creates a new [TabController] with `index`, `previousIndex`, `length`, and
-  /// `animationDuration` if they are non-null.
+  /// `animationDuration` if they are non-null, and disposes current instance.
   ///
   /// This method is used by [DefaultTabController].
   ///
   /// When [DefaultTabController.length] is updated, this method is called to
   /// create a new [TabController] without creating a new [AnimationController].
-  ///
-  /// This instance of [TabController] will be disposed and must not be used
-  /// anymore.
+  /// Instead the [_animationController] is nulled in current instance and
+  /// passed to the new instance.
   TabController _copyWithAndDispose({
     required int? index,
     required int? length,
@@ -157,20 +157,16 @@ class TabController extends ChangeNotifier {
     if (index != null) {
       _animationController!.value = index.toDouble();
     }
-    final TabController newController = TabController._(
+    final TabController result = TabController._(
       index: index ?? _index,
       length: length ?? this.length,
       animationController: _animationController,
       previousIndex: previousIndex ?? _previousIndex,
       animationDuration: animationDuration ?? _animationDuration,
     );
-
-    // Nulling _animationController to not dispose it. It will be disposed by
-    // the newly created instance of the TabController.
     _animationController = null;
     dispose();
-
-    return newController;
+    return result;
   }
 
   /// An animation whose value represents the current position of the [TabBar]'s

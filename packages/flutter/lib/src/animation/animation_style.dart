@@ -13,6 +13,9 @@ import 'tween.dart';
 /// - [ExpansionTile]
 /// - [MaterialApp]
 /// - [PopupMenuButton]
+/// - [ScaffoldMessengerState.showSnackBar]
+/// - [showBottomSheet]
+/// - [showModalBottomSheet]
 ///
 /// If [duration] and [reverseDuration] are set to [Duration.zero], the
 /// corresponding animation will be disabled.

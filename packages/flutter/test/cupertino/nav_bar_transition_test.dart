@@ -59,26 +59,24 @@ Future<void> startTransitionBetween(
 }
 
 CupertinoPageScaffold? scaffoldForNavBar(Widget? navBar) {
-  if (navBar is CupertinoNavigationBar || navBar == null) {
-    return CupertinoPageScaffold(
-      navigationBar: navBar as CupertinoNavigationBar? ?? const CupertinoNavigationBar(),
-      child: const Placeholder(),
-    );
-  } else if (navBar is CupertinoSliverNavigationBar) {
-    return CupertinoPageScaffold(
-      child: CustomScrollView(
-        slivers: <Widget>[
+  switch (navBar) {
+    case CupertinoNavigationBar? _:
+      return CupertinoPageScaffold(
+        navigationBar: navBar ?? const CupertinoNavigationBar(),
+        child: const Placeholder(),
+      );
+    case CupertinoSliverNavigationBar():
+      return CupertinoPageScaffold(
+        child: CustomScrollView(slivers: <Widget>[
           navBar,
           // Add filler so it's scrollable.
-          const SliverToBoxAdapter(
-            child: Placeholder(fallbackHeight: 1000.0),
-          ),
-        ],
-      ),
-    );
+          const SliverToBoxAdapter(child: Placeholder(fallbackHeight: 1000.0)),
+        ]),
+      );
+    default:
+      assert(false, 'Unexpected nav bar type ${navBar.runtimeType}');
+      return null;
   }
-  assert(false, 'Unexpected nav bar type ${navBar.runtimeType}');
-  return null;
 }
 
 Finder flying(WidgetTester tester, Finder finder) {

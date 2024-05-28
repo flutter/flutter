@@ -174,11 +174,11 @@ void testWidgets(
         test_package.addTearDown(binding.postTest);
         return binding.runTest(
           () async {
-            binding.reset(); // TODO(ianh): the binding should just do this itself in _runTest
             debugResetSemanticsIdCounter();
             Object? memento;
             try {
               memento = await variant.setUp(value);
+              binding.reset(); // TODO(ianh): the binding should just do this itself in _runTest
               maybeSetupLeakTrackingForTest(experimentalLeakTesting, combinedDescription);
               await callback(tester);
             } finally {
@@ -932,14 +932,11 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
         final Key? key = widget.key;
         if (key is ValueKey<dynamic>) {
-          String? keyLabel;
-          if (key is ValueKey<int> ||
-              key is ValueKey<double> ||
-              key is ValueKey<bool>) {
-            keyLabel = 'const ${key.runtimeType}(${key.value})';
-          } else if (key is ValueKey<String>) {
-            keyLabel = "const Key('${key.value}')";
-          }
+          final String? keyLabel = switch (key.value) {
+            int() || double() || bool() => 'const ${key.runtimeType}(${key.value})',
+            final String value => "const Key('$value')",
+            _ => null,
+          };
           if (keyLabel != null) {
             final Iterable<Element> matches = find.byKey(key).evaluate();
             if (matches.length == 1) {

@@ -1318,13 +1318,17 @@ mixin SchedulerBinding on BindingBase {
       final List<FrameCallback> localPostFrameCallbacks =
           List<FrameCallback>.of(_postFrameCallbacks);
       _postFrameCallbacks.clear();
-      Timeline.startSync('POST_FRAME');
+      if (!kReleaseMode) {
+        FlutterTimeline.startSync('POST_FRAME');
+      }
       try {
         for (final FrameCallback callback in localPostFrameCallbacks) {
           _invokeFrameCallback(callback, _currentFrameTimeStamp!);
         }
       } finally {
-        Timeline.finishSync();
+        if (!kReleaseMode) {
+          FlutterTimeline.finishSync();
+        }
       }
     } finally {
       _schedulerPhase = SchedulerPhase.idle;

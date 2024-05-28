@@ -64,6 +64,39 @@ class RenderListBody extends RenderBox
   Axis get mainAxis => axisDirectionToAxis(axisDirection);
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    assert(_debugCheckConstraints(constraints));
+    RenderBox? child;
+    final RenderBox? Function(RenderBox) nextChild;
+    switch (axisDirection) {
+      case AxisDirection.right:
+      case AxisDirection.left:
+        final BoxConstraints childConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
+        BaselineOffset baselineOffset = BaselineOffset.noBaseline;
+        for (child = firstChild; child != null; child = childAfter(child)) {
+          baselineOffset = baselineOffset.minOf(BaselineOffset(child.getDryBaseline(childConstraints, baseline)));
+        }
+        return baselineOffset.offset;
+      case AxisDirection.up:
+        child = lastChild;
+        nextChild = childBefore;
+      case AxisDirection.down:
+        child = firstChild;
+        nextChild = childAfter;
+    }
+    final BoxConstraints childConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
+    double mainAxisExtent = 0.0;
+    for (; child != null; child = nextChild(child)) {
+      final double? childBaseline = child.getDryBaseline(childConstraints, baseline);
+      if (childBaseline != null) {
+        return childBaseline + mainAxisExtent;
+      }
+      mainAxisExtent += child.getDryLayout(childConstraints).height;
+    }
+    return null;
+  }
+
+  @override
   @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
     assert(_debugCheckConstraints(constraints));

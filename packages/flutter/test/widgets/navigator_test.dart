@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'navigator_utils.dart';
 import 'observer_tester.dart';
@@ -1830,7 +1831,9 @@ void main() {
   });
 
   group('error control test', () {
-    testWidgets('onUnknownRoute null and onGenerateRoute returns null', (WidgetTester tester) async {
+    testWidgets('onGenerateRoute returns null',
+    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
       await tester.pumpWidget(Navigator(
         key: navigatorKey,
@@ -1856,7 +1859,9 @@ void main() {
       );
     });
 
-    testWidgets('onUnknownRoute null and onGenerateRoute returns null', (WidgetTester tester) async {
+    testWidgets('onUnknownRoute null and onGenerateRoute returns null',
+    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
       await tester.pumpWidget(Navigator(
         key: navigatorKey,
@@ -2889,13 +2894,15 @@ void main() {
         error.toStringDeep(),
         equalsIgnoringHashCodes(
           'FlutterError\n'
-          '   The Navigator.onPopPage must be provided to use the\n'
-          '   Navigator.pages API\n',
+          '   Either onDidRemovePage or onPopPage must be provided to use the\n'
+          '   Navigator.pages API but not both.\n',
         ),
       );
     });
 
-    testWidgets('throw if page list is empty', (WidgetTester tester) async {
+    testWidgets('throw if page list is empty',
+    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
       final List<TestPage> myPages = <TestPage>[];
       final FlutterExceptionHandler? originalOnError = FlutterError.onError;
       FlutterErrorDetails? firstError;
@@ -2982,7 +2989,7 @@ void main() {
       const List<Page<void>> myPages = <Page<void>>[
         MaterialPage<void>(child: Text('page1')),
         MaterialPage<void>(
-          child: PopScope(
+          child: PopScope<void>(
             canPop: false,
             child: Text('page2'),
           ),
@@ -4901,9 +4908,9 @@ void main() {
             home: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 builderSetState = setState;
-                return PopScope(
+                return PopScope<Object?>(
                   canPop: canPop(),
-                  onPopInvoked: (bool success) {
+                  onPopInvokedWithResult: (bool success, Object? result) {
                     if (success || pages.last == _Page.noPop) {
                       return;
                     }
@@ -5017,9 +5024,9 @@ void main() {
           MaterialApp(
             home: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-                return PopScope(
+                return PopScope<Object?>(
                   canPop: canPop(),
-                  onPopInvoked: (bool success) {
+                  onPopInvokedWithResult: (bool success, Object? result) {
                     if (success || pages.last == _Page.noPop) {
                       return;
                     }
@@ -5110,9 +5117,9 @@ void main() {
           MaterialApp(
             home: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-                return PopScope(
+                return PopScope<Object?>(
                   canPop: canPop(),
-                  onPopInvoked: (bool success) {
+                  onPopInvokedWithResult: (bool success, Object? result) {
                     if (success || pages.last == _PageWithYesPop.noPop) {
                       return;
                     }
@@ -5182,7 +5189,7 @@ void main() {
                             child: _LinksPage(
                               title: 'Can pop page',
                               canPop: true,
-                              onPopInvoked: (bool didPop) {
+                              onPopInvoked: (bool didPop, void result) {
                                 onPopInvokedCallCount += 1;
                               },
                             ),
@@ -5549,7 +5556,7 @@ class _LinksPage extends StatelessWidget {
   final bool? canPop;
   final VoidCallback? onBack;
   final String title;
-  final PopInvokedCallback? onPopInvoked;
+  final PopInvokedWithResultCallback<Object?>? onPopInvoked;
 
   @override
   Widget build(BuildContext context) {
@@ -5568,9 +5575,9 @@ class _LinksPage extends StatelessWidget {
                 child: const Text('Go back'),
               ),
             if (canPop != null)
-              PopScope(
+              PopScope<void>(
                 canPop: canPop!,
-                onPopInvoked: onPopInvoked,
+                onPopInvokedWithResult: onPopInvoked,
                 child: const SizedBox.shrink(),
               ),
           ],

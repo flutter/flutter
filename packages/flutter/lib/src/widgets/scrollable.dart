@@ -116,6 +116,7 @@ class Scrollable extends StatefulWidget {
     this.restorationId,
     this.scrollBehavior,
     this.clipBehavior = Clip.hardEdge,
+    this.hitTestBehavior = HitTestBehavior.opaque,
   }) : assert(semanticChildCount == null || semanticChildCount >= 0);
 
   /// {@template flutter.widgets.Scrollable.axisDirection}
@@ -224,6 +225,18 @@ class Scrollable extends StatefulWidget {
   ///  * [GestureDetector.excludeFromSemantics], which is used to accomplish the
   ///    exclusion.
   final bool excludeFromSemantics;
+
+  /// {@template flutter.widgets.scrollable.hitTestBehavior}
+  /// Defines the behavior of gesture detector used in this [Scrollable].
+  ///
+  /// This defaults to [HitTestBehavior.opaque] which means it prevents targets
+  /// behind this [Scrollable] from receiving events.
+  /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [HitTestBehavior], for an explanation on different behaviors.
+  final HitTestBehavior hitTestBehavior;
 
   /// The number of children that will contribute semantic information.
   ///
@@ -758,7 +771,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
                   ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
                   ..dragStartBehavior = widget.dragStartBehavior
-                  ..multitouchDragStrategy = _configuration.multitouchDragStrategy
+                  ..multitouchDragStrategy = _configuration.getMultitouchDragStrategy(context)
                   ..gestureSettings = _mediaQueryGestureSettings
                   ..supportedDevices = _configuration.dragDevices;
               },
@@ -780,7 +793,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
                   ..maxFlingVelocity = _physics?.maxFlingVelocity
                   ..velocityTrackerBuilder = _configuration.velocityTrackerBuilder(context)
                   ..dragStartBehavior = widget.dragStartBehavior
-                  ..multitouchDragStrategy = _configuration.multitouchDragStrategy
+                  ..multitouchDragStrategy = _configuration.getMultitouchDragStrategy(context)
                   ..gestureSettings = _mediaQueryGestureSettings
                   ..supportedDevices = _configuration.dragDevices;
               },
@@ -971,7 +984,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
         child: RawGestureDetector(
           key: _gestureDetectorKey,
           gestures: _gestureRecognizers,
-          behavior: HitTestBehavior.opaque,
+          behavior: widget.hitTestBehavior,
           excludeFromSemantics: widget.excludeFromSemantics,
           child: Semantics(
             explicitChildNodes: !widget.excludeFromSemantics,
@@ -1443,6 +1456,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
         _selectableStartEdgeUpdateRecords.remove(selectable);
       case SelectionEventType.selectAll:
       case SelectionEventType.selectWord:
+      case SelectionEventType.selectParagraph:
         _selectableEndEdgeUpdateRecords[selectable] = state.position.pixels;
         _selectableStartEdgeUpdateRecords[selectable] = state.position.pixels;
     }
@@ -1731,6 +1745,7 @@ class TwoDimensionalScrollable extends StatefulWidget {
     this.excludeFromSemantics = false,
     this.diagonalDragBehavior = DiagonalDragBehavior.none,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.hitTestBehavior = HitTestBehavior.opaque,
   });
 
   /// How scrolling gestures should lock to one axis, or allow free movement
@@ -1776,6 +1791,11 @@ class TwoDimensionalScrollable extends StatefulWidget {
   ///
   /// This value applies to both axes.
   final bool excludeFromSemantics;
+
+  /// {@macro flutter.widgets.scrollable.hitTestBehavior}
+  ///
+  /// This value applies to both axes.
+  final HitTestBehavior hitTestBehavior;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   ///
@@ -1979,9 +1999,11 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
         restorationId: 'OuterVerticalTwoDimensionalScrollable',
         dragStartBehavior: widget.dragStartBehavior,
         diagonalDragBehavior: widget.diagonalDragBehavior,
+        hitTestBehavior: widget.hitTestBehavior,
         viewportBuilder: (BuildContext context, ViewportOffset verticalOffset) {
           return _HorizontalInnerDimension(
             key: _horizontalInnerScrollableKey,
+            verticalOuterKey: _verticalOuterScrollableKey,
             axisDirection: widget.horizontalDetails.direction,
             controller: widget.horizontalDetails.controller
               ?? _horizontalFallbackController!,
@@ -1994,6 +2016,7 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
             restorationId: 'InnerHorizontalTwoDimensionalScrollable',
             dragStartBehavior: widget.dragStartBehavior,
             diagonalDragBehavior: widget.diagonalDragBehavior,
+            hitTestBehavior: widget.hitTestBehavior,
             viewportBuilder: (BuildContext context, ViewportOffset horizontalOffset) {
               return widget.viewportBuilder(context, verticalOffset, horizontalOffset);
             },
@@ -2049,6 +2072,7 @@ class _VerticalOuterDimension extends Scrollable {
     super.excludeFromSemantics,
     super.dragStartBehavior,
     super.restorationId,
+    super.hitTestBehavior,
     this.diagonalDragBehavior = DiagonalDragBehavior.none,
   }) : assert(axisDirection == AxisDirection.up || axisDirection == AxisDirection.down);
 
@@ -2250,9 +2274,9 @@ class _VerticalOuterDimensionState extends ScrollableState {
         if (value) {
           // Replaces the typical vertical/horizontal drag gesture recognizers
           // with a pan gesture recognizer to allow bidirectional scrolling.
-          // Based on the diagonalDragBehavior, valid horizontal deltas are
-          // applied to this scrollable, while vertical deltas are routed to
-          // the vertical scrollable.
+          // Based on the diagonalDragBehavior, valid vertical deltas are
+          // applied to this scrollable, while horizontal deltas are routed to
+          // the horizontal scrollable.
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             PanGestureRecognizer: GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
               () => PanGestureRecognizer(supportedDevices: _configuration.dragDevices),
@@ -2303,6 +2327,7 @@ class _VerticalOuterDimensionState extends ScrollableState {
 class _HorizontalInnerDimension extends Scrollable {
   const _HorizontalInnerDimension({
     super.key,
+    required this.verticalOuterKey,
     required super.viewportBuilder,
     required super.axisDirection,
     super.controller,
@@ -2312,9 +2337,11 @@ class _HorizontalInnerDimension extends Scrollable {
     super.excludeFromSemantics,
     super.dragStartBehavior,
     super.restorationId,
+    super.hitTestBehavior,
     this.diagonalDragBehavior = DiagonalDragBehavior.none,
   }) : assert(axisDirection == AxisDirection.left || axisDirection == AxisDirection.right);
 
+  final GlobalKey<ScrollableState> verticalOuterKey;
   final DiagonalDragBehavior diagonalDragBehavior;
 
   @override
@@ -2324,6 +2351,7 @@ class _HorizontalInnerDimension extends Scrollable {
 class _HorizontalInnerDimensionState extends ScrollableState {
   late ScrollableState verticalScrollable;
 
+  GlobalKey<ScrollableState> get verticalOuterKey => (widget as _HorizontalInnerDimension).verticalOuterKey;
   DiagonalDragBehavior get diagonalDragBehavior => (widget as _HorizontalInnerDimension).diagonalDragBehavior;
 
   @override
@@ -2345,23 +2373,22 @@ class _HorizontalInnerDimensionState extends ScrollableState {
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
     RenderObject? targetRenderObject,
   }) {
-    final List<Future<void>> newFutures = <Future<void>>[];
-
-    newFutures.add(position.ensureVisible(
-      object,
-      alignment: alignment,
-      duration: duration,
-      curve: curve,
-      alignmentPolicy: alignmentPolicy,
-    ));
-
-    newFutures.add(verticalScrollable.position.ensureVisible(
-      object,
-      alignment: alignment,
-      duration: duration,
-      curve: curve,
-      alignmentPolicy: alignmentPolicy,
-    ));
+    final List<Future<void>> newFutures = <Future<void>>[
+      position.ensureVisible(
+        object,
+        alignment: alignment,
+        duration: duration,
+        curve: curve,
+        alignmentPolicy: alignmentPolicy,
+      ),
+      verticalScrollable.position.ensureVisible(
+        object,
+        alignment: alignment,
+        duration: duration,
+        curve: curve,
+        alignmentPolicy: alignmentPolicy,
+      ),
+    ];
 
     return (newFutures, verticalScrollable);
   }
@@ -2379,9 +2406,12 @@ class _HorizontalInnerDimensionState extends ScrollableState {
       case DiagonalDragBehavior.free:
         if (value) {
           // If a type of diagonal scrolling is enabled, a panning gesture
-          // recognizer will be created for the _InnerDimension. So in this
-          // case, the _OuterDimension does not require a gesture recognizer.
+          // recognizer will be created for the _VerticalOuterDimension. So in
+          // this case, the _HorizontalInnerDimension does not require a gesture
+          // recognizer, meanwhile we should ensure the outer dimension has
+          // updated in case it did not have enough content to enable dragging.
           _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
+          verticalOuterKey.currentState!.setCanDrag(value);
           // Cancel the active hold/drag (if any) because the gesture recognizers
           // will soon be disposed by our RawGestureDetector, and we won't be
           // receiving pointer up events to cancel the hold/drag.

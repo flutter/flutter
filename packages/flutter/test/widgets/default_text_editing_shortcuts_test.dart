@@ -486,6 +486,257 @@ void main() {
       expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
     }, variant: macOSOnly);
   }, skip: kIsWeb); // [intended] specific tests target non-web.
+
+  group('Linux numpad shortcuts', () {
+    testWidgets('are triggered when numlock is locked', (WidgetTester tester) async {
+      final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
+      final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
+
+      await tester.pumpWidget(
+        buildSpyAboveEditableText(
+          editableFocusNode: editable,
+          spyFocusNode: spy,
+        ),
+      );
+      spy.requestFocus();
+      await tester.pump();
+      final ActionSpyState state = tester.state<ActionSpyState>(find.byType(ActionSpy));
+
+      // Lock NumLock.
+      await tester.sendKeyEvent(LogicalKeyboardKey.numLock);
+      expect(HardwareKeyboard.instance.lockModesEnabled.contains(KeyboardLockMode.numLock), isTrue);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad6, shift: true));
+      expect(state.lastIntent, isA<ExtendSelectionByCharacterIntent>());
+      expect((state.lastIntent! as ExtendSelectionByCharacterIntent).forward, true);
+      expect((state.lastIntent! as ExtendSelectionByCharacterIntent).collapseSelection, false);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad4, shift: true));
+      expect(state.lastIntent, isA<ExtendSelectionByCharacterIntent>());
+      expect((state.lastIntent! as ExtendSelectionByCharacterIntent).forward, false);
+      expect((state.lastIntent! as ExtendSelectionByCharacterIntent).collapseSelection, false);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad8, shift: true));
+      expect(state.lastIntent, isA<ExtendSelectionVerticallyToAdjacentLineIntent>());
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentLineIntent).forward, false);
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentLineIntent).collapseSelection, false);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad2, shift: true));
+      expect(state.lastIntent, isA<ExtendSelectionVerticallyToAdjacentLineIntent>());
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentLineIntent).forward, true);
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentLineIntent).collapseSelection, false);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad9, shift: true));
+      expect(state.lastIntent, isA<ExtendSelectionVerticallyToAdjacentPageIntent>());
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentPageIntent).forward, false);
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentPageIntent).collapseSelection, false);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad3, shift: true));
+      expect(state.lastIntent, isA<ExtendSelectionVerticallyToAdjacentPageIntent>());
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentPageIntent).forward, true);
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentPageIntent).collapseSelection, false);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad7, shift: true));
+      expect(state.lastIntent, isA<ExtendSelectionVerticallyToAdjacentLineIntent>());
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentLineIntent).forward, false);
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentLineIntent).collapseSelection, false);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad1, shift: true));
+      expect(state.lastIntent, isA<ExtendSelectionVerticallyToAdjacentLineIntent>());
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentLineIntent).forward, true);
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentLineIntent).collapseSelection, false);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpadDecimal, shift: true));
+      expect(state.lastIntent, isA<DeleteCharacterIntent>());
+      expect((state.lastIntent! as DeleteCharacterIntent).forward, true);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad6, shift: true, control: true));
+      expect(state.lastIntent, isA<ExtendSelectionToNextWordBoundaryIntent>());
+      expect((state.lastIntent! as ExtendSelectionToNextWordBoundaryIntent).forward, true);
+      expect((state.lastIntent! as ExtendSelectionToNextWordBoundaryIntent).collapseSelection, false);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad4, shift: true, control: true));
+      expect(state.lastIntent, isA<ExtendSelectionToNextWordBoundaryIntent>());
+      expect((state.lastIntent! as ExtendSelectionToNextWordBoundaryIntent).forward, false);
+      expect((state.lastIntent! as ExtendSelectionToNextWordBoundaryIntent).collapseSelection, false);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad8, shift: true, control: true));
+      expect(state.lastIntent, isA<ExtendSelectionToNextParagraphBoundaryIntent>());
+      expect((state.lastIntent! as ExtendSelectionToNextParagraphBoundaryIntent).forward, false);
+      expect((state.lastIntent! as ExtendSelectionToNextParagraphBoundaryIntent).collapseSelection, false);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad2, shift: true, control: true));
+      expect(state.lastIntent, isA<ExtendSelectionToNextParagraphBoundaryIntent>());
+      expect((state.lastIntent! as ExtendSelectionToNextParagraphBoundaryIntent).forward, true);
+      expect((state.lastIntent! as ExtendSelectionToNextParagraphBoundaryIntent).collapseSelection, false);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpadDecimal, shift: true, control: true));
+      expect(state.lastIntent, isA<DeleteToNextWordBoundaryIntent>());
+      expect((state.lastIntent! as DeleteToNextWordBoundaryIntent).forward, true);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
+
+    testWidgets('are triggered when numlock is unlocked', (WidgetTester tester) async {
+      final FocusNode editable = FocusNode();
+      addTearDown(editable.dispose);
+      final FocusNode spy = FocusNode();
+      addTearDown(spy.dispose);
+
+      await tester.pumpWidget(
+        buildSpyAboveEditableText(
+          editableFocusNode: editable,
+          spyFocusNode: spy,
+        ),
+      );
+      spy.requestFocus();
+      await tester.pump();
+      final ActionSpyState state = tester.state<ActionSpyState>(find.byType(ActionSpy));
+
+      // Verify that NumLock is unlocked.
+      expect(HardwareKeyboard.instance.lockModesEnabled.contains(KeyboardLockMode.numLock), isFalse);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad6));
+      expect(state.lastIntent, isA<ExtendSelectionByCharacterIntent>());
+      expect((state.lastIntent! as ExtendSelectionByCharacterIntent).forward, true);
+      expect((state.lastIntent! as ExtendSelectionByCharacterIntent).collapseSelection, true);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad4));
+      expect(state.lastIntent, isA<ExtendSelectionByCharacterIntent>());
+      expect((state.lastIntent! as ExtendSelectionByCharacterIntent).forward, false);
+      expect((state.lastIntent! as ExtendSelectionByCharacterIntent).collapseSelection, true);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad8));
+      expect(state.lastIntent, isA<ExtendSelectionVerticallyToAdjacentLineIntent>());
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentLineIntent).forward, false);
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentLineIntent).collapseSelection, true);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad2));
+      expect(state.lastIntent, isA<ExtendSelectionVerticallyToAdjacentLineIntent>());
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentLineIntent).forward, true);
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentLineIntent).collapseSelection, true);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad9));
+      expect(state.lastIntent, isA<ExtendSelectionVerticallyToAdjacentPageIntent>());
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentPageIntent).forward, false);
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentPageIntent).collapseSelection, true);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad3));
+      expect(state.lastIntent, isA<ExtendSelectionVerticallyToAdjacentPageIntent>());
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentPageIntent).forward, true);
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentPageIntent).collapseSelection, true);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad7));
+      expect(state.lastIntent, isA<ExtendSelectionVerticallyToAdjacentLineIntent>());
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentLineIntent).forward, false);
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentLineIntent).collapseSelection, true);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad1));
+      expect(state.lastIntent, isA<ExtendSelectionVerticallyToAdjacentLineIntent>());
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentLineIntent).forward, true);
+      expect((state.lastIntent! as ExtendSelectionVerticallyToAdjacentLineIntent).collapseSelection, true);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpadDecimal));
+      expect(state.lastIntent, isA<DeleteCharacterIntent>());
+      expect((state.lastIntent! as DeleteCharacterIntent).forward, true);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad6, control: true));
+      expect(state.lastIntent, isA<ExtendSelectionToNextWordBoundaryIntent>());
+      expect((state.lastIntent! as ExtendSelectionToNextWordBoundaryIntent).forward, true);
+      expect((state.lastIntent! as ExtendSelectionToNextWordBoundaryIntent).collapseSelection, true);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad4, control: true));
+      expect(state.lastIntent, isA<ExtendSelectionToNextWordBoundaryIntent>());
+      expect((state.lastIntent! as ExtendSelectionToNextWordBoundaryIntent).forward, false);
+      expect((state.lastIntent! as ExtendSelectionToNextWordBoundaryIntent).collapseSelection, true);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad8, control: true));
+      expect(state.lastIntent, isA<ExtendSelectionToNextParagraphBoundaryIntent>());
+      expect((state.lastIntent! as ExtendSelectionToNextParagraphBoundaryIntent).forward, false);
+      expect((state.lastIntent! as ExtendSelectionToNextParagraphBoundaryIntent).collapseSelection, true);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad2, control: true));
+      expect(state.lastIntent, isA<ExtendSelectionToNextParagraphBoundaryIntent>());
+      expect((state.lastIntent! as ExtendSelectionToNextParagraphBoundaryIntent).forward, true);
+      expect((state.lastIntent! as ExtendSelectionToNextParagraphBoundaryIntent).collapseSelection, true);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpadDecimal, control: true));
+      expect(state.lastIntent, isA<DeleteToNextWordBoundaryIntent>());
+      expect((state.lastIntent! as DeleteToNextWordBoundaryIntent).forward, true);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
+
+    testWidgets('update the editable text content when triggered on non-web', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final TextEditingController controller = TextEditingController(text: 'Flutter');
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: EditableText(
+            controller: controller,
+            autofocus: true,
+            focusNode: focusNode,
+            style: const TextStyle(fontSize: 10.0),
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+          ),
+        ),
+      ));
+
+      // Verify that NumLock is unlocked.
+      expect(HardwareKeyboard.instance.lockModesEnabled.contains(KeyboardLockMode.numLock), isFalse);
+
+      await tester.enterText(find.byType(EditableText), 'Flutter');
+      expect(controller.selection.end, 7);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad4));
+      // Verify the cursor moved to the left (numpad4).
+      expect(controller.selection.end, 6);
+    },
+      variant: TargetPlatformVariant.only(TargetPlatform.linux),
+      skip: kIsWeb, // [intended] Non-web test.
+    );
+
+    testWidgets('do not update the editable text content when triggered on web', (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final TextEditingController controller = TextEditingController(text: 'Flutter');
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: EditableText(
+            controller: controller,
+            autofocus: true,
+            focusNode: focusNode,
+            style: const TextStyle(fontSize: 10.0),
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+          ),
+        ),
+      ));
+
+      // Verify that NumLock is unlocked.
+      expect(HardwareKeyboard.instance.lockModesEnabled.contains(KeyboardLockMode.numLock), isFalse);
+
+      await tester.enterText(find.byType(EditableText), 'Flutter');
+      expect(controller.selection.end, 7);
+
+      await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.numpad4));
+      // On web, the editable text would have been updated by the browser.
+      // In the flutter test environment, the browser logic is not called
+      // so the editable content is not updated when a shortcut is triggered.
+      // This is the intended result, this test is checking that numpad shortcuts
+      // have no effect on the web (their intent is set to DoNothingAndStopPropagationTextIntent).
+      expect(controller.selection.end, 7);
+    },
+      variant: TargetPlatformVariant.only(TargetPlatform.linux),
+      skip: !kIsWeb, // [intended] Web only.
+    );
+  });
 }
 
 class ActionSpy extends StatefulWidget {
@@ -508,6 +759,8 @@ class ActionSpyState extends State<ActionSpy> {
     ExtendSelectionVerticallyToAdjacentLineIntent: CallbackAction<ExtendSelectionVerticallyToAdjacentLineIntent>(onInvoke: _captureIntent),
     ExtendSelectionToDocumentBoundaryIntent: CallbackAction<ExtendSelectionToDocumentBoundaryIntent>(onInvoke: _captureIntent),
     ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: CallbackAction<ExtendSelectionToNextWordBoundaryOrCaretLocationIntent>(onInvoke: _captureIntent),
+    ExtendSelectionToNextParagraphBoundaryIntent: CallbackAction<ExtendSelectionToNextParagraphBoundaryIntent>(onInvoke: _captureIntent),
+    ExtendSelectionVerticallyToAdjacentPageIntent: CallbackAction<ExtendSelectionVerticallyToAdjacentPageIntent>(onInvoke: _captureIntent),
 
     DeleteToLineBreakIntent: CallbackAction<DeleteToLineBreakIntent>(onInvoke: _captureIntent),
     DeleteToNextWordBoundaryIntent: CallbackAction<DeleteToNextWordBoundaryIntent>(onInvoke: _captureIntent),

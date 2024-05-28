@@ -14,7 +14,7 @@ import 'package:matcher/expect.dart';
 import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
 import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
-import '_matchers_io.dart' if (dart.library.html) '_matchers_web.dart' show MatchesGoldenFile, captureImage;
+import '_matchers_io.dart' if (dart.library.js_interop) '_matchers_web.dart' show MatchesGoldenFile, captureImage;
 import 'accessibility.dart';
 import 'binding.dart';
 import 'controller.dart';
@@ -546,12 +546,11 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 ///  * [flutter_test] for a discussion of test configurations, whereby callers
 ///    may swap out the backend for this matcher.
 AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
-  if (key is Uri) {
-    return MatchesGoldenFile(key, version);
-  } else if (key is String) {
-    return MatchesGoldenFile.forStringPath(key, version);
-  }
-  throw ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
+  return switch (key) {
+    Uri()    => MatchesGoldenFile(key, version),
+    String() => MatchesGoldenFile.forStringPath(key, version),
+    _ => throw ArgumentError('Unexpected type for golden file: ${key.runtimeType}'),
+  };
 }
 
 /// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches a

@@ -13,7 +13,7 @@
 
 import 'package:integration_test/integration_test.dart';
 
-import '_extended_test_io.dart' if (dart.library.html) '_extended_test_web.dart' as tests;
+import '_extended_test_io.dart' if (dart.library.js_interop) '_extended_test_web.dart' as tests;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();

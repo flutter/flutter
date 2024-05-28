@@ -6,7 +6,7 @@ chrome://version.
 
 Start `chromedriver` using the following command:
 
-```
+```sh
 chromedriver --port=4444
 ```
 
@@ -18,7 +18,7 @@ mode you'd like to run the test in.
 
 Here's an example of running an integration test:
 
-```
+```sh
 flutter drive --target=test_driver/text_editing_integration.dart \
   -d web-server \
   --browser-name=chrome \
@@ -37,5 +37,5 @@ More resources:
 
 [1]: https://chromedriver.chromium.org/downloads
 [2]: https://flutter.dev/docs/development/tools/web-renderers
-[3]: https://github.com/flutter/flutter/blob/master/dev/bots/test.dart
+[3]: https://github.com/flutter/flutter/blob/main/dev/bots/test.dart
 [4]: https://flutter.dev/docs/testing/build-modes

@@ -23,6 +23,7 @@ import '../test/test_time_recorder.dart';
 import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
 import '../web/compile.dart';
+import '../web/web_constants.dart';
 
 /// The name of the directory where Integration Tests are placed.
 ///
@@ -233,7 +234,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
               'in seconds (e.g. "60s"), '
               'as a multiplier of the default timeout (e.g. "2x"), '
               'or as the string "none" to disable the timeout entirely.',
+      )
+      ..addFlag(
+        FlutterOptions.kWebWasmFlag,
+        help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
+        negatable: false,
       );
+
     addDdsOptions(verboseHelp: verboseHelp);
     addServeObservatoryOptions(verboseHelp: verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
@@ -256,6 +263,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   final Set<Uri> _testFileUris = <Uri>{};
 
   bool get isWeb => stringArg('platform') == 'chrome';
+  bool get useWasm => boolArg(FlutterOptions.kWebWasmFlag);
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
@@ -322,6 +330,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     return super.verifyThenRunCommand(commandPath);
   }
 
+  WebRendererMode get webRenderer => WebRendererMode.fromCliOption(
+    stringArg(FlutterOptions.kWebRendererFlag),
+    useWasm: useWasm
+  );
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (!globals.fs.isFileSync('pubspec.yaml')) {
@@ -380,10 +393,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       );
     }
 
-    final String? webRendererString = stringArg('web-renderer');
-    final WebRendererMode webRenderer = (webRendererString != null)
-        ? WebRendererMode.values.byName(webRendererString)
-        : WebRendererMode.auto;
     final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(
       buildInfo,
       startPaused: startPaused,
@@ -397,11 +406,16 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       enableImpeller: ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?),
       debugLogsDirectoryPath: debugLogsDirectoryPath,
       webRenderer: webRenderer,
+      webUseWasm: useWasm,
     );
 
     String? testAssetDirectory;
     if (buildTestAssets) {
-      await _buildTestAsset(flavor: buildInfo.flavor, impellerStatus: debuggingOptions.enableImpeller);
+      await _buildTestAsset(
+        flavor: buildInfo.flavor,
+        impellerStatus: debuggingOptions.enableImpeller,
+        buildMode: debuggingOptions.buildInfo.mode,
+      );
       testAssetDirectory = globals.fs.path.
         join(flutterProject.directory.path, 'build', 'unit_test_assets');
     }
@@ -497,6 +511,14 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       watcher = EventPrinter(parent: collector, out: globals.stdio.stdout);
     } else if (collector != null) {
       watcher = collector;
+    }
+
+    if (!isWeb && useWasm) {
+      throwToolExit('--wasm is only supported on the web platform');
+    }
+
+    if (webRenderer == WebRendererMode.skwasm && !useWasm) {
+      throwToolExit('Skwasm renderer requires --wasm');
     }
 
     Device? integrationTestDevice;
@@ -656,6 +678,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   Future<void> _buildTestAsset({
     required String? flavor,
     required ImpellerStatus impellerStatus,
+    required BuildMode buildMode,
   }) async {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     final int build = await assetBundle.build(
@@ -675,6 +698,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         fileSystem: globals.fs,
         artifacts: globals.artifacts!,
         logger: globals.logger,
+        projectDir: globals.fs.currentDirectory,
+        buildMode: buildMode,
       );
     }
   }

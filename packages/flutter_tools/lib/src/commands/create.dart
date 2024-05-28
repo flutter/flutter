@@ -21,6 +21,8 @@ import '../flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../ios/code_signing.dart';
+import '../macos/swift_package_manager.dart';
+import '../macos/swift_packages.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
@@ -324,6 +326,7 @@ class CreateCommand extends CreateBase {
       projectDescription: stringArg('description'),
       flutterRoot: flutterRoot,
       withPlatformChannelPluginHook: generateMethodChannelsPlugin,
+      withSwiftPackageManager: featureFlags.isSwiftPackageManagerEnabled,
       withFfiPluginHook: generateFfiPlugin,
       withFfiPackage: generateFfiPackage,
       withEmptyMain: emptyArgument,
@@ -360,8 +363,11 @@ class CreateCommand extends CreateBase {
     final PubContext pubContext;
     switch (template) {
       case FlutterProjectType.app:
+        final bool skipWidgetTestsGeneration =
+            sampleCode != null || emptyArgument;
+
         generatedFileCount += await generateApp(
-          <String>['app', 'app_test_widget'],
+          <String>['app', if (!skipWidgetTestsGeneration) 'app_test_widget'],
           relativeDir,
           templateContext,
           overwrite: overwrite,
@@ -450,9 +456,6 @@ class CreateCommand extends CreateBase {
     }
     if (sampleCode != null) {
       _applySample(relativeDir, sampleCode);
-    }
-    if (sampleCode != null || emptyArgument) {
-      generatedFileCount += _removeTestDir(relativeDir);
     }
     globals.printStatus('Wrote $generatedFileCount files.');
     globals.printStatus('\nAll done!');
@@ -603,8 +606,21 @@ Your $application code is in $relativeAppMain.
         ? stringArg('description')
         : 'A new Flutter plugin project.';
     templateContext['description'] = description;
+
+    final String? projectName = templateContext['projectName'] as String?;
+    final List<String> templates = <String>['plugin', 'plugin_shared'];
+    if ((templateContext['ios'] == true || templateContext['macos'] == true) && featureFlags.isSwiftPackageManagerEnabled) {
+      templates.add('plugin_swift_package_manager');
+      templateContext['swiftLibraryName'] = projectName?.replaceAll('_', '-');
+      templateContext['swiftToolsVersion'] = minimumSwiftToolchainVersion;
+      templateContext['iosSupportedPlatform'] = SwiftPackageManager.iosSwiftPackageSupportedPlatform.format();
+      templateContext['macosSupportedPlatform'] = SwiftPackageManager.macosSwiftPackageSupportedPlatform.format();
+    } else {
+      templates.add('plugin_cocoapods');
+    }
+
     generatedCount += await renderMerged(
-      <String>['plugin', 'plugin_shared'],
+      templates,
       directory,
       templateContext,
       overwrite: overwrite,
@@ -618,7 +634,6 @@ Your $application code is in $relativeAppMain.
         project: project, requireAndroidSdk: false);
     }
 
-    final String? projectName = templateContext['projectName'] as String?;
     final String organization = templateContext['organization']! as String; // Required to make the context.
     final String? androidPluginIdentifier = templateContext['androidIdentifier'] as String?;
     final String exampleProjectName = '${projectName}_example';
@@ -764,20 +779,6 @@ Your $application code is in $relativeAppMain.
     mainDartFile.writeAsStringSync(sampleCode);
   }
 
-  int _removeTestDir(Directory directory) {
-    final Directory testDir = directory.childDirectory('test');
-    if (!testDir.existsSync()) {
-      return 0;
-    }
-    final List<FileSystemEntity> files = testDir.listSync(recursive: true);
-    try {
-      testDir.deleteSync(recursive: true);
-    } on FileSystemException catch (exception) {
-      throwToolExit('Failed to delete test directory: $exception');
-    }
-    return -files.length;
-  }
-
   List<String> _getSupportedPlatformsFromTemplateContext(Map<String, Object?> templateContext) {
     return <String>[
       for (final String platform in kAllCreatePlatforms)
@@ -866,10 +867,11 @@ void _printWarningDisabledPlatform(List<String> platforms) {
   final List<String> web = <String>[];
 
   for (final String platform in platforms) {
-    if (platform == 'web') {
-      web.add(platform);
-    } else if (platform == 'macos' || platform == 'windows' || platform == 'linux') {
-      desktop.add(platform);
+    switch (platform) {
+      case 'web':
+        web.add(platform);
+      case 'macos' || 'windows' || 'linux':
+        desktop.add(platform);
     }
   }
 

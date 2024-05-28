@@ -36,5 +36,27 @@ void main() {
       expect(removedItems.first, 'aaa');
       expect(removedItems[1], 'bbb');
     });
+
+    test('becomes populated when item is added', () async {
+      final ItemListNotifier<String> list = ItemListNotifier<String>();
+      expect(list.isPopulated, false);
+      expect(list.items, isEmpty);
+
+      // Becomes populated when a new list is added.
+      list.updateWithNewList(<String>['a']);
+      expect(list.isPopulated, true);
+      expect(list.items, <String>['a']);
+
+      // Remain populated even when the last item is removed.
+      list.removeItem('a');
+      expect(list.isPopulated, true);
+      expect(list.items, isEmpty);
+    });
+
+    test('is populated by default if initialized with list of items', () async {
+      final ItemListNotifier<String> list = ItemListNotifier<String>.from(<String>['a']);
+      expect(list.isPopulated, true);
+      expect(list.items, <String>['a']);
+    });
   });
 }
