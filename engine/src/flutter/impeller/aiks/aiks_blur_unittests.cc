@@ -199,19 +199,29 @@ TEST_P(AiksTest, ClearBlendWithBlur) {
 }
 
 TEST_P(AiksTest, BlurHasNoEdge) {
-  Canvas canvas;
-  canvas.Scale(GetContentScale());
-  canvas.DrawPaint({});
-  Paint blur = {
-      .color = Color::Green(),
-      .mask_blur_descriptor =
-          Paint::MaskBlurDescriptor{
-              .style = FilterContents::BlurStyle::kNormal,
-              .sigma = Sigma(47.6),
-          },
+  Scalar sigma = 47.6;
+  auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("Sigma", &sigma, 0, 50);
+      ImGui::End();
+    }
+    Canvas canvas;
+    canvas.Scale(GetContentScale());
+    canvas.DrawPaint({});
+    Paint blur = {
+        .color = Color::Green(),
+        .mask_blur_descriptor =
+            Paint::MaskBlurDescriptor{
+                .style = FilterContents::BlurStyle::kNormal,
+                .sigma = Sigma(sigma),
+            },
+    };
+    canvas.DrawRect(Rect::MakeXYWH(300, 300, 200, 200), blur);
+    return canvas.EndRecordingAsPicture();
   };
-  canvas.DrawRect(Rect::MakeXYWH(300, 300, 200, 200), blur);
-  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 TEST_P(AiksTest, BlurredRectangleWithShader) {
