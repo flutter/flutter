@@ -15,6 +15,7 @@ import 'package:yaml/yaml.dart';
 import '../src/common.dart';
 import '../src/fake_process_manager.dart';
 
+const String defaultTemplateLocale = 'en';
 const String defaultTemplateArbFileName = 'app_en.arb';
 const String defaultOutputFileString = 'output-localization-file.dart';
 const String defaultClassNameString = 'AppLocalizations';
@@ -86,6 +87,8 @@ void main() {
       String? headerString,
       String? headerFile,
       String? untranslatedMessagesFile,
+      String? templateLocale,
+      String? templateArbFileName,
       bool useSyntheticPackage = true,
       bool isFromYaml = false,
       bool usesNullableGetter = true,
@@ -113,7 +116,8 @@ void main() {
       fileSystem: fs,
       inputPathString: l10nDirectory.path,
       outputPathString: outputPathString ?? l10nDirectory.path,
-      templateArbFileName: defaultTemplateArbFileName,
+      templateLocale: templateLocale ?? defaultTemplateLocale,
+      templateArbFileName: templateArbFileName ?? defaultTemplateArbFileName,
       outputFileString: outputFileString ?? defaultOutputFileString,
       classNameString: defaultClassNameString,
       headerString: headerString,
@@ -775,7 +779,7 @@ flutter:
 
       expect(generator.inputDirectory.path, '/lib/l10n/');
       expect(generator.outputDirectory.path, '/lib/l10n/');
-      expect(generator.templateArbFile.path, '/lib/l10n/app_en.arb');
+      expect(generator.templateLocale, LocaleInfo.fromString('en'));
       expect(generator.baseOutputFile.path, '/lib/l10n/bar.dart');
       expect(generator.className, 'Foo');
       expect(generator.preferredSupportedLocales.single, LocaleInfo.fromString('es'));
@@ -3083,5 +3087,34 @@ String helloName({required String name}) {
     expect(localizationsFile, containsIgnoringWhitespace(r'''
 String helloNameAndAge({required String name, required int age}) {
   '''));
+  });
+
+  testWithoutContext('throws when templateLocale and templateArbFileName are both null', () {
+    fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true)
+      ..childFile('app.arb')
+      .writeAsStringSync(singleMessageArbFileString);
+
+    expect(
+      () {
+        LocalizationsGenerator(
+          fileSystem: fs,
+          inputPathString: defaultL10nPathString,
+          outputPathString: defaultL10nPathString,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+          logger: logger,
+          // ignore: avoid_redundant_argument_values
+          templateArbFileName: null,
+          // ignore: avoid_redundant_argument_values
+          templateLocale: null,
+        );
+      },
+      throwsA(isA<AssertionError>().having(
+        (AssertionError e) => e.message,
+        'message',
+        contains('templateArbFileName or templateLocale must be provided.'),
+      )),
+    );
   });
 }

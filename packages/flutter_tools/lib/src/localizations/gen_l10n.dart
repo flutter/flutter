@@ -58,6 +58,7 @@ Future<LocalizationsGenerator> generateLocalizations({
       projectPathString: projectDir.path,
       inputPathString: options.arbDir,
       templateArbFileName: options.templateArbFile,
+      templateLocale: options.templateLocale,
       outputFileString: options.outputLocalizationFile,
       outputPathString: options.outputDir,
       classNameString: options.outputClass,
@@ -498,7 +499,7 @@ String _generateDelegateClass({
 
 class LocalizationsGenerator {
   /// Initializes [inputDirectory], [outputDirectory], [templateArbFile],
-  /// [outputFile] and [className].
+  /// [templateLocale], [outputFile] and [className].
   ///
   /// Throws an [L10nException] when a provided configuration is not allowed
   /// by [LocalizationsGenerator].
@@ -509,7 +510,8 @@ class LocalizationsGenerator {
     required FileSystem fileSystem,
     required String inputPathString,
     String? outputPathString,
-    required String templateArbFileName,
+    String? templateArbFileName,
+    String? templateLocale,
     required String outputFileString,
     required String classNameString,
     List<String>? preferredSupportedLocales,
@@ -528,9 +530,15 @@ class LocalizationsGenerator {
     bool useRelaxedSyntax = false,
     bool useNamedParameters = false,
   }) {
+    assert(templateArbFileName != null || templateLocale != null, 'templateArbFileName or templateLocale must be provided.');
+
     final Directory? projectDirectory = projectDirFromPath(fileSystem, projectPathString);
     final Directory inputDirectory = inputDirectoryFromPath(fileSystem, inputPathString, projectDirectory);
     final Directory outputDirectory = outputDirectoryFromPath(fileSystem, outputPathString ?? inputPathString, useSyntheticPackage, projectDirectory);
+    final LocaleInfo templateLocaleInfo = templateLocale != null
+      ? LocaleInfo.fromString(templateLocale)
+      : templateLocaleFromFile(templateArbFileName!, inputDirectory);
+
     return LocalizationsGenerator._(
       fileSystem,
       useSyntheticPackage: useSyntheticPackage,
@@ -539,7 +547,7 @@ class LocalizationsGenerator {
       projectDirectory: projectDirectory,
       inputDirectory: inputDirectory,
       outputDirectory: outputDirectory,
-      templateArbFile: templateArbFileFromFileName(templateArbFileName, inputDirectory),
+      templateLocale: templateLocaleInfo,
       baseOutputFile: outputDirectory.childFile(outputFileString),
       preferredSupportedLocales: preferredSupportedLocalesFromLocales(preferredSupportedLocales),
       header: headerFromFile(headerString, headerFile, inputDirectory),
@@ -561,7 +569,7 @@ class LocalizationsGenerator {
   LocalizationsGenerator._(this._fs, {
     required this.inputDirectory,
     required this.outputDirectory,
-    required this.templateArbFile,
+    required this.templateLocale,
     required this.baseOutputFile,
     required this.className,
     this.preferredSupportedLocales = const <LocaleInfo>[],
@@ -583,7 +591,7 @@ class LocalizationsGenerator {
   final FileSystem _fs;
   List<Message> _allMessages = <Message>[];
   late final AppResourceBundleCollection _allBundles = AppResourceBundleCollection(inputDirectory);
-  late final AppResourceBundle _templateBundle = AppResourceBundle(templateArbFile);
+  late final AppResourceBundle _templateBundle = _allBundles.bundleFor(templateLocale)!;
   late final Map<LocaleInfo, String> _inputFileNames = Map<LocaleInfo, String>.fromEntries(
     _allBundles.bundles.map((AppResourceBundle bundle) => MapEntry<LocaleInfo, String>(bundle.locale, bundle.file.basename))
   );
@@ -615,9 +623,9 @@ class LocalizationsGenerator {
   /// will reside here.
   final Directory outputDirectory;
 
-  /// The input arb file which defines all of the messages that will be
-  /// exported by the generated class that's written to [outputFile].
-  final File templateArbFile;
+  /// The locale which defines all of the messages that will be exported by the
+  /// generated class that's written to [outputFile].
+  final LocaleInfo templateLocale;
 
   /// The file to write the generated abstract localizations and
   /// localizations delegate classes to. Separate localizations
@@ -823,6 +831,15 @@ class LocalizationsGenerator {
     return templateArbFile;
   }
 
+  /// Sets the reference [LocaleInfo] for [File].
+  /// If [templateArbFileName] is provided, the locale is inferred from the
+  /// filename.
+  @visibleForTesting
+  static LocaleInfo templateLocaleFromFile(String templateArbFileName, Directory inputDirectory) {
+    final File file = templateArbFileFromFileName(templateArbFileName, inputDirectory);
+    return localeInfoFromFile(file);
+  }
+
   static bool _isValidClassName(String className) {
     // Public Dart class name cannot begin with an underscore
     if (className[0] == '_') {
@@ -943,7 +960,7 @@ class LocalizationsGenerator {
     for (final String resourceId in _templateBundle.resourceIds) {
       if (!_isValidGetterAndMethodName(resourceId)) {
         throw L10nException(
-          'Invalid ARB resource name "$resourceId" in $templateArbFile.\n'
+          'Invalid ARB resource name "$resourceId" in ${_templateBundle.file}.\n'
           'Resources names must be valid Dart method names: they have to be '
           'camel case, cannot start with a number or underscore, and cannot '
           'contain non-alphanumeric characters.'
