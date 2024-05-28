@@ -699,20 +699,6 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     );
   }
 
-  Widget _buildActions() {
-    if (widget.actions == null || widget.actions!.isEmpty) {
-      return const LimitedBox(
-        maxWidth: 0,
-        child: SizedBox(width: double.infinity, height: 0),
-      );
-    }
-    return _CupertinoActionSheetActionSection(
-      scrollController: _effectiveActionScrollController,
-      hasCancelButton: widget.cancelButton != null,
-      children: widget.actions!,
-    );
-  }
-
   Widget _buildCancelButton() {
     assert(widget.cancelButton != null);
     final double cancelPadding = (widget.actions != null || widget.message != null || widget.title != null)
@@ -1048,11 +1034,27 @@ class _ActionSheetScaffold extends StatefulWidget {
   _ActionSheetScaffoldState createState() => _ActionSheetScaffoldState();
 }
 
+class _DividerKey extends ValueKey<int> {
+  const _DividerKey(super.value);
+}
+
 class _ActionSheetScaffoldState extends State<_ActionSheetScaffold> {
   int? _pressedAction;
+  double _topOverscroll = 0;
+  double _bottomOverscroll = 0;
+
+  Widget _buildDivider({required int key, required bool hidden}) {
+    final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
+    return Container(
+      key: _DividerKey(key),
+      height: 1,
+      decoration: BoxDecoration(
+        color: hidden ? backgroundColor : widget.dividerColor,
+      ),
+    );
+  }
 
   Widget _buildActionSection() {
-    final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
     final List<Widget>? actions = widget.actions;
     if (actions == null || actions.isEmpty) {
       return const LimitedBox(
@@ -1062,14 +1064,14 @@ class _ActionSheetScaffoldState extends State<_ActionSheetScaffold> {
     }
     final List<Widget> column = <Widget>[];
     for (int actionIdx = 0; actionIdx < actions.length; actionIdx += 1) {
-      final bool shouldDisplay = _pressedAction != actionIdx - 1 && _pressedAction != actionIdx;
-      column.add(Container(
-        height: 1,
-        decoration: BoxDecoration(
-          color: shouldDisplay ? widget.dividerColor : backgroundColor,
-        ),
-      ));
+      if (actionIdx != 0) {
+        column.add(_buildDivider(
+          key: actionIdx,
+          hidden: _pressedAction == actionIdx - 1 || _pressedAction == actionIdx,
+        ));
+      }
       column.add(_ActionSheetButtonListener(
+        key: ValueKey<int>(actionIdx),
         onStateChange: (bool state) {
           if (!state) {
             if (_pressedAction == actionIdx) {
@@ -1091,22 +1093,60 @@ class _ActionSheetScaffoldState extends State<_ActionSheetScaffold> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildOverscroll() {
+    final Color backgroundColor = CupertinoDynamicColor.resolve(_kActionSheetBackgroundColor, context);
     return Column(
       mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        widget.contentSection,
-        Flexible(
-          child: CupertinoScrollbar(
-            controller: widget.scrollController,
-            child: SingleChildScrollView(
-              controller: widget.scrollController,
-              child: _buildActionSection(),
-            ),
-          ),
+        Container(
+          color: backgroundColor,
+          height: _topOverscroll,
+        ),
+        Container(
+          color: backgroundColor,
+          height: _bottomOverscroll,
         ),
       ],
+    );
+  }
+
+  bool _onScrollUpdate(ScrollUpdateNotification notification) {
+    final ScrollMetrics metrics = notification.metrics;
+    setState(() {
+      _topOverscroll = math.max(metrics.minScrollExtent - metrics.pixels, 0);
+      _bottomOverscroll = math.max(metrics.pixels - metrics.maxScrollExtent, 0);
+    });
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener<ScrollUpdateNotification>(
+      onNotification: _onScrollUpdate,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          widget.contentSection,
+          _buildDivider(key: 0, hidden: false),
+          Flexible(
+            child: Stack(
+              children: <Widget>[
+                Positioned.fill(
+                  child: _buildOverscroll(),
+                ),
+                CupertinoScrollbar(
+                  controller: widget.scrollController,
+                  child: SingleChildScrollView(
+                    controller: widget.scrollController,
+                    child: _buildActionSection(),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
