@@ -40,7 +40,7 @@ String snakeCase(String str) {
   return _reCase(str, '_');
 }
 
-/// Convert `fooBar` to `foo_bar`.
+/// Convert `fooBar` to `foo[sep]bar`.
 String _reCase(String str, String sep) {
   return str.replaceAllMapped(_upperRegex,
       (Match m) => '${m.start == 0 ? '' : sep}${m[0]!.toLowerCase()}');
