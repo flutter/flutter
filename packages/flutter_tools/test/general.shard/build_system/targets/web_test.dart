@@ -34,7 +34,6 @@ const List<String> _kDart2WasmLinuxArgs = <String> [
   'compile',
   'wasm',
   '--packages=.dart_tool/package_config.json',
-  '--extra-compiler-option=--dart-sdk=Artifact.engineDartSdkPath.TargetPlatform.web_javascript',
   '--extra-compiler-option=--platform=HostArtifact.webPlatformKernelFolder/dart2wasm_platform.dill',
   '--extra-compiler-option=--delete-tostring-package-uri=dart:ui',
   '--extra-compiler-option=--delete-tostring-package-uri=package:flutter',
