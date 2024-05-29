@@ -17,7 +17,6 @@ class MyCascadingMenu extends StatefulWidget {
 }
 
 class _MyCascadingMenuState extends State<MyCascadingMenu> {
-  /// [FocusNode] for Menu Button.
   final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
 
   @override
