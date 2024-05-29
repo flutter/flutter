@@ -40,7 +40,7 @@ void main() {
     );
 
     // The animation duration defined in the example app.
-    const Duration animationDuration = Duration(microseconds: 500);
+    const Duration animationDuration = Duration(milliseconds: 500);
 
     final Finder zeroTransitionFinder = find.ancestor(
       of: find.text('0'),

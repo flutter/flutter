@@ -38,7 +38,7 @@ class _AnimatedSwitcherExampleState extends State<AnimatedSwitcherExample> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           AnimatedSwitcher(
-            duration: const Duration(microseconds: 500),
+            duration: const Duration(milliseconds: 500),
             transitionBuilder: (Widget child, Animation<double> animation) {
               return ScaleTransition(scale: animation, child: child);
             },
