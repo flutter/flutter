@@ -129,7 +129,8 @@ abstract final class Feedback {
   ///
   /// On Android the platform-typical vibration is triggered. On iOS a
   /// heavy-impact haptic feedback is triggered, alongside the click system
-  /// sound.
+  /// sound, which was observed to be the default behavior on a physical iPhone
+  /// 15 Pro running iOS version 17.5.
   ///
   /// See also:
   ///
@@ -142,9 +143,10 @@ abstract final class Feedback {
       case TargetPlatform.fuchsia:
         return HapticFeedback.vibrate();
       case TargetPlatform.iOS:
-        SystemSound.play(SystemSoundType.click);
-        HapticFeedback.heavyImpact();
-        return Future<void>.value();
+        return Future.wait(<Future<void>>[
+          SystemSound.play(SystemSoundType.click),
+          HapticFeedback.heavyImpact()
+        ]);
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
@@ -157,7 +159,8 @@ abstract final class Feedback {
   ///
   /// On Android the platform-typical vibration is triggered. On iOS a
   /// heavy-impact haptic feedback is triggered, alongside the click system
-  /// sound.
+  /// sound, which was observed to be the default behavior on a physical iPhone
+  /// 15 Pro running iOS version 17.5.
   ///
   /// See also:
   ///
