@@ -5725,6 +5725,10 @@ class _Scribe extends StatefulWidget {
 
 class _ScribeState extends State<_Scribe> {
   void _handlePointerDown(PointerDownEvent event) {
+    if (event.kind != ui.PointerDeviceKind.stylus) {
+      return;
+    }
+
     if (!widget.focusNode.hasFocus) {
       // TODO(justinmc): But don't show the keyboard!
       widget.focusNode.requestFocus();
