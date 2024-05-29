@@ -39,6 +39,9 @@ void main() {
       const example.AnimatedSwitcherExampleApp(),
     );
 
+    // The animation duration defined in the example app.
+    const Duration animationDuration = Duration(microseconds: 500);
+
     final Finder zeroTransitionFinder = find.ancestor(
       of: find.text('0'),
       matching: find.byType(ScaleTransition),
@@ -72,9 +75,7 @@ void main() {
     expect(oneTransition.scale.value, equals(0.0));
 
     // Advance animation to the middle.
-    await tester.pump(
-      example.AnimatedSwitcherExampleApp.duration ~/ 2,
-    );
+    await tester.pump(animationDuration ~/ 2);
 
     expect(zeroTransitionFinder, findsOneWidget);
     zeroTransition = tester.widget(zeroTransitionFinder);
@@ -85,9 +86,7 @@ void main() {
     expect(oneTransition.scale.value, equals(0.5));
 
     // Advance animation to the end.
-    await tester.pump(
-      example.AnimatedSwitcherExampleApp.duration ~/ 2,
-    );
+    await tester.pump(animationDuration ~/ 2);
 
     expect(zeroTransitionFinder, findsOneWidget);
     zeroTransition = tester.widget(zeroTransitionFinder);

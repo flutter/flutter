@@ -11,23 +11,16 @@ void main() => runApp(const AnimatedSwitcherExampleApp());
 class AnimatedSwitcherExampleApp extends StatelessWidget {
   const AnimatedSwitcherExampleApp({super.key});
 
-  static const Duration duration = Duration(microseconds: 500);
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: AnimatedSwitcherExample(duration: duration),
+      home: AnimatedSwitcherExample(),
     );
   }
 }
 
 class AnimatedSwitcherExample extends StatefulWidget {
-  const AnimatedSwitcherExample({
-    super.key,
-    required this.duration,
-  });
-
-  final Duration duration;
+  const AnimatedSwitcherExample({super.key});
 
   @override
   State<AnimatedSwitcherExample> createState() =>
@@ -45,7 +38,7 @@ class _AnimatedSwitcherExampleState extends State<AnimatedSwitcherExample> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           AnimatedSwitcher(
-            duration: widget.duration,
+            duration: const Duration(microseconds: 500),
             transitionBuilder: (Widget child, Animation<double> animation) {
               return ScaleTransition(scale: animation, child: child);
             },
