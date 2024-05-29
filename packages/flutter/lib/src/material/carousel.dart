@@ -15,22 +15,22 @@ import 'theme.dart';
 
 /// A Material Design carousel widget.
 ///
-/// Carousels present a scrollable list of items, each of which can dynamically
+/// The [CarouselView] present a scrollable list of items, each of which can dynamically
 /// change size based on the chosen layout.
 ///
 /// This widget supports uncontained carousel layout. It shows items that scroll
-/// to the edge of the container, behaving similarly to a `ListView` where all
+/// to the edge of the container, behaving similarly to a [ListView] where all
 /// children are a uniform size.
 ///
 /// The [CarouselController] is used to control the [CarouselController.initialItem].
 ///
-/// The [Carousel.itemExtent] property must be non-null and defines the base
+/// The [CarouselView.itemExtent] property must be non-null and defines the base
 /// size of items. While items typically maintain this size, the first and last
 /// visible items may be slightly compressed during scrolling. The [shrinkExtent]
 /// property controls the minimum allowable size for these compressed items.
 ///
 /// {@tool dartpad}
-/// Here is an example of [Carousel] to show the uncontained layout. Each carousel
+/// Here is an example of [CarouselView] to show the uncontained layout. Each carousel
 /// item has the same size but can be "squished" to the [shrinkExtent] when they
 /// are show on the view and out of view.
 ///
@@ -41,9 +41,9 @@ import 'theme.dart';
 ///
 ///  * [CarouselController], which controls the first visible item in the carousel.
 ///  * [PageView], which is a scrollable list that works page by page.
-class Carousel extends StatefulWidget {
+class CarouselView extends StatefulWidget {
   /// Creates a Material Design carousel.
-  const Carousel({
+  const CarouselView({
     super.key,
     this.padding,
     this.backgroundColor,
@@ -155,10 +155,10 @@ class Carousel extends StatefulWidget {
   final List<Widget> children;
 
   @override
-  State<Carousel> createState() => _CarouselState();
+  State<CarouselView> createState() => _CarouselViewState();
 }
 
-class _CarouselState extends State<Carousel> {
+class _CarouselViewState extends State<CarouselView> {
   late double _itemExtent;
   CarouselController? _internalController;
   CarouselController get _controller => widget.controller ?? _internalController!;
@@ -179,7 +179,7 @@ class _CarouselState extends State<Carousel> {
   }
 
   @override
-  void didUpdateWidget(covariant Carousel oldWidget) {
+  void didUpdateWidget(covariant CarouselView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
       oldWidget.controller?._detach(this);
@@ -491,7 +491,7 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
   ItemExtentBuilder? get itemExtentBuilder => _buildItemExtent;
 }
 
-/// Scroll physics used by a [Carousel].
+/// Scroll physics used by a [CarouselView].
 ///
 /// These physics cause the carousel item to snap to item boundaries.
 ///
@@ -501,7 +501,7 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
 ///    physics.
 ///  * [PageScrollPhysics], scroll physics used by a [PageView].
 class CarouselScrollPhysics extends ScrollPhysics {
-  /// Creates physics for a [Carousel].
+  /// Creates physics for a [CarouselView].
   const CarouselScrollPhysics({super.parent});
 
   @override
@@ -570,9 +570,9 @@ class CarouselScrollPhysics extends ScrollPhysics {
   bool get allowImplicitScrolling => true;
 }
 
-/// Metrics for a [Carousel].
+/// Metrics for a [CarouselView].
 class _CarouselMetrics extends FixedScrollMetrics {
-  /// Creates an immutable snapshot of values associated with a [Carousel].
+  /// Creates an immutable snapshot of values associated with a [CarouselView].
   _CarouselMetrics({
     required super.minScrollExtent,
     required super.maxScrollExtent,
@@ -702,7 +702,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
   }
 }
 
-/// A controller for [Carousel].
+/// A controller for [CarouselView].
 ///
 /// Using a carousel controller helps to show the first visible item on the
 /// carousel list.
@@ -712,7 +712,7 @@ class CarouselController extends ScrollController {
     this.initialItem = 0,
   });
 
-  /// The item that expands to the maximum size when first creating the [Carousel].
+  /// The item that expands to the maximum size when first creating the [CarouselView].
   final int initialItem;
 
   _CarouselState? _carouselState;

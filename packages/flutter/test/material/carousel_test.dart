@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Carousel defaults', (WidgetTester tester) async {
+  testWidgets('CarouselView defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final ColorScheme colorScheme = theme.colorScheme;
 
@@ -16,7 +16,7 @@ void main() {
       MaterialApp(
         theme: theme,
         home: Scaffold(
-          body: Carousel(
+          body: CarouselView(
             itemExtent: 200,
             children: List<Widget>.generate(10, (int index) {
               return Center(child: Text('Item $index'));
@@ -27,7 +27,7 @@ void main() {
     );
 
     final Finder carouselMaterial = find.descendant(
-      of: find.byType(Carousel),
+      of: find.byType(CarouselView),
       matching: find.byType(Material),
     ).first;
 
@@ -40,7 +40,7 @@ void main() {
     ));
   });
 
-  testWidgets('Carousel items customization', (WidgetTester tester) async {
+  testWidgets('CarouselView items customization', (WidgetTester tester) async {
     final Key key = UniqueKey();
     final ThemeData theme = ThemeData();
 
@@ -48,7 +48,7 @@ void main() {
       MaterialApp(
         theme: theme,
         home: Scaffold(
-          body: Carousel(
+          body: CarouselView(
             padding: const EdgeInsets.all(20.0),
             backgroundColor: Colors.amber,
             elevation: 10.0,
@@ -81,7 +81,7 @@ void main() {
     );
 
     final Finder carouselMaterial = find.descendant(
-      of: find.byType(Carousel),
+      of: find.byType(CarouselView),
       matching: find.byType(Material),
     ).first;
 
@@ -120,7 +120,7 @@ void main() {
     expect(inkWell.overlayColor?.resolve(<WidgetState>{state}), Colors.purple);
   });
 
-  testWidgets('Carousel respect onTap', (WidgetTester tester) async {
+  testWidgets('CarouselView respects onTap', (WidgetTester tester) async {
     final List<Key> keys = List<Key>.generate(10, (_) => UniqueKey());
     final ThemeData theme = ThemeData();
     int tapIndex = 0;
@@ -129,7 +129,7 @@ void main() {
       MaterialApp(
         theme: theme,
         home: Scaffold(
-          body: Carousel(
+          body: CarouselView(
             itemExtent: 50,
             onTap: (int index) {
               tapIndex = index;
@@ -156,11 +156,11 @@ void main() {
     expect(tapIndex, 2);
   });
 
-  testWidgets('Carousel layout (Uncontained layout)', (WidgetTester tester) async {
+  testWidgets('CarouselView layout (Uncontained layout)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Carousel(
+          body: CarouselView(
             itemExtent: 250,
             children: List<Widget>.generate(10, (int index) {
               return Center(
@@ -172,7 +172,7 @@ void main() {
       )
     );
 
-    final Size viewportSize = MediaQuery.sizeOf(tester.element(find.byType(Carousel)));
+    final Size viewportSize = MediaQuery.sizeOf(tester.element(find.byType(CarouselView)));
     expect(viewportSize, const Size(800, 600));
 
     expect(find.text('Item 0'), findsOneWidget);
@@ -198,7 +198,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Carousel(
+          body: CarouselView(
             controller: CarouselController(initialItem: 5),
             itemExtent: 400,
             children: List<Widget>.generate(10, (int index) {
@@ -211,7 +211,7 @@ void main() {
       )
     );
 
-    final Size viewportSize = MediaQuery.sizeOf(tester.element(find.byType(Carousel)));
+    final Size viewportSize = MediaQuery.sizeOf(tester.element(find.byType(CarouselView)));
     expect(viewportSize, const Size(800, 600));
 
     expect(find.text('Item 5'), findsOneWidget);
@@ -228,11 +228,11 @@ void main() {
     expect(find.text('Item 7'), findsNothing);
   });
 
-  testWidgets('Carousel respects itemSnapping', (WidgetTester tester) async {
+  testWidgets('CarouselView respects itemSnapping', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Carousel(
+          body: CarouselView(
             itemSnapping: true,
             itemExtent: 300,
             children: List<Widget>.generate(10, (int index) {
@@ -276,11 +276,11 @@ void main() {
     expect(getItem(3), findsOneWidget);
   });
 
-  testWidgets('Carousel respect itemSnapping when fling', (WidgetTester tester) async {
+  testWidgets('CarouselView respect itemSnapping when fling', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Carousel(
+          body: CarouselView(
             itemSnapping: true,
             itemExtent: 300,
             children: List<Widget>.generate(10, (int index) {
@@ -330,11 +330,11 @@ void main() {
     expect(getItem(4), findsNothing);
   });
 
-  testWidgets('Carousel respects scrollingDirection: Axis.vertical', (WidgetTester tester) async {
+  testWidgets('CarouselView respects scrollingDirection: Axis.vertical', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Carousel(
+          body: CarouselView(
             itemExtent: 200,
             padding: EdgeInsets.zero,
             scrollDirection: Axis.vertical,
@@ -358,17 +358,17 @@ void main() {
     expect(rect0, const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0));
 
     // Simulate a scroll up
-    await tester.drag(find.byType(Carousel), const Offset(0, -200), kind: PointerDeviceKind.trackpad);
+    await tester.drag(find.byType(CarouselView), const Offset(0, -200), kind: PointerDeviceKind.trackpad);
     await tester.pumpAndSettle();
     expect(getItem(0), findsNothing);
     expect(getItem(3), findsOneWidget);
   });
 
-  testWidgets('Carousel respects reverse', (WidgetTester tester) async {
+  testWidgets('CarouselView respects reverse', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Carousel(
+          body: CarouselView(
             itemExtent: 200,
             reverse: true,
             padding: EdgeInsets.zero,
@@ -404,11 +404,11 @@ void main() {
     expect(rect3, const Rect.fromLTRB(0.0, 0.0, 200.0, 600.0));
   });
 
-  testWidgets('Carousel respects shrinkExtent', (WidgetTester tester) async {
+  testWidgets('CarouselView respects shrinkExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Carousel(
+          body: CarouselView(
             itemExtent: 350,
             shrinkExtent: 300,
             children: List<Widget>.generate(10, (int index) {
@@ -432,20 +432,20 @@ void main() {
     // The extent of item 2 is 300, and only 100 is on screen.
     expect(rect2, const Rect.fromLTRB(700.0, 0.0, 1000.0, 600.0));
 
-    await tester.drag(find.byType(Carousel), const Offset(-50, 0), kind: PointerDeviceKind.trackpad);
+    await tester.drag(find.byType(CarouselView), const Offset(-50, 0), kind: PointerDeviceKind.trackpad);
     await tester.pump();
     // The item 0 should be pinned and has a size change from 350 to 50.
     expect(tester.getRect(getItem(0)), const Rect.fromLTRB(0.0, 0.0, 300.0, 600.0));
     // Keep dragging to left, extent of item 0 won't change (still 300) and part of item 0 will
     // be off screen.
-    await tester.drag(find.byType(Carousel), const Offset(-50, 0), kind: PointerDeviceKind.trackpad);
+    await tester.drag(find.byType(CarouselView), const Offset(-50, 0), kind: PointerDeviceKind.trackpad);
     await tester.pump();
     expect(tester.getRect(getItem(0)), const Rect.fromLTRB(-50, 0.0, 250, 600));
   });
 }
 
 Finder getItem(int index) {
-  return find.descendant(of: find.byType(Carousel), matching: find.ancestor(of: find.text('Item $index'), matching: find.byType(Padding)));
+  return find.descendant(of: find.byType(CarouselView), matching: find.ancestor(of: find.text('Item $index'), matching: find.byType(Padding)));
 }
 
 Future<TestGesture> hoverPointerOverCarouselItem(WidgetTester tester, Key key) async {
