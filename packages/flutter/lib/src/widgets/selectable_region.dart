@@ -354,9 +354,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   Orientation? _lastOrientation;
   SelectedContent? _lastSelectedContent;
 
-  /// {@macro flutter.rendering.RenderEditable.lastSecondaryTapDownPosition}
-  Offset? lastSecondaryTapDownPosition;
-
   /// The [SelectionOverlay] that is currently visible on the screen.
   ///
   /// Can be null if there is no visible [SelectionOverlay].
@@ -376,27 +373,45 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _initMouseGestureRecognizer();
     _initTouchGestureRecognizer();
     // Taps and right clicks.
-    _gestureRecognizers[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-          () => TapGestureRecognizer(debugOwner: this),
-          (TapGestureRecognizer instance) {
-        instance.onTapUp = (TapUpDetails details) {
-          if (defaultTargetPlatform == TargetPlatform.iOS && _positionIsOnActiveSelection(globalPosition: details.globalPosition)) {
-            // On iOS when the tap occurs on the previous selection, instead of
-            // moving the selection, the context menu will be toggled.
-            final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
-            if (toolbarIsVisible) {
-              hideToolbar(false);
-            } else {
-              _showToolbar(location: details.globalPosition);
-            }
-          } else {
-            hideToolbar();
-            _collapseSelectionAt(offset: details.globalPosition);
-          }
-        };
-        instance.onSecondaryTapDown = _handleRightClickDown;
-      },
-    );
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        break;
+      case TargetPlatform.iOS:
+        if (kIsWeb) {
+          // On iOS web, double tap gestures are not supported.
+          _gestureRecognizers[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+                () => TapGestureRecognizer(debugOwner: this),
+                (TapGestureRecognizer instance) {
+              instance.onTapUp = (TapUpDetails details) {
+                if (defaultTargetPlatform == TargetPlatform.iOS && _positionIsOnActiveSelection(globalPosition: details.globalPosition)) {
+                  // On iOS when the tap occurs on the previous selection, instead of
+                  // moving the selection, the context menu will be toggled.
+                  final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
+                  if (toolbarIsVisible) {
+                    hideToolbar(false);
+                  } else {
+                    _showToolbar(location: details.globalPosition);
+                  }
+                } else {
+                  hideToolbar();
+                  _collapseSelectionAt(offset: details.globalPosition);
+                }
+              };
+              instance.onSecondaryTapDown = _handleRightClickDown;
+            },
+          );
+        }
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        _gestureRecognizers[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+              () => TapGestureRecognizer(debugOwner: this),
+              (TapGestureRecognizer instance) {
+            instance.onSecondaryTapDown = _handleRightClickDown;
+          },
+        );
+    }
     _initProcessTextActions();
   }
 
@@ -487,6 +502,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   // gestures.
 
+  // The position of the most recent secondary tap down event on this
+  // SelectableRegion.
+  Offset? _lastSecondaryTapDownPosition;
+
+  // The device kind for the pointer of the most recent tap down event on this
+  // SelectableRegion.
+  PointerDeviceKind? _lastPointerDeviceKind;
+
   // Converts the details.consecutiveTapCount from a TapAndDrag*Details object,
   // which can grow to be infinitely large, to a value between 1 and the supported
   // max consecutive tap count. The value that the raw count is converted to is
@@ -519,19 +542,58 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _initMouseGestureRecognizer() {
-    _gestureRecognizers[TapAndPanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndPanGestureRecognizer>(
-          () => TapAndPanGestureRecognizer(debugOwner:this, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse }),
-          (TapAndPanGestureRecognizer instance) {
-        instance
-          ..onTapDown = _startNewMouseSelectionGesture
-          ..onTapUp = _handleMouseTapUp
-          ..onDragStart = _handleMouseDragStart
-          ..onDragUpdate = _handleMouseDragUpdate
-          ..onDragEnd = _handleMouseDragEnd
-          ..onCancel = _clearSelection
-          ..dragStartBehavior = DragStartBehavior.down;
-      },
-    );
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        _gestureRecognizers[TapAndHorizontalDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndHorizontalDragGestureRecognizer>(
+              () => TapAndHorizontalDragGestureRecognizer(debugOwner:this),
+              (TapAndHorizontalDragGestureRecognizer instance) {
+            instance
+              ..onTapDown = _startNewMouseSelectionGesture
+              ..onTapUp = _handleMouseTapUp
+              ..onDragStart = _handleMouseDragStart
+              ..onDragUpdate = _handleMouseDragUpdate
+              ..onDragEnd = _handleMouseDragEnd
+              ..onCancel = _clearSelection
+              ..dragStartBehavior = DragStartBehavior.down;
+          },
+        );
+      case TargetPlatform.iOS:
+        if (kIsWeb) {
+          // On iOS web, double tap gestures are not supported.
+          break;
+        }
+        _gestureRecognizers[TapAndHorizontalDragGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndHorizontalDragGestureRecognizer>(
+              () => TapAndHorizontalDragGestureRecognizer(debugOwner:this),
+              (TapAndHorizontalDragGestureRecognizer instance) {
+            instance
+              ..eagerVictoryOnDrag = false
+              ..onTapDown = _startNewMouseSelectionGesture
+              ..onTapUp = _handleMouseTapUp
+              ..onDragStart = _handleMouseDragStart
+              ..onDragUpdate = _handleMouseDragUpdate
+              ..onDragEnd = _handleMouseDragEnd
+              ..onCancel = _clearSelection
+              ..dragStartBehavior = DragStartBehavior.down;
+          },
+        );
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        _gestureRecognizers[TapAndPanGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapAndPanGestureRecognizer>(
+              () => TapAndPanGestureRecognizer(debugOwner:this, supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.mouse }),
+              (TapAndPanGestureRecognizer instance) {
+            instance
+              ..onTapDown = _startNewMouseSelectionGesture
+              ..onTapUp = _handleMouseTapUp
+              ..onDragStart = _handleMouseDragStart
+              ..onDragUpdate = _handleMouseDragUpdate
+              ..onDragEnd = _handleMouseDragEnd
+              ..onCancel = _clearSelection
+              ..dragStartBehavior = DragStartBehavior.down;
+          },
+        );
+    }
   }
 
   void _initTouchGestureRecognizer() {
@@ -547,25 +609,43 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _startNewMouseSelectionGesture(TapDragDownDetails details) {
+    _lastPointerDeviceKind = details.kind;
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
         widget.focusNode.requestFocus();
-        hideToolbar();
         switch (defaultTargetPlatform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.iOS:
-            // On mobile platforms the selection is set on tap up.
+            // On mobile platforms the selection is set on tap up for the first
+            // tap.
             break;
           case TargetPlatform.macOS:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
+            hideToolbar();
             _collapseSelectionAt(offset: details.globalPosition);
         }
       case 2:
         _selectWordAt(offset: details.globalPosition);
+        if (defaultTargetPlatform == TargetPlatform.iOS) {
+          _showHandles();
+        }
       case 3:
-        _selectParagraphAt(offset: details.globalPosition);
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+            if (details.kind != null && details.kind == PointerDeviceKind.mouse) {
+              _selectParagraphAt(offset: details.globalPosition);
+            }
+          case TargetPlatform.iOS:
+            // Triple tap on static text is not supported on mobile platforms.
+            break;
+          case TargetPlatform.macOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            _selectParagraphAt(offset: details.globalPosition);
+        }
     }
     _updateSelectedContentIfNeeded();
   }
@@ -583,19 +663,77 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case 1:
         _selectEndTo(offset: details.globalPosition, continuous: true);
       case 2:
-        _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+            // Double tap + drag is only supported on Android when using a mouse
+            // or when not on the web.
+            if (details.kind != null && details.kind == PointerDeviceKind.mouse || !kIsWeb) {
+              _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
+            }
+          case TargetPlatform.iOS:
+            // Double tap + drag is only supported on native iOS.
+            if (!kIsWeb) {
+              _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
+              _showHandles();
+            }
+          case TargetPlatform.macOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
+        }
       case 3:
-        _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.paragraph);
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+            // Triple tap + drag is only supported on Android when using a mouse.
+            if (details.kind != null && details.kind == PointerDeviceKind.mouse) {
+              _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.paragraph);
+            }
+          case TargetPlatform.iOS:
+            // Triple tap + drag on static text is not supported on iOS.
+            break;
+          case TargetPlatform.macOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.paragraph);
+        }
     }
     _updateSelectedContentIfNeeded();
   }
 
   void _handleMouseDragEnd(TapDragEndDetails details) {
+    if (_lastPointerDeviceKind != null 
+        && _lastPointerDeviceKind != PointerDeviceKind.mouse 
+        && defaultTargetPlatform == TargetPlatform.android) {
+      // On Android, a drag gesture will only show the selection overlay when
+      // the drag has finished and the pointer device kind is not precise.
+      _showHandles();
+      _showToolbar();
+    }
+    if (_lastPointerDeviceKind != null 
+        && _lastPointerDeviceKind != PointerDeviceKind.mouse 
+        && defaultTargetPlatform == TargetPlatform.iOS) {
+      // On iOS, a drag gesture will only show the selection overlay when
+      // the drag has finished and the pointer device kind is not precise.
+      _showToolbar();
+    }
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
   }
 
   void _handleMouseTapUp(TapDragUpDetails details) {
+    if (defaultTargetPlatform == TargetPlatform.iOS && _positionIsOnActiveSelection(globalPosition: details.globalPosition)) {
+      // On iOS when the tap occurs on the previous selection, instead of
+      // moving the selection, the context menu will be toggled.
+      final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
+      if (toolbarIsVisible) {
+        hideToolbar(false);
+      } else {
+        _showToolbar();
+      }
+      return;
+    }
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
         switch (defaultTargetPlatform) {
@@ -603,11 +741,28 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.fuchsia:
           case TargetPlatform.iOS:
             _collapseSelectionAt(offset: details.globalPosition);
+            hideToolbar();
           case TargetPlatform.macOS:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
             // On desktop platforms the selection is set on tap down.
             break;
+        }
+      case 2:
+        if (details.kind != null 
+            && details.kind != PointerDeviceKind.mouse 
+            && defaultTargetPlatform == TargetPlatform.android) {
+          // On Android, a double tap will only show the selection overlay after
+          // the following tap up when the pointer device kind is not precise.
+          _showHandles();
+          _showToolbar();
+        }
+        if (details.kind != null 
+            && details.kind != PointerDeviceKind.mouse 
+            && defaultTargetPlatform == TargetPlatform.iOS) {
+          // On iOS, a double tap will only show the selection overlay after
+          // the following tap up when the pointer device kind is not precise.
+          _showToolbar();
         }
     }
     _updateSelectedContentIfNeeded();
@@ -659,47 +814,47 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _handleRightClickDown(TapDownDetails details) {
-    final Offset? previousSecondaryTapDownPosition = lastSecondaryTapDownPosition;
+    final Offset? previousSecondaryTapDownPosition = _lastSecondaryTapDownPosition;
     final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
-    lastSecondaryTapDownPosition = details.globalPosition;
+    _lastSecondaryTapDownPosition = details.globalPosition;
     widget.focusNode.requestFocus();
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.windows:
-        // If lastSecondaryTapDownPosition is within the current selection then
+        // If _lastSecondaryTapDownPosition is within the current selection then
         // keep the current selection, if not then collapse it.
-        final bool lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
-        if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
-          _collapseSelectionAt(offset: lastSecondaryTapDownPosition!);
+        final bool _lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
+        if (!_lastSecondaryTapDownPositionWasOnActiveSelection) {
+          _collapseSelectionAt(offset: _lastSecondaryTapDownPosition!);
         }
         _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition);
+        _showToolbar(location: _lastSecondaryTapDownPosition);
       case TargetPlatform.iOS:
-        _selectWordAt(offset: lastSecondaryTapDownPosition!);
+        _selectWordAt(offset: _lastSecondaryTapDownPosition!);
         _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition);
+        _showToolbar(location: _lastSecondaryTapDownPosition);
       case TargetPlatform.macOS:
-        if (previousSecondaryTapDownPosition == lastSecondaryTapDownPosition && toolbarIsVisible) {
+        if (previousSecondaryTapDownPosition == _lastSecondaryTapDownPosition && toolbarIsVisible) {
           hideToolbar();
           return;
         }
-        _selectWordAt(offset: lastSecondaryTapDownPosition!);
+        _selectWordAt(offset: _lastSecondaryTapDownPosition!);
         _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition);
+        _showToolbar(location: _lastSecondaryTapDownPosition);
       case TargetPlatform.linux:
         if (toolbarIsVisible) {
           hideToolbar();
           return;
         }
-        // If lastSecondaryTapDownPosition is within the current selection then
+        // If _lastSecondaryTapDownPosition is within the current selection then
         // keep the current selection, if not then collapse it.
-        final bool lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
-        if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
-          _collapseSelectionAt(offset: lastSecondaryTapDownPosition!);
+        final bool _lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
+        if (!_lastSecondaryTapDownPositionWasOnActiveSelection) {
+          _collapseSelectionAt(offset: _lastSecondaryTapDownPosition!);
         }
         _showHandles();
-        _showToolbar(location: lastSecondaryTapDownPosition);
+        _showToolbar(location: _lastSecondaryTapDownPosition);
     }
     _updateSelectedContentIfNeeded();
   }
@@ -1177,9 +1332,9 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///  * [contextMenuButtonItems], which provides the [ContextMenuButtonItem]s
   ///    for the default context menu buttons.
   TextSelectionToolbarAnchors get contextMenuAnchors {
-    if (lastSecondaryTapDownPosition != null) {
+    if (_lastSecondaryTapDownPosition != null) {
       return TextSelectionToolbarAnchors(
-        primaryAnchor: lastSecondaryTapDownPosition!,
+        primaryAnchor: _lastSecondaryTapDownPosition!,
       );
     }
     final RenderBox renderBox = context.findRenderObject()! as RenderBox;
