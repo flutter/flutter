@@ -3235,6 +3235,28 @@ targets:
       task_name: animated_advanced_blend_perf_ios__timeline_summary
 
   # Uses Impeller.
+  - name: Linux_pixel_7pro rrect_blur_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: rrect_blur_perf__timeline_summary
+
+  - name: Mac_ios rrect_blur_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: rrect_blur_perf_ios__timeline_summary
+
+  # Uses Impeller.
   - name: Linux_pixel_7pro animated_blur_backdrop_filter_perf_opengles__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false

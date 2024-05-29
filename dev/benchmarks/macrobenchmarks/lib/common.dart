@@ -41,6 +41,7 @@ const String kDrawPointsPageRougeName = '/draw_points';
 const String kDrawVerticesPageRouteName = '/draw_vertices';
 const String kDrawAtlasPageRouteName = '/draw_atlas';
 const String kAnimatedAdvancedBlend = '/animated_advanced_blend';
+const String kRRectBlurRouteName = '/rrect_blur';
 
 const String kOpacityPeepholeOneRectRouteName = '$kOpacityPeepholeRouteName/one_big_rect';
 const String kOpacityPeepholeColumnOfOpacityRouteName = '$kOpacityPeepholeRouteName/column_of_opacity';
