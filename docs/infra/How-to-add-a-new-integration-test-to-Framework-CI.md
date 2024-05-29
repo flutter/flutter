@@ -55,7 +55,7 @@ Quick steps:
 
 ## How to add an integration test as a `Shard` target
 
-Please refer to [steps-to-add-a-new-framework-test-shard](https://github.com/flutter/flutter/wiki/Adding-a-new-Test-Shard#steps-to-add-a-new-framework-test-shard).
+Please refer to [steps-to-add-a-new-framework-test-shard](./Adding-a-new-Test-Shard.md#steps-to-add-a-new-framework-test-shard).
 
 ## How to add an integration tests with Android emulator support
 
