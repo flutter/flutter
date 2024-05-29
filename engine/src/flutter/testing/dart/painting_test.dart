@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:litetest/litetest.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 typedef CanvasCallback = void Function(Canvas canvas);
 
@@ -102,5 +103,13 @@ void main() {
     image.dispose();
     whitePicture.dispose();
     redClippedPicture.dispose();
+  });
+
+  test('ImageFilter.matrix defaults to FilterQuality.medium', () {
+    final Float64List data = Matrix4.identity().storage;
+    expect(
+      ImageFilter.matrix(data).toString(),
+      'ImageFilter.matrix($data, FilterQuality.medium)',
+    );
   });
 }
