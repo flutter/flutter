@@ -27,6 +27,4 @@ void main() {
     final DefaultTextStyle routeDefaultTextStyle = DefaultTextStyle.of(tester.element(find.text('Hello World')));
     expect(routeDefaultTextStyle.style, const TextStyle(fontSize: 48, color: Colors.blue));
   });
-
-
 }
