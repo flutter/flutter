@@ -102,7 +102,7 @@ class ExpansionPanel {
   /// or the splash color of the expand/collapse IconButton if [canTapOnHeader]
   /// is false.
   ///
-  /// Note that if [canTapOnHeader] is false, and [ThemeData.useMaterial3] is
+  /// If [canTapOnHeader] is false, and [ThemeData.useMaterial3] is
   /// true, this field will be ignored, as [IconButton.splashColor]
   /// will be ignored, and you should use [highlightColor] instead.
   ///

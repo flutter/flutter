@@ -98,7 +98,7 @@ class ExpandIcon extends StatefulWidget {
 
   /// Defines the splash color of the IconButton.
   ///
-  /// Note that if [ThemeData.useMaterial3] is true, this field will be ignored,
+  /// If [ThemeData.useMaterial3] is true, this field will be ignored,
   /// as [IconButton.splashColor] will be ignored, and you should use
   /// [highlightColor] instead.
   ///
