@@ -1701,7 +1701,7 @@ void main() {
       textDirection: TextDirection.ltr,
       text: const TextSpan(
         style: TextStyle(fontSize: 10, height: 1000),
-        children: <TextSpan> [TextSpan(text: 'A', style: TextStyle(height: kTextHeightNone))]
+        children: <TextSpan>[TextSpan(text: 'A', style: TextStyle(height: kTextHeightNone))],
       ),
     )..layout();
     expect(painter.height, 10);
