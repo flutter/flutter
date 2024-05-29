@@ -45,8 +45,6 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
           onPressed: () {},
         ),
       ],
-
-      /// Builds the Menu Button.
       builder: (_, MenuController controller, Widget? child) {
         return IconButton(
           focusNode: _buttonFocusNode,
