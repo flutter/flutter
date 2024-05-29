@@ -488,8 +488,6 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
           return;
         }
 
-        sk_sp<DlImage> image;
-        std::string decode_error;
         auto upload_texture_and_invoke_result = [result, context, bitmap_result,
                                                  gpu_disabled_switch]() {
           sk_sp<DlImage> image;
@@ -499,12 +497,7 @@ void ImageDecoderImpeller::Decode(fml::RefPtr<ImageDescriptor> descriptor,
               bitmap_result.sk_bitmap, gpu_disabled_switch);
           result(image, decode_error);
         };
-        if (context->GetBackendType() ==
-            impeller::Context::BackendType::kOpenGLES) {
-          io_runner->PostTask(upload_texture_and_invoke_result);
-        } else {
-          upload_texture_and_invoke_result();
-        }
+        io_runner->PostTask(upload_texture_and_invoke_result);
       });
 }
 
