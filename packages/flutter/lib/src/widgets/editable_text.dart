@@ -5723,7 +5723,35 @@ class _Scribe extends StatefulWidget {
   State<_Scribe> createState() => _ScribeState();
 }
 
-class _ScribeState extends State<_Scribe> {
+class _ScribeState extends State<_Scribe> implements ScribeClient {
+  @override
+  void initState() {
+    super.initState();
+    Scribe.registerScribeClient(this);
+  }
+
+  @override
+  void dispose() {
+    Scribe.unregisterScribeClient(this);
+    super.dispose();
+  }
+
+  // Begin ScribeClient.
+
+  // TODO(justinmc): ScribbleClient does this in EditableText, setting the
+  // active client on Scribble. Maybe that's better? Reconcile?
+  @override
+  bool get isActive => widget.focusNode.hasFocus;
+
+  @override
+  bool performSelectionGesture(Rect selectionArea) {
+    // TODO(justinmc): Find the text in the selectionArea and select it. Do I
+    // need to do this inside of EditableTextState?
+    return true;
+  }
+
+  // End ScribeClient.
+
   void _handlePointerDown(PointerDownEvent event) {
     if (event.kind != ui.PointerDeviceKind.stylus) {
       return;

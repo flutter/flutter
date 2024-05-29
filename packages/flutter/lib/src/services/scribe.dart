@@ -4,6 +4,9 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
+
+import 'message_codec.dart';
 import 'system_channels.dart';
 
 /// An interface into system-level handwriting text input.
@@ -25,7 +28,7 @@ import 'system_channels.dart';
 ///    class, and which has a list of the methods that this class handles.
 class Scribe {
   Scribe._() {
-    //_channel.setMethodCallHandler(_handleScribeInvocation);
+    _channel.setMethodCallHandler(_loudlyHandleScribeInputInvocation);
   }
 
   /// Ensure that a [Scribe] instance has been set up so that the platform
@@ -50,6 +53,8 @@ class Scribe {
 
   final MethodChannel _channel = SystemChannels.scribe;
 
+  final Set<ScribeClient> _scribeClients = <ScribeClient>{};
+
   /// Tell Android to begin receiving stylus handwriting input.
   ///
   /// This is typically called after detecting the start of stylus input.
@@ -60,48 +65,70 @@ class Scribe {
       'Scribe.startStylusHandwriting',
     );
   }
+
+  static Rect _selectionAreaFromArguments(List<dynamic> args) {
+    final Map<dynamic, dynamic> argsMap = args.first as Map<dynamic, dynamic>;
+    final Map<dynamic, dynamic> selectionAreaMap = argsMap['selectionArea'] as Map<dynamic, dynamic>;
+    final Map<String, double> selectionAreaJson = selectionAreaMap.cast<String, double>();
+    return Rect.fromLTRB(
+      selectionAreaJson['left']!,
+      selectionAreaJson['top']!,
+      selectionAreaJson['bottom']!,
+      selectionAreaJson['right']!,
+    );
+  }
+
+  static void registerScribeClient(ScribeClient scribeClient) {
+    _instance._scribeClients.add(scribeClient);
+  }
+
+  static void unregisterScribeClient(ScribeClient scribeClient) {
+    _instance._scribeClients.remove(scribeClient);
+  }
+
+  ScribeClient? get activeScribeClient {
+    final Iterable<ScribeClient> activeClients = _scribeClients.where((ScribeClient client) {
+      return client.isActive;
+    });
+    assert(activeClients.length <= 1);
+    return activeClients.firstOrNull;
+  }
+
+  Future<dynamic> _loudlyHandleScribeInputInvocation(MethodCall call) async {
+    try {
+      return await _handleScribeInputInvocation(call);
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'services library',
+        context: ErrorDescription('during method call ${call.method}'),
+        informationCollector: () => <DiagnosticsNode>[
+          DiagnosticsProperty<MethodCall>('call', call, style: DiagnosticsTreeStyle.errorProperty),
+        ],
+      ));
+      rethrow;
+    }
+  }
+
+  Future<dynamic> _handleScribeInputInvocation(MethodCall methodCall) async {
+    switch (methodCall.method) {
+      case 'ScribeClient.performSelectionGesture':
+        assert(activeScribeClient != null);
+        final List<dynamic> args = methodCall.arguments as List<dynamic>;
+        assert(args.length == 1, 'ScribeClient.performSelectionGesture should send a single Rect as its args');
+        final Rect selectionArea = _selectionAreaFromArguments(args);
+        return activeScribeClient!.performSelectionGesture(selectionArea);
+    }
+  }
 }
 
-/// An interface to interact with the engine for handwriting text input.
-///
-/// This is currently only used to handle
-/// [UIIndirectScribbleInteraction](https://developer.apple.com/documentation/uikit/uiindirectscribbleinteraction),
-/// which is responsible for manually receiving handwritten text input in UIKit.
-/// The Flutter engine uses this to receive handwriting input on Flutter text
-/// input fields.
+// TODO(justinmc): How to reconcile this with Scribble? Something that implements both?
 mixin ScribeClient {
-  /// A unique identifier for this element.
-  String get elementIdentifier;
+  bool get isActive;
 
-  /// Called by the engine when the [ScribeClient] should receive focus.
-  ///
-  /// For example, this method is called during a UIIndirectScribbleInteraction.
-  ///
-  /// The [Offset] indicates the location where the focus event happened, which
-  /// is typically where the cursor should be placed.
-  void onScribeFocus(Offset offset);
-
-  /// Tests whether the [ScribeClient] overlaps the given rectangle bounds,
-  /// where the rectangle bounds are in global coordinates.
-  bool isInScribeRect(Rect rect);
-
-  /// The current bounds of the [ScribeClient].
-  Rect get bounds;
-
-  /// Requests that the client show the editing toolbar.
-  ///
-  /// This is used when the platform changes the selection during scribe
-  /// input.
-  void showToolbar();
-
-  /// Requests that the client add a text placeholder to reserve visual space
-  /// in the text.
-  ///
-  /// For example, this is called when responding to UIKit requesting
-  /// a text placeholder be added at the current selection, such as when
-  /// requesting additional writing space with iPadOS14 Scribble.
-  void insertTextPlaceholder(Size size);
-
-  /// Requests that the client remove the text placeholder.
-  void removeTextPlaceholder();
+  // TODO(justinmc): No implementation provided, so that means that anyone that
+  // mixes this in must provide an implementation. Is that right, and is that
+  // what we want here for avoiding breaking changes?
+  bool performSelectionGesture(Rect selectionArea);
 }
