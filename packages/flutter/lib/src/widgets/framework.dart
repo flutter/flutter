@@ -2756,6 +2756,11 @@ final class BuildScope {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('buildScope missed some dirty elements.'),
             ErrorHint('This probably indicates that the dirty list should have been resorted but was not.'),
+            DiagnosticsProperty<Element>(
+              'The context argument of the buildScope call was',
+              debugBuildRoot,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
             Element.describeElements('The list of missed elements at the end of the buildScope call was', missedElements),
           ]);
         }
